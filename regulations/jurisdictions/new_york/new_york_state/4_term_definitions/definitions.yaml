@@ -1,0 +1,370 @@
+# How New York's 2025 Residential Code defines the words its egress sections (R318-R321) depend on: Section R202's own
+# whole definitions, quoted exactly (file, page, lines), with no paraphrase (drafting_rules.md). R201.1: a word printed in
+# italics in the code has the meaning given here. Quotes are checked against the book's text by `python -m rule_format`
+# where the code cache exists (the book is kept outside the repo). No measurement names yet: egress rules come later.
+# Drafted in a Claude Code session (claude-opus-5-5, 2026-11-12); drafts (approval deferred, 2026-10-19).
+
+stair:
+  term: STAIR
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 52
+    lines:
+    - 19
+    - 19
+    quote: STAIR. A change in elevation, consisting of one or more risers.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+stairway:
+  term: STAIRWAY
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 52
+    lines:
+    - 20
+    - 21
+    quote: STAIRWAY. One or more flights of stairs, either interior or exterior, with the necessary landings and connecting
+      platforms to form a continuous and uninterrupted passage from one level to another.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+stairway_spiral:
+  term: STAIRWAY, SPIRAL
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 52
+    lines:
+    - 22
+    - 23
+    quote: STAIRWAY, SPIRAL. A stairway with a plan view of closed circular form and uniform section-shaped treads radiating
+      from a mini- mum-diameter circle.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+flight:
+  term: FLIGHT
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 42
+    lines:
+    - 48
+    - 48
+    quote: FLIGHT. A continuous run of rectangular treads or winders or combination thereof from one landing to another.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+riser_stair:
+  term: RISER (STAIR)
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 50
+    lines:
+    - 49
+    - 49
+    quote: RISER (STAIR). The vertical component of a step or stair.
+  notes: Sections R318-R321 print 'riser(s)' in italics; Section R202 defines it as RISER (STAIR). RISER (PLUMBING) is brought
+    in as well because the word alone matches both; it does not apply to stairs.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nosing:
+  term: NOSING
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 48
+    lines:
+    - 12
+    - 12
+    quote: NOSING. The leading edge of treads of stairs and of landings at the top of stairway flights.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+winder:
+  term: WINDER
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 55
+    lines:
+    - 56
+    - 56
+    quote: WINDER. A tread with nonparallel edges.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+handrail:
+  term: HANDRAIL
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 44
+    lines:
+    - 38
+    - 38
+    quote: HANDRAIL. A horizontal or sloping rail intended for grasping by the hand for guidance or support.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+guard:
+  term: GUARD
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 44
+    lines:
+    - 27
+    - 28
+    quote: GUARD. A building component or a system of building components located near the open sides of elevated walking
+      surfaces that minimizes the possibility of a fall from the walking surface to the lower level.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ramp:
+  term: RAMP
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 50
+    lines:
+    - 12
+    - 12
+    quote: RAMP. A walking surface that has a running slope steeper than 1 unit vertical in 20 units horizontal (5-percent
+      slope).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+alternating_tread_device:
+  term: ALTERNATING TREAD DEVICE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 35
+    lines:
+    - 18
+    - 20
+    quote: ALTERNATING TREAD DEVICE. A device that has a series of steps between 50 and 70 degrees (0.87 and 1.22 rad) from
+      horizontal, usually attached to a center support rail in an alternating manner so that the user does not have both
+      feet on the same level at the same time.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+emergency_escape_and_rescue_opening:
+  term: EMERGENCY ESCAPE AND RESCUE OPENING
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 40
+    lines:
+    - 46
+    - 47
+    quote: EMERGENCY ESCAPE AND RESCUE OPENING. An operable exterior window, door or other similar device that provides
+      for a means of escape and access for rescue in the event of an emergency. (See also “Grade floor emergency escape
+      and rescue opening.”)
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+grade_floor_emergency_escape_and_rescue_opening:
+  term: GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 44
+    lines:
+    - 3
+    - 5
+    quote: GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING. An emergency escape and rescue opening located such that the
+      bottom of the clear opening is not more than 44 inches (1118 mm) above or below the finished ground level adjacent
+      to the opening. (See also “Emergency escape and rescue opening.”)
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+public_way:
+  term: PUBLIC WAY
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 50
+    lines:
+    - 3
+    - 5
+    quote: PUBLIC WAY. Any street, alley or other parcel of land open to the outside air leading to a public street, that
+      has been deeded, dedicated or otherwise permanently appropriated to the public for public use and that has a clear
+      width and height of not less than 10 feet (3048 mm).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+yard:
+  term: YARD
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 56
+    lines:
+    - 6
+    - 7
+    quote: YARD. An open space, other than a court, unobstructed from the ground to the sky, except where specifically provided
+      by this code, on the lot on which a building is situated.
+  notes: Ithaca's zoning code has its own yard definitions (§325-3) for its yard rules; this is the building code's YARD,
+    used by R318.1 and R319.1 (where an exit or escape opening must lead).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+court:
+  term: COURT
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 39
+    lines:
+    - 7
+    - 8
+    quote: COURT. A space, open and unobstructed to the sky, located at or above grade level on a lot and bounded on three
+      or more sides by walls or a building.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+grade:
+  term: GRADE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 43
+    lines:
+    - 55
+    - 55
+    quote: GRADE. The finished ground level adjoining the building at all exterior walls.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+grade_plane:
+  term: GRADE PLANE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 44
+    lines:
+    - 6
+    - 9
+    quote: GRADE PLANE. A reference plane representing the average of the finished ground level adjoining the building at
+      all exterior walls. Where the finished ground level slopes away from the exterior walls, the reference plane shall
+      be established by the lowest points within the area between the building and the lot line or, where the lot line is
+      more than 6 feet (1829 mm) from the building between the structure and a point 6 feet (1829 mm) from the building.
+  notes: 'Ithaca''s zoning code defines GRADE PLANE too (§325-3, ithaca_city/4_term_definitions): a zoning rule uses Ithaca''s,
+    a building-code rule this one.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+story:
+  term: STORY
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 52
+    lines:
+    - 32
+    - 33
+    quote: STORY. That portion of a building included between the upper surface of a floor and the upper surface of the
+      floor or roof next above.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+story_above_grade_plane:
+  term: STORY ABOVE GRADE PLANE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 52
+    lines:
+    - 34
+    - 38
+    quote: 'STORY ABOVE GRADE PLANE. Any story having its finished floor surface entirely above grade plane, or in which
+      the finished surface of the floor next above is either of the following: 1. More than 6 feet (1829 mm) above grade
+      plane. 2. More than 12 feet (3658 mm) above the finished ground level at any point. 3. More than 6 feet (1829 mm)
+      above the finished ground level for more than 50 percent of the total building perimeter.'
+  notes: Ithaca's zoning code has its own STORY definition (§325-3) for its zoning rules; this one is the building code's.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+basement:
+  term: BASEMENT
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 36
+    lines:
+    - 12
+    - 12
+    quote: BASEMENT. A story that is not a story above grade plane (see “Story above grade plane”).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+attic:
+  term: ATTIC
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 35
+    lines:
+    - 40
+    - 40
+    quote: ATTIC. The space between the ceiling assembly and the roof assembly.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+attic_habitable:
+  term: ATTIC, HABITABLE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 35
+    lines:
+    - 41
+    - 41
+    quote: ATTIC, HABITABLE. A finished or unfinished habitable space within an attic.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+habitable_space:
+  term: HABITABLE SPACE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 44
+    lines:
+    - 36
+    - 37
+    quote: HABITABLE SPACE. A space in a building for living, sleeping, eating or cooking. Bathrooms, toilet rooms, closets,
+      halls, storage or utility spaces and similar areas are not considered habitable spaces.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+crawl_space:
+  term: CRAWL SPACE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 39
+    lines:
+    - 9
+    - 9
+    quote: CRAWL SPACE. An underfloor space that is not a basement.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+dwelling:
+  term: DWELLING
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 40
+    lines:
+    - 21
+    - 22
+    quote: DWELLING. Any building that contains one or two dwelling units used, intended, or designed to be built, used,
+      rented, leased, let or hired out to be occupied, or that are occupied for living purposes.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+dwelling_unit:
+  term: DWELLING UNIT
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 40
+    lines:
+    - 23
+    - 26
+    quote: DWELLING UNIT. A single unit providing complete independent living facilities for one or more persons, including
+      permanent provisions for living, sleeping, eating, cooking and sanitation. Dwelling units include, but are not limited
+      to, one-family dwellings, each unit in a two-family dwelling, each townhouse unit in a townhouse, bed and breakfast
+      dwellings, and lodging houses.For the definition applicable in Chapter 24, see Section G2403.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+sleeping_loft:
+  term: SLEEPING LOFT
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 51
+    lines:
+    - 47
+    - 48
+    quote: SLEEPING LOFT. A space designated for sleeping on an intermediate level or levels between the floor and ceiling
+      of a story, open on one or more sides to the room in which the space is located, and in accordance with Section R315.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+mezzanine:
+  term: MEZZANINE
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 47
+    lines:
+    - 50
+    - 50
+    quote: MEZZANINE. An intermediate level or levels between the floor and ceiling of any story.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+kitchen:
+  term: KITCHEN
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 45
+    lines:
+    - 47
+    - 47
+    quote: KITCHEN. An area used, or designated to be used, for the preparation of food.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
