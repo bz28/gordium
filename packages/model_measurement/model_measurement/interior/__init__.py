@@ -7,8 +7,8 @@ interior description. Plain code written by engineers, no AI (principle 6): same
 named as rule_format/parts.yaml names them, in inches and square feet. A kind not given in the description is None
 (not read, so its rules need review), never an empty list; [] means the description says there are none. A
 measure the description can't settle is left out of `measures` and its reason put in `not_measured` (a rule
-reading it then needs review). Measures for rules not yet in parts.yaml are in `more` (and guards are their own
-kind). The input format: docs/interior/interior_description_format.md; each measure's definition:
+reading it then needs review). Other values worked out are in `more`, not yet handed to the rules; a parts.yaml
+measure kept there says so in `not_measured` (and guards are their own kind). The input format: docs/interior/interior_description_format.md; each measure's definition:
 docs/interior/interior_measurements.md.
 """
 
@@ -148,7 +148,24 @@ def measure(description) -> dict:
             flights = {g.get("stair"): Stop("not_read", what="stairs", key="stairs").reason for g in guards
                        if isinstance(g.get("stair"), str)}
         parts["guard"] = [_part(g, measure_guard(g, reader, flights)) for g in guards]
+    _not_measured_yet(parts)
     return out
+
+
+def _not_measured_yet(parts: dict) -> None:
+    """A measure parts.yaml lists for a kind that this code doesn't work out yet gets a reason, never silent
+    absence: a rule reading it then needs review. (parts.yaml can gain measures before the measuring code does.)
+    Guards are their own kind here, outside parts.yaml."""
+    from rule_format.parts import measure_kinds
+    for kind, got in parts.items():
+        if kind == "guard" or not got:
+            continue
+        for part in got:
+            for name in measure_kinds(kind):
+                if name not in part["measures"] and name not in part["not_measured"]:
+                    # worked out already but kept in `more` (not yet handed to the rules), or not worked out at all
+                    part["not_measured"][name] = Stop("in_more_not_rules" if name in part["more"]
+                                                      else "not_measured_yet").reason
 
 
 def measure_file(path) -> dict:
