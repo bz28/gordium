@@ -128,9 +128,11 @@ public static class SiteReader
 
     /// <summary>Whether the element is looked at at all: a model element, not drawn in one view only, not a
     /// category with no building in it, not a model group (its members are read on their own).</summary>
+    /// <remarks>A linked model or a CAD import is looked at whatever type Revit gives its category (whether "RVT
+    /// Links" is a model category is to check): skipping one would skip a house it holds.</remarks>
     internal static bool Looked(RevitElement e) =>
-        e.CategoryType == CategoryType.Model && !e.ViewSpecific && !NotLookedAt.Contains(e.BuiltInCategory)
-        && e.Kind != ElementKind.Group;
+        (e.CategoryType == CategoryType.Model || e.Kind is ElementKind.LinkInstance or ElementKind.CadImport)
+        && !e.ViewSpecific && !NotLookedAt.Contains(e.BuiltInCategory) && e.Kind != ElementKind.Group;
 
     /// <summary>Whether the element is on the lot in the design checked (proposed, design note, section 1):
     /// <list type="bullet">

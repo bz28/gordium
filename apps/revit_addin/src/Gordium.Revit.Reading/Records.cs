@@ -122,6 +122,8 @@ public sealed record RevitElement
     /// for the architect's reading only.</summary>
     public required string Category { get; init; }
 
+    /// <summary><c>Category.CategoryType</c>. Only model elements are looked at, but a linked model and a CAD import
+    /// whatever it says (whether "RVT Links" is a model category is to check).</summary>
     public CategoryType CategoryType { get; init; } = CategoryType.Model;
 
     /// <summary><c>Element.ViewSpecific</c>: drawn in one view only (a 2D CAD import, a detail): not looked at.</summary>

@@ -214,7 +214,8 @@ change to `conformance.py`.
 
 ## 8. Left for the trial
 
-Every "to check" above, plus: whether the curtain wall host has faces of its own; whether open shells come back as
+Every "to check" above, plus: which category type Revit gives a linked model and a CAD import (the reader looks at
+both whatever it is, so skipping one can't hide a house it holds); whether the curtain wall host has faces of its own; whether open shells come back as
 solids; how property lines read in 2026; the shared-coordinates transform's direction and Revit's distance limit;
 whether `DocumentChanged` reports joined neighbours; whether `ElementOnPhaseStatus` has the values section 1 needs;
 how often real models need review only because of curved family details (Q3); how a component stair's and a
@@ -234,8 +235,9 @@ with each drawn conformance scene drawn as fake Revit records ([its README secti
 The trial writes only the layer that fills its records from the API, and confirms each "to check". Two choices the
 code makes, for Ben to confirm: one departs from what this note first said (section 2 had null geometry `unsent`
 for every element), one it didn't spell out. An element outside the building categories whose
-geometry Revit returns as null is skipped (nothing that could be a building; one whose reading throws is still
-`unsent`), so a model element that simply has no shape (one Revit gives no geometry, outside the categories and families above) doesn't make every check need review; and a building whose nested
+geometry Revit returns as null is skipped (nothing that could be a building; one whose reading throws, or that holds a kind of geometry the reader
+doesn't know, is still `unsent`, a family, a CAD import and a Toposolid too, so it counts even with no lot; inside a
+linked model such an element leaves the link with no box: left out and touching), so a model element that simply has no shape (one Revit gives no geometry, outside the categories and families above) doesn't make every check need review; and a building whose nested
 family gives no geometry gets a `tool_words` problem (it may be bigger than measured). Found while writing it: on a
 model turned to true north by 30°, Revit's own box of each element, square to its internal axes, is bigger once
 turned into shared coordinates, so objects well apart from the house read as touching (scene 15's context solid, 15 ft behind it, does) (the cautious side;

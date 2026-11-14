@@ -317,13 +317,29 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     }
 
     [Fact]
-    public async Task A_toposolid_whose_geometry_cant_be_read_has_no_box()
+    public async Task A_family_cad_import_or_toposolid_that_cant_be_read_is_reported_even_with_no_lot()
     {
-        // review round 1: it was placed by Revit's own box alone, which the reader never trusts on its own
+        // review round 1: a Toposolid unread was placed by Revit's own box alone (off the lot here); review round 3:
+        // left out with no box, it vanished when there was no lot (nothing is left out then). Not sent, it counts.
         var topo = new RevitElement { UniqueId = "topo", BuiltInCategory = "OST_Toposolid", Category = "Toposolid",
                                       Kind = ElementKind.Toposolid, GeometryFailed = true,
                                       BoundingBox = new RevitBox(new(100, 100, 0), new(101, 101, 1)) };
-        Assert.Null(LeftOut(await Site(House(topo)), "topo")["touching"]);
+        var garage = FakeRevit.Family("garage", [Block(5, 40, 15, 60)]) with { IsInPlace = true, GeometryFailed = true };
+        var cad = FakeRevit.Family("cad", [Block(20, 90, 30, 100), new OtherItem("PolyLine")]) with { Kind = ElementKind.CadImport };
+        var site = await Site(House(topo, garage, cad) with { LotLines = [] });
+        Assert.Null(site["lot"]);
+        Assert.Equal(["topo", "garage", "cad"], Ids(site, "unsent"));
+        Assert.Equal(["topo", "garage", "cad"], Ids(await Site(House(topo, garage, cad)), "unsent"));
+    }
+
+    [Fact]
+    public async Task A_link_is_looked_at_whatever_type_Revit_gives_its_category()
+    {
+        var gone = new RevitModel { Document = "house.rvt" };
+        var link = FakeRevit.LinkOf("link", gone, status: "Unloaded") with { CategoryType = CategoryType.Internal };
+        Assert.False((await Site(House(link)))["inventory_complete"]!.GetValue<bool>());
+        var cad = FakeRevit.Family("cad", [Block(20, 90, 30, 100)]) with { Kind = ElementKind.CadImport, CategoryType = CategoryType.Internal };
+        Assert.Equal(["cad"], Ids(await Site(House(cad)), "left_out"));
     }
 
     [Fact]

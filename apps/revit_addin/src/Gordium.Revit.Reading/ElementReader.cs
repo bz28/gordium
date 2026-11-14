@@ -176,11 +176,14 @@ internal sealed class Read(RevitModel model)
     /// definition, so a nested family that gives nothing leaves it with no box (touching: null).</summary>
     private void Family(RevitElement e, bool context)
     {
+        if (Unreadable(e, out var seen))
+        {
+            Unsend(e, e.Category, seen);
+            return;
+        }
         var key = e.UniqueId;
-        var parts = e.GeometryFailed ? new JsonArray(new JsonObject { ["box"] = null })
-                                     : Parts(e.Geometry ?? [], ToShared, key, e);
-        Definitions[key] = new JsonObject { ["status"] = SiteReader.NotLinked, ["parts"] = parts };
-        var g = e.GeometryFailed || e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
+        Definitions[key] = new JsonObject { ["status"] = SiteReader.NotLinked, ["parts"] = Parts(e.Geometry ?? [], ToShared, key, e) };
+        var g = e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
         Candidates.Add(Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, context, "Family", true));
     }
 
@@ -189,9 +192,25 @@ internal sealed class Read(RevitModel model)
     /// no box (Revit's own box is never trusted alone).</summary>
     private void Toposolid(RevitElement e)
     {
-        var g = e.GeometryFailed || e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
-        var box = g.MissingPart || g.Other || !g.HasFaces ? null : Union(g.Box.Box, RevitBox(e, ToShared));
+        if (Unreadable(e, out var seen))
+        {
+            Unsend(e, e.Category, seen);
+            return;
+        }
+        var g = e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
+        var box = g.MissingPart || !g.HasFaces ? null : Union(g.Box.Box, RevitBox(e, ToShared));
         Candidates.Add(Make(e, g, box, null, false, "Toposolid", true));
+    }
+
+    /// <summary>Whether reading the element's geometry threw, or it holds a piece of a kind the reader doesn't know:
+    /// then it is sent as an object that couldn't be (every building measure needs review, lot or no lot), as every
+    /// element is (design note, section 2). <paramref name="box"/>: what box it may have (Revit's own, and what was
+    /// read), for touching.</summary>
+    private bool Unreadable(RevitElement e, out Box3? box)
+    {
+        var g = e.GeometryFailed || e.Geometry is null ? null : Walk(e.Geometry, ToShared, e);
+        box = Union(g?.Box.Box, RevitBox(e, ToShared));
+        return e.GeometryFailed || g is { Other: true };
     }
 
     private static Candidate Make(RevitElement e, Gathered g, Box3? box, string? definition, bool context, string kind, bool closed)
