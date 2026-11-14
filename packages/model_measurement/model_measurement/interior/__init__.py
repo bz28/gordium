@@ -55,7 +55,7 @@ def _given(description: dict, kind: str, problems: list):
 
 def _part(item: dict, measured, within=None) -> dict:
     measures, more, stopped = measured[:3]
-    # a last guard for every kind: a value that isn't a finite number is no value (read.FAR should make this unreachable)
+    # a last guard for every kind: a value that isn't a finite number is no value (read.FAR keeps this unreachable)
     for got in (measures, more):
         for name in [n for n, v in got.items() if isinstance(v, float) and not math.isfinite(v)]:
             del got[name]
