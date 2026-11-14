@@ -53,8 +53,10 @@ one ("Elternzimmer + Bad", a parents' room with its bath: the unknown word may m
 is free text, so its words don't name the room, but a sleeping or ask word in it (the space's or its type's)
 keeps a room from reading `false` ("Kitchen" described as "Bedroom (kitchen to be removed)"). So does one in the
 name or stated use of a zone the space is in (`IfcZone`, `IfcSpatialZone`): a zone is a group (a flat, a fire
-compartment), so its words don't name the room. The architect's `Gordium_Egress.Sleeping` false settles these, as it
-does an ask word. The format then
+compartment), so its words don't name the room. Zones inside zones count too. The architect's `Gordium_Egress.Sleeping` false on the space
+settles these, as it does an ask word (one on its type, said once for every room of it, doesn't). A property the
+element states with no value is still its statement (IFC4: a property left out of a set "has not been set"; one
+present is the element's), so it never lets its type's value through: the value is unknown. The format then
 reads none of the rooms (a bedroom nobody labelled is never quietly not a bedroom), so every sleeping-room rule
 says **needs review** until the architect says. The architect says by giving the space a property set
 `Gordium_Egress` with `Sleeping` true or false. True always counts. False settles an ask or unknown word (that is

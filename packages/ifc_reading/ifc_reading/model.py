@@ -73,7 +73,9 @@ class Model:
                 if item.Name != name:
                     continue
                 if item.is_a("IfcPropertySingleValue"):
-                    value = item.NominalValue.wrappedValue if item.NominalValue is not None else None
+                    # review round 12: stated with no value is still stated here (it never lets the type's through)
+                    value = item.NominalValue.wrappedValue if item.NominalValue is not None else \
+                        Unreadable("stated with no value", stated=True)
                 elif item.is_a("IfcPhysicalSimpleQuantity"):
                     value = item[3]                       # LengthValue, AreaValue…
                 else:

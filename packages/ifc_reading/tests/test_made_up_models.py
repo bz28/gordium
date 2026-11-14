@@ -794,3 +794,57 @@ def test_informative_window_parameters_give_no_frame(build, tmp_path, exact):
     b.f.by_type("IfcWindowType")[0].ParameterTakesPrecedence = exact
     got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
     assert "frame" not in got and "operation" not in got and "only informative" in got["not_given"]["frame"]
+
+
+def _blank(b, element, set_name, name):
+    prop = b.f.create_entity("IfcPropertySingleValue", Name=name)          # NominalValue unset
+    p = b.f.create_entity("IfcPropertySet", GlobalId=b.guid(), Name=set_name, HasProperties=[prop])
+    b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[element],
+                      RelatingPropertyDefinition=p)
+
+
+def test_a_flag_stated_with_no_value_blocks_the_types(build, tmp_path):
+    """Review round 12: a property the element states with no value was skipped, so its type's applied: a window
+    whose own EscapeOpening is blank was marked an escape opening from its type, a space whose own Sleeping is
+    blank read not sleeping from its type."""
+    b = bedroom_house(build, name="Kitchen")
+    [space], [w] = b.f.by_type("IfcSpace"), b.f.by_type("IfcWindow")
+    b.pset(b.f.by_type("IfcWindowType")[0], "Gordium_Egress", {"EscapeOpening": True})
+    _blank(b, w, "Gordium_Egress", "EscapeOpening")
+    st = b.run("root.create_entity", ifc_class="IfcSpaceType", name="ST")
+    b.run("type.assign_type", related_objects=[space], relating_type=st)
+    b.pset(st, "Gordium_Egress", {"Sleeping": False})
+    _blank(b, space, "Gordium_Egress", "Sleeping")
+    d = read(b.write(tmp_path / "h.ifc"))
+    assert d["openings"][0]["escape"] is False and "stated with no value" in d["openings"][0]["ifc"]["escape_from"]
+    room = d["rooms"][0]
+    assert "sleeping" not in room and "stated with no value" in room["not_given"]["sleeping"]
+
+
+@pytest.mark.parametrize("inner", ["IfcZone", "IfcSpatialZone"])
+def test_a_bedroom_zone_holding_the_spaces_zone_is_doubt(build, tmp_path, inner):
+    b = bedroom_house(build, name="Living")
+    [space] = b.f.by_type("IfcSpace")
+    z1 = b.run("root.create_entity", ifc_class=inner, name="Z1")
+    if inner == "IfcZone":
+        b.run("group.assign_group", products=[space], group=z1)
+    else:
+        b.f.create_entity("IfcRelReferencedInSpatialStructure", GlobalId=b.guid(), RelatedElements=[space],
+                          RelatingStructure=z1)
+    outer = b.run("root.create_entity", ifc_class="IfcZone", name="Bedroom")
+    b.run("group.assign_group", products=[z1], group=outer)
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and "'Bedroom'" in room["not_given"]["sleeping"]
+
+
+def test_a_types_false_doesnt_settle_this_rooms_description(build, tmp_path):
+    """Review round 12 (sceptic's note): a space type's Sleeping false, said once for every room of it, settled a
+    "Bedroom 3" in one room's Description. Only the space's own false does."""
+    b = bedroom_house(build, name="Kitchen")
+    [space] = b.f.by_type("IfcSpace")
+    space.Description = "Bedroom 3"
+    st = b.run("root.create_entity", ifc_class="IfcSpaceType", name="ST")
+    b.run("type.assign_type", related_objects=[space], relating_type=st)
+    b.pset(st, "Gordium_Egress", {"Sleeping": False})
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and "Bedroom 3" in room["not_given"]["sleeping"]
