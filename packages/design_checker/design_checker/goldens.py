@@ -28,10 +28,10 @@ the same lot corner: the stress test's jog lot) the overlay can then keep a diff
 near-identical crossing points: the shape is the same, its list of points is not. (Seen on CI's Linux, and on the
 Mac itself running an Intel build of Python: the same 34 jog-lot stress designs and nothing else.) So an answer
 whose sha256 differs is still its golden when every value other than a shape's points is identical (every
-verdict, status, word, id and number, to PLACES) and each list of plan points (x, y) traces the same line as its
-golden's (one of SHAPE_KEYS), from the same end to the same end, no point of either farther than GEOMETRY_TOL
-from the other (shape_distance). `--check` says how many answers matched that way. Any other difference fails as
-before."""
+verdict, status, word, id and number, to PLACES) and each list of plan points (x, y) under one of SHAPE_KEYS is
+the same line as its golden's (same_line: from the same end to the same end, no point of either farther than
+GEOMETRY_TOL from the other, the same length and enclosed area). `--check` says how many answers matched that
+way. Any other difference fails as before."""
 
 import argparse
 import hashlib
@@ -53,7 +53,6 @@ PLACES = 6
 # times the rounding step (a millionth of a foot), so the two sides' rounding (up to 0.71 millionths each) never
 # trips it. Seen between an Apple-chip Mac and an Intel one: 0.76 millionths at most (the 34 jog-lot designs).
 GEOMETRY_TOL = 1e-5
-SHAPE_STEP = 0.1           # ft: shape_distance looks this often along each line, as well as at its points
 STRESS_SEED = 20261105
 STRESS_DESIGNS = 200
 FOLDER = REPO / "test_data" / "goldens"
@@ -244,29 +243,44 @@ def _plan_points(v) -> bool:
         for p in v)
 
 
-def shape_distance(a: list, b: list) -> float:
-    """How far apart two lists of plan points are as lines, each the line through its points in order: the farther
-    of their two ends from the other's same end, and the Hausdorff distance (the farthest a point of either line is
-    from the other line's segments), sampled at every point of each line and every SHAPE_STEP along it, so a
-    stretch of one line the other skips counts. The ends keep a line's direction: a line drawn the other way round,
-    or doubling back, is not the same line."""
+def same_line(a: list, b: list, tol: float = GEOMETRY_TOL) -> bool:
+    """Whether two lists of plan points are the same line within `tol`, each the line through its points in order:
+    - each end at the other's same end (a line drawn the other way round is not the same line);
+    - every point of each line within `tol` of the other line (the Hausdorff distance at most `tol`, tested exactly:
+      each line inside the other grown by `tol`, so a stretch one skips, however short, counts);
+    - the same length, and the same area to the left of the line closed back to its start, each within `tol` (per
+      foot of length, for the area): a line doubling back on itself, or a closed outline wound the other way, is
+      not the same line though it covers the same ground.
+    (Seen between an Apple-chip Mac and an Intel one: 0.76 millionths of a foot apart, lengths 1e-11 ft apart.)"""
     import shapely
+    if math.dist(a[0], b[0]) > tol or math.dist(a[-1], b[-1]) > tol:
+        return False
     la, lb = shapely.LineString(a), shapely.LineString(b)
+    if abs(la.length - lb.length) > tol or abs(_area(a) - _area(b)) > tol * max(la.length, lb.length, 1.0):
+        return False
+    return bool(lb.buffer(tol).covers(la) and la.buffer(tol).covers(lb))
 
-    def farthest(line, other):
-        dense = shapely.points(shapely.get_coordinates(shapely.segmentize(line, SHAPE_STEP)))
-        return float(shapely.distance(dense, other).max())
+
+def _area(points) -> float:
+    """The signed area the points enclose, closed back to the first (shoelace: positive anticlockwise)."""
+    return sum(x0 * y1 - x1 * y0 for (x0, y0), (x1, y1) in zip(points, points[1:] + points[:1])) / 2
+
+
+def shape_distance(a: list, b: list) -> float:
+    """How far apart two lists of plan points are, for the message when they are not the same line: the farther of
+    their two ends from the other's same end, or the Hausdorff distance between them (shapely), if farther."""
+    import shapely
     ends = max(math.dist(a[0], b[0]), math.dist(a[-1], b[-1]))
-    return max(ends, farthest(la, lb), farthest(lb, la))
+    return max(ends, shapely.hausdorff_distance(shapely.LineString(a), shapely.LineString(b), densify=0.01))
 
 
 def same_shape(old, new, key: str = "") -> bool:
     """Whether two canonical answers are the same but for how a shape's points fall: every value identical, except
     that a list of plan points under one of SHAPE_KEYS may have other points (even another number of them) if it
-    is the same line, within GEOMETRY_TOL (shape_distance; module docstring: shapes on another kind of computer).
+    is the same line, within GEOMETRY_TOL (same_line; module docstring: shapes on another kind of computer).
     Verdicts, statuses, words, ids and every other number must be exactly as golden."""
     if key in SHAPE_KEYS and _plan_points(old) and _plan_points(new):
-        return old == new or shape_distance(old, new) <= GEOMETRY_TOL
+        return old == new or same_line(old, new)
     if isinstance(old, dict) and isinstance(new, dict):
         return old.keys() == new.keys() and all(same_shape(old[k], new[k], k) for k in old)
     if isinstance(old, list) and isinstance(new, list):          # (a list of shapes: each under its list's key)
@@ -284,10 +298,9 @@ def differences(old, new, path: str = "", limit: int = 8) -> list[str]:
             return
         if p.rsplit("/", 1)[-1].split("[")[0] in SHAPE_KEYS and _plan_points(a) and _plan_points(b):
             # a shape: shown only if it moved (how far), not its point list
-            far = 0.0 if a == b else shape_distance(a, b)
-            if far > GEOMETRY_TOL:
-                out.append(f"{p}: {len(a)} points -> {len(b)}, up to {far:.3g} ft from the golden's line: "
-                           f"{_short(a)} -> {_short(b)}")
+            if a != b and not same_line(a, b):
+                out.append(f"{p}: {len(a)} points -> {len(b)}, not the same line (up to {shape_distance(a, b):.3g} ft "
+                           f"from the golden's): {_short(a)} -> {_short(b)}")
         elif isinstance(a, dict) and isinstance(b, dict):
             for k in sorted(set(a) | set(b)):
                 if k not in a or k not in b:

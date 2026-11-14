@@ -140,7 +140,7 @@ def test_a_shape_moved_farther_than_the_tolerance_or_any_other_value_changed_sti
     moved["check"]["plan"]["buildable"][5][0] += 3 * goldens.GEOMETRY_TOL        # one corner 3/100,000 ft over
     problems = goldens.check({name: goldens.canonical_text(moved)}, only=name)
     assert problems and problems[0].startswith(f"{name}: differs (parts: check)")
-    assert any("/check/plan/buildable:" in p and "from the golden's line" in p for p in problems)
+    assert any("/check/plan/buildable:" in p and "not the same line" in p for p in problems)
     # every value outside a shape's points must be exactly the golden's, however the shapes fall
     def verdict(a):
         rule = next(iter(sorted(a["check"]["statuses"])))
@@ -155,16 +155,17 @@ def test_a_shape_moved_farther_than_the_tolerance_or_any_other_value_changed_sti
         assert goldens.check({name: goldens.canonical_text(other)}, only=name) != []
 
 
-def test_the_shape_distance_is_measured_along_the_lines_not_only_at_their_points():
+def test_the_same_line_is_tested_all_along_it_not_only_at_its_points():
     square = [[0, 0], [10, 0], [10, 10], [0, 10]]
-    assert goldens.shape_distance(square, [[0, 0], [5, 0], [10, 0], [10, 10], [0, 10]]) == 0.0
-    assert goldens.shape_distance([[0, 0], [10, 0]], [[0, 0], [5, 0.001], [10, 0]]) == 0.001
-    # a line that skips a stretch of the other is as far as the stretch it skips
-    assert goldens.shape_distance([[0, 0], [10, 0], [10, 10]], [[0, 0], [10, 10]]) > 7
-    assert not goldens.same_shape([[0, 0], [10, 0], [10, 10]], [[0, 0], [10, 10]])
+    assert goldens.same_line(square, [[0, 0], [5, 0], [10, 0], [10, 10], [0, 10]])        # a point on a side
+    assert not goldens.same_line([[0, 0], [10, 0]], [[0, 0], [5, 0.001], [10, 0]])        # a thousandth of a foot
+    assert not goldens.same_line([[0, 0], [10, 0], [10, 10]], [[0, 0], [10, 10]])         # a corner cut off
+    # a short stretch left out (a 0.09 ft side, the line going up and back down each side instead: review round 2)
+    notch = [[0, 0.5], [0, 0], [0.09, 0], [0.09, 0.5]]
+    assert not goldens.same_line(notch, [[0, 0.5], [0, 0], [0, 0.045], [0.09, 0.045], [0.09, 0], [0.09, 0.5]])
     # only plan points (x, y) are shapes: 3D points, and true/false, are compared exactly
-    assert not goldens.same_shape([[0, 0, 1], [1, 0, 1]], [[0, 0, 1], [1, 1e-7, 1]])
-    assert not goldens.same_shape([[0, True], [1, 0]], [[0, 1], [1, 0]])
+    assert not goldens.same_shape({"points": [[0, 0, 1], [1, 0, 1]]}, {"points": [[0, 0, 1], [1, 1e-7, 1]]})
+    assert not goldens.same_shape({"points": [[0, True], [1, 0]]}, {"points": [[0, 1], [1, 0]]})
 
 
 def test_a_line_drawn_the_other_way_round_or_doubling_back_or_a_list_that_is_not_a_shape_must_be_exact():
@@ -172,6 +173,9 @@ def test_a_line_drawn_the_other_way_round_or_doubling_back_or_a_list_that_is_not
     assert goldens.same_shape({"points": line}, {"points": [[47.5, 90.0], [47.5, 70.0], [47.5, 66.6]]})
     assert not goldens.same_shape({"points": line}, {"points": line[::-1]})                    # its ends swapped
     assert not goldens.same_shape({"points": [[0, 0], [10, 0]]}, {"points": [[0, 0], [10, 0], [3, 0]]})   # back
+    assert not goldens.same_line([[0, 0], [10, 0]], [[0, 0], [10, 0], [5, 0], [10, 0]])    # back and forth again
+    ring = [[0, 0], [10, 0], [10, 10], [0, 10], [0, 0]]                                     # closed: its ends one point
+    assert not goldens.same_line(ring, ring[::-1])                                           # wound the other way
     square = [[0, 0], [10, 0], [10, 10], [0, 10]]
     assert not goldens.same_shape({"outline": square}, {"outline": square[:1] + square[1:][::-1]})   # other way round
     # pairs of numbers under any other key are not a shape: exact, even a point between two others
