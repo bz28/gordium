@@ -226,6 +226,20 @@ sentences are Rhino's: `lot_not_found` says "the Site layer", `no_lot_outline` a
 the … layer", `not_a_solid` says "explode it". Host-neutral wording for those is a change to
 `model_measurement/stops.py`, its own PR, before the Revit add-in is used on a real project.
 
+## Where the decisions are written
+
+Every decision above that a Revit model doesn't have to be open for is code in
+`apps/revit_addin/src/Gordium.Revit.Reading/` (plain C#, no Revit types), tested on the Mac against the real worker
+with each drawn conformance scene drawn as fake Revit records ([its README section](../../apps/revit_addin/README.md#the-readers-logic-gordiumrevitreading)).
+The trial writes only the layer that fills its records from the API, and confirms each "to check". Two choices the
+code makes that this note didn't spell out, for Ben to confirm: an element outside the building categories whose
+geometry Revit returns as null is skipped (nothing that could be a building; one whose reading throws is still
+`unsent`), so a survey point or a view's element doesn't make every check need review; and a building whose nested
+family gives no geometry gets a `tool_words` problem (it may be bigger than measured). Found while writing it: on a
+model turned to true north by 30°, Revit's own box of each element, square to its internal axes, is bigger once
+turned into shared coordinates, so objects well apart from the house read as touching (scene 15's context solid, 15 ft behind it, does) (the cautious side;
+scene J must be hand-worked with this in mind).
+
 ## Sources
 
 Autodesk's Revit API reference (2026, API 26.4), fetched 2026-11-09:

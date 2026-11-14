@@ -2,7 +2,7 @@
 
 **Purpose:** the C# library the Revit add-in uses to start Gordium's checker and talk to it, what it does when something goes wrong, and how we know it works.\
 **For:** engineers writing the Revit add-in; reviewers checking that nothing the checker sends can turn into a pass it didn't give.\
-**Kept current by:** every PR that changes this library or a protocol command it sends.
+**Kept current by:** every PR that changes these libraries or a protocol command they send.
 
 Gordium's checker is Python. Revit add-ins are C#. So the add-in runs the checker as its own process, the
 **worker** (`python -m design_checker serve`), and sends it one request per line, as the
@@ -20,8 +20,9 @@ for Revit 2026 as it first shipped. The same post says Autodesk plans to move Re
 Revit 2026 preview was tested until 2026-06-03; no release date given), so which runtime the installed Revit 2026
 uses is checked in the Windows trial. The refusal of a key given twice
 in an answer is the library's own (`StrictJson.RefuseDuplicateKeys`), one code path for both: .NET 10's built-in
-switch doesn't exist on .NET 8, and a .NET 10 test checks ours says the same as it on every case. The add-in itself
-(the ribbon button, reading the model) comes later, in the [Windows trial](../../docs/revit/windows_trial_runbook.md).
+switch doesn't exist on .NET 8, and a .NET 10 test checks ours says the same as it on every case. Beside it is
+`Gordium.Revit.Reading`, the reader's decisions (below). The add-in itself (the ribbon button, and the thin layer that
+fills the reader's records from the Revit API) comes later, in the [Windows trial](../../docs/revit/windows_trial_runbook.md).
 
 ## What it does
 
@@ -96,6 +97,57 @@ the message and no verdicts.
 The main guards (the status words, the empty and repeated rows, a key twice, an escape or line that isn't whole text, the versions, `about`, the id, the
 byte-order mark, a refused part, half an answer, stopping after a timeout) were each undone once to check that
 their test then fails (the strict reading on both .NET 8 and .NET 10).
+
+## The reader's logic: `Gordium.Revit.Reading`
+
+The **reader** turns a Revit model into the site description (`gordium.site/1`, the same JSON the Rhino plugin
+sends), with every decision of the [design note](../../docs/revit/revit_reading_design.md). It has no Revit types at
+all: it works on plain **records** of what Revit says about the model (`Records.cs`: each element's `UniqueId`,
+category, kind, phase created and demolished, design option, workset, Revit's own box, its geometry as faces, edges
+and meshes; the property lines; the worksets, option sets, phases and links; the turn into shared coordinates). The
+Revit layer, written later on Windows, only fills those records from the API named beside each field; it decides
+nothing. So the decisions are built and tested here, on the Mac.
+
+1. **What is on the lot in the design checked:** the last phase (only what is demolished by then is gone), the main
+   model and one option from every option set (the one being edited, else the primary). The panel must name both
+   (`ReadResult.PhaseChecked`, `OptionsChecked`).
+2. **Buildings:** each element of a building category, and each Gordium floor block, is one building: its flat faces
+   with straight edges are sent; a curved face or edge, an open solid or a mesh not known to be closed is reported,
+   never sent as if it were flat. A building element with nothing to send is never skipped: it is sent as an object
+   that couldn't be (`unsent`), so every building measure needs review.
+3. **Left out:** every other solid or mesh, every family instance and CAD import whatever it holds, Gordium's
+   neighbourhood objects, a Toposolid. **Which of them are on the lot and which touch the house is the worker's
+   decision** (`objects.left_out`, the one copy every host uses), never the reader's.
+4. **Linked models:** one holding any building element (at any depth) or a closed workset is not sent (every
+   building measure needs review); one not loaded, or a closed workset in the model, means not everything was
+   looked at (`inventory_complete: false`).
+5. **The lot:** the lot picked, else the one closed property line; never an open one; arcs followed closely.
+6. **Coordinates:** every point turned once into shared (survey) coordinates; a box turned by all 8 corners.
+   Units are always feet (Revit's own).
+
+How we know it is right (`tests/Gordium.Revit.Reading.Tests`, run with the rest by `dotnet test`):
+
+- **Every drawn conformance scene (15 of the 17; 13 and 14 are descriptions only) drawn as fake Revit records**,
+  the way the trial would draw it in Revit (`SceneDrawing.cs`: floor blocks as marked DirectShapes, the lot as a
+  property line, the shed of scene 04 as a linked model, the block of scene 15 as a family instance, the survey
+  scene near Revit's origin with shared coordinates moved), read by the reader with the real worker deciding what
+  is left out. Each must pass the conformance suite's own check of a recording (`recording_problems`: the expected
+  description, then exactly the hand-worked verdicts) and give the same verdicts again through `check_site` from C#.
+  Four of them are also drawn with shared coordinates turned a quarter turn.
+- **Revit-only decisions, pinned on fakes, each to confirm on Windows** (`ReaderTests.cs`): phases, design
+  options, worksets, links (unloaded, nested, closed workset, holding a wall two links deep), curtain walls,
+  groups, in-place and empty families, building elements with no geometry, meshes, faces with holes, the picked
+  lot and open property lines, the grade markers, a box turned 30°, and the strict reading of the worker's answer.
+- Each main guard was undone once to check its test then fails (15 of them: arcs read as chords, the shared
+  coordinates, curved edges, open solids, touching, phases, the option being edited, the 8 corners, unloaded links,
+  empty families, empty building elements, closed worksets, links holding a wall, open property lines, open meshes).
+
+What the fakes can't show, and the trial must: that Revit's API gives what each record says (every "to check" in
+the design note), and the scenes that need real Revit behaviour (the note's proposed scenes A to K: native walls
+and slabs, links and worksets, phases, design options, groups, the picked lot, empty families, Toposolids and
+terrain, true north turned, the survey point moved). Not in this reader yet: the ground sampled from a Toposolid
+(`grade_from: terrain` is refused with words, never read as no ground), and checking that the saved facts were
+entered under the same shared coordinates (scene K).
 
 ## Running it
 
