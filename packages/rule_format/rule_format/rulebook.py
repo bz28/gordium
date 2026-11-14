@@ -170,9 +170,80 @@ def _jsonl_rows(data: bytes) -> list[dict]:
     return [json.loads(line) for line in text.splitlines() if line.strip()]
 
 
+# A state's own law folder, regulations/jurisdictions/<state>/<name>/, holds law every place in that state inherits
+# (New York's Residential Code). It has the same numbered steps as a place, but its settings file is state.yaml, not
+# jurisdiction.yaml: it is no place (no boundary, no lot lookup), so the place registry and the Rhino plugin's "one
+# place" never see it. A place names the state folders it inherits in its jurisdiction.yaml `inherits:` (place.py).
+# Decided 2026-11-12: docs/decisions/2026-11-12_building_code_text.md.
+STATE_SETTINGS = "state.yaml"
+
+
 def jurisdictions(repo: Path = REPO) -> list[Path]:
-    """Every jurisdiction folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order."""
+    """Every place folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order (a state's own
+    law folder, which has a state.yaml, is not a place: state_folders)."""
+    return [p for p in _law_folders(repo) if not (p / STATE_SETTINGS).is_file()]
+
+
+def state_folders(repo: Path = REPO) -> list[Path]:
+    """Every state law folder (one with a state.yaml), regulations/jurisdictions/<state>/<name>, in a stable order."""
+    return [p for p in _law_folders(repo) if (p / STATE_SETTINGS).is_file()]
+
+
+def law_folders(repo: Path = REPO) -> list[Path]:
+    """Every folder of law: the places, then the state law folders. What checks the law's own files (sources,
+    extracted text, labels, definitions, coverage) walks."""
+    return jurisdictions(repo) + state_folders(repo)
+
+
+def _law_folders(repo: Path) -> list[Path]:
     return sorted(p for p in (Path(repo) / "regulations/jurisdictions").glob("*/*") if p.is_dir())
+
+
+# ---- law kept outside the repo ------------------------------------------------------------------------------------
+# A copyrighted code book (New York's Residential Code, published by the International Code Council) can't be
+# committed: the repo keeps only short exact quotes with their section, page and a link, and its sources.yaml entry
+# says `kept_outside_repo: true`. The book itself and its extracted text live in a cache on the machines that have
+# it, one folder per fingerprint: <cache>/<sha256>/<file>, and the text of every page, one file per extractor
+# version (document_extraction/book_text.py): the same cache for every branch, each reading its own brought-in pages
+# from it. Where the cache is missing (CI), every check that needs the text is skipped and says so; nothing is ever
+# passed in its stead.
+CODE_CACHE_ENV = "GORDIUM_CODE_CACHE"
+DEFAULT_CODE_CACHE = Path.home() / "Documents/gordium_archive/code_cache"
+
+
+def code_cache() -> Path:
+    """The folder holding law kept outside the repo ($GORDIUM_CODE_CACHE, else ~/Documents/gordium_archive/code_cache)."""
+    import os
+    return Path(os.environ.get(CODE_CACHE_ENV) or DEFAULT_CODE_CACHE)
+
+
+def cached(entry: dict) -> Path:
+    """Where a kept-outside document is in the cache."""
+    return code_cache() / str(entry.get("sha256")) / entry["file"]
+
+
+def cached_text(entry: dict) -> Path:
+    """Where a kept-outside document's extracted text (every page, this extractor version) is in the cache."""
+    from document_extraction.book_text import file_name
+    return code_cache() / str(entry.get("sha256")) / file_name(entry)
+
+
+def brought_in_pages(entry: dict) -> list[int] | None:
+    """The pages a kept-outside document's sources.yaml entry brings in (brought_in.pages), or None if it names none."""
+    from document_extraction.icc_sections import parse_pages
+    spec = entry.get("brought_in", {}).get("pages") if isinstance(entry.get("brought_in"), dict) else None
+    return None if spec is None else parse_pages(spec)
+
+
+def kept_text(entry: dict) -> list[dict]:
+    """A kept-outside document's extracted text as this branch brings it in: its brought-in pages chosen from the
+    cached whole book, row for row what extract_icc(pdf, those pages) gives (header included)."""
+    from document_extraction.book_text import select
+    pages = brought_in_pages(entry)
+    if not pages:                               # never the whole book in its stead (_source_entry_problems)
+        raise ValueError(f"{entry['file']}: kept outside the repo with no brought_in.pages")
+    return _kept(f"kept text {pages}", cached_text(entry).read_bytes(),
+                 lambda data: select(_jsonl_rows(data), pages))
 
 
 @dataclass
@@ -191,6 +262,8 @@ class Context:
     districts: set[str] = field(default_factory=set)                 # district names, as the city writes them
     proposed: dict[str, dict] = field(default_factory=dict)          # measures drafts asked for, not yet in measures.yaml
     pieces: set[str] = field(default_factory=set)                    # every piece id the law is cut into (research cites them)
+    uncached: dict[str, str] = field(default_factory=dict)           # file -> why its text can't be read here (cache)
+    skipped: list[str] = field(default_factory=list)                 # checks not run here for want of the cache
 
     def kinds(self) -> dict:
         """Every usable measure's kind: "number", "text" or "boolean" (this context's measures, plus the
@@ -228,21 +301,37 @@ class Context:
             for problem in _source_entry_problems(entry):
                 ctx._problem(name, problem)
         for name, entry in listed.items():
-            pdf = j / "1_source_documents" / name
+            outside = entry.get("kept_outside_repo") is True
+            pdf = cached(entry) if outside else j / "1_source_documents" / name
+            extracted = cached_text(entry) if outside else j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
             sha = entry.get("sha256")
-            if not sha:
+            if outside and (j / "1_source_documents" / name).exists():
+                ctx._problem(name, "is kept outside the repo (kept_outside_repo), but a copy is in 1_source_documents")
+            elif outside and (j / "2_extracted_text" / f"{Path(name).stem}.jsonl").exists():
+                ctx._problem(name, "is kept outside the repo (kept_outside_repo), but its text is in 2_extracted_text")
+            elif not sha:
                 ctx._problem(name, "no sha256 in sources.yaml")
+            elif outside and not pdf.exists():      # skipped, never passed: every quote of it is listed as not checked
+                ctx.uncached[name] = (f"kept outside the repo, and not in the code cache here ({_shown_cache(pdf)}); "
+                                      "checked where the cache exists")
             elif not pdf.exists():
                 ctx._problem(name, "listed in sources.yaml but missing")
             elif hashlib.sha256(pdf.read_bytes()).hexdigest() != sha:
                 ctx._problem(name, "fingerprint does not match sources.yaml")
-            extracted = j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
+            elif outside and not extracted.exists():
+                ctx._problem(name, f"its extracted text isn't in the code cache for this extractor version "
+                                   f"({_shown_cache(extracted)}): run python -m document_extraction (it needs "
+                                   "pdfplumber; the version is book_text.extractor_key)")
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
-                ctx._load_extracted(name, sha, extracted)
+                ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None)
+                # (an outside book with no brought_in.pages has a problem, so is never loaded whole)
             cut = j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
             if cut.exists():
                 ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
+            if outside and cut.exists() and name in ctx.pages:
+                for problem in _stale_cache_problems(extracted, cut):
+                    ctx._problem(name, problem)
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
                 ctx._load_cells(name, sha, cells, j)
@@ -266,15 +355,39 @@ class Context:
         self.districts |= districts
         self.cells[name] = cells
 
-    def _load_extracted(self, name, sha, path):
+    def _load_extracted(self, name, sha, path, pages=None):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
         The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
-        document_extraction --check) and requires an exact match, so this file can't be edited by hand."""
-        pages = _kept(f"extracted {sha}", Path(path).read_bytes(), lambda data: _pages_of(data, sha))
-        if pages is None:
+        document_extraction --check) and requires an exact match, so this file can't be edited by hand. `pages`: only
+        these pages (a book kept outside the repo: its cached text is the whole book; the branch brings in some)."""
+        found = _kept(f"extracted {sha} {pages}", Path(path).read_bytes(), lambda data: _pages_of(data, sha, pages))
+        if found is None:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
-        self.pages[name] = pages
+        self.pages[name] = found
+
+
+def _stale_cache_problems(extracted: Path, cut: Path) -> list[str]:
+    """A cached text that is not the one the repo's pieces were cut from (edited, or left from another extraction):
+    each piece's words must still have the fingerprint the sections file records. Only `python -m
+    document_extraction --check` re-extracts, so without this an edited cache would feed every other check."""
+    from document_extraction.icc_sections import text_fingerprint
+    lines = {(r["page"], r["line"]): r for r in read_jsonl(extracted)[1:]}
+    out = []
+    for piece in read_jsonl(cut)[1:]:
+        members = [lines.get((pg, n)) for pg, a, b in piece["lines"] for n in range(a, b + 1)]
+        if None in members or text_fingerprint(members) != piece["text_sha256"]:
+            out.append(f"{_shown_cache(extracted)}: {piece['id']}'s words are not the ones its piece was cut from; "
+                       "run python -m document_extraction")
+    return out
+
+
+def _shown_cache(path: Path) -> str:
+    """A cache path as messages show it: from the cache folder, so a message reads the same on every machine."""
+    try:
+        return "<code cache>/" + path.relative_to(code_cache()).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | None:
@@ -293,21 +406,27 @@ def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | Non
     return cells, districts
 
 
-def _pages_of(data: bytes, sha: str) -> dict | None:
-    """An extracted-text .jsonl file's bytes -> page -> line -> the line's words, or None when its header names
-    another PDF version than `sha` (checked before any row is read, as for _cells_of)."""
+def _pages_of(data: bytes, sha: str, only: list[int] | None = None) -> dict | None:
+    """An extracted-text .jsonl file's bytes -> page -> line -> the line's words (`only`: these pages), or None when
+    its header names another PDF version than `sha` (checked before any row is read, as for _cells_of)."""
     rows = _jsonl_rows(data)
     if not rows or rows[0].get("sha256") != sha:
         return None
     pages: dict[int, dict[int, list[str]]] = {}
+    keep = None if only is None else set(only)
     for row in rows[1:]:
+        if keep is not None and int(row["page"]) not in keep:
+            continue
         pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
     return pages
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
-                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages"}
-LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
+                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages",
+                 "kept_outside_repo", "copy", "terms", "edition", "in_force", "brought_in"}
+# Document layouts the section splitters know: ecode360 (document_extraction/sections.py), icc (an ICC code book,
+# document_extraction/icc_sections.py)
+LAYOUTS = {"ecode360", "icc"}
 # A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU), is each place's own: its
 # jurisdiction.yaml districts.chart_column, through the registry (place.py: Place.district_column), the one
 # definition the chart reader, the inspector and the drafter all use.
@@ -537,6 +656,16 @@ def _source_entry_problems(entry: dict) -> list[str]:
             and len(set(chart_pages)) == len(chart_pages)
             and (type(entry.get("pages")) is not int or all(n <= entry["pages"] for n in chart_pages))):
         p.append("'chart_pages' must be a list of distinct page numbers in the document")
+    if entry.get("kept_outside_repo") is True:
+        # The code cache holds every page of the book, for every branch: without the pages this branch brings in, a
+        # quote from any page of it would be checked as law brought in.
+        try:
+            pages = brought_in_pages(entry)
+        except (TypeError, ValueError):
+            pages = None
+        if not pages:
+            p.append("kept outside the repo, so it needs brought_in.pages (the pages read, e.g. '34-56, 99'): "
+                     "only those of the cached book are read")
     return p
 
 
@@ -995,6 +1124,8 @@ def _source_problems(sources: list[dict], ctx: Context, district: str | None = N
             p.append(f"source file {name!r} is not in sources.yaml")
         elif reason := not_quotable(ctx.sources[name]):
             p.append(f"source {name} {reason}")
+        elif name in ctx.uncached:          # skipped, never passed: listed so the run says what it didn't check
+            ctx.skipped.append(f"{name} p.{page} lines {lines}: quote not checked here ({ctx.uncached[name]})")
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
         elif "cell" in s:

@@ -5,7 +5,8 @@
     python -m rule_format cite new_york/ithaca_city zoning_charts_2026-04.pdf 3 "Height in feet 35 ft"
                                    # prints the lines to cite: lines: [31, 31]
 
-For each jurisdiction: its settings file (jurisdiction.yaml, read by the registry in place.py), its source documents (fingerprints, extracted text), its definitions and
+For each place and each state law folder (a state's own law, e.g. New York's Residential Code, with a state.yaml
+instead of a jurisdiction.yaml; its text_verification.yaml too): its settings file (jurisdiction.yaml, read by the registry in place.py), its source documents (fingerprints, extracted text), its definitions and
 uses (4_term_definitions/), its section labels (3_section_labels/<document>.yaml, against the pieces in
 2_extracted_text/<document>.sections.jsonl), then every rule file in 5_zoning_rules/ and in its
 test_data/answer_keys/ folder. Then that the plugin's copy of its place's settings (place.json) is current.
@@ -17,27 +18,34 @@ from pathlib import Path
 
 from . import place as places
 from .labels import load_pieces, validate_labels
-from .rulebook import (REPO, Context, finding_conflicts, jurisdictions, load, locate, not_quotable, research_entries,
-                       rulebook_file_problems, rulebook_paths, term_file_problems, utf8_console)
+from .rulebook import (REPO, STATE_SETTINGS, Context, finding_conflicts, law_folders, load, locate, not_quotable,
+                       research_entries, rulebook_file_problems, rulebook_paths, term_file_problems, utf8_console)
+from .state_law import VERIFICATION, state_settings_problems, verification_problems
 
 
 def main() -> int:
     failed = checked = 0
-    for jurisdiction in jurisdictions(REPO):
+    for jurisdiction in law_folders(REPO):
         place = jurisdiction.relative_to(REPO / "regulations/jurisdictions")
+        state = (jurisdiction / STATE_SETTINGS).is_file()
         checked += 1
-        try:
-            places.place(jurisdiction)
-            print(f"✓ {place}/{places.SETTINGS}")
-        except places.UnknownPlace as e:
-            print(f"✗ {place}: {e}")
-            failed += 1
         try:
             ctx = Context.for_jurisdiction(jurisdiction)
         except Exception as e:  # report and keep going: one broken folder mustn't hide the rest
             print(f"✗ {place}: can't load sources ({type(e).__name__}: {e})")
             failed += 1
             continue
+        if state:
+            problems = state_settings_problems(jurisdiction, ctx)
+            print(f"{'✗' if problems else '✓'} {place}/{STATE_SETTINGS}" + "".join(f"\n    {p}" for p in problems))
+            failed += bool(problems)
+        else:
+            try:
+                places.place(jurisdiction)
+                print(f"✓ {place}/{places.SETTINGS}")
+            except places.UnknownPlace as e:
+                print(f"✗ {place}: {e}")
+                failed += 1
         for problem in ctx.problems:
             print(f"✗ {place}: {problem}")
         failed += bool(ctx.problems)
@@ -68,6 +76,19 @@ def main() -> int:
             for problem in problems:
                 print(f"    {problem}")
             failed += bool(problems)
+        if state:
+            checked += 1
+            try:
+                problems, notes = verification_problems(jurisdiction, ctx)
+            except Exception as e:  # report and keep going
+                problems, notes = [f"validator error ({type(e).__name__}: {e})"], []
+            print(f"{'✗' if problems else '✓'} {place}/{VERIFICATION}" + "".join(f"\n    {p}" for p in problems))
+            failed += bool(problems)
+            for note in notes:
+                print(f"– {place}: {note}")
+        for name, why in ctx.uncached.items():            # skipped here, never passed: said once per document
+            count = sum(s.startswith(f"{name} ") for s in ctx.skipped)
+            print(f"– {place}: {count} quotes of {name} not checked here: {why}")
         try:                                              # across files: a question is settled or open, not both
             conflicts = finding_conflicts(research_entries(jurisdiction))
         except Exception as e:  # report and keep going
