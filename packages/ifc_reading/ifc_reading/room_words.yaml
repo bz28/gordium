@@ -1,6 +1,7 @@
 # Which room names say a room is, or isn't, a sleeping room. Read by ifc_reading.rooms (README: "Rooms").
 #
-# A room's words are taken from its IFC LongName, Name, ObjectType and classification names (Unicode-normalised,
+# A room's words are taken from its IFC LongName, Name, ObjectType, classification names and stated use
+# (OccupancyType, Category), and its space type's LongName, Name, ElementType and classification names (Unicode-normalised,
 # cut at every character that isn't a letter, lowercased) and each is looked up here, whole (never part of a word):
 #   - a `sleeping` word and no `not_sleeping` or `ask` word          -> sleeping: true
 #   - only `not_sleeping` words (and `neutral` ones)                 -> sleeping: false

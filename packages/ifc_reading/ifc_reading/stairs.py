@@ -30,6 +30,8 @@ def read_flight(model, flight) -> dict:
                         unread[key] = bad
                 else:
                     v, w = model.prop(flight, ["Pset_StairFlightCommon"], p)
+                    if v is not None and not is_number(v):     # review round 9: never dropped without a reason
+                        unread[key] = f"{w} is {v!r}, not a number"
                 if is_number(v):
                     value, where = v, w
                     break

@@ -21,15 +21,22 @@ class Model:
         import ifcopenshell.util.unit
         self.file = ifcopenshell.open(str(path))
         self.schema = self.file.schema
-        assignments = self.file.by_type("IfcUnitAssignment")
-        units = [u for a in assignments for u in a.Units if getattr(u, "UnitType", None) == "LENGTHUNIT"]
+        # review round 9: the project's own units only (a library's are a library's), each scaled strictly (a
+        # unit ifcopenshell can't scale comes back as 1, which would read inches as metres)
+        projects = self.file.by_type("IfcProject")
+        context = projects[0].UnitsInContext if len(projects) == 1 else None
+        if context is None:
+            raise ValueError("the file's project states no units (IfcProject.UnitsInContext): what its lengths are in "
+                             "is unclear")
+        units = [u for u in context.Units if getattr(u, "UnitType", None) == "LENGTHUNIT"]
         if len(units) != 1:
             raise ValueError(f"the file states {len(units)} length units: which one its lengths are in is unclear")
         self.length_unit = _unit_name(units[0])
-        self.metres = float(ifcopenshell.util.unit.calculate_unit_scale(self.file, "LENGTHUNIT"))
-        areas = [u for a in assignments for u in a.Units if getattr(u, "UnitType", None) == "AREAUNIT"]
-        self.square_metres = float(ifcopenshell.util.unit.calculate_unit_scale(self.file, "AREAUNIT")) \
-            if len(areas) == 1 else None
+        self.metres, why = unit_scale(units[0], "LENGTHUNIT")
+        if self.metres is None:
+            raise ValueError(f"the file's length unit {self.length_unit!r} can't be converted to metres: {why}")
+        areas = [u for u in context.Units if getattr(u, "UnitType", None) == "AREAUNIT"]
+        self.square_metres = unit_scale(areas[0], "AREAUNIT")[0] if len(areas) == 1 else None
         self._settings = None
 
     def by_type(self, name):
@@ -114,7 +121,10 @@ class Model:
         if unit is not None:
             if getattr(unit, "UnitType", None) != kind:
                 return None, f"{where} is stated in a unit that isn't a {kind.lower()[:-4]} unit"
-            return float(value) * float(ifcopenshell.util.unit.get_unit_scale(unit)), None
+            scale, why = unit_scale(unit, kind)
+            if scale is None:
+                return None, f"{where} is stated in {_unit_name(unit)!r}, which can't be converted: {why}"
+            return float(value) * scale, None
         scale = self.metres if kind == "LENGTHUNIT" else self.square_metres
         if scale is None:
             return None, f"the file states no single area unit, so {where} can't be read"
@@ -162,13 +172,15 @@ class Model:
         return ifcopenshell.util.element.get_type(element)
 
     def predefined(self, element, entity):
-        """The type's predefined property sets of an entity kind (IfcWindowLiningProperties…), then the element's."""
-        found = []
+        """The element's own predefined property sets of an entity kind (IfcWindowLiningProperties…), or, if it has
+        none, its type's: (records, "" or " (from its type …)"). The element's own replace its type's (review
+        round 9: they were added together, so a window overriding its type's one panel read as two)."""
+        own = [d for d in self._own(element) if d.is_a(entity)]
+        if own:
+            return own, ""
         t = self.type_of(element)
-        for holder in ([t] if t is not None else []):
-            found += [p for p in (getattr(holder, "HasPropertySets", None) or []) if p.is_a(entity)]
-        found += [d for d in self._own(element) if d.is_a(entity)]
-        return found
+        found = [p for p in (getattr(t, "HasPropertySets", None) or []) if p.is_a(entity)] if t is not None else []
+        return found, (self.from_type(t) if found else "")
 
     # -- where things are --------------------------------------------------------------------------------------
     def placement(self, element):
@@ -213,6 +225,33 @@ class Unreadable:
 
     def __repr__(self):
         return self.kind if self.stated else f"an {self.kind} (not read)"
+
+
+PREFIX = {"EXA": 1e18, "PETA": 1e15, "TERA": 1e12, "GIGA": 1e9, "MEGA": 1e6, "KILO": 1e3, "HECTO": 1e2,
+          "DECA": 1e1, "DECI": 1e-1, "CENTI": 1e-2, "MILLI": 1e-3, "MICRO": 1e-6, "NANO": 1e-9, "PICO": 1e-12,
+          "FEMTO": 1e-15, "ATTO": 1e-18}
+SI = {"LENGTHUNIT": ("METRE", 1), "AREAUNIT": ("SQUARE_METRE", 2)}
+
+
+def unit_scale(unit, kind, depth=0):
+    """Metres (or square metres) per one of `unit`: (scale, None), or (None, why). Only an IfcSIUnit of the right
+    name, or an IfcConversionBasedUnit whose factor is itself such a unit (a foot is 0.3048 metres), never a
+    guess: ifcopenshell scales a unit it doesn't know (an IfcContextDependentUnit) by 1 (review round 9)."""
+    base, power = SI[kind]
+    if unit is None or getattr(unit, "UnitType", None) != kind:
+        return None, f"it isn't a {kind.lower()[:-4]} unit"
+    if unit.is_a("IfcSIUnit"):
+        if unit.Name != base or (unit.Prefix and unit.Prefix not in PREFIX):
+            return None, f"an SI unit named {unit.Name}, not {base}"
+        return (PREFIX[unit.Prefix] if unit.Prefix else 1.0) ** power, None
+    if unit.is_a("IfcConversionBasedUnit") and depth < 5:
+        factor = unit.ConversionFactor
+        value = getattr(getattr(factor, "ValueComponent", None), "wrappedValue", None)
+        inner, why = unit_scale(getattr(factor, "UnitComponent", None), kind, depth + 1)
+        if not is_number(value) or value <= 0 or inner is None:
+            return None, f"its conversion factor isn't a positive number of a known unit ({why or value!r})"
+        return float(value) * inner, None
+    return None, f"an {unit.is_a()}, whose size in metres the model doesn't state"
 
 
 def _unit_name(unit) -> str:

@@ -152,6 +152,7 @@ openings:
     panels:
     - SIDEHUNGRIGHTHAND
     - SIDEHUNGLEFTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
 - id: 0B1RwEzzP3CfME5NR$Vqh5
   name: EG-Fenster-7
@@ -178,6 +179,7 @@ openings:
     panels:
     - SIDEHUNGLEFTHAND
     - SIDEHUNGRIGHTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
 - id: 25nJxEpYf8LRDJNkMUVO0m
   name: EG-Fenster-4
@@ -204,6 +206,7 @@ openings:
     panels:
     - SIDEHUNGLEFTHAND
     - SIDEHUNGRIGHTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
 - id: 3BFcylCsX74PQAoRAe5fNv
   name: EG-Fenster-5
@@ -230,6 +233,7 @@ openings:
     panels:
     - SIDEHUNGLEFTHAND
     - SIDEHUNGRIGHTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
 - id: 13aSY79zb8fP4HApEJ0z_e
   name: EG-Fenster-8
@@ -256,6 +260,7 @@ openings:
     panels:
     - SIDEHUNGLEFTHAND
     - SIDEHUNGRIGHTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #24189'
     partitioning: NOTDEFINED
 - id: 2EQh_jhP1B_A_AMuSJc5E0
   name: EG-Fenster-9
@@ -282,6 +287,7 @@ openings:
     panels:
     - SIDEHUNGRIGHTHAND
     - SIDEHUNGLEFTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
 - id: 1TAI4ouKX4Xx4lBDZIu5qM
   name: EG-Fenster-1
@@ -308,6 +314,7 @@ openings:
     panels:
     - SIDEHUNGRIGHTHAND
     - SIDEHUNGLEFTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
 - id: 2Q9w7oRXP249jBobEMVqlZ
   name: EG-Fenster-2
@@ -334,6 +341,7 @@ openings:
     panels:
     - SIDEHUNGRIGHTHAND
     - SIDEHUNGLEFTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
 - id: 1DiYqhfzH9xxuJdVHwXCNa
   name: EG-Fenster-3
@@ -360,6 +368,7 @@ openings:
     panels:
     - SIDEHUNGRIGHTHAND
     - SIDEHUNGLEFTHAND
+    panels_from: 'from its type IFC Fenster - zwei Panele - Vertikal #23269'
     partitioning: NOTDEFINED
 - id: 1zOBw0Gej5Wf0QAJfHnOc0
   name: OG-Fenster-2
@@ -384,6 +393,7 @@ openings:
     opening_bottom_above_floor: 0.8
     panels:
     - NOTDEFINED
+    panels_from: 'from its type Rundfenster 13 #67450'
     partitioning: NOTDEFINED
 - id: 2ACmFFQhT1Ouf0x4YRUh9m
   name: OG-Fenster-1
@@ -408,6 +418,7 @@ openings:
     opening_bottom_above_floor: 0.8
     panels:
     - NOTDEFINED
+    panels_from: 'from its type Rundfenster 13 #67450'
     partitioning: NOTDEFINED
 - id: 2jTRqchjf7oB0yhQ6462T0/opening
   name: Haustuer
@@ -426,6 +437,7 @@ openings:
     global_id: 2jTRqchjf7oB0yhQ6462T0
     escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
     operation_type: NOTDEFINED
+    operation_type_from: 'IfcDoorType.OperationType (from its type Eingangstür #27350)'
     overall_width: 1.01
     overall_height: 2.01
     opening_bottom: 0.0
@@ -446,6 +458,7 @@ openings:
     global_id: 1M$gxUrX1Fiwe3P64ww7U5
     escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
     operation_type: DOUBLE_DOOR_SLIDING
+    operation_type_from: 'IfcDoorType.OperationType (from its type Schiebetür_3-teilig #31392)'
     overall_width: 2.01
     overall_height: 2.375
     opening_bottom: 0.0
@@ -466,6 +479,7 @@ doors:
     step_id: 17468
     global_id: 1Oms875aH3Wg$9l65H2ZGw
     operation_type: SINGLE_SWING_RIGHT
+    operation_type_from: 'IfcDoorType.OperationType (from its type IFC Tür - Eine Öffnunsgrichtung #17730)'
     overall_width: 0.885
     overall_height: 2.01
     opening_bottom: 0.0
@@ -486,6 +500,7 @@ doors:
     global_id: 0pGAjlJMP3ifYPATVF5xAR
     exit_from: Pset_DoorCommon.FireExit is false
     operation_type: SINGLE_SWING_LEFT
+    operation_type_from: 'IfcDoorType.OperationType (from its type IFC Tür - Eine Öffnunsgrichtung #19459)'
     overall_width: 0.885
     overall_height: 2.01
     opening_bottom: 0.0
@@ -505,6 +520,7 @@ doors:
     step_id: 19504
     global_id: 2qiPPF3FrF8OIqfrKiSUqm
     operation_type: SINGLE_SWING_LEFT
+    operation_type_from: 'IfcDoorType.OperationType (from its type IFC Tür - Eine Öffnunsgrichtung #19762)'
     overall_width: 0.885
     overall_height: 2.01
     opening_bottom: 0.0
@@ -524,6 +540,7 @@ doors:
     step_id: 27013
     global_id: 2jTRqchjf7oB0yhQ6462T0
     operation_type: NOTDEFINED
+    operation_type_from: 'IfcDoorType.OperationType (from its type Eingangstür #27350)'
     overall_width: 1.01
     overall_height: 2.01
     opening_bottom: 0.0
@@ -543,6 +560,7 @@ doors:
     step_id: 31079
     global_id: 1M$gxUrX1Fiwe3P64ww7U5
     operation_type: DOUBLE_DOOR_SLIDING
+    operation_type_from: 'IfcDoorType.OperationType (from its type Schiebetür_3-teilig #31392)'
     overall_width: 2.01
     overall_height: 2.375
     opening_bottom: 0.0

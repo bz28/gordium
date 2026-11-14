@@ -142,9 +142,11 @@ def read_window(model, window, floors: dict) -> dict:
         if room is not None and floors.get(room.GlobalId) is not None:
             info["opening_bottom_above_floor"] = tidy(m[2, 3] - floors[room.GlobalId])
 
-    panels = model.predefined(window, "IfcWindowPanelProperties")
+    panels, panels_from = model.predefined(window, "IfcWindowPanelProperties")
     kinds = [p.OperationType for p in panels]
     info["panels"] = kinds
+    if panels_from:
+        info["panels_from"] = panels_from.strip(" ()")
     partitioning = _partitioning(model, window)
     if partitioning:
         info["partitioning"] = " and ".join(partitioning)
@@ -186,7 +188,7 @@ def _frame(model, window, m, size):
         return None, "the window's OverallWidth and OverallHeight aren't given"
     if not _upright(m):
         return None, "the window isn't upright in a wall (a roof window, or turned): not read yet"
-    linings = model.predefined(window, "IfcWindowLiningProperties")
+    linings, lining_from = model.predefined(window, "IfcWindowLiningProperties")
     if len(linings) != 1 or not is_number(linings[0].LiningThickness) or linings[0].LiningThickness < 0:
         return None, "the window's lining thickness (IfcWindowLiningProperties.LiningThickness) isn't given"
     lining = linings[0]
@@ -203,7 +205,7 @@ def _frame(model, window, m, size):
     z0 = float(m[2, 3])
     frame = {"left": tidy(thick), "right": tidy(w - thick), "bottom": tidy(z0 + thick), "top": tidy(z0 + h - thick)}
     return frame, (f"OverallWidth {tidy(w)} m x OverallHeight {tidy(h)} m at the window's origin ({tidy(z0)} m), "
-                   f"less LiningThickness {tidy(thick)} m all round; {why}")
+                   f"less LiningThickness {tidy(thick)} m{lining_from} all round; {why}")
 
 
 def _silhouette(tris, m):
@@ -247,11 +249,13 @@ def _rectangle(model, window, m, w, h):
 
 
 def door_operation(model, door):
+    """The door's own OperationType, else its type's: (operation, where it came from)."""
     op = getattr(door, "OperationType", None)
     if op in (None, "NOTDEFINED"):
         t = model.type_of(door)
-        op = getattr(t, "OperationType", None) if t is not None else None
-    return op
+        if t is not None:
+            return getattr(t, "OperationType", None), f"{t.is_a()}.OperationType{model.from_type(t)}"
+    return op, f"{door.is_a()}.OperationType"
 
 
 def read_door_opening(model, door, floors: dict):
@@ -267,8 +271,9 @@ def read_door_opening(model, door, floors: dict):
         o["room"] = room.GlobalId
     o["escape"] = bool(escape)
     info["escape_from"] = _escape_from(escape, where, bad)
-    op = door_operation(model, door)
+    op, op_from = door_operation(model, door)
     info["operation_type"] = op
+    info["operation_type_from"] = op_from
     mapped = DOOR_OPERATION.get(op, (None, None))[1]
     if mapped:
         o["operation"] = mapped
@@ -297,8 +302,9 @@ def read_door(model, door) -> dict:
     else:
         d["exit"] = exit_
         info["exit_from"] = f"{where} is {str(exit_).lower()}"
-    op = door_operation(model, door)
+    op, op_from = door_operation(model, door)
     info["operation_type"] = op
+    info["operation_type_from"] = op_from
     mapped = DOOR_OPERATION.get(op, (None, None))[0]
     if mapped:
         d["operation"] = mapped

@@ -608,3 +608,93 @@ def test_a_flights_lengths_from_its_type(build, tmp_path, own):
         assert near(fl["riser_height"], 0.6 * FT) and fl["source"]["riser_height"] == "Pset_StairFlightCommon.RiserHeight"
     else:
         assert near(fl["riser_height"], 0.65 * FT) and "(from its type Std flight #" in fl["source"]["riser_height"]
+
+
+def _length_unit_to(b, unit):
+    [project] = b.f.by_type("IfcProject")
+    ctx = project.UnitsInContext
+    ctx.Units = [u for u in ctx.Units if getattr(u, "UnitType", None) != "LENGTHUNIT"] + [unit]
+
+
+def test_a_unit_whose_size_isnt_stated_is_refused(build, tmp_path):
+    """Review round 9: an IfcContextDependentUnit "inch" (no size in metres) was scaled by 1: every length read as
+    metres, a 62.5 sq ft bedroom as 96875 sq ft."""
+    b = bedroom_house(build)
+    dims = b.f.create_entity("IfcDimensionalExponents", 1, 0, 0, 0, 0, 0, 0)
+    _length_unit_to(b, b.f.create_entity("IfcContextDependentUnit", Dimensions=dims, UnitType="LENGTHUNIT",
+                                         Name="inch"))
+    with pytest.raises(ValueError, match="can't be converted to metres"):
+        read(b.write(tmp_path / "h.ifc"))
+
+
+def test_a_conversion_to_an_unknown_unit_is_refused(build, tmp_path):
+    b = bedroom_house(build)
+    dims = b.f.create_entity("IfcDimensionalExponents", 1, 0, 0, 0, 0, 0, 0)
+    odd = b.f.create_entity("IfcContextDependentUnit", Dimensions=dims, UnitType="LENGTHUNIT", Name="module")
+    factor = b.f.create_entity("IfcMeasureWithUnit", b.f.create_entity("IfcLengthMeasure", 25.4), odd)
+    _length_unit_to(b, b.f.create_entity("IfcConversionBasedUnit", Dimensions=dims, UnitType="LENGTHUNIT",
+                                         Name="inch", ConversionFactor=factor))
+    with pytest.raises(ValueError, match="conversion factor"):
+        read(b.write(tmp_path / "h.ifc"))
+
+
+def test_a_quantity_in_a_unit_whose_size_isnt_stated_is_left_out(build, tmp_path):
+    b = bedroom_house(build)
+    dims = b.f.create_entity("IfcDimensionalExponents", 1, 0, 0, 0, 0, 0, 0)
+    odd = b.f.create_entity("IfcContextDependentUnit", Dimensions=dims, UnitType="LENGTHUNIT", Name="module")
+    [q] = [q for q in b.f.by_type("IfcQuantityLength") if q.Name == "FinishCeilingHeight"]
+    q.Unit = odd
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "ceiling_height" not in room and "can't be converted" in room["not_given"]["ceiling_height"]
+
+
+def test_only_the_projects_own_units(build, tmp_path):
+    """Review round 9: units were counted across every unit assignment but scaled from the project's: a project
+    with none and a library in millimetres read as millimetre at 1 metre per unit."""
+    b = bedroom_house(build)
+    lib_unit = b.f.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Prefix="MILLI", Name="METRE")
+    library = b.f.create_entity("IfcProjectLibrary", GlobalId=b.guid(), Name="lib",
+                                UnitsInContext=b.f.create_entity("IfcUnitAssignment", [lib_unit]))
+    b.f.create_entity("IfcRelDeclares", GlobalId=b.guid(), RelatingContext=b.f.by_type("IfcProject")[0],
+                      RelatedDefinitions=[library])
+    d = read(b.write(tmp_path / "h.ifc"))                       # the project's foot, not the library's millimetre
+    assert d["source"]["length_unit"] == "foot" and d["source"]["metres_per_unit"] == FT
+    b.f.by_type("IfcProject")[0].UnitsInContext = None
+    with pytest.raises(ValueError, match="states no units"):
+        read(b.write(tmp_path / "h2.ifc"))
+
+
+def test_the_elements_own_panel_replaces_its_types(build, tmp_path):
+    """Review round 9: a window's own panel record was added to its type's, so a window overriding its type's one
+    panel read as two (not measured, for the wrong reason)."""
+    b = bedroom_house(build)
+    [w] = b.f.by_type("IfcWindow")
+    own = b.f.create_entity("IfcWindowPanelProperties", GlobalId=b.guid(), OperationType="TOPHUNG", PanelPosition="MIDDLE")
+    b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[w], RelatingPropertyDefinition=own)
+    got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
+    assert got["operation"] == "awning" and got["ifc"]["panels"] == ["TOPHUNG"] and "panels_from" not in got["ifc"]
+
+
+def test_a_panel_lining_and_door_operation_from_the_type_name_it(build, tmp_path):
+    b = bedroom_house(build)
+    door = b.door("Front", (5, 0, 0), operation="NOTDEFINED")
+    t = b.run("root.create_entity", ifc_class="IfcDoorType", name="Entry")
+    t.OperationType = "SINGLE_SWING_LEFT"
+    b.run("type.assign_type", related_objects=[door], relating_type=t)
+    d = read(b.write(tmp_path / "h.ifc"))
+    w, dr = d["openings"][0], one(d["doors"], "Front")
+    assert w["ifc"]["panels_from"].startswith("from its type type of W1 #")
+    assert "LiningThickness" in w["ifc"]["frame_from"] and "(from its type type of W1 #" in w["ifc"]["frame_from"]
+    assert dr["ifc"]["operation_type"] == "SINGLE_SWING_LEFT"
+    assert dr["ifc"]["operation_type_from"].startswith("IfcDoorType.OperationType (from its type Entry #")
+
+
+def test_an_unreadable_stair_count_says_why(build, tmp_path):
+    b = build.house("foot")
+    f = b.flight("F1")
+    prop = b.f.create_entity("IfcPropertyEnumeratedValue", Name="NumberOfRiser",
+                             EnumerationValues=[b.f.create_entity("IfcCountMeasure", 14)])
+    p = b.f.create_entity("IfcPropertySet", GlobalId=b.guid(), Name="Pset_StairFlightCommon", HasProperties=[prop])
+    b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[f], RelatingPropertyDefinition=p)
+    [fl] = read(b.write(tmp_path / "h.ifc"))["source"]["stair_flights"]
+    assert "risers" not in fl and "not a number" in fl["not_given"]["risers"]

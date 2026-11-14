@@ -61,7 +61,10 @@ a slip is caught rather than a bedroom missed. A flag that is there but isn't tr
 
 **Units of a stated number.** A quantity or property may carry its own unit (IFC lets each `IfcQuantityArea`,
 `IfcQuantityLength` or property value name one); it is converted by that unit, otherwise by the file's. One stated
-in a unit of the wrong kind (an area in a length unit) is left out, with the reason. A quantity stated twice (an
+in a unit of the wrong kind (an area in a length unit) is left out, with the reason. The file's units are its
+project's own (`IfcProject.UnitsInContext`; a file whose project states none is refused, never read as metres),
+and a unit is only ever an SI unit or a conversion of one (a foot is 0.3048 m): a unit whose size the model doesn't
+state (an `IfcContextDependentUnit`) refuses the file, or leaves out the one number stated in it. A quantity stated twice (an
 export holding both IFC4's `Qto_SpaceBaseQuantities` and IFC2x3's `BaseQuantities`) is read only if both agree,
 never the first one found. A flag stored as something other than a single value (an enumerated or list value)
 is never taken as absent: its part is left unknown, with what was found. A flag stated twice on the same element
