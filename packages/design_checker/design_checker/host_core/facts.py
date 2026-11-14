@@ -134,8 +134,8 @@ STATED_FACTS = {
     "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
 # The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
-# at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
-# accept what the check refuses (#r2 review round 2).
+# at least one), else 0. The answer fields (parse_answer) and update_counts both use it, so a field can't accept what
+# the check refuses (#r2 review round 2).
 MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1,
            "private_garages": 1, "adus_on_parcel": 1}
 # Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit

@@ -8,8 +8,8 @@ where none of the .venv's packages are installed."""
 
 __all__ = ['report_message', 'BUSY', 'NO_DOCUMENT', 'WorkCancelled', 'WAIT_WINDOW_S', 'CANCELLING', 'STOP_HINT',
     'STOP_HINT_CLICK', 'FIRST_STEP', 'CHECK_CANCELLED', 'CHECK_CANCELLED_NOTE', 'DRAW_CANCELLED', 'REPORT_CANCELLED',
-    'REPORT_CANCELLED_LATE', 'report_cancelled', 'SETTLING', 'CHECK_OUTDATED', 'SITE_SUFFIX', 'REPORT_OUTDATED',
-    'NOT_IN_FRONT', 'outdated_report_message', 'HOUSE_OUTDATED', 'DRAW_OUTDATED', 'ModelChanged']
+    'REPORT_CANCELLED_LATE', 'report_cancelled', 'SETTLING', 'CHECK_OUTDATED', 'SITE_SUFFIX', 'check_not_done',
+    'REPORT_OUTDATED', 'NOT_IN_FRONT', 'outdated_report_message', 'HOUSE_OUTDATED', 'DRAW_OUTDATED', 'ModelChanged']
 
 
 def report_message(path, written, error=None, opened=True, open_error=None, stale=False):
@@ -64,6 +64,20 @@ def report_cancelled(path, changed):
 SETTLING = "Finishing the check that is running…"
 CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
 SITE_SUFFIX = ".site.json"   # the site description kept beside a report (design_checker.check.SITE_SUFFIX)
+
+
+def check_not_done(last, since):
+    """Why a Check gave no result, for the command line (STATE["last"], set by that check at or after `since`):
+    cancelled, the model changed while it ran, or it could not run; None when nothing was set by it (a box open, a
+    check already running: nothing happened, so nothing is said)."""
+    last = last or {}
+    if not last.get("error") or last.get("at", 0) < since:
+        return None
+    if last.get("cancelled"):
+        return CHECK_CANCELLED + ". " + CHECK_CANCELLED_NOTE
+    if last.get("outdated"):
+        return CHECK_OUTDATED
+    return "Check could not run: " + str(last["error"])[:200]
 REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
                    "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
                    "panel) for a report of the model now.")
