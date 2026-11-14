@@ -4,6 +4,7 @@ from pathlib import Path
 
 import pdfplumber
 import pytest
+import yaml
 
 import document_extraction.__main__ as cli
 from document_extraction import charts as chart_reader
@@ -165,7 +166,9 @@ def test_check_catches_a_hand_edited_cells_file(tmp_path, monkeypatch):
     shutil.copy(CHARTS, src / CHARTS.name)
     (src / "sources.yaml").write_text(f"documents:\n  - file: {CHARTS.name}\n    sha256: {sha256(CHARTS)}\n"
                                       f"    chart_pages: [3]\n", encoding="utf-8")
-    shutil.copy(ITHACA / "jurisdiction.yaml", src.parent / "jurisdiction.yaml")     # its settings: Ithaca's chart
+    settings = yaml.safe_load((ITHACA / "jurisdiction.yaml").read_text(encoding="utf-8"))   # its settings: Ithaca's
+    settings.pop("inherits")                                     # chart, and no state law (this made-up repo has none)
+    (src.parent / "jurisdiction.yaml").write_text(yaml.safe_dump(settings), encoding="utf-8")
     assert cli.main([]) == 0 and cli.main(["--check"]) == 0
     out = src.parent / "2_extracted_text" / f"{CHARTS.stem}.cells.jsonl"
     rows = out.read_text(encoding="utf-8").splitlines()
