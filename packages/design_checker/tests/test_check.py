@@ -43,12 +43,14 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     s = result["summary"]
     # who lives there, whether an accessory dwelling unit is planned, a home occupation, a stream near the lot and the
     # garage's cars aren't in their spreadsheet: those eleven rules wait (never a pass; six are the ADU's, §325-28)
-    assert s["state"] == "fail" and s["text"] == "10 pass · 1 fail · 11 need review"
+    # its words are the panel's own (one summary everywhere, D3), the overlays among them (Ben, 2026-11-09)
+    assert s["state"] == "fail" and s["text"] == result["view"]["summary"] == (
+        "1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to answer")
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
-    assert len(s["lines"]) == 12 and all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank"
-                                        in x or "private garages hold" in x or "accessory dwelling unit (ADU)" in x
-                                        for x in s["lines"][1:])
+    assert len(s["lines"]) == 13 and s["lines"][-1].startswith("Overlays · not in this release: ")
+    assert all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank" in x
+               or "private garages hold" in x or "accessory dwelling unit (ADU)" in x for x in s["lines"][1:-1])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -75,7 +77,8 @@ def test_needs_review_rows_say_why_in_the_measuring_words(facts):
     assert parking["Error"] == "NEEDS REVIEW" and parking["Why"] == "enter bedrooms / parking spaces"
     assert all(r["Rule id"] != "R-1b.parking_one_family" for r in result["rows"])
     # WAITING_ON_THE_HOUSEHOLD's eleven (the six ADU rules among them, §325-28)
-    assert result["summary"]["state"] == "fail" and result["summary"]["text"].endswith(" · 11 need review")
+    assert result["summary"]["state"] == "fail" and result["summary"]["text"] == result["view"]["summary"]
+    assert " · 1 to answer · 1 not checked in this release" in result["summary"]["text"]   # parking, on the bedrooms
     assert sorted(r["Rule id"] for r in result["rows"] if r["Error"] == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
 
 
@@ -156,7 +159,8 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     serve(stdin, out)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
-    assert replies[0]["result"]["summary"]["text"] == "10 pass · 1 fail · 11 need review"
+    assert replies[0]["result"]["summary"]["text"] == replies[0]["result"]["view"]["summary"] == (
+        "1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to answer")
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 
@@ -1129,7 +1133,7 @@ def test_the_delta_column_is_named_delta_in_the_panel_and_the_report(facts, tmp_
              for row in ws.iter_rows(values_only=True) for c in row if isinstance(c, str)]
     assert logic.COLUMN_DELTA == "Delta" and "Delta" in cells and "Margin" not in cells
     ui = host_text("rhino", "ui", purpose="wiring")
-    assert '(logic.COLUMN_DELTA, 86)' in ui and '"Margin"' not in ui
+    assert '(logic.COLUMN_DELTA, 100)' in ui and '"Margin"' not in ui
 
 
 def test_on_screen_labels_are_off_by_default_and_a_tick_turns_them_on_per_document():
@@ -1224,7 +1228,7 @@ def test_the_use_row_names_the_use_in_its_item_cell(facts, tmp_path):
     assert logic.list_cells(other) == (logic.row_name(other), other["proposed"])
     ui = host_text("rhino", "ui", purpose="wiring")
     rows = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
-    assert "logic.list_cells(i)" in rows and "logic.row_name(i)" not in rows
+    assert "logic.list_values(i)" in rows and "logic.row_name(i)" not in rows
     detail = ui[ui.index("def show_detail("):]
     assert "logic.list_cells(i)[0] + \" · \" + words" in detail    # the detail heads with the list's name, whole
 
@@ -1245,7 +1249,9 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     deltas = {i["delta"] for i in got["view"]["items"] if i.get("delta")}
     assert deltas and deltas <= set(cells)                            # the report's Delta: the panel's words
     ui = host_text("rhino", "ui", purpose="wiring")
-    assert '(i.get("delta") or "")' in ui and "delta_text" not in ui          # settle's words only (round 2)
+    assert "logic.list_values(i)" in ui and "delta_text" not in ui           # settle's words only (round 2), or
+    logic_src = logic_text("rhino", purpose="wiring")         # (list_values: host_core/panel_words.py since the move)
+    assert 'item.get("delta_cell") or item.get("delta")' in logic_src          # their shorter form, made by settle
 
 
 
@@ -4686,3 +4692,30 @@ def test_a_rows_button_and_dialog_say_how_many_questions_when_there_are_several(
     dialog = ui[ui.index("def row_dialog("):ui.index("def ", ui.index("def row_dialog(") + 10)]
     assert "field.Width = logic.ANSWER_WIDTH" in dialog
     assert logic.FOLLOW_UP_HELP.startswith("Your answers. ") and logic.FOLLOW_UP_HELP.endswith(".")
+
+
+def test_the_checkers_summary_counts_rules_and_says_so():
+    """The audit of main (2026-10-29): the checker's "8 pass" sat beside the panel's "9 comply" (one side-yard rule is
+    two rows). It counts rules, so it says rules."""
+    one = {"Error": "PASS", "Requirement": "x"}
+    review = {"Error": "NEEDS REVIEW", "Requirement": "y", "Why": "z"}
+    assert summary([one, review])["text"].startswith("1 rule passes · ")
+    assert summary([one, one, review])["text"].startswith("2 rules pass · ")
+
+
+def test_a_district_with_no_rules_is_said_plainly(tmp_path):
+    """The audit of main (2026-10-29): saved facts naming B-1a raised "…/T/tmp…/project.yaml: no rulebook for zone
+    'B-1a' in …". Now the district, and the districts Gordium has rules for, with no file path."""
+    from design_checker.check import check_site, no_rules_for, start
+    facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "B-1a"}
+    want = ("Gordium doesn't have rules for district B-1a yet. It has rules for R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, "
+            "R-3aa, R-3b and RU.")
+    assert no_rules_for(facts) == want
+    assert no_rules_for({**facts, "zone": "R-1b"}) is None
+    site = {"units": "ft", "lot": {"id": "lot", "edges": []}, "buildings": [], "problems": []}
+    with pytest.raises(ValueError) as e:
+        check_site(site, facts)
+    assert str(e.value) == want and "project.yaml" not in str(e.value)
+    with pytest.raises(ValueError) as e:
+        start(tmp_path / "none.3dm", facts)
+    assert str(e.value) == want

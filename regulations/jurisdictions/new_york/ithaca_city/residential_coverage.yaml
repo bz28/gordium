@@ -78,13 +78,6 @@ _accessory_sp: &accessory_sp
     (R-x.home_occupation flags one, §325-9B(1)(i)), namely an antenna or dish over 6 ft, in the front yard or over 10 ft
     tall; telecommunications facilities; a tower for electricity; a neighborhood garden; neighborhood
     parking.
-_bnb_conflict: &bnb_conflict
-  status: missing
-  priority: medium
-  why: The chart (p.2) marks a bed-and-breakfast inn "-" in R-1 and R-2, so the use rule fails one here; but
-    §325-9B(1)(p) and §325-10C(2) say bed-and-breakfast inns need a special permit "in all districts". The law's text
-    and its chart disagree, and nothing in Gordium settles or surfaces it; to research (resolve before asking), then
-    ask the architects or the City if still unclear.
 _no_yard_object: &no_yard_object
   status: missing
   priority: low
@@ -680,10 +673,9 @@ pieces:
     - quote: "Bed-and-breakfast inns in all districts"
       lines: [[31, 36, 36]]
       what: "(p) Bed-and-breakfast inns need a special permit in all districts"
-      all: *bnb_conflict
-      R-3a, R-3aa, R-3b, RU:
-        status: flag
-        rules: [use]
+      # R-1 and R-2: the chart marks it "-", the law's text says all districts, and the law doesn't settle which
+      # governs; the use rule's review_when sends it to needs review, with the open question (questions page §5.23)
+      all: {status: flag, rules: [use]}
     - lines: [[30, 37, 38], [31, 3, 15]]
       what: "(i) A home occupation needs a special permit unless it meets all four criteria"
       all:
@@ -715,7 +707,7 @@ pieces:
     - quote: "Bed-and-breakfast inns in all districts"
       lines: [[35, 3, 20]]
       what: "Bed-and-breakfast inns (special-permit conditions)"
-      all: *bnb_conflict
+      all: {status: flag, rules: [use]}      # R-1 and R-2: the use rule's sources cite these conditions
       R-3a, R-3aa, R-3b, RU:
         status: flag
         rules: [use]
