@@ -1813,7 +1813,9 @@ rules:
     title: "Sleeping loft stair: tread depth = 20 in minus 4/3 of the riser (R315.5.2.2)"
     for_each: stair
     when_none: not_applicable
-    applies_when: stair_serves_sleeping_loft and not (stair_riser_height <= 8.25 and stair_tread_depth >= 9)
+    applies_when: >-
+      stair_serves_sleeping_loft and not (stair_riser_height <= 8.25 and stair_tread_depth >= 9
+      and stair_clear_width >= 36 and stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides <= 1 else 27))
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 98
@@ -1827,6 +1829,14 @@ rules:
         page: 100
         lines: [50, 50]
         quote: "The tread depth shall be not less than 9 inches (229 mm)."
+      - file: gov.ny.residential.2025.pdf
+        page: 100
+        lines: [23, 24]
+        quote: "Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height and below the required headroom height."
+      - file: gov.ny.residential.2025.pdf
+        page: 100
+        lines: [24, 26]
+        quote: "The clear width of stairways at and below the handrail height, including treads and landings, shall be not less than 31 1/2 inches (787 mm) where a handrail is installed on one side and 27 inches (698 mm) where handrails are installed on both sides."
     examples:
       - given: {}
         parts:
@@ -1836,10 +1846,20 @@ rules:
         note: 20 - 4/3 x 10.5 = 6 in, as drawn; still a person's check (see notes)
       - given: {}
         parts:
-          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 7.5, stair_tread_depth: 10}}]
+          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 7.5, stair_tread_depth: 10,
+                                      stair_clear_width: 36, stair_clear_width_at_handrail: 32, stair_handrail_sides: 1}}]
         rows: [{part: s1, outcome: not_applicable}]
         expect: not_applicable
-        note: an ordinary R318.7.5 riser and tread; the formula is not needed
+        note: an ordinary R318.7 stair, width, risers and treads; the formula is not needed
+      - given: {}
+        parts:
+          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 8, stair_tread_depth: 12,
+                                      stair_clear_width: 17, stair_clear_width_at_handrail: 20, stair_handrail_sides: 1}}]
+        rows: [{part: s1, outcome: needs_review}]
+        expect: needs_review
+        note: >-
+          R315.5.2.1's width with R318.7.5's riser and tread, and neither formula (20 - 4/3 x 8 = 9.33, not 12): a mix
+          of the two sets, for a person (fixed after the comparison, review round 4: it was not applicable)
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_serves_sleeping_loft: false}}]
@@ -1869,6 +1889,9 @@ rules:
       of" adds no choice, but "shall be" sets an exact equality with no tolerance, and text_verification records 20,
       15, four-thirds and three-fourths as none (not limits), so no formula may use them as one. A loft stair that
       takes the R318.7.5 path instead (riser 8 1/4 or less, R318.7.5.1, <=; tread 9 or more, R318.7.5.2, >=) needs no
-      formula: not applicable.
+      formula: not applicable; only a stair that meets R318.7 whole (its width as well, R318.7.1) does, since whether a
+      loft stair may mix the two sets is open (general.r315_5_2_2_loft_stair_risers). Fixed after the comparison with
+      the drafts, review round 4, 2026-11-13: R318.7.1's width was not part of that test, so a stair with R315.5.2.1's
+      width and R318.7.5's risers was not applicable.
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft

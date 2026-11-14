@@ -15,6 +15,12 @@ key_fixes:
       clearly allows. It now needs review. Found by review round 3. Open question for the architects: may a loft
       stair take some limits from R315.5.2 and others from R318.7?
     law: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3."; R315.5: "The means of egress shall comply with Section R318 as modified by Sections R315.5.1 through R315.5.3."'
+  - rule: general.r315_5_2_2_loft_stair_formula
+    what: >-
+      The formula flag was not applicable to a loft stair meeting R318.7.5's riser and tread, even where its width met
+      only R315.5.2.1's (17 in): a mix of the two sets passed. It now applies unless the stair meets R318.7 whole,
+      width included. Found by review round 4.
+    law: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3."'
   - rule: general.r318_2_egress_door
     what: >-
       "One egress door for each dwelling unit" was a flag with applies_when "dwelling_units - 1 > 0", which the
@@ -91,8 +97,8 @@ causes:
     verdict: drafts_stricter
     why: >-
       A sleeping loft's stair "shall be permitted to comply" with R315.5.2.1 to R315.5.2.3: a choice, so it may meet
-      either those or R318.7's ordinary limits. The key leaves loft stairs out of R318.7.1/.2/.5 (R315.5.2's limits
-      are looser, so meeting R318.7's meets them) and makes a loft stair outside R315.5.2.2's risers but within
+      either those or R318.7's ordinary limits. The key leaves loft stairs out of R318.7.1 and R318.7.5 (R315.5.2's
+      limits are looser, so meeting R318.7's meets them; under R318.7.2 a loft stair below 6 ft 8 in needs review) and makes a loft stair outside R315.5.2.2's risers but within
       R318.7.5's need review (whether a loft stair may mix the two sets is open: key fixes). The
       drafts apply R318.7.1's 36 in to loft stairs (fail a 20 in loft stair R315.5.2.1 allows), make loft stairs
       need review under R318.7.2 and R318.7.5, and apply R315.5.2.2 alone (fail a 6 1/2 in riser on an ordinary
