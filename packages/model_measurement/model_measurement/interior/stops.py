@@ -63,6 +63,8 @@ STOPS = {
     "side_not_along": "the {side} {what} doesn't run along the flight from its first nosing to its top one",
     "sides_cross": "the stair's sides meet or cross (clear width {width} in)",
     "handrail_side": "a handrail's side is {got!r}, not left or right",
+    "handrail_part_way": "no {side} handrail runs the whole flight (from above its lowest nosing to above its top "
+                         "one, R320.5): whether that side has a handrail isn't measured",
     # guards
     "guard_top_not_drawn": "the guard's members don't reach its stated top all along it (at its lowest the drawn "
                            "guard is {least} in high): which is its height is unclear",

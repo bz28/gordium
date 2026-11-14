@@ -544,6 +544,32 @@ def test_a_handrail_on_part_of_the_flight_still_counts_where_it_is():
     assert more["stair_clear_width_at_handrail"] == 32.0
 
 
+def test_a_handrail_off_the_flight_never_counts_as_a_side():
+    # both handrails lie wholly past the top nosing (s = 30): counted, they would make a 1-side stair read as 2,
+    # and the width at the handrail would be held to 27 in instead of 31 1/2 (R318.7.1)
+    d = base()
+    d["stairs"][0]["handrails"] = [{"side": "left", "inner_edge": [[200, 33], [300, 33]]},
+                                   {"side": "right", "inner_edge": [[200, 3], [300, 3]]}]
+    _, stopped, more = stair(d)
+    assert "stair_handrail_sides" not in more
+    assert "runs the whole flight" in stopped["stair_handrail_sides"]
+    assert more["stair_clear_width_at_handrail"] == 36.0          # they narrow nothing on the flight
+
+
+def test_a_handrail_part_way_gives_no_side_count():
+    # a 2 in stub on each side: not a handrail "installed" on that side (R320.5: the full length of the flight)
+    d = base()
+    d["stairs"][0]["handrails"] = [{"side": "left", "inner_edge": [[0, 33], [2, 33]]},
+                                   {"side": "right", "inner_edge": [[0, 3], [2, 3]]}]
+    _, stopped, more = stair(d)
+    assert "stair_handrail_sides" not in more and "left" in stopped["stair_handrail_sides"]
+    assert more["stair_clear_width_at_handrail"] == 30.0          # where they run, they still narrow it
+    # one side the whole flight, the other part way: still no count (1 would be wrong too, 2 too favourable)
+    d["stairs"][0]["handrails"][0]["inner_edge"] = [[0, 33], [30, 33]]
+    _, stopped, more = stair(d)
+    assert "stair_handrail_sides" not in more and "right" in stopped["stair_handrail_sides"]
+
+
 def test_treads_shorter_than_the_walls_narrow_the_width_at_the_treads():
     d = base()
     d["stairs"][0]["nosings"] = [[[10 * j, 1, 7 * (j + 1)], [10 * j, 34, 7 * (j + 1)]] for j in range(4)]
@@ -1048,6 +1074,7 @@ STOP_CASES = {
     "side_not_along": _stair(sides={"left": [[-5, 36], [20, 36]], "right": [[-5, 0], [40, 0]]}),
     "sides_cross": _stair(sides={"left": [[-5, 0], [40, 0]], "right": [[-5, 36], [40, 36]]}),
     "handrail_side": _stair(handrails=[{"side": "up", "inner_edge": [[0, 4], [30, 4]]}]),
+    "handrail_part_way": _stair(handrails=[{"side": "left", "inner_edge": [[10, 32], [20, 32]]}]),
     "guard_kind": _guard(stair="s"),
     "guard_top_not_drawn": _guard(members=[]),
     "sash_outside_frame": lambda: sliding([{"left": 0, "right": 30, "bottom": 60, "top": 90}]),

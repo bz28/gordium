@@ -123,8 +123,8 @@ def at(line, s):
 
 
 def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int | None, str | None]:
-    """(clear width above the handrail, clear width at and below it, handrail sides, why the second isn't
-    measured)."""
+    """(clear width above the handrail, clear width at and below it, handrail sides, why the second or the third
+    isn't measured)."""
     start, end = flight.s[0], flight.s[-1]
     sides = st.get("sides")
     if not isinstance(sides, dict):
@@ -172,6 +172,12 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
               - inward("right", [bound["right"], treads["right"], *handrails["right"]], s) for s in breaks)
     if low <= 0:
         raise Stop("sides_cross", width=tidy(low))
+    # a side has a handrail (R318.7.1) only where one runs the whole flight, from above its lowest nosing to above
+    # the top one (R320.5): one drawn part way, or off the flight, would credit the side with a handrail it lacks
+    first, top = flight.s_ends[0][0], flight.s_ends[-1][1]
+    for side, lines in handrails.items():
+        if lines and not any(at(line, first) is not None and at(line, top) is not None for line in lines):
+            return above, low, None, Stop("handrail_part_way", side=side).reason
     return above, low, sum(1 for side in handrails.values() if side), None
 
 
@@ -238,10 +244,14 @@ def measure_stair(st: dict, reader) -> tuple[dict, dict, dict, Flight | None]:
     try:
         above, low, rails, why = widths(st, flight, reader)
         measures["stair_clear_width"] = tidy(above)
-        if why:
+        if low is None:
             stop(["stair_clear_width_at_handrail", "stair_handrail_sides"], why)
         else:
-            more.update(stair_clear_width_at_handrail=tidy(low), stair_handrail_sides=rails)
+            more["stair_clear_width_at_handrail"] = tidy(low)
+            if why:
+                stop(["stair_handrail_sides"], why)
+            else:
+                more["stair_handrail_sides"] = rails
     except Stop as s:
         stop(["stair_clear_width", "stair_clear_width_at_handrail", "stair_handrail_sides"], s.reason)
     return measures, more, stopped, flight

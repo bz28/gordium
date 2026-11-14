@@ -66,7 +66,7 @@ One part per straight flight. s runs up the flight at a right angle to the first
 | `stair_headroom` (in) | The least height from the line connecting the nosings up to anything overhead, over the flight's whole width from its first nosing to its top one. The overhead pieces must cover all of it | R318.7.2 "measured vertically from the sloped line adjoining the tread nosing" (p.77) |
 | `stair_clear_width` (in) | The least distance across between the two sides above handrail height (wall faces, a guard's inside face; tread ends for an open side), over the flight | R318.7.1 "not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height" (p.77) |
 | `stair_clear_width_at_handrail` (in, `more`) | The same, at and below handrail height: the inmost of the side, the handrail's inner edge (where it runs) and the tread ends | R318.7.1 "The clear width of stairways at and below the handrail height, including treads and landings" (p.77) |
-| `stair_handrail_sides` (count, `more`) | How many sides have a handrail (0, 1 or 2): the width allowed at the handrail turns on it | R318.7.1 (31 1/2 in with one side, 27 in with both) |
+| `stair_handrail_sides` (count, `more`) | How many sides have a handrail (0, 1 or 2): the width allowed at the handrail turns on it. A side counts only where one handrail runs the whole flight; a side whose handrails run only part of it (or lie off it): no value | R318.7.1 (31 1/2 in with one side, 27 in with both); R320.5 "continuous for the full length of the flight, from a point directly above the nosing of the landing at the top of the flight to a point directly above the lowest nosing of the flight" (p.81) |
 | `stair_total_rise`, `stair_risers` (`more`) | The top nosing less the foot; the number of risers | R318.7.3 "a vertical rise greater than 12 feet 7 inches" (p.77) |
 
 The tread and riser dimensions are "exclusive of carpets, rugs or runners" (R318.7.5, p.77): the description gives finished walking surfaces without them. Not measured yet: winder treads (at the walkline, R318.7.5.2.1: no value), spiral stairs, nosing projections (R318.7.5.3), landings (their size and headroom, R318.7.6), open risers' 4 in sphere.
@@ -144,6 +144,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `side_not_along` | the {side} {what} doesn't run along the flight from its first nosing to its top one |
 | `sides_cross` | the stair's sides meet or cross (clear width {width} in) |
 | `handrail_side` | a handrail's side is {got!r}, not left or right |
+| `handrail_part_way` | no {side} handrail runs the whole flight (from above its lowest nosing to above its top one, R320.5): whether that side has a handrail isn't measured |
 | `guard_top_not_drawn` | the guard's members don't reach its stated top all along it (at its lowest the drawn guard is {least} in high): which is its height is unclear |
 | `guard_kind` | say whether the guard is along a stair (`stair`) or at a level walking surface (`walking_surface`): give one |
 | `guard_opening_shape` | an opening in the guard isn't a rectangle: the largest sphere through it isn't measured yet |
