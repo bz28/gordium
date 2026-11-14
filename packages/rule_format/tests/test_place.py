@@ -93,6 +93,9 @@ def test_two_places_need_a_picker_never_the_first_one(tmp_path):
     shutil.copytree(FIXTURES, root)
     shutil.copytree(REPO / "regulations/jurisdictions/new_york/ithaca_city", root / "regulations/jurisdictions/new_york/ithaca_city",
                     ignore=lambda d, names: [n for n in names if n != "jurisdiction.yaml"])
+    state = root / "regulations/jurisdictions/new_york/new_york_state"   # the state law Ithaca inherits
+    state.mkdir(parents=True)
+    shutil.copy(REPO / "regulations/jurisdictions/new_york/new_york_state/state.yaml", state)
     assert len(places(root)) == 2
     with pytest.raises(UnknownPlace, match="the plugin reads one place, and 2 have settings .*place picker"):
         plugin_place(root)
