@@ -603,6 +603,101 @@ def test_treads_shorter_than_the_walls_narrow_the_width_at_the_treads():
     assert m["stair_clear_width"] == 36.0 and more["stair_clear_width_at_handrail"] == 33.0
 
 
+def _landing_wider_on_the_open_side(top_width):
+    """The base stair with its left side open and the top nosing (the landing's edge) top_width wide."""
+    d = changed(("stairs", 0, "sides", "left"), "open")
+    d["stairs"][0]["nosings"][3] = [[30, 0, 28], [30, top_width, 28]]
+    d["stairs"][0]["overhead"] = [[[-5, -5, 120], [40, -5, 120], [40, 60, 120], [-5, 60, 120]]]
+    return d
+
+
+@pytest.mark.parametrize("top_width", [36, 48])
+def test_a_tread_never_widens_toward_a_wider_nosing_above(top_width):
+    """Review round 7: tread ends were drawn straight from one nosing to the next, so a landing edge 48 in wide made
+    the 36 in top tread (s 20..30) read 42 in wide halfway. Each tread holds its own width back to the next nosing:
+    with the right side jogging in to 6 at s 25, the clear width there is 36 - 6 = 30 (it read 36)."""
+    d = _landing_wider_on_the_open_side(top_width)
+    d["stairs"][0]["sides"]["right"] = [[-5, 0], [24.9, 0], [25, 6], [40, 6]]
+    m, _, more = stair(d)
+    assert m["stair_clear_width"] == 30.0 and more["stair_clear_width_at_handrail"] == 30.0
+    # a handrail part way, on the right at 6 over s 25..33, narrows the top tread the same way: 36 - 6 (it read 36)
+    d = _landing_wider_on_the_open_side(top_width)
+    d["stairs"][0]["handrails"] = [{"side": "right", "inner_edge": [[25, 6], [33, 6]]}]
+    _, _, more = stair(d)
+    assert more["stair_clear_width_at_handrail"] == 30.0
+
+
+def test_a_handrail_past_a_treads_end_never_counts_for_an_open_side():
+    """Review round 7: a left handrail running 30 to 38 across the flight on an open side stands past the 36 in top
+    tread's end at s 30 (36.89 there) but inside the 48 in landing edge it was drawn toward: it counted as a side."""
+    d = _landing_wider_on_the_open_side(48)
+    d["stairs"][0]["handrails"] = [{"side": "left", "inner_edge": [[-1, 30], [35, 38]]}]
+    _, stopped, more = stair(d)
+    assert "stair_handrail_sides" not in more and "left" in stopped["stair_handrail_sides"]
+
+
+def test_a_nosing_drawn_as_a_point_is_no_nosing():
+    """Review round 7: a nosing with both ends at one point gave a width of 0 'because a handrail crosses', with
+    no handrail on the stair. It isn't a nosing across the stair: the flight isn't placed."""
+    d = base()
+    d["stairs"][0]["nosings"][1] = [[10, 18, 14], [10, 18, 14]]
+    m, stopped, _ = stair(d)
+    assert "stair_clear_width" not in m and "nosing 2" in stopped["stair_clear_width"]
+    assert m["stair_riser_height"] == 7.0                               # its height is still read
+
+
+def test_treads_past_a_side_say_so_not_a_handrail():
+    """Review round 7: tread ends beyond a wall (a tread 40..50 between walls at 0 and 36) were blamed on a
+    handrail, with none drawn. The width above the treads (36) still stands."""
+    d = base()
+    d["stairs"][0]["nosings"][1] = [[10, 40, 14], [10, 50, 14]]
+    m, stopped, more = stair(d)
+    assert m["stair_clear_width"] == 36.0 and "stair_clear_width_at_handrail" not in more
+    assert "a tread's end meets or crosses" in stopped["stair_clear_width_at_handrail"]
+    assert "handrail meets" not in stopped["stair_clear_width_at_handrail"]
+
+
+def test_random_flights_are_never_wider_than_drawn():
+    """Review round 7, property check: 400 random flights (tread ends that change from tread to tread, open or
+    slanting walled sides, handrails part way and slanting). Read by hand at many points along the run, each tread
+    a rectangle back to the next nosing, the widths measured are never more than the least drawn."""
+    import random
+    rnd = random.Random(7)
+    for _ in range(400):
+        n = rnd.randint(2, 5)
+        ends = [(rnd.choice([0, rnd.uniform(-6, 6)]), rnd.choice([36, rnd.uniform(30, 42)])) for _ in range(n)]
+        run = 10 * (n - 1)
+        walls = {"left": rnd.choice(["open", (rnd.uniform(34, 44), rnd.uniform(34, 44))]),
+                 "right": rnd.choice(["open", (rnd.uniform(-8, 2), rnd.uniform(-8, 2))])}
+        rails = []
+        for _ in range(rnd.randint(0, 3)):
+            a0, s0 = rnd.uniform(-10, 46), rnd.uniform(-3, run)
+            far = (rnd.uniform(s0 + 0.5, run + 3), a0 + rnd.uniform(-6, 6))
+            rails.append((rnd.choice(["left", "right"]), (s0, a0), far))
+        d = base()
+        d["stairs"][0].update(
+            nosings=[[[10 * j, ends[j][0], 7 * (j + 1)], [10 * j, ends[j][1], 7 * (j + 1)]] for j in range(n)],
+            sides={k: v if v == "open" else [[-5, v[0]], [run + 5, v[1]]] for k, v in walls.items()},
+            handrails=[{"side": k, "inner_edge": [list(p), list(q)]} for k, p, q in rails],
+            overhead=[[[-20, -20, 200], [run + 20, -20, 200], [run + 20, 60, 200], [-20, 60, 200]]])
+        m, _, more = stair(d)
+
+        def side(k, s, with_rails):
+            tread = ends[min(int(s // 10), n - 1)][0 if k == "right" else 1]
+            got = [tread] if walls[k] == "open" else [walls[k][0] + (s + 5) / (run + 10) * (walls[k][1] - walls[k][0])]
+            if with_rails:
+                got += [tread] + [p[1] + (s - p[0]) / (q[0] - p[0]) * (q[1] - p[1])
+                                  for r, p, q in rails if r == k and p[0] <= s <= q[0]]
+            return min(got) if k == "left" else max(got)
+
+        points = [rnd.uniform(0, run) for _ in range(200)] + [10 * j - 1e-7 for j in range(1, n)]
+        for s in points:
+            if "stair_clear_width" in m:
+                assert m["stair_clear_width"] <= side("left", s, False) - side("right", s, False) + 1e-6
+            if "stair_clear_width_at_handrail" in more:
+                assert more["stair_clear_width_at_handrail"] <= side("left", s, True) - side("right", s, True) + 1e-6
+
+
 def test_a_narrowing_wall():
     # the left wall runs from 36 at s = -5 to 30 at s = 40: at the top nosing (s = 30) it is at 36 - 6 x 35/45
     d = changed(("stairs", 0, "sides", "left"), [[-5, 36], [40, 30]])
@@ -800,6 +895,18 @@ def test_headroom_covers_a_tread_wider_than_the_next():
                                   [[6, 37, 40], [9.9, 37, 40], [9.9, 42, 40], [6, 42, 40]]]
     m, _, _ = stair(d)
     assert m["stair_headroom"] == pytest.approx(40 - (7 + 0.99 * 7))
+
+
+@pytest.mark.parametrize("x0, x36", [(29.9375, 30), (30, 29.9375)])
+def test_headroom_covers_both_ends_of_an_askew_top_nosing(x0, x36):
+    """Review round 7: the area checked ended at each nosing's middle along the run, so a top nosing drawn 1/16 in
+    askew (allowed) left its far end out, and a header at 60 from x 29.99 on read 92 (the ceiling), not 60 - 28."""
+    d = base()
+    d["stairs"][0]["nosings"][3] = [[x0, 0, 28], [x36, 36, 28]]
+    d["stairs"][0]["overhead"] = [[[-5, -5, 120], [29.99, -5, 120], [29.99, 41, 120], [-5, 41, 120]],
+                                  [[29.99, -5, 60], [45, -5, 60], [45, 41, 60], [29.99, 41, 60]]]
+    m, _, _ = stair(d)
+    assert m["stair_headroom"] == pytest.approx(32.0)
 
 
 @pytest.mark.parametrize("first", [True, False])
@@ -1119,6 +1226,8 @@ STOP_CASES = {
                                            [[5, 0, 21], [5, 36, 21]]]),
     "side_not_along": _stair(sides={"left": [[-5, 36], [20, 36]], "right": [[-5, 0], [40, 0]]}),
     "sides_cross": _stair(sides={"left": [[-5, 0], [40, 0]], "right": [[-5, 36], [40, 36]]}),
+    "treads_cross": _stair(nosings=[[[0, 0, 7], [0, 36, 7]], [[10, 40, 14], [10, 50, 14]], [[20, 0, 21], [20, 36, 21]],
+                                    [[30, 0, 28], [30, 36, 28]]]),
     "handrails_cross": _stair(handrails=[{"side": "left", "inner_edge": [[0, -2], [30, -2]]}]),
     "handrail_side": _stair(handrails=[{"side": "up", "inner_edge": [[0, 4], [30, 4]]}]),
     "handrail_part_way": _stair(handrails=[{"side": "left", "inner_edge": [[10, 32], [20, 32]]}]),

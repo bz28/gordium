@@ -69,6 +69,8 @@ class Flight:
             self.s.append((s1 + s2) / 2)
             self.s_ends.append((min(s1, s2), max(s1, s2)))
             a1, a2 = self.a_of(*e1), self.a_of(*e2)
+            if a1 == a2:                                          # a point, not a nosing across the stair
+                raise Stop("not_a_polyline", what=f"nosing {n} (its two ends)")
             self.ends.append((min(a1, a2), max(a1, a2)))          # (right end, left end)
         # each tread at its shallowest and its deepest (the nosings' ends paired the worst way)
         self.treads = [b[0] - a[1] for a, b in zip(self.s_ends, self.s_ends[1:])]
@@ -118,7 +120,7 @@ def at(line, s):
     """a(s) on a line from `along`, or None where it doesn't reach."""
     for (s1, a1), (s2, a2) in zip(line, line[1:]):
         if s1 - 1e-9 <= s <= s2 + 1e-9:
-            return a1 + (s - s1) / (s2 - s1) * (a2 - a1)
+            return a1 if s2 == s1 else a1 + (s - s1) / (s2 - s1) * (a2 - a1)
     return None
 
 
@@ -129,8 +131,11 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
     sides = st.get("sides")
     if not isinstance(sides, dict):
         raise Stop("missing", what="the stair's sides (`sides`: left and right)")
-    treads = {"right": [(s, e[0]) for s, e in zip(flight.s, flight.ends)],
-              "left": [(s, e[1]) for s, e in zip(flight.s, flight.ends)]}
+    # each tread is a rectangle: its nosing's ends hold back to the next nosing (never drawn toward it, which would
+    # widen a tread below a wider one), and where two treads meet, both count; the top nosing counts at its place
+    k = {"right": 0, "left": 1}
+    treads = {side: [[(s1, e[k[side]]), (s2, e[k[side]])] for s1, s2, e in zip(flight.s, flight.s[1:], flight.ends)]
+              + [[(end, flight.ends[-1][k[side]]), (end, flight.ends[-1][k[side]])]] for side in k}
     bound = {}
     for side in ("left", "right"):
         given = sides.get(side)
@@ -140,7 +145,7 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
         line = along(flight, reader.points(given, 2, f"the stair's {side} side", 2), "side", side)
         if at(line, start) is None or at(line, end) is None:
             raise Stop("side_not_along", side=side, what="side")
-        bound[side] = line
+        bound[side] = [line]
     handrails, why = {"left": [], "right": []}, None
     given = st.get("handrails")
     if not isinstance(given, list):
@@ -155,7 +160,8 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
             handrails[side].append(along(flight, reader.points(h.get("inner_edge"), 2, f"handrail {n}'s inner edge",
                                                                2), "handrail", side))
     breaks = {start, end}
-    for line in [*bound.values(), *treads.values(), *handrails["left"], *handrails["right"]]:
+    for line in [*bound["left"], *bound["right"], *treads["left"], *treads["right"], *handrails["left"],
+                 *handrails["right"]]:
         breaks |= {s for s, _ in line if start <= s <= end}
     breaks = sorted(breaks)
 
@@ -163,13 +169,19 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
         got = [a for a in (at(line, s) for line in lines) if a is not None]
         return min(got) if side == "left" else max(got)
 
-    above = min(inward("left", [bound["left"]], s) - inward("right", [bound["right"]], s) for s in breaks)
+    def least(left, right):
+        return min(inward("left", left, s) - inward("right", right, s) for s in breaks)
+
+    above = least(bound["left"], bound["right"])
     if above <= 0:
         raise Stop("sides_cross", width=tidy(above))
+    at_treads = least([*bound["left"], *treads["left"]], [*bound["right"], *treads["right"]])
+    if at_treads <= 0:                   # the treads lie beyond a side: the width above them still stands
+        return above, None, None, Stop("treads_cross", width=tidy(at_treads)).reason
     if why:
         return above, None, None, why
-    low = min(inward("left", [bound["left"], treads["left"], *handrails["left"]], s)
-              - inward("right", [bound["right"], treads["right"], *handrails["right"]], s) for s in breaks)
+    low = least([*bound["left"], *treads["left"], *handrails["left"]],
+                [*bound["right"], *treads["right"], *handrails["right"]])
     if low <= 0:                         # the handrails do it (the sides alone don't): the width above them stands
         return above, None, None, Stop("handrails_cross", width=tidy(low)).reason
     # a side has a handrail (R318.7.1) only where one runs the whole flight, from above its lowest nosing to above
@@ -180,7 +192,7 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
     def on_stair(line):
         if at(line, first) is None or at(line, top) is None:
             return False
-        return all(inward("right", [bound["right"]], s) <= at(line, s) <= inward("left", [bound["left"]], s)
+        return all(inward("right", bound["right"], s) <= at(line, s) <= inward("left", bound["left"], s)
                    for s in breaks)
 
     for side, lines in handrails.items():
@@ -202,17 +214,20 @@ def headroom(st: dict, flight: Flight, reader) -> float:
     surfaces = [Surface(reader.points(p, 3, f"overhead surface {n}", 3), f"overhead surface {n}")
                 for n, p in enumerate(given, 1)]
     # each tread is a rectangle: its nosing's width, back to the next riser. With the shape between neighbouring
-    # nosings, a tread wider than the next (a flared starter step) is covered all over, never cut at a corner
+    # nosings, a tread wider than the next (a flared starter step) is covered all over, never cut at a corner.
+    # Along the run each reaches from its nosing's nearer end to the next one's farther end: a nosing drawn a hair
+    # askew (within LEVEL) is covered at both its ends (the first one sets the run, so it is never askew)
     quads = []
     for j in range(len(flight.s) - 1):
         (r1, l1), (r2, l2) = flight.ends[j], flight.ends[j + 1]
-        s1, s2 = flight.s[j], flight.s[j + 1]
+        s1, s2 = flight.s_ends[j][0], flight.s_ends[j + 1][1]
         quads.append(Polygon([flight.xy(s1, r1), flight.xy(s2, r2), flight.xy(s2, l2), flight.xy(s1, l1)]))
         quads.append(Polygon([flight.xy(s1, r1), flight.xy(s2, r1), flight.xy(s2, l1), flight.xy(s1, l1)]))
     band = unary_union(quads)
     # cut the flight at every bend of the nosing line, so the line is straight over each piece and the least gap
     # is at a piece's corner (the pieces of the treads alone would hide a bend inside one)
-    cuts = sorted({flight.s[0], flight.s[-1], *(s for s, _ in flight.line() if flight.s[0] < s < flight.s[-1])})
+    first, top = flight.s_ends[0][0], flight.s_ends[-1][1]
+    cuts = sorted({first, top, *(s for s, _ in flight.line() if first < s < top)})
     wide = max(abs(a) for ends in flight.ends for a in ends) + 1.0
     pieces = []
     for s1, s2 in zip(cuts, cuts[1:]):

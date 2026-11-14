@@ -62,6 +62,8 @@ STOPS = {
     "nosings_not_forward": "the nosings don't move forward up the flight (tread {n} is {depth} in deep)",
     "side_not_along": "the {side} {what} doesn't run along the flight from its first nosing to its top one",
     "sides_cross": "the stair's sides meet or cross (clear width {width} in)",
+    "treads_cross": "at the treads, a tread's end meets or crosses the other side (clear width {width} in): check "
+                    "the nosings' ends and the stair's sides",
     "handrails_cross": "at handrail height, a handrail meets or crosses the other side (clear width {width} in): "
                        "check each handrail's side",
     "handrail_side": "a handrail's side is {got!r}, not left or right",
