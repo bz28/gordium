@@ -58,6 +58,7 @@ class Inputs:
     """Everything drafting reads, for one jurisdiction (a place's zoning; a state's building code: book.BookInputs)."""
 
     for_parts = False
+    settings = drafter.SETTINGS
 
     def __init__(self, j: Path | None = None):
         j = j or one_place()
@@ -246,7 +247,7 @@ def estimate(i: Inputs, todo: list[dict], model: str, client=None) -> dict:
         tokens = sum(count(m) - system_tokens for m in messages)
     else:
         system_tokens, tokens = len(system) // 4, sum(len(m) // 4 for m in messages)
-    out_each = _measured_output(i, model) or drafter.SETTINGS["max_tokens"]
+    out_each = _measured_output(i, model) or i.settings["max_tokens"]
     usage = {"input_tokens": tokens, "cache_creation_input_tokens": system_tokens if ai else 0,
              "cache_read_input_tokens": system_tokens * max(len(ai) - 1, 0), "output_tokens": int(out_each * len(ai))}
     return {"units": len(todo), "ai_calls": len(ai), "exact_input": client is not None, "usage": usage,
@@ -337,7 +338,7 @@ def cmd_draft(args) -> int:
                 result = draft_accessory()
             else:
                 result = drafter.draft_unit(client, u, i.context(u), system, i.law, i.ctx, i.columns, i.cells, i.notes,
-                                            record, budget=budget, for_parts=i.for_parts)
+                                            record, settings=i.settings, budget=budget, for_parts=i.for_parts)
             save_result(i, log, u["id"], result)
             saved = True
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "

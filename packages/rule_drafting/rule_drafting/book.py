@@ -72,6 +72,7 @@ class BookInputs:
     as Inputs: j, drafted, records, ctx, law, columns, cells, notes, for_parts, system(), units(), context())."""
 
     for_parts = True
+    settings = drafter.SETTINGS | {"max_tokens": drafter.SETTINGS["book_max_tokens"]}
 
     def __init__(self, folder: Path):
         self.j = Path(folder)
