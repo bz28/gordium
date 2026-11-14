@@ -7,8 +7,8 @@ interior description. Plain code written by engineers, no AI (principle 6): same
 named as rule_format/parts.yaml names them, in inches and square feet. A kind not given in the description is None
 (not read, so its rules need review), never an empty list; [] means the description says there are none. A
 measure the description can't settle is left out of `measures` and its reason put in `not_measured` (a rule
-reading it then needs review). Measures for rules not yet in parts.yaml are in `more` (and guards are their own
-kind). The input format: docs/interior/interior_description_format.md; each measure's definition:
+reading it then needs review). Other values worked out are in `more`, not yet handed to the rules; a parts.yaml
+measure kept there says so in `not_measured` (and guards are their own kind). The input format: docs/interior/interior_description_format.md; each measure's definition:
 docs/interior/interior_measurements.md.
 """
 
