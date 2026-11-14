@@ -11,7 +11,8 @@ Draw does inside its one record (gordium_rhino._draw_prepare to edit_facts): doc
 facts, the box's choices, the sources), an object's attribute user strings set, a layer added then deleted (the
 hidden holding layer), an object moved onto a hidden layer then deleted (held, then gone at commit), a layer's
 visibility set directly, and a Rhino command run inside the record (frame_site's _-Zoom). Rhino's undo events are
-recorded for each. Writes <temp>/gordium_undo_probe/out.json ("done": true at the end)."""
+recorded for each. _Undo and _Redo are Rhino's own commands run in the document (RhinoApp.ExecuteCommand, as Cmd+Z
+runs _Undo): RunScript("_Undo") does nothing while no Rhino window is on screen (2026-11-12). Writes <temp>/gordium_undo_probe/out.json ("done": true at the end)."""
 import json
 import os
 import sys
@@ -122,13 +123,13 @@ def one(docs, name, extra):
         wrote = name in ("document strings", "all of them")       # the document string written in the record
         kept_id = before.Id
         kept_layer = before_layer
-        undo = bool(Rhino.RhinoApp.RunScript("_Undo", False))
+        undo = Rhino.RhinoApp.ExecuteCommand(doc, "_Undo") == Rhino.Commands.Result.Success
         gone = doc.Objects.FindId(added) is None
         back_obj = doc.Objects.FindId(kept_id)
         held_back = back_obj is not None and back_obj.Attributes.LayerIndex == kept_layer   # back, on its own layer
         string_after_undo = doc.Strings.GetValue("gordium_probe", "facts")
         string_undone = not string_after_undo                    # gone, or emptied
-        redo = bool(Rhino.RhinoApp.RunScript("_Redo", False))
+        redo = Rhino.RhinoApp.ExecuteCommand(doc, "_Redo") == Rhino.Commands.Result.Success
         back = doc.Objects.FindId(added) is not None
         held_gone = doc.Objects.FindId(kept_id) is None            # and Redo deletes it again
         string_after_redo = doc.Strings.GetValue("gordium_probe", "facts")
