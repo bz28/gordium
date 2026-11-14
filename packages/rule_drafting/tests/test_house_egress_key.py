@@ -66,7 +66,8 @@ def test_each_fix_to_the_key_is_recorded_in_the_key_itself(key):
 def test_each_verdict_matches_its_rows(ctx, key, drafts):
     """A verdict is a claim about the rows it covers: drafts_stricter means the drafts are further from a pass on
     every one; key_stricter the key; a draft that is wrong without a false-pass risk never passes (or says not
-    applicable) where the key fails or needs review."""
+    applicable) where the key fails or needs review; both_follow_the_law never covers a pass by the drafts where
+    the key fails. (A false-pass-risk draft needs no row to show it: its why says the design that would.)"""
     _, resolutions = book_eval.resolutions_of()
     rank = book_eval.STRICTNESS
     for f in book_eval.compare(key, drafts, ctx):
@@ -78,6 +79,8 @@ def test_each_verdict_matches_its_rows(ctx, key, drafts):
             assert k > d, (f["id"], r["cause"], f["key"], f["draft"])
         elif r["verdict"] == "draft_wrong" and not r["false_pass_risk"]:
             assert not (d == 1 and k > 1), (f["id"], r["cause"], f["key"], f["draft"])
+        elif r["verdict"] == "both_follow_the_law":    # never where the drafts pass what the key fails
+            assert not (d == 1 and k == 3), (f["id"], r["cause"], f["key"], f["draft"])
 
 
 @pytest.mark.parametrize("missing", ["area_well_depth", "area_well_area", "area_well_projection", "area_well_width",

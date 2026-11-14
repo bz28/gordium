@@ -95,7 +95,8 @@ causes:
     why: >-
       The example leaves out a measure one side's rule reads: the side whose rule needs it gives needs review, the
       other a definite answer that the law supports (a 35.5 in stair width fails R318.7.1 whatever the width at the
-      handrail; a loft stair whose shortest riser is 6 in fails R315.5.2.2 and, at 2 in variation, R318.7.5.1; a
+      handrail; a loft stair whose shortest riser is 6 in fails R315.5.2.2 (its other way, R318.7.5, can't be
+      settled without the tread depth the example leaves out); a
       36 in guard meets R321.1.2 whatever the drop, required or not; a 30 in door fails R318.2 whatever the number of
       dwelling units, which the key's door rule reads and the drafts' examples don't give).
     law: 'R318.7.1: "Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height"; R315.5.2.2: "Risers ... shall be not less than 7 inches (178 mm)".'
@@ -131,12 +132,14 @@ causes:
       two give the same answer.
     law: 'R319.1: "Emergency escape and rescue openings shall open directly into a public way, or to a yard or court that opens to a public way."'
   r319_1_room_a_loft_opens_to:
-    verdict: key_stricter
+    verdict: draft_wrong
+    false_pass_risk: true
     why: >-
       Both check an escape opening in the room a sleeping loft is open to (a loft_room part: a loft has no escape
       opening of its own, R315.1 and R319.1). The key also flags each loft, so a person checks that its room was
-      labeled; the drafts don't, so a loft whose room isn't labeled is never checked. Not a pass the law denies on
-      its own rows, but the drafts rely wholly on the label.
+      labeled; the drafts don't, so a house with a marked loft whose room isn't labeled passes on its other rooms
+      though R319.1's opening for the loft's room was never checked. The loft is evidence of that room: missing
+      data, which must give needs review.
     law: 'R319.1: "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening."'
   r319_4_1_full_opening_flag:
     verdict: draft_wrong

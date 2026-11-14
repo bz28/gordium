@@ -190,7 +190,7 @@ def book_context(unit: dict, law: dict) -> dict:
             continue
         pieces.append({"id": pid, "title": law["pieces"][pid]["title"], "text": body})
         size += len(body)
-    pointing, size = [], 0                # pieces whose text names this piece or a section above it ("ways in")
+    pointing, pointing_dropped, size = [], [], 0   # pieces whose text names this piece or a section above it
     above = {unit["piece"]} | {unit["piece"].rsplit(".", k)[0] for k in range(1, unit["piece"].count(".") + 1)}
     for pid, other in law["pieces"].items():
         if (pid == unit["piece"] or pid in refs or other.get("kind") == "definition" or pid.startswith("BO")
@@ -201,6 +201,8 @@ def book_context(unit: dict, law: dict) -> dict:
             if size + len(body) <= RELATED_LIMIT:
                 pointing.append({"id": pid, "title": other["title"], "text": body})
                 size += len(body)
+            else:
+                pointing_dropped.append(pid)                  # named to the drafter and in the record
     definitions, size = [], 0
     for did in list(dict.fromkeys(piece.get("uses", []) + piece.get("defined_terms_in_roman", []))):
         if did in law["pieces"]:
@@ -209,7 +211,7 @@ def book_context(unit: dict, law: dict) -> dict:
                 definitions.append(body)
                 size += len(body)
     return {"notes": [], "pieces": pieces, "dropped": dropped, "unfound": unfound, "definitions": definitions,
-            "related": pointing, "related_dropped": []}
+            "related": pointing, "related_dropped": pointing_dropped}
 
 
 def state_folder(name: str) -> Path:
