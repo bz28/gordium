@@ -21,13 +21,23 @@ Where a piece starts: a line that starts in bold, with
   - "SECTION R318—MEANS OF EGRESS": a section heading (piece "R318")
   - "[NY] R318.7.5.1 Risers.": a numbered part (piece "R318.7.5.1"), its title up to the first period; an
     optional tag in brackets ([NY] marks New York's own change to the model code)
-  - in Section R202, "[RB] STAIRWAY.": a defined term in capitals (piece "R202:stairway"). A bold entry in
+  - an appendix's sections and parts the same way, with the appendix's letters: "SECTION BO105—ALTERATIONS",
+    "[NY] BO105.10.4 Stair treads and risers."
+  - in a section of definitions (titled DEFINITIONS: R202, or an appendix's own, BO103; or DEFINITION, BF102), or
+    under a numbered part titled "Definition" or "Definitions" (BF106.2), "[RB] STAIRWAY.": a defined term in
+    capitals (piece "R202:stairway", "BO103:work_area", "BF102:patio_cover"; under a part, by the part: "BF106.2:screen_enclosure", so
+    the part that says where it applies comes in with it, and not the rest of its section). An appendix's own definitions apply in
+    that appendix only (R201.1: "as defined within the chapter or appendix where the word or term is found"). A bold entry in
     lower case printed under a term ("[NY] Building permit." under PERMIT, "[NY] Building, existing. See ..." under
     BUILDING) is New York's addition to that term, and stays in its piece
 A bold line start is the book's own heading style: a wrapped line of body text that happens to begin "R318.7. ..."
 is not bold, so it is never a heading. And a numbered part must come in order (the child .1 of the part above, or
 the next number at some level above): one out of order is reported as a problem, never silently skipped, as is a
-definition out of alphabetical order. Problems go in the sections file's header and fail CI.
+definition out of alphabetical order, and a numbered part printed inside another section. Where the book's own
+numbering is out of order, sources.yaml's `brought_in.printed_out_of_order` names the line with why, and only then is it
+cut where printed; where New York's rules amend a term the book prints, `brought_in.amended_by_law` names the line, and
+it is cut under the law's term. A name that matches nothing is a problem too. `brought_in.alone` brings in a part
+without the parts under it. Problems go in the sections file's header and fail CI.
 
 Each piece: {id, title, kind, lines: [[page, first, last], ...], text_sha256, uses: [definition piece ids],
 italic_not_defined_here: [the piece's italic words that Section R202 doesn't define: R201.3 gives them the meaning
@@ -40,14 +50,15 @@ import hashlib
 import json
 import re
 
-SPLITTER = "document_extraction.icc_sections v7"   # bump when the cutting rules change
+SPLITTER = "document_extraction.icc_sections v9"   # bump when the cutting rules change
 STAMP = re.compile(r"^\d{9}$")                      # the number stamped at the top of every page of this copy
 FOOTER = re.compile(r"^(?:\d+ )?2025 RESIDENTIAL CODE OF NEW YORK STATE(?: \d+)?$")
 DOT = "."                                           # a lone "." printed under the footer
-SECTION = re.compile(r"^(?:\[[A-Z]{2}\] )?SECTION (R\d{3})\s*[—–-]\s*(\S.*)$")
-NUMBERED = re.compile(r"^(?:\[[A-Z]{2}\] )?(R\d{3}(?:\.\d+)+) (\S.*)$")
+# A section of the code (R318) or of an appendix (BO105: the appendix's letters, then its number)
+SECTION = re.compile(r"^(?:\[[A-Z]{2}\] )?SECTION ([A-Z]{1,2}\d{3})\s*[—–-]\s*(\S.*)$")
+NUMBERED = re.compile(r"^(?:\[[A-Z]{2}\] )?([A-Z]{1,2}\d{3}(?:\.\d+)+) (\S.*)$")
 TERM = re.compile(r"^(?:\[[A-Z]{2}\] )?([A-Z0-9](?:[^.(]|\([^)]*\))*?)\.(?: |$)")   # "(d.f.u.)" inside
-CHAPTER_OPENING = re.compile(r"^(?:Part [IVXLC]+\s*—.*|CHAPTER)$")   # a chapter's first page: its part, "CHAPTER", "3"
+CHAPTER_OPENING = re.compile(r"^(?:Part [IVXLC]+\s*—.*|CHAPTER|APPENDIX)$")   # a chapter's or appendix's first page
 # Words that join defined terms inside one italic phrase ("dwelling(s) or townhouse(s)": the "s" of a bracketed
 # plural too): never an undefined italic word themselves.
 JOINING = {"and", "or", "of", "the", "a", "an", "s", "es"}
@@ -64,8 +75,14 @@ def parse_pages(spec: str) -> list[int]:
 
 
 def number(code: str) -> tuple:
-    """'R318.7.5' -> (318, 7, 5)."""
-    return tuple(int(x) for x in code[1:].split("."))
+    """'R318.7.5' -> (318, 7, 5); 'BO105.10' -> (105, 10)."""
+    return tuple(int(x) for x in re.sub(r"^[A-Z]+", "", code).split("."))
+
+
+def letters(code: str) -> str:
+    """The letters a section number starts with: 'R318.7' -> 'R'; 'BO105.8' -> 'BO' (an appendix);
+    'BO103:work_area' -> 'BO'."""
+    return re.match(r"[A-Z]*", code)[0]
 
 
 def slug(term: str) -> str:
@@ -116,51 +133,86 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     last: tuple = ()                     # the last numbered part's number
     last_letter = ""                     # the last definition's first letter
     page_before = None
+    definitions: set[str] = set()        # the sections of definitions: R202, and an appendix's own (BO103, BF102)
+    defining_part = None                 # the numbered part titled "Definition(s)" (BF106.2) the terms are under, if any
+    out_of_order = brought_in.get("printed_out_of_order") or {}   # "p.973 line 54": why the book prints it so
+    amended = brought_in.get("amended_by_law") or {}               # "p.966 line 38": {term, why}
+    used_names: set[str] = set()
     before_gap: list[tuple[int, int]] = []   # (the unit a gap in the pages read follows, the page before the gap)
     for r in body:
         if page_before is not None and any(n not in pages for n in range(page_before + 1, r["page"])):
             # A page after a gap in the pages read: what it starts with continues a part on a page not read.
             before_gap.append((len(units) - 1, page_before))
-            section, last, last_letter = None, (), ""
+            section, last, last_letter, defining_part = None, (), "", None
             units.append({"id": f"before the first heading on p.{r['page']}", "title": "", "kind": "before",
                           "members": []})
         page_before = r["page"]
         bold = _bold_start(r)
         head = None
         opening = f"chapter opening on p.{r['page']}"
-        if CHAPTER_OPENING.match(r["text"]) and (bold or r["text"] == "CHAPTER") \
+        where = f"p.{r['page']} line {r['line']}"
+        if CHAPTER_OPENING.match(r["text"]) and (bold or r["text"] in ("CHAPTER", "APPENDIX")) \
                 and not (units and units[-1]["id"] == opening):
             # A new chapter: its title and ICC's user notes are not law, and end the section before (never part
             # of the last definition, nor of the first section after).
-            section, last, last_letter = None, (), ""
+            section, last, last_letter, defining_part = None, (), "", None
             head = {"id": opening, "title": "", "kind": "before"}
         elif bold and (m := SECTION.match(r["text"])):
             section, last, last_letter = m[1], (), ""
             head = {"id": m[1], "title": m[2].strip(), "kind": "section_heading"}
-        elif bold and (m := NUMBERED.match(bold)) and (section is None or m[1].split(".")[0] == section):
+            if m[2].strip() in ("DEFINITIONS", "DEFINITION"):   # Appendix BF prints the singular (BF102)
+                definitions.add(m[1])
+        elif bold and (m := NUMBERED.match(bold)):
             code = m[1]
             n = number(code)
-            if section is None:          # the first heading after a gap: its order can't be checked against unread text
+            if section is not None and code.split(".")[0] != section:
+                # A heading numbered in another section than the one it is printed in: cut where printed if sources.yaml
+                # says why (the numbering of the parts after it goes on from the part before it), else a problem
+                if _printed(out_of_order, where, code, problems):
+                    used_names.add(where)
+                    head = {"id": code, "title": m[2].strip().rstrip("."), "kind": "section"}
+                else:
+                    problems.append(f"{where}: {code} is printed inside Section {section}; not cut there")
+            elif section is None:          # the first heading after a gap: its order can't be checked against unread text
                 section, last = code.split(".")[0], n
                 head = {"id": code, "title": m[2].strip().rstrip("."), "kind": "section"}
+            elif not _in_order(last, n, number(section)) and _printed(out_of_order, where, code, problems):
+                # The book's own numbering is out of order here, and sources.yaml says why: cut where it is printed
+                used_names.add(where)
+                last = n
+                head = {"id": code, "title": m[2].strip().rstrip("."), "kind": "section"}
             elif not _in_order(last, n, number(section)):
-                problems.append(f"p.{r['page']} line {r['line']}: {code} is out of order after "
-                                f"{'R' + '.'.join(map(str, last)) if last else section}; not cut there")
+                problems.append(f"{where}: {code} is out of order after "
+                                f"{letters(section) + '.'.join(map(str, last)) if last else section}; not cut there")
             else:
                 last = n
                 head = {"id": code, "title": m[2].strip().rstrip("."), "kind": "section"}
-        elif bold and section == "R202" and (m := TERM.match(bold)) and _is_term(m[1]):
+        elif bold and (section in definitions or defining_part) and (m := TERM.match(bold)) and _is_term(m[1]):
             term = m[1].strip()
+            if _printed(amended, where, term, problems):
+                # New York's rules amend the term the book prints here (19 NYCRR Part 1220): cut under the law's term
+                used_names.add(where)
+                term = str(amended[where]["term"])
             if term[0] < last_letter:
                 problems.append(f"p.{r['page']} line {r['line']}: definition {term!r} is out of alphabetical order "
                                 f"(after a term starting {last_letter!r}); not cut there")
             else:
                 last_letter = term[0]
-                head = {"id": f"R202:{slug(term)}", "title": term, "kind": "definition"}
-        elif bold and section == "R202" and _is_term(bold.split(". ")[0]) and bold.rstrip().endswith("."):
+                head = {"id": f"{defining_part or section}:{slug(term)}", "title": term, "kind": "definition"}
+        elif bold and (section in definitions or defining_part) and _is_term(bold.split(". ")[0]) \
+                and bold.rstrip().endswith("."):
             # Bold capitals ending in a period look like a defined term the cutter couldn't read: never let it
             # fall silently into the definition above it.
             problems.append(f"p.{r['page']} line {r['line']}: {bold!r} looks like a defined term but was not cut")
+        if head and head["kind"] != "definition":
+            # A numbered part titled "Definition(s)" ("BF106.2 Definition. The following word and term shall, for the
+            # purposes of this appendix, ..."): the bold terms under it are definitions, up to the next heading
+            # (only outside a section of definitions: "BJ102.1 Definitions." under "SECTION BJ102—DEFINITIONS" leaves its
+            # terms named by the section, BJ102:term, with the section's heading brought in)
+            defining_part = head["id"] if head["kind"] == "section" and section not in definitions \
+                and head["title"] in ("Definition", "Definitions") else None
+            if defining_part:
+                last_letter = ""
         if head:
             units.append(head | {"members": []})
         elif not units:
@@ -173,18 +225,21 @@ def split(rows: list[dict], brought_in: dict) -> dict:
 
     ids = [u["id"] for u in units]
     problems += [f"{i} is cut twice" for i in sorted({i for i in ids if ids.count(i) > 1})]
+    problems += [f"brought_in names {w} ({kind}), where the book prints no such heading" for kind, named in
+                 (("printed_out_of_order", out_of_order), ("amended_by_law", amended)) for w in named if w not in used_names]
     sections = list(brought_in.get("sections") or [])
-    for code in sections:
+    alone = list(brought_in.get("alone") or [])      # parts brought in without the parts under them
+    for code in sections + alone:
         if code not in ids:
             problems.append(f"{code}: brought in, but no such heading on the pages read")
 
     def in_sections(u):
         if u["kind"] == "definition":
             return False
-        return any(u["id"] == c or u["id"].startswith(c + ".") for c in sections)
+        return u["id"] in alone or any(u["id"] == c or u["id"].startswith(c + ".") for c in sections)
 
     # A brought-in part must end where the book's next part begins, on a page read: else it may run on unread.
-    for code in sections:
+    for code in sections + alone:
         if code in ids:
             after = [u for u in units[ids.index(code) + 1:] if not in_sections(u)]
             if not after:
@@ -193,11 +248,11 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     terms = {u["id"]: u for u in units if u["kind"] == "definition"}
     used, undefined = {}, {}
     for u in units:
-        used[u["id"]], undefined[u["id"]] = _uses(u, terms)
+        used[u["id"]], undefined[u["id"]] = _uses(u, _in_scope(u["id"], terms))
     keep = {u["id"] for u in units if in_sections(u)}
     # A defined term printed in roman type in a brought-in section: R201.1 gives the defined meaning to italic words
     # only, so it doesn't strictly apply there, but it is brought in too, so the reader sees both (never fewer).
-    roman = {u["id"]: sorted(_roman(u, terms) - used[u["id"]] - {u["id"]}) for u in units}
+    roman = {u["id"]: sorted(_roman(u, _in_scope(u["id"], terms)) - used[u["id"]] - {u["id"]}) for u in units}
     todo = [d for i in keep for d in used[i]] + [d for i in keep for d in roman[i]]
     while todo:                                      # each brought-in definition's own defined words, and theirs
         d = todo.pop()
@@ -207,8 +262,10 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     # Every definition a kept piece uses is kept too: never a piece that names one the reader can't see. The loop
     # above makes this so today; this line keeps it so if the loop is ever changed.
     problems += [f"{i}: uses {d}, which is not brought in" for i in sorted(keep) for d in used.get(i, ()) if d not in keep]
-    if any(i.startswith("R202:") for i in keep):
-        keep.add("R202")                             # the heading the definitions sit under
+    # The heading the definitions sit under, and the section's own numbered parts above them ("BO103.1 General. The
+    # terms used in this appendix ... are defined as follows"), which say where its definitions apply
+    for s in {i.split(":")[0] for i in keep if ":" in i}:
+        keep |= {u["id"] for u in units if u["kind"] != "definition" and (u["id"] == s or u["id"].startswith(s + "."))}
     # A brought-in part that is the last before a gap in the pages read, or the last of all, may run on onto a
     # page not read (a page left out of `pages` would silently drop the law on it): never cut short silently.
     for i, page in before_gap + [(len(units) - 1, body[-1]["page"] if body else 0)]:
@@ -221,7 +278,8 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     known = brought_in.get("italic_not_defined") or {}
     for u in units:
         if u["id"] in keep:
-            problems += [f"{u['id']}: italic {w!r} is not defined in Section R202; name it in brought_in."
+            problems += [f"{u['id']}: italic {w!r} is not defined in Section R202"
+                         f"{'' if letters(u['id']) == 'R' else ' or its appendix'}; name it in brought_in."
                          f"italic_not_defined under {u['id']}, with why" for w in sorted(undefined[u["id"]])
                          if w not in (known.get(u["id"]) or {})]
     problems += [f"brought_in.italic_not_defined names {w!r} under {pid}, which has no such italic word"
@@ -238,6 +296,27 @@ def split(rows: list[dict], brought_in: dict) -> dict:
             outside += [[*run, u["id"]] for run in _runs_of(u["members"])]
     return {"pieces": pieces, "furniture": furn, "outside": outside, "problems": problems,
             "line_counts": {str(p): len(pages[p]) for p in sorted(pages)}}
+
+
+def _printed(named: dict, where: str, printed: str, problems: list[str]) -> bool:
+    """Is the line `where` named in sources.yaml (printed_out_of_order, amended_by_law), and does the book print there what
+    the entry says (its `printed`)? A name whose line prints something else is a problem, never applied: a stale line
+    number must not rename or cut whatever happens to be printed there now."""
+    if where not in named:
+        return False
+    if (named[where] or {}).get("printed") != printed:
+        problems.append(f"brought_in names {where} as printing {(named[where] or {}).get('printed')!r}, but the book "
+                        f"prints {printed!r} there; not applied")
+        return False
+    return True
+
+
+def _in_scope(uid: str, terms: dict[str, dict]) -> dict[str, dict]:
+    """The definitions that apply in a unit: Chapter 2's everywhere; an appendix's own (BO103's) only in that appendix
+    (R201.1: "the meanings indicated in this chapter or as defined within the chapter or appendix where the word or
+    term is found"; BO103.1: "The terms used in this appendix")."""
+    mine = letters(uid)
+    return {pid: t for pid, t in terms.items() if letters(pid) in ("R", mine)}
 
 
 def _in_order(last: tuple, n: tuple, section: tuple) -> bool:
@@ -336,6 +415,13 @@ def _roman(unit: dict, terms: dict[str, dict]) -> set[str]:
         for f in _forms(u["title"]):
             f = f.lower()
             plural = re.escape(f) + r"(?:s|es)?" + (f"|{re.escape(f[:-1])}ies" if f.endswith("y") else "")
+            parts = f.split(" ")
+            for k in range(len(parts) - 1):        # a word inside in its plural: "changes of occupancy", "stories
+                w = re.escape(parts[k]) + r"(?:s|es)"   # above grade plane"
+                if parts[k].endswith("y"):
+                    w = f"(?:{w}|{re.escape(parts[k][:-1])}ies)"
+                plural += "|" + re.escape(" ".join(parts[:k])) + (" " if k else "") + w + \
+                    re.escape(" " + " ".join(parts[k + 1:]))
             if f and re.search(r"(?<![\w-])(?:" + plural + r")(?!\w)", text):   # "owner-occupied", "stories" too
                 out.add(pid)
     return out
@@ -371,13 +457,19 @@ def _defined(words: list[str], by_slug: dict[str, list[str]]) -> tuple[list[list
 
 
 def _lookup(words: list[str], by_slug: dict[str, list[str]]) -> list[str] | None:
-    last = words[-1]
-    for ending in (last, last[:-1] if last.endswith("s") else None, last[:-2] if last.endswith("es") else None,
-                   last[:-3] + "y" if last.endswith("ies") else None):
-        if ending:
-            key = slug(" ".join(words[:-1] + [ending]))
-            if key in by_slug:
-                return by_slug[key]
+    """The definitions a run of words names, as written or with one word in its plural: the last ("risers") or
+    another ("changes of occupancy": CHANGE OF OCCUPANCY)."""
+    key = slug(" ".join(words))
+    if key in by_slug:
+        return by_slug[key]
+    for k in [len(words) - 1, *range(len(words) - 1)]:
+        w = words[k]
+        for one in (w[:-1] if w.endswith("s") else None, w[:-2] if w.endswith("es") else None,
+                    w[:-3] + "y" if w.endswith("ies") else None):
+            if one:
+                key = slug(" ".join(words[:k] + [one] + words[k + 1:]))
+                if key in by_slug:
+                    return by_slug[key]
     return None
 
 
