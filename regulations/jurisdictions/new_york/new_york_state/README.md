@@ -39,17 +39,18 @@ Every reference in the brought-in sections was followed (found by code, `documen
 - R101.2 Exception 6 (which lodging houses the code covers; from R318.1.1)
 - P2904 (sprinkler systems; from R319.1 Exception 3)
 - R405.1 and Table R401.4.1(2) (foundation drainage and soils; from R319.4.3)
-- Appendix BO's other parts (from R319.7, R102.6.1, R102.6.2 and its own brought-in parts: BO104's other parts, BO105.2 and the rest of BO105, BO107, BO109): not egress (above)
+- Appendix BO's other parts (from R101.2.1, which adopts it, R319.7, R102.6.1, R102.6.2, and its own brought-in parts: BO102.6.1 from BO102.6; BO104's other parts from BO106.1.2; BO105.2 from BO105.1, BO105.1.1, BO105.1.2; the rest of BO105 from BO106.1.2, BO107.1; BO107's other parts from BO108.1; BO109's other parts from BO104.1, BO105.1 (printed "B0109"), BO107.1, BO107.2, BO109.1): not egress (above)
+- Chapter 2 (from BO103.1, BO109.1): all of it (R201, R202) is brought in; the code's search lists it only because it does not know which sections make up a chapter
 - R301.5 (guard loads; from R507.10), R301.1.3 (engineered design; from BO105.1, BO106.1): structural
 - R312 and R313 (room area and ceiling height; from R316.2): not egress; R316.2 is a flag until they come in
 - R310.7 (fire alarm systems; from BO105.13, BO106.7) and the sprinkler standards NFPA 13D and NFPA 72 (also BO108.4)
 - R101.2 (which buildings the code covers; from BO101.1)
 - R311.7 (from BO108.4): no such part in this book (above)
 - Section 702 of the Property Maintenance Code of New York State (from BO105.8) and the Existing Building Code of New York State (from R102.6.1): other New York codes, named in words, so the code's search (which finds section numbers) does not list them
-- Appendices BA, BB, BE to BN and CA to CG (from R101.2.1, which only lists them)
+- Appendices BA, BB, BE, BF, BG, BH, BI, BJ, BK, BL, BM, BN, CA, CB, CC, CD, CE, CF and CG (from R101.2.1, which only lists them)
 - E3401.2.1 (when a house has electrical power; from the exceptions of R325.6 and R325.7)
 - P2904 also from R314.3, R315.4, R316.3, BO105.13, BO106.7, BO108.4 (sprinklered houses get larger mezzanines and lofts)
-- the outside standards ICC 500 (storm shelters; R319.1) and ASTM F2090 (window opening control devices; R319.1.1, R321.2.1)
+- the outside standards ICC 500 (storm shelters; from R319.1) and ASTM F2090 (window opening control devices; from R319.1.1, R321.2.1)
 - "accessed", printed in italics but not defined in Section R202: R201.3 sends such a word to another New York code's definition; that code is not brought in.
 - "unit" in R319.1 is printed in italics alone only because the book breaks the styling inside "dwelling *unit*" (p.102, line 35); the term is DWELLING UNIT, and its definition is brought in by the roman-type match.
 - "change of use" (BO101.1) and "change in use" (the definition of RECONFIGURATION OF SPACE), in italics but not defined: R202 defines CHANGE OF OCCUPANCY only; R201.3 sends them to another New York code.
