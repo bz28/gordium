@@ -143,9 +143,10 @@ def test_the_answer_key_is_worked_for_every_part(name):
     unsized = {p["id"] for p in got if not p["measures"]} | {n["id"] for n in measured["not_checked"]}
     sized_rooms = {o["room"] for o in house["openings"] if o["id"] in {p["id"] for p in got} - unsized}
     unsized |= {r["id"] for r in house["rooms"] if r["sleeping"]} - sized_rooms
-    for area in key["areas"]:   # an escape rule over an opening the code can't size (or its room) never complies
-        if "R319" in area["rule"]:
-            assert not (set(area["parts"]) & unsized and area["outcome"] == "complies"), area["id"]
+    openings = {o["id"] for o in house["openings"]}
+    for area in key["areas"]:   # a rule over an opening the code can't size, or an escape rule over its room, never complies
+        never = unsized & openings | (unsized if "R319" in area["rule"] else set())
+        assert not (set(area["parts"]) & never and area["outcome"] == "complies"), area["id"]
     worked = {p for a in key["areas"] for p in a["parts"]}
     escape = {o["id"] for o in house["openings"] if o["escape"]}
     assert escape <= worked                       # every marked escape opening is worked in the key

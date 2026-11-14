@@ -243,11 +243,12 @@ areas:
     quote: "The tread depth shall be not less than 9 inches (229 mm)"
     page: 77
     parts: [main stair, basement stair]
-    drawings: "A-2 stair detail '9\" MIN' (a requirement, not a size); A-2 main floor plan '10'-0\"' along the stair; A-3 stairwell opening '9'-8\"'"
+    drawings: "A-2 stair detail '9\" MIN' (a requirement, not a size); A-2 main floor plan and A-2 basement plan '10'-0\"' in the same place, from the stairs' shared first riser line to the basement stair's top riser ('DN 13R'), followed on both by the '3'-4\"' landing; A-3 stairwell opening '9'-8\"'"
     working: |
-      No tread depth is given. If A-2's 10'-0" is the main stair's run (its first riser to its top one), 14 treads (15
-      risers to the bridge) would be 120 / 14 = 8.57 in, under 9: it would fail. The plan is drawn at about 10 in a
-      tread, but the sheets say "DO NOT SCALE PLANS !". What the 10'-0" spans is a question for the architect.
+      Main stair: no tread depth is given (drawn at about 10 in, but the sheets say "DO NOT SCALE PLANS !"). The
+      10'-0" is the basement stair's run: it ends at the basement stair's top riser, where the main stair keeps
+      climbing to the bridge. Basement stair: 120 / 12 = 10.0 in at 13 risers, 120 / 13 = 9.23 in at 14 risers
+      (9.19 in if the 10'-0" was rounded up by half an inch): at least 9 either way, on this reading of the dimension.
     outcome: needs_review
     measured: "stairs not read"
 
@@ -255,7 +256,7 @@ areas:
     rule: R318.7.2
     quote: "not less than 6 feet 8 inches (2032 mm) measured vertically from the sloped line adjoining the tread nosing"
     page: 77
-    parts: [main stair]
+    parts: [main stair, basement stair]
     drawings: "A-2 stair detail 'MINIMUM 6'-9\" HEADROOM AS PER 2020 NYS CODE' (a requirement, stricter than 2025's 6'-8\"); A-3 stairwell opening 9'-8\" long; A-4 main floor ceiling 9'-0\""
     working: |
       Not given. The lower end of the main stair runs under the second-floor hallway (the stairwell opening is
@@ -264,8 +265,15 @@ areas:
       112.5 - 870 / T in above the main floor; the hallway's underside is the main floor's 9'-0" = 108 in ceiling.
       Headroom there = 108 - (112.5 - 870 / T) = 870 / T - 4.5. It is at least 80 in only if T <= 870 / 84.5 =
       10.30 in. At 9 in treads: 92.2 in; at 10 in: 82.5 in; at 10 1/2 in: 78.4 in (fails).
+      Basement stair: it runs under the main stair (both A-2 plans start both stairs on the same riser line and
+      rise south; A-2 basement plan '1/2" GYP. BD. ON UNDERSIDE'; A-5 section 'STAIRS BEYOND (SEE TYPICAL STAIR DETAIL)', drawn under the main stair). It is the steeper
+      (about 100 in over its 120 in run, against 0.75 in per in for the main stair), so its headroom is least at its
+      top riser, 120 in along, level with the main floor. The main stair's nosing line there is 7.5 + 120 x 7.5 / T
+      = 7.5 + 900 / T in above the main floor; its underside is lower by d, the stringer, tread and finish, not
+      given (about 15.5 in for a 2x12 stringer, a 1 in tread and 1/2 in gypsum board). Headroom = 7.5 + 900 / T - d:
+      at T = 10 in, 82 in; under 80 in if T is more than about 10.2 in.
     outcome: needs_review
-    reading: "complies only if the treads are no deeper than about 10.3 in (with 7 1/2 in risers): a real constraint to confirm"
+    reading: "complies only if the main stair's treads are no deeper than about 10.2 to 10.3 in (with 7 1/2 in risers), for its own headroom and the basement stair's under it: a real constraint to confirm"
     measured: "stairs not read"
 
   - id: stair_width
@@ -273,10 +281,10 @@ areas:
     quote: "not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height"
     page: 77
     parts: [main stair, basement stair]
-    drawings: "Main stair: A-2 and A-3 '3'-4\"' between the lines drawn (a wall on one side, the railing line on the other upstairs). Basement stair: A-2 basement plan '3'-0\"' between its two walls. A-1 floor plan notes: 'DIMENSIONS ARE TO NEAREST INCH/ ACTUAL ROOM SIZES VARY DUE TO GYPSUM BOARD'"
+    drawings: "Main stair: A-2 and A-3 '3'-4\"' between the lines drawn (A-2: a railing on the west, a wall on the east; A-3: railings on both sides). Basement stair: A-2 basement plan '3'-0\"' between its two walls. A-1 floor plan notes: 'DIMENSIONS ARE TO NEAREST INCH/ ACTUAL ROOM SIZES VARY DUE TO GYPSUM BOARD'"
     working: |
       40 in, rounded to the inch, before gypsum board (1/2 in each side, A-5 section): about 39 in finished between
-      walls; where a railing bounds it, how much of its thickness the 3'-4" includes isn't stated. Above the
+      walls; where railings bound it (one side downstairs, both upstairs), how much of its thickness the 3'-4" includes isn't stated. Above the
       handrail it needs 36: about 3 in to spare. At the handrail (one side) it needs 31 1/2: a handrail may
       project up to 4 1/2 in (R320.3), so about 39 - 4.5 = 34.5. Basement stair: 36 in between framed walls, rounded
       to the inch: exactly the 36 in minimum before any finish, so any wall finish (1/2 in gypsum board each side
@@ -311,7 +319,7 @@ areas:
     page: 77
     parts: [bridge steps]
     drawings: "A-3: 'DN 7 1/2\"' from the hallway onto the 'BRIDGE', at the bridge's east edge, where it is '4'-0\"' wide"
-    working: "A single riser is a stair (R202: 'STAIR. A change in elevation, consisting of one or more risers'). Riser 7 1/2 in <= 8 1/4; width 48 in, less 1/2 in gypsum board each side = 47 >= 36 (R318.7.1)"
+    working: "A single riser is a stair (R202: 'STAIR. A change in elevation, consisting of one or more risers'). Riser 7 1/2 in <= 8 1/4; width 48 in, less 1/2 in gypsum board on the south wall (the north end is the stair railing's post) = 47.5 >= 36 (R318.7.1)"
     outcome: complies
     measured: "not measured (the bridge steps aren't in the description)"
 
@@ -352,7 +360,7 @@ areas:
     page: 78
     parts: [main stair, basement stair]
     drawings: "A-2 'STAIRS & RAILING AS PER RES. CODE'; A-2 stair detail: top rail, '3'-0\"' at the top floor, '3 1/2\" MAX.'"
-    working: "A handrail is drawn on the main stair (detail and plan). Its height above the nosings (34 to 38 in, R320.2) isn't dimensioned along the flight; the basement stair's handrail isn't shown."
+    working: "A handrail is drawn on both stairs (main stair: detail and plans; basement stair: a line along its west wall on both A-2 plans, 'STAIRS AND RAILING AS PER CODE'). Neither's height above the nosings (34 to 38 in, R320.2) is dimensioned."
     outcome: needs_review
     measured: "stairs not read"
 
