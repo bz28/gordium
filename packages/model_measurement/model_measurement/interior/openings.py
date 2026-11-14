@@ -31,6 +31,7 @@ AGREE = 1 / 16          # in: a maker's clear opening and the drawn one agree wi
 GRADE_FLOOR = 44.0      # in: the definition of a grade-floor emergency escape and rescue opening
 CLEAR = ("opening_net_clear_area", "opening_net_clear_height", "opening_net_clear_width")
 NONE = "none"           # the opening doesn't open
+BELOW = 1 / 16          # in: a sill this far under the floor is drawing noise (read as 0); more is a wrong floor
 
 
 def drawn_clear(o: dict, reader, operation: str):
@@ -179,7 +180,10 @@ def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict]:
         measures["opening_net_clear_height"] = tidy(top - bottom)
         measures["opening_net_clear_area"] = tidy((right - left) * (top - bottom) / 144)
         try:
-            measures["opening_sill_height"] = tidy(bottom - floor_of(o.get("room")))
+            sill = bottom - floor_of(o.get("room"))
+            if sill < -BELOW:             # an opening's bottom below its room's floor: the floor or the opening is wrong
+                raise Stop("sill_below_floor", sill=tidy(sill))
+            measures["opening_sill_height"] = tidy(max(sill, 0.0))
         except Stop as s:
             stopped["opening_sill_height"] = s.reason
         try:
