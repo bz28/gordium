@@ -51,7 +51,7 @@ T = _site_lookup_tests()
 def looked_up(name, **kw):
     from site_lookup.adapters.ithaca_city.lookup import lookup
     fx = T.load(name)
-    return box_payload(lookup(fx["address"], T.Fake(fx, **kw), T.NOW))
+    return box_payload(lookup(fx["address"], T.Fake(fx, **kw), T.NOW), T.NOW)   # dated, as lookup_box.main always is
 
 
 def area(ring):
@@ -236,7 +236,7 @@ def test_the_lookup_runs_in_its_own_process_and_prints_one_line(capsys):
     # a progress line as each stage starts, then the answer, always last
     assert [json.loads(line) for line in out[:-1]] == [{"step": t} for t in (
         "Finding the address…", "Finding the tax parcel…", "Finding which lot lines face a street…",
-        "Reading the ground elevations…", "Reading the City zoning map…", "Checking the historic and gorge maps…")]
+        "Reading the ground elevations…", "Reading the City zoning map…", "Checking the historic, gorge and flood maps…")]
     assert json.loads(out[-1])["status"] == "found" and logic.lookup_answer("\n".join(out))["status"] == "found"
     rhino = host_text("rhino", "plugin", purpose="wiring")
     assert '"-m", "design_checker.lookup_box", address' in rhino and "logic.LOOKUP_LIMIT_S" in rhino

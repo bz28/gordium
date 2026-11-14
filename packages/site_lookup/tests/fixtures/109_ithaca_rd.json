@@ -823,7 +823,162 @@
      }
     ]
    }
+  },
+  {
+   "source": "fema_flood",
+   "params": {
+    "geometry": "{\"rings\": [[[847900.9604781456, 888215.9583705652], [847850.7571606596, 888196.6178400882], [847776.1382228025, 888268.0360340683], [847825.283424503, 888326.2734762188], [847875.0624430462, 888277.0578144335], [847900.9604781456, 888215.9583705652]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "FLD_ZONE,ZONE_SUBTY,SFHA_TF"
+   },
+   "body": {
+    "displayFieldName": "FLD_AR_ID",
+    "fieldAliases": {
+     "FLD_ZONE": "FLD_ZONE",
+     "ZONE_SUBTY": "ZONE_SUBTY",
+     "SFHA_TF": "SFHA_TF"
+    },
+    "fields": [
+     {
+      "name": "FLD_ZONE",
+      "type": "esriFieldTypeString",
+      "alias": "FLD_ZONE",
+      "length": 17
+     },
+     {
+      "name": "ZONE_SUBTY",
+      "type": "esriFieldTypeString",
+      "alias": "ZONE_SUBTY",
+      "length": 76
+     },
+     {
+      "name": "SFHA_TF",
+      "type": "esriFieldTypeString",
+      "alias": "SFHA_TF",
+      "length": 1
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "FLD_ZONE": "X",
+       "ZONE_SUBTY": "AREA OF MINIMAL FLOOD HAZARD",
+       "SFHA_TF": "F"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "fema_flood",
+   "params": {
+    "geometry": "{\"rings\": [[[847900.9604781456, 888215.9583705652], [847850.7571606596, 888196.6178400882], [847776.1382228025, 888268.0360340683], [847825.283424503, 888326.2734762188], [847875.0624430462, 888277.0578144335], [847900.9604781456, 888215.9583705652]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelWithin",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "FLD_ZONE,ZONE_SUBTY,SFHA_TF"
+   },
+   "body": {
+    "displayFieldName": "FLD_AR_ID",
+    "fieldAliases": {
+     "FLD_ZONE": "FLD_ZONE",
+     "ZONE_SUBTY": "ZONE_SUBTY",
+     "SFHA_TF": "SFHA_TF"
+    },
+    "fields": [
+     {
+      "name": "FLD_ZONE",
+      "type": "esriFieldTypeString",
+      "alias": "FLD_ZONE",
+      "length": 17
+     },
+     {
+      "name": "ZONE_SUBTY",
+      "type": "esriFieldTypeString",
+      "alias": "ZONE_SUBTY",
+      "length": 76
+     },
+     {
+      "name": "SFHA_TF",
+      "type": "esriFieldTypeString",
+      "alias": "SFHA_TF",
+      "length": 1
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "FLD_ZONE": "X",
+       "ZONE_SUBTY": "AREA OF MINIMAL FLOOD HAZARD",
+       "SFHA_TF": "F"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "fema_pending",
+   "params": {
+    "geometry": "{\"rings\": [[[847900.9604781456, 888215.9583705652], [847850.7571606596, 888196.6178400882], [847776.1382228025, 888268.0360340683], [847825.283424503, 888326.2734762188], [847875.0624430462, 888277.0578144335], [847900.9604781456, 888215.9583705652]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "OBJECTID"
+   },
+   "body": {
+    "displayFieldName": "DFIRM_ID",
+    "fieldAliases": {
+     "OBJECTID": "OBJECTID"
+    },
+    "fields": [
+     {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+     }
+    ],
+    "features": []
+   }
+  },
+  {
+   "source": "fema_preliminary",
+   "params": {
+    "geometry": "{\"rings\": [[[847900.9604781456, 888215.9583705652], [847850.7571606596, 888196.6178400882], [847776.1382228025, 888268.0360340683], [847825.283424503, 888326.2734762188], [847875.0624430462, 888277.0578144335], [847900.9604781456, 888215.9583705652]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "OBJECTID"
+   },
+   "body": {
+    "displayFieldName": "PFIDX_ID",
+    "fieldAliases": {
+     "OBJECTID": "OBJECTID"
+    },
+    "fields": [
+     {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+     }
+    ],
+    "features": []
+   }
   }
  ],
- "live_status": "found"
+ "live_status": "found",
+ "flood_captured": "2026-11-11"
 }

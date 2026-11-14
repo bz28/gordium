@@ -9,7 +9,7 @@ from the chart reader. A template with no slots is one rule for every district (
 import ast
 import re
 
-from rule_format import formula
+from rule_format import formula, parts
 from rule_format.rulebook import district_name, pending_research
 
 DRAFTED_QUESTION = "raised by the drafting script (the AI's draft); not searched yet"
@@ -102,9 +102,16 @@ def _stands_with(number_path: list, slot_path: list) -> bool:
     return False
 
 
+def _listed(items) -> list[dict]:
+    return [i for i in items if isinstance(i, dict)] if isinstance(items, list) else []
+
+
 def slot_names(template: dict) -> set[str]:
     """Every slot the template refers to, its examples' values included."""
     examples = [g["value"] for ex in template.get("examples", []) for g in ex["given"]]
+    # a part's measure values too (a malformed one is sent back by fill_template, never a crash here)
+    examples += [v for ex in template.get("examples", []) for p in _listed(ex.get("parts"))
+                 for g in _listed(p.get("measures")) if isinstance(v := g.get("value"), str)]
     return formula_slots(template) | {n for t in examples for n in SLOT.findall(t)}
 
 
@@ -144,6 +151,47 @@ def _example_value(text: str, values: dict[str, float]):
     return t
 
 
+def _example(ex: dict, rule: dict, values: dict[str, float]) -> dict:
+    """A drafted worked example as the rule file writes it. For a rule for each part it is a small design: the
+    building's measures (`given`), its parts by kind (each kind the rule reads is listed, empty when the example has
+    none of it: "read, and there are none"), and every row expected ({part, within} ids, "" for none, and outcome),
+    checked by validation with the checker's own rows (parts.examples_problems)."""
+    out = {"given": {g["measure"]: _example_value(g["value"], values) for g in ex["given"]}}
+    if parts.is_part_rule(rule):
+        kinds = [k for k in (rule.get("for_each"), rule.get("within")) if k]
+        given = {k: [] for k in kinds}
+        for p in _entries(ex.get("parts", []), "part"):
+            if _text(p, "kind") not in given:
+                raise ValueError(f"an example's part {p.get('id')!r} is a {p.get('kind')!r}, not a kind this rule reads {kinds}")
+            part = {"id": p["id"]} | {k: p[k] for k in ("name", "within") if _text(p, k)}
+            measures = _entries(p.get("measures", []), "measure")
+            for g in measures:
+                _text(g, "measure"), _text(g, "value")       # text, or the template is sent back (never a crash)
+            part["measures"] = {g["measure"]: _example_value(g["value"], values) for g in measures}
+            given[p["kind"]].append(part)
+        out["parts"] = given
+        out["rows"] = [{k: r[k] for k in ("part", "within") if _text(r, k)} | {"outcome": r["outcome"]}
+                       for r in _entries(ex.get("rows", []), "row")]
+    elif ex.get("parts") or ex.get("rows"):
+        raise ValueError("an example gives parts or rows, but the rule isn't for each part (for_each is empty)")
+    return out | {"expect": ex["expect"]}
+
+
+def _entries(items, what: str) -> list[dict]:
+    """A list of mappings from the answer, or ValueError (the template is sent back, never a crash)."""
+    if not (isinstance(items, list) and all(isinstance(i, dict) for i in items)):
+        raise ValueError(f"an example's {what}s must be a list of objects")
+    return items
+
+
+def _text(entry: dict, key: str) -> str:
+    """An answer's text field, stripped ("" for none), or ValueError when it isn't text."""
+    v = entry.get(key, "")
+    if not isinstance(v, str):
+        raise ValueError(f"an example's {key} {v!r} isn't text")
+    return v.strip()
+
+
 def fill_template(template: dict, column: str | None, cells: dict, quote_sources: list[dict],
                   drafted_by: str, chart: str) -> tuple[dict | None, str | None]:
     """(the rule for this district column, None), or (None, why it can't be filled). With column None the
@@ -169,12 +217,15 @@ def fill_template(template: dict, column: str | None, cells: dict, quote_sources
         rule["check"] = _substitute(template["check"], values)
     if template.get("review_when"):
         rule["review_when"] = [{"when": _substitute(r["when"], values), "reason": r["reason"]} for r in template["review_when"]]
+    # a rule for each part (rule_format/parts.py): its part fields as drafted ("" is none)
+    rule |= {k: template[k] for k in parts.PART_FIELDS if isinstance(template.get(k), str) and template[k].strip()}
     rule["sources"] = cell_sources + quote_sources
     try:
-        rule["examples"] = [{"given": {g["measure"]: _example_value(g["value"], values) for g in ex["given"]},
-                             "expect": ex["expect"]} for ex in template["examples"]]
+        rule["examples"] = [_example(ex, rule, values) for ex in template["examples"]]
     except (formula.FormulaError, formula.EvaluationError, formula.MissingMeasure) as e:
         return None, f"an example value can't be worked out: {e}"
+    except ValueError as e:
+        return None, str(e)
     if template.get("open_questions"):
         rule["open_questions"] = list(template["open_questions"])
         rule["research"] = [pending_research(q, DRAFTED_QUESTION) for q in rule["open_questions"]]

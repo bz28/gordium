@@ -181,6 +181,14 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Until you answer:** Today, these features are not checked yet (§325-16A and B will become rules of their own): check them by hand. From a model, a building with a parapet, chimney or similar feature above its roof gets NEEDS REVIEW on height.
 - **Options:** (a) the 5 ft is measured from the chart's limit (the stricter reading); (b) from the bonus height.
 
+### 4.6 A basement escape window in a window well: is "grade" the well's floor or the ground around the well?
+
+- **The code's words** (2025 Residential Code of New York State; Ithaca's own code doesn't cover escape windows): a grade-floor escape opening is one "located such that the bottom of the clear opening is not more than 44 inches (1118 mm) above or below the finished ground level adjacent to the opening" (Definitions, p.21), and it may be 5 sq ft instead of 5.7 (R319.2.1 Exception, p.79). "GRADE. The finished ground level adjoining the building at all exterior walls." (p.21). "An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade shall be provided with an area well" (R319.4, p.80).
+- **What research found:** Ithaca's zoning code has no escape-window rules, and no City or zoning board record touches this (escape windows are state building code, enforced by the City's building division). The state code's own words point both ways: the well's floor is "finished ground level adjacent to the opening" and adjoins the wall; but R319.4 calls an opening that needs a well one "below the adjacent grade", which only makes sense if grade is the ground around the well (by the well-floor reading, no opening in a well would ever be below grade). The ICC's commentary on the same wording wasn't read: Gordium doesn't fetch the ICC's website. Searched 2026-11-13 in the stored 2025 code text.
+- **Why it matters:** a basement window whose sill is 10 in above the well's floor and 60 in below the lawn is grade-floor (5 sq ft is enough) by the well-floor reading, and not grade-floor (5.7 sq ft needed) by the surrounding-ground reading. A 5.2 sq ft window passes one and fails the other.
+- **Until you answer:** Today, escape windows are not checked yet: check them by hand. From a model, Gordium measures both readings; where they disagree the window gets no grade-floor answer, so a rule that turns on it gets NEEDS REVIEW (the test house `test_data/interior_houses/5_basement_window_well/`).
+- **Options:** (a) the ground around the well (the stricter reading: a window deep in a well needs the full 5.7 sq ft); (b) the well's own floor.
+
 ---
 
 ## 5. Accessory buildings, accessory dwelling units, and the R-3a, R-2c, R-3aa, R-3b and RU districts
