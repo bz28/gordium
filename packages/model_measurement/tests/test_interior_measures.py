@@ -140,7 +140,8 @@ def test_sashes_leaving_an_l_shape_give_no_value():
 def test_sashes_covering_it_all_leave_nothing():
     m, stopped, _ = opening_measures(sliding([{"left": 0, "right": 30, "bottom": 20, "top": 60}]))
     assert m == {"opening_net_clear_area": 0.0, "opening_net_clear_height": 0.0, "opening_net_clear_width": 0.0}
-    assert set(stopped) == {"opening_sill_height", "opening_at_grade"}
+    assert {k for k, why in stopped.items() if why != STOPS["not_measured_yet"]} == {"opening_sill_height",
+                                                                                       "opening_at_grade"}
 
 
 def test_a_sliding_window_with_no_sashes_given():
@@ -1663,6 +1664,7 @@ STOP_CASES = {
     "missing": _set(("doors", 0, "threshold_top"), _DELETE),
     "not_a_length": _set(("doors", 0, "threshold_top"), "low"),
     "too_far": _set(("doors", 0, "threshold_top"), 1e10),
+    "not_measured_yet": _with(base),
     "not_finite": _with(base, lambda d: d["doors"][0].update(threshold_top=-1.7e308, head_stop_bottom=1.7e308)),
     "not_a_point": _set(("doors", 0, "hinge_pin"), [0]),
     "negative": _set(("openings", 0, "hinged", "sash_thickness"), -1),
@@ -1782,3 +1784,19 @@ def test_the_doc_lists_every_reason_word_for_word():
                 if line.startswith("`") and " | " in line and line.split(" | ")[0].strip("`") in STOPS)
     listed = {k.strip("`"): v for k, v in rows.items()}
     assert listed == STOPS
+
+
+def test_every_measure_parts_yaml_lists_is_measured_or_has_a_reason():
+    """parts.yaml can list a measure before this code works it out (#96 added area wells, patio covers and more to
+    escape openings): it then gets the not_measured_yet reason, so a rule reading it needs review, never silence."""
+    from rule_format.parts import measure_kinds
+    got = measure(base())
+    for kind, parts in got["parts"].items():
+        if kind == "guard":
+            continue
+        for p in parts or []:
+            for name in measure_kinds(kind):
+                assert name in p["measures"] or name in p["not_measured"], (kind, p["id"], name)
+            for name, why in p["not_measured"].items():
+                if why == STOPS["not_measured_yet"]:
+                    assert name in measure_kinds(kind) and name not in p["measures"], (kind, name)

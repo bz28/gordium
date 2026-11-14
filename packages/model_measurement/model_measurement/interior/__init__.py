@@ -148,7 +148,22 @@ def measure(description) -> dict:
             flights = {g.get("stair"): Stop("not_read", what="stairs", key="stairs").reason for g in guards
                        if isinstance(g.get("stair"), str)}
         parts["guard"] = [_part(g, measure_guard(g, reader, flights)) for g in guards]
+    _not_measured_yet(parts)
     return out
+
+
+def _not_measured_yet(parts: dict) -> None:
+    """A measure parts.yaml lists for a kind that this code doesn't work out yet gets a reason, never silent
+    absence: a rule reading it then needs review. (parts.yaml can gain measures before the measuring code does.)
+    Guards are their own kind here, outside parts.yaml."""
+    from rule_format.parts import measure_kinds
+    for kind, got in parts.items():
+        if kind == "guard" or not got:
+            continue
+        for part in got:
+            for name in measure_kinds(kind):
+                if name not in part["measures"] and name not in part["not_measured"]:
+                    part["not_measured"][name] = Stop("not_measured_yet").reason
 
 
 def measure_file(path) -> dict:
