@@ -253,3 +253,26 @@ def test_a_value_the_piece_reads_two_ways_counts_only_as_the_quote_words_it(ctx)
     assert ok == [], ok
     got = problems(ctx, "handrail_height <= 34 and handrail_height_max <= 38", handrail, "handrail")
     assert any("needs <= 34 to hold, but the law reads >= 34" in p for p in got), got
+
+
+@pytest.mark.parametrize("check, source, kind", [
+    ("guard_opening_sphere > 4 + 0 * guard_height", SPHERE, "open_side"),     # a zero coefficient makes no formula
+    ("guard_opening_sphere >= 4 - 0 / guard_height", SPHERE, "open_side"),
+    ("stair_clear_width - stair_handrail_sides >= 4", {"file": BOOK, "page": 101, "lines": [32, 32], "quote": (
+        "R318.7.8 Handrails. Handrails shall be provided on not less than one side of each flight of stairs with four or "
+        "more risers.")}, "stair"),                                            # a count beside a length backs nothing
+])
+def test_a_limit_hidden_by_a_zero_term_or_a_count_measure_is_refused(ctx, check, source, kind):
+    assert problems(ctx, check, source, kind), check
+
+
+def test_an_ifs_test_measure_never_lends_its_unit(ctx):
+    risers = {"file": BOOK, "page": 100, "lines": [42, 46], "quote": (
+        "[NY] R318.7.5.1 Risers. The riser height shall be not more than 8 1/4 inches (209 mm). The riser height shall "
+        "be measured vertically between leading edges of the adjacent treads. The greatest riser height within any "
+        "flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm). Risers shall be vertical or "
+        "sloped from the underside of the nosing of the tread above at an angle not more than 30 degrees (0.51 rad) "
+        "from the vertical. At open risers, openings located more than 30 inches (762 mm), as measured vertically, to "
+        "the floor or grade below shall not permit the passage of a 4-inch-diameter (102 mm) sphere.")}
+    got = problems(ctx, "stair_riser_height <= (30 if stair_handrail_sides > 0 else 30)", risers, "stair", "applies_when")
+    assert got, "30 degrees backed a 30 in limit through an if's test measure"

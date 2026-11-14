@@ -23,7 +23,9 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    is a dropped "not"; x <= 15 - c reads c the other way round), and a term the law reads "none" is allowed only in
    a formula of the law's kind, a measure times a number (the 20 of "20 inches minus four-thirds of the riser"),
    never where a measure is only added or taken away (sphere - 4 > 0 is a limit, refused); where the direction
-   can't be told (a divisor, another function) it is checked by value only. Membership (in, not in) is equality
+   can't be told (a divisor, another function) it is checked by value only; inside a formula of the law's kind its
+   direction isn't checked either (its numbers are read "none": terms, not limits). Beside a length or an area a
+   count's reading never fits, even with a count measure on the same side. Membership (in, not in) is equality
    with each item. A range ("10-inch to 14-inch", read "between" on both) has its lower number read >= and its
    upper <=. A number the walk can't place is reported, never let through. A number in an if's test, which picks which limit applies
    ("27 if stair_handrail_sides > 1 else 31.5": where handrails are on both sides), is checked by value only: a
@@ -282,8 +284,10 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
         unit_classes = {UNIT_OF.get(units.get(m)) for m in measures} - {None}
         # a count, a degree or a percent ("any") backs a number with no unit of its own (a coefficient, a count),
         # never a length or an area
+        length = bool(unit_classes & {"in", "ft", "sf"})
         fits = [c for c in allowed if any(_close(v, number) for u, v in c["values"].items()
-                                          if u in unit_classes or (u == "any" and unit_classes <= {"count"}))]
+                                          if (u in unit_classes and not (length and u == "count"))
+                                          or (u == "any" and unit_classes <= {"count"}))]
         shown = f"{float(number):g}"
         if not fits:
             out.append(f"number {shown} in '{key}' isn't one of the second-reading numbers (text_verification.yaml) "
@@ -351,8 +355,8 @@ def _uses(tree) -> list[tuple]:
                     a, b = sides[i], sides[i + 1]
                     for side, other, mirrored in ((b, a, False), (a, b, True)):
                         # the measures it is compared with: the other side's, and its own side's (8.25 - riser < 0)
-                        names = {n.id for n in ast.walk(other) if isinstance(n, ast.Name)} \
-                            | {n.id for n in ast.walk(side) if isinstance(n, ast.Name) and n.id not in ("min", "max")}
+                        # (an if's test inside a side only picks a limit: its measures say nothing of the unit)
+                        names = _compared_names(other) | _compared_names(side)
                         for number, grows, coefficient in _numbers(side):
                             needed = None
                             if sign in ("==", "!=") and not selector:
@@ -454,8 +458,26 @@ def _formula(side) -> bool:
     """A side that is a formula of the law's kind: a measure multiplied or divided by a number (20 - 4/3 * riser), where
     a number read "none" is a term, not a limit. A number with a measure only added or taken away (sphere - 4 > 0) is
     still a limit and is refused as one."""
-    return any(isinstance(n, ast.BinOp) and isinstance(n.op, (ast.Mult, ast.Div)) and _has_name(n)
-               for n in ast.walk(side))
+    def scaled(n):                  # a measure times (or over) a number that isn't 0: 4/3 * riser, never 0 * riser
+        if not (isinstance(n, ast.BinOp) and isinstance(n.op, (ast.Mult, ast.Div))):
+            return False
+        for a, b in ((n.left, n.right), (n.right, n.left)):
+            v = _fold(a)
+            if v is not None and v != 0 and _has_name(b):
+                return True
+        return False
+    return any(scaled(n) for n in ast.walk(side))
+
+
+def _compared_names(node) -> set[str]:
+    """The measure names in an expression, leaving out those inside a condition (an if's test) and function names."""
+    if isinstance(node, (ast.Compare, ast.BoolOp)) or (isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not)):
+        return set()
+    if isinstance(node, ast.Name):
+        return {node.id}
+    if isinstance(node, ast.Call):
+        return {n for a in node.args for n in _compared_names(a)}
+    return {n for c in ast.iter_child_nodes(node) for n in _compared_names(c)}
 
 
 def _flip(grows):
