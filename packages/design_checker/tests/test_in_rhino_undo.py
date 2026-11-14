@@ -7,9 +7,8 @@ nothing while no Rhino window is on screen (undo_steps_in_rhino's "undone" claim
 Run in CI, no Rhino."""
 import ast
 
-from rule_format.rulebook import REPO
+from host_source import host_scripts, host_tree
 
-SCRIPTS = REPO / "apps/rhino_plugin/tests"
 NAMES = {"Undo", "Redo"}
 
 
@@ -37,14 +36,14 @@ def _run_script_undo_calls(source):
 
 
 def test_no_in_rhino_script_undoes_with_rhinodoc_undo():
-    scripts = sorted(SCRIPTS.glob("*_in_rhino.py"))
+    scripts = host_scripts("rhino")
     assert scripts
     bad = {p.name: lines for p in scripts if (lines := _doc_undo_calls(p.read_text(encoding="utf-8")))}
     assert not bad, bad
 
 
 def test_no_in_rhino_script_undoes_with_run_script():
-    scripts = sorted(SCRIPTS.glob("*_in_rhino*.py"))
+    scripts = sorted(p for p in host_tree("rhino") if "_in_rhino" in p.name)
     bad = {p.name: lines for p in scripts if (lines := _run_script_undo_calls(p.read_text(encoding="utf-8")))}
     assert not bad, bad
 
