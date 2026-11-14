@@ -17,8 +17,10 @@ from pathlib import Path
 REPO = Path(__file__).resolve().parents[1]
 PURPOSES = ("lint", "wiring")
 
-# part name -> file, per host. "plugin" is the host's main file, "ui" its windows; "logic" is the host-neutral
-# helper module the host calls (packages/design_checker/design_checker/rhino_logic.py).
+# part name -> file, per host. "plugin" is the host's main file, "ui" its windows; "logic" is the helper module the
+# host calls (packages/design_checker/design_checker/rhino_logic.py), whose host-neutral half now lives in host_core/
+# (CORE_DIR, shared by every host): logic_files() and logic_text() read both, as the one module they were.
+CORE_DIR = REPO / "packages/design_checker/design_checker/host_core"
 _RHINO_DIR = REPO / "apps/rhino_plugin"
 HOSTS = {
     "rhino": {
@@ -79,6 +81,23 @@ def host_command_files(host):
 def host_path(host, part):
     """The path of one named part ("plugin", "ui", "logic", ...), for a test that needs the file, not its text."""
     return _host(host)["parts"][part]
+
+
+def core_files():
+    """host_core's modules (facts, streets, lookup, start_box, place...), sorted: the code every host calls."""
+    return sorted(CORE_DIR.glob("*.py"))
+
+
+def logic_files(host):
+    """The host's logic module and the host_core modules it re-exports: everything `logic.X` can name."""
+    return [host_path(host, "logic"), *core_files()]
+
+
+def logic_text(host, *, purpose):
+    """The text of logic_files(host), one after another: what the logic module's own text was before host_core
+    (a wiring check that a line or name is there reads this, so a line that moved is still found)."""
+    _check(purpose)
+    return "\n".join(p.read_text(encoding="utf-8") for p in logic_files(host))
 
 
 def host_text(host, part, *, purpose):

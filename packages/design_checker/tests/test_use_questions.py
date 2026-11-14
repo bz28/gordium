@@ -10,7 +10,7 @@ from design_checker import present
 from design_checker import rhino_logic as logic
 from design_checker.check import follow_up_facts, implied_for, options, use_choices
 from rule_format.rulebook import REPO, load, outcome
-from host_source import host_text
+from host_source import host_text, host_text_of, logic_files
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 NAMES = {"one_family_detached": "One-family dwelling, detached", "one_family_attached": "One-family dwelling, attached",
@@ -319,9 +319,12 @@ def test_rhino_logic_names_each_thing_once():
     build; here in #37's merge-3 carry). Every top-level name is defined once."""
     import ast
     import collections
-    tree = ast.parse(host_text("rhino", "logic", purpose="wiring"))
-    names = [n.name for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
-    names += [t.id for n in tree.body if isinstance(n, ast.Assign) for t in n.targets if isinstance(t, ast.Name)]
+    names = []          # rhino_logic and the host_core modules it re-exports: one name, one definition, in all of them
+    for path in logic_files("rhino"):
+        tree = ast.parse(host_text_of(path, purpose="wiring"))
+        names += [n.name for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
+        names += [t.id for n in tree.body if isinstance(n, ast.Assign) for t in n.targets
+                  if isinstance(t, ast.Name) and t.id != "__all__"]
     assert [n for n, k in collections.Counter(names).items() if k > 1] == []
     assert logic.NOT_ANSWERED == "Not answered"
     assert logic._listed({"district_uses": {"R-1b": [1]}}, "R-1b") == [1] and logic._joined(["a", "b"]) == "a and b"

@@ -117,7 +117,8 @@ def test_same_design_same_facts_same_day_same_answer_and_the_day_is_the_only_clo
     """The checker never reads the clock: with the place's day function made to fail, the check still runs, and the
     answer moves only with the day the host gives."""
     from design_checker import rhino_logic
-    monkeypatch.setattr(rhino_logic, "city_day", lambda *a, **k: pytest.fail("the checker read the clock"))
+    from moved_names import patch_moved              # city_day lives in host_core/start_box.py since the move
+    patch_moved(monkeypatch, rhino_logic, "city_day", lambda *a, **k: pytest.fail("the checker read the clock"))
     facts = facts_found_on("2026-08-14")
     a, b = (check_site(SITE, facts, today=TODAY)["view"] for _ in range(2))
     assert (a["state"], a["summary"], a["header"]["sources"]) == (b["state"], b["summary"], b["header"]["sources"])

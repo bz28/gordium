@@ -65,6 +65,7 @@ def stand_ins(text):
 
 def test_every_stand_in_names_a_function_the_plugin_has():
     defined = {"g": _defined(host_path("rhino", "plugin")), "g.ui": _defined(host_path("rhino", "ui")),
+               # rhino_logic's own names only: one it re-exports from host_core can't be replaced on it (it refuses)
                "g.logic": _defined(host_path("rhino", "logic"))}
     stale, seen = [], 0
     for script in host_scripts("rhino"):

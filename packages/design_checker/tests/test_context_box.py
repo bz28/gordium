@@ -19,7 +19,7 @@ from design_checker.lookup_box import box_payload
 from model_measurement.read_3dm import read_site
 from site_lookup.adapters.ithaca_city.lookup import lookup
 from site_lookup.adapters.ithaca_city.sources import ENDPOINTS
-from host_source import host_doc, host_script, host_text
+from host_source import host_doc, host_script, host_text, logic_text
 
 REPO = Path(__file__).parents[3]
 spec = importlib.util.spec_from_file_location("site_lookup_t", REPO / "packages/site_lookup/tests/test_lookup.py")
@@ -731,7 +731,7 @@ def test_no_reader_text_still_says_the_footprints_are_never_saved():
         "packages/site_lookup/site_lookup/adapters/ithaca_city/context.py",
         "packages/design_checker/design_checker/context_box.py", "packages/site_lookup/tests/test_context.py")}
     texts["plugin"] = host_text("rhino", "plugin", purpose="wiring")
-    texts["logic"] = host_text("rhino", "logic", purpose="wiring")
+    texts["logic"] = logic_text("rhino", purpose="wiring")
     for stale in ("only drawn on screen by the overlay, never saved", "the building footprints, never saved",
                   "nothing of them is in any fixture", "its footprints (never saved) fetched again",
                   "the footprints are never saved", "the footprints, never saved", "until Ben decides"):
@@ -810,7 +810,7 @@ def test_every_state_of_the_context_has_one_definition():
     assert not re.search(r"loaded = \(STATE", RHINO)
     assert "logic.guides_of(STATE.get(\"context_guides\"), doc.RuntimeSerialNumber)" in RHINO     # _clear_context
     assert 'get("frame") ==' not in RHINO and 'get("frame") !=' not in RHINO and "same = " not in RHINO
-    src = host_text("rhino", "logic", purpose="wiring")
+    src = logic_text("rhino", purpose="wiring")
     rest = src.replace(inspect.getsource(logic.is_stored), "")
     assert '"store") == "raw"' not in rest and '"store") != "raw"' not in rest and '["store"] == "raw"' not in rest
     box = inspect.getsource(cb)

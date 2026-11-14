@@ -3,7 +3,7 @@ start-box row, command and command-line prompt in the code is in the guide, and 
 the code, so a screen change without a guide change fails here."""
 import re
 
-from host_source import host_command_files, host_dir, host_doc, host_text, host_text_of
+from host_source import host_command_files, host_dir, host_doc, host_text, host_text_of, logic_text
 
 PLUGIN = host_dir("rhino")
 GUIDE = " ".join(host_doc("rhino", "GUIDE.md", purpose="wiring").split())      # (line breaks are not part of a name)
@@ -14,7 +14,7 @@ RHINO_ALL = host_text("rhino", "plugin", purpose="wiring")
 _a = RHINO_ALL.index("def change_facts(")
 _b = RHINO_ALL.index("\ndef ", RHINO_ALL.index("def _change_facts(") + 1)
 RHINO = RHINO_ALL[:_a] + RHINO_ALL[_b:]
-LOGIC = host_text("rhino", "logic", purpose="wiring")
+LOGIC = logic_text("rhino", purpose="wiring")
 # the code's texts as shown: the source, and each text rhino_logic builds from its place's settings (place.json:
 # "Is this lot in the City of Ithaca?")
 from design_checker import rhino_logic as _logic  # noqa: E402
