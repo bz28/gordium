@@ -36,7 +36,7 @@ FORMAT_KEYS = {
 }
 NOT_VALUES = {"id", "name", "cite", "absent"}
 # parts of the house the answer key works that the interior description has no entry for
-UNDESCRIBED = {"main stair", "basement stair", "bridge steps", "hallways"}
+UNDESCRIBED = {"main stair", "basement stair", "bridge steps", "hallways", "garage steps"}
 
 
 def required(key, part):
@@ -138,8 +138,9 @@ def test_the_answer_key_is_worked_for_every_part(name):
         assert all(p in ids | UNDESCRIBED for p in area["parts"]), area["id"]
         if area["outcome"] != "needs_review":         # a reading rests on assumptions: never under a verdict
             assert "reading" not in area, area["id"]
-    got = measure_file(REAL / name / "house.yaml")["parts"]["emergency_escape_opening"] or []
-    unsized = {p["id"] for p in got if not p["measures"]}
+    measured = measure_file(REAL / name / "house.yaml")
+    got = measured["parts"]["emergency_escape_opening"] or []
+    unsized = {p["id"] for p in got if not p["measures"]} | {n["id"] for n in measured["not_checked"]}
     sized_rooms = {o["room"] for o in house["openings"] if o["id"] in {p["id"] for p in got} - unsized}
     unsized |= {r["id"] for r in house["rooms"] if r["sleeping"]} - sized_rooms
     for area in key["areas"]:   # an escape rule over an opening the code can't size (or its room) never complies

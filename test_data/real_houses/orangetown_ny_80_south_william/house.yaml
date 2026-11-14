@@ -48,7 +48,7 @@ rooms:
     ceiling_height: 96
     cite:
       sleeping: "A-3 2nd floor plan, room label 'BEDRM 2'; A-5 window schedule row 'BEDROOM 2 128 SQ. FT.'"
-      floor: "A-3 2nd floor plan, inside dimensions 11'-0\" by 11'-8\""
+      floor: "A-3 2nd floor plan, inside dimensions 11'-0\" by 11'-8\" (the main rectangle). The entry alcove between the bath wall and the closet, where the door opens, has no dimension: left out, so the area is understated, never overstated"
       floor_elevation: "the datum: the second floor's finished floor"
       ceiling_height: "A-4 rear elevation, 'SEC. FLR' to 'CLG.' 8'-0\""
   - id: bed3

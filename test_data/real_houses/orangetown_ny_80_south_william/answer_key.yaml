@@ -40,8 +40,10 @@ areas:
     quote: "not less than 7 feet (2134 mm) in any horizontal dimension"
     page: 74
     parts: [master, bed2, bed3, bed4]
-    working: "smallest inside dimension of any bedroom: 11'-0\" (bedroom 2) = 132 in >= 84 in"
-    outcome: complies
+    drawings: "A-3: each bedroom's main rectangle is dimensioned (smallest side: bedroom 2's 11'-0\"). Bedroom 2 also has an entry alcove between its bath wall and its closet, where its 2'-8\" door opens, with no dimension (it scales to about 44 in by about 2 ft; the drawings say 'DO NOT SCALE PLANS !'); bedroom 4 has a window recess 1'-4\" deep (outside dimension)."
+    working: "Main rectangles: smallest side 11'-0\" = 132 in >= 84 in. Read literally ('any horizontal dimension'), bedroom 2's alcove (about 44 in) and bedroom 4's recess (16 in) are under 84 in. R312.2's only exception is kitchens; R312.3 only leaves low-ceiling parts out of the area. So the law doesn't settle alcoves."
+    outcome: needs_review
+    reading: "complies if R312.2 is read, as is common practice, as applying to the part of the room that provides the required 70 sf (every main rectangle is at least 11'-0\" each way), not to a shallow entry alcove or window recess open to it"
     measured: "not a measure yet"
 
   - id: bedroom_ceiling_height
@@ -318,10 +320,20 @@ areas:
     quote: "The width of a hallway shall be not less than 3 feet (914 mm)."
     page: 77
     parts: [hallways]
-    drawings: "A-2 main floor 'HALL' beside the stair '3'-4\"'; A-3 second floor 'HALLWAY' '5'-0\"', the passage east of the stair '3'-10\"'. A-1: dimensions to the nearest inch, before gypsum board"
+    drawings: "A-2 main floor 'HALL' beside the stair '3'-4\"', the mudroom by the laundry '4'-0\"'; A-3 second floor 'HALLWAY' '5'-0\"', the passage east of the stair '3'-10\"'. A-1: dimensions to the nearest inch, before gypsum board"
     working: "narrowest: 40 in, less 1/2 in gypsum board each side = 39 in, and at worst 38.5 in with the inch rounding: >= 36"
     outcome: complies
     measured: "not a measure yet"
+
+  - id: garage_steps
+    rule: R318.7, R318.7.5.1, R318.7.5.2, R318.7.8
+    quote: "Where required by this code or provided, stairways shall comply with this section."
+    page: 77
+    parts: [garage steps]
+    drawings: "A-2: from the mudroom door, a landing '3'-8\"' by '3'-4\"', then three treads marked '9\"' down into the garage, 'CLOSED RISERS', 'RAILING AS PER RES. CODE', 'DN'. No rise is given (the garage floor's drop isn't dimensioned)."
+    working: "Not on the way out (R318.1: the path to the exit door may not require 'travel through a garage'), but provided, so R318.7 applies. Treads 9 in: exactly the 9 in minimum, rounded to the nearest inch (A-1), so not established. Risers: no rise given. Three treads means about four risers, so a handrail is required (R318.7.8); the railing is noted, not detailed."
+    outcome: needs_review
+    measured: "stairs aren't read"
 
   - id: stair_handrail
     rule: R318.7.8, R320.2
