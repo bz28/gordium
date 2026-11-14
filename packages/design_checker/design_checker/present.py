@@ -1627,7 +1627,10 @@ def state(items: list[dict]) -> str:
         if any(i["status"] == st for i in counted):
             return st
     # a use detail left unanswered is not a problem with the building, but it is not a pass either: never "complies"
-    return REVIEW if any(i.get("use_detail") for i in items) else COMPLIES
+    if any(i.get("use_detail") for i in items):
+        return REVIEW
+    # nothing actually checked (no counted item, or every one "not checked"): never "complies" (principle 4)
+    return COMPLIES if any(i["status"] == COMPLIES for i in counted) else REVIEW
 
 
 from model_measurement.stops import stop as _stop  # noqa: E402
