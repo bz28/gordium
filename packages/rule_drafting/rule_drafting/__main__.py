@@ -153,10 +153,18 @@ def owned_rules_approved(i: Inputs, log: dict, unit_id: str) -> bool:
 
 
 def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
-    """Replace this unit's earlier drafts with the new ones, and record what happened."""
+    """Replace this unit's earlier drafts with the new ones, and record what happened. The AI's rules are also kept
+    as drafted (records/as_drafted/<district>.yaml), so a change made after the draft (a rule's `revised`) is
+    always told apart from the AI's own answer; a re-draft replaces a revised rule, and the log says which."""
     old = set(log["units"].get(unit_id, {}).get("rules", []))
     books = {p.stem: load(p) for p in i.drafted.glob("*.yaml")}
+    as_drafted_folder = i.records / "as_drafted"
+    as_drafted = {p.stem: load(p) for p in as_drafted_folder.glob("*.yaml")}
+    replaced = sorted(r["id"] for book in books.values() for r in book.get("rules", [])
+                      if r["id"] in old and r.get("revised"))
     for district, book in books.items():
+        book["rules"] = [r for r in book.get("rules", []) if r["id"] not in old]
+    for district, book in as_drafted.items():
         book["rules"] = [r for r in book.get("rules", []) if r["id"] not in old]
     new_ids = []
     for district, rules in result["rules"].items():
@@ -168,16 +176,23 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
                     {"rule": rule["id"], "why": "the id is already drafted by another unit; not saved"})
                 continue
             book["rules"].append(rule)
+            as_drafted.setdefault(district, {"district": district, "rules": []})["rules"].append(rule)
             taken.add(rule["id"])
             new_ids.append(rule["id"])
     i.drafted.mkdir(parents=True, exist_ok=True)
-    for district, book in books.items():
-        path = rulebook_path(i, district)
-        if book["rules"]:
-            path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
-        elif path.exists():
-            path.unlink()
+    as_drafted_folder.mkdir(parents=True, exist_ok=True)
+    for folder, saved in ((i.drafted, books), (as_drafted_folder, as_drafted)):
+        for district, book in saved.items():
+            path = folder / f"{district}.yaml"
+            if book["rules"]:
+                path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
+            elif path.exists():
+                path.unlink()
     entry = {"rules": new_ids, "unresolved": result.get("unresolved", []), "problems": result.get("problems", [])}
+    if replaced:                  # changes made after the AI's draft, gone with the re-draft: a person re-applies them
+        entry["revisions_replaced"] = replaced
+        print(f"  {unit_id}: re-drafted rules that had been revised after the AI ({', '.join(replaced)}): "
+              "their revisions are gone; re-apply them")
     if result.get("reason"):
         entry["reason"] = result["reason"]
     if result.get("failed"):

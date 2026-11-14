@@ -102,7 +102,7 @@ python -m rule_drafting draft --limit 10 --yes      # drafts them; --only UNIT..
 python -m rule_drafting cost                        # what the recorded runs actually cost
 ```
 
-Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $20.00).
+Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $5.00).
 The budget is a hard cap kept in `~/.config/gordium/rule_drafting_ledger.json`, separate from labeling's,
 with the same rules: a run whose estimate exceeds what's left is refused, and no call is sent whose worst
 case could cross the cap. Drafting never runs in CI; the tests use a fake client.
@@ -123,4 +123,7 @@ or a section above it (Appendix BO left out). Drafts go to `<state folder>/5_bui
   `python -m rule_format` like any rulebook).
 - `5_zoning_rules/drafted/records/`: `drafting_log.yaml` (per unit: rules, reason, what goes to a person),
   `proposed_measures.yaml`, and `runs/` (every AI call: prompt and input fingerprints, the raw answer,
-  tokens, cost). Re-drafting a unit replaces its drafts, never an approved one.
+  tokens, cost), and `as_drafted/` (the AI's own rules, as the run saved them). A rule changed after the
+  draft records each change in its `revised` (field, who, when, why); a test holds that it differs from its
+  `as_drafted/` copy only there. Re-drafting a unit replaces its drafts, never an approved one; a revised rule
+  it replaces is named in the log (`revisions_replaced`), for a person to re-apply.
