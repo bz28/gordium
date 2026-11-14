@@ -132,7 +132,10 @@ class Model:
         t = self.type_of(element)
         for s in sets:
             for level, holders in enumerate(self.levels(element)):
-                got = self.find_all(element, lambda n, s=s: n == s, name, holders)
+                # review round 18: several names for one property (a tuple) are one statement per level, so a
+                # type's under one name never beats the element's own under the other
+                got = [g for n in ((name,) if isinstance(name, str) else name)
+                       for g in self.find_all(element, lambda x, s=s: x == s, n, holders)]
                 if not got:
                     continue
                 # review round 7: a value inherited from the type (every element of it) says so

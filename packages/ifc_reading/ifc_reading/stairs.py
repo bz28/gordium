@@ -30,8 +30,8 @@ def read_flight(model, flight) -> dict:
                     v, w, bad = model.inherited(flight, lambda n: n == "Pset_StairFlightCommon", p, "LENGTHUNIT")
                     if bad:
                         unread[key] = bad
-                else:
-                    v, w = model.prop(flight, ["Pset_StairFlightCommon"], p)
+                else:                            # every name at once (review round 18): the flight's own wins
+                    v, w = model.prop(flight, ["Pset_StairFlightCommon"], props)
                     if v is not None and not is_number(v):     # review round 9: never dropped without a reason
                         unread[key] = f"{w} is {v!r}, not a number"
                 if is_number(v):

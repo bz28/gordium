@@ -1077,3 +1077,31 @@ def test_a_door_and_its_type_must_agree_on_how_it_opens(build, tmp_path, typed, 
     if read_as is None:
         assert "states SINGLE_SWING_LEFT but its type states DOUBLE_DOOR" in door["not_given"]["operation"]
         assert "operation" not in desc["openings"][0]
+
+
+@pytest.mark.parametrize("own, typed, risers", [(16, 12, 16), (None, 12, 12)])
+def test_a_flights_own_riser_count_beats_its_types_under_either_name(tmp_path, own, typed, risers):
+    """Review round 18: the riser count's two names were tried one at a time, each through both levels, so a type's
+    NumberOfRiser (12) beat the flight's own NumberOfRisers (16)."""
+    import ifcopenshell
+    import ifcopenshell.guid as guid
+    f = ifcopenshell.file(schema="IFC4")
+    units = [f.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Name="METRE"),
+             f.create_entity("IfcSIUnit", UnitType="PLANEANGLEUNIT", Name="RADIAN")]
+    f.create_entity("IfcProject", GlobalId=guid.new(), Name="P",
+                    UnitsInContext=f.create_entity("IfcUnitAssignment", Units=units))
+
+    def pset(name, value):
+        return f.create_entity("IfcPropertySet", GlobalId=guid.new(), Name="Pset_StairFlightCommon", HasProperties=[
+            f.create_entity("IfcPropertySingleValue", Name=name, NominalValue=f.create_entity("IfcCountMeasure", value))])
+    flight = f.create_entity("IfcStairFlight", GlobalId=guid.new(), Name="flight")
+    if own is not None:
+        f.create_entity("IfcRelDefinesByProperties", GlobalId=guid.new(), RelatedObjects=[flight],
+                        RelatingPropertyDefinition=pset("NumberOfRisers", own))
+    t = f.create_entity("IfcStairFlightType", GlobalId=guid.new(), Name="T", PredefinedType="STRAIGHT",
+                        HasPropertySets=[pset("NumberOfRiser", typed)])
+    f.create_entity("IfcRelDefinesByType", GlobalId=guid.new(), RelatedObjects=[flight], RelatingType=t)
+    f.write(str(tmp_path / "s.ifc"))
+    got = read(tmp_path / "s.ifc")["source"]["stair_flights"][0]
+    assert got["risers"] == risers
+    assert ("from its type" in got["source"]["risers"]) == (own is None)
