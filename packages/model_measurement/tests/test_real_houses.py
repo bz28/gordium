@@ -34,6 +34,23 @@ FORMAT_KEYS = {
     "guards": {"walking_surface", "top", "extent", "members", "stair", "top_line"},
 }
 NOT_VALUES = {"id", "name", "cite", "absent"}
+# parts of the house the answer key works that the interior description has no entry for
+UNDESCRIBED = {"main stair", "basement stair", "bridge steps", "hallways"}
+
+
+def required(key, part):
+    """The format keys a part must either give or list as absent with a reason: what measuring it reads."""
+    if key == "rooms":
+        return {"floor", "floor_elevation", "ceiling_height"} if part.get("sleeping") else set()
+    if key == "openings":
+        by_kind = {"casement": {"hinged"}, "side_hinged_door": {"hinged"}, "fixed": set()}
+        return {"frame", "stated_clear", "ground_outside"} | by_kind.get(part.get("operation"), {"sashes"})
+    if key == "doors":
+        return FORMAT_KEYS["doors"] - {"exit"}
+    if key == "guards":
+        return {"stair", "top_line", "members"} if "stair" in part else {"walking_surface", "top", "extent",
+                                                                          "members"}
+    return FORMAT_KEYS[key]
 OUTCOMES = {"complies", "fails", "needs_review"}
 
 
@@ -57,6 +74,8 @@ def test_every_value_is_cited_and_every_gap_has_a_reason(name):
             assert given == set(cite), (part["id"], "cited but not given or given but not cited",
                                         given ^ set(cite))
             assert set(absent) <= allowed and not set(absent) & given, (part["id"], set(absent))
+            missing = required(key, part) - given - set(absent)
+            assert not missing, (part["id"], "neither given nor absent with a reason", missing)
             assert all(isinstance(v, str) and v.strip() for v in [*cite.values(), *absent.values()]), part["id"]
 
 
@@ -112,9 +131,9 @@ def test_the_answer_key_is_worked_for_every_part(name):
         assert area["outcome"] in OUTCOMES, area["id"]
         for field in ("rule", "quote", "working", "measured"):
             assert isinstance(area.get(field), str) and area[field].strip(), (area["id"], field)
-        assert all(p in ids or p.endswith("stair") for p in area["parts"]), area["id"]
-        if area["outcome"] != "needs_review":
-            assert "reading" not in area or area["outcome"] == "complies", area["id"]
+        assert all(p in ids | UNDESCRIBED for p in area["parts"]), area["id"]
+        if area["outcome"] != "needs_review":         # a reading rests on assumptions: never under a verdict
+            assert "reading" not in area, area["id"]
     worked = {p for a in key["areas"] for p in a["parts"]}
     escape = {o["id"] for o in house["openings"] if o["escape"]}
     assert escape <= worked                       # every marked escape opening is worked in the key

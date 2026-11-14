@@ -16,8 +16,9 @@
 # dimensioned (A-4 gives floor-to-ceiling heights only), so the main floor and basement have no elevation on this
 # datum and nothing on them is given one. Plan (x, y): each room's outline is drawn from its own corner, from the
 # room's inside dimensions on the plan (only its area is measured); the rooms' places in the house are not
-# transcribed. Inside dimensions on these plans run to the wall lines drawn; whether those are framing or finished
-# faces isn't stated (the finished floor is at most a few inches smaller each way; every bedroom is over 120 sf).
+# transcribed. The A-1 floor plan notes: "DIMENSIONS ARE TO NEAREST INCH/ ACTUAL ROOM SIZES VARY DUE TO GYPSUM
+# BOARD" (the framing notes say the same): the dimensions are rounded to the inch and the finished rooms are a
+# little smaller (1/2 in gypsum board each side, A-5 section). Every bedroom is over 120 sf, so it can't matter.
 format: gordium.interior/1
 units: in
 source:
@@ -95,8 +96,10 @@ rooms:
 openings:
   # Every escape opening the drawings mark. What the drawings give for each: the unit's size code (e.g. 3046: by
   # common naming 3'-0" by 4'-6", but no maker or product is named, the schedule is "for design intent only", A-1),
-  # the operation, and the header height (A-1 door & window notes: "ALL HEADER HEIGHTS TO BE 6'-9\" ABOVE THE
-  # FINISHED FLOOR"; A-4 dimensions 6'-9"). They give no frame clear opening, no sash sizes, no maker's net clear
+  # the operation, and the header height, approximately (A-1 door & window notes: "ALL HEADER HEIGHTS TO BE 6'-9\"
+  # ABOVE THE FINISHED FLOOR, UNLESS NOTED OTHERWISE."; A-1 window & door notes: "ALL WINDOW HEADERS TO BE FRAMED AT
+  # 6'-9\" +/- ABOVE FINISHED FLR FOR 8 FT. CEILING HEIGHTS": the framed rough-opening header, with a tolerance;
+  # A-4 dimensions 6'-9"). They give no frame clear opening, no sash sizes, no maker's net clear
   # opening, and no sill height: so each window's clear opening is absent, and with it the sill height and
   # grade-floor reading (the measuring code needs the clear opening's bottom for both).
   - id: m1
@@ -216,7 +219,7 @@ openings:
     operation: casement
     cite: &basement_cw
       room: "A-2 basement plan: in the foundation wall of the unfinished basement (one north, one west)"
-      escape: "A-2 basement plan 'CW14' in a 'BOWMAN KEMP AREAWAY ... PROVIDE FALL PROTECTION'; A-5 'WALL SECTION THRU. WINDOW WELL' labels the window in the well 'EGRESS' and shows an escape ladder"
+      escape: "A-2 basement plan 'CW14' in a 'BOWMAN KEMP AREAWAY ... PROVIDE FALL PROTECTION' ('SEE DETAIL THIS SHEET': A-2's own escape-opening detail gives only the minimums); A-5 'WALL SECTION THRU. WINDOW WELL' labels the window in the well 'EGRESS' and shows an escape ladder"
       operation: "A-2 basement plan 'CW14' (C: casement, the plans' own naming, as 'C15'). The A-5 window-well details instead show a 'BOMAN KEMP 4040 EASY-BUCK' window with 'NET WIDTH OF PATH = 21 3/4\"' and 'NET HEIGHT = 45 3/8\"': a different window, so its clear opening isn't used here"
     absent: &basement_absent
       frame: "no frame clear opening for the CW14; the A-5 detail's 4040 is a different window"
@@ -234,8 +237,8 @@ openings:
 
 # stairs: not given (not read). Every stair rule needs review. The drawings give: main stair 'UP 16R' (A-2) but
 # 'DN 15R' (A-3), 3'-4" wide (A-2, A-3), its stairwell opening 9'-8" long (A-3), a '10'-0"' dimension along it on
-# A-2 whose ends aren't clear; basement stair 'DN 13R' (A-2); the A-2 'TYPICAL INT. STAIR DETAIL': riser '7 1/2"'
-# marked 'VERIFY', tread '9" MIN', nosing '1 1/8" ±', top rail '3'-0"', 'MINIMUM 6'-9" HEADROOM AS PER 2020 NYS
+# A-2 whose ends aren't clear; basement stair 'DN 13R' (A-2); the A-2 'TYPICAL INT. STAIR DETAIL' (a typical
+# detail, 1/2"=1'-0"): riser '7 1/2"', tread '9" MIN', nosing '1 1/8" ±', top rail '3'-0"', 'MINIMUM 6'-9" HEADROOM AS PER 2020 NYS
 # CODE'. No floor-to-floor height is dimensioned, so no riser height or nosing elevation can be placed, and no tread
 # depth is dimensioned: the nosings the format needs can't be written without inventing them.
 
@@ -245,7 +248,7 @@ doors:
     exit: true
     operation: side_hinged
     cite:
-      exit: "the only side-hinged door from the house straight outside: A-2 main floor plan, entry door '3'-0\"x8'-0\"' to the covered porch. The rear doors are sliding ('6061 SL DR', A-2; 'SLIDING DR 6061', A-5 schedule) and the other door leads into the garage (R318.1: egress is 'without requiring travel through a garage'). No sheet names the required egress door"
+      exit: "the only side-hinged door from the house straight outside: A-2 main floor plan, entry door '3'-0\"x8'-0\"' to the covered porch. The rear doors are sliding ('60611 SL DR', A-2; 'SLIDING DR 60611', A-5 schedule) and the other door leads into the garage (R318.1: egress is 'without requiring travel through a garage'). No sheet names the required egress door"
       operation: "A-2 main floor plan, drawn with a swing arc"
     absent:
       hinge_side: "readable from the swing arc, but not needed without the stops and the leaf (left out rather than half-given)"
@@ -258,8 +261,8 @@ doors:
 guards:
   # The railings drawn around the open stairwell and the 'OPEN TO BELOW' areas on the second floor (A-3). Each is
   # labelled '36" HIGH RAILING' (A-3; A-5 section: '36" HIGH RAILING AS PER 2020 NYS RESIDENTIAL CODE'). Balusters
-  # and rails aren't drawn in elevation or dimensioned anywhere except the typical stair detail (A-2), which gives
-  # no spacing; A-1 stair & railing notes: openings in 'OPEN RAILINGS AND GUARDS SHALL NOT BE GREATER THAN 4"'.
+  # and top rails are drawn (A-5 section, A-2 typical stair detail) but not dimensioned: no spacing, rail or
+  # baluster sizes, or post layout; A-1 stair & railing notes: openings in 'OPEN RAILINGS AND GUARDS SHALL NOT BE GREATER THAN 4"'.
   - id: g_hall
     name: Hallway railing across the north end of the stairwell
     walking_surface: 0
@@ -270,7 +273,7 @@ guards:
       top: "A-3 2nd floor plan, '36\" HIGH RAILING'"
       extent: "A-3 2nd floor plan, from the hall's west wall to the post at the stair's east side: '3'-4\"' (open to below) + '3'-4\"' (stair)"
     absent: &no_members
-      members: "rails, balusters and posts aren't drawn in elevation or dimensioned"
+      members: "drawn (A-5 section, A-2 typical stair detail) but not dimensioned: no baluster spacing, rail or baluster sizes, or post layout"
   - id: g_bridge_n
     name: Bridge railing, north side (over the open-to-below)
     walking_surface: -7.5
@@ -308,3 +311,4 @@ guards:
       stair: "A-3 2nd floor plan, railing drawn along the stair's west side over 'OPEN TO BELOW'; A-5 building section '36\" HIGH RAILING AS PER 2020 NYS RESIDENTIAL CODE (SEE TYPICAL STAIR DETAIL)'"
     absent:
       top_line: "not placeable: the stair's nosings aren't given (see stairs); the A-2 stair detail's '3'-0\"' is dimensioned at the top floor, not along the rake"
+      members: "drawn (A-5 section, A-2 typical stair detail) but not dimensioned: no baluster spacing, rail or baluster sizes"

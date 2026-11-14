@@ -20,7 +20,7 @@ parts:
       measures:
         sleeping_room_floor_area: 201.444444   # 196 x 148 = 29008 / 144
       more: {floor_area_drawn: 201.444444, least_ceiling_height: 96.0}
-  # every escape window: no frame and no maker's clear opening -> "the opening's frame isn't given" for all five
+  # every escape window: no frame and no maker's clear opening -> "the opening's frame isn't given" for all five measures
   emergency_escape_opening:
     m1:  &no_frame
       within: master
