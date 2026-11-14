@@ -56,7 +56,10 @@ a slip is caught rather than a bedroom missed. A flag that is there but isn't tr
 
 **Units of a stated number.** A quantity or property may carry its own unit (IFC lets each `IfcQuantityArea`,
 `IfcQuantityLength` or property value name one); it is converted by that unit, otherwise by the file's. One stated
-in a unit of the wrong kind (an area in a length unit) is left out, with the reason.
+in a unit of the wrong kind (an area in a length unit) is left out, with the reason. A quantity stated twice (an
+export holding both IFC4's `Qto_SpaceBaseQuantities` and IFC2x3's `BaseQuantities`) is read only if both agree,
+never the first one found. A flag stored as something other than a single value (an enumerated or list value)
+is never taken as absent: its part is left unknown, with what was found.
 
 **Why the floor outline needs the net floor area.** The format wants the finished floor's outline, inside the
 finished walls. An IFC space can be drawn to the rough wall or the wall's centre; IFC4's `NetFloorArea` is the

@@ -39,18 +39,22 @@ class Model:
             return []
 
     # -- properties --------------------------------------------------------------------------------------------
-    def _holders(self, element):
-        """The element's own property and quantity sets, then its type's (the element's own value wins)."""
+    def _own(self, element):
+        """The element's own property definitions (IFC4 lets one relation hold a set of them: a tuple)."""
         own = [r.RelatingPropertyDefinition for r in getattr(element, "IsDefinedBy", []) or []
                if r.is_a("IfcRelDefinesByProperties")]
-        own = [d for x in own for d in (x if isinstance(x, tuple) else (x,))]     # IFC4 allows a set of sets
-        t = self.type_of(element)
-        return own + list(getattr(t, "HasPropertySets", None) or [] if t is not None else [])
+        return [d for x in own for d in (x if isinstance(x, tuple) else (x,))]
 
-    def find(self, element, wanted, name):
-        """The first property or quantity called `name` in a set `wanted(set name)` accepts: (value, "Set.Name",
-        its own unit or None); (None, None, None) if there is none. The value is the bare number, text or
-        true/false the model states."""
+    def _holders(self, element):
+        """The element's own property and quantity sets, then its type's (the element's own value wins)."""
+        t = self.type_of(element)
+        return self._own(element) + list(getattr(t, "HasPropertySets", None) or [] if t is not None else [])
+
+    def find_all(self, element, wanted, name):
+        """Every property or quantity called `name` in a set `wanted(set name)` accepts, the element's own first:
+        [(value, "Set.Name", its own unit or None)]. The value is the bare number, text or true/false the model
+        states; one stored another way (an enumerated or list value…) comes back as UNREADABLE, never skipped."""
+        found = []
         for holder in self._holders(element):
             if not (holder.is_a("IfcPropertySet") or holder.is_a("IfcElementQuantity")) or not wanted(holder.Name):
                 continue
@@ -63,10 +67,15 @@ class Model:
                 elif item.is_a("IfcPhysicalSimpleQuantity"):
                     value = item[3]                       # LengthValue, AreaValue…
                 else:
-                    continue
+                    value = Unreadable(item.is_a())
                 if value is not None:
-                    return value, f"{holder.Name}.{name}", getattr(item, "Unit", None)
-        return None, None, None
+                    found.append((value, f"{holder.Name}.{name}", getattr(item, "Unit", None)))
+        return found
+
+    def find(self, element, wanted, name):
+        """The first of find_all: (value, "Set.Name", unit); (None, None, None) if there is none."""
+        got = self.find_all(element, wanted, name)
+        return got[0] if got else (None, None, None)
 
     def prop(self, element, sets, name):
         """The first set in `sets` (by name, in order) holding `name`, as (value, "Set.Name"); (None, None) if none."""
@@ -76,24 +85,38 @@ class Model:
                 return value, where
         return None, None
 
+    def _convert(self, value, where, unit, kind):
+        import ifcopenshell.util.unit
+        if not is_number(value):
+            return None, f"{where} is {value!r}, not a number"
+        if unit is not None:
+            if getattr(unit, "UnitType", None) != kind:
+                return None, f"{where} is stated in a unit that isn't a {kind.lower()[:-4]} unit"
+            return float(value) * float(ifcopenshell.util.unit.get_unit_scale(unit)), None
+        scale = self.metres if kind == "LENGTHUNIT" else self.square_metres
+        if scale is None:
+            return None, f"the file states no single area unit, so {where} can't be read"
+        return float(value) * scale, None
+
     def measure(self, element, wanted, name, kind):
         """A length (kind "LENGTHUNIT", in metres) or an area ("AREAUNIT", in square metres) the model states:
         (value, where, None), or (None, where, why not). A value carrying its own unit is converted by that unit;
-        otherwise by the file's."""
-        import ifcopenshell.util.unit
-        value, where, unit = self.find(element, wanted, name)
-        if value is None:
+        otherwise by the file's. Stated more than once (two quantity sets), every statement must agree, else
+        which is right is unclear and there is no value (never the first found, which could be the larger)."""
+        got = self.find_all(element, wanted, name)
+        if not got:
             return None, None, None
-        if not is_number(value):
-            return None, where, f"{where} is {value!r}, not a number"
-        if unit is not None:
-            if getattr(unit, "UnitType", None) != kind:
-                return None, where, f"{where} is stated in a unit that isn't a {kind.lower()[:-4]} unit"
-            return float(value) * float(ifcopenshell.util.unit.get_unit_scale(unit)), where, None
-        scale = self.metres if kind == "LENGTHUNIT" else self.square_metres
-        if scale is None:
-            return None, where, f"the file states no single area unit, so {where} can't be read"
-        return float(value) * scale, where, None
+        values = []
+        for value, where, unit in got:
+            v, bad = self._convert(value, where, unit, kind)
+            if bad:
+                return None, where, bad
+            values.append((v, where))
+        low, high = min(v for v, _ in values), max(v for v, _ in values)
+        if high - low > 1e-9 * max(1.0, abs(high)):
+            said = ", ".join(f"{w} {tidy(v)}" for v, w in values)
+            return None, values[0][1], f"the model states {name} more than once, differently ({said}): which is right is unclear"
+        return values[0][0], values[0][1], None
 
     def quantity(self, element, name, kind="LENGTHUNIT"):
         """A base quantity (a Qto_* set, or IFC2x3's BaseQuantities): (metres or square metres, where, why not)."""
@@ -110,9 +133,7 @@ class Model:
         t = self.type_of(element)
         for holder in ([t] if t is not None else []):
             found += [p for p in (getattr(holder, "HasPropertySets", None) or []) if p.is_a(entity)]
-        for rel in getattr(element, "IsDefinedBy", []) or []:
-            if rel.is_a("IfcRelDefinesByProperties") and rel.RelatingPropertyDefinition.is_a(entity):
-                found.append(rel.RelatingPropertyDefinition)
+        found += [d for d in self._own(element) if d.is_a(entity)]
         return found
 
     # -- where things are --------------------------------------------------------------------------------------
@@ -147,6 +168,17 @@ class Model:
         if not len(faces):
             return None
         return verts[faces]
+
+
+class Unreadable:
+    """A property the model states under the wanted name but in a form not read (an enumerated or list value):
+    never taken as absent, so a flag stored that way leaves its part unknown."""
+
+    def __init__(self, kind: str):
+        self.kind = kind
+
+    def __repr__(self):
+        return f"an {self.kind} (not read)"
 
 
 def _unit_name(unit) -> str:

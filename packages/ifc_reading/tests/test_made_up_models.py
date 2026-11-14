@@ -264,3 +264,55 @@ def test_a_flag_that_isnt_true_or_false(build, tmp_path, value):
     assert w["escape"] is False and repr(value) in w["ifc"]["escape_from"]
     door = one(d["doors"], "Front")
     assert "exit" not in door and repr(value) in door["not_given"]["exit"]
+
+
+@pytest.mark.parametrize("kind", ["IfcPropertyEnumeratedValue", "IfcPropertyListValue"])
+def test_a_flag_stored_another_way_is_never_skipped(build, tmp_path, kind):
+    """Review round 2: a Sleeping flag stored as an enumerated or list value (a yes/no pick-list) was skipped, and
+    the name decided ("Laundry" -> not a sleeping room). Now the room is unknown."""
+    b = bedroom_house(build, name="Laundry")
+    space = b.f.by_type("IfcSpace")[0]
+    value = b.f.create_entity("IfcBoolean", True)
+    item = (b.f.create_entity(kind, Name="Sleeping", EnumerationValues=[value]) if kind.endswith("EnumeratedValue")
+            else b.f.create_entity(kind, Name="Sleeping", ListValues=[value]))
+    pset = b.f.create_entity("IfcPropertySet", GlobalId=b.guid(), Name="Gordium_Egress", HasProperties=[item])
+    b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[space],
+                      RelatingPropertyDefinition=pset)
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and kind in room["not_given"]["sleeping"]
+
+
+@pytest.mark.parametrize("first, second, kept", [(200.0, 100.0, False), (100.0, 200.0, False), (120.0, 120.0, True)])
+def test_two_quantity_sets_must_agree(build, tmp_path, first, second, kept):
+    """Review round 2: NetFloorArea stated in two sets (Qto_SpaceBaseQuantities and IFC2x3's BaseQuantities) that
+    disagree: which is right is unclear, so no outline, whichever comes first (the 12 x 10 ft outline is 120 sq ft)."""
+    b = bedroom_house(build, quantities=dict(QTY, NetFloorArea=first))
+    space = b.f.by_type("IfcSpace")[0]
+    q = b.run("pset.add_qto", product=space, name="BaseQuantities")
+    b.run("pset.edit_qto", qto=q, properties={"NetFloorArea": second})
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert ("floor" in room) is kept
+    if not kept:
+        assert "more than once, differently" in room["not_given"]["floor"]
+
+
+def test_a_set_of_property_sets_in_one_relation(build, tmp_path):
+    """Review round 2: IFC4 lets one IfcRelDefinesByProperties hold a set of property sets (a tuple to
+    ifcopenshell); reading a window's predefined sets crashed on it."""
+    b = bedroom_house(build)
+    [w] = b.f.by_type("IfcWindow")
+    mark = b.f.create_entity("IfcPropertySet", GlobalId=b.guid(), Name="Gordium_Egress", HasProperties=[
+        b.f.create_entity("IfcPropertySingleValue", Name="EscapeOpening",
+                          NominalValue=b.f.create_entity("IfcBoolean", True))])
+    other = b.f.create_entity("IfcPropertySet", GlobalId=b.guid(), Name="Other", HasProperties=[
+        b.f.create_entity("IfcPropertySingleValue", Name="Note", NominalValue=b.f.create_entity("IfcLabel", "x"))])
+    rel = b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[w],
+                            RelatingPropertyDefinition=mark)
+    path = b.write(tmp_path / "h.ifc")       # ifcopenshell's API won't write a set here: edit the file's line
+    text = path.read_text(encoding="utf-8")
+    line = next(t for t in text.splitlines() if t.startswith(f"#{rel.id()}="))
+    assert line.endswith(f",#{mark.id()});")
+    path.write_text(text.replace(line, line[:-len(f"#{mark.id()});")] + f"(#{mark.id()},#{other.id()}));"),
+                    encoding="utf-8")
+    got = read(path)["openings"][0]
+    assert got["escape"] is True and "frame" in got
