@@ -297,7 +297,7 @@ POINTING_OUT = {
     ("R325.6", "E3401.2.1"), ("R325.7", "E3401.2.1"), ("R507.10", "R301.5"), ("R507.10.3", "R507.2.2"),
     ("BO101.1", "R101.2"), ("BO102.6", "BO102.6.1"), ("BO105.1", "R301.1.3"), ("BO105.1.1", "BO105.2"),
     ("BO105.1.2", "BO105.2"), ("BO105.8", "702"), ("BO106.1", "R301.1.3"), ("BO106.1.2", "BO104"),
-    ("BO106.1.2", "BO105"), ("BO107.1", "BO105"),
+    ("BO106.1.2", "BO105"), ("BO107.1", "BO105"), ("BF103.1", "R324"),
 }
 
 
@@ -593,7 +593,7 @@ def test_the_recorded_second_reading_is_the_kept_transcripts():
     pieces = {p["id"]: p for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
     recorded = load(NY_STATE / "text_verification.yaml")["pieces"]
     rebuilt = {}
-    for name in ("step_1_round_3", "step_1b", "step_1b_round_1"):
+    for name in ("step_1_round_3", "step_1b", "step_1b_round_1", "step_1c"):
         rebuilt.update(_transcript_numbers(folder, name, pieces))
     assert len(rebuilt) >= 110
     assert {pid: recorded[pid]["second_reading_numbers"] for pid in rebuilt} == rebuilt
@@ -642,3 +642,61 @@ def test_a_permission_to_exceed_is_flagged_as_no_minimum():
                 if not any("second reading (none) is right" in f and "wrong" in f for f in said):
                     unclear.append((pid, n))
     assert seen >= 2 and unclear == [], unclear
+
+
+def test_every_part_of_appendix_bf_is_brought_in_or_named_in_the_readme():
+    # egress step 1c: Appendix BF comes in only for egress (BF101 to BF103); its other parts must each be named as not
+    # brought in, so a reader never takes the patio-cover height or structure limits as checked
+    import re
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    # only the README's own list of what is not brought in counts (BF101.1's "BF101 to BF106" names no part as out)
+    named = set(re.findall(r"\bBF\d{3}(?:\.\d+)*", readme.split("Not brought in, being no egress:")[1].split(" BF101.1 ")[0]))
+    brought = {p["id"] for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    heads = {m[1] for r in kept_text(entry)[1:]
+             if r.get("bold") and (m := re.match(r"(?:\[NY\] )?(?:SECTION )?(BF1\d\d(?:\.\d+)*)\W", r["text"]))}
+
+    def covered(pid):
+        parts = pid.split(".")
+        return pid in brought or any(".".join(parts[:k]) in named and not any(
+            b.startswith(".".join(parts[:k])) for b in brought) for k in range(1, len(parts) + 1))
+    missing = sorted(h for h in heads if not covered(h))
+    assert {"BF101", "BF103.2", "BF106.4"} <= heads and missing == [], " ".join(missing)
+    assert {"BF101", "BF101.1", "BF101.2", "BF102", "BF102.1", "BF102:patio_cover", "BF103", "BF103.1", "BF103.2"} <= brought
+
+
+def test_a_label_that_calls_its_reading_an_open_question_records_it_as_one():
+    # review round 1 of egress step 1c: BF103.2's "unenclosed" was called an open question in its notes only, so the
+    # review list showed no open questions and nothing would block approving it
+    import re
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    said = [pid for pid, e in labels.items() if re.search(r"open question", " ".join(str(e.get(k, "")) for k in
+                                                                                     ("reason", "notes")), re.I)]
+    assert "BF103.2" in said and all(labels[pid].get("open_questions") for pid in said), said
+    review = (NY_STATE / "3_section_labels/gov.ny.residential.2025.review.md").read_text(encoding="utf-8")
+    listed = review.split("## Open questions for the architects")[1].split("\n## ")[0]
+    assert all(f"| {pid} |" in listed for pid in said)
+
+
+def test_a_label_with_readings_still_in_play_never_says_one_reading_decides():
+    # review round 2 of egress step 1c: BF103.2 listed three readings of "unenclosed" but its notes (and the README)
+    # said a screened porch "fails, never passes" under the stricter one; with readings in play a design fails only if
+    # it fails under all of them, else needs review (docs/methods.md)
+    import re
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    open_ = [pid for pid, e in labels.items() if any(len(r.get("readings") or []) >= 2 for r in e.get("research") or [])]
+    assert "BF103.2" in open_
+    decides = re.compile(r"fails, never passes|until (?:it is )?answered,? Gordium takes|Gordium's reading until answered", re.I)
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    for pid in open_:
+        e = labels[pid]
+        assert not decides.search(yaml.safe_dump(e)) and "needs review" in e.get("notes", ""), pid
+    # review round 4: BF103.1's reason (a piece the open question turns on) said it "says what makes a patio cover
+    # enclosed", the stricter reading as settled
+    assert "what makes a patio cover enclosed" not in labels["BF103.1"]["reason"]
+    assert not decides.search(readme)
+    # review round 3: the README's lead-in still said the notes give Gordium's reading of both undefined words
+    assert "Two words are not defined, and the label's notes give Gordium's reading" not in readme

@@ -23,8 +23,10 @@ Where a piece starts: a line that starts in bold, with
     optional tag in brackets ([NY] marks New York's own change to the model code)
   - an appendix's sections and parts the same way, with the appendix's letters: "SECTION BO105—ALTERATIONS",
     "[NY] BO105.10.4 Stair treads and risers."
-  - in a section of definitions (titled DEFINITIONS: R202, or an appendix's own, BO103), "[RB] STAIRWAY.": a
-    defined term in capitals (piece "R202:stairway", "BO103:work_area"). An appendix's own definitions apply in
+  - in a section of definitions (titled DEFINITIONS: R202, or an appendix's own, BO103; or DEFINITION, BF102), or
+    under a numbered part titled "Definition" or "Definitions" (BF106.2), "[RB] STAIRWAY.": a defined term in
+    capitals (piece "R202:stairway", "BO103:work_area", "BF102:patio_cover"; under a part, by the part: "BF106.2:screen_enclosure", so
+    the part that says where it applies comes in with it, and not the rest of its section). An appendix's own definitions apply in
     that appendix only (R201.1: "as defined within the chapter or appendix where the word or term is found"). A bold entry in
     lower case printed under a term ("[NY] Building permit." under PERMIT, "[NY] Building, existing. See ..." under
     BUILDING) is New York's addition to that term, and stays in its piece
@@ -48,7 +50,7 @@ import hashlib
 import json
 import re
 
-SPLITTER = "document_extraction.icc_sections v8"   # bump when the cutting rules change
+SPLITTER = "document_extraction.icc_sections v9"   # bump when the cutting rules change
 STAMP = re.compile(r"^\d{9}$")                      # the number stamped at the top of every page of this copy
 FOOTER = re.compile(r"^(?:\d+ )?2025 RESIDENTIAL CODE OF NEW YORK STATE(?: \d+)?$")
 DOT = "."                                           # a lone "." printed under the footer
@@ -131,7 +133,8 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     last: tuple = ()                     # the last numbered part's number
     last_letter = ""                     # the last definition's first letter
     page_before = None
-    definitions: set[str] = set()        # the sections of definitions: R202, and an appendix's own (BO103)
+    definitions: set[str] = set()        # the sections of definitions: R202, and an appendix's own (BO103, BF102)
+    defining_part = None                 # the numbered part titled "Definition(s)" (BF106.2) the terms are under, if any
     out_of_order = brought_in.get("printed_out_of_order") or {}   # "p.973 line 54": why the book prints it so
     amended = brought_in.get("amended_by_law") or {}               # "p.966 line 38": {term, why}
     used_names: set[str] = set()
@@ -140,7 +143,7 @@ def split(rows: list[dict], brought_in: dict) -> dict:
         if page_before is not None and any(n not in pages for n in range(page_before + 1, r["page"])):
             # A page after a gap in the pages read: what it starts with continues a part on a page not read.
             before_gap.append((len(units) - 1, page_before))
-            section, last, last_letter = None, (), ""
+            section, last, last_letter, defining_part = None, (), "", None
             units.append({"id": f"before the first heading on p.{r['page']}", "title": "", "kind": "before",
                           "members": []})
         page_before = r["page"]
@@ -152,12 +155,12 @@ def split(rows: list[dict], brought_in: dict) -> dict:
                 and not (units and units[-1]["id"] == opening):
             # A new chapter: its title and ICC's user notes are not law, and end the section before (never part
             # of the last definition, nor of the first section after).
-            section, last, last_letter = None, (), ""
+            section, last, last_letter, defining_part = None, (), "", None
             head = {"id": opening, "title": "", "kind": "before"}
         elif bold and (m := SECTION.match(r["text"])):
             section, last, last_letter = m[1], (), ""
             head = {"id": m[1], "title": m[2].strip(), "kind": "section_heading"}
-            if m[2].strip() == "DEFINITIONS":
+            if m[2].strip() in ("DEFINITIONS", "DEFINITION"):   # Appendix BF prints the singular (BF102)
                 definitions.add(m[1])
         elif bold and (m := NUMBERED.match(bold)):
             code = m[1]
@@ -184,7 +187,7 @@ def split(rows: list[dict], brought_in: dict) -> dict:
             else:
                 last = n
                 head = {"id": code, "title": m[2].strip().rstrip("."), "kind": "section"}
-        elif bold and section in definitions and (m := TERM.match(bold)) and _is_term(m[1]):
+        elif bold and (section in definitions or defining_part) and (m := TERM.match(bold)) and _is_term(m[1]):
             term = m[1].strip()
             if _printed(amended, where, term, problems):
                 # New York's rules amend the term the book prints here (19 NYCRR Part 1220): cut under the law's term
@@ -195,11 +198,21 @@ def split(rows: list[dict], brought_in: dict) -> dict:
                                 f"(after a term starting {last_letter!r}); not cut there")
             else:
                 last_letter = term[0]
-                head = {"id": f"{section}:{slug(term)}", "title": term, "kind": "definition"}
-        elif bold and section in definitions and _is_term(bold.split(". ")[0]) and bold.rstrip().endswith("."):
+                head = {"id": f"{defining_part or section}:{slug(term)}", "title": term, "kind": "definition"}
+        elif bold and (section in definitions or defining_part) and _is_term(bold.split(". ")[0]) \
+                and bold.rstrip().endswith("."):
             # Bold capitals ending in a period look like a defined term the cutter couldn't read: never let it
             # fall silently into the definition above it.
             problems.append(f"p.{r['page']} line {r['line']}: {bold!r} looks like a defined term but was not cut")
+        if head and head["kind"] != "definition":
+            # A numbered part titled "Definition(s)" ("BF106.2 Definition. The following word and term shall, for the
+            # purposes of this appendix, ..."): the bold terms under it are definitions, up to the next heading
+            # (only outside a section of definitions: "BJ102.1 Definitions." under "SECTION BJ102—DEFINITIONS" leaves its
+            # terms named by the section, BJ102:term, with the section's heading brought in)
+            defining_part = head["id"] if head["kind"] == "section" and section not in definitions \
+                and head["title"] in ("Definition", "Definitions") else None
+            if defining_part:
+                last_letter = ""
         if head:
             units.append(head | {"members": []})
         elif not units:

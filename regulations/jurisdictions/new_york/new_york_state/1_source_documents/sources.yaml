@@ -47,9 +47,13 @@ documents:
       # definitions; p.57 is blank, p.58 starts Chapter 3); R314-R316 and R318-R321 (mezzanines, sleeping lofts,
       # habitable attics, egress; R317, garages and carports, is not egress and not brought in; p.97 starts with R312
       # and R313, not brought in); R325.6-R325.7; R507.10 deck guards (p.205 is blank, p.206 starts Chapter 6);
-      # Appendix BO (pp.964-974). Each with the next part's heading, so each part's end is proven.
-      pages: 24-26, 34-58, 97-105, 109-110, 204-206, 964-974
+      # Appendix BF patio covers (p.898: BF101 to BF103, brought in, with the heading of BF104 after them; BF104 to
+      # BF106.4's opening, also on p.898, and the rest of BF106 with its wind figure and tables, pp.899-900, are not
+      # egress and not brought in); Appendix BO (pp.964-974). Each with the next part's heading, so each part's end is
+      # proven.
+      pages: 24-26, 34-58, 97-105, 109-110, 204-206, 898, 964-974
       sections: [R101.2.1, R102.6, R201, R314, R315, R316, R318, R319, R320, R321, R325.6, R325.7, R507.10,
+                 BF101, BF102, BF103,
                  BO101, BO102.1.2, BO102.6.3, BO104.1, BO105.1, BO105.2.2, BO105.2.3, BO105.3, BO105.8, BO105.10, BO105.11, BO105.13,
                  BO106.1, BO107.1, BO107.2.1, BO107.2.2, BO108, BO109.1, BO109.8.1, BO109.8.5, BO109.8.6]
       alone: [BO102.1, BO102.6, BO106.7, BO107.2, BO109.8]   # brought in without the parts under them (only some of those are egress)
@@ -102,7 +106,8 @@ documents:
       Egress step 1b, the parts the egress text points to: R314 mezzanines, R315 sleeping lofts, R316 habitable attics,
       R507.10 deck guards; R101.2.1 (which appendices are adopted) and R102.6 (work on existing buildings goes to
       Appendix BO); and Appendix BO's parts on egress for work on existing one- and two-family houses (README). Appendix
-      BB (tiny houses) is left for later.
+      BB (tiny houses) is left for later. Egress step 1c: Appendix BF patio covers, BF101 to BF103 (scope, its definition,
+      walls and openings, and BF103.2: escape openings and exits into a patio cover); BF104 to BF106 are not egress (README).
     notes: >
       Its section numbers are not the model code's (the International Residential Code's): cite only this book's.
       A bracketed letter before a section names the party responsible for it (page 7); [NY] is the New York State
@@ -114,6 +119,6 @@ documents:
       (2) referenced standards (Chapter 44); (3) BA113.3; (4) in BO103.1, the second definition printed "HOME OCCUPATION" reads "LOAD-BEARING
       ELEMENT". DOS rule text of 2025-12-02, pp.6-9
       (https://dos.ny.gov/system/files/documents/2025/12/rule-text_uniform-code_amended-notice-of-adoption_12-2-25_0.pdf,
-      read 2026-11-12, sha256 dcfd684456631233d983a21f8e42f6dd1a89bf6623aa7faa20b75f24b99bc9f0). Only (4) touches a
+      read 2026-11-12, sha256 dcfd684456631233d983a21f8e42f6dd1a89bf6623aa7faa20b75f24b99bc9f0). None amends Appendix BF. Only (4) touches a
       brought-in part's cutting (brought_in.amended_by_law); (1) changes the words of PERMIT, a brought-in definition
       (README).
