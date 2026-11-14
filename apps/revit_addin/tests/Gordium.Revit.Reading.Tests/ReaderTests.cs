@@ -290,6 +290,21 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
         var cw = new RevitElement { UniqueId = "cw", BuiltInCategory = "OST_Walls", Category = "Walls",
                                     Kind = ElementKind.CurtainWallHost, Geometry = [new InstanceItem(null)] };
         Assert.Equal(["cw"], Ids(await Site(House(cw)), "unsent"));
+        // review round 2: a curtain wall whose geometry comes back null is reported like any wall, never dropped
+        Assert.Equal(["cw"], Ids(await Site(House(cw with { Geometry = null })), "unsent"));
+    }
+
+    [Fact]
+    public async Task A_nested_family_that_gives_an_empty_list_counts_as_missing_too()
+    {
+        // review round 2: GetInstanceGeometry() may give an empty list rather than null; both mean "nothing to read"
+        var doc = new RevitModel { Document = "shed.rvt", Elements = [
+            new RevitElement { UniqueId = "shed", BuiltInCategory = "OST_GenericModel", Category = "Generic Models",
+                               Geometry = [Block(20, 105, 30, 115), new InstanceItem([])] }] };
+        Assert.Null(LeftOut(await Site(House(FakeRevit.LinkOf("link", doc))), "link")["touching"]);
+        var door = FakeRevit.Family("door", [Block(25, 29.5, 28, 30, 0, 7), new InstanceItem([])], "OST_Doors", "Doors");
+        var b = (await Site(House(door)))["buildings"]!.AsArray().Single(x => x!["id"]!.GetValue<string>() == "door")!.AsObject();
+        Assert.Equal(["tool_words"], Codes(b));
     }
 
     [Fact]
@@ -315,7 +330,7 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     public async Task A_toposolid_is_left_out_and_never_labelled_as_the_ground()
     {
         var topo = new RevitElement { UniqueId = "topo", BuiltInCategory = "OST_Toposolid", Category = "Toposolid",
-                                      Kind = ElementKind.Toposolid, Geometry = [Block(-5, -5, 65, 125, -3, 0)] };
+                                      Kind = ElementKind.Toposolid, Geometry = [F.Prism(Rect(-5, -5, 65, 125), -3, 0, open: true)] };
         topo = topo with { BoundingBox = FakeRevit.BoxOf(topo.Geometry!) };
         var o = LeftOut(await Site(House(topo)), "topo");
         Assert.True(o["touching"]!.GetValue<bool>());

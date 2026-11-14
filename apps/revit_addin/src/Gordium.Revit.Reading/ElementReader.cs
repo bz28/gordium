@@ -102,7 +102,7 @@ internal sealed class Read(RevitModel model)
         }
         if (g is null || !g.HasFaces)
         {
-            if (e.Kind == ElementKind.CurtainWallHost && g is not { MissingPart: true })
+            if (e.Kind == ElementKind.CurtainWallHost && g is { MissingPart: false })
                 return;                  // its panels and mullions are their own elements; it has no faces of its own
             Unsend(e, $"a {e.Category} with no geometry", RevitBox(e, ToShared));
             return;
@@ -379,8 +379,8 @@ internal sealed class Read(RevitModel model)
                         g.Faces.Add(new JsonObject { ["points"] = Ring([v[a], v[b], v[c]]) });
                     }
                     break;
-                case InstanceItem { Items: null }:
-                    g.MissingPart = true;
+                case InstanceItem { Items: null or { Count: 0 } }:
+                    g.MissingPart = true;        // GetInstanceGeometry gave nothing (null or an empty list)
                     break;
                 case InstanceItem { Items: { } inner }:
                     Walk(inner, t, e, g);

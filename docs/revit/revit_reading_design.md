@@ -235,7 +235,7 @@ The trial writes only the layer that fills its records from the API, and confirm
 code makes, for Ben to confirm: one departs from what this note first said (section 2 had null geometry `unsent`
 for every element), one it didn't spell out. An element outside the building categories whose
 geometry Revit returns as null is skipped (nothing that could be a building; one whose reading throws is still
-`unsent`), so a survey point or a view's element doesn't make every check need review; and a building whose nested
+`unsent`), so a model element that simply has no shape (one Revit gives no geometry, outside the categories and families above) doesn't make every check need review; and a building whose nested
 family gives no geometry gets a `tool_words` problem (it may be bigger than measured). Found while writing it: on a
 model turned to true north by 30°, Revit's own box of each element, square to its internal axes, is bigger once
 turned into shared coordinates, so objects well apart from the house read as touching (scene 15's context solid, 15 ft behind it, does) (the cautious side;
