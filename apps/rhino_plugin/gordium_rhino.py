@@ -1132,15 +1132,16 @@ def _north(doc, facts):
 
 
 def _unmeasured_outlines(doc, ids):
-    """The plan outline (box) of each object on the lot the check doesn't measure, drawn dashed and light."""
-    out, wholes = [], {}
-    for i in ids or []:
-        o = _find(doc, i)
-        if o is None:
+    """The plan outline (box) of each object on the lot the check doesn't measure, drawn dashed and light. One with
+    no box that covers all of it (host_core.left_out.no_box_reasons) has nothing to outline: its review row says it."""
+    found = [o for o in (_find(doc, i) for i in ids or []) if o is not None]
+    definitions = {}
+    seen = [_seen(o, definitions) for o in found]
+    out = []
+    for o, decided in zip(found, logic.no_box_reasons(seen, definitions)):
+        if decided["why"] is not None:
             continue
-        b = _whole_box(o, wholes)
-        if b is None:      # no box that covers all of it (_whole_box): nothing to outline, its review row says it
-            continue
+        b = o.Geometry.GetBoundingBox(True)
         z = b.Max.Z
         out.append([rg.Point3d(b.Min.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Min.Y, z), rg.Point3d(b.Max.X, b.Max.Y, z),
                     rg.Point3d(b.Min.X, b.Max.Y, z), rg.Point3d(b.Min.X, b.Min.Y, z)])
@@ -1726,26 +1727,24 @@ def add_to_check(ids):
 
 
 def _not_included(doc, lot):
-    """Anything on the lot (its footprint reaching more than 0.1 ft into the lot's outline, partly or wholly:
-    rhino_logic.reaches_into_lot) that could be a building and isn't measured (rhino_logic.could_be_building: solids,
+    """Anything on the lot that could be a building and isn't measured (rhino_logic.could_be_building: solids,
     polysurfaces, meshes, SubD, blocks; not the picked terrain, what the architect marked as the ground, the
-    Building layer or Gordium's own layers): each one makes the check need review (C8). Nothing is ever left out
-    on a guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the
-    architect says "This is the ground". One with no bounding box that covers all of it (_whole_box: a block whose
-    definition is empty, or whose linked file is missing, unreadable or changed, at any depth; an empty SubD) can't
-    be told off the lot: it counts as on the lot (and, in _touching, as touching), never dropped, as the reference
-    adapter (conformance_rhino._left_out) says."""
+    Building layer or Gordium's own layers): each one makes the check need review (C8). Which of them are on the
+    lot is decided by host_core.left_out.left_out_decisions, the same for every host (the reference adapter,
+    conformance_rhino._left_out, and the Revit add-in through the worker): its footprint reaching more than 0.1 ft
+    into the lot's outline, partly or wholly; or no box that covers all of it (a block whose definition is empty,
+    or whose linked file is missing, unreadable or changed, at any depth; an empty SubD), so it can't be told off
+    the lot: it counts as on the lot (and, in _touching, as touching), never dropped. Nothing is ever left out on a
+    guess: a topography mesh stays here (marked as looking like the ground, see _ground_like) until the architect
+    says "This is the ground". This function only looks: what each object is (_seen) and its plan points, asked
+    only of an object whose box comes near the lot."""
     if lot is None:
         return []
-    ring = _plan_points(lot.Geometry)
-    reach = _model_length(doc, logic.ON_LOT_REACH)              # ft -> model units
-    lot_box = _plan_box(lot.Geometry)
-    out = []
     every = Rhino.DocObjects.ObjectEnumeratorSettings()          # hidden and locked too, as for the Building layer:
     every.NormalObjects, every.LockedObjects, every.HiddenObjects = True, True, True   # a hidden shed still counts
     state = _ui_state(doc)
     known_ground = {str(state.get("terrain_id") or "")} | set(state.get("ground_ids") or [])
-    wholes = {}                                                 # each block definition walked once (_whole_box)
+    objects, definitions = [], {}                               # each block definition looked at once (_seen)
     for o in doc.Objects.GetObjectList(every):
         layer = doc.Layers[o.Attributes.LayerIndex].FullPath
         g = o.Geometry
@@ -1755,46 +1754,32 @@ def _not_included(doc, lot):
         if not could_be or str(o.Id) in known_ground or logic.on_layer(layer, LAYERS["building"]) \
                 or not logic.left_out_candidate(layer):        # Gordium's own layers, but for the neighbourhood's
             continue
-        b = _whole_box(o, wholes)
-        if b is None:                                               # nowhere to place it: on the lot, not dropped
-            out.append(str(o.Id))
-            continue
-        box = (b.Min.X, b.Min.Y, b.Max.X, b.Max.Y)                  # its plan box (_plan_box), worked out once
-        if not logic.box_near_lot(box, lot_box, reach):             # far from the lot: no outline work
-            continue
-        if logic.reaches_into_lot(ring, _plan_points(g), reach, box):   # its footprint, against the lot's outline
-            out.append(str(o.Id))
-    return out
+        objects.append(dict(_seen(o, definitions), points=lambda g=g: _plan_points(g)))   # outlined only if near
+    lot_seen = {"ring": _plan_points(lot.Geometry), "box": list(_plan_box(lot.Geometry))}
+    return [d["id"] for d in logic.left_out_decisions(lot_seen, objects, definitions, _scale(doc)) if d["left_out"]]
 
 
-def _whole_box(o, wholes, depth=0):
-    """An object's bounding box, or None when it has none that covers all of it: no valid box (an empty block, an
-    empty SubD); or a block whose definition, at any depth, is missing, is empty, isn't what the block is (a linked
-    file not found, not readable or changed since it was read: rhino_logic.block_contents_known) or holds an object
-    with no box. A linked block whose file has moved holds, in live Rhino 8.35 (Mac), one text label at the centre
-    of the last known shape: a valid box of a single point, which said "whole" and "off the lot" (or, placed inside
-    another block, added only a point to its box), while the shed it stands for may touch the house. Rhino leaves an
-    invalid box out when it joins a block's parts, so a block holding a part with no box has its other parts' box
-    alone. The reference adapter (conformance_rhino._box) gives such a block no box, and so does this. `wholes`
-    ({definition id: whether it is whole}, one per check) has each definition walked once, however many times it
-    is placed."""
+def _seen(o, definitions):
+    """What the check sees of one object, as host_core.left_out reads it: its id and its box (None when Rhino has
+    no valid box for it: an empty block, an empty SubD); and, for a placed block, its definition's id (None when it
+    has none), with what that definition holds (each part seen the same way, blocks inside blocks too) and its
+    ArchiveFileStatus by name (None when it can't be read) put into `definitions` once, however often it is placed.
+    Only what Rhino says: whether that adds up to a box that covers all of it is host_core's decision
+    (no_box_reasons). Each definition is walked whole, however deep it is first met: host_core gives a definition
+    the same answer wherever it is placed and gives no box to a block placed past MAX_BLOCK_DEPTH itself."""
     b = o.Geometry.GetBoundingBox(True)
-    if not b.IsValid:
-        return None
+    seen = {"id": str(o.Id), "box": [b.Min.X, b.Min.Y, b.Min.Z, b.Max.X, b.Max.Y, b.Max.Z] if b.IsValid else None}
     if isinstance(o, Rhino.DocObjects.InstanceObject):
-        definition = o.InstanceDefinition if depth <= 32 else None
-        if definition is None:
-            return None
-        if definition.Id not in wholes:
+        definition = o.InstanceDefinition
+        seen["definition"] = None if definition is None else str(definition.Id)
+        if definition is not None and seen["definition"] not in definitions:
+            entry = definitions[seen["definition"]] = {"status": None, "parts": []}   # before its parts: once
             try:
-                known = logic.block_contents_known(definition.ArchiveFileStatus)
-            except Exception:                                       # no status to read: not known
-                known = False
-            parts = list(definition.GetObjects()) if known else []
-            wholes[definition.Id] = bool(parts) and all(_whole_box(p, wholes, depth + 1) is not None for p in parts)
-        if not wholes[definition.Id]:
-            return None
-    return b
+                entry["status"] = str(definition.ArchiveFileStatus)
+            except Exception:                                       # no status to read: None, which isn't known
+                entry["status"] = None
+            entry["parts"] = [_seen(p, definitions) for p in definition.GetObjects()]
+    return seen
 
 
 def _plan_box(g):
@@ -1912,29 +1897,51 @@ def _extras(doc, facts):
             "context_left_out": logic.context_left_out(
                 {i: doc.Layers[_find(doc, i).Attributes.LayerIndex].FullPath for i in left_out if _find(doc, i)}),
             "ground_like": _ground_like(doc, left_out, _find(doc, facts.get("lot_id") or "")),
+            "left_out_advice": logic.guard(lambda: _link_advice(doc, left_out), "say which linked file to reload",
+                                           fallback={})(),
             "sources": fact_sources(doc)}
 
 
+def _link_advice(doc, ids):
+    """For each left-out block whose linked file, at any depth, is missing, unreadable or changed since it was read
+    (host_core.left_out.linked_file_problems), what to do in Rhino (rhino_logic.linked_file_advice): "Linked file
+    'garage.3dm' has changed since it was loaded: reload it (Edit > Blocks > Block Definitions ...)". Words on the
+    review row only: the block stays left out and counts as touching until the file is put right."""
+    objects, definitions = [], {}
+    for i in ids:
+        o = _find(doc, i)
+        if o is not None:
+            objects.append(_seen(o, definitions))
+    problems = logic.linked_file_problems(objects, definitions)
+    files = {}
+    for p in problems:
+        if p["definition"] and p["definition"] not in files:
+            d = doc.InstanceDefinitions.Find(System.Guid(p["definition"]), True)
+            path = ""
+            try:
+                path = (d.SourceArchive or "") if d is not None else ""
+            except Exception:                                   # no path to read: named by the definition alone
+                path = ""
+            files[p["definition"]] = (path, d.Name if d is not None else "")
+    return logic.linked_file_advice(problems, files)
+
+
 def _touching(doc, ids, buildings):
-    """The left-out solids that may be part of the building: their box within 0.1 ft of a building's box. Boxes
-    say "touching" more often than the shapes do, which only ever makes the check more cautious. One with no box
-    that covers all of it (_whole_box: an empty block, a linked block whose file is missing, unreadable or changed,
-    or one holding such a block) may be touching, so it counts as touching."""
-    gap = _model_length(doc, 0.1)
+    """The left-out solids that may be part of the building (host_core.left_out.touching_decisions): their box
+    within 0.1 ft of a building's box. Boxes say "touching" more often than the shapes do, which only ever makes
+    the check more cautious. One with no box that covers all of it (an empty block, a linked block whose file is
+    missing, unreadable or changed, or one holding such a block) may be touching, so it counts as touching."""
+    objects, definitions = [], {}
+    for i in ids:
+        o = _find(doc, i)
+        if o is not None:
+            objects.append(_seen(o, definitions))
     boxes = []
     for b in buildings:
         bb = b.Geometry.GetBoundingBox(True)
-        bb.Inflate(gap)
-        boxes.append(bb)
-    out, wholes = [], {}
-    for i in ids:
-        o = _find(doc, i)
-        if o is None:
-            continue
-        bb = _whole_box(o, wholes)
-        if bb is None or any(rg.BoundingBox.Intersection(bb, k).IsValid for k in boxes):
-            out.append(i)
-    return out
+        boxes.append([bb.Min.X, bb.Min.Y, bb.Min.Z, bb.Max.X, bb.Max.Y, bb.Max.Z] if bb.IsValid else None)
+    return [d["id"] for d in logic.touching_decisions(objects, boxes, definitions, _scale(doc))
+            if d["touching"] is not False]
 
 
 # ---- the confirm dialog and the lot facts ----------------------------------------------------------------

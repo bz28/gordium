@@ -835,18 +835,22 @@ def test_which_spot_grades_count_is_a_saved_fact_never_the_boxs_unsaved_state():
 
 def test_units_are_converted_in_one_place_both_ways():
     """Gordium works in feet; the Rhino side converts at its helpers and nowhere else (a mm template showed why the
-    edge must be one place: there the start had to be checked line by line)."""
+    edge must be one place: there the start had to be checked line by line). The scale itself may be handed, as it
+    is, to host_core's functions that take it (to_feet; the left-out decisions, which turn their own 0.1 ft into
+    the model's units: host_core.left_out)."""
     import re
     rhino = host_text("rhino", "plugin", purpose="wiring")
     helpers = ("_scale", "_model_point", "_model_length", "_feet_point", "_feet_length", "_feet_area", "_feet_volume",
                "_facts_in_feet")
+    handed = ("logic.to_feet(facts, _scale(doc))", "logic.left_out_decisions(lot_seen, objects, definitions, _scale(doc))",
+              "logic.touching_decisions(objects, boxes, definitions, _scale(doc))")
     outside = []
     for chunk in re.split(r"\n(?=def )", rhino):
         name = re.match(r"def (\w+)", chunk)
         if name and name.group(1) in helpers:
             continue
         for line in chunk.splitlines():
-            if re.search(UNITS_PATTERN, line) and "logic.to_feet(facts, _scale(doc))" not in line:
+            if re.search(UNITS_PATTERN, line) and not any(h in line for h in handed):
                 outside.append(line.strip())
     assert outside == [], outside
     assert "def frame_site(" in rhino and "frame_site(doc, facts)" in rhino.split("def gordium_start(", 1)[1]
@@ -1542,7 +1546,8 @@ def test_the_plugin_tests_left_out_objects_against_the_lot_outline():
     """The Rhino side can't run in CI: its source must use the tested logic, not the bounding-box centre."""
     src = host_text("rhino", "plugin", purpose="wiring")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
-    assert "logic.reaches_into_lot(" in body and ".Center" not in body
+    assert "logic.left_out_decisions(" in body and ".Center" not in body       # host_core.left_out decides
+    assert "reaches_into_lot(ring, points, reach, box)" in _left_out_source("left_out_decisions")
 
 
 
@@ -1668,7 +1673,8 @@ def test_a_solid_whose_points_dont_outline_it_counts_by_its_box():
     assert not reaches_into_lot(lot, [(100, 40), (110, 40)], ON_LOT_REACH, box=(95, 35, 115, 45))   # off the lot
     src = host_text("rhino", "plugin", purpose="wiring")
     body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
-    assert "logic.reaches_into_lot(ring, _plan_points(g), reach, box)" in body
+    assert "points=lambda g=g: _plan_points(g)" in body                 # its points, to host_core.left_out
+    assert "reaches_into_lot(ring, points, reach, box)" in _left_out_source("left_out_decisions")   # with its box
     assert "f.PointAt(" in src[src.index("def _plan_points("):]
 
 
@@ -1688,9 +1694,15 @@ def test_the_box_pre_filter_never_drops_an_object_that_reaches_the_lot():
             assert box_near_lot(box, lot_box, ON_LOT_REACH), pts
     assert not box_near_lot((100, 0, 120, 20), lot_box, ON_LOT_REACH)
     assert box_near_lot((73, 0, 90, 20), lot_box, ON_LOT_REACH)                  # touching: still outlined
-    src = host_text("rhino", "plugin", purpose="wiring")
-    body = src[src.index("def _not_included("):src.index("\ndef ", src.index("def _not_included(") + 10)]
-    assert body.index("logic.box_near_lot(") < body.index("_plan_points(g)")
+    body = _left_out_source("left_out_decisions")       # (that only a near object is outlined: test_left_out.py)
+    assert body.index("box_near_lot(") < body.index("points()")
+
+
+def _left_out_source(name):
+    """The source of one function of host_core/left_out.py, where the Rhino command's left-out decisions live."""
+    import inspect
+    from design_checker.host_core import left_out
+    return inspect.getsource(getattr(left_out, name))
 
 
 def test_the_notice_never_hides_the_model_when_there_is_room():

@@ -154,6 +154,40 @@ def test_a_solid_on_the_neighbourhood_layers_makes_the_check_need_review_and_say
     assert "neighbourhood" not in plain["reason"]
 
 
+LINKED = ("Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit \u25b8 Blocks \u25b8 Block "
+          "Definitions, select it, then Update) so Gordium can see where it is")
+
+
+def test_the_left_out_row_says_what_to_do_about_a_linked_file_and_nothing_else_changes(surveyed):
+    """Ben, 2026-11-12: a linked block whose file is missing or changed stays left out and touching (it can't be
+    measured), and the row now says which file and what to do, in the host's words (extras["left_out_advice"]),
+    once however many of its placings are left out. Every row's status, mark and words but that sentence are the
+    same as without it: the advice is words, never a decision's input."""
+    extras = {"not_included": ["garage", "garage_again", "shed"], "touching": ["garage", "garage_again"]}
+    plain = check(MODEL, surveyed, extras=extras)["view"]
+    told = check(MODEL, surveyed, extras={**extras, "left_out_advice": {"garage": LINKED, "garage_again": LINKED}})["view"]
+    left = items(told)["Objects on the lot not included"]
+    assert left["status"] == present.REVIEW and left["objects"] == ["garage", "garage_again", "shed"]
+    assert left["reason"] == items(plain)["Objects on the lot not included"]["reason"] + " \u00b7 " + LINKED
+    assert left["reason"].count("garage.3dm") == 1
+    assert [(i["id"], i["status"], i["mark"]) for i in told["items"]] == \
+        [(i["id"], i["status"], i["mark"]) for i in plain["items"]]
+    assert [i for i in told["items"] if i["id"] != "scope.not_included"] == \
+        [i for i in plain["items"] if i["id"] != "scope.not_included"]
+    assert told["summary"] == plain["summary"]
+
+
+@pytest.mark.parametrize("advice, words", [
+    ({"nowhere": LINKED}, "nowhere given advice"),
+    ({"garage": ""}, "left_out_advice is {object id"),
+    ({"garage": 7}, "left_out_advice is {object id"),
+    (["garage"], "left_out_advice is {object id")])
+def test_advice_for_an_object_not_left_out_or_not_words_is_refused(surveyed, advice, words):
+    from design_checker.site_json import SiteRefused
+    with pytest.raises(SiteRefused, match=re.escape(words)):
+        check(MODEL, surveyed, extras={"not_included": ["garage"], "left_out_advice": advice})
+
+
 # ---- C9: never rounded toward compliance -------------------------------------------------------------------------
 
 def test_values_are_never_rounded_toward_compliance():

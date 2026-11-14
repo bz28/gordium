@@ -1,4 +1,4 @@
-"""The worker's session commands (protocol 1.0, design_checker/protocol.py, docs/protocol/worker_protocol_v1.md).
+"""The worker's session commands (protocol 1.1, design_checker/protocol.py, docs/protocol/worker_protocol_v1.md).
 
 The parity proof: for every host_core call recorded while the tests drove the plugin's own logic headlessly
 (test_data/sessions/headless_calls/calls.jsonl, design_checker/call_session.py), the function called directly still

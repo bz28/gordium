@@ -452,6 +452,8 @@ class _Box:
             and self.Min.X <= self.Max.X and self.Min.Y <= self.Max.Y and self.Min.Z <= self.Max.Z
 
     def Inflate(self, d):  # noqa: N802
+        if not self.IsValid:        # RhinoCommon, BoundingBox.Inflate: "Invalid boxes can not be inflated."
+            return                  # (developer.rhino3d.com/api/rhinocommon/rhino.geometry.boundingbox/inflate)
         self.Min, self.Max = _Pt(self.Min.X - d, self.Min.Y - d, self.Min.Z - d), _Pt(self.Max.X + d, self.Max.Y + d,
                                                                                        self.Max.Z + d)
 
@@ -548,7 +550,7 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
     from host_source import host_path, host_text
 
     from design_checker import rhino_logic as logic
-    names = ("_not_included", "_whole_box", "_plan_box", "_plan_points", "_touching", "_ground_like",
+    names = ("_not_included", "_seen", "_plan_box", "_plan_points", "_touching", "_ground_like",
              "_unmeasured_outlines")
     tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
     fns = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in names]
@@ -569,7 +571,7 @@ def _live_left_out(blocks, lot_at=(1000.0, 2000.0)):
     rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(ObjectEnumeratorSettings=types.SimpleNamespace,
                                                                    InstanceObject=_InstanceObject))
     ns = {"rg": rg, "Rhino": rhino, "logic": logic, "LAYERS": {"building": "Building"},
-          "_model_length": lambda doc, feet: feet, "_ui_state": lambda doc: {},
+          "_model_length": lambda doc, feet: feet, "_scale": lambda doc: 1.0, "_ui_state": lambda doc: {},
           "_find": lambda doc, i: next((o for o in every if o.Id == i), None)}
     exec(compile(ast.Module(body=fns, type_ignores=[]), host_path("rhino", "plugin").name, "exec"), ns)  # noqa: S102
     left = ns["_not_included"](doc, lot)
@@ -690,6 +692,108 @@ def test_the_live_command_walks_each_block_definition_once_however_often_it_is_p
     left, touching, _, outlines = _live_left_out(placed, (x, y))
     assert len(left) == 20 and touching == [] and len(outlines) == 20
     assert _Definition.walked == 2 * 3                  # 2 definitions, in each of the 3 looks
+
+
+def test_the_live_command_counts_a_block_whose_status_cant_be_read_as_left_out_and_touching():
+    """Review round 1: reading a definition's ArchiveFileStatus may fail; the command then sends no status (None),
+    which is not known: the block, a shed on the lot apart from the house, is left out and touching, never told by
+    its box."""
+    x, y = 1000.0, 2000.0
+
+    class Unreadable(_Definition):
+        @property
+        def ArchiveFileStatus(self):  # noqa: N802
+            raise RuntimeError("no status")
+
+        @ArchiveFileStatus.setter
+        def ArchiveFileStatus(self, value):  # noqa: N802
+            pass
+    shed = _InstanceObject("shed", None, definition=Unreadable([_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))]))
+    left, touching, _, outlines = _live_left_out({"shed": shed}, (x, y))
+    assert left == ["shed"] and touching == ["shed"] and outlines == []
+
+
+def test_the_live_command_sends_each_block_definition_whole_however_deep_it_is_first_seen():
+    """Review round 3: the command's look (_seen) stopped walking 32 deep, so a definition first seen 33 deep (inside
+    a block host_core gives up on early: it holds an empty block first) was never sent, and the same definition
+    placed on its own, far off the lot, came back "not found": left out and touching, where the command had judged
+    it by its box. A chain 40 deep still has no box."""
+    x, y = 1000.0, 2000.0
+    far = _part(((x + 500, y, 0), (x + 510, y + 10, 8)))
+    p = _Definition([_InstanceObject("c", None, definition=_Definition([far]))])
+    chain = [p]
+    for k in range(31):
+        chain.append(_Definition([_InstanceObject("q%d" % k, None, definition=chain[-1])]))
+    first = _Definition([_InstanceObject("e", None, definition=_Definition([])),
+                         _InstanceObject("q", None, definition=chain[-1])])
+    placed = {"A": _InstanceObject("A", None, definition=first), "B": _InstanceObject("B", None, definition=p)}
+    left, touching, _, _ = _live_left_out(placed, (x, y))
+    assert left == ["A"] and touching == ["A"]
+    inner = _Definition([_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
+    deep = [inner]
+    for k in range(40):
+        deep.append(_Definition([_InstanceObject("d%d" % k, None, definition=deep[-1])]))
+    left, touching, _, _ = _live_left_out({"deep": _InstanceObject("deep", None, definition=deep[-1])}, (x, y))
+    assert left == ["deep"] and touching == ["deep"]
+
+
+def _live_advice(placed, files):
+    """gordium_rhino's own _link_advice (with _seen) on a stub document holding `placed` ({id: _InstanceObject}):
+    `files` ({definition: (its SourceArchive, its Name)}) is what the document's InstanceDefinitions.Find gives."""
+    import ast
+
+    from host_source import host_path, host_text
+
+    from design_checker import rhino_logic as logic
+    tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
+    fns = [n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name in ("_link_advice", "_seen")]
+    assert sorted(f.name for f in fns) == ["_link_advice", "_seen"]
+    by_id = {}
+    for d, (archive, name) in files.items():
+        d.SourceArchive, d.Name = archive, name
+        by_id[str(d.Id)] = d
+    doc = types.SimpleNamespace(InstanceDefinitions=types.SimpleNamespace(
+        Find=lambda guid, ignore_deleted: by_id.get(guid) if ignore_deleted else None))
+    rhino = types.SimpleNamespace(DocObjects=types.SimpleNamespace(InstanceObject=_InstanceObject))
+    ns = {"Rhino": rhino, "logic": logic, "System": types.SimpleNamespace(Guid=str),
+          "_find": lambda doc, i: placed.get(i)}
+    exec(compile(ast.Module(body=fns, type_ignores=[]), host_path("rhino", "plugin").name, "exec"), ns)  # noqa: S102
+    return ns["_link_advice"](doc, list(placed))
+
+
+def test_the_live_command_says_which_linked_file_to_put_right_and_how():
+    """Ben, 2026-11-12: a linked shed whose file has moved, and a garage placed inside a block whose linked file
+    changed since it was read, stay left out and touching (tests above); the review row now names each file and
+    what to do in Rhino 8 (the file Rhino looked for, by its own name; Edit > Blocks > Block Definitions). A block
+    whose contents are known is given no advice."""
+    x, y = 1000.0, 2000.0
+    shed = _missing_file_block("shed", (x + 11, y + 76, 4))
+    garage_def = _Definition([_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))], status="LinkedFileIsNewer")
+    holder = _InstanceObject("holder", [_InstanceObject("garage", None, definition=garage_def)])
+    normal = _InstanceObject("normal", [_part(((x + 48, y + 90, 0), (x + 56, y + 98, 8)))])
+    advice = _live_advice({"shed": shed, "holder": holder, "normal": normal},
+                          {shed.InstanceDefinition: ("/Users/me/Projects/106 Ithaca/shed.3dm", "Shed"),
+                           garage_def: ("/Users/me/Projects/106 Ithaca/garage.3dm", "Garage")})
+    assert advice == {
+        "shed": "Linked file 'shed.3dm' can't be found at /Users/me/Projects/106 Ithaca/shed.3dm: relink it to where "
+                "the file is now (Edit \u25b8 Blocks \u25b8 Block Definitions, select it, then Properties \u25b8 "
+                "Filename: Browse to the file) so Gordium can see where it is",
+        "holder": "Linked file 'garage.3dm' has changed since it was loaded: reload it (Edit \u25b8 Blocks \u25b8 "
+                  "Block Definitions, select it, then Update; or type -BlockManager, Update, All) so Gordium can see "
+                  "where it is"}
+    left, touching, _, _ = _live_left_out({"shed": shed, "holder": holder, "normal": normal}, (x, y))
+    assert left == ["shed", "holder", "normal"] and touching == ["shed", "holder"]     # the answer, as before
+
+
+def test_the_reference_adapter_stops_with_the_workers_words_when_it_refuses():
+    """Review round 2: a refused part (a lot with no outline) came back as a bare KeyError, its reason lost; it is
+    never read as nothing left out."""
+    import rhino3dm as r
+    lot = types.SimpleNamespace(Geometry=r.Polyline([r.Point3d(0, 0, 0), r.Point3d(60, 0, 0), r.Point3d(0, 0, 0)])
+                                .ToPolylineCurve())
+    model = types.SimpleNamespace(Layers=[], Objects=[])
+    with pytest.raises(ValueError, match="objects.left_out refused: left_out: lot: its ring is an outline"):
+        cr._left_out(model, lot, [], 1.0)
 
 
 def test_the_reference_adapter_gives_a_block_holding_a_part_with_no_box_no_box(tmp_path):
@@ -916,3 +1020,16 @@ def test_blocks_with_nothing_to_measure_are_listed_touching_unknown_never_placed
     dropped = c.expected_site(scene)
     dropped["left_out"] = [o for o in dropped["left_out"] if o["id"] != "empty_block"]
     assert "left out empty_block: not listed (it makes the check need review)" in c.differences(dropped, c.expected_site(scene))
+
+def test_the_live_command_s_linked_file_advice_can_never_stop_a_check():
+    """The advice is words only: _extras asks for it through logic.guard (an error is logged and the row is said
+    without it), never directly, so a failure reading a definition's file can't take the check's answer with it."""
+    import ast
+
+    from host_source import host_text
+    tree = ast.parse(host_text("rhino", "plugin", purpose="wiring"))
+    extras = next(n for n in tree.body if isinstance(n, ast.FunctionDef) and n.name == "_extras")
+    calls = [n for n in ast.walk(extras) if isinstance(n, ast.Call) and getattr(n.func, "id", None) == "_link_advice"]
+    guarded = [n for n in ast.walk(extras) if isinstance(n, ast.Call) and getattr(n.func, "attr", None) == "guard"
+               and any(c in ast.walk(n) for c in calls)]
+    assert len(calls) == 1 and len(guarded) == 1

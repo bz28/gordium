@@ -1,4 +1,4 @@
-# The worker protocol, version 1 (`1.0`)
+# The worker protocol, version 1 (`1.1`)
 
 **Purpose:** how a design tool (Rhino now, Revit later) talks to Gordium's checker: the message format, every command, and how versions change.\
 **For:** engineers writing a design-tool add-in; reviewers checking that the worker answers exactly what the tool's own copy of the logic would.\
@@ -12,7 +12,8 @@ description, has its own page: [site_description_v1.md](site_description_v1.md).
 
 ## Messages
 
-A request is one JSON object on one line: `{"id": 7, "cmd": "box.view", "protocol": "1.0", ...its fields}`.
+A request is one JSON object on one line: `{"id": 7, "cmd": "box.view", "protocol": "1.1", ...its fields}`
+(a tool written for `1.0` may keep sending `"1.0"`: the same major version, answered the same).
 
 - `id`: any value; the answer carries it back.
 - `cmd`: the command.
@@ -73,6 +74,17 @@ the street. The worker can't ask, so the tool sends the answers it has, in order
 `null`), and the answer lists every question asked after those ran out (`unasked`, answered `null` meanwhile:
 kept as street, and the command line's words say so). A tool with an architect at hand asks each one, adds the
 answer and sends the request again; the answers are always asked in the same order.
+
+**Which objects are left out** (`objects.left_out`, from 1.1). The tool picks the objects that could be a
+building and aren't measured (Rhino: by layer and geometry type; Revit: by category) and sends what it saw of each:
+its `id`, its 3D `box` (`null` when it has none), its plan `points`, and for a placed block or linked model its
+`definition` (left out entirely for anything else: `null` means a block whose definition is missing, so no box), with every definition it holds, at any depth, once in `definitions` (each with its `status`, the
+tool's word for whether what it holds is the design, and its `parts`). The worker decides the rest, the same for
+every tool: which are on the lot (`left_out`), which may be part of the house (`touching`), and which have no box
+that covers all of them (`no_box`: a linked file missing, unreadable or out of date at any depth, an empty block,
+no box given), which always count as left out and touching. Each answer is one entry per object sent, in order,
+with a code saying why (`host_core/left_out.py`, `NO_BOX` and `WHY`). Lengths are in the model's units, with
+`feet_per_unit` saying how long one is; the field-by-field form is at the top of `host_core/left_out.py`.
 
 <!-- the command reference: written by protocol.reference() (python -m design_checker.protocol --write-doc); a test keeps it equal -->
 
@@ -261,6 +273,16 @@ The panel's words: its header (`header`), a row's status words (`status`), name 
 | `highlight` | `panel_words.highlight` | `status` |  |
 | `detail` | `panel_words.detail_parts` | `det` |  |
 | `cell` | `panel_words.cell_text` | `cell_text` |  |
+
+### `objects.left_out`
+
+Of the objects a host sends that could be a building and aren't measured (host_core/left_out.py says what each is): whether each is left out of the check, on the lot or with no box to tell (`left_out`), whether it may be part of the house (`touching`; null when it has no box, which counts as touching), and why it has no box that covers all of it (`no_box`).
+
+| Answer | host_core | Needs | May also send |
+|---|---|---|---|
+| `left_out` | `left_out.left_out_decisions` | `lot`, `objects` | `definitions` (None), `feet_per_unit` (1.0) |
+| `touching` | `left_out.touching_decisions` | `objects`, `buildings` | `definitions` (None), `feet_per_unit` (1.0) |
+| `no_box` | `left_out.no_box_reasons` | `objects` | `definitions` (None) |
 
 <!-- end of the command reference -->
 

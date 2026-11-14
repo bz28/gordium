@@ -66,7 +66,8 @@ CI runs it on every push. The **Rhino reference adapter** (`design_checker/confo
 `.3dm` with rhino3dm, no Rhino needed: the lot and Building layers through `read_site` (the reader the Rhino
 command's exported copy goes through), the spot grades from `Gordium::Grade` as the command reads them, and every
 other object on the lot looked at with the same decisions the command makes (`rhino_logic.could_be_building`,
-`reaches_into_lot`, `looks_like_ground`, `context_left_out`), on the same points (a curve's points along it; a
+`looks_like_ground`, `context_left_out`; which are on the lot, touching or without a box from the worker's
+`objects.left_out`, `host_core/left_out.py`, as any host asks it), on the same points (a curve's points along it; a
 solid's corners, edges and faces; a block's box, from what it holds, as rhino3dm gives a placed block none). The live command does that inventory in RhinoCommon,
 which CI can't run; its Rhino-side tests cover it.
 

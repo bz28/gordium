@@ -220,6 +220,34 @@ public sealed class WorkerClient : IDisposable
         return Guard(() => SessionAnswer.Parse(command, answer, want));
     }
 
+    /// <summary><c>objects.left_out</c> (protocol 1.1): which of the objects the add-in saw that could be a building
+    /// and aren't measured are left out of the check (<c>left_out</c>), may be part of the house (<c>touching</c>,
+    /// null when an object has no box: it counts as touching) and have no box that covers all of them
+    /// (<c>no_box</c>), each one entry per object, in the order sent. What each object, definition, the lot and a
+    /// building's box are: host_core/left_out.py. Lengths in the model's units, <paramref name="feetPerUnit"/>
+    /// feet each (Revit's internal units are feet: 1).</summary>
+    /// <param name="lot">The lot's <c>{ring, box}</c>, or null when there is none (nothing is left out).</param>
+    /// <param name="objects">What the add-in saw of each object: <c>{id, box, points, definition?}</c>. Send
+    /// <c>definition</c> only for a family instance or linked model, never null for anything else: null means one
+    /// whose definition is missing, so no box (left out and touching).</param>
+    /// <param name="buildings">The measured buildings' boxes.</param>
+    /// <param name="definitions">What each placed family or linked model holds, once each, or null for none.</param>
+    /// <param name="feetPerUnit">How many feet one model unit is.</param>
+    /// <param name="cancel">Cancels the wait; the worker is then stopped.</param>
+    public Task<SessionAnswer> LeftOutAsync(JsonNode? lot, JsonArray objects, JsonArray buildings,
+                                            JsonObject? definitions = null, double feetPerUnit = 1.0,
+                                            CancellationToken cancel = default)
+    {
+        ArgumentNullException.ThrowIfNull(objects);
+        ArgumentNullException.ThrowIfNull(buildings);
+        var fields = new JsonObject
+        {
+            ["lot"] = lot?.DeepClone(), ["objects"] = objects.DeepClone(), ["buildings"] = buildings.DeepClone(),
+            ["definitions"] = definitions?.DeepClone() ?? new JsonObject(), ["feet_per_unit"] = feetPerUnit,
+        };
+        return SessionAsync("objects.left_out", fields, cancel: cancel);
+    }
+
     /// <summary>A protocol-1 command this client has no typed method for (one a later 1.x worker adds), by name, with
     /// its fields (<c>id</c>, <c>cmd</c> and <c>protocol</c> are added). Its result comes back unread: only the
     /// answer's envelope is checked (this request's id, <c>ok</c>, <c>about</c>). A command with a typed method is

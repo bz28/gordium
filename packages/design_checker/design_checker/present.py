@@ -2022,6 +2022,19 @@ def _on_context(extras):
             "Building layer if part of your design") if k else ""
 
 
+def _advice(extras, left_out):
+    """What the host says the architect can do about some left-out objects (extras["left_out_advice"], {id: words},
+    e.g. a linked file to reload), said on the row once each, in the left-out objects' order. Words only: the row
+    and every result it touches stay as they are."""
+    advice = (extras or {}).get("left_out_advice") or {}
+    said = []
+    for i in left_out:
+        words = advice.get(i)
+        if words and words not in said:
+            said.append(words)
+    return "".join(" · " + w for w in said)
+
+
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
     """Every item, grouped; the summary; the header. `extras` is what the Rhino command adds: what it sent
     (scope), objects on the lot it didn't include, and the grade and lot sources."""
@@ -2086,7 +2099,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "reason": f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
                                 "measured (not on the Building layer) · Add to check…" + _on_context(extras) + (
                                     f" (" + str(len(extras.get("ground_like") or [])) + " looks like the ground: if it is, "
-                                    "This is the ground)" if extras.get("ground_like") else ""),
+                                    "This is the ground)" if extras.get("ground_like") else "") + _advice(extras, left_out),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     for row in interior:

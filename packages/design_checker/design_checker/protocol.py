@@ -1,6 +1,6 @@
 """The worker's protocol version and what it says about itself (`hello`), for any design tool that talks to it.
 
-A request to a new-style command (`hello`, `read_model`) names the protocol it speaks, {"protocol": "1.0", ...}: a
+A request to a new-style command (`hello`, `read_model`) names the protocol it speaks, {"protocol": "1.1", ...}: a
 different major version is refused, since the two sides would read the same words differently. The five older
 commands (check, start, facts, options, sample_site) are answered with or without it, exactly as before. Every
 new-style answer carries `about()`: the protocol, the site description version, and fingerprints of the worker's
@@ -16,7 +16,7 @@ from rule_format.rulebook import REPO
 
 from .site_json import SCHEMA
 
-PROTOCOL = "1.0"
+PROTOCOL = "1.1"
 LEGACY = ("check", "start", "facts", "options", "sample_site")
 
 
@@ -78,7 +78,7 @@ def speaks(request: dict) -> None:
                          f"\"{PROTOCOL}\"; a different major version is refused)")
 
 
-# ---- the session commands (protocol 1.0): host_core's functions, served by a fixed table ---------------------------
+# ---- the session commands (protocol 1.0; objects.left_out from 1.1): host_core functions, by a fixed table ----
 #
 # Each command is a few PARTS, and each part is ONE named host_core function (or one of its constants) with the
 # request fields it reads: never "call any function by name". The table below is the whole list; anything not in it
@@ -105,6 +105,7 @@ import json as _json
 
 from .host_core import edits as _edits, facts as _facts, freshness as _freshness, lookup as _lookup
 from .host_core import panel_words as _panel_words, report as _report, start_box as _start_box, streets as _streets
+from .host_core import left_out as _left_out
 from .host_core.worker_client import NotPlain, plain, unplain
 
 ENVELOPE = ("id", "cmd", "protocol", "progress", "want")       # a request's own fields, never a command's
@@ -311,6 +312,14 @@ COMMANDS = {
         Part("name", _panel_words.row_name), Part(("cell_name", "proposed"), _panel_words.list_cells),
         Part("highlight", _panel_words.highlight), Part("detail", _panel_words.detail_parts),
         Part("cell", _panel_words.cell_text, fields={"text": "cell_text"})),
+    # ---- which objects the check leaves out (protocol 1.1) ----
+    "objects.left_out": Command(
+        "Of the objects a host sends that could be a building and aren't measured (host_core/left_out.py says what "
+        "each is): whether each is left out of the check, on the lot or with no box to tell (`left_out`), whether "
+        "it may be part of the house (`touching`; null when it has no box, which counts as touching), and why it "
+        "has no box that covers all of it (`no_box`).",
+        Part("left_out", _left_out.left_out_decisions), Part("touching", _left_out.touching_decisions),
+        Part("no_box", _left_out.no_box_reasons)),
 }
 
 
