@@ -242,3 +242,14 @@ def test_a_range_reads_its_lower_number_as_at_least_and_its_upper_as_at_most(ctx
     assert got == [">=", "<=", "<="]
     lone = code_numbers._between_ends([{"comparison": "between", "values": {"in": 10}}])
     assert lone[0]["comparison"] == "between"          # no partner: no comparison fits it
+
+
+def test_a_value_the_piece_reads_two_ways_counts_only_as_the_quote_words_it(ctx):
+    # R320.2: "not less than 34 inches" (handrails) and "not more than 34 inches" (ship's ladders, not quoted)
+    handrail = {"file": BOOK, "page": 103, "lines": [54, 55], "quote": (
+        "Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface of "
+        "ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm).")}
+    ok = problems(ctx, "handrail_height >= 34 and handrail_height_max <= 38", handrail, "handrail")
+    assert ok == [], ok
+    got = problems(ctx, "handrail_height <= 34 and handrail_height_max <= 38", handrail, "handrail")
+    assert any("needs <= 34 to hold, but the law reads >= 34" in p for p in got), got

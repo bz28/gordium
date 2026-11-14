@@ -139,7 +139,11 @@ def _plain_number(shown: str) -> bool:
 
 def _length(first: dict, values: dict, members=None) -> dict:
     members = members or [first]
+    from document_extraction.numbers import statements
+    words = statements(first["shown"])
+    worded = (" ".join(words[0]["before"].lower().split()), first["value"], first["unit"]) if len(words) == 1 else None
     return {"shown": " + ".join(m["shown"] for m in members), "values": values, "comparison": first["comparison"],
+            "worded": worded,
             "unit": first["unit"], "statements": [(m["value"], m["unit"]) for m in members],
             "flags": [m["flag"] for m in members if m["flag"]],
             "resolved": all(m["resolved"] for m in members) or (len(members) > 1 and all(
@@ -152,6 +156,13 @@ def _resolves(flag: str, comparison: str) -> bool:
     ("so the second reading (none) is right"), or says the number is part of one length."""
     return (f"({comparison})" in flag and (comparison != "none" or "second reading (none) is right" in flag)) \
         or "one length" in flag
+
+
+def _worded_statements(quote: str) -> set[tuple]:
+    """(the words before it, value, unit) of every number a quote states, as the reading's own words are matched."""
+    from document_extraction.numbers import statements
+    return {(" ".join(s["before"].lower().split()), value_of(s["value"]), s["unit"]) for s in statements(quote)
+            if value_of(s["value"]) is not None}
 
 
 def quote_statements(quote: str) -> set[tuple]:
@@ -168,10 +179,20 @@ def candidates(sources: list[dict], ctx) -> list[dict]:
         if not book or not isinstance(s.get("quote"), str):
             continue
         stated = quote_statements(s["quote"])
+        worded = _worded_statements(s["quote"])
         for pid in pieces_of(s, book):
-            for length in _between_ends(readings(book["pieces"].get(pid) or {})):
-                if all(st in stated for st in length["statements"]):
-                    out.append(length | {"piece": pid})
+            lengths = _between_ends(readings(book["pieces"].get(pid) or {}))
+            # a value the piece reads more than one way (R320.2: "not less than 34" and, for ship's ladders, "not
+            # more than 34"): a reading counts only where the quote states it with the same words before it
+            ways: dict = {}
+            for length in lengths:
+                ways.setdefault(tuple(length["statements"]), set()).add(length["comparison"])
+            for length in lengths:
+                if not all(st in stated for st in length["statements"]):
+                    continue
+                if len(ways[tuple(length["statements"])]) > 1 and length["worded"] not in worded:
+                    continue
+                out.append(length | {"piece": pid})
     return out
 
 
