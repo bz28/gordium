@@ -11,10 +11,11 @@ from pathlib import Path
 import pytest
 
 from design_checker import rhino_logic as logic
+from host_source import host_doc, host_script, host_text
 
 REPO = Path(__file__).resolve().parents[3]
-RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-UI = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+RHINO = host_text("rhino", "plugin", purpose="wiring")
+UI = host_text("rhino", "ui", purpose="wiring")
 
 
 def body(src, name, until):
@@ -167,7 +168,7 @@ def test_gordiumlive_turns_the_tick_never_the_edit_hooks_off():
 def test_the_architects_docs_say_press_check():
     """P2: QUICKSTART and README still said Gordium re-checks by itself half a second after every edit."""
     for name in ("QUICKSTART.md", "README.md"):
-        text = (REPO / "apps/rhino_plugin" / name).read_text(encoding="utf-8")
+        text = host_doc("rhino", name, purpose="wiring")
         flat = " ".join(text.split())
         assert logic.CHANGED_SINCE in flat and logic.AUTO_CHECK_LABEL in flat, name
         assert "Half a second after you stop, Gordium re-checks" not in flat, name
@@ -187,9 +188,9 @@ def test_edits_are_noticed_whichever_command_drew_the_results():
 
 def test_no_command_text_still_promises_live_re_checking():
     """P3: install.py, gordium_check.py, gordium_off.py and docs/methods.md still said live re-checking."""
-    for path in ("apps/rhino_plugin/install.py", "apps/rhino_plugin/gordium_check.py",
-                 "apps/rhino_plugin/gordium_off.py", "docs/methods.md"):
-        text = (REPO / path).read_text(encoding="utf-8")
+    texts = {part: host_text("rhino", part, purpose="wiring") for part in ("install", "check", "off")}
+    texts["docs/methods.md"] = (REPO / "docs/methods.md").read_text(encoding="utf-8")
+    for path, text in texts.items():
         assert "live re-checking" not in text and "turn on live mode" not in text and "stop live mode" not in text, path
         assert "Live checking is on" not in text, path
 
@@ -200,7 +201,7 @@ def test_the_rhino_check_runs_its_idle_steps_across_real_idle():
     handler grey the panel or check by itself, and claim 2 failed on a correct plugin. Now the script only starts the
     run: each step runs from a timer once no command is running, steps 2 and 4 only after Rhino's own Idle event has
     been seen 3 s past the edit, and a wait that never sees it fails (never hangs)."""
-    script = (REPO / "apps/rhino_plugin/tests/check_button_in_rhino.py").read_text(encoding="utf-8")
+    script = host_script("rhino", "check_button_in_rhino.py", purpose="wiring")
     assert "RhinoApp.Wait()" not in script.split('"""', 2)[2]                 # (the docstring says why)
     assert "Rhino.RhinoApp.Idle += idle_handler" in script and "ef.UITimer()" in script
     tick = body(script, "def tick(", "\ndef ")

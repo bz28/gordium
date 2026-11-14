@@ -7,14 +7,14 @@ CI, no Rhino: every name a script assigns on the plugin is one its module really
 import ast
 
 from rule_format.rulebook import REPO
+from host_source import host_path, host_scripts, host_text_of
 
-APP = REPO / "apps/rhino_plugin"
 
 
 def _defined(path):
     """The names a module defines at its top level: functions, classes, assignments and imports, including those
     inside a top-level if / try / with / for (never inside a function or class)."""
-    names, todo = set(), list(ast.parse(path.read_text(encoding="utf-8")).body)
+    names, todo = set(), list(ast.parse(host_text_of(path, purpose="wiring")).body)
     while todo:
         node = todo.pop()
         if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
@@ -64,12 +64,11 @@ def stand_ins(text):
 
 
 def test_every_stand_in_names_a_function_the_plugin_has():
-    logic = next(REPO.glob("packages/*/*/rhino_logic.py"))
-    defined = {"g": _defined(APP / "gordium_rhino.py"), "g.ui": _defined(APP / "gordium_ui.py"),
-               "g.logic": _defined(logic)}
+    defined = {"g": _defined(host_path("rhino", "plugin")), "g.ui": _defined(host_path("rhino", "ui")),
+               "g.logic": _defined(host_path("rhino", "logic"))}
     stale, seen = [], 0
-    for script in sorted((APP / "tests").glob("*_in_rhino.py")):
-        for owner, name in stand_ins(script.read_text(encoding="utf-8")):
+    for script in host_scripts("rhino"):
+        for owner, name in stand_ins(host_text_of(script, purpose="wiring")):
             seen += 1
             if name not in defined[owner]:
                 stale.append(f"{script.name}: {owner}.{name}")
@@ -79,7 +78,7 @@ def test_every_stand_in_names_a_function_the_plugin_has():
 
 def test_a_removed_name_is_caught():
     """The check itself: the stand-ins the row's dialog replaced are caught."""
-    defined = _defined(APP / "gordium_rhino.py")
+    defined = _defined(host_path("rhino", "plugin"))
     old = stand_ins("g._count = lambda prompt: 2\ng._ask_yes_no_or_skip, g._pick = a, b\n")
     assert old == [("g", "_count"), ("g", "_ask_yes_no_or_skip"), ("g", "_pick")]
     assert [n for _, n in old if n not in defined] == ["_count", "_ask_yes_no_or_skip"]
