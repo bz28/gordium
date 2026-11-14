@@ -98,7 +98,7 @@ def test_synthetic_rules_validate():
 @pytest.mark.parametrize("change, words", [
     ({"for_each": "balcony"}, "unknown part kind 'balcony'"),
     ({"for_each": 3}, "unknown part kind 3"),
-    ({"within": "stair"}, "can sit within ['sleeping_room'], not 'stair'"),
+    ({"within": "stair"}, "can sit within ['sleeping_room', 'basement', 'habitable_attic'], not 'stair'"),
     ({"when_none": "pass"}, "never pass"),
     ({"when_none": None}, "never pass"),
     ({"check": "stair_riser_height <= 8.25"}, "unknown measure 'stair_riser_height'"),       # another kind's

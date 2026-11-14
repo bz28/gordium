@@ -1,0 +1,153 @@
+"""A rule drafted from New York's Residential Code may use only the second reading's numbers, the way the second
+reading says the law reads them (rule_format/code_numbers.py, egress step 3).
+
+The numbers and comparisons come from the repo's text_verification.yaml and sections file (no code cache needed, so
+CI runs these too); each quote here is the book's own words (checked against the book where the cache is, by
+`python -m rule_format`, through the answer key and drafts that quote them).
+"""
+
+import copy
+
+import pytest
+
+from rule_format import code_numbers
+from rule_format.rulebook import REPO, Context, validate
+
+STATE = REPO / "regulations/jurisdictions/new_york/new_york_state"
+BOOK = "gov.ny.residential.2025.pdf"
+RISERS = {"file": BOOK, "page": 100, "lines": [42, 42],
+          "quote": "[NY] R318.7.5.1 Risers. The riser height shall be not more than 8 1/4 inches (209 mm)."}
+HEADROOM = {"file": BOOK, "page": 100, "lines": [28, 29],
+            "quote": "R318.7.2 Headroom. The headroom in stairways shall be not less than 6 feet 8 inches (2032 mm) measured "
+                     "vertically from the sloped line adjoining the tread nosing or from the floor surface of the landing or "
+                     "platform on that portion of the stairway."}
+AREA = {"file": BOOK, "page": 102, "lines": [48, 50],
+        "quote": "R319.2.1 Minimum size. Emergency escape and rescue openings shall have a net clear opening of not less "
+                 "than 5.7 square feet (0.530 m[fn2]). Exception: The minimum net clear opening for grade-floor emergency "
+                 "escape and rescue openings shall be 5 square feet (0.465 m[fn2])."}
+GUARDS = {"file": BOOK, "page": 104, "lines": [35, 37],
+          "quote": "R321.1.1 Where required. Guards shall be provided for those portions of open-sided walking surfaces, "
+                   "including floors, stairs, ramps and landings that are located more than 30 inches (762 mm) measured "
+                   "vertically to the floor or grade below at any point within 36 inches (914 mm) horizontally to the edge "
+                   "of the open side."}
+
+
+@pytest.fixture(scope="module")
+def ctx():
+    return Context.for_jurisdiction(STATE)
+
+
+def problems(ctx, check, source, kind, key="check"):
+    return code_numbers.problems({key: check, "for_each": kind}, [source], ctx)
+
+
+def test_the_sources_sit_in_the_pieces_they_quote(ctx):
+    book = ctx.verification[BOOK]
+    assert code_numbers.pieces_of(RISERS, book) == ["R318.7.5.1"]
+    assert code_numbers.pieces_of(AREA, book) == ["R319.2.1"]
+    assert code_numbers.pieces_of(GUARDS, book) == ["R321.1.1"]
+
+
+@pytest.mark.parametrize("check, words", [
+    ("stair_riser_height <= 8.25", None),
+    ("8.25 >= stair_riser_height", None),                       # the number on the left: read mirrored
+    ("not (stair_riser_height > 8.25)", None),                  # a "not" turned round
+    ("stair_riser_height > 8.25", "needs > 8.25 to hold, but the law reads <= 8.25"),    # a dropped "not"
+    ("not (stair_riser_height <= 8.25)", "needs > 8.25 to hold"),
+    ("stair_riser_height < 8.25", "needs < 8.25 to hold, but the law reads <= 8.25"),    # the edge moved
+    ("stair_riser_height <= 8", "isn't one of the second-reading numbers"),             # "8 1/4" misread as 8
+    ("stair_riser_height <= 209", "isn't one of the second-reading numbers"),           # the millimetres
+    ("stair_riser_height == 8.25", "never an equality"),
+])
+def test_a_riser_limit_is_the_second_readings_number_used_the_laws_way(ctx, check, words):
+    got = problems(ctx, check, RISERS, "stair")
+    assert (got == []) if words is None else any(words in p for p in got), got
+
+
+def test_feet_and_inches_are_one_length_in_inches(ctx):
+    assert problems(ctx, "stair_headroom >= 80", HEADROOM, "stair") == []
+    # 6 (the feet alone) is no length in inches here, and 8 (the inches alone) is part of the one length
+    assert any("isn't one of" in p for p in problems(ctx, "stair_headroom >= 6", HEADROOM, "stair"))
+    assert any("isn't one of" in p for p in problems(ctx, "stair_headroom >= 8", HEADROOM, "stair"))
+
+
+def test_a_flagged_number_counts_when_its_flag_resolves_it(ctx):
+    # '5 square foot' is flagged in text_verification.yaml: printed "minimum ... shall be 5 square feet" (>=)
+    assert problems(ctx, "opening_net_clear_area >= (5 if opening_at_grade else 5.7)", AREA,
+                    "emergency_escape_opening") == []
+    assert any("needs < 5 to hold" in p for p in problems(
+        ctx, "opening_net_clear_area < (5 if opening_at_grade else 5.7)", AREA, "emergency_escape_opening"))
+
+
+def test_a_flag_that_does_not_resolve_its_number_sends_it_to_a_person(ctx):
+    changed = copy.copy(ctx)
+    changed.verification = copy.deepcopy(ctx.verification)
+    entry = changed.verification[BOOK]["pieces"]["R319.2.1"]
+    entry["flags"] = ["'5 square foot': printed so unclearly that the two readings could not be told apart"]
+    got = problems(changed, "opening_net_clear_area >= (5 if opening_at_grade else 5.7)", AREA, "emergency_escape_opening")
+    assert any("flag doesn't resolve it" in p for p in got), got
+    # the unflagged 5.7 of the same piece is still fine alone
+    assert problems(changed, "opening_net_clear_area >= 5.7", AREA, "emergency_escape_opening") == []
+
+
+def test_a_number_the_second_reading_reads_as_no_limit_is_never_compared_with(ctx):
+    # R318.7.5.1's "4-inch-diameter sphere": the second reading reads it "none" (its limit is on the opening)
+    sphere = dict(RISERS, lines=[45, 46], quote=(
+        "At open risers, openings located more than 30 inches (762 mm), as measured vertically, to the floor or grade "
+        "below shall not permit the passage of a 4-inch-diameter (102 mm) sphere."))
+    variation = dict(RISERS, lines=[43, 44], quote=(
+        "The greatest riser height within any flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm)."))
+    got = problems(ctx, "stair_riser_variation <= 4", sphere, "stair")
+    assert any("sets no limit with it" in p for p in got), got
+    assert problems(ctx, "stair_riser_variation <= 0.375", variation, "stair") == []
+
+
+def test_a_trigger_inside_an_or_may_be_written_either_way_but_keeps_its_edge(ctx):
+    # "more than 30 inches": a guard is required above 30 in. In an "or", "drop <= 30" is the same edge turned round
+    assert problems(ctx, "open_side_drop <= 30 or guard_present", GUARDS, "open_side") == []
+    assert problems(ctx, "open_side_drop > 30", GUARDS, "open_side", key="applies_when") == []
+    # ... but "30 or more" moves the edge: refused in either place
+    assert any("needs < 30" in p for p in problems(ctx, "open_side_drop < 30 or guard_present", GUARDS, "open_side"))
+    assert any("needs >= 30" in p for p in problems(ctx, "open_side_drop >= 30", GUARDS, "open_side", key="applies_when"))
+
+
+def test_review_when_numbers_are_checked_by_value_only(ctx):
+    rule = {"check": "stair_riser_height <= 8.25", "for_each": "stair",
+            "review_when": [{"when": "stair_riser_height > 8.25", "reason": "x"}, {"when": "stair_riser_height > 8", "reason": "y"}]}
+    got = code_numbers.problems(rule, [RISERS], ctx)
+    assert got == ["number 8 in 'review_when' isn't one of the second-reading numbers (text_verification.yaml) of the "
+                   "pieces its quotes cite, stated in those quotes, in in"], got
+
+
+def test_a_quote_that_does_not_state_the_number_backs_nothing(ctx):
+    # the third sentence of R318.7.5.1 alone: 8 1/4 is the piece's number, but this quote doesn't state it
+    source = dict(RISERS, lines=[43, 44], quote="The greatest riser height within any flight of stairs shall not exceed "
+                                                 "the smallest by more than 3/8 inch (9.5 mm).")
+    assert any("isn't one of" in p for p in problems(ctx, "stair_riser_height <= 8.25", source, "stair"))
+
+
+def test_validation_uses_the_second_reading_for_a_rule_citing_the_book(ctx):
+    """The whole validator: a per-part rule citing R318.7.5.1 is refused for a reversed limit; a zoning rule's numbers
+    are still traced the old way (the quote's own numbers)."""
+    def rule(check):
+        return {"id": "general.risers", "kind": "rule", "topic": "means_of_egress", "title": "Riser height",
+                "for_each": "stair", "when_none": "not_applicable", "check": check, "sources": [RISERS],
+                "examples": [{"given": {}, "parts": {"stair": [{"id": "s1", "measures": {"stair_riser_height": 7}}]},
+                              "rows": [{"part": "s1", "outcome": "pass"}], "expect": "pass"},
+                             {"given": {}, "parts": {"stair": [{"id": "s1", "measures": {"stair_riser_height": 9}}]},
+                              "rows": [{"part": "s1", "outcome": "fail"}], "expect": "fail"},
+                             {"given": {}, "parts": {"stair": []}, "rows": [{"outcome": "not_applicable"}],
+                              "expect": "not_applicable"}],
+                "drafted_by": "test", "status": "draft"}
+    good = validate({"district": "general", "rules": [rule("stair_riser_height <= 8.25")]}, ctx)
+    assert not any("number" in p for p in good), good
+    bad = validate({"district": "general", "rules": [rule("stair_riser_height < 8.25")]}, ctx)
+    assert any("needs < 8.25 to hold" in p for p in bad), bad
+
+
+@pytest.mark.parametrize("text, value", [("8 1/4", 8.25), ("3/8", 0.375), ("5.7", 5.7), ("1,000", 1000), ("four", 4),
+                                         ("one-half", 0.5), ("two-thirds", 2 / 3), ("one and one third", 4 / 3),
+                                         ("twenty-one", 21), ("R318", None)])
+def test_values_are_read_exactly(text, value):
+    got = code_numbers.value_of(text)
+    assert (got is None) if value is None else abs(float(got) - value) < 1e-9

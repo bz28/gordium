@@ -55,7 +55,9 @@ def slug(text: str) -> str:
 
 
 class Inputs:
-    """Everything drafting reads, for one jurisdiction."""
+    """Everything drafting reads, for one jurisdiction (a place's zoning; a state's building code: book.BookInputs)."""
+
+    for_parts = False
 
     def __init__(self, j: Path | None = None):
         j = j or one_place()
@@ -83,6 +85,9 @@ class Inputs:
         # Every section of every chart page the reader read; the use lists are built by code, not the AI.
         pages = sorted({t["page"] for t in self.tables})
         self.chart_sections = [s for s in chart_values.sections(cells, pages) if s not in CODE_SECTIONS]
+
+    def context(self, unit: dict) -> dict:
+        return drafter.gather_context(unit, self.law, {"notes": self.notes}, self.definitions)
 
     def rows_of(self, page, section):
         return chart_values.section_rows(self.cells_list, page, section)
@@ -117,6 +122,14 @@ class Inputs:
                             "lines": numbered_lines(self.law["rows"], piece),
                             "requirements": [s for s in label.get("sources", []) if s.get("file") == self.law["file"]]})
         return out
+
+
+def inputs(args) -> "Inputs":
+    """What a command drafts: a state folder's building code with --state, else the place's zoning."""
+    if getattr(args, "state", None):
+        from .book import BookInputs, state_folder
+        return BookInputs(state_folder(args.state))
+    return Inputs()
 
 
 def read_log(i: Inputs) -> dict:
@@ -224,9 +237,9 @@ def estimate(i: Inputs, todo: list[dict], model: str, client=None) -> dict:
     characters per token; output at the measured average of recorded calls, else max_tokens."""
     ai = [u for u in todo if not u.get("code")]
     system = i.system()
-    messages = [drafter.unit_message(u, drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions)) for u in ai]
+    messages = [drafter.unit_message(u, i.context(u)) for u in ai]
     if client is not None and ai:           # exact, counted the way a call is sent (instructions and answer schema too)
-        fmt = {"effort": drafter.SETTINGS["effort"], "format": drafter.output_schema(sorted(i.ctx.topics))}
+        fmt = {"effort": drafter.SETTINGS["effort"], "format": drafter.output_schema(sorted(i.ctx.topics), i.for_parts)}
         count = lambda text: client.messages.count_tokens(model=model, system=system, output_config=fmt,
                                                           messages=[{"role": "user", "content": text}]).input_tokens
         system_tokens = count(".")
@@ -258,7 +271,7 @@ def _client():
 
 
 def cmd_status(args) -> int:
-    i = Inputs()
+    i = inputs(args)
     log = read_log(i)
     units = i.units()
     done = [u for u in units if u["id"] in log["units"]]
@@ -271,7 +284,7 @@ def cmd_status(args) -> int:
 
 
 def cmd_estimate(args) -> int:
-    i = Inputs()
+    i = inputs(args)
     model = args.model or drafter.SETTINGS["model"]
     todo = select(i, read_log(i), args)
     print_estimate(estimate(i, todo, model, _client()), model)
@@ -282,7 +295,7 @@ def cmd_draft(args) -> int:
     if args.limit is None and not args.all and not args.only:
         print("say how many: --limit N, --only UNIT..., or --all")
         return 1
-    i = Inputs()
+    i = inputs(args)
     log = read_log(i)
     todo = select(i, log, args)
     client = None
@@ -323,9 +336,8 @@ def cmd_draft(args) -> int:
             elif u["id"] == ACCESSORY_UNIT:
                 result = draft_accessory()
             else:
-                context = drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions)
-                result = drafter.draft_unit(client, u, context, system, i.law, i.ctx, i.columns, i.cells, i.notes,
-                                            record, budget=budget)
+                result = drafter.draft_unit(client, u, i.context(u), system, i.law, i.ctx, i.columns, i.cells, i.notes,
+                                            record, budget=budget, for_parts=i.for_parts)
             save_result(i, log, u["id"], result)
             saved = True
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "
@@ -382,7 +394,7 @@ def draft_uses(i: Inputs) -> dict:
 
 
 def cmd_cost(args) -> int:
-    i = Inputs()
+    i = inputs(args)
     calls = run_records(i)
     print(f"{len(calls)} recorded calls, ${sum(c['cost_usd'] for c in calls):.4f}")
     return 0
@@ -393,6 +405,9 @@ def main(argv: list[str]) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     for name in ("status", "estimate", "draft", "cost"):
         sub.add_parser(name)
+    for name in ("status", "estimate", "draft", "cost"):
+        sub.choices[name].add_argument("--state", help="a state law folder's building code (new_york/new_york_state) "
+                                                       "instead of the place's zoning")
     for name in ("estimate", "draft"):
         p = sub.choices[name]
         p.add_argument("--limit", type=int, help="only the next N undrafted units")
