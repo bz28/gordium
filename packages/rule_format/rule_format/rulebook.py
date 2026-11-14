@@ -21,7 +21,7 @@ from pathlib import Path
 
 import yaml
 
-from . import formula
+from . import formula, parts
 from .formula import EvaluationError, FormulaError, MissingMeasure
 
 REPO = Path(__file__).resolve().parents[3]
@@ -36,7 +36,7 @@ STATUSES = ("draft", "approved")
 # meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
 RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
                "notes", "open_questions", "research", "findings", "answers", "drafted_by", "status", "approved_by", "approved_on",
-               "approved_hash"}
+               "approved_hash", *parts.PART_FIELDS}
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
@@ -56,8 +56,23 @@ def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
     no list, is unrecognized. A measure that isn't in measures.yaml (one a draft proposed) is described here by
     its kind instead: "number" or "boolean". A missing or unusable measure is unknown: the result is pass or fail
     only if it is the same whatever that measure turns out to be (three-valued logic, formula.evaluate); else
-    needs review."""
-    kinds = MEASURE_KINDS | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
+    needs review. A rule for each part (for_each: parts.py) has no one answer for the whole building: needs review
+    here, so code that doesn't know about parts can never pass one (its rows: parts.rows)."""
+    if parts.is_part_rule(rule):
+        return "needs_review"
+    return _outcome(rule, values, allowed)
+
+
+def _kinds(allowed: dict, extra: dict | None = None) -> dict:
+    """What every measure is (formula.evaluate's kinds): measures.yaml's, then `extra` (a part's measures), then
+    `allowed` (the text values a text measure may take, or a proposed measure's kind)."""
+    return MEASURE_KINDS | (extra or {}) | {k: v if isinstance(v, str) else frozenset(v) for k, v in allowed.items()}
+
+
+def _outcome(rule: dict, values: dict, allowed: dict[str, set], extra: dict | None = None) -> str:
+    """outcome() itself, for one set of values: the whole building's, or (parts.part_outcome) one part's, with
+    `extra` describing the part's own measures."""
+    kinds = _kinds(allowed, extra)
     try:
         if "applies_when" in rule and not _condition(rule["applies_when"], values, kinds):
             return "not_applicable"
@@ -170,9 +185,80 @@ def _jsonl_rows(data: bytes) -> list[dict]:
     return [json.loads(line) for line in text.splitlines() if line.strip()]
 
 
+# A state's own law folder, regulations/jurisdictions/<state>/<name>/, holds law every place in that state inherits
+# (New York's Residential Code). It has the same numbered steps as a place, but its settings file is state.yaml, not
+# jurisdiction.yaml: it is no place (no boundary, no lot lookup), so the place registry and the Rhino plugin's "one
+# place" never see it. A place names the state folders it inherits in its jurisdiction.yaml `inherits:` (place.py).
+# Decided 2026-11-12: docs/decisions/2026-11-12_building_code_text.md.
+STATE_SETTINGS = "state.yaml"
+
+
 def jurisdictions(repo: Path = REPO) -> list[Path]:
-    """Every jurisdiction folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order."""
+    """Every place folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order (a state's own
+    law folder, which has a state.yaml, is not a place: state_folders)."""
+    return [p for p in _law_folders(repo) if not (p / STATE_SETTINGS).is_file()]
+
+
+def state_folders(repo: Path = REPO) -> list[Path]:
+    """Every state law folder (one with a state.yaml), regulations/jurisdictions/<state>/<name>, in a stable order."""
+    return [p for p in _law_folders(repo) if (p / STATE_SETTINGS).is_file()]
+
+
+def law_folders(repo: Path = REPO) -> list[Path]:
+    """Every folder of law: the places, then the state law folders. What checks the law's own files (sources,
+    extracted text, labels, definitions, coverage) walks."""
+    return jurisdictions(repo) + state_folders(repo)
+
+
+def _law_folders(repo: Path) -> list[Path]:
     return sorted(p for p in (Path(repo) / "regulations/jurisdictions").glob("*/*") if p.is_dir())
+
+
+# ---- law kept outside the repo ------------------------------------------------------------------------------------
+# A copyrighted code book (New York's Residential Code, published by the International Code Council) can't be
+# committed: the repo keeps only short exact quotes with their section, page and a link, and its sources.yaml entry
+# says `kept_outside_repo: true`. The book itself and its extracted text live in a cache on the machines that have
+# it, one folder per fingerprint: <cache>/<sha256>/<file>, and the text of every page, one file per extractor
+# version (document_extraction/book_text.py): the same cache for every branch, each reading its own brought-in pages
+# from it. Where the cache is missing (CI), every check that needs the text is skipped and says so; nothing is ever
+# passed in its stead.
+CODE_CACHE_ENV = "GORDIUM_CODE_CACHE"
+DEFAULT_CODE_CACHE = Path.home() / "Documents/gordium_archive/code_cache"
+
+
+def code_cache() -> Path:
+    """The folder holding law kept outside the repo ($GORDIUM_CODE_CACHE, else ~/Documents/gordium_archive/code_cache)."""
+    import os
+    return Path(os.environ.get(CODE_CACHE_ENV) or DEFAULT_CODE_CACHE)
+
+
+def cached(entry: dict) -> Path:
+    """Where a kept-outside document is in the cache."""
+    return code_cache() / str(entry.get("sha256")) / entry["file"]
+
+
+def cached_text(entry: dict) -> Path:
+    """Where a kept-outside document's extracted text (every page, this extractor version) is in the cache."""
+    from document_extraction.book_text import file_name
+    return code_cache() / str(entry.get("sha256")) / file_name(entry)
+
+
+def brought_in_pages(entry: dict) -> list[int] | None:
+    """The pages a kept-outside document's sources.yaml entry brings in (brought_in.pages), or None if it names none."""
+    from document_extraction.icc_sections import parse_pages
+    spec = entry.get("brought_in", {}).get("pages") if isinstance(entry.get("brought_in"), dict) else None
+    return None if spec is None else parse_pages(spec)
+
+
+def kept_text(entry: dict) -> list[dict]:
+    """A kept-outside document's extracted text as this branch brings it in: its brought-in pages chosen from the
+    cached whole book, row for row what extract_icc(pdf, those pages) gives (header included)."""
+    from document_extraction.book_text import select
+    pages = brought_in_pages(entry)
+    if not pages:                               # never the whole book in its stead (_source_entry_problems)
+        raise ValueError(f"{entry['file']}: kept outside the repo with no brought_in.pages")
+    return _kept(f"kept text {pages}", cached_text(entry).read_bytes(),
+                 lambda data: select(_jsonl_rows(data), pages))
 
 
 @dataclass
@@ -191,6 +277,8 @@ class Context:
     districts: set[str] = field(default_factory=set)                 # district names, as the city writes them
     proposed: dict[str, dict] = field(default_factory=dict)          # measures drafts asked for, not yet in measures.yaml
     pieces: set[str] = field(default_factory=set)                    # every piece id the law is cut into (research cites them)
+    uncached: dict[str, str] = field(default_factory=dict)           # file -> why its text can't be read here (cache)
+    skipped: list[str] = field(default_factory=list)                 # checks not run here for want of the cache
 
     def kinds(self) -> dict:
         """Every usable measure's kind: "number", "text" or "boolean" (this context's measures, plus the
@@ -228,21 +316,37 @@ class Context:
             for problem in _source_entry_problems(entry):
                 ctx._problem(name, problem)
         for name, entry in listed.items():
-            pdf = j / "1_source_documents" / name
+            outside = entry.get("kept_outside_repo") is True
+            pdf = cached(entry) if outside else j / "1_source_documents" / name
+            extracted = cached_text(entry) if outside else j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
             sha = entry.get("sha256")
-            if not sha:
+            if outside and (j / "1_source_documents" / name).exists():
+                ctx._problem(name, "is kept outside the repo (kept_outside_repo), but a copy is in 1_source_documents")
+            elif outside and (j / "2_extracted_text" / f"{Path(name).stem}.jsonl").exists():
+                ctx._problem(name, "is kept outside the repo (kept_outside_repo), but its text is in 2_extracted_text")
+            elif not sha:
                 ctx._problem(name, "no sha256 in sources.yaml")
+            elif outside and not pdf.exists():      # skipped, never passed: every quote of it is listed as not checked
+                ctx.uncached[name] = (f"kept outside the repo, and not in the code cache here ({_shown_cache(pdf)}); "
+                                      "checked where the cache exists")
             elif not pdf.exists():
                 ctx._problem(name, "listed in sources.yaml but missing")
             elif hashlib.sha256(pdf.read_bytes()).hexdigest() != sha:
                 ctx._problem(name, "fingerprint does not match sources.yaml")
-            extracted = j / "2_extracted_text" / f"{Path(name).stem}.jsonl"
+            elif outside and not extracted.exists():
+                ctx._problem(name, f"its extracted text isn't in the code cache for this extractor version "
+                                   f"({_shown_cache(extracted)}): run python -m document_extraction (it needs "
+                                   "pdfplumber; the version is book_text.extractor_key)")
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
-                ctx._load_extracted(name, sha, extracted)
+                ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None)
+                # (an outside book with no brought_in.pages has a problem, so is never loaded whole)
             cut = j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
             if cut.exists():
                 ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
+            if outside and cut.exists() and name in ctx.pages:
+                for problem in _stale_cache_problems(extracted, cut):
+                    ctx._problem(name, problem)
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
                 ctx._load_cells(name, sha, cells, j)
@@ -266,15 +370,39 @@ class Context:
         self.districts |= districts
         self.cells[name] = cells
 
-    def _load_extracted(self, name, sha, path):
+    def _load_extracted(self, name, sha, path, pages=None):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
         The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
-        document_extraction --check) and requires an exact match, so this file can't be edited by hand."""
-        pages = _kept(f"extracted {sha}", Path(path).read_bytes(), lambda data: _pages_of(data, sha))
-        if pages is None:
+        document_extraction --check) and requires an exact match, so this file can't be edited by hand. `pages`: only
+        these pages (a book kept outside the repo: its cached text is the whole book; the branch brings in some)."""
+        found = _kept(f"extracted {sha} {pages}", Path(path).read_bytes(), lambda data: _pages_of(data, sha, pages))
+        if found is None:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
-        self.pages[name] = pages
+        self.pages[name] = found
+
+
+def _stale_cache_problems(extracted: Path, cut: Path) -> list[str]:
+    """A cached text that is not the one the repo's pieces were cut from (edited, or left from another extraction):
+    each piece's words must still have the fingerprint the sections file records. Only `python -m
+    document_extraction --check` re-extracts, so without this an edited cache would feed every other check."""
+    from document_extraction.icc_sections import text_fingerprint
+    lines = {(r["page"], r["line"]): r for r in read_jsonl(extracted)[1:]}
+    out = []
+    for piece in read_jsonl(cut)[1:]:
+        members = [lines.get((pg, n)) for pg, a, b in piece["lines"] for n in range(a, b + 1)]
+        if None in members or text_fingerprint(members) != piece["text_sha256"]:
+            out.append(f"{_shown_cache(extracted)}: {piece['id']}'s words are not the ones its piece was cut from; "
+                       "run python -m document_extraction")
+    return out
+
+
+def _shown_cache(path: Path) -> str:
+    """A cache path as messages show it: from the cache folder, so a message reads the same on every machine."""
+    try:
+        return "<code cache>/" + path.relative_to(code_cache()).as_posix()
+    except ValueError:
+        return path.as_posix()
 
 
 def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | None:
@@ -293,21 +421,27 @@ def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | Non
     return cells, districts
 
 
-def _pages_of(data: bytes, sha: str) -> dict | None:
-    """An extracted-text .jsonl file's bytes -> page -> line -> the line's words, or None when its header names
-    another PDF version than `sha` (checked before any row is read, as for _cells_of)."""
+def _pages_of(data: bytes, sha: str, only: list[int] | None = None) -> dict | None:
+    """An extracted-text .jsonl file's bytes -> page -> line -> the line's words (`only`: these pages), or None when
+    its header names another PDF version than `sha` (checked before any row is read, as for _cells_of)."""
     rows = _jsonl_rows(data)
     if not rows or rows[0].get("sha256") != sha:
         return None
     pages: dict[int, dict[int, list[str]]] = {}
+    keep = None if only is None else set(only)
     for row in rows[1:]:
+        if keep is not None and int(row["page"]) not in keep:
+            continue
         pages.setdefault(int(row["page"]), {})[int(row["line"])] = tokenize(row["text"])
     return pages
 
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
-                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages"}
-LAYOUTS = {"ecode360"}   # document layouts the section splitter knows (document_extraction/sections.py)
+                 "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages",
+                 "kept_outside_repo", "copy", "terms", "edition", "in_force", "brought_in"}
+# Document layouts the section splitters know: ecode360 (document_extraction/sections.py), icc (an ICC code book,
+# document_extraction/icc_sections.py)
+LAYOUTS = {"ecode360", "icc"}
 # A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU), is each place's own: its
 # jurisdiction.yaml districts.chart_column, through the registry (place.py: Place.district_column), the one
 # definition the chart reader, the inspector and the drafter all use.
@@ -537,6 +671,16 @@ def _source_entry_problems(entry: dict) -> list[str]:
             and len(set(chart_pages)) == len(chart_pages)
             and (type(entry.get("pages")) is not int or all(n <= entry["pages"] for n in chart_pages))):
         p.append("'chart_pages' must be a list of distinct page numbers in the document")
+    if entry.get("kept_outside_repo") is True:
+        # The code cache holds every page of the book, for every branch: without the pages this branch brings in, a
+        # quote from any page of it would be checked as law brought in.
+        try:
+            pages = brought_in_pages(entry)
+        except (TypeError, ValueError):
+            pages = None
+        if not pages:
+            p.append("kept outside the repo, so it needs brought_in.pages (the pages read, e.g. '34-56, 99'): "
+                     "only those of the cached book are read")
     return p
 
 
@@ -580,6 +724,8 @@ def approval_hash(entry: dict, ctx: "Context", fields: tuple[str, ...] = APPROVE
                    if isinstance(sources, list) else [])
     approved = {k: entry.get(k) for k in fields} | {
         "source_fingerprints": {f: ctx.sources.get(f, {}).get("sha256") for f in cited}}
+    # a rule's per-part fields (parts.py) only when it has them: every fingerprint made before them is unchanged
+    approved |= {k: entry[k] for k in parts.PART_FIELDS if k in entry}
     return hashlib.sha256(json.dumps(_canonical(approved)).encode()).hexdigest()
 
 
@@ -646,6 +792,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p.append(f"'title' is a one-line label of at most {TITLE_MAX} characters; the rule is its quotes and check")
     if (rule.get("kind") == "rule") != ("check" in rule):
         p.append("a 'rule' needs a 'check'; a 'flag' must not have one")
+    p += parts.rule_problems(rule)       # for_each, within, when_none (a rule for each part)
     review_when, sources, examples = (_list_of_dicts(rule, k) for k in ("review_when", "sources", "examples"))
     for key, value in (("review_when", review_when), ("sources", sources), ("examples", examples)):
         if value is None:
@@ -655,7 +802,14 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     if any("unknown field" in x for x in p):
         return p  # the approval fingerprint and other checks rely on well-formed items
 
-    kinds = ctx.kinds()
+    # a rule for each part may use its part kind's measures too (parts.yaml), and no other kind's
+    try:                              # parts.yaml broken: said as a problem (and by python -m rule_format), never a crash
+        own = parts.measure_kinds(rule.get("for_each"))
+        foreign = parts.all_measures() - set(own)
+    except (ValueError, OSError) as e:
+        own, foreign = {}, set()
+        p.append(f"rule_format/parts.yaml can't be read, so part measures can't be told apart: {e}")
+    kinds = ctx.kinds() | own
     conditions = [rule[k] for k in ("applies_when", "check") if k in rule]
     for r in review_when or []:
         if not (isinstance(r.get("reason"), str) and r["reason"].strip()):
@@ -671,6 +825,9 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             elif (name := formula.bare_name(f)) and kinds.get(name) != "boolean":
                 p.append(f"{f!r} is just a measure name; only a yes/no measure can be a test on its own")
             unknown = sorted(formula.names(f) - set(kinds))
+            # a part's measure (parts.yaml) only in a rule for each part of that kind, even if a draft proposed it
+            p += [f"'{n}' in {f!r} is a measure of a part (rule_format/parts.yaml): only a rule for each "
+                  f"{_part_kind_of(n)} may use it" for n in sorted(formula.names(f) & foreign)]
             p += [f"unknown measure '{n}' in {f!r}" for n in unknown]
             p += _text_problems(f, {"use": ctx.uses, "district": ctx.districts})
             if not unknown:                 # well-typed for every value, or it is no rule (formula.type_of)
@@ -700,7 +857,8 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(f"example {n}: unknown district {given['district']!r}")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
-        elif not p and (got := outcome(rule, given, ctx.allowed())) != ex["expect"]:
+        elif not p and (got := (parts.part_outcome if parts.is_part_rule(rule) else outcome)(
+                rule, given, ctx.allowed())) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
 
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)
@@ -709,6 +867,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
               for m in sorted(used & set(ctx.proposed))]
     return p
+
+
+def _part_kind_of(measure: str) -> str:
+    return next((k for k, d in parts.registry().items() if measure in d["measures"]), "part").replace("_", " ")
 
 
 def _fits(kind: str, value) -> bool:
@@ -995,6 +1157,8 @@ def _source_problems(sources: list[dict], ctx: Context, district: str | None = N
             p.append(f"source file {name!r} is not in sources.yaml")
         elif reason := not_quotable(ctx.sources[name]):
             p.append(f"source {name} {reason}")
+        elif name in ctx.uncached:          # skipped, never passed: listed so the run says what it didn't check
+            ctx.skipped.append(f"{name} p.{page} lines {lines}: quote not checked here ({ctx.uncached[name]})")
         elif name in ctx.file_problems:
             p.append(f"source {name} has problems: {'; '.join(ctx.file_problems[name])}")
         elif "cell" in s:
