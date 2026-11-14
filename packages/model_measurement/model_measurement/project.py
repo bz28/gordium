@@ -24,8 +24,13 @@ FACT_FIELDS = {"title", "address", "jurisdiction", "zone", "use", "lot_id", "lot
                "adu_building", "adu_detached", "adu_existing_building", "adus_on_parcel", "adu_bedrooms",
                "adu_floor_area", "primary_floor_area",
                "grade_points", "grade_from", "grade_is", "unsettled", "ground_fall", "address_street_line", "accessory_buildings", "accessory_frame",
-               "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids"}
+               "eaves_confirmed", "ground_assumed", "plan_north_deg", "street_ids", "overlays_none_found"}
 CONFIRMATION_FIELDS = {"overhang", "value", "source", "confirmed_by", "date"}
+# An address lookup's positive "no overlay on this lot" (historic, gorge, the zoning map's overlays, the parcel's own
+# record, FEMA's flood maps: every source answered, and every one said none), with the lot outline it was found for
+# (as drawn, in feet), the address it was found at and its day. Set only by a live lookup that drew that lot; the check honours it only while the
+# lot is still exactly that outline (design_checker.present.overlays_cleared). Anything else: the overlays row stays.
+OVERLAYS_NONE_FIELDS = {"value", "lot_outline", "address", "source", "date"}
 # Facts an address lookup found doubtful and the architect hasn't confirmed or changed yet: {fact: why}. Every item
 # measured from one of them needs review (never a false pass on a lot that may be the wrong one).
 UNSETTLED = ("lot", "street", "ground")
@@ -112,6 +117,14 @@ def fact_problems(facts: dict) -> list[str]:
             and c["date"] for c in confirmed)):
         problems.append("eaves_confirmed must be a list of {overhang (the overhang's fingerprint, as the check names "
                         "it), value: true, source, confirmed_by, date}: an architect's confirmation that it is eaves")
+    none_found = facts.get("overlays_none_found")
+    if none_found is not None and not (
+            isinstance(none_found, dict) and none_found.keys() == OVERLAYS_NONE_FIELDS and none_found["value"] is True
+            and isinstance(none_found["lot_outline"], list) and len(none_found["lot_outline"]) >= 3
+            and all(_point(p) for p in none_found["lot_outline"])
+            and all(isinstance(none_found[k], str) and none_found[k].strip() for k in ("address", "source", "date"))):
+        problems.append("overlays_none_found must be {value: true, lot_outline (the lot's corners, each [x, y] in feet), "
+                        "address, source, date}: an address lookup's finding that no overlay is on that lot")
     listed = facts.get("accessory_buildings")
     if listed is not None and not (isinstance(listed, list) and all(isinstance(i, str) for i in listed)):
         problems.append("accessory_buildings must be a list of object ids (the solids that are accessory buildings)")

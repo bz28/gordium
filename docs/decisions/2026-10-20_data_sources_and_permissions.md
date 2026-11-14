@@ -78,10 +78,11 @@ What an architect looks into before designing on an Ithaca lot, and where Gordiu
 | Boundary survey | Partly. The tax-map lot is used (±2 ft, judged at the worst case) until the architect loads a survey |
 | Topographic survey | Partly. USGS LiDAR ground levels, good enough for early design only |
 | Historic district and gorge protection zone | ✓ Looked up; not yet checked, so they show "needs review" |
+| FEMA flood zone | ✓ Looked up (FEMA's National Flood Hazard Layer, and its pending and preliminary maps; federal data, stored in the fixtures); not yet checked, so a lot in or near a flood zone shows "needs review" (2026-11-11) |
 
 **Gaps:**
 
-- **FEMA flood zones:** not checked yet. Easy to add (a public federal service, storable).
+- **FEMA flood zones:** looked up since 2026-11-11 (the flood rules themselves are not checked yet).
 - **Easements and deed restrictions:** not in any public map; they must come from the architect (title report, survey).
 - **The zoning office is the final authority.** Gordium's readings of unclear law are shown as readings to confirm; the questions process (`docs/questions_for_architects.md`) is how they reach the architects and the City.
 

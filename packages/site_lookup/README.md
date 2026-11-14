@@ -37,7 +37,15 @@ settings, or no adapter folder, is a plain error. Everything below describes the
 | **Ground** | The elevation at each lot corner and the centre, in feet above NAVD88. It's **today's** ground; finished ground is set in the start box | USGS 3DEP (1 m, the 2020 LiDAR here) |
 | **Zone** | The City zoning polygon(s) under a grid of points inside the lot; more than one zone covering 2%+ of the lot → Gordium asks. The map's code is matched exactly against `names.yaml`: a residential district as the rulebooks write it is used as is, a listed alias is renamed (the map's `R-U` is the rulebook's `RU`, as §325-4 and the chart write it two ways), and any other code is shown as the map gives it and needs review (never matched by likeness). Always a suggestion: the start box's "I confirm" tick is the architect's statement | City of Ithaca zoning map (online, informational; live only, never stored) |
 | **Rezonings the map may not show** | `amendments.yaml`: ordinances the City adopted, each with a padded box around the districts on its map (Ord. 2025-12 Southside: from the May 2026 Southside Form District Map, p.9). A lot touching the box, or on a street the ordinance names → needs review. An ordinance without a box → every City lot needs review. A row is cleared only by `map_shows_since`, set by hand after checking the online map shows the rezoning; the map's own edit date never clears one (any edit moves it) | kept by hand |
-| **Overlays** | Historic districts, gorge protection zones, secondary and overlay zones and landmark flags on the parcel, and the overlays the zoning map draws over the districts (`names.yaml`: SHOD, SLAUOZ, the Adult Use Overlay Zone; every polygon under a point is counted, so an overlay is never taken for the district nor missed for coming second). Not checked in this release, so any found, or any that couldn't be looked for → needs review | City of Ithaca layers (live only) |
+| **Overlays** | Historic districts, gorge protection zones, secondary and overlay zones and landmark flags on the parcel, and the overlays the zoning map draws over the districts (`names.yaml`: SHOD, SLAUOZ, the Adult Use Overlay Zone; an overlay is never taken for the district). Each is looked for on the lot and 2 ft around it (the tax map's tolerance), and counts however little it touches: the zoning map's overlays by their outlines (never by a share of the lot), the historic and gorge areas by the layer's own query, an area with no name included. The parcel's flags count unless they say `NO` (read 2026-11-11 the City also writes `NR` and `chk`, and leaves a few blank: each is said). A lot the zoning map doesn't cover (a point more than 5 ft inside the lot off the map: the two maps disagree by up to 2.3 ft along lot lines), a code drawn on the lot that is neither a district Gordium knows nor a listed overlay (more than 5 ft in: nearer the line it can't be told from the neighbour's district), an adopted rezoning the map may not show that reaches the lot (`amendments.yaml`), or a layer answering without a feature list, can't be said to have none. The finding keeps its day and never expires (the same file gives the same answer); Look up again to refresh it. Not checked in this release, so any found, or any that couldn't be looked for → needs review | City of Ithaca layers (live only) |
+| **Flood zone** (in the overlays) | FEMA's flood zones touching the lot and 2 ft around it (the tax map's tolerance), asked without geometry (FEMA's polygons run to 265,000 points). The one "none" is FEMA's Zone X, *area of minimal flood hazard* (SFHA_TF `F`), matched exactly, with the whole lot inside one such area (`within`) and no pending or preliminary new map over it. Any other zone touching any part of the lot is named and needs review: every Special Flood Hazard Area (A, AE and its floodway, AH, AO, AR, A99, V, VE), shaded Zone X (0.2% chance, or 1% chance under a foot deep), Zone D, any value not listed. No zone, a lot across two areas, a new map on the way, or FEMA not answering → "couldn't tell / couldn't check", needs review. Definitions: FEMA's glossary ([Flood Zones](https://www.fema.gov/about/glossary/flood-zones), [Zone D](https://www.fema.gov/glossary/zone-d), read 2026-11-11) | FEMA National Flood Hazard Layer, its pending and preliminary maps (federal, stored) |
+
+**The overlays fact's one positive answer.** The overlays fact is `suggested` with an empty list only when every
+overlay source answered and every one said none, on a lot nothing is doubtful about. The start box turns exactly that
+(from a live lookup that draws its lot, never a saved one) into the lot fact `overlays_none_found`, with the lot
+outline and the address it was found for; the check then leaves the "Overlays · not in this release" row out while the
+lot is still that outline, at that address, and the architect hasn't said the lot is in the South Hill Overlay (`design_checker.present.overlays_cleared`). The City's layers have no freshness date: their live answer
+on the lookup's day is taken as the City's current map (as the zoning suggestion is), and the finding keeps that day.
 
 **Incomplete evidence is never "suggested".** A second address match that couldn't be placed on a parcel,
 elevations missing at some corners, road widths unknown (a second street could be missed: the corner lot is
@@ -67,7 +75,7 @@ allows (`details[name]["source_keys"]` lists every source the value was worked o
 one decides; a reason worked out from another source, like the County point's distance, follows that source's
 rule):
 
-- **Kept:** State and USGS data (public, no redistribution limit).
+- **Kept:** State, USGS and FEMA data (public, no redistribution limit).
 - **Numbers only:** a lot from the City's parcel layer (when the State's is down) keeps its area and side
   lengths, never its outline, position or parcel id.
 - **Used live, never kept:** the City of Ithaca zoning and overlay layers ("may not be reproduced or
@@ -79,8 +87,9 @@ suggestion, and the start box's "I confirm" tick stays unticked until the archit
 
 ## How we know it's right
 
-`tests/test_lookup.py`, offline: the State and USGS answers recorded from the live services
-(`tests/fixtures/capture.py`), and synthetic stand-ins for the City layers (every street 60 ft wide, the map
+`tests/test_lookup.py`, offline: the State, USGS and FEMA answers recorded from the live services
+(`tests/fixtures/capture.py`; `capture.py --flood` added FEMA's to the fixtures captured before the flood lookup,
+nothing else re-asked), and synthetic stand-ins for the City layers (every street 60 ft wide, the map
 last edited 2025-01-01, 106's zone from Gordium's own test site): nothing from a City or County layer is in
 the fixtures. A test checks every fixture and snapshot against `endpoints.yaml`.
 
@@ -91,6 +100,9 @@ the fixtures. A test checks every fixture and snapshot against `endpoints.yaml`.
 - **96 Ithaca Rd:** touches both streets too. The research's first test (a 3 ft margin) matched only Mitchell
   St, which looked like an address/street mismatch; with the 10 ft margin and the parallel rule the tax map
   shows lines along both Ithaca Rd and Mitchell St, so it's treated as a corner lot and Gordium asks.
+- **Flood:** 106, 109 and 96 Ithaca Rd are wholly in Zone X, minimal flood hazard, no new map pending (FEMA,
+  2026-11-11): no overlay. 601 Hancock St is in Zone AE: named, needs review. Every other zone, a partial overlap,
+  no zone, two areas, a pending or preliminary map, FEMA down, timing out or answering oddly: needs review.
 - **A Town of Ithaca address** (953 Danby Rd) is refused; an unknown address is not found; offline is a plain
   state; a failing zoning map leaves the rest and asks for the district.
 - **Synthetic checks:** an address on a street the lot doesn't touch, a lot in two zones, a Southside lot on a
