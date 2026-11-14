@@ -140,6 +140,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `sash_outside_frame` | open sash {n} reaches outside the frame: a sliding sash opens within it |
 | `sash_smaller_than_frame` | the hinged sash ({width} in wide, {thickness} in thick) doesn't close the {frame} in frame: the rest of the frame isn't an opening |
 | `no_clear_opening` | the opening doesn't open (no clear opening), so it has no bottom |
+| `sill_below_floor` | the opening's bottom is {sill} in from its room's floor, below it: check the room's floor elevation and the opening's position |
 | `no_ground` | the finished ground level outside the opening isn't given |
 | `ground_mixed` | the ground outside the opening is within 44 in of its bottom at some points and not at others |
 | `readings_differ` | the readings give different answers; {question} |
