@@ -89,6 +89,9 @@ STOPS = {
     # doors
     "not_side_hinged": "R318.2 measures a side-hinged door open 90 degrees; this door is {operation}",
     "stops_wrong_way": "the latch-side stop isn't on the far side of the opening from the hinge side",
+    "leaf_no_thickness": "the door leaf's closed corners give it no thickness: a leaf is thicker than nothing",
+    "leaf_not_closing": "the closed leaf stops {short} in short of the latch-side stop (within 1/16 in is drawing "
+                        "noise): the leaf drawn doesn't close this opening",
     "pin_off_leaf": "the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it "
                     "swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't "
                     "hung on that pin",

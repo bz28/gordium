@@ -38,6 +38,14 @@ def clear_width(d: dict, reader) -> float:
     # hold out of the opening
     edge = min(u for u, _ in corners) if side == "left" else max(u for u, _ in corners)
     far = max(n for _, n in corners)
+    if far - near <= 0:                            # a leaf drawn flat: its thickness, which narrows the width, lost
+        raise Stop("leaf_no_thickness")
+    # the closed leaf closes this opening: it reaches the latch-side stop (within 1/16 in). A leaf drawn elsewhere
+    # with its pin (in the wall, a wrong origin) would turn open clear of the opening and read its full width
+    reach = max(u for u, _ in corners) if side == "left" else min(u for u, _ in corners)
+    short = (latch - reach) if side == "left" else (reach - latch)
+    if short > PIN_OFF + 1e-9:
+        raise Stop("leaf_not_closing", short=tidy(short))
     back = max(0.0, far - pn) + max(0.0, edge - pu if side == "left" else pu - edge)    # both widen: together
     if back > PIN_OFF + 1e-9:
         raise Stop("pin_off_leaf", off=tidy(back))

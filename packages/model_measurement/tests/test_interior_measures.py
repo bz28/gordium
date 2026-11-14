@@ -1176,6 +1176,71 @@ def test_a_right_hinged_pin_back_toward_its_jamb():
     assert "isn't hung" in door(d)[1]["door_clear_width"]        # before: min(44.25, 36) - 2 = 34, not 32.25
 
 
+@pytest.mark.parametrize("pin, leaf, hand, words", [
+    ([0, 0], [[0, 0], [35, 0]], "left", "no thickness"),               # drawn flat: before, 34 (not 32.25)
+    ([-40, 1.75], [[-40, 0], [-5, 1.75]], "left", "39.0 in short"),    # leaf and pin in the wall: before, 34
+    ([80, 1.75], [[45, 0], [80, 1.75]], "right", "45.0 in short"),     # the same, right hand: before, 34
+    ([0, 1.75], [[0, 0], [34 - 1 / 16, 1.75]], "left", None),          # 1/16 in short: drawing noise
+    ([0, 1.75], [[0, 0], [34 - 1 / 8, 1.75]], "left", "0.125 in short"),
+    ([34, 1.75], [[1 / 8, 0], [34, 1.75]], "right", "0.125 in short"),
+])
+def test_a_door_leaf_must_close_its_own_opening(pin, leaf, hand, words):
+    """Round 8: nothing checked the leaf itself. A flat leaf lost its thickness, and a leaf drawn (with its pin) in
+    the wall turned open clear of the opening: both read the full stop-to-stop width."""
+    d = base()
+    stops = {"hinge": 0, "latch": 34} if hand == "left" else {"hinge": 34, "latch": 0}
+    d["doors"][0].update(hinge_side=hand, stops=stops, hinge_pin=pin, leaf_closed=leaf)
+    m, stopped = door(d)
+    if words is None:
+        assert m["door_clear_width"] == 32.25         # the base: 34 - 1.75
+    else:
+        assert "door_clear_width" not in m and words in stopped["door_clear_width"], stopped
+
+
+def test_headroom_covers_the_near_end_of_an_askew_wider_top_nosing():
+    """Round 8: the top nosing had no strip of its own, so where it is wider than the one below (a landing edge,
+    open side) and askew, its nearer end lay outside the area: a beam over it read 92 (the ceiling), not 40 - 28."""
+    d = base()
+    d["stairs"][0]["sides"]["left"] = "open"
+    d["stairs"][0]["nosings"][3] = [[30.03, 0, 28], [29.97, 48, 28]]
+    d["stairs"][0]["overhead"] = [[[-5, -5, 120], [45, -5, 120], [45, 60, 120], [-5, 60, 120]],
+                                  [[29.9, 47.95, 40], [29.98, 47.95, 40], [29.98, 60, 40], [29.9, 60, 40]]]
+    m, _, _ = stair(d)
+    assert m["stair_headroom"] == pytest.approx(12.0)
+
+
+def test_random_leaves_only_measured_where_they_close_the_opening():
+    """Round 8, property check: 2,000 random leaves and pins moved together (flat or not, in the wall, part way,
+    across the opening), either hand. Whenever a width is given, the leaf is thicker than nothing, reaches the
+    latch-side stop within 1/16 in, and the width is never more than that leaf hung at its corner gives."""
+    import random
+    rnd = random.Random(808)
+    given = 0
+    for _ in range(2000):
+        side = rnd.choice(["left", "right"])
+        thick = rnd.choice([0, 1 / 32, rnd.uniform(1, 2.5)])
+        shift = rnd.choice([0, 0, rnd.uniform(-1 / 8, 1 / 8), rnd.uniform(-50, 50)])
+        width_leaf = rnd.choice([34 + rnd.uniform(-1 / 8, 1 / 8), rnd.uniform(5, 40)])
+        if side == "left":
+            edge, hinge, latch = shift, 0, 34
+            far_edge = edge + width_leaf
+        else:
+            edge, hinge, latch = 34 + shift, 34, 0
+            far_edge = edge - width_leaf
+        d = base()
+        d["doors"][0].update(hinge_side=side, stops={"hinge": hinge, "latch": latch}, hinge_pin=[edge, thick],
+                             leaf_closed=[[edge, 0], [far_edge, thick]])
+        m, _ = door(d)
+        if "door_clear_width" not in m:
+            continue
+        given += 1
+        assert thick > 0
+        assert (latch - far_edge if side == "left" else far_edge - latch) <= 1 / 16 + 1e-9
+        hand = latch - max(edge + thick, hinge) if side == "left" else min(edge - thick, hinge) - latch
+        assert m["door_clear_width"] <= hand + 1e-6               # tidy rounds to a millionth
+    assert given > 200
+
+
 def test_random_hinge_pins_never_give_more_than_the_leaf_hung_at_its_corner():
     """Round 8, property check: 2,000 random pins and leaves, either hand. Whenever a width is given, it is never
     more than the leaf hung at its own corner gives, by more than the 1/16 in of drawing noise."""
@@ -1390,6 +1455,9 @@ STOP_CASES = {
     "guard_no_side": _with(lambda: stair_guard([[0, 36, 41], [30, 36, 64]]),
                            lambda d: d["stairs"][0].update(sides={"left": "open", "right": "open"})),
     "pin_off_leaf": _set(("doors", 0, "hinge_pin"), [0, -500]),
+    "leaf_no_thickness": _with(base, lambda d: d["doors"][0].update(hinge_pin=[0, 0], leaf_closed=[[0, 0], [35, 0]])),
+    "leaf_not_closing": _with(base, lambda d: d["doors"][0].update(hinge_pin=[-40, 1.75],
+                                                                   leaf_closed=[[-40, 0], [-5, 1.75]])),
     "not_side_hinged": _set(("doors", 0, "operation"), "sliding"),
     "stops_wrong_way": _set(("doors", 0, "stops"), {"hinge": 34, "latch": 0}),
     "not_positive": _set(("doors", 0, "head_stop_bottom"), 0),

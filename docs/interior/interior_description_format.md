@@ -79,7 +79,7 @@ One entry per **flight** (a run of treads between landings; R318 calls it a flig
 | `hinge_side` | `left` or `right`, in the door's own elevation |
 | `stops` | `{hinge, latch}`: the u of the face of each jamb stop |
 | `hinge_pin` | `[u, n]`: the hinge pin's centre in the door's plan: at the leaf's hinge-side corner on the face it swings toward, or beyond it (a pin more than 1/16 in behind that face, or back toward the hinge jamb, doesn't hang the leaf: no clear width) |
-| `leaf_closed` | `[[u, n], [u, n]]`: two opposite corners of the leaf, closed, in the door's plan |
+| `leaf_closed` | `[[u, n], [u, n]]`: two opposite corners of the leaf, closed, in the door's plan: thicker than nothing, and reaching the latch-side stop (it closes the opening) |
 | `threshold_top`, `head_stop_bottom` | the top of the threshold and the bottom of the head stop, elevations |
 
 ### guards

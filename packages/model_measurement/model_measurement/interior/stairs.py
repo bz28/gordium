@@ -234,6 +234,11 @@ def headroom(st: dict, flight: Flight, reader) -> float:
         s1, s2 = flight.s_ends[j][0], flight.s_ends[j + 1][1]
         quads.append(Polygon([flight.xy(s1, r1), flight.xy(s2, r2), flight.xy(s2, l2), flight.xy(s1, l1)]))
         quads.append(Polygon([flight.xy(s1, r1), flight.xy(s2, r1), flight.xy(s2, l1), flight.xy(s1, l1)]))
+    # and each nosing's own strip, across its own ends, between its nearer and farther end along the run: the top
+    # one is no tread's start, so where it is wider than the one below, its nearer end lay outside the area
+    for (lo, hi), (r, l) in zip(flight.s_ends, flight.ends):
+        if hi > lo:
+            quads.append(Polygon([flight.xy(lo, r), flight.xy(hi, r), flight.xy(hi, l), flight.xy(lo, l)]))
     band = unary_union(quads)
     # cut the flight at every bend of the nosing line, so the line is straight over each piece and the least gap
     # is at a piece's corner (the pieces of the treads alone would hide a bend inside one)
