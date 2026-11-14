@@ -1,7 +1,7 @@
 # rule_drafting
 
-Drafts the zoning rules for every residential district, with one recorded AI call per unit, and checks
-every draft with code. Drafts stay marked draft: architect approval is deferred for now (decided 2026-10-19),
+Drafts the zoning rules for every residential district, and a state's building-code rules (New York's house
+egress, `--state`, below), with one recorded AI call per unit, and checks every draft with code. Drafts stay marked draft: architect approval is deferred for now (decided 2026-10-19),
 so a draft that passes every code check can be used; people read the rules through the rules spreadsheet.
 
 ## The units
@@ -107,10 +107,23 @@ The budget is a hard cap kept in `~/.config/gordium/rule_drafting_ledger.json`, 
 with the same rules: a run whose estimate exceeds what's left is refused, and no call is sent whose worst
 case could cross the cap. Drafting never runs in CI; the tests use a fake client.
 
+## A state's building code (`--state`, `rule_drafting/book.py`)
+
+`python -m rule_drafting draft --state new_york/new_york_state --all --yes` drafts New York's house egress: the
+units are the book pieces labeled rule in `book.SCOPE`; there is no chart, so no slots; every number must be one
+of the piece's second-reading numbers, used the way the law reads it (`rule_format/code_numbers.py`); rules are
+for each part (`rule_format/parts.yaml`). Related sections are the pieces labeled rule or flag that name the unit
+or a section above it (Appendix BO left out). Drafts go to `<state folder>/5_building_code_rules/drafted/`.
+`python -m rule_drafting.book_eval` grades them against the hand answer key, rule by rule
+(`evals/2026-11-13_house_egress/`). Why and how: `docs/decisions/2026-11-13_house_egress_rules.md`.
+
 ## Where things go
 
 - `5_zoning_rules/drafted/<district>.yaml` and `general.yaml`: the drafted rulebooks (checked by
   `python -m rule_format` like any rulebook).
 - `5_zoning_rules/drafted/records/`: `drafting_log.yaml` (per unit: rules, reason, what goes to a person),
   `proposed_measures.yaml`, and `runs/` (every AI call: prompt and input fingerprints, the raw answer,
-  tokens, cost). Re-drafting a unit replaces its drafts, never an approved one.
+  tokens, cost), and `as_drafted/` (the AI's own rules, as the run saved them). A rule changed after the
+  draft records each change in its `revised` (field, who, when, why); a test holds that it differs from its
+  `as_drafted/` copy only there. Re-drafting a unit replaces its drafts, never an approved one; a revised rule
+  it replaces is named in the log (`revisions_replaced`), for a person to re-apply.

@@ -24,7 +24,7 @@ from pathlib import Path
 import yaml
 
 from document_extraction.sections import piece_text
-from rule_format import parts
+from rule_format import code_numbers, parts
 from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context, _source_problems, district_name,
                                   locate, source_numbers, validate)
 from section_labeling.budget import worst_case
@@ -160,7 +160,7 @@ For any other rule, leave for_each, within and when_none "" and every example's 
 """
 
 
-def output_schema(topics: list[str], for_parts: bool = False) -> dict:
+def output_schema(topics: list[str], for_parts: bool = False, book: bool = False) -> dict:
     """The answer's shape. With for_parts (a building code's rules for each part: rule_format/parts.py), each
     template also carries for_each, within and when_none, and each example the parts and the rows expected; without
     (the zoning chart and law), exactly the shape it always was."""
@@ -218,9 +218,32 @@ def output_schema(topics: list[str], for_parts: bool = False) -> dict:
             "rows": {"type": "array", "items": {
                 "type": "object", "additionalProperties": False, "required": ["part", "within", "outcome"],
                 "properties": {"part": text, "within": text, "outcome": {"type": "string", "enum": OUTCOMES}}}}}
+    if book:                        # a building code: no chart, so no slots and nothing but law quotes (book_answer)
+        props, req = template["properties"], template["required"]
+        for k in ("slots",):
+            props.pop(k)
+            req.remove(k)
+        props["topic"] = text           # validation checks it; an enum of every topic makes the grammar too large
+        props["quotes"]["items"] = {"type": "object", "additionalProperties": False, "required": ["piece", "text"],
+                                    "properties": {"piece": text, "text": text}}
+        props["numbers"]["items"] = {"type": "object", "additionalProperties": False, "required": ["value", "quote"],
+                                     "properties": {"value": {"type": "number"}, "quote": {"type": "integer"}}}
     return {"type": "json_schema", "schema": {
         "type": "object", "additionalProperties": False, "required": ["templates", "no_rule_reason"],
         "properties": {"templates": {"type": "array", "items": template}, "no_rule_reason": text}}}
+
+
+def book_answer(answer: dict) -> dict:
+    """A building code's answer (output_schema's book shape) in the full shape check_answer reads: no slots, every
+    quote a law quote, every number bound to one of them. Nothing else changes."""
+    out = dict(answer, templates=[])
+    for t in answer.get("templates") or []:
+        out["templates"].append(t | {
+            "slots": [],
+            "quotes": [{"document": "law", "page": 0, "piece": q.get("piece"), "text": q.get("text")} for q in t["quotes"]],
+            "numbers": [{"value": n.get("value"), "from": "law_quote", "quote": n.get("quote"), "slot": "", "footnote": ""}
+                        for n in t["numbers"]]})
+    return out
 
 
 def chart_table(sections: list[tuple[int, str]], rows_of) -> str:
@@ -415,7 +438,8 @@ def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dic
     return p
 
 
-def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None = None) -> tuple[list[str], list[dict]]:
+def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None = None,
+                   book: dict | None = None) -> tuple[list[str], list[dict]]:
     """Check each entry of `numbers` names ONE evidence item that holds its value and that can be trusted
     (Ben's policy, 2026-10-20). Code can check that evidence holds a number, never what the number is about,
     so only evidence that belongs to the rule itself is trusted:
@@ -426,7 +450,10 @@ def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None
     - slot_row_label: that slot's own row label ("First three bed or sleeping rooms").
     Anything else is rejected, so the unit is retried and in the end listed for a person: an untrusted
     number never reaches a rule. A number that only labels or points ("(3)", "§ 325-20D(1)") doesn't count;
-    a percent counts only as its fraction (25% is 0.25). Returns (problems, the valid entries)."""
+    a percent counts only as its fraction (25% is 0.25). book: a building code read twice (the law file's entry in
+    ctx.verification): a law quote then backs only its piece's second-reading numbers that it states, in the units
+    they stand for (8 1/4 inches is 8.25, 6 feet 8 inches is 80; rule_format/code_numbers.py), and validation checks
+    how each is used. Returns (problems, the valid entries)."""
     slots = {s["name"]: s for s in template["slots"]}
     live = formula_slots(template)
     p, valid = [], []
@@ -456,7 +483,9 @@ def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None
                              "number is trusted only from a footnote on the slot's own cell")
                     continue
                 text = note["text"]
-        if not v_close(v, source_numbers(text, percent_as_number=False)):
+        stated = (code_numbers.book_values(text, book["pieces"].get(own_piece) or {}) if book and b["from"] == "law_quote"
+                  else source_numbers(text, percent_as_number=False))
+        if not v_close(v, stated):
             p.append(f"{where}: {v:g} isn't written in it: {text!r}")
             continue
         valid.append(b)
@@ -526,7 +555,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
         sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
         p += quote_problems + (_footnote_problems(t, sources, notes, law["chart"]) if not quote_problems else [])
-        binding_problems, valid = _binding_items(t, notes, unit.get("piece"))
+        binding_problems, valid = _binding_items(t, notes, unit.get("piece"), ctx.verification.get(law["file"]))
         p += binding_problems
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
@@ -615,7 +644,7 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
 
 def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: Context, columns: list[str],
                cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None,
-               for_parts: bool = False) -> dict:
+               for_parts: bool = False, book: bool = False) -> dict:
     """Draft one unit. Every template that works nowhere sends the answer back with the reasons (keeping
     nothing from it) until max_attempts; after the last attempt, the rules that work are kept and every
     rejected template and every requirement no rule cites goes to a person. Returns check_answer's result
@@ -634,7 +663,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
             output_config={"effort": settings["effort"],
-                           "format": output_schema(topics, for_parts=for_parts)})
+                           "format": output_schema(topics, for_parts=for_parts, book=book)})
         usage = {k: getattr(response.usage, k, 0) or 0 for k in
                  ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")}
         spent = cost(usage, settings["model"])
@@ -647,6 +676,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
         else:
             try:
                 answer = json.loads(text)
+                answer = book_answer(answer) if book else answer
                 result = check_answer(answer, unit, context, law, ctx, columns, cells, notes, drafted_by)
                 if result["problems"]:
                     why = "; ".join(result["problems"][:6])
@@ -667,7 +697,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                 "context_dropped": context.get("dropped", []), "context_unfound": context.get("unfound", []),
                 "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None}
-               | ({"for_parts": True} if for_parts else {}))
+               | ({"for_parts": True} if for_parts else {}) | ({"book": True} if book else {}))
         if crash is not None:
             raise crash
         if why is None:

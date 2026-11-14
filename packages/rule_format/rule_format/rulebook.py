@@ -37,7 +37,12 @@ STATUSES = ("draft", "approved")
 # meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
 RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
                "notes", "open_questions", "research", "findings", "answers", "drafted_by", "status", "approved_by", "approved_on",
-               "approved_hash", *parts.PART_FIELDS}
+               "approved_hash", "revised", *parts.PART_FIELDS}
+# A drafted rule changed after the AI's draft says so, oldest first, as a label does (labels.py): one entry per
+# field changed, {field, by, date, why}; a rule added whole after the AI's draft is {field: rule, by, date, why}.
+# The AI's own answer stays in the run record (and drafted/records/as_drafted/), so every difference is explained.
+REVISED_FIELDS = (RULE_FIELDS - {"id", "revised", "drafted_by", "status", "approved_by", "approved_on",
+                                 "approved_hash"}) | {"rule"}
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
@@ -48,7 +53,7 @@ APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "rev
 UNIT_KINDS = {"text": "text", "yes_no": "boolean"}       # every other unit (ft, sf, count) is a number
 MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8")).items()}
 # Measures a draft asked for that aren't in measures.yaml yet: listed for engineers, never used silently.
-PROPOSED_MEASURES = "5_zoning_rules/drafted/records/proposed_measures.yaml"
+PROPOSED_MEASURES = "drafted/records/proposed_measures.yaml"   # under the folder's rulebooks (rules_folder)
 
 
 def outcome(rule: dict, values: dict, allowed: dict[str, set]) -> str:
@@ -217,6 +222,18 @@ def _jsonl_rows(data: bytes) -> list[dict]:
 STATE_SETTINGS = "state.yaml"
 
 
+ZONING_RULES = "5_zoning_rules"                  # a place's rulebooks (step 5)
+BUILDING_CODE_RULES = "5_building_code_rules"    # a state folder's rulebooks: its building code's rules (egress step 3)
+
+
+def rules_folder(folder) -> Path:
+    """Where a law folder's rulebooks are: 5_zoning_rules/ for a place, 5_building_code_rules/ for a state law folder
+    (one with a state.yaml), whose law is a building code, not zoning. The one definition, used by validation, the
+    research checks, the coverage review list and drafting."""
+    folder = Path(folder)
+    return folder / (BUILDING_CODE_RULES if (folder / STATE_SETTINGS).is_file() else ZONING_RULES)
+
+
 def jurisdictions(repo: Path = REPO) -> list[Path]:
     """Every place folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order (a state's own
     law folder, which has a state.yaml, is not a place: state_folders)."""
@@ -303,6 +320,10 @@ class Context:
     pieces: set[str] = field(default_factory=set)                    # every piece id the law is cut into (research cites them)
     uncached: dict[str, str] = field(default_factory=dict)           # file -> why its text can't be read here (cache)
     skipped: list[str] = field(default_factory=list)                 # checks not run here for want of the cache
+    # a book's second reading of its numbers (a state folder's text_verification.yaml), by file: {"pieces": {piece
+    # id: its entry}, "lines": {piece id: [[page, first, last], ...]}}; a rule citing it uses only those numbers
+    # (code_numbers.py)
+    verification: dict[str, dict] = field(default_factory=dict)
 
     def kinds(self) -> dict:
         """Every usable measure's kind: "number", "text" or "boolean" (this context's measures, plus the
@@ -374,7 +395,8 @@ class Context:
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
                 ctx._load_cells(name, sha, cells, j)
-        proposed = j / PROPOSED_MEASURES
+        ctx.verification = _verification(j)
+        proposed = rules_folder(j) / PROPOSED_MEASURES
         if proposed.exists():
             listed_measures = load(proposed) or {}
             ctx.proposed = {n: m for n, m in listed_measures.items() if isinstance(m, dict) and n not in ctx.measures}
@@ -404,6 +426,19 @@ class Context:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
         self.pages[name] = found
+
+
+def _verification(j: Path) -> dict[str, dict]:
+    """A law folder's second reading of a book's numbers (text_verification.yaml) with the lines of each piece, for
+    code_numbers; {} if it has none, or it can't be read (its own check, state_law.verification_problems, says why)."""
+    path = j / "text_verification.yaml"
+    try:
+        book = load(path) if path.is_file() else None
+        name = book["document"]
+        cut = read_jsonl(j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
+        return {name: {"pieces": dict(book["pieces"]), "lines": {r["id"]: r["lines"] for r in cut[1:]}}}
+    except Exception:            # reported by its own check, never a crash here
+        return {}
 
 
 def _stale_cache_problems(extracted: Path, cut: Path) -> list[str]:
@@ -579,6 +614,9 @@ def source_numbers(text: str, percent_as_number: bool = True) -> set[float]:
 def _number_problems(rule: dict, sources: list[dict], ctx: "Context") -> list[str]:
     """Every number a formula uses must be written in one of the rule's own sources (a cited quote, or a
     cited chart cell or its row label), so no limit can be typed in from nowhere. 0 needs no source."""
+    from . import code_numbers
+    if code_numbers.cites_book(sources, ctx):      # a building code read twice: its second reading's numbers only
+        return code_numbers.problems(rule, sources, ctx)
     supported = {0.0}
     for s in sources:
         if (cell := _cell(s, ctx)) is not None:
@@ -893,11 +931,29 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     if per_part:
         p += parts.examples_problems(rule, examples or [], ctx.allowed(), run=not p)
 
+    p += rule_revision_problems(rule.get("revised", []))
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)
     if rule.get("status") == "approved":
         used = set().union(*(formula.names(f) for f in conditions if isinstance(f, str) and _parses(f)))
         p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
               for m in sorted(used & set(ctx.proposed))]
+    return p
+
+
+def rule_revision_problems(revised) -> list[str]:
+    """A rule's changes after the AI's draft (REVISED_FIELDS): each {field, by, date, why}, by and why text."""
+    if not (isinstance(revised, list) and all(isinstance(r, dict) for r in revised)):
+        return ["'revised' must be a list of {field, by, date, why}"]
+    p = []
+    for r in revised:
+        if r.keys() != {"field", "by", "date", "why"}:
+            p.append("each revision needs exactly field, by, date, why")
+        elif r["field"] not in REVISED_FIELDS:
+            p.append(f"revised field {r['field']!r}: not a field a revision can change ({sorted(REVISED_FIELDS)})")
+        elif not all(isinstance(r[k], str) and r[k].strip() for k in ("by", "why")):
+            p.append("a revision's by and why must be text")
+        elif not isinstance(r["date"], datetime.date):
+            p.append("a revision's date must be a date (YYYY-MM-DD)")
     return p
 
 
@@ -1218,14 +1274,14 @@ def _source_problems(sources: list[dict], ctx: Context, district: str | None = N
 # ---- one file's checks, shared by `python -m rule_format` and everything that uses a rulebook -----------
 
 def research_entries(jurisdiction) -> list[tuple[str, dict]]:
-    """(where, entry) for every entry that can hold open questions: definitions, rules (5_zoning_rules) and
+    """(where, entry) for every entry that can hold open questions: definitions, rules (rules_folder) and
     section labels. `where` names it for a message ("definitions.yaml story", "R-1b.yaml R-1b.height")."""
     j = Path(jurisdiction)
     out = []
     definitions = j / "4_term_definitions/definitions.yaml"
     if definitions.exists():
         out += [(f"definitions.yaml {k}", e) for k, e in (load(definitions) or {}).items() if isinstance(e, dict)]
-    for path in rulebook_paths(j / "5_zoning_rules"):
+    for path in rulebook_paths(rules_folder(j)):
         out += [(f"{path.name} {r.get('id')}", r) for r in (load(path) or {}).get("rules") or [] if isinstance(r, dict)]
     for path in sorted((j / "3_section_labels").glob("*.yaml")):
         book = load(path) or {}

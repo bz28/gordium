@@ -189,7 +189,8 @@ def _example_parts(e: dict) -> str:
 
 def _revisions(revised, label) -> str:
     """Each change after the AI's answer, as it happened: from → to, who, when, why (a chain reads in order)."""
-    return _bullets((f"{r['from']} → {to}" if "from" in r else "sources changed")
+    return _bullets((f"{r['from']} → {to}" if "from" in r else "rule added" if r.get("field") == "rule"
+                     else f"{r.get('field')} changed")
                     + f" ({r.get('by')}, {r.get('date')}): {r.get('why')}" for r, to in revision_steps(revised or [], label))
 
 
@@ -263,7 +264,10 @@ COLUMNS = {
              Col("Needs review when", 34, "review_when", _get("review_when", lambda v: _bullets(
                  f"{r.get('when')}: {r.get('reason')}" for r in v or [])), every=False),
              Col("Worked examples", 40, "examples", _get("examples", _examples), every=False),
-             *_source_cols(60), _RELATED, *_QUESTIONS, _NOTES],
+             *_source_cols(60), _RELATED,
+             Col("Changed after the AI", 60, "revised", lambda e, s, n, t: _revisions(e.get("revised"), None),
+                 every=False),
+             *_QUESTIONS, _NOTES],
     "definitions": [Col("Id", 24), Col("Term", 26, "term", _get("term")), *_WHO,
                     Col("Measures", 22, "measures", _get("measures", lambda v: ", ".join(v or [])), every=False),
                     *_source_cols(70), _RELATED, *_QUESTIONS, _NOTES],
