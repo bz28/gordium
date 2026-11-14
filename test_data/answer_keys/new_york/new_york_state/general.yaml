@@ -1428,6 +1428,9 @@ rules:
     check: >-
       guard_height >= (34 if open_side_on_stair else 36)
       and (not (open_side_on_stair and guard_is_handrail) or guard_height_max <= 38)
+    review_when:
+      - when: open_side_drop <= 30 and guard_height >= 34 and guard_height <= 38 and guard_height_max > 38
+        reason: "Not a required guard, so only R320.2 holds for its handrail top, whose exception 2 lets it exceed 38 in at fittings or bendings; where the greatest height is isn't measured. A person checks."
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 104
@@ -1449,6 +1452,10 @@ rules:
         page: 103
         lines: [54, 55]
         quote: "Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface of ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)."
+      - file: gov.ny.residential.2025.pdf
+        page: 104
+        lines: [3, 5]
+        quote: "Where handrail fittings or bendings are used to provide continuous transition between flights, transitions at winder treads, the transition from handrail to guard, or used at the start of a flight, the handrail height at the fittings or bendings shall be permitted to exceed 38 inches (965 mm)."
     examples:
       - given: {}
         parts:
@@ -1495,6 +1502,12 @@ rules:
         expect: fail
         note: a guard top that is the stair's handrail is held to R320.2's 34-38 in at any drop
       - given: {}
+        parts:
+          open_side: [{id: e1, measures: {open_side_drop: 24, guard_present: true, open_side_on_stair: true, guard_is_handrail: true, guard_height: 35, guard_height_max: 40}}]
+        rows: [{part: e1, outcome: needs_review}]
+        expect: needs_review
+        note: above 38 in only somewhere, which R320.2 exception 2 allows at fittings or bendings
+      - given: {}
         parts: {open_side: []}
         rows: [{outcome: not_applicable}]
         expect: not_applicable
@@ -1503,7 +1516,8 @@ rules:
       "required" is R321.1.1's (more than 30 inch, >). A missing guard is general.r321_1_1_guard_required's fail.
       Fixed after the comparison (review round 6): a guard top that serves as the stair's handrail was checked only
       on a drop over 30 in, so a 42 in one on a 24 in drop passed; it is the stair's handrail, and R320.2's 34 to 38
-      in holds for every handrail, so it is checked at any drop.
+      in holds for every handrail, so it is checked at any drop, with R320.2 exception 2's review where the greatest
+      height is above 38 in (fittings or bendings; review round 7).
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 

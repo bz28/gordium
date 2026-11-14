@@ -295,3 +295,9 @@ def test_a_guard_top_that_is_the_stairs_handrail_is_held_to_r320_2_at_any_drop(c
     for rules in (drafts, key):
         assert piece_result(rules, "R321.1.2", design(42, 44), {}, ctx) == "fail"
         assert piece_result(rules, "R321.1.2", design(36, 37), {}, ctx) == "pass"
+        # review round 7: above 38 in only somewhere may be a fitting R320.2 exception 2 allows: needs review, as
+        # the same rail modeled as a handrail part does; a required guard's top keeps R321.1.2's 38 in at most
+        assert piece_result(rules, "R321.1.2", design(35, 40), {}, ctx) == "needs_review"
+        required = design(35, 40)
+        required["open_side"][0]["measures"]["open_side_drop"] = 36
+        assert piece_result(rules, "R321.1.2", required, {}, ctx) == "fail"
