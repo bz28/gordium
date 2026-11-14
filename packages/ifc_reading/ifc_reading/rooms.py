@@ -70,13 +70,49 @@ def sleeping_from_names(texts: dict, flag=None):
 
 
 def names_of(model, space) -> dict:
+    """Every name the model gives the space: its LongName, Name, ObjectType and classifications, and its
+    space type's LongName, Name, ElementType and classifications (review round 6: the type says what kind of space it is,
+    and was ignored). Each under its own key: two classifications with no code no longer overwrite each other."""
     texts = {"LongName": space.LongName, "Name": space.Name, "ObjectType": space.ObjectType}
-    for rel in getattr(space, "HasAssociations", []) or []:
-        if rel.is_a("IfcRelAssociatesClassification"):
-            ref = rel.RelatingClassification
-            texts[f"classification {getattr(ref, 'Identification', None) or getattr(ref, 'ItemReference', '')}"
-                  .strip()] = getattr(ref, "Name", None)
+
+    def add(key, text):
+        if key in texts:
+            n = 2
+            while f"{key} ({n})" in texts:
+                n += 1
+            key = f"{key} ({n})"
+        texts[key] = text
+
+    def classifications(element, prefix):
+        for rel in getattr(element, "HasAssociations", []) or []:
+            if rel.is_a("IfcRelAssociatesClassification"):
+                ref = rel.RelatingClassification
+                code = getattr(ref, "Identification", None) or getattr(ref, "ItemReference", None) or ""
+                add(f"{prefix}classification {code}".strip(), getattr(ref, "Name", None))
+
+    classifications(space, "")
+    t = model.type_of(space)
+    if t is not None:
+        add("type LongName", getattr(t, "LongName", None))
+        add("type Name", t.Name)
+        add("type ElementType", getattr(t, "ElementType", None))
+        classifications(t, "type ")
     return {k: v for k, v in texts.items() if isinstance(v, str) and v.strip()}
+
+
+def description_doubt(model, space):
+    """A Description is free text ("informative comments", IFC4), so its words don't name the room; but a sleeping
+    or ask word in it (the space's or its type's) is doubt, never left behind a "not sleeping" (review round 6:
+    "Bedroom" in the Description of a space named Kitchen)."""
+    table, found = words(), []
+    t = model.type_of(space)
+    for where, element in (("Description", space), ("type Description", t)):
+        text = getattr(element, "Description", None) if element is not None else None
+        if isinstance(text, str):
+            hit = [w for w in name_words(text) if table.get(w) in ("sleeping", "ask")]
+            if hit:
+                found.append(f"{where} {text!r} ({', '.join(hit)})")
+    return "; ".join(found)
 
 
 def display_name(space) -> str:
@@ -100,6 +136,10 @@ def read_room(model, space) -> dict:
         sleeping, why = None, f"{where} is {flag!r}, not true or false: the architect says"
     else:
         sleeping, why = sleeping_from_names(texts, flag)
+    if sleeping is False:
+        doubt = description_doubt(model, space)
+        if doubt:
+            sleeping, why = None, f"{why}, but {doubt}: the architect says (Gordium_Egress.Sleeping)"
     info["sleeping_from"] = why
     if sleeping is None:
         missing["sleeping"] = why

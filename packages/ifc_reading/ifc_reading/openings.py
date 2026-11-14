@@ -212,8 +212,9 @@ def _silhouette(tris, m):
 
 
 def _rectangle(model, window, m, w, h):
-    """Whether the window (its body, and the opening it fills where there is one) is the W x H rectangle at its
-    origin: a round or arched window's bounding box isn't its opening."""
+    """Whether the window is the W x H rectangle at its origin: its body fills its silhouette and covers W x H,
+    and the opening it fills (where there is one) matches W x H. A round or arched window's bounding box isn't
+    its opening."""
     tris = model.triangles(window)
     if tris is None:
         return None, "the window has no body shape, so whether it is rectangular can't be told"

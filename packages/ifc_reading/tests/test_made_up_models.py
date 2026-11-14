@@ -454,3 +454,59 @@ def test_a_mark_from_the_type_names_the_type(build, tmp_path):
     dr = one(d["doors"], "Front")
     assert dr["exit"] is True and dr["ifc"]["exit_from"].startswith("Pset_DoorCommon.FireExit (from its type Entry door #")
     assert "(from its type type of W1 #" in d["openings"][0]["ifc"]["escape_from"]
+
+
+@pytest.mark.parametrize("order", [("Bedroom", "Living"), ("Living", "Bedroom")])
+def test_every_classification_is_read(build, tmp_path, order):
+    """Review round 6: two classifications with no code shared one key, so the last stored won: "Room 3"
+    classed Bedroom and Living read as not a sleeping room in one order. Both are read: unknown either way."""
+    b = bedroom_house(build, name="Room 3")
+    [space] = b.f.by_type("IfcSpace")
+    for name in order:
+        ref = b.f.create_entity("IfcClassificationReference", Name=name)
+        b.f.create_entity("IfcRelAssociatesClassification", GlobalId=b.guid(), RelatedObjects=[space],
+                          RelatingClassification=ref)
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room
+    assert "'Bedroom'" in room["not_given"]["sleeping"] and "'Living'" in room["not_given"]["sleeping"]
+
+
+@pytest.mark.parametrize("attribute", ["Name", "LongName", "ElementType"])
+def test_the_space_types_names_are_read(build, tmp_path, attribute):
+    """Review round 6: a space named Kitchen, typed by an IfcSpaceType named Bedroom, read as not a sleeping room
+    (the type, which says what kind of space it is, was ignored). Now unknown."""
+    b = bedroom_house(build, name="Kitchen")
+    [space] = b.f.by_type("IfcSpace")
+    t = b.run("root.create_entity", ifc_class="IfcSpaceType", name="Type 1")
+    setattr(t, attribute, "Bedroom")
+    b.run("type.assign_type", related_objects=[space], relating_type=t)
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and f"type {attribute} 'Bedroom'" in room["not_given"]["sleeping"]
+
+
+def test_the_check_fails_when_it_finds_no_models(tmp_path, monkeypatch, capsys):
+    """Review round 6: --check with no models (installed away from the repo) printed "all current"."""
+    import ifc_reading.__main__ as cli
+    monkeypatch.setattr(cli, "MODELS", tmp_path)
+    assert cli.check() == 1 and "nothing was checked" in capsys.readouterr().out
+
+
+@pytest.mark.parametrize("on_type", [False, True])
+def test_a_bedroom_word_in_a_description_is_doubt(build, tmp_path, on_type):
+    """Review round 6: "Bedroom" in the Description of a space named Kitchen was ignored (not a sleeping room).
+    A Description is free text, so other words in it say nothing; a sleeping or ask word makes it unknown."""
+    b = bedroom_house(build, name="Kitchen")
+    [space] = b.f.by_type("IfcSpace")
+    target = space
+    if on_type:
+        target = b.run("root.create_entity", ifc_class="IfcSpaceType", name="Kitchen")
+        b.run("type.assign_type", related_objects=[space], relating_type=target)
+    target.Description = "Bedroom (kitchen to be removed)"
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and "Description 'Bedroom (kitchen to be removed)'" in room["not_given"]["sleeping"]
+
+
+def test_other_words_in_a_description_say_nothing(build, tmp_path):
+    b = bedroom_house(build, name="Kitchen")
+    b.f.by_type("IfcSpace")[0].Description = "Oak floor, new cabinets"
+    assert read(b.write(tmp_path / "h.ifc"))["rooms"][0]["sleeping"] is False

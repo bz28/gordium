@@ -21,7 +21,11 @@ def dump(description) -> str:
 
 def check() -> int:
     stale = 0
-    for ifc in sorted(MODELS.glob("*/*.ifc")):
+    models = sorted(MODELS.glob("*/*.ifc"))
+    if not models:                      # review round 6: a check that finds nothing must not pass
+        print(f"no models found in {MODELS}: nothing was checked")
+        return 1
+    for ifc in models:
         want = ifc.with_name(ifc.stem + "_interior.yaml")
         got = dump(read(ifc))
         if not want.exists() or want.read_text(encoding="utf-8") != got:

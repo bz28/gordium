@@ -40,13 +40,16 @@ records the file (name, SHA-256 fingerprint, schema, unit) and what wasn't read 
 | `ceiling_height` | the `FinishCeilingHeight` quantity (the lower of it and the space's top, above the finished floor) | it isn't given, the floor elevation isn't known, the space's top isn't level, or it or the space's top isn't above the floor |
 
 **Sleeping room or not: only from words or a flag, never from size.** The room's words are taken from its IFC
-`LongName`, `Name`, `ObjectType` and classification names (Unicode-normalised, so "Gästezimmer" reads the same
+`LongName`, `Name`, `ObjectType` and classification names, and its space type's `LongName`, `Name`,
+`ElementType` and classification names (Unicode-normalised, so "Gästezimmer" reads the same
 however its "ä" is stored) and looked up whole in [`room_words.yaml`](ifc_reading/room_words.yaml) (English and
 German). A sleeping word (bedroom, nursery, Schlafzimmer) and no word against it → `sleeping: true`. Only words
 for rooms that aren't slept in (bath, kitchen, hall, living, Küche), with at most *neutral* ones ("room", "No.")
 → `false`. Anything else → `sleeping` is left out: an *ask* word (office, den, loft, gallery, which a code official
 may count as a sleeping room), both kinds, no listed word, or a word the table doesn't know beside a not-sleeping
-one ("Elternzimmer + Bad", a parents' room with its bath: the unknown word may mean bedroom). The format then
+one ("Elternzimmer + Bad", a parents' room with its bath: the unknown word may mean bedroom). A `Description`
+is free text, so its words don't name the room, but a sleeping or ask word in it (the space's or its type's)
+keeps a room from reading `false` ("Kitchen" described as "Bedroom (kitchen to be removed)"). The format then
 reads none of the rooms (a bedroom nobody labelled is never quietly not a bedroom), so every sleeping-room rule
 says **needs review** until the architect says. The architect says by giving the space a property set
 `Gordium_Egress` with `Sleeping` true or false. True always counts. False settles an ask or unknown word (that is
@@ -89,7 +92,7 @@ door is also in `doors`).
 | `room` | the room its space boundary (`IfcRelSpaceBoundary`) names | no boundary names one, or it bounds more than one |
 | `escape` | `Gordium_Egress.EscapeOpening`, or a window's `Pset_WindowCommon.FireExit` ("an exit window in accordance to the national building code") | never: not marked (or marked with something other than true/false, recorded in `escape_from`, which names the window's type when the mark is the type's) is `false`. Only an opening marked in the model is checked as an escape opening (Ben, 2026-11-12); a bedroom with none marked fails, never passes |
 | `operation` | a single-panel window's `IfcWindowPanelProperties.OperationType` (side-hung → casement, top-hung → awning, bottom-hung → hopper, sliding horizontal → horizontal slider, fixed → fixed…); a door's operation type (single swing → side-hinged door, sliding → sliding door) | a window of more than one panel (by its panel records, or by any partitioning stated: its type's `PartitioningType`, an IFC2x3 style's `OperationType`, the window's own `PartitioningType`); sliding vertical (single- or double-hung: IFC doesn't say); not defined |
-| `frame` | a rectangular, upright, single-panel window: its `OverallWidth` × `OverallHeight` at its origin, less its lining's `LiningThickness` all round (IFC4: the overall size is "a bounding box, enclosing the window opening") | the window isn't rectangular (a round window's bounding box isn't its opening), isn't upright, has a mullion or transom or more than one panel, has no lining thickness, or its body or the opening it fills disagree with its stated size; every door |
+| `frame` | a rectangular, upright, single-panel window: its `OverallWidth` × `OverallHeight` at its origin, less its lining's `LiningThickness` all round (IFC4: the overall size is "a bounding box, enclosing the window opening") | the window isn't rectangular (a round window's bounding box isn't its opening), isn't upright, has a mullion or transom or more than one panel, has no lining thickness, or its body doesn't cover its stated size or the opening it fills doesn't match it; every door |
 | `hinged`, `sashes`, `stated_clear`, `ground_outside` | never | not in IFC: how far a sash opens, where open sashes stand, the maker's clear opening, the ground outside |
 
 The frame's `u` runs along the window's own x axis from its origin. The frame is the same either way along it, and
