@@ -159,5 +159,5 @@ def test_the_sections_that_modify_a_piece_are_shown_with_it_appendix_bo_left_out
 
 def test_the_book_note_says_how_to_scope_flag_and_never_equate():
     for words in ("Use `within` only where the law ties", "never a whole-building flag", "never write `==`",
-                  "never write that an architect"):
+                  "never write that an architect", "never not applicable (until that", "a loft_room part"):
         assert words in book.BOOK_NOTE, words

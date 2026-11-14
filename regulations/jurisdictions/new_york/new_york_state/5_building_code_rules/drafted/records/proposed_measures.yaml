@@ -4,3 +4,9 @@ egress_doors:
   needed_by:
   - general.r318_2_egress_door_per_dwelling_unit
   unit: count
+stair_nosings_under_floor_opening:
+  meaning: The nosings of treads at the side of the flight extend under the edge of a floor opening through which
+    the stair passes
+  needed_by:
+  - general.r318_7_2_stair_floor_opening_headroom
+  unit: yes_no

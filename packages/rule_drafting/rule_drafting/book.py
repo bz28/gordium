@@ -62,8 +62,9 @@ city's zoning law. Read the instructions above with these changes:
   `not (stair_riser_height > 8.25)`); a condition the law sets for when a requirement applies ("more than 30
   inches", "four or more risers") goes in applies_when when the rule's when_none is "not_applicable".
 - An exception that sends a part to another section (spiral stairways to R318.7.11.1) is not drafted here: make
-  that part not applicable to this rule (applies_when) or needs review (review_when), never a pass by this rule's
-  numbers.
+  that part need review (review_when), never a pass by this rule's numbers and never not applicable (until that
+  section is drafted, nothing else checks it).
+- A sleeping loft is not a sleeping room: its escape opening is in the room it is open to (R319.1), a loft_room part.
 - Most rules here are rules for each part (below). A rule for each part reads only its own part kind's measures and
   the building's. Use `within` only where the law ties the requirement to the part it sits in ("every sleeping room
   shall have" one); a requirement the law sets on every part of a kind ("emergency escape and rescue openings shall

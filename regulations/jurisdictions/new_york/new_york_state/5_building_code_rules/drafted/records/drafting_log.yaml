@@ -3,8 +3,8 @@ units:
     rules:
     - general.r318_7_5_1_stair_riser_height_max
     - general.r318_7_5_1_stair_riser_variation_max
-    - general.r318_7_5_1_stair_riser_slope_flag
-    - general.r318_7_5_1_stair_open_riser_sphere_flag
+    - general.r318_7_5_1_stair_riser_slope
+    - general.r318_7_5_1_stair_open_riser_sphere
     unresolved: []
     problems: []
   R318.2:
@@ -25,12 +25,13 @@ units:
   R318.7.2:
     rules:
     - general.r318_7_2_stair_headroom
+    - general.r318_7_2_stair_floor_opening_headroom
     unresolved: []
     problems: []
   R318.7.5.2:
     rules:
-    - general.r318_7_5_2_tread_depth_minimum
-    - general.r318_7_5_2_tread_depth_variation
+    - general.r318_7_5_2_stair_tread_depth_min
+    - general.r318_7_5_2_stair_tread_variation_max
     unresolved: []
     problems: []
   R318.7.8:
@@ -40,9 +41,11 @@ units:
     problems: []
   R319.1:
     rules:
-    - general.r319_1_sleeping_room_escape_opening
-    - general.r319_1_basement_escape_opening
-    - general.r319_1_habitable_attic_escape_opening
+    - general.r319_1_sleeping_room_escape_opening_operable
+    - general.r319_1_basement_escape_opening_operable
+    - general.r319_1_habitable_attic_escape_opening_operable
+    - general.r319_1_loft_room_escape_opening_operable
+    - general.r319_1_escape_opening_opens_to_public_way_or_yard
     unresolved: []
     problems: []
   R319.2.1:
