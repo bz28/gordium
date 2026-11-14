@@ -56,12 +56,24 @@ parts:
     g_bridge_s: *no_guard
     g_east: *no_guard
     g_stair_w: *no_guard
-reasons:                                   # the exact reason expected for one measure of each kind
-  m1/opening_net_clear_area: "the opening's frame isn't given (and no maker's clear opening)"
+reasons:                                   # the exact reason for every measure not taken: by part, or part/measure
+  m1: "the opening's frame isn't given (and no maker's clear opening)"
+  m2: "the opening's frame isn't given (and no maker's clear opening)"
+  m3: "the opening's frame isn't given (and no maker's clear opening)"
+  m4: "the opening's frame isn't given (and no maker's clear opening)"
+  b2a: "the opening's frame isn't given (and no maker's clear opening)"
+  b2b: "the opening's frame isn't given (and no maker's clear opening)"
+  b3a: "the opening's frame isn't given (and no maker's clear opening)"
+  b3b: "the opening's frame isn't given (and no maker's clear opening)"
+  b4a: "the opening's frame isn't given (and no maker's clear opening)"
+  b4b: "the opening's frame isn't given (and no maker's clear opening)"
   front/door_clear_width: "the door's hinge side isn't given"
   front/door_clear_height: "the top of the threshold isn't given"
-  g_hall/guard_height: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
-  g_stair_w/guard_height: "the stair the guard is along couldn't be measured: the stairs weren't read (no `stairs` in the description)"
+  g_hall: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
+  g_bridge_n: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
+  g_bridge_s: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
+  g_east: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
+  g_stair_w: "the stair the guard is along couldn't be measured: the stairs weren't read (no `stairs` in the description)"
 problems:
   - "the stairs weren't read (no `stairs` in the description)"
 not_checked:                               # escape openings in rooms that aren't sleeping rooms

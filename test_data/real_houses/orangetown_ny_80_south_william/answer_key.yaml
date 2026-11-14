@@ -60,8 +60,8 @@ areas:
     page: 79
     parts: [master, bed2, bed3, bed4]
     drawings: "A-5 window schedule remark 'EGRESS' on each bedroom's double-hung pair; A-4 marks them E ('INDICATES EGRESS WINDOW', A-1)"
-    working: "4 of 4 bedrooms have at least one window marked as the escape opening. Whether any of them is big enough is the next five areas."
-    outcome: complies
+    working: "4 of 4 bedrooms have at least one window marked as the escape opening. A marked window is an escape and rescue opening only if it meets R319.2 (area, height, width, sill), and none is shown to (the next four areas), so R319.1 isn't established for any bedroom."
+    outcome: needs_review
     measured: "10 escape openings, each `within` its bedroom"
 
   - id: escape_opening_area
@@ -130,7 +130,7 @@ areas:
     rule: R321.2.1
     quote: "located less than 24 inches (610 mm) above the finished floor and greater than 72 inches (1829 mm) above the finished grade"
     page: 81
-    parts: [m1, m2, m3, m4, b4a, b4b, x1, x2]
+    parts: [m1, m2, m3, m4, b2a, b2b, b3a, b3b, b4a, b4b, x1, x2]
     working: |
       R321.2.1 covers every operable window in the dwelling. Second-floor windows are at least 132 in above the
       ground (worked under escape_opening_area); bedroom 4's and the bonus room's windows stand over a 'ROOF BELOW'
@@ -139,7 +139,8 @@ areas:
       bottom is at least 24 in, R321.2.1 needs an opening limit or a fall prevention device, and R321.2.2 then needs
       it to release to the full escape opening. The drawings show none. 3052s: the bonus room's two (A-3, no
       conflict), and the master's or bedroom 4's (the plan and schedule swap them). The C15 casements: no height
-      given. The 3046s (about 27 in, approximate) are only about 3 in clear of the line. Other second-floor windows
+      given. The 3046s (about 27 in, resting on a framed header '+/-' and a nominal unit height) are only about 3 in
+      clear of the line: not established either. Other second-floor windows
       (bath 'C24 - TG', '2036 DH') aren't in house.yaml and aren't worked here.
     outcome: needs_review
     measured: "not a measure yet"
@@ -209,7 +210,7 @@ areas:
     page: 80
     parts: [bsw1, bsw2]
     drawings: "A-5: 'BOMAN KEMP 4'-0 ESCAPE LADDER (WHEN EXIT HEIGHT EXCEEDS 44\")', drawn in the well; the well's depth isn't dimensioned"
-    working: "A ladder is drawn, so whether the depth exceeds 44 in doesn't matter for having one. Its rungs (inside width >= 12 in, projection >= 3 in, spacing <= 18 in, R319.4.2.1) aren't given."
+    working: "The ladder is called for only 'WHEN EXIT HEIGHT EXCEEDS 44\"', and the well's depth isn't given, so whether one is provided isn't settled. Its rungs (inside width >= 12 in, projection >= 3 in, spacing <= 18 in, R319.4.2.1) aren't given either."
     outcome: needs_review
     measured: "not measured"
 
@@ -219,18 +220,20 @@ areas:
     quote: "The riser height shall be not more than 8 1/4 inches (209 mm)"
     page: 77
     parts: [main stair, basement stair]
-    drawings: "A-2 typical stair detail (1/2\"=1'-0\"): riser '7 1/2\"'; A-2 'UP 16R', A-3 'DN 15R' (main stair); A-2 'DN 13R' (basement stair). No floor-to-floor height is dimensioned"
+    drawings: "A-2 typical stair detail (1/2\"=1'-0\"): riser '7 1/2\"'; A-2 'UP 16R', A-3 'DN 15R' (main stair); basement stair 'DN 13R' on the A-2 main floor plan but 'UP 14R' on the A-2 basement plan. No floor-to-floor height is dimensioned"
     working: |
       Each riser is the floor-to-floor rise divided by the risers, and no floor-to-floor rise is given. The detail's
       typical 7 1/2 in would comply (<= 8 1/4), but it is a typical detail, not this stair's rise divided by its
-      risers. It can't be the basement stair's: 13 x 7 1/2 = 97.5 in, less than the 96 in slab-to-ceiling plus the
-      floor above. Main stair: 15 risers to the bridge, which is 7 1/2 in
+      risers. Main stair: 15 risers to the bridge, which is 7 1/2 in
       below the second floor (A-3 'DN 7 1/2"'), so 16 x 7 1/2 = 120 in floor to floor would fit both counts. Limit:
-      15 x 8 1/4 = 123.75 in to the bridge. Basement stair: 13 x 8 1/4 = 107.25 in is the most it can rise; the
-      basement is 8'-0" (96 in) slab to ceiling (A-4) plus the main floor's joists and subfloor, whose depth isn't
-      dimensioned (2x10 on the A-2 plan notes, 2x12 in the A-5 section).
+      15 x 8 1/4 = 123.75 in to the bridge. Basement stair: its rise is the basement's 8'-0" (96 in) slab to ceiling
+      (A-4) plus the main floor's joists and subfloor, not dimensioned: '2x10' joists on the A-2 basement plan,
+      '2x12' joists and '3/4" T&G SUBFLOOR' in the A-5 section. With the section's 2x12 (11 1/4 in actual): at least
+      96 + 11.25 + 0.75 = 108 in. At 13 risers (A-2 main floor plan) that is 8.31 in a riser: over 8 1/4, it fails;
+      at 14 risers (A-2 basement plan) 7.71 in: it complies. With the plan's 2x10 (9 1/4 in): at least 106 in,
+      8.15 in at 13 risers.
     outcome: needs_review
-    reading: "main stair likely complies at 7 1/2 in; the basement stair is close to the 107.25 in limit and needs the actual floor-to-floor"
+    reading: "main stair likely complies at 7 1/2 in. The basement stair fails at 13 risers with the section's 2x12 joists and complies at 14: the drawings give both counts and both joist sizes"
     measured: "stairs not read: stair_riser_height has no value; the kind is null (not read)"
 
   - id: stair_tread
@@ -268,14 +271,16 @@ areas:
     quote: "not less than 36 inches (914 mm) in clear width at all points above the permitted handrail height"
     page: 77
     parts: [main stair, basement stair]
-    drawings: "A-2 and A-3: stair '3'-4\"' between the lines drawn (a wall on one side, the railing line on the other upstairs). A-1 floor plan notes: 'DIMENSIONS ARE TO NEAREST INCH/ ACTUAL ROOM SIZES VARY DUE TO GYPSUM BOARD'"
+    drawings: "Main stair: A-2 and A-3 '3'-4\"' between the lines drawn (a wall on one side, the railing line on the other upstairs). Basement stair: A-2 basement plan '3'-0\"' between its two walls. A-1 floor plan notes: 'DIMENSIONS ARE TO NEAREST INCH/ ACTUAL ROOM SIZES VARY DUE TO GYPSUM BOARD'"
     working: |
       40 in, rounded to the inch, before gypsum board (1/2 in each side, A-5 section): about 39 in finished between
       walls; where a railing bounds it, how much of its thickness the 3'-4" includes isn't stated. Above the
       handrail it needs 36: about 3 in to spare. At the handrail (one side) it needs 31 1/2: a handrail may
-      project up to 4 1/2 in (R320.3), so about 39 - 4.5 = 34.5.
+      project up to 4 1/2 in (R320.3), so about 39 - 4.5 = 34.5. Basement stair: 36 in between framed walls, rounded
+      to the inch: exactly the 36 in minimum before any finish, so any wall finish (1/2 in gypsum board each side
+      would leave 35 in) or rounding down makes it fail; at the handrail, 36 - 4.5 = 31.5, exactly the minimum.
     outcome: needs_review
-    reading: "complies unless the railing's thickness takes more than about 3 in off the finished width"
+    reading: "main stair: complies unless the railing's thickness takes more than about 3 in off the finished width. Basement stair: fails if its walls are finished (35 in with 1/2 in gypsum board each side); it can only meet 36 in with bare framing at a full 36 in"
     measured: "stairs not read"
 
   - id: stair_top_landing
@@ -283,9 +288,19 @@ areas:
     quote: "Where the stairway has a straight run, the depth in the direction of travel shall be not less than 36 inches"
     page: 78
     parts: [main stair]
-    drawings: "A-3: the 'BRIDGE' at the top of the main stair is '4'-0\"' deep and 3'-4\" + 3'-4\" wide"
-    working: "depth 48 >= 36; width 80 >= the flight's 40"
+    drawings: "A-3: the 'BRIDGE' at the top of the main stair: '4'-0\"' dimensioned just east of it, between the lines of its north and south railings; 3'-4\" + 3'-4\" wide"
+    working: "the main stair's top landing only: depth 48 >= 36; width 80 >= the flight's 40"
     outcome: complies
+    measured: "landings aren't measured yet"
+
+  - id: stair_other_landings
+    rule: "[NY] R318.7.6"
+    quote: "There shall be a floor or landing at the top and bottom of each flight of stairs."
+    page: 78
+    parts: [main stair, basement stair]
+    drawings: "A-2 main floor plan: the basement stair's top landing is '3'-4\"' from its top riser to the closet wall, between the stair's walls ('3'-0\"' on the A-2 basement plan), entered through a '2'-8\"x6'-8\"' door in its side wall that swings out into the hall. The main stair's foot (A-2, at 'UP 16R') and the basement stair's foot (A-2 basement plan, at 'UP 14R') aren't dimensioned in the direction of travel."
+    working: "Basement stair top landing: depth 40 >= 36; width 36 = the stair's 36, both to framing, so it is as wide as the stair it serves. The two bottom landings: not given."
+    outcome: needs_review
     measured: "landings aren't measured yet"
 
   - id: bridge_steps
@@ -369,8 +384,18 @@ areas:
     page: 76
     parts: [front]
     drawings: "A-2: 'COVERED PORCH' outside the front door, '4'-0\"' deep and '6'-8\"' wide; the door is 3'-0\""
-    working: "depth 48 >= 36; width 80 >= the 36 in door (R318.3: 'not less than the door served')"
+    working: "its depth and width only: depth 48 >= 36; width 80 >= the 36 in door (R318.3: 'not less than the door served'). Its slope and its stair to grade are worked under exit_door_porch"
     outcome: complies
+    measured: "not a measure yet"
+
+  - id: exit_door_porch
+    rule: R318.3, [NY] R318.3.1, R318.7
+    quote: "Where exterior landings or floors serving the required egress door are not at grade, they shall be provided with access to grade by means of a ramp in accordance with Section R318.8 or a stairway in accordance with Section R318.7."
+    page: 77
+    parts: [front]
+    drawings: "A-2: steps 'DOWN' from the covered porch to grade, not dimensioned (risers, treads, width); no slope given for the porch"
+    working: "R318.3 also limits the landing's slope ('shall not exceed 1/4 unit vertical in 12 units horizontal', p.76): not given. The porch steps are a stairway under R318.7 (risers, treads, handrail if four or more risers): nothing about them is given."
+    outcome: needs_review
     measured: "not a measure yet"
 
   - id: exit_door_threshold

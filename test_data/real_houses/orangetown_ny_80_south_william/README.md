@@ -1,6 +1,6 @@
 # A real house: 80 South William Street (Lot 2), Pearl River, Town of Orangetown, NY
 
-**Purpose:** the first real house for egress checking: a four-bedroom, two-story house with a basement, transcribed from its public planning-board drawings, with every egress rule worked out by hand.\
+**Purpose:** the first real house for egress checking: a four-bedroom, two-story house with a basement, transcribed from its public planning-board drawings, with the egress rules listed in `answer_key.yaml` worked out by hand.\
 **For:** anyone testing or changing egress measuring and checking; architects checking the hand answers.\
 **Kept current by:** whoever changes the interior description format (`docs/interior/interior_description_format.md`) or adds an egress rule this house should be checked against.
 
@@ -24,8 +24,8 @@
 
 Construction drawings for a house like this state **requirements more than sizes**. Windows are given as size codes ("3046 DH": a double-hung about 3'-0" by 4'-6"), "Andersen or equal", with a schedule "for design intent only"; the typical stair detail says "9" min" tread and a "7 1/2"" riser, but no floor-to-floor height is given; railings are "36" high". So:
 
-- **Settled from the drawings:** bedroom sizes and ceilings (all comply), every bedroom has an escape window marked, the top landing of the main stair, the single steps onto the bridge, the hallway widths, the landing outside the front door, the level railings' 36 in height, the front door being the side-hinged exit door.
-- **Not settled:** every escape window's clear opening (area, height, width, sill height), window fall protection, the basement's escape window and its well, stair risers, treads, headroom and width, guard openings, the exit door's clear width and height. Gordium must say **needs review** for each: never a pass on a guess.
+- **Settled from the drawings:** bedroom sizes and ceilings (all comply), the top landing of the main stair, the single steps onto the bridge, the hallway widths, the depth and width of the landing outside the front door, the level railings' 36 in height, the front door being side-hinged.
+- **Not settled:** whether each bedroom has a qualifying escape opening (every bedroom has one marked, but no marked window is shown to be big enough), every escape window's clear opening (area, height, width, sill height), window fall protection, the basement's escape window and its well, stair risers, treads, headroom and width, guard openings, the exit door's clear width and height. Gordium must say **needs review** for each: never a pass on a guess.
 - **Two real risks the arithmetic shows** (answer key): a 3046 double-hung, the only escape window in bedrooms 2 and 3, can come in under 5.7 sf or 24 in high once its frame is deducted; and the main stair's headroom under the second-floor hallway falls below 6'-8" if its treads are deeper than about 10.3 in.
 
 ## The drawings disagree with themselves
@@ -42,6 +42,8 @@ Construction drawings for a house like this state **requirements more than sizes
 | 8 | Main stair risers | A-2: "UP 16R" | A-3: "DN 15R" (both fit if the 16th is the 7 1/2" step from the bridge up to the second floor) |
 | 9 | Basement escape windows | A-2 plan: "CW14" in areaways ("SEE DETAIL THIS SHEET": A-2's own escape-opening detail, which gives only minimums) | A-5's window-well details, the only areaway details, show a "4040 EASY-BUCK" window |
 | 10 | Dates | A-1, A-2, A-4, A-5: 30 Dec 2025 | A-3: 21 Aug 2025 |
+| 11 | Basement stair risers | A-2 main floor plan: "DN 13R" | A-2 basement plan: "UP 14R" |
+| 12 | Main floor joists over the basement | A-2 basement plan: "2x10 JOISTS 16"OC" | A-5 section: "2x12 JOISTS (SEE PLANS FOR SPACING)" |
 
 ## Questions for the drawing's architect
 
@@ -49,6 +51,6 @@ Construction drawings for a house like this state **requirements more than sizes
 2. Master bedroom and bedroom 4: 3046 or 3052? For every 3052 on the second floor (the bonus room's too), is window fall protection provided (R321.2.1: the bottom about 19 in above the floor)?
 3. Is the bonus room ever a bedroom? Its windows are marked E; if it is, R319.1 needs it to have its own escape opening checked.
 4. The main stair: floor-to-floor height, riser count to the bridge, tread depth, and what the A-2 "10'-0"" along it spans. If it is the run of 14 treads, each is 8.57 in, under 9.
-5. The basement stair: floor-to-floor height (13 risers may rise at most 107.25 in).
+5. The basement stair: 13 or 14 risers, 2x10 or 2x12 joists, and the floor-to-floor height. With the section's 2x12 and 3/4 in subfloor it rises at least 108 in: 8.31 in a riser at 13 (fails), 7.71 in at 14. And its width: the plan's 3'-0" is to framing, so finished walls would leave about 35 in, under 36.
 6. The basement escape windows: the CW14 on the plan or the 4040 in the detail? And the well's size at its outer edge (the detail draws it tapered, dimensioned only at the wall), and does the window open fully in it?
-7. The front door: how far below the threshold is the covered porch (R318.3.1: at most 1 1/2 in, or 8 1/4 in for a door that doesn't swing over it)?
+7. The front door: the porch's slope and its steps to grade (risers, treads, width); and how far below the threshold is the covered porch (R318.3.1: at most 1 1/2 in, or 8 1/4 in for a door that doesn't swing over it)?

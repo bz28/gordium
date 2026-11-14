@@ -18,6 +18,7 @@ import yaml
 
 from design_checker import each_part
 from model_measurement.interior import KINDS, measure, measure_file
+from model_measurement.interior.openings import SLIDING
 
 REAL = Path(__file__).parents[3] / "test_data" / "real_houses"
 NAMES = sorted(p.name for p in REAL.iterdir() if (p / "house.yaml").exists())
@@ -43,8 +44,9 @@ def required(key, part):
     if key == "rooms":
         return {"floor", "floor_elevation", "ceiling_height"} if part.get("sleeping") else set()
     if key == "openings":
-        by_kind = {"casement": {"hinged"}, "side_hinged_door": {"hinged"}, "fixed": set()}
-        return {"frame", "stated_clear", "ground_outside"} | by_kind.get(part.get("operation"), {"sashes"})
+        by_kind = {"casement": {"hinged"}, "side_hinged_door": {"hinged"}}
+        sashes = {"sashes"} if part.get("operation") in SLIDING else set()      # only sliding ones read `sashes`
+        return {"frame", "stated_clear", "ground_outside"} | by_kind.get(part.get("operation"), sashes)
     if key == "doors":
         return FORMAT_KEYS["doors"] - {"exit"}
     if key == "guards":
@@ -115,9 +117,11 @@ def test_each_measure_is_the_hand_worked_one(name):
             assert set(p["more"]) == set(w.get("more") or {}), pid
             for m, v in (w.get("more") or {}).items():
                 assert p["more"][m] == pytest.approx(v, abs=1e-6), (pid, m)
-    for where, reason in expected["reasons"].items():
-        pid, m = where.split("/")
-        assert by_id[pid]["not_measured"][m] == reason, where
+    reasons = expected["reasons"]                  # every measure not taken has its hand-worked reason
+    assert {w.split("/")[0] for w in reasons} <= set(by_id)
+    for pid, p in by_id.items():
+        for m, reason in p["not_measured"].items():
+            assert reason == reasons.get(f"{pid}/{m}", reasons.get(pid)), (pid, m)
     assert got["problems"] == expected["problems"]
     assert [n["id"] for n in got["not_checked"]] == expected["not_checked"]
 
@@ -134,6 +138,13 @@ def test_the_answer_key_is_worked_for_every_part(name):
         assert all(p in ids | UNDESCRIBED for p in area["parts"]), area["id"]
         if area["outcome"] != "needs_review":         # a reading rests on assumptions: never under a verdict
             assert "reading" not in area, area["id"]
+    got = measure_file(REAL / name / "house.yaml")["parts"]["emergency_escape_opening"] or []
+    unsized = {p["id"] for p in got if not p["measures"]}
+    sized_rooms = {o["room"] for o in house["openings"] if o["id"] in {p["id"] for p in got} - unsized}
+    unsized |= {r["id"] for r in house["rooms"] if r["sleeping"]} - sized_rooms
+    for area in key["areas"]:   # an escape rule over an opening the code can't size (or its room) never complies
+        if "R319" in area["rule"]:
+            assert not (set(area["parts"]) & unsized and area["outcome"] == "complies"), area["id"]
     worked = {p for a in key["areas"] for p in a["parts"]}
     escape = {o["id"] for o in house["openings"] if o["escape"]}
     assert escape <= worked                       # every marked escape opening is worked in the key

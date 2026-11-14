@@ -18,7 +18,8 @@
 # room's inside dimensions on the plan (only its area is measured); the rooms' places in the house are not
 # transcribed. The A-1 floor plan notes: "DIMENSIONS ARE TO NEAREST INCH/ ACTUAL ROOM SIZES VARY DUE TO GYPSUM
 # BOARD" (the framing notes say the same): the dimensions are rounded to the inch and the finished rooms are a
-# little smaller (1/2 in gypsum board each side, A-5 section). Every bedroom is over 120 sf, so it can't matter.
+# little smaller (1/2 in gypsum board each side, A-5 section). The smallest bedroom is 128 sf, well over the 70 sf
+# minimum (R312.1), so it can't matter there.
 format: gordium.interior/1
 units: in
 source:
@@ -237,7 +238,7 @@ openings:
 
 # stairs: not given (not read). Every stair rule needs review. The drawings give: main stair 'UP 16R' (A-2) but
 # 'DN 15R' (A-3), 3'-4" wide (A-2, A-3), its stairwell opening 9'-8" long (A-3), a '10'-0"' dimension along it on
-# A-2 whose ends aren't clear; basement stair 'DN 13R' (A-2); the A-2 'TYPICAL INT. STAIR DETAIL' (a typical
+# A-2 whose ends aren't clear; basement stair 'DN 13R' (A-2 main floor plan) but 'UP 14R' (A-2 basement plan), '3'-0"' wide; the A-2 'TYPICAL INT. STAIR DETAIL' (a typical
 # detail, 1/2"=1'-0"): riser '7 1/2"', tread '9" MIN', nosing '1 1/8" ±', top rail '3'-0"', 'MINIMUM 6'-9" HEADROOM AS PER 2020 NYS
 # CODE'. No floor-to-floor height is dimensioned, so no riser height or nosing elevation can be placed, and no tread
 # depth is dimensioned: the nosings the format needs can't be written without inventing them.
