@@ -82,7 +82,10 @@ def covers(surfaces: list[Surface], pieces: list) -> bool:
     never unioned with its neighbours, whose shared edges can be too nearly parallel for the geometry library)."""
     plans = unary_union([s.plan for s in surfaces])
     left = sum(p.difference(plans).area for p in pieces)
-    return left <= COVER * sum(p.area for p in pieces)
+    whole = sum(p.area for p in pieces)
+    if not (math.isfinite(left) and math.isfinite(whole)):  # read.FAR keeps areas finite; never let inf <= inf pass
+        raise Stop("surface_out_of_range", what="the region")
+    return left <= COVER * whole
 
 
 def least_gap(surfaces: list[Surface], pieces: list[tuple], what: str, region_words: str) -> float:
@@ -98,4 +101,6 @@ def least_gap(surfaces: list[Surface], pieces: list[tuple], what: str, region_wo
                 for poly, ref in pieces for s in surfaces for x, y in corners(s.plan.intersection(poly))]
     if not all(map(math.isfinite, gaps)):                     # never let one surface drop out of the least
         raise Stop("surface_out_of_range", what=what)
+    if not gaps:                                              # nothing read over the region: never min() of none
+        raise Stop("not_covered", what=what, region=region_words)
     return min(gaps)

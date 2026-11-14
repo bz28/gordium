@@ -12,6 +12,8 @@ kind). The input format: docs/interior/interior_description_format.md; each meas
 docs/interior/interior_measurements.md.
 """
 
+import math
+
 from model_measurement.interior.doors import measure_door
 from model_measurement.interior.guards import measure_guard
 from model_measurement.interior.openings import measure_opening
@@ -53,6 +55,11 @@ def _given(description: dict, kind: str, problems: list):
 
 def _part(item: dict, measured, within=None) -> dict:
     measures, more, stopped = measured[:3]
+    # a last guard for every kind: a value that isn't a finite number is no value (read.FAR should make this unreachable)
+    for got in (measures, more):
+        for name in [n for n, v in got.items() if isinstance(v, float) and not math.isfinite(v)]:
+            del got[name]
+            stopped.setdefault(name, Stop("not_finite").reason)
     part = {"id": item.get("id"), "name": name_of(item)}
     if within is not None or "room" in item:
         part["within"] = within

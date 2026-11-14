@@ -760,17 +760,115 @@ def test_a_tread_starts_at_its_nosings_nearer_end():
     assert "out beyond its treads' ends" in stopped["stair_clear_width"]
 
 
-def test_nosings_too_large_to_measure_give_no_value_never_nan_or_a_crash():
+@pytest.mark.parametrize("far", [math.inf, None])
+def test_nosings_too_large_to_measure_give_no_value_never_nan_or_a_crash(far, monkeypatch):
     """Round 11: nosing ends 1.8e308 apart overflowed the run direction to NaN, which every check let through: a NaN
-    tread depth was reported, then the geometry library raised and lost the whole house."""
+    tread depth was reported, then the geometry library raised and lost the whole house. Round 12: refused as they
+    are read (too_far); with that bound lifted, the flight's own check still refuses them."""
     import json
+    if far:
+        monkeypatch.setattr("model_measurement.interior.read.FAR", far)
     d = base()
     d["stairs"][0]["nosings"] = [[[10 * j, -9e307, 7 * (j + 1)], [10 * j, 9e307, 7 * (j + 1)]] for j in range(3)]
     out = measure(d)
     json.dumps(out, allow_nan=False)                                  # no NaN anywhere
     p = out["parts"]["stair"][0]
     assert "stair_tread_depth" not in p["measures"] and "stair_headroom" not in p["measures"]
-    assert "too large to measure" in p["not_measured"]["stair_headroom"]
+    assert ("too large to measure" if far else "15,800 miles") in p["not_measured"]["stair_headroom"]
+
+
+def _huge_stair_overhead_only_over_36_in(half):
+    d = base()
+    d["stairs"][0]["sides"] = {"left": "open", "right": "open"}
+    d["stairs"][0]["nosings"][1] = [[10, -half, 14], [10, half, 14]]
+    d["stairs"][0]["overhead"] = [[[-5, -5, 120], [40, -5, 120], [40, 41, 120], [-5, 41, 120]]]
+    return d
+
+
+@pytest.mark.parametrize("far", [math.inf, None])
+def test_an_overflowing_area_is_never_read_as_covered(far, monkeypatch):
+    """Round 12: a nosing 2e307 wide made the flight's area infinite, and `inf <= inf` passed the coverage check: a
+    headroom of 92 over a flight covered only on 36 in of it. A 1e154 room floor did the same for its ceiling. Now
+    such lengths are refused as read. With that bound lifted the coverage check still refuses the room's infinite
+    area; the stair's tread is lost to rounding inside the geometry library before any area is worked out, which is
+    why the bound, not a later check, is the fix."""
+    m, stopped, _ = stair(_huge_stair_overhead_only_over_36_in(1e307))
+    assert "stair_headroom" not in m, m
+    if far:
+        monkeypatch.setattr("model_measurement.interior.read.FAR", far)
+    d = base()
+    d["rooms"][0].pop("ceiling_height")
+    d["rooms"][0].update(floor=[[0, 0], [1e154, 0], [1e154, 1e154], [0, 1e154]],
+                         ceilings=[[[0, 0, 96], [120, 0, 96], [120, 120, 96], [0, 120, 96]]])
+    p = one(d, "sleeping_room")
+    assert "least_ceiling_height" not in p["more"] and "sleeping_room_floor_area" not in p["measures"]
+
+
+@pytest.mark.parametrize("far", [math.inf, None])
+def test_a_flight_too_wide_to_cut_never_crashes(far, monkeypatch):
+    """Round 12: a nosing 2e308 wide (each end finite) left nothing to read overhead, and min() of no gaps raised
+    out of measure()."""
+    if far:
+        monkeypatch.setattr("model_measurement.interior.read.FAR", far)
+    d = _huge_stair_overhead_only_over_36_in(1e308)
+    m, stopped, _ = stair(d)
+    assert "stair_headroom" not in m and "stair_headroom" in stopped
+
+
+HUGE_CASES = {
+    "door_clear_height": lambda d: d["doors"][0].update(threshold_top=-1.7e308, head_stop_bottom=1.7e308),
+    "guard_height": lambda d: d["guards"][0].update(walking_surface=-1.7e308, top=1.7e308, members=[
+        {"left": 0, "right": 10, "bottom": 1e308, "top": 1.7e308}]),
+    "sleeping_room_floor_area": lambda d: d["rooms"][0].update(floor=[[0, 0], [1e154, 0], [1e154, 1e154],
+                                                                      [0, 1e154]]),
+    "opening_net_clear_area": lambda d: d["openings"][0].update(operation="awning", frame=None, stated_clear={
+        "width": 1e200, "height": 1e200, "bottom": 30}),
+    "stair_riser_height": lambda d: d["stairs"][0].update(bottom_elevation=-1.7e308, nosings=[
+        [[10 * j, 0, 1e308], [10 * j, 36, 1e308]] for j in range(4)]),
+}
+
+
+@pytest.mark.parametrize("far", [math.inf, None])
+@pytest.mark.parametrize("name", sorted(HUGE_CASES))
+def test_lengths_far_apart_never_give_infinity_or_nan(name, far, monkeypatch):
+    """Round 12: two huge but finite lengths subtracted or multiplied gave inf or NaN measures (the output wasn't
+    even valid JSON). Now refused as read (too_far); with that bound lifted, the last guard leaves them out."""
+    import json
+    if far:
+        monkeypatch.setattr("model_measurement.interior.read.FAR", far)
+    d = base()
+    HUGE_CASES[name](d)
+    out = measure(d)
+    json.dumps(out, allow_nan=False)
+    parts = [p for ps in out["parts"].values() for p in ps or []]
+    assert not any(name in p["measures"] or name in p["more"] for p in parts)
+    assert any(name in p["not_measured"] for p in parts)
+
+
+def test_a_guard_too_far_off_gives_no_sphere():
+    """Round 12 (a sceptic's case): a guard 1.7e308 in tall with a 10 in gap under its one member read a sphere of
+    0 (a solid guard): the geometry library lost the gap to rounding. Lengths that far are now refused as read."""
+    d = base()
+    d["guards"][0].update(walking_surface=0, top=1.7e308, members=[{"left": 0, "right": 10, "bottom": 8.5e307,
+                                                                    "top": 1.7e308}])
+    m, stopped = guard(d)
+    assert "guard_opening_sphere" not in m and "15,800 miles" in stopped["guard_opening_sphere"]
+
+
+def test_a_house_a_long_way_from_the_origin_still_measures():
+    """The bound is far: a whole description moved 10,000,000 in (158 miles) off its origin measures the same."""
+    def moved(v, key=None):
+        if isinstance(v, list) and v and all(isinstance(x, (int, float)) and not isinstance(x, bool) for x in v) \
+                and len(v) in (2, 3):
+            return [v[0] + 1e7, v[1] + 1e7] + v[2:]
+        if isinstance(v, list):
+            return [moved(x) for x in v]
+        if isinstance(v, dict):
+            return {k: moved(x, k) for k, x in v.items()}
+        return v
+    d = base()
+    d["stairs"] = moved(d["stairs"])
+    assert stair(d)[0] == stair(base())[0]
 
 
 def _rotated_flight(theta, ox, oy, askew):
@@ -1062,11 +1160,15 @@ def test_headroom_covers_both_ends_of_an_askew_top_nosing(x0, x36):
 
 
 @pytest.mark.parametrize("first", [True, False])
-def test_a_surface_too_large_to_measure_is_never_dropped(first):
+def test_a_surface_too_large_to_measure_is_never_dropped(first, monkeypatch):
     """Review round 4: a 60 in plane reaching 1e200 in made NaN heights, and min() let the other surface win."""
     huge = [[-5, -5, 60], [1e200, -5, 60], [1e200, 1e200, 60], [-5, 1e200, 60]]
     normal = [[-5, -5, 200], [40, -5, 200], [40, 41, 200], [-5, 41, 200]]
     d = base()
+    _, stopped, _ = stair(d)
+    d["stairs"][0]["overhead"] = [huge, normal] if first else [normal, huge]
+    assert "15,800 miles" in stair(d)[1]["stair_headroom"]                 # round 12: refused as read
+    monkeypatch.setattr("model_measurement.interior.read.FAR", math.inf)   # and the check behind it still holds
     d["stairs"][0]["overhead"] = [huge, normal] if first else [normal, huge]
     _, stopped, _ = stair(d)
     assert "too large to measure" in stopped["stair_headroom"]
@@ -1560,6 +1662,8 @@ STOP_CASES = {
     "flag_missing": _set(("doors", 0, "exit"), _DELETE),
     "missing": _set(("doors", 0, "threshold_top"), _DELETE),
     "not_a_length": _set(("doors", 0, "threshold_top"), "low"),
+    "too_far": _set(("doors", 0, "threshold_top"), 1e10),
+    "not_finite": _with(base, lambda d: d["doors"][0].update(threshold_top=-1.7e308, head_stop_bottom=1.7e308)),
     "not_a_point": _set(("doors", 0, "hinge_pin"), [0]),
     "negative": _set(("openings", 0, "hinged", "sash_thickness"), -1),
     "clear_outside_frame": _with(base, _awning, lambda d: d["openings"][0].update(
@@ -1640,7 +1744,13 @@ def _geometry_fails(*_args, **_kw):
 
 
 # a reason no drawing reliably makes (the geometry library failing): it is made to happen
-STOP_SETUP = {"shapes_failed": lambda mp: mp.setattr("model_measurement.interior.stairs.unary_union", _geometry_fails)}
+def _no_bound(mp):
+    mp.setattr("model_measurement.interior.read.FAR", math.inf)
+
+
+STOP_SETUP = {"shapes_failed": lambda mp: mp.setattr("model_measurement.interior.stairs.unary_union", _geometry_fails),
+              # reasons behind the read-time bound (read.FAR): the bound lifted, each still happens
+              "surface_out_of_range": _no_bound, "nosings_out_of_range": _no_bound, "not_finite": _no_bound}
 
 
 def test_every_stop_has_a_case():

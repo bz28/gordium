@@ -16,7 +16,8 @@ The input is the [interior description](interior_description_format.md); the cod
 4. **Drawing noise read on the cautious side.** A nosing's two ends may differ by 1/16 in: each riser and tread is read with the ends paired the worst way, and the line of the nosings through their higher ends, each at its end nearer the foot (the line rises, so that is as high as it can stand). A maker's clear opening within 1/16 in of its frame is cut back to the frame. A flat surface's points may stand 1/16 in off its plane: the plane is lowered to its lowest point.
 5. **Exact, never sampled.** Heights between flat surfaces are found at the corners of where they overlap, the flight cut at every bend of the line of the nosings (the gap between two flat surfaces changes in a straight line, so its least value is at a corner); widths along a flight at every point where a side, handrail or tread end bends.
 6. **A part placed against another must stand where it says.** A part that attaches to another by where it is drawn counts only where it actually is: a stair guard only along a side of its stair (its top line on that side's line, within 1/16 in, drawing noise), a handrail is a side's handrail only if it runs the whole flight between the stair's sides, a door leaf only turned about a hinge pin that hangs it (at its hinge-side corner, within 1/16 in, or beyond it, which only narrows the width), and only where it closes its own opening (from the hinge-side stop to the latch-side stop). And what they are checked against is itself checked: a stair's drawn side bounds it only where it stands at the tread ends (no more than a skirt or stringer, 1 1/2 in, out beyond them; treads may run past it into the wall), so a side drawn away from the stair can't carry a guard or a handrail with it. The 3/4 in and 1 1/2 in are Gordium's stated readings of usual construction (a door stop's projection; a 2x stringer's thickness), to be confirmed. Drawn anywhere else, it gets no value: a guard 500 in off to the side of a stair protects none of it.
-7. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
+7. **Every length within reach.** A length more than 1,000,000,000 in (about 15,800 miles) from the origin gets no value (`too_far`). Inside that, every area, sum and difference worked out from lengths stays a finite number, so no check can be passed by an overflow to infinity. As a last guard, any value that still isn't a finite number is left out (`not_finite`).
+8. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
 
 ## Sleeping rooms (`sleeping_room`)
 
@@ -107,6 +108,8 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `flag_missing` | {what} {name}: say whether it is {question} (`{key}`: true or false) |
 | `missing` | {what} isn't given |
 | `not_a_length` | {what} isn't a length (a number) |
+| `too_far` | {what} is more than 1,000,000,000 in (about 15,800 miles) from the origin: not a place in a house |
+| `not_finite` | it came out too large to be a number (from lengths far apart) |
 | `negative` | {what} is {value} in: a size can't be less than zero |
 | `not_a_point` | {what} isn't a list of {n} numbers |
 | `not_an_outline` | {what} isn't an outline of at least 3 points that encloses an area |
