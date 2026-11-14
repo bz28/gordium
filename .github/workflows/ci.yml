@@ -37,6 +37,8 @@ jobs:
         run: python -m model_measurement --check
       - name: The example project reports match a fresh build (results from the rule checker only)
         run: python -m project_report --check
+      - name: Every golden answer is the same (check and start on the test sites, scenarios and 200 stress designs)
+        run: python -m design_checker.goldens --check
 
   # The same tests on Windows, where Python reads files as cp1252 unless told UTF-8. PYTHONUTF8 is deliberately
   # not set: the job proves the code names its encodings, as an architect's Windows PC runs it.
@@ -69,3 +71,5 @@ jobs:
         run: python -m model_measurement --check
       - name: The example project reports match a fresh build (results from the rule checker only)
         run: python -m project_report --check
+      - name: Every golden answer is the same (check and start on the test sites, scenarios and 200 stress designs)
+        run: python -m design_checker.goldens --check
