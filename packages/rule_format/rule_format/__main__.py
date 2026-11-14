@@ -16,6 +16,7 @@ import argparse
 import sys
 from pathlib import Path
 
+from . import parts
 from . import place as places
 from .labels import load_pieces, validate_labels
 from .rulebook import (REPO, STATE_SETTINGS, Context, finding_conflicts, law_folders, load, locate, not_quotable,
@@ -24,7 +25,14 @@ from .state_law import VERIFICATION, state_settings_problems, verification_probl
 
 
 def main() -> int:
-    failed = checked = 0
+    failed, checked = 0, 1
+    shown = parts.PARTS_FILE.relative_to(parts.PARTS_FILE.parents[3])   # the code's own repository
+    try:                                  # the part kinds per-part rules repeat over (parts.yaml)
+        parts.load_registry()
+        print(f"✓ {shown}")
+    except (ValueError, OSError, AttributeError, TypeError) as e:
+        failed = 1
+        print(f"✗ {shown}: {e}")
     for jurisdiction in law_folders(REPO):
         place = jurisdiction.relative_to(REPO / "regulations/jurisdictions")
         state = (jurisdiction / STATE_SETTINGS).is_file()

@@ -13,6 +13,14 @@ Requests to the worker: `check` (a model and its lot facts), `start` (the larges
 the lot in a model, `envelope_builder.start`), `sample_site` (the plugin's place's sample lot, from its jurisdiction.yaml: 106 Ithaca Rd's lot and facts, as files
 drawn from the sample before 2026-10-27 have them; GordiumStart no longer prefills it: a new file starts empty), `options` (zones and uses), `facts` (what's wrong with saved lot facts).
 
+**Rules for each part** (`each_part.py`, egress step 2): `check_parts(rules, parts, values, allowed)` runs a
+rulebook's per-part rules (`for_each`: bedrooms, escape openings, stairs; `rule_format/parts.py`) over the parts
+given, one row per part with a line naming it ("Bedroom 2 › Window 5: net clear area 5.1 sq ft, needs ≥ 5.7 sq ft"),
+and gives panel items whose overall answer is `present.state`'s with the zoning rows. Parts `None` (the interior
+isn't being checked) is one counted "Interior: not checked yet" item, needs review. Not wired into `check()` yet:
+parts don't arrive in the site description until egress step 4
+([decision](../../docs/decisions/2026-11-12_rules_for_each_part.md)).
+
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
 `rhino_logic.py` runs in Rhino's Python, which can't read YAML, so it reads `place.json` beside it: the place's name,
 time zone and how its addresses are written, copied from its `jurisdiction.yaml` by `python -m rule_format place
