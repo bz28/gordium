@@ -5,9 +5,10 @@ unchanged). Python 3.9 and the standard library only: Rhino 8 imports this into 
 where none of the .venv's packages are installed."""
 
 
-__all__ = ['panel_header', 'status_words', 'row_name', 'USE_STATED', 'list_cells', 'highlight', 'red_last',
-    'newly_failing', 'WORKED_OUT', 'detail_parts', 'coloured_info', 'labels_on', 'context_shown', 'yard_label_shown',
-    'legend_text', 'COLUMN_DELTA', 'CELL_FRACTIONS', 'cell_text', 'shorten', 'link_text', 'height_limit_text']
+__all__ = ['panel_header', 'status_words', 'row_name', 'USE_STATED', 'list_cells', 'list_values', 'highlight',
+    'red_last', 'newly_failing', 'WORKED_OUT', 'detail_parts', 'coloured_info', 'labels_on', 'context_shown',
+    'yard_label_shown', 'legend_text', 'COLUMN_DELTA', 'CELL_FRACTIONS', 'cell_text', 'shorten', 'link_text',
+    'height_limit_text']
 
 
 def panel_header(head):
@@ -50,6 +51,17 @@ def list_cells(item):
     if item.get("name") == "Use" and proposed and proposed != "—":
         return "Use: " + proposed + (" · " + item["note"] if item.get("note") else ""), USE_STATED
     return row_name(item), proposed
+
+
+def list_values(item):
+    """A row's four cells in the panel's list (Item, Proposed, Required, Delta), before cell_text shortens them: the
+    list's own shorter forms where the checker gave one (present: a tax-map lot's Delta, delta_cell, "+2'-0 1/2";
+    worst +0'-0 1/2""; a span of readings' tightest pair, cells, "35'-0 5/8" (varies)"), else the row's words. The
+    detail below the list always has the words whole (the audit of main, 2026-10-29)."""
+    name, proposed = list_cells(item)
+    cells = item.get("cells") or {}
+    return (name, cells.get("proposed") or proposed, cells.get("required") or item.get("required"),
+            item.get("delta_cell") or item.get("delta") or "")
 
 
 def highlight(status):

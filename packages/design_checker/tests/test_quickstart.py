@@ -236,18 +236,19 @@ def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(hou
     rear = _check(_moved(got["floors"], dy=float(dy)), facts)["Rear yard"]
     assert (rear["status"], rear["proposed"]) == (present.REVIEW, proposed)
     dy, proposed, short = said(r"Now move it (\d+) ft back:\*\*\s+Rear yard\s+" + RANGE + r": \*\*does not "
-                               r"comply\*\*, at least (\d+'-\d+(?: \d/\d)?\") short")
+                               r"comply\*\*, \"still (\d+'-\d+(?: \d/\d)?\") short under every reading\"")
     dy_fails = dy
     moved = _moved(got["floors"], dy=float(dy))
     rear = _check(moved, facts)["Rear yard"]
-    assert (rear["status"], rear["proposed"], rear["delta"]) == (present.FAILS, proposed, f"at least {short} short")
+    assert (rear["status"], rear["proposed"]) == (present.FAILS, proposed)
+    assert rear["delta"].endswith(f" short (still {short} short under every reading)"), rear["delta"]
     assert ("yard", present.FAILS) in _regions(moved, facts)                    # "the strip ... turns red"
     # short under only some readings (the tax map's slack and the back-line question): needs review, amber only
     low, high = said(r"From (\d+) to (\d+) ft back it still needs review")
     for dy in range(int(low), int(high) + 1):
         moved = _moved(got["floors"], dy=float(dy))
         rear = _check(moved, facts)["Rear yard"]
-        assert rear["status"] == present.REVIEW and rear["delta"].startswith("up to "), (dy, rear["delta"])
+        assert rear["status"] == present.REVIEW and rear["delta"].endswith(" under another reading)"), (dy, rear["delta"])
         assert ("yard", present.FAILS) not in _regions(moved, facts), dy
         row = next(x for x in check_site(_site(moved), facts)["rows"] if x["Rule id"] == "R-1b.rear_yard")
         assert not row["Fails"], (dy, row["Provisional"])        # the checker itself: one reading set (round 2)
@@ -255,7 +256,7 @@ def test_3_short_only_under_some_readings_needs_review_short_under_all_fails(hou
     assert first == int(high) + 1 and first < int(dy_fails)
     for dy in range(first, int(dy_fails) + 1):
         rear = _check(_moved(got["floors"], dy=float(dy)), facts)["Rear yard"]
-        assert rear["status"] == present.FAILS and rear["delta"].startswith("at least "), (dy, rear["delta"])
+        assert rear["status"] == present.FAILS and " short (still " in rear["delta"], (dy, rear["delta"])
 
 
 def test_4_pull_the_rear_wall_back_coverage_fails_on_every_tax_map_lot(house):
@@ -287,15 +288,19 @@ def test_5_raise_the_roof_fails(house):
 
 def test_6_the_left_side_wall_out(house):
     got, facts = house
-    feet, proposed, up_to = said(r"move the southwest wall (\d+) ft out\*\*.*?Side yard, Southwest (\d+'-\d+(?: \d/\d)?\"):"
-                                 r" \*\*needs review\*\*, up to (\d+'-\d+(?: \d/\d)?\") short")
+    feet, proposed, drawn, best = said(
+        r"move the southwest wall (\d+) ft out\*\*.*?Side yard, Southwest (\d+'-\d+(?: \d/\d)?\"): \*\*needs review\*\*, "
+        r"(\d+'-\d+(?: \d/\d)?\") short as drawn, \"(\+\d+'-\d+(?: \d/\d)?\") if the tax-map lines are 2 ft off the other way\"")
     side = _left_side(_check(_wall_out(got["floors"], float(feet)), facts))
-    assert (side["status"], side["proposed"], side["delta"]) == (present.REVIEW, proposed, "up to " + up_to + " short")
-    feet, proposed, least = said(r"Move it (\d+) ft out instead:\*\* (\d+'-\d+(?: \d/\d)?\"): \*\*does not comply\*\*,"
-                                 r" at least (\d+'-\d+(?: \d/\d)?\") short")
+    assert (side["status"], side["proposed"], side["delta"]) == (
+        present.REVIEW, proposed, f"{drawn} short ({best} if the tax-map lines are 2 ft off the other way)")
+    feet, proposed, drawn, least = said(
+        r"Move it (\d+) ft out\s+instead:\*\* (\d+'-\d+(?: \d/\d)?\"): \*\*does not comply\*\*, (\d+'-\d+(?: \d/\d)?\") short, "
+        r"\"still (\d+'-\d+(?: \d/\d)?\") short if the tax-map lines are 2 ft off the other way\"")
     out = _wall_out(got["floors"], float(feet))
     side = _left_side(_check(out, facts))
-    assert (side["status"], side["proposed"], side["delta"]) == (present.FAILS, proposed, "at least " + least + " short")
+    assert (side["status"], side["proposed"], side["delta"]) == (
+        present.FAILS, proposed, f"{drawn} short (still {least} short if the tax-map lines are 2 ft off the other way)")
     assert ("yard", present.FAILS) in _regions(out, facts)                      # "that strip turns red"
 
 
@@ -329,14 +334,14 @@ def test_10_the_height_bonus_waits_for_the_open_question(house):
 def test_11_delta_in_words(house):
     from design_checker import rhino_logic as logic
     got, facts = house
-    front_words, up_words, least_words, survey_words = (" ".join(w.split()) for w in said(
-        r'after test 2 the Front yard row reads "(≥ \+\d+\'-\d+(?: \d/\d)?")"\s+\(at least that much to spare\); in '
-        r'test 6 the Southwest\s+side yard reads "(up to \d+\'-\d+(?: \d/\d)?" short)" \(3 ft out: it\s+may comply\) '
-        r'and "(at least\s+\d+\'-\d+(?: \d/\d)?" short)" \(5 ft out: the red strip\).*?With a survey it reads the '
-        r'margin\s+itself: after test 2, "(\+\d+\'-\d+(?: \d/\d)?")"'))
+    front_words, cell_1, cell_2, up_words, least_words, survey_words = (" ".join(w.split()) for w in said(
+        r'after test 2 the Front yard row\'s details\s+read "(.+?\))" \(the list says it shorter, on two lines: "(.+?)" '
+        r'over "(.+?)"\); in test 6 '
+        r'the Southwest side yard reads "(.+?\))" \(3 ft out: it may comply\) and "(.+?\))" \(5 ft out: the red '
+        r'strip\).*?With a survey it reads the margin itself: after test 2,\s+"(\+\d+\'-\d+(?: \d/\d)?")"'))
     back, = said(r"Move the house (\d+) ft back")
     front = _check(_moved(got["floors"], dy=float(back)), facts)["Front yard"]
-    assert front["delta"] == front_words
+    assert front["delta"] == front_words and front["delta_cell"] == cell_1 + "\n" + cell_2
     assert _left_side(_check(_wall_out(got["floors"], 3), facts))["delta"] == up_words
     assert _left_side(_check(_wall_out(got["floors"], 5), facts))["delta"] == least_words
     surveyed = _check(_moved(got["floors"], dy=float(back)), facts, lot_surveyed=True)["Front yard"]
@@ -442,7 +447,7 @@ def test_a_side_yard_short_under_every_reading_fails_in_the_checker_itself(house
         if surveyed:                    # a survey reads the margin itself (guide, test 11): every reading agrees here
             assert side["delta"] == side["margin"] + " short" and side["delta"].startswith("−"), side["delta"]
         else:
-            assert side["delta"].startswith("at least ") and side["delta"].endswith(" short"), side["delta"]
+            assert side["delta"].startswith(side["margin"].lstrip("−") + " short (still "), side["delta"]   # as drawn first
         assert any(e["why"] == "yard" and e["status"] == present.FAILS for e in r["plan"]["encroach"])
 
 
@@ -484,6 +489,25 @@ def test_a_span_of_readings_is_whole_in_its_detail(house):
         assert line.startswith(f"{i['proposed']} proposed") and f"{i['required']} required" in line, (name, line)
         if i.get("approx"):
             assert line.endswith(i["delta"]), (name, line, i["delta"])
+
+
+def test_the_rear_yards_span_shows_its_tightest_pair_in_the_list(house):
+    """The audit of main (2026-10-29): the starting house's Rear yard showed a range in both columns ("34'-11 7/8" to
+    36'-3 3/8"" against "24'-1 7/8" to 32'-10 1/8""), hard to read. The list now shows the tightest reading's pair,
+    marked "(varies)", and that pair's margin first in the Delta (36'-3 3/8" − 32'-10 1/8" = 3'-5 1/4", by hand); the
+    row's own words keep both ranges (the details and the report), so it is never hidden that it is a range."""
+    from design_checker import rhino_logic as logic
+    got, facts = house
+    rear = _check(got["floors"], facts)["Rear yard"]
+    assert rear["proposed"] == "34'-11 7/8\" to 36'-3 3/8\"" and rear["required"] == "24'-1 7/8\" to 32'-10 1/8\""
+    assert rear["cells"] == {"proposed": "36'-3 3/8\" (varies)", "required": "32'-10 1/8\" (varies)"}
+    assert rear["delta"] == "+3'-5 1/4\" if confirmed (at least +0'-5 1/4\" under every reading)"
+    assert rear["delta_cell"] == "worst +0'-5 1/4\"\nif confirmed"     # in review: never kinder than the status
+    assert rear["detail"]["line"].startswith(rear["proposed"] + " proposed, " + rear["required"] + " required")
+    assert logic.list_values(rear)[1:] == ("36'-3 3/8\" (varies)", "32'-10 1/8\" (varies)", rear["delta_cell"])
+    side = _check(got["floors"], facts)["Side yard, Southwest"]     # one reading as drawn: no cells, its own value
+    assert "cells" not in side and logic.list_values(side)[1:] == (side["proposed"], side["required"],
+                                                                  "+2'-0 1/2\"\nworst +0'-0 1/2\"")
 
 
 def test_the_starting_house_on_a_sloping_lot_is_the_flat_lots_and_says_so(house, tmp_path):
