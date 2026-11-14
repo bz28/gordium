@@ -3364,7 +3364,8 @@ def _check_begin(doc, report, facts=None):
     return {"at": at, "facts": facts, "sent": sent, "extras": extras, "report": bool(report),
             "had_report": had_report, "doc": doc.RuntimeSerialNumber,
             "request": {"cmd": "check", "model": path, "facts": sent, "building_problems": problems,
-                        "report": report_path(doc) if report else None, "extras": extras}}
+                        "report": report_path(doc) if report else None, "extras": extras,
+                        "today": logic.city_day()}}   # the checker never reads the clock: the day is said
 
 
 def _check_apply(doc, o, begun, result):

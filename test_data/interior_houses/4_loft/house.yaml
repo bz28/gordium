@@ -1,0 +1,69 @@
+# A made-up house drawn in millimetres (not a real house): a bedroom with a sleeping loft open to it, a steep loft
+# stair under a sloped roof, a balustered guard along the loft's edge. The bedroom's awning window gives no
+# maker's clear opening, so it can't be measured. No exit door in this description (an empty list).
+format: gordium.interior/1
+units: mm
+rooms:
+  - id: main
+    name: Bedroom
+    sleeping: true
+    floor: [[0, 0], [4267.2, 0], [4267.2, 3657.6], [0, 3657.6]]
+    floor_elevation: 0
+    ceiling_height: 4876.8
+  - id: loft
+    name: Sleeping loft
+    sleeping: true
+    floor: [[0, 0], [3048, 0], [3048, 2438.4], [0, 2438.4]]
+    floor_elevation: 2743.2
+    ceiling_height: 2133.6
+openings:
+  - id: wa
+    name: Window A
+    room: main
+    escape: true
+    operation: awning
+    frame: {left: 0, right: 914.4, bottom: 609.6, top: 1219.2}
+    ground_outside: -203.2
+stairs:
+  - id: ls
+    name: Loft stair
+    bottom_elevation: 0
+    nosings:
+      - [[0.0, 0, 228.6], [0.0, 609.6, 228.6]]
+      - [[177.8, 0, 457.2], [177.8, 609.6, 457.2]]
+      - [[355.6, 0, 685.8], [355.6, 609.6, 685.8]]
+      - [[533.4, 0, 914.4], [533.4, 609.6, 914.4]]
+      - [[711.2, 0, 1143.0], [711.2, 609.6, 1143.0]]
+      - [[889.0, 0, 1371.6], [889.0, 609.6, 1371.6]]
+      - [[1066.8, 0, 1600.2], [1066.8, 609.6, 1600.2]]
+      - [[1244.6, 0, 1828.8], [1244.6, 609.6, 1828.8]]
+      - [[1422.4, 0, 2057.4], [1422.4, 609.6, 2057.4]]
+      - [[1600.2, 0, 2286.0], [1600.2, 609.6, 2286.0]]
+      - [[1778.0, 0, 2514.6], [1778.0, 609.6, 2514.6]]
+      - [[1955.8, 0, 2743.2], [1955.8, 609.6, 2743.2]]
+    sides:
+      left: [[-100, 609.6], [2100, 609.6]]
+      right: [[-100, 0], [2100, 0]]
+    handrails:
+      - {side: right, inner_edge: [[0, 76.2], [1955.8, 76.2]]}
+    overhead:                    # the roof's underside, rising 1 in 2 along the stair
+      - [[-100, -100, 4217.2], [2100, -100, 5317.2], [2100, 700, 5317.2], [-100, 700, 4217.2]]
+guards:
+  - id: lg
+    name: Loft guard
+    walking_surface: 2743.2
+    top: 3657.6
+    extent: {left: 0, right: 1219.2}   # between the wall and the newel post it runs to
+    members:                     # in the guard's own elevation: u along it, z up
+      - {left: 0, right: 1219.2, bottom: 3619.5, top: 3657.6}    # top rail
+      - {left: 0, right: 1219.2, bottom: 2794.0, top: 2832.1}    # bottom rail
+      - {left: 88.9, right: 127, bottom: 2832.1, top: 3619.5}
+      - {left: 215.9, right: 254, bottom: 2832.1, top: 3619.5}
+      - {left: 342.9, right: 381, bottom: 2832.1, top: 3619.5}
+      - {left: 469.9, right: 508, bottom: 2832.1, top: 3619.5}
+      - {left: 596.9, right: 635, bottom: 2832.1, top: 3619.5}
+      - {left: 723.9, right: 762, bottom: 2832.1, top: 3619.5}
+      - {left: 850.9, right: 889, bottom: 2832.1, top: 3619.5}
+      - {left: 977.9, right: 1016, bottom: 2832.1, top: 3619.5}
+      - {left: 1104.9, right: 1143, bottom: 2832.1, top: 3619.5}
+doors: []
