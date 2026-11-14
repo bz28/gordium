@@ -265,13 +265,19 @@ def _rectangle(model, window, m, w, h):
 
 
 def door_operation(model, door):
-    """The door's own OperationType, else its type's: (operation, where it came from)."""
-    op = getattr(door, "OperationType", None)
-    if op in (None, "NOTDEFINED"):
-        t = model.type_of(door)
-        if t is not None:
-            return getattr(t, "OperationType", None), f"{t.is_a()}.OperationType{model.from_type(t)}"
-    return op, f"{door.is_a()}.OperationType"
+    """The door's OperationType, from the door or its type: (operation, where it came from, why it's unclear).
+    Review round 17: IFC4 says the door's own is "only used, if no type object IfcDoorType is assigned", so when
+    both state one and they differ, which is right is unclear (as with a window's partitioning)."""
+    own = getattr(door, "OperationType", None)
+    t = model.type_of(door)
+    typed = getattr(t, "OperationType", None) if t is not None else None
+    own_at, typed_at = f"{door.is_a()}.OperationType", f"{t.is_a()}.OperationType{model.from_type(t)}" if t else None
+    if own not in (None, "NOTDEFINED") and typed not in (None, "NOTDEFINED") and own != typed:
+        return None, f"{own_at}, {typed_at}", (f"the door states {own} but its type states {typed}: which is right "
+                                                "is unclear")
+    if own in (None, "NOTDEFINED") and t is not None:
+        return typed, typed_at, None
+    return own, own_at, None
 
 
 def read_door_opening(model, door, floors: dict):
@@ -287,14 +293,14 @@ def read_door_opening(model, door, floors: dict):
         o["room"] = room.GlobalId
     o["escape"] = bool(escape)
     info["escape_from"] = _escape_from(escape, where, bad)
-    op, op_from = door_operation(model, door)
+    op, op_from, unclear = door_operation(model, door)
     info["operation_type"] = op
     info["operation_type_from"] = op_from
     mapped = DOOR_OPERATION.get(op, (None, None))[1]
     if mapped:
         o["operation"] = mapped
     else:
-        missing["operation"] = f"the door's operation is {op}: not read as an escape opening's yet"
+        missing["operation"] = unclear or f"the door's operation is {op}: not read as an escape opening's yet"
     _size(model, door, info)
     m = model.placement(door)
     if _upright(m):
@@ -318,14 +324,14 @@ def read_door(model, door) -> dict:
     else:
         d["exit"] = exit_
         info["exit_from"] = f"{where} is {str(exit_).lower()}"
-    op, op_from = door_operation(model, door)
+    op, op_from, unclear = door_operation(model, door)
     info["operation_type"] = op
     info["operation_type_from"] = op_from
     mapped = DOOR_OPERATION.get(op, (None, None))[0]
     if mapped:
         d["operation"] = mapped
     else:
-        missing["operation"] = f"the door's operation is {op}: not read yet"
+        missing["operation"] = unclear or f"the door's operation is {op}: not read yet"
     _size(model, door, info)
     m = model.placement(door)
     if _upright(m):

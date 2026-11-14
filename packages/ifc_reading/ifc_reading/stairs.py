@@ -6,8 +6,8 @@ leaves `stairs` out, and every stair rule needs review.
 
 from ifc_reading.model import is_number, tidy
 
-# IFC4 IfcStairFlight attributes, then Pset_StairFlightCommon (IFC4 names; IFC2x3's NumberOfRiser too)
-COUNTS = {"risers": ("NumberOfRisers", ("NumberOfRiser", "NumberOfRisers")),
+# IfcStairFlight attributes (IFC4's, and IFC2x3's NumberOfRiser), then Pset_StairFlightCommon (the same names)
+COUNTS = {"risers": (("NumberOfRisers", "NumberOfRiser"), ("NumberOfRiser", "NumberOfRisers")),
           "treads": ("NumberOfTreads", ("NumberOfTreads",))}
 LENGTHS = {"riser_height": ("RiserHeight", ("RiserHeight",)), "tread_length": ("TreadLength", ("TreadLength",))}
 
@@ -16,8 +16,10 @@ def read_flight(model, flight) -> dict:
     out = {"id": flight.GlobalId, "name": flight.Name or flight.GlobalId, "entity": flight.is_a(),
            "step_id": flight.id()}
     sources, unread = {}, {}
-    for key, (attr, props) in {**COUNTS, **LENGTHS}.items():
-        value, where = getattr(flight, attr, None), f"{flight.is_a()}.{attr}"
+    for key, (attrs, props) in {**COUNTS, **LENGTHS}.items():
+        # review round 17: IFC2x3 names the riser count NumberOfRiser
+        attr = next((a for a in ((attrs,) if isinstance(attrs, str) else attrs) if hasattr(flight, a)), None)
+        value, where = getattr(flight, attr, None) if attr else None, f"{flight.is_a()}.{attr}"
         if is_number(value):                     # an attribute: in the file's own unit
             value = float(value) * model.metres if key in LENGTHS else value
         else:

@@ -1043,3 +1043,37 @@ def test_a_stepped_floor_has_no_one_height_to_measure_from(build, tmp_path):
     room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
     assert "ceiling_height" not in room and "floor_elevation" not in room and "floor" not in room
     assert "isn't at one level (0.0 to 0.5 m)" in room["not_given"]["floor_elevation"]
+
+
+def test_an_ifc2x3_flight_keeps_its_riser_count(tmp_path):
+    """Review round 17: IFC2x3 names the attribute NumberOfRiser; only IFC4's NumberOfRisers was read, so the
+    count vanished with no reason."""
+    import ifcopenshell
+    import ifcopenshell.guid as guid
+    f = ifcopenshell.file(schema="IFC2X3")
+    units = [f.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Name="METRE"),
+             f.create_entity("IfcSIUnit", UnitType="PLANEANGLEUNIT", Name="RADIAN")]
+    f.create_entity("IfcProject", GlobalId=guid.new(), Name="P",
+                    UnitsInContext=f.create_entity("IfcUnitAssignment", Units=units))
+    f.create_entity("IfcStairFlight", GlobalId=guid.new(), Name="flight", NumberOfRiser=16, NumberOfTreads=15)
+    f.write(str(tmp_path / "s.ifc"))
+    flight = read(tmp_path / "s.ifc")["source"]["stair_flights"][0]
+    assert flight["risers"] == 16 and flight["source"]["risers"] == "IfcStairFlight.NumberOfRiser"
+
+
+@pytest.mark.parametrize("typed, read_as", [("DOUBLE_DOOR_SINGLE_SWING", None), ("SINGLE_SWING_LEFT", "side_hinged")])
+def test_a_door_and_its_type_must_agree_on_how_it_opens(build, tmp_path, typed, read_as):
+    """Review round 17: a door saying single swing whose type says double door read as one side-hinged leaf; IFC4
+    says the door's own operation is only for a door without a type. Now a disagreement leaves it out."""
+    b = build.house("metre")
+    room = b.space("Bedroom", (0, 0, 0), (4, 4, 2.5))
+    d = b.door("front", (0, 0, 0), operation="SINGLE_SWING_LEFT", width=1.8, height=2.1, spaces=[room])
+    t = b.run("root.create_entity", ifc_class="IfcDoorType", name="the type")
+    t.OperationType = typed
+    b.run("type.assign_type", related_objects=[d], relating_type=t)
+    desc = read(b.write(tmp_path / "h.ifc"))
+    door = desc["doors"][0]
+    assert door.get("operation") == read_as
+    if read_as is None:
+        assert "states SINGLE_SWING_LEFT but its type states DOUBLE_DOOR" in door["not_given"]["operation"]
+        assert "operation" not in desc["openings"][0]
