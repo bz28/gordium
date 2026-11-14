@@ -25,6 +25,25 @@ answer exactly as before, with or without a protocol, and go the same way: `chec
 model, make it a description (`site_json.legacy_description`), send it through JSON text and back, and check
 that. A zoning report keeps the exact description beside it (`<report name>.site.json`).
 
+**The session commands** (protocol 1.0, `protocol.COMMANDS`; every command and field in
+[docs/protocol/worker_protocol_v1.md](../../docs/protocol/worker_protocol_v1.md)): the start box's, the panel's
+and the live check's decisions, `host_core/`'s functions served to a second design tool by a fixed table
+(`facts.*`, `box.view`, `box.pick`, `lookup.*` with edit plans, `streets.*`, `session.freshness`, `session.undo`,
+`report.message`, `panel.rows`). Each part of a command is one named host_core function; stateless (the tool sends
+its facts and box choices and gets the new ones back). Rhino still calls host_core directly. The proof that each
+answer is the in-process one: `tests/test_protocol.py` replays `test_data/sessions/headless_calls/` (host_core
+calls recorded while the tests drove the plugin's logic: `python -m design_checker.call_session --record`, through
+`host_core.worker_client.CallRecorder`) through the worker.
+
+**The host conformance suite** (`conformance.py`, `conformance_rhino.py`;
+[test_data/host_conformance/README.md](../../test_data/host_conformance/README.md)): fixed scenes (a curved wall, a
+block, a garage left out, millimetres, survey coordinates, a corner lot…) that any design tool's reading must turn
+into the expected description, every point within a millionth of a foot, with the same ids, problem codes and
+left-out objects, and exactly the hand-worked verdicts through `check_site`. A tool that sends fewer problems than
+expected fails. The Rhino reference adapter (rhino3dm) runs in CI; a tool that can't run on the Mac (Revit)
+records its descriptions once on its own machine (`recorded/<host>/`) and the same test checks them.
+`python -m design_checker.conformance` runs it.
+
 **Golden answers and recorded sessions** (the yardstick for changes that must not change any answer):
 `python -m design_checker.goldens --check` runs `check` and `start` on every test site, scenario (and its edit),
 deep-run site and 200 stress designs from a fixed seed, and compares each canonical answer with
@@ -52,7 +71,11 @@ by `python -m rule_format place --write` and checked current in CI. Never edit `
 **host_core/** holds the half of the plugin's logic that has nothing to do with Rhino, so a second host (a Revit
 add-in) can use it: `facts` (the facts the architect states, the use questions, the row dialog), `streets` (which
 lot edges face a street, one street or two), `lookup` (an address lookup's answer, saved addresses), `start_box`
-(the start box's rows, buttons and reset) and `place`. Like `rhino_logic.py` it is Python 3.9 and the standard
+(the start box's rows, buttons and reset), `place`, `freshness` (whether the results on screen are current, the
+undo steps' names, the panel's actions refused while a box is open), `report` (the report's and long work's words),
+`panel_words`, `context` (the neighbourhood around a looked-up lot), `edits` (the start box's model edits as one
+transaction) and `worker_client` (the reference Python client of the checker: its pipes, one request and its
+answer, a Job, the session recorder). Like `rhino_logic.py` it is Python 3.9 and the standard
 library only, because Rhino 8 imports it into its own Python 3.9. `rhino_logic.py` still offers every one of its
 names (`logic.box_rows is host_core.start_box.box_rows`) and refuses `logic.X = ...` for them, since that would
 change a copy host_core never reads; a test swaps such a name with `tests/moved_names.py`'s `patch_moved`.

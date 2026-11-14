@@ -1,0 +1,35 @@
+title: A corner lot
+what: >-
+  A 60 × 120 ft lot on the corner of two streets: Cayuga St along its west edge, Seneca St along its south edge,
+  where the address is. §325-19C: every yard facing a street is a front yard (25 ft); the rear yard is opposite the
+  address street (§325-8A(14)(d)), so the north edge; the east edge is the one side yard. The house, 18 × 50 ft,
+  stands 30 ft from each street, 12 ft from the east line and 40 ft from the north line: every yard complies (the lot width needs review for an open
+  question, below). The
+  outline starts at the lot's north-west corner, so the two street lines are its first two edges.
+lots:
+  - [[0, 120], [0, 0], [60, 0], [60, 120]]
+streets: [0, 1]
+facts:
+  corner_lot: true
+  street_ids: [Cayuga St, Seneca St]
+  address_street_line: [[[0, 0], [60, 0]]]
+buildings:
+  - {id: house, outline: [[30, 30], [48, 30], [48, 80], [30, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies    # 7,200 sf
+  # 60 ft on Seneca St, 120 ft on Cayuga St: complies either way. Found on running: which street's frontage is a
+  # corner lot's width isn't settled (lot_width's open question, measure._width), and Gordium never says complies
+  # while a reading is open, even when every reading complies: needs review. (Its reason names only the question's
+  # other half, about curved streets, which doesn't apply here: a wording issue in the measuring, not this suite.)
+  R-1b.lot_width_one_family_detached: needs_review
+  R-1b.front_yard: complies                      # 30 from Cayuga St and 30 from Seneca St, each ≥ 25
+  # the corner lot's one side yard (the east line, 60 − 48 = 12 ≥ 10), measured as both sides (Gordium's reading,
+  # to confirm with the zoning office); found on running: the rows are named narrower and wider, not by compass
+  R-1b.side_yards#narrower: complies
+  R-1b.side_yards#wider: complies
+  R-1b.rear_yard: complies                       # 120 − 80 = 40 ≥ 30
+  R-1b.yard_projections: complies
+  R-1b.height: complies
+  R-1b.stories: complies
+  R-1b.lot_coverage: complies                    # 18 × 50 = 900 ≤ 1,800 sf

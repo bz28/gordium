@@ -1,0 +1,20 @@
+title: No grade
+what: >-
+  The box house with nothing said about the ground: no spot grades in the model, and the facts don't say it is
+  flat. Height and stories are measured from the grade plane, which isn't known, so they need review. The yards and
+  coverage don't depend on the ground and are still checked.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies
+  R-1b.side_yards#east: complies
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies
+  # found on running: how far a projection may reach into a yard depends on the height (the §325-16C height
+  # bonus), which isn't known without the grade plane
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review                      # no grade plane
+  R-1b.stories: needs_review                     # counted from the grade plane
+  R-1b.lot_coverage: complies

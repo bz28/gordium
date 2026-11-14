@@ -13,6 +13,8 @@ Revit add-in can send the same description later and get exactly the same checki
 - **The code that reads it:** `packages/design_checker/design_checker/site_json.py` (`validate`, `to_site`,
   `from_site`). Its tests prove the schema file and the code list the same fields.
 - **Changes:** [CHANGELOG.md](CHANGELOG.md).
+- **How a tool proves it sends the right description:** the [host conformance suite](../../test_data/host_conformance/README.md)
+  (fixed scenes, the description each must give, and the verdicts it must lead to).
 
 ## Why it is strict
 

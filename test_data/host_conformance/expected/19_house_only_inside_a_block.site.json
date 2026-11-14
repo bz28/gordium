@@ -1,0 +1,98 @@
+{
+ "buildings": [],
+ "grade": {
+  "points": [],
+  "source": "none"
+ },
+ "host": {
+  "document": "19_house_only_inside_a_block",
+  "model_units": "Feet",
+  "name": "scene",
+  "version": ""
+ },
+ "inventory_complete": true,
+ "left_out": [
+  {
+   "context": false,
+   "could_be_building": true,
+   "ground_like": false,
+   "id": "house_link",
+   "layer": "Default",
+   "touching": false
+  }
+ ],
+ "lot": {
+  "edges": [
+   {
+    "curved": false,
+    "points": [
+     [
+      0,
+      0
+     ],
+     [
+      60,
+      0
+     ]
+    ]
+   },
+   {
+    "curved": false,
+    "points": [
+     [
+      60,
+      0
+     ],
+     [
+      60,
+      120
+     ]
+    ]
+   },
+   {
+    "curved": false,
+    "points": [
+     [
+      60,
+      120
+     ],
+     [
+      0,
+      120
+     ]
+    ]
+   },
+   {
+    "curved": false,
+    "points": [
+     [
+      0,
+      120
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  ],
+  "id": "lot"
+ },
+ "problems": [],
+ "schema": "gordium.site/1",
+ "units": "ft",
+ "unsent": [
+  {
+   "id": "house_link's building parts",
+   "kind": "block",
+   "layer": "Default",
+   "problem": {
+    "args": {
+     "kind": "a block",
+     "layer": "Building"
+    },
+    "code": "not_a_solid"
+   }
+  }
+ ]
+}

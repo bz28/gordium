@@ -1,0 +1,37 @@
+title: Spot grades on a slope, then the house moves (scenario 07)
+what: >-
+  Scenario 07 (test_sites/new_york/ithaca_city/scenarios/07_spot_grades_on_a_slope_then_the_house_moves.yaml): the
+  lot falls toward the street; four spot grades, one at each wall (front 1.0, rear 3.0, sides 2.0), drawn as points
+  on Gordium::Grade. Grade plane (1 + 3 + 2 + 2) / 4 = 2.0; the three-story house stands on it, 30 ft to the roof.
+  Then the house moves 10 ft back and the spot grades stay: two are no longer at its walls, so height and stories
+  need review until the grade is set again.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 70], [15, 70]], base: 2, floors: [10, 10, 10]}
+grade:
+  spots: [[30, 29, 1.0], [30, 71, 3.0], [14, 50, 2.0], [46, 50, 2.0]]
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies                      # 30 ≥ 25
+  R-1b.side_yards#east: complies                 # 15 ≥ 10
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies                       # 120 − 70 = 50 ≥ 30
+  R-1b.yard_projections: complies
+  R-1b.height: complies                          # 32 − 2 = 30 ≤ 35
+  R-1b.stories: complies                         # 3 ≤ 3
+  R-1b.lot_coverage: complies                    # 30 × 40 = 1,200 ≤ 1,800 sf
+then:
+  what: The house moved 10 ft back (y 40 to 80); the spot grades stay where they were.
+  move: [0, 10]
+  expected:
+    R-1b.lot_area_one_family_detached: complies
+    R-1b.lot_width_one_family_detached: complies
+    R-1b.front_yard: complies                    # 40 ≥ 25
+    R-1b.side_yards#east: complies
+    R-1b.side_yards#west: complies
+    R-1b.rear_yard: complies                     # 120 − 80 = 40 ≥ 30
+    # found on running: how far a projection may reach depends on the height (§325-16C), not known now
+    R-1b.yard_projections: needs_review
+    R-1b.height: needs_review                    # spot grades no longer at the building's walls
+    R-1b.stories: needs_review
+    R-1b.lot_coverage: complies

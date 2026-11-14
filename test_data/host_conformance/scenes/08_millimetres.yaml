@@ -1,0 +1,20 @@
+title: A model in millimetres
+what: >-
+  The box house drawn in a model whose units are millimetres (15 ft is 4,572 mm). The host converts to feet once,
+  where it reads the model, and sends exactly the box house's description: every point within a millionth of a
+  foot of it, the same verdicts.
+model: {units: Millimeters}
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies
+  R-1b.side_yards#east: complies
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies
+  R-1b.yard_projections: complies
+  R-1b.height: complies
+  R-1b.stories: complies
+  R-1b.lot_coverage: complies

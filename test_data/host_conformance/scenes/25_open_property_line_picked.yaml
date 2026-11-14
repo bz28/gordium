@@ -1,0 +1,26 @@
+title: An open property line, picked
+what: >-
+  Scene 24's open outline (no west line), picked by the architect as the lot (its id in the facts as lot_id). A
+  picked line that doesn't close is still not a lot: the host must send no lot and say the picked lot isn't found
+  (lot_not_found), never close it itself. Height and stories comply.
+guards: >-
+  The Revit reading design note, new scene G: section 4, an open property line picked "gives lot_not_found". In
+  Rhino: read_3dm.read_site looks for the picked id among closed curves only.
+lots:
+  - [[0, 0], [60, 0], [60, 120], [0, 120]]
+open_lots: [0]
+picked: lot
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: needs_review
+  R-1b.lot_width_one_family_detached: needs_review
+  R-1b.front_yard: needs_review
+  R-1b.side_yards#narrower: needs_review         # no lot: which side line is which isn't known
+  R-1b.side_yards#wider: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: complies                          # the house alone: 20 − 0 = 20 ≤ 35, no lot needed
+  R-1b.stories: complies                         # 2 floor blocks ≤ 3
+  R-1b.lot_coverage: needs_review                # coverage is a share of the lot's area

@@ -1250,7 +1250,7 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     assert deltas and deltas <= set(cells)                            # the report's Delta: the panel's words
     ui = host_text("rhino", "ui", purpose="wiring")
     assert "logic.list_values(i)" in ui and "delta_text" not in ui           # settle's words only (round 2), or
-    logic_src = host_text("rhino", "logic", purpose="wiring")
+    logic_src = logic_text("rhino", purpose="wiring")         # (list_values: host_core/panel_words.py since the move)
     assert 'item.get("delta_cell") or item.get("delta")' in logic_src          # their shorter form, made by settle
 
 
@@ -1414,6 +1414,128 @@ def test_an_object_reaching_into_the_lot_counts_as_on_it_and_a_neighbour_does_no
     jogged = [(0, 0), (73, 0), (73, 99.4), (10.5, 99.4), (10.5, 90.3), (0, 90.3)]
     assert not reaches_into_lot(jogged, rect(0, 91, 10, 99), ON_LOT_REACH)       # in the jog's notch: off the lot
     assert reaches_into_lot(jogged, rect(5, 85, 20, 98), ON_LOT_REACH)
+
+
+def test_a_thin_object_standing_on_the_lot_counts_as_on_it_however_thin():
+    """reaches_into_lot's averaged width (2 x area / perimeter) measures how thick the part on the lot is, not how
+    far it reaches in: a 1-inch fin wall against the house in the side yard, a 1-inch mast or an upright panel
+    turned 5 degrees (its box has area, so no "covers no ground" rule catches it) read as off the lot, so nothing
+    said a building part was left out and the yards and height could read COMPLIES (review round 2 of PR 78,
+    confirmed by 2 sceptics). It now counts when some of it stands more than the reach inside the lot's outline;
+    a thin neighbour's fence a hair over the line, or one touching it from outside, stays off."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+
+    def rect(x0, y0, x1, y1):
+        return [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+
+    lot = rect(0, 0, 50, 100)
+    turn = math.radians(5)
+    panel = [(20 + dx * math.cos(turn) - dy * math.sin(turn), 30 + dx * math.sin(turn) + dy * math.cos(turn))
+             for dx, dy in rect(0, 0, 10, 1 / 12)]
+    on = {"a 1-inch fin wall": rect(20, 30, 20 + 1 / 12, 38), "a 1-inch mast": rect(20, 30, 20 + 1 / 12, 30 + 1 / 12),
+          "a 1-inch panel turned 5 degrees": panel, "a thin wall across the whole lot": rect(-5, 50, 55, 50.08)}
+    off = {"a thin fence a hair over the line": rect(-0.03, 10, 0.05, 90),
+           "a thin fence touching the line from outside": rect(-0.08, 10, 0, 90)}
+    for name, footprint in on.items():
+        assert reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    for name, footprint in off.items():
+        assert not reaches_into_lot(lot, footprint, ON_LOT_REACH), name
+    skewed = [(0, 0), (0.12, 100), (-5, 100), (-5, 0)]     # 0 ft in at one end, 0.12 ft at the other: in
+    assert reaches_into_lot(lot, skewed, ON_LOT_REACH)
+    u = [(0, 0), (50, 0), (50, 100), (40, 100), (40, 20), (10, 20), (10, 100), (0, 100)]   # a U: its gap isn't the lot
+    assert not reaches_into_lot(u, [(9.95, 60), (40.05, 60), (40.05, 60.08), (9.95, 60.08)], ON_LOT_REACH)
+
+
+@pytest.mark.parametrize("at", [100.0, 1000.0, 20000.0, 800000.0])
+def test_a_wall_flat_in_plan_at_any_angle_counts_as_on_the_lot(at):
+    """An upright wall of no thickness (a polysurface or a block of one, flat in plan), turned to any angle: its
+    points are seldom exactly in a line, so rounding leaves its hull a sliver of area, and an empty or sliver part
+    inside the lot read as off it (review round 4 of PR 78: 3 to 10 of 30 angles at every scale, survey
+    coordinates included). It is on the lot whenever some of it stands more than the reach inside the outline;
+    and a long flat line cutting 0.3 ft across a corner of a turned lot is caught where it goes deepest."""
+    import math
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    lot = [(at, at), (at + 100, at), (at + 100, at + 100), (at, at + 100)]
+    for degrees in range(0, 180, 3):
+        c, s = math.cos(math.radians(degrees)), math.sin(math.radians(degrees))
+        pts = [(at + 50 + (-15 + 30 * k / 8) * c, at + 50 + (-15 + 30 * k / 8) * s) for k in range(9)]
+        xs, ys = [p[0] for p in pts], [p[1] for p in pts]
+        assert reaches_into_lot(lot, pts, ON_LOT_REACH, (min(xs), min(ys), max(xs), max(ys))), degrees
+        assert reaches_into_lot(lot, pts, ON_LOT_REACH), degrees
+    diamond = [(0, -50), (50, 0), (0, 50), (-50, 0)]                    # a square lot turned 45 degrees
+    tip = 50 - 0.3 * math.sqrt(2)                                       # a line 0.3 ft inside the top corner
+    line = [(-17, tip), (23, tip)]                                     # its samples 2.5 ft apart miss x = 0
+    assert reaches_into_lot(diamond, line, ON_LOT_REACH, (-17, tip, 23, tip))
+    hair = [(-20, 50 - 0.05 * math.sqrt(2)), (20, 50 - 0.05 * math.sqrt(2))]   # 0.05 ft in: a hair
+    assert not reaches_into_lot(diamond, hair, ON_LOT_REACH, (-20, hair[0][1], 20, hair[0][1]))
+    deep = 50 - 2 * math.sqrt(2)                       # 200 ft long, 2 ft inside the corner (round 5 of PR 78)
+    assert reaches_into_lot(diamond, [(-103, deep), (97, deep)], ON_LOT_REACH, (-103, deep, 97, deep))
+    long_lot = [(at, at), (at + 50, at), (at + 50, at + 100), (at, at + 100)]
+    wall = [(at - 530, at + 50), (at + 520, at + 50)]  # 1,050 ft long, across the middle of a 50 ft wide lot
+    assert reaches_into_lot(long_lot, wall, ON_LOT_REACH, (at - 530, at + 50, at + 520, at + 50))
+    assert reaches_into_lot(long_lot, wall + [(at + 520, at + 50 + 1 / 24), (at - 530, at + 50 + 1 / 24)],
+                            ON_LOT_REACH)          # half an inch thick
+    notched = [(at, at), (at + 52, at), (at + 52, at - 10), (at + 55, at - 10), (at + 55, at), (at + 100, at),
+               (at + 100, at + 100), (at, at + 100)]                      # a 3 x 10 ft notch out of the south line
+    fence = [(at, at + 0.05), (at + 100, at + 0.05)]   # 0.05 ft in along the line, 1.5 ft in over the notch (round 6)
+    assert reaches_into_lot(notched, fence, ON_LOT_REACH, (at, at + 0.05, at + 100, at + 0.05))
+    assert reaches_into_lot(notched, [(at, at + 0.02), (at + 100, at + 0.02), (at + 100, at + 0.06),
+                                      (at, at + 0.06)], ON_LOT_REACH)
+    plain = [(at, at), (at + 100, at), (at + 100, at + 100), (at, at + 100)]
+    assert not reaches_into_lot(plain, fence, ON_LOT_REACH, (at, at + 0.05, at + 100, at + 0.05))   # a hair
+    for start in [(at, at + 30), (at, at)]:            # starting on the lot line, or at its corner: still on it
+        assert reaches_into_lot(plain, [start, (at + 30, at + 30.05), (at + 30, at + 30)], ON_LOT_REACH), start
+    sliver = [(37.5, 100.0), (49.25, 85.98), (49.28, 86.01)]   # from the rear line into the lot; its first corner
+    assert reaches_into_lot([(0, 0), (50, 0), (50, 100), (0, 100)], sliver, ON_LOT_REACH)   # on the line
+    assert not reaches_into_lot([(0, 0), (50, 0), (50, 100), (0, 100)],                # from the front line, out
+                                [(12.5, 0.0), (36.59, -28.16), (36.62, -28.13)], ON_LOT_REACH)
+
+
+def test_the_depth_search_misses_nothing_more_than_0_15_ft_in_and_says_where_it_can_miss_less():
+    """_deep's promise, as its docstring states it (review round 8 of PR 78: it said only a spike of the lot
+    narrower than 0.1 ft could be missed between 0.1 and 0.15 ft in, but a plain square corner can be): a stretch
+    whose middle goes deeper than its ends is found once it goes more than 0.15 ft in, and between 0.1 and 0.15 ft
+    it can be missed, at a lot corner as across a narrow strip of the lot."""
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    lot = [(0, 0), (100, 0), (100, 100), (0, 100)]
+
+    def strip(half):                                   # a strip of the lot 2 x half wide, running north from it
+        return [(0, 0), (100, 0), (100, 100), (50 + half, 100), (50 + half, 200), (50 - half, 200), (50 - half, 100),
+                (0, 100)]
+    across = [(40, 150), (60, 150)]                    # a flat wall crossing the strip, its ends off the lot
+    assert reaches_into_lot(lot, [(0, 0.32), (0.32, 0), (-5, -5)], ON_LOT_REACH)          # a corner, 0.16 ft in
+    assert reaches_into_lot(strip(0.16), across, ON_LOT_REACH, (40, 150, 60, 150))      # 0.16 ft in
+    assert not reaches_into_lot(lot, [(0, 0.21), (0.21, 0), (-5, -5)], ON_LOT_REACH)    # 0.105 ft in: can be missed
+    assert not reaches_into_lot(strip(0.145), across, ON_LOT_REACH, (40, 150, 60, 150))  # 0.145 ft in: can be
+
+
+def test_a_neighbour_along_a_dense_lot_outline_is_judged_quickly():
+    """A GIS lot outline has hundreds of points, and a neighbour drawn along the line gives an inside part with as
+    many: the depth test once measured every sample against every outline edge (1.75 s per neighbour on a
+    1,000-point lot, review round 3 of PR 78; a round mesh a hair over took 1 s, round 5; a 500 ft wall exactly at
+    the reach ran on without end with no slack, round 7). Only the stretches of the object's sides inside the lot
+    are measured, against the outline edges near them; past DEPTH_QUESTIONS, an object counts as on the lot (the
+    cautious answer)."""
+    import math
+    import time
+    from design_checker.rhino_logic import ON_LOT_REACH, reaches_into_lot
+    n = 250
+    lot = [(50 * k / n, 0) for k in range(n)] + [(50, 100 * k / n) for k in range(n)] + \
+        [(50 - 50 * k / n, 100) for k in range(n)] + [(0, 100 - 100 * k / n) for k in range(n)]
+    start = time.perf_counter()
+    for k in range(20):
+        assert not reaches_into_lot(lot, [(-10, 1 + k), (0.05, 1 + k), (0.05, 90), (-10, 90)], ON_LOT_REACH)
+    for k in range(5):                                 # a round tank or tree crown (a 1,000-vertex mesh) a hair over
+        tank = [(57.95 + 8 * math.cos(2 * math.pi * j / 1000), 50 + k + 8 * math.sin(2 * math.pi * j / 1000))
+                for j in range(1000)]
+        assert not reaches_into_lot(lot, tank, ON_LOT_REACH)
+    long_lot = [(0, 0), (500, 0), (500, 100), (0, 100)]
+    for y in (0.1, 0.0999, 0.05):                      # a 500 ft wall along the line, at the reach or just under it
+        assert not reaches_into_lot(long_lot, [(0, y), (500, y)], ON_LOT_REACH, (0, y, 500, y)), y
+    assert time.perf_counter() - start < 3.0             # about 0.6 s; the old ways took 35 s, then 5 s
+    longer = [(0, 0), (5000, 0), (5000, 100), (0, 100)]   # 5,000 ft at 0.0999 ft in: past the depth search's budget
+    assert reaches_into_lot(longer, [(0, 0.0999), (5000, 0.0999)], ON_LOT_REACH, (0, 0.0999, 5000, 0.0999))
 
 
 def test_the_plugin_tests_left_out_objects_against_the_lot_outline():

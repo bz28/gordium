@@ -1457,6 +1457,9 @@ def test_round_7_a_saved_lookup_is_never_more_certain_than_the_live_one():
         def ground_points(self):
             return []
 
+        def apply(self, plan, session, facts, saved_ui):
+            return logic.carry_out(plan, self, session, facts, saved_ui)
+
     class Session:
         def hold(self, x):
             pass
