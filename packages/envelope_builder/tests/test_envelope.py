@@ -145,3 +145,23 @@ def test_a_limit_that_depends_on_the_use_is_worked_out_for_the_use_stated():
     none = {k: v for k, v in FACTS.items() if k != "use"}
     env = envelope(site, none, measure(site, none), rules)
     assert env["outline"] is None and any("sides" in n and "can't be worked out" in n for n in env["notes"])
+
+
+def test_a_rule_for_each_part_never_shapes_the_envelope():
+    """A rule for each part (SYNTHETIC: rule_format/tests/test_parts.py) is about the inside. One that reads nothing the
+    envelope shapes is skipped: the envelope is what R-1b's own rules give. One that reads the building height or a
+    yard is refused, no envelope drawn, never read as a limit on the whole building (or ignored)."""
+    site = {"lot": lot([(0, 0), (73, 0), (73, 90), (0, 90)]), "buildings": [box(10, 30, 63, 65)], "problems": []}
+    m = measure(site, FACTS)
+    plain = envelope(site, FACTS, m, R1B)
+    stair = {"id": "synthetic_riser", "kind": "rule", "for_each": "stair", "when_none": "not_applicable",
+             "check": "stair_riser_height <= 8.25"}
+    assert envelope(site, FACTS, m, R1B + [stair]) == plain
+    # a per-part rule whose check would read as a lower height limit (30 ft) is never taken as one
+    tall = stair | {"check": "stair_riser_height <= 8.25 and building_height <= 30"}
+    env = envelope(site, FACTS, m, R1B + [tall])
+    assert env["outline"] is None and env["height"] is None
+    assert any("synthetic_riser: a rule for each part that reads building_height" in n for n in env["notes"])
+    # the yard read inside an applies_when counts too
+    yard = stair | {"applies_when": "front_yard > 0"}
+    assert envelope(site, FACTS, m, R1B + [yard])["outline"] is None

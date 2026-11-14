@@ -24,8 +24,9 @@ from pathlib import Path
 import yaml
 
 from document_extraction.sections import piece_text
+from rule_format import code_numbers, parts
 from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context, _source_problems, district_name,
-                                  locate, outcome, source_numbers, validate)
+                                  locate, source_numbers, validate)
 from section_labeling.budget import worst_case
 from section_labeling.labeler import PRICES, cost, find_quote, numbered, sha
 from section_labeling.term_index import related as related_pieces
@@ -134,7 +135,35 @@ it has slots) or one rule for every district (when it has none).
 """
 
 
-def output_schema(topics: list[str]) -> dict:
+PARTS_FORMAT = """\
+## Rules for each part (bedrooms, escape openings, stairs, exit doors)
+
+A requirement that every part of a kind must meet ("each sleeping room shall have an emergency escape opening",
+"stair risers shall not exceed ...") is a rule for each part: one result per part, never one for the building.
+- for_each: the part kind it repeats over (listed below); "" for a rule about the whole building or lot.
+- within: the kind those parts sit in, when the law says "of each" ("each sleeping room's escape opening": for_each
+  emergency_escape_opening, within sleeping_room); else "".
+- when_none: what the law says when there is nothing to check: "fail" (a sleeping room with no escape opening,
+  when the law requires one), "not_applicable" (a house with no stairs, for a stair rule), or "needs_review" when
+  the text doesn't settle it (and say why in open_questions). Never "pass".
+- Formulas use the building's measures and that part kind's own measures, nothing else. A rule that must find a part
+  (when_none not "not_applicable") never tests the part's measures in applies_when: say how parts differ inside check
+  (`opening_net_clear_area >= (5.0 if opening_at_grade else 5.7)`).
+- examples: each is a small design. given: the building's measures. parts: every part, {kind, id, name, within: the
+  id of the part it sits in or "", measures: [{measure, value}]}. rows: every row the rule gives, {part: the part's
+  id, within: the id of the part it sits in, outcome}, with part "" for a row about no one part (a room with no
+  escape opening: part "", within the room's id). expect: the rule's one answer (fail if any row fails, else needs
+  review if any does, else pass if any passes). At least one example has a part that passes the check, one a part
+  that fails it (a row for nothing to check doesn't count), and one shows when_none (a room with none, or a building
+  with none): code refuses a rule for each part without them.
+For any other rule, leave for_each, within and when_none "" and every example's parts and rows empty.
+"""
+
+
+def output_schema(topics: list[str], for_parts: bool = False, book: bool = False) -> dict:
+    """The answer's shape. With for_parts (a building code's rules for each part: rule_format/parts.py), each
+    template also carries for_each, within and when_none, and each example the parts and the rows expected; without
+    (the zoning chart and law), exactly the shape it always was."""
     text = {"type": "string"}
     slot = {"type": "object", "additionalProperties": False,
             "required": ["name", "page", "section", "row", "number", "numbers_in_cell", "percent", "footnotes"],
@@ -171,9 +200,50 @@ def output_schema(topics: list[str]) -> dict:
                     "new_measures": {"type": "array", "items": {
                         "type": "object", "additionalProperties": False, "required": ["name", "unit", "meaning"],
                         "properties": {"name": text, "unit": {"type": "string", "enum": list(UNITS)}, "meaning": text}}}}}
+    if for_parts:
+        kinds = sorted(parts.registry())
+        given = {"type": "array", "items": {"type": "object", "additionalProperties": False,
+                                            "required": ["measure", "value"], "properties": {"measure": text, "value": text}}}
+        template["required"] += list(parts.PART_FIELDS)
+        template["properties"] |= {"for_each": {"type": "string", "enum": [""] + kinds},
+                                   "within": {"type": "string", "enum": [""] + kinds},
+                                   "when_none": {"type": "string", "enum": [""] + list(parts.WHEN_NONE)}}
+        example = template["properties"]["examples"]["items"]
+        example["required"] += ["parts", "rows"]
+        example["properties"] |= {
+            "parts": {"type": "array", "items": {
+                "type": "object", "additionalProperties": False, "required": ["kind", "id", "name", "within", "measures"],
+                "properties": {"kind": {"type": "string", "enum": kinds}, "id": text, "name": text, "within": text,
+                               "measures": given}}},
+            "rows": {"type": "array", "items": {
+                "type": "object", "additionalProperties": False, "required": ["part", "within", "outcome"],
+                "properties": {"part": text, "within": text, "outcome": {"type": "string", "enum": OUTCOMES}}}}}
+    if book:                        # a building code: no chart, so no slots and nothing but law quotes (book_answer)
+        props, req = template["properties"], template["required"]
+        for k in ("slots",):
+            props.pop(k)
+            req.remove(k)
+        props["topic"] = text           # validation checks it; an enum of every topic makes the grammar too large
+        props["quotes"]["items"] = {"type": "object", "additionalProperties": False, "required": ["piece", "text"],
+                                    "properties": {"piece": text, "text": text}}
+        props["numbers"]["items"] = {"type": "object", "additionalProperties": False, "required": ["value", "quote"],
+                                     "properties": {"value": {"type": "number"}, "quote": {"type": "integer"}}}
     return {"type": "json_schema", "schema": {
         "type": "object", "additionalProperties": False, "required": ["templates", "no_rule_reason"],
         "properties": {"templates": {"type": "array", "items": template}, "no_rule_reason": text}}}
+
+
+def book_answer(answer: dict) -> dict:
+    """A building code's answer (output_schema's book shape) in the full shape check_answer reads: no slots, every
+    quote a law quote, every number bound to one of them. Nothing else changes."""
+    out = dict(answer, templates=[])
+    for t in answer.get("templates") or []:
+        out["templates"].append(t | {
+            "slots": [],
+            "quotes": [{"document": "law", "page": 0, "piece": q.get("piece"), "text": q.get("text")} for q in t["quotes"]],
+            "numbers": [{"value": n.get("value"), "from": "law_quote", "quote": n.get("quote"), "slot": "", "footnote": ""}
+                        for n in t["numbers"]]})
+    return out
 
 
 def chart_table(sections: list[tuple[int, str]], rows_of) -> str:
@@ -192,11 +262,18 @@ def chart_notes(notes: dict[int, dict]) -> str:
                      for n in by_number.values())
 
 
-def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str, notes: dict[int, dict]) -> str:
-    """The fixed instructions: identical for every unit, so they're cached after the first call."""
+def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str, notes: dict[int, dict],
+                  for_parts: bool = False) -> str:
+    """The fixed instructions: identical for every unit, so they're cached after the first call. With for_parts,
+    also how to write a rule for each part, and the part kinds with their measures (output_schema's for_parts);
+    without, exactly what they always were."""
     measures = yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8"))
     topics = yaml.safe_load(VOCABULARY_FILE.read_text(encoding="utf-8"))["topics"]
-    return (f"{GUIDE_FILE.read_text(encoding="utf-8")}\n{FORMAT}\n## Measures (with units)\n"
+    kinds = ("" if not for_parts else f"{PARTS_FORMAT}\n## Part kinds (for for_each and within), with their measures\n"
+             + "\n".join(f"- {k}: {d['meaning']}" + (f" (within {', '.join(d['within'])})" if d.get("within") else "")
+                         + "".join(f"\n  - {m} ({md['unit']}): {md['meaning']}" for m, md in d["measures"].items())
+                         for k, d in parts.registry().items()) + "\n")
+    return (f"{GUIDE_FILE.read_text(encoding="utf-8")}\n{FORMAT}\n{kinds}## Measures (with units)\n"
             + "\n".join(f"- {n} ({m['unit']}): {m['meaning']}" for n, m in measures.items())
             + "\n\n## Use ids (for the use measure)\n" + "\n".join(f"- {k}: {v['name']}" for k, v in uses.items())
             + "\n\n## Residential districts (for the district measure: write them like this)\n"
@@ -361,7 +438,8 @@ def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dic
     return p
 
 
-def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None = None) -> tuple[list[str], list[dict]]:
+def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None = None,
+                   book: dict | None = None) -> tuple[list[str], list[dict]]:
     """Check each entry of `numbers` names ONE evidence item that holds its value and that can be trusted
     (Ben's policy, 2026-10-20). Code can check that evidence holds a number, never what the number is about,
     so only evidence that belongs to the rule itself is trusted:
@@ -372,7 +450,10 @@ def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None
     - slot_row_label: that slot's own row label ("First three bed or sleeping rooms").
     Anything else is rejected, so the unit is retried and in the end listed for a person: an untrusted
     number never reaches a rule. A number that only labels or points ("(3)", "§ 325-20D(1)") doesn't count;
-    a percent counts only as its fraction (25% is 0.25). Returns (problems, the valid entries)."""
+    a percent counts only as its fraction (25% is 0.25). book: a building code read twice (the law file's entry in
+    ctx.verification): a law quote then backs only its piece's second-reading numbers that it states, in the units
+    they stand for (8 1/4 inches is 8.25, 6 feet 8 inches is 80; rule_format/code_numbers.py), and validation checks
+    how each is used. Returns (problems, the valid entries)."""
     slots = {s["name"]: s for s in template["slots"]}
     live = formula_slots(template)
     p, valid = [], []
@@ -402,7 +483,9 @@ def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None
                              "number is trusted only from a footnote on the slot's own cell")
                     continue
                 text = note["text"]
-        if not v_close(v, source_numbers(text, percent_as_number=False)):
+        stated = (code_numbers.book_values(text, book["pieces"].get(own_piece) or {}) if book and b["from"] == "law_quote"
+                  else source_numbers(text, percent_as_number=False))
+        if not v_close(v, stated):
             p.append(f"{where}: {v:g} isn't written in it: {text!r}")
             continue
         valid.append(b)
@@ -431,7 +514,9 @@ def _backing(template: dict, valid: list[dict], filled: list[tuple[str, dict]], 
         if (key, k) not in decides:
             changed = with_occurrence_nudged(template, key, k)
             decides[key, k] = any(
-                outcome(new, ex["given"], allowed) != outcome(rule, ex["given"], allowed)
+                # a rule for each part: its rows and its one answer (parts.worked_example), never outcome(), which
+                # always says needs review for one (so no number could ever be shown to decide anything)
+                parts.worked_example(new, ex, allowed) != parts.worked_example(rule, ex, allowed)
                 for column, rule in filled for new in [fill_template(changed, column, cells, sources, drafted_by, chart)[0]]
                 if new is not None for ex in rule["examples"])
         return decides[key, k]
@@ -470,7 +555,7 @@ def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Contex
                 proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
         sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
         p += quote_problems + (_footnote_problems(t, sources, notes, law["chart"]) if not quote_problems else [])
-        binding_problems, valid = _binding_items(t, notes, unit.get("piece"))
+        binding_problems, valid = _binding_items(t, notes, unit.get("piece"), ctx.verification.get(law["file"]))
         p += binding_problems
         if p:
             out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
@@ -558,11 +643,13 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
 
 
 def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: Context, columns: list[str],
-               cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None) -> dict:
+               cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None,
+               for_parts: bool = False, book: bool = False) -> dict:
     """Draft one unit. Every template that works nowhere sends the answer back with the reasons (keeping
     nothing from it) until max_attempts; after the last attempt, the rules that work are kept and every
     rejected template and every requirement no rule cites goes to a person. Returns check_answer's result
-    plus "reason" (no rules, and why) or "failed" (no usable answer)."""
+    plus "reason" (no rules, and why) or "failed" (no usable answer). for_parts: the answer may hold rules for each
+    part (output_schema's for_parts; `system` must then be system_prompt(..., for_parts=True)); recorded when set."""
     topics = sorted(ctx.topics)
     drafted_by = f"rule_drafting/{settings['model']}"
     messages = [{"role": "user", "content": unit_message(unit, context)}]
@@ -575,7 +662,8 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
             model=settings["model"], max_tokens=settings["max_tokens"],
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
-            output_config={"effort": settings["effort"], "format": output_schema(topics)})
+            output_config={"effort": settings["effort"],
+                           "format": output_schema(topics, for_parts=for_parts, book=book)})
         usage = {k: getattr(response.usage, k, 0) or 0 for k in
                  ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")}
         spent = cost(usage, settings["model"])
@@ -588,6 +676,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
         else:
             try:
                 answer = json.loads(text)
+                answer = book_answer(answer) if book else answer
                 result = check_answer(answer, unit, context, law, ctx, columns, cells, notes, drafted_by)
                 if result["problems"]:
                     why = "; ".join(result["problems"][:6])
@@ -607,7 +696,8 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                 "request_id": getattr(response, "_request_id", None), "stop_reason": response.stop_reason,
                 "context_dropped": context.get("dropped", []), "context_unfound": context.get("unfound", []),
                 "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
-                "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None})
+                "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None}
+               | ({"for_parts": True} if for_parts else {}) | ({"book": True} if book else {}))
         if crash is not None:
             raise crash
         if why is None:

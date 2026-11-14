@@ -447,3 +447,25 @@ def test_a_check_stopped_just_after_its_report_moved_in_never_puts_the_earlier_s
     with pytest.raises(KeyboardInterrupt):
         check_description(doc, _facts(facts), report)
     assert report.exists() and not kept.exists() and not _aside(kept).exists()      # a report with no site, at worst
+
+
+def test_check_site_takes_the_hosts_day_as_check_does(tmp_path):
+    """Main's day of the check (PR 92: `today`, how old the overlays lookup is) goes through the description's path:
+    check() passes it on to check_description and check_site, and the worker's check_site command takes it as the
+    check command does. With the lookup's "no overlay here" from yesterday the overlays row goes; with no day it
+    stays (no lookup counts as recent); a day that isn't one is refused (merge of main, 2026-11-14)."""
+    import sys
+    sys.path.insert(0, str(Path(__file__).parent))
+    from test_flood_lookup_age import TODAY, facts_found_on
+    from test_overlays_none_found import _model, release_rows
+    model = _model(tmp_path, [(0, 0), (60, 0), (60, 110), (0, 110)])
+    facts = facts_found_on("2026-11-11")
+    doc = site_json.read_model(model, facts, inventory_complete=True)
+    dated = _check_site(doc, facts, today=TODAY)
+    assert release_rows(dated["view"]) == []
+    assert _same(dated["view"], check(model, facts, today=TODAY)["view"])
+    assert release_rows(_check_site(doc, facts)["view"]) == ["release.overlays"]
+    assert release_rows(check_description(site_json.through_json(doc), _facts(facts), today=TODAY)["view"]) == []
+    bad = answer({"id": 1, "cmd": "check_site", "protocol": "1.0", "site": site_json.through_json(doc),
+                  "facts": _facts(facts), "today": "12 Nov"})
+    assert not bad["ok"] and "today must be the day of the check" in bad["error"]
