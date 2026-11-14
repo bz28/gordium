@@ -21,6 +21,10 @@ topics:
   site_features:           Fences, accessory structures, signs, landscaping.
   nonconforming:           Existing lots, buildings and uses that don't conform.
   procedures:              Permits, reviews, approvals.
+  existing_buildings:      Work on existing buildings (repairs, alterations, additions, changes of occupancy, historic
+                           buildings), from a building code such as Appendix BO of New York's Residential Code.
+  patio_covers:            Patio covers (roofed structures with open or glazed walls for outdoor living), from a building
+                           code such as Appendix BF of New York's Residential Code.
   means_of_egress:         Ways out of a building (exits, stairs, ramps, landings, handrails, guards,
                            emergency escape and rescue openings), from a building code such as New York's
                            Residential Code R318-R321.

@@ -1,0 +1,35 @@
+# Hand-derived before the code ran on this house (the house is in feet; measures in inches, areas in sq ft).
+not_read: [egress_door]                     # no `doors` in the description: not read, never "no exit door"
+parts:
+  sleeping_room:
+    bed:
+      measures:
+        sleeping_room_floor_area: 110.0     # 10 x 11 ft
+  emergency_escape_opening:
+    w:
+      within: bed
+      measures:
+        opening_net_clear_width: 24.0       # sashes cover 2..4 ft: clear 0..2 ft
+        opening_net_clear_height: 36.0      # 2..5 ft
+        opening_net_clear_area: 6.0         # 2 x 3 ft
+        opening_sill_height: 24.0
+      not_measured: [opening_at_grade]      # no ground level outside it
+  stair:
+    s:
+      measures:
+        stair_riser_height: 9.0             # 0.75 ft
+        stair_tread_depth: 9.75             # 0.8125 ft
+        stair_headroom: 84.0                # ceiling at 7 ft over the top nosing at 0
+        stair_clear_width: 36.0             # 3 ft between the wall and the guard's inside
+      more:
+        stair_riser_variation: 1.5          # 9 - 7.5
+        stair_tread_variation: 0.0
+        stair_clear_width_at_handrail: 30.0 # 2.75 - 0.25 = 2.5 ft
+        stair_handrail_sides: 2
+        stair_total_rise: 99.0              # 8.25 ft
+        stair_risers: 13
+  guard:
+    g:
+      measures:
+        guard_height: 35.25                 # least at the tall riser's nosing (y 4.875): top -4.625 + 7.625 x 0.5 = -0.8125; -0.8125 - (-3.75) = 2.9375 ft
+      not_measured: [guard_opening_sphere]  # a stair guard's openings aren't measured yet
