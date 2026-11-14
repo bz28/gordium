@@ -239,6 +239,10 @@ def test_the_recorded_second_reading_covers_every_piece_and_needs_no_cache_to_be
     (lambda b: b["pieces"]["R318.7.5.1"]["second_reading_comparisons"].__setitem__(0, "at most"),
      "needs second_reading_comparisons"),
     (lambda b: b["pieces"]["R319.2.2"].pop("flags"), "R319.2.2: '24 inch' is recorded as 'none', but the printed"),
+    # review round 8 of step 1, on step 1b's pieces: R315.2's "more than one-half" is the law backwards ("shall not
+    # exceed 7 feet for more than one-half of the floor"); only its flag says so
+    (lambda b: b["pieces"]["R315.2"].pop("flags"),
+     "R315.2: 'more than one-half' is recorded as '>', but the printed sentence reads '<='"),
 ])
 def test_a_second_reading_that_doesnt_hold_is_refused(tmp_path, monkeypatch, change, problem):
     problems, _ = _copy_of_ny_state(tmp_path, monkeypatch, change)
@@ -284,12 +288,27 @@ def test_an_edited_cache_is_a_problem_even_where_no_quote_covers_the_edit(tmp_pa
     assert any("words are not the ones its piece was cut from" in p for p in Context.for_jurisdiction(NY_STATE).problems)
 
 
+# Every brought-in piece that points to law not brought in, as the pointer test finds it in the whole piece (where
+# the code cache has the book). Kept here so CI, which has no cache and sees only the labels' quotes, still checks
+# each one's label; with the cache, the test proves this list is exactly what the pieces say.
+POINTING_OUT = {
+    ("R102.6.1", "BO"), ("R102.6.2", "BO"), ("R314.3", "P2904"), ("R315.4", "P2904"), ("R316.2", "R312"),
+    ("R316.3", "P2904"), ("R319.1", "P2904"), ("R319.7", "BO"), ("R320.7", "R507.2.2"), ("R321.1.4", "R507.2.2"),
+    ("R325.6", "E3401.2.1"), ("R325.7", "E3401.2.1"), ("R507.10", "R301.5"), ("R507.10.3", "R507.2.2"),
+    ("BO101.1", "R101.2"), ("BO102.6", "BO102.6.1"), ("BO105.1", "R301.1.3"), ("BO105.1.1", "BO105.2"),
+    ("BO105.1.2", "BO105.2"), ("BO105.8", "702"), ("BO106.1", "R301.1.3"), ("BO106.1.2", "BO104"),
+    ("BO106.1.2", "BO105"), ("BO107.1", "BO105"), ("BF103.1", "R324"),
+}
+
+
 def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
     # review round 5: R319.7 sends existing basements to Appendix BO, not brought in; as a reference nobody sees it.
-    # Step 1b's review round 4: a pointer past the label's quote, or worded "the scoping requirements of", was missed
+    # Step 1b's review round 4: a pointer past the label's quote, or worded "the scoping requirements of", was missed.
+    # Step 1b's review rounds 5 and 6: without the cache (CI) a pointer past the quote was never seen, so a rule
+    # turned into a reference passed CI; POINTING_OUT checks those labels with or without the cache
     import re
     src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
-    brought = src["brought_in"]["sections"]
+    brought, alone = src["brought_in"]["sections"], src["brought_in"].get("alone") or []
     labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
     points = re.compile(r"(?:comply with|in accordance with|(?:scoping )?(?:requirements|provisions) of)"
                         r"(?: the (?:requirements|provisions) of)? "
@@ -297,21 +316,147 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
     from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
     words = {pid: " ".join(s["quote"] for s in e["sources"]) for pid, e in labels.items()}
-    if cached_text(entry).exists():             # the whole piece where the book is here, not only its quote
+    whole = cached_text(entry).exists()
+    if whole:                                   # the whole piece where the book is here, not only its quote
         text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
         for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
             words[p["id"]] = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+    found = {(pid, target) for pid in labels for target in (m[1] for m in points.finditer(" ".join(words[pid].split())))
+             if not (target in alone or any(target == b or target.startswith(b + ".") for b in brought))}
+    if whole:
+        assert found == POINTING_OUT, (sorted(found - POINTING_OUT), sorted(POINTING_OUT - found))
     readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
-    seen, wrong = 0, []
-    for pid, e in labels.items():
-        for target in (m[1] for m in points.finditer(" ".join(words[pid].split()))):
-            inside = any(target == b or target.startswith(b + ".") for b in brought)
-            seen += not inside
-            # a definition sets no requirement, so it is no rule or flag; its pointer is named in the README instead,
-            # since the pieces using the term never show it (review round 8: R202:sleeping_loft -> Section R315)
-            if not inside and (e["label"] not in ("rule", "flag") if ":" not in pid else target not in readme):
-                wrong.append((pid, target, e["label"]))
-    assert seen >= 3 and wrong == []          # R319.7 (Appendix BO), R320.7 and R321.1.4 (R507.2.2)
+    wrong = []
+    for pid, target in sorted(found | POINTING_OUT):
+        label = labels[pid]["label"]
+        # a definition sets no requirement, so it is no rule or flag; its pointer is named in the README instead,
+        # since the pieces using the term never show it (review round 8: R202:sleeping_loft -> Section R315)
+        if (label not in ("rule", "flag") if ":" not in pid else target not in readme):
+            wrong.append((pid, target, label))
+    assert wrong == []
+
+
+def _readme_gaps(found: dict[str, list[str]], readme: str) -> tuple[list, list]:
+    """(references the README's "not brought in" list never names, (reference, piece) pairs where the piece pointing
+    to it is not named in the README's words about that reference)."""
+    import re
+    part = readme.split("## References in the brought-in sections that are not brought in")[1].split("\n## ")[0]
+    bullets = [b for b in part.splitlines() if b.startswith("- ")]
+    named = lambda code, text: re.search(rf"(?<![\w.]){re.escape(code)}(?!\w|\.\d)", text)
+    misprinted = {"B0109": "BO109"}            # the book's zero for the letter O (README: the book's own misnumbering)
+    spelled = lambda code: [code, misprinted.get(code)] + ([code.split()[1]] if code.startswith("Appendix ") else [])
+
+    def said_for(code, bullet):
+        """The bullet's words about this reference: from where it is named to the next reference, unless only words
+        like "and" come between, so "R405.1 and Table R401.4.1(2) (...; from R319.4.3)" gives R319.4.3 to both, but
+        "R301.5 (guard loads), R301.1.3 (...; from ...)" gives R301.5 nothing."""
+        if code.startswith("Appendix ") and not bullet.startswith("- Appendices ") and not named(code, bullet):
+            return []
+        others = sorted(m.start() for c in found if c != code for s in spelled(c) if s
+                        for m in re.finditer(rf"(?<![\w.]){re.escape(s)}(?!\w|\.\d)", bullet))
+        said = []
+        for s in filter(None, spelled(code)):
+            for m in re.finditer(rf"(?<![\w.]){re.escape(s)}(?!\w|\.\d)", bullet):
+                start = m.end()
+                end = next((o for o in others if o > start and re.search(r"from |[;)]", bullet[start:o])), len(bullet))
+                said.append(bullet[start:end])
+        return said
+
+    unlisted, missing = [], []
+    for code, by in found.items():
+        mine = [w for b in bullets for w in said_for(code, b)]
+        if not mine:
+            unlisted.append(code)
+        missing += [(code, p) for p in by if mine and not any(named(p, w) for w in mine)]
+    return unlisted, missing
+
+
+def test_the_readmes_references_not_brought_in_name_every_piece_the_code_finds_pointing_to_them():
+    # step 1b's review round 5: R507.10.3 also points to R507.2.2, but the README named only the step-1 pieces.
+    # Round 6: the check read only references heading a bullet with "from", so 31 of 42 went unchecked.
+    # Round 7: a piece named anywhere in a bullet passed for every reference in it; now only its own words count.
+    # Round 8: a reference with no "from" of its own took the next one's, across a ";" or ")"
+    from document_extraction.icc_references import ways_out
+    from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    lines = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
+    cut = read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]
+    found = ways_out(cut, lines, entry["brought_in"]["sections"], entry["brought_in"].get("alone") or [])
+    readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
+    assert len(found) >= 40 and _readme_gaps(found, readme) == ([], [])
+    # a piece filed under the wrong reference is a gap: BO108.1 points to BO107, not BO109
+    was = "BO107's other parts from BO108.1; BO109's other parts from BO107.1,"
+    assert was in readme
+    moved = readme.replace(was, "BO107's other parts; BO109's other parts from BO108.1, BO107.1,")
+    assert ("BO107", "BO108.1") in _readme_gaps(found, moved)[1]
+
+
+def test_the_readmes_chapter_2_count_is_the_r202_definitions_brought_in():
+    # review round 7: Chapter 2 is not all brought in, only R201 and the R202 definitions the brought-in parts use.
+    # Round 8: checked without the code cache (CI too), since it reads only files in the repo
+    from rule_format.rulebook import read_jsonl
+    cut = read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]
+    used = sum(p["id"].startswith("R202:") for p in cut)
+    readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
+    chapter_2 = next(b for b in readme.splitlines() if b.startswith("- Chapter 2 "))
+    assert used > 0 and f"R201 and the {used} R202 definitions" in chapter_2, chapter_2
+
+
+def test_a_range_of_sections_named_as_brought_in_has_every_section_in_it_brought_in():
+    # step 1b's review round 5: "R314-R321" read as if R317 (garages and carports) were brought in; it is not
+    import re
+    src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
+    brought = set(src["brought_in"]["sections"])
+    files = [REPO / "docs/README.md", NY_STATE / "README.md", NY_STATE / "1_source_documents/sources.yaml",
+             NY_STATE / "4_term_definitions/definitions.yaml"]
+    ranges, wrong = 0, []
+    for f in files:
+        for a, b in re.findall(r"\bR(\d{3})[-\u2013]R(\d{3})\b", f.read_text(encoding="utf-8")):
+            ranges += 1
+            wrong += [(f.name, f"R{a}-R{b}", f"R{n}") for n in range(int(a), int(b) + 1) if f"R{n}" not in brought]
+    assert ranges >= 3 and wrong == [], wrong
+
+
+def test_every_term_definition_is_quoted_whole():
+    # review round 1 of egress step 1b: CHANGE OF OCCUPANCY was quoted without its last words ("this code.")
+    import json
+    import re
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
+    pieces = {p["id"]: p for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    by_line = {(pg, a): p for p in pieces.values() if p["kind"] == "definition" for pg, a, _ in p["lines"][:1]}
+    for key, d in load(NY_STATE / "4_term_definitions/definitions.yaml").items():
+        first = d["sources"][0]
+        piece = by_line[(first["page"], first["lines"][0])]
+        whole = " ".join(text[(pg, n)] for pg, a, b in piece["lines"] for n in range(a, b + 1))
+        quoted = " ".join(s["quote"] for s in d["sources"])
+        assert re.sub(r"^\[[A-Z]{2}\] ", "", whole) == quoted, key
+
+
+def test_an_allowance_for_an_existing_condition_is_a_flag_never_a_rule():
+    # review round 1 of egress step 1b: BO107.2.2 (existing stairs may keep 9-inch risers) was a rule, so a rule drafted
+    # from it could relax R318 for a new stair; whether a stair exists, and was lawful when built, isn't in the model
+    import re
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
+    labels = load(NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml")["labels"]
+    allowance = re.compile(r"\bexisting\b.*\b(?:permitted to (?:remain|maintain|continue)|need not|not (?:be )?required|shall be "
+                           r"accepted|shall be allowed|be allowed|may remain|are not required)", re.I | re.S)
+    found = []
+    for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
+        words = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+        if p["kind"] != "definition" and allowance.search(words):
+            found.append((p["id"], labels[p["id"]]["label"]))
+    assert len(found) >= 6 and all(label == "flag" for _, label in found), found
+    assert "R102.6" in dict(found)      # review round 2: "shall be permitted to continue" was missed
 
 
 def _wrong_conversions(words: str) -> list[tuple[str, str]]:
@@ -385,6 +530,102 @@ def test_a_metric_conversion_that_is_not_its_inches_is_named_in_the_labels_notes
     assert wrong and unnamed == [], unnamed
 
 
+def test_no_label_reason_calls_a_brought_in_section_not_brought_in():
+    # review round 2 of egress step 1b: BO106.1.2's reason said "BO104 (not brought in)" after BO104.1 came in
+    import re
+    src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
+    brought = src["brought_in"]["sections"] + (src["brought_in"].get("alone") or [])
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    said = [(pid, m[1]) for pid, e in labels.items()
+            for m in re.finditer(r"\b([A-Z]{1,2}\d{3}(?:\.\d+)*) \(not brought in\b", " ".join(e["reason"].split()))]
+    wrong = [(pid, t) for pid, t in said if any(b == t or b.startswith(t + ".") or t.startswith(b + ".") for b in brought)]
+    assert wrong == [], wrong
+
+
+def _transcript_numbers(folder: Path, name: str, pieces: dict) -> dict[str, list[str]]:
+    """Each piece's numbers as a kept second-reading transcript has them: the transcript cut at each piece's heading
+    within its crop, put through numbers.py (the same cutting as the tools beside it, `tools/compare.py`)."""
+    import json
+    import re
+    from document_extraction.numbers import shown, statements_of_lines
+    crops, cur = {}, None
+    for line in (folder / f"{name}_transcript.txt").read_text(encoding="utf-8").splitlines():
+        if m := re.match(r"=== (crop_\d+\.png)", line):
+            cur = m[1]
+            crops[cur] = []
+        elif cur and line.strip():
+            crops[cur].append(line.replace("m²", "m[fn2]").replace("ft²", "ft[fn2]").strip())
+
+    def starts(pid, ln):
+        p = pieces[pid]
+        if p["kind"] == "section_heading":
+            return ln.startswith(f"SECTION {pid}") or ln.startswith(f"[NY] SECTION {pid}")
+        if p["kind"] == "definition":
+            return bool(re.match(r"(\[[A-Z]{2}\] )?" + re.escape(p["title"].split(" ")[0]), ln))
+        return bool(re.match(r"(\[[A-Z]{2}\] )?" + re.escape(pid) + r" ", ln))
+    lines_of = {}
+    for c in json.loads((folder / f"{name}_crops.json").read_text(encoding="utf-8")):
+        lines, ids, at = crops[c["image"]], c["pieces"], []
+        for pid in ids:
+            if pieces[pid]["kind"] == "definition" and len(ids) == 1:
+                at.append(0)
+                continue
+            k = next((i for i, ln in enumerate(lines) if starts(pid, ln) and (not at or i > at[-1])), None)
+            at.append(0 if k is None and not at else k)
+            assert at[-1] is not None, (name, c["image"], pid)
+        for j, pid in enumerate(ids):
+            lines_of.setdefault(pid, []).extend(lines[at[j]: at[j + 1] if j + 1 < len(ids) else len(lines)])
+    return {pid: [shown(s) for s in statements_of_lines(ls)] for pid, ls in lines_of.items()}
+
+
+def test_the_recorded_second_reading_is_the_kept_transcripts():
+    # review round 3 of egress step 1b: second_reading_numbers could be edited by hand to agree; where a transcript is
+    # kept (in the code cache, beside the book, since it holds the book's words), the list must be rebuilt from it
+    import hashlib
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    folder = cached(entry).parent / "second_reading"
+    if not folder.exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    for line in (folder / "README.md").read_text(encoding="utf-8").splitlines():   # "    <sha256>  <file>"
+        if len(parts := line.split()) == 2 and len(parts[0]) == 64:
+            assert hashlib.sha256((folder / parts[1]).read_bytes()).hexdigest() == parts[0], parts[1]
+    pieces = {p["id"]: p for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    recorded = load(NY_STATE / "text_verification.yaml")["pieces"]
+    rebuilt = {}
+    for name in ("step_1_round_3", "step_1b", "step_1b_round_1", "step_1c"):
+        rebuilt.update(_transcript_numbers(folder, name, pieces))
+    assert len(rebuilt) >= 110
+    assert {pid: recorded[pid]["second_reading_numbers"] for pid in rebuilt} == rebuilt
+
+
+def test_every_part_of_appendix_bo_is_brought_in_or_named_in_the_readme():
+    # review round 3 of egress step 1b: the README's list of what is not brought in left out BO102.1.1, BO106.5 and others
+    import re
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    named = set(re.findall(r"\bBO\d{3}(?:\.\d+)*", readme))
+    for a, b in re.findall(r"\b(BO\d{3}(?:\.\d+)*) (?:to|through) (BO\d{3}(?:\.\d+)*)", readme):
+        *stem, first = a.split(".")
+        if b.rsplit(".", 1)[0] == ".".join(stem):
+            named |= {".".join(stem + [str(k)]) for k in range(int(first), int(b.rsplit(".", 1)[1]) + 1)}
+    brought = {p["id"] for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    heads = {m[1] for r in kept_text(entry)[1:]
+             if r.get("bold") and (m := re.match(r"(?:\[NY\] )?(BO1(?:0\d|1[0-3])(?:\.\d+)+) ", r["text"]))}
+
+    def wholly_out(part):                  # a part named, none of it brought in: its own parts are named with it
+        return part in named and not any(b == part or b.startswith(part + ".") for b in brought)
+
+    def covered(pid):
+        parts = pid.split(".")
+        return pid in brought or pid in named or any(wholly_out(".".join(parts[:k])) for k in range(1, len(parts)))
+    missing = sorted(h for h in heads if not covered(h) and not h.startswith("BO103."))
+    assert len(heads) > 100 and missing == [], " ".join(missing)
+
+
 def test_a_permission_to_exceed_is_flagged_as_no_minimum():
     # Review round 9 of step 1: "shall be permitted to exceed 38 inches" (R320.2, R318.7.5.3) lifts a maximum; the
     # recorded words read it as more than (>), a minimum the law does not set. Its flag must say the recorded
@@ -401,3 +642,61 @@ def test_a_permission_to_exceed_is_flagged_as_no_minimum():
                 if not any("second reading (none) is right" in f and "wrong" in f for f in said):
                     unclear.append((pid, n))
     assert seen >= 2 and unclear == [], unclear
+
+
+def test_every_part_of_appendix_bf_is_brought_in_or_named_in_the_readme():
+    # egress step 1c: Appendix BF comes in only for egress (BF101 to BF103); its other parts must each be named as not
+    # brought in, so a reader never takes the patio-cover height or structure limits as checked
+    import re
+    from rule_format.rulebook import cached, cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    # only the README's own list of what is not brought in counts (BF101.1's "BF101 to BF106" names no part as out)
+    named = set(re.findall(r"\bBF\d{3}(?:\.\d+)*", readme.split("Not brought in, being no egress:")[1].split(" BF101.1 ")[0]))
+    brought = {p["id"] for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]}
+    heads = {m[1] for r in kept_text(entry)[1:]
+             if r.get("bold") and (m := re.match(r"(?:\[NY\] )?(?:SECTION )?(BF1\d\d(?:\.\d+)*)\W", r["text"]))}
+
+    def covered(pid):
+        parts = pid.split(".")
+        return pid in brought or any(".".join(parts[:k]) in named and not any(
+            b.startswith(".".join(parts[:k])) for b in brought) for k in range(1, len(parts) + 1))
+    missing = sorted(h for h in heads if not covered(h))
+    assert {"BF101", "BF103.2", "BF106.4"} <= heads and missing == [], " ".join(missing)
+    assert {"BF101", "BF101.1", "BF101.2", "BF102", "BF102.1", "BF102:patio_cover", "BF103", "BF103.1", "BF103.2"} <= brought
+
+
+def test_a_label_that_calls_its_reading_an_open_question_records_it_as_one():
+    # review round 1 of egress step 1c: BF103.2's "unenclosed" was called an open question in its notes only, so the
+    # review list showed no open questions and nothing would block approving it
+    import re
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    said = [pid for pid, e in labels.items() if re.search(r"open question", " ".join(str(e.get(k, "")) for k in
+                                                                                     ("reason", "notes")), re.I)]
+    assert "BF103.2" in said and all(labels[pid].get("open_questions") for pid in said), said
+    review = (NY_STATE / "3_section_labels/gov.ny.residential.2025.review.md").read_text(encoding="utf-8")
+    listed = review.split("## Open questions for the architects")[1].split("\n## ")[0]
+    assert all(f"| {pid} |" in listed for pid in said)
+
+
+def test_a_label_with_readings_still_in_play_never_says_one_reading_decides():
+    # review round 2 of egress step 1c: BF103.2 listed three readings of "unenclosed" but its notes (and the README)
+    # said a screened porch "fails, never passes" under the stricter one; with readings in play a design fails only if
+    # it fails under all of them, else needs review (docs/methods.md)
+    import re
+    labels = yaml.safe_load((NY_STATE / "3_section_labels/gov.ny.residential.2025.yaml").read_text(encoding="utf-8"))["labels"]
+    open_ = [pid for pid, e in labels.items() if any(len(r.get("readings") or []) >= 2 for r in e.get("research") or [])]
+    assert "BF103.2" in open_
+    decides = re.compile(r"fails, never passes|until (?:it is )?answered,? Gordium takes|Gordium's reading until answered", re.I)
+    readme = " ".join((NY_STATE / "README.md").read_text(encoding="utf-8").split())
+    for pid in open_:
+        e = labels[pid]
+        assert not decides.search(yaml.safe_dump(e)) and "needs review" in e.get("notes", ""), pid
+    # review round 4: BF103.1's reason (a piece the open question turns on) said it "says what makes a patio cover
+    # enclosed", the stricter reading as settled
+    assert "what makes a patio cover enclosed" not in labels["BF103.1"]["reason"]
+    assert not decides.search(readme)
+    # review round 3: the README's lead-in still said the notes give Gordium's reading of both undefined words
+    assert "Two words are not defined, and the label's notes give Gordium's reading" not in readme

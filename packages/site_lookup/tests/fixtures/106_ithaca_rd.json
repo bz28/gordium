@@ -1023,7 +1023,162 @@
      }
     ]
    }
+  },
+  {
+   "source": "fema_flood",
+   "params": {
+    "geometry": "{\"rings\": [[[847728.3900338345, 888315.9688356004], [847722.6401125732, 888308.030820129], [847717.7648868919, 888301.6560134675], [847712.3279283496, 888293.7809447139], [847705.5149896143, 888285.405810788], [847700.9530816674, 888278.5940880359], [847694.8899107263, 888270.4058803518], [847688.6397757346, 888263.030902565], [847683.4527796973, 888254.9691315404], [847601.357107991, 888314.0189466483], [847601.4984755326, 888314.0188739961], [847611.6996411238, 888314.2922333265], [847653.6004517096, 888369.7520881945], [847653.7963032017, 888369.6114726093], [847673.2516521207, 888355.6205509076], [847728.3900338345, 888315.9688356004]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "FLD_ZONE,ZONE_SUBTY,SFHA_TF"
+   },
+   "body": {
+    "displayFieldName": "FLD_AR_ID",
+    "fieldAliases": {
+     "FLD_ZONE": "FLD_ZONE",
+     "ZONE_SUBTY": "ZONE_SUBTY",
+     "SFHA_TF": "SFHA_TF"
+    },
+    "fields": [
+     {
+      "name": "FLD_ZONE",
+      "type": "esriFieldTypeString",
+      "alias": "FLD_ZONE",
+      "length": 17
+     },
+     {
+      "name": "ZONE_SUBTY",
+      "type": "esriFieldTypeString",
+      "alias": "ZONE_SUBTY",
+      "length": 76
+     },
+     {
+      "name": "SFHA_TF",
+      "type": "esriFieldTypeString",
+      "alias": "SFHA_TF",
+      "length": 1
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "FLD_ZONE": "X",
+       "ZONE_SUBTY": "AREA OF MINIMAL FLOOD HAZARD",
+       "SFHA_TF": "F"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "fema_flood",
+   "params": {
+    "geometry": "{\"rings\": [[[847728.3900338345, 888315.9688356004], [847722.6401125732, 888308.030820129], [847717.7648868919, 888301.6560134675], [847712.3279283496, 888293.7809447139], [847705.5149896143, 888285.405810788], [847700.9530816674, 888278.5940880359], [847694.8899107263, 888270.4058803518], [847688.6397757346, 888263.030902565], [847683.4527796973, 888254.9691315404], [847601.357107991, 888314.0189466483], [847601.4984755326, 888314.0188739961], [847611.6996411238, 888314.2922333265], [847653.6004517096, 888369.7520881945], [847653.7963032017, 888369.6114726093], [847673.2516521207, 888355.6205509076], [847728.3900338345, 888315.9688356004]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelWithin",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "FLD_ZONE,ZONE_SUBTY,SFHA_TF"
+   },
+   "body": {
+    "displayFieldName": "FLD_AR_ID",
+    "fieldAliases": {
+     "FLD_ZONE": "FLD_ZONE",
+     "ZONE_SUBTY": "ZONE_SUBTY",
+     "SFHA_TF": "SFHA_TF"
+    },
+    "fields": [
+     {
+      "name": "FLD_ZONE",
+      "type": "esriFieldTypeString",
+      "alias": "FLD_ZONE",
+      "length": 17
+     },
+     {
+      "name": "ZONE_SUBTY",
+      "type": "esriFieldTypeString",
+      "alias": "ZONE_SUBTY",
+      "length": 76
+     },
+     {
+      "name": "SFHA_TF",
+      "type": "esriFieldTypeString",
+      "alias": "SFHA_TF",
+      "length": 1
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "FLD_ZONE": "X",
+       "ZONE_SUBTY": "AREA OF MINIMAL FLOOD HAZARD",
+       "SFHA_TF": "F"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "fema_pending",
+   "params": {
+    "geometry": "{\"rings\": [[[847728.3900338345, 888315.9688356004], [847722.6401125732, 888308.030820129], [847717.7648868919, 888301.6560134675], [847712.3279283496, 888293.7809447139], [847705.5149896143, 888285.405810788], [847700.9530816674, 888278.5940880359], [847694.8899107263, 888270.4058803518], [847688.6397757346, 888263.030902565], [847683.4527796973, 888254.9691315404], [847601.357107991, 888314.0189466483], [847601.4984755326, 888314.0188739961], [847611.6996411238, 888314.2922333265], [847653.6004517096, 888369.7520881945], [847653.7963032017, 888369.6114726093], [847673.2516521207, 888355.6205509076], [847728.3900338345, 888315.9688356004]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "OBJECTID"
+   },
+   "body": {
+    "displayFieldName": "DFIRM_ID",
+    "fieldAliases": {
+     "OBJECTID": "OBJECTID"
+    },
+    "fields": [
+     {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+     }
+    ],
+    "features": []
+   }
+  },
+  {
+   "source": "fema_preliminary",
+   "params": {
+    "geometry": "{\"rings\": [[[847728.3900338345, 888315.9688356004], [847722.6401125732, 888308.030820129], [847717.7648868919, 888301.6560134675], [847712.3279283496, 888293.7809447139], [847705.5149896143, 888285.405810788], [847700.9530816674, 888278.5940880359], [847694.8899107263, 888270.4058803518], [847688.6397757346, 888263.030902565], [847683.4527796973, 888254.9691315404], [847601.357107991, 888314.0189466483], [847601.4984755326, 888314.0188739961], [847611.6996411238, 888314.2922333265], [847653.6004517096, 888369.7520881945], [847653.7963032017, 888369.6114726093], [847673.2516521207, 888355.6205509076], [847728.3900338345, 888315.9688356004]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "OBJECTID"
+   },
+   "body": {
+    "displayFieldName": "PFIDX_ID",
+    "fieldAliases": {
+     "OBJECTID": "OBJECTID"
+    },
+    "fields": [
+     {
+      "name": "OBJECTID",
+      "type": "esriFieldTypeOID",
+      "alias": "OBJECTID"
+     }
+    ],
+    "features": []
+   }
   }
  ],
- "live_status": "found"
+ "live_status": "found",
+ "flood_captured": "2026-11-11"
 }
