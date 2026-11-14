@@ -319,9 +319,9 @@ def test_options_is_quick():
 
 def test_a_uses_file_that_cannot_be_read_is_an_error_as_before(tmp_path):
     """Review round 1: a uses.yaml that is there but is no file (a folder) is an error, as it always was, never a
-    city with no uses."""
+    city with no uses. Windows refuses to open a folder with PermissionError, macOS and Linux with IsADirectoryError."""
     j = _city(tmp_path)
     (j / "4_term_definitions/uses.yaml").unlink()
     (j / "4_term_definitions/uses.yaml").mkdir()
-    with pytest.raises(IsADirectoryError):
+    with pytest.raises((IsADirectoryError, PermissionError)):
         check.options(str(j))
