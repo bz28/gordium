@@ -611,7 +611,6 @@ YARD_LINES = {"front_yard": "the front lot line", "rear_yard": "the rear lot lin
 # (the requirement for every part, eaves included), so the checker confirms what it says (#18 review round 26)
 EAVE_YARD = {"front_yard_eaves": "front_yard", "side_yard_smaller_eaves": "side_yard_smaller",
              "side_yard_larger_eaves": "side_yard_larger", "rear_yard_eaves": "rear_yard"}
-COMPASS = ("North", "South", "East", "West", "Northeast", "Northwest", "Southeast", "Southwest")
 
 
 def _yard_line(name: str, measure: str) -> str:
@@ -940,6 +939,100 @@ def delta_words(status: str, span, unit: str, approx: bool, maximum: bool = Fals
     return room + " room here; see why"
 
 
+TAX_OFF = f"if the tax-map lines are {TOLERANCE:g} ft off"     # what the worst case of a tax-map lot means
+
+
+def _plain_margin(m: float, unit: str, maximum: bool) -> str:
+    """One margin as a row says it: "+2'-0 1/2"" to spare, "at limit", "1'-4" short" (a minimum) or "1'-6" over"
+    (a maximum); never overstated (room rounds down, a shortfall up)."""
+    if m >= 0:
+        return margin_text(m, unit)
+    return _amount(max(-m, LEAST.get(unit, 0)), unit, "up") + (" over" if maximum else " short")
+
+
+def tax_delta(status: str, drawn: float, span, unit: str, maximum: bool = False,
+              several: bool = False) -> tuple[str, str]:
+    """A Delta that says the margin as drawn first, then, in brackets, the other end of the readings that decides
+    the status (the audit of main, 2026-10-29: "≥ +0'-0 1/2"" beside 12'-0 1/2" against 10'-0" read as a bug, the
+    tax map's 2 ft taken out unsaid). `drawn`: the least margin with the lot lines as drawn (the tightest reading of
+    the rest); `span`: the least and most over every reading. On a tax-map lot whose only doubt is where its lines
+    are (`several` False):
+      room under every reading      "+2'-0 1/2" (+0'-0 1/2" if the tax-map lines are 2 ft off)"   the worst
+      room as drawn, short at worst "+1'-11 3/4" (0'-0 1/4" short if the tax-map lines are 2 ft off)"
+      short as drawn, room at best  "0'-3" short (+1'-9" if the tax-map lines are 2 ft off the other way)"
+      short under every reading     "2'-11 1/2" short (still 0'-11 3/8" short if …2 ft off the other way)",
+                                    the certain shortfall rounded down
+    With several readings as drawn too (`several`: which lot line is the rear), the other end may be another
+    reading's, so it is said so, never put down to the tax map: "+3'-5 1/4" if confirmed (at least +0'-5 1/4" under
+    every reading)", "6'-4" short (+3'-10" under another reading)", "11'-1 3/4" short (still 1'-1 7/8" short under
+    every reading)", "+2'-10 5/8" if confirmed (0'-1 3/8" short under another reading)".
+    The verdict is the checker's and unchanged: only the words. Never overstated (room rounds down, a shortfall
+    up) and never kinder than the status: a row in review says its room "if confirmed", one that fails another way
+    its room "room here; see why". Returns (words, the panel cell's shorter form: the two numbers signed, one a
+    line, the second after "worst" or "best", to fit the narrow Delta column's two lines (measured in Rhino); the
+    detail has the words whole)."""
+    low, high = span
+    head = _plain_margin(drawn, unit, maximum)
+    if drawn >= 0 and status == REVIEW:      # "at limit if confirmed" too: never read as a pass (review round 2)
+        head += " if confirmed"
+    elif drawn >= 0 and status == FAILS:            # "at limit here", never "at limit room here" (review round 1)
+        head = ("at limit here" if head == "at limit" else head.lstrip("+") + " room here") + "; see why"
+    worst = drawn >= 0 or low >= 0       # the worst: how much room is certain, or how short it may be; else the
+    end, word = (low, "worst") if worst else (high, "best")      # best: whether it could comply another way
+    certain = end < 0 and drawn < 0      # short even at best: the certain shortfall, rounded DOWN
+    gap = " over" if maximum else " short"
+    if certain:
+        tail = "still" + gap if _rounds_to_nothing(-end, unit) else "still " + _amount(-end, unit, "down") + gap
+    else:
+        tail = _plain_margin(end, unit, maximum)
+    if not several:
+        tail += " " + TAX_OFF + ("" if worst else " the other way")
+    elif certain:
+        tail += " under every reading"
+    elif end >= 0 and worst:                 # "at limit at worst", never "at least at limit" (review round 2)
+        tail = "at limit at worst" if tail == "at limit" else "at least " + tail + " under every reading"
+    else:
+        tail += " under another reading"
+    cell_end = margin_text(end, unit) if not certain else (
+        ("over" if maximum else "short") if _rounds_to_nothing(-end, unit) else "−" + _amount(-end, unit, "down"))
+    # short even at best on a row in review for another reason: the certain words with "see why", as delta_words
+    # a row that fails another way but has room under some reading points to why too (review round 2)
+    why = "; see why" if (certain and status != FAILS) or (status == FAILS and drawn < 0 and not certain) else ""
+    # the cell is never kinder than the status either (review round 1 of plain-words: "+2'-0" / worst +0'-6"" beside
+    # a ✕, "+4'-0 3/4" / worst +2'-0 3/4"" in review without "if confirmed"): a ✕ row's room has no "+" and says
+    # "see why"; a row in review with room under every reading says the certain room "if confirmed"
+    if drawn >= 0 and status == FAILS:
+        cell = ("at limit" if head.startswith("at limit") else margin_text(drawn, unit).lstrip("+") + " room") \
+            + "\nsee why"
+    elif status == FAILS and why:           # short as drawn, room at best, failing another way: never "best +…"
+        cell = margin_text(drawn, unit) + "\nsee why"                   # beside a ✕ (review round 3)
+    elif drawn >= 0 and end >= 0 and status == REVIEW:
+        cell = f"{word} {cell_end}\nif confirmed"
+    elif drawn >= 0 and status == REVIEW:    # room as drawn, short at worst: "if so" (the head's "if confirmed", short
+        cell = f"{margin_text(drawn, unit)} if so\n{word} {cell_end}"       # enough for the two-line column)
+    else:
+        cell = f"{margin_text(drawn, unit)}\n{word} {cell_end}"
+    return f"{head} ({tail}){why}", cell
+
+VARIES = " (varies)"
+
+
+def _tightest(item: dict, rs: list[dict], unit: str) -> None:
+    """A row whose readings disagree on the length itself (which lot line is the rear: "34'-11 7/8" to 36'-3 3/8""
+    against "24'-1 7/8" to 32'-10 1/8"", ranges in both columns, hard to read: the audit of main, 2026-10-29): the
+    panel's cells show the tightest reading's pair, the one whose margin is least, each marked "(varies)" so it is
+    never taken for the only reading; the Delta is that pair's margin; the detail line says both ranges whole
+    (item["cells"]: the panel's Proposed and Required). Lengths only; anything else keeps its span."""
+    if unit != "ft" or " to " not in str(item.get("proposed") or "") or not rs:
+        return
+    r = min(rs, key=lambda r: r["margin"])
+    if not isinstance(r.get("value"), (int, float)) or not isinstance(r.get("limit"), (int, float)):
+        return
+    sign = item.get("sign") or ""
+    item["cells"] = {"proposed": value_text(r["value"], unit, sign) + VARIES,
+                     "required": value_text(r["limit"], unit, sign, for_proposed=False) + VARIES}
+
+
 def _worst_case(expr: str, values: dict, names: set, measured: dict, facts: dict) -> dict | None:
     """The values (a reading of THE reading set, reading_set.combos: the open questions, and on the tax map each
     lot line off by up to TOLERANCE, the lot area at either end) under which `expr` doesn't hold, or None if it
@@ -1010,6 +1103,15 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
             i.update(status=REVIEW, mark=MARK[REVIEW], reason=(
                 f"Complies as drawn, but not under every reading of {_which(lot, open_)} · Pick survey lot lines…"))
         i.update(delta=delta_words(i["status"], span, unit, approx, _is_maximum(node)), approx=approx)
+        # the readings with the lot lines as drawn (a survey's): the margin as drawn, said first on a tax-map lot
+        base = readings(node, expr or ast.unparse(node), values, measured, {**facts, "lot_surveyed": True}) \
+            if approx else rs
+        _tightest(i, base, unit)
+        several = len({round(r["margin"], 9) for r in base or []}) > 1
+        if base and (approx or i.get("cells")):    # a tax-map lot, or a span shown by its tightest pair
+            i["delta"], i["delta_cell"] = tax_delta(i["status"], min(r["margin"] for r in base), span, unit,
+                                                    _is_maximum(node), several or not approx)   # a survey:
+            #   never the tax map's words, even when every reading as drawn agrees (review round 2 of plain-words)
         body = ast.parse(expr or ast.unparse(node), mode="eval").body
         one_way = not isinstance(body, ast.BoolOp) or (i.get("_raised") and isinstance(body.op, ast.And))
         if (i.get("_advice") or {}).get("crossing"):     # partly off the lot: its one advice, move it back (PR 18)
@@ -1028,9 +1130,13 @@ def settle(items: list[dict], values: dict, measured: dict, facts: dict) -> None
             if advice:                               # (the checker confirms each part: check.confirm_advice)
                 i["hint"], i["_advice"] = advice_text(advice), advice
         i.pop("_raised", None)
-        if approx and i["detail"].get("line"):
-            i["detail"]["line"] = (f"{i['proposed']} proposed, {i['required']} required as drawn · with the tax map's "
-                                   f"±{feet_inches(TOLERANCE)}: {i['delta']}")
+        if i.get("cells"):              # a span of readings: each end said, then the tightest (the cells' pair)
+            i["detail"]["line"] = (f"{i['proposed']} proposed, {i['required']} required, depending on the reading; "
+                                   f"the tightest: {i['cells']['proposed'].replace(VARIES, '')} against "
+                                   f"{i['cells']['required'].replace(VARIES, '')} · "
+                                   f"{i['delta']}")
+        elif approx and i["detail"].get("line"):
+            i["detail"]["line"] = f"{i['proposed']} proposed, {i['required']} required · {i['delta']}"
         if node.left.id not in YARD_MEASURES or i["status"] not in (FAILS, REVIEW) or span[0] >= 0:
             continue
         i["colour"] = "red" if i["status"] == FAILS and span[1] < 0 else "amber"
@@ -1136,6 +1242,9 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     name = NAMES.get(measure) or row.get("Short") or row.get("Requirement")
     if primary is None and names == {"use"}:          # use in [...]: the use, and whether it's permitted
         name = "Use"
+    column = name                                     # the chart's column it cites, whatever the row is called
+    if measure == "lot_area" and "primary_buildings" in names:   # §325-8B(1): beside the use's own Lot area row,
+        name = "Lot area per main building"           # never a second "Lot area" (the audit of main, 2026-10-29)
     site = bool(names) and names <= SITE_MEASURES
     status, reason = _status(row), _reason(row)
     reason = _depends(row, status, measured) or reason
@@ -1152,7 +1261,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
     quotes = [q for q in (_quote(s, j, documents, district, cite) for s in sources) if q is not None]
     # each source as an examiner cites it, with its own link (named by the rule's item: both side yards cite the
     # same chart rows)
-    cited = [(citation(s, name, district, cite.section, documents), link(s, j, documents))
+    cited = [(citation(s, column, district, cite.section, documents), link(s, j, documents))
              for s in sources if s.get("file")]
     out = []
     for node, label in parts:
