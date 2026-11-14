@@ -35,6 +35,24 @@ class Model:
         self.metres, why = unit_scale(units[0], "LENGTHUNIT")
         if self.metres is None:
             raise ValueError(f"the file's length unit {self.length_unit!r} can't be converted to metres: {why}")
+        # Angles (review round 14). The geometry engine finds the file's units itself, and its angle-unit
+        # setting changes nothing: with no angle unit stated it turns a revolved shape the other way, and with
+        # more than one context (a project library) it finds no units and reads every angle as radians (a 90
+        # degree turn came out 117). Lengths are rescaled here; angles can't be, so those shapes are refused.
+        angles = [u for u in context.Units if getattr(u, "UnitType", None) == "PLANEANGLEUNIT"]
+        radians = len(angles) == 1 and angles[0].is_a("IfcSIUnit") and angles[0].Name == "RADIAN" \
+            and not angles[0].Prefix
+        contexts = len(self.by_type("IfcContext"))
+        if len(angles) != 1:
+            self.shape_problem = (f"the file states {len(angles)} angle units, so how the geometry engine reads its "
+                                  "angles is unclear (with none it turns a curved shape the other way): shapes "
+                                  "aren't read")
+        elif contexts != 1 and not radians:
+            self.shape_problem = (f"the file holds {contexts} contexts (a project library beside the project), so the "
+                                  "geometry engine can't find its units and would read its angles, stated in "
+                                  f"{_unit_name(angles[0])}, as radians: shapes aren't read")
+        else:
+            self.shape_problem = None
         areas = [u for u in context.Units if getattr(u, "UnitType", None) == "AREAUNIT"]
         self.square_metres, self.area_unit_why = unit_scale(areas[0], "AREAUNIT") if len(areas) == 1 else \
             (None, f"the file states {len(areas)} area units")
@@ -210,6 +228,8 @@ class Model:
     def triangles(self, element):
         """The element's body as triangles, world coordinates in metres: an (n, 3, 3) array; None if it has none."""
         import ifcopenshell.geom
+        if self.shape_problem:                    # review round 14: see __init__
+            return None
         if self._settings is None:
             self._settings = ifcopenshell.geom.settings()
             self._settings.set("use-world-coords", True)

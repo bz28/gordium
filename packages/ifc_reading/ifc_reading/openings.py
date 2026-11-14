@@ -239,7 +239,7 @@ def _rectangle(model, window, m, w, h):
     its opening."""
     tris = model.triangles(window)
     if tris is None:
-        return None, "the window has no body shape, so whether it is rectangular can't be told"
+        return None, model.shape_problem or "the window has no body shape, so whether it is rectangular can't be told"
     body = _silhouette(tris, m)
     x0, z0, x1, z1 = body.bounds
     if body.area < SQUARE * (x1 - x0) * (z1 - z0):

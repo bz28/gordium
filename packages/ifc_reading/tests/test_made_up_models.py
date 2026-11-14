@@ -881,3 +881,48 @@ def test_a_blank_never_outvotes_a_real_statement(build, tmp_path):
     assert d["openings"][0]["escape"] is True
     assert one(d["doors"], "Front")["exit"] is True
     assert d["rooms"][0]["sleeping"] is True
+
+
+def _degrees(b):
+    rad = b.f.create_entity("IfcSIUnit", UnitType="PLANEANGLEUNIT", Name="RADIAN")
+    dims = b.f.create_entity("IfcDimensionalExponents", 0, 0, 0, 0, 0, 0, 0)
+    deg = b.f.create_entity("IfcConversionBasedUnit", Dimensions=dims, UnitType="PLANEANGLEUNIT", Name="DEGREE",
+                            ConversionFactor=b.f.create_entity(
+                                "IfcMeasureWithUnit", b.f.create_entity("IfcPlaneAngleMeasure", 0.017453292519943295), rad))
+    ctx = b.f.by_type("IfcProject")[0].UnitsInContext
+    ctx.Units = [u for u in ctx.Units if getattr(u, "UnitType", None) != "PLANEANGLEUNIT"] + [deg]
+
+
+def _library(b):
+    library = b.f.create_entity("IfcProjectLibrary", GlobalId=b.guid(), Name="lib", UnitsInContext=b.f.create_entity(
+        "IfcUnitAssignment", [b.f.create_entity("IfcSIUnit", UnitType="LENGTHUNIT", Name="METRE")]))
+    b.f.create_entity("IfcRelDeclares", GlobalId=b.guid(), RelatingContext=b.f.by_type("IfcProject")[0],
+                      RelatedDefinitions=[library])
+
+
+@pytest.mark.parametrize("library", [False, True])
+def test_angles_in_degrees(build, tmp_path, library):
+    """Angles in degrees (as ArchiCAD writes, FZK-Haus among them) read as degrees. But with a project library the
+    geometry engine finds no units and reads them as radians (a 90 degree turn came out 117); its angle-unit
+    setting changes nothing, so then shapes are refused, with the reason."""
+    b = _raised_bedroom(build)
+    _degrees(b)
+    if library:
+        _library(b)
+    d = read(b.write(tmp_path / "h.ifc"))
+    room, w = d["rooms"][0], d["openings"][0]
+    if library:
+        assert "floor_elevation" not in room and "read its angles" in room["not_given"]["floor_elevation"]
+        assert "frame" not in w and "read its angles" in w["not_given"]["frame"]
+    else:
+        assert near(room["floor_elevation"], 10 * FT) and "frame" in w
+
+
+def test_no_angle_unit_refuses_shapes(build, tmp_path):
+    """Review round 14: with no angle unit stated, the geometry engine turned a revolved shape the other way (+90
+    degrees came out -90). Real exporters state one; a file that doesn't has its shapes refused."""
+    b = _raised_bedroom(build)
+    ctx = b.f.by_type("IfcProject")[0].UnitsInContext
+    ctx.Units = [u for u in ctx.Units if getattr(u, "UnitType", None) != "PLANEANGLEUNIT"]
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "floor_elevation" not in room and "0 angle units" in room["not_given"]["floor_elevation"]

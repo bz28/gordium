@@ -215,7 +215,7 @@ def read_room(model, space) -> dict:
     tris = model.triangles(space)
     if tris is None:
         for k in ("floor", "floor_elevation", "ceiling_height"):
-            missing[k] = "the space has no body shape to read"
+            missing[k] = model.shape_problem or "the space has no body shape to read"
         return _done(room, missing, info)
     n, size = normals(tris)
     real = size > 1e-12

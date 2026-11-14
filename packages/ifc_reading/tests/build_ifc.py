@@ -25,7 +25,8 @@ class Builder:
         else:
             length = run("unit.add_si_unit", unit_type="LENGTHUNIT")
             area = run("unit.add_si_unit", unit_type="AREAUNIT")
-        run("unit.assign_unit", units=[length, area])
+        angle = self.f.create_entity("IfcSIUnit", UnitType="PLANEANGLEUNIT", Name="RADIAN")
+        run("unit.assign_unit", units=[length, area, angle])
         self.metres = {"foot": 0.3048, "millimetre": 0.001}.get(unit, 1.0)   # ifcopenshell's shape API takes metres
         model = run("context.add_context", context_type="Model")
         self.body = run("context.add_context", context_type="Model", context_identifier="Body",
