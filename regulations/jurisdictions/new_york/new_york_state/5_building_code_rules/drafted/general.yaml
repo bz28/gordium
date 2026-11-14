@@ -1687,7 +1687,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Guard top serving as stair handrail, 34 to 38 in (R321.1.2 Exc. 2)
-  applies_when: open_side_drop > 30 and guard_present and open_side_on_stair and guard_is_handrail
+  applies_when: guard_present and open_side_on_stair and guard_is_handrail
   check: guard_height >= 34 and guard_height_max <= 38
   for_each: open_side
   when_none: not_applicable
@@ -1700,7 +1700,13 @@ rules:
     quote: Where the top of the guard serves as a handrail on the open sides of stairs, the top of the guard shall
       be not less than 34 inches (864 mm) and not more than 38 inches (965 mm) as measured vertically from a line
       connecting the nosings.
-  - *id003
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 54
+    - 55
+    quote: Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface
+      of ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm).
   examples:
   - given: {}
     parts:
@@ -1754,17 +1760,18 @@ rules:
     parts:
       open_side:
       - id: os1
-        name: Optional guard
+        name: Optional guard, top is the handrail
         measures:
           open_side_drop: 24
           open_side_on_stair: true
           guard_present: true
           guard_is_handrail: true
-          guard_height: 30
+          guard_height: 42
+          guard_height_max: 44
     rows:
     - part: os1
-      outcome: not_applicable
-    expect: not_applicable
+      outcome: fail
+    expect: fail
   - given: {}
     parts:
       open_side: []
@@ -1783,24 +1790,24 @@ rules:
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
   revised:
-  - field: applies_when
-    by: Claude for Ben (house egress review, round 5)
-    date: *id002
-    why: 'R321.1.2 and R321.1.3 limit "required guards": those R321.1.1 requires, where the drop is more than 30
-      in. The AI checked every guard present, failing an optional guard on a 24 in drop; each now applies only where
-      the drop is more than 30 in. Cause r321_1_required_guards_only, resolutions.yaml.'
   - field: sources
-    by: Claude for Ben (house egress review, round 5)
-    date: *id002
-    why: 'R321.1.2 and R321.1.3 limit "required guards": those R321.1.1 requires, where the drop is more than 30
-      in. The AI checked every guard present, failing an optional guard on a 24 in drop; each now applies only where
-      the drop is more than 30 in. Cause r321_1_required_guards_only, resolutions.yaml.'
+    by: Claude for Ben (house egress review, round 6)
+    date: 2026-11-14
+    why: 'R321.1.2 exception 2 limits a required guard''s top that serves as the stair''s handrail; but that top
+      is the stair''s handrail, and R320.2''s 34 to 38 in ("Handrail height ... shall be not less than 34 inches
+      (864 mm) and not more than 38 inches (965 mm)") holds for every handrail, whatever the drop. Round 5 had limited
+      this rule to drops over 30 in with the other guard rules, so a 42 in guard-top handrail on a 24 in drop passed
+      (no handrail part is modeled for it): review round 6. This rule keeps the AI''s scope (any drop); R320.2''s
+      quote is cited for the height. Cause r321_1_required_guards_only, resolutions.yaml.'
   - field: examples
-    by: Claude for Ben (house egress review, round 5)
-    date: *id002
-    why: 'R321.1.2 and R321.1.3 limit "required guards": those R321.1.1 requires, where the drop is more than 30
-      in. The AI checked every guard present, failing an optional guard on a 24 in drop; each now applies only where
-      the drop is more than 30 in. Cause r321_1_required_guards_only, resolutions.yaml.'
+    by: Claude for Ben (house egress review, round 6)
+    date: 2026-11-14
+    why: 'R321.1.2 exception 2 limits a required guard''s top that serves as the stair''s handrail; but that top
+      is the stair''s handrail, and R320.2''s 34 to 38 in ("Handrail height ... shall be not less than 34 inches
+      (864 mm) and not more than 38 inches (965 mm)") holds for every handrail, whatever the drop. Round 5 had limited
+      this rule to drops over 30 in with the other guard rules, so a 42 in guard-top handrail on a 24 in drop passed
+      (no handrail part is modeled for it): review round 6. This rule keeps the AI''s scope (any drop); R320.2''s
+      quote is cited for the height. Cause r321_1_required_guards_only, resolutions.yaml.'
 - id: general.r321_1_3_guard_opening_4_inch_sphere
   kind: flag
   topic: means_of_egress

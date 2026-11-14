@@ -279,3 +279,19 @@ def test_fully_openable_is_asked_of_the_opening_as_installed_in_its_well():
     from rule_format import parts
     meaning = parts.registry()["emergency_escape_opening"]["measures"]["opening_fully_openable"]["meaning"]
     assert "as installed" in meaning and "area well" in meaning, meaning
+
+
+def test_a_guard_top_that_is_the_stairs_handrail_is_held_to_r320_2_at_any_drop(ctx, key, drafts):
+    """Review round 6: limiting R321.1.2 to required guards (a drop over 30 in) left a guard top that serves as the
+    stair's only handrail checked by nothing on a lower drop (no handrail part is modeled for it): a 42 in one passed.
+    It is the stair's handrail, and R320.2's 34 to 38 in holds at any drop: both the drafts and the key fail it."""
+    def design(height, top):
+        return {"stair": [{"id": "s1", "measures": {"stair_riser_count": 4, "stair_handrail_sides": 1,
+                                                    "stair_spiral": False, "stair_serves_sleeping_loft": False}}],
+                "handrail": [],
+                "open_side": [{"id": "e1", "measures": {"open_side_drop": 24, "guard_present": True,
+                                                        "open_side_on_stair": True, "guard_is_handrail": True,
+                                                        "guard_height": height, "guard_height_max": top}}]}
+    for rules in (drafts, key):
+        assert piece_result(rules, "R321.1.2", design(42, 44), {}, ctx) == "fail"
+        assert piece_result(rules, "R321.1.2", design(36, 37), {}, ctx) == "pass"
