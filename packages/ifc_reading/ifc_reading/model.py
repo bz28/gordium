@@ -42,7 +42,8 @@ class Model:
         # can't be, so shapes are read only when the file states one angle unit the engine reads right: an SI
         # radian, or a unit defined directly from one (a degree), and the project is the file's one context.
         angles = [u for u in context.Units if getattr(u, "UnitType", None) == "PLANEANGLEUNIT"]
-        contexts = len(self.by_type("IfcContext"))
+        # the project and any project libraries (IfcContext is IFC4's; IFC2x3 has the project alone)
+        contexts = len(self.by_type("IfcProject")) + len(self.by_type("IfcProjectLibrary"))
 
         def plain_radian(u):
             return u is not None and u.is_a("IfcSIUnit") and u.Name == "RADIAN"

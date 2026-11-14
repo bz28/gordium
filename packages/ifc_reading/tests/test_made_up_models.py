@@ -949,3 +949,53 @@ def test_a_degree_defined_through_a_degree_refuses_shapes(build, tmp_path):
     ctx.Units = [u for u in ctx.Units if u != deg] + [outer]
     room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
     assert "floor_elevation" not in room and "defined directly" in room["not_given"]["floor_elevation"]
+
+
+def _ifc2x3_bedroom(tmp_path, degrees):
+    """An IFC2x3 file (no IfcContext in that schema): one project, metres, a 4 x 3 x 3 m Bedroom."""
+    import ifcopenshell.api as api
+    import ifcopenshell.api.owner.settings as owner
+    f = api.run("project.create_file", version="IFC2X3")
+    po = f.create_entity("IfcPersonAndOrganization", f.create_entity("IfcPerson", FamilyName="x"),
+                         f.create_entity("IfcOrganization", Name="o"))
+    app = f.create_entity("IfcApplication", po.TheOrganization, "1", "a", "a")
+    keep = owner.get_user, owner.get_application
+    owner.get_user, owner.get_application = (lambda f: po), (lambda f: app)
+    try:
+        r = lambda u, **k: api.run(u, f, **k)
+        project = r("root.create_entity", ifc_class="IfcProject", name="P")
+        rad = f.create_entity("IfcSIUnit", UnitType="PLANEANGLEUNIT", Name="RADIAN")
+        angle = f.create_entity("IfcConversionBasedUnit", Dimensions=f.create_entity(
+            "IfcDimensionalExponents", 0, 0, 0, 0, 0, 0, 0), UnitType="PLANEANGLEUNIT", Name="DEGREE",
+            ConversionFactor=f.create_entity("IfcMeasureWithUnit", f.create_entity(
+                "IfcPlaneAngleMeasure", 0.017453292519943295), rad)) if degrees else rad
+        r("unit.assign_unit", units=[r("unit.add_si_unit", unit_type="LENGTHUNIT"),
+                                     r("unit.add_si_unit", unit_type="AREAUNIT"), angle])
+        model = r("context.add_context", context_type="Model")
+        body = r("context.add_context", context_type="Model", context_identifier="Body", target_view="MODEL_VIEW",
+                 parent=model)
+        storey = r("root.create_entity", ifc_class="IfcBuildingStorey")
+        r("aggregate.assign_object", products=[storey], relating_object=project)
+        r("geometry.edit_object_placement", product=storey)
+        s = r("root.create_entity", ifc_class="IfcSpace", name="1")
+        s.LongName, s.InteriorOrExteriorSpace = "Bedroom", "INTERNAL"
+        r("aggregate.assign_object", products=[s], relating_object=storey)
+        r("geometry.edit_object_placement", product=s)
+        r("geometry.assign_representation", product=s, representation=r(
+            "geometry.add_wall_representation", context=body, length=4, height=3, thickness=3))
+        q = r("pset.add_qto", product=s, name="BaseQuantities")
+        r("pset.edit_qto", qto=q, properties={"NetFloorArea": 12.0, "FinishFloorHeight": 0.0, "FinishCeilingHeight": 2.5})
+    finally:
+        owner.get_user, owner.get_application = keep
+    path = tmp_path / "x3.ifc"
+    f.write(str(path))
+    return path
+
+
+@pytest.mark.parametrize("degrees", [True, False])
+def test_an_ifc2x3_file_reads_its_shapes(tmp_path, degrees):
+    """Review round 14: IfcContext is IFC4's, so an IFC2x3 file counted 0 contexts and every shape was refused
+    ("0 contexts (a project library ...)"). It counts its project (and any project libraries) now."""
+    pytest.importorskip("ifcopenshell")
+    room = read(_ifc2x3_bedroom(tmp_path, degrees))["rooms"][0]
+    assert room["floor_elevation"] == 0.0 and near(room["ceiling_height"], 2.5)
