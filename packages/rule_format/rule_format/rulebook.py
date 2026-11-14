@@ -37,7 +37,12 @@ STATUSES = ("draft", "approved")
 # meaning is the `check` and its `examples`. (Retellings kept dropping or adding words.)
 RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "examples",
                "notes", "open_questions", "research", "findings", "answers", "drafted_by", "status", "approved_by", "approved_on",
-               "approved_hash", *parts.PART_FIELDS}
+               "approved_hash", "revised", *parts.PART_FIELDS}
+# A drafted rule changed after the AI's draft says so, oldest first, as a label does (labels.py): one entry per
+# field changed, {field, by, date, why}; a rule added whole after the AI's draft is {field: rule, by, date, why}.
+# The AI's own answer stays in the run record (and drafted/records/as_drafted/), so every difference is explained.
+REVISED_FIELDS = (RULE_FIELDS - {"id", "revised", "drafted_by", "status", "approved_by", "approved_on",
+                                 "approved_hash"}) | {"rule"}
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
@@ -926,11 +931,29 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     if per_part:
         p += parts.examples_problems(rule, examples or [], ctx.allowed(), run=not p)
 
+    p += rule_revision_problems(rule.get("revised", []))
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)
     if rule.get("status") == "approved":
         used = set().union(*(formula.names(f) for f in conditions if isinstance(f, str) and _parses(f)))
         p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
               for m in sorted(used & set(ctx.proposed))]
+    return p
+
+
+def rule_revision_problems(revised) -> list[str]:
+    """A rule's changes after the AI's draft (REVISED_FIELDS): each {field, by, date, why}, by and why text."""
+    if not (isinstance(revised, list) and all(isinstance(r, dict) for r in revised)):
+        return ["'revised' must be a list of {field, by, date, why}"]
+    p = []
+    for r in revised:
+        if r.keys() != {"field", "by", "date", "why"}:
+            p.append("each revision needs exactly field, by, date, why")
+        elif r["field"] not in REVISED_FIELDS:
+            p.append(f"revised field {r['field']!r}: not a field a revision can change ({sorted(REVISED_FIELDS)})")
+        elif not all(isinstance(r[k], str) and r[k].strip() for k in ("by", "why")):
+            p.append("a revision's by and why must be text")
+        elif not isinstance(r["date"], datetime.date):
+            p.append("a revision's date must be a date (YYYY-MM-DD)")
     return p
 
 
