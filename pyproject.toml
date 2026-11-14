@@ -23,13 +23,16 @@ export = ["openpyxl==3.1.5"]
 # Only for running the AI labeling and rule-drafting scripts on your own machine (never in CI; tests use
 # a fake client).
 labeling = ["anthropic==1.15.0"]
+# Only for reading IFC building models (packages/ifc_reading). ifcopenshell is LGPL-3.0, pinned exactly: a different
+# version could read a model's geometry differently. Never needed by the checker.
+ifc = ["ifcopenshell==0.9.0.post1"]
 
 [tool.setuptools.packages.find]
 where = ["packages/rule_format", "packages/document_extraction", "packages/section_labeling", "packages/rule_drafting",
          "packages/rule_export", "packages/project_report", "packages/model_measurement", "packages/design_checker",
-         "packages/envelope_builder", "packages/site_lookup"]
+         "packages/envelope_builder", "packages/site_lookup", "packages/ifc_reading"]
 include = ["rule_format*", "document_extraction*", "section_labeling*", "rule_drafting*", "rule_export*", "project_report*",
-           "model_measurement*", "design_checker*", "envelope_builder*", "site_lookup*"]
+           "model_measurement*", "design_checker*", "envelope_builder*", "site_lookup*", "ifc_reading*"]
 
 [tool.setuptools.package-data]
 rule_format = ["*.yaml"]
@@ -37,6 +40,7 @@ section_labeling = ["*.yaml"]
 rule_drafting = ["*.yaml"]
 site_lookup = ["*.yaml", "adapters/*/*.yaml"]   # each place's lookup data
 design_checker = ["place.json"]   # the plugin's copy of its place's settings (rule_format/place.py)
+ifc_reading = ["*.yaml"]   # room_words.yaml
 
 [tool.pytest.ini_options]
 testpaths = ["packages"]

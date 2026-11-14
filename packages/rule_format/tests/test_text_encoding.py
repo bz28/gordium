@@ -22,8 +22,9 @@ SCANNED = sorted(p for root in ("packages", "apps/rhino_plugin") for p in (REPO 
                  if "evals" not in p.relative_to(REPO).parts)
 assert len(SCANNED) > 50
 
-# `x.open(...)` that are not files: pdfplumber reads a PDF (binary); in the Rhino tests `docs.open` opens a template.
-NOT_FILES = {"pdfplumber", "docs", "webbrowser"}
+# `x.open(...)` that are not files: pdfplumber reads a PDF (binary); in the Rhino tests `docs.open` opens a template;
+# ifcopenshell parses an IFC model itself (its own STEP reader, no text-mode file).
+NOT_FILES = {"pdfplumber", "docs", "webbrowser", "ifcopenshell"}
 SUBPROCESS = {"Popen", "run", "check_output", "call", "check_call"}
 
 

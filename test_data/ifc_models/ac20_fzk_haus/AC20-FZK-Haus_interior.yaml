@@ -1,0 +1,566 @@
+format: gordium.interior/1
+units: m
+rooms:
+- id: 347jFE2yX7IhCEIALmupEH
+  name: Schlafzimmer (4)
+  sleeping: true
+  floor_elevation: 0.0
+  ceiling_height: 2.5
+  not_given:
+    floor: 'the space''s outline (22.0725 m²) is bigger than its stated net floor area (BaseQuantities.NetFloorArea 21.410325
+      m²): it may run to the rough wall, not the finished face, so it isn''t the floor'
+  ifc:
+    entity: IfcSpace
+    step_id: 20909
+    global_id: 347jFE2yX7IhCEIALmupEH
+    storey: Erdgeschoss
+    sleeping_from: 'named a sleeping room: sleeping: LongName ''Schlafzimmer'' (schlafzimmer)'
+    base_elevation: 0.0
+    floor_elevation_from: the space's base 0.0 m + BaseQuantities.FinishFloorHeight 0.0 m
+    ceiling_from: BaseQuantities.FinishCeilingHeight 2.5 m
+- id: 0e_hbkIQ5DMQlIJ$2V3j_m
+  name: Bad (3)
+  sleeping: false
+  floor_elevation: 0.0
+  ceiling_height: 2.5
+  not_given:
+    floor: 'the space''s outline (12.5027 m²) is bigger than its stated net floor area (BaseQuantities.NetFloorArea 12.127619
+      m²): it may run to the rough wall, not the finished face, so it isn''t the floor'
+  ifc:
+    entity: IfcSpace
+    step_id: 21283
+    global_id: 0e_hbkIQ5DMQlIJ$2V3j_m
+    storey: Erdgeschoss
+    sleeping_from: 'named a room that isn''t a sleeping room: not sleeping: LongName ''Bad'' (bad)'
+    base_elevation: 0.0
+    floor_elevation_from: the space's base 0.0 m + BaseQuantities.FinishFloorHeight 0.0 m
+    ceiling_from: BaseQuantities.FinishCeilingHeight 2.5 m
+- id: 2RSCzLOBz4FAK$_wE8VckM
+  name: Buero (2)
+  floor_elevation: 0.0
+  ceiling_height: 2.5
+  not_given:
+    sleeping: 'its name doesn''t settle it (ask: LongName ''Buero'' (buero)): the architect says (Gordium_Egress.Sleeping)'
+    floor: 'the space''s outline (12.985 m²) is bigger than its stated net floor area (BaseQuantities.NetFloorArea 12.59545
+      m²): it may run to the rough wall, not the finished face, so it isn''t the floor'
+  ifc:
+    entity: IfcSpace
+    step_id: 21640
+    global_id: 2RSCzLOBz4FAK$_wE8VckM
+    storey: Erdgeschoss
+    sleeping_from: 'its name doesn''t settle it (ask: LongName ''Buero'' (buero)): the architect says (Gordium_Egress.Sleeping)'
+    base_elevation: 0.0
+    floor_elevation_from: the space's base 0.0 m + BaseQuantities.FinishFloorHeight 0.0 m
+    ceiling_from: BaseQuantities.FinishCeilingHeight 2.5 m
+- id: 0Lt8gR_E9ESeGH5uY_g9e9
+  name: Wohnen (5)
+  sleeping: false
+  floor_elevation: 0.0
+  ceiling_height: 2.5
+  not_given:
+    floor: 'the space''s outline (25.98855 m²) is bigger than its stated net floor area (BaseQuantities.NetFloorArea 25.2088935
+      m²): it may run to the rough wall, not the finished face, so it isn''t the floor'
+  ifc:
+    entity: IfcSpace
+    step_id: 33774
+    global_id: 0Lt8gR_E9ESeGH5uY_g9e9
+    storey: Erdgeschoss
+    sleeping_from: 'named a room that isn''t a sleeping room: not sleeping: LongName ''Wohnen'' (wohnen)'
+    base_elevation: 0.0
+    floor_elevation_from: the space's base 0.0 m + BaseQuantities.FinishFloorHeight 0.0 m
+    ceiling_from: BaseQuantities.FinishCeilingHeight 2.5 m
+- id: 3$f2p7VyLB7eox67SA_zKE
+  name: Flur (1)
+  sleeping: false
+  floor_elevation: 0.0
+  not_given:
+    floor: 'the space''s outline (11.5314 m²) is bigger than its stated net floor area (BaseQuantities.NetFloorArea 11.185458
+      m²): it may run to the rough wall, not the finished face, so it isn''t the floor'
+    ceiling_height: 'the space''s top isn''t level (2.26 to 2.5 m): a sloped or stepped ceiling isn''t read yet'
+  ifc:
+    entity: IfcSpace
+    step_id: 34191
+    global_id: 3$f2p7VyLB7eox67SA_zKE
+    storey: Erdgeschoss
+    sleeping_from: 'named a room that isn''t a sleeping room: not sleeping: LongName ''Flur'' (flur)'
+    base_elevation: 0.0
+    floor_elevation_from: the space's base 0.0 m + BaseQuantities.FinishFloorHeight 0.0 m
+- id: 17JZcMFrf5tOftUTidA0d3
+  name: Küche (6)
+  sleeping: false
+  floor_elevation: 0.0
+  floor:
+  - - 0.3
+    - 4.01
+  - - 4.695
+    - 4.01
+  - - 4.695
+    - 0.3
+  - - 0.3
+    - 0.3
+  ceiling_height: 2.5
+  ifc:
+    entity: IfcSpace
+    step_id: 34763
+    global_id: 17JZcMFrf5tOftUTidA0d3
+    storey: Erdgeschoss
+    sleeping_from: 'named a room that isn''t a sleeping room: not sleeping: LongName ''Küche'' (küche)'
+    base_elevation: 0.0
+    floor_elevation_from: the space's base 0.0 m + BaseQuantities.FinishFloorHeight 0.0 m
+    floor_from: the space's underside at 0.0 m (16.30545 m², within BaseQuantities.NetFloorArea 16.30545 m²)
+    ceiling_from: BaseQuantities.FinishCeilingHeight 2.5 m
+- id: 2dQFggKBb1fOc1CqZDIDlx
+  name: Galerie (7)
+  floor_elevation: 2.7
+  not_given:
+    sleeping: 'its name doesn''t settle it (ask: LongName ''Galerie'' (galerie)): the architect says (Gordium_Egress.Sleeping)'
+    floor: 'the space''s outline (107.16 m²) is bigger than its stated net floor area (BaseQuantities.NetFloorArea 74.509241582
+      m²): it may run to the rough wall, not the finished face, so it isn''t the floor'
+    ceiling_height: 'the space''s top isn''t level (3.373205081 to 6.086751346 m): a sloped or stepped ceiling isn''t read
+      yet'
+  ifc:
+    entity: IfcSpace
+    step_id: 76214
+    global_id: 2dQFggKBb1fOc1CqZDIDlx
+    storey: Dachgeschoss
+    sleeping_from: 'its name doesn''t settle it (ask: LongName ''Galerie'' (galerie)): the architect says (Gordium_Egress.Sleeping)'
+    base_elevation: 2.7
+    floor_elevation_from: the space's base 2.7 m + BaseQuantities.FinishFloorHeight 0.0 m
+openings:
+- id: 1srAI$R4T8ihLXSNHmUSET
+  name: EG-Fenster-6
+  room: 2RSCzLOBz4FAK$_wE8VckM
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 23024
+    global_id: 1srAI$R4T8ihLXSNHmUSET
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.8
+    opening_bottom_above_floor: 0.8
+    panels:
+    - SIDEHUNGRIGHTHAND
+    - SIDEHUNGLEFTHAND
+    partitioning: NOTDEFINED
+- id: 0B1RwEzzP3CfME5NR$Vqh5
+  name: EG-Fenster-7
+  room: 17JZcMFrf5tOftUTidA0d3
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 23944
+    global_id: 0B1RwEzzP3CfME5NR$Vqh5
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.95
+    opening_bottom_above_floor: 0.95
+    panels:
+    - SIDEHUNGLEFTHAND
+    - SIDEHUNGRIGHTHAND
+    partitioning: NOTDEFINED
+- id: 25nJxEpYf8LRDJNkMUVO0m
+  name: EG-Fenster-4
+  room: 17JZcMFrf5tOftUTidA0d3
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 27833
+    global_id: 25nJxEpYf8LRDJNkMUVO0m
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.95
+    opening_bottom_above_floor: 0.95
+    panels:
+    - SIDEHUNGLEFTHAND
+    - SIDEHUNGRIGHTHAND
+    partitioning: NOTDEFINED
+- id: 3BFcylCsX74PQAoRAe5fNv
+  name: EG-Fenster-5
+  room: 0Lt8gR_E9ESeGH5uY_g9e9
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 28113
+    global_id: 3BFcylCsX74PQAoRAe5fNv
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.8
+    opening_bottom_above_floor: 0.8
+    panels:
+    - SIDEHUNGLEFTHAND
+    - SIDEHUNGRIGHTHAND
+    partitioning: NOTDEFINED
+- id: 13aSY79zb8fP4HApEJ0z_e
+  name: EG-Fenster-8
+  room: 347jFE2yX7IhCEIALmupEH
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGLEFTHAND, SIDEHUNGRIGHTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 31818
+    global_id: 13aSY79zb8fP4HApEJ0z_e
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.8
+    opening_bottom_above_floor: 0.8
+    panels:
+    - SIDEHUNGLEFTHAND
+    - SIDEHUNGRIGHTHAND
+    partitioning: NOTDEFINED
+- id: 2EQh_jhP1B_A_AMuSJc5E0
+  name: EG-Fenster-9
+  room: 0Lt8gR_E9ESeGH5uY_g9e9
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 32098
+    global_id: 2EQh_jhP1B_A_AMuSJc5E0
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.8
+    opening_bottom_above_floor: 0.8
+    panels:
+    - SIDEHUNGRIGHTHAND
+    - SIDEHUNGLEFTHAND
+    partitioning: NOTDEFINED
+- id: 1TAI4ouKX4Xx4lBDZIu5qM
+  name: EG-Fenster-1
+  room: 2RSCzLOBz4FAK$_wE8VckM
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 32829
+    global_id: 1TAI4ouKX4Xx4lBDZIu5qM
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.8
+    opening_bottom_above_floor: 0.8
+    panels:
+    - SIDEHUNGRIGHTHAND
+    - SIDEHUNGLEFTHAND
+    partitioning: NOTDEFINED
+- id: 2Q9w7oRXP249jBobEMVqlZ
+  name: EG-Fenster-2
+  room: 0e_hbkIQ5DMQlIJ$2V3j_m
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 33109
+    global_id: 2Q9w7oRXP249jBobEMVqlZ
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.8
+    opening_bottom_above_floor: 0.8
+    panels:
+    - SIDEHUNGRIGHTHAND
+    - SIDEHUNGLEFTHAND
+    partitioning: NOTDEFINED
+- id: 1DiYqhfzH9xxuJdVHwXCNa
+  name: EG-Fenster-3
+  room: 347jFE2yX7IhCEIALmupEH
+  escape: false
+  not_given:
+    operation: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    frame: 'the window has 2 panels (SIDEHUNGRIGHTHAND, SIDEHUNGLEFTHAND): a window of more than one panel isn''t measured
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 33389
+    global_id: 1DiYqhfzH9xxuJdVHwXCNa
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 2.0
+    overall_height: 1.2
+    opening_bottom: 0.8
+    opening_bottom_above_floor: 0.8
+    panels:
+    - SIDEHUNGRIGHTHAND
+    - SIDEHUNGLEFTHAND
+    partitioning: NOTDEFINED
+- id: 1zOBw0Gej5Wf0QAJfHnOc0
+  name: OG-Fenster-2
+  room: 2dQFggKBb1fOc1CqZDIDlx
+  escape: false
+  not_given:
+    operation: the panel's operation is NOTDEFINED
+    frame: 'the window isn''t rectangular (its outline fills 0.784137123 of its bounding box): its clear opening isn''t read
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 66459
+    global_id: 1zOBw0Gej5Wf0QAJfHnOc0
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 1.0
+    overall_height: 1.0
+    opening_bottom: 3.5
+    opening_bottom_above_floor: 0.8
+    panels:
+    - NOTDEFINED
+    partitioning: NOTDEFINED
+- id: 2ACmFFQhT1Ouf0x4YRUh9m
+  name: OG-Fenster-1
+  room: 2dQFggKBb1fOc1CqZDIDlx
+  escape: false
+  not_given:
+    operation: the panel's operation is NOTDEFINED
+    frame: 'the window isn''t rectangular (its outline fills 0.784137123 of its bounding box): its clear opening isn''t read
+      yet'
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcWindow
+    step_id: 74280
+    global_id: 2ACmFFQhT1Ouf0x4YRUh9m
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    overall_width: 1.0
+    overall_height: 1.0
+    opening_bottom: 3.5
+    opening_bottom_above_floor: 0.8
+    panels:
+    - NOTDEFINED
+    partitioning: NOTDEFINED
+- id: 2jTRqchjf7oB0yhQ6462T0/opening
+  name: Haustuer
+  room: 3$f2p7VyLB7eox67SA_zKE
+  escape: false
+  not_given:
+    operation: 'the door''s operation is NOTDEFINED: not read as an escape opening''s yet'
+    frame: a door's clear opening (its frame and stops) isn't read from IFC yet
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcDoor
+    step_id: 27013
+    global_id: 2jTRqchjf7oB0yhQ6462T0
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    operation_type: NOTDEFINED
+    overall_width: 1.01
+    overall_height: 2.01
+    opening_bottom: 0.0
+- id: 1M$gxUrX1Fiwe3P64ww7U5/opening
+  name: Terrassentuer
+  room: 0Lt8gR_E9ESeGH5uY_g9e9
+  escape: false
+  operation: sliding_door
+  not_given:
+    frame: a door's clear opening (its frame and stops) isn't read from IFC yet
+    hinged: how far a hinged sash opens, and where its hinge stands, aren't in IFC
+    sashes: where the sashes stand fully open isn't in IFC
+    stated_clear: the maker's net clear opening isn't in IFC
+    ground_outside: the finished ground outside isn't read from IFC
+  ifc:
+    entity: IfcDoor
+    step_id: 31079
+    global_id: 1M$gxUrX1Fiwe3P64ww7U5
+    escape_from: not marked in the model (only an opening the architect marks is checked as an escape opening)
+    operation_type: DOUBLE_DOOR_SLIDING
+    overall_width: 2.01
+    overall_height: 2.375
+    opening_bottom: 0.0
+doors:
+- id: 1Oms875aH3Wg$9l65H2ZGw
+  name: Innentuer-1
+  operation: side_hinged
+  not_given:
+    exit: the model doesn't say whether it is the required exit door (Gordium_Egress.ExitDoor or Pset_DoorCommon.FireExit)
+    hinge_side: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    stops: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    hinge_pin: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    leaf_closed: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    threshold_top: the threshold's top isn't read from IFC
+    head_stop_bottom: the head stop's bottom isn't in IFC (the lining isn't the stop)
+  ifc:
+    entity: IfcDoor
+    step_id: 17468
+    global_id: 1Oms875aH3Wg$9l65H2ZGw
+    operation_type: SINGLE_SWING_RIGHT
+    overall_width: 0.885
+    overall_height: 2.01
+    opening_bottom: 0.0
+- id: 0pGAjlJMP3ifYPATVF5xAR
+  name: Innentuer-2
+  exit: false
+  operation: side_hinged
+  not_given:
+    hinge_side: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    stops: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    hinge_pin: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    leaf_closed: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    threshold_top: the threshold's top isn't read from IFC
+    head_stop_bottom: the head stop's bottom isn't in IFC (the lining isn't the stop)
+  ifc:
+    entity: IfcDoor
+    step_id: 19199
+    global_id: 0pGAjlJMP3ifYPATVF5xAR
+    exit_from: Pset_DoorCommon.FireExit is false
+    operation_type: SINGLE_SWING_LEFT
+    overall_width: 0.885
+    overall_height: 2.01
+    opening_bottom: 0.0
+- id: 2qiPPF3FrF8OIqfrKiSUqm
+  name: Innentuer-3
+  operation: side_hinged
+  not_given:
+    exit: the model doesn't say whether it is the required exit door (Gordium_Egress.ExitDoor or Pset_DoorCommon.FireExit)
+    hinge_side: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    stops: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    hinge_pin: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    leaf_closed: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    threshold_top: the threshold's top isn't read from IFC
+    head_stop_bottom: the head stop's bottom isn't in IFC (the lining isn't the stop)
+  ifc:
+    entity: IfcDoor
+    step_id: 19504
+    global_id: 2qiPPF3FrF8OIqfrKiSUqm
+    operation_type: SINGLE_SWING_LEFT
+    overall_width: 0.885
+    overall_height: 2.01
+    opening_bottom: 0.0
+- id: 2jTRqchjf7oB0yhQ6462T0
+  name: Haustuer
+  not_given:
+    exit: the model doesn't say whether it is the required exit door (Gordium_Egress.ExitDoor or Pset_DoorCommon.FireExit)
+    operation: 'the door''s operation is NOTDEFINED: not read yet'
+    hinge_side: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    stops: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    hinge_pin: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    leaf_closed: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    threshold_top: the threshold's top isn't read from IFC
+    head_stop_bottom: the head stop's bottom isn't in IFC (the lining isn't the stop)
+  ifc:
+    entity: IfcDoor
+    step_id: 27013
+    global_id: 2jTRqchjf7oB0yhQ6462T0
+    operation_type: NOTDEFINED
+    overall_width: 1.01
+    overall_height: 2.01
+    opening_bottom: 0.0
+- id: 1M$gxUrX1Fiwe3P64ww7U5
+  name: Terrassentuer
+  operation: sliding
+  not_given:
+    exit: the model doesn't say whether it is the required exit door (Gordium_Egress.ExitDoor or Pset_DoorCommon.FireExit)
+    hinge_side: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    stops: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    hinge_pin: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    leaf_closed: where the door's stops, hinge pin and closed leaf stand isn't in IFC
+    threshold_top: the threshold's top isn't read from IFC
+    head_stop_bottom: the head stop's bottom isn't in IFC (the lining isn't the stop)
+  ifc:
+    entity: IfcDoor
+    step_id: 31079
+    global_id: 1M$gxUrX1Fiwe3P64ww7U5
+    operation_type: DOUBLE_DOOR_SLIDING
+    overall_width: 2.01
+    overall_height: 2.375
+    opening_bottom: 0.0
+source:
+  reader: ifc_reading/1
+  file: AC20-FZK-Haus.ifc
+  sha256: 70cc8ff245fc0894201d96496c031005a5cbd7a96b22d8a1b87c5a883fb77994
+  schema: IFC4
+  length_unit: metre
+  metres_per_unit: 1.0
+  not_read:
+    stairs: stairs come from the Revit add-in (an IFC export doesn't give each nosing's place); what the model says about
+      each flight is under stair_flights
+    guards: guards (IfcRailing) aren't read from IFC yet
+  stairs_seen:
+  - id: 38a9vdh9bF5Qg28GWyHhlr
+    name: Wendeltreppe
+    entity: IfcStair
+    step_id: 14502
+    shape: null
+  stair_flights: []

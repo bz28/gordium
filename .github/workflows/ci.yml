@@ -32,6 +32,22 @@ jobs:
       - name: The example project reports match a fresh build (results from the rule checker only)
         run: python -m project_report --check
 
+  # The IFC reader (packages/ifc_reading) with its optional ifcopenshell, which the jobs above don't install (there
+  # its tests are skipped): its tests, and the committed description of each IFC model matches a fresh read.
+  ifc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev,ifc]"
+      - name: IFC reader tests
+        run: pytest packages/ifc_reading
+      - name: Each IFC model's committed interior description matches a fresh read (no AI)
+        run: python -m ifc_reading --check
+
   # The same tests on Windows, where Python reads files as cp1252 unless told UTF-8. PYTHONUTF8 is deliberately
   # not set: the job proves the code names its encodings, as an architect's Windows PC runs it.
   windows:
