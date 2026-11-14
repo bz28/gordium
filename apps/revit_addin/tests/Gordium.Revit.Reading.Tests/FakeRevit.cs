@@ -70,6 +70,34 @@ internal sealed class FakeRevit(Transform3 internalToShared)
         return new SolidItem(faces, edges);
     }
 
+    /// <summary>A prism over a plan outline as a closed mesh (<c>Mesh.IsClosed</c> true): its floor, roof and walls,
+    /// in conformance._ring_faces's order, each a fan of triangles from its first corner, as conformance.mesh_faces
+    /// splits them (the way scene 18's roof is drawn).</summary>
+    public MeshItem ClosedMesh(IReadOnlyList<(double X, double Y)> outline, double z0, double z1)
+    {
+        var n = outline.Count;
+        var faces = new List<List<Xyz>>
+        {
+            outline.Select(p => Place(p.X, p.Y, z0)).ToList(),
+            outline.Select(p => Place(p.X, p.Y, z1)).ToList(),
+        };
+        for (var i = 0; i < n; i++)
+        {
+            var (a, b) = (outline[i], outline[(i + 1) % n]);
+            faces.Add([Place(a.X, a.Y, z0), Place(b.X, b.Y, z0), Place(b.X, b.Y, z1), Place(a.X, a.Y, z1)]);
+        }
+        var v = new List<Xyz>();
+        var t = new List<(int, int, int)>();
+        foreach (var f in faces)
+        {
+            var at = v.Count;
+            v.AddRange(f);
+            for (var k = 1; k < f.Count - 1; k++)
+                t.Add((at, at + k, at + k + 1));
+        }
+        return new MeshItem(v, t, true);
+    }
+
     /// <summary>A flat open mesh over a plan box at height z, cells × cells squares (two triangles each).</summary>
     public MeshItem Grid((double X, double Y) lo, (double X, double Y) hi, double z, int cells)
     {
@@ -88,13 +116,14 @@ internal sealed class FakeRevit(Transform3 internalToShared)
         return new MeshItem(v, t, null);
     }
 
-    /// <summary>Revit's own box of geometry: axis-aligned in internal coordinates, as <c>get_BoundingBox</c> gives it.</summary>
-    public static RevitBox BoxOf(IEnumerable<GeometryItem> items)
+    /// <summary>Revit's own box of geometry: axis-aligned in internal coordinates, as <c>get_BoundingBox</c> gives it.
+    /// Null when the geometry has no point (an empty solid), as Revit gives no box for it.</summary>
+    public static RevitBox? BoxOf(IEnumerable<GeometryItem> items)
     {
         var b = new BoxBuilder();
         foreach (var p in AllPoints(items))
             b.Add(p);
-        return new RevitBox(b.Box!.Value.Min, b.Box!.Value.Max);
+        return b.Box is { } x ? new RevitBox(x.Min, x.Max) : null;
     }
 
     private static IEnumerable<Xyz> AllPoints(IEnumerable<GeometryItem> items)
@@ -119,12 +148,14 @@ internal sealed class FakeRevit(Transform3 internalToShared)
     }
 
     /// <summary>A lot line along a plan polyline (shared coordinates), closed, each piece a Line, but the pieces
-    /// <paramref name="arcs"/> names (edge index: the arc's start, end, centre and radius, as conformance.lot_arcs).</summary>
+    /// <paramref name="arcs"/> names (edge index: the arc's start, end, centre and radius, as conformance.lot_arcs).
+    /// <paramref name="open"/>: finished open, every piece but the last (as conformance.open_lots), so its ends don't
+    /// meet: Revit lets a property line be finished so (design note, section 4).</summary>
     public LotLineElement PropertyLine(string id, IReadOnlyList<(double X, double Y)> ring,
-                                      IReadOnlyDictionary<int, JsonObject>? arcs = null)
+                                      IReadOnlyDictionary<int, JsonObject>? arcs = null, bool open = false)
     {
         var curves = new List<LotCurve>();
-        for (var i = 0; i < ring.Count; i++)
+        for (var i = 0; i < (open ? ring.Count - 1 : ring.Count); i++)
         {
             var (a, b) = (ring[i], ring[(i + 1) % ring.Count]);
             if (arcs is not null && arcs.TryGetValue(i, out var arc))
@@ -191,9 +222,12 @@ internal sealed class FakeRevit(Transform3 internalToShared)
         FloorMark = floorMark, Name = id, Geometry = geometry, BoundingBox = BoxOf(geometry),
     };
 
-    public static RevitElement Wall(string id, IReadOnlyList<GeometryItem> geometry) => new()
+    public static RevitElement Wall(string id, IReadOnlyList<GeometryItem> geometry) => Part(id, "OST_Walls", "Walls", geometry);
+
+    /// <summary>A system element (a wall, a floor, a roof, a mullion) of that category.</summary>
+    public static RevitElement Part(string id, string category, string name, IReadOnlyList<GeometryItem> geometry) => new()
     {
-        UniqueId = id, BuiltInCategory = "OST_Walls", Category = "Walls", Name = id, Geometry = geometry,
+        UniqueId = id, BuiltInCategory = category, Category = name, Name = id, Geometry = geometry,
         BoundingBox = BoxOf(geometry),
     };
 

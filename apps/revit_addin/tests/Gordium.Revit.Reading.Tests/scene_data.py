@@ -18,6 +18,7 @@ def main() -> int:
         line = {"name": name, "units": (scene.get("model") or {}).get("units", "Feet"),
                 "offset": c._offset(scene), "lots": c.lots(scene), "lot_ids": c.lot_ids(scene),
                 "lot_arcs": {str(k): a for k, a in c.lot_arcs(scene).items()}, "others": c.others(scene),
+                "open_lots": sorted(c.open_lots(scene)), "picked": c.picked(scene), "group": bool(scene.get("group")),
                 "spots": c.spot_grades(scene), "facts": c.facts(scene),
                 "steps": {step: {"solids": c.solids(scene, step), "verdicts": c.expected_verdicts(scene, step)}
                           for step in c.steps(scene)}}

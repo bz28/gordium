@@ -20,12 +20,22 @@ public sealed class ConformanceTests(RealWorker worker) : IClassFixture<RealWork
         return d;
     }
 
+    /// <summary>The scenes that are descriptions only (a top-level <c>site:</c>, no drawing to read): 13 and 14, checked
+    /// for their verdicts by the worker client's tests. Every other scene is drawn here: the design note (section 7)
+    /// names no drawn scene Revit can't draw, so none is left out, least of all because it was hard.</summary>
+    private static readonly string[] DescriptionsOnly = ["13_no_lot_and_no_reason", "14_nothing_sent_and_inventory_incomplete"];
+
     [Fact]
     public void Every_drawn_scene_is_drawn_here()
     {
-        // the 15 scenes with a drawing (13 and 14 are descriptions only, checked for their verdicts by the
-        // worker client's tests): none left out because it was hard
-        Assert.Equal(15, SceneDrawing.All.Count);
+        // read from the scene files themselves, not from scene_data.py, so a scene it skipped would be caught: the
+        // 26 scenes less the 2 descriptions, 24 drawn (01 to 12, 15 to 26)
+        var dir = Path.Combine(Env.Repo, "test_data", "host_conformance", "scenes");
+        var every = Directory.GetFiles(dir, "*.yaml").Select(Path.GetFileNameWithoutExtension).Order(StringComparer.Ordinal).ToList();
+        var descriptions = every.Where(n => File.ReadLines(Path.Combine(dir, n + ".yaml")).Any(l => l.StartsWith("site:", StringComparison.Ordinal))).ToList();
+        Assert.Equal(DescriptionsOnly, descriptions);
+        Assert.Equal(every.Except(DescriptionsOnly), SceneDrawing.All.Select(s => s.Name).Order(StringComparer.Ordinal));
+        Assert.Equal(24, SceneDrawing.All.Count);
     }
 
     [Theory]
@@ -73,7 +83,7 @@ public sealed class ConformanceTests(RealWorker worker) : IClassFixture<RealWork
         try
         {
             var problems = JsonSerializer.Deserialize<List<string>>(Env.RunPython("check_recording.py", path))!;
-            Assert.Empty(problems);
+            Assert.True(problems.Count == 0, string.Join("\n", problems));   // every reason, not the first's start
         }
         finally
         {
