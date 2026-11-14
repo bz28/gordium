@@ -19,6 +19,10 @@ import yaml
 from design_checker import each_part
 from model_measurement.interior import KINDS, measure, measure_file
 from model_measurement.interior.openings import SLIDING
+from model_measurement.interior.stops import STOPS
+
+# parts.yaml measures the measuring code gives no value yet (#100): checked on main, not by this house
+NOT_YET = {STOPS["not_measured_yet"], STOPS["in_more_not_rules"]}
 
 REAL = Path(__file__).parents[3] / "test_data" / "real_houses"
 NAMES = sorted(p.name for p in REAL.iterdir() if (p / "house.yaml").exists())
@@ -113,7 +117,7 @@ def test_each_measure_is_the_hand_worked_one(name):
             assert set(p["measures"]) == set(w["measures"]), pid
             for m, v in w["measures"].items():
                 assert p["measures"][m] == pytest.approx(v, abs=1e-6), (pid, m)
-            assert set(p["not_measured"]) == set(w.get("not_measured", [])), pid
+            assert {m for m, why in p["not_measured"].items() if why not in NOT_YET} == set(w.get("not_measured", [])), pid
             assert set(p["more"]) == set(w.get("more") or {}), pid
             for m, v in (w.get("more") or {}).items():
                 assert p["more"][m] == pytest.approx(v, abs=1e-6), (pid, m)
@@ -121,6 +125,8 @@ def test_each_measure_is_the_hand_worked_one(name):
     assert {w.split("/")[0] for w in reasons} <= set(by_id)
     for pid, p in by_id.items():
         for m, reason in p["not_measured"].items():
+            if reason in NOT_YET:
+                continue
             assert reason == reasons.get(f"{pid}/{m}", reasons.get(pid)), (pid, m)
     assert got["problems"] == expected["problems"]
     assert [n["id"] for n in got["not_checked"]] == expected["not_checked"]
