@@ -1681,7 +1681,7 @@ rules:
     when_none: not_applicable
     applies_when: stair_serves_sleeping_loft
     check: >-
-      (stair_riser_height >= 7 and stair_riser_height <= 12)
+      (stair_riser_height - stair_riser_variation >= 7 and stair_riser_height <= 12)
       or (stair_riser_height <= 8.25 and stair_tread_depth >= 9)
     sources:
       - file: gov.ny.residential.2025.pdf
@@ -1703,7 +1703,7 @@ rules:
     examples:
       - given: {}
         parts:
-          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 10, stair_tread_depth: 6.75}}]
+          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 10, stair_riser_variation: 0.25, stair_tread_depth: 6.75}}]
         rows: [{part: s1, outcome: pass}]
         expect: pass
         note: a steep loft stair, 10 in risers (the tread formula is the next flag)
@@ -1720,10 +1720,18 @@ rules:
         note: under 7 in, but an ordinary R318.7.5 stair (riser 8 1/4 or less, tread 9 or more), which R315.5.2 never forbids
       - given: {}
         parts:
-          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 6.5, stair_tread_depth: 8}}]
+          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 6.5, stair_riser_variation: 0, stair_tread_depth: 8}}]
         rows: [{part: s1, outcome: fail}]
         expect: fail
         note: meets neither R315.5.2.2 (under 7 in) nor R318.7.5.2 (tread under 9 in)
+      - given: {}
+        parts:
+          stair: [{id: s1, measures: {stair_serves_sleeping_loft: true, stair_riser_height: 9, stair_riser_variation: 2.5, stair_tread_depth: 7}}]
+        rows: [{part: s1, outcome: fail}]
+        expect: fail
+        note: >-
+          the tallest riser is 9 in but the shortest 6 1/2 in: "risers" (every one) must be 7 in at least, and
+          stair_riser_height is the tallest (parts.yaml), so the shortest is the tallest minus the variation
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_serves_sleeping_loft: false, stair_riser_height: 10}}]
@@ -1734,6 +1742,9 @@ rules:
         rows: [{outcome: not_applicable}]
         expect: not_applicable
     notes: >-
+      Every riser is 7 to 12 in: stair_riser_height is the tallest (parts.yaml), so the shortest is it minus
+      stair_riser_variation (fixed after the comparison with the drafts, 2026-11-13: the key first tested the tallest
+      riser against the 7 in minimum, which let a flight with one short riser pass).
       Numbers: 7 and 12 (R315.5.2.2 second reading, not less than 7 inch, >=; not more than 12 inch, <=); 8 1/4 =
       8.25 (R318.7.5.1, <=) and 9 (R318.7.5.2, >=). Gordium's reading: "shall be permitted to comply" (R315.5.2) is
       a choice, so a loft stair may meet R318.7.5's riser and tread instead (the second half of the check). The

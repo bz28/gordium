@@ -34,7 +34,7 @@ emergency_escape_opening:
     opening_sill_height:      {unit: in, meaning: "Height of the bottom of the clear opening above the floor"}
     opening_at_grade:         {unit: yes_no, meaning: "The opening's sill is at or near the ground outside it (a grade-floor opening)"}
     opening_operable:         {unit: yes_no, meaning: "The opening can be opened (an operable window or a door, not fixed glass)"}
-    opening_opens_to_yard:    {unit: yes_no, meaning: "The opening opens directly into a public way, or to a yard or court that opens to a public way"}
+    opening_opens_to_yard:    {unit: yes_no, meaning: "The opening opens directly into a public way, or to a yard or court that opens to a public way (directly, or for a yard by an unobstructed path at least 36 inches wide to the public way: R319.1 exception 4)"}
     opening_is_door:          {unit: yes_no, meaning: "The opening is a door (not a window)"}
     opening_door_hinged_or_sliding: {unit: yes_no, meaning: "For a door: it is a side-hinged door or a sliding door"}
     opening_under_projection: {unit: yes_no, meaning: "The opening is under a deck, porch or cantilever"}
