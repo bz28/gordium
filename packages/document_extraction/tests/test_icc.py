@@ -565,6 +565,18 @@ def test_appendix_bfs_singular_definition_section_and_its_definition_part_cut_th
     assert plain["problems"] == [] and not any("not_a_term" in o[3] for o in plain["outside"])
 
 
+def test_a_gap_in_the_pages_read_ends_a_definition_part():
+    # review round 5 of egress step 1c: a gap reset the section but not the "Definition" part, so bold capitals at
+    # the top of the next page read were cut as a term of BF106.2, a part on another page
+    rows = [r for r in _patio() if not (r.get("page") == 3 and r.get("line") in (13, 19, 20))]
+    rows += [_row(5, 1, "102102166"), _row(5, 2, "ZEBRA STRIPE. A line.", bold="ZEBRA STRIPE."),
+             _row(5, 3, "2025 RESIDENTIAL CODE OF NEW YORK STATE 15")]
+    cut = icc_sections.split(rows, {"pages": "1-3,5", "sections": ["R318", "BF101", "BF106.1"]})
+    ids = {p["id"] for p in cut["pieces"]} | {o[3] for o in cut["outside"]}
+    assert not any("zebra_stripe" in i for i in ids), ids
+    assert any(o[0] == 5 and o[3] == "before the first heading on p.5" for o in cut["outside"]), cut["outside"]
+
+
 def test_a_definitions_part_inside_a_section_of_definitions_leaves_its_terms_named_by_the_section():
     # review round 1 of egress step 1c: "BJ102.1 Definitions." printed under "SECTION BJ102—DEFINITIONS" (p.912) cut
     # its terms as "BJ102.1:term", silently leaving the section's heading out
