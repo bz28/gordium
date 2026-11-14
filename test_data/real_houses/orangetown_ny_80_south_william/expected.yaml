@@ -1,0 +1,71 @@
+# What the measuring code (model_measurement.interior, PR #95) should return for house.yaml, worked out by hand
+# BEFORE the code ran on this house (committed first, in its own commit). Inches; areas in sq ft.
+# Whether each rule is met is a separate question, worked from the code text in answer_key.yaml.
+not_read: [stair]                       # no `stairs` in the description: the nosings can't be placed
+parts:
+  sleeping_room:
+    master:
+      measures:
+        sleeping_room_floor_area: 229.5     # 162 x 204 = 33048 / 144; ceiling 96 in (not under 84)
+      more: {floor_area_drawn: 229.5, least_ceiling_height: 96.0}
+    bed2:
+      measures:
+        sleeping_room_floor_area: 128.333333   # 132 x 140 = 18480 / 144
+      more: {floor_area_drawn: 128.333333, least_ceiling_height: 96.0}
+    bed3:
+      measures:
+        sleeping_room_floor_area: 158.666667   # 168 x 136 = 22848 / 144
+      more: {floor_area_drawn: 158.666667, least_ceiling_height: 96.0}
+    bed4:
+      measures:
+        sleeping_room_floor_area: 201.444444   # 196 x 148 = 29008 / 144
+      more: {floor_area_drawn: 201.444444, least_ceiling_height: 96.0}
+  # every escape window: no frame and no maker's clear opening -> "the opening's frame isn't given" for all five
+  emergency_escape_opening:
+    m1:  &no_frame
+      within: master
+      measures: {}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+    m2: *no_frame
+    m3: *no_frame
+    m4: *no_frame
+    b2a: &no_frame_b2
+      within: bed2
+      measures: {}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+    b2b: *no_frame_b2
+    b3a: &no_frame_b3
+      within: bed3
+      measures: {}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+    b3b: *no_frame_b3
+    b4a: &no_frame_b4
+      within: bed4
+      measures: {}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+    b4b: *no_frame_b4
+  egress_door:
+    front:
+      measures: {}
+      not_measured: [door_clear_width, door_clear_height]   # no hinge side / stops; no threshold
+  guard:                                  # level guards: no members -> no height, no sphere; the stair guard:
+    g_hall: &no_guard                     # its stair wasn't read
+      measures: {}
+      not_measured: [guard_height, guard_opening_sphere]
+    g_bridge_n: *no_guard
+    g_bridge_s: *no_guard
+    g_east: *no_guard
+    g_stair_w: *no_guard
+reasons:                                   # the exact reason expected for one measure of each kind
+  m1/opening_net_clear_area: "the opening's frame isn't given (and no maker's clear opening)"
+  front/door_clear_width: "the door's hinge side isn't given"
+  front/door_clear_height: "the top of the threshold isn't given"
+  g_hall/guard_height: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"
+  g_stair_w/guard_height: "the stair the guard is along couldn't be measured: the stairs weren't read (no `stairs` in the description)"
+problems:
+  - "the stairs weren't read (no `stairs` in the description)"
+not_checked:                               # escape openings in rooms that aren't sleeping rooms
+  - x1
+  - x2
+  - bsw1
+  - bsw2
