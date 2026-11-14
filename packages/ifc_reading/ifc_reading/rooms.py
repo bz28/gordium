@@ -123,6 +123,10 @@ def read_room(model, space) -> dict:
         missing["floor_elevation"] = bad or ("the space's flooring height (FinishFloorHeight) isn't given: its base "
                                              "is the slab without flooring, so the finished floor is unknown")
         floor = None
+    elif finish < 0:                       # review round 5: flooring below the slab would raise the ceiling cap
+        missing["floor_elevation"] = (f"{where} is {tidy(finish)} m: a flooring thickness can't be negative, so "
+                                      "the finished floor is unknown")
+        floor = None
     else:
         floor = base + finish
         room["floor_elevation"] = tidy(floor)
@@ -196,6 +200,9 @@ def _ceiling(model, space, above, floor, top_of_body):
         return None, bad or ("the finished ceiling's height (FinishCeilingHeight) isn't given: the space's top is the slab "
                       "above, without its finish, so the finished ceiling is unknown")
     top = float(tops.min()) - floor
+    if stated <= 0 or top <= 0:
+        return None, (f"{where} is {tidy(stated)} m and the space's top is {tidy(top)} m above the finished floor: "
+                      "a ceiling must be above the floor, so it is unknown")
     height = min(stated, top)
     return tidy(height), (f"{where} {tidy(stated)} m" + (f", lowered to the space's top {tidy(top)} m above the floor"
                                                          if top < stated else ""))

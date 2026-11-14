@@ -397,3 +397,60 @@ def test_two_marks_that_agree(build, tmp_path):
     w = read(b.write(tmp_path / "h.ifc"))["openings"][0]
     assert w["escape"] is True
     assert w["ifc"]["escape_from"] == "Gordium_Egress.EscapeOpening and Pset_WindowCommon.FireExit is true"
+
+
+@pytest.mark.parametrize("how", ["window_own", "style"])
+def test_every_partitioning_stated_counts(build, tmp_path, how):
+    """Review round 5: with a type, only the type's PartitioningType was read. A window whose type says
+    NOTDEFINED (or is an IfcWindowStyle, IFC2x3's type, which states its partitioning as OperationType; built
+    here in an IFC4 file, which IFC4 itself forbids, since the reader reads it the same either way) and whose own
+    PartitioningType is DOUBLE_PANEL_VERTICAL, with one panel record, read as one casement framed across both
+    panels. Now any partitioning stated, by the type or the window, that isn't single leaves both out."""
+    b = bedroom_house(build)
+    [w] = b.f.by_type("IfcWindow")
+    t = b.f.by_type("IfcWindowType")[0]
+    if how == "window_own":
+        t.PartitioningType = "NOTDEFINED"
+        w.PartitioningType = "DOUBLE_PANEL_VERTICAL"
+    else:
+        style = b.f.create_entity("IfcWindowStyle", GlobalId=b.guid(), Name="a style", ConstructionType="NOTDEFINED",
+                                  OperationType="DOUBLE_PANEL_VERTICAL", ParameterTakesPrecedence=False,
+                                  Sizeable=False, HasPropertySets=t.HasPropertySets)
+        for rel in b.f.by_type("IfcRelDefinesByType"):
+            if rel.RelatingType == t:
+                rel.RelatingType = style
+    got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
+    assert "frame" not in got and "operation" not in got
+    assert "DOUBLE_PANEL_VERTICAL" in got["not_given"]["frame"] and "DOUBLE_PANEL_VERTICAL" in got["ifc"]["partitioning"]
+
+
+def test_a_negative_flooring_height_is_no_floor(build, tmp_path):
+    """Review round 5: FinishFloorHeight -1.5 ft put the finished floor below the slab, so the 9 ft space's top
+    was 10.5 ft above it and a stated 10 ft ceiling was kept: taller than the space."""
+    room = read(bedroom_house(build, quantities=dict(QTY, FinishFloorHeight=-1.5, FinishCeilingHeight=10.0))
+                .write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "floor_elevation" not in room and "negative" in room["not_given"]["floor_elevation"]
+    assert "ceiling_height" not in room
+
+
+@pytest.mark.parametrize("ceiling", [0.0, -2.0])
+def test_a_ceiling_at_or_below_the_floor_is_unknown(build, tmp_path, ceiling):
+    room = read(bedroom_house(build, quantities=dict(QTY, FinishCeilingHeight=ceiling))
+                .write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "ceiling_height" not in room and "above the floor" in room["not_given"]["ceiling_height"]
+
+
+def test_a_mark_from_the_type_names_the_type(build, tmp_path):
+    """Review round 5: a door type marked FireExit true makes every door of it an exit; the source said only
+    "Pset_DoorCommon.FireExit is true", the same as a mark on one door. Now it names the type."""
+    b = bedroom_house(build)
+    door = b.door("Front", (5, 0, 0))
+    t = b.run("root.create_entity", ifc_class="IfcDoorType", name="Entry door")
+    b.run("type.assign_type", related_objects=[door], relating_type=t)
+    b.pset(t, "Pset_DoorCommon", {"FireExit": True})
+    w = b.f.by_type("IfcWindowType")[0]
+    b.pset(w, "Pset_WindowCommon", {"FireExit": True})
+    d = read(b.write(tmp_path / "h.ifc"))
+    dr = one(d["doors"], "Front")
+    assert dr["exit"] is True and dr["ifc"]["exit_from"].startswith("Pset_DoorCommon.FireExit (from its type Entry door #")
+    assert "(from its type type of W1 #" in d["openings"][0]["ifc"]["escape_from"]

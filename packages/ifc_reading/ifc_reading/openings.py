@@ -51,14 +51,31 @@ def rooms_bounded(element) -> list:
     return spaces
 
 
+def _partitioning(model, window):
+    """Every partitioning the model states: the type's PartitioningType (IFC4 IfcWindowType), an IfcWindowStyle's
+    OperationType (IFC2x3's way; IFC4 requires an IfcWindowType) and the window's own PartitioningType (IFC4). A window
+    is single-panel only if none of them says otherwise (review round 5: the window's own was ignored when it
+    had a type, so a two-panel window typed by a style read as one casement framed across both panels)."""
+    t = model.type_of(window)
+    said = []
+    if t is not None:
+        said.append(getattr(t, "PartitioningType", None) if t.is_a("IfcWindowType")
+                    else getattr(t, "OperationType", None) if t.is_a("IfcWindowStyle") else None)
+    said.append(getattr(window, "PartitioningType", None))
+    return [p for p in dict.fromkeys(said) if p]
+
+
 def _flag(model, element, sets_names):
     """What the model states, as (true/false, "Set.Name", None); (None, None, None) if it states nothing. Every
     statement under every name given counts (Gordium_Egress.EscapeOpening and Pset_WindowCommon.FireExit alike),
     the element's own overriding its type's: they must agree, else (None, "Set.Name", why), as for a statement
     that isn't true/false (text "TRUE", an enumerated value). Never the first one found."""
     from ifc_reading.model import Unreadable
-    for holders in model.levels(element):
-        got = [(v, w) for s, name in sets_names
+    t = model.type_of(element)
+    for level, holders in enumerate(model.levels(element)):
+        # review round 5: a mark inherited from the type (every door of it) says so, by the type's name
+        whose = f" (from its type {t.Name or t.is_a()} #{t.id()})" if level and t is not None else ""
+        got = [(v, w + whose) for s, name in sets_names
                for v, w, _ in model.find_all(element, lambda n, s=s: n == s, name, holders)]
         if not got:
             continue
@@ -128,16 +145,16 @@ def read_window(model, window, floors: dict) -> dict:
     panels = model.predefined(window, "IfcWindowPanelProperties")
     kinds = [p.OperationType for p in panels]
     info["panels"] = kinds
-    t = model.type_of(window)
-    partitioning = getattr(t, "PartitioningType", None) if t is not None else getattr(window, "PartitioningType", None)
+    partitioning = _partitioning(model, window)
     if partitioning:
-        info["partitioning"] = partitioning
-    single = len(panels) == 1 and partitioning in (None, "SINGLE_PANEL", "NOTDEFINED")
+        info["partitioning"] = " and ".join(partitioning)
+    more = [p for p in partitioning if p not in ("SINGLE_PANEL", "NOTDEFINED")]
+    single = len(panels) == 1 and not more
     if not single:
         why = (f"the window has {len(panels)} panels ({', '.join(kinds)})" if len(panels) > 1 else
-               f"the window is partitioned {partitioning}" if partitioning not in (None, "SINGLE_PANEL", "NOTDEFINED")
+               f"the window is partitioned {', '.join(more)}" if more
                else "the window's panel (IfcWindowPanelProperties) isn't given")
-        if len(panels) > 1 or partitioning not in (None, "SINGLE_PANEL", "NOTDEFINED"):
+        if len(panels) > 1 or more:
             why += ": a window of more than one panel isn't measured yet"
         missing["operation"] = missing["frame"] = why
     else:

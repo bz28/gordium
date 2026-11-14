@@ -35,9 +35,9 @@ records the file (name, SHA-256 fingerprint, schema, unit) and what wasn't read 
 | Key | Read from | Left out when |
 |---|---|---|
 | `sleeping` | the room's words (below), or the `Gordium_Egress.Sleeping` flag | the words don't settle it |
-| `floor_elevation` | the space's base (its body's lowest point) + its `FinishFloorHeight` quantity | `FinishFloorHeight` isn't given |
+| `floor_elevation` | the space's base (its body's lowest point) + its `FinishFloorHeight` quantity | `FinishFloorHeight` isn't given, or is negative (a flooring thickness can't be) |
 | `floor` | the outline of the space's underside | the underside isn't one level outline, or the outline's area is more than the space's `NetFloorArea` quantity, or that quantity isn't given |
-| `ceiling_height` | the `FinishCeilingHeight` quantity (the lower of it and the space's top, above the finished floor) | it isn't given, the floor elevation isn't known, or the space's top isn't level |
+| `ceiling_height` | the `FinishCeilingHeight` quantity (the lower of it and the space's top, above the finished floor) | it isn't given, the floor elevation isn't known, the space's top isn't level, or it or the space's top isn't above the floor |
 
 **Sleeping room or not: only from words or a flag, never from size.** The room's words are taken from its IFC
 `LongName`, `Name`, `ObjectType` and classification names (Unicode-normalised, so "Gästezimmer" reads the same
@@ -87,8 +87,8 @@ door is also in `doors`).
 | Key | Read from | Left out when |
 |---|---|---|
 | `room` | the room its space boundary (`IfcRelSpaceBoundary`) names | no boundary names one, or it bounds more than one |
-| `escape` | `Gordium_Egress.EscapeOpening`, or a window's `Pset_WindowCommon.FireExit` ("an exit window in accordance to the national building code") | never: not marked (or marked with something other than true/false, recorded in `escape_from`) is `false`. Only an opening marked in the model is checked as an escape opening (Ben, 2026-11-12); a bedroom with none marked fails, never passes |
-| `operation` | a single-panel window's `IfcWindowPanelProperties.OperationType` (side-hung → casement, top-hung → awning, bottom-hung → hopper, sliding horizontal → horizontal slider, fixed → fixed…); a door's operation type (single swing → side-hinged door, sliding → sliding door) | a window of more than one panel; sliding vertical (single- or double-hung: IFC doesn't say); not defined |
+| `escape` | `Gordium_Egress.EscapeOpening`, or a window's `Pset_WindowCommon.FireExit` ("an exit window in accordance to the national building code") | never: not marked (or marked with something other than true/false, recorded in `escape_from`, which names the window's type when the mark is the type's) is `false`. Only an opening marked in the model is checked as an escape opening (Ben, 2026-11-12); a bedroom with none marked fails, never passes |
+| `operation` | a single-panel window's `IfcWindowPanelProperties.OperationType` (side-hung → casement, top-hung → awning, bottom-hung → hopper, sliding horizontal → horizontal slider, fixed → fixed…); a door's operation type (single swing → side-hinged door, sliding → sliding door) | a window of more than one panel (by its panel records, or by any partitioning stated: its type's `PartitioningType`, an IFC2x3 style's `OperationType`, the window's own `PartitioningType`); sliding vertical (single- or double-hung: IFC doesn't say); not defined |
 | `frame` | a rectangular, upright, single-panel window: its `OverallWidth` × `OverallHeight` at its origin, less its lining's `LiningThickness` all round (IFC4: the overall size is "a bounding box, enclosing the window opening") | the window isn't rectangular (a round window's bounding box isn't its opening), isn't upright, has a mullion or transom or more than one panel, has no lining thickness, or its body or the opening it fills disagree with its stated size; every door |
 | `hinged`, `sashes`, `stated_clear`, `ground_outside` | never | not in IFC: how far a sash opens, where open sashes stand, the maker's clear opening, the ground outside |
 
