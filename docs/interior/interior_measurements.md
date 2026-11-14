@@ -138,6 +138,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `no_ground` | the finished ground level outside the opening isn't given |
 | `ground_mixed` | the ground outside the opening is within 44 in of its bottom at some points and not at others |
 | `readings_differ` | the readings give different answers; {question} |
+| `nosings_out_of_range` | the stair's nosings have coordinates too large to measure |
 | `too_few_nosings` | the flight needs at least {n} nosings (each tread's leading edge, and the top one) for this |
 | `nosing_not_level` | nosing {n} isn't level (its ends are {off} in apart in height) |
 | `not_bottom_to_top` | the nosings don't go up from the bottom one at a time (riser {n} is {rise} in) |

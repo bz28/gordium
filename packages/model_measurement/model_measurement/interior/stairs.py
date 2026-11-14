@@ -8,6 +8,8 @@ Coordinates along the flight: s runs up the flight, at a right angle to the firs
 left looking up. Definitions: docs/interior/interior_measurements.md.
 """
 
+import math
+
 from shapely.geometry import Polygon, box
 from shapely.ops import transform, unary_union
 
@@ -76,6 +78,10 @@ class Flight:
             if a1 == a2:                                          # a point, not a nosing across the stair
                 raise Stop("not_a_polyline", what=f"nosing {n} (its two ends)")
             self.ends.append((min(a1, a2), max(a1, a2)))          # (right end, left end)
+        # coordinates so large their squares overflow give a run direction of NaN, which every comparison above lets
+        # through: no value, never a NaN depth or a crash further on
+        if not all(map(math.isfinite, [*self.r, *(v for e in self.s_ends + self.ends for v in e)])):
+            raise Stop("nosings_out_of_range")
         # each tread at its shallowest and its deepest (the nosings' ends paired the worst way)
         self.treads = [b[0] - a[1] for a, b in zip(self.s_ends, self.s_ends[1:])]
         self.treads_most = [b[1] - a[0] for a, b in zip(self.s_ends, self.s_ends[1:])]
@@ -165,9 +171,10 @@ def side_lines(st: dict, flight: Flight, reader) -> dict:
 def side_off_treads(line, flight: Flight, side: str) -> float:
     """How far a drawn side stands out beyond its treads' ends, at most (0 where every tread reaches it or runs past
     it, into the wall). A side bounds the stair only where it stands at the tread ends (a skirt or stringer between,
-    STRINGER at most): drawn farther off, it would widen the stair, and anything checked against it (a guard on it, a handrail between the sides) would count
-    wherever it is. Each tread holds its nosing's end back to the next nosing (Flight.tread_spans); the side is
-    straight between its points, so the gap is greatest at a point of it or at a tread's ends: exact."""
+    STRINGER at most): drawn farther off, it would widen the stair, and anything checked against it (a guard on it,
+    a handrail between the sides) would count wherever it is. Each tread holds its nosing's end back to the next
+    nosing (Flight.tread_spans); the side is straight between its points, so the gap is greatest at a point of it
+    or at a tread's ends: exact."""
     k = 1 if side == "left" else 0
     sign = 1 if side == "left" else -1
     worst = 0.0
@@ -264,24 +271,24 @@ def headroom(st: dict, flight: Flight, reader) -> float:
     # Everything is worked out in the flight's own frame (s along the run, a across it), where the treads' edges run
     # along or across the run: unioned and cut in plan, near-parallel edges of a turned flight made the geometry
     # library fail
-    quads = []
-    for j in range(len(flight.s) - 1):
-        (r1, l1), (r2, l2) = flight.ends[j], flight.ends[j + 1]
-        s1, s2 = flight.s_ends[j][0], flight.s_ends[j + 1][1]
-        quads.append(Polygon([(s1, r1), (s2, r2), (s2, l2), (s1, l1)]))
-        quads.append(Polygon([(s1, r1), (s2, r1), (s2, l1), (s1, l1)]))
-    # and each nosing's own strip, across its own ends, between its nearer and farther end along the run: the top
-    # one is no tread's start, so where it is wider than the one below, its nearer end lay outside the area
-    for s1, s2, (r, l) in flight.tread_spans()[-1:] + [(lo, hi, e) for (lo, hi), e in zip(flight.s_ends, flight.ends)]:
-        if s2 > s1:
-            quads.append(Polygon([(s1, r), (s2, r), (s2, l), (s1, l)]))
-    # cut the flight at every bend of the nosing line, so the line is straight over each piece and the least gap
-    # is at a piece's corner (the pieces of the treads alone would hide a bend inside one)
-    first, top = flight.span()
-    cuts = sorted({first, top, *(s for s, _ in flight.line() if first < s < top)})
-    wide = max(abs(a) for ends in flight.ends for a in ends) + 1.0
-    pieces = []
     with shapes("what is overhead"):
+        quads = []
+        for j in range(len(flight.s) - 1):
+            (r1, l1), (r2, l2) = flight.ends[j], flight.ends[j + 1]
+            s1, s2 = flight.s_ends[j][0], flight.s_ends[j + 1][1]
+            quads.append(Polygon([(s1, r1), (s2, r2), (s2, l2), (s1, l1)]))
+            quads.append(Polygon([(s1, r1), (s2, r1), (s2, l1), (s1, l1)]))
+        # and each nosing's own strip, across its own ends, between its nearer and farther end along the run: the top
+        # one is no tread's start, so where it is wider than the one below, its nearer end lay outside the area
+        for (s1, s2), (r, l) in zip(flight.s_ends, flight.ends):
+            if s2 > s1:
+                quads.append(Polygon([(s1, r), (s2, r), (s2, l), (s1, l)]))
+        # cut the flight at every bend of the nosing line, so the line is straight over each piece and the least gap
+        # is at a piece's corner (the pieces of the treads alone would hide a bend inside one)
+        first, top = flight.span()
+        cuts = sorted({first, top, *(s for s, _ in flight.line() if first < s < top)})
+        wide = max(abs(a) for ends in flight.ends for a in ends) + 1.0
+        pieces = []
         band = unary_union(quads)
         for s1, s2 in zip(cuts, cuts[1:]):
             pieces.append((band.intersection(box(s1, -wide, s2, wide)), lambda s, a: flight.nosing_z(s)))

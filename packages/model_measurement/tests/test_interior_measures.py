@@ -760,6 +760,19 @@ def test_a_tread_starts_at_its_nosings_nearer_end():
     assert "out beyond its treads' ends" in stopped["stair_clear_width"]
 
 
+def test_nosings_too_large_to_measure_give_no_value_never_nan_or_a_crash():
+    """Round 11: nosing ends 1.8e308 apart overflowed the run direction to NaN, which every check let through: a NaN
+    tread depth was reported, then the geometry library raised and lost the whole house."""
+    import json
+    d = base()
+    d["stairs"][0]["nosings"] = [[[10 * j, -9e307, 7 * (j + 1)], [10 * j, 9e307, 7 * (j + 1)]] for j in range(3)]
+    out = measure(d)
+    json.dumps(out, allow_nan=False)                                  # no NaN anywhere
+    p = out["parts"]["stair"][0]
+    assert "stair_tread_depth" not in p["measures"] and "stair_headroom" not in p["measures"]
+    assert "too large to measure" in p["not_measured"]["stair_headroom"]
+
+
 def _rotated_flight(theta, ox, oy, askew):
     """A square 36 in flight of 4 nosings, turned by theta about (ox, oy), the second nosing's left end askew."""
     c, s = math.cos(theta), math.sin(theta)
@@ -1579,6 +1592,8 @@ STOP_CASES = {
     "ground_mixed": _set(("openings", 0, "ground_outside"), [0, -30]),
     "readings_differ": _with(base, lambda d: d["openings"][0].update(
         area_well={"floor_elevation": 10, "width": 36, "projection": 36}, ground_outside=80)),
+    "nosings_out_of_range": _stair(nosings=[[[10 * j, -9e307, 7 * (j + 1)], [10 * j, 9e307, 7 * (j + 1)]]
+                                           for j in range(3)]),
     "too_few_nosings": _stair(nosings=[[[0, 0, 7], [0, 36, 7]]]),
     "nosing_not_level": _stair(nosings=[[[0, 0, 7], [0, 36, 8]]]),
     "not_bottom_to_top": _stair(nosings=[[[0, 0, -7], [0, 36, -7]]]),
@@ -1588,8 +1603,8 @@ STOP_CASES = {
     "side_not_along": _stair(sides={"left": [[-5, 36], [20, 36]], "right": [[-5, 0], [40, 0]]}),
     "sides_cross": _stair(sides={"left": [[-5, 0], [40, 0]], "right": [[-5, 36], [40, 36]]}),
     "treads_cross": _stair(sides={"left": [[-5, 36], [40, 36]], "right": "open"},
-                           nosings=[[[0, 0, 7], [0, 34.6, 7]], [[10, 35, 14], [10, 40, 14]], [[20, 0, 21], [20, 36, 21]],
-                                    [[30, 0, 28], [30, 36, 28]]]),
+                           nosings=[[[0, 0, 7], [0, 34.6, 7]], [[10, 35, 14], [10, 40, 14]],
+                                    [[20, 0, 21], [20, 36, 21]], [[30, 0, 28], [30, 36, 28]]]),
     "side_off_treads": _stair(sides={"left": [[-5, 40], [40, 40]], "right": [[-5, 0], [40, 0]]}),
     "leaf_behind_hinge_stop": _with(base, lambda d: d["doors"][0].update(hinge_pin=[-40, 1.75],
                                                                          leaf_closed=[[-40, 0], [34, 1.75]])),
