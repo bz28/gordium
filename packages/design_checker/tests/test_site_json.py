@@ -238,9 +238,7 @@ def test_a_site_holding_what_a_description_cant_say_is_refused_never_dropped():
             (lambda s: s["unsent"][0].update(severity="low"), "unsent[0]: unknown field 'severity'"),
             (lambda s: s["left_out"][0].update(size=3), "left_out[0]: unknown field 'size'"),
             (lambda s: s["host"].update(user="ben"), "host: unknown field 'user'"),
-            (lambda s: s["buildings"][0]["problems"].append("a block (Garage)"), "no measuring reason gives"),
-            (lambda s: s["unsent"][0].update(problem="a block (Garage)"), "unsent[0].problem: no measuring reason"),
-            (lambda s: s["problems"].append("lot is odd"), "problems[0]: no measuring reason gives"),
+            (lambda s: s["buildings"][0]["problems"].append(""), "the tool's own words should not be empty"),
             (lambda s: s["buildings"][0]["faces"][0]["points"][0].__setitem__(2, math.nan), "should be finite numbers"),
             (lambda s: s["host"].update(version=object()), "site: not JSON data")):
         s = copy.deepcopy(site)
@@ -252,6 +250,29 @@ def test_a_site_holding_what_a_description_cant_say_is_refused_never_dropped():
                                                                                        "layer": "Building"}}
     with pytest.raises(SiteRefused, match="should be an object"):
         from_site(["not", "a", "site"])
+
+
+
+def test_words_no_measuring_reason_gives_go_as_the_tools_own_words_never_dropped():
+    site = to_site(_example())
+    site["buildings"][0]["problems"].append("a block (Garage)")
+    site["problems"].append("lot is odd")
+    doc = from_site(site)
+    assert doc["buildings"][0]["problems"] == [{"code": "tool_words", "args": {"words": "a block (Garage)"}}]
+    assert doc["problems"] == [{"code": "tool_words", "args": {"words": "lot is odd"}}]
+    assert to_site(doc) == site
+
+
+@pytest.mark.parametrize("words, reason", [
+    ("no Site layer", "are a measuring reason: send its code, no_lot_layer"),
+    ("a building has a curved surface (not measured yet)", "send its code, curved_surface"),
+    (" ", "the tool's own words should not be empty")])
+def test_the_tools_own_words_are_never_a_measuring_reason_in_disguise(words, reason):
+    doc = _example()
+    doc["buildings"][0]["problems"] = [{"code": "tool_words", "args": {"words": words}}]
+    with pytest.raises(SiteRefused) as e:
+        to_site(doc)
+    assert any(reason in r for r in e.value.reasons), e.value.reasons
 
 
 def test_a_key_given_twice_is_refused_never_one_of_them_dropped():

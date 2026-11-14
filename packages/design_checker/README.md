@@ -19,8 +19,11 @@ JSON, `gordium.site/1`, so another design tool (Revit) can send what Rhino sends
 exactly v1, every reason listed; `to_site` and `from_site` turn a description into the site the measuring reads and
 back (each problem goes by its code in `model_measurement.stops`, read back from its words by `stops.code_of`). The
 worker's new-style commands name their protocol (`protocol.py`): `hello` (the protocol, the schema version and
-fingerprints of the code and rules) and `read_model` (a .3dm as a site description). The older commands answer
-exactly as before, with or without a protocol.
+fingerprints of the code and rules), `read_model` (a .3dm as a site description), `check_site` and `start_site`
+(check and start for a description: `check.check_description`, `check.start_description`). The older commands
+answer exactly as before, with or without a protocol, and go the same way: `check()` and `start()` read the
+model, make it a description (`site_json.legacy_description`), send it through JSON text and back, and check
+that. A zoning report keeps the exact description beside it (`<report name>.site.json`).
 
 **Golden answers and recorded sessions** (the yardstick for changes that must not change any answer):
 `python -m design_checker.goldens --check` runs `check` and `start` on every test site, scenario (and its edit),

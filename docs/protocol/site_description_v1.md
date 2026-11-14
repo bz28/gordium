@@ -40,7 +40,7 @@ ignored and a design could pass that shouldn't (Gordium's rule: never a false pa
 | `buildings` | Each solid on the building layer: `{id, role: "building", layer, name?, floor?, faces: [{points: [[x, y, z], …], holes?: [[…]]}], problems: [problem…]}`. `floor` is a floor block's height as drawn (ft); left out or `null` for any other solid. A face that can't be read exactly is never approximated: it is left out and the building gets a problem (`curved_surface`, `curved_edge`, `open_solid`…). |
 | `unsent` | Objects that may be building but couldn't be sent at all (a block, a surface): `{id, layer, kind, problem}`. A tool that can't name each such object may instead send one building per kind with no faces and the problem (`read_model` does: a building with id `"a block"` and a `not_a_solid` problem, as `read_site` reads a file); either way every building's measuring needs review. |
 | `left_out` | Objects on the lot that weren't sent: `{id, layer, could_be_building, touching, ground_like, context}`. Each one makes the check need review. `touching: null` means not known, which counts as touching. |
-| `grade` | `{source, points: [[x, y, z], …]}`, source one of `spot`, `finished_spots`, `terrain` or `none`. Always present: no ground read is `{"source": "none", "points": []}`, and the measuring then says the ground is missing. |
+| `grade` | `{source, points: [[x, y, z], …]}`, source one of `spot`, `finished_spots`, `terrain` or `none`. Always present: no ground read is `{"source": "none", "points": []}`, and the measuring then uses the lot facts' flat ground (`ground_is_flat`, `grade_elevation`) if they give one, else says the ground is missing. |
 | `inventory_complete` | `true` only when the tool looked at everything on the lot, so `left_out` is the whole list. `false` makes every building's measuring need review. |
 | `problems` | Problems with the site as a whole (the file, the lot outline). |
 
@@ -79,7 +79,7 @@ length), flat ground not yet given, and nothing else on the lot.
 
 ## How the worker uses it
 
-The worker (`python -m design_checker serve`) answers JSON requests one per line. Two new-style commands name
+The worker (`python -m design_checker serve`) answers JSON requests one per line. The new-style commands name
 the protocol they speak, `"protocol": "1.0"` (a different major version is refused):
 
 - `hello`: the protocol, the site description version, and fingerprints of the worker's code and of each place's
@@ -87,9 +87,42 @@ the protocol they speak, `"protocol": "1.0"` (a different major version is refus
 - `read_model {model, facts, inventory_complete?}`: a `.3dm` file read as a site description, for recording test
   fixtures. It reads only the lot and Building layers, so it says `inventory_complete: false` unless the caller
   says it looked at the rest of the lot itself.
+- `check_site {site, facts, report?, extras?, today?}`: the check of a site description, the same answer `check`
+  gives (`today`: the day of the check, YYYY-MM-DD, as `check` takes it).
+- `start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}`: the largest legal starting building
+  on the description's lot (its buildings are left out), the same answer `start` gives.
 
-The older commands (`check`, `start`, `facts`, `options`, `sample_site`) answer exactly as before. Checking a site
-description directly (`check_site`) comes in the next step of the tidy-up.
+**Rhino takes the same path.** The older `check` and `start` read the model, make it a site description (the
+grade from the facts, what Rhino couldn't send as `unsent`, the objects it left out as `left_out`), write it as
+JSON text, read it back strictly, and check that, exactly as `check_site` does. So the path a Revit add-in will
+use is the one every Rhino check already takes, and both give the same answers (tests/test_check_via_site.py).
+
+**How the checker reads a description** (`site_json.for_measuring`):
+
+- Every `unsent` object's problem goes on one faceless building, so every building measure needs review.
+- `inventory_complete: false` puts a problem on every building ("the design tool didn't say everything on the lot
+  was sent…"): no building measure complies; lot size and width, which don't depend on the buildings, still can.
+- Each `left_out` object makes the check need review (an "Objects on the lot not included" row; lot coverage and
+  the accessory building rules need review); one that touches a building, or isn't known to (`touching: null`),
+  makes the yards, height and stories need review too.
+- The grade points come only from the description. Facts that also give `grade_points`, a `grade_from` other than
+  the description's grade source, or extras that also list left-out objects are refused: one source for each
+  thing. A flat ground stated in the facts (`ground_is_flat` with `grade_elevation`) is still used when the
+  description has no grade points, as it always has been.
+- **A problem in the tool's own words.** A tool that found a problem the measuring has no code for sends
+  `{"code": "tool_words", "args": {"words": "…"}}`. It still makes the building's measuring need review. Words the
+  measuring does have a code for are refused this way (send that code).
+
+**A report keeps its site.** When `check` or `check_site` writes a zoning report, the exact description it was
+worked out from is written beside it as `<report name>.site.json` (Ben, 2026-11-06), so any report can be traced
+to exactly the site it was worked out from, and worked out again with the same lot facts (the file holds the site
+description only, not the lot facts). If the description can't be written, no new report is written either (the answer says
+why). The earlier report's site file is replaced only once the new report is in place, so a report that can't be
+saved (open in Excel, say) leaves the earlier report beside its own site. Never a report beside another check's
+site; at worst, a check stopped between the two leaves a report with no site file.
+
+The older commands (`check`, `start`, `facts`, `options`, `sample_site`) answer exactly as before (the golden
+answers and the recorded session prove it, to the last character).
 
 ## Versions
 

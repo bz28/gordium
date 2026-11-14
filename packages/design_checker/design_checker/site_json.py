@@ -19,7 +19,7 @@ import math
 from pathlib import Path
 
 from model_measurement.read_3dm import LAYERS
-from model_measurement.stops import STOPS, blanks, code_of, stop
+from model_measurement.stops import STOPS, TOOL_WORDS, blanks, code_of, stop
 
 SCHEMA = "gordium.site/1"
 UNITS = "ft"
@@ -138,9 +138,16 @@ class _Checker:
             try:
                 back = code_of(words)
             except ValueError as e:
-                self.no(where, str(e))
-                return
-            if back != (code, args):     # its words would read back as another problem: never a mix-up
+                back = None
+                if code != TOOL_WORDS:
+                    self.no(where, str(e))
+                    return
+            if code == TOOL_WORDS:      # the tool's own words: never empty, never words the table has a code for
+                if not words.strip():
+                    self.no(where, "the tool's own words should not be empty")
+                elif back is not None:
+                    self.no(where, f"the words {words!r} are a measuring reason: send its code, {back[0]}")
+            elif back != (code, args):   # its words would read back as another problem: never a mix-up
                 self.no(where, f"its words {words!r} read back as {back[0]} {back[1]}, not as given")
 
 
@@ -276,14 +283,18 @@ def _words(problem: dict) -> str:
 
 
 def _coded(words, where: str, reasons: list):
-    """A problem's words as {code, args}; words no measuring reason gives are a refusal reason (never dropped)."""
+    """A problem's words as {code, args}: the measuring reason that gives them, else the design tool's own words
+    (TOOL_WORDS: words the site came with that no reason gives, such as an older Rhino plugin's own sentence for a
+    block it couldn't send). Words two reasons give equally are a refusal reason (never a guess, never dropped)."""
     if not isinstance(words, str):
         return words                            # not words: the description's own check refuses it
     try:
         code, args = code_of(words)
     except ValueError as e:
-        reasons.append(f"{where}: {e}")
-        return words
+        if not str(e).startswith("no "):
+            reasons.append(f"{where}: {e}")
+            return words
+        code, args = TOOL_WORDS, {"words": words}
     return {"code": code, "args": args}
 
 
@@ -381,3 +392,77 @@ def read_model(path, facts: dict, inventory_complete: bool = False) -> dict:
     units = str(model.Settings.ModelUnitSystem).split(".")[-1] if model is not None else "unreadable"
     host = {"name": "rhino3dm", "version": r.__version__, "document": Path(path).name, "model_units": units}
     return from_read_site(read_site(Path(path), facts), grade_of(facts), host, inventory_complete)
+
+
+# ---- the checker's own requests through the description -----------------------------------------------------
+# Since PR 4 of the tidy-up, check() and start() send what they read through a description and back (JSON text and
+# all), so Rhino's check takes the path another design tool's will: check_site / start_site in the worker.
+
+LEFT_OUT_EXTRAS = ("not_included", "touching", "ground_like", "context_left_out")   # check()'s extras, before
+UNSENT_BUILDING = "Building layer"   # the building every unsent object's problem is measured on (check()'s, before)
+
+
+def legacy_description(site: dict, facts: dict, building_problems=None, extras=None, host=None) -> dict:
+    """check()'s request as a description: the model as read_site read it, the facts' grade (grade_of), what the
+    Rhino command couldn't send (`building_problems`, its words, each an unsent object) and the objects on the lot
+    it left out (`extras`: not_included, and which of them touch the building, look like the ground, are on the
+    neighbourhood's layers). The left-out list is taken as the whole of it (inventory_complete), as check() always
+    has: the Rhino command looks at everything on the lot; a file checked from the command line has only its lot
+    and Building layers read. Ids in the extras' sub-lists that aren't left out are refused, never dropped."""
+    extras = extras or {}
+    ids = list(extras.get("not_included") or [])
+    stray = sorted({str(i) for k in LEFT_OUT_EXTRAS[1:] for i in (extras.get(k) or [])} - {str(i) for i in ids})
+    if stray:
+        raise SiteRefused([f"extras: {', '.join(stray)} named as touching, ground-like or on the neighbourhood's "
+                           "layers, but not among the objects left out (not_included)"])
+    touching = extras.get("touching")
+    left_out = [{"id": i, "layer": None, "could_be_building": True,
+                 "touching": None if touching is None else i in touching,       # not known: counts as touching
+                 "ground_like": i in (extras.get("ground_like") or []),
+                 "context": i in (extras.get("context_left_out") or [])} for i in ids]
+    unsent = [{"id": f"{UNSENT_BUILDING}#{k}", "layer": LAYERS["building"], "kind": "unknown", "problem": words}
+              for k, words in enumerate(building_problems or [], 1)]
+    return from_read_site(site, grade_of(facts), host or {"name": "", "version": "", "document": "", "model_units": ""},
+                          inventory_complete=True, left_out=left_out, unsent=unsent)
+
+
+def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[dict, dict, dict]:
+    """A description's site (to_site) as check_site reads it: (the site the measuring reads, the facts with the
+    description's grade, the extras with its left-out objects). Every unsent object's problem goes on one building
+    (UNSENT_BUILDING), so every building measure needs review; inventory_complete false puts a problem on every
+    building. The grade and the left-out objects come from the description only: facts naming grade points, a
+    grade_from other than the description's grade source, or extras naming left-out objects are refused (two
+    sources for one thing), never merged."""
+    extras = dict(extras or {})
+    reasons = [f"extras: {k} belongs in the site description (left_out), not the extras" for k in LEFT_OUT_EXTRAS
+               if k in extras]
+    if "grade_points" in facts:
+        reasons.append("facts: grade_points belong in the site description (grade), not the facts")
+    grade = site["grade"]
+    if grade["source"] != "none" and facts.get("grade_from") not in (None, grade["source"]):
+        reasons.append(f"facts: grade_from is {facts['grade_from']!r} but the site's grade is {grade['source']!r}")
+    if reasons:
+        raise SiteRefused(reasons)
+    buildings = [{k: v for k, v in b.items() if k != "layer"} for b in site["buildings"]]
+    if site["unsent"]:
+        buildings.append({"id": UNSENT_BUILDING, "faces": [], "problems": [u["problem"] for u in site["unsent"]]})
+    if not site["inventory_complete"]:
+        buildings = [{**b, "problems": b["problems"] + [stop("inventory_incomplete")]} for b in buildings]
+        if not buildings:                    # none sent: what wasn't could still be a building (never "0 stories")
+            buildings = [{"id": UNSENT_BUILDING, "faces": [], "problems": [stop("inventory_incomplete")]}]
+    facts = dict(facts)
+    if grade["source"] != "none":
+        facts["grade_points"] = grade["points"]
+        if grade["source"] != "spot":            # spot grades are what grade points are when no source is named
+            facts["grade_from"] = grade["source"]
+    left_out = site["left_out"]
+    extras.update(not_included=[o["id"] for o in left_out],
+                  touching=[o["id"] for o in left_out if o["touching"] is not False],
+                  ground_like=[o["id"] for o in left_out if o["ground_like"]],
+                  context_left_out=sorted(o["id"] for o in left_out if o["context"]))
+    return {"units": site["units"], "lot": site["lot"], "buildings": buildings, "problems": site["problems"]}, facts, extras
+
+
+def through_json(doc: dict) -> dict:
+    """A description as another design tool would send it: written as JSON text and read back strictly."""
+    return loads(json.dumps(doc, allow_nan=False))

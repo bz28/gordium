@@ -17,7 +17,7 @@ REAL = {"layer": "Site", "count": "2", "units": "UnitSystem.Miles", "path": "/tm
         "entry": "eave.yaml", "reason": "no roof faces"}
 
 
-@pytest.mark.parametrize("key", sorted(STOPS))
+@pytest.mark.parametrize("key", sorted(set(STOPS) - {stops.TOOL_WORDS}))
 def test_every_reason_reads_back_as_itself(key):
     for fill in ({b: REAL.get(b, "some words") for b in blanks(key)}, {b: f"<{b}>" for b in blanks(key)}):
         words = stop(key, **fill)
@@ -45,3 +45,11 @@ def test_two_reasons_giving_the_words_equally_are_refused(monkeypatch):
     monkeypatch.setattr(stops, "PATTERNS", patterns)
     with pytest.raises(ValueError, match="more than one measuring reason .*no_lot_layer, twin|twin, no_lot_layer"):
         code_of("no Site layer")
+
+
+def test_the_design_tools_own_words_are_never_read_back_from_words():
+    # "{words}" fits any words: read back, every unknown sentence would become it, so only its code ever sends it
+    assert stop(stops.TOOL_WORDS, words="a block (Garage)") == "a block (Garage)"
+    with pytest.raises(ValueError, match="no measuring reason gives"):
+        code_of("a block (Garage)")
+    assert stops.TOOL_WORDS not in stops.PATTERNS

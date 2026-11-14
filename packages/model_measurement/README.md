@@ -256,6 +256,12 @@ Every reason the code gives today comes from the table:
   origin, or turn it into a solid)"; "a block on the Building layer can't be measured yet (explode it or turn it
   into a solid)" (the same for a surface or anything else that isn't a solid or mesh: it is reported, never left
   out, since leaving it out would undercount coverage).
+- **What the design tool says** (the site description, `design_checker/site_json.py`; never given by the measuring
+  itself): "the design tool didn't say everything on the lot was sent: anything not sent may be part of a building,
+  or another building (lot coverage counts every building on the lot, §325-8A)" (on every building when the tool
+  sends `inventory_complete: false`); and an object the tool couldn't send, in the tool's own words, "<its words>"
+  (an older Rhino plugin's words for a block on the Building layer): the building's measuring needs review all the
+  same.
 - **Accessory buildings:** "no accessory building on the lot (every solid is the main building or touches it)".
 - **A detached accessory dwelling unit** (§325-28C): "pick the detached accessory dwelling unit's building (the solid
   it is in) with Pick the ADU's building…"; "no detached accessory dwelling unit is said to be on the lot" (its rules
