@@ -735,6 +735,67 @@ def test_random_sides_count_only_at_the_tread_ends():
     assert given > 100
 
 
+def test_a_wall_over_the_far_end_of_an_askew_top_nosing_narrows_the_width():
+    """Round 10: widths were read only up to the top nosing's middle. With it drawn 1/16 in askew (allowed), its
+    right end at s 30.031, the last tread runs there on the right, and a wall jutting in to 4 at s 30.02 was missed:
+    36, not 36 - 4."""
+    d = base()
+    d["stairs"][0]["nosings"][3] = [[30.03125, 0, 28], [29.96875, 36, 28]]
+    d["stairs"][0]["sides"]["right"] = [[-5, 0], [30.01, 0], [30.02, 4], [40, 4]]
+    m, _, _ = stair(d)
+    assert m["stair_clear_width"] == pytest.approx(32.0)
+
+
+def test_a_tread_starts_at_its_nosings_nearer_end():
+    """Round 10: each tread now runs from its nosing's nearer end (a nosing askew within 1/16 in). Nosing 2's left
+    end stands at s 9.969 and that tread is 34 wide; the left wall bulges out to 37.4 at s 9.98, already over it:
+    3.4 in beyond its end, more than a stringer. Read from the nosing's middle (s 10), the bulge fell on tread 1
+    (36 wide, 1.4 in off) and the wall was taken as the stair's side."""
+    d = base()
+    d["stairs"][0]["nosings"][1] = [[10.03125, 0, 14], [9.96875, 34, 14]]
+    d["stairs"][0]["nosings"][2] = [[20, 0, 21], [20, 34, 21]]
+    d["stairs"][0]["nosings"][3] = [[30, 0, 28], [30, 34, 28]]
+    d["stairs"][0]["sides"]["left"] = [[-5, 36], [9.97, 36], [9.98, 37.4], [9.99, 35.5], [40, 35.5]]
+    _, stopped, _ = stair(d)
+    assert "out beyond its treads' ends" in stopped["stair_clear_width"]
+
+
+def _rotated_flight(theta, ox, oy, askew):
+    """A square 36 in flight of 4 nosings, turned by theta about (ox, oy), the second nosing's left end askew."""
+    c, s = math.cos(theta), math.sin(theta)
+
+    def xy(u, v):
+        return [ox + u * c - v * s, oy + u * s + v * c]
+
+    nos = [[xy(10 * j, 0) + [7 * (j + 1)], xy(10 * j + (askew if j == 1 else 0), 36) + [7 * (j + 1)]]
+           for j in range(4)]
+    d = base()
+    d["stairs"][0].update(nosings=nos, sides={"left": "open", "right": "open"}, handrails=[],
+                          overhead=[[xy(-20, -20) + [300], xy(60, -20) + [300], xy(60, 60) + [300],
+                                     xy(-20, 60) + [300]]])
+    return d
+
+
+def test_a_rotated_flight_with_an_askew_nosing_never_crashes():
+    """Round 10: unioned in plan, the treads' near-parallel edges on a turned flight made the geometry library fail
+    (TopologyException) 25 times in 2,000, and the exception lost the whole house. Now the band is drawn in the
+    flight's own frame: every flight gives its headroom (300 - 28 at the top nosing)."""
+    import random
+    rnd = random.Random(3)
+    d = base()
+    d["stairs"][0].update(
+        nosings=[[[3.609671806592651, -34.438607528785695, 7], [-28.287722147056215, -17.74860276648186, 7]],
+                 [[8.16159034834538, -25.739128946302444, 14], [-23.725179759743668, -9.028820236099826, 14]]],
+        sides={"left": "open", "right": "open"}, handrails=[],
+        overhead=[[[-100, -100, 300], [100, -100, 300], [100, 100, 300], [-100, 100, 300]]])
+    m, stopped, _ = stair(d)
+    assert m["stair_headroom"] == pytest.approx(286.0), stopped
+    for _ in range(2000):
+        m, stopped, _ = stair(_rotated_flight(rnd.uniform(0, 2 * math.pi), rnd.uniform(-50, 50),
+                                              rnd.uniform(-50, 50), 1 / 64))
+        assert m["stair_headroom"] == pytest.approx(272.0), stopped
+
+
 def test_random_flights_are_never_wider_than_drawn():
     """Review round 7, property check: 400 random flights (tread ends that change from tread to tread, open or
     slanting walled sides, handrails part way and slanting). Read by hand at many points along the run, each tread
@@ -1500,6 +1561,7 @@ STOP_CASES = {
     "surface_vertical": _stair(overhead=[[[0, 0, 96], [30, 0, 96], [30, 0, 50]]]),
     "surface_out_of_range": _stair(overhead=[[[-5, -5, 60], [1e200, -5, 60], [1e200, 1e200, 60], [-5, 1e200, 60]]]),
     "surface_not_flat": _stair(overhead=[[[-5, -5, 120], [40, -5, 120], [40, 41, 130], [-5, 41, 120]]]),
+    "shapes_failed": _stair(),          # made to fail by STOP_SETUP
     "not_covered": _stair(overhead=[[[-5, -5, 120], [10, -5, 120], [10, 41, 120], [-5, 41, 120]]]),
     "nothing_overhead": _stair(overhead=[]),
     "room_unknown": _set(("openings", 0, "room"), "nowhere"),
@@ -1557,6 +1619,15 @@ STOP_CASES = {
 }
 
 
+def _geometry_fails(*_args, **_kw):
+    from shapely.errors import GEOSException
+    raise GEOSException("TopologyException: a stand-in")
+
+
+# a reason no drawing reliably makes (the geometry library failing): it is made to happen
+STOP_SETUP = {"shapes_failed": lambda mp: mp.setattr("model_measurement.interior.stairs.unary_union", _geometry_fails)}
+
+
 def test_every_stop_has_a_case():
     assert set(STOP_CASES) == set(STOPS)
 
@@ -1570,6 +1641,7 @@ def test_each_stop_happens_and_reaches_the_output(key, monkeypatch):
         made.append((which, self.reason))
 
     monkeypatch.setattr(Stop, "__init__", recording)
+    STOP_SETUP.get(key, lambda mp: None)(monkeypatch)
     got = measure(STOP_CASES[key]())
     reasons = [r for w, r in made if w == key]
     assert reasons, f"{key} didn't happen"
