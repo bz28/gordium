@@ -1715,14 +1715,6 @@ rules:
     quote: Where handrail fittings or bendings are used to provide continuous transition between flights, transitions
       at winder treads, the transition from handrail to guard, or used at the start of a flight, the handrail height
       at the fittings or bendings shall be permitted to exceed 38 inches (965 mm).
-  - file: gov.ny.residential.2025.pdf
-    page: 104
-    lines:
-    - 35
-    - 37
-    quote: Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs,
-      ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade
-      below at any point within 36 inches (914 mm) horizontally to the edge of the open side.
   examples:
   - given: {}
     parts:
@@ -1754,8 +1746,8 @@ rules:
           guard_height_max: 39
     rows:
     - part: os1
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       open_side:
@@ -1812,12 +1804,42 @@ rules:
     expect: not_applicable
   open_questions:
   - Handrail requirements for the guard top (grip size, continuity) are in other sections, not drafted here.
+  - 'May a stair guard''s top that serves as the handrail rise above 38 in at a fitting or bending (R320.2 exception 2, "the transition from handrail to guard"), or does R321.1.2 exception 2''s "not more than 38 inches" hold there for a required guard?'
   research:
   - question: Handrail requirements for the guard top (grip size, continuity) are in other sections, not drafted
       here.
     searched: []
     sources: []
     why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'May a stair guard''s top that serves as the handrail rise above 38 in at a fitting or bending (R320.2 exception 2, "the transition from handrail to guard"), or does R321.1.2 exception 2''s "not more than 38 inches" hold there for a required guard?'
+    searched:
+    - R320
+    - R320.2
+    - R321.1
+    - R321.1.1
+    - R321.1.2
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 3
+      - 5
+      quote: Where handrail fittings or bendings are used to provide continuous transition between flights, transitions
+        at winder treads, the transition from handrail to guard, or used at the start of a flight, the handrail height
+        at the fittings or bendings shall be permitted to exceed 38 inches (965 mm).
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 44
+      - 45
+      quote: Where the top of the guard serves as a handrail on the open sides of stairs, the top of the guard shall
+        be not less than 34 inches (864 mm) and not more than 38 inches (965 mm) as measured vertically from a line
+        connecting the nosings.
+    why_open: 'Neither section refers to the other. R320.2 exception 2 names "the transition from handrail to guard"
+      and doesn''t exclude a guard''s top that is the handrail; R321.1.2 exception 2 caps that top at 38 in and lists
+      no exception for fittings. Read on its own, each settles it a different way, so a fitting above 38 in needs
+      review (never a pass, never a guessed fail) until the architects or the City say which governs. Code commentary
+      (rank 3) not searched yet.'
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
@@ -1848,11 +1870,55 @@ rules:
       height at the fittings or bendings shall be permitted to exceed 38 inches"); the drafts'' own R320.2 rule
       needs review there. It now needs review too. A required guard keeps R321.1.2 exception 2''s 38 in at most.
       Cause r321_1_required_guards_only, resolutions.yaml.'
+  - field: review_when
+    by: Claude for Ben (house egress review, round 8)
+    date: 2026-11-14
+    why: 'Review round 8: round 7 kept a fail for a required guard (drop over 30 in) whose top, the stair''s handrail,
+      rises above 38 in only somewhere, reading R321.1.2 exception 2''s "not more than 38 inches" as absolute there;
+      but R320.2 exception 2 lets the handrail exceed 38 in at "the transition from handrail to guard", and neither
+      section settles which governs (the open question here). Unclear gives needs review, so the review now holds at
+      any drop. Cause r321_1_required_guards_only, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress review, round 8)
+    date: 2026-11-14
+    why: 'Review round 8: round 7 kept a fail for a required guard (drop over 30 in) whose top, the stair''s handrail,
+      rises above 38 in only somewhere, reading R321.1.2 exception 2''s "not more than 38 inches" as absolute there;
+      but R320.2 exception 2 lets the handrail exceed 38 in at "the transition from handrail to guard", and neither
+      section settles which governs (the open question here). Unclear gives needs review, so the review now holds at
+      any drop. Round 7 added R320.2 exception 2''s quote (the fittings) and R321.1.1''s (for the 30 in of the round-7
+      review); with the review at any drop, R321.1.1''s 30 is no longer used here and its quote is removed. Cause
+      r321_1_required_guards_only, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress review, round 8)
+    date: 2026-11-14
+    why: 'Review round 8: round 7 kept a fail for a required guard (drop over 30 in) whose top, the stair''s handrail,
+      rises above 38 in only somewhere, reading R321.1.2 exception 2''s "not more than 38 inches" as absolute there;
+      but R320.2 exception 2 lets the handrail exceed 38 in at "the transition from handrail to guard", and neither
+      section settles which governs (the open question here). Unclear gives needs review, so the review now holds at
+      any drop. Round 7 added the 24 in drop fitting case (35 to 40 in, needs review); round 8 turns the AI''s 34 to
+      39 in case on a 36 in drop from fail to needs review. Cause r321_1_required_guards_only, resolutions.yaml.'
+  - field: open_questions
+    by: Claude for Ben (house egress review, round 8)
+    date: 2026-11-14
+    why: 'Review round 8: round 7 kept a fail for a required guard (drop over 30 in) whose top, the stair''s handrail,
+      rises above 38 in only somewhere, reading R321.1.2 exception 2''s "not more than 38 inches" as absolute there;
+      but R320.2 exception 2 lets the handrail exceed 38 in at "the transition from handrail to guard", and neither
+      section settles which governs (the open question here). Unclear gives needs review, so the review now holds at
+      any drop. Cause r321_1_required_guards_only, resolutions.yaml.'
+  - field: research
+    by: Claude for Ben (house egress review, round 8)
+    date: 2026-11-14
+    why: 'Review round 8: round 7 kept a fail for a required guard (drop over 30 in) whose top, the stair''s handrail,
+      rises above 38 in only somewhere, reading R321.1.2 exception 2''s "not more than 38 inches" as absolute there;
+      but R320.2 exception 2 lets the handrail exceed 38 in at "the transition from handrail to guard", and neither
+      section settles which governs (the open question here). Unclear gives needs review, so the review now holds at
+      any drop. Cause r321_1_required_guards_only, resolutions.yaml.'
   review_when:
-  - when: open_side_drop <= 30 and guard_height >= 34 and guard_height <= 38 and guard_height_max > 38
-    reason: Not a required guard (a drop of 30 in or less), so only R320.2 holds, whose exception 2 lets the handrail
-      exceed 38 in at fittings or bendings (the transition from handrail to guard among them); the measures don't
-      say where the greatest height is. A person checks.
+  - when: guard_height >= 34 and guard_height <= 38 and guard_height_max > 38
+    reason: Above 38 in only somewhere. R320.2 exception 2 lets the handrail exceed 38 in at fittings or bendings
+      (the transition from handrail to guard among them), and whether that holds for a required guard's top under
+      R321.1.2 exception 2 is an open question; the measures don't say where the greatest height is either. A person
+      checks.
 - id: general.r321_1_3_guard_opening_4_inch_sphere
   kind: flag
   topic: means_of_egress

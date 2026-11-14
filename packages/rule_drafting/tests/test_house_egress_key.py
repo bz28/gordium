@@ -281,23 +281,26 @@ def test_fully_openable_is_asked_of_the_opening_as_installed_in_its_well():
     assert "as installed" in meaning and "area well" in meaning, meaning
 
 
-def test_a_guard_top_that_is_the_stairs_handrail_is_held_to_r320_2_at_any_drop(ctx, key, drafts):
-    """Review round 6: limiting R321.1.2 to required guards (a drop over 30 in) left a guard top that serves as the
-    stair's only handrail checked by nothing on a lower drop (no handrail part is modeled for it): a 42 in one passed.
-    It is the stair's handrail, and R320.2's 34 to 38 in holds at any drop: both the drafts and the key fail it."""
-    def design(height, top):
+def test_a_guard_top_that_is_the_stairs_handrail_is_held_to_r320_2_at_any_drop_and_a_fitting_needs_review(ctx, key, drafts):
+    """A guard top that serves as the stair's handrail, in both the drafts and the key:
+    - review round 6: limiting R321.1.2 to required guards (a drop over 30 in) left it checked by nothing on a lower
+      drop (no handrail part is modeled for it), so a 42 in one passed. It is the stair's handrail, and R320.2's 34 to
+      38 in holds at any drop: it fails.
+    - review round 7: on a low drop, a top within 34 to 38 in at its least but above 38 in somewhere may be a fitting
+      R320.2 exception 2 allows: needs review, as the same rail modeled as a handrail part does.
+    - review round 8: on a required guard too, since whether R321.1.2 exception 2's 38 in holds at a fitting is an
+      open question; a top whose least height is out of 34 to 38 in still fails at any drop."""
+    def design(height, top, drop=24):
         return {"stair": [{"id": "s1", "measures": {"stair_riser_count": 4, "stair_handrail_sides": 1,
                                                     "stair_spiral": False, "stair_serves_sleeping_loft": False}}],
                 "handrail": [],
-                "open_side": [{"id": "e1", "measures": {"open_side_drop": 24, "guard_present": True,
+                "open_side": [{"id": "e1", "measures": {"open_side_drop": drop, "guard_present": True,
                                                         "open_side_on_stair": True, "guard_is_handrail": True,
                                                         "guard_height": height, "guard_height_max": top}}]}
     for rules in (drafts, key):
         assert piece_result(rules, "R321.1.2", design(42, 44), {}, ctx) == "fail"
         assert piece_result(rules, "R321.1.2", design(36, 37), {}, ctx) == "pass"
-        # review round 7: above 38 in only somewhere may be a fitting R320.2 exception 2 allows: needs review, as
-        # the same rail modeled as a handrail part does; a required guard's top keeps R321.1.2's 38 in at most
         assert piece_result(rules, "R321.1.2", design(35, 40), {}, ctx) == "needs_review"
-        required = design(35, 40)
-        required["open_side"][0]["measures"]["open_side_drop"] = 36
-        assert piece_result(rules, "R321.1.2", required, {}, ctx) == "fail"
+        assert piece_result(rules, "R321.1.2", design(35, 40, drop=36), {}, ctx) == "needs_review"
+        assert piece_result(rules, "R321.1.2", design(39, 40, drop=36), {}, ctx) == "fail"
+        assert piece_result(rules, "R321.1.2", design(33, 36, drop=36), {}, ctx) == "fail"

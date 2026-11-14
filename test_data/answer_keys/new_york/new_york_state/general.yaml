@@ -1429,8 +1429,8 @@ rules:
       guard_height >= (34 if open_side_on_stair else 36)
       and (not (open_side_on_stair and guard_is_handrail) or guard_height_max <= 38)
     review_when:
-      - when: open_side_drop <= 30 and guard_height >= 34 and guard_height <= 38 and guard_height_max > 38
-        reason: "Not a required guard, so only R320.2 holds for its handrail top, whose exception 2 lets it exceed 38 in at fittings or bendings; where the greatest height is isn't measured. A person checks."
+      - when: open_side_on_stair and guard_is_handrail and guard_height >= 34 and guard_height <= 38 and guard_height_max > 38
+        reason: "Above 38 in only somewhere: R320.2 exception 2 lets a handrail exceed 38 in at fittings or bendings (the transition from handrail to guard among them), and whether that holds for a required guard's top under R321.1.2 exception 2 is open; where the greatest height is isn't measured. A person checks."
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 104
@@ -1508,6 +1508,12 @@ rules:
         expect: needs_review
         note: above 38 in only somewhere, which R320.2 exception 2 allows at fittings or bendings
       - given: {}
+        parts:
+          open_side: [{id: e1, measures: {open_side_drop: 36, guard_present: true, open_side_on_stair: true, guard_is_handrail: true, guard_height: 35, guard_height_max: 40}}]
+        rows: [{part: e1, outcome: needs_review}]
+        expect: needs_review
+        note: a required guard too; whether R321.1.2 exception 2's 38 in holds at a fitting is open (review round 8)
+      - given: {}
         parts: {open_side: []}
         rows: [{outcome: not_applicable}]
         expect: not_applicable
@@ -1517,7 +1523,10 @@ rules:
       Fixed after the comparison (review round 6): a guard top that serves as the stair's handrail was checked only
       on a drop over 30 in, so a 42 in one on a 24 in drop passed; it is the stair's handrail, and R320.2's 34 to 38
       in holds for every handrail, so it is checked at any drop, with R320.2 exception 2's review where the greatest
-      height is above 38 in (fittings or bendings; review round 7).
+      height is above 38 in (fittings or bendings; review round 7). Review round 8: that review holds for a required
+      guard too. R320.2 exception 2 names "the transition from handrail to guard", R321.1.2 exception 2 caps the
+      guard's top at 38 in, and neither refers to the other, so which governs at a fitting is open (recorded in the
+      drafts' research on general.r321_1_2_guard_height_stair_guard_as_handrail), and an open reading needs review.
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
