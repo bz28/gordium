@@ -8,6 +8,13 @@
 # ids: each disagreement's id (comparison.md): its cause.
 # Fixes to the key made after the comparison (each recorded in the key's notes): key_fixes.
 key_fixes:
+  - rule: general.r315_5_2_2_loft_stair_risers
+    what: >-
+      A loft stair outside R315.5.2.2's risers but within R318.7.5's passed, so a 20 in wide stair (R315.5.2.1's
+      width) with 6 1/2 in risers (R318.7.5's) passed on a mix of the two sets, which neither reading of the law
+      clearly allows. It now needs review. Found by review round 3. Open question for the architects: may a loft
+      stair take some limits from R315.5.2 and others from R318.7?
+    law: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3."; R315.5: "The means of egress shall comply with Section R318 as modified by Sections R315.5.1 through R315.5.3."'
   - rule: general.r318_2_egress_door
     what: >-
       "One egress door for each dwelling unit" was a flag with applies_when "dwelling_units - 1 > 0", which the
@@ -85,7 +92,8 @@ causes:
     why: >-
       A sleeping loft's stair "shall be permitted to comply" with R315.5.2.1 to R315.5.2.3: a choice, so it may meet
       either those or R318.7's ordinary limits. The key leaves loft stairs out of R318.7.1/.2/.5 (R315.5.2's limits
-      are looser, so meeting R318.7's meets them) and passes a loft stair that meets R318.7.5 under R315.5.2.2. The
+      are looser, so meeting R318.7's meets them) and makes a loft stair outside R315.5.2.2's risers but within
+      R318.7.5's need review (whether a loft stair may mix the two sets is open: key fixes). The
       drafts apply R318.7.1's 36 in to loft stairs (fail a 20 in loft stair R315.5.2.1 allows), make loft stairs
       need review under R318.7.2 and R318.7.5, and apply R315.5.2.2 alone (fail a 6 1/2 in riser on an ordinary
       stair; flag the formula on every loft stair).
@@ -210,9 +218,7 @@ ids:
   "R315.5.2.1/key/general.r315_5_2_1_loft_stair_width#4/s1": r315_5_2_1_width_at_the_handrail
   "R315.5.2.1/draft/general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail#2/s1": r315_5_2_1_width_at_the_handrail
   "R315.5.2.2/key/general.r315_5_2_2_loft_stair_risers#3/s1": loft_stair_may_follow_r318_7
-  "R315.5.2.2/key/general.r315_5_2_2_loft_stair_formula#2/s1": loft_stair_may_follow_r318_7
   "R315.5.2.2/draft/general.r315_5_2_2_sleeping_loft_stair_riser_height#3/s1": missing_input_in_the_example
-  "R315.5.2.2/draft/general.r315_5_2_2_sleeping_loft_stair_tread_riser_formula#1/s1": loft_stair_may_follow_r318_7
   "R318.2/key/general.r318_2_egress_door#1/the building": r318_2_doors_counted
   "R318.2/key/general.r318_2_egress_door#1/d1": r318_2_readily_openable_flag
   "R318.2/key/general.r318_2_egress_door#2/the building": r318_2_doors_counted
