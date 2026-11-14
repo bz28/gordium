@@ -36,6 +36,7 @@ SCOPE = ("R318.2", "R318.7.1", "R318.7.2", "R318.7.5.1", "R318.7.5.2", "R318.7.8
          "BF103.2", "R320.2", "R320.4", "R321.1.1", "R321.1.2", "R321.1.3",
          "R315.2", "R315.3", "R315.5.2.1", "R315.5.2.2")
 CONTEXT_LIMIT = 20_000          # characters of the sections a piece points to
+RELATED_LIMIT = 12_000          # characters of the sections that point to it (background only)
 DEFINITIONS_LIMIT = 12_000      # characters of the definitions it uses
 REF = re.compile(r"\b((?:R|BF|BO)\d{3}(?:\.\d+)*)(?:\s+through\s+(?:Section\s+)?((?:R|BF|BO)\d{3}(?:\.\d+)*))?")
 
@@ -44,9 +45,10 @@ BOOK_NOTE = """\
 
 The text you draft from is New York's 2025 Residential Code (one- and two-family dwellings and townhouses), not a
 city's zoning law. Read the instructions above with these changes:
-- There is no zoning chart and there are no districts: never write a slot (slots: []), never test `district` or
-  `use`, and read "the residential districts" as "the dwellings this code covers". Every rule is for every house
-  (its id is "general." plus id_suffix).
+- There is no zoning chart and there are no districts: the answer's shape has no slots, a quote is {piece, text}
+  (always the law, by piece id) and a number is {value, quote: its index in quotes} (always a sentence of the piece
+  being drafted). Never test `district` or `use`; read "the residential districts" as "the dwellings this code
+  covers". Every rule is for every house (its id is "general." plus id_suffix). topic: means_of_egress.
 - Every number you type comes from a sentence of the piece being drafted (numbers: from "law_quote"), and must be
   one of the numbers the SECOND READING of that piece lists (given with the piece: a reading of the page images
   independent of the extracted text, with what the printed sentence says of each number: >=, <=, >, <, between,
@@ -63,7 +65,22 @@ city's zoning law. Read the instructions above with these changes:
   that part not applicable to this rule (applies_when) or needs review (review_when), never a pass by this rule's
   numbers.
 - Most rules here are rules for each part (below). A rule for each part reads only its own part kind's measures and
-  the building's.
+  the building's. Use `within` only where the law ties the requirement to the part it sits in ("every sleeping room
+  shall have" one); a requirement the law sets on every part of a kind ("emergency escape and rescue openings shall
+  have ...") is for each part of that kind wherever it sits, with no `within` and when_none "not_applicable".
+- A requirement or doubt about one kind of part is a rule or flag for each part of that kind (for_each, with
+  applies_when saying which parts it is about), never a whole-building flag: a whole-building flag makes every
+  house need review, even one without such a part.
+- The related sections shown with a piece are, for this code, the sections labeled rule or flag that name it or a
+  section above it: they may modify it. They are drafted from their own text; where one lets a part follow other
+  limits instead (a sleeping loft's stair, R315.5), leave that part out of this rule (applies_when) or make it needs
+  review (review_when), so this rule never fails a part the code lets follow the other limits.
+- Architects' approval of rules is deferred: never write that an architect (or architects) should confirm, check,
+  review or approve something. Write a review reason or open question as the doubt itself, or as "a person checks
+  ...".
+- Where the law sets a formula a measure must equal ("riser height shall be 15 inches minus three-fourths of the
+  tread depth"), never write `==`: a measured length never equals a number exactly. Make it a flag for each part it
+  is about, naming the formula, for a person to check.
 """
 
 
@@ -72,6 +89,7 @@ class BookInputs:
     as Inputs: j, drafted, records, ctx, law, columns, cells, notes, for_parts, system(), units(), context())."""
 
     for_parts = True
+    book = True
     settings = drafter.SETTINGS | {"max_tokens": drafter.SETTINGS["book_max_tokens"]}
 
     def __init__(self, folder: Path):
@@ -154,9 +172,11 @@ def references(text: str, pieces: dict) -> tuple[list[str], list[str]]:
 
 
 def book_context(unit: dict, law: dict) -> dict:
-    """What a piece points to (the sections it names) and the definitions it uses (its sections-file `uses` and
-    roman-type terms), each as the book's own text. Background and quotable only as gather_context allows: a law quote
-    must be from the unit's piece or a piece it points to; numbers only from the unit's own piece."""
+    """What a piece points to (the sections it names), the pieces labeled rule or flag that point to it or to a
+    section above it (as related background: R315.5.2 lets a loft's stair follow other limits than R318.7's), and the
+    definitions it uses (its sections-file `uses` and roman-type terms), each as the book's own text. Appendix BO's
+    pieces are left out of the related ones (existing buildings: flags, in the labels). A law quote must be from the
+    unit's piece or a piece it points to; numbers only from the unit's own piece."""
     piece = law["pieces"][unit["piece"]]
     refs, unfound = references(unit["text"], law["pieces"])
     pieces, dropped, size = [], [], 0
@@ -169,6 +189,17 @@ def book_context(unit: dict, law: dict) -> dict:
             continue
         pieces.append({"id": pid, "title": law["pieces"][pid]["title"], "text": body})
         size += len(body)
+    pointing, size = [], 0                # pieces whose text names this piece or a section above it ("ways in")
+    above = {unit["piece"]} | {unit["piece"].rsplit(".", k)[0] for k in range(1, unit["piece"].count(".") + 1)}
+    for pid, other in law["pieces"].items():
+        if (pid == unit["piece"] or pid in refs or other.get("kind") == "definition" or pid.startswith("BO")
+                or pid not in law.get("requires", ())):           # Appendix BO (existing buildings) stays flags
+            continue
+        body = piece_text(law["rows"], other)
+        if set(references(body, law["pieces"])[0] + references(body, {p: {} for p in above})[0]) & above:
+            if size + len(body) <= RELATED_LIMIT:
+                pointing.append({"id": pid, "title": other["title"], "text": body})
+                size += len(body)
     definitions, size = [], 0
     for did in list(dict.fromkeys(piece.get("uses", []) + piece.get("defined_terms_in_roman", []))):
         if did in law["pieces"]:
@@ -177,7 +208,7 @@ def book_context(unit: dict, law: dict) -> dict:
                 definitions.append(body)
                 size += len(body)
     return {"notes": [], "pieces": pieces, "dropped": dropped, "unfound": unfound, "definitions": definitions,
-            "related": [], "related_dropped": []}
+            "related": pointing, "related_dropped": []}
 
 
 def state_folder(name: str) -> Path:

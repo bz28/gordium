@@ -133,10 +133,31 @@ def test_a_misread_number_or_comparison_is_sent_back(inputs, change, words):
 @needs_cache
 def test_a_recorded_drafting_call_is_marked_for_parts(inputs):
     unit = next(u for u in inputs.units() if u["id"] == "R318.7.5.1")
-    client, calls = FakeClient({"templates": [risers_template()], "no_rule_reason": ""}), []
+    t = risers_template()
+    short = {k: v for k, v in t.items() if k != "slots"} | {     # the book's shape: no slots, plain quotes and numbers
+        "quotes": [{"piece": q["piece"], "text": q["text"]} for q in t["quotes"]],
+        "numbers": [{"value": n["value"], "quote": n["quote"]} for n in t["numbers"]]}
+    client, calls = FakeClient({"templates": [short], "no_rule_reason": ""}), []
     result = drafter.draft_unit(client, unit, inputs.context(unit), inputs.system(), inputs.law, inputs.ctx, [], {}, {},
-                                calls.append, for_parts=True)
+                                calls.append, for_parts=True, book=True)
     assert [r["id"] for r in result["rules"]["general"]] == ["general.r318_7_5_1_riser_height"]
     assert calls[0]["for_parts"] is True and calls[0]["unit"] == "R318.7.5.1"
     schema = client.requests[0]["output_config"]["format"]["schema"]
-    assert "for_each" in schema["properties"]["templates"]["items"]["properties"]
+    template = schema["properties"]["templates"]["items"]["properties"]
+    assert "for_each" in template and "slots" not in template and calls[0]["book"] is True
+    assert set(template["quotes"]["items"]["properties"]) == {"piece", "text"}
+
+
+@needs_cache
+def test_the_sections_that_modify_a_piece_are_shown_with_it_appendix_bo_left_out(inputs):
+    # R315.5.2 lets a sleeping loft's stair follow other limits than R318.7's: the stair pieces must show it
+    unit = next(u for u in inputs.units() if u["id"] == "R318.7.5.1")
+    related = [p["id"] for p in inputs.context(unit)["related"]]
+    assert "R315.5" in related and not any(p.startswith("BO") for p in related), related
+    assert "R318.7.5.1" not in related                  # never itself
+
+
+def test_the_book_note_says_how_to_scope_flag_and_never_equate():
+    for words in ("Use `within` only where the law ties", "never a whole-building flag", "never write `==`",
+                  "never write that an architect"):
+        assert words in book.BOOK_NOTE, words

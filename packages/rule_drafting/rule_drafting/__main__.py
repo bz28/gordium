@@ -58,6 +58,7 @@ class Inputs:
     """Everything drafting reads, for one jurisdiction (a place's zoning; a state's building code: book.BookInputs)."""
 
     for_parts = False
+    book = False                      # a building code's answer shape (drafter.output_schema's book)
     settings = drafter.SETTINGS
 
     def __init__(self, j: Path | None = None):
@@ -240,7 +241,7 @@ def estimate(i: Inputs, todo: list[dict], model: str, client=None) -> dict:
     system = i.system()
     messages = [drafter.unit_message(u, i.context(u)) for u in ai]
     if client is not None and ai:           # exact, counted the way a call is sent (instructions and answer schema too)
-        fmt = {"effort": drafter.SETTINGS["effort"], "format": drafter.output_schema(sorted(i.ctx.topics), i.for_parts)}
+        fmt = {"effort": drafter.SETTINGS["effort"], "format": drafter.output_schema(sorted(i.ctx.topics), i.for_parts, i.book)}
         count = lambda text: client.messages.count_tokens(model=model, system=system, output_config=fmt,
                                                           messages=[{"role": "user", "content": text}]).input_tokens
         system_tokens = count(".")
@@ -338,7 +339,8 @@ def cmd_draft(args) -> int:
                 result = draft_accessory()
             else:
                 result = drafter.draft_unit(client, u, i.context(u), system, i.law, i.ctx, i.columns, i.cells, i.notes,
-                                            record, settings=i.settings, budget=budget, for_parts=i.for_parts)
+                                            record, settings=i.settings, budget=budget, for_parts=i.for_parts,
+                                            book=i.book)
             save_result(i, log, u["id"], result)
             saved = True
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "

@@ -160,7 +160,7 @@ For any other rule, leave for_each, within and when_none "" and every example's 
 """
 
 
-def output_schema(topics: list[str], for_parts: bool = False) -> dict:
+def output_schema(topics: list[str], for_parts: bool = False, book: bool = False) -> dict:
     """The answer's shape. With for_parts (a building code's rules for each part: rule_format/parts.py), each
     template also carries for_each, within and when_none, and each example the parts and the rows expected; without
     (the zoning chart and law), exactly the shape it always was."""
@@ -218,9 +218,32 @@ def output_schema(topics: list[str], for_parts: bool = False) -> dict:
             "rows": {"type": "array", "items": {
                 "type": "object", "additionalProperties": False, "required": ["part", "within", "outcome"],
                 "properties": {"part": text, "within": text, "outcome": {"type": "string", "enum": OUTCOMES}}}}}
+    if book:                        # a building code: no chart, so no slots and nothing but law quotes (book_answer)
+        props, req = template["properties"], template["required"]
+        for k in ("slots",):
+            props.pop(k)
+            req.remove(k)
+        props["topic"] = text           # validation checks it; an enum of every topic makes the grammar too large
+        props["quotes"]["items"] = {"type": "object", "additionalProperties": False, "required": ["piece", "text"],
+                                    "properties": {"piece": text, "text": text}}
+        props["numbers"]["items"] = {"type": "object", "additionalProperties": False, "required": ["value", "quote"],
+                                     "properties": {"value": {"type": "number"}, "quote": {"type": "integer"}}}
     return {"type": "json_schema", "schema": {
         "type": "object", "additionalProperties": False, "required": ["templates", "no_rule_reason"],
         "properties": {"templates": {"type": "array", "items": template}, "no_rule_reason": text}}}
+
+
+def book_answer(answer: dict) -> dict:
+    """A building code's answer (output_schema's book shape) in the full shape check_answer reads: no slots, every
+    quote a law quote, every number bound to one of them. Nothing else changes."""
+    out = dict(answer, templates=[])
+    for t in answer.get("templates") or []:
+        out["templates"].append(t | {
+            "slots": [],
+            "quotes": [{"document": "law", "page": 0, "piece": q.get("piece"), "text": q.get("text")} for q in t["quotes"]],
+            "numbers": [{"value": n.get("value"), "from": "law_quote", "quote": n.get("quote"), "slot": "", "footnote": ""}
+                        for n in t["numbers"]]})
+    return out
 
 
 def chart_table(sections: list[tuple[int, str]], rows_of) -> str:
@@ -621,7 +644,7 @@ def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dic
 
 def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: Context, columns: list[str],
                cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None,
-               for_parts: bool = False) -> dict:
+               for_parts: bool = False, book: bool = False) -> dict:
     """Draft one unit. Every template that works nowhere sends the answer back with the reasons (keeping
     nothing from it) until max_attempts; after the last attempt, the rules that work are kept and every
     rejected template and every requirement no rule cites goes to a person. Returns check_answer's result
@@ -640,7 +663,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
             system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
             messages=messages,
             output_config={"effort": settings["effort"],
-                           "format": output_schema(topics, for_parts=for_parts)})
+                           "format": output_schema(topics, for_parts=for_parts, book=book)})
         usage = {k: getattr(response.usage, k, 0) or 0 for k in
                  ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")}
         spent = cost(usage, settings["model"])
@@ -653,6 +676,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
         else:
             try:
                 answer = json.loads(text)
+                answer = book_answer(answer) if book else answer
                 result = check_answer(answer, unit, context, law, ctx, columns, cells, notes, drafted_by)
                 if result["problems"]:
                     why = "; ".join(result["problems"][:6])
@@ -673,7 +697,7 @@ def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: C
                 "context_dropped": context.get("dropped", []), "context_unfound": context.get("unfound", []),
                 "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
                 "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None}
-               | ({"for_parts": True} if for_parts else {}))
+               | ({"for_parts": True} if for_parts else {}) | ({"book": True} if book else {}))
         if crash is not None:
             raise crash
         if why is None:
