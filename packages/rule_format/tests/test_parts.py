@@ -28,6 +28,13 @@ def src(*lines):
             "quote": " ".join(SYNTHETIC_PAGE[n] for n in lines)}
 
 
+def one_room(area, at_grade=False, height=30):
+    """A worked example's parts: one bedroom with one escape opening."""
+    return {"sleeping_room": [{"id": "br1", "name": "Bedroom 1"}],
+            "emergency_escape_opening": [{"id": "w1", "within": "br1", "measures": {
+                "opening_net_clear_area": area, "opening_at_grade": at_grade, "opening_net_clear_height": height}}]}
+
+
 AREA = {  # SYNTHETIC: each sleeping room's escape openings, net clear area (and height)
     "id": "R-1b.synthetic_escape_area", "kind": "rule", "topic": "egress",
     "title": "SYNTHETIC escape opening area", "for_each": "emergency_escape_opening", "within": "sleeping_room",
@@ -35,21 +42,34 @@ AREA = {  # SYNTHETIC: each sleeping room's escape openings, net clear area (and
     "check": "opening_net_clear_area >= (5.0 if opening_at_grade else 5.7) and opening_net_clear_height >= 24",
     "sources": [src(1, 2)],
     "examples": [
-        {"given": {"opening_net_clear_area": 6, "opening_at_grade": False, "opening_net_clear_height": 30},
+        {"given": {}, "parts": one_room(6), "rows": [{"part": "w1", "within": "br1", "outcome": "pass"}],
          "expect": "pass"},
-        {"given": {"opening_net_clear_area": 5.1, "opening_at_grade": False, "opening_net_clear_height": 30},
+        {"given": {}, "parts": one_room(5.1), "rows": [{"part": "w1", "within": "br1", "outcome": "fail"}],
          "expect": "fail"},
-        {"given": {"opening_net_clear_area": 5.1, "opening_at_grade": True, "opening_net_clear_height": 30},
-         "expect": "pass"},
+        {"given": {}, "parts": one_room(5.1, at_grade=True),
+         "rows": [{"part": "w1", "within": "br1", "outcome": "pass"}], "expect": "pass"},
+        # when_none: Bedroom 2 has no escape opening, so it gets its own failing row
+        {"given": {}, "parts": {"sleeping_room": [{"id": "br1"}, {"id": "br2"}],
+                                "emergency_escape_opening": one_room(6)["emergency_escape_opening"]},
+         "rows": [{"part": "w1", "within": "br1", "outcome": "pass"}, {"within": "br2", "outcome": "fail"}],
+         "expect": "fail"},
     ],
     "drafted_by": "claude", "status": "draft",
 }
+
+
+def stairs(*risers):
+    return {"stair": [{"id": f"s{n}", "measures": {"stair_riser_height": r}} for n, r in enumerate(risers, 1)]}
+
+
 RISER = {  # SYNTHETIC: each stair's riser
     "id": "R-1b.synthetic_riser", "kind": "rule", "topic": "egress", "title": "SYNTHETIC stair riser",
     "for_each": "stair", "when_none": "not_applicable", "check": "stair_riser_height <= 8.25",
     "sources": [src(3)],
-    "examples": [{"given": {"stair_riser_height": 7}, "expect": "pass"},
-                 {"given": {"stair_riser_height": 8.5}, "expect": "fail"}],
+    "examples": [{"given": {}, "parts": stairs(7), "rows": [{"part": "s1", "outcome": "pass"}], "expect": "pass"},
+                 {"given": {}, "parts": stairs(8.5), "rows": [{"part": "s1", "outcome": "fail"}], "expect": "fail"},
+                 {"given": {}, "parts": stairs(), "rows": [{"outcome": "not_applicable"}],      # when_none: no stairs
+                  "expect": "not_applicable"}],
     "drafted_by": "claude", "status": "draft",
 }
 
@@ -78,7 +98,7 @@ def test_synthetic_rules_validate():
 @pytest.mark.parametrize("change, words", [
     ({"for_each": "balcony"}, "unknown part kind 'balcony'"),
     ({"for_each": 3}, "unknown part kind 3"),
-    ({"within": "stair"}, "can sit within ['sleeping_room'], not 'stair'"),
+    ({"within": "stair"}, "can sit within ['sleeping_room', 'basement', 'habitable_attic', 'loft_room'], not 'stair'"),
     ({"when_none": "pass"}, "never pass"),
     ({"when_none": None}, "never pass"),
     ({"check": "stair_riser_height <= 8.25"}, "unknown measure 'stair_riser_height'"),       # another kind's
@@ -102,17 +122,16 @@ def test_missing_when_none_is_refused():
 def test_a_rule_that_must_find_a_part_cant_rule_parts_out():
     """applies_when on a part measure + when_none fail: every opening of a room ruled out would leave the room
     with no failing row. Refused; the split goes inside check (AREA does)."""
+    examples = [ex for ex in AREA["examples"] if not ex["parts"]["emergency_escape_opening"][0]["measures"]["opening_at_grade"]]
     rule = AREA | {"applies_when": "not opening_at_grade",
-                   "check": "opening_net_clear_area >= 5.7 and opening_net_clear_height >= 24",
-                   "examples": [{"given": {"opening_net_clear_area": 6, "opening_net_clear_height": 30,
-                                           "opening_at_grade": False}, "expect": "pass"},
-                                {"given": {"opening_net_clear_area": 5, "opening_net_clear_height": 30,
-                                           "opening_at_grade": False}, "expect": "fail"}]}
+                   "check": "opening_net_clear_area >= 5.7 and opening_net_clear_height >= 24", "examples": examples}
     assert any("can't rule parts out" in p for p in validate(book(rule), CTX))
-    assert validate(book(rule | {"when_none": "not_applicable"}), CTX) == []
+    none = {"given": {}, "parts": {"sleeping_room": [{"id": "br1"}], "emergency_escape_opening": []},
+            "rows": [{"within": "br1", "outcome": "not_applicable"}], "expect": "not_applicable"}
+    assert validate(book(rule | {"when_none": "not_applicable", "examples": examples[:2] + [none]}), CTX) == []
     # a building measure in applies_when is fine: it is the same for every part
     use = AREA | {"applies_when": 'use == "one_family_detached"',
-                  "examples": [ex | {"given": ex["given"] | {"use": "one_family_detached"}} for ex in AREA["examples"]]}
+                  "examples": [ex | {"given": {"use": "one_family_detached"}} for ex in AREA["examples"]]}
     assert validate(book(use), CTX) == []
 
 
@@ -121,13 +140,84 @@ def test_a_building_rule_cant_use_a_part_measure():
     assert any("unknown measure 'stair_riser_height'" in p for p in validate(book(rule), CTX))
 
 
-def test_worked_examples_are_checked_per_part():
-    rule = AREA | {"examples": AREA["examples"] + [{"given": {"opening_net_clear_area": 9,
-                                                              "opening_net_clear_height": 30,
-                                                              "opening_at_grade": False}, "expect": "fail"}]}
-    assert any("example 4: expected fail, got pass" in p for p in validate(book(rule), CTX))
-    rule = AREA | {"examples": [{"given": {"stair_riser_height": 7}, "expect": "pass"}] + AREA["examples"]}
-    assert any("example 1: unknown measures ['stair_riser_height']" in p for p in validate(book(rule), CTX))
+def test_worked_examples_are_checked_by_the_rows_the_checker_gives():
+    wrong_row = copy.deepcopy(AREA)
+    wrong_row["examples"][0]["rows"][0]["outcome"] = "fail"
+    assert any("example 1: expected rows fail for w1 in br1; got pass for w1 in br1" in p
+               for p in validate(book(wrong_row), CTX)), validate(book(wrong_row), CTX)
+    missing_row = copy.deepcopy(AREA)
+    missing_row["examples"][3]["rows"].pop()            # Bedroom 2's "no escape opening" row left out
+    assert any("example 4: expected rows" in p for p in validate(book(missing_row), CTX))
+    wrong_answer = copy.deepcopy(AREA)
+    wrong_answer["examples"][3]["expect"] = "pass"
+    assert any("example 4: expected pass, got fail" in p for p in validate(book(wrong_answer), CTX))
+    # a part's measure in `given` (the building's), or another kind's measure on a part, is refused
+    in_given = copy.deepcopy(AREA)
+    in_given["examples"][0]["given"] = {"opening_net_clear_area": 6}
+    assert any("example 1: unknown measures ['opening_net_clear_area'] (a part's measures go in 'parts')" in p
+               for p in validate(book(in_given), CTX))
+    other_kind = copy.deepcopy(AREA)
+    other_kind["examples"][0]["parts"]["emergency_escape_opening"][0]["measures"]["stair_riser_height"] = 7
+    assert any("'stair_riser_height' isn't a measure of a emergency escape opening" in p
+               for p in validate(book(other_kind), CTX))
+    stair_list = copy.deepcopy(AREA)
+    stair_list["examples"][0]["parts"]["stair"] = []
+    assert any("'parts' has 'stair', not a kind this rule reads" in p for p in validate(book(stair_list), CTX))
+    wrong_value = copy.deepcopy(AREA)
+    wrong_value["examples"][0]["parts"]["emergency_escape_opening"][0]["measures"]["opening_at_grade"] = "no"
+    assert any("wrong kind of value for 'opening_at_grade'" in p for p in validate(book(wrong_value), CTX))
+
+
+@pytest.mark.parametrize("drop", ["parts", "rows"])
+def test_a_per_part_example_needs_its_parts_and_rows(drop):
+    rule = copy.deepcopy(AREA)
+    del rule["examples"][0][drop]
+    assert any(f"example 1: a rule for each part needs {drop!r}" in p for p in validate(book(rule), CTX))
+
+
+def test_a_whole_building_rule_has_no_parts_in_its_examples():
+    rule = {k: v for k, v in RISER.items() if k not in parts.PART_FIELDS} | {
+        "check": "stories <= 3", "examples": [{"given": {"stories": 2}, "parts": {}, "expect": "pass"},
+                                               {"given": {"stories": 4}, "expect": "fail"}]}
+    assert any("example 1: ['parts'] only go with a rule for each part" in p for p in validate(book(rule), CTX))
+
+
+@pytest.mark.parametrize("rule", [AREA, RISER])
+def test_a_per_part_rule_without_a_when_none_example_is_refused(rule):
+    """The law's answer for nothing to check (a bedroom with no escape opening; a house with no stairs) is the
+    part a reader is likeliest to get wrong, so every per-part rule shows it in a worked example."""
+    without = rule | {"examples": [ex for ex in rule["examples"] if not
+                                   any("part" not in r for r in ex["rows"])]}
+    assert any("no worked example shows when_none" in p for p in validate(book(without), CTX))
+    assert validate(book(rule), CTX) == []           # with it, the rule is kept
+    # a flag for each part (no check, so no other example needed) needs it too
+    flag = {k: v for k, v in rule.items() if k != "check"} | {"kind": "flag", "examples": []}
+    assert any("no worked example shows when_none" in p for p in validate(book(flag), CTX))
+
+
+@pytest.mark.parametrize("check", ["opening_net_clear_area >= 0 * 5.7 and opening_net_clear_height >= 0 * 24",
+                                   "opening_net_clear_area >= (5.0 if opening_at_grade else 5.7) or "
+                                   "opening_net_clear_height >= 24"])
+def test_the_when_none_row_cant_stand_in_for_a_part_that_fails(check):
+    """Review round 1: a "none" row fails whatever the check says, so with it as the only failing example a check
+    every part passes (written the wrong way round) was kept, and every real escape opening would pass. A part
+    that fails the check is needed, and one that passes it."""
+    examples = [AREA["examples"][0], AREA["examples"][3]]           # a part that passes; a room with none
+    got = validate(book(AREA | {"check": check, "examples": examples}), CTX)
+    assert any("a part that passes its check and a part that fails it" in p for p in got), got
+    assert any("a part that fails it" in p for p in validate(book(AREA | {"examples": examples}), CTX))
+    # a flag has no check to exercise: only its when_none
+    flag = {k: v for k, v in AREA.items() if k != "check"} | {"kind": "flag"}
+    assert not any("a part that fails it" in p for p in validate(book(flag | {"examples": []}), CTX))
+
+
+def test_a_none_row_that_is_not_the_when_none_answer_does_not_count():
+    rule = AREA | {"applies_when": 'use == "one_family_detached"'}
+    examples = [ex | {"given": {"use": "one_family_detached"}} for ex in AREA["examples"][:3]]
+    church = {"given": {"use": "church"}, "parts": {"sleeping_room": [{"id": "br1"}], "emergency_escape_opening": []},
+              "rows": [{"within": "br1", "outcome": "not_applicable"}], "expect": "not_applicable"}
+    assert any("no worked example shows when_none (fail)" in p
+               for p in validate(book(rule | {"examples": examples + [church]}), CTX))
 
 
 def test_the_registry_is_checked(tmp_path):
@@ -211,6 +301,46 @@ def test_a_missing_measure_needs_review_unless_it_fails_whatever():
     assert by_name(got) == {("Bedroom 1", "w1"): "needs_review", ("Bedroom 2", "w2"): "fail"}
     nan = rows(AREA, house(opening("w1", "br1", area=float("nan")), opening("w2", "br2")), {}, ALLOWED)
     assert rule_result(nan) == "needs_review"
+
+
+HEADROOM = {  # SYNTHETIC: a stair's headroom grows with its riser (made up, to need the proof)
+    "id": "R-1b.synthetic_headroom", "kind": "rule", "topic": "egress", "title": "SYNTHETIC stair headroom",
+    "for_each": "stair", "when_none": "not_applicable", "check": "stair_headroom >= 72 + stair_riser_height",
+    "sources": [src(3)], "examples": [], "drafted_by": "claude", "status": "draft"}
+
+
+def headroom(rule, **measures):
+    return rows(rule, {"stair": [{"id": "s1", "measures": measures}]}, {}, ALLOWED)[0]
+
+
+def test_a_part_that_fails_whatever_its_missing_number_is_fails():
+    """The 2026-10-21 proof, for a part: 70 in of headroom against "72 + riser" fails whatever the riser is (a riser
+    is never below 0), so the stair fails, and the row says which measure wasn't given."""
+    row = headroom(HEADROOM, stair_headroom=70)
+    assert (row["outcome"], row["unknown"]) == ("fail", ["stair_riser_height"])
+    # 80 in might pass (a riser of 8 or less): needs review, never pass
+    assert headroom(HEADROOM, stair_headroom=80)["outcome"] == "needs_review"
+    # a missing number the check is NOT truest at 0 for: no proof, needs review
+    assert headroom(HEADROOM | {"check": "stair_headroom >= 72 - stair_riser_height"},
+                    stair_headroom=70)["outcome"] == "needs_review"
+    # a number the proof can't follow (inside an if's test): no proof
+    both = HEADROOM | {"check": "stair_headroom >= (72 if stair_riser_height > 7 else 76)"}
+    assert headroom(both, stair_headroom=70)["outcome"] == "needs_review"
+    # given but unusable (NaN, below 0) isn't "not given": no proof
+    assert headroom(HEADROOM, stair_headroom=70, stair_riser_height=-1)["outcome"] == "needs_review"
+    assert headroom(HEADROOM, stair_headroom=70, stair_riser_height=float("nan"))["outcome"] == "needs_review"
+    # an unknown in review_when: no proof (the proof never runs over the rule's own doubt)
+    doubt = HEADROOM | {"review_when": [{"when": "stair_riser_height > 9", "reason": "a tall riser"}]}
+    assert headroom(doubt, stair_headroom=70)["outcome"] == "needs_review"
+
+
+def test_the_part_proof_is_the_checkers_proof():
+    """The shared proof's settings (rulebook.unknown_settings); that parts.rows and check.fails_whatever both use it
+    is pinned by design_checker/tests/test_each_part.py::test_one_proof_for_parts_and_zoning_rows."""
+    from rule_format import rulebook
+    assert rulebook.unknown_settings(HEADROOM, ["stair_riser_height"], parts.measure_kinds("stair")) == \
+        [{"stair_riser_height": 0}]
+    assert rulebook.unknown_settings(HEADROOM | {"kind": "flag"}, ["stair_riser_height"], parts.measure_kinds("stair")) is None
 
 
 @pytest.mark.parametrize("given", [
