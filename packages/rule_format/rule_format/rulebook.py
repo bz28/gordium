@@ -10,6 +10,7 @@ A missing or unusable measurement, or a value the formula can't evaluate -> need
 
 import datetime
 import hashlib
+import itertools
 import json
 import pickle
 import re
@@ -40,7 +41,7 @@ RULE_FIELDS = {"id", "kind", "topic", "title", "applies_when", "check", "review_
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
-               "examples": {"given", "expect", "note"}}
+               "examples": {"given", "expect", "note", *parts.EXAMPLE_FIELDS}}
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "findings",
                    "answers")
@@ -83,6 +84,29 @@ def _outcome(rule: dict, values: dict, allowed: dict[str, set], extra: dict | No
         return "pass" if _condition(rule["check"], values, kinds) else "fail"
     except (MissingMeasure, EvaluationError, FormulaError, ArithmeticError):
         return "needs_review"         # a formula that can't be read (never frozen so) is never a crash
+
+
+def unknown_settings(rule: dict, unknown: list[str], kinds: dict) -> list[dict] | None:
+    """The settings the "fails whatever the missing number is" proof (decided 2026-10-21) tries for these unknown
+    measures, or None when it can't be made. A rule with a check; no unknown measure in its applies_when or
+    review_when; each unknown a number the check is provably truest at when it is 0 (formula.truth_direction -1,
+    taken at 0: measures are never negative) or a yes/no fact (tried both ways); anything else, None. A rule that
+    fails under every setting fails whatever the unknowns are. Used by the checker's rows (check.fails_whatever) and
+    by each part's row (parts.rows): one proof, so it means the same for both."""
+    if rule.get("kind") != "rule" or not rule.get("check"):
+        return None
+    side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
+    for r in rule.get("review_when") or []:
+        side |= formula.names(r["when"])
+    if not unknown or any(n in side for n in unknown):
+        return None
+    numbers = [n for n in unknown if kinds.get(n) == "number"]
+    yes_no = [n for n in unknown if kinds.get(n) == "boolean"]
+    if len(numbers) + len(yes_no) != len(unknown) or any(
+            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
+        return None
+    return [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
+            for ways in itertools.product((False, True), repeat=len(yes_no))]
 
 
 def _condition(text: str, values: dict, kinds: dict) -> bool:
@@ -843,12 +867,19 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
     expects = {ex.get("expect") for ex in examples or [] if isinstance(ex.get("expect"), str)}
     if rule.get("kind") == "rule" and not {"pass", "fail"} <= expects:
         p.append("a 'rule' needs worked examples that pass and that fail, so its check is really exercised")
+    # a rule for each part: each example is a small design, its building's measures in `given` and its parts' in
+    # `parts`, checked by the rows the checker gives (parts.examples_problems); a whole-building rule has no parts
+    per_part = parts.is_part_rule(rule)
+    building = ctx.kinds() if per_part else kinds
     for n, ex in enumerate(examples or [], 1):
         given = ex.get("given")
-        if not isinstance(given, dict) or not all(isinstance(k, str) for k in given):
+        if not per_part and (extra := [k for k in parts.EXAMPLE_FIELDS if k in ex]):
+            p.append(f"example {n}: {extra} only go with a rule for each part (for_each)")
+        elif not isinstance(given, dict) or not all(isinstance(k, str) for k in given):
             p.append(f"example {n}: 'given' must be a mapping of measurement names to values")
-        elif unknown := sorted(given.keys() - set(kinds)):
-            p.append(f"example {n}: unknown measures {unknown}")
+        elif unknown := sorted(given.keys() - set(building)):
+            p.append(f"example {n}: unknown measures {unknown}" + (
+                " (a part's measures go in 'parts')" if per_part and set(unknown) & set(own) else ""))
         elif wrong := sorted(k for k, v in given.items() if not _fits(kinds[k], v)):
             p.append(f"example {n}: wrong kind of value for {wrong} (see measures.yaml units)")
         elif "use" in given and given["use"] not in ctx.uses:
@@ -857,9 +888,10 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(f"example {n}: unknown district {given['district']!r}")
         elif ex.get("expect") not in OUTCOMES:
             p.append(f"example {n}: expect must be one of {OUTCOMES}")
-        elif not p and (got := (parts.part_outcome if parts.is_part_rule(rule) else outcome)(
-                rule, given, ctx.allowed())) != ex["expect"]:
+        elif not per_part and not p and (got := outcome(rule, given, ctx.allowed())) != ex["expect"]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
+    if per_part:
+        p += parts.examples_problems(rule, examples or [], ctx.allowed(), run=not p)
 
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)
     if rule.get("status") == "approved":
