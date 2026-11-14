@@ -1,0 +1,1135 @@
+{
+ "address": "601 Hancock St, Ithaca, NY 14850",
+ "captured": "2026-11-11",
+ "answers": [
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "601 Hancock St, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 840995.3006183133,
+       "y": 890996.29904234
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840712.3154343956,
+       "ymin": 890631.6373087398,
+       "xmax": 841278.277218985,
+       "ymax": 891360.9640204464
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 840995.3006183133,
+       "y": 890996.29904234
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840712.3154343956,
+       "ymin": 890631.6373087398,
+       "xmax": 841278.277218985,
+       "ymax": 891360.9640204464
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 840995.3006183133,
+       "y": 890996.29904234
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840712.3154343956,
+       "ymin": 890631.6373087398,
+       "xmax": 841278.277218985,
+       "ymax": 891360.9640204464
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 841022.7713719283,
+       "y": 891141.6160085634
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840739.7882260382,
+       "ymin": 890776.9539239982,
+       "xmax": 841305.7459344914,
+       "ymax": 891506.281337629
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 841022.7713719283,
+       "y": 891141.6160085634
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840739.7882260382,
+       "ymin": 890776.9539239982,
+       "xmax": 841305.7459344914,
+       "ymax": 891506.281337629
+      }
+     },
+     {
+      "address": "601 Hancock Street, NY, 14850",
+      "location": {
+       "x": 841022.7713719283,
+       "y": 891141.6160085634
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840739.7882260382,
+       "ymin": 890776.9539239982,
+       "xmax": 841305.7459344914,
+       "ymax": 891506.281337629
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 840995.3006183133, \"y\": 890996.29904234}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "500700",
+       "PRINT_KEY": "44.-8-1",
+       "MUNI_NAME": "Ithaca, City",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "601 Hancock St"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          841122.5153151491,
+          891015.5301618258
+         ],
+         [
+          841094.4541576025,
+          890998.5303422317
+         ],
+         [
+          841187.5796586056,
+          890839.2804839677
+         ],
+         [
+          840963.7664373806,
+          890704.7188283671
+         ],
+         [
+          840795.0794658927,
+          890987.843271746
+         ],
+         [
+          841020.5164502207,
+          891122.7804357258
+         ],
+         [
+          841047.76658925,
+          891139.1553705897
+         ],
+         [
+          841122.5153151491,
+          891015.5301618258
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "elevation",
+   "params": {
+    "geometry": "{\"points\": [[841122.5153151491, 891015.5301618258], [841094.4541576025, 890998.5303422317], [841187.5796586056, 890839.2804839677], [840963.7664373806, 890704.7188283671], [840795.0794658927, 890987.843271746], [841020.5164502207, 891122.7804357258], [841047.76658925, 891139.1553705897], [840995.8405166242, 890921.8064569421]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryMultipoint",
+    "returnFirstValueOnly": "true",
+    "interpolation": "RSP_BilinearInterpolation"
+   },
+   "body": {
+    "samples": [
+     {
+      "location": {
+       "x": 841122.5153151491,
+       "y": 891015.5301618258,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 0,
+      "value": "117.975502014",
+      "rasterId": 54410,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 841094.4541576025,
+       "y": 890998.5303422317,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 1,
+      "value": "117.894607544",
+      "rasterId": 54410,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 841187.5796586056,
+       "y": 890839.2804839677,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 2,
+      "value": "118.289283752",
+      "rasterId": 54410,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 840963.7664373806,
+       "y": 890704.7188283671,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 3,
+      "value": "118.256210327",
+      "rasterId": 54410,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 840795.0794658927,
+       "y": 890987.843271746,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 4,
+      "value": "117.739227295",
+      "rasterId": 54410,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 841020.5164502207,
+       "y": 891122.7804357258,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 5,
+      "value": "117.787971497",
+      "rasterId": 54410,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 841047.76658925,
+       "y": 891139.1553705897,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 6,
+      "value": "117.615753174",
+      "rasterId": 54410,
+      "resolution": 1
+     },
+     {
+      "location": {
+       "x": 840995.8405166242,
+       "y": 890921.8064569421,
+       "spatialReference": {
+        "wkid": 102716,
+        "latestWkid": 2261
+       }
+      },
+      "locationId": 7,
+      "value": "118.022514343",
+      "rasterId": 54410,
+      "resolution": 1
+     }
+    ]
+   }
+  },
+  {
+   "source": "fema_flood",
+   "params": {
+    "geometry": "{\"rings\": [[[841122.5153151491, 891015.5301618258], [841094.4541576025, 890998.5303422317], [841187.5796586056, 890839.2804839677], [840963.7664373806, 890704.7188283671], [840795.0794658927, 890987.843271746], [841020.5164502207, 891122.7804357258], [841047.76658925, 891139.1553705897], [841122.5153151491, 891015.5301618258]]], \"spatialReference\": {\"wkid\": 2261}}",
+    "geometryType": "esriGeometryPolygon",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "distance": 2.0,
+    "units": "esriSRUnit_Foot",
+    "returnGeometry": "false",
+    "outFields": "FLD_ZONE,ZONE_SUBTY,SFHA_TF"
+   },
+   "body": {
+    "displayFieldName": "FLD_AR_ID",
+    "fieldAliases": {
+     "FLD_ZONE": "FLD_ZONE",
+     "ZONE_SUBTY": "ZONE_SUBTY",
+     "SFHA_TF": "SFHA_TF"
+    },
+    "fields": [
+     {
+      "name": "FLD_ZONE",
+      "type": "esriFieldTypeString",
+      "alias": "FLD_ZONE",
+      "length": 17
+     },
+     {
+      "name": "ZONE_SUBTY",
+      "type": "esriFieldTypeString",
+      "alias": "ZONE_SUBTY",
+      "length": 76
+     },
+     {
+      "name": "SFHA_TF",
+      "type": "esriFieldTypeString",
+      "alias": "SFHA_TF",
+      "length": 1
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "FLD_ZONE": "AE",
+       "ZONE_SUBTY": null,
+       "SFHA_TF": "T"
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "geocoder",
+   "params": {
+    "SingleLine": "601 Hancock St, Ithaca, NY 14850",
+    "outSR": 2261,
+    "maxLocations": 6,
+    "outFields": "Addr_type,AddNum,StPreDir,StName,StType,City,Region,Subregion,Postal"
+   },
+   "body": {
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "candidates": [
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 840995.3006183133,
+       "y": 890996.29904234
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840712.3154343956,
+       "ymin": 890631.6373087398,
+       "xmax": 841278.277218985,
+       "ymax": 891360.9640204464
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 840995.3006183133,
+       "y": 890996.29904234
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840712.3154343956,
+       "ymin": 890631.6373087398,
+       "xmax": 841278.277218985,
+       "ymax": 891360.9640204464
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 840995.3006183133,
+       "y": 890996.29904234
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "PointAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840712.3154343956,
+       "ymin": 890631.6373087398,
+       "xmax": 841278.277218985,
+       "ymax": 891360.9640204464
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 841022.7713719283,
+       "y": 891141.6160085634
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840739.7882260382,
+       "ymin": 890776.9539239982,
+       "xmax": 841305.7459344914,
+       "ymax": 891506.281337629
+      }
+     },
+     {
+      "address": "601 Hancock Street, Ithaca, NY, 14850",
+      "location": {
+       "x": 841022.7713719283,
+       "y": 891141.6160085634
+      },
+      "score": 100,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "Ithaca",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840739.7882260382,
+       "ymin": 890776.9539239982,
+       "xmax": 841305.7459344914,
+       "ymax": 891506.281337629
+      }
+     },
+     {
+      "address": "601 Hancock Street, NY, 14850",
+      "location": {
+       "x": 841022.7713719283,
+       "y": 891141.6160085634
+      },
+      "score": 99.07,
+      "attributes": {
+       "Addr_type": "StreetAddress",
+       "AddNum": "601",
+       "StPreDir": "",
+       "StName": "Hancock",
+       "StType": "Street",
+       "City": "",
+       "Region": "NY",
+       "Subregion": "Tompkins",
+       "Postal": "14850"
+      },
+      "extent": {
+       "xmin": 840739.7882260382,
+       "ymin": 890776.9539239982,
+       "xmax": 841305.7459344914,
+       "ymax": 891506.281337629
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_parcels",
+   "params": {
+    "geometry": "{\"x\": 840995.3006183133, \"y\": 890996.29904234}",
+    "geometryType": "esriGeometryPoint",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "SWIS,PRINT_KEY,MUNI_NAME,CITYTOWN_NAME,PARCEL_ADDR"
+   },
+   "body": {
+    "objectIdFieldName": "OBJECTID",
+    "globalIdFieldName": "",
+    "geometryType": "esriGeometryPolygon",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "SWIS",
+      "alias": "SWIS",
+      "type": "esriFieldTypeString",
+      "length": 10
+     },
+     {
+      "name": "PRINT_KEY",
+      "alias": "PRINT_KEY",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "MUNI_NAME",
+      "alias": "MUNI_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "CITYTOWN_NAME",
+      "alias": "CITYTOWN_NAME",
+      "type": "esriFieldTypeString",
+      "length": 50
+     },
+     {
+      "name": "PARCEL_ADDR",
+      "alias": "PARCEL_ADDR",
+      "type": "esriFieldTypeString",
+      "length": 255
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "SWIS": "500700",
+       "PRINT_KEY": "44.-8-1",
+       "MUNI_NAME": "Ithaca, City",
+       "CITYTOWN_NAME": "Ithaca",
+       "PARCEL_ADDR": "601 Hancock St"
+      },
+      "geometry": {
+       "rings": [
+        [
+         [
+          841122.5153151491,
+          891015.5301618258
+         ],
+         [
+          841094.4541576025,
+          890998.5303422317
+         ],
+         [
+          841187.5796586056,
+          890839.2804839677
+         ],
+         [
+          840963.7664373806,
+          890704.7188283671
+         ],
+         [
+          840795.0794658927,
+          890987.843271746
+         ],
+         [
+          841020.5164502207,
+          891122.7804357258
+         ],
+         [
+          841047.76658925,
+          891139.1553705897
+         ],
+         [
+          841122.5153151491,
+          891015.5301618258
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  },
+  {
+   "source": "state_streets",
+   "params": {
+    "geometry": "840645.0794658927,890554.7188283671,841337.5796586056,891289.1553705897",
+    "geometryType": "esriGeometryEnvelope",
+    "inSR": 2261,
+    "spatialRel": "esriSpatialRelIntersects",
+    "returnGeometry": "true",
+    "outSR": 2261,
+    "outFields": "CompleteStreetName"
+   },
+   "body": {
+    "displayFieldName": "CompleteStreetName",
+    "fieldAliases": {
+     "CompleteStreetName": "CompleteStreetName"
+    },
+    "geometryType": "esriGeometryPolyline",
+    "spatialReference": {
+     "wkid": 102716,
+     "latestWkid": 2261
+    },
+    "fields": [
+     {
+      "name": "CompleteStreetName",
+      "type": "esriFieldTypeString",
+      "alias": "CompleteStreetName",
+      "length": 100
+     }
+    ],
+    "features": [
+     {
+      "attributes": {
+       "CompleteStreetName": "Washington Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          840856.1169041204,
+          890196.1021948849
+         ],
+         [
+          840841.4428637602,
+          890592.182781838
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Park Place"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841119.2752795703,
+          890205.8026162462
+         ],
+         [
+          841106.4836990946,
+          890603.0013843015
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Fourth Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841359.6497740395,
+          890615.2723850567
+         ],
+         [
+          841235.0125785886,
+          890829.4210651796
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Cascadilla Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841359.6497740395,
+          890615.2723850567
+         ],
+         [
+          841106.4836990946,
+          890603.0013843015
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Cascadilla Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841106.4836990946,
+          890603.0013843015
+         ],
+         [
+          840956.9540813488,
+          890596.3065919818
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Fifth Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          840949.090864311,
+          890657.1704197509
+         ],
+         [
+          840938.5478464946,
+          890680.4720042446
+         ],
+         [
+          840745.0155204886,
+          891000.6205184072
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Cascadilla Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          840956.9540813488,
+          890596.3065919818
+         ],
+         [
+          840841.4428637602,
+          890592.182781838
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Fifth Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          840956.9540813488,
+          890596.3065919818
+         ],
+         [
+          840949.090864311,
+          890657.1704197509
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Cascadilla Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          840841.4428637602,
+          890592.182781838
+         ],
+         [
+          840380.4610138908,
+          890573.2128657883
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Hancock Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          840745.0155204886,
+          891000.6205184072
+         ],
+         [
+          840577.4966995093,
+          890899.1701346752
+         ],
+         [
+          840504.3590710985,
+          890866.6606158536
+         ],
+         [
+          840466.0533577296,
+          890856.4286421323
+         ],
+         [
+          840426.1305326074,
+          890850.2031753162
+         ],
+         [
+          840372.1532872709,
+          890846.1441178557
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Fifth Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          840745.0155204886,
+          891000.6205184072
+         ],
+         [
+          840563.3500062763,
+          891310.9477408287
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Fourth Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841029.8687800948,
+          891170.3245440158
+         ],
+         [
+          840909.3236736831,
+          891369.1902981398
+         ],
+         [
+          840839.0158177927,
+          891498.1370206856
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Hancock Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841029.8687800948,
+          891170.3245440158
+         ],
+         [
+          840803.2707822568,
+          891037.479942436
+         ],
+         [
+          840745.0155204886,
+          891000.6205184072
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Hancock Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841314.7204982776,
+          891341.8662776047
+         ],
+         [
+          841029.8687800948,
+          891170.3245440158
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Morris Avenue"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841416.3367158002,
+          891172.5126984412
+         ],
+         [
+          841233.1856048044,
+          891057.5443166347
+         ],
+         [
+          841147.9617615009,
+          891007.9075483995
+         ],
+         [
+          841143.3603264402,
+          890997.7135406351
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Fourth Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841235.0125785886,
+          890829.4210651796
+         ],
+         [
+          841145.5505432405,
+          890980.590081543
+         ],
+         [
+          841143.3603264402,
+          890997.7135406351
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Madison Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841235.0125785886,
+          890829.4210651796
+         ],
+         [
+          840949.090864311,
+          890657.1704197509
+         ]
+        ]
+       ]
+      }
+     },
+     {
+      "attributes": {
+       "CompleteStreetName": "Madison Street"
+      },
+      "geometry": {
+       "paths": [
+        [
+         [
+          841518.7938626454,
+          891002.0587646324
+         ],
+         [
+          841235.0125785886,
+          890829.4210651796
+         ]
+        ]
+       ]
+      }
+     }
+    ]
+   }
+  }
+ ],
+ "live_status": "found"
+}

@@ -158,3 +158,29 @@ def test_an_applies_when_that_isnt_text_gives_a_review_row():
     got = each_part.check_parts([copy.deepcopy(RISER) | {"applies_when": ["x"]}],
                                 {"stair": [{"id": "s1", "measures": {"stair_riser_height": 7}}]}, ZONING, ALLOWED)
     assert [i["status"] for i in got["items"]] == [present.REVIEW]
+
+
+def test_a_part_proven_to_fail_says_what_was_not_measured():
+    rule = synthetic.HEADROOM
+    got = each_part.check_parts([copy.deepcopy(rule)], {"stair": [{"id": "s1", "name": "Stair 1",
+                                                                   "measures": {"stair_headroom": 70}}]},
+                                ZONING, ALLOWED)
+    assert [(i["status"], i["reason"]) for i in got["items"]] == [
+        (present.FAILS, "Stair 1: SYNTHETIC stair headroom: does not comply whatever the riser height (not measured)")]
+
+
+def test_one_proof_for_parts_and_zoning_rows(monkeypatch):
+    """Review round 4: parts.rows and the checker's zoning rows (check.fails_whatever) take the 2026-10-21 proof from
+    one function, rulebook.unknown_settings: switched off there, both stop proving the fail."""
+    from design_checker import check
+    from rule_format import rulebook
+    assert check.unknown_settings is rulebook.unknown_settings
+    stair = {"stair": [{"id": "s1", "measures": {"stair_headroom": 70}}]}
+    zoning = {"id": "z", "kind": "rule", "check": "front_yard >= 25 + building_height"}
+    measured = {"front_yard": {"value": 20}}
+    assert each_part.check_parts([synthetic.HEADROOM], stair, ZONING, ALLOWED)["rows"][0]["outcome"] == "fail"
+    assert check.fails_whatever(zoning, measured, ALLOWED) is not None
+    monkeypatch.setattr(rulebook, "unknown_settings", lambda *a: None)
+    monkeypatch.setattr(check, "unknown_settings", rulebook.unknown_settings)
+    assert each_part.check_parts([synthetic.HEADROOM], stair, ZONING, ALLOWED)["rows"][0]["outcome"] == "needs_review"
+    assert check.fails_whatever(zoning, measured, ALLOWED) is None

@@ -12,6 +12,7 @@ import yaml
 from rule_format.place import place
 
 from ... import geometry as g
+from ...http import ServiceError
 
 PLACE = place("new_york/ithaca_city")       # the place this lookup serves: its settings (jurisdiction.yaml)
 ENDPOINTS = yaml.safe_load((Path(__file__).parent / "endpoints.yaml").read_text(encoding="utf-8"))
@@ -52,6 +53,16 @@ def normalize_street(name: str) -> str:
     if words and words[-1] in _SUFFIX:
         words[-1] = _SUFFIX[words[-1]]
     return " ".join(words)
+
+
+def _features(body) -> list[dict]:
+    """A query answer's features. An answer that isn't {"features": [...]} with an attributes dict on each is a
+    ServiceError: where "nothing found" lets a fact say none, an odd answer must never read as nothing found."""
+    feats = body.get("features") if isinstance(body, dict) else None
+    if not isinstance(feats, list) or not all(isinstance(f, dict) and isinstance(f.get("attributes"), dict)
+                                              for f in feats):
+        raise ServiceError("an answer without a feature list")
+    return feats
 
 
 class Fetcher:
@@ -169,21 +180,49 @@ class Fetcher:
 
     # ---- zoning and overlays (live only) --------------------------------------------------------------
 
-    def zoning_near(self, ring) -> list[dict]:
-        body = self._ask("city_zoning", {**self._envelope(ring, 0.0), "outFields": "ZONE"})
+    def zoning_near(self, ring, pad: float = 0.0) -> list[dict]:
+        """The zoning map's polygons meeting the lot's box, `pad` feet around it (an overlay that close counts)."""
+        body = self._ask("city_zoning", {**self._envelope(ring, pad), "outFields": "ZONE"})
+        feats = _features(body)
+        if body.get("exceededTransferLimit") or not all((f.get("geometry") or {}).get("rings") for f in feats):
+            raise ServiceError("the zoning map's answer is incomplete (more polygons, or one without its outline)")
         return [{"zone": f["attributes"].get("ZONE"), "rings": [g.open_ring(r) for r in f["geometry"]["rings"]]}
-                for f in body.get("features", []) if f.get("geometry")]
+                for f in feats]
 
     def zoning_last_edited(self) -> dt.date | None:
         body = self._ask("city_zoning", {}, url=ENDPOINTS["city_zoning"]["layer"])
         ms = (body.get("editingInfo") or {}).get("dataLastEditDate")
         return dt.datetime.fromtimestamp(ms / 1000, dt.timezone.utc).date() if ms else None
 
-    def overlays(self, key: str, field: str, ring) -> list[str]:
+    def overlays(self, key: str, field: str, ring, margin_ft: float = 0.0) -> list[str]:
+        """The names of the layer's areas touching the lot (and `margin_ft` around it). An area with no name still
+        counts ("no name given"): it is there. An answer without a feature list is an error, never "none"."""
+        body = self._ask(key, self._lot_query(ring, "esriSpatialRelIntersects", field, margin_ft))
+        return sorted({str(f["attributes"].get(field) or "").strip() or "no name given" for f in _features(body)})
+
+    # ---- FEMA flood maps (public: stored) ---------------------------------------------------------------
+
+    FLOOD_FIELDS = "FLD_ZONE,ZONE_SUBTY,SFHA_TF"
+
+    def _lot_query(self, ring, rel: str, fields: str, margin_ft: float) -> dict:
+        """A question about the lot's outline (and `margin_ft` around it, the tax map's tolerance), no geometry
+        back: FEMA's zone polygons run to hundreds of thousands of points."""
         geom = {"rings": [[list(p) for p in ring + ring[:1]]], "spatialReference": {"wkid": SR}}
-        body = self._ask(key, {"geometry": json.dumps(geom), "geometryType": "esriGeometryPolygon", "inSR": SR,
-                               "spatialRel": "esriSpatialRelIntersects", "returnGeometry": "false", "outFields": field})
-        return sorted({str(f["attributes"].get(field)) for f in body.get("features", []) if f["attributes"].get(field)})
+        return {"geometry": json.dumps(geom), "geometryType": "esriGeometryPolygon", "inSR": SR, "spatialRel": rel,
+                "distance": margin_ft, "units": "esriSRUnit_Foot", "returnGeometry": "false", "outFields": fields}
+
+    def flood_zones(self, ring, within: bool = False, margin_ft: float = 2.0) -> list[dict]:
+        """The FEMA flood zones touching the lot (and `margin_ft` around it), or with `within`, the zones the whole
+        of it lies inside (ArcGIS: the query geometry within the feature). Each {zone, subtype, sfha}."""
+        rel = "esriSpatialRelWithin" if within else "esriSpatialRelIntersects"
+        body = self._ask("fema_flood", self._lot_query(ring, rel, self.FLOOD_FIELDS, margin_ft))
+        return [{"zone": f["attributes"].get("FLD_ZONE"), "subtype": f["attributes"].get("ZONE_SUBTY"),
+                 "sfha": f["attributes"].get("SFHA_TF")} for f in _features(body)]
+
+    def flood_study_here(self, key: str, ring, margin_ft: float = 2.0) -> bool:
+        """Whether a pending or preliminary FEMA flood map (its study area) covers any of the lot."""
+        body = self._ask(key, self._lot_query(ring, "esriSpatialRelIntersects", "OBJECTID", margin_ft))
+        return bool(_features(body))
 
     # ---- ground ----------------------------------------------------------------------------------------
 
