@@ -581,11 +581,16 @@ def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[
     return generator.largest_legal_building(site, facts, measured, rules, verdict=verdict, **options)
 
 
+def _rules_pass(n: int) -> str:
+    return f"{n} rule passes" if n == 1 else f"{n} rules pass"
+
+
 def summary(rows: list[dict]) -> dict:
     """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on how the
     law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
     with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
-    missing fact, not a reading, so it is never shown as complying."""
+    missing fact, not a reading, so it is never shown as complying. No row at all is "Nothing checked", needs review:
+    a check that decided nothing never passes."""
     # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
     # whatever its named readings say (review round 20); a row without a verdict, by its outcome
     def verdict_of(r):
@@ -594,20 +599,24 @@ def summary(rows: list[dict]) -> dict:
     fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
     review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
     passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
+    if not fails and not review and not passes:     # nothing checked is never a pass (principle 4)
+        return {"state": "review", "text": "Nothing checked", "lines": []}
     if not fails and not review:
         return {"state": "pass", "text": f"All {len(passes)} rules pass", "lines": []}
     if not fails and all(r.get("Provisional") and not r.get("Survey") for r in review):
         waiting = {}
         for r in review:
             waiting.setdefault(r["Provisional"], []).append(short(r["Requirement"]))
-        return {"state": "complies", "text": f"Complies: {len(passes)} pass, {len(review)} pass whichever way open "
-                                             "questions go",
+        return {"state": "complies", "text": f"Complies: {_rules_pass(len(passes))}, {len(review)} pass whichever "
+                                             "way open questions go",
                 "lines": [", ".join(names) + ": " + why for why, names in waiting.items()]}
     lines = [r.get("Line") or (_amount(r) if r["Error"] == "FAIL" else f"{short(r['Requirement'])}: {r['Provisional']}")
              for r in fails]
     lines += [f"{short(r['Requirement'])}: {r.get('Provisional') or (r.get('Named') or {}).get('text') or r['Why']}"
               for r in review]
-    counts = f"{len(passes)} pass" + (f" · {len(fails)} fail" if fails else "") + (
+    # counted in rules, said so: the panel counts its rows, and one rule can be two rows (the side yards: the
+    # audit of main, 2026-10-29: "8 pass" beside the panel's "9 comply")
+    counts = _rules_pass(len(passes)) + (f" · {len(fails)} fail" if fails else "") + (
         f" · {len(review)} need review" if review else "")
     return {"state": "fail" if fails else "review", "text": counts, "lines": lines}
 
@@ -743,6 +752,20 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     return check_site(site, facts, model_path.name, report_path, extras, step=step)
 
 
+def no_rules_for(facts: dict) -> str | None:
+    """Why a district can't be checked, in plain words, when it has no rulebook (saved facts naming B-1a raised the
+    report's own "<temp path>/project.yaml: no rulebook for zone 'B-1a' in …": the audit of main, 2026-10-29);
+    None when it has one. The districts that do are listed from the rulebooks themselves."""
+    j = REPO / facts["jurisdiction"]
+    if rulebook_for(j, facts["zone"]) is not None:
+        return None
+    have = sorted({p.stem for folder in (j / "5_zoning_rules", j / "5_zoning_rules/drafted") if folder.is_dir()
+                   for p in folder.glob("*.yaml")}, key=lambda z: [int(t) if t.isdigit() else t.lower()
+                                                                  for t in re.split(r"(\d+)", z)])
+    listed = ", ".join(have[:-1]) + " and " + have[-1] if len(have) > 1 else "".join(have) or "none yet"
+    return f"Gordium doesn't have rules for district {facts['zone']} yet. It has rules for {listed}."
+
+
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
                extras: dict | None = None, step=None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
@@ -750,6 +773,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    if no_rules_for(facts):                    # said plainly, never the report's temporary file and its words
+        raise ValueError(no_rules_for(facts))
     model_path = Path(name)
     say = step or _quiet
     say(STEPS["measure"])
@@ -1600,6 +1625,8 @@ def start(model_path: Path, facts: dict, floor_to_floor: float | None = None, de
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    if no_rules_for(facts):
+        raise ValueError(no_rules_for(facts))
     say = step or _quiet
     say(STEPS["lot"])
     site = {**read_site(Path(model_path), facts), "buildings": []}
