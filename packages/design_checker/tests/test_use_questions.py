@@ -9,7 +9,7 @@ import pytest
 from design_checker import present
 from design_checker import rhino_logic as logic
 from design_checker.check import follow_up_facts, implied_for, options, use_choices
-from rule_format.rulebook import REPO, outcome
+from rule_format.rulebook import REPO, load, outcome
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 NAMES = {"one_family_detached": "One-family dwelling, detached", "one_family_attached": "One-family dwelling, attached",
@@ -58,11 +58,28 @@ def test_the_use_dropdown_lists_the_districts_chart_uses_permitted_first_and_say
     r1b = city["district_uses"]["R-1b"]
     assert [u["id"] for u in r1b if u["permitted"]] == ["one_family_detached", "church", "public_park_or_playground",
                                                          "library_or_fire_station"]
-    assert [u["id"] for u in r1b if not u["permitted"]] == ["cemetery", "public_utility_structure", "school"]
-    assert all(u["note"].startswith("Not permitted by right in R-1b: Marked SP") for u in r1b if not u["permitted"])
+    assert [u["id"] for u in r1b if not u["permitted"]] == ["cemetery", "public_utility_structure", "school",
+                                                             "bed_and_breakfast_inn"]
+    assert all(u["note"].startswith("Not permitted by right in R-1b: Marked SP") for u in r1b if not u["permitted"]
+               and u["id"] != "bed_and_breakfast_inn")
     assert logic.district_use_names(city, "R-1b")[0] == ("one_family_detached", "One-family dwelling, detached")
     assert logic.use_note(city, "R-1b", "school").endswith("(p.2).") and logic.use_note(city, "R-1b", "church") is None
     assert json.loads(json.dumps(city)) == city                   # it crosses to Rhino as JSON, unchanged
+
+
+@pytest.mark.parametrize("zone", ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c"])
+def test_a_bed_and_breakfast_in_r1_r2_is_said_as_its_rule_says_never_wont_comply(zone):
+    """The chart marks a bed-and-breakfast inn "-" in R-1 and R-2, but §325-9B(1)(p) lists it among the special-permit
+    uses "in all districts": an open question, so the use rule says needs review. The box says the same, never "won't
+    comply" (review round 1 of PR 65: its rule writes `use == "..."`, which the dropdown once didn't read)."""
+    city = options(CITY)
+    inn = next(u for u in city["district_uses"][zone] if u["id"] == "bed_and_breakfast_inn")
+    assert inn["permitted"] is False
+    note = logic.use_note(city, zone, "bed_and_breakfast_inn")
+    assert note.startswith(f"Not permitted by right in {zone}: Marked - (not permitted)") and "§325-9B(1)(p)" in note
+    assert "won't comply" not in note
+    rule = next(r for r in load(REPO / CITY / "5_zoning_rules" / f"{zone}.yaml")["rules"] if r["id"] == f"{zone}.use")
+    assert outcome(rule, {"use": "bed_and_breakfast_inn"}, {"use": set(city["uses"])}) == "needs_review"
 
 
 def test_a_use_the_district_doesnt_list_stays_picked_and_is_said():
@@ -307,3 +324,14 @@ def test_rhino_logic_names_each_thing_once():
     assert [n for n, k in collections.Counter(names).items() if k > 1] == []
     assert logic.NOT_ANSWERED == "Not answered"
     assert logic._listed({"district_uses": {"R-1b": [1]}}, "R-1b") == [1] and logic._joined(["a", "b"]) == "a and b"
+
+
+def test_a_rule_for_each_part_asks_its_building_facts_never_its_parts_measures():
+    """A rule for each part (SYNTHETIC) reads its parts' measures from the interior, never from the box; the building
+    facts it reads are asked like any rule's (so its rows don't need review for a fact never asked)."""
+    from design_checker.check import _read_for
+    stair = {"id": "X.synthetic_riser", "kind": "rule", "for_each": "stair", "when_none": "not_applicable",
+             "applies_when": 'use == "multiple_family"', "check": "stair_riser_height <= 8.25 + 0 * dwelling_units"}
+    assert _read_for([stair], "multiple_family", NAMES) == {"use", "dwelling_units"}
+    assert "dwelling_units" in follow_up_facts(X[5:] + [stair], "multiple_family", NAMES)
+    assert _read_for([stair], "one_family_detached", NAMES) == set()     # not this use's rule: nothing asked

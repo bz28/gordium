@@ -35,9 +35,10 @@ from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
-from rule_format import formula
+from rule_format import formula, parts
 from rule_format.place import plugin_place
-from rule_format.rulebook import MEASURE_KINDS, REPO, Context, load, load_bytes, outcome, rulebook_for
+from rule_format.rulebook import (MEASURE_KINDS, REPO, Context, load, load_bytes, outcome, rulebook_for,
+                                  unknown_settings)
 
 COLUMNS = OUTPUT_HEADERS + OUTPUT_EXTRA
 # Facts about the inside of a building (rooms, parking spaces). This phase checks the outside only: a rule waiting
@@ -306,22 +307,13 @@ def fails_whatever(rule: dict, measured: dict, allowed: dict, facts: dict | None
     comply (principle 4)."""
     if rule.get("kind") != "rule" or not rule.get("check"):
         return None
-    side = formula.names(rule["applies_when"]) if rule.get("applies_when") else set()
-    for r in rule.get("review_when") or []:
-        side |= formula.names(r["when"])
     names = reading_set.rule_names(rule)
     unknown = sorted(n for n in names if (measured.get(n) or {}).get("value") is None
                      and not (measured.get(n) or {}).get("readings"))
-    if not unknown or any(n in side for n in unknown):
-        return None
-    numbers = [n for n in unknown if MEASURE_KINDS.get(n) == "number"]
-    yes_no = [n for n in unknown if MEASURE_KINDS.get(n) == "boolean"]
-    if len(numbers) + len(yes_no) != len(unknown) or any(
-            formula.truth_direction(rule["check"], n) != -1 for n in numbers):
+    settings = unknown_settings(rule, unknown, MEASURE_KINDS)     # the proof's settings (shared with parts.rows)
+    if settings is None:
         return None
     values = {k: m["value"] for k, m in measured.items()}
-    settings = [{**{n: 0 for n in numbers}, **dict(zip(yes_no, ways))}
-                for ways in itertools.product((False, True), repeat=len(yes_no))]
     # the rest over THE reading set (each reading of what has readings; on a tax-map lot the lines' slack and the
     # lot area's low and high): it fails whatever the unknown values are only if it fails under every one of them
     every = reading_set.combos(names - set(unknown), values, measured, facts)
@@ -1754,15 +1746,18 @@ def sample_site() -> dict:
 
 
 def _use_lists(body) -> list:
-    """The use names a formula lists in `use in [...]` (the chart's own rows), in order."""
+    """The use names a formula lists in `use in [...]` (the chart's own rows) or names in `use == "..."` (one row, as
+    the bed-and-breakfast inn's review in R-1 and R-2), in order. Missing the second once left the box saying a use
+    "won't comply" while its rule said needs review (review round 1 of PR 65)."""
     import ast
     out = []
     for node in ast.walk(body):
-        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use" and \
-                any(isinstance(op, ast.In) for op in node.ops):
-            for comp in node.comparators:
-                if isinstance(comp, ast.List):
+        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use":
+            for op, comp in zip(node.ops, node.comparators):
+                if isinstance(op, ast.In) and isinstance(comp, ast.List):
                     out += [e.value for e in comp.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)]
+                elif isinstance(op, ast.Eq) and isinstance(comp, ast.Constant) and isinstance(comp.value, str):
+                    out.append(comp.value)
     return out
 
 
@@ -1842,7 +1837,16 @@ def _read_for(rules: list, use: str | None, uses: dict) -> set:
                     continue                      # not this use's rule: nothing it reads is asked
             except (formula.MissingMeasure, formula.EvaluationError):
                 pass                              # depends on what isn't known yet: it may apply, so asked
-        wanted |= reading_set.rule_names(rule)
+        names = reading_set.rule_names(rule)
+        if parts.is_part_rule(rule):
+            # a rule for each part: its parts' own measures come from the parts (the interior), never asked in the
+            # box; the building facts it reads (stories, use) are asked like any rule's, so its rows aren't left
+            # needing review for a fact the architect was never asked (a fact not asked is unknown: needs review)
+            try:
+                names -= parts.all_measures()
+            except (ValueError, OSError):     # parts.yaml broken (python -m rule_format says so): every name kept
+                pass
+        wanted |= names
     return wanted
 
 
