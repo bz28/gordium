@@ -226,7 +226,12 @@ def read_room(model, space) -> dict:
     info["base_elevation"] = tidy(base)
 
     finish, where, bad = model.quantity(space, "FinishFloorHeight")
-    if finish is None:
+    lows = tris[down][:, :, 2]
+    if len(lows) and float(lows.max() - lows.min()) > FLAT:   # review round 16: a stepped floor has no one height
+        missing["floor_elevation"] = (f"the space's underside isn't at one level ({tidy(lows.min())} to "
+                                      f"{tidy(lows.max())} m): there is no one finished floor to measure from")
+        floor = None
+    elif finish is None:
         missing["floor_elevation"] = bad or ("the space's flooring height (FinishFloorHeight) isn't given: its base "
                                              "is the slab without flooring, so the finished floor is unknown")
         floor = None
@@ -297,7 +302,7 @@ def _ceiling(model, space, above, floor, top_of_body):
     """A flat ceiling's height above the finished floor: the model's FinishCeilingHeight, if the space's top is level
     (the lower of the two, if its top is lower)."""
     if floor is None:
-        return None, "the finished floor isn't known (FinishFloorHeight), so no height above it is"
+        return None, "the finished floor isn't known (see floor_elevation), so no height above it is"
     if not len(above):
         return None, "the space's body has no top"
     tops = above[:, :, 2]

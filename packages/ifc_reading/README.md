@@ -35,7 +35,7 @@ records the file (name, SHA-256 fingerprint, schema, unit) and what wasn't read 
 | Key | Read from | Left out when |
 |---|---|---|
 | `sleeping` | the room's words (below), or the `Gordium_Egress.Sleeping` flag | the words don't settle it |
-| `floor_elevation` | the space's base (its body's lowest point) + its `FinishFloorHeight` quantity | `FinishFloorHeight` isn't given, is negative (a flooring thickness can't be), or puts the floor at or above the space's top |
+| `floor_elevation` | the space's base (its body's lowest point) + its `FinishFloorHeight` quantity | the space's underside isn't at one level (a step or slope), or `FinishFloorHeight` isn't given, is negative (a flooring thickness can't be), or puts the floor at or above the space's top |
 | `floor` | the outline of the space's underside | the underside isn't one level outline, or the outline's area is more than the space's `NetFloorArea` quantity, or that quantity isn't given |
 | `ceiling_height` | the `FinishCeilingHeight` quantity (the lower of it and the space's top, above the finished floor) | it isn't given, the floor elevation isn't known, the space's top isn't level, or it or the space's top isn't above the floor |
 

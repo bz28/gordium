@@ -1025,3 +1025,21 @@ def test_a_wall_out_by_drawing_noise_is_still_a_wall(build, tmp_path, lean):
     room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
     assert "floor" in room, room.get("not_given")
     assert room["floor_elevation"] == 0.0 and room["ceiling_height"] == 2.5
+
+
+def test_a_stepped_floor_has_no_one_height_to_measure_from(build, tmp_path):
+    """Review round 16: with half the floor 0.5 m up, the finished floor was taken at the lower half, so the ceiling
+    read 2.9 m where over the raised half it is 2.5 m. A stepped underside now leaves the floor's elevation, and so
+    the ceiling height, out."""
+    b = build.house("metre")
+    s = b.space("Bedroom", (0, 0, 0), (4, 3, 3),
+                quantities={"NetFloorArea": 12.0, "FinishFloorHeight": 0.0, "FinishCeilingHeight": 2.9})
+    side = [(0, 0), (2, 0), (2, 0.5), (4, 0.5), (4, 3), (0, 3)]     # (x, z): the step at x = 2
+    verts = [(x, 0.0, z) for x, z in side] + [(x, 3.0, z) for x, z in side]
+    faces = [list(range(6)), list(range(11, 5, -1))] + [[i, 6 + i, 6 + (i + 1) % 6, (i + 1) % 6] for i in range(6)]
+    s.Representation = None
+    b.run("geometry.assign_representation", product=s, representation=b.run(
+        "geometry.add_mesh_representation", context=b.body, vertices=[verts], faces=[faces]))
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "ceiling_height" not in room and "floor_elevation" not in room and "floor" not in room
+    assert "isn't at one level (0.0 to 0.5 m)" in room["not_given"]["floor_elevation"]
