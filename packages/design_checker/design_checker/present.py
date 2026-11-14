@@ -1714,23 +1714,52 @@ def _building_items(items: list[dict]) -> list[dict]:
     return [i for i in items if i["group"] != "not_covered" and not i.get("use_detail")]
 
 
+RELEASE = "release."      # the id prefix of a row this release doesn't check (not_checked_yet.yaml's not_in_this_release)
+TO_ANSWER = ("to answer", "to answer")                               # a row waiting on a fact the architect can enter
+NOT_IN_RELEASE = ("not checked in this release", "not checked in this release")   # one Gordium can't check yet
+
+
+def waiting_parts(items: list[dict]) -> list[str]:
+    """The counted rows not checked, by what the architect does next (Ben, 2026-11-09): "1 to answer" (a row waiting on
+    a fact the model doesn't show, bedrooms, parking spaces: its "Enter …" button answers it) and "1 not checked in this
+    release" (overlays: checked by hand for now). A row not checked for any other reason is "not checked". Each holds
+    the whole design at needs review (state): missing data is never a pass."""
+    waiting = [i for i in _building_items(items) if i["status"] == NOT_CHECKED]
+    kinds = [(TO_ANSWER, [i for i in waiting if i.get("needs")]),
+             (NOT_IN_RELEASE, [i for i in waiting if not i.get("needs") and str(i.get("id") or "").startswith(RELEASE)]),
+             (WORDS[NOT_CHECKED], [i for i in waiting if not i.get("needs")
+                                   and not str(i.get("id") or "").startswith(RELEASE)])]
+    return [f"{len(rows)} {words[0 if len(rows) == 1 else 1]}" for words, rows in kinds if rows]
+
+
 def summary(items: list[dict]) -> str:
     """One line, the same everywhere: every item counted (site rows too), bad news first, no zero counts, never
-    a check mark: "1 does not comply · 2 need review · 7 comply · 3 not checked". The use details still to answer are
-    counted apart, last: "· 5 use details to answer" (not among the problems, and never among the passes)."""
+    a check mark: "1 does not comply · 2 need review · 7 comply · 1 to answer · 1 not checked in this release" (the
+    rows not checked, by what to do next: waiting_parts). The use details still to answer are counted apart, last:
+    "· 5 use details to answer" (not among the problems, and never among the passes). When the design needs review
+    only because of rows still waiting (no row fails or needs review), the line says so first: "needs review · 7 comply
+    · 1 to answer · 1 not checked in this release", never a line of passes on a design that isn't one (Ben,
+    2026-11-09)."""
     counted = _building_items(items)
     parts = []
-    for st in ORDER:
+    for st in (FAILS, REVIEW, COMPLIES):
         n = sum(1 for i in counted if i["status"] == st)
         if n:
             parts.append(f"{n} {WORDS[st][0 if n == 1 else 1]}")
+    parts += waiting_parts(items)
     d = sum(1 for i in items if i.get("use_detail"))
     if d:
         parts.append(f"{d} use detail{'s' if d != 1 else ''} to answer")
+    if parts and state(items) == REVIEW and not any(i["status"] in (FAILS, REVIEW) for i in counted):
+        parts.insert(0, WORDS[REVIEW][0])
     return " · ".join(parts) or "nothing checked"
 
 
 def state(items: list[dict]) -> str:
+    """The design's one overall answer: does not comply if any counted row does; else needs review if any counted row
+    needs review, any use detail waits for an answer, or any counted row is not checked (waiting on a fact, or not in
+    this release: Ben, 2026-11-09); complies only when every counted row complies. Nothing counted is needs review: a
+    check that decided nothing never passes (principle 4)."""
     counted = _building_items(items)
     for st in (FAILS, REVIEW):
         if any(i["status"] == st for i in counted):
@@ -1738,8 +1767,8 @@ def state(items: list[dict]) -> str:
     # a use detail left unanswered is not a problem with the building, but it is not a pass either: never "complies"
     if any(i.get("use_detail") for i in items):
         return REVIEW
-    # nothing actually checked (no counted item, or every one "not checked"): never "complies" (principle 4)
-    return COMPLIES if any(i["status"] == COMPLIES for i in counted) else REVIEW
+    # every counted row complies, and there is one: nothing left waiting, nothing unchecked (principle 4)
+    return COMPLIES if counted and all(i["status"] == COMPLIES for i in counted) else REVIEW
 
 
 from model_measurement.stops import stop as _stop  # noqa: E402
