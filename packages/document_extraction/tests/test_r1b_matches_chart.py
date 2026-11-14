@@ -401,7 +401,12 @@ def test_use_list_matches_the_chart_marks(district):
         flagged = formula.strings(use_rule["applies_when"])
         allowed = set(uses) - flagged
     assert {u for u, m in marks.items() if m == "•"} == allowed               # every • allowed, nothing else
-    assert {u for u, m in marks.items() if m == "SP"} == flagged              # every SP sent to review
+    # a "-" use the law's text lists among the special-permit uses "in all districts" (§325-9B(1)(p): a bed-and-
+    # breakfast inn in R-1 and R-2) is sent to review too, as the open question on the use rule says (2026-10-29)
+    text_conflicts = {u for u in flagged if marks.get(u) == "-"}
+    assert text_conflicts <= {"bed_and_breakfast_inn"}, text_conflicts
+    assert not text_conflicts or any("bed-and-breakfast" in q for q in use_rule.get("open_questions", []))
+    assert {u for u, m in marks.items() if m == "SP"} == flagged - text_conflicts   # every SP sent to review
     cited = {use_of(c) for c in cited_rows(use_rule, primary)}
     assert allowed | flagged <= cited                                         # and each one's row is cited
 

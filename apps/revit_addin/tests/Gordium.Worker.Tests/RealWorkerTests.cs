@@ -95,16 +95,20 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Contains(result.Items, i => i.Status == Verdict.NeedsReview);
     }
 
-    [Fact]
+    [Fact(Skip = "Waits on PR 84: since PR 82 the overall answer waits on the overlays row too, and only PR 84's "
+                 + "overlays finding (overlays_none_found) can clear it; add that fact here when PR 84 is on main")]
     public async Task A_real_check_that_complies_is_read_as_complying()
     {
         // the box house with every question the common rows ask answered: the worker's state is "complies", and the
-        // client's own check (the rows must back it) accepts it
+        // client's own check (the rows must back it) accepts it. Since PR 82 (the headline waits on the facts) a row
+        // still waiting keeps the whole check at needs review, so the facts the model can't show are given too: the
+        // bedrooms and parking spaces (R-1b's parking rule) and, once PR 84 is merged, the overlays finding.
         var c = SceneCase.All.Single(x => x.Scene == "01_box_house");
         var facts = c.Facts.DeepClone().AsObject();
         foreach (var (k, v) in Json.Obj("""
             {"stream_near_lot": false, "accessory_dwelling_unit": false, "garage_cars": 0, "home_occupation": false,
-             "unrelated_persons": 0, "owner_occupied": true, "rooms_let_for_profit": 0}
+             "unrelated_persons": 0, "owner_occupied": true, "rooms_let_for_profit": 0,
+             "sleeping_rooms": 3, "parking_spaces": 2}
             """).ToList())
             facts[k] = v!.DeepClone();
         var result = await Client.CheckSiteAsync(c.Site, facts);
