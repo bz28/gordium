@@ -1,0 +1,730 @@
+{
+ "phase": "before",
+ "wt": "/private/tmp/claude-501/-Users-benzhao-Documents-Gordium/624e933b-7d2e-463f-9744-6e95edbe5cbe/scratchpad/rh_main",
+ "rows": [
+  {
+   "values": [
+    "Needs review \u00b7 3",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "Needs review \u00b7 3",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "?  New structures at least 20 ft from an inlet wall or stream bank",
+    "\u2014",
+    "20'-0\"",
+    ""
+   ],
+   "shown": [
+    "?  New structures at least 20 ft from an inlet wall or\u2026",
+    "\u2014",
+    "20'-0\"",
+    ""
+   ],
+   "cut": [
+    true,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "?  Rear yard",
+    "34'-11\u215e\"\u2013\n36'-3\u215c\"",
+    "24'-1\u215e\"\u2013\n32'-10\u215b\"",
+    "\u2265 +0'-5\u00bc\" if confirmed"
+   ],
+   "shown": [
+    "?  Rear yard",
+    "34'-11\u215e\"\u2013\n36'-3\u215c\"",
+    "24'-1\u215e\"\u2013\n32'-10\u215b\"",
+    "\u2265 +0'-5\u00bc\" if confirmed"
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "?  Eaves into front yard",
+    "27'-0\u00be\"",
+    "23'-0\"",
+    "\u2265 +2'-0\u00be\" if confirmed"
+   ],
+   "shown": [
+    "?  Eaves into front yard",
+    "27'-0\u00be\"",
+    "23'-0\"",
+    "\u2265 +2'-0\u00be\" if confirmed"
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "Complies \u00b7 9",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "Complies \u00b7 9",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Use: One-family dwelling, detached",
+    "stated",
+    "permitted",
+    ""
+   ],
+   "shown": [
+    "\u2713  Use: One-family dwelling, detached",
+    "stated",
+    "permitted",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Lot area (site)",
+    "7,033 sf",
+    "6,000 sf",
+    "\u2265 +357 sf"
+   ],
+   "shown": [
+    "\u2713  Lot area (site)",
+    "7,033 sf",
+    "6,000 sf",
+    "\u2265 +357 sf"
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Lot width (site)",
+    "75'-10\"",
+    "50'-0\"",
+    "\u2265 +21'-10\""
+   ],
+   "shown": [
+    "\u2713  Lot width (site)",
+    "75'-10\"",
+    "50'-0\"",
+    "\u2265 +21'-10\""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Stories \u00b7 assuming flat ground",
+    "3",
+    "3",
+    "at limit"
+   ],
+   "shown": [
+    "\u2713  Stories \u00b7 assuming flat ground",
+    "3",
+    "3",
+    "at limit"
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Building height \u00b7 assuming flat ground",
+    "35'-0\"",
+    "35'-0\"",
+    "at limit"
+   ],
+   "shown": [
+    "\u2713  Building height \u00b7 assuming flat ground",
+    "35'-0\"",
+    "35'-0\"",
+    "at limit"
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Lot coverage",
+    "21.7%",
+    "25%",
+    "\u2265 +1.04%"
+   ],
+   "shown": [
+    "\u2713  Lot coverage",
+    "21.7%",
+    "25%",
+    "\u2265 +1.04%"
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Front yard",
+    "27'-0\u00be\"",
+    "25'-0\"",
+    "\u2265 +0'-0\u00be\""
+   ],
+   "shown": [
+    "\u2713  Front yard",
+    "27'-0\u00be\"",
+    "25'-0\"",
+    "\u2265 +0'-0\u00be\""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Side yard, Northeast",
+    "12'-0\u215c\"",
+    "10'-0\"",
+    "\u2265 +0'-0\u215c\""
+   ],
+   "shown": [
+    "\u2713  Side yard, Northeast",
+    "12'-0\u215c\"",
+    "10'-0\"",
+    "\u2265 +0'-0\u215c\""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2713  Side yard, Southwest",
+    "12'-0\u00bd\"",
+    "10'-0\"",
+    "\u2265 +0'-0\u00bd\""
+   ],
+   "shown": [
+    "\u2713  Side yard, Southwest",
+    "12'-0\u00bd\"",
+    "10'-0\"",
+    "\u2265 +0'-0\u00bd\""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "Use details (for later) \u00b7 3",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "Use details (for later) \u00b7 3",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "?  One-family occupancy",
+    "\u2014",
+    "1",
+    ""
+   ],
+   "shown": [
+    "?  One-family occupancy",
+    "\u2014",
+    "1",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "?  Home occupation size",
+    "\u2014",
+    "500 sf",
+    ""
+   ],
+   "shown": [
+    "?  Home occupation size",
+    "\u2014",
+    "500 sf",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "?  Home occupation",
+    "\u2014",
+    "\u2014",
+    ""
+   ],
+   "shown": [
+    "?  Home occupation",
+    "\u2014",
+    "\u2014",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "Not checked \u00b7 2",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "Not checked \u00b7 2",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2013  Parking \u00b7 needs input",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "\u2013  Parking \u00b7 needs input",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "\u2013  Overlays \u00b7 not in this release",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "\u2013  Overlays \u00b7 not in this release",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "Not checked yet \u00b7 5",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "Not checked yet \u00b7 5",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "  \u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "  \u00a7325-16A, \u00a7325-16B Height exceptions (chimn\u2026",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    true,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "  \u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "  \u00a7325-18B Windowsills, belt courses and cornices\u2026",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    true,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "  \u00a7325-17B Corner lots, the clear triangle at the street corner",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "  \u00a7325-17B Corner lots, the clear triangle at the street\u2026",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    true,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "  \u00a7325-25B, \u00a7325-25D Accessory structures below grade or across a common lot line",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "  \u00a7325-25B, \u00a7325-25D Accessory structures bel\u2026",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    true,
+    false,
+    false,
+    false
+   ]
+  },
+  {
+   "values": [
+    "  \u00a7325-28 Accessory dwelling units",
+    "",
+    "",
+    ""
+   ],
+   "shown": [
+    "  \u00a7325-28 Accessory dwelling units",
+    "",
+    "",
+    ""
+   ],
+   "cut": [
+    false,
+    false,
+    false,
+    false
+   ]
+  }
+ ],
+ "command_line_last": [
+  "Gordium: drawing in panelwords_Large_Objects_-_Feet.3dm",
+  "Gordium: created 1 group (3 floor solids) on Gordium::Massing::Floor 1\u20263",
+  "Gordium: Cancelled: nothing changed."
+ ],
+ "items": {
+  "Use": {
+   "status": "complies",
+   "proposed": "One-family dwelling, detached",
+   "required": "permitted",
+   "delta": "",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Lot area": {
+   "status": "complies",
+   "proposed": "7,033 sf",
+   "required": "6,000 sf",
+   "delta": "\u2265 +357 sf",
+   "delta_cell": null,
+   "cells": null
+  },
+  "New structures at least 20 ft from an inlet wall or stream bank": {
+   "status": "needs_review",
+   "proposed": "\u2014",
+   "required": "20'-0\"",
+   "delta": "",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Lot width": {
+   "status": "complies",
+   "proposed": "75'-10\"",
+   "required": "50'-0\"",
+   "delta": "\u2265 +21'-10\"",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Stories": {
+   "status": "complies",
+   "proposed": "3",
+   "required": "3",
+   "delta": "at limit",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Building height": {
+   "status": "complies",
+   "proposed": "35'-0\"",
+   "required": "35'-0\"",
+   "delta": "at limit",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Lot coverage": {
+   "status": "complies",
+   "proposed": "21.7%",
+   "required": "25%",
+   "delta": "\u2265 +1.04%",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Front yard": {
+   "status": "complies",
+   "proposed": "27'-0 3/4\"",
+   "required": "25'-0\"",
+   "delta": "\u2265 +0'-0 3/4\"",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Side yard, Northeast": {
+   "status": "complies",
+   "proposed": "12'-0 3/8\"",
+   "required": "10'-0\"",
+   "delta": "\u2265 +0'-0 3/8\"",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Side yard, Southwest": {
+   "status": "complies",
+   "proposed": "12'-0 1/2\"",
+   "required": "10'-0\"",
+   "delta": "\u2265 +0'-0 1/2\"",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Rear yard": {
+   "status": "needs_review",
+   "proposed": "34'-11 7/8\" to 36'-3 3/8\"",
+   "required": "24'-1 7/8\" to 32'-10 1/8\"",
+   "delta": "\u2265 +0'-5 1/4\" if confirmed",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Eaves into front yard": {
+   "status": "needs_review",
+   "proposed": "27'-0 3/4\"",
+   "required": "23'-0\"",
+   "delta": "\u2265 +2'-0 3/4\" if confirmed",
+   "delta_cell": null,
+   "cells": null
+  },
+  "One-family occupancy": {
+   "status": "needs_review",
+   "proposed": "\u2014",
+   "required": "1",
+   "delta": "",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Home occupation size": {
+   "status": "needs_review",
+   "proposed": "\u2014",
+   "required": "500 sf",
+   "delta": "",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Home occupation": {
+   "status": "needs_review",
+   "proposed": "\u2014",
+   "required": "\u2014",
+   "delta": "",
+   "delta_cell": null,
+   "cells": null
+  },
+  "Parking \u00b7 needs input": {
+   "status": "not_checked",
+   "proposed": "",
+   "required": "",
+   "delta": null,
+   "delta_cell": null,
+   "cells": null
+  },
+  "Overlays \u00b7 not in this release": {
+   "status": "not_checked",
+   "proposed": "",
+   "required": "",
+   "delta": null,
+   "delta_cell": null,
+   "cells": null
+  },
+  "\u00a7325-16A, \u00a7325-16B Height exceptions (chimneys, spires, parapets)": {
+   "status": "not_checked",
+   "proposed": "",
+   "required": "",
+   "delta": null,
+   "delta_cell": null,
+   "cells": null
+  },
+  "\u00a7325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only)": {
+   "status": "not_checked",
+   "proposed": "",
+   "required": "",
+   "delta": null,
+   "delta_cell": null,
+   "cells": null
+  },
+  "\u00a7325-17B Corner lots, the clear triangle at the street corner": {
+   "status": "not_checked",
+   "proposed": "",
+   "required": "",
+   "delta": null,
+   "delta_cell": null,
+   "cells": null
+  },
+  "\u00a7325-25B, \u00a7325-25D Accessory structures below grade or across a common lot line": {
+   "status": "not_checked",
+   "proposed": "",
+   "required": "",
+   "delta": null,
+   "delta_cell": null,
+   "cells": null
+  },
+  "\u00a7325-28 Accessory dwelling units": {
+   "status": "not_checked",
+   "proposed": "",
+   "required": "",
+   "delta": null,
+   "delta_cell": null,
+   "cells": null
+  }
+ },
+ "ok": true
+}
