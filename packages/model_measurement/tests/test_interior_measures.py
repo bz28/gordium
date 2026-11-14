@@ -1031,6 +1031,97 @@ def test_a_guard_along_a_stair_not_read_or_shared():
     assert "more than one with this id" in guard(d)[1]["guard_height"]
 
 
+def test_a_stair_guard_far_off_to_the_side_gets_no_height():
+    """Round 8 (decided by Ben): a guard drawn 500 in off to the side of its stair protects none of it. Before, its
+    top above the nosing line was still read as the guard's height (34 in here): a false pass for R321."""
+    m, stopped = guard(stair_guard([[0, 536, 41], [30, 536, 64]]))
+    assert "guard_height" not in m
+    assert "doesn't stand along a side" in stopped["guard_height"] and "500.0 in" in stopped["guard_height"]
+
+
+@pytest.mark.parametrize("a, ok", [(36 + 1 / 16, True), (36 - 1 / 16, True), (36 + 1 / 8, False),
+                                   (36 - 1 / 8, False), (0, True), (1 / 16, True), (-1 / 8, False), (18, False)])
+def test_a_stair_guard_must_be_on_a_side_within_drawing_noise(a, ok):
+    # the base stair's sides: left at a = 36, right at a = 0; 1/16 in either way is drawing noise, 1/8 in isn't
+    m, stopped = guard(stair_guard([[0, a, 41], [30, a, 64]]))
+    assert ("guard_height" in m) == ok, stopped
+    if ok:
+        assert m["guard_height"] == 34.0
+
+
+def test_a_stair_guard_bending_away_from_its_side_midway():
+    # on the left side (a = 36) at both ends, 3 in out at s = 15 (a point of the guard's own line)
+    _, stopped = guard(stair_guard([[0, 36, 41], [15, 39, 52.5], [30, 36, 64]]))
+    assert "3.0 in" in stopped["guard_height"]
+
+
+def test_a_side_bending_away_from_a_straight_guard():
+    # the left side juts out to a = 40 at s = 15 (a point of the side's line); the guard stays at a = 36: 4 in off
+    d = stair_guard([[0, 36, 41], [30, 36, 64]])
+    d["stairs"][0]["sides"]["left"] = [[-5, 36], [15, 40], [40, 36]]
+    assert "4.0 in" in guard(d)[1]["guard_height"]
+
+
+def test_a_stair_guard_along_an_open_side_or_none():
+    # the left side given as open (the format: a side with a guard is the guard's inside face): the guard at the
+    # tread ends (a = 36) is 36 in from the one side drawn (the right, a = 0)
+    d = stair_guard([[0, 36, 41], [30, 36, 64]])
+    d["stairs"][0]["sides"]["left"] = "open"
+    assert "36.0 in" in guard(d)[1]["guard_height"]
+    d["stairs"][0]["sides"]["right"] = "open"
+    assert "stands on neither" in guard(d)[1]["guard_height"]
+    d["stairs"][0]["sides"] = None
+    assert "sides" in guard(d)[1]["guard_height"]
+
+
+def test_random_stair_guards_only_on_a_side_and_never_taller_than_drawn():
+    """Round 8, property check: 1,000 random stair guards (straight or bent top lines, near a side or not; slanting
+    or bent sides, open or drawn). Whenever a height is given, the guard is within 1/16 in of a drawn side at every
+    sampled point along the flight, and its height is never more than its top above the nosing line there."""
+    import random
+    rnd = random.Random(8)
+    given = 0
+    for _ in range(1000):
+        n = rnd.randint(2, 5)
+        run = 10 * (n - 1)
+        sides = {}
+        for k, a in (("left", 36), ("right", 0)):
+            if rnd.random() < 0.2:
+                sides[k] = "open"
+            else:
+                bend = rnd.choice([0, 0, rnd.uniform(-0.1, 0.1), rnd.uniform(-3, 3)])
+                sides[k] = [[-5, a + rnd.choice([0, rnd.uniform(-0.1, 0.1)])], [run / 2, a + bend],
+                            [run + 5, a + rnd.choice([0, rnd.uniform(-0.1, 0.1)])]]
+        on = rnd.choice(["left", "right"])
+        base_a = 36 if on == "left" else 0
+        k = rnd.randint(2, 4)
+        ss = [0] + sorted(rnd.uniform(0.5, run - 0.5) for _ in range(k - 2)) + [run]
+        off = rnd.choice([0, 1 / 32, 1 / 16, 0.07, 1, 500])
+        top = [[s, base_a + rnd.uniform(-off, off), 7 * (1 + s / 10) + rnd.uniform(30, 40)] for s in ss]
+        d = stair_guard(top)
+        d["stairs"][0]["nosings"] = nosings([7] * n, [10] * (n - 1))
+        d["stairs"][0]["sides"] = sides
+        d["stairs"][0]["overhead"] = [[[-20, -20, 400], [run + 20, -20, 400], [run + 20, 60, 400], [-20, 60, 400]]]
+        m, _ = guard(d)
+        if "guard_height" not in m:
+            continue
+        given += 1
+
+        def interp(pts, s):
+            for (s1, a1), (s2, a2) in zip(pts, pts[1:]):
+                if s1 <= s <= s2:
+                    return a1 + (s - s1) / (s2 - s1) * (a2 - a1)
+
+        samples = [rnd.uniform(0, run) for _ in range(200)] + ss
+        drawn = [v for v in sides.values() if v != "open"]
+        for s in samples:
+            ga = interp([(p[0], p[1]) for p in top], s)
+            assert min(abs(ga - interp([tuple(q) for q in v], s)) for v in drawn) <= 1 / 16 + 1e-9
+            nosing = 7 * (1 + min(s, run) / 10)
+            assert m["guard_height"] <= interp([(p[0], p[2]) for p in top], s) - nosing + 1e-6
+    assert given > 100                        # the check has teeth: many guards were measured
+
+
 # --- the exit door --------------------------------------------------------------------------------------------------
 
 def door(d):
@@ -1057,6 +1148,60 @@ def test_a_pin_off_the_leafs_corner():
 def test_a_hinge_stop_deeper_than_the_open_leaf():
     d = changed(("doors", 0, "stops"), {"hinge": 3, "latch": 34})
     assert door(d)[0]["door_clear_width"] == 31.0                     # 34 - max(1.75, 3)
+
+
+@pytest.mark.parametrize("pin, width", [
+    ([0, -500], None),               # far behind the leaf: before, the leaf "turned" clear out of the opening (34)
+    ([-10, 1.75], None),             # back toward the hinge jamb, 10 in off the leaf: before, 34
+    ([0, 1.75 - 1 / 8], None),       # 1/8 in behind the swing face: more than drawing noise
+    ([-1 / 8, 1.75], None),
+    ([0, 1.75 - 1 / 16], 32.3125),   # 1/16 in behind: drawing noise; the face turns to 1.6875: 34 - 1.6875
+    ([-1 / 16, 1.75], 32.3125),
+    ([0, 500], None),                # far beyond the face: the turned leaf closes the opening (not more than zero)
+    ([5, 1.75], 27.25),              # toward the latch: only narrower (34 - 6.75)
+])
+def test_a_hinge_pin_must_hang_the_leaf(pin, width):
+    """Round 8: the leaf is turned about its pin, so a pin drawn away from the leaf (behind it, or back toward the
+    hinge jamb) turned it out of the opening and gave the full stop-to-stop width: too favourable."""
+    m, stopped = door(changed(("doors", 0, "hinge_pin"), pin))
+    assert m.get("door_clear_width") == width, stopped
+    if width is None and pin[1] != 500:
+        assert "isn't hung on that pin" in stopped["door_clear_width"]
+
+
+def test_a_right_hinged_pin_back_toward_its_jamb():
+    d = base()
+    d["doors"][0].update(hinge_side="right", stops={"hinge": 36, "latch": 2}, hinge_pin=[46, 1.75],
+                         leaf_closed=[[1, 0], [36, 1.75]])
+    assert "isn't hung" in door(d)[1]["door_clear_width"]        # before: min(44.25, 36) - 2 = 34, not 32.25
+
+
+def test_random_hinge_pins_never_give_more_than_the_leaf_hung_at_its_corner():
+    """Round 8, property check: 2,000 random pins and leaves, either hand. Whenever a width is given, it is never
+    more than the leaf hung at its own corner gives, by more than the 1/16 in of drawing noise."""
+    import random
+    rnd = random.Random(88)
+    given = 0
+    for _ in range(2000):
+        side = rnd.choice(["left", "right"])
+        thick = rnd.uniform(1, 2.5)
+        edge = rnd.uniform(-2, 2) if side == "left" else rnd.uniform(34, 38)
+        width_leaf = rnd.uniform(30, 38)
+        far_edge = edge + width_leaf if side == "left" else edge - width_leaf
+        hinge, latch = (rnd.uniform(-3, 3), rnd.uniform(32, 38)) if side == "left" else \
+            (rnd.uniform(33, 39), rnd.uniform(-2, 4))
+        spread = rnd.choice([0.03, 0.0625, 0.2, 5, 500])
+        pin = [edge + rnd.uniform(-spread, spread), thick + rnd.uniform(-spread, spread)]
+        d = base()
+        d["doors"][0].update(hinge_side=side, stops={"hinge": hinge, "latch": latch}, hinge_pin=pin,
+                             leaf_closed=[[edge, 0], [far_edge, thick]])
+        m, _ = door(d)
+        if "door_clear_width" not in m:
+            continue
+        given += 1
+        hand = latch - max(edge + thick, hinge) if side == "left" else min(edge - thick, hinge) - latch
+        assert m["door_clear_width"] <= hand + 1 / 16 + 1e-9
+    assert given > 200
 
 
 @pytest.mark.parametrize("path, value, words, measure", [
@@ -1241,6 +1386,10 @@ STOP_CASES = {
     "stair_unread": _with(lambda: stair_guard([[0, 36, 41], [30, 36, 64]]),
                           lambda d: d["stairs"][0].update(nosings=[[[0, 0, 7], [0, 36, 7]]])),
     "stair_guard_openings": lambda: stair_guard([[0, 36, 41], [30, 36, 64]]),
+    "guard_off_side": lambda: stair_guard([[0, 536, 41], [30, 536, 64]]),
+    "guard_no_side": _with(lambda: stair_guard([[0, 36, 41], [30, 36, 64]]),
+                           lambda d: d["stairs"][0].update(sides={"left": "open", "right": "open"})),
+    "pin_off_leaf": _set(("doors", 0, "hinge_pin"), [0, -500]),
     "not_side_hinged": _set(("doors", 0, "operation"), "sliding"),
     "stops_wrong_way": _set(("doors", 0, "stops"), {"hinge": 34, "latch": 0}),
     "not_positive": _set(("doors", 0, "head_stop_bottom"), 0),

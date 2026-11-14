@@ -79,11 +79,19 @@ STOPS = {
                            "yet",
     "stair_unknown": "the stair the guard is along isn't one of the stairs given (by its id)",
     "stair_unread": "the stair the guard is along couldn't be measured: {reason}",
+    "guard_no_side": "both of the stair's sides are given as open: a guard along it stands on neither (give the "
+                     "side the guard stands on as the guard's inside face, in the stair's `sides`)",
+    "guard_off_side": "the guard's top line doesn't stand along a side of its stair ({off} in, in plan, from the "
+                      "nearer side drawn, at its farthest; within {on} in is drawing noise): which side it protects "
+                      "is unclear (a side with a guard is given as the guard's inside face, in the stair's `sides`)",
     "stair_guard_openings": "a stair guard's openings (the 4 3/8 in sphere, the triangle at each step) aren't measured "
                             "yet",
     # doors
     "not_side_hinged": "R318.2 measures a side-hinged door open 90 degrees; this door is {operation}",
     "stops_wrong_way": "the latch-side stop isn't on the far side of the opening from the hinge side",
+    "pin_off_leaf": "the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it "
+                    "swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't "
+                    "hung on that pin",
     "not_positive": "{what} is {value} in: not more than zero",
 }
 

@@ -5,6 +5,7 @@ Guard is not a part kind in rule_format/parts.yaml yet, so these are measured fo
     walking surface; its members (rails, balusters, posts, panels) are drawn in its own elevation, and the largest
     sphere that passes is the largest circle that fits an opening between them (each must be a rectangle);
   - a guard along a stair: its height is its top above the line connecting the nosings, least over the flight;
+    it must stand along a side of the stair (its top line on that side's line, within 1/16 in), else no value;
     its openings (R321.1.3's 4 3/8 in sphere and the triangle at each step) aren't measured yet.
 Definitions: docs/interior/interior_measurements.md.
 """
@@ -13,8 +14,13 @@ from shapely.geometry import box
 from shapely.ops import unary_union
 
 from model_measurement.interior.read import tidy
-from model_measurement.interior.stairs import along, at
+from model_measurement.interior.stairs import LEVEL, along, at, side_lines
 from model_measurement.interior.stops import Stop
+
+# in: how far a stair guard's top line may be, in plan, from the side of the stair it stands along: drawing noise
+# only (the same 1/16 in a nosing's ends may be off, stairs.LEVEL), since both are drawn on the same line
+ON_SIDE = LEVEL
+ON_SIDE_WORDS = "1/16"
 
 
 def level_guard(g: dict, reader) -> tuple[dict, dict]:
@@ -89,13 +95,13 @@ def largest_sphere(g: dict, reader, walk: float, top: float) -> float:
 
 
 def stair_guard(g: dict, reader, flights: dict) -> tuple[dict, dict]:
-    """flights: stair id → its placed Flight, or the reason it couldn't be measured."""
+    """flights: stair id → (its placed Flight, its description), or the reason it couldn't be measured."""
     stair = g.get("stair")
     if not isinstance(stair, str) or stair not in flights:
         raise Stop("stair_unknown")
-    flight = flights[stair]
-    if isinstance(flight, str):
-        raise Stop("stair_unread", reason=flight)
+    if isinstance(flights[stair], str):
+        raise Stop("stair_unread", reason=flights[stair])
+    flight, st = flights[stair]
     pts = reader.points(g.get("top_line"), 3, "the guard's top line", 2)
     line = along(flight, [(x, y) for x, y, _ in pts], "top line", "guard's")
     # its height along the run, from the same points in elevation: s → z
@@ -103,12 +109,31 @@ def stair_guard(g: dict, reader, flights: dict) -> tuple[dict, dict]:
     start, end = flight.s[0], flight.s[-1]
     if at(line, start) is None or at(line, end) is None:
         raise Stop("side_not_along", side="guard's", what="top line")
+    on_side(line, flight, side_lines(st, flight, reader))
     breaks = sorted({start, end, *flight.s, *(s for s, _ in flight.line()),
                      *(s for s, _ in sz if start <= s <= end)})
     height = min(at(sz, s) - flight.nosing_z(s) for s in breaks)
     if height <= 0:
         raise Stop("not_positive", what="the guard's height", value=tidy(height))
     return {"guard_height": tidy(height)}, {"guard_opening_sphere": Stop("stair_guard_openings").reason}
+
+
+def on_side(line, flight, sides: dict) -> None:
+    """Stop unless the guard stands along a side of its stair: its top line, in plan, within ON_SIDE of a side
+    drawn as a line (a side with a guard is given as the guard's inside face) all along the flight. A guard drawn
+    anywhere else (off to one side, along nothing) protects no side of this stair, so it gets no height. Both lines
+    are straight between their points, so how far apart they are is greatest at a point of one of them, or at an
+    end of the flight: checked exactly there."""
+    drawn = {side: s for side, s in sides.items() if s != "open"}
+    if not drawn:
+        raise Stop("guard_no_side")
+    start, end = flight.s[0], flight.s[-1]
+    far = {}
+    for side, side_line in drawn.items():
+        cuts = {start, end, *(s for s, _ in [*line, *side_line] if start <= s <= end)}
+        far[side] = max(abs(at(line, s) - at(side_line, s)) for s in cuts)
+    if min(far.values()) > ON_SIDE + 1e-9:
+        raise Stop("guard_off_side", off=tidy(min(far.values())), on=ON_SIDE_WORDS)
 
 
 def measure_guard(g: dict, reader, flights: dict) -> tuple[dict, dict, dict]:

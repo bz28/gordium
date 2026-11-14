@@ -128,7 +128,7 @@ def measure(description) -> dict:
                 flights[st.get("id")] = f"{len(stairs)} stairs given, more than one with this id"
             else:
                 flight = measured[3]
-                flights[st.get("id")] = flight if flight is not None else \
+                flights[st.get("id")] = (flight, st) if flight is not None else \
                     next(iter(measured[2].values()), "it couldn't be placed")
 
     doors = _given(description, "egress_door", problems)

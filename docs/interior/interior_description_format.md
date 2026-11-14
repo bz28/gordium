@@ -78,7 +78,7 @@ One entry per **flight** (a run of treads between landings; R318 calls it a flig
 | `operation` | `side_hinged`, `sliding`, `folding`, `pocket`, `other` |
 | `hinge_side` | `left` or `right`, in the door's own elevation |
 | `stops` | `{hinge, latch}`: the u of the face of each jamb stop |
-| `hinge_pin` | `[u, n]`: the hinge pin's centre in the door's plan |
+| `hinge_pin` | `[u, n]`: the hinge pin's centre in the door's plan: at the leaf's hinge-side corner on the face it swings toward, or beyond it (a pin more than 1/16 in behind that face, or back toward the hinge jamb, doesn't hang the leaf: no clear width) |
 | `leaf_closed` | `[[u, n], [u, n]]`: two opposite corners of the leaf, closed, in the door's plan |
 | `threshold_top`, `head_stop_bottom` | the top of the threshold and the bottom of the head stop, elevations |
 
@@ -93,7 +93,7 @@ Either a guard at a level walking surface, or one along a stair (give `walking_s
 | `extent` | `{left, right}`: the u of what the guard ends against at each end (a wall, a newel post): solid beyond |
 | `members` | every rail, baluster, post and panel in the guard's elevation, `{left, right, bottom, top}`; the members (the top rail) must reach `top` all along the guard, or it gets no height |
 | `stair` | for a guard along a stair: the stair's id |
-| `top_line` | for a guard along a stair: the top of the guard as 3D points, running the flight's whole length |
+| `top_line` | for a guard along a stair: the top of the guard as 3D points, running the flight's whole length, in plan on the side of the stair it stands along (the same line as that side's guard inside face in the stair's `sides`, within 1/16 in), else it gets no height |
 
 ## What comes back
 

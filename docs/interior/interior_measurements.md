@@ -15,7 +15,8 @@ The input is the [interior description](interior_description_format.md); the cod
 3. **Where the drawing and a stated value can disagree** (the maker's clear opening against the drawn sashes), they must agree within 1/16 in, and the less favourable one counts (the smaller width and height, the higher sill; grade-floor must come out the same at both bottoms). A maker's opening can never be bigger than its frame, and a fixed window never opens. Sizes (widths, thicknesses, offsets) can't be negative.
 4. **Drawing noise read on the cautious side.** A nosing's two ends may differ by 1/16 in: each riser and tread is read with the ends paired the worst way, and the line of the nosings through their higher ends, each at its end nearer the foot (the line rises, so that is as high as it can stand). A maker's clear opening within 1/16 in of its frame is cut back to the frame. A flat surface's points may stand 1/16 in off its plane: the plane is lowered to its lowest point.
 5. **Exact, never sampled.** Heights between flat surfaces are found at the corners of where they overlap, the flight cut at every bend of the line of the nosings (the gap between two flat surfaces changes in a straight line, so its least value is at a corner); widths along a flight at every point where a side, handrail or tread end bends.
-6. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
+6. **A part placed against another must stand where it says.** A part that attaches to another by where it is drawn counts only where it actually is: a stair guard only along a side of its stair (its top line on that side's line, within 1/16 in, drawing noise), a handrail is a side's handrail only if it runs the whole flight between the stair's sides, a door leaf only turned about a hinge pin that hangs it (at its hinge-side corner, within 1/16 in, or beyond it, which only narrows the width). Drawn anywhere else, it gets no value: a guard 500 in off to the side of a stair protects none of it.
+7. **Units explicit.** Every length in is converted from the description's stated `units`; every measure comes out in inches (`in`) or square feet (`sf`), as `rule_format/parts.yaml` names them. Values are rounded to a millionth (float noise only, far finer than any drawing).
 
 ## Sleeping rooms (`sleeping_room`)
 
@@ -77,7 +78,7 @@ Guard is not a part kind in `rule_format/parts.yaml` yet: these are measured so 
 
 | Measure | How | Serves |
 |---|---|---|
-| `guard_height` (in) | A level guard: its top less the walking surface; the members must reach that top all along the guard (at each point between its ends the highest member there; a member wholly above the stated top isn't part of the guard), else no value. A stair guard: its top above the line connecting the nosings, least over the flight (checked at every nosing and every bend of the top line) | R321.1.2 "as measured vertically above the adjacent walking surface or the line connecting the nosings" (p.81) |
+| `guard_height` (in) | A level guard: its top less the walking surface; the members must reach that top all along the guard (at each point between its ends the highest member there; a member wholly above the stated top isn't part of the guard), else no value. A stair guard: its top above the line connecting the nosings, least over the flight (checked at every nosing and every bend of the top line); only a guard standing along a side of its stair (its top line, in plan, within 1/16 in of a side drawn in the stair's `sides` all along the flight), else no value | R321.1.2 "as measured vertically above the adjacent walking surface or the line connecting the nosings" (p.81) |
 | `guard_opening_sphere` (in) | A level guard: the diameter of the largest sphere that passes through it between the walking surface and its top: the largest circle that fits an opening between its members (an opening that is a rectangle: its smaller side). A solid guard: 0. Measured over the guard's whole height (at least the required height: the cautious side) | R321.1.3 "openings from the walking surface to the required guard height that allow passage of a sphere 4 inches (102 mm) in diameter" (p.81) |
 
 Not measured yet: a stair guard's openings (R321.1.3 Exceptions 1 and 2: the 6 in triangle at each step, the 4 3/8 in sphere): no value. Whether a guard is required (more than 30 in above the floor below, R321.1.1) is the rule's question, not a measure here.
@@ -86,7 +87,7 @@ Not measured yet: a stair guard's openings (R321.1.3 Exceptions 1 and 2: the 6 i
 
 | Measure | How | Serves |
 |---|---|---|
-| `door_clear_width` (in) | A side-hinged door only: the leaf, drawn closed, turned 90 degrees about its hinge pin; from its face toward the latch side (or the hinge-side stop, if that stands further in) to the latch-side stop | R318.2 "measured between the face of the door and the stop, with the door open 90 degrees" (p.76) |
+| `door_clear_width` (in) | A side-hinged door only: the leaf, drawn closed, turned 90 degrees about its hinge pin (which must hang it: at the leaf's hinge-side corner on the face it swings toward, within 1/16 in, or beyond it; else no value); from its face toward the latch side (or the hinge-side stop, if that stands further in) to the latch-side stop | R318.2 "measured between the face of the door and the stop, with the door open 90 degrees" (p.76) |
 | `door_clear_height` (in) | The bottom of the head stop less the top of the threshold | R318.2 "measured from the top of the threshold to the bottom of the stop" (p.76) |
 
 A sliding, folding or pocket door gets no clear width: R318.2's measure is defined for a side-hinged door (and requires one).
@@ -152,7 +153,10 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `guard_opening_shape` | an opening in the guard isn't a rectangle: the largest sphere through it isn't measured yet |
 | `stair_unknown` | the stair the guard is along isn't one of the stairs given (by its id) |
 | `stair_unread` | the stair the guard is along couldn't be measured: {reason} |
+| `guard_no_side` | both of the stair's sides are given as open: a guard along it stands on neither (give the side the guard stands on as the guard's inside face, in the stair's `sides`) |
+| `guard_off_side` | the guard's top line doesn't stand along a side of its stair ({off} in, in plan, from the nearer side drawn, at its farthest; within {on} in is drawing noise): which side it protects is unclear (a side with a guard is given as the guard's inside face, in the stair's `sides`) |
 | `stair_guard_openings` | a stair guard's openings (the 4 3/8 in sphere, the triangle at each step) aren't measured yet |
 | `not_side_hinged` | R318.2 measures a side-hinged door open 90 degrees; this door is {operation} |
 | `stops_wrong_way` | the latch-side stop isn't on the far side of the opening from the hinge side |
+| `pin_off_leaf` | the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't hung on that pin |
 | `not_positive` | {what} is {value} in: not more than zero |

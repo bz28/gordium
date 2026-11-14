@@ -12,6 +12,7 @@ from model_measurement.interior.read import choice, tidy
 from model_measurement.interior.stops import Stop
 
 OPERATIONS = ("side_hinged", "sliding", "folding", "pocket", "other")
+PIN_OFF = 1 / 16        # in: how far the hinge pin may stand back from the leaf's hinge corner (drawing noise)
 
 
 def clear_width(d: dict, reader) -> float:
@@ -31,6 +32,15 @@ def clear_width(d: dict, reader) -> float:
     if len(corners) != 2:
         raise Stop("not_a_polyline", what="the door leaf's closed corners (two opposite corners)")
     near = min(n for _, n in corners)              # the leaf's face away from the side it swings into
+    # the leaf turns about its pin, so the pin must hang it: at the leaf's hinge-side corner on the face it swings
+    # toward (within 1/16 in, drawing noise), or beyond it, past the face or toward the latch side, which only
+    # narrows the width. A pin drawn behind the leaf, or back toward the hinge jamb, would turn a leaf it doesn't
+    # hold out of the opening
+    edge = min(u for u, _ in corners) if side == "left" else max(u for u, _ in corners)
+    far = max(n for _, n in corners)
+    back = max(0.0, far - pn) + max(0.0, edge - pu if side == "left" else pu - edge)    # both widen: together
+    if back > PIN_OFF + 1e-9:
+        raise Stop("pin_off_leaf", off=tidy(back))
     # open 90 degrees about the pin, into +n: a point's u becomes pu - (n - pn) (hinge left) or pu + (n - pn)
     if side == "left":
         face = pu + (pn - near)

@@ -124,28 +124,39 @@ def at(line, s):
     return None
 
 
-def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int | None, str | None]:
-    """(clear width above the handrail, clear width at and below it, handrail sides, why the second or the third
-    isn't measured)."""
+def side_lines(st: dict, flight: Flight, reader) -> dict:
+    """Each side of the flight, left and right: its plan line from `along`, run from the first nosing to the top
+    one, or "open" (nothing bounds it: the tread ends do)."""
     start, end = flight.s[0], flight.s[-1]
     sides = st.get("sides")
     if not isinstance(sides, dict):
         raise Stop("missing", what="the stair's sides (`sides`: left and right)")
+    out = {}
+    for side in ("left", "right"):
+        given = sides.get(side)
+        if given == "open":
+            out[side] = "open"
+            continue
+        line = along(flight, reader.points(given, 2, f"the stair's {side} side", 2), "side", side)
+        if at(line, start) is None or at(line, end) is None:
+            raise Stop("side_not_along", side=side, what="side")
+        out[side] = line
+    return out
+
+
+def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int | None, str | None]:
+    """(clear width above the handrail, clear width at and below it, handrail sides, why the second or the third
+    isn't measured)."""
+    start, end = flight.s[0], flight.s[-1]
+    given_sides = side_lines(st, flight, reader)
     # each tread is a rectangle: its nosing's ends hold back to the next nosing (never drawn toward it, which would
     # widen a tread below a wider one), and where two treads meet, both count; the top nosing counts at its place
     k = {"right": 0, "left": 1}
     treads = {side: [[(s1, e[k[side]]), (s2, e[k[side]])] for s1, s2, e in zip(flight.s, flight.s[1:], flight.ends)]
               + [[(end, flight.ends[-1][k[side]]), (end, flight.ends[-1][k[side]])]] for side in k}
     bound = {}
-    for side in ("left", "right"):
-        given = sides.get(side)
-        if given == "open":
-            bound[side] = treads[side]
-            continue
-        line = along(flight, reader.points(given, 2, f"the stair's {side} side", 2), "side", side)
-        if at(line, start) is None or at(line, end) is None:
-            raise Stop("side_not_along", side=side, what="side")
-        bound[side] = [line]
+    for side, line in given_sides.items():
+        bound[side] = treads[side] if line == "open" else [line]
     handrails, why = {"left": [], "right": []}, None
     given = st.get("handrails")
     if not isinstance(given, list):
