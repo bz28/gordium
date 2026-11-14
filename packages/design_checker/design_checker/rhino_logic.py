@@ -189,6 +189,17 @@ def list_cells(item):
     return row_name(item), proposed
 
 
+def list_values(item):
+    """A row's four cells in the panel's list (Item, Proposed, Required, Delta), before cell_text shortens them: the
+    list's own shorter forms where the checker gave one (present: a tax-map lot's Delta, delta_cell, "+2'-0 1/2";
+    worst +0'-0 1/2""; a span of readings' tightest pair, cells, "35'-0 5/8" (varies)"), else the row's words. The
+    detail below the list always has the words whole (the audit of main, 2026-10-29)."""
+    name, proposed = list_cells(item)
+    cells = item.get("cells") or {}
+    return (name, cells.get("proposed") or proposed, cells.get("required") or item.get("required"),
+            item.get("delta_cell") or item.get("delta") or "")
+
+
 def dock_host(hosts, serial):
     """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
     document's number); a panel made without one (key 0) serves when the front document has none."""
@@ -453,8 +464,8 @@ STATED_FACTS = {
     "stories": ("Stories of the whole building", "count", "the number of stories"),
 }
 # The least whole number each counted fact may be: its own definition's (a unit's most occupants, a building's units:
-# at least one), else 0. The Enter prompt (gordium_rhino._count) and update_counts both use it, so the prompt can't
-# accept what the check refuses (#r2 review round 2).
+# at least one), else 0. The answer fields (parse_answer) and update_counts both use it, so a field can't accept what
+# the check refuses (#r2 review round 2).
 MINIMUM = {"occupants_most_in_one_unit": 1, "attached_units_in_building": 1, "primary_buildings": 1,
            "private_garages": 1, "adus_on_parcel": 1}
 # Facts a row can be decided without, each with the fact that bounds it from above (the most occupants in one unit
@@ -4302,13 +4313,20 @@ def last_check_at(checked_at, document):
 
 # Each panel change is one Rhino undo step, named in Edit > Undo by what it did (a change written outside any undo
 # record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead: #32's review, 2026-10-26)
-UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",
+UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",   # (enter: undo_enter)
               "main": "Gordium: pick the main building", "adu": "Gordium: pick the ADU's building",
               "add": "Gordium: add to check",
               "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
               "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
               "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",
               "context": "Gordium: show or hide the neighbourhood", "auto_check": "Gordium: check after every edit"}
+
+
+def undo_enter(needs):
+    """A row's Enter step, named in Edit > Undo by what was entered ("Gordium: enter the number of stories"), not
+    the same words for every row (the audit of main, 2026-10-29); UNDO_WORDS["enter"] with no facts named."""
+    words = enter_words(needs)
+    return "Gordium: " + words[:1].lower() + words[1:] if words else UNDO_WORDS["enter"]
 
 
 @contextlib.contextmanager
@@ -4516,6 +4534,20 @@ def report_cancelled(path, changed):
 SETTLING = "Finishing the check that is running…"
 CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
 SITE_SUFFIX = ".site.json"   # the site description kept beside a report (design_checker.check.SITE_SUFFIX)
+
+
+def check_not_done(last, since):
+    """Why a Check gave no result, for the command line (STATE["last"], set by that check at or after `since`):
+    cancelled, the model changed while it ran, or it could not run; None when nothing was set by it (a box open, a
+    check already running: nothing happened, so nothing is said)."""
+    last = last or {}
+    if not last.get("error") or last.get("at", 0) < since:
+        return None
+    if last.get("cancelled"):
+        return CHECK_CANCELLED + ". " + CHECK_CANCELLED_NOTE
+    if last.get("outdated"):
+        return CHECK_OUTDATED
+    return "Check could not run: " + str(last["error"])[:200]
 REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
                    "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
                    "panel) for a report of the model now.")
