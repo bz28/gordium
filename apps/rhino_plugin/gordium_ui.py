@@ -23,7 +23,9 @@ PANEL_WIDTH = 400          # as wide as Rhino's own panels (architect's review, 
 # fixed widths that fit the panel: an Item column sized to its text pushed the numbers out of sight (seen in the
 # Rhino window capture). The mark is the first thing in the Item cell: on the Mac the tree's expand arrows take
 # the first column, which hid a column of its own.
-COLUMNS = [("Item", 120), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 86)]   # Item takes the rest
+COLUMNS = [("Item", 106), ("Proposed", 64), ("Required", 64), (logic.COLUMN_DELTA, 100)]   # Item takes the rest
+# (Delta 100 px: a tax-map lot's two lines, "+2'-0⅜"" then "worst +0'-0⅜"", each one line, measured in Rhino
+# 2026-10-29: "worst +12,033 sf" needs 99 px; Item's 106 is its least, it takes whatever the panel has)
 ROW_HEIGHT = 36            # two lines: a long item name or "at least 1'-0" short" wraps instead of being cut off
 #                           (Eto's tree grid has one height for every row: a third line would cost rows in view, so
 #                           the values are made to fit two instead: logic.cell_text)
@@ -567,11 +569,11 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
             i = by_id[item_id]
             stale_row = parts["stale"] and i["status"] != "not_checked"
             # the values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)
-            name, proposed = logic.list_cells(i)          # the use row: the use's own name as its Item
-            values = [("" if stale_row else i["mark"] + "  ") + name,
+            name, proposed, required, delta = logic.list_values(i)   # the use row: the use's own name as its Item;
+            values = [("" if stale_row else i["mark"] + "  ") + name,   # a tax-map Delta and a span: their short forms
                       "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
-                      "" if stale_row else logic.cell_text(i["required"]),
-                      "" if stale_row else logic.cell_text(i.get("delta") or "")]
+                      "" if stale_row else logic.cell_text(required),
+                      "" if stale_row else logic.cell_text(delta)]
             ci = ef.TreeGridItem()
             ci.Tag = item_id
             ci.Values = System.Array[System.Object](values)

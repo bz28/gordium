@@ -153,3 +153,12 @@ def test_every_link_in_an_ru_check_has_one_name():
             if "Zoning-Charts" in c["link"] and "#page=2&" in c["link"]:
                 seen.setdefault(c["link"], set()).add(c["citation"])
     assert seen and all(len(names) == 1 for names in seen.values()), {k: v for k, v in seen.items() if len(v) > 1}
+
+
+def test_the_lot_area_for_each_main_building_has_its_own_name():
+    """The audit of main (2026-10-29): two rows both called "Lot area", one complying and one needing review, read as
+    a contradiction. The §325-8B(1) row is "Lot area per main building"; the use's own row stays "Lot area"."""
+    for rows in (_rows(), _rows(primary_buildings=2, primary_buildings_same_use=True)):
+        assert rows[RULE]["name"] == "Lot area per main building", rows[RULE]["name"]
+        assert rows["R-1b.lot_area_one_family_detached"]["name"] == "Lot area"
+        assert [i["name"] for i in rows.values()].count("Lot area") == 1
