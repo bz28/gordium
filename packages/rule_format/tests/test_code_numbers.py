@@ -212,3 +212,33 @@ def test_a_degree_or_a_count_never_backs_a_length(ctx):
     slope = {"file": BOOK, "page": 100, "lines": [44, 45],
              "quote": "an angle not more than 30 degrees (0.51 rad) from the vertical."}
     assert any("isn't one of" in p for p in problems(ctx, "stair_riser_height <= 30", slope, "stair"))
+
+
+SPHERE = {"file": BOOK, "page": 104, "lines": [46, 47],
+          "quote": "Required guards shall not have openings from the walking surface to the required guard height that "
+                   "allow passage of a sphere 4 inches (102 mm) in diameter."}
+
+
+@pytest.mark.parametrize("check, source, words", [
+    # membership is equality with each item: never a limit, and its numbers are still the law's
+    ("stair_riser_height not in [99]", RISERS, "isn't one of"),
+    ("stair_riser_height not in [8.25]", RISERS, "never an equality"),
+    ("stair_riser_height in [1, 2, 3, 4, 5, 6, 7, 8]", RISERS, "isn't one of"),
+    # a number read "none" is no limit, even with a measure added or taken away; only in a formula of the law's kind
+    # (a measure times a number) is it a term
+    ("guard_opening_sphere - 4 > 0", SPHERE, "can't be compared with"),
+    ("guard_opening_sphere > 4 + 0", SPHERE, "can't be compared with"),
+    ("guard_opening_sphere < 4", SPHERE, "can't be compared with"),
+])
+def test_membership_and_none_numbers_with_arithmetic_are_refused(ctx, check, source, words):
+    got = problems(ctx, check, source, "open_side" if "guard" in check else "stair")
+    assert any(words in p for p in got), got
+
+
+def test_a_range_reads_its_lower_number_as_at_least_and_its_upper_as_at_most(ctx):
+    lengths = [{"comparison": "between", "values": {"in": 10}}, {"comparison": "between", "values": {"in": 14}},
+               {"comparison": "<=", "values": {"in": 3}}]
+    got = [c["comparison"] for c in code_numbers._between_ends(lengths)]
+    assert got == [">=", "<=", "<="]
+    lone = code_numbers._between_ends([{"comparison": "between", "values": {"in": 10}}])
+    assert lone[0]["comparison"] == "between"          # no partner: no comparison fits it

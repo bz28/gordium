@@ -20,9 +20,12 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    "area_well_depth <= 44 or area_well_ladder") the law's comparison or its exact opposite (> for <=, >= for <) is
    accepted, so the edge stays where the law puts it (more than 30 is never 30 or more). A chain (0 <= x < 36) is
    an "and" of its comparisons. A number in arithmetic keeps its direction where it can be told (riser > 8.25 + 0
-   is a dropped "not"; x <= 15 - c reads c the other way round), and a term the law reads "none" (the 20 of
-   "20 inches minus four-thirds of the riser") is allowed there; where the direction can't be told (a divisor,
-   another function) it is checked by value only. A number in an if's test, which picks which limit applies
+   is a dropped "not"; x <= 15 - c reads c the other way round), and a term the law reads "none" is allowed only in
+   a formula of the law's kind, a measure times a number (the 20 of "20 inches minus four-thirds of the riser"),
+   never where a measure is only added or taken away (sphere - 4 > 0 is a limit, refused); where the direction
+   can't be told (a divisor, another function) it is checked by value only. Membership (in, not in) is equality
+   with each item. A range ("10-inch to 14-inch", read "between" on both) has its lower number read >= and its
+   upper <=. A number the walk can't place is reported, never let through. A number in an if's test, which picks which limit applies
    ("27 if stair_handrail_sides > 1 else 31.5": where handrails are on both sides), is checked by value only: a
    test written the wrong way round (">= 1") gives the looser limit to the wrong stairs and passes this check; the
    worked examples and the answer key comparison are what catch it. review_when is checked by value only.
@@ -45,7 +48,8 @@ from . import formula, parts
 CONVERSIONS = {"mm", "cm", "m", "rad", "kg"}          # printed in brackets after the US number: never a limit here
 OPPOSITE = {"<": ">=", ">": "<=", ">=": "<", "<=": ">"}
 MIRROR = {"<": ">", ">": "<", "<=": ">=", ">=": "<="}
-OPS = {ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=", ast.Eq: "==", ast.NotEq: "!="}
+OPS = {ast.Lt: "<", ast.LtE: "<=", ast.Gt: ">", ast.GtE: ">=", ast.Eq: "==", ast.NotEq: "!=",
+       ast.In: "==", ast.NotIn: "!="}                     # membership is equality with each item
 UNIT_OF = {"in": "in", "ft": "ft", "sf": "sf", "count": "count"}     # a measure's unit -> the reading's unit class
 _WORDS = {"one": 1, "two": 2, "three": 3, "four": 4, "five": 5, "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10,
           "eleven": 11, "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16, "seventeen": 17,
@@ -165,9 +169,29 @@ def candidates(sources: list[dict], ctx) -> list[dict]:
             continue
         stated = quote_statements(s["quote"])
         for pid in pieces_of(s, book):
-            for length in readings(book["pieces"].get(pid) or {}):
+            for length in _between_ends(readings(book["pieces"].get(pid) or {})):
                 if all(st in stated for st in length["statements"]):
                     out.append(length | {"piece": pid})
+    return out
+
+
+def _between_ends(lengths: list[dict]) -> list[dict]:
+    """A range ("10-inch to 14-inch") is read "between" on both its numbers, in order: the lower one is an at-least
+    (>=) and the upper an at-most (<=), so each is checked the law's way. A "between" number with no partner stays
+    "between", which no comparison fits."""
+    out, pending = [], None
+    for length in lengths:
+        if length["comparison"] != "between":
+            out.append(length)
+            continue
+        if pending is None:
+            pending = length
+            continue
+        lo, hi = sorted((pending, length), key=lambda x: min(x["values"].values()))
+        out += [lo | {"comparison": ">="}, hi | {"comparison": "<="}]
+        pending = None
+    if pending is not None:
+        out.append(pending)
     return out
 
 
@@ -221,7 +245,17 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
     except formula.FormulaError:
         return []                                             # reported with the formula
     out = []
-    for number, op, sure, measures, in_arithmetic in _uses(tree):
+    uses = _uses(tree)
+    seen = {u[0] for u in uses}
+    parts_of_one = {id(x) for n in ast.walk(tree) if isinstance(n, ast.BinOp) and isinstance(n.op, ast.Div)
+                    and isinstance(n.left, ast.Constant) and isinstance(n.right, ast.Constant) for x in (n.left, n.right)}
+    for node in ast.walk(tree):
+        if id(node) not in parts_of_one and isinstance(node, ast.Constant) and type(node.value) in (int, float) and node.value != 0 \
+                and Fraction(node.value) not in seen and -Fraction(node.value) not in seen \
+                and not any(_close(Fraction(node.value), n) for n in seen):
+            out.append(f"number {float(node.value):g} in '{key}' sits where the number check can't read it "
+                       "(write it as a comparison of a measure with the law's number)")
+    for number, op, sure, measures, in_formula in uses:
         if number == 0:
             continue
         unit_classes = {UNIT_OF.get(units.get(m)) for m in measures} - {None}
@@ -248,13 +282,13 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
                        "check it within a tolerance it states, or make the rule a flag)")
             continue
         reads = {c["comparison"] for c in fits}
-        if reads == {"none"} and in_arithmetic:
+        if reads == {"none"} and in_formula:
             continue                                          # a term of the law's formula (20 inches minus ...)
         if reads == {"none"}:
             out.append(f"number {shown} in '{key}': the second reading says the law sets no limit with it ('none': a "
                        f"conversion, a count or a permission, {fits[0]['piece']}: {fits[0]['shown']!r}); it can't be compared with")
             continue
-        ok = any(c == "between" or op == c or (not sure and op == OPPOSITE.get(c)) for c in reads)
+        ok = any(op == c or (not sure and op == OPPOSITE.get(c)) for c in reads)
         if not ok:
             law = " or ".join(sorted(reads - {"none"}))
             where = "where it must hold for the formula to hold" if sure else "here"
@@ -309,8 +343,7 @@ def _uses(tree) -> list[tuple]:
                                 if not positive:
                                     needed = OPPOSITE.get(needed, {"==": "!=", "!=": "=="}.get(needed))
                             # a coefficient (0.5 * floor area) has no unit of its own
-                            alone = len(_numbers(side)) == 1 and not _has_name(side) or isinstance(side, ast.IfExp)
-                            out.append((number, needed, pair_sure, set() if coefficient else names, not alone))
+                            out.append((number, needed, pair_sure, set() if coefficient else names, _formula(side)))
                 for side in sides:
                     for n in _conditions(side):              # an if's test inside a side: it picks a limit
                         walk(n, positive, False, True)
@@ -365,6 +398,8 @@ def _numbers(node, grows=1, coefficient=False) -> list[tuple]:
             return _numbers(l, None, coefficient) + _numbers(r, None, coefficient)
         case ast.Call(func=ast.Name(id=f), args=args):
             return [n for a in args for n in _numbers(a, grows if f in ("min", "max") else None, coefficient)]
+        case ast.List(elts=items) | ast.Tuple(elts=items) | ast.Set(elts=items):
+            return [n for x in items for n in _numbers(x, grows, coefficient)]
         case ast.Compare() | ast.BoolOp() | ast.UnaryOp(op=ast.Not()):
             return []                                            # a condition inside: walked on its own
     return []
@@ -392,6 +427,14 @@ def _fold(node) -> Fraction | None:
                 case ast.Div() if b:
                     return a / b
     return None
+
+
+def _formula(side) -> bool:
+    """A side that is a formula of the law's kind: a measure multiplied or divided by a number (20 - 4/3 * riser), where
+    a number read "none" is a term, not a limit. A number with a measure only added or taken away (sphere - 4 > 0) is
+    still a limit and is refused as one."""
+    return any(isinstance(n, ast.BinOp) and isinstance(n.op, (ast.Mult, ast.Div)) and _has_name(n)
+               for n in ast.walk(side))
 
 
 def _flip(grows):
