@@ -110,6 +110,6 @@ problems: [...]           # why a kind wasn't read
 not_checked: [...]        # escape openings in rooms that aren't sleeping rooms
 ```
 
-`parts` is exactly what `rule_format.parts.rows` and `design_checker.each_part.check_parts` read: a kind not read is `null`, so its rules need review. `measures` holds only the names `rule_format/parts.yaml` gives the part's kind; `more` holds measures for rules not in `parts.yaml` yet.
+`parts` is exactly what `rule_format.parts.rows` and `design_checker.each_part.check_parts` read: a kind not read is `null`, so its rules need review. `measures` holds only the names `rule_format/parts.yaml` gives the part's kind; `more` holds other values worked out but not yet handed to the rules; a `parts.yaml` measure kept there is listed in `not_measured` as `in_more_not_rules`, and one not worked out at all as `not_measured_yet`.
 
 Running one by hand: `python -m model_measurement.interior <description.yaml>`.

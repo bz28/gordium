@@ -13,6 +13,7 @@ import yaml
 
 from design_checker import each_part
 from model_measurement.interior import KINDS, measure_file
+from model_measurement.interior.stops import STOPS
 
 HOUSES = Path(__file__).parents[3] / "test_data" / "interior_houses"
 NAMES = sorted(p.name for p in HOUSES.iterdir() if (p / "house.yaml").exists())
@@ -25,6 +26,9 @@ AREA, RISER, ALLOWED = synthetic.AREA, synthetic.RISER, synthetic.ALLOWED
 HEADROOM = dict(RISER, id="R-1b.synthetic_headroom", title="SYNTHETIC stair headroom", check="stair_headroom >= 80",
                 examples=[{"given": {"stair_headroom": 81}, "expect": "pass"},
                           {"given": {"stair_headroom": 79}, "expect": "fail"}])
+
+
+NOT_YET = {STOPS["not_measured_yet"], STOPS["in_more_not_rules"]}
 
 
 def test_there_are_five_houses():
@@ -51,7 +55,8 @@ def test_each_measure_is_the_hand_worked_one(name):
             for m, v in w["measures"].items():
                 assert p["measures"][m] == pytest.approx(v, abs=1e-6), (pid, m)
                 assert type(p["measures"][m]) is type(v) or isinstance(v, float), (pid, m)
-            assert set(p["not_measured"]) == set(w.get("not_measured", [])), pid
+            # measures parts.yaml lists that this code doesn't work out yet are pinned in test_interior_measures
+            assert {m for m, why in p["not_measured"].items() if why not in NOT_YET} == set(w.get("not_measured", [])), pid
             for m, v in (w.get("more") or {}).items():
                 assert p["more"][m] == pytest.approx(v, abs=1e-6), (pid, m)
     assert got["not_checked"] == []
