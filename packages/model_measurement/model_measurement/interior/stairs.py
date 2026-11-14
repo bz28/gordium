@@ -170,13 +170,21 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
         return above, None, None, why
     low = min(inward("left", [bound["left"], treads["left"], *handrails["left"]], s)
               - inward("right", [bound["right"], treads["right"], *handrails["right"]], s) for s in breaks)
-    if low <= 0:
-        raise Stop("sides_cross", width=tidy(low))
+    if low <= 0:                         # the handrails do it (the sides alone don't): the width above them stands
+        return above, None, None, Stop("handrails_cross", width=tidy(low)).reason
     # a side has a handrail (R318.7.1) only where one runs the whole flight, from above its lowest nosing to above
     # the top one (R320.5): one drawn part way, or off the flight, would credit the side with a handrail it lacks
+    # and between the stair's sides: one beyond a wall, or past an open side's tread ends, isn't this stair's
     first, top = flight.s_ends[0][0], flight.s_ends[-1][1]
+
+    def on_stair(line):
+        if at(line, first) is None or at(line, top) is None:
+            return False
+        return all(inward("right", [bound["right"]], s) <= at(line, s) <= inward("left", [bound["left"]], s)
+                   for s in breaks)
+
     for side, lines in handrails.items():
-        if lines and not any(at(line, first) is not None and at(line, top) is not None for line in lines):
+        if lines and not any(on_stair(line) for line in lines):
             return above, low, None, Stop("handrail_part_way", side=side).reason
     return above, low, sum(1 for side in handrails.values() if side), None
 
@@ -193,11 +201,14 @@ def headroom(st: dict, flight: Flight, reader) -> float:
         raise Stop("nothing_overhead")
     surfaces = [Surface(reader.points(p, 3, f"overhead surface {n}", 3), f"overhead surface {n}")
                 for n, p in enumerate(given, 1)]
+    # each tread is a rectangle: its nosing's width, back to the next riser. With the shape between neighbouring
+    # nosings, a tread wider than the next (a flared starter step) is covered all over, never cut at a corner
     quads = []
     for j in range(len(flight.s) - 1):
         (r1, l1), (r2, l2) = flight.ends[j], flight.ends[j + 1]
-        quads.append(Polygon([flight.xy(flight.s[j], r1), flight.xy(flight.s[j + 1], r2),
-                              flight.xy(flight.s[j + 1], l2), flight.xy(flight.s[j], l1)]))
+        s1, s2 = flight.s[j], flight.s[j + 1]
+        quads.append(Polygon([flight.xy(s1, r1), flight.xy(s2, r2), flight.xy(s2, l2), flight.xy(s1, l1)]))
+        quads.append(Polygon([flight.xy(s1, r1), flight.xy(s2, r1), flight.xy(s2, l1), flight.xy(s1, l1)]))
     band = unary_union(quads)
     # cut the flight at every bend of the nosing line, so the line is straight over each piece and the least gap
     # is at a piece's corner (the pieces of the treads alone would hide a bend inside one)

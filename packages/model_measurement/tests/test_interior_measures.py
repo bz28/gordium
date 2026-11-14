@@ -570,6 +570,32 @@ def test_a_handrail_part_way_gives_no_side_count():
     assert "stair_handrail_sides" not in more and "right" in stopped["stair_handrail_sides"]
 
 
+def test_a_handrail_outside_the_stairs_sides_never_counts():
+    """Review round 6: only checked along the run, rails 14 in past each wall (in the next room) made 2 sides."""
+    d = base()
+    d["stairs"][0]["handrails"] = [{"side": "left", "inner_edge": [[0, 50], [30, 50]]},
+                                   {"side": "right", "inner_edge": [[0, -14], [30, -14]]}]
+    _, stopped, more = stair(d)
+    assert "stair_handrail_sides" not in more and "between the stair's sides" in stopped["stair_handrail_sides"]
+    # one real rail inside the left wall, the other past the right wall: 2 would be too favourable, 1 wrong too
+    d["stairs"][0]["handrails"][0]["inner_edge"] = [[0, 33], [30, 33]]
+    _, stopped, more = stair(d)
+    assert "stair_handrail_sides" not in more and "right" in stopped["stair_handrail_sides"]
+    # inside the walls, the whole flight: both count
+    d["stairs"][0]["handrails"][1]["inner_edge"] = [[0, 3], [30, 3]]
+    assert stair(d)[2]["stair_handrail_sides"] == 2
+
+
+def test_a_mislabelled_handrail_keeps_the_width_above_it():
+    """Review round 6: a left handrail drawn right of the right wall threw away the clear width (36) too."""
+    d = base()
+    d["stairs"][0]["handrails"] = [{"side": "left", "inner_edge": [[0, -2], [30, -2]]}]
+    m, stopped, more = stair(d)
+    assert m["stair_clear_width"] == 36.0
+    assert "a handrail meets or crosses" in stopped["stair_clear_width_at_handrail"]
+    assert "stair_handrail_sides" in stopped and "stair_clear_width_at_handrail" not in more
+
+
 def test_treads_shorter_than_the_walls_narrow_the_width_at_the_treads():
     d = base()
     d["stairs"][0]["nosings"] = [[[10 * j, 1, 7 * (j + 1)], [10 * j, 34, 7 * (j + 1)]] for j in range(4)]
@@ -619,7 +645,7 @@ def test_an_open_side_is_bounded_by_the_tread_ends():
     ({"handrails": [{"side": "middle", "inner_edge": [[0, 4], [30, 4]]}]}, "not left or right",
      "stair_clear_width"),
     ({"handrails": ["rail"]}, "handrail #1 isn't a mapping", "stair_clear_width"),
-    ({"handrails": [{"side": "left", "inner_edge": [[0, -4], [30, -4]]}]}, "meet or cross",
+    ({"handrails": [{"side": "left", "inner_edge": [[0, -4], [30, -4]]}]}, "a handrail meets or crosses",
      "stair_clear_width_at_handrail"),
 ])
 def test_stair_data_problems_give_no_value(change, words, measure):
@@ -652,6 +678,15 @@ def test_balusters_and_rails():
         [{"left": u, "right": u + 1.5, "bottom": 104, "top": 134} for u in (4.5, 9.5, 14.5)]
     m, _ = guard(d)
     assert m == {"guard_height": 36.0, "guard_opening_sphere": 4.5}
+
+
+def test_a_member_wholly_above_the_guard_never_reaches_its_top():
+    """Review round 6: a rail drawn at 300..301 over a panel to 133 gave the guard its stated 36 in, not 33."""
+    d = base()
+    d["guards"][0]["members"] = [{"left": 0, "right": 10, "bottom": 100, "top": 133},
+                                 {"left": 0, "right": 10, "bottom": 300, "top": 301}]
+    m, stopped = guard(d)
+    assert m == {} and "is 33.0 in high" in stopped["guard_height"]
 
 
 def test_a_solid_panel_lets_nothing_through():
@@ -754,6 +789,17 @@ def test_headroom_is_read_at_every_bend_of_the_nosing_line():
     d["stairs"][0]["overhead"] = [[[-5, -5, 95], [40, -5, 117.5], [40, 41, 117.5], [-5, 41, 95]]]
     m, _, _ = stair(d)
     assert m["stair_headroom"] == pytest.approx(82.5)
+
+
+def test_headroom_covers_a_tread_wider_than_the_next():
+    """Review round 6: the shape between neighbouring nosings cut the corner of a flared starter step (48 in, the
+    rest 36), so a beam over its wide end (z 40, s 6..9.9) was never read: 28.33, not 40 - 13.93 = 26.07."""
+    d = base()
+    d["stairs"][0]["nosings"][0] = [[0, -6, 7], [0, 42, 7]]
+    d["stairs"][0]["overhead"] = [[[-10, -10, 120], [40, -10, 120], [40, 50, 120], [-10, 50, 120]],
+                                  [[6, 37, 40], [9.9, 37, 40], [9.9, 42, 40], [6, 42, 40]]]
+    m, _, _ = stair(d)
+    assert m["stair_headroom"] == pytest.approx(40 - (7 + 0.99 * 7))
 
 
 @pytest.mark.parametrize("first", [True, False])
@@ -1073,6 +1119,7 @@ STOP_CASES = {
                                            [[5, 0, 21], [5, 36, 21]]]),
     "side_not_along": _stair(sides={"left": [[-5, 36], [20, 36]], "right": [[-5, 0], [40, 0]]}),
     "sides_cross": _stair(sides={"left": [[-5, 0], [40, 0]], "right": [[-5, 36], [40, 36]]}),
+    "handrails_cross": _stair(handrails=[{"side": "left", "inner_edge": [[0, -2], [30, -2]]}]),
     "handrail_side": _stair(handrails=[{"side": "up", "inner_edge": [[0, 4], [30, 4]]}]),
     "handrail_part_way": _stair(handrails=[{"side": "left", "inner_edge": [[10, 32], [20, 32]]}]),
     "guard_kind": _guard(stair="s"),
