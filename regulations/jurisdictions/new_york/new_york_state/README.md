@@ -51,7 +51,7 @@ How the cutter reads Appendix BF: its section of definitions is titled "DEFINITI
 
 Every reference in the brought-in sections was followed (found by code, `document_extraction/icc_references.py`: each section, table, appendix, chapter and standard a brought-in piece names; `python -m document_extraction.icc_references` lists them again where the code cache has the book). Those inside the brought-in parts are brought in. These are not, each a material, structural, plumbing, electrical-supply, fire-protection, room-size or outside-standard matter, or an appendix that is not egress:
 
-- R507.2.2 (plastic composite treads, handrails and guards: materials; from R318.7.5.4, R320.7, R321.1.4)
+- R507.2.2 (plastic composite treads, handrails and guards: materials; from R318.7.5.4, R320.7, R321.1.4, R507.10.3)
 - R101.2 Exception 6 (which lodging houses the code covers; from R318.1.1)
 - P2904 (sprinkler systems; from R319.1 Exception 3)
 - R405.1 and Table R401.4.1(2) (foundation drainage and soils; from R319.4.3)

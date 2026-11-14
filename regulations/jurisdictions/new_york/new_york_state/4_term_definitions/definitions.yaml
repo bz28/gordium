@@ -1,4 +1,4 @@
-# How New York's 2025 Residential Code defines the words its egress sections (R314-R321, R507.10, Appendices BF, BO) depend on:
+# How New York's 2025 Residential Code defines the words its egress sections (R314-R316, R318-R321, R507.10, Appendices BF, BO) depend on:
 # whole definitions, quoted exactly (file, page, lines), with no paraphrase (drafting_rules.md). R201.1: a word printed in
 # italics in the code has the meaning given here. Quotes are checked against the book's text by `python -m rule_format`
 # where the code cache exists (the book is kept outside the repo). No measurement names yet: egress rules come later.

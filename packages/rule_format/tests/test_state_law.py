@@ -318,6 +318,46 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
     assert seen >= 3 and wrong == []          # R319.7 (Appendix BO), R320.7 and R321.1.4 (R507.2.2)
 
 
+def test_the_readmes_references_not_brought_in_name_every_piece_the_code_finds_pointing_to_them():
+    # step 1b's review round 5: R507.10.3 also points to R507.2.2, but the README named only the step-1 pieces
+    import re
+    from document_extraction.icc_references import ways_out
+    from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    lines = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
+    cut = read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]
+    found = ways_out(cut, lines, entry["brought_in"]["sections"], entry["brought_in"].get("alone") or [])
+    part = (NY_STATE / "README.md").read_text(encoding="utf-8").split(
+        "## References in the brought-in sections that are not brought in")[1].split("\n## ")[0]
+    bullets = [b for b in part.splitlines() if b.startswith("- ")]
+    named = lambda code, text: re.search(rf"(?<![\w.]){re.escape(code)}(?!\w|\.\d)", text)
+    checked, missing = 0, []
+    for code, by in found.items():
+        # a bullet that names this reference before its parentheses and lists where it comes from
+        mine = [b for b in bullets if named(code, b.split("(")[0]) and "from " in b]
+        checked += bool(mine)
+        # R101.2.1 is the list of adopted appendices (how Appendix BO comes in), not a pointer to one
+        missing += [(code, p) for p in by if mine and p != "R101.2.1" and not any(named(p, b) for b in mine)]
+    assert checked >= 10 and missing == [], missing
+
+
+def test_a_range_of_sections_named_as_brought_in_has_every_section_in_it_brought_in():
+    # step 1b's review round 5: "R314-R321" read as if R317 (garages and carports) were brought in; it is not
+    import re
+    src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
+    brought = set(src["brought_in"]["sections"])
+    files = [REPO / "docs/README.md", NY_STATE / "README.md", NY_STATE / "1_source_documents/sources.yaml",
+             NY_STATE / "4_term_definitions/definitions.yaml"]
+    ranges, wrong = 0, []
+    for f in files:
+        for a, b in re.findall(r"\bR(\d{3})[-\u2013]R(\d{3})\b", f.read_text(encoding="utf-8")):
+            ranges += 1
+            wrong += [(f.name, f"R{a}-R{b}", f"R{n}") for n in range(int(a), int(b) + 1) if f"R{n}" not in brought]
+    assert ranges >= 3 and wrong == [], wrong
+
+
 def test_every_term_definition_is_quoted_whole():
     # review round 1 of egress step 1b: CHANGE OF OCCUPANCY was quoted without its last words ("this code.")
     import json
