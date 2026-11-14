@@ -38,7 +38,10 @@ calls recorded while the tests drove the plugin's logic: `python -m design_check
 **Golden answers and recorded sessions** (the yardstick for changes that must not change any answer):
 `python -m design_checker.goldens --check` runs `check` and `start` on every test site, scenario (and its edit),
 deep-run site and 200 stress designs from a fixed seed, and compares each canonical answer with
-`test_data/goldens/` (`--write` writes them again, only when an answer should change). `python -m
+`test_data/goldens/` (`--write` writes them again, only when an answer should change). Every verdict, status, word
+and number must be exactly the golden's; only a shape's list of points may differ, on an Intel or AMD computer
+(CI) where two near-coincident curves give the overlay other crossing points, and then only if each shape is the
+same line within 0.00001 ft (`goldens.same_shape`, `GEOMETRY_TOL`). `python -m
 design_checker.replay` runs every request of each recorded session in `test_data/sessions/` through the worker's
 `answer()` and needs the recorded answer (compared in the goldens' canonical form: a number's last digit
 may differ between a Mac and Linux or Windows). Both run in CI.
