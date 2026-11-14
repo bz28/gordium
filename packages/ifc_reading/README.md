@@ -35,13 +35,14 @@ records the file (name, SHA-256 fingerprint, schema, unit) and what wasn't read 
 | Key | Read from | Left out when |
 |---|---|---|
 | `sleeping` | the room's words (below), or the `Gordium_Egress.Sleeping` flag | the words don't settle it |
-| `floor_elevation` | the space's base (its body's lowest point) + its `FinishFloorHeight` quantity | `FinishFloorHeight` isn't given, or is negative (a flooring thickness can't be) |
+| `floor_elevation` | the space's base (its body's lowest point) + its `FinishFloorHeight` quantity | `FinishFloorHeight` isn't given, is negative (a flooring thickness can't be), or puts the floor at or above the space's top |
 | `floor` | the outline of the space's underside | the underside isn't one level outline, or the outline's area is more than the space's `NetFloorArea` quantity, or that quantity isn't given |
 | `ceiling_height` | the `FinishCeilingHeight` quantity (the lower of it and the space's top, above the finished floor) | it isn't given, the floor elevation isn't known, the space's top isn't level, or it or the space's top isn't above the floor |
 
 **Sleeping room or not: only from words or a flag, never from size.** The room's words are taken from its IFC
-`LongName`, `Name`, `ObjectType`, classification names and stated use (`Pset_SpaceOccupancyRequirements.OccupancyType`,
-`Pset_SpaceCommon.Category`), and its space type's `LongName`, `Name`,
+`LongName`, `Name`, `ObjectType`, classification names and stated use (`Pset_SpaceOccupancyRequirements.OccupancyType`;
+`Pset_SpaceCommon.Category`, an IFC2x3 property ArchiCAD also writes in IFC4; a stated use that isn't plain text
+keeps the room from reading `false`), and its space type's `LongName`, `Name`,
 `ElementType` and classification names (Unicode-normalised, so "Gästezimmer" reads the same
 however its "ä" is stored) and looked up whole in [`room_words.yaml`](ifc_reading/room_words.yaml) (English and
 German). A sleeping word (bedroom, nursery, Schlafzimmer) and no word against it → `sleeping: true`. Only words

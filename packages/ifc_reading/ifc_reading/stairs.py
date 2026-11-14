@@ -24,7 +24,8 @@ def read_flight(model, flight) -> dict:
             value, where = None, None
             for p in props:
                 if key in LENGTHS:               # a property may state its own unit
-                    v, w, bad = model.measure(flight, lambda n: n == "Pset_StairFlightCommon", p, "LENGTHUNIT")
+                    # review round 8: the flight's own wins over its type's, which says so
+                    v, w, bad = model.inherited(flight, lambda n: n == "Pset_StairFlightCommon", p, "LENGTHUNIT")
                     if bad:
                         unread[key] = bad
                 else:

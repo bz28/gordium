@@ -560,3 +560,51 @@ def test_a_lone_panel_beside_something_is_not_single(build, tmp_path, position):
     b.f.by_type("IfcWindowPanelProperties")[0].PanelPosition = position
     got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
     assert "frame" not in got and "operation" not in got and position in got["not_given"]["frame"]
+
+
+@pytest.mark.parametrize("how", ["enumerated", "list", "two_sets"])
+def test_a_stated_use_that_isnt_text_is_doubt(build, tmp_path, how):
+    """Review round 8: a stated use stored as an enumerated or list value, or stated twice differently, was dropped
+    silently, so a Kitchen whose use is Bedroom read as not a sleeping room."""
+    b = bedroom_house(build, name="Kitchen")
+    [space] = b.f.by_type("IfcSpace")
+    label = b.f.create_entity("IfcLabel", "Bedroom")
+    if how == "two_sets":                     # two sets of the same name: Bedroom in one, Kitchen in the other
+        props = [b.f.create_entity("IfcPropertySingleValue", Name="OccupancyType",
+                                   NominalValue=b.f.create_entity("IfcLabel", use)) for use in ("Bedroom", "Kitchen")]
+    elif how == "enumerated":
+        props = [b.f.create_entity("IfcPropertyEnumeratedValue", Name="OccupancyType", EnumerationValues=[label])]
+    else:
+        props = [b.f.create_entity("IfcPropertyListValue", Name="OccupancyType", ListValues=[label])]
+    for prop in props:
+        p = b.f.create_entity("IfcPropertySet", GlobalId=b.guid(), Name="Pset_SpaceOccupancyRequirements",
+                              HasProperties=[prop])
+        b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[space],
+                          RelatingPropertyDefinition=p)
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and "not a name" in room["not_given"]["sleeping"]
+
+
+def test_flooring_up_to_the_top_is_no_floor(build, tmp_path):
+    """Review round 8: 10 ft of flooring in a 9 ft space put the floor above the ceiling; the window's height above
+    the floor came out negative."""
+    d = read(bedroom_house(build, quantities=dict(QTY, FinishFloorHeight=10.0)).write(tmp_path / "h.ifc"))
+    room = d["rooms"][0]
+    assert "floor_elevation" not in room and "at or above the space's top" in room["not_given"]["floor_elevation"]
+    assert "opening_bottom_above_floor" not in d["openings"][0]["ifc"]
+
+
+@pytest.mark.parametrize("own", [False, True])
+def test_a_flights_lengths_from_its_type(build, tmp_path, own):
+    """Review round 8: a riser height on the flight's type didn't say so, and the flight's own differing value was
+    refused instead of winning."""
+    b = build.house("foot")
+    f = b.flight("F1", pset={"RiserHeight": 0.6} if own else None)
+    t = b.run("root.create_entity", ifc_class="IfcStairFlightType", name="Std flight")
+    b.run("type.assign_type", related_objects=[f], relating_type=t)
+    b.pset(t, "Pset_StairFlightCommon", {"RiserHeight": 0.65})
+    [fl] = read(b.write(tmp_path / "h.ifc"))["source"]["stair_flights"]
+    if own:
+        assert near(fl["riser_height"], 0.6 * FT) and fl["source"]["riser_height"] == "Pset_StairFlightCommon.RiserHeight"
+    else:
+        assert near(fl["riser_height"], 0.65 * FT) and "(from its type Std flight #" in fl["source"]["riser_height"]

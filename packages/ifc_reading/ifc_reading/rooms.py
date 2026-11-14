@@ -71,15 +71,16 @@ def sleeping_from_names(texts: dict, flag=None, where=None):
     return None, f"nothing in its name says what it is ({shown}): the architect says (Gordium_Egress.Sleeping)"
 
 
-USE = (("Pset_SpaceOccupancyRequirements", "OccupancyType"), ("Pset_SpaceCommon", "Category"))
+USE = (("Pset_SpaceOccupancyRequirements", "OccupancyType"), ("Pset_SpaceCommon", "Category"))   # Category: IFC2x3
 
 
-def names_of(model, space) -> dict:
+def names_of(model, space) -> tuple:
     """Every name the model gives the space: its LongName, Name, ObjectType, classifications and stated use
-    (Pset_SpaceOccupancyRequirements.OccupancyType, Pset_SpaceCommon.Category), and its
+    (Pset_SpaceOccupancyRequirements.OccupancyType, IFC2x3's Pset_SpaceCommon.Category), and its
     space type's LongName, Name, ElementType and classifications (review round 6: the type says what kind of space it is,
     and was ignored). Each under its own key: two classifications with no code no longer overwrite each other."""
     texts = {"LongName": space.LongName, "Name": space.Name, "ObjectType": space.ObjectType}
+    unclear = []
 
     def add(key, text):
         if key in texts:
@@ -100,13 +101,15 @@ def names_of(model, space) -> dict:
     for pset, name in USE:                 # review round 7: the model's stated use of the space is a name for it
         value, where = model.prop(space, [pset], name)
         add(where or f"{pset}.{name}", value if isinstance(value, str) else None)
+        if value is not None and not isinstance(value, str):     # review round 8: never dropped silently
+            unclear.append(f"{where} is {value!r}, not a name")
     t = model.type_of(space)
     if t is not None:
         add("type LongName", getattr(t, "LongName", None))
         add("type Name", t.Name)
         add("type ElementType", getattr(t, "ElementType", None))
         classifications(t, "type ")
-    return {k: v for k, v in texts.items() if isinstance(v, str) and v.strip()}
+    return {k: v for k, v in texts.items() if isinstance(v, str) and v.strip()}, unclear
 
 
 def description_doubt(model, space):
@@ -139,14 +142,15 @@ def read_room(model, space) -> dict:
     if storey is not None:
         info["storey"] = storey.Name
 
-    texts = names_of(model, space)
+    texts, unclear = names_of(model, space)
     flag, where = model.prop(space, [GORDIUM_SET], "Sleeping")
     if flag is not None and not isinstance(flag, bool):     # a flag that can't be read is never left to the name
         sleeping, why = None, f"{where} is {flag!r}, not true or false: the architect says"
     else:
         sleeping, why = sleeping_from_names(texts, flag, where)
     if sleeping is False:
-        doubt = description_doubt(model, space)
+        described = description_doubt(model, space)
+        doubt = "; ".join(unclear + ([described] if described else []))
         if doubt:
             sleeping, why = None, f"{why}, but {doubt}: the architect says (Gordium_Egress.Sleeping)"
     info["sleeping_from"] = why
@@ -175,6 +179,10 @@ def read_room(model, space) -> dict:
     elif finish < 0:                       # review round 5: flooring below the slab would raise the ceiling cap
         missing["floor_elevation"] = (f"{where} is {tidy(finish)} m: a flooring thickness can't be negative, so "
                                       "the finished floor is unknown")
+        floor = None
+    elif base + finish >= float(tris[:, :, 2].max()) - FLAT:   # review round 8: a floor at or above the room's top
+        missing["floor_elevation"] = (f"{where} is {tidy(finish)} m, which puts the finished floor at or above the "
+                                      "space's top: the finished floor is unknown")
         floor = None
     else:
         floor = base + finish

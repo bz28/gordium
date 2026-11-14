@@ -140,17 +140,22 @@ class Model:
             return None, values[0][1], f"the model states {name} more than once, differently ({said}): which is right is unclear"
         return values[0][0], values[0][1], None
 
-    def quantity(self, element, name, kind="LENGTHUNIT"):
-        """A base quantity (a Qto_* set, or IFC2x3's BaseQuantities): (metres or square metres, where, why not).
-        IFC4's template for these sets is type-driven with override: the element's own value wins, else its
-        type's, which then says so (review round 7: a type's NetFloorArea read as if the room stated it)."""
-        wanted = lambda n: bool(n) and (n.startswith("Qto_") or n == "BaseQuantities")
+    def inherited(self, element, wanted, name, kind):
+        """measure() one level at a time: the element's own statement wins, else its type's, which then says so
+        in its source ("from its type ..."), since it holds for every element of that type."""
         t = self.type_of(element)
         for level, holders in enumerate(self.levels(element)):
             value, where, bad = self.measure(element, wanted, name, kind, holders)
             if where is not None:
                 return value, where + (self.from_type(t) if level else ""), bad
         return None, None, None
+
+    def quantity(self, element, name, kind="LENGTHUNIT"):
+        """A base quantity (a Qto_* set, or IFC2x3's BaseQuantities): (metres or square metres, where, why not).
+        IFC4's template for these sets is type-driven with override: the element's own value wins, else its
+        type's, which then says so (review round 7: a type's NetFloorArea read as if the room stated it)."""
+        return self.inherited(element, lambda n: bool(n) and (n.startswith("Qto_") or n == "BaseQuantities"), name,
+                              kind)
 
     def type_of(self, element):
         import ifcopenshell.util.element
