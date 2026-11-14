@@ -1,0 +1,3614 @@
+district: general
+rules:
+- id: general.r318_2_egress_door_per_dwelling_unit
+  kind: rule
+  topic: means_of_egress
+  title: One egress door for each dwelling unit (R318.2)
+  check: egress_doors >= dwelling_units
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 44
+    - 44
+    quote: Not less than one egress door shall be provided for each dwelling unit.
+  examples:
+  - given:
+      dwelling_units: 1
+      egress_doors: 1
+    expect: pass
+  - given:
+      dwelling_units: 2
+      egress_doors: 1
+    expect: fail
+  open_questions:
+  - Egress doors are counted for the whole lot against the lot's dwelling units; for a townhouse split across lots,
+    confirm that each unit's own door is counted.
+  - R318.2 does not say how a door is marked as the egress door; Gordium relies on the architect's marking.
+  research:
+  - question: Egress doors are counted for the whole lot against the lot's dwelling units; for a townhouse split
+      across lots, confirm that each unit's own door is counted.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: R318.2 does not say how a door is marked as the egress door; Gordium relies on the architect's marking.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_2_egress_door_side_hinged
+  kind: rule
+  topic: means_of_egress
+  title: Egress door shall be side-hinged (R318.2)
+  check: door_side_hinged
+  for_each: egress_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 44
+    - 46
+    quote: The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813
+      mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad).
+  examples:
+  - given: {}
+    parts:
+      egress_door:
+      - id: d1
+        name: Front door
+        measures:
+          door_side_hinged: true
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      egress_door:
+      - id: d1
+        name: Front door
+        measures:
+          door_side_hinged: false
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      egress_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Whether a building with no marked egress door fails is covered by the rule requiring one egress door per dwelling
+    unit.
+  research:
+  - question: Whether a building with no marked egress door fails is covered by the rule requiring one egress door
+      per dwelling unit.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_2_egress_door_clear_width
+  kind: rule
+  topic: means_of_egress
+  title: Egress door clear width at least 32 in (R318.2)
+  check: door_clear_width >= 32
+  for_each: egress_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 44
+    - 46
+    quote: The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813
+      mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad).
+  examples:
+  - given: {}
+    parts:
+      egress_door:
+      - id: d1
+        name: Front door
+        measures:
+          door_clear_width: 32
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      egress_door:
+      - id: d1
+        name: Front door
+        measures:
+          door_clear_width: 31.5
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      egress_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The width is measured between the face of the door and the stop with the door open 90 degrees; confirm the architect's
+    measure follows this.
+  research:
+  - question: The width is measured between the face of the door and the stop with the door open 90 degrees; confirm
+      the architect's measure follows this.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_2_egress_door_clear_height
+  kind: rule
+  topic: means_of_egress
+  title: Egress door clear height at least 78 in (R318.2)
+  check: door_clear_height >= 78
+  for_each: egress_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 46
+    - 47
+    quote: The clear height of the door opening shall be not less than 78 inches (1981 mm) in height measured from
+      the top of the threshold to the bottom of the stop.
+  examples:
+  - given: {}
+    parts:
+      egress_door:
+      - id: d1
+        name: Front door
+        measures:
+          door_clear_height: 78
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      egress_door:
+      - id: d1
+        name: Front door
+        measures:
+          door_clear_height: 77
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      egress_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_2_egress_door_readily_openable
+  kind: flag
+  topic: means_of_egress
+  title: Egress doors readily openable without key (R318.2)
+  for_each: egress_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 48
+    - 49
+    quote: Egress doors shall be readily openable from inside the dwelling unit without the use of a key or special
+      knowledge or effort.
+  examples:
+  - given: {}
+    parts:
+      egress_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - What counts as 'readily openable' and 'special knowledge or effort' is a judgment for the architect or examiner;
+    it cannot be decided from measurements.
+  research:
+  - question: What counts as 'readily openable' and 'special knowledge or effort' is a judgment for the architect
+      or examiner; it cannot be decided from measurements.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_8_stair_handrail_one_side
+  kind: rule
+  topic: means_of_egress
+  title: Handrail on one side of flights with four or more risers (R318.7.8)
+  applies_when: stair_riser_count >= 4
+  check: stair_handrail_sides >= 1
+  review_when:
+  - when: stair_spiral
+    reason: Spiral stairways are sent to R318.7.11.1, not drafted by this rule.
+  - when: stair_serves_sleeping_loft
+    reason: A sleeping loft's stair may follow other limits (R315.5), so this rule does not decide it.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 32
+    - 32
+    quote: Handrails shall be provided on not less than one side of each flight of stairs with four or more risers.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_riser_count: 14
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+          stair_handrail_sides: 1
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_riser_count: 4
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+          stair_handrail_sides: 0
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Porch steps
+        measures:
+          stair_riser_count: 3
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+          stair_handrail_sides: 0
+    rows:
+    - part: s1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_riser_count: 12
+          stair_spiral: true
+          stair_serves_sleeping_loft: false
+          stair_handrail_sides: 1
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Spiral stairways go to R318.7.11.1 and sleeping loft stairs follow R315.5; the exact limits that apply to them
+    are drafted from those sections.
+  - R318.7.11.2 exempts some bulkhead enclosure stairways from R318.7; no measure says a stair is such a stairway,
+    so the architect should say whether this rule applies to it.
+  research:
+  - question: Spiral stairways go to R318.7.11.1 and sleeping loft stairs follow R315.5; the exact limits that apply
+      to them are drafted from those sections.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: R318.7.11.2 exempts some bulkhead enclosure stairways from R318.7; no measure says a stair is such
+      a stairway, so the architect should say whether this rule applies to it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_2_1_escape_opening_min_net_clear_area
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening minimum net clear area (R319.2.1)
+  check: opening_net_clear_area >= (5.0 if opening_at_grade else 5.7)
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 48
+    - 48
+    quote: Emergency escape and rescue openings shall have a net clear opening of not less than 5.7 square feet
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 50
+    - 50
+    quote: 'Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall
+      be 5 square feet (0.465 m[fn2]).'
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: w1
+        name: Window above grade
+        measures:
+          opening_net_clear_area: 5.7
+          opening_at_grade: false
+    rows:
+    - part: w1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: w1
+        name: Window above grade
+        measures:
+          opening_net_clear_area: 5.3
+          opening_at_grade: false
+    rows:
+    - part: w1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: w2
+        name: Grade-floor window
+        measures:
+          opening_net_clear_area: 5
+          opening_at_grade: true
+    rows:
+    - part: w2
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: w2
+        name: Grade-floor window
+        measures:
+          opening_net_clear_area: 4.9
+          opening_at_grade: true
+    rows:
+    - part: w2
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R319.5 exempts certain replacement windows from R319.2; this rule does not model that exemption.
+  - R319.4.4 and R321.2.2 relate to net clear opening size with devices fitted; not modelled here.
+  - The grade-floor definition (bottom of clear opening not more than 44 inches above or below adjacent ground)
+    is represented by the opening_at_grade measure; confirm that it matches.
+  research:
+  - question: R319.5 exempts certain replacement windows from R319.2; this rule does not model that exemption.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: R319.4.4 and R321.2.2 relate to net clear opening size with devices fitted; not modelled here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The grade-floor definition (bottom of clear opening not more than 44 inches above or below adjacent
+      ground) is represented by the opening_at_grade measure; confirm that it matches.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_2_2_escape_opening_min_net_clear_height
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening minimum net clear height (R319.2.2)
+  check: opening_net_clear_height >= 24
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 51
+    - 51
+    quote: The minimum net clear opening height dimension shall be 24 inches (610 mm).
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eo1
+        name: Window
+        measures:
+          opening_net_clear_height: 24
+    rows:
+    - part: eo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eo1
+        name: Window
+        measures:
+          opening_net_clear_height: 23.5
+    rows:
+    - part: eo1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R319.4.4 applies this minimum to openings with bars, grilles, covers or screens, and R319.5 exempts some replacement
+    windows from R319.2; those are drafted from their own sections.
+  - The text says dimensions are the result of normal operation of the opening; the measure opening_net_clear_height
+    is assumed to be taken that way.
+  research:
+  - question: R319.4.4 applies this minimum to openings with bars, grilles, covers or screens, and R319.5 exempts
+      some replacement windows from R319.2; those are drafted from their own sections.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text says dimensions are the result of normal operation of the opening; the measure opening_net_clear_height
+      is assumed to be taken that way.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_2_2_escape_opening_min_net_clear_width
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening minimum net clear width (R319.2.2)
+  check: opening_net_clear_width >= 20
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 51
+    - 52
+    quote: The minimum net clear opening width dimension shall be 20 inches (508 mm).
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eo1
+        name: Window
+        measures:
+          opening_net_clear_width: 20
+    rows:
+    - part: eo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eo1
+        name: Window
+        measures:
+          opening_net_clear_width: 19.5
+    rows:
+    - part: eo1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R319.4.4 applies this minimum to openings with bars, grilles, covers or screens, and R319.5 exempts some replacement
+    windows from R319.2; those are drafted from their own sections.
+  - The text says dimensions are the result of normal operation of the opening; the measure opening_net_clear_width
+    is assumed to be taken that way.
+  research:
+  - question: R319.4.4 applies this minimum to openings with bars, grilles, covers or screens, and R319.5 exempts
+      some replacement windows from R319.2; those are drafted from their own sections.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text says dimensions are the result of normal operation of the opening; the measure opening_net_clear_width
+      is assumed to be taken that way.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_2_3_escape_opening_max_sill_height
+  kind: rule
+  topic: means_of_egress
+  title: Escape opening bottom of clear opening max height (R319.2.3)
+  check: opening_sill_height <= 44
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 54
+    - 55
+    quote: 'Emergency escape and rescue openings shall have the bottom of the clear opening not
+
+      greater than 44 inches (1118 mm) above the floor.'
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_sill_height: 40
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_sill_height: 44
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_sill_height: 46
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R319.5 exempts certain replacement windows from R319.2 and R319.4.4; this rule does not model that exemption
+    (it is drafted from its own text). Should a replacement window needing the exemption go to review?
+  research:
+  - question: R319.5 exempts certain replacement windows from R319.2 and R319.4.4; this rule does not model that
+      exemption (it is drafted from its own text). Should a replacement window needing the exemption go to review?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_2_4_under_projection_openable_path
+  kind: rule
+  topic: means_of_egress
+  title: Escape openings under decks, porches, cantilevers (R319.2.4)
+  applies_when: opening_under_projection
+  check: opening_fully_openable and opening_path_height >= 36 and opening_path_width >= 36
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 3
+    - 5
+    quote: 'Emergency escape and rescue open-
+
+      ings installed under decks, porches and cantilevers shall be fully openable and provide a path not less than
+      36 inches (914 mm) in
+
+      height and 36 inches (914 mm) in width to a yard or court.'
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening under deck
+        measures:
+          opening_under_projection: true
+          opening_fully_openable: true
+          opening_path_height: 36
+          opening_path_width: 40
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening under deck
+        measures:
+          opening_under_projection: true
+          opening_fully_openable: true
+          opening_path_height: 40
+          opening_path_width: 35
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening under porch
+        measures:
+          opening_under_projection: true
+          opening_fully_openable: false
+          opening_path_height: 40
+          opening_path_width: 40
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Ordinary opening
+        measures:
+          opening_under_projection: false
+    rows:
+    - part: o1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The text requires a path to a yard or court; the measures record only the path's height and width, not whether
+    it leads to a yard or court (see the opening_opens_to_yard measure).
+  - Does the 36 inch path need to be clear along its whole length? The measures record the least clear height and
+    width of the path.
+  - Whether replacement windows (R319.5) and bars, grilles or covers (R319.4.4) modify this requirement is drafted
+    from those sections.
+  research:
+  - question: The text requires a path to a yard or court; the measures record only the path's height and width,
+      not whether it leads to a yard or court (see the opening_opens_to_yard measure).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does the 36 inch path need to be clear along its whole length? The measures record the least clear
+      height and width of the path.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Whether replacement windows (R319.5) and bars, grilles or covers (R319.4.4) modify this requirement
+      is drafted from those sections.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_3_escape_door_side_hinged_or_sliding
+  kind: rule
+  topic: means_of_egress
+  title: 'Emergency escape and rescue door: side-hinged or sliding (R319.3)'
+  applies_when: opening_is_door
+  check: opening_door_hinged_or_sliding
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 6
+    - 7
+    quote: 'R319.3 Emergency escape and rescue doors. Where a door is provided as the required emergency escape
+      and rescue opening, it
+
+      shall be a side-hinged door or a sliding door.'
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eo1
+        name: Sliding escape door
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: true
+    rows:
+    - part: eo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eo2
+        name: Bi-fold escape door
+        measures:
+          opening_is_door: true
+          opening_door_hinged_or_sliding: false
+    rows:
+    - part: eo2
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eo3
+        name: Escape window
+        measures:
+          opening_is_door: false
+          opening_door_hinged_or_sliding: false
+    rows:
+    - part: eo3
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_area_well_required
+  kind: rule
+  topic: means_of_egress
+  title: Area well where opening is below grade (R319.4)
+  applies_when: opening_below_grade
+  check: area_well_area > 0
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 8
+    - 8
+    quote: R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below
+      the adjacent grade
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 9
+    - 9
+    quote: shall be provided with an area well in accordance with Sections R319.4.1 through R319.4.4.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window 1
+        measures:
+          opening_below_grade: true
+          area_well_area: 12
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window 1
+        measures:
+          opening_below_grade: true
+          area_well_area: 0
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window 1
+        measures:
+          opening_below_grade: false
+          area_well_area: 0
+    rows:
+    - part: o1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Is an area well with zero area the only way to show no area well is provided? Should the architect instead mark
+    presence of an area well explicitly?
+  research:
+  - question: Is an area well with zero area the only way to show no area well is provided? Should the architect
+      instead mark presence of an area well explicitly?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_2_area_well_ladder_over_44
+  kind: rule
+  topic: means_of_egress
+  title: 'Area well deeper than 44 in: ladder or steps (R319.4.2)'
+  applies_when: area_well_depth > 44
+  check: area_well_ladder
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 15
+    - 16
+    quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+      permanently affixed ladder or steps.
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 16
+    - 17
+    quote: The ladder or steps shall not be obstructed by the emergency escape and rescue opening where the window
+      or door is in the open position.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Basement window
+        measures:
+          area_well_depth: 50
+          area_well_ladder: true
+    rows:
+    - part: eeo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Basement window
+        measures:
+          area_well_depth: 50
+          area_well_ladder: false
+    rows:
+    - part: eeo1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Basement window
+        measures:
+          area_well_depth: 44
+          area_well_ladder: false
+    rows:
+    - part: eeo1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - '"Approved" means acceptable to the building official; Gordium cannot decide approval, so the check reads only
+    that a permanently affixed ladder or steps is present and not obstructed by the open window or door. Should
+    approval be flagged for the building official?'
+  - The code's R319.4 requires an area well only where the bottom of the clear opening is below adjacent grade;
+    this rule reads area_well_depth as present only for openings with an area well.
+  - The last sentence says ladders or steps required here need not comply with Section R318.7; no requirement of
+    R318.7 is applied by this rule.
+  research:
+  - question: '"Approved" means acceptable to the building official; Gordium cannot decide approval, so the check
+      reads only that a permanently affixed ladder or steps is present and not obstructed by the open window or
+      door. Should approval be flagged for the building official?'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The code's R319.4 requires an area well only where the bottom of the clear opening is below adjacent
+      grade; this rule reads area_well_depth as present only for openings with an area well.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The last sentence says ladders or steps required here need not comply with Section R318.7; no requirement
+      of R318.7 is applied by this rule.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.bf103_2_escape_opening_into_patio_cover_unenclosed
+  kind: flag
+  topic: means_of_egress
+  title: 'Escape opening into a patio cover: unenclosed (BF103.2)'
+  applies_when: opening_into_patio_cover
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 898
+    lines:
+    - 26
+    - 28
+    quote: Exterior openings required for light and ventilation into a patio structure conforming to Section BF101
+      shall be unenclosed where such openings serve as emergency egress or rescue openings from sleeping rooms.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: w1
+        name: Window 1
+        within: br1
+        measures:
+          opening_into_patio_cover: true
+          patio_cover_openings_open: false
+      sleeping_room:
+      - id: br1
+        name: Bedroom 1
+        measures: {}
+    rows:
+    - part: w1
+      within: br1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: w1
+        name: Window 1
+        within: br1
+        measures:
+          opening_into_patio_cover: false
+      sleeping_room:
+      - id: br1
+        name: Bedroom 1
+        measures: {}
+    rows:
+    - part: w1
+      within: br1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: br1
+        name: Bedroom 1
+        measures: {}
+    rows:
+    - within: br1
+      outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does insect screening, plastic or glass in a patio cover's wall openings (what BF103.1 says openings are "enclosed
+    with") make the patio cover enclosed under BF103.2, so a sleeping room's escape opening may not open into it?
+  research:
+  - question: Does insect screening, plastic or glass in a patio cover's wall openings (what BF103.1 says openings
+      are "enclosed with") make the patio cover enclosed under BF103.2, so a sleeping room's escape opening may
+      not open into it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.bf103_2_exit_into_patio_cover_r318_exits
+  kind: flag
+  topic: means_of_egress
+  title: 'Exit into a patio cover not unenclosed: exits per R318 (BF103.2)'
+  for_each: egress_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 898
+    lines:
+    - 28
+    - 29
+    quote: Where such exterior openings serve as an exit from the dwelling unit, the patio structure, unless unenclosed,
+      shall be provided with exits conforming to the provisions of Section R318.
+  examples:
+  - given: {}
+    parts:
+      egress_door:
+      - id: d1
+        name: Rear door
+        measures: {}
+    rows:
+    - part: d1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      egress_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does insect screening, plastic or glass in a patio cover's wall openings make the patio cover enclosed, so that
+    it needs its own exits conforming to Section R318?
+  - Whether an egress door opens into a patio cover is not in the model, so a person must check it.
+  research:
+  - question: Does insect screening, plastic or glass in a patio cover's wall openings make the patio cover enclosed,
+      so that it needs its own exits conforming to Section R318?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Whether an egress door opens into a patio cover is not in the model, so a person must check it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_2_handrail_height_34_38
+  kind: rule
+  topic: means_of_egress
+  title: Handrail height 34 to 38 in (R320.2)
+  check: handrail_height >= 34 and handrail_height_max <= 38
+  review_when:
+  - when: handrail_height_max > 38 and handrail_height >= 34
+    reason: Exception 2 lets handrail fittings or bendings exceed 38 inches at transitions, winders, a handrail-to-guard
+      transition or the start of a flight. The measure does not say where the greatest height occurs.
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 54
+    - 55
+    quote: Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface
+      of ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 3
+    - 5
+    quote: Where handrail fittings or bendings are used to provide continuous transition between flights, transitions
+      at winder treads, the transition from handrail to guard, or used at the start of a flight, the handrail height
+      at the fittings or bendings shall be permitted to exceed 38 inches (965 mm).
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_height: 34
+          handrail_height_max: 36
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_height: 33
+          handrail_height_max: 36
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_height: 35
+          handrail_height_max: 40
+    rows:
+    - part: h1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The handrail part kind is a handrail along a flight of stairs. Does the 34 to 38 inch limit also apply to ramp
+    handrails (R318.8.3 sends them to R320)? No ramp part is modelled, so ramp handrails are not checked here.
+  - R320.2 sets handrail height on alternating tread devices and ship's ladders at 30 to 34 inches and uniform (R318.7.12.2
+    and R318.7.13.2 send their handrails to R320). No part kind exists for those handrails, so that sentence is
+    not drafted as a rule; an engineer needs to add a part kind or measure for it.
+  - Exception 1 allows a volute, turnout or starting easing over the lowest tread. How does it change the height
+    there? Can the measured least height fall below 34 inches at it?
+  - 'Where does the greatest handrail height occur: at a fitting or bending that Exception 2 permits above 38 inches,
+    or along the run? A greatest height over 38 inches goes to review for that reason.'
+  research:
+  - question: The handrail part kind is a handrail along a flight of stairs. Does the 34 to 38 inch limit also apply
+      to ramp handrails (R318.8.3 sends them to R320)? No ramp part is modelled, so ramp handrails are not checked
+      here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: R320.2 sets handrail height on alternating tread devices and ship's ladders at 30 to 34 inches and
+      uniform (R318.7.12.2 and R318.7.13.2 send their handrails to R320). No part kind exists for those handrails,
+      so that sentence is not drafted as a rule; an engineer needs to add a part kind or measure for it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Exception 1 allows a volute, turnout or starting easing over the lowest tread. How does it change
+      the height there? Can the measured least height fall below 34 inches at it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'Where does the greatest handrail height occur: at a fitting or bending that Exception 2 permits above
+      38 inches, or along the run? A greatest height over 38 inches goes to review for that reason.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_4_handrail_wall_clearance
+  kind: rule
+  topic: means_of_egress
+  title: Handrail clearance from wall (R320.4)
+  applies_when: handrail_adjacent_to_wall
+  check: handrail_wall_clearance >= 1.5
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 10
+    - 10
+    quote: R320.4 Handrail clearance. Handrails adjacent to a wall shall have a space of not less than 1 1/2 inches
+      (38 mm) between the wall and
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail 1
+        measures:
+          handrail_adjacent_to_wall: true
+          handrail_wall_clearance: 1.5
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail 1
+        measures:
+          handrail_adjacent_to_wall: true
+          handrail_wall_clearance: 1.25
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail 1
+        measures:
+          handrail_adjacent_to_wall: false
+          handrail_wall_clearance: 0
+    rows:
+    - part: h1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Handrails of alternating tread devices, ship's ladders and ramps are required to comply with R320; confirm whether
+    this wall clearance applies to them as to stair handrails.
+  research:
+  - question: Handrails of alternating tread devices, ship's ladders and ramps are required to comply with R320;
+      confirm whether this wall clearance applies to them as to stair handrails.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r321_1_2_guard_height_open_side_not_stair
+  kind: rule
+  topic: means_of_egress
+  title: Guard height, open sides other than stairs (R321.1.2)
+  applies_when: guard_present and not open_side_on_stair
+  check: guard_height >= 36
+  for_each: open_side
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 38
+    - 40
+    quote: Required guards at open-sided walking surfaces, including stairs, porches, balconies or landings, shall
+      be not less than 36 inches (914 mm) in height as measured vertically above the adjacent walking surface or
+      the line connecting the nosings.
+  examples:
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Porch edge
+        measures:
+          open_side_on_stair: false
+          guard_present: true
+          guard_height: 36
+    rows:
+    - part: os1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Porch edge
+        measures:
+          open_side_on_stair: false
+          guard_present: true
+          guard_height: 35
+    rows:
+    - part: os1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      open_side: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Which open sides need a guard at all is set by another section of the code (not this text); this rule checks
+    only the height of a guard that is present.
+  - Where an open side that is a landing or porch edge meets a stair, it is left to the architect to label which
+    part is the stair's open side.
+  research:
+  - question: Which open sides need a guard at all is set by another section of the code (not this text); this rule
+      checks only the height of a guard that is present.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Where an open side that is a landing or porch edge meets a stair, it is left to the architect to label
+      which part is the stair's open side.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r321_1_2_guard_height_stair_open_side
+  kind: rule
+  topic: means_of_egress
+  title: Guard height, open sides of stairs (R321.1.2 Exc. 1)
+  applies_when: guard_present and open_side_on_stair
+  check: guard_height >= 34
+  for_each: open_side
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 42
+    - 43
+    quote: Guards on the open sides of stairs shall have a height of not less than 34 inches (864 mm) measured vertically
+      from a line connecting the nosings.
+  examples:
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Stair open side
+        measures:
+          open_side_on_stair: true
+          guard_present: true
+          guard_height: 34
+    rows:
+    - part: os1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Stair open side
+        measures:
+          open_side_on_stair: true
+          guard_present: true
+          guard_height: 33
+    rows:
+    - part: os1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      open_side: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Which open sides of stairs need a guard is set by another section, not this text.
+  research:
+  - question: Which open sides of stairs need a guard is set by another section, not this text.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r321_1_2_guard_height_stair_guard_as_handrail
+  kind: rule
+  topic: means_of_egress
+  title: Guard top serving as stair handrail, 34 to 38 in (R321.1.2 Exc. 2)
+  applies_when: guard_present and open_side_on_stair and guard_is_handrail
+  check: guard_height >= 34 and guard_height_max <= 38
+  for_each: open_side
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 44
+    - 45
+    quote: Where the top of the guard serves as a handrail on the open sides of stairs, the top of the guard shall
+      be not less than 34 inches (864 mm) and not more than 38 inches (965 mm) as measured vertically from a line
+      connecting the nosings.
+  examples:
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Stair open side
+        measures:
+          open_side_on_stair: true
+          guard_present: true
+          guard_is_handrail: true
+          guard_height: 34
+          guard_height_max: 38
+    rows:
+    - part: os1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Stair open side
+        measures:
+          open_side_on_stair: true
+          guard_present: true
+          guard_is_handrail: true
+          guard_height: 34
+          guard_height_max: 39
+    rows:
+    - part: os1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Stair open side
+        measures:
+          open_side_on_stair: true
+          guard_present: true
+          guard_is_handrail: true
+          guard_height: 33
+          guard_height_max: 36
+    rows:
+    - part: os1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      open_side: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Handrail requirements for the guard top (grip size, continuity) are in other sections, not drafted here.
+  research:
+  - question: Handrail requirements for the guard top (grip size, continuity) are in other sections, not drafted
+      here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r321_1_3_guard_opening_4_inch_sphere
+  kind: flag
+  topic: means_of_egress
+  title: Guard openings stop a 4 inch sphere (R321.1.3)
+  applies_when: guard_present and not open_side_on_stair
+  for_each: open_side
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 46
+    - 47
+    quote: R321.1.3 Opening limitations. Required guards shall not have openings from the walking surface to the
+      required guard height that allow passage of a sphere 4 inches (102 mm) in diameter.
+  examples:
+  - given: {}
+    parts:
+      open_side: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The second reading gives no comparison for '4 inch', so Gordium cannot decide this automatically. A person must
+    check that no opening in the guard, from the walking surface to the required guard height, allows a 4 inch sphere
+    to pass.
+  - The required guard height is set in another section (R312).
+  - Does a sphere of exactly 4 inches count as passing? The text doesn't say.
+  research:
+  - question: The second reading gives no comparison for '4 inch', so Gordium cannot decide this automatically.
+      A person must check that no opening in the guard, from the walking surface to the required guard height, allows
+      a 4 inch sphere to pass.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The required guard height is set in another section (R312).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does a sphere of exactly 4 inches count as passing? The text doesn't say.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r321_1_3_guard_stair_triangle_6_inch_sphere
+  kind: flag
+  topic: means_of_egress
+  title: Stair guard triangle stops a 6 inch sphere (R321.1.3 Exc. 1)
+  applies_when: guard_present and open_side_on_stair
+  for_each: open_side
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 49
+    - 50
+    quote: 1. The triangular openings at the open side of stair, formed by the riser, tread and bottom rail of a
+      guard, shall not allow passage of a sphere 6 inches (153 mm) in diameter.
+  examples:
+  - given: {}
+    parts:
+      open_side: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The second reading gives no comparison for '6 inch', so Gordium cannot decide this automatically. A person must
+    check that the triangle formed by the riser, tread and bottom rail does not allow a 6 inch sphere to pass.
+  - Does a sphere of exactly 6 inches count as passing? The text doesn't say.
+  research:
+  - question: The second reading gives no comparison for '6 inch', so Gordium cannot decide this automatically.
+      A person must check that the triangle formed by the riser, tread and bottom rail does not allow a 6 inch sphere
+      to pass.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does a sphere of exactly 6 inches count as passing? The text doesn't say.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r321_1_3_guard_stair_opening_4_3_8_sphere
+  kind: flag
+  topic: means_of_egress
+  title: Stair guard openings stop a 4 3/8 inch sphere (R321.1.3 Exc. 2)
+  applies_when: guard_present and open_side_on_stair
+  for_each: open_side
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 51
+    - 52
+    quote: 2. Guards on the open side of stairs shall not have openings that allow passage of a sphere 4 3/8 inches
+      (111 mm) in diameter.
+  examples:
+  - given: {}
+    parts:
+      open_side: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The second reading gives no comparison for '4 3/8 inch', so Gordium cannot decide this automatically. A person
+    must check that no opening in a guard on the open side of a stair allows a 4 3/8 inch sphere to pass.
+  - Does this exception replace the general 4 inch limit on the open side of stairs? Gordium reads it that way.
+  - Does a sphere of exactly 4 3/8 inches count as passing? The text doesn't say.
+  research:
+  - question: The second reading gives no comparison for '4 3/8 inch', so Gordium cannot decide this automatically.
+      A person must check that no opening in a guard on the open side of a stair allows a 4 3/8 inch sphere to pass.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does this exception replace the general 4 inch limit on the open side of stairs? Gordium reads it
+      that way.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does a sphere of exactly 4 3/8 inches count as passing? The text doesn't say.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_2_sleeping_loft_floor_area_limit
+  kind: rule
+  topic: means_of_egress
+  title: Sleeping loft floor area less than 70 sf (R315.2 item 1)
+  check: loft_floor_area < 70
+  for_each: sleeping_loft
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 12
+    - 12
+    quote: The sleeping loft floor area shall be less than 70 square feet (6.5 m[fn2]).
+  examples:
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_floor_area: 60
+    rows:
+    - part: loft1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_floor_area: 70
+    rows:
+    - part: loft1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      sleeping_loft: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R315.1 sets exceptions (depth under 3 feet, floor area under 35 square feet, no permanent means of egress) and
+    says lofts are subject to this code as modified by R315.2 through R315.5; this rule assumes the architect marks
+    only lofts that R315 applies to as sleeping lofts.
+  research:
+  - question: R315.1 sets exceptions (depth under 3 feet, floor area under 35 square feet, no permanent means of
+      egress) and says lofts are subject to this code as modified by R315.2 through R315.5; this rule assumes the
+      architect marks only lofts that R315 applies to as sleeping lofts.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_2_sleeping_loft_ceiling_height_limit
+  kind: rule
+  topic: means_of_egress
+  title: Sleeping loft ceiling over 7 ft on at most half the floor area (R315.2 item 2)
+  check: loft_floor_area_over_7ft <= 0.5 * loft_floor_area
+  for_each: sleeping_loft
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 13
+    - 13
+    quote: The sleeping loft ceiling height shall not exceed 7 feet (2134 mm) for more than one-half of the sleeping
+      loft floor area.
+  examples:
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_floor_area: 60
+          loft_floor_area_over_7ft: 30
+    rows:
+    - part: loft1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_floor_area: 60
+          loft_floor_area_over_7ft: 31
+    rows:
+    - part: loft1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      sleeping_loft: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Is the ceiling height measured over the loft's counted floor area only (sloped spaces under 3 feet left out,
+    R315.3)?
+  research:
+  - question: Is the ceiling height measured over the loft's counted floor area only (sloped spaces under 3 feet
+      left out, R315.3)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_3_sleeping_loft_clear_height_below
+  kind: rule
+  topic: means_of_egress
+  title: 'Sleeping loft: clear height below floor construction (R315.3)'
+  check: loft_clear_height_below >= 84
+  for_each: sleeping_loft
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 14
+    - 15
+    quote: The clear height below the sleeping loft floor construction shall not be less than 7 feet (2134 mm).
+  examples:
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_clear_height_below: 84
+    rows:
+    - part: loft1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_clear_height_below: 83
+    rows:
+    - part: loft1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      sleeping_loft: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_3_sleeping_loft_ceiling_height
+  kind: rule
+  topic: means_of_egress
+  title: 'Sleeping loft: ceiling height above finished floor (R315.3)'
+  check: loft_ceiling_height >= 36
+  for_each: sleeping_loft
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 15
+    - 15
+    quote: The ceiling height above the finished floor of the sleeping loft shall not be less than 3 feet (914 mm).
+  examples:
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_ceiling_height: 36
+    rows:
+    - part: loft1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      sleeping_loft:
+      - id: loft1
+        name: Loft
+        measures:
+          loft_ceiling_height: 35
+    rows:
+    - part: loft1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      sleeping_loft: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R315.3 says spaces adjacent to the loft with a sloped ceiling under 3 feet do not count toward the loft floor
+    area. Is loft_ceiling_height meant to be measured only over the counted floor area?
+  research:
+  - question: R315.3 says spaces adjacent to the loft with a sloped ceiling under 3 feet do not count toward the
+      loft floor area. Is loft_ceiling_height meant to be measured only over the counted floor area?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_5_2_2_sleeping_loft_stair_riser_height
+  kind: rule
+  topic: means_of_egress
+  title: Sleeping loft stair riser height, 7 to 12 in (R315.5.2.2)
+  applies_when: stair_serves_sleeping_loft
+  check: stair_riser_height - stair_riser_variation >= 7 and stair_riser_height <= 12
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 30
+    - 31
+    quote: Risers for stairs providing egress from a sleeping loft shall be not less than 7 inches (178 mm) and
+      not more than 12 inches (305 mm) in height.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_riser_height: 8
+          stair_riser_variation: 0.25
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_riser_height: 13
+          stair_riser_variation: 0
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_riser_height: 8
+          stair_riser_variation: 2
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The check reads the tallest riser against 12 inches and the smallest riser (tallest minus variation) against
+    7 inches, so every riser must be in range. Please confirm this reading.
+  - R315.5 sends the means of egress to Section R318 as modified; the other R318 stair limits are drafted from their
+    own sections.
+  research:
+  - question: The check reads the tallest riser against 12 inches and the smallest riser (tallest minus variation)
+      against 7 inches, so every riser must be in range. Please confirm this reading.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: R315.5 sends the means of egress to Section R318 as modified; the other R318 stair limits are drafted
+      from their own sections.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_5_2_2_sleeping_loft_stair_tread_riser_formula
+  kind: flag
+  topic: means_of_egress
+  title: Sleeping loft stair tread/riser formula (R315.5.2.2)
+  applies_when: stair_serves_sleeping_loft
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 31
+    - 32
+    quote: 'Tread depth and riser height shall be calculated in accordance with one of the following formulas:'
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 33
+    - 33
+    quote: The tread depth shall be 20 inches (508 mm) minus four-thirds of the riser height.
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 34
+    - 34
+    quote: The riser height shall be 15 inches (381 mm) minus three-fourths of the tread depth.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_riser_height: 8
+          stair_tread_depth: 9.33
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - A measured length never equals a formula result exactly, so a person must check that tread depth is 20 inches
+    minus four-thirds of riser height, or riser height is 15 inches minus three-fourths of tread depth. What tolerance
+    is acceptable?
+  research:
+  - question: A measured length never equals a formula result exactly, so a person must check that tread depth is
+      20 inches minus four-thirds of riser height, or riser height is 15 inches minus three-fourths of tread depth.
+      What tolerance is acceptable?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r321_1_1_guard_required_open_side
+  kind: rule
+  topic: means_of_egress
+  title: Guard required at open sides over 30 in. drop (R321.1.1)
+  applies_when: open_side_drop > 30
+  check: guard_present
+  for_each: open_side
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 35
+    - 37
+    quote: 'Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs,
+
+      ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade
+      below at any point
+
+      within 36 inches (914 mm) horizontally to the edge of the open side.'
+  examples:
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Deck edge
+        measures:
+          open_side_drop: 40
+          guard_present: true
+    rows:
+    - part: os1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Deck edge
+        measures:
+          open_side_drop: 40
+          guard_present: false
+    rows:
+    - part: os1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      open_side:
+      - id: os1
+        name: Low porch edge
+        measures:
+          open_side_drop: 30
+          guard_present: false
+    rows:
+    - part: os1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      open_side: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The 36-inch horizontal distance is built into the measure open_side_drop (greatest drop within 36 inches of
+    the edge), so the rule tests that one measure.
+  - Whether a guard that is present but does not meet the height and opening limits of R321 satisfies this section
+    is decided by the other R321 sections, not here.
+  - 'Insect screening is not a guard: guard_present is defined as excluding insect screening, so it is relied on
+    to be marked no where only screening is installed.'
+  research:
+  - question: The 36-inch horizontal distance is built into the measure open_side_drop (greatest drop within 36
+      inches of the edge), so the rule tests that one measure.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Whether a guard that is present but does not meet the height and opening limits of R321 satisfies
+      this section is decided by the other R321 sections, not here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'Insect screening is not a guard: guard_present is defined as excluding insect screening, so it is
+      relied on to be marked no where only screening is installed.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_1_area_well_min_area
+  kind: rule
+  topic: means_of_egress
+  title: Area well horizontal area at least 9 sf (R319.4.1)
+  applies_when: opening_below_grade
+  check: area_well_area >= 9
+  review_when:
+  - when: area_well_ladder and area_well_area < 9
+    reason: The exception lets the ladder or steps encroach into the required dimensions of the area well, but the
+      text does not say how that changes the required horizontal area, so a person checks it.
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 10
+    - 10
+    quote: The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]), with a horizontal
+      projec-
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 13
+    - 13
+    quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
+      than 6 inches (152 mm)'
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_area: 10
+          area_well_ladder: false
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          area_well_ladder: false
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_area: 8
+          area_well_ladder: true
+    rows:
+    - part: o1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The book prints '9 square feet (0.9 m²)' and 9 square feet is 0.84 m². Gordium reads the square feet as governing,
+    the square metres being a conversion printed after them.
+  - How much the ladder or steps encroachment (exception) may reduce the horizontal area is not stated.
+  - Whether the exception applies only where the ladder is required by R319.4.2 (depth greater than 44 inches) is
+    decided in R319.4.2.
+  research:
+  - question: The book prints '9 square feet (0.9 m²)' and 9 square feet is 0.84 m². Gordium reads the square feet
+      as governing, the square metres being a conversion printed after them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: How much the ladder or steps encroachment (exception) may reduce the horizontal area is not stated.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Whether the exception applies only where the ladder is required by R319.4.2 (depth greater than 44
+      inches) is decided in R319.4.2.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_1_area_well_min_projection
+  kind: rule
+  topic: means_of_egress
+  title: Area well horizontal projection at least 36 in (R319.4.1)
+  applies_when: opening_below_grade
+  check: area_well_projection >= 36
+  review_when:
+  - when: area_well_ladder and area_well_projection < 36
+    reason: The exception lets the ladder or steps encroach not more than 6 inches into the required dimensions,
+      but whether the ladder is one required by R319.4.2 is not known from this measure, so a person checks it.
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 11
+    - 11
+    quote: tion and width of not less than 36 inches (914 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 13
+    - 13
+    quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
+      than 6 inches (152 mm)'
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_projection: 40
+          area_well_ladder: false
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_projection: 30
+          area_well_ladder: false
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_projection: 31
+          area_well_ladder: true
+    rows:
+    - part: o1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
+  research:
+  - question: Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_1_area_well_min_width
+  kind: rule
+  topic: means_of_egress
+  title: Area well width at least 36 in (R319.4.1)
+  applies_when: opening_below_grade
+  check: area_well_width >= 36
+  review_when:
+  - when: area_well_ladder and area_well_width < 36
+    reason: The exception lets the ladder or steps encroach not more than 6 inches into the required dimensions,
+      but whether the ladder is one required by R319.4.2 is not known from this measure, so a person checks it.
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 11
+    - 11
+    quote: tion and width of not less than 36 inches (914 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 13
+    - 13
+    quote: 'Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more
+      than 6 inches (152 mm)'
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_width: 40
+          area_well_ladder: false
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_width: 30
+          area_well_ladder: false
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+          area_well_width: 31
+          area_well_ladder: true
+    rows:
+    - part: o1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
+  research:
+  - question: Does the exception apply only where the ladder is required by R319.4.2 (depth greater than 44 inches)?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_1_area_well_allows_full_opening
+  kind: flag
+  topic: means_of_egress
+  title: Area well size allows opening to fully open (R319.4.1)
+  applies_when: opening_below_grade
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 11
+    - 11
+    quote: The size of the area well shall allow the emergency escape and rescue opening
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_below_grade: true
+    rows:
+    - part: o1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Whether the area well is large enough for the window or door to be fully opened depends on the opening's swing
+    and the well's shape, so a person checks it.
+  research:
+  - question: Whether the area well is large enough for the window or door to be fully opened depends on the opening's
+      swing and the well's shape, so a person checks it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_5_2_1_sleeping_loft_stair_clear_width_at_or_above_handrail
+  kind: rule
+  topic: means_of_egress
+  title: Sleeping loft stairway clear width at or above handrail (R315.5.2.1)
+  applies_when: stair_serves_sleeping_loft
+  check: stair_clear_width >= 17
+  review_when:
+  - when: stair_spiral
+    reason: A spiral stairway is not covered by this width rule; a person checks it against its own section.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 28
+    - 29
+    quote: Stairways providing egress from a sleeping loft shall not be less than 17 inches (432 mm) in clear width
+      at or above the handrail.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_spiral: false
+          stair_clear_width: 17
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_spiral: false
+          stair_clear_width: 16.5
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft spiral stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_spiral: true
+          stair_clear_width: 17
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  open_questions:
+  - Does a spiral stairway serving a sleeping loft follow this width, or the spiral stairway section it is sent
+    to by R318?
+  research:
+  - question: Does a spiral stairway serving a sleeping loft follow this width, or the spiral stairway section it
+      is sent to by R318?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail
+  kind: rule
+  topic: means_of_egress
+  title: Sleeping loft stairway width below handrail (R315.5.2.1)
+  applies_when: stair_serves_sleeping_loft
+  check: stair_clear_width_at_handrail >= 20
+  review_when:
+  - when: stair_spiral
+    reason: A spiral stairway is not covered by this width rule; a person checks it against its own section.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 29
+    - 29
+    quote: The width below the handrail shall be not less than 20 inches (610 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_spiral: false
+          stair_clear_width_at_handrail: 20
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_spiral: false
+          stair_clear_width_at_handrail: 19
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft spiral stair
+        measures:
+          stair_serves_sleeping_loft: true
+          stair_spiral: true
+          stair_clear_width_at_handrail: 20
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  open_questions:
+  - The book prints 20 inches (610 mm), but 610 mm is 24 inches; 20 inches is 508 mm. Gordium reads 20 inches as
+    governing, the millimetres being a misprinted conversion.
+  - Does a spiral stairway serving a sleeping loft follow this width, or the spiral stairway section it is sent
+    to by R318?
+  research:
+  - question: The book prints 20 inches (610 mm), but 610 mm is 24 inches; 20 inches is 508 mm. Gordium reads 20
+      inches as governing, the millimetres being a misprinted conversion.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Does a spiral stairway serving a sleeping loft follow this width, or the spiral stairway section it
+      is sent to by R318?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_1_stair_clear_width_above_handrail
+  kind: rule
+  topic: means_of_egress
+  title: Stairway clear width above handrail height (R318.7.1)
+  check: stair_clear_width >= 36
+  review_when:
+  - when: stair_spiral
+    reason: Spiral stairways follow R318.7.11.1, which no other rule checks yet; a person checks the width.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 23
+    - 23
+    quote: Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted
+      handrail
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_clear_width: 36
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_clear_width: 35
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_clear_width: 30
+          stair_spiral: true
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The book's metric conversions (914 mm for 36 inches) are not exact; the inches are read as governing.
+  - The text says 'at all points above the permitted handrail height and below the required headroom height'; the
+    measure stair_clear_width is taken to be that least width.
+  research:
+  - question: The book's metric conversions (914 mm for 36 inches) are not exact; the inches are read as governing.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text says 'at all points above the permitted handrail height and below the required headroom height';
+      the measure stair_clear_width is taken to be that least width.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_1_stair_clear_width_at_handrail
+  kind: rule
+  topic: means_of_egress
+  title: Stairway clear width at and below handrail (R318.7.1)
+  check: stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides == 1 else 27)
+  review_when:
+  - when: stair_spiral
+    reason: Spiral stairways follow R318.7.11.1, which no other rule checks yet; a person checks the width.
+  - when: stair_handrail_sides == 0
+    reason: The text sets no width for a stairway with no handrail; a person checks it.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 24
+    - 24
+    quote: The clear width of stairways at and below the handrail height, including treads
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 25
+    - 25
+    quote: and landings, shall be not less than 31 1/2 inches (787 mm) where a handrail is installed on one side
+      and 27 inches (698 mm) where
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: One rail
+        measures:
+          stair_clear_width_at_handrail: 31.5
+          stair_handrail_sides: 1
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: One rail
+        measures:
+          stair_clear_width_at_handrail: 30
+          stair_handrail_sides: 1
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Two rails
+        measures:
+          stair_clear_width_at_handrail: 27
+          stair_handrail_sides: 2
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Two rails
+        measures:
+          stair_clear_width_at_handrail: 26
+          stair_handrail_sides: 2
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: No rail
+        measures:
+          stair_clear_width_at_handrail: 40
+          stair_handrail_sides: 0
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral
+        measures:
+          stair_clear_width_at_handrail: 26
+          stair_handrail_sides: 1
+          stair_spiral: true
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The book's metric conversions (787 mm, 698 mm) do not match 31 1/2 and 27 inches; the inches are read as governing.
+  - The printed sentence says 'not less than' governs the 27 inches too; the recorded words keep only 'and'.
+  - The text does not say what width applies where a stairway has no handrail or handrails on only part of its length.
+  research:
+  - question: The book's metric conversions (787 mm, 698 mm) do not match 31 1/2 and 27 inches; the inches are read
+      as governing.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The printed sentence says 'not less than' governs the 27 inches too; the recorded words keep only
+      'and'.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text does not say what width applies where a stairway has no handrail or handrails on only part
+      of its length.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_2_stair_headroom
+  kind: rule
+  topic: means_of_egress
+  title: Minimum stairway headroom, 6 ft 8 in (R318.7.2)
+  check: stair_headroom >= 80
+  review_when:
+  - when: stair_spiral
+    reason: Exception 2 sends the headroom of spiral stairways to Section R318.7.11.1, which is not checked by this
+      rule.
+  - when: stair_serves_sleeping_loft
+    reason: A sleeping loft's stairway follows Section R318 as modified by Sections R315.5.1 through R315.5.3, which
+      may change the headroom limit.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 28
+    - 29
+    quote: The headroom in stairways shall be not less than 6 feet 8 inches (2032 mm) measured vertically from the
+      sloped line adjoining the tread nosing or from the floor surface of the landing or platform on that portion
+      of the stairway.
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 33
+    - 33
+    quote: The headroom for spiral stairways shall be in accordance with Section R318.7.11.1.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_headroom: 81
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_headroom: 79
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_headroom: 81
+          stair_spiral: true
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Whether the sleeping loft stairway sections R315.5.1 through R315.5.3 change the headroom limit depends on those
+    sections, which are drafted separately.
+  research:
+  - question: Whether the sleeping loft stairway sections R315.5.1 through R315.5.3 change the headroom limit depends
+      on those sections, which are drafted separately.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_2_stair_floor_opening_headroom
+  kind: flag
+  topic: means_of_egress
+  title: Floor opening projection into stair headroom (R318.7.2 exc. 1)
+  applies_when: stair_nosings_under_floor_opening
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 31
+    - 32
+    quote: Where the nosings of treads at the side of a flight extend under the edge of a floor opening through
+      which the stair passes, the floor opening shall not project horizontally into the required headroom more than
+      4 3/4 inches (121 mm).
+  examples:
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - A person checks that the floor opening does not project horizontally into the required headroom more than 4
+    3/4 inches where the nosings of treads at the side of the flight extend under its edge.
+  research:
+  - question: A person checks that the floor opening does not project horizontally into the required headroom more
+      than 4 3/4 inches where the nosings of treads at the side of the flight extend under its edge.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_5_1_stair_riser_height_max
+  kind: rule
+  topic: means_of_egress
+  title: Maximum stair riser height (R318.7.5.1)
+  check: stair_riser_height <= 8.25
+  review_when:
+  - when: stair_spiral
+    reason: The riser height of spiral stairways is set by Section R318.7.11.1, which this rule does not check.
+  - when: stair_serves_sleeping_loft
+    reason: A stairway from a sleeping loft may follow the limits of Section R315.5 instead of this one.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 42
+    - 42
+    quote: The riser height shall be not more than 8 1/4 inches (209 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 49
+    - 49
+    quote: 2. The riser height of spiral stairways shall be in accordance with Section R318.7.11.1.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_riser_height: 8
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_riser_height: 8.5
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_riser_height: 8
+          stair_spiral: true
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The riser height is measured vertically between leading edges of adjacent treads; the stair_riser_height measure
+    is the tallest riser in the flight, read that way.
+  research:
+  - question: The riser height is measured vertically between leading edges of adjacent treads; the stair_riser_height
+      measure is the tallest riser in the flight, read that way.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_5_1_stair_riser_variation_max
+  kind: rule
+  topic: means_of_egress
+  title: Riser height variation within a flight (R318.7.5.1)
+  check: stair_riser_variation <= 0.375
+  review_when:
+  - when: stair_spiral
+    reason: Spiral stairways follow Section R318.7.11.1 for riser height, which this rule does not check.
+  - when: stair_serves_sleeping_loft
+    reason: A stairway from a sleeping loft may follow the limits of Section R315.5 instead of this one.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 43
+    - 44
+    quote: The greatest riser height within any flight of stairs shall not exceed the smallest by more than 3/8
+      inch (9.5 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_riser_variation: 0.375
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_riser_variation: 0.5
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_riser_variation: 0.1
+          stair_spiral: true
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_5_1_stair_riser_slope
+  kind: flag
+  topic: means_of_egress
+  title: Riser slope from the vertical (R318.7.5.1)
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 44
+    - 45
+    quote: Risers shall be vertical or sloped from the underside of the nosing of the tread above at an angle not
+      more than 30 degrees (0.51 rad) from the vertical.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures: {}
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The book prints 30 degrees (0.51 rad), but 30 degrees is 0.52 rad. Is the limit 30 degrees, the radians being
+    a conversion printed after it? A person checks each flight's riser slope against it.
+  research:
+  - question: The book prints 30 degrees (0.51 rad), but 30 degrees is 0.52 rad. Is the limit 30 degrees, the radians
+      being a conversion printed after it? A person checks each flight's riser slope against it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_5_1_stair_open_riser_sphere
+  kind: flag
+  topic: means_of_egress
+  title: 'Open risers: 4-inch sphere limit (R318.7.5.1)'
+  applies_when: not stair_spiral
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 45
+    - 46
+    quote: At open risers, openings located more than 30 inches (762 mm), as measured vertically, to the floor or
+      grade below shall not permit the passage of a 4-inch-diameter (102 mm) sphere.
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 48
+    - 48
+    quote: 1. The opening between adjacent treads is not limited on spiral stairways.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_spiral: false
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - A person checks, for a flight with open risers, that no opening more than 30 inches above the floor or grade
+    below passes a 4-inch-diameter sphere; a flight with closed risers has nothing to check. Spiral stairways are
+    exempt from this limit, but their riser height goes to R318.7.11.1.
+  research:
+  - question: A person checks, for a flight with open risers, that no opening more than 30 inches above the floor
+      or grade below passes a 4-inch-diameter sphere; a flight with closed risers has nothing to check. Spiral stairways
+      are exempt from this limit, but their riser height goes to R318.7.11.1.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_5_2_stair_tread_depth_min
+  kind: rule
+  topic: means_of_egress
+  title: Minimum stair tread depth (R318.7.5.2)
+  check: stair_tread_depth >= 9
+  review_when:
+  - when: stair_spiral
+    reason: Spiral stairways are sent to another section (R318.7.11.1), so this section's tread depth does not decide
+      them; a person checks them.
+  - when: stair_serves_sleeping_loft
+    reason: R315.5 lets a sleeping loft's stairway follow Section R318 as modified by R315.5.1 through R315.5.3;
+      a person checks which tread limits apply.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 50
+    - 50
+    quote: The tread depth shall be not less than 9 inches (229 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_tread_depth: 10
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_tread_depth: 8.5
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_tread_depth: 10
+          stair_spiral: true
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The sentence on how tread depth is measured (horizontally between the vertical planes of the foremost projection
+    of adjacent treads, at a right angle to the leading edge) is not a formula; the stair_tread_depth measure must
+    be taken that way.
+  - Which tread limits R315.5 through R315.5.3 set for a sleeping loft's stairway is not drafted here.
+  research:
+  - question: The sentence on how tread depth is measured (horizontally between the vertical planes of the foremost
+      projection of adjacent treads, at a right angle to the leading edge) is not a formula; the stair_tread_depth
+      measure must be taken that way.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: Which tread limits R315.5 through R315.5.3 set for a sleeping loft's stairway is not drafted here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_5_2_stair_tread_variation_max
+  kind: rule
+  topic: means_of_egress
+  title: Tread depth variation within a flight (R318.7.5.2)
+  check: stair_tread_variation <= 0.375
+  review_when:
+  - when: stair_spiral
+    reason: Spiral stairways are sent to another section (R318.7.11.1), so this section's tread variation limit
+      does not decide them; a person checks them.
+  - when: stair_serves_sleeping_loft
+    reason: R315.5 lets a sleeping loft's stairway follow Section R318 as modified by R315.5.1 through R315.5.3;
+      a person checks which limits apply.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 52
+    - 52
+    quote: The greatest tread depth within any flight of stairs shall not exceed the smallest by more than 3/8 inch
+      (9.5 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_tread_variation: 0.25
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Main stair
+        measures:
+          stair_tread_variation: 0.5
+          stair_spiral: false
+          stair_serves_sleeping_loft: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_tread_variation: 0.25
+          stair_spiral: false
+          stair_serves_sleeping_loft: true
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Which limits R315.5 through R315.5.3 set for a sleeping loft's stairway is not drafted here.
+  research:
+  - question: Which limits R315.5 through R315.5.3 set for a sleeping loft's stairway is not drafted here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_1_sleeping_room_escape_opening_operable
+  kind: rule
+  topic: means_of_egress
+  title: 'Every sleeping room: operable escape opening (R319.1)'
+  check: opening_operable
+  for_each: emergency_escape_opening
+  within: sleeping_room
+  when_none: needs_review
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 28
+    - 29
+    quote: Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall
+      have not less than one operable emergency escape and rescue opening.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        within: r1
+        measures:
+          opening_operable: true
+      sleeping_room:
+      - id: r1
+        name: Bedroom 1
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Fixed window
+        within: r1
+        measures:
+          opening_operable: false
+      sleeping_room:
+      - id: r1
+        name: Bedroom 1
+        measures: {}
+    rows:
+    - part: o1
+      within: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+      sleeping_room:
+      - id: r1
+        name: Bedroom 1
+        measures: {}
+    rows:
+    - within: r1
+      outcome: needs_review
+    expect: needs_review
+  open_questions:
+  - Exception 3 lets sleeping rooms in basements go without an escape opening in a sprinklered unit with the basement
+    having egress under R318; no measure records the sprinkler system or the basement's means of egress, so a sleeping
+    room with no opening is left to a person.
+  research:
+  - question: Exception 3 lets sleeping rooms in basements go without an escape opening in a sprinklered unit with
+      the basement having egress under R318; no measure records the sprinkler system or the basement's means of
+      egress, so a sleeping room with no opening is left to a person.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_1_basement_escape_opening_operable
+  kind: rule
+  topic: means_of_egress
+  title: 'Every basement: operable escape opening (R319.1)'
+  check: opening_operable
+  for_each: emergency_escape_opening
+  within: basement
+  when_none: needs_review
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 28
+    - 29
+    quote: Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall
+      have not less than one operable emergency escape and rescue opening.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        within: b1
+        measures:
+          opening_operable: true
+      basement:
+      - id: b1
+        name: Basement
+        measures: {}
+    rows:
+    - part: o1
+      within: b1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Fixed window
+        within: b1
+        measures:
+          opening_operable: false
+      basement:
+      - id: b1
+        name: Basement
+        measures: {}
+    rows:
+    - part: o1
+      within: b1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+      basement:
+      - id: b1
+        name: Basement
+        measures: {}
+    rows:
+    - within: b1
+      outcome: needs_review
+    expect: needs_review
+  open_questions:
+  - Exceptions 1 (a basement used only for mechanical equipment of a limited total floor area), 2 (storm shelters)
+    and 3 (sprinklered units) can excuse a basement with no opening; the basement without an opening is left to
+    a person.
+  research:
+  - question: Exceptions 1 (a basement used only for mechanical equipment of a limited total floor area), 2 (storm
+      shelters) and 3 (sprinklered units) can excuse a basement with no opening; the basement without an opening
+      is left to a person.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_1_habitable_attic_escape_opening_operable
+  kind: rule
+  topic: means_of_egress
+  title: 'Every habitable attic: operable escape opening (R319.1)'
+  check: opening_operable
+  for_each: emergency_escape_opening
+  within: habitable_attic
+  when_none: fail
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 28
+    - 29
+    quote: Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall
+      have not less than one operable emergency escape and rescue opening.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        within: a1
+        measures:
+          opening_operable: true
+      habitable_attic:
+      - id: a1
+        name: Attic
+        measures: {}
+    rows:
+    - part: o1
+      within: a1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Fixed window
+        within: a1
+        measures:
+          opening_operable: false
+      habitable_attic:
+      - id: a1
+        name: Attic
+        measures: {}
+    rows:
+    - part: o1
+      within: a1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+      habitable_attic:
+      - id: a1
+        name: Attic
+        measures: {}
+    rows:
+    - within: a1
+      outcome: fail
+    expect: fail
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_1_loft_room_escape_opening_operable
+  kind: rule
+  topic: means_of_egress
+  title: 'Room a sleeping loft is open to: operable escape opening (R319.1)'
+  check: opening_operable
+  for_each: emergency_escape_opening
+  within: loft_room
+  when_none: fail
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 28
+    - 29
+    quote: Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall
+      have not less than one operable emergency escape and rescue opening.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        within: l1
+        measures:
+          opening_operable: true
+      loft_room:
+      - id: l1
+        name: Loft room
+        measures: {}
+    rows:
+    - part: o1
+      within: l1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Fixed window
+        within: l1
+        measures:
+          opening_operable: false
+      loft_room:
+      - id: l1
+        name: Loft room
+        measures: {}
+    rows:
+    - part: o1
+      within: l1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+      loft_room:
+      - id: l1
+        name: Loft room
+        measures: {}
+    rows:
+    - within: l1
+      outcome: fail
+    expect: fail
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_1_escape_opening_opens_to_public_way_or_yard
+  kind: rule
+  topic: means_of_egress
+  title: Escape openings open to a public way, yard or court (R319.1)
+  check: opening_opens_to_yard
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 30
+    - 31
+    quote: Emergency escape and rescue openings shall open directly into a public way, or to a yard or court that
+      opens to a public way.
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 40
+    - 41
+    quote: A yard shall not be required to open directly into a public way where the yard opens to an unobstructed
+      path from the yard to the public way.
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 41
+    - 41
+    quote: Such path shall have a width of not less than 36 inches (914 mm).
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_opens_to_yard: true
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Window
+        measures:
+          opening_opens_to_yard: false
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does an opening into a court count where the court has no clear path to the public way? The measure opening_opens_to_yard
+    covers a yard's path of at least 36 inches but the text only says a court that opens to a public way.
+  research:
+  - question: Does an opening into a court count where the court has no clear path to the public way? The measure
+      opening_opens_to_yard covers a yard's path of at least 36 inches but the text only says a court that opens
+      to a public way.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft

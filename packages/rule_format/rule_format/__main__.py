@@ -8,7 +8,7 @@
 For each place and each state law folder (a state's own law, e.g. New York's Residential Code, with a state.yaml
 instead of a jurisdiction.yaml; its text_verification.yaml too): its settings file (jurisdiction.yaml, read by the registry in place.py), its source documents (fingerprints, extracted text), its definitions and
 uses (4_term_definitions/), its section labels (3_section_labels/<document>.yaml, against the pieces in
-2_extracted_text/<document>.sections.jsonl), then every rule file in 5_zoning_rules/ and in its
+2_extracted_text/<document>.sections.jsonl), then every rule file in 5_zoning_rules/ (a state folder: 5_building_code_rules/) and in its
 test_data/answer_keys/ folder. Then that the plugin's copy of its place's settings (place.json) is current.
 """
 
@@ -20,7 +20,8 @@ from . import parts
 from . import place as places
 from .labels import load_pieces, validate_labels
 from .rulebook import (REPO, STATE_SETTINGS, Context, finding_conflicts, law_folders, load, locate, not_quotable,
-                       research_entries, rulebook_file_problems, rulebook_paths, term_file_problems, utf8_console)
+                       research_entries, rulebook_file_problems, rulebook_paths, rules_folder, term_file_problems,
+                       utf8_console)
 from .state_law import VERIFICATION, state_settings_problems, verification_problems
 
 
@@ -75,7 +76,7 @@ def main() -> int:
             for problem in problems:
                 print(f"    {problem}")
             failed += bool(problems)
-        files = [p for folder in (jurisdiction / "5_zoning_rules", REPO / "test_data/answer_keys" / place)
+        files = [p for folder in (rules_folder(jurisdiction), REPO / "test_data/answer_keys" / place)
                  for p in rulebook_paths(folder)]
         for path in files:
             checked += 1
