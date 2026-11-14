@@ -36,7 +36,10 @@ class Model:
         if self.metres is None:
             raise ValueError(f"the file's length unit {self.length_unit!r} can't be converted to metres: {why}")
         areas = [u for u in context.Units if getattr(u, "UnitType", None) == "AREAUNIT"]
-        self.square_metres = unit_scale(areas[0], "AREAUNIT")[0] if len(areas) == 1 else None
+        self.square_metres, self.area_unit_why = unit_scale(areas[0], "AREAUNIT") if len(areas) == 1 else \
+            (None, f"the file states {len(areas)} area units")
+        if self.square_metres is None and len(areas) == 1:
+            self.area_unit_why = f"the file's area unit {_unit_name(areas[0])!r} can't be converted: {self.area_unit_why}"
         self._settings = None
 
     def by_type(self, name):
@@ -127,7 +130,7 @@ class Model:
             return float(value) * scale, None
         scale = self.metres if kind == "LENGTHUNIT" else self.square_metres
         if scale is None:
-            return None, f"the file states no single area unit, so {where} can't be read"
+            return None, f"{self.area_unit_why}, so {where} can't be read"
         return float(value) * scale, None
 
     def measure(self, element, wanted, name, kind, holders=None):

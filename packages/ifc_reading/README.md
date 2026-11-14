@@ -51,7 +51,9 @@ for rooms that aren't slept in (bath, kitchen, hall, living, Küche), with at mo
 may count as a sleeping room), both kinds, no listed word, or a word the table doesn't know beside a not-sleeping
 one ("Elternzimmer + Bad", a parents' room with its bath: the unknown word may mean bedroom). A `Description`
 is free text, so its words don't name the room, but a sleeping or ask word in it (the space's or its type's)
-keeps a room from reading `false` ("Kitchen" described as "Bedroom (kitchen to be removed)"). The format then
+keeps a room from reading `false` ("Kitchen" described as "Bedroom (kitchen to be removed)"). So does one in the
+name or stated use of a zone the space is in (`IfcZone`, `IfcSpatialZone`): a zone is a group (a flat, a fire
+compartment), so its words don't name the room. The format then
 reads none of the rooms (a bedroom nobody labelled is never quietly not a bedroom), so every sleeping-room rule
 says **needs review** until the architect says. The architect says by giving the space a property set
 `Gordium_Egress` with `Sleeping` true or false. True always counts. False settles an ask or unknown word (that is

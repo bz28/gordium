@@ -537,6 +537,8 @@ def test_base_quantities_from_the_type_name_it(build, tmp_path, own):
         assert "floor" not in room and "9.290304" in room["not_given"]["floor"]        # 100 sq ft
         assert near(room["ceiling_height"], 8 * FT)
     else:
+        # IFC4: Qto_SpaceBaseQuantities is type-driven, so the type's net area is the room's (review round 10 asked
+        # otherwise; its sceptics split, and IFC's reading stands); the source names the type
         assert "floor" in room and "(from its type Bedrooms #" in room["ifc"]["floor_from"]
         assert near(room["ceiling_height"], 7 * FT) and "(from its type Bedrooms #" in room["ifc"]["ceiling_from"]
 
@@ -698,3 +700,39 @@ def test_an_unreadable_stair_count_says_why(build, tmp_path):
     b.f.create_entity("IfcRelDefinesByProperties", GlobalId=b.guid(), RelatedObjects=[f], RelatingPropertyDefinition=p)
     [fl] = read(b.write(tmp_path / "h.ifc"))["source"]["stair_flights"]
     assert "risers" not in fl and "not a number" in fl["not_given"]["risers"]
+
+
+@pytest.mark.parametrize("where", ["name", "use", "spatial_zone"])
+def test_a_bedroom_zone_is_doubt(build, tmp_path, where):
+    """Review round 10: a studio drawn as one space "Living", grouped in a zone "Bedroom" (or one whose stated use
+    is Bedroom), read as not a sleeping room."""
+    b = bedroom_house(build, name="Living")
+    [space] = b.f.by_type("IfcSpace")
+    if where == "spatial_zone":
+        z = b.run("root.create_entity", ifc_class="IfcSpatialZone", name="Bedroom")
+        b.f.create_entity("IfcRelReferencedInSpatialStructure", GlobalId=b.guid(), RelatedElements=[space],
+                          RelatingStructure=z)
+    else:
+        z = b.run("root.create_entity", ifc_class="IfcZone", name="Bedroom" if where == "name" else "Zone 1")
+        b.run("group.assign_group", products=[space], group=z)
+        if where == "use":
+            b.pset(z, "Pset_SpaceOccupancyRequirements", {"OccupancyType": "Bedroom"})
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and "Bedroom" in room["not_given"]["sleeping"] and "Zone" in room["not_given"]["sleeping"]
+
+
+def test_a_zone_named_otherwise_says_nothing(build, tmp_path):
+    b = bedroom_house(build, name="Living")
+    z = b.run("root.create_entity", ifc_class="IfcZone", name="Apartment 1")
+    b.run("group.assign_group", products=b.f.by_type("IfcSpace"), group=z)
+    assert read(b.write(tmp_path / "h.ifc"))["rooms"][0]["sleeping"] is False
+
+
+def test_an_area_unit_that_cant_be_converted_says_so(build, tmp_path):
+    b = bedroom_house(build)
+    ctx = b.f.by_type("IfcProject")[0].UnitsInContext
+    dims = b.f.create_entity("IfcDimensionalExponents", 2, 0, 0, 0, 0, 0, 0)
+    ctx.Units = [u for u in ctx.Units if getattr(u, "UnitType", None) != "AREAUNIT"] + [
+        b.f.create_entity("IfcContextDependentUnit", Dimensions=dims, UnitType="AREAUNIT", Name="tsubo")]
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "floor" not in room and "area unit 'tsubo' can't be converted" in room["not_given"]["floor"]

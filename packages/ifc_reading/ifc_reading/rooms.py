@@ -127,6 +127,32 @@ def description_doubt(model, space):
     return "; ".join(found)
 
 
+def zone_doubt(model, space):
+    """The zones a space is grouped in (IfcZone, IFC4's IfcSpatialZone) can state a use for every space in them; a
+    zone is often a flat, a fire compartment or a heating zone, so its words don't name the room, but a sleeping
+    or ask word in its name or stated use is doubt (review round 10: a "Living" space in a zone "Bedroom")."""
+    table, found = words(), []
+    zones = [r.RelatingGroup for r in getattr(space, "HasAssignments", []) or []
+             if r.is_a("IfcRelAssignsToGroup") and r.RelatingGroup is not None and r.RelatingGroup.is_a("IfcZone")]
+    # an IfcSpatialZone references its spaces (IfcRelReferencedInSpatialStructure); IfcSpace has no inverse for it
+    zones += [r.RelatingStructure for r in model.file.get_inverse(space)
+              if r.is_a("IfcRelReferencedInSpatialStructure") and r.RelatingStructure is not None
+              and r.RelatingStructure.is_a("IfcSpatialZone")]
+    for zone in dict.fromkeys(zones):
+        texts = [(a, getattr(zone, a, None)) for a in ("Name", "LongName", "ObjectType")]
+        for pset, name in USE:
+            value, where = model.prop(zone, [pset], name)
+            texts.append((where, value if isinstance(value, str) else None))
+            if value is not None and not isinstance(value, str):
+                found.append(f"the {zone.is_a()} {zone.Name!r}'s {where} is {value!r}, not a name")
+        for where, text in texts:
+            if isinstance(text, str):
+                hit = [w for w in name_words(text) if table.get(w) in ("sleeping", "ask")]
+                if hit:
+                    found.append(f"the {zone.is_a()} {zone.Name!r}'s {where} {text!r} ({', '.join(hit)})")
+    return "; ".join(found)
+
+
 def display_name(space) -> str:
     long, short = space.LongName, space.Name
     if long and short and long != short:
@@ -149,8 +175,7 @@ def read_room(model, space) -> dict:
     else:
         sleeping, why = sleeping_from_names(texts, flag, where)
     if sleeping is False:
-        described = description_doubt(model, space)
-        doubt = "; ".join(unclear + ([described] if described else []))
+        doubt = "; ".join(unclear + [d for d in (description_doubt(model, space), zone_doubt(model, space)) if d])
         if doubt:
             sleeping, why = None, f"{why}, but {doubt}: the architect says (Gordium_Egress.Sleeping)"
     info["sleeping_from"] = why
