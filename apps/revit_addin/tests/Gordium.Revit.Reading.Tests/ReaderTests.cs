@@ -134,7 +134,27 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
         var doc = new RevitModel { Document = "site.rvt", UserWorksets = [new("9", "Hidden", false)],
                                    Elements = [Thing("shed", 20, 90, 30, 100)] };
         var site = await Site(House(FakeRevit.LinkOf("link", doc)));
-        Assert.Equal(["link"], Ids(site, "unsent"));
+        Assert.Equal(["a linked model"], Ids(site, "unsent"));
+        Assert.Equal(["link"], Ids(site, "left_out"));
+    }
+
+    [Fact]
+    public async Task A_link_holding_a_building_is_also_left_out_under_its_own_id_and_touches_nothing_of_itself()
+    {
+        // scene 19's reading (design note, section 1): unsent once, named by its kind (ids are unique), and each
+        // such link left out under its UniqueId, as Rhino lists every block off the Building layer. Its own box is
+        // no building's, so a link beside nothing touches nothing (Rhino's answer); the not_a_solid already makes
+        // every building measure need review.
+        var house = new RevitModel { Document = "house.rvt", Elements = [FakeRevit.Wall("w", [Block(15, 30, 45, 80)])] };
+        var shed = new RevitModel { Document = "shed.rvt", Elements = [FakeRevit.Wall("s", [Block(20, 90, 30, 100)])] };
+        var lotOnly = Box.Model("as drawn") with { Elements = [] };
+        var site = await Site(lotOnly with { Elements = [FakeRevit.LinkOf("house_link", house), FakeRevit.LinkOf("shed_link", shed)] });
+        var u = Assert.Single(site["unsent"]!.AsArray())!;
+        Assert.Equal("a linked model", u["id"]!.GetValue<string>());
+        Assert.Equal("not_a_solid", u["problem"]!["code"]!.GetValue<string>());
+        Assert.Equal(["house_link", "shed_link"], Ids(site, "left_out"));
+        Assert.False(LeftOut(site, "house_link")["touching"]!.GetValue<bool>());
+        Assert.Empty(site["buildings"]!.AsArray());
     }
 
     [Fact]

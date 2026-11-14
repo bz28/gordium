@@ -280,8 +280,8 @@ internal sealed class Read(RevitModel model)
     /// <summary>A linked Revit model (proposed, design note, section 1). Not loaded: it can't be looked inside, so the
     /// reader hasn't looked at everything (<c>inventory_complete: false</c>). Loaded and holding any building-category
     /// element at any depth of links inside links, or a closed workset of its own: an object that couldn't be sent
-    /// (wherever it is placed), so every building measure needs review. Otherwise left out, like a family, what it
-    /// holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
+    /// (wherever it is placed), so every building measure needs review (<see cref="UnsendLinks"/>). Either way left
+    /// out, like a family, what it holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
     /// link's own phase mapping isn't read (to check), and more is only more cautious.</summary>
     private void Link(RevitElement e)
     {
@@ -298,15 +298,31 @@ internal sealed class Read(RevitModel model)
             InventoryComplete = false;
         LotInLink |= inside.HoldsLot;
         if (inside.HoldsBuilding || inside.ClosedWorkset)
-        {
-            Unsend(e, SiteReader.LinkedModelKind, box);
-            return;
-        }
+            UnsendLinks(e);              // and left out under its own id, below (scene 19)
         Definitions[key] = new JsonObject { ["status"] = SiteReader.LinkKnown, ["parts"] = parts };
         var g = new Gathered();
         foreach (var p in inside.Plan)
             g.Plan.Add(p);
         Candidates.Add(Make(e, g, inside.MissingPart ? null : box, key, false, "Link", true));
+    }
+
+    /// <summary>A linked model holding a building-category element at any depth, or a closed workset of its own: an
+    /// object that couldn't be sent, so every building measure needs review, wherever it is placed (design note,
+    /// section 1). Ids are unique across the description and the link itself is also left out under its
+    /// <c>UniqueId</c> (as Rhino lists every block off the Building layer: scene 19), so the unsent entry is named
+    /// by its kind, once for every such link (as <c>read_3dm.read_site</c>'s one "a block"). Its box is not a
+    /// building's: the not_a_solid already makes every building measure need review, and the link must not touch
+    /// itself (scene 19: touching false, as Rhino's).</summary>
+    private void UnsendLinks(RevitElement e)
+    {
+        if (Unsent.Any(u => u!["id"]!.GetValue<string>() == SiteReader.LinkedModelKind))
+            return;
+        Unsent.Add(new JsonObject
+        {
+            ["id"] = SiteReader.LinkedModelKind, ["layer"] = e.Category, ["kind"] = SiteReader.LinkedModelKind,
+            ["problem"] = SiteReader.Problem("not_a_solid", ("kind", SiteReader.LinkedModelKind),
+                                             ("layer", e.Category.Length > 0 ? e.Category : "no category")),
+        });
     }
 
     private sealed class Inside
@@ -347,10 +363,8 @@ internal sealed class Read(RevitModel model)
                 continue;
             }
             if (el.Mark == GordiumMark.FloorBlock || SiteReader.BuildingCategories.Contains(el.BuiltInCategory))
-            {
-                inside.HoldsBuilding = true;
-                continue;
-            }
+                inside.HoldsBuilding = true;     // read on for its place too: the link is left out (scene 19), and
+                                                 // where it stands is where its building parts stand
             if (el.Mark is GordiumMark.SpotGrade or GordiumMark.FinishedGrade)
                 continue;
             var anyGeometry = el.Kind is ElementKind.FamilyInstance or ElementKind.CadImport or ElementKind.Toposolid
