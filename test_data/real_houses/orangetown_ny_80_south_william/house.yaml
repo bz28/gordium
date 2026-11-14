@@ -1,0 +1,315 @@
+# A REAL house: the "Bennington model", 80 South William Street (Lot 2), Pearl River, Town of Orangetown, NY,
+# transcribed by hand from its public planning-board drawings into the interior description (gordium.interior/1).
+#
+# Source (public filing, not kept in this repository):
+#   https://www.orangetown.com/wp-content/uploads/2026/02/68.20-2-76.2-80-South-William-Street-Lot-2-Arch-Plans.pdf
+#   5 sheets (A-1 to A-5), Eric Knute Osborn, Architect; sheets dated 30 Dec 2025 (A-3: 21 Aug 2025).
+#   SHA-256 of the PDF read: c6879996539fb1df257b58117bcc4bb590811ab63979fb4ab3eeaa639651a34d
+#
+# How to read the citations. Every value below has a `cite` entry naming the sheet and the drawing, callout or
+# dimension it comes from. Every key the format has that this house can't fill is listed under `absent`, with
+# why. Nothing is scaled off the drawings (every sheet says "DO NOT SCALE PLANS !") and nothing is filled in from
+# typical practice: a value the drawings don't give stays missing. `cite`, `absent` and `source` are not part of
+# the format; the measuring code ignores them (a test checks the measures are the same without them).
+#
+# Coordinates. Elevations (z): 0 is the second floor's finished floor. The floor-to-floor heights are not
+# dimensioned (A-4 gives floor-to-ceiling heights only), so the main floor and basement have no elevation on this
+# datum and nothing on them is given one. Plan (x, y): each room's outline is drawn from its own corner, from the
+# room's inside dimensions on the plan (only its area is measured); the rooms' places in the house are not
+# transcribed. The A-1 floor plan notes: "DIMENSIONS ARE TO NEAREST INCH/ ACTUAL ROOM SIZES VARY DUE TO GYPSUM
+# BOARD" (the framing notes say the same): the dimensions are rounded to the inch and the finished rooms are a
+# little smaller (1/2 in gypsum board each side, A-5 section). The smallest bedroom is 128 sf, well over the 70 sf
+# minimum (R312.1), so it can't matter there.
+format: gordium.interior/1
+units: in
+source:
+  url: https://www.orangetown.com/wp-content/uploads/2026/02/68.20-2-76.2-80-South-William-Street-Lot-2-Arch-Plans.pdf
+  sha256: c6879996539fb1df257b58117bcc4bb590811ab63979fb4ab3eeaa639651a34d
+  sheets: "A-1 title sheet and general notes; A-2 basement and main floor plans; A-3 2nd floor and roof plans; A-4 elevations; A-5 building section and details"
+  code_cited: "A-1: '2025 RESIDENTIAL CODE OF NEW YORK STATE' (the stair and railing notes on A-1, A-2 and A-5 cite the 2020 code)"
+
+rooms:
+  - id: master
+    name: Master bedroom
+    sleeping: true
+    floor: [[0, 0], [162, 0], [162, 204], [0, 204]]
+    floor_elevation: 0
+    ceiling_height: 96
+    cite:
+      sleeping: "A-3 2nd floor plan, room label 'MASTER BEDRM'; A-5 window schedule row 'M. BEDROOM 230 SQ. FT.'"
+      floor: "A-3 2nd floor plan, inside dimensions 13'-6\" (east-west) by 17'-0\" (north-south)"
+      floor_elevation: "the datum: the second floor's finished floor (A-4 'SEC. FLR')"
+      ceiling_height: "A-4 left side and rear elevations, 'SEC. FLR' to 'CLG.' 8'-0\"; A-5 building section, flat 2x8 ceiling joists"
+  - id: bed2
+    name: Bedroom 2
+    sleeping: true
+    floor: [[0, 0], [132, 0], [132, 140], [0, 140]]
+    floor_elevation: 0
+    ceiling_height: 96
+    cite:
+      sleeping: "A-3 2nd floor plan, room label 'BEDRM 2'; A-5 window schedule row 'BEDROOM 2 128 SQ. FT.'"
+      floor: "A-3 2nd floor plan, inside dimensions 11'-0\" by 11'-8\" (the main rectangle). The entry alcove between the bath wall and the closet, where the door opens, has no dimension: left out, so the area is understated, never overstated"
+      floor_elevation: "the datum: the second floor's finished floor"
+      ceiling_height: "A-4 rear elevation, 'SEC. FLR' to 'CLG.' 8'-0\""
+  - id: bed3
+    name: Bedroom 3
+    sleeping: true
+    floor: [[0, 0], [168, 0], [168, 136], [0, 136]]
+    floor_elevation: 0
+    ceiling_height: 96
+    cite:
+      sleeping: "A-3 2nd floor plan, room label 'BEDRM 3'; A-5 window schedule row 'BEDROOM 3 159 SQ. FT.'"
+      floor: "A-3 2nd floor plan, inside dimensions 14'-0\" by 11'-4\""
+      floor_elevation: "the datum: the second floor's finished floor"
+      ceiling_height: "A-4 right side elevation, 'SEC. FLR' to 'CLG.' 8'-0\""
+  - id: bed4
+    name: Bedroom 4
+    sleeping: true
+    floor: [[0, 0], [196, 0], [196, 148], [0, 148]]
+    floor_elevation: 0
+    ceiling_height: 96
+    cite:
+      sleeping: "A-3 2nd floor plan, room label 'BEDRM 4'; A-5 window schedule row 'BEDROOM 4 202 SQ. FT.'"
+      floor: "A-3 2nd floor plan, inside dimensions 16'-4\" by 12'-4\" (the main rectangle). The window recess on the south wall has no inside dimension (its 10'-0\" and 1'-4\" are outside dimensions): left out, so the area is understated, never overstated"
+      floor_elevation: "the datum: the second floor's finished floor"
+      ceiling_height: "A-4 front elevation (right), 'SEC. FLR' to 'CLG.' 8'-0\""
+  - id: bonus
+    name: Bonus room
+    sleeping: false
+    floor: [[0, 0], [160, 0], [160, 162], [0, 162]]
+    floor_elevation: 0
+    ceiling_height: 96
+    cite:
+      sleeping: "A-3 2nd floor plan, room label 'BONUS RM.' (not a bedroom label; not in the A-5 window schedule). Its windows are marked E (egress) on the A-4 front elevation: whether it may be slept in is a question for the architect (answer key)"
+      floor: "A-3 2nd floor plan, inside dimensions 13'-4\" by 13'-6\""
+      floor_elevation: "the datum: the second floor's finished floor"
+      ceiling_height: "A-4 front elevation (left), 'SEC. FLR' to 'CLG.' 8'-0\""
+  - id: basement
+    name: Unfinished basement
+    sleeping: false
+    cite:
+      sleeping: "A-2 basement plan, label 'UNFINISHED BASEMENT'; no sleeping room in the basement"
+    absent:
+      floor: "not needed: not a sleeping room (the basement plan is dimensioned to the outside of the foundation)"
+      floor_elevation: "not on the datum: the floor-to-floor heights aren't dimensioned"
+      ceiling_height: "A-4 gives 'SLAB' to 'CLG.' 8'-0\"; not needed for a room that isn't a sleeping room"
+
+openings:
+  # Every escape opening the drawings mark. What the drawings give for each: the unit's size code (e.g. 3046: by
+  # common naming 3'-0" by 4'-6", but no maker or product is named, the schedule is "for design intent only", A-1),
+  # the operation, and the header height, approximately (A-1 door & window notes: "ALL HEADER HEIGHTS TO BE 6'-9\"
+  # ABOVE THE FINISHED FLOOR, UNLESS NOTED OTHERWISE."; A-1 window & door notes: "ALL WINDOW HEADERS TO BE FRAMED AT
+  # 6'-9\" +/- ABOVE FINISHED FLR FOR 8 FT. CEILING HEIGHTS": the framed rough-opening header, with a tolerance;
+  # A-4 dimensions 6'-9"). They give no frame clear opening, no sash sizes, no maker's net clear
+  # opening, and no sill height: so each window's clear opening is absent, and with it the sill height and
+  # grade-floor reading (the measuring code needs the clear opening's bottom for both).
+  - id: m1
+    name: Master bedroom double-hung 1 of 2
+    room: master
+    escape: true
+    operation: double_hung
+    cite: &master_dh
+      room: "A-3 2nd floor plan: in the master bedroom's north wall"
+      escape: "A-5 window schedule, M. BEDROOM 'DOUBLE HUNG' remark 'EGRESS'; A-4 rear elevation (right pair) marked E ('INDICATES EGRESS WINDOW', A-1)"
+      operation: "A-3 2nd floor plan '(2) 3046 DH'; A-5 schedule 'DOUBLE HUNG' (the size differs: the schedule says 3052)"
+    absent: &no_clear_opening
+      frame: "no frame clear opening is drawn or dimensioned; the size code is a nominal unit size, the product isn't chosen ('ANDERSEN OR EQUAL', A-1) and the schedule is 'FOR DESIGN INTENT ONLY' (A-1)"
+      sashes: "not drawn with dimensions (elevations are not to scale for this: 'DO NOT SCALE PLANS !')"
+      stated_clear: "no maker's net clear opening is given"
+      ground_outside: "not needed without the clear opening's bottom; on the datum the ground isn't placed (spot grades on A-4 are in site feet, the floor-to-floor heights aren't dimensioned)"
+  - id: m2
+    name: Master bedroom double-hung 2 of 2
+    room: master
+    escape: true
+    operation: double_hung
+    cite: *master_dh
+    absent: *no_clear_opening
+  - id: m3
+    name: Master bedroom casement C15, 1 of 2
+    room: master
+    escape: true
+    operation: casement
+    cite: &master_cas
+      room: "A-3 2nd floor plan: in the master bedroom's west wall"
+      escape: "A-4 left side elevation, both C15 casements marked E. The A-5 schedule lists '(2) CASEMENT C15' for the master bedroom with no 'EGRESS' remark: the two sheets differ"
+      operation: "A-3 2nd floor plan 'C15' on the west wall (twice); A-5 schedule 'CASEMENT C15'"
+    absent: &no_clear_opening_casement
+      frame: "no frame clear opening; 'C15' is a size code with no dimensions on the drawings"
+      hinged: "the sash's hinge side, width, thickness and open angle aren't given"
+      stated_clear: "no maker's net clear opening is given"
+      ground_outside: "not needed without the clear opening's bottom"
+  - id: m4
+    name: Master bedroom casement C15, 2 of 2
+    room: master
+    escape: true
+    operation: casement
+    cite: *master_cas
+    absent: *no_clear_opening_casement
+  - id: b2a
+    name: Bedroom 2 double-hung 1 of 2
+    room: bed2
+    escape: true
+    operation: double_hung
+    cite: &bed2_dh
+      room: "A-3 2nd floor plan: in bedroom 2's north wall"
+      escape: "A-5 window schedule, BEDROOM 2 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 rear elevation (left pair) marked E"
+      operation: "A-3 2nd floor plan '(2) 3046 DH' on the north wall; A-5 schedule 'DOUBLE HUNG 3046'"
+    absent: *no_clear_opening
+  - id: b2b
+    name: Bedroom 2 double-hung 2 of 2
+    room: bed2
+    escape: true
+    operation: double_hung
+    cite: *bed2_dh
+    absent: *no_clear_opening
+  - id: b3a
+    name: Bedroom 3 double-hung 1 of 2
+    room: bed3
+    escape: true
+    operation: double_hung
+    cite: &bed3_dh
+      room: "A-3 2nd floor plan: in bedroom 3's east wall"
+      escape: "A-5 window schedule, BEDROOM 3 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 right side elevation (upper pair) marked E"
+      operation: "A-3 2nd floor plan '(2) 3046 DH' on the east wall; A-5 schedule 'DOUBLE HUNG 3046'"
+    absent: *no_clear_opening
+  - id: b3b
+    name: Bedroom 3 double-hung 2 of 2
+    room: bed3
+    escape: true
+    operation: double_hung
+    cite: *bed3_dh
+    absent: *no_clear_opening
+  - id: b4a
+    name: Bedroom 4 double-hung 1 of 2
+    room: bed4
+    escape: true
+    operation: double_hung
+    cite: &bed4_dh
+      room: "A-3 2nd floor plan: in bedroom 4's south wall"
+      escape: "A-5 window schedule, BEDROOM 4 'DOUBLE HUNG' remark 'EGRESS'; A-4 front elevation (dormer pair, right) marked E"
+      operation: "A-3 2nd floor plan '(2) 3052 DH' on the south wall; A-5 schedule 'DOUBLE HUNG' (the size differs: the schedule says 3046)"
+    absent: *no_clear_opening
+  - id: b4b
+    name: Bedroom 4 double-hung 2 of 2
+    room: bed4
+    escape: true
+    operation: double_hung
+    cite: *bed4_dh
+    absent: *no_clear_opening
+  - id: x1
+    name: Bonus room double-hung 1 of 2
+    room: bonus
+    escape: true
+    operation: double_hung
+    cite: &bonus_dh
+      room: "A-3 2nd floor plan: in the bonus room's south bay"
+      escape: "A-4 front elevation (left, second floor pair) marked E; the bonus room is not in the A-5 schedule"
+      operation: "A-3 2nd floor plan '(2) 3052 DH' in the bay on the south wall"
+    absent: *no_clear_opening
+  - id: x2
+    name: Bonus room double-hung 2 of 2
+    room: bonus
+    escape: true
+    operation: double_hung
+    cite: *bonus_dh
+    absent: *no_clear_opening
+  - id: bsw1
+    name: Basement window CW14 in areaway (north wall)
+    room: basement
+    escape: true
+    operation: casement
+    cite: &basement_cw
+      room: "A-2 basement plan: in the foundation wall of the unfinished basement (one north, one west)"
+      escape: "A-2 basement plan 'CW14' in a 'BOWMAN KEMP AREAWAY ... PROVIDE FALL PROTECTION' ('SEE DETAIL THIS SHEET': A-2's own escape-opening detail gives only the minimums); A-5 'WALL SECTION THRU. WINDOW WELL' labels the window in the well 'EGRESS' and shows an escape ladder"
+      operation: "A-2 basement plan 'CW14' (C: casement, the plans' own naming, as 'C15'). The A-5 window-well details instead show a 'BOMAN KEMP 4040 EASY-BUCK' window with 'NET WIDTH OF PATH = 21 3/4\"' and 'NET HEIGHT = 45 3/8\"': a different window, so its clear opening isn't used here"
+    absent: &basement_absent
+      frame: "no frame clear opening for the CW14; the A-5 detail's 4040 is a different window"
+      hinged: "not given"
+      stated_clear: "the A-5 detail's net 21 3/4\" by 45 3/8\" is for a 4040 window, not the CW14 the plan shows; which is right is a question for the architect"
+      ground_outside: "not on the datum (floor-to-floor not dimensioned)"
+      area_well: "A-5 'PLAN VIEW WINDOW WELL': '52\" WELL WIDTH', '36\" WELL PROJECTION'; the well's floor isn't on the datum. Not given here: the basement isn't a sleeping room, so the opening isn't measured (answer key works the well by hand)"
+  - id: bsw2
+    name: Basement window CW14 in areaway (west wall)
+    room: basement
+    escape: true
+    operation: casement
+    cite: *basement_cw
+    absent: *basement_absent
+
+# stairs: not given (not read). Every stair rule needs review. The drawings give: main stair 'UP 16R' (A-2) but
+# 'DN 15R' (A-3), 3'-4" wide (A-2, A-3), its stairwell opening 9'-8" long (A-3), a '10'-0"' on both A-2 plans (read
+# in answer_key.yaml as the basement stair's run, its first riser to its top one); basement stair 'DN 13R' (A-2 main floor plan) but 'UP 14R' (A-2 basement plan), '3'-0"' wide; the A-2 'TYPICAL INT. STAIR DETAIL' (a typical
+# detail, 1/2"=1'-0"): riser '7 1/2"', tread '9" MIN', nosing '1 1/8" ±', top rail '3'-0"', 'MINIMUM 6'-9" HEADROOM AS PER 2020 NYS
+# CODE'. No floor-to-floor height is dimensioned, so no riser height or nosing elevation can be placed, and no tread
+# depth is dimensioned: the nosings the format needs can't be written without inventing them.
+
+doors:
+  - id: front
+    name: Front entry door
+    exit: true
+    operation: side_hinged
+    cite:
+      exit: "the only side-hinged door from the house straight outside: A-2 main floor plan, entry door '3'-0\"x8'-0\"' to the covered porch. The rear doors are sliding ('60611 SL DR', A-2; 'SLIDING DR 60611', A-5 schedule) and the other door leads into the garage (R318.1: egress is 'without requiring travel through a garage'). No sheet names the required egress door"
+      operation: "A-2 main floor plan, drawn with a swing arc"
+    absent:
+      hinge_side: "readable from the swing arc, but not needed without the stops and the leaf (left out rather than half-given)"
+      stops: "the door frame and its stops aren't drawn or dimensioned"
+      hinge_pin: "not drawn"
+      leaf_closed: "the leaf is '3'-0\"x8'-0\"' (A-2); its thickness isn't given ('THERMA-TRU OR EQUAL', A-1)"
+      threshold_top: "not on the datum (main floor elevation relative to the second floor not dimensioned); the threshold isn't detailed"
+      head_stop_bottom: "not given"
+
+guards:
+  # The railings drawn around the open stairwell and the 'OPEN TO BELOW' areas on the second floor (A-3). Each is
+  # labelled '36" HIGH RAILING' (A-3; A-5 section: '36" HIGH RAILING AS PER 2020 NYS RESIDENTIAL CODE'). Balusters
+  # and top rails are drawn (A-5 section, A-2 typical stair detail) but not dimensioned: no spacing, rail or
+  # baluster sizes, or post layout; A-1 stair & railing notes: openings in 'OPEN RAILINGS AND GUARDS SHALL NOT BE GREATER THAN 4"'.
+  - id: g_hall
+    name: Hallway railing across the north end of the stairwell
+    walking_surface: 0
+    top: 36
+    extent: {left: 0, right: 80}
+    cite: &railing36
+      walking_surface: "the datum: the second floor's finished floor"
+      top: "A-3 2nd floor plan, '36\" HIGH RAILING'"
+      extent: "A-3 2nd floor plan, from the hall's west wall to the post at the stair's east side: '3'-4\"' (open to below) + '3'-4\"' (stair)"
+    absent: &no_members
+      members: "drawn (A-5 section, A-2 typical stair detail) but not dimensioned: no baluster spacing, rail or baluster sizes, or post layout"
+  - id: g_bridge_n
+    name: Bridge railing, north side (over the open-to-below)
+    walking_surface: -7.5
+    top: 28.5
+    extent: {left: 0, right: 40}
+    cite: &railing36_bridge
+      walking_surface: "A-3 2nd floor plan, 'DN 7 1/2\"' from the bonus room and from the hallway onto the 'BRIDGE': the bridge is 7 1/2 in below the second floor"
+      top: "A-3 2nd floor plan, '36\" HIGH RAILING': 36 in above the bridge"
+      extent: "A-3 2nd floor plan, '3'-4\"' (open to below, west of the stair)"
+    absent: *no_members
+  - id: g_bridge_s
+    name: Bridge railing, south side (over the open-to-below)
+    walking_surface: -7.5
+    top: 28.5
+    extent: {left: 0, right: 80}
+    cite:
+      walking_surface: "A-3 2nd floor plan, 'DN 7 1/2\"' onto the 'BRIDGE'"
+      top: "A-3 2nd floor plan, '36\" HIGH RAILING': 36 in above the bridge"
+      extent: "A-3 2nd floor plan, '3'-4\"' + '3'-4\"' (the open-to-below south of the bridge)"
+    absent: *no_members
+  - id: g_east
+    name: Railing along the east side of the stairwell (second floor passage)
+    walking_surface: 0
+    top: 36
+    extent: {left: 0, right: 116}
+    cite:
+      walking_surface: "the datum: the second floor's finished floor (the passage east of the stair, '3'-10\"' wide, A-3)"
+      top: "A-3 2nd floor plan, '36\" HIGH RAILING AS PER CODE'"
+      extent: "A-3 2nd floor plan, the stairwell's length '9'-8\"'"
+    absent: *no_members
+  - id: g_stair_w
+    name: Stair guard, west side (open to the hall below)
+    stair: main_stair
+    cite:
+      stair: "A-3 2nd floor plan, railing drawn along the stair's west side over 'OPEN TO BELOW'; A-5 building section '36\" HIGH RAILING AS PER 2020 NYS RESIDENTIAL CODE (SEE TYPICAL STAIR DETAIL)'"
+    absent:
+      top_line: "not placeable: the stair's nosings aren't given (see stairs); the A-2 stair detail's '3'-0\"' is dimensioned at the top floor, not along the rake"
+      members: "drawn (A-5 section, A-2 typical stair detail) but not dimensioned: no baluster spacing, rail or baluster sizes"
