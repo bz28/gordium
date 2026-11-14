@@ -66,7 +66,7 @@ One entry per **flight** (a run of treads between landings; R318 calls it a flig
 |---|---|
 | `bottom_elevation` | the finished floor or landing at the flight's foot |
 | `nosings` | the leading edge of each tread, bottom to top, then the leading edge of the floor or landing at the top: each `[[x, y, z], [x, y, z]]`, its two ends across the stair's width |
-| `sides` | `{left, right}`, looking up the stair: the plan line of what bounds the flight above handrail height (a finished wall face, a guard's inside face), from before the first nosing to past the top one; or `open` for a side with neither (then the tread ends bound it) |
+| `sides` | `{left, right}`, looking up the stair: the plan line of what bounds the flight above handrail height (a finished wall face, a guard's inside face), from before the first nosing to past the top one, standing at the tread ends (no more than 1 1/2 in, a skirt or stringer, out beyond them; the treads may run past it into the wall); or `open` for a side with neither (then the tread ends bound it) |
 | `handrails` | a list (empty for none) of `{side: left|right, inner_edge}`: the plan line of the handrail's edge nearest the middle of the stair, as far as it runs |
 | `overhead` | the underside of everything above the flight (ceiling, the floor above and its framing, a beam, a soffit), as flat pieces of 3D points, together covering the whole flight seen from above (an empty list is refused: nothing above can't be told from nothing sent) |
 
@@ -79,7 +79,7 @@ One entry per **flight** (a run of treads between landings; R318 calls it a flig
 | `hinge_side` | `left` or `right`, in the door's own elevation |
 | `stops` | `{hinge, latch}`: the u of the face of each jamb stop |
 | `hinge_pin` | `[u, n]`: the hinge pin's centre in the door's plan: at the leaf's hinge-side corner on the face it swings toward, or beyond it (a pin more than 1/16 in behind that face, or back toward the hinge jamb, doesn't hang the leaf: no clear width) |
-| `leaf_closed` | `[[u, n], [u, n]]`: two opposite corners of the leaf, closed, in the door's plan: thicker than nothing, and reaching the latch-side stop (it closes the opening) |
+| `leaf_closed` | `[[u, n], [u, n]]`: two opposite corners of the leaf, closed, in the door's plan: thicker than nothing, spanning the opening: reaching the latch-side stop, and no more than 3/4 in (a stop's lap) behind the hinge-side stop |
 | `threshold_top`, `head_stop_bottom` | the top of the threshold and the bottom of the head stop, elevations |
 
 ### guards

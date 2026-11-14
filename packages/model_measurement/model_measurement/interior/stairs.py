@@ -16,6 +16,10 @@ from model_measurement.interior.read import tidy
 from model_measurement.interior.stops import Stop
 
 LEVEL = 1 / 16          # in: a nosing's ends may differ this much in height, or in position along the run
+# in: how far a drawn side (a wall face) may stand out beyond the tread ends: what lies between them below handrail
+# height, a skirt board or a stringer, at most a 2x stringer's actual 1 1/2 in. Farther, the side isn't this stair's
+STRINGER = 1.5
+STRINGER_WORDS = "1 1/2"
 
 
 class Flight:
@@ -140,8 +144,28 @@ def side_lines(st: dict, flight: Flight, reader) -> dict:
         line = along(flight, reader.points(given, 2, f"the stair's {side} side", 2), "side", side)
         if at(line, start) is None or at(line, end) is None:
             raise Stop("side_not_along", side=side, what="side")
+        off = side_off_treads(line, flight, side)
+        if off > STRINGER + 1e-9:
+            raise Stop("side_off_treads", side=side, off=tidy(off), most=STRINGER_WORDS)
         out[side] = line
     return out
+
+
+def side_off_treads(line, flight: Flight, side: str) -> float:
+    """How far a drawn side stands out beyond its treads' ends, at most (0 where every tread reaches it or runs past
+    it, into the wall). A side bounds the stair only where it stands at the tread ends (a skirt or stringer between,
+    STRINGER at most): drawn farther off, it would widen the stair, and anything checked against it (a guard on it, a handrail between the sides) would count
+    wherever it is. Each tread holds its nosing's end back to the next nosing, the top nosing at its own place; the
+    side is straight between its points, so the gap is greatest at a point of it or at a tread's ends: exact."""
+    k = 1 if side == "left" else 0
+    sign = 1 if side == "left" else -1
+    spans = [(s1, s2, e[k]) for s1, s2, e in zip(flight.s, flight.s[1:], flight.ends)]
+    spans.append((flight.s[-1], flight.s[-1], flight.ends[-1][k]))
+    worst = 0.0
+    for s1, s2, a in spans:
+        for s in {s1, s2, *(s for s, _ in line if s1 < s < s2)}:
+            worst = max(worst, sign * (at(line, s) - a))
+    return worst
 
 
 def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int | None, str | None]:

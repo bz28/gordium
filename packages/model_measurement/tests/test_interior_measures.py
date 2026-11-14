@@ -597,10 +597,11 @@ def test_a_mislabelled_handrail_keeps_the_width_above_it():
 
 
 def test_treads_shorter_than_the_walls_narrow_the_width_at_the_treads():
+    # a 1 in and a 1 1/2 in skirt between the tread ends and the walls (at most a stringer's 1 1/2 in)
     d = base()
-    d["stairs"][0]["nosings"] = [[[10 * j, 1, 7 * (j + 1)], [10 * j, 34, 7 * (j + 1)]] for j in range(4)]
+    d["stairs"][0]["nosings"] = [[[10 * j, 1, 7 * (j + 1)], [10 * j, 34.5, 7 * (j + 1)]] for j in range(4)]
     m, _, more = stair(d)
-    assert m["stair_clear_width"] == 36.0 and more["stair_clear_width_at_handrail"] == 33.0
+    assert m["stair_clear_width"] == 36.0 and more["stair_clear_width_at_handrail"] == 33.5
 
 
 def _landing_wider_on_the_open_side(top_width):
@@ -649,12 +650,89 @@ def test_a_nosing_drawn_as_a_point_is_no_nosing():
 def test_treads_past_a_side_say_so_not_a_handrail():
     """Review round 7: tread ends beyond a wall (a tread 40..50 between walls at 0 and 36) were blamed on a
     handrail, with none drawn. The width above the treads (36) still stands."""
+    # round 9: the right wall at 0 must stand at the tread ends, so the crossing is drawn with the right side open:
+    # tread 1 ends at 34.6 under the left wall (36, a skirt of 1.4); tread 2 starts at 35, past it (into the wall)
     d = base()
-    d["stairs"][0]["nosings"][1] = [[10, 40, 14], [10, 50, 14]]
+    d["stairs"][0]["sides"]["right"] = "open"
+    d["stairs"][0]["nosings"][0] = [[0, 0, 7], [0, 34.6, 7]]
+    d["stairs"][0]["nosings"][1] = [[10, 35, 14], [10, 40, 14]]
     m, stopped, more = stair(d)
-    assert m["stair_clear_width"] == 36.0 and "stair_clear_width_at_handrail" not in more
+    assert m["stair_clear_width"] == 1.0 and "stair_clear_width_at_handrail" not in more     # 36 - 35
     assert "a tread's end meets or crosses" in stopped["stair_clear_width_at_handrail"]
     assert "handrail meets" not in stopped["stair_clear_width_at_handrail"]
+
+
+@pytest.mark.parametrize("left, right, ends, width", [
+    (40, 0, (0, 30), None),           # treads 30 wide between walls 40 apart: before, a clear width of 40
+    (136, -100, (0, 36), None),       # walls drawn 100 in off the treads: before, 236
+    (37.5, 0, (0, 36), 37.5),         # a 1 1/2 in stringer between the treads and the left wall, wall to wall
+    (37.5625, 0, (0, 36), None),      # 1/16 in more than a stringer
+    (36, -1.5, (0, 36), 37.5),
+    (30, 0, (0, 36), 30.0),           # the treads run past the wall, into it: the wall bounds them
+])
+def test_a_side_must_stand_at_the_tread_ends(left, right, ends, width):
+    """Round 9: a drawn side was never checked against the treads, so a wall drawn anywhere still bounded the
+    stair, and a guard or handrail drawn with it counted."""
+    d = base()
+    d["stairs"][0]["nosings"] = [[[10 * j, ends[0], 7 * (j + 1)], [10 * j, ends[1], 7 * (j + 1)]] for j in range(4)]
+    d["stairs"][0]["sides"] = {"left": [[-5, left], [40, left]], "right": [[-5, right], [40, right]]}
+    d["stairs"][0]["overhead"] = [[[-5, -200, 120], [40, -200, 120], [40, 200, 120], [-5, 200, 120]]]
+    m, stopped, _ = stair(d)
+    assert m.get("stair_clear_width") == width, stopped
+    if width is None:
+        assert "out beyond its treads' ends" in stopped["stair_clear_width"]
+
+
+def test_a_guard_and_handrail_on_a_side_drawn_far_off_never_count():
+    """Round 9: the round-8 guard check compared the guard with the drawn side only, so the side and the guard drawn
+    together 500 in off still gave a guard height (34.78); a handrail at 300 in counted as the left handrail."""
+    d = stair_guard([[-5, 536, 41], [40, 536, 69]])
+    d["stairs"][0]["sides"]["left"] = [[-5, 536], [40, 536]]
+    m, stopped = guard(d)
+    assert "guard_height" not in m and "out beyond its treads' ends" in stopped["guard_height"]
+    d["stairs"][0]["handrails"] = [{"side": "left", "inner_edge": [[-5, 300], [40, 300]]}]
+    _, stopped, more = stair(d)
+    assert "stair_handrail_sides" not in more and "out beyond" in stopped["stair_handrail_sides"]
+
+
+def test_random_sides_count_only_at_the_tread_ends():
+    """Round 9, property check: 1,500 random flights whose sides stand anywhere from the tread ends to far off,
+    straight or bent, with a guard on the left side. Whenever a width or a guard height is given, each drawn side
+    stands no more than 1 1/2 in beyond its treads' ends at every sampled point."""
+    import random
+    rnd = random.Random(9)
+    given = 0
+    for _ in range(1500):
+        n = rnd.randint(2, 5)
+        run = 10 * (n - 1)
+        ends = [(rnd.choice([0, rnd.uniform(-1, 1)]), rnd.choice([36, rnd.uniform(35, 37)])) for _ in range(n)]
+        sides = {}
+        for k, base_a, sign in (("left", 36, 1), ("right", 0, -1)):
+            off = [base_a + sign * rnd.choice([0, rnd.uniform(0, 1.6), rnd.uniform(0, 600), rnd.uniform(-3, 0)])
+                   for _ in range(3)]
+            sides[k] = [[-5, off[0]], [run / 2, off[1]], [run + 5, off[2]]]
+        d = stair_guard([[p[0], p[1], 7 * (1 + max(0, min(p[0], run)) / 10) + 36] for p in sides["left"]])
+        d["stairs"][0].update(
+            nosings=[[[10 * j, ends[j][0], 7 * (j + 1)], [10 * j, ends[j][1], 7 * (j + 1)]] for j in range(n)],
+            sides=sides,
+            overhead=[[[-20, -900, 400], [run + 20, -900, 400], [run + 20, 900, 400], [-20, 900, 400]]])
+        m, _, _ = stair(d)
+        g, _ = guard(d)
+        if "stair_clear_width" not in m and "guard_height" not in g:
+            continue
+        given += 1
+
+        def side_a(k, s):
+            pts = sides[k]
+            for (s1, a1), (s2, a2) in zip(pts, pts[1:]):
+                if s1 <= s <= s2:
+                    return a1 + (s - s1) / (s2 - s1) * (a2 - a1)
+
+        for s in [rnd.uniform(0, run) for _ in range(300)]:
+            j = min(int(s // 10), n - 1)
+            assert side_a("left", s) - ends[j][1] <= 1.5 + 1e-9
+            assert ends[j][0] - side_a("right", s) <= 1.5 + 1e-9
+    assert given > 100
 
 
 def test_random_flights_are_never_wider_than_drawn():
@@ -1135,8 +1213,12 @@ def test_a_right_hinged_door():
     d["doors"][0].update(hinge_side="right", stops={"hinge": 36, "latch": 2}, hinge_pin=[36, 1.75],
                          leaf_closed=[[1, 0], [36, 1.75]])
     assert door(d)[0]["door_clear_width"] == 32.25
-    d["doors"][0]["stops"]["hinge"] = 33                              # a hinge stop deeper than the open face
-    assert door(d)[0]["door_clear_width"] == 31.0                     # min(34.25, 33) - 2
+    d["doors"][0]["stops"]["hinge"] = 35.25                           # lapping the leaf by 3/4 in: the face rules
+    assert door(d)[0]["door_clear_width"] == 32.25
+    d["doors"][0].update(hinge_pin=[36, 0.25], leaf_closed=[[1, 0], [36, 0.25]])   # a 1/4 in leaf: the stop rules
+    assert door(d)[0]["door_clear_width"] == 33.25                    # min(35.75, 35.25) - 2
+    d["doors"][0]["stops"]["hinge"] = 33                              # 3 in in front of the leaf's edge: no stop
+    assert "3.0 in behind" in door(d)[1]["door_clear_width"]
 
 
 def test_a_pin_off_the_leafs_corner():
@@ -1146,8 +1228,11 @@ def test_a_pin_off_the_leafs_corner():
 
 
 def test_a_hinge_stop_deeper_than_the_open_leaf():
+    # round 9: a hinge stop may lap the leaf by 3/4 in (the face still turns to 1.75: 34 - 1.75); 3 in is no stop
+    d = changed(("doors", 0, "stops"), {"hinge": 0.75, "latch": 34})
+    assert door(d)[0]["door_clear_width"] == 32.25
     d = changed(("doors", 0, "stops"), {"hinge": 3, "latch": 34})
-    assert door(d)[0]["door_clear_width"] == 31.0                     # 34 - max(1.75, 3)
+    assert "3.0 in behind the hinge-side stop" in door(d)[1]["door_clear_width"]
 
 
 @pytest.mark.parametrize("pin, width", [
@@ -1180,6 +1265,10 @@ def test_a_right_hinged_pin_back_toward_its_jamb():
     ([0, 0], [[0, 0], [35, 0]], "left", "no thickness"),               # drawn flat: before, 34 (not 32.25)
     ([-40, 1.75], [[-40, 0], [-5, 1.75]], "left", "39.0 in short"),    # leaf and pin in the wall: before, 34
     ([80, 1.75], [[45, 0], [80, 1.75]], "right", "45.0 in short"),     # the same, right hand: before, 34
+    ([-40, 1.75], [[-40, 0], [34, 1.75]], "left", "40.0 in behind"),   # round 9: reaching the latch, run into the wall
+    ([74, 1.75], [[0, 0], [74, 1.75]], "right", "40.0 in behind"),     # the same, right hand: before, 34
+    ([-0.75, 1.75], [[-0.75, 0], [34, 1.75]], "left", 33.0),           # a stop's 3/4 in lap: 34 - (-0.75 + 1.75)
+    ([-0.8125, 1.75], [[-0.8125, 0], [34, 1.75]], "left", "0.8125 in behind"),
     ([0, 1.75], [[0, 0], [34 - 1 / 16, 1.75]], "left", None),          # 1/16 in short: drawing noise
     ([0, 1.75], [[0, 0], [34 - 1 / 8, 1.75]], "left", "0.125 in short"),
     ([34, 1.75], [[1 / 8, 0], [34, 1.75]], "right", "0.125 in short"),
@@ -1191,8 +1280,8 @@ def test_a_door_leaf_must_close_its_own_opening(pin, leaf, hand, words):
     stops = {"hinge": 0, "latch": 34} if hand == "left" else {"hinge": 34, "latch": 0}
     d["doors"][0].update(hinge_side=hand, stops=stops, hinge_pin=pin, leaf_closed=leaf)
     m, stopped = door(d)
-    if words is None:
-        assert m["door_clear_width"] == 32.25         # the base: 34 - 1.75
+    if words is None or isinstance(words, float):
+        assert m["door_clear_width"] == (words or 32.25)         # the base: 34 - 1.75
     else:
         assert "door_clear_width" not in m and words in stopped["door_clear_width"], stopped
 
@@ -1436,8 +1525,12 @@ STOP_CASES = {
                                            [[5, 0, 21], [5, 36, 21]]]),
     "side_not_along": _stair(sides={"left": [[-5, 36], [20, 36]], "right": [[-5, 0], [40, 0]]}),
     "sides_cross": _stair(sides={"left": [[-5, 0], [40, 0]], "right": [[-5, 36], [40, 36]]}),
-    "treads_cross": _stair(nosings=[[[0, 0, 7], [0, 36, 7]], [[10, 40, 14], [10, 50, 14]], [[20, 0, 21], [20, 36, 21]],
+    "treads_cross": _stair(sides={"left": [[-5, 36], [40, 36]], "right": "open"},
+                           nosings=[[[0, 0, 7], [0, 34.6, 7]], [[10, 35, 14], [10, 40, 14]], [[20, 0, 21], [20, 36, 21]],
                                     [[30, 0, 28], [30, 36, 28]]]),
+    "side_off_treads": _stair(sides={"left": [[-5, 40], [40, 40]], "right": [[-5, 0], [40, 0]]}),
+    "leaf_behind_hinge_stop": _with(base, lambda d: d["doors"][0].update(hinge_pin=[-40, 1.75],
+                                                                         leaf_closed=[[-40, 0], [34, 1.75]])),
     "handrails_cross": _stair(handrails=[{"side": "left", "inner_edge": [[0, -2], [30, -2]]}]),
     "handrail_side": _stair(handrails=[{"side": "up", "inner_edge": [[0, 4], [30, 4]]}]),
     "handrail_part_way": _stair(handrails=[{"side": "left", "inner_edge": [[10, 32], [20, 32]]}]),

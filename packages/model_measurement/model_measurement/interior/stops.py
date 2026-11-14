@@ -61,6 +61,9 @@ STOPS = {
                "are measured at the walkline, not yet",
     "nosings_not_forward": "the nosings don't move forward up the flight (tread {n} is {depth} in deep)",
     "side_not_along": "the {side} {what} doesn't run along the flight from its first nosing to its top one",
+    "side_off_treads": "the stair's {side} side stands {off} in out beyond its treads' ends, more than a skirt or "
+                       "stringer between them ({most} in): it doesn't bound this stair (draw it where the treads end, "
+                       "or give the side as `open`)",
     "sides_cross": "the stair's sides meet or cross (clear width {width} in)",
     "treads_cross": "at the treads, a tread's end meets or crosses the other side (clear width {width} in): check "
                     "the nosings' ends and the stair's sides",
@@ -92,6 +95,9 @@ STOPS = {
     "leaf_no_thickness": "the door leaf's closed corners give it no thickness: a leaf is thicker than nothing",
     "leaf_not_closing": "the closed leaf stops {short} in short of the latch-side stop (within 1/16 in is drawing "
                         "noise): the leaf drawn doesn't close this opening",
+    "leaf_behind_hinge_stop": "the closed leaf's hinge edge stands {back} in behind the hinge-side stop, more than a "
+                              "stop laps a leaf ({most} in): the leaf drawn doesn't close this opening (a swing-clear "
+                              "hinge isn't measured yet)",
     "pin_off_leaf": "the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it "
                     "swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't "
                     "hung on that pin",
