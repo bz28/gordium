@@ -1,0 +1,35 @@
+# Hand-derived before the code ran on this house (the house is in mm; 25.4 mm = 1 in; areas in sq ft).
+parts:
+  sleeping_room:
+    main:
+      measures:
+        sleeping_room_floor_area: 168.0     # 14 x 12 ft; ceiling 16 ft
+    loft:
+      measures:
+        sleeping_room_floor_area: 80.0      # 10 x 8 ft; ceiling 2133.6 mm = 84 in, not under 84
+  emergency_escape_opening:
+    wa:
+      within: main
+      measures: {}                          # an awning window: its clear opening is the maker's to state
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width,
+                     opening_sill_height, opening_at_grade]
+  stair:
+    ls:
+      measures:
+        stair_riser_height: 9.0             # 228.6 mm
+        stair_tread_depth: 7.0              # 177.8 mm
+        stair_headroom: 98.5                # at the top nosing: roof 4267.2 + 0.5 x 1955.8 = 5245.1; - 2743.2 = 2501.9 mm
+        stair_clear_width: 24.0             # 609.6 mm
+      more:
+        stair_riser_variation: 0.0
+        stair_tread_variation: 0.0
+        stair_clear_width_at_handrail: 21.0 # 609.6 - 76.2 = 533.4 mm
+        stair_handrail_sides: 1
+        stair_total_rise: 108.0             # 2743.2 mm
+        stair_risers: 12
+  guard:
+    lg:
+      measures:
+        guard_height: 36.0                  # 3657.6 - 2743.2 = 914.4 mm
+        guard_opening_sphere: 3.5           # baluster gaps 88.9 mm; the gap under the bottom rail is 50.8 mm tall; the last gap 76.2
+  egress_door: {}

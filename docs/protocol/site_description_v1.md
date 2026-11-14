@@ -89,7 +89,8 @@ the protocol they speak, `"protocol": "1.1"` (a different major version is refus
 - `read_model {model, facts, inventory_complete?}`: a `.3dm` file read as a site description, for recording test
   fixtures. It reads only the lot and Building layers, so it says `inventory_complete: false` unless the caller
   says it looked at the rest of the lot itself.
-- `check_site {site, facts, report?, extras?}`: the check of a site description, the same answer `check` gives.
+- `check_site {site, facts, report?, extras?, today?}`: the check of a site description, the same answer `check`
+  gives (`today`: the day of the check, YYYY-MM-DD, as `check` takes it).
 - `start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}`: the largest legal starting building
   on the description's lot (its buildings are left out), the same answer `start` gives.
 

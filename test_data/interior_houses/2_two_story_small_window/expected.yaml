@@ -1,0 +1,49 @@
+# Hand-derived before the code ran on this house (inches; areas in sq ft).
+parts:
+  sleeping_room:
+    bed3:
+      measures:
+        sleeping_room_floor_area: 100.0     # 120 x 120 = 14400 / 144
+    bed4:
+      measures: {}                          # the knee wall end is 48 in above the floor (< 84): R312.3 decides what counts
+      not_measured: [sleeping_room_floor_area]
+      more:
+        floor_area_drawn: 120.0             # 144 x 120 = 17280 / 144
+        least_ceiling_height: 48.0          # 168 - 120
+  emergency_escape_opening:
+    w5:
+      within: bed3
+      measures:
+        opening_net_clear_width: 20.5       # 22 - 1.5
+        opening_net_clear_height: 36.0
+        opening_net_clear_area: 5.125       # 20.5 x 36 = 738 / 144: under 5.7
+        opening_sill_height: 24.0           # 144 - 120
+        opening_at_grade: false             # 144 above the ground at 0
+    w6:
+      within: bed4
+      measures:
+        opening_net_clear_width: 26.5
+        opening_net_clear_height: 36.0
+        opening_net_clear_area: 6.625       # 26.5 x 36 = 954 / 144
+        opening_sill_height: 12.0
+        opening_at_grade: false
+  stair:
+    s1:
+      measures:
+        stair_riser_height: 7.5
+        stair_tread_depth: 10.0
+        stair_headroom: 85.5                # under the upper floor at s = 20: 108 - (7.5 + 0.75 x 20) = 108 - 22.5
+        stair_clear_width: 36.0             # wall to wall above the handrail
+      more:
+        stair_riser_variation: 0.0
+        stair_tread_variation: 0.0
+        stair_clear_width_at_handrail: 32.5 # 36 - 3.5
+        stair_handrail_sides: 1
+        stair_total_rise: 120.0
+        stair_risers: 16
+  egress_door:
+    d1:
+      measures:
+        door_clear_width: 32.0              # 33.75 - (0 + 1.75)
+        door_clear_height: 78.0             # 78.75 - 0.75
+  guard: {}

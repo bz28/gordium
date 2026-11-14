@@ -18,6 +18,10 @@ from .formula import EvaluationError, FormulaError, MissingMeasure
 
 PARTS_FILE = Path(__file__).with_name("parts.yaml")
 PART_FIELDS = ("for_each", "within", "when_none")      # a rule's fields for repeating over parts
+EXAMPLE_FIELDS = ("parts", "rows")                     # a per-part rule's worked example: the parts, the rows expected
+PART_ENTRY_FIELDS = {"id", "name", "within", "measures"}
+ROW_FIELDS = {"part", "within", "outcome"}             # an expected row: the part's id, the id of the part it sits in
+OUTCOMES = ("pass", "fail", "needs_review", "not_applicable")
 WHEN_NONE = ("fail", "needs_review", "not_applicable")  # never "pass": nothing checked never passes
 UNITS = {"ft", "sf", "in", "count", "text", "yes_no"}
 UNIT_KINDS = {"text": "text", "yes_no": "boolean"}       # every other unit is a number (as in measures.yaml)
@@ -197,10 +201,12 @@ def _ref(part: dict, kind: str) -> dict:
     return {"kind": kind, "id": part["id"], "name": _name(part)}
 
 
-def _row(rule, result, part=None, within=None, reason=None, values=None) -> dict:
+def _row(rule, result, part=None, within=None, reason=None, values=None, none=False, unknown=None) -> dict:
+    """One row. `none`: the row is the rule's when_none answer (nothing to check). `unknown`: the part's measures
+    that weren't given, for a part that fails whatever they are (the 2026-10-21 proof)."""
     return {"rule": rule.get("id"), "part": rule["for_each"], "id": part["id"] if part else None,
             "name": _name(part) if part else None, "within": within, "outcome": result, "reason": reason,
-            "values": values or {}}
+            "values": values or {}, "none": none, "unknown": unknown or []}
 
 
 def part_outcome(rule: dict, values: dict, allowed: dict) -> str:
@@ -271,13 +277,17 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
 
     def checked(part, within=None):
         mine = {m: v for m, v in (part.get("measures") or {}).items() if m in own}
-        return _row(rule, part_outcome(rule, {**values, **mine}, allowed), part, within,
-                    values={m: mine.get(m) for m in sorted(formula_names(rule) & own)})
+        known = {**values, **mine}
+        result, unknown = part_outcome(rule, known, allowed), None
+        if result == "needs_review" and (unknown := fails_whatever(rule, known, allowed)):
+            result = "fail"                      # fails whatever the measures not given are (2026-10-21)
+        return _row(rule, result, part, within, values={m: mine.get(m) for m in sorted(formula_names(rule) & own)},
+                    unknown=unknown)
 
     if not parent:
         out += [checked(p) for p in children]
         if not children and not problems:
-            out.append(_row(rule, _none_outcome(rule, values, allowed), reason=f"no {_plural(kind)}"))
+            out.append(_row(rule, _none_outcome(rule, values, allowed), reason=f"no {_plural(kind)}", none=True))
         return out
     by_parent = {p["id"]: [] for p in parents}
     # every part id given, and its kind: a part within a kind this rule isn't about (a basement) isn't its business
@@ -302,7 +312,7 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
             out.append(_row(rule, "needs_review", within=within, reason=f"an {_words(kind)} that may be in it can't be read"))
         elif not mine:
             out.append(_row(rule, _none_outcome(rule, values, allowed), within=within,
-                            reason=f"no {_words(kind)}"))
+                            reason=f"no {_words(kind)}", none=True))
     if not parents and not parent_problems:
         out.append(_row(rule, "not_applicable", reason=f"no {_plural(parent)}"))
     return out
@@ -330,3 +340,133 @@ def rule_result(rule_rows: list[dict]) -> str:
         if o in got:
             return o
     return "not_applicable" if got == {"not_applicable"} else "needs_review"
+
+
+def fails_whatever(rule: dict, values: dict, allowed: dict) -> list[str] | None:
+    """The "fails whatever the missing number is" proof (decided 2026-10-21; rulebook.unknown_settings, the same
+    proof the checker's zoning rows use) for one part: the measures the rule reads that weren't given (absent or
+    None), if the part fails under every setting the proof tries; else None. A value given but unusable (NaN, below
+    0, the wrong kind) isn't unknown: the row stays needs review. Only ever turns needs review into fail, never into
+    pass (principle 4)."""
+    from .rulebook import MEASURE_KINDS, unknown_settings
+    unknown = sorted(n for n in formula_names(rule) if values.get(n) is None)
+    settings = unknown_settings(rule, unknown, MEASURE_KINDS | measure_kinds(rule.get("for_each")))
+    if settings and all(part_outcome(rule, {**values, **s}, allowed) == "fail" for s in settings):
+        return unknown
+    return None
+
+
+# --- worked examples ------------------------------------------------------------------------------------------------
+# A per-part rule's worked example is a small design: the building's measures (`given`), its parts (`parts`, as the
+# checker is given them) and every row the rule must give (`rows`: {part: id, within: id, outcome}, a key left out
+# where the row has none, as for a room's "no escape opening" row), with the rule's one answer (`expect`). Checked
+# by parts.rows itself, so the examples prove the rows the checker will show. At least one example must show the
+# rule's when_none: a row for nothing to check, whose answer is the rule's when_none.
+
+def _fits(kind, value) -> bool:
+    if kind == "boolean":
+        return type(value) is bool
+    if kind == "text":
+        return type(value) is str
+    return type(value) in (int, float) and value == value and abs(value) != float("inf") and value >= 0
+
+
+def _example_shape(rule: dict, ex: dict) -> list[str]:
+    """What is wrong with the shape of one per-part worked example (its `given` is checked by the rulebook)."""
+    p, kinds = [], [k for k in (rule.get("for_each"), rule.get("within")) if isinstance(k, str)]
+    given, want = ex.get("parts"), ex.get("rows")
+    if not isinstance(given, dict):
+        p.append("a rule for each part needs 'parts': the parts by kind, {kind: [{id, name, within, measures}]}")
+    else:
+        ids = []
+        for kind, listed in given.items():
+            if kind not in kinds:
+                p.append(f"'parts' has {kind!r}, not a kind this rule reads ({kinds})")
+                continue
+            if not isinstance(listed, list):
+                p.append(f"parts {kind}: must be a list")
+                continue
+            own = measure_kinds(kind)
+            for n, part in enumerate(listed, 1):
+                where = f"{_words(kind)} #{n}"
+                if not isinstance(part, dict) or part.keys() - PART_ENTRY_FIELDS:
+                    p.append(f"{where}: a part is a mapping of {sorted(PART_ENTRY_FIELDS)}")
+                    continue
+                if not (isinstance(part.get("id"), str) and part["id"].strip()):
+                    p.append(f"{where}: needs an id")
+                else:
+                    ids.append(part["id"])
+                p += [f"{where}: {k} must be text" for k in ("name", "within") if k in part and not isinstance(part[k], str)]
+                measures = part.get("measures", {})
+                if not isinstance(measures, dict):
+                    p.append(f"{where}: measures must be a mapping")
+                    continue
+                p += [f"{where}: {m!r} isn't a measure of a {_words(kind)} (rule_format/parts.yaml)"
+                      for m in sorted(measures.keys() - set(own), key=str)]
+                p += [f"{where}: wrong kind of value for {m!r} (rule_format/parts.yaml units)"
+                      for m in sorted(measures.keys() & set(own)) if not _fits(own[m], measures[m])]
+        p += [f"two parts have the id {i!r}" for i in sorted({i for i in ids if ids.count(i) > 1})]
+    if not (isinstance(want, list) and want):
+        p.append("a rule for each part needs 'rows': every row it gives, [{part: id, within: id, outcome}]")
+    else:
+        for n, row in enumerate(want, 1):
+            if not isinstance(row, dict) or row.keys() - ROW_FIELDS or row.get("outcome") not in OUTCOMES \
+                    or any(k in row and not isinstance(row[k], str) for k in ("part", "within")):
+                p.append(f"row {n}: {{part: id, within: id, outcome: one of {list(OUTCOMES)}}} (part and within "
+                         "left out where the row has none)")
+    return p
+
+
+def _row_key(row: dict) -> tuple:
+    return row["id"], (row.get("within") or {}).get("id"), row["outcome"]
+
+
+def _shown(keys) -> str:
+    return "; ".join(f"{o}" + (f" for {i}" if i else "") + (f" in {w}" if w else "") for i, w, o in keys) or "none"
+
+
+def worked_example(rule: dict, ex: dict, allowed: dict):
+    """What a worked example comes out as: a whole-building rule's outcome(); a per-part rule's one answer and its
+    rows (each part's id, the id of the part it sits in, and its result). Two versions of a rule decide an example
+    the same way only if these are equal (the drafter's test of whether a number decides anything)."""
+    from .rulebook import outcome
+    if not is_part_rule(rule):
+        return outcome(rule, ex.get("given") or {}, allowed)
+    got = rows(rule, ex.get("parts"), ex.get("given") or {}, allowed)
+    return rule_result(got), tuple(sorted((_row_key(r) for r in got), key=repr))
+
+
+def examples_problems(rule: dict, examples: list, allowed: dict, run: bool = True) -> list[str]:
+    """Problems with a per-part rule's worked examples: each one's shape, then (run: the rule has no other problem)
+    each one's rows and answer as parts.rows gives them, and at least one example showing the rule's when_none.
+    With parts.yaml unreadable, nothing (validation already says so: the rule is refused, never a crash)."""
+    try:
+        registry()
+    except (ValueError, OSError):
+        return []
+    p, shown_none, part_rows = [], False, set()
+    for n, ex in enumerate(examples, 1):
+        shape = _example_shape(rule, ex) if isinstance(ex, dict) else ["must be a mapping"]
+        p += [f"example {n}: {x}" for x in shape]
+        if shape or not run or not isinstance(ex.get("given"), dict):
+            continue
+        got = rows(rule, ex["parts"], ex["given"], allowed)
+        have = sorted((_row_key(r) for r in got), key=repr)
+        want = sorted(((r.get("part"), r.get("within"), r["outcome"]) for r in ex["rows"]), key=repr)
+        if have != want:
+            p.append(f"example {n}: expected rows {_shown(want)}; got {_shown(have)}")
+        elif (result := rule_result(got)) != ex.get("expect"):
+            p.append(f"example {n}: expected {ex.get('expect')}, got {result}")
+        else:
+            shown_none |= any(r["none"] and r["outcome"] == rule.get("when_none") for r in got)
+            part_rows |= {r["outcome"] for r in got if r["id"] is not None}
+    # the check itself exercised: a part that passes it and a part that fails it (a "none" row fails whatever the
+    # check says, so it can't stand in for a failing part: an always-true check would pass every real part)
+    if run and not p and rule.get("kind") == "rule" and not {"pass", "fail"} <= part_rows:
+        p.append("a rule for each part needs worked examples with a part that passes its check and a part that fails "
+                 "it (a row for nothing to check doesn't exercise the check)")
+    if run and not p and not shown_none:
+        where = _words(rule["within"]) if rule.get("within") else "building"
+        p.append(f"no worked example shows when_none ({rule.get('when_none')}): give one with a {where} that has no "
+                 f"{_words(rule.get('for_each') or 'part')}, whose row is {rule.get('when_none')}")
+    return p

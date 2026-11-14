@@ -7,11 +7,11 @@ the standard library only: Rhino 8 imports this into its own Python 3.9, where n
 installed."""
 
 from .facts import FLAT_GROUND, corner_answered, set_street_lines
-from .lookup import KEEP_MINE, MISSING, lookup_choices, lookup_may_replace, same_address
+from .lookup import KEEP_MINE, MISSING, found_address, lookup_choices, lookup_may_replace, same_address
 from .start_box import BOX_CHOSEN_FACTS, BOX_CHOSEN_UI, ENTERED
 
 __all__ = ['Cancelled', 'draw_then_commit', 'run_box', 'pick_or_nothing', 'EDIT_OPS', 'carry_out', 'with_ids',
-           'lookup_edits', 'apply_lookup', 'reset_edits', 'apply_reset']
+           'lookup_edits', 'apply_lookup', 'reset_edits', 'apply_reset', 'OVERLAYS_NONE_SOURCE', 'overlays_none_found']
 
 
 # ---- the start box as one transaction (review rounds 1-2 of PR #19) ----------------------------------------------
@@ -124,6 +124,7 @@ def lookup_edits(answer, facts, saved_ui, zones=(), *, ground_points):
     facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
     if (answer or {}).get("status") != "found":
         return facts, saved_ui, None, plan
+    facts.pop("overlays_none_found", None)       # a found lookup decides it again, for its own lot only
     if not replaces:
         saved_ui["_lookup"]["says"] = "Your own lot is kept: the lookup filled in the address and the district only."
         return facts, saved_ui, None, plan
@@ -147,6 +148,9 @@ def lookup_edits(answer, facts, saved_ui, zones=(), *, ground_points):
             #   lot width wait for the street pick, #18 reading its streets only from the ids; one street: as drawn)
         if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
             facts["plan_north_deg"] = w["frame"]["rotation_deg"]
+        none_found = overlays_none_found(answer, w["lot_ring"])
+        if none_found:
+            facts["overlays_none_found"] = none_found
         spots = [] if FLAT_GROUND else ["$spot%d" % (n + 1) for n in range(len(w.get("spots") or []))]  # flat: none
         plan += [{"op": "add_spot", "point": p, "ref": ref} for p, ref in zip(w.get("spots") or [], spots)]
         plan.append({"op": "own", "refs": spots})
@@ -226,3 +230,28 @@ def apply_reset(table, session, facts, saved_ui, choice, zones=()):
         ground_points=table.ground_points())
     facts, saved_ui = table.apply(plan, session, facts, saved_ui)
     return facts, saved_ui, redraw, guide
+
+
+OVERLAYS_NONE_SOURCE = ("address lookup: FEMA flood maps, the City's historic, gorge and zoning maps and parcel "
+                        "record, every one answering none")
+
+
+def overlays_none_found(answer, lot_ring):
+    """The lot fact a live lookup's positive "no overlay on this lot" becomes (project.OVERLAYS_NONE_FIELDS), for the
+    lot it draws (`lot_ring`, in feet, as drawn), or None. Only when its overlays fact is "suggested" with nothing in
+    it: every overlay source answered, none found, and nothing doubtful about the lot it was worked out on (site_lookup
+    raises it to needs review otherwise). Never from a saved lookup (an old answer, offered when the services are
+    down), nor without the lot: the checker honours it only while the lot is still this outline."""
+    answer = answer or {}
+    got = ((answer.get("facts") or {}).get("overlays") or {})
+    status = ((answer.get("details") or {}).get("overlays") or {}).get("status")
+    if answer.get("status") != "found" or answer.get("saved_on") or status != "suggested":
+        return None
+    if not isinstance(got.get("value"), list) or got["value"] or not lot_ring or len(lot_ring) < 3:
+        return None
+    date = answer.get("checked")   # the place's own day (lookup_box: city_day), the day the host compares it with;
+    address = found_address(answer)   # never the overlays fact's UTC day (a day ahead after about 8 pm in Ithaca)
+    if not date or not address:
+        return None
+    return {"value": True, "lot_outline": [[float(p[0]), float(p[1])] for p in lot_ring], "address": address,
+            "source": OVERLAYS_NONE_SOURCE, "date": str(date)}

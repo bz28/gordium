@@ -18,6 +18,9 @@ Plain code reading the zone's rules; no AI.
   that can't be worked out for this lot.
 - **Not a shape:** lot coverage comes back as numbers: allowed, have, and how far over; none until the lot
   area is known (a surveyed lot).
+- **Rules for each part** (bedrooms, stairs: `rule_format/parts.py`) are about the inside: skipped, unless one reads a
+  yard, the height or the building area, which it can't set as a whole-building limit: then no envelope is drawn,
+  with a note ([decision](../../docs/decisions/2026-11-12_rules_for_each_part.md), point 11).
 
 Tested by `tests/test_envelope.py`: the 106 Ithaca Rd lot gives front 25, sides 10, rear 22.5 and 35 ft; no point
 is inside a yard (a jog, an inside corner); rules that don't apply and flags add nothing; the envelope doesn't
