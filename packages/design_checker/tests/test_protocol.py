@@ -15,6 +15,7 @@ import pytest
 
 from design_checker import call_session, protocol
 from design_checker.__main__ import NEW, answer, serve
+from design_checker.goldens import canonical
 from design_checker.host_core.freshness import UNDO_WORDS
 from design_checker.host_core.lookup import MISSING
 from design_checker.host_core.worker_client import CallRecorder, NotPlain, plain, unplain, with_tuples
@@ -111,14 +112,30 @@ def test_the_session_has_calls_of_every_function_the_worker_serves():
     assert set(SERVED) <= recorded, sorted(set(SERVED) - recorded)
 
 
+def _same_answer(now, recorded) -> bool:
+    """Whether host_core's answer now is the recorded one, in the goldens' canonical form (goldens.canonical: every
+    word, verdict and id exact, every number to a millionth): the session was recorded on an Apple-chip Mac, and an
+    Intel or AMD computer's maths library can give a number's last binary digit otherwise (a curved street's swing,
+    90.00000000000004 degrees on the Mac and 90.00000000000003 on CI's Linux, both "unsure")."""
+    return canonical(now) == canonical(recorded)
+
+
 def test_each_recorded_call_still_gives_its_recorded_answer():
     stale = []
     for e in ENTRIES:
         outcome, _ = _in_process(e)
-        if outcome != (("result", e["result"]) if "result" in e else ("raised", e["raised"])):
+        if not _same_answer(outcome, ("result", e["result"]) if "result" in e else ("raised", e["raised"])):
             stale.append(e["fn"])
     assert not stale, f"host_core answers differently now: record again (python -m design_checker.call_session " \
                       f"--record) if that is meant: {sorted(set(stale))}"
+
+
+def test_a_recorded_answer_is_the_same_to_its_last_digits_but_not_in_a_word_or_a_millionth():
+    swing = ("result", ["unsure", 90.00000000000004])
+    assert _same_answer(("result", ("unsure", 90.00000000000003)), swing)      # an Intel computer's last digit
+    assert not _same_answer(("result", ["one", 90.00000000000003]), swing)     # another verdict
+    assert not _same_answer(("result", ["unsure", 90.000002]), swing)          # two millionths of a degree
+    assert not _same_answer(("raised", ["ValueError", "unsure"]), swing)
 
 
 def test_no_served_function_changes_what_it_was_given():

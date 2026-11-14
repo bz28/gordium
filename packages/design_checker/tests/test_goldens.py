@@ -101,3 +101,67 @@ def test_two_keys_that_would_be_written_the_same_are_refused_never_merged():
     import pytest
     with pytest.raises(ValueError, match="two keys written the same"):
         goldens.canonical({1: "a", "1": "b"})
+
+
+# ---- shapes on another kind of computer (goldens.same_shape) -------------------------------------------------
+
+def _jog_design():
+    """A stored stress design on the jog lot (the lot whose outline's points differ on an Intel computer)."""
+    _, answers = goldens.stored()
+    name = next(n for n, a in sorted(answers.items()) if n.startswith("stress/design_") and a["lot"] == "jog")
+    return name, json.loads(json.dumps(answers[name]))
+
+
+def _another_computers(points):
+    """The same line with other points, as an Intel computer gave it: a corner's neighbours nudged by under a
+    millionth of a foot, and a point that lies on the line between its neighbours dropped (182 -> 181 points)."""
+    out = [list(p) for p in points]
+    out[1] = [out[1][0] + 4e-7, out[1][1] - 3e-7]
+    mid = next(i for i in range(1, len(out) - 1) if goldens.shape_distance(out[i - 1:i + 2:2], out[i - 1:i + 2]) < 1e-7)
+    return out[:mid] + out[mid + 1:]
+
+
+def test_an_answer_whose_shapes_have_other_points_on_the_same_lines_is_still_its_golden(tmp_path):
+    name, answer = _jog_design()
+    plan = answer["check"]["plan"]
+    answer["check"]["envelope"]["outline"] = _another_computers(answer["check"]["envelope"]["outline"])
+    plan["buildable"] = _another_computers(plan["buildable"])
+    assert len(plan["buildable"]) == len(goldens.stored()[1][name]["check"]["plan"]["buildable"]) - 1
+    text = goldens.canonical_text(answer)
+    manifest, _ = goldens.stored()
+    assert goldens.sha(text) != manifest[name]["sha256"]           # not the same text: the shapes' points differ
+    shaped = []
+    assert goldens.check({name: text}, only=name, shaped=shaped) == [] and shaped == [name]
+
+
+def test_a_shape_moved_farther_than_the_tolerance_or_any_other_value_changed_still_fails():
+    name, golden = _jog_design()
+    moved = json.loads(json.dumps(golden))
+    moved["check"]["plan"]["buildable"][5][0] += 3 * goldens.GEOMETRY_TOL        # one corner 3/100,000 ft over
+    problems = goldens.check({name: goldens.canonical_text(moved)}, only=name)
+    assert problems and problems[0].startswith(f"{name}: differs (parts: check)")
+    assert any("/check/plan/buildable:" in p and "from the golden's line" in p for p in problems)
+    # every value outside a shape's points must be exactly the golden's, however the shapes fall
+    def verdict(a):
+        rule = next(iter(sorted(a["check"]["statuses"])))
+        a["check"]["statuses"][rule] = "complies" if a["check"]["statuses"][rule] != "complies" else "needs_review"
+
+    for change in (verdict, lambda a: a.__setitem__("lot", "narrow"),
+                   lambda a: a["check"]["envelope"].__setitem__("height", a["check"]["envelope"]["height"] + 1e-6)):
+        other = json.loads(json.dumps(golden))
+        other["check"]["plan"]["buildable"] = _another_computers(other["check"]["plan"]["buildable"])
+        change(other)
+        assert not goldens.same_shape(golden, other)
+        assert goldens.check({name: goldens.canonical_text(other)}, only=name) != []
+
+
+def test_the_shape_distance_is_measured_along_the_lines_not_only_at_their_points():
+    square = [[0, 0], [10, 0], [10, 10], [0, 10]]
+    assert goldens.shape_distance(square, [[0, 0], [5, 0], [10, 0], [10, 10], [0, 10]]) == 0.0
+    assert goldens.shape_distance([[0, 0], [10, 0]], [[0, 0], [5, 0.001], [10, 0]]) == 0.001
+    # a line that skips a stretch of the other is as far as the stretch it skips
+    assert goldens.shape_distance([[0, 0], [10, 0], [10, 10]], [[0, 0], [10, 10]]) > 7
+    assert not goldens.same_shape([[0, 0], [10, 0], [10, 10]], [[0, 0], [10, 10]])
+    # only plan points (x, y) are shapes: 3D points, and true/false, are compared exactly
+    assert not goldens.same_shape([[0, 0, 1], [1, 0, 1]], [[0, 0, 1], [1, 1e-7, 1]])
+    assert not goldens.same_shape([[0, True], [1, 0]], [[0, 1], [1, 0]])
