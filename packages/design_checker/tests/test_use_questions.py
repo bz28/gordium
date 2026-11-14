@@ -10,6 +10,7 @@ from design_checker import present
 from design_checker import rhino_logic as logic
 from design_checker.check import follow_up_facts, implied_for, options, use_choices
 from rule_format.rulebook import REPO, load, outcome
+from host_source import host_text
 
 CITY = "regulations/jurisdictions/new_york/ithaca_city"
 NAMES = {"one_family_detached": "One-family dwelling, detached", "one_family_attached": "One-family dwelling, attached",
@@ -91,10 +92,10 @@ def test_a_use_the_district_doesnt_list_stays_picked_and_is_said():
     assert logic.district_use_names(city, "R-1b", "school") == logic.district_use_names(city, "R-1b")   # listed: once
     assert logic.use_note(city, "R-1b", "two_family") == (
         "Two-family dwelling isn't on R-1b's list of uses in the zoning chart: its Use row won't comply.")
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
     assert 'logic.district_use_names(options, state.get("zone"), state.get("use"))' in box
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     state = rhino[rhino.index("def _box_state("):rhino.index("def _ft_text(")]
     assert '"use_choices": logic.district_use_names(options, facts.get("zone"), facts.get("use"))' in state
 
@@ -187,11 +188,11 @@ def test_the_box_opens_again_only_when_the_use_or_district_changes_what_it_shows
     city = dict(options(CITY), zones=["R-1b", "X"])
     city = {k: ({**v, **opts[k]} if isinstance(v, dict) and k != "uses" else v) for k, v in city.items()}
     assert logic.box_needs_refresh(city, ("R-1b", "one_family_detached"), ("X", "one_family_detached"))  # its uses
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
     assert "logic.box_needs_refresh(" in box and 'pick("refresh")' in box
     assert box.count("        refresh_if_needed()\n") == 3       # the district, the use, and the quick answers (a yes opens a question)
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     loop = rhino[rhino.index("def _box_loop("):rhino.index("def _lookup_start(")]
     assert 'if what != "pick:refresh":' in loop                    # a refresh is no pick in the model
 
@@ -235,7 +236,7 @@ def test_the_box_rows_answers_and_their_source():
     rooms = {**saved, "rooms_let_for_profit": {"value": 2}}
     assert logic.sources_kept(rooms, {"zone": "X"}) == logic.sources_kept(saved, {"zone": "X"})
     assert logic.sources_kept(rooms, {"rooms_let_for_profit": 2})["rooms_let_for_profit"] == {"value": 2}
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     drawn = rhino[rhino.index("def _drawn("):rhino.index("def hide_massing(")]
     assert "logic.sources_kept(fact_sources(doc), out)" in drawn
 
@@ -251,7 +252,7 @@ def test_an_unanswered_fact_says_what_it_needs_and_its_button_opens_its_own_dial
         ("Answer 2 questions…", "enter")]           # too long for a button: how many (answer_words)
     assert logic.row_buttons({"needs": ["sleeping_rooms", "parking_spaces"]}) == [
         ("Enter bedrooms and parking spaces…", "enter")]
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert "Tell Gordium in Edit site" not in ui and not hasattr(logic, "answered_in_box")
     detail = ui[ui.index("def show_detail("):ui.index("def row_dialog(")]
     assert "for words, what in logic.row_buttons(i):" in detail
@@ -262,7 +263,7 @@ def test_an_unanswered_fact_says_what_it_needs_and_its_button_opens_its_own_dial
     assert 'state["answers"] = answers' in ui_box
     assert "about_section(layout, questions)" in ui_box and '"About this project"' in ui_box   # the compact section
     assert "logic.answers_note(" in ui_box and "note.Text = text" in ui_box     # a refused entry is said at once
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     apply_ = rhino[rhino.index("def _apply_box("):rhino.index("def _place_spots(")]
     assert 'logic.box_applied(facts, state.get("answers"), state["zone"], state["use"], state.get("options"),' \
         in apply_
@@ -306,7 +307,7 @@ def test_the_box_reopens_with_the_pick_it_was_laid_out_for():
     start_box (the test hook's own name rebound it, so every pick raised inside the guard and the box never
     opened again)."""
     import re
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     box = ui[ui.index("def start_box("):ui.index("def text_box_size(")]
     assert "                options, laid_out, (z, names[use.SelectedIndex][0]" in box
     assert len(re.findall(r"^\s+laid_out = ", box, re.M)) == 1
@@ -318,7 +319,7 @@ def test_rhino_logic_names_each_thing_once():
     build; here in #37's merge-3 carry). Every top-level name is defined once."""
     import ast
     import collections
-    tree = ast.parse((REPO / "packages/design_checker/design_checker/rhino_logic.py").read_text(encoding="utf-8"))
+    tree = ast.parse(host_text("rhino", "logic", purpose="wiring"))
     names = [n.name for n in tree.body if isinstance(n, (ast.FunctionDef, ast.ClassDef))]
     names += [t.id for n in tree.body if isinstance(n, ast.Assign) for t in n.targets if isinstance(t, ast.Name)]
     assert [n for n, k in collections.Counter(names).items() if k > 1] == []

@@ -19,11 +19,12 @@ from design_checker.lookup_box import _fixture_http, main as lookup_main
 from model_measurement.project import load_facts
 from rule_format.rulebook import REPO
 from site_lookup.adapters.ithaca_city.lookup import STEPS as LOOKUP_STEPS, lookup
+from host_source import host_path, host_text
 
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 MODEL = SITE / "spreadsheet_design_model.3dm"
-RHINO = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
-UI = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+RHINO = host_text("rhino", "plugin", purpose="wiring")
+UI = host_text("rhino", "ui", purpose="wiring")
 
 
 def part(src, start_at, end_at):
@@ -699,7 +700,7 @@ def _run_box_loop(script, confirmed_at_draw=None, answer="found", box_pick=None,
           "_box_pick": box_pick or (lambda doc, what, facts, saved_ui, session: (
               (facts, dict(saved_ui, _lookup={"status": answer}, **({"_reconfirm": True} if answer == "found" else {})))
               if what == "lookup_done" else (facts, saved_ui)))}
-    exec(compile(ast.Module(body=[fn], type_ignores=[]), "gordium_rhino.py", "exec"), ns)
+    exec(compile(ast.Module(body=[fn], type_ignores=[]), host_path("rhino", "plugin").name, "exec"), ns)
     assert ns["_box_loop"](None, facts or {"zone": "R-1b"}, {}, "check", saved_ui or {}, None) is None
     return shown
 

@@ -22,6 +22,7 @@ MODEL = SITE / "spreadsheet_design_model.3dm"
 RULES = {r["id"]: r for r in load(REPO / "regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/R-1b.yaml")["rules"]}
 sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
 from test_measure import FACTS, RECT, box, sloped_roof_box  # noqa: E402
+from host_source import host_text
 
 
 @pytest.fixture(scope="module")
@@ -369,9 +370,9 @@ def test_the_delta_on_the_tax_map_says_what_holds_however_the_lines_lie():
     now = check_site(_plot(box(7, 30, 35, 65)), tax)["view"]["items"]
     assert present.notice(before, now)[1].endswith("· " + words[7]["delta"])
     # round 2: settle is the ONLY writer of the Delta; nothing falls back to the as-drawn margin's words
-    for path in ("packages/design_checker/design_checker/check.py", "packages/design_checker/design_checker/present.py",
-                 "apps/rhino_plugin/gordium_ui.py"):
+    for path in ("packages/design_checker/design_checker/check.py", "packages/design_checker/design_checker/present.py"):
         assert "delta_text" not in (REPO / path).read_text(encoding="utf-8"), path
+    assert "delta_text" not in host_text("rhino", "ui", purpose="wiring")
 
 
 def test_delta_words_never_overstate():
@@ -585,7 +586,7 @@ def test_the_colour_comes_from_the_result_only():
     import rhino_logic
     assert [rhino_logic.highlight(s) for s in (present.FAILS, present.REVIEW, present.COMPLIES, "not_checked", None)] \
         == ["red", "amber", None, None, None]
-    src = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    src = host_text("rhino", "plugin", purpose="wiring")
     scene = src.split("def draw_scene(", 1)[1].split("\ndef ", 1)[0]
     # each part drawn in draw_scene's one loop, the red after the amber (merged with depth-lines, whose see-through
     # fills are pinned in the scene itself: test_depth)
@@ -593,7 +594,7 @@ def test_the_colour_comes_from_the_result_only():
     assert "name = logic.highlight(status)" in coloured and "colour = ui.HIGHLIGHT[name]" in coloured
     # drawn after the translucent envelope, so its blue never tints them (seen muddy in Rhino, 2026-10-21)
     assert scene.index("o.envelope, Rhino.Display.DisplayMaterial") < scene.index("for g, status, _ in rest + red:")
-    ui = (REPO / "apps/rhino_plugin/gordium_ui.py").read_text(encoding="utf-8")
+    ui = host_text("rhino", "ui", purpose="wiring")
     assert "FromArgb(215, 38, 61)" in ui and "FromArgb(242, 169, 0)" in ui      # #D7263D, #F2A900
 
 
@@ -1919,7 +1920,7 @@ def test_the_stories_row_asks_for_the_whole_buildings_count_and_takes_it():
     view = check_site(_plot(*house, lot_=lot), logic.update_counts(base, {"stories": 2}))["view"]
     assert "fewer than the floor blocks drawn (3)" in (logic.refused_stories(
         [{k: i.get(k) for k in ("name", "reason", "refused")} for i in view["items"]]) or "")
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert "logic.refused_stories(" in rhino
 
 
@@ -1954,7 +1955,7 @@ def test_a_count_of_0_is_rolled_back_by_its_code_and_enter_stays():
     assert st["refused"] == "below_one" and "stories" in st["needs"], st
     said = logic.refused_stories(view["items"])
     assert said and "fewer than one" in said and "wasn't kept" in said
-    rhino = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    rhino = host_text("rhino", "plugin", purpose="wiring")
     assert '"group", "needs", "hint", "refused")' in rhino
 
 

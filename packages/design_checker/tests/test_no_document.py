@@ -9,8 +9,9 @@ from unittest.mock import MagicMock
 import pytest
 
 from design_checker import rhino_logic as logic
+from host_source import host_text
 
-SRC = (Path(__file__).resolve().parents[3] / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+SRC = host_text("rhino", "plugin", purpose="wiring")
 
 
 # every command and panel button that reads the front document, with the arguments the panel gives it

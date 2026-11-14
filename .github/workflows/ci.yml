@@ -37,6 +37,8 @@ jobs:
         run: python -m model_measurement --check
       - name: The example project reports match a fresh build (results from the rule checker only)
         run: python -m project_report --check
+      - name: Every golden answer is the same (check and start on the test sites, scenarios and 200 stress designs)
+        run: python -m design_checker.goldens --check
 
   # The IFC reader (packages/ifc_reading) with its optional ifcopenshell, which the jobs above don't install (there
   # its tests are skipped): its tests, and the committed description of each IFC model matches a fresh read.
@@ -85,3 +87,5 @@ jobs:
         run: python -m model_measurement --check
       - name: The example project reports match a fresh build (results from the rule checker only)
         run: python -m project_report --check
+      - name: Every golden answer is the same (check and start on the test sites, scenarios and 200 stress designs)
+        run: python -m design_checker.goldens --check

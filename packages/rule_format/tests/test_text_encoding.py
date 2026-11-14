@@ -16,9 +16,10 @@ import warnings
 import pytest
 
 from rule_format.rulebook import REPO, jurisdictions
+from host_source import host_path, host_script, host_text, host_tree
 
 # Code and tests alike. Dated eval records (evals/) are frozen as they were run, never run again by CI.
-SCANNED = sorted(p for root in ("packages", "apps/rhino_plugin") for p in (REPO / root).rglob("*.py")
+SCANNED = sorted(p for p in [*(REPO / "packages").rglob("*.py"), *host_tree("rhino")]
                  if "evals" not in p.relative_to(REPO).parts)
 assert len(SCANNED) > 50
 
@@ -98,11 +99,11 @@ def test_the_scan_leaves_binary_and_encoded_calls_alone(line):
 
 def test_every_venv_python_the_plugin_starts_runs_in_utf8_mode():
     """A second guard for third-party code that opens files itself: the checker Rhino starts runs in UTF-8 mode."""
-    for name in ("gordium_rhino.py", "tests/scenarios_in_rhino.py"):
-        source = (REPO / "apps/rhino_plugin" / name).read_text(encoding="utf-8")
+    for name, source in ((host_path("rhino", "plugin").name, host_text("rhino", "plugin", purpose="lint")),
+                         ("scenarios_in_rhino.py", host_script("rhino", "scenarios_in_rhino.py", purpose="lint"))):
         starts = source.count("_python(), ")
         assert starts and source.count('env["PYTHONUTF8"] = "1"') == starts, name
-    worker = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8").split("def _worker(", 1)[1]
+    worker = host_text("rhino", "plugin", purpose="lint").split("def _worker(", 1)[1]
     worker = worker.split("\ndef ", 1)[0]
     assert worker.index('env["PYTHONUTF8"] = "1"') < worker.index("ui.spawn(")    # (no console on Windows)
 

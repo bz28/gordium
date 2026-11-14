@@ -19,6 +19,7 @@ from design_checker import __main__ as worker
 from design_checker import present
 from design_checker.check import check, check_site
 from rule_format.rulebook import REPO
+from host_source import host_text
 
 sys.path.insert(0, str(REPO / "packages/design_checker/tests"))
 sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
@@ -164,7 +165,7 @@ def test_the_command_line_says_its_own_day(tmp_path, monkeypatch, capsys):
 def test_the_plugin_says_the_day_in_every_check_request():
     """The one check request the plugin builds (_check_begin, used by GordiumCheck and the live re-check) carries
     the place's own day; nothing else in it reads the clock for the checker."""
-    source = (REPO / "apps/rhino_plugin/gordium_rhino.py").read_text(encoding="utf-8")
+    source = host_text("rhino", "plugin", purpose="wiring")
     begin = source[source.index("def _check_begin("):source.index("def _check_apply(")]
     assert '"today": logic.city_day()' in begin
     assert source.count('"cmd": "check"') == 1

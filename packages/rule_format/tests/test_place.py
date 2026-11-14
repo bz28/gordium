@@ -12,6 +12,7 @@ import pytest
 from rule_format import place as registry
 from rule_format.place import UnknownPlace, place, places, plugin_place
 from rule_format.rulebook import REPO, jurisdictions
+from host_source import host_path
 
 FIXTURES = Path(__file__).parent / "fixtures/places"          # a made-up repo with one made-up place in it
 FAKE = FIXTURES / "regulations/jurisdictions/test_state/fake_town"
@@ -214,9 +215,9 @@ def test_the_plugin_loads_with_the_fewest_address_words_the_check_accepts(tmp_pa
     (folder / "jurisdiction.yaml").write_text(yaml.safe_dump(settings), encoding="utf-8")
     plugin = tmp_path / "plugin"
     plugin.mkdir()
-    shutil.copy(REPO / "packages/design_checker/design_checker/rhino_logic.py", plugin)
+    shutil.copy(host_path("rhino", "logic"), plugin)
     (plugin / "place.json").write_text(registry.plugin_file_text(root), encoding="utf-8")
-    spec = importlib.util.spec_from_file_location("rhino_logic_fewest", plugin / "rhino_logic.py")
+    spec = importlib.util.spec_from_file_location("rhino_logic_fewest", plugin / host_path("rhino", "logic").name)
     logic = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(logic)
     assert "may instead be in the Elsewhere, which" in logic.IN_CITY_QUESTION

@@ -67,6 +67,13 @@ The report (`<model>_gordium_report.xlsx`) is written next to the model by `Gord
   `python -m design_checker.scenarios rhino <rhino_out.json>`); `tests/windows_in_rhino.py` (puts the panel or
   the start box on show for a window capture, `screencapture -l<window id>`); `tests/check_in_rhino.py`.
 
+- **Recording a session** (for the replay test): start Rhino with `GORDIUM_RECORD_SESSION` set to a folder (Mac:
+  `open --env GORDIUM_RECORD_SESSION=/Users/<you>/gordium_session -a "Rhino 8"`, a full path: `open` passes
+  nothing from the shell otherwise). The command line says "Gordium: recording every check to …" when it is on.
+  Every request to the checker, a copy of the model it sent (one per check: a long session takes room) and the
+  answer are saved there (`rhino_logic.Recorder`); copy the folder into `test_data/sessions/<name>/`. Off
+  (nothing saved) unless the variable is set.
+
 ## Not yet
 
 A proper Rhino plugin package (yak) and installer; Windows tested; the panel as a docked Rhino panel (it floats: docking needs a plugin package); grouping
