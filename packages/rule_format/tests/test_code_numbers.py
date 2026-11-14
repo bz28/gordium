@@ -151,3 +151,18 @@ def test_validation_uses_the_second_reading_for_a_rule_citing_the_book(ctx):
 def test_values_are_read_exactly(text, value):
     got = code_numbers.value_of(text)
     assert (got is None) if value is None else abs(float(got) - value) < 1e-9
+
+
+def test_a_number_in_an_ifs_test_only_picks_a_limit_and_is_checked_by_value(ctx):
+    width = {"file": BOOK, "page": 100, "lines": [23, 26], "quote": (
+        "R318.7.1 Width. Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the "
+        "permitted handrail height and below the required headroom height. The clear width of stairways at and below "
+        "the handrail height, including treads and landings, shall be not less than 31 1/2 inches (787 mm) where a "
+        "handrail is installed on one side and 27 inches (698 mm) where handrails are installed on both sides.")}
+    # "one side" is read "none" (it says where, not how much): fine as the test that picks 31 1/2 or 27
+    assert problems(ctx, "stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides <= 1 else 27)", width,
+                    "stair") == []
+    # ... but still only a number the quote states, and never as a limit itself
+    assert any("isn't one of" in p for p in problems(
+        ctx, "stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides <= 2 else 27)", width, "stair"))
+    assert any("sets no limit" in p for p in problems(ctx, "stair_handrail_sides >= 1", width, "stair"))

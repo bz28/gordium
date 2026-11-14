@@ -19,7 +19,9 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    Anywhere else (one side of an "or", an if's test, where the same number can be a trigger written either way:
    "area_well_depth <= 44 or area_well_ladder") the law's comparison or its exact opposite (> for <=, >= for <) is
    accepted, so the edge stays where the law puts it (more than 30 is never 30 or more). A number in arithmetic
-   (20 - 4/3 * riser) is checked by value only. review_when is checked by value only.
+   (20 - 4/3 * riser) is checked by value only, and so is one in an if's test, which only picks which limit applies
+   ("27 if stair_handrail_sides > 1 else 31.5": where a handrail is on one side), never passes anything itself.
+   review_when is checked by value only.
 3. A number the verification file flags (a flag quoting it) counts only if the flag resolves it: it gives the
    comparison the second reading has ("(>=)", "the second reading (none) is right") or says the number is part of
    one length ("one length"). Otherwise the rule is refused: such a number is for a person (make it a flag, which
@@ -261,18 +263,18 @@ def _uses(tree) -> list[tuple]:
     is followed: under a "not", an "or" works as an "and" (both parts must fail) and an "and" as an "or"."""
     out = []
 
-    def walk(node, positive, sure):
+    def walk(node, positive, sure, selector=False):
         match node:
             case ast.BoolOp(op=op, values=vs):
                 both = isinstance(op, ast.And) == positive      # every part must go the formula's way
                 for v in vs:
-                    walk(v, positive, sure and both)
+                    walk(v, positive, sure and both, selector)
             case ast.UnaryOp(op=ast.Not(), operand=x):
-                walk(x, not positive, sure)
+                walk(x, not positive, sure, selector)
             case ast.IfExp(test=t, body=b, orelse=e):
-                walk(t, positive, False)
-                walk(b, positive, sure)
-                walk(e, positive, sure)
+                walk(t, positive, False, True)                   # it only picks which limit applies
+                walk(b, positive, sure, selector)
+                walk(e, positive, sure, selector)
             case ast.Compare(left=left, ops=ops, comparators=rights):
                 sides = [left, *rights]
                 for i, op in enumerate(ops):
@@ -282,19 +284,19 @@ def _uses(tree) -> list[tuple]:
                         names = {n.id for n in ast.walk(other) if isinstance(n, ast.Name)}
                         for number, direct in _numbers(side):
                             needed = None
-                            if sign is not None and direct:
+                            if sign is not None and direct and not selector:
                                 needed = MIRROR.get(sign, sign) if mirrored else sign
                                 if not positive:
                                     needed = OPPOSITE.get(needed, {"==": "!=", "!=": "=="}.get(needed))
                             out.append((number, needed, sure and len(ops) == 1, names))
                 for side in sides:
-                    for n in _conditions(side):
-                        walk(n, positive, False)
+                    for n in _conditions(side):              # an if's test inside a side: it picks a limit
+                        walk(n, positive, False, True)
             case _:
                 for number, _ in _numbers(node):
                     out.append((number, None, False, set()))
                 for n in _conditions(node):
-                    walk(n, positive, False)
+                    walk(n, positive, False, True)
 
     walk(tree, True, True)
     return out

@@ -3,7 +3,7 @@
     python -m rule_drafting.book_eval            # writes evals/2026-11-13_house_egress/comparison.md
     python -m rule_drafting.book_eval --check    # fails if that file is out of date
 
-The answer key (test_data/answer_keys/new_york/new_york_state/houses.yaml) was written by a helper that never saw a
+The answer key (test_data/answer_keys/new_york/new_york_state/general.yaml) was written by a helper that never saw a
 draft; the drafts (new_york_state/5_building_code_rules/drafted/general.yaml) by the recorded drafting run, which
 never reads the key. Rules are compared where they come from the same law: each rule belongs to the pieces its
 sources sit in, and the rules of one piece for one part kind are taken together on each side (one side may split a
@@ -25,7 +25,7 @@ from rule_format import code_numbers, parts
 from rule_format.rulebook import REPO, Context, load, rules_folder, utf8_console
 
 STATE = REPO / "regulations/jurisdictions/new_york/new_york_state"
-KEY = REPO / "test_data/answer_keys/new_york/new_york_state/houses.yaml"
+KEY = REPO / "test_data/answer_keys/new_york/new_york_state/general.yaml"
 DRAFTS = rules_folder(STATE) / "drafted/general.yaml"
 HERE = Path(__file__).resolve().parents[1] / "evals/2026-11-13_house_egress"
 REPORT, RESOLUTIONS = HERE / "comparison.md", HERE / "resolutions.yaml"
