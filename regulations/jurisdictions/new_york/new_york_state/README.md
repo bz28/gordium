@@ -39,8 +39,8 @@ Every reference in the brought-in sections was followed (found by code, `documen
 - R101.2 Exception 6 (which lodging houses the code covers; from R318.1.1)
 - P2904 (sprinkler systems; from R319.1 Exception 3)
 - R405.1 and Table R401.4.1(2) (foundation drainage and soils; from R319.4.3)
-- Appendix BO's other parts (from R101.2.1, which adopts it, R319.7, R102.6.1, R102.6.2, and its own brought-in parts: BO102.6.1 from BO102.6; BO104's other parts from BO106.1.2; BO105.2 from BO105.1, BO105.1.1, BO105.1.2; the rest of BO105 from BO106.1.2, BO107.1; BO107's other parts from BO108.1; BO109's other parts from BO104.1, BO105.1 (printed "B0109"), BO107.1, BO107.2, BO109.1): not egress (above)
-- Chapter 2 (from BO103.1, BO109.1): all of it (R201, R202) is brought in; the code's search lists it only because it does not know which sections make up a chapter
+- Appendix BO's other parts (from R101.2.1, which adopts it, R319.7, R102.6.1, R102.6.2, and its own brought-in parts: BO102.6.1 from BO102.6; BO104's other parts from BO106.1.2; BO105.2 from BO105.1, BO105.1.1, BO105.1.2; the rest of BO105 from BO106.1.2, BO107.1; BO107's other parts from BO108.1; BO109's other parts from BO107.1, BO107.2, BO109.1, and from BO104.1 and BO105.1, which print it "B0109"): not egress (above)
+- Chapter 2 (from BO103.1, BO109.1): R201 and the 104 R202 definitions the brought-in parts use are brought in (found by code); the rest of R202 defines words no brought-in part uses
 - R301.5 (guard loads; from R507.10), R301.1.3 (engineered design; from BO105.1, BO106.1): structural
 - R312 and R313 (room area and ceiling height; from R316.2): not egress; R316.2 is a flag until they come in
 - R310.7 (fire alarm systems; from BO105.13, BO106.7) and the sprinkler standards NFPA 13D and NFPA 72 (also BO108.4)
