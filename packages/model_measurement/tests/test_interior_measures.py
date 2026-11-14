@@ -1696,6 +1696,7 @@ STOP_CASES = {
     "clear_differs": _with(base, lambda d: d["openings"][0].update(stated_clear={"width": 30, "height": 40,
                                                                                "bottom": 20})),
     "no_clear_opening": _set(("openings", 0, "operation"), "fixed"),
+    "sill_below_floor": _set(("rooms", 0, "floor_elevation"), 30),
     "no_ground": _set(("openings", 0, "ground_outside"), _DELETE),
     "ground_mixed": _set(("openings", 0, "ground_outside"), [0, -30]),
     "readings_differ": _with(base, lambda d: d["openings"][0].update(
@@ -1813,3 +1814,12 @@ def test_a_measured_area_well_is_said_to_be_measured_not_missing():
     p = one(d, "emergency_escape_opening")
     for name in ("area_well_area", "area_well_depth"):
         assert name in p["more"] and p["not_measured"][name] == STOPS["in_more_not_rules"], name
+
+
+def test_a_sill_below_its_rooms_floor_is_no_value():
+    """A wrong floor elevation must not make a low sill: 20 in bottom over a 30 in floor is -10 in, which would pass
+    the 44 in maximum. It gets no value (needs review); within 1/16 in under the floor it is drawing noise, read as 0."""
+    _, stopped, _ = opening_measures(changed(("rooms", 0, "floor_elevation"), 30))
+    assert "below it" in stopped["opening_sill_height"]
+    m, stopped, _ = opening_measures(changed(("rooms", 0, "floor_elevation"), 20 + 1 / 32))
+    assert m["opening_sill_height"] == 0.0 and "opening_sill_height" not in stopped
