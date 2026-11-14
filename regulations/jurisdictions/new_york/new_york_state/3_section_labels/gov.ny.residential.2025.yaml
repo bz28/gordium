@@ -1,0 +1,2768 @@
+# What kind of text each brought-in piece of the 2025 Residential Code of New York State is (3_section_labels/README.md).
+# Drafted by hand in a Claude Code session (claude-opus-5-5, 2026-11-12), checked by code (python -m rule_format):
+# each quote is the book's exact words where it says, where the code cache exists (the book is kept outside the repo).
+# Drafts: approval is deferred (2026-10-19).
+document: gov.ny.residential.2025.pdf
+labels:
+  R201:
+    label: not_for_checking
+    topic: definitions
+    reason: 'A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one).'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 11
+      - 11
+      quote: SECTION R201—GENERAL
+    piece_sha256: 3729f6c482560feb21d1facd4e44d2994869f51452483aef844e72da77719dc7
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R201.1:
+    label: reference
+    topic: definitions
+    reason: 'Says that italic words have the meanings Chapter 2 gives them: how every definition applies to the egress sections.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 12
+      - 13
+      quote: '[NY] R201.1 Scope. Unless otherwise expressly stated, the words and terms provided in italics shall, for the
+        purposes of this code, have the meanings indicated in this'
+    piece_sha256: 4909ee9dbaf43a904cf56f15344d8624f05a6f7331a11e47c1cda7378dbf1fcc
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R201.2:
+    label: reference
+    topic: definitions
+    reason: 'How words are read (tense, gender, number): a rule of reading, no requirement.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 15
+      - 16
+      quote: '[NY] R201.2 Interchangeability. Words and terms used in the present tense include the future; words and terms
+        stated in the masculine gender include the feminine and neuter'
+    piece_sha256: ac4b253f5dae891d1cd5f943a3d621eec80f235e2ac819bb35a62f647714ab96
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R201.3:
+    label: reference
+    topic: definitions
+    reason: Sends an italic word this code doesn't define to the meaning another New York code gives it.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 17
+      - 18
+      quote: '[NY] R201.3 Words and terms defined in other codes. Where italicized words and terms are not defined in this
+        code and are defined in the Building Code of New York State, Property Maintenance'
+    piece_sha256: 468b4fe0fe78b5610c753ed3483aea09f34a3d32cca41388bbb5e88a0a1be02a
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R201.4:
+    label: reference
+    topic: definitions
+    reason: 'Gives a word with no definition its ordinary meaning in context: a rule of reading, no requirement.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 21
+      - 22
+      quote: '[NY] R201.4 Words and terms not defined. Where words and terms are not italicized or italicized but not defined
+        through the meth- ods authorized by this section, such words and terms'
+    piece_sha256: 6d1c43c8b0afb0adf3f29e40e126a0efb05e8b99996723026ac9f51502d57268
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:
+    label: not_for_checking
+    topic: definitions
+    reason: 'A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one).'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 24
+      - 24
+      quote: SECTION R202—DEFINITIONS
+    piece_sha256: f0187f468c69f97f2cac23aae77d5b0395ffba63481ada244cc802abcb2c7600
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:access_to:
+    label: reference
+    topic: definitions
+    reason: Defines ACCESS (TO), named in roman type in R318.3.1, R318.7.6, R318.7.11.2, R318.7.12 and others (R201.1 gives
+      the defined meaning to italic words only; brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 25
+      - 26
+      quote: ACCESS (TO). That which enables a device, an appliance or equipment to be reached by ready access or by a means
+        that first requires the removal
+    piece_sha256: b8ccdfba68c7b272441cce4fd33822d2ebfa67d78d6b522cd3081b492d04cc23
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:accessory_structure:
+    label: reference
+    topic: definitions
+    reason: Defines ACCESSORY STRUCTURE, used in italics by the definition of BUILDING. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 35
+      - 36
+      quote: ACCESSORY STRUCTURE. A structure that is accessory to and incidental to that of the dwelling(s) or townhouse(s)
+        and that is located on the same lot.
+    piece_sha256: f2cd58af036b3e0efe4c49212f856e160b577754901a0f7a79c5cf7828a0dcff
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:addition:
+    label: reference
+    topic: definitions
+    reason: Defines ADDITION, printed in italics in R319.6; used in italics by the definition of ALTERATION. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 34
+      lines:
+      - 37
+      - 37
+      quote: ADDITION. An extension or increase in floor area, number of stories or height of a building or structure.
+    piece_sha256: a304a94a1196c7af69185f12ee2d0ed3aaf053531034943895bce6f228ff5632
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:alteration:
+    label: reference
+    topic: definitions
+    reason: Defines ALTERATION, printed in italics in R318.7.9, R319.7; used in italics by the definition of PLUMBING. A
+      definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 35
+      lines:
+      - 14
+      - 14
+      quote: ALTERATION. Any construction, retrofit or renovation to an existing structure other than repair or addition
+        that requires a permit.
+    piece_sha256: 6fa561f3a1bce2eaabf977c30557b6deb0b13252fc3b0da3b21681d9897877a7
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:alternating_tread_device:
+    label: reference
+    topic: definitions
+    reason: Defines ALTERNATING TREAD DEVICE, printed in italics in R318.7.12, R318.7.12.1, R318.7.12.2. A definition sets
+      no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 35
+      lines:
+      - 18
+      - 19
+      quote: ALTERNATING TREAD DEVICE. A device that has a series of steps between 50 and 70 degrees (0.87 and 1.22 rad)
+        from horizontal, usually attached to a center
+    piece_sha256: ca1fe80f99fa2540f3e755ef61ef9ad9869107d297c358f55a6f9ec1d2a808e2
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:appliance:
+    label: reference
+    topic: definitions
+    reason: Defines APPLIANCE, used in italics by the definitions of ACCESS (TO), EQUIPMENT. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 35
+      lines:
+      - 26
+      - 27
+      quote: APPLIANCE. A device or apparatus that is manufactured and designed to utilize energy and for which this code
+        provides specific requirements.
+    piece_sha256: 9ee65b3bc27dc6af4b26ac725b83c8b622c3e9f7242c77ebcda7392941307dec
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:approved:
+    label: reference
+    topic: definitions
+    reason: Defines APPROVED, printed in italics in R318.7.11.2, R319.4.2; used in italics by the definitions of CERTIFICATE
+      OF OCCUPANCY, DIAMETER, UNDERLAYMENT. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 35
+      lines:
+      - 32
+      - 32
+      quote: APPROVED. Acceptable to the building official.
+    piece_sha256: eca35d388005aaaa921e2944c0bbb2b1bfbf26f6bc6f728c3098c9d5ae5ef479
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:attic:
+    label: reference
+    topic: definitions
+    reason: Defines ATTIC, used in italics by the definition of ATTIC, HABITABLE. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 35
+      lines:
+      - 40
+      - 40
+      quote: ATTIC. The space between the ceiling assembly and the roof assembly.
+    piece_sha256: 6283aec0857b2cbc011d967b0c5ae5e61e8ee41a4a395587868b732601719cbf
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:attic_habitable:
+    label: reference
+    topic: definitions
+    reason: Defines ATTIC, HABITABLE, printed in italics in R319.1. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 35
+      lines:
+      - 41
+      - 41
+      quote: ATTIC, HABITABLE. A finished or unfinished habitable space within an attic.
+    piece_sha256: 30dd5a5b3f6c755709739396b3880ebbbf595870e1648b00fac6d084e0e13fbc
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:authority_having_jurisdiction:
+    label: reference
+    topic: definitions
+    reason: Defines AUTHORITY HAVING JURISDICTION, used in italics by the definitions of CERTIFICATE OF OCCUPANCY, PERMIT.
+      A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 35
+      lines:
+      - 42
+      - 43
+      quote: AUTHORITY HAVING JURISDICTION. The governmental unit or agency responsible for administration and enforcement
+        of the Uniform Code and the Energy Code.
+    piece_sha256: db6b559b4ed26b97e3400e92be56f405c5c921e680278179860424bd581190e6
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:basement:
+    label: reference
+    topic: definitions
+    reason: Defines BASEMENT, printed in italics in R318.4, R318.7.11.2, R319.1, R319.6 and others; used in italics by the
+      definition of CRAWL SPACE. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 36
+      lines:
+      - 12
+      - 12
+      quote: BASEMENT. A story that is not a story above grade plane (see “Story above grade plane”).
+    piece_sha256: c1148f751d83e8892edef216f7ca7fcc2b860f76d1df8a49292d5d74cd57d70e
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:bed_and_breakfast_dwelling:
+    label: reference
+    topic: definitions
+    reason: Defines BED AND BREAKFAST DWELLING, used in italics by the definition of DWELLING UNIT. A definition sets no
+      requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 36
+      lines:
+      - 17
+      - 18
+      quote: BED AND BREAKFAST DWELLING. An owner-occupied residence resulting from a conversion of a one-family dwelling,
+        used for providing overnight accommodations and a morning meal to not more than
+    piece_sha256: 28b280daac6ea297bdafe671995e1336bc29acaed42643e4f041a4663e747054
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:building:
+    label: reference
+    topic: definitions
+    reason: Defines BUILDING, printed in italics in R318.7, R318.8, R319.5, R321.2.1; used in italics by the definitions
+      of ADDITION, ALTERATION, CERTIFICATE OF OCCUPANCY and others. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 36
+      lines:
+      - 51
+      - 52
+      quote: BUILDING. Any one- or two-family dwelling or townhouse, or portion thereof, used or intended to be used for
+        human habitation, for living, sleeping, cooking or
+    piece_sha256: 241649d5daa76ce95b65cd8ade884b4fd15aed4d58753df95a51e5897e9e858a
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:building_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: Defines BUILDING CODE OF NEW YORK STATE, printed in italics in R201.3. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 36
+      lines:
+      - 54
+      - 55
+      quote: BUILDING CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Building Code of New York State,”
+        published by the International Code Council, Inc. (publication date July 2025).
+    piece_sha256: c0a5d562dbc3da1e739d882d9691d7b2d17ab93ffe1714b228a0b1c363d93986
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:building_official:
+    label: reference
+    topic: definitions
+    reason: Defines BUILDING OFFICIAL, used in italics by the definition of APPROVED. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 37
+      lines:
+      - 6
+      - 7
+      quote: BUILDING OFFICIAL. The officer or other designated authority charged with the administration and enforcement
+        of this code, or a duly authorized representative.
+    piece_sha256: 1104221e0f3f3427c47429d27a9c253912800ff7b5ab42ca41f3376951a64f61
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:certificate_of_occupancy:
+    label: reference
+    topic: definitions
+    reason: Defines CERTIFICATE OF OCCUPANCY, used in italics by the definition of EXISTING BUILDING. A definition sets
+      no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 37
+      lines:
+      - 34
+      - 35
+      quote: CERTIFICATE OF OCCUPANCY. A document issued by the authority having jurisdiction certifying that the building
+        or structure, or portion thereof, complies with the approved construction documents that
+    piece_sha256: dbb32c22f3418c67685e92e46bf6deabedd5dcb3c0f9b2976902f297fc08bb44
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:change_of_occupancy:
+    label: reference
+    topic: definitions
+    reason: Defines CHANGE OF OCCUPANCY, printed in italics in R319.5. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 37
+      lines:
+      - 37
+      - 38
+      quote: CHANGE OF OCCUPANCY. A change in the use of a building or portion of a building that involves a change in the
+        application of the requirements of
+    piece_sha256: 38197d3b5b92b476f409425989e514ec311f3024af49035570bba5c5aa9b49e3
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:clearance:
+    label: reference
+    topic: definitions
+    reason: Defines CLEARANCE, named in roman type in R320.3, R320.4 (R201.1 gives the defined meaning to italic words only;
+      brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 37
+      lines:
+      - 57
+      - 57
+      quote: CLEARANCE. For the definition applicable in Chapter 24, see Section G2403.
+    piece_sha256: 4dc8ce5736d5e9a3fc231682ca1dff50d26387a9d30791a3fab415f16d5ffbd1
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:closet:
+    label: reference
+    topic: definitions
+    reason: Defines CLOSET, used in italics by the definition of HABITABLE SPACE. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 38
+      lines:
+      - 4
+      - 4
+      quote: CLOSET. A small room or chamber used for storage.
+    piece_sha256: e5534063e796b1dfa9fc1e7e6e9b2b8e2629a1916c6251d8b0a442d8473c648d
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:code:
+    label: reference
+    topic: definitions
+    reason: Defines CODE, named in roman type in R201.1, R201.3, R318.1.1, R318.7 and others (R201.1 gives the defined meaning
+      to italic words only; brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 38
+      lines:
+      - 7
+      - 7
+      quote: CODE. For the definition applicable in Chapter 24, see Section G2403.
+    piece_sha256: ee1af158f2d5a696c265d5b9c15d12136ea8ffbc983502249fa15bc9c3b22315
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:control:
+    label: reference
+    topic: definitions
+    reason: Defines CONTROL, named in roman type in R319.1.1, R319.5.1, R321.2.1, R321.2.2 and others (R201.1 gives the
+      defined meaning to italic words only; brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 38
+      lines:
+      - 47
+      - 47
+      quote: CONTROL. For the definition applicable in Chapter 24, see Section G2403.
+    piece_sha256: 200e8469faf27e9ed55e3f46a4e7901bd1cc5010f58f4518e5e2e9b33022448b
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:court:
+    label: reference
+    topic: definitions
+    reason: Defines COURT, printed in italics in R318.1, R319.1, R319.2.4; used in italics by the definition of YARD. A
+      definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 39
+      lines:
+      - 7
+      - 7
+      quote: COURT. A space, open and unobstructed to the sky, located at or above grade level on a lot and bounded on three
+        or more sides
+    piece_sha256: 36c7c15efc839559bbed559009facfc314e02fe5b8a300977541a854eb96b488
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:crawl_space:
+    label: reference
+    topic: definitions
+    reason: Defines CRAWL SPACE, printed in italics in R318.7. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 39
+      lines:
+      - 9
+      - 9
+      quote: CRAWL SPACE. An underfloor space that is not a basement.
+    piece_sha256: 064f0986838bdafb22b39992fd3c41929b955139687997691e62d6346bc56b55
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:diameter:
+    label: reference
+    topic: definitions
+    reason: Defines DIAMETER, named in roman type in R320.6, R321.1.3 (R201.1 gives the defined meaning to italic words
+      only; brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 39
+      lines:
+      - 40
+      - 41
+      quote: DIAMETER. Unless specifically stated, the term “diameter” is the nominal diameter as designated by the approved
+        material standard.
+    piece_sha256: 4b87da95cba6173de04fddebea2f46de625e5679c5fc7a8baa1be222ce197c70
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:drain:
+    label: reference
+    topic: definitions
+    reason: Defines DRAIN, named in roman type in R318.7.7 (R201.1 gives the defined meaning to italic words only; brought
+      in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 40
+      lines:
+      - 11
+      - 11
+      quote: DRAIN. Any pipe that carries soil and waterborne wastes in a building drainage system.
+    piece_sha256: b04e2bd7feb02731301419ad9e33d092102f4ffa69636b459e83f757336eac1d
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:dwelling:
+    label: reference
+    topic: definitions
+    reason: Defines DWELLING, printed in italics in R325.6, R325.7; used in italics by the definitions of ACCESSORY STRUCTURE,
+      BED AND BREAKFAST DWELLING, BUILDING and others. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 40
+      lines:
+      - 21
+      - 22
+      quote: DWELLING. Any building that contains one or two dwelling units used, intended, or designed to be built, used,
+        rented, leased, let or hired out to
+    piece_sha256: b2f00e17a35ec1a0f82b554163c0a3cce1f5e030c5769c8c8244a69cf45e4905
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:dwelling_unit:
+    label: reference
+    topic: definitions
+    reason: Defines DWELLING UNIT, printed in italics in R318.1, R318.2, R319.6, R321.2.1; used in italics by the definitions
+      of DWELLING, SLEEPING UNIT, TOWNHOUSE UNIT. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 40
+      lines:
+      - 23
+      - 24
+      quote: DWELLING UNIT. A single unit providing complete independent living facilities for one or more persons, including
+        permanent provisions for living, sleeping, eating, cooking and sanitation.
+    piece_sha256: 1707d555b676a44e99305a9cb5c5826e91ccc424be45ba679a68742a275fe89e
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:emergency_escape_and_rescue_opening:
+    label: reference
+    topic: definitions
+    reason: Defines EMERGENCY ESCAPE AND RESCUE OPENING, printed in italics in R319.1, R319.1.1, R319.2, R319.2.1 and others;
+      used in italics by the definition of GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 40
+      lines:
+      - 46
+      - 47
+      quote: EMERGENCY ESCAPE AND RESCUE OPENING. An operable exterior window, door or other similar device that provides
+        for a means of escape and access for rescue in the event of
+    piece_sha256: 1b183af86f56bf5765167889011e931eff5cb01c456f16a2f9a661a086f5b9f2
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:energy_code:
+    label: reference
+    topic: definitions
+    reason: Defines ENERGY CODE, used in italics by the definition of AUTHORITY HAVING JURISDICTION. A definition sets no
+      requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 40
+      lines:
+      - 48
+      - 49
+      quote: ENERGY CODE. The New York State Energy Conservation Construction Code, adopted pursuant to Article 11 of the
+        New York State Energy Law.
+    piece_sha256: 5a2c3b2e43a80d95e74c31c06bf9bbbcf7e602583d2293e146decfece2f55833
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:equipment:
+    label: reference
+    topic: definitions
+    reason: Defines EQUIPMENT, printed in italics in R319.1. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 40
+      lines:
+      - 57
+      - 58
+      quote: EQUIPMENT. Piping, ducts, vents, control devices and other components of systems other than appliances that
+        are permanently installed and integrated to provide control of environmental
+    piece_sha256: 9f2c7cf2ccc0e8d48561e6d10c1e7cc8b134ab65308b15b0aa62a5f5016a7b46
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:existing_building:
+    label: reference
+    topic: definitions
+    reason: Defines EXISTING BUILDING, used in italics by the definitions of BUILDING, REPAIR. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 41
+      lines:
+      - 17
+      - 18
+      quote: EXISTING BUILDING. A building or structure that is legally occupied and/or for which a certificate of occupancy
+        authorizing its use(s) has been issued, without regard to
+    piece_sha256: 2ee997c54b8cf0ac323766587ae4eeb744d848cb154554d166f0d4b46375ed17
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:existing_building_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: Defines EXISTING BUILDING CODE OF NEW YORK STATE, printed in italics in R201.3. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 41
+      lines:
+      - 20
+      - 21
+      quote: EXISTING BUILDING CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Existing Building Code
+        of New York State,” published by the International Code Council, Inc. (publication date July
+    piece_sha256: aaef3a1631157c3e922fac14b65857d8e531c1323a40697a177a20486879a5f2
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:fire_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: Defines FIRE CODE OF NEW YORK STATE, printed in italics in R201.3. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 41
+      lines:
+      - 57
+      - 58
+      quote: FIRE CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Fire Code of New York State,” published
+        by the International Code Council, Inc. (publication date July 2025).
+    piece_sha256: f99f580d675f2378cb5fbe0fd82deaa49ea706beb266474174a150ac520a3196
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:flight:
+    label: reference
+    topic: definitions
+    reason: Defines FLIGHT, printed in italics in R318.7.2, R318.7.3, R318.7.4, R318.7.5.1 and others; used in italics by
+      the definitions of NOSING, STAIRWAY. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 42
+      lines:
+      - 48
+      - 48
+      quote: FLIGHT. A continuous run of rectangular treads or winders or combination thereof from one landing to another.
+    piece_sha256: 18fa8109abe89ac74fb4029d1b54260f2ce45a6308f95306418cade68cfd7778
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:fuel_gas:
+    label: reference
+    topic: definitions
+    reason: Defines FUEL GAS, named in roman type in R201.3 (R201.1 gives the defined meaning to italic words only; brought
+      in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 43
+      lines:
+      - 36
+      - 36
+      quote: FUEL GAS. For the definition applicable in Chapter 24, see Section G2403.
+    piece_sha256: c490314c3c24c0e860b9e1209e5bca7af274b7553ba27eab06cd339ce192a93c
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:fuel_gas_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: Defines FUEL GAS CODE OF NEW YORK STATE, printed in italics in R201.3. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 43
+      lines:
+      - 37
+      - 38
+      quote: FUEL GAS CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Fuel Gas Code of New York State,”
+        published by the International Code Council, Inc. (publication date July
+    piece_sha256: bedf6e26cd5d3c41f3733801485dc9402a6f74aceab1b1744cd19098b06b4140
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:grade:
+    label: reference
+    topic: definitions
+    reason: Defines GRADE, printed in italics in R318.3.1, R318.7.5.1, R318.7.11.2, R319.4 and others; used in italics by
+      the definition of COURT. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 43
+      lines:
+      - 55
+      - 55
+      quote: GRADE. The finished ground level adjoining the building at all exterior walls.
+    piece_sha256: 4d24b6beb034526892c23f5df7e09cf5488833c49934ac2afa738bdc64c7df27
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:grade_floor_emergency_escape_and_rescue_opening:
+    label: reference
+    topic: definitions
+    reason: Defines GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING, printed in italics in R319.2.1; used in italics by
+      the definition of EMERGENCY ESCAPE AND RESCUE OPENING. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 44
+      lines:
+      - 3
+      - 4
+      quote: GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING. An emergency escape and rescue opening located such that the
+        bottom of the clear opening is not more than 44 inches (1118 mm) above
+    piece_sha256: 8848d95c591e76eb11b4e8a6844e3ff9d9d5619a4f70e601604d3a625848471a
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:grade_plane:
+    label: reference
+    topic: definitions
+    reason: Defines GRADE PLANE, used in italics by the definition of STORY ABOVE GRADE PLANE. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 44
+      lines:
+      - 6
+      - 6
+      quote: GRADE PLANE. A reference plane representing the average of the finished ground level adjoining the building
+        at all exterior walls.
+    piece_sha256: f73298b8f7ce342d2d0170102c9f3608799c0fe259c0a00d587c99a1fe6d555f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:guard:
+    label: reference
+    topic: definitions
+    reason: Defines GUARD, printed in italics in R320.2, R321.1, R321.1.1, R321.1.2 and others. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 44
+      lines:
+      - 27
+      - 28
+      quote: GUARD. A building component or a system of building components located near the open sides of elevated walking
+        surfaces that minimizes the possibility of a
+    piece_sha256: 9914b3ae0c54bd8f275fae23d3a8028955b94abca5746a0db7875eba35d21f73
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:guestroom:
+    label: reference
+    topic: definitions
+    reason: Defines GUESTROOM, used in italics by the definition of LODGING HOUSE. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 44
+      lines:
+      - 29
+      - 29
+      quote: GUESTROOM. Any room or rooms used or intended to be used by one or more guests for living or sleeping purposes.
+    piece_sha256: b7f10dec2f58bbf901ba2a44c0cdab1a9adce736bb059014d4e9ded10456605f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:habitable_space:
+    label: reference
+    topic: definitions
+    reason: Defines HABITABLE SPACE, used in italics by the definition of ATTIC, HABITABLE. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 44
+      lines:
+      - 36
+      - 36
+      quote: HABITABLE SPACE. A space in a building for living, sleeping, eating or cooking.
+    piece_sha256: 0c2b643e5e32b0d4ba172a9dd984994efb82505c739e52180c8f7b15ba2d8a5a
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:handrail:
+    label: reference
+    topic: definitions
+    reason: Defines HANDRAIL, printed in italics in R318.7.1, R318.7.8, R318.7.11.1, R318.7.12 and others. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 44
+      lines:
+      - 38
+      - 38
+      quote: HANDRAIL. A horizontal or sloping rail intended for grasping by the hand for guidance or support.
+    piece_sha256: e1584ebef760071988ec3e52a945b187607c19c3a00dfa9dff12ae4db868f0fe
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:kitchen:
+    label: reference
+    topic: definitions
+    reason: Defines KITCHEN, printed in italics in R318.7.12, R318.7.13; used in italics by the definition of SLEEPING UNIT.
+      A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 45
+      lines:
+      - 47
+      - 47
+      quote: KITCHEN. An area used, or designated to be used, for the preparation of food.
+    piece_sha256: fb597d637022074182f3e875788fcfd636e97e1493fefe51e00bc590a020fec0
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:lodging_house:
+    label: reference
+    topic: definitions
+    reason: Defines LODGING HOUSE, printed in italics in R318.1.1; used in italics by the definition of DWELLING UNIT. A
+      definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 46
+      lines:
+      - 30
+      - 31
+      quote: LODGING HOUSE. A one-family dwelling where one or more occupants are primarily permanent in nature, and rent
+        is paid for guestrooms.
+    piece_sha256: be46819caf1e26eb677809e416e7d4a093d1536238dbb87d5617416283d7e012
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:lot:
+    label: reference
+    topic: definitions
+    reason: Defines LOT, used in italics by the definitions of ACCESSORY STRUCTURE, COURT, LOT LINE and others. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 46
+      lines:
+      - 33
+      - 33
+      quote: LOT. A measured portion or parcel of land considered as a unit having fixed boundaries.
+    piece_sha256: d82651fe8f14c9a008920f807f6c43dcd9f23d23f7777e0941af1116c7e8e7a2
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:lot_line:
+    label: reference
+    topic: definitions
+    reason: Defines LOT LINE, used in italics by the definition of GRADE PLANE. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 46
+      lines:
+      - 34
+      - 34
+      quote: LOT LINE. The line that bounds a plot of ground described as a lot in the title to the property.
+    piece_sha256: b66f1b48b6a13e599ed8a1e3e129e398a55be1f1552e0bafcf26b63941b2ad54
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:mechanical_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: Defines MECHANICAL CODE OF NEW YORK STATE, printed in italics in R201.3. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 47
+      lines:
+      - 35
+      - 36
+      quote: MECHANICAL CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Mechanical Code of New York
+        State,” published by the International Code Council, Inc. (publication date July 2025).
+    piece_sha256: 59f25dd23169c157fa8309bdfef2014504c8771569c5b3d735f31ec4cdf13cd2
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:mezzanine:
+    label: reference
+    topic: definitions
+    reason: Defines MEZZANINE, printed in italics in R318.7.12, R318.7.13. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 47
+      lines:
+      - 50
+      - 50
+      quote: MEZZANINE. An intermediate level or levels between the floor and ceiling of any story.
+    piece_sha256: ca077b6e8fc917d2126d2800c80696432fa4d82212a3e6eca5ea75512fc0217b
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:nosing:
+    label: reference
+    topic: definitions
+    reason: Defines NOSING, printed in italics in R318.7.2, R318.7.5.1, R318.7.5.3, R318.7.13.1 and others. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 48
+      lines:
+      - 12
+      - 12
+      quote: NOSING. The leading edge of treads of stairs and of landings at the top of stairway flights.
+    piece_sha256: c4c82f7a65d8256661702646a7d7bd3a2736ab462bd7cc3d5797ac598c1e8430
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:owner:
+    label: reference
+    topic: definitions
+    reason: Defines OWNER, named in roman type in R325.6 Exception 2 and the R325.7 Exception ("Owner-occupied one-family
+      dwellings"; R201.1 gives the defined meaning to italic words only; brought in so the reader sees it). A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 48
+      lines:
+      - 22
+      - 22
+      quote: OWNER. Any person, agent, firm or corporation having a legal or equitable interest in the property.
+    piece_sha256: 344ef2c7b85254970027fea3cf98ea0fc69165e0d464a9c2c770ded981aa1976
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:permit:
+    label: reference
+    topic: definitions
+    reason: Defines PERMIT, used in italics by the definition of ALTERATION. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 48
+      lines:
+      - 42
+      - 44
+      quote: PERMIT. An official document or certificate issued by the authority having jurisdiction that authorizes performance
+        of a specified activity. [NY] Building permit.
+    piece_sha256: 9437cca9970173f5d3f964abcbcc8acbb76f16827fbc921f24c448e1787c47dd
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:person:
+    label: reference
+    topic: definitions
+    reason: Defines PERSON, used in italics by the definitions of DWELLING UNIT, SLEEPING UNIT. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 48
+      lines:
+      - 46
+      - 47
+      quote: PERSON. An individual, heirs, executors, administrators or assigns, and a firm, partnership or corporation,
+        its or their successors or assigns, or the agent of any
+    piece_sha256: ca3f9a518f36b022c6ac0dbd57ef63723a4b202140169a5ac1aef46737d814d7
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:pitch:
+    label: reference
+    topic: definitions
+    reason: Defines PITCH, named in roman type in R318.7.9 (R201.1 gives the defined meaning to italic words only; brought
+      in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 49
+      lines:
+      - 11
+      - 11
+      quote: PITCH. See “Slope.”
+    piece_sha256: 9f012b2c21042e19c5b347144cd9f0d71b57e5eec51e3350b4b64a85c52f0f49
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:plastic_composite:
+    label: reference
+    topic: definitions
+    reason: Defines PLASTIC COMPOSITE, printed in italics in R318.7.5.4, R320.7, R321.1.4. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 49
+      lines:
+      - 13
+      - 13
+      quote: PLASTIC COMPOSITE. A generic designation that refers to wood-plastic composites and plastic lumber.
+    piece_sha256: ea927d39287bcb8315255542f866025a930f1e6d99130d24325a89cc42c2ae53
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:plumbing:
+    label: reference
+    topic: definitions
+    reason: Defines PLUMBING, named in roman type in R201.3 (R201.1 gives the defined meaning to italic words only; brought
+      in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 49
+      lines:
+      - 17
+      - 18
+      quote: PLUMBING. For the purpose of this code, plumbing refers to those installations, repairs, maintenance and alterations
+        regulated by Chapters 25 through 33.
+    piece_sha256: 922a706bdf27440e08ff7bcce68fd899767a484c808ac5ef1ece7890fecaee04
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:plumbing_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: Defines PLUMBING CODE OF NEW YORK STATE, printed in italics in R201.3. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 49
+      lines:
+      - 24
+      - 25
+      quote: PLUMBING CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Plumbing Code of New York State,”
+        published by the International Code Council, Inc. (publication date July 2025).
+    piece_sha256: ac0fe76b73e3850369c74fd548f5e0056756b0616342e7d9795461575a2caf13
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:property_maintenance_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: Defines PROPERTY MAINTENANCE CODE OF NEW YORK STATE, printed in italics in R201.3. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 49
+      lines:
+      - 54
+      - 55
+      quote: PROPERTY MAINTENANCE CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Property Maintenance
+        Code of New York State,” published by the International Code Council, Inc. (publication date July
+    piece_sha256: 11a4455e0764a27029fb325479de98d78a56a47a93956088202a4769768b6c44
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:public_way:
+    label: reference
+    topic: definitions
+    reason: Defines PUBLIC WAY, printed in italics in R318.1, R319.1; used in italics by the definition of TOWNHOUSE UNIT.
+      A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 3
+      - 4
+      quote: PUBLIC WAY. Any street, alley or other parcel of land open to the outside air leading to a public street, that
+        has been deeded, dedicated or
+    piece_sha256: 5b644c85e63f214ce9efc215371fc5cd5ddb64746dc99f78b83c23c170c08c6d
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:ramp:
+    label: reference
+    topic: definitions
+    reason: Defines RAMP, printed in italics in R318.3.1, R318.4, R318.7.12, R318.7.13 and others. A definition sets no
+      requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 12
+      - 12
+      quote: RAMP. A walking surface that has a running slope steeper than 1 unit vertical in 20 units horizontal (5-percent
+        slope).
+    piece_sha256: b179336de087ff5c6b2cce9a4fe6f46f0ffbabe6768b646c3be9191e06b347c3
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:ready_access_to:
+    label: reference
+    topic: definitions
+    reason: Defines READY ACCESS (TO), used in italics by the definition of ACCESS (TO), which is brought in. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 13
+      - 14
+      quote: READY ACCESS (TO). That which enables a device, appliance or equipment to be directly reached, without requiring
+        the removal or movement of any panel, door or similar obstruction.
+    piece_sha256: 377589311b1dc5cb7e3d5e28b9d0f8124b053e5e97abbfcb266ef032cfd51532
+    notes: Drafted by hand in a Claude Code session (2026-11-12, review round 5); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:repair:
+    label: reference
+    topic: definitions
+    reason: Defines REPAIR, printed in italics in R319.7; used in italics by the definitions of ALTERATION, PLUMBING. A
+      definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 40
+      - 41
+      quote: REPAIR. The reconstruction, replacement or renewal of any part of an existing building for the purpose of its
+        maintenance or to correct damage.
+    piece_sha256: c2afbeecd8e138697db3e655bb9223162e3bc18f08bbb97befec98961a0fcf59
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:riser_plumbing:
+    label: reference
+    topic: definitions
+    reason: Defines RISER (PLUMBING), printed in italics in R318.3.2, R318.7.5, R318.7.5.1, R318.7.5.3 and others; used
+      in italics by the definition of STAIR. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 47
+      - 48
+      quote: RISER (PLUMBING). A water pipe that extends vertically one full story or more to convey water to branches or
+        to a group of fixtures.
+    piece_sha256: 37493e39b1c290791e17da2e5618df3a18362062f5c6bb68a2d5d3092f4e3a62
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:riser_stair:
+    label: reference
+    topic: definitions
+    reason: Defines RISER (STAIR), printed in italics in R318.3.2, R318.7.5, R318.7.5.1, R318.7.5.3 and others; used in
+      italics by the definition of STAIR. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 49
+      - 49
+      quote: RISER (STAIR). The vertical component of a step or stair.
+    piece_sha256: 621448a876dbc2dec22c869f1c47a5ebd7017ce5940bbfb1da41d9e6209766be
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:roof_assembly:
+    label: reference
+    topic: definitions
+    reason: Defines ROOF ASSEMBLY, used in italics by the definition of ATTIC. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 50
+      lines:
+      - 51
+      - 51
+      quote: ROOF ASSEMBLY. A system designed to provide weather protection and resistance to design loads.
+    piece_sha256: a6a5440f261fc52729caf6a7bd4d0813b2ac1e77a1dd54341bca8a2059e6e9af
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:roof_covering:
+    label: reference
+    topic: definitions
+    reason: Defines ROOF COVERING, used in italics by the definitions of ROOF ASSEMBLY, UNDERLAYMENT. A definition sets
+      no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 51
+      lines:
+      - 3
+      - 3
+      quote: ROOF COVERING. The covering applied to the roof deck for weather resistance, fire classification or appearance.
+    piece_sha256: 0b664637230efcf890670c828d5f289704a80ec98dd256fc586826ed66eb23bf
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:roof_deck:
+    label: reference
+    topic: definitions
+    reason: Defines ROOF DECK, used in italics by the definitions of ROOF ASSEMBLY, ROOF COVERING. A definition sets no
+      requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 51
+      lines:
+      - 5
+      - 5
+      quote: ROOF DECK. The flat or sloped surface not including its supporting members or vertical supports.
+    piece_sha256: e543817c4a89fd67b227d550ff29e9842c068f9d5110f9c6d12d9148807cb29e
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:shall:
+    label: reference
+    topic: definitions
+    reason: Defines SHALL, named in roman type in R201.1, R201.3, R201.4, R318.1 and others (R201.1 gives the defined meaning
+      to italic words only; brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 51
+      lines:
+      - 31
+      - 31
+      quote: SHALL. The term, where used in the code, is construed as mandatory.
+    piece_sha256: 786d5fd72cc8ecfaca64c6e0fd669504e89c757beaf54fa10c3e76bb5dd0f766
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:sleeping_loft:
+    label: reference
+    topic: definitions
+    reason: Defines SLEEPING LOFT, named in roman type in R319.1 (R201.1 gives the defined meaning to italic words only;
+      brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 51
+      lines:
+      - 47
+      - 48
+      quote: SLEEPING LOFT. A space designated for sleeping on an intermediate level or levels between the floor and ceiling
+        of a story, open on one or more
+    piece_sha256: 5e6347c48c7f39d07fb64b269a41e97b0d87a4171e5a0b58dc9d2ac18081a1e8
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:sleeping_unit:
+    label: reference
+    topic: definitions
+    reason: Defines SLEEPING UNIT, named in roman type in R318.1.1 (R201.1 gives the defined meaning to italic words only;
+      brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 51
+      lines:
+      - 49
+      - 50
+      quote: SLEEPING UNIT. A single unit that provides rooms or spaces for one or more persons, includes permanent provisions
+        for sleeping and can include provisions for living
+    piece_sha256: fc500e5ea6da41d32e199a11b829b8bc68ae13b61a937a1829063dcc04a7b7e8
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:slope:
+    label: reference
+    topic: definitions
+    reason: Defines SLOPE, used in italics by the definition of PITCH. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 51
+      lines:
+      - 54
+      - 54
+      quote: SLOPE. The fall (pitch) of a line of pipe in reference to a horizontal plane.
+    piece_sha256: 555a9ac36c8a8cbfab3bca4fad7e3bf8d91ec428b80cebbdef2c773c24154bd4
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:stair:
+    label: reference
+    topic: definitions
+    reason: Defines STAIR, printed in italics in R318.3.3, R318.5, R318.7.2, R318.7.5.2.1 and others; used in italics by
+      the definitions of NOSING, RISER (STAIR), STAIRWAY. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 52
+      lines:
+      - 19
+      - 19
+      quote: STAIR. A change in elevation, consisting of one or more risers.
+    piece_sha256: 3b27ab60242c0518ba69944509207ca0360c75101db72256a9daa10bdac2c3d8
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:stairway:
+    label: reference
+    topic: definitions
+    reason: Defines STAIRWAY, printed in italics in R318.3.1, R318.3.2, R318.4, R318.7 and others; used in italics by the
+      definitions of NOSING, STAIRWAY, SPIRAL. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 52
+      lines:
+      - 20
+      - 21
+      quote: STAIRWAY. One or more flights of stairs, either interior or exterior, with the necessary landings and connecting
+        platforms to form a continuous and uninterrupted passage
+    piece_sha256: fefffbb11b297278b1824dbef59f1c59f8edaf6043c97f74909972e350a7f683
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:stairway_spiral:
+    label: reference
+    topic: definitions
+    reason: Defines STAIRWAY, SPIRAL, printed in italics in R318.7.1, R318.7.2, R318.7.5.1, R318.7.5.2.1 and others. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 52
+      lines:
+      - 22
+      - 23
+      quote: STAIRWAY, SPIRAL. A stairway with a plan view of closed circular form and uniform section-shaped treads radiating
+        from a mini- mum-diameter circle.
+    piece_sha256: b985f33ca2fbedf8c81f1b46ba7e69196272d5cc2881e2fb5fd0dcdb12db15af
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:storm_shelter:
+    label: reference
+    topic: definitions
+    reason: Defines STORM SHELTER, named in roman type in R319.1 (R201.1 gives the defined meaning to italic words only;
+      brought in so the reader sees it). A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 52
+      lines:
+      - 30
+      - 31
+      quote: STORM SHELTER. A building, structure or portion thereof, constructed in accordance with ICC 500 and designated
+        for use during a severe wind storm event, such as
+    piece_sha256: fd32affde857b635ddb3941c0b9d33c913df1a4b1241082fc23bdf1c78641abd
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:story:
+    label: reference
+    topic: definitions
+    reason: Defines STORY, used in italics by the definitions of ADDITION, BASEMENT, MEZZANINE and others. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 52
+      lines:
+      - 32
+      - 33
+      quote: STORY. That portion of a building included between the upper surface of a floor and the upper surface of the
+        floor or roof next above.
+    piece_sha256: cd81e0e43faab5a3b8fc37e8327c7cf713348137a5eb8b931b790af156ed0316
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:story_above_grade_plane:
+    label: reference
+    topic: definitions
+    reason: Defines STORY ABOVE GRADE PLANE, used in italics by the definition of BASEMENT. A definition sets no requirement
+      itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 52
+      lines:
+      - 34
+      - 35
+      quote: STORY ABOVE GRADE PLANE. Any story having its finished floor surface entirely above grade plane, or in which
+        the finished surface of the floor next above is either
+    piece_sha256: 8bf47338d91a6f658d742fe70cc93cf1d3d29e4efa302325ee9e41ad6543c0be
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:structure:
+    label: reference
+    topic: definitions
+    reason: Defines STRUCTURE, used in italics by the definitions of CERTIFICATE OF OCCUPANCY, EXISTING BUILDING. A definition
+      sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 52
+      lines:
+      - 55
+      - 55
+      quote: STRUCTURE. That which is built or constructed.
+    piece_sha256: 633a73df3fcb837d947bb54958fd369536e1ef4b68235e0de8ae5ad8c7b550fd
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:townhouse:
+    label: reference
+    topic: definitions
+    reason: Defines TOWNHOUSE, used in italics by the definitions of ACCESSORY STRUCTURE, BUILDING, DWELLING UNIT and others.
+      A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 53
+      lines:
+      - 44
+      - 44
+      quote: TOWNHOUSE. A building that contains three or more attached townhouse units.
+    piece_sha256: de90782d8fc1797fb1a0867a12853286a709fa0abb9d3e05c32d20ba89f687a1
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:townhouse_unit:
+    label: reference
+    topic: definitions
+    reason: Defines TOWNHOUSE UNIT, printed in italics in R319.1; used in italics by the definitions of DWELLING UNIT, TOWNHOUSE.
+      A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 53
+      lines:
+      - 45
+      - 46
+      quote: TOWNHOUSE UNIT. A single-family dwelling unit in a townhouse that extends from foundation to roof, that has
+        a yard or public way on not less than
+    piece_sha256: 5828cbeba43269765a58c29cbdb97175852050379a5477b89efdb0d13cd6f99f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:underlayment:
+    label: reference
+    topic: definitions
+    reason: Defines UNDERLAYMENT, used in italics by the definition of ROOF ASSEMBLY. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 54
+      lines:
+      - 13
+      - 14
+      quote: UNDERLAYMENT. One or more layers of felt, sheathing paper, nonbituminous saturated felt, or other approved
+        material over which a roof covering, with a slope of
+    piece_sha256: 1f6f1155b6b706041cc53014d13f4a56290bd0f6d59b693ac5936c784840b3cc
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:uniform_code:
+    label: reference
+    topic: definitions
+    reason: Defines UNIFORM CODE, used in italics by the definition of AUTHORITY HAVING JURISDICTION. A definition sets
+      no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 54
+      lines:
+      - 15
+      - 16
+      quote: UNIFORM CODE. The New York State Uniform Fire Prevention and Building Code, adopted pursuant to Article 18
+        of the New York State Executive Law, as currently
+    piece_sha256: d9afba7fc38e60149a2abff02f9171831906b3ee76d069f3f835d95dbbea8b8b
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:winder:
+    label: reference
+    topic: definitions
+    reason: Defines WINDER, printed in italics in R318.7.4, R318.7.5.2.1, R320.2, R320.5; used in italics by the definition
+      of FLIGHT. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 55
+      lines:
+      - 56
+      - 56
+      quote: WINDER. A tread with nonparallel edges.
+    piece_sha256: 06e8ed02e4d50453614aa9b4558f9f969866e7a1acdcd884ed38c8d6ea3080bc
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R202:yard:
+    label: reference
+    topic: definitions
+    reason: Defines YARD, printed in italics in R318.1, R319.1, R319.2.4; used in italics by the definition of TOWNHOUSE
+      UNIT. A definition sets no requirement itself.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 56
+      lines:
+      - 6
+      - 7
+      quote: YARD. An open space, other than a court, unobstructed from the ground to the sky, except where specifically
+        provided by this code, on the lot
+    piece_sha256: 86112f4b30c9988773f7df45733aeba111b79e4bd496919deae4272ca8d53ff8
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318:
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one).'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 99
+      lines:
+      - 33
+      - 33
+      quote: SECTION R318—MEANS OF EGRESS
+    piece_sha256: e2a7de0524c2a9fdf5c59f4b312741c9f6de6b5cf90964552c6e29895ccecf0f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.1:
+    label: rule
+    topic: means_of_egress
+    reason: Requires a continuous, unobstructed egress path to the required egress door, not through a garage, with the
+      door opening to a public way, yard or court.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 99
+      lines:
+      - 34
+      - 34
+      quote: R318.1 Means of egress. Dwelling units shall be provided with a means of egress in accordance with this section.
+    piece_sha256: ea6aae7e5ea9573c55a1492213be1ec45d2dbb17acebc3a0a45e2412e37222fc
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.1.1:
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A fire-safety notice posted on doors in lodging houses: an operating requirement, not a feature of the building''s
+      design.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 99
+      lines:
+      - 38
+      - 39
+      quote: '[NY] R318.1.1 Lodging house evacuation notice. In addition to, but not in limitation of, any other requirement
+        of this code, a fire-safety notice shall be affixed to the occupied side'
+    piece_sha256: fb5c60ae54bc9c99a24a2edf9748cc115f5cd3ef7347dff0d17d73a7962d56a9
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'Sets the egress door: one per dwelling unit, side-hinged, clear width not less than 32 inches and clear height
+      not less than 78 inches.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 99
+      lines:
+      - 44
+      - 44
+      quote: R318.2 Egress door. Not less than one egress door shall be provided for each dwelling unit.
+    piece_sha256: ca5ac31aa4939c1f2d9bedfc55c6535be6006287ce3f5257d3dd96bc22e86a6f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.3:
+    label: rule
+    topic: means_of_egress
+    reason: Requires a landing or floor each side of each exterior door, not less than the door's width and 36 inches deep,
+      sloped not more than 2 percent.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 99
+      lines:
+      - 50
+      - 50
+      quote: R318.3 Floors and landings at exterior doors. There shall be a landing or floor on each side of each exterior
+        door.
+    piece_sha256: d9acf1fe726e897c9db2a369e64ea23f1ca3d3e54f89f4ca21d408fe36d180e3
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.3.1:
+    label: rule
+    topic: means_of_egress
+    reason: Limits how far below the threshold the landing or floor at the required egress door may be (1 1/2 inches; 8
+      1/4 inches outside with the door not swinging over it).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 99
+      lines:
+      - 55
+      - 56
+      quote: '[NY] R318.3.1 Floor elevations at the required egress doors. Landings or finished floors at the required egress
+        door shall be not more than 1 1/2 inches (38 mm) lower than the top of'
+    piece_sha256: 8f8cbcfd89b39dab2ebc617684241a740d6b299b60070f1aeef81432177119b6
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.3.2:
+    label: rule
+    topic: means_of_egress
+    reason: Limits how far below the threshold the landing or floor at other exterior doors may be (8 1/4 inches).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 7
+      - 8
+      quote: '[NY] R318.3.2 Floor elevations at other exterior doors. Exterior doors other than the required egress door
+        shall be provided with landings or floors not more than 8 1/4 inches (209 mm) below'
+    piece_sha256: e0022c106d4301600cd8cc422d6d66a0e6aa902f6aa11ffa58b23887d2928419
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.3.3:
+    label: reference
+    topic: means_of_egress
+    reason: 'A permission (storm and screen doors may swing over exterior stairs and landings): it relaxes the landing rules,
+      sets no requirement of its own.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 11
+      - 11
+      quote: R318.3.3 Storm and screen doors. Storm and screen doors shall be permitted to swing over exterior stairs and
+        landings.
+    piece_sha256: d8a5f6c6b90cf4d5d1607435931fb887256224e7199a081b5f1bb5ff6a8ef36a
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.4:
+    label: rule
+    topic: means_of_egress
+    reason: Requires egress from basements and habitable levels without an egress door to be by a ramp or stairway complying
+      with this code.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 12
+      - 13
+      quote: R318.4 Vertical egress. Egress from basements and habitable levels that are not provided with an egress door
+        in accordance with Section R318.2 shall be by a ramp
+    piece_sha256: 95660f3338a2b9ec55fbf6e5f56deecc47dc20221756cdbf22714941a3db06b3
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Requires exterior landings, decks, balconies and stairs to be positively anchored or self-supporting: a structural
+      judgment, not a dimension code can measure.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 14
+      - 15
+      quote: R318.5 Landing, deck, balcony and stair construction and attachment. Exterior landings, decks, balconies, stairs
+        and similar facilities shall be positively anchored to the primary structure to resist both vertical and lateral
+        forces or
+    piece_sha256: 76c3934caa78919820b65068a8ea7d3b1357aaad8e3dd6a1515cf73fc043e9b1
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.6:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum hallway width (3 feet).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 17
+      - 17
+      quote: R318.6 Hallways. The width of a hallway shall be not less than 3 feet (914 mm).
+    piece_sha256: 2fb6990cb308e0d977bd7d646b655868e93e56bdd095a03811b21315121ca6a8
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says which stairways the stair rules apply to, with its exceptions: it scopes the numbered rules below, sets
+      no dimension itself.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 18
+      - 18
+      quote: R318.7 Stairways. Where required by this code or provided, stairways shall comply with this section.
+    piece_sha256: 94bbb604febda72f2e456e405992bfdb4d0f153d3e704e7934ce39cca5a98c76
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum clear width of stairways above and below the handrail height.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 23
+      - 24
+      quote: R318.7.1 Width. Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the
+        permitted handrail height and below the
+    piece_sha256: 4ca1a6906e695a54af0cbedd05745111d64038a8bbb38a90850f5467a52548a0
+    notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. The book''s metric
+      conversions here are not its inches: "31 1/2 inches (787 mm)" (31 1/2 inches is 800 mm) and "27 inches (698 mm)"
+      (27 inches is 686 mm), p.100. Gordium''s reading: the inches govern, the millimetres being a conversion printed
+      after them; a reading for the architects to confirm before a rule is drafted from these limits.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.2:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum headroom in stairways (6 feet 8 inches) and how it is measured.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 28
+      - 29
+      quote: R318.7.2 Headroom. The headroom in stairways shall be not less than 6 feet 8 inches (2032 mm) measured vertically
+        from the sloped line adjoining the tread
+    piece_sha256: 7acb6a579055c66d810932464385a4752a66750a60d80b502a2cf48be0c19d6b
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.3:
+    label: rule
+    topic: means_of_egress
+    reason: Limits the vertical rise of a flight between floor levels or landings (12 feet 7 inches).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 34
+      - 35
+      quote: R318.7.3 Vertical rise. A flight of stairs shall not have a vertical rise greater than 12 feet 7 inches (3835
+        mm) between floor levels or landings.
+    piece_sha256: 9d610e9ff2dcceff483b28da79709c38e6d952b0b6b5b12f131d907dc183128a
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.4:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says where the walkline is (12 inches from the inside of the turn): how winder treads are measured, no requirement
+      of its own.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 36
+      - 37
+      quote: R318.7.4 Walkline. The walkline across winder treads and landings shall be concentric to the turn and parallel
+        to the direction of travel entering and exiting the
+    piece_sha256: ab8ae162d8f067a044d6cc6f26b81e5386b233da4a87d8444a7fa817bb8d6c22
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.5:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says tread and riser dimensions are measured exclusive of carpets, rugs or runners: how to measure, no limit
+      itself.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 40
+      - 40
+      quote: R318.7.5 Stair treads and risers. Stair treads and risers shall meet the requirements of this section.
+    piece_sha256: f07e5fea2752626f3d3b4d9c60246861b7a26c8777be9867c7106fe31509d781
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.5.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the maximum riser height (8 1/4 inches, New York's own), the variation within a flight, riser slope and
+      the open-riser sphere limit.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 42
+      - 42
+      quote: '[NY] R318.7.5.1 Risers. The riser height shall be not more than 8 1/4 inches (209 mm).'
+    piece_sha256: a3c13f44fc5ef9be9de7ce19d811782abb2020102da3bd7331f42d9c94f59653
+    notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. The book''s metric
+      conversion of the riser slope is not its degrees: "30 degrees (0.51 rad)" (30 degrees is 0.52 rad), p.100. Gordium''s
+      reading: the degrees govern, the radians being a conversion printed after them; a reading for the architects to
+      confirm before a rule is drafted from this limit.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.5.2:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum tread depth (9 inches, New York's own) and the variation within a flight.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 50
+      - 50
+      quote: '[NY] R318.7.5.2 Treads. The tread depth shall be not less than 9 inches (229 mm).'
+    piece_sha256: c2bb3238132120d4109c85bf8a1245f4bcc2719b1162d7e2a19f711e98a0981c
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.5.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum depths of winder treads at the walkline and at any point, and their variation.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 100
+      lines:
+      - 53
+      - 54
+      quote: R318.7.5.2.1 Winder treads. Winder treads shall have a tread depth of not less than 10 inches (254 mm) measured
+        between the vertical planes of the foremost projection
+    piece_sha256: 1d6a140e00050bae33273e7822cd7f7994dc8b14ad13144f86a7afd507912fe9
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.5.3:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the nosing radius or bevel and the nosing projection limits, with their exceptions.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 4
+      - 5
+      quote: R318.7.5.3 Nosings. Treads, landings and floors of stairways shall have a radius of curvature at the nosing
+        not greater than 9/16 inch (14 mm) or a
+    piece_sha256: 3a48b81f9452c2482c29d2c67b1603d8276b6d74b87fabd1b8e40384c6e5081e
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.5.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Requires plastic composite stair treads to meet a materials section (R507.2.2): a product and material question
+      an architect must judge.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 11
+      - 12
+      quote: R318.7.5.4 Exterior plastic composite stair treads. Plastic composite exterior stair treads shall comply with
+        the provisions of this section and Section R507.2.2.
+    piece_sha256: 3a19fb357b270bd162d8826e9370abdb037b296c7dbf7d24812bbdf0cb63a569
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.6:
+    label: rule
+    topic: means_of_egress
+    reason: Requires landings at the top and bottom of each flight and sets their width and depth, with exceptions.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 13
+      - 13
+      quote: '[NY] R318.7.6 Landings for stairways. There shall be a floor or landing at the top and bottom of each flight
+        of stairs.'
+    piece_sha256: 2f826ca495455f22959b81421873468b8926275b49809ee378a5260796148a25
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.7:
+    label: rule
+    topic: means_of_egress
+    reason: Limits the slope of tread and landing walking surfaces (1 in 48; 1 in 20 where a landing must drain).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 28
+      - 29
+      quote: R318.7.7 Stairway walking surface. The walking surface of treads and landings of stairways shall be sloped
+        not steeper than 1 unit vertical in 48 units horizontal (2-percent slope).
+    piece_sha256: ef602ca55c74b5fe3b52399b6e666c6f80e6dbd5df487109d47f44ae8dc94e58
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.8:
+    label: rule
+    topic: means_of_egress
+    reason: Requires a handrail on at least one side of each flight with four or more risers.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 32
+      - 32
+      quote: R318.7.8 Handrails. Handrails shall be provided on not less than one side of each flight of stairs with four
+        or more risers.
+    piece_sha256: 29e35fa992f8415f16165fc45e6c23bd2d6a84a4820a61d1efe0c951d3e2e3f3
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.9:
+    label: flag
+    topic: means_of_egress
+    reason: 'Relieves alterations to existing stairs where existing space and construction don''t allow: a judgment about
+      an existing building.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 33
+      - 34
+      quote: R318.7.9 Stairways in existing buildings. Alterations to existing stairs shall not be required to comply with
+        the requirements of this code where the existing space and construction does not
+    piece_sha256: e83ab8dd2085caf281ba4f99e9f60d617ccaf0eec339568d8458dedba1d58838
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.10:
+    label: reference
+    topic: means_of_egress
+    reason: Requires stairway illumination by pointing to Sections R325.6 and R325.7, which are brought in and labeled themselves.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 35
+      - 35
+      quote: R318.7.10 Illumination. Stairways shall be provided with illumination in accordance with Sections R325.6 and
+        R325.7.
+    piece_sha256: f7debb0a0c1127d5807a3e653672d417fd223a942991585c52d70d890e9b5df2
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.11:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says spiral and bulkhead enclosure stairways follow the stair rules except as R318.7.11.1 and R318.7.11.2 say:
+      scopes them, no limit itself.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 36
+      - 37
+      quote: R318.7.11 Special stairways. Spiral stairways and bulkhead enclosure stairways shall comply with the requirements
+        of Section R318.7 except as specified in Sections R318.7.11.1 and R318.7.11.2.
+    piece_sha256: 0e35d6e1f869cc38570f62d54a2415a852fcdebc3200ce83432ca8d35e4b08aa
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.11.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the clear width, walkline radius, tread depth, rise and headroom of spiral stairways.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 38
+      - 39
+      quote: R318.7.11.1 Spiral stairways. The clear width at and below the handrails at spiral stairways shall be not less
+        than 26 inches (660 mm) and the walkline radius
+    piece_sha256: 4a5a1eaf531090528507a82bdfb8653c7b1bc35fffc3d347edb971b3c7878157
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.11.2:
+    label: rule
+    topic: means_of_egress
+    reason: Exempts bulkhead enclosure stairways from R318.3 and R318.7 under measurable conditions (basement floor to grade
+      not more than 8 feet, hinged-door enclosure).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 42
+      - 43
+      quote: R318.7.11.2 Bulkhead enclosure stairways. Stairways serving bulkhead enclosures, not part of the required building
+        egress, providing access from the outside grade level to the basement shall be exempt
+    piece_sha256: e1bbca03705826726491f0c96f13b1769fb39f34d48bcf362f4bb98510058f7b
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.12:
+    label: rule
+    topic: means_of_egress
+    reason: Limits where alternating tread devices may be used in a means of egress and sets their clear width (20 inches).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 47
+      - 47
+      quote: R318.7.12 Alternating tread devices. Alternating tread devices shall not be used as an element of a means of
+        egress.
+    piece_sha256: 56b46d47de03a0d789ea58fd0a065794abd7fe546c110106dd54ca5f7e8600ef
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.12.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the tread depth, projected tread depth, tread width, riser height and angle of alternating tread devices.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 101
+      lines:
+      - 53
+      - 54
+      quote: R318.7.12.1 Treads of alternating tread devices. Alternating tread devices shall have a tread depth of not
+        less than 5 inches (127 mm), a projected tread depth of not less than
+    piece_sha256: e5e7ea0f7403199234e4c9e6602d84c1f5d983d84af9f15949cccbb136031371
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.12.2:
+    label: rule
+    topic: means_of_egress
+    reason: Requires handrails on both sides of alternating tread devices, complying with R320.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 3
+      - 4
+      quote: R318.7.12.2 Handrails of alternating tread devices. Handrails shall be provided on both sides of alternating
+        tread devices and shall comply with Section R320.
+    piece_sha256: cee02ba46e792a35ac205a32668de99ed6a7a1656862724313bcd7c2eeeeb9f0
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.13:
+    label: rule
+    topic: means_of_egress
+    reason: Limits where ship's ladders may be used in a means of egress and sets their clear width (20 inches).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 5
+      - 5
+      quote: R318.7.13 Ship’s ladders. Ship’s ladders shall not be used as an element of a means of egress.
+    piece_sha256: 8a02eec1c6cb4bfb34886ce9ef89abb4159a443dfca23cc4451a7a514bc44867
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.13.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the tread depth, tread plus nosing, and riser height of ship's ladders.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 10
+      - 10
+      quote: R318.7.13.1 Treads of ship’s ladders. Treads shall have a depth of not less than 5 inches (127 mm).
+    piece_sha256: c67516d8d6f8bef2cd678b80fd9d0d42aa79ab974589739bca5d6cb3b2f8dfcc
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.7.13.2:
+    label: rule
+    topic: means_of_egress
+    reason: Requires handrails on both sides of ship's ladders, complying with R320.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 13
+      - 14
+      quote: R318.7.13.2 Handrails of ship’s ladders. Handrails shall be provided on both sides of ship’s ladders and shall
+        comply with Section R320.
+    piece_sha256: 034887b824d48cbc661c8d943e9fe8e63edfa83867a7c55211bd547381aeaa2f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.8:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says which ramps the ramp rules apply to (with its exception): scopes the numbered rules below, no limit itself.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 15
+      - 15
+      quote: R318.8 Ramps. Where required by this code or provided, ramps shall comply with this section.
+    piece_sha256: c456a88806b75923bbb341d68a0332cbea6917974b428ad27a704b104cb74ba1
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.8.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the maximum ramp slope (1 in 12 serving the required egress door; 1 in 8 otherwise or where technically
+      infeasible).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 17
+      - 18
+      quote: R318.8.1 Maximum slope. Ramps serving the egress door required by Section R318.2 shall have a slope of not
+        more than 1 unit vertical in 12 units horizontal
+    piece_sha256: 80bbe88129e30ad215180d4cd892a8d81f9e8b8f19fe6c93083daa7431bff3e1
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.8.2:
+    label: rule
+    topic: means_of_egress
+    reason: Requires landings at the top and bottom of ramps, at doors and at turns, and sets their width and depth (36
+      inches).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 22
+      - 23
+      quote: R318.8.2 Landings required. There shall be a floor or landing at the top and bottom of each ramp, where doors
+        open onto ramps, and where ramps change
+    piece_sha256: a8907ce6609d403fef97e4c81aebfef2688d562b63e0adae0770cd1f62e31558
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R318.8.3:
+    label: rule
+    topic: means_of_egress
+    reason: Requires a handrail on at least one side of ramps steeper than 1 in 12.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 25
+      - 26
+      quote: R318.8.3 Handrails required. Handrails shall be provided on not less than one side of ramps exceeding a slope
+        of 1 unit vertical in 12 units horizontal (8.33-percent
+    piece_sha256: 77661577703f82783682c3599c9f3d328e1dd5246090359519da44e353fcedff
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319:
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one).'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 27
+      - 27
+      quote: SECTION R319—EMERGENCY ESCAPE AND RESCUE OPENINGS
+    piece_sha256: 06367977c1742c403c6476f8c1a1e0a6aec660e6cc92272df4c6d26e69d24273
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.1:
+    label: rule
+    topic: means_of_egress
+    reason: Requires an operable emergency escape and rescue opening in basements, habitable attics, rooms a sleeping loft
+      opens to and every sleeping room, opening to a public way, yard or court, with exceptions.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 28
+      - 29
+      quote: R319.1 Emergency escape and rescue opening required. Basements, habitable attics, the room to which a sleeping
+        loft is open, and every sleeping room shall have not less than one operable emergency
+    piece_sha256: 6282d38ff225fb89cd41117c6bf34bc87e97117b0cf51e601c3361027aff7548
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: Requires escape openings to work from inside without keys or tools and puts opening-control devices not more
+      than 70 inches above the floor.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 42
+      - 43
+      quote: R319.1.1 Operational constraints and opening control devices. Emergency escape and rescue openings shall be
+        operational from the inside of the room without the use of keys, tools or special knowledge.
+    piece_sha256: cdbfb6fc861e80fbc84dd791187e2336ae7c1b59bf164bc492a15f35748ed657
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Points to Sections R319.2.1 to R319.2.4 for the minimum dimensions: they are labeled one by one.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 46
+      - 47
+      quote: R319.2 Emergency escape and rescue openings. Emergency escape and rescue openings shall have minimum dimensions
+        in accor- dance with Sections R319.2.1 through R319.2.4.
+    piece_sha256: 87f306a8757b823e445e9c468aed6978c4be5cc0fa887b545fea7991c77f290e
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum net clear opening of escape openings (5.7 square feet; 5 square feet at grade floor).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 48
+      - 49
+      quote: R319.2.1 Minimum size. Emergency escape and rescue openings shall have a net clear opening of not less than
+        5.7 square feet (0.530 m[fn2]).
+    piece_sha256: 7fc10512c2269bae71b5339f04ae1b4eac52f65a854fedd3bc1065df835d57de
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.2.2:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum net clear opening height (24 inches) and width (20 inches).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 51
+      - 51
+      quote: R319.2.2 Minimum dimensions. The minimum net clear opening height dimension shall be 24 inches (610 mm).
+    piece_sha256: 0904d2c220b156dc8d3b8221268657b381f996f7f23669347b729c62f2b79c5e
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.2.3:
+    label: rule
+    topic: means_of_egress
+    reason: Limits the bottom of the clear opening to not more than 44 inches above the floor.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 102
+      lines:
+      - 54
+      - 55
+      quote: R319.2.3 Maximum height from floor. Emergency escape and rescue openings shall have the bottom of the clear
+        opening not greater than 44 inches (1118 mm) above the floor.
+    piece_sha256: 7cd5adfb784d224c9afc0c4fd877916ae6de5b815dba5f3c9ee20bf602737411
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.2.4:
+    label: rule
+    topic: means_of_egress
+    reason: Requires escape openings under decks, porches and cantilevers to open fully and keep a 36 by 36 inch path to
+      a yard or court.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 3
+      - 4
+      quote: R319.2.4 Emergency escape and rescue openings under decks, porches and cantilevers. Emergency escape and rescue
+        open- ings installed under decks, porches and cantilevers shall be fully openable and provide a path not less than
+        36
+    piece_sha256: 762c4a56d758665aea86ec0c573b12b42939f337aefcb4b97f22601164a22d14
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.3:
+    label: rule
+    topic: means_of_egress
+    reason: Requires a door used as the escape opening to be side-hinged or sliding.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 6
+      - 7
+      quote: R319.3 Emergency escape and rescue doors. Where a door is provided as the required emergency escape and rescue
+        opening, it shall be a side-hinged door or a sliding door.
+    piece_sha256: 5db89cf14a0b5f13f250921669e3c0542471a4045ca792fab71ffb81b3d7dc41
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.4:
+    label: rule
+    topic: means_of_egress
+    reason: Requires an area well where the bottom of the clear opening is below adjacent grade.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 8
+      - 9
+      quote: R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below the
+        adjacent grade shall be provided with an area
+    piece_sha256: 49ab59b9f487ae0c10edcc5881f533676332dddd2b57f30430bbe28ddf115c40
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.4.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum area well size (9 square feet, 36 inches projection and width).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 10
+      - 11
+      quote: R319.4.1 Minimum size. The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]),
+        with a horizontal projec- tion and width
+    piece_sha256: fcf8b3967abc22fd4420d1a9acc9d3c2ab7d705bc4e9173c4f6a1243dbd69849
+    notes: 'Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run. The book''s metric
+      conversion of the area is not its square feet: "9 square feet (0.9 m²)" (9 square feet is 0.84 m²), p.103.
+      Gordium''s reading: the square feet govern, the square metres being a conversion printed after them; a reading
+      for the architects to confirm before a rule is drafted from this limit.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.4.2:
+    label: rule
+    topic: means_of_egress
+    reason: Requires a permanent ladder or steps in area wells deeper than 44 inches, not obstructed by the open window
+      or door.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 15
+      - 16
+      quote: R319.4.2 Ladder and steps. Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped
+        with an approved, permanently affixed ladder or steps.
+    piece_sha256: bf8997990981a7f5bfcede58d9d0e5715e9e8de0a39283762b99a08771eca810
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.4.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: Sets area well ladder width, projection from the wall and rung spacing.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 19
+      - 20
+      quote: R319.4.2.1 Ladders. Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall
+        project not less than 3 inches (76
+    piece_sha256: 5936133ea1e9069742a5f01bb36784a3ecc51ecb99088a291f9dec4e1d12ce26
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.4.2.2:
+    label: rule
+    topic: means_of_egress
+    reason: Sets area well step width, tread depth and riser height.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 22
+      - 23
+      quote: R319.4.2.2 Steps. Steps shall have an inside width of not less than 12 inches (305 mm), a minimum tread depth
+        of 5 inches (127 mm) and
+    piece_sha256: 561beadeb49942233d5c718612de91efe223a182b4ee398b434ec0dd9d4d2fe3
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.4.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Requires area wells to drain to the foundation drainage system unless the soil is well-drained: a site and
+      soils judgment.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 24
+      - 25
+      quote: R319.4.3 Drainage. Area wells shall be designed for proper drainage by connecting to the building’s foundation
+        drainage system required by Section R405.1.
+    piece_sha256: be1c89947a22e6fdcf0e8bdc6af2dfe61f5a43eaa159e39911b27a5738a87a5f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.4.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Requires bars, grilles, covers and screens over escape openings to keep the clear opening and be releasable
+      without a key, tool or extra force: product operation an architect must judge.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 28
+      - 29
+      quote: R319.4.4 Bars, grilles, covers and screens. Where bars, grilles, covers, screens or similar devices are placed
+        over emergency escape and rescue openings, bulkhead enclosures or area wells that serve such
+    piece_sha256: 686060ab75a3fbd549500c6ec8f4426306775fa0d8f77950b3a4fa9f8a45e68d
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.5:
+    label: flag
+    topic: means_of_egress
+    reason: 'Exempts replacement windows in existing escape openings under conditions about the existing frame and manufacturer''s
+      sizes: a judgment about existing work.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 32
+      - 33
+      quote: R319.5 Replacement windows for emergency escape and rescue openings. Replacement for emergency escape and rescue
+        open- ings installed in buildings meeting the scope of this code shall be exempt from Sections R319.2 and
+    piece_sha256: de464ab95f3566fab0ee080eaded90ad92b00cb77023fa58bd8805e5c6432f6c
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.5.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Sets where opening-control or fall-protection devices go on replacement windows: about existing openings, judged
+      case by case.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 39
+      - 40
+      quote: R319.5.1 Window opening control device and fall protection device height. Window opening control devices or
+        fall protection devices shall be located at a height in accordance with Section R319.1.1 or at as low a
+    piece_sha256: 6041e0d420829b8069b00269e84214fad51547db237ad0d40da6e6c8ce85e13d
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.6:
+    label: rule
+    topic: means_of_egress
+    reason: Requires escape openings in new sleeping rooms and new basements of dwelling additions, with exceptions.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 42
+      - 43
+      quote: R319.6 Dwelling additions. Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue
+        opening shall be provided in each new sleeping room.
+    piece_sha256: 6a3e1e1b90d80e0d9c94dc54efa5ad118f1e197dfd8622fcde6625dac326e211
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R319.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Requires alterations and repairs of existing basements to comply with Appendix BO, which is not brought in: work
+      on an existing basement is shown as needing review until it is (as R318.7.9 for existing stairs).'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 50
+      - 51
+      quote: '[NY] R319.7 Alterations or repairs of existing basements. Alterations or repairs of existing basements shall
+        comply with Appendix BO.'
+    piece_sha256: bae8b7d1e35ed493780f8c00283f42995b216646d51506b5f05979f71af98cb0
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320:
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one).'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 52
+      - 52
+      quote: SECTION R320—HANDRAILS
+    piece_sha256: b4c36864f9b863b99a6b23101780a28e0b4f2adc32d184fb2f45c0f902a56f49
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says handrails comply with Section R320: a pointer to the numbered rules below.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 53
+      - 53
+      quote: R320.1 General. Handrails shall comply with Section R320.
+    piece_sha256: 33a34e870f5d49380d8e3c74fb9c2da9b968c8a79da43a3f6b6de2ac1504293b
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320.2:
+    label: rule
+    topic: means_of_egress
+    reason: Sets handrail height (34 to 38 inches; 30 to 34 on alternating tread devices and ship's ladders), with exceptions.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 103
+      lines:
+      - 54
+      - 55
+      quote: R320.2 Height. Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish
+        surface of ramp slope, shall be not less than 34
+    piece_sha256: ecdc82a81484d610ad14543530cbb8eb201f73aa2be764e948c4dac8d9c91f0e
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320.3:
+    label: rule
+    topic: means_of_egress
+    reason: Limits how far handrails project into the stairway or ramp (4 1/2 inches; 6 1/2 under the exception).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 6
+      - 6
+      quote: R320.3 Handrail projection. Handrails shall not project more than 4 1/2 inches (114 mm) on either side of the
+        stairway or ramp.
+    piece_sha256: ca561394426d289c443c4410343a9b2ee615794398edf8628824f4added9360f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320.4:
+    label: rule
+    topic: means_of_egress
+    reason: Requires not less than 1 1/2 inches between a handrail and the wall.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 10
+      - 11
+      quote: R320.4 Handrail clearance. Handrails adjacent to a wall shall have a space of not less than 1 1/2 inches (38
+        mm) between the wall and the handrails.
+    piece_sha256: f1875ddc4ef7fad9b779f89c933c7e59ab3b925344c1d7723a5e1bbca075189f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320.5:
+    label: rule
+    topic: means_of_egress
+    reason: Requires handrails continuous for the full flight or ramp, with returns, and limits return gaps (1/4 inch).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 12
+      - 13
+      quote: R320.5 Continuity. Handrails shall be continuous for the full length of the flight, from a point directly above
+        the nosing of the landing at the top
+    piece_sha256: 618169eb608eefd852b3b8bf97ba4c1dc7609bf5ba985d04d5ef72a74baeeb8d
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320.6:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the graspable handrail profiles (Type I and Type II dimensions).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 20
+      - 21
+      quote: R320.6 Grip size. Required handrails shall be of one of the following types or provide equivalent graspability.
+        1.
+    piece_sha256: 29befa45b7bb4a6a652a59bdc15317c981229c7ee3ac29ee4c2df3cd35cbd3b9
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R320.7:
+    label: flag
+    topic: means_of_egress
+    reason: 'Requires plastic composite handrails to meet a materials section (R507.2.2): a product question an architect
+      must judge.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 31
+      - 32
+      quote: R320.7 Exterior plastic composite handrails. Plastic composite exterior handrails shall also comply with the
+        requirements of Section R507.2.2.
+    piece_sha256: 46f7d9115991654246f26d979309447146f58f5920e7f6b94750e1a3a52d3a1b
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321:
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A section heading only: its title, with no requirement of its own (its numbered parts are labeled one by one).'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 33
+      - 33
+      quote: SECTION R321—GUARDS AND WINDOW FALL PROTECTION
+    piece_sha256: 52131c07022b953185f9b9272478361cdb3b830761333407bf9761f199e6b380
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Points to Sections R321.1.1 to R321.1.4 for guards: they are labeled one by one.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 34
+      - 34
+      quote: R321.1 Guards. Guards shall be provided in accordance with Sections R321.1.1 through R321.1.4.
+    piece_sha256: 86c586699808b10876b7ddbcf9811b27af0082d75b35339296b18aa638459346
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: Requires guards on open-sided walking surfaces more than 30 inches above the floor or grade below within 36
+      inches horizontally.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 35
+      - 36
+      quote: R321.1.1 Where required. Guards shall be provided for those portions of open-sided walking surfaces, including
+        floors, stairs, ramps and landings that are located more than 30 inches
+    piece_sha256: 4441f83c4aac7d3870fb050090d8d0059facc51e413de1db2c950073acca1608
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.1.2:
+    label: rule
+    topic: means_of_egress
+    reason: Sets the minimum guard height (36 inches; 34 on stairs) and the limit where a guard top serves as handrail.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 38
+      - 39
+      quote: R321.1.2 Height. Required guards at open-sided walking surfaces, including stairs, porches, balconies or landings,
+        shall be not less than 36 inches (914 mm) in height as
+    piece_sha256: 294d92543b5509ca62cf7ae0cfa0fb1ce2d75727044e44df15cc750aa471f1be
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.1.3:
+    label: rule
+    topic: means_of_egress
+    reason: Limits guard openings (4-inch sphere; 6 inches at stair triangles; 4 3/8 inches on stairs).
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 46
+      - 47
+      quote: R321.1.3 Opening limitations. Required guards shall not have openings from the walking surface to the required
+        guard height that allow passage of a sphere 4 inches (102
+    piece_sha256: cd8ba793737595e91a05d1a105ad6edbe56c0239a10559c4ce91a4e839bbacae
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.1.4:
+    label: flag
+    topic: means_of_egress
+    reason: 'Requires plastic composite guards to meet a materials section (R507.2.2): a product question an architect must
+      judge.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 53
+      - 54
+      quote: R321.1.4 Exterior plastic composite guards. Plastic composite exterior guards shall comply with the requirements
+        of Section R507.2.2.
+    piece_sha256: e99e4f9e4c898cc8443a13db1545b6cfc2514b88146d34cfd92e715b5282b716
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Points to Sections R321.2.1 and R321.2.2 for window fall protection: they are labeled one by one.'
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 55
+      - 55
+      quote: R321.2 Window fall protection. Window fall protection shall be provided in accordance with Sections R321.2.1
+        and R321.2.2.
+    piece_sha256: 62013a649d92d09a57d3b7b957ffbea8422d4b935352bfcca1867e3048420154
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: Requires fall protection for operable windows with a sill less than 24 inches above the floor and more than
+      72 inches above grade outside.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 104
+      lines:
+      - 56
+      - 57
+      quote: R321.2.1 Window opening height. In dwelling units, where the bottom of the clear opening of an operable window
+        opening is located less than 24 inches (610 mm) above
+    piece_sha256: 4cbcceeac5721cae32299aadd70fd0349282e49d6b16d946b67a318922e2174f
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R321.2.2:
+    label: rule
+    topic: means_of_egress
+    reason: Says a window control device on an escape opening must not reduce the net clear opening below R319.2.1 and R319.2.2
+      once released.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 105
+      lines:
+      - 7
+      - 8
+      quote: R321.2.2 Emergency escape and rescue openings. Where an operable window serves as an emergency escape and rescue
+        open- ing, a window opening control device or fall prevention device, after operation
+    piece_sha256: 6dc61ee8ded05d88e4745265feeff22f1fc86a8e4c060181f227ac5a329f5461
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R325.6:
+    label: rule
+    topic: means_of_egress
+    reason: Requires artificial lighting of interior stairways (not less than 1 footcandle) and wall switches where there
+      are six or more risers.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 109
+      lines:
+      - 48
+      - 49
+      quote: '[NY] R325.6 Interior stairway illumination. Interior stairways shall be provided with an artificial light
+        source to illuminate the land- ings and treads.'
+    piece_sha256: 586d7180ceedf3b0501020f7d8b6ca0dd8c497c08e314953da93963046c3e15d
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  R325.7:
+    label: rule
+    topic: means_of_egress
+    reason: Requires an artificial light at the top landing of exterior stairways, and at the bottom of exterior stairs
+      down to a basement.
+    sources:
+    - file: gov.ny.residential.2025.pdf
+      page: 109
+      lines:
+      - 55
+      - 56
+      quote: '[NY] R325.7 Exterior stairway illumination. Exterior stairways shall be provided with an artificial light
+        source located at the top landing of the stairway.'
+    piece_sha256: 0787a61bc9ad0a12e130ef4a86149d778a7214d09adebc1666add97e787f7815
+    notes: Drafted by hand in a Claude Code session (2026-11-12); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
