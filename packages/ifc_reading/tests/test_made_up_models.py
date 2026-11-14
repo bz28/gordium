@@ -999,3 +999,29 @@ def test_an_ifc2x3_file_reads_its_shapes(tmp_path, degrees):
     pytest.importorskip("ifcopenshell")
     room = read(_ifc2x3_bedroom(tmp_path, degrees))["rooms"][0]
     assert room["floor_elevation"] == 0.0 and near(room["ceiling_height"], 2.5)
+
+
+@pytest.mark.parametrize("lean", [1e-6, -1e-6])
+def test_a_wall_out_by_drawing_noise_is_still_a_wall(build, tmp_path, lean):
+    """Review round 15: faces were sorted into floor and ceiling by any tilt over 1e-9, so a side wall 1e-6 m out
+    of plumb over 3 m counted as floor (or ceiling) and the level floor was refused as "a step or a slope"."""
+    b = build.house("metre")
+    f = b.f
+    s = f.create_entity("IfcSpace", GlobalId=b.guid(), Name="1", LongName="Bedroom")
+    b.run("aggregate.assign_object", products=[s], relating_object=b.storey)
+    b.place(s, (0, 0, 0))
+    pt = lambda *c: f.createIfcCartesianPoint([float(x) for x in c])  # noqa: E731
+    bot = [pt(0, 0, 0), pt(4, 0, 0), pt(4, 3, 0), pt(0, 3, 0)]
+    top = [pt(0, 0, 3), pt(4 + lean, 0, 3), pt(4 + lean, 3, 3), pt(0, 3, 3)]
+    face = lambda pts: f.createIfcFace([f.createIfcFaceOuterBound(f.createIfcPolyLoop(pts), True)])  # noqa: E731
+    faces = [face(bot[::-1]), face(top)] + [face([bot[i], bot[(i + 1) % 4], top[(i + 1) % 4], top[i]])
+                                             for i in range(4)]
+    brep = f.createIfcFacetedBrep(f.createIfcClosedShell(faces))
+    s.Representation = f.createIfcProductDefinitionShape(
+        None, None, [f.createIfcShapeRepresentation(b.body, "Body", "Brep", [brep])])
+    q = b.run("pset.add_qto", product=s, name="Qto_SpaceBaseQuantities")
+    b.run("pset.edit_qto", qto=q, properties={"NetFloorArea": 12.0, "FinishFloorHeight": 0.0,
+                                               "FinishCeilingHeight": 2.5})
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "floor" in room, room.get("not_given")
+    assert room["floor_elevation"] == 0.0 and room["ceiling_height"] == 2.5

@@ -76,7 +76,7 @@ degrees (as ArchiCAD writes) reads correctly, but the geometry engine finds the 
 them: whenever it can't find the angle unit it turns every angle the other way. That happens when the file states
 no angle unit, holds a project library beside the project (then degrees are also read as radians), or defines its
 degree through another degree. Shapes are read only when the project is the file's one context and states one
-angle unit that is a radian or defined directly from one; otherwise the floor, its height and the window frame are
+angle unit that is a radian or defined directly from one; otherwise the floor, its elevation, the ceiling height and the window frame are
 left out, with the reason. A quantity stated twice (an
 export holding both IFC4's `Qto_SpaceBaseQuantities` and IFC2x3's `BaseQuantities`) is read only if both agree,
 never the first one found. A flag stored as something other than a single value (an enumerated or list value)

@@ -219,8 +219,9 @@ def read_room(model, space) -> dict:
         return _done(room, missing, info)
     n, size = normals(tris)
     real = size > 1e-12
-    down = real & (n[:, 2] < -1e-9)
-    up = real & (n[:, 2] > 1e-9)
+    # a face tilted under 1 in 1000 is a wall: drawing noise (a wall 1e-6 m out over its height) is not a floor
+    down = real & (n[:, 2] < -1e-3)
+    up = real & (n[:, 2] > 1e-3)
     base = float(tris[:, :, 2].min())
     info["base_elevation"] = tidy(base)
 
