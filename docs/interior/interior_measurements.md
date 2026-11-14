@@ -49,7 +49,7 @@ Why no area under a low ceiling: R312.3 leaves out "Portions of a room with a sl
 | `area_well_width`, `area_well_projection` (in, `more`) | As given | R319.4.1 "a horizontal projection and width of not less than 36 inches" (p.80) |
 | `area_well_depth` (in, `more`) | The highest ground given outside less the well's floor | R319.4.2 "vertical depth greater than 44 inches" needs a ladder or steps (p.80) |
 
-**An opening in an area well, read two ways.** "The finished ground level adjacent to the opening" can be the well's own floor or the ground around the well. Both are measured; if one says grade-floor and the other doesn't, `opening_at_grade` has no value (open question for the architects; until answered, a rule that turns on it needs review).
+**An opening in an area well, read two ways.** "The finished ground level adjacent to the opening" can be the well's own floor or the ground around the well. Both are measured; if one says grade-floor and the other doesn't, `opening_at_grade` has no value (open question for the architects, [questions_for_architects.md](../questions_for_architects.md) §4.6; until answered, a rule that turns on it needs review).
 
 Not measured here (each a rule of its own, later): bars, grilles and screens over the opening (R319.4.4), window opening control devices (R319.1.1, R321.2.2), the 36 in path under a deck or porch (R319.2.4), whether the opening reaches a public way (R319.1).
 
