@@ -1,7 +1,7 @@
 # A real house: 80 South William Street (Lot 2), Pearl River, Town of Orangetown, NY
 
 **Purpose:** the first real house for egress checking: a four-bedroom, two-story house with a basement, transcribed from its public planning-board drawings, with the egress rules listed in `answer_key.yaml` worked out by hand.\
-**For:** anyone testing or changing egress measuring and checking; architects checking the hand answers.\
+**For:** anyone testing or changing egress measuring and checking; anyone checking the hand-worked answers.\
 **Kept current by:** whoever changes the interior description format (`docs/interior/interior_description_format.md`) or adds an egress rule this house should be checked against.
 
 ## The source
