@@ -848,3 +848,36 @@ def test_a_types_false_doesnt_settle_this_rooms_description(build, tmp_path):
     b.pset(st, "Gordium_Egress", {"Sleeping": False})
     room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
     assert "sleeping" not in room and "Bedroom 3" in room["not_given"]["sleeping"]
+
+
+@pytest.mark.parametrize("name, expected", [("Office", None), ("Bath Gast", None), ("Laundry", False), ("1", False)])
+def test_a_types_false_doesnt_settle_the_rooms_own_name(build, tmp_path, name, expected):
+    """Review round 13: a space type's Sleeping false settled an ask word ("Office") or an unknown word beside a
+    not-sleeping one in the room's own name. It settles the type's words only; a room whose own name says
+    nothing, or only not-sleeping words, takes it."""
+    b = bedroom_house(build, name=name)
+    [space] = b.f.by_type("IfcSpace")
+    space.Name = None
+    st = b.run("root.create_entity", ifc_class="IfcSpaceType", name="Study")
+    b.run("type.assign_type", related_objects=[space], relating_type=st)
+    b.pset(st, "Gordium_Egress", {"Sleeping": False})
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert room.get("sleeping") is expected
+    if expected is None:
+        assert "said once for every room of its type" in room["not_given"]["sleeping"]
+
+
+def test_a_blank_never_outvotes_a_real_statement(build, tmp_path):
+    """Review round 13: since round 12 a blank counted as a statement that disagreed: the architect's
+    EscapeOpening true beside a blank FireExit read not marked, ExitDoor true beside a blank FireExit unknown,
+    and a "Bedroom 2" with a blank Sleeping (and no type) unknown. A blank only blocks its type's value."""
+    b = bedroom_house(build, window={"psets": {"Gordium_Egress": {"EscapeOpening": True}}})
+    [space], [w] = b.f.by_type("IfcSpace"), b.f.by_type("IfcWindow")
+    _blank(b, w, "Pset_WindowCommon", "FireExit")
+    door = b.door("Front", (5, 0, 0), psets={"Gordium_Egress": {"ExitDoor": True}})
+    _blank(b, door, "Pset_DoorCommon", "FireExit")
+    _blank(b, space, "Gordium_Egress", "Sleeping")
+    d = read(b.write(tmp_path / "h.ifc"))
+    assert d["openings"][0]["escape"] is True
+    assert one(d["doors"], "Front")["exit"] is True
+    assert d["rooms"][0]["sleeping"] is True

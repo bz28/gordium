@@ -15,7 +15,7 @@ from pathlib import Path
 
 import yaml
 
-from ifc_reading.model import EPS, FLAT, normals, tidy
+from ifc_reading.model import EPS, FLAT, Unreadable, normals, tidy
 
 GORDIUM_SET = "Gordium_Egress"
 KINDS = ("sleeping", "not_sleeping", "ask", "neutral")
@@ -179,7 +179,23 @@ def read_room(model, space) -> dict:
 
     texts, unclear = names_of(model, space)
     flag, where = model.prop(space, [GORDIUM_SET], "Sleeping")
-    if flag is not None and not isinstance(flag, bool):     # a flag that can't be read is never left to the name
+    if getattr(flag, "blank", False) and not model.find_all(space, lambda n: n == GORDIUM_SET, "Sleeping",
+                                                            model.levels(space)[1]):
+        flag, where = None, None           # review round 13: blank, and no type to block: the name decides
+    if flag is False and "(from its type" in (where or ""):
+        # review round 13: a type's false, said once for every room of it, settles the type's words, not the
+        # room's own: an ask, sleeping or unknown word in the room's own names leaves it unknown
+        own = {k: v for k, v in texts.items() if not k.startswith("type ")}
+        alone, said = sleeping_from_names(own)
+        table = words()
+        spoken = [w for v in own.values() for w in name_words(v) if table.get(w, "unlisted") != "neutral"]
+        if alone is not False and spoken:
+            flag = Unreadable("type", stated=True)
+            why = (f"{where} is false, said once for every room of its type, but the room's own name doesn't settle "
+                   f"it ({said}): the architect says (Gordium_Egress.Sleeping on the space)")
+    if isinstance(flag, Unreadable) and flag.kind == "type":
+        sleeping = None
+    elif flag is not None and not isinstance(flag, bool):     # a flag that can't be read is never left to the name
         sleeping, why = None, f"{where} is {flag!r}, not true or false: the architect says"
     else:
         sleeping, why = sleeping_from_names(texts, flag, where)

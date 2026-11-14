@@ -79,6 +79,10 @@ def _flag(model, element, sets_names):
                for v, w, _ in model.find_all(element, lambda n, s=s: n == s, name, holders)]
         if not got:
             continue
+        # review round 13: a blank blocks its type's mark, but never outvotes a real one at its level
+        if all(getattr(v, "blank", False) for v, _ in got):
+            return None, got[0][1], f"{got[0][1]} is stated with no value"
+        got = [(v, w) for v, w in got if not getattr(v, "blank", False)]
         said = ", ".join(f"{w} {v!r}" for v, w in got)
         if any(not isinstance(v, bool) or isinstance(v, Unreadable) for v, _ in got):
             bad = [(v, w) for v, w in got if not isinstance(v, bool)][0]

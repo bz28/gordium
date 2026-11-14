@@ -75,7 +75,7 @@ class Model:
                 if item.is_a("IfcPropertySingleValue"):
                     # review round 12: stated with no value is still stated here (it never lets the type's through)
                     value = item.NominalValue.wrappedValue if item.NominalValue is not None else \
-                        Unreadable("stated with no value", stated=True)
+                        Unreadable("stated with no value", stated=True, blank=True)
                 elif item.is_a("IfcPhysicalSimpleQuantity"):
                     value = item[3]                       # LengthValue, AreaValue…
                 else:
@@ -110,6 +110,9 @@ class Model:
                 if not got:
                     continue
                 # review round 7: a value inherited from the type (every element of it) says so
+                # review round 13: a blank blocks its type's value, but never outvotes a real statement
+                stated = [g for g in got if not getattr(g[0], "blank", False)] or got[:1]
+                got = stated
                 where = got[0][1] + (self.from_type(t) if level else "")
                 values = [v for v, _, _ in got]
                 if len(got) > 1 and any(isinstance(v, Unreadable) or type(v) is not type(values[0]) or
@@ -229,8 +232,8 @@ class Unreadable:
     """A property the model states under the wanted name but in a form not read (an enumerated or list value):
     never taken as absent, so a flag stored that way leaves its part unknown."""
 
-    def __init__(self, kind: str, stated=False):
-        self.kind, self.stated = kind, stated
+    def __init__(self, kind: str, stated=False, blank=False):
+        self.kind, self.stated, self.blank = kind, stated, blank
 
     def __repr__(self):
         return self.kind if self.stated else f"an {self.kind} (not read)"
