@@ -1250,7 +1250,7 @@ def test_the_delta_says_to_spare_or_short_in_words(facts, tmp_path):
     assert deltas and deltas <= set(cells)                            # the report's Delta: the panel's words
     ui = host_text("rhino", "ui", purpose="wiring")
     assert "logic.list_values(i)" in ui and "delta_text" not in ui           # settle's words only (round 2), or
-    logic_src = host_text("rhino", "logic", purpose="wiring")
+    logic_src = logic_text("rhino", purpose="wiring")         # (list_values: host_core/panel_words.py since the move)
     assert 'item.get("delta_cell") or item.get("delta")' in logic_src          # their shorter form, made by settle
 
 
