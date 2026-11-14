@@ -1,0 +1,33 @@
+# Hand-derived before the code ran on this house (inches; areas in sq ft). Working shown per value.
+parts:
+  sleeping_room:
+    bed1:
+      measures:
+        sleeping_room_floor_area: 132.0     # 144 x 132 = 19008 sq in / 144; ceiling 96 in >= 84 everywhere
+    bed2:
+      measures:
+        sleeping_room_floor_area: 110.0     # 132 x 120 = 15840 / 144
+  emergency_escape_opening:
+    w1:
+      within: bed1
+      measures:
+        opening_net_clear_width: 24.5       # frame 26 wide, casement at 90 deg: sash edge 1.5 in thick stands in the opening
+        opening_net_clear_height: 36.0      # 66 - 30
+        opening_net_clear_area: 6.125       # 24.5 x 36 = 882 / 144
+        opening_sill_height: 30.0           # clear bottom 30 - floor 0
+        opening_at_grade: true              # |30 - (-8)| = 38 <= 44
+    w2:
+      within: bed2
+      measures:
+        opening_net_clear_width: 30.0
+        opening_net_clear_height: 26.0      # open sashes cover 50..84, clear 24..50
+        opening_net_clear_area: 5.416667    # 30 x 26 = 780 / 144
+        opening_sill_height: 24.0
+        opening_at_grade: true              # |24 + 8| = 32
+  egress_door:
+    d1:
+      measures:
+        door_clear_width: 32.25             # latch stop 34.25 - door face at 90 deg (pin 0.25 + leaf 1.75 = 2.0)
+        door_clear_height: 80.0             # 80.5 - 0.5
+  stair: {}
+  guard: {}

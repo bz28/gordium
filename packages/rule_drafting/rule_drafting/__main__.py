@@ -55,7 +55,11 @@ def slug(text: str) -> str:
 
 
 class Inputs:
-    """Everything drafting reads, for one jurisdiction."""
+    """Everything drafting reads, for one jurisdiction (a place's zoning; a state's building code: book.BookInputs)."""
+
+    for_parts = False
+    book = False                      # a building code's answer shape (drafter.output_schema's book)
+    settings = drafter.SETTINGS
 
     def __init__(self, j: Path | None = None):
         j = j or one_place()
@@ -83,6 +87,9 @@ class Inputs:
         # Every section of every chart page the reader read; the use lists are built by code, not the AI.
         pages = sorted({t["page"] for t in self.tables})
         self.chart_sections = [s for s in chart_values.sections(cells, pages) if s not in CODE_SECTIONS]
+
+    def context(self, unit: dict) -> dict:
+        return drafter.gather_context(unit, self.law, {"notes": self.notes}, self.definitions)
 
     def rows_of(self, page, section):
         return chart_values.section_rows(self.cells_list, page, section)
@@ -119,6 +126,14 @@ class Inputs:
         return out
 
 
+def inputs(args) -> "Inputs":
+    """What a command drafts: a state folder's building code with --state, else the place's zoning."""
+    if getattr(args, "state", None):
+        from .book import BookInputs, state_folder
+        return BookInputs(state_folder(args.state))
+    return Inputs()
+
+
 def read_log(i: Inputs) -> dict:
     path = i.records / "drafting_log.yaml"
     return (load(path) or {}) if path.exists() else {"units": {}, "complete": False}
@@ -138,10 +153,18 @@ def owned_rules_approved(i: Inputs, log: dict, unit_id: str) -> bool:
 
 
 def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
-    """Replace this unit's earlier drafts with the new ones, and record what happened."""
+    """Replace this unit's earlier drafts with the new ones, and record what happened. The AI's rules are also kept
+    as drafted (records/as_drafted/<district>.yaml), so a change made after the draft (a rule's `revised`) is
+    always told apart from the AI's own answer; a re-draft replaces a revised rule, and the log says which."""
     old = set(log["units"].get(unit_id, {}).get("rules", []))
     books = {p.stem: load(p) for p in i.drafted.glob("*.yaml")}
+    as_drafted_folder = i.records / "as_drafted"
+    as_drafted = {p.stem: load(p) for p in as_drafted_folder.glob("*.yaml")}
+    replaced = sorted(r["id"] for book in books.values() for r in book.get("rules", [])
+                      if r["id"] in old and r.get("revised"))
     for district, book in books.items():
+        book["rules"] = [r for r in book.get("rules", []) if r["id"] not in old]
+    for district, book in as_drafted.items():
         book["rules"] = [r for r in book.get("rules", []) if r["id"] not in old]
     new_ids = []
     for district, rules in result["rules"].items():
@@ -153,16 +176,23 @@ def save_result(i: Inputs, log: dict, unit_id: str, result: dict) -> None:
                     {"rule": rule["id"], "why": "the id is already drafted by another unit; not saved"})
                 continue
             book["rules"].append(rule)
+            as_drafted.setdefault(district, {"district": district, "rules": []})["rules"].append(rule)
             taken.add(rule["id"])
             new_ids.append(rule["id"])
     i.drafted.mkdir(parents=True, exist_ok=True)
-    for district, book in books.items():
-        path = rulebook_path(i, district)
-        if book["rules"]:
-            path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
-        elif path.exists():
-            path.unlink()
+    as_drafted_folder.mkdir(parents=True, exist_ok=True)
+    for folder, saved in ((i.drafted, books), (as_drafted_folder, as_drafted)):
+        for district, book in saved.items():
+            path = folder / f"{district}.yaml"
+            if book["rules"]:
+                path.write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True, width=110), encoding="utf-8")
+            elif path.exists():
+                path.unlink()
     entry = {"rules": new_ids, "unresolved": result.get("unresolved", []), "problems": result.get("problems", [])}
+    if replaced:                  # changes made after the AI's draft, gone with the re-draft: a person re-applies them
+        entry["revisions_replaced"] = replaced
+        print(f"  {unit_id}: re-drafted rules that had been revised after the AI ({', '.join(replaced)}): "
+              "their revisions are gone; re-apply them")
     if result.get("reason"):
         entry["reason"] = result["reason"]
     if result.get("failed"):
@@ -224,16 +254,16 @@ def estimate(i: Inputs, todo: list[dict], model: str, client=None) -> dict:
     characters per token; output at the measured average of recorded calls, else max_tokens."""
     ai = [u for u in todo if not u.get("code")]
     system = i.system()
-    messages = [drafter.unit_message(u, drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions)) for u in ai]
+    messages = [drafter.unit_message(u, i.context(u)) for u in ai]
     if client is not None and ai:           # exact, counted the way a call is sent (instructions and answer schema too)
-        fmt = {"effort": drafter.SETTINGS["effort"], "format": drafter.output_schema(sorted(i.ctx.topics))}
+        fmt = {"effort": drafter.SETTINGS["effort"], "format": drafter.output_schema(sorted(i.ctx.topics), i.for_parts, i.book)}
         count = lambda text: client.messages.count_tokens(model=model, system=system, output_config=fmt,
                                                           messages=[{"role": "user", "content": text}]).input_tokens
         system_tokens = count(".")
         tokens = sum(count(m) - system_tokens for m in messages)
     else:
         system_tokens, tokens = len(system) // 4, sum(len(m) // 4 for m in messages)
-    out_each = _measured_output(i, model) or drafter.SETTINGS["max_tokens"]
+    out_each = _measured_output(i, model) or i.settings["max_tokens"]
     usage = {"input_tokens": tokens, "cache_creation_input_tokens": system_tokens if ai else 0,
              "cache_read_input_tokens": system_tokens * max(len(ai) - 1, 0), "output_tokens": int(out_each * len(ai))}
     return {"units": len(todo), "ai_calls": len(ai), "exact_input": client is not None, "usage": usage,
@@ -258,7 +288,7 @@ def _client():
 
 
 def cmd_status(args) -> int:
-    i = Inputs()
+    i = inputs(args)
     log = read_log(i)
     units = i.units()
     done = [u for u in units if u["id"] in log["units"]]
@@ -271,7 +301,7 @@ def cmd_status(args) -> int:
 
 
 def cmd_estimate(args) -> int:
-    i = Inputs()
+    i = inputs(args)
     model = args.model or drafter.SETTINGS["model"]
     todo = select(i, read_log(i), args)
     print_estimate(estimate(i, todo, model, _client()), model)
@@ -282,7 +312,7 @@ def cmd_draft(args) -> int:
     if args.limit is None and not args.all and not args.only:
         print("say how many: --limit N, --only UNIT..., or --all")
         return 1
-    i = Inputs()
+    i = inputs(args)
     log = read_log(i)
     todo = select(i, log, args)
     client = None
@@ -323,9 +353,9 @@ def cmd_draft(args) -> int:
             elif u["id"] == ACCESSORY_UNIT:
                 result = draft_accessory()
             else:
-                context = drafter.gather_context(u, i.law, {"notes": i.notes}, i.definitions)
-                result = drafter.draft_unit(client, u, context, system, i.law, i.ctx, i.columns, i.cells, i.notes,
-                                            record, budget=budget)
+                result = drafter.draft_unit(client, u, i.context(u), system, i.law, i.ctx, i.columns, i.cells, i.notes,
+                                            record, settings=i.settings, budget=budget, for_parts=i.for_parts,
+                                            book=i.book)
             save_result(i, log, u["id"], result)
             saved = True
             print(f"  {u['id']}: {sum(len(r) for r in result['rules'].values())} rules, "
@@ -382,7 +412,7 @@ def draft_uses(i: Inputs) -> dict:
 
 
 def cmd_cost(args) -> int:
-    i = Inputs()
+    i = inputs(args)
     calls = run_records(i)
     print(f"{len(calls)} recorded calls, ${sum(c['cost_usd'] for c in calls):.4f}")
     return 0
@@ -393,6 +423,9 @@ def main(argv: list[str]) -> int:
     sub = parser.add_subparsers(dest="command", required=True)
     for name in ("status", "estimate", "draft", "cost"):
         sub.add_parser(name)
+    for name in ("status", "estimate", "draft", "cost"):
+        sub.choices[name].add_argument("--state", help="a state law folder's building code (new_york/new_york_state) "
+                                                       "instead of the place's zoning")
     for name in ("estimate", "draft"):
         p = sub.choices[name]
         p.add_argument("--limit", type=int, help="only the next N undrafted units")

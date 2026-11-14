@@ -2053,6 +2053,7 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
     facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
     if (answer or {}).get("status") != "found":
         return facts, saved_ui, None
+    facts.pop("overlays_none_found", None)       # a found lookup decides it again, for its own lot only
     if not replaces:
         saved_ui["_lookup"]["says"] = "Your own lot is kept: the lookup filled in the address and the district only."
         return facts, saved_ui, None
@@ -2074,6 +2075,9 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
             #   lot width wait for the street pick, #18 reading its streets only from the ids; one street: as drawn)
         if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
             facts["plan_north_deg"] = w["frame"]["rotation_deg"]
+        none_found = overlays_none_found(answer, w["lot_ring"])
+        if none_found:
+            facts["overlays_none_found"] = none_found
         spots = [] if FLAT_GROUND else [table.add_spot(p) for p in w.get("spots") or []]   # flat: none drawn
         session.add(spots)
         saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"), lookup_spots=spots)
@@ -2083,6 +2087,31 @@ def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
         guide = w["guide_ring"]
     saved_ui["lookup_snapshot"] = w.get("snapshot")
     return facts, saved_ui, guide
+
+
+OVERLAYS_NONE_SOURCE = ("address lookup: FEMA flood maps, the City's historic, gorge and zoning maps and parcel "
+                        "record, every one answering none")
+
+
+def overlays_none_found(answer, lot_ring):
+    """The lot fact a live lookup's positive "no overlay on this lot" becomes (project.OVERLAYS_NONE_FIELDS), for the
+    lot it draws (`lot_ring`, in feet, as drawn), or None. Only when its overlays fact is "suggested" with nothing in
+    it: every overlay source answered, none found, and nothing doubtful about the lot it was worked out on (site_lookup
+    raises it to needs review otherwise). Never from a saved lookup (an old answer, offered when the services are
+    down), nor without the lot: the checker honours it only while the lot is still this outline."""
+    answer = answer or {}
+    got = ((answer.get("facts") or {}).get("overlays") or {})
+    status = ((answer.get("details") or {}).get("overlays") or {}).get("status")
+    if answer.get("status") != "found" or answer.get("saved_on") or status != "suggested":
+        return None
+    if not isinstance(got.get("value"), list) or got["value"] or not lot_ring or len(lot_ring) < 3:
+        return None
+    date = answer.get("checked")   # the place's own day (lookup_box: city_day), the day the host compares it with;
+    address = found_address(answer)   # never the overlays fact's UTC day (a day ahead after about 8 pm in Ithaca)
+    if not date or not address:
+        return None
+    return {"value": True, "lot_outline": [[float(p[0]), float(p[1])] for p in lot_ring], "address": address,
+            "source": OVERLAYS_NONE_SOURCE, "date": str(date)}
 
 
 # ---- long work: a line that says what Gordium is doing, and a Cancel that stops it --------------------------------
