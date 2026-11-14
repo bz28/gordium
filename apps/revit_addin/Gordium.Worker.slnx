@@ -1,8 +1,10 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/Gordium.Worker/Gordium.Worker.csproj" />
+    <Project Path="src/Gordium.Revit.Reading/Gordium.Revit.Reading.csproj" />
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/Gordium.Worker.Tests/Gordium.Worker.Tests.csproj" />
+    <Project Path="tests/Gordium.Revit.Reading.Tests/Gordium.Revit.Reading.Tests.csproj" />
   </Folder>
 </Solution>

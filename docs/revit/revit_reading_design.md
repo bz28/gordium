@@ -44,6 +44,7 @@ are for the architect's reading only (proposed).
 | Proposed: a linked Revit model, wherever it is placed (Rhino reports such a block wherever it is, with no lot test), that holds any building-category element at any depth of links inside links (as `_block_holds`), or has a closed workset of its own (its hidden part could hold the house; **to check** that the API says so) | `unsent`, kind `"a linked model"`, `not_a_solid`: every building measure needs review. Also listed in `left_out` under its `UniqueId`, `could_be_building: true`, as Rhino lists every block off the Building layer (scene 19); ids are unique, so the `unsent` entry is then named by its kind, as Rhino's reader names its `"a block"` | A block holding Building-layer objects (`read_3dm._block_holds`) | 04 (the shed drawn as a linked model); 19 (new scene B's first case) |
 | Proposed: a linked model with no building-category element at any depth, or a 3D CAD import (`ImportInstance`), reaching into the lot | `left_out`, `could_be_building: true` | A block on another layer | **New scene B** (scene 15's block is already the family instance above) |
 | A link that isn't loaded, including a link nested as an overlay (not loaded in the host: **to check**) | Can't be looked inside: `inventory_complete: false` | | Verdicts only: 14 (never drawn); the mapping: **new scene B** |
+| A coordination model (Navisworks, Revit 2024 and later; `CoordinationModelLinkUtils.IsCoordinationModelInstance`), which Revit draws for show only and gives no geometry for (**to check**) | `left_out`, its contents not known (`contents_not_known`): on the lot and touching wherever it stands, never skipped as an element with no geometry; inside a linked model, the link has no box | A linked block whose file isn't the design | Reader pin (review round 5) |
 | Elements in a closed workset | Proposed: `inventory_complete: false` whenever any user workset is closed (`Workset.IsOpen`), whether or not the reader can still read them (**to check**) | | Verdicts only: 14; the mapping: **new scene B** |
 | Lines, annotations, levels, grids, reference planes, rooms, areas, views, a 2D CAD import | Not looked at (no solid: not a building) | Curves, points, text | 01 to 17 (none is sent) |
 | Toposolid | Proposed: `left_out` (it is a closed solid that could be a building until the architect says it is the ground; then it gives the grade, section 5) | A terrain the architect hasn't picked | **New scene I** (scene 16's terrain is an open flat mesh, drawn in Revit as an open mesh DirectShape, not a Toposolid) |
@@ -82,9 +83,9 @@ objects wholly inside the building is **new scene F**, for Ben to decide.
 | An empty solid | A solid with no faces (Revit families often hold some) is skipped: it has nothing to send | | **new scene H** |
 | An open solid | A solid with faces and an edge that has only one face (`Edge.GetFace(1)` null): `open_solid` with `what` the element's name (**to check** that Revit gives open shells as solids, and that `GetFace(1)` behaves so) | `open_solid` | 03 |
 | A mesh in an element's geometry | Its triangles as faces, with `open_mesh` unless the mesh is known to be closed (**to check** whether Revit can say) | `_mesh_faces`, `open_mesh` | **new scene A** |
-| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails (`get_Geometry` returns null or throws) | The element is `unsent`, `not_a_solid`, kind its category | `not_a_solid` | 04 |
+| Anything else in the geometry (an object type that is not a solid, mesh, curve, point or family instance), or reading the geometry fails (`get_Geometry` throws, or returns null for a building-category element) | The element is `unsent`, `not_a_solid`, kind its category. Null for an element outside the building categories and not a family, a CAD import or a Toposolid (those are left out with no box): skipped, as having nothing that could be a building (proposed in code, Ben to confirm: see "Where the decisions are written") | `not_a_solid` | 04 |
 | Curves and points in an element's geometry | Skipped (as `read_3dm` skips curves and points) | | 01 |
-| A building-category element with no face to send at all (for example a family whose solids show only at Coarse detail) | Never skipped: `unsent`, `not_a_solid`, kind `"a <category> with no geometry"`, so every building measure needs review (Rhino sends an empty solid on the Building layer as a building with no faces and `open_solid`) | `read_3dm.read_site` | **new scene H** |
+| A building-category element with no face to send at all (for example a family whose solids show only at Coarse detail) | Never skipped: `unsent`, `not_a_solid`, kind `"a <category> element with no geometry"` (as "a Walls element with no geometry": Revit names its categories in the plural), so every building measure needs review (Rhino sends an empty solid on the Building layer as a building with no faces and `open_solid`) | `read_3dm.read_site` | **new scene H** |
 
 One building per element, not per solid (proposed; Rhino sends one per solid, which is one per object there): Revit gives no stable id to a solid inside an element, and results must
 point back to something the architect can click (ids, below).
@@ -135,6 +136,7 @@ closed one the lot is `no_lot_outline`.
 | Nothing picked, two or more | `lot: null`, `several_lot_outlines` (count, layer `"Property Lines"`) | 09 |
 | Nothing picked, none | `lot: null`, `no_lot_outline` | **new scene G** |
 | The picked lot no longer there | `lot: null`, `lot_not_found` | **new scene G** |
+| A linked model holding a property line, at any depth (in code; Ben to confirm) | `lot_block` on the site, whatever lot is read (as Rhino's block holding anything on the Site layer): the lot may be the link's, not the host's | **new scene G** |
 | A straight piece | One lot line: its two ends | 01 |
 | An arc (or any curved piece) | Points along it at most 0.25 ft apart (at least 16), `curved: true`, never its chord (as `read_3dm._edges`) | 17 |
 
@@ -232,7 +234,8 @@ house will need its stories entered (or its floors marked) before that row can c
 
 ## 8. Left for the trial
 
-Every "to check" above, plus: whether the curtain wall host has faces of its own; whether open shells come back as
+Every "to check" above, plus: which category type Revit gives a linked model and a CAD import (the reader looks at
+both whatever it is, so skipping one can't hide a house it holds); whether the curtain wall host has faces of its own; whether open shells come back as
 solids; how property lines read in 2026; the shared-coordinates transform's direction and Revit's distance limit;
 whether `DocumentChanged` reports joined neighbours; whether `ElementOnPhaseStatus` has the values section 1 needs;
 how often real models need review only because of curved family details (Q3); how a component stair's and a
@@ -243,6 +246,22 @@ neither left out nor unsent (Snowdon Towers has stairs).
 sentences are Rhino's: `lot_not_found` says "the Site layer", `no_lot_outline` and `several_lot_outlines` say "on
 the … layer", `not_a_solid` says "explode it". Host-neutral wording for those is a change to
 `model_measurement/stops.py`, its own PR, before the Revit add-in is used on a real project.
+
+## Where the decisions are written
+
+Every decision above that a Revit model doesn't have to be open for is code in
+`apps/revit_addin/src/Gordium.Revit.Reading/` (plain C#, no Revit types), tested on the Mac against the real worker
+with each drawn conformance scene drawn as fake Revit records ([its README section](../../apps/revit_addin/README.md#the-readers-logic-gordiumrevitreading)).
+The trial writes only the layer that fills its records from the API, and confirms each "to check". Two choices the
+code makes, for Ben to confirm: one departs from what this note first said (section 2 had null geometry `unsent`
+for every element), one it didn't spell out. An element outside the building categories whose
+geometry Revit returns as null is skipped (nothing that could be a building; one whose reading throws, or that holds a kind of geometry the reader
+doesn't know, is still `unsent`, a family, a CAD import and a Toposolid too; a coordination model, which Revit gives no geometry for though it may hold a building, is left out as a linked model whose contents aren't known, so it counts even with no lot; inside a
+linked model such an element leaves the link with no box: left out and touching), so a model element that simply has no shape (one Revit gives no geometry, outside the categories and families above) doesn't make every check need review; and a building whose nested
+family gives no geometry gets a `tool_words` problem (it may be bigger than measured). Found while writing it: on a
+model turned to true north by 30°, Revit's own box of each element, square to its internal axes, is bigger once
+turned into shared coordinates, so objects well apart from the house read as touching (scene 15's context solid, 15 ft behind it, does) (the cautious side;
+scene J must be hand-worked with this in mind).
 
 ## Sources
 
