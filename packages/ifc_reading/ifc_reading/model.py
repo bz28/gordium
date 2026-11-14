@@ -35,22 +35,29 @@ class Model:
         self.metres, why = unit_scale(units[0], "LENGTHUNIT")
         if self.metres is None:
             raise ValueError(f"the file's length unit {self.length_unit!r} can't be converted to metres: {why}")
-        # Angles (review round 14). The geometry engine finds the file's units itself, and its angle-unit
-        # setting changes nothing: with no angle unit stated it turns a revolved shape the other way, and with
-        # more than one context (a project library) it finds no units and reads every angle as radians (a 90
-        # degree turn came out 117). Lengths are rescaled here; angles can't be, so those shapes are refused.
+        # Angles (review round 14). The geometry engine finds the file's units itself and its angle-unit setting
+        # changes nothing. It misread angles with no angle unit stated (a revolved shape turned the other way),
+        # with more than one context (a project library: it finds no units, turns radians the other way and reads
+        # degrees as radians) and with a degree defined through another degree. Lengths are rescaled here; angles
+        # can't be, so shapes are read only when the file states one angle unit the engine reads right: an SI
+        # radian, or a unit defined directly from one (a degree), and the project is the file's one context.
         angles = [u for u in context.Units if getattr(u, "UnitType", None) == "PLANEANGLEUNIT"]
-        radians = len(angles) == 1 and angles[0].is_a("IfcSIUnit") and angles[0].Name == "RADIAN" \
-            and not angles[0].Prefix
         contexts = len(self.by_type("IfcContext"))
+
+        def plain_radian(u):
+            return u is not None and u.is_a("IfcSIUnit") and u.Name == "RADIAN"
+
         if len(angles) != 1:
             self.shape_problem = (f"the file states {len(angles)} angle units, so how the geometry engine reads its "
                                   "angles is unclear (with none it turns a curved shape the other way): shapes "
                                   "aren't read")
-        elif contexts != 1 and not radians:
+        elif contexts != 1:
             self.shape_problem = (f"the file holds {contexts} contexts (a project library beside the project), so the "
-                                  "geometry engine can't find its units and would read its angles, stated in "
-                                  f"{_unit_name(angles[0])}, as radians: shapes aren't read")
+                                  "geometry engine can't find its units and misreads its angles: shapes aren't read")
+        elif not (plain_radian(angles[0]) or (angles[0].is_a("IfcConversionBasedUnit") and plain_radian(
+                getattr(angles[0].ConversionFactor, "UnitComponent", None)))):
+            self.shape_problem = (f"the file's angle unit {_unit_name(angles[0])!r} isn't a radian or defined directly "
+                                  "from one, and the geometry engine misreads such angles: shapes aren't read")
         else:
             self.shape_problem = None
         areas = [u for u in context.Units if getattr(u, "UnitType", None) == "AREAUNIT"]

@@ -73,9 +73,11 @@ project's own (`IfcProject.UnitsInContext`; a file whose project states none is 
 and a unit is only ever an SI unit or a conversion of one (a foot is 0.3048 m): a unit whose size the model doesn't
 state (an `IfcContextDependentUnit`) refuses the file, or leaves out the one number stated in it. Angles: a file in
 degrees (as ArchiCAD writes) reads correctly, but the geometry engine finds the file's units itself and can't be told
-them, and it misreads angles when the file states no angle unit (it turns a curved shape the other way) or holds a
-project library beside the project (it reads degrees as radians). Then shapes aren't read: the floor, its height and
-the window frame are left out, with the reason. A quantity stated twice (an
+them: whenever it can't find the angle unit it turns every angle the other way. That happens when the file states
+no angle unit, holds a project library beside the project (then degrees are also read as radians), or defines its
+degree through another degree. Shapes are read only when the project is the file's one context and states one
+angle unit that is a radian or defined directly from one; otherwise the floor, its height and the window frame are
+left out, with the reason. A quantity stated twice (an
 export holding both IFC4's `Qto_SpaceBaseQuantities` and IFC2x3's `BaseQuantities`) is read only if both agree,
 never the first one found. A flag stored as something other than a single value (an enumerated or list value)
 is never taken as absent: its part is left unknown, with what was found. A flag stated twice on the same element

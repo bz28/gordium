@@ -746,7 +746,8 @@ def _raised_bedroom(build):
     return b
 
 
-@pytest.mark.parametrize("how", ["library", "nested_unit"])
+# the library case: since review round 14 its shapes are refused (test_a_library_refuses_shapes_even_in_radians)
+@pytest.mark.parametrize("how", ["nested_unit"])
 def test_shapes_and_placements_in_one_scale(build, tmp_path, how):
     """Review round 11: the geometry engine picked its own unit scale. With a project library holding its own
     units, or a foot defined through another foot, it left shapes in feet-as-metres while placements were in
@@ -912,8 +913,8 @@ def test_angles_in_degrees(build, tmp_path, library):
     d = read(b.write(tmp_path / "h.ifc"))
     room, w = d["rooms"][0], d["openings"][0]
     if library:
-        assert "floor_elevation" not in room and "read its angles" in room["not_given"]["floor_elevation"]
-        assert "frame" not in w and "read its angles" in w["not_given"]["frame"]
+        assert "floor_elevation" not in room and "misreads its angles" in room["not_given"]["floor_elevation"]
+        assert "frame" not in w and "misreads its angles" in w["not_given"]["frame"]
     else:
         assert near(room["floor_elevation"], 10 * FT) and "frame" in w
 
@@ -926,3 +927,25 @@ def test_no_angle_unit_refuses_shapes(build, tmp_path):
     ctx.Units = [u for u in ctx.Units if getattr(u, "UnitType", None) != "PLANEANGLEUNIT"]
     room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
     assert "floor_elevation" not in room and "0 angle units" in room["not_given"]["floor_elevation"]
+
+
+def test_a_library_refuses_shapes_even_in_radians(build, tmp_path):
+    """Sceptic, review round 14: with a project library the engine also turned radians the other way."""
+    b = _raised_bedroom(build)
+    _library(b)
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "floor_elevation" not in room and "2 contexts" in room["not_given"]["floor_elevation"]
+
+
+def test_a_degree_defined_through_a_degree_refuses_shapes(build, tmp_path):
+    """Sceptic, review round 14: a degree defined as 1 degree (itself from radians) was read as radians."""
+    b = _raised_bedroom(build)
+    _degrees(b)
+    ctx = b.f.by_type("IfcProject")[0].UnitsInContext
+    [deg] = [u for u in ctx.Units if getattr(u, "UnitType", None) == "PLANEANGLEUNIT"]
+    outer = b.f.create_entity("IfcConversionBasedUnit", Dimensions=deg.Dimensions, UnitType="PLANEANGLEUNIT",
+                              Name="DEGREE", ConversionFactor=b.f.create_entity(
+                                  "IfcMeasureWithUnit", b.f.create_entity("IfcPlaneAngleMeasure", 1.0), deg))
+    ctx.Units = [u for u in ctx.Units if u != deg] + [outer]
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "floor_elevation" not in room and "defined directly" in room["not_given"]["floor_elevation"]
