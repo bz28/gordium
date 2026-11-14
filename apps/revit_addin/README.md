@@ -121,7 +121,8 @@ nothing. So the decisions are built and tested here, on the Mac.
 4. **Linked models:** one holding any building element (at any depth) or a closed workset is not sent (every
    building measure needs review); one not loaded, or a closed workset in the model, means not everything was
    looked at (`inventory_complete: false`).
-5. **The lot:** the lot picked, else the one closed property line; never an open one; arcs followed closely.
+5. **The lot:** the lot picked, else the one closed property line; never an open one; arcs followed closely. A
+   property line inside a linked model makes the lot need review (`lot_block`): the lot may be the link's.
 6. **Coordinates:** every point turned once into shared (survey) coordinates; a box turned by all 8 corners.
    Units are always feet (Revit's own).
 
