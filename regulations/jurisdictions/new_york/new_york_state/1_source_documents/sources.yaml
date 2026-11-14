@@ -1,0 +1,72 @@
+# Source documents for New York State's own law (inherited by every New York place: its jurisdiction.yaml
+# `inherits: [new_york/new_york_state]`).
+# The code book is copyrighted (International Code Council), so it is NOT in this folder: kept_outside_repo: true
+# means the book and its extracted text are in the code cache on the machines that have it,
+# <cache>/<sha256>/<file> (rule_format/rulebook.py: code_cache; ~/Documents/gordium_archive/code_cache on Ben's Mac),
+# with the text of every page (document_extraction/book_text.py), the same for every branch; brought_in.pages
+# says which of its pages this branch reads.
+# The repo keeps only short exact quotes, each with its section, page and a link (decided 2026-11-12:
+# docs/decisions/2026-11-12_building_code_text.md).
+# sha256 is the book's fingerprint: if a single byte changes, it changes. To check: shasum -a 256 <file>
+# brought_in: the pages read and the sections cut into pieces (document_extraction/icc_sections.py); the definitions
+# brought in are found by code (every Section R202 definition a brought-in section uses).
+
+documents:
+
+  - file: gov.ny.residential.2025.pdf
+    title: 2025 Residential Code of New York State (RCNYS)
+    publisher: International Code Council, for the New York State Department of State (publication date July 2025)
+    edition: 2025   # ISBN 978-1-967590-81-0 (PDF download), as its page 3 prints
+    url: https://archive.org/details/gov.ny.residential.2025
+    downloaded_on: 2026-11-12   # https://archive.org/download/gov.ny.residential.2025/gov.ny.residential.2025.pdf
+    sha256: 36490d8c8b11dd2b12c50bb11bd78c4aa228b38245d2fe99225cabe059398451
+    pages: 1079
+    kept_outside_repo: true
+    copy: >
+      Posted to the Internet Archive by Public.Resource.Org on 2026-02-02 (item gov.ny.residential.2025; the PDF is
+      the item's original upload, sha1 88eb6d7f443cc250d1b7e244905397dd9935cf77, as archive.org lists it). It is not a
+      scan: it is ICC's own digital PDF edition (ISBN 978-1-967590-81-0, "PDF download", as its page 3 prints), with
+      real text in its fonts (no OCR). It carries a per-copy number, 102102166, stamped at the top of every page (all
+      1,079), so it is one specific licensed copy, posted by Public.Resource.Org. The copyright approach is unchanged:
+      short exact quotes only in the repo (terms, below). Gordium reads the PDF's own text; archive.org's OCR files of
+      it are not used. A working copy: to be checked against a copy bought from ICC (ICC's digital codes site may not
+      be read by any script or automated browser: its terms forbid automated extraction and commercial use).
+    terms: >
+      Copyright 2025 International Code Council. The code is law in New York (19 NYCRR Part 1220 incorporates it by
+      reference). Gordium keeps only short exact quotes, with section, page and a link, in the repo; the book and its
+      full text stay outside it.
+    in_force: >
+      In force since 2025-12-31 for one- and two-family dwellings and townhouses not more than three stories above
+      grade plane (19 NYCRR §1220.2(a), the Uniform Code as amended, DOS rule text 2025-12-02:
+      https://dos.ny.gov/system/files/documents/2025/12/rule-text_uniform-code_amended-notice-of-adoption_12-2-25_0.pdf;
+      §1219.2(a)(8) names the publication). The 2020 code could be chosen instead only during the transition, which
+      ended 2025-12-30 (DOS: https://dos.ny.gov/notice-adoption).
+    layout: icc   # cut into pieces at the book's own headings (document_extraction/icc_sections.py)
+    brought_in:
+      pages: 34-58, 99-105, 109-110   # Chapter 2 (R201, R202 definitions; p.57 is blank, p.58 starts Chapter 3); R318-R321; R325.6-R325.7 (and the next
+                                      # part's heading after each, so each brought-in part's end is proven)
+      sections: [R201, R318, R319, R320, R321, R325.6, R325.7]
+      italic_not_defined:    # by piece: italic words Section R202 doesn't define (any other, or a stale one, is a problem)
+        R318.3:
+          accessed: R202 defines ACCESS (TO), not "accessed", so R201.3 sends it to another New York code's
+            definition, not brought in (README).
+        R319.6:
+          accessed: As in R318.3.
+        R319.1:
+          unit: The book prints "dwelling unit" with only "unit" in italics; the term is DWELLING UNIT, brought in by
+            the roman-type match (README).
+        R202:story_above_grade_plane:
+          above: The book prints item 1 as "above grade plane" in italics (p.52, line 36), where the line above prints
+            only "grade plane" in italics; the term is GRADE PLANE, brought in, and "above" keeps its ordinary meaning.
+    contents: >
+      The house code. Brought in so far (egress step 1): R318 means of egress (doors, landings, stairways, ramps),
+      R319 emergency escape and rescue openings, R320 handrails, R321 guards and window fall protection; R325.6 and
+      R325.7 (stairway lighting, which R318.7.10 requires); R201 (how the definitions apply) and every R202
+      definition those sections use. Not egress, so not brought in: R310 smoke alarms, R311 carbon monoxide alarms.
+    notes: >
+      Its section numbers are not the model code's (the International Residential Code's): cite only this book's.
+      A bracketed letter before a section names the party responsible for it (page 7); [NY] is the New York State
+      Department of State, e.g. risers not more than 8 1/4 inches and treads not less than 9 inches
+      ([NY] R318.7.5.1, [NY] R318.7.5.2). The code cache holds the whole book's text (every page,
+      document_extraction/book_text.py); the pages outside brought_in are read only to find which other parts of
+      the book point into the brought-in sections (document_extraction/icc_references.py).

@@ -36,6 +36,14 @@ design_checker.replay` runs every request of each recorded session in `test_data
 `answer()` and needs the recorded answer (compared in the goldens' canonical form: a number's last digit
 may differ between a Mac and Linux or Windows). Both run in CI.
 
+**Rules for each part** (`each_part.py`, egress step 2): `check_parts(rules, parts, values, allowed)` runs a
+rulebook's per-part rules (`for_each`: bedrooms, escape openings, stairs; `rule_format/parts.py`) over the parts
+given, one row per part with a line naming it ("Bedroom 2 › Window 5: net clear area 5.1 sq ft, needs ≥ 5.7 sq ft"),
+and gives panel items whose overall answer is `present.state`'s with the zoning rows. Parts `None` (the interior
+isn't being checked) is one counted "Interior: not checked yet" item, needs review. Not wired into `check()` yet:
+parts don't arrive in the site description until egress step 4
+([decision](../../docs/decisions/2026-11-12_rules_for_each_part.md)).
+
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
 `rhino_logic.py` runs in Rhino's Python, which can't read YAML, so `host_core/place.py` reads `place.json` beside
 `rhino_logic.py`: the place's name, time zone and how its addresses are written, copied from its `jurisdiction.yaml`
@@ -50,8 +58,11 @@ names (`logic.box_rows is host_core.start_box.box_rows`) and refuses `logic.X = 
 change a copy host_core never reads; a test swaps such a name with `tests/moved_names.py`'s `patch_moved`.
 
 What it adds for the Rhino command, never changing a result:
-- **summary:** one line for the viewport corner: "All 10 rules pass", or "9 pass · 1 fail" with what fails and
-  by how much ("Rear yard 22 ft, needs ≥ 22.5 ft (0.5 ft short)").
+- **summary:** the check's own answer: its state ("pass", "complies" under every reading, "review", "fail") never
+  less cautious than the panel's, its text the panel's own line (`present.summary`, one summary everywhere), and
+  its lines what fails and by how much ("Rear yard 22 ft, needs ≥ 22.5 ft (0.5 ft short)") and what waits. A row
+  still waiting (a fact to answer, a rule not in this release) is never a pass (Ben, 2026-11-09), so an Ithaca
+  result, which always lists the overlays, never passes.
 - **Why:** for a NEEDS REVIEW row, the measuring's own reason ("enter bedrooms / parking spaces", "a building
   isn't inside the lot").
 - **red:** the objects a failing rule measured (never the lot).

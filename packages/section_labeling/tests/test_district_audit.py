@@ -379,11 +379,38 @@ def test_a_district_decided_twice_through_an_alias_is_refused(decisions):
 # Review round 5.
 
 
-def test_rooming_units_and_bed_and_breakfasts_in_r1_r2_are_not_claimed_settled(built):
+def test_rooming_units_in_r1_r2_are_not_claimed_settled(built):
     for d in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
         assert {dec["status"] for _, dec in built.cells["325-3B:rooming_unit"][d]} == {"missing"}
-        assert built.cells["325-10C"][d][part_index(built, "325-10C", "Bed-and-breakfast")][1]["status"] == "missing"
-        assert built.cells["325-9B"][d][part_index(built, "325-9B", "(p) Bed-and-breakfast")][1]["status"] == "missing"
+
+
+def test_bed_and_breakfasts_in_r1_r2_are_the_use_rules_special_permit(built):
+    """The chart marks a bed-and-breakfast inn "-" in R-1 and R-2, but §325-9B(1)(p) lists it "in all districts"
+    among the special-permit uses (2026-10-29: it was a fail, listed as missing). The law doesn't settle which
+    governs (review round 1: §325-9B(1)'s list describes the chart, which cites the permit conditions beside its
+    "-"), so the use rule says needs review, saying it may be prohibited, and records the open question with its
+    research; the coverage table says so."""
+    from rule_format.rulebook import REPO, load, outcome
+    for d in ("R-1a", "R-1b", "R-2a", "R-2b", "R-2c"):
+        for piece, words in (("325-10C", "Bed-and-breakfast"), ("325-9B", "(p) Bed-and-breakfast")):
+            dec = built.cells[piece][d][part_index(built, piece, words)][1]
+            assert dec["status"] == "flag" and dec["rules"] == ["use"], (d, piece, dec)
+        rules = load(REPO / f"regulations/jurisdictions/new_york/ithaca_city/5_zoning_rules/{d}.yaml")["rules"]
+        use = next(r for r in rules if r["id"] == f"{d}.use")
+        allowed = {"use": {"bed_and_breakfast_inn", "dormitory"}}
+        assert outcome(use, {"use": "bed_and_breakfast_inn"}, allowed) == "needs_review", d
+        assert outcome(use, {"use": "dormitory"}, allowed) == "fail", d          # a "-" use still fails
+        reason = next(w["reason"] for w in use["review_when"] if "bed_and_breakfast_inn" in w["when"])
+        assert "may be prohibited" in reason and "open question" in reason, d
+        assert not any(f["id"] == "bed_and_breakfast_by_special_permit" for f in use["findings"])   # not a reading
+        assert [q for q in use["open_questions"] if "bed-and-breakfast" in q], d
+        research = next(x for x in use["research"] if "bed-and-breakfast" in x["question"])
+        assert {"325-9B", "325-8A", "325-10C"} <= set(research["searched"]) and "web search 2026-10-29" in \
+            research["why_open"], d
+    # the coverage decisions' own notes say the same: no reading (finding) of it exists (review round 1 of PR 65)
+    coverage = (REPO / "regulations/jurisdictions/new_york/ithaca_city/residential_coverage.yaml").read_text(
+        encoding="utf-8")
+    assert "bed_and_breakfast_by_special_permit" not in coverage and "the use rule's finding cites" not in coverage
 
 
 

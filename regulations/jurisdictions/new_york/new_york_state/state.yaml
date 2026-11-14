@@ -1,0 +1,9 @@
+# Gordium's settings for New York State's own law: the law every place in New York inherits (a place lists this
+# folder in its jurisdiction.yaml `inherits:`). Kept by hand. This folder is no place (no boundary, no lot lookup),
+# so the place registry and the Rhino plugin never read it as one (rule_format/rulebook.py: state_folders).
+# Decided 2026-11-12: docs/decisions/2026-11-12_building_code_text.md.
+
+name: New York State
+
+law:                                  # the documents in 1_source_documents/sources.yaml, by what they are
+  residential_code: gov.ny.residential.2025.pdf    # 2025 Residential Code of New York State (kept outside the repo)
