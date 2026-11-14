@@ -4,7 +4,8 @@
     python -m design_checker serve                            # Rhino: one JSON request per line in, one answer out
 
 Requests (one JSON object per line): {"id": 1, "cmd": "check", "model": "<.3dm>", "facts": {...}, "report":
-"<.xlsx or null>"}, {"id": 2, "cmd": "options", "jurisdiction": "regulations/jurisdictions/..."}, {"id": 3, "cmd": "facts",
+"<.xlsx or null>", "today": "YYYY-MM-DD"} ("today": the day of the check, the place's own day; optional, and
+without it no saved address lookup counts as recent, so the overlays row stays: the checker never reads the clock), {"id": 2, "cmd": "options", "jurisdiction": "regulations/jurisdictions/..."}, {"id": 3, "cmd": "facts",
 "facts": {...}} (what's wrong with saved lot facts: the same check as a facts file), {"id": 4, "cmd": "start",
 "model": "<.3dm with the lot>", "facts": {...}, "larger_side": null} (the largest legal starting building, as stacked floors;
 "larger_side": "left" or "right" puts a zone's larger side yard there), {"id": 5, "cmd": "sample_site"} (the
@@ -33,6 +34,7 @@ from rule_format.rulebook import utf8_console
 
 from . import protocol, site_json
 from .check import check, check_description, options, sample_site, start, start_description
+from .rhino_logic import city_day
 
 
 def _read_model(request: dict) -> dict:
@@ -45,7 +47,7 @@ def _read_model(request: dict) -> dict:
 def _check_site(request: dict, step) -> dict:
     report = request.get("report")
     return check_description(request["site"], request["facts"], Path(report) if report else None,
-                             request.get("extras"), step=step)
+                             request.get("extras"), step=step, today=request.get("today"))
 
 
 def _start_site(request: dict, step) -> dict:
@@ -64,7 +66,8 @@ def answer(request: dict, step=None) -> dict:
         if request.get("cmd") == "check":
             report = request.get("report")
             result = check(Path(request["model"]), request["facts"], Path(report) if report else None,
-                           request.get("building_problems"), request.get("extras"), step=step)
+                           request.get("building_problems"), request.get("extras"), step=step,
+                           today=request.get("today"))
         elif request.get("cmd") == "start":
             result = start(Path(request["model"]), request["facts"], request.get("floor_to_floor"),
                            request.get("design_buffer") or 0.0, request.get("larger_side"), step=step)
@@ -134,7 +137,7 @@ def main(argv: list[str]) -> int:
         print(__doc__)
         return 2
     try:
-        result = check(Path(argv[0]), load_facts(Path(argv[1])))
+        result = check(Path(argv[0]), load_facts(Path(argv[1])), today=city_day())   # this host's day, said here
     except ValueError as e:
         print(f"✗ {e}")
         return 1

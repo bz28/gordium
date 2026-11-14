@@ -830,6 +830,24 @@ def test_proposed_measures_follow_the_saved_rules(inputs, tmp_path):
     assert proposed() == {}
 
 
+def test_the_ais_rules_are_kept_as_drafted_and_a_redraft_says_which_revisions_it_replaced(inputs, tmp_path, capsys):
+    """Principle 5: the AI's own rules are kept beside the drafts (records/as_drafted/), so a change made after the
+    draft (`revised`) is always told from the AI's answer; re-drafting a unit replaces a revised rule, and the log
+    names it so a person re-applies the change (house egress review, round 5)."""
+    i, log = _scratch(inputs, tmp_path), {"units": {}}
+    rule = lambda check: {"id": "R-1b.a", "kind": "rule", "check": check, "sources": [], "examples": []}
+    cli.save_result(i, log, "u1", {"rules": {"R-1b": [rule("height <= 35")]}, "proposed": {}})
+    assert cli.load(i.records / "as_drafted/R-1b.yaml")["rules"] == [rule("height <= 35")]
+    book = cli.load(i.drafted / "R-1b.yaml")
+    book["rules"][0] |= {"check": "height <= 30", "revised": [{"field": "check", "by": "b", "date": "d", "why": "w"}]}
+    (i.drafted / "R-1b.yaml").write_text(cli.yaml.safe_dump(book), encoding="utf-8")
+    cli.save_result(i, log, "u1", {"rules": {"R-1b": [rule("height <= 36")]}, "proposed": {}})
+    assert log["units"]["u1"]["revisions_replaced"] == ["R-1b.a"] and "re-apply them" in capsys.readouterr().out
+    assert cli.load(i.records / "as_drafted/R-1b.yaml")["rules"] == [rule("height <= 36")]
+    cli.save_result(i, log, "u1", {"rules": {}, "proposed": {}})        # a unit drafted to nothing leaves no copy
+    assert not (i.records / "as_drafted/R-1b.yaml").exists() and "revisions_replaced" not in log["units"]["u1"]
+
+
 def _cell_source(section, row, column, page=3):
     return {"file": "zoning_charts_2026-04.pdf", "page": page, "cell": {"section": section, "row": row, "column": column}}
 
