@@ -7,7 +7,7 @@
 # `within`: the kinds a part of this kind can sit in (a rule's `within` must be one of them).
 
 sleeping_room:
-  meaning: "A room used, or intended to be used, for sleeping (a bedroom), as the architect labels it"
+  meaning: "A room used, or intended to be used, for sleeping (a bedroom), as the architect labels it (a sleeping loft is not one: it is part of the story below, R315.1, and its escape opening is in the room it is open to, R319.1: loft_room)"
   measures:
     sleeping_room_floor_area: {unit: sf, meaning: "Floor area of the room"}
 
@@ -24,9 +24,14 @@ habitable_attic:
   measures:
     habitable_attic_floor_area: {unit: sf, meaning: "Floor area of the habitable attic"}
 
+loft_room:
+  meaning: "The room a sleeping loft is open to (R202 SLEEPING LOFT: \"open on one or more sides to the room in which the space is located\"), as the architect labels it; R319.1 requires it to have an escape opening"
+  measures:
+    loft_room_floor_area: {unit: sf, meaning: "Floor area of the room"}
+
 emergency_escape_opening:
   meaning: "An opening (a window or door) the architect marks as a room's emergency escape and rescue opening"
-  within: [sleeping_room, basement, habitable_attic]
+  within: [sleeping_room, basement, habitable_attic, loft_room]
   measures:
     opening_net_clear_area:   {unit: sf, meaning: "Net clear opening area with the window or door fully open"}
     opening_net_clear_height: {unit: in, meaning: "Net clear opening height with the window or door fully open"}

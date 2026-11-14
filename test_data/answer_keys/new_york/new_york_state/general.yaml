@@ -23,6 +23,11 @@ rules:
     for_each: egress_door
     when_none: fail
     check: door_side_hinged and door_clear_width >= 32 and door_clear_height >= 78
+    review_when:
+      - when: dwelling_units > 1
+        reason: >-
+          Two dwelling units: each needs its own egress door, and which unit a door serves isn't in the model. A
+          person checks.
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 99
@@ -37,82 +42,50 @@ rules:
         lines: [46, 47]
         quote: "The clear height of the door opening shall be not less than 78 inches (1981 mm) in height measured from the top of the threshold to the bottom of the stop."
     examples:
-      - given: {}
+      - given: {dwelling_units: 1}
         parts:
           egress_door: [{id: d1, name: Front door, measures: {door_side_hinged: true, door_clear_width: 34, door_clear_height: 80}}]
         rows: [{part: d1, outcome: pass}]
         expect: pass
-      - given: {}
+      - given: {dwelling_units: 1}
         parts:
           egress_door: [{id: d1, measures: {door_side_hinged: true, door_clear_width: 30, door_clear_height: 80}}]
         rows: [{part: d1, outcome: fail}]
         expect: fail
         note: a 2 ft 8 in door leaf gives about 30 in clear between the stop and the door face
-      - given: {}
+      - given: {dwelling_units: 1}
         parts:
           egress_door: [{id: d1, measures: {door_side_hinged: true, door_clear_width: 34, door_clear_height: 76}}]
         rows: [{part: d1, outcome: fail}]
         expect: fail
-      - given: {}
+      - given: {dwelling_units: 1}
         parts:
           egress_door: [{id: d1, measures: {door_side_hinged: false, door_clear_width: 70, door_clear_height: 80}}]
         rows: [{part: d1, outcome: fail}]
         expect: fail
         note: a sliding patio door marked as the egress door is not side-hinged
-      - given: {}
+      - given: {dwelling_units: 1}
         parts: {egress_door: []}
         rows: [{outcome: fail}]
         expect: fail
         note: "when_none: a dwelling unit with no egress door fails (\"Not less than one egress door shall be provided\")"
-    notes: >-
-      Numbers (R318.2 second reading): 32 (not less than 32 inch, >=), 78 (not less than 78 inch, >=); "one" (>=) is
-      the per-unit count, below. The 90 degrees and the mm are none (a measuring condition and conversions). Only
-      the door the architect marks as the required egress door is checked ("Other doors shall not be required to
-      comply with these minimum dimensions"). Not checked here: "readily openable from inside ... without the use
-      of a key" (no measure), and R318.1's path to the door and where it opens (not in scope).
-    drafted_by: claude_code/claude-opus-5-5 (answer key helper)
-    status: draft
-
-  - id: general.r318_2_door_each_dwelling_unit
-    kind: flag
-    topic: means_of_egress
-    title: "One egress door for each dwelling unit, two-family house (R318.2)"
-    for_each: egress_door
-    when_none: fail
-    applies_when: dwelling_units - 1 > 0
-    sources:
-      - file: gov.ny.residential.2025.pdf
-        page: 99
-        lines: [44, 44]
-        quote: "Not less than one egress door shall be provided for each dwelling unit."
-    examples:
       - given: {dwelling_units: 2}
         parts:
           egress_door: [{id: d1, measures: {door_side_hinged: true, door_clear_width: 34, door_clear_height: 80}}]
         rows: [{part: d1, outcome: needs_review}]
         expect: needs_review
         note: two dwelling units, one door marked; which unit each door serves isn't in the model
-      - given: {dwelling_units: 2}
-        parts: {egress_door: []}
-        rows: [{outcome: fail}]
-        expect: fail
-        note: "when_none: no egress door at all fails"
-      - given: {dwelling_units: 1}
-        parts:
-          egress_door: [{id: d1, measures: {door_side_hinged: true, door_clear_width: 34, door_clear_height: 80}}]
-        rows: [{part: d1, outcome: not_applicable}]
-        expect: not_applicable
     notes: >-
-      A flag: the part kinds have no dwelling unit an egress door sits within, so "one for each dwelling unit" can't
-      be counted. In a one-family house the door rule's own when_none (no door: fail) is the whole requirement; with
-      two units a person checks that each unit has its own. Number: "one" (R318.2 second reading, not less than one,
-      >=), used as dwelling_units - 1 > 0 (two or more units; the "one" in arithmetic, since
-      the law's comparison on it is the doors' >=, not the units'). Measure lacking: which dwelling unit an egress door
-      serves (an egress_door within a dwelling_unit part).
+      Numbers (R318.2 second reading): 32 (not less than 32 inch, >=), 78 (not less than 78 inch, >=); "one" (>=) is
+      the per-unit count: in a one-family house the when_none (no door: fail) is the whole requirement; with two
+      units a person checks each has its own (review_when, value only: "one" is the doors' count, not the units').
+      Fixed after the comparison with the drafts, 2026-11-13: this was a flag with applies_when "dwelling_units - 1 > 0",
+      which code_numbers now reads as a limit on units the law never sets. The 90 degrees and the mm are none (a measuring condition and conversions). Only
+      the door the architect marks as the required egress door is checked ("Other doors shall not be required to
+      comply with these minimum dimensions"). Not checked here: "readily openable from inside ... without the use
+      of a key" (no measure), and R318.1's path to the door and where it opens (not in scope).
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
-
-  # --- R318.7 stairways -------------------------------------------------------------------------------------------
 
   - id: general.r318_7_1_stair_width
     kind: rule
@@ -120,9 +93,13 @@ rules:
     title: "Stair clear width: 36 in; 31 1/2 or 27 in at the handrail (R318.7.1)"
     for_each: stair
     when_none: not_applicable
-    applies_when: not stair_spiral and not stair_serves_sleeping_loft
+    applies_when: not stair_serves_sleeping_loft
     check: stair_clear_width >= 36 and stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides <= 1 else 27)
     review_when:
+      - when: stair_spiral
+        reason: >-
+          A spiral stairway: R318.7.11.1 sets its own clear width (26 in at and below the handrails), and R318.7.11.1 isn't drafted yet. A person checks it
+          (needs review, never not applicable, until it is).
       - when: stair_handrail_sides == 0 and stair_clear_width_at_handrail < 36
         reason: >-
           R318.7.1 gives the clear width at and below the handrail height only where a handrail is installed on one
@@ -183,8 +160,8 @@ rules:
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_clear_width: 26, stair_clear_width_at_handrail: 26, stair_handrail_sides: 1, stair_spiral: true, stair_serves_sleeping_loft: false}}]
-        rows: [{part: s1, outcome: not_applicable}]
-        expect: not_applicable
+        rows: [{part: s1, outcome: needs_review}]
+        expect: needs_review
         note: a spiral stairway's width is R318.7.11.1's (not in this key)
       - given: {}
         parts:
@@ -198,6 +175,8 @@ rules:
         expect: not_applicable
         note: "when_none: no stairs, nothing to check"
     notes: >-
+      Spiral stairways need review here until R318.7.11.1 is drafted (fixed after the comparison with the drafts,
+      2026-11-13: they were not applicable, which left a spiral stair's rise, width and headroom unchecked).
       Numbers (R318.7.1 second reading): 36 (not less than 36 inch, >=), 31 1/2 = 31.5 (not less than, >=), 27 ("and
       27 inch", >=: its flag says the "not less than" governs the 27 too); "one" (none) is the one side, written
       stair_handrail_sides - 1 > 0 for "both sides" (the count in arithmetic: the validator refuses a "none"
@@ -216,9 +195,12 @@ rules:
     title: "Stair headroom: 6 ft 8 in (R318.7.2)"
     for_each: stair
     when_none: not_applicable
-    applies_when: not stair_spiral
     check: stair_headroom >= 80
     review_when:
+      - when: stair_spiral
+        reason: >-
+          A spiral stairway: R318.7.11.1 sets its own headroom (6 ft 6 in), and R318.7.11.1 isn't drafted yet. A person checks it
+          (needs review, never not applicable, until it is).
       - when: stair_serves_sleeping_loft and stair_headroom < 80
         reason: >-
           A sleeping loft's means of egress follows R318 "as modified by" R315.5.1 to R315.5.3 (R315.5), and R315.5.1
@@ -266,8 +248,8 @@ rules:
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_headroom: 78, stair_spiral: true}}]
-        rows: [{part: s1, outcome: not_applicable}]
-        expect: not_applicable
+        rows: [{part: s1, outcome: needs_review}]
+        expect: needs_review
         note: a spiral stairway's headroom is R318.7.11.1's (6 ft 6 in; not in this key)
       - given: {}
         parts: {stair: []}
@@ -290,6 +272,8 @@ rules:
           but not headroom. No New York interpretation found; ICC commentary not read. Until answered, a loft stair
           under 6 ft 8 in needs review.
     notes: >-
+      Spiral stairways need review here until R318.7.11.1 is drafted (fixed after the comparison with the drafts,
+      2026-11-13: they were not applicable, which left a spiral stair's rise, width and headroom unchecked).
       Number (R318.7.2 second reading): 6 feet 8 inches = 80 (not less than, >=; its flag: one length, recorded as
       '6 foot' and '8 inch'). 4 3/4 in (exception 1, <=) is not used: the floor opening may project into the
       headroom up to 4 3/4 in where the nosings run under its edge, which stair_headroom (the least clear height)
@@ -303,8 +287,13 @@ rules:
     title: "Riser height: not more than 8 1/4 in (R318.7.5.1)"
     for_each: stair
     when_none: not_applicable
-    applies_when: not stair_spiral and not stair_serves_sleeping_loft
+    applies_when: not stair_serves_sleeping_loft
     check: stair_riser_height <= 8.25
+    review_when:
+      - when: stair_spiral
+        reason: >-
+          A spiral stairway: R318.7.11.1 sets its own rise (9 1/2 in at most), and R318.7.11.1 isn't drafted yet. A person checks it
+          (needs review, never not applicable, until it is).
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 100
@@ -346,6 +335,8 @@ rules:
         rows: [{outcome: not_applicable}]
         expect: not_applicable
     notes: >-
+      Spiral stairways need review here until R318.7.11.1 is drafted (fixed after the comparison with the drafts,
+      2026-11-13: they were not applicable, which left a spiral stair's rise, width and headroom unchecked).
       Number (R318.7.5.1 second reading): 8 1/4 = 8.25 (not more than, <=). New York's own riser (the [NY] mark).
       Measured between leading edges of adjacent treads, exclusive of carpets, rugs or runners (R318.7.5).
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
@@ -410,8 +401,13 @@ rules:
     title: "Tread depth: not less than 9 in (R318.7.5.2)"
     for_each: stair
     when_none: not_applicable
-    applies_when: not stair_spiral and not stair_serves_sleeping_loft
+    applies_when: not stair_serves_sleeping_loft
     check: stair_tread_depth >= 9
+    review_when:
+      - when: stair_spiral
+        reason: >-
+          A spiral stairway: R318.7.11.1 sets its own tread depth (6 3/4 in at the walkline), and R318.7.11.1 isn't drafted yet. A person checks it
+          (needs review, never not applicable, until it is).
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 100
@@ -443,14 +439,16 @@ rules:
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_tread_depth: 7, stair_spiral: true, stair_serves_sleeping_loft: false}}]
-        rows: [{part: s1, outcome: not_applicable}]
-        expect: not_applicable
+        rows: [{part: s1, outcome: needs_review}]
+        expect: needs_review
         note: a spiral stairway's tread is R318.7.11.1's (6 3/4 in at the walkline; not in this key)
       - given: {}
         parts: {stair: []}
         rows: [{outcome: not_applicable}]
         expect: not_applicable
     notes: >-
+      Spiral stairways need review here until R318.7.11.1 is drafted (fixed after the comparison with the drafts,
+      2026-11-13: they were not applicable, which left a spiral stair's rise, width and headroom unchecked).
       Number (R318.7.5.2 second reading): 9 (not less than 9 inch, >=). New York's own tread (the [NY] mark).
       R318.7.5.2 prints no spiral exception of its own; R318.7.11 sends a spiral stair's tread to R318.7.11.1.
       Winder treads (R318.7.5.2.1: 10 in at the walkline, 6 in at any point) are not this rule's: stair_tread_depth
@@ -707,6 +705,53 @@ rules:
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
+  - id: general.r319_1_loft_room_escape_opening
+    kind: rule
+    topic: means_of_egress
+    title: "Room a sleeping loft is open to: an operable escape opening (R319.1)"
+    for_each: emergency_escape_opening
+    within: loft_room
+    when_none: fail
+    check: opening_operable and opening_opens_to_yard
+    sources:
+      - file: gov.ny.residential.2025.pdf
+        page: 102
+        lines: [28, 29]
+        quote: "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening."
+      - file: gov.ny.residential.2025.pdf
+        page: 102
+        lines: [30, 31]
+        quote: "Emergency escape and rescue openings shall open directly into a public way, or to a yard or court that opens to a public way."
+    examples:
+      - given: {}
+        parts:
+          loft_room: [{id: a1, name: Living room under the loft}]
+          emergency_escape_opening: [{id: w1, within: a1, measures: {opening_operable: true, opening_opens_to_yard: true}}]
+        rows: [{part: w1, within: a1, outcome: pass}]
+        expect: pass
+      - given: {}
+        parts:
+          loft_room: [{id: a1}]
+          emergency_escape_opening: [{id: w1, within: a1, measures: {opening_operable: false, opening_opens_to_yard: true}}]
+        rows: [{part: w1, within: a1, outcome: fail}]
+        expect: fail
+        note: a fixed window
+      - given: {}
+        parts:
+          loft_room: [{id: a1}]
+          emergency_escape_opening: []
+        rows: [{within: a1, outcome: fail}]
+        expect: fail
+        note: "when_none: \"the room to which a sleeping loft is open ... shall have not less than one\""
+    notes: >-
+      Number: "not less than one" (R319.1 second reading, >=). A sleeping loft has no escape opening of its own: it
+      is part of the story below (R315.1) and open to a room (R202 SLEEPING LOFT), and R319.1 puts the opening in
+      that room (the architect labels it loft_room; a bedroom or basement it opens to is also checked as one). Added
+      after the comparison with the drafts, 2026-11-13: the key had only a flag on each loft, because the parts had
+      no such room.
+    drafted_by: claude_code/claude-opus-5-5 (answer key helper)
+    status: draft
+
   - id: general.r319_1_room_a_loft_opens_to
     kind: flag
     topic: means_of_egress
@@ -734,9 +779,9 @@ rules:
         expect: not_applicable
         note: "when_none: no sleeping loft"
     notes: >-
-      A flag: the parts have no room a loft is open to (no "room" kind, and a loft sits within nothing), so whether
-      that room has an operable escape opening can't be read. A person checks each loft's room. Measure lacking:
-      the room a sleeping loft is open to, as a part an escape opening can sit within.
+      A flag: a loft sits within nothing, so whether the room it is open to was labeled (loft_room, checked by
+      general.r319_1_loft_room_escape_opening) can't be read from the loft. A person checks each loft's room is
+      labeled; the escape opening itself is then checked by code.
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
