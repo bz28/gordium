@@ -77,6 +77,10 @@ class Model:
         t = self.type_of(element)
         return self._own(element), list(getattr(t, "HasPropertySets", None) or [] if t is not None else [])
 
+    @staticmethod
+    def from_type(t):
+        return f" (from its type {t.Name or t.is_a()} #{t.id()})" if t is not None else ""
+
     def find(self, element, wanted, name):
         """The first of find_all: (value, "Set.Name", unit); (None, None, None) if there is none."""
         got = self.find_all(element, wanted, name)
@@ -87,17 +91,20 @@ class Model:
         The element's own statements override its type's (IFC's inheritance); stated more than once at the same
         level (two sets of the same name, say), they must agree, else the value is Unreadable (never the first
         one found, which could be the wrong one)."""
+        t = self.type_of(element)
         for s in sets:
-            for holders in self.levels(element):
+            for level, holders in enumerate(self.levels(element)):
                 got = self.find_all(element, lambda n, s=s: n == s, name, holders)
                 if not got:
                     continue
+                # review round 7: a value inherited from the type (every element of it) says so
+                where = got[0][1] + (self.from_type(t) if level else "")
                 values = [v for v, _, _ in got]
                 if len(got) > 1 and any(isinstance(v, Unreadable) or type(v) is not type(values[0]) or
                                         v != values[0] for v in values):
                     return Unreadable(f"{len(got)} statements that differ ({', '.join(map(repr, values))})",
-                                      stated=True), got[0][1]
-                return values[0], got[0][1]
+                                      stated=True), where
+                return values[0], where
         return None, None
 
     def _convert(self, value, where, unit, kind):
@@ -113,12 +120,12 @@ class Model:
             return None, f"the file states no single area unit, so {where} can't be read"
         return float(value) * scale, None
 
-    def measure(self, element, wanted, name, kind):
+    def measure(self, element, wanted, name, kind, holders=None):
         """A length (kind "LENGTHUNIT", in metres) or an area ("AREAUNIT", in square metres) the model states:
         (value, where, None), or (None, where, why not). A value carrying its own unit is converted by that unit;
         otherwise by the file's. Stated more than once (two quantity sets), every statement must agree, else
         which is right is unclear and there is no value (never the first found, which could be the larger)."""
-        got = self.find_all(element, wanted, name)
+        got = self.find_all(element, wanted, name, holders)
         if not got:
             return None, None, None
         values = []
@@ -134,9 +141,16 @@ class Model:
         return values[0][0], values[0][1], None
 
     def quantity(self, element, name, kind="LENGTHUNIT"):
-        """A base quantity (a Qto_* set, or IFC2x3's BaseQuantities): (metres or square metres, where, why not)."""
-        return self.measure(element, lambda n: bool(n) and (n.startswith("Qto_") or n == "BaseQuantities"), name,
-                            kind)
+        """A base quantity (a Qto_* set, or IFC2x3's BaseQuantities): (metres or square metres, where, why not).
+        IFC4's template for these sets is type-driven with override: the element's own value wins, else its
+        type's, which then says so (review round 7: a type's NetFloorArea read as if the room stated it)."""
+        wanted = lambda n: bool(n) and (n.startswith("Qto_") or n == "BaseQuantities")
+        t = self.type_of(element)
+        for level, holders in enumerate(self.levels(element)):
+            value, where, bad = self.measure(element, wanted, name, kind, holders)
+            if where is not None:
+                return value, where + (self.from_type(t) if level else ""), bad
+        return None, None, None
 
     def type_of(self, element):
         import ifcopenshell.util.element

@@ -510,3 +510,53 @@ def test_other_words_in_a_description_say_nothing(build, tmp_path):
     b = bedroom_house(build, name="Kitchen")
     b.f.by_type("IfcSpace")[0].Description = "Oak floor, new cabinets"
     assert read(b.write(tmp_path / "h.ifc"))["rooms"][0]["sleeping"] is False
+
+
+@pytest.mark.parametrize("pset, name", [("Pset_SpaceOccupancyRequirements", "OccupancyType"),
+                                        ("Pset_SpaceCommon", "Category")])
+def test_the_stated_use_is_a_name(build, tmp_path, pset, name):
+    """Review round 7: a space named Kitchen whose stated use is Bedroom read as not a sleeping room."""
+    b = bedroom_house(build, name="Kitchen")
+    b.pset(b.f.by_type("IfcSpace")[0], pset, {name: "Bedroom"})
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert "sleeping" not in room and f"{pset}.{name} 'Bedroom'" in room["not_given"]["sleeping"]
+
+
+@pytest.mark.parametrize("own", [False, True])
+def test_base_quantities_from_the_type_name_it(build, tmp_path, own):
+    """Review round 7: a NetFloorArea stated on the space type (IFC4: type-driven, the space's own overrides) was
+    read with no word that it was the type's. Now the source names the type, and the space's own value wins."""
+    b = bedroom_house(build, quantities=dict(QTY, NetFloorArea=100.0) if own else {})
+    [space] = b.f.by_type("IfcSpace")
+    t = b.run("root.create_entity", ifc_class="IfcSpaceType", name="Bedrooms")
+    b.run("type.assign_type", related_objects=[space], relating_type=t)
+    q = b.run("pset.add_qto", product=t, name="Qto_SpaceBaseQuantities")
+    b.run("pset.edit_qto", qto=q, properties=dict(QTY, FinishCeilingHeight=7.0))
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    if own:      # the space's 100 sq ft (smaller than its 120 sq ft outline) wins over the type's 120: refused
+        assert "floor" not in room and "9.290304" in room["not_given"]["floor"]        # 100 sq ft
+        assert near(room["ceiling_height"], 8 * FT)
+    else:
+        assert "floor" in room and "(from its type Bedrooms #" in room["ifc"]["floor_from"]
+        assert near(room["ceiling_height"], 7 * FT) and "(from its type Bedrooms #" in room["ifc"]["ceiling_from"]
+
+
+def test_a_sleeping_flag_from_the_type_names_the_type(build, tmp_path):
+    b = bedroom_house(build, name="Laundry")
+    [space] = b.f.by_type("IfcSpace")
+    t = b.run("root.create_entity", ifc_class="IfcSpaceType", name="Utility")
+    b.run("type.assign_type", related_objects=[space], relating_type=t)
+    b.pset(t, "Gordium_Egress", {"Sleeping": False})
+    room = read(b.write(tmp_path / "h.ifc"))["rooms"][0]
+    assert room["sleeping"] is False and "(from its type Utility #" in room["ifc"]["sleeping_from"]
+
+
+@pytest.mark.parametrize("position", ["LEFT", "TOP"])
+def test_a_lone_panel_beside_something_is_not_single(build, tmp_path, position):
+    """Review round 7: one panel record placed LEFT (something to its right), partitioning NOTDEFINED, read as one
+    casement framed across the whole window."""
+    b = bedroom_house(build)
+    b.f.by_type("IfcWindowType")[0].PartitioningType = "NOTDEFINED"
+    b.f.by_type("IfcWindowPanelProperties")[0].PanelPosition = position
+    got = read(b.write(tmp_path / "h.ifc"))["openings"][0]
+    assert "frame" not in got and "operation" not in got and position in got["not_given"]["frame"]

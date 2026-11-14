@@ -34,7 +34,7 @@ def test_a_name_decides_only_when_its_words_agree(name, expected):
 def test_never_from_size_only_from_words():
     # the reader's only inputs are words and the flag: nothing else reaches the decision
     import inspect
-    assert list(inspect.signature(sleeping_from_names).parameters) == ["texts", "flag"]
+    assert list(inspect.signature(sleeping_from_names).parameters) == ["texts", "flag", "where"]   # where: a label
 
 
 def test_every_name_source_counts_and_they_must_agree():

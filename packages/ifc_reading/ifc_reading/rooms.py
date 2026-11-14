@@ -43,9 +43,11 @@ def name_words(text) -> list[str]:
     return [w.casefold() for w in re.split(r"[\W\d_]+", unicodedata.normalize("NFKC", text)) if w]
 
 
-def sleeping_from_names(texts: dict, flag=None):
-    """(sleeping: True | False | None, why). texts: {where: text}; flag: the model's Gordium_Egress.Sleeping."""
+def sleeping_from_names(texts: dict, flag=None, where=None):
+    """(sleeping: True | False | None, why). texts: {where: text}; flag: the model's Gordium_Egress.Sleeping, stated
+    at `where` (which names the type when the flag is the type's)."""
     table = words()
+    said_at = where or f"{GORDIUM_SET}.Sleeping"
     hits = {}
     for where, text in texts.items():
         for w in name_words(text):
@@ -53,11 +55,11 @@ def sleeping_from_names(texts: dict, flag=None):
     hits.pop("neutral", None)                       # "room", "Zimmer": say nothing either way
     said = "; ".join(f"{k.replace('_', ' ')}: {', '.join(v)}" for k, v in hits.items())
     if flag is True:
-        return True, f"{GORDIUM_SET}.Sleeping is true"
+        return True, f"{said_at} is true"
     if flag is False:
         if "sleeping" in hits:              # an ask word is what the flag answers; a bedroom's name it can't
-            return None, f"{GORDIUM_SET}.Sleeping is false, but its name says otherwise ({said}): the architect says"
-        return False, f"{GORDIUM_SET}.Sleeping is false"
+            return None, f"{said_at} is false, but its name says otherwise ({said}): the architect says"
+        return False, f"{said_at} is false"
     if "ask" in hits or ("sleeping" in hits and "not_sleeping" in hits) or ("not_sleeping" in hits and
                                                                            "unlisted" in hits):
         return None, f"its name doesn't settle it ({said}): the architect says (Gordium_Egress.Sleeping)"
@@ -69,8 +71,12 @@ def sleeping_from_names(texts: dict, flag=None):
     return None, f"nothing in its name says what it is ({shown}): the architect says (Gordium_Egress.Sleeping)"
 
 
+USE = (("Pset_SpaceOccupancyRequirements", "OccupancyType"), ("Pset_SpaceCommon", "Category"))
+
+
 def names_of(model, space) -> dict:
-    """Every name the model gives the space: its LongName, Name, ObjectType and classifications, and its
+    """Every name the model gives the space: its LongName, Name, ObjectType, classifications and stated use
+    (Pset_SpaceOccupancyRequirements.OccupancyType, Pset_SpaceCommon.Category), and its
     space type's LongName, Name, ElementType and classifications (review round 6: the type says what kind of space it is,
     and was ignored). Each under its own key: two classifications with no code no longer overwrite each other."""
     texts = {"LongName": space.LongName, "Name": space.Name, "ObjectType": space.ObjectType}
@@ -91,6 +97,9 @@ def names_of(model, space) -> dict:
                 add(f"{prefix}classification {code}".strip(), getattr(ref, "Name", None))
 
     classifications(space, "")
+    for pset, name in USE:                 # review round 7: the model's stated use of the space is a name for it
+        value, where = model.prop(space, [pset], name)
+        add(where or f"{pset}.{name}", value if isinstance(value, str) else None)
     t = model.type_of(space)
     if t is not None:
         add("type LongName", getattr(t, "LongName", None))
@@ -135,7 +144,7 @@ def read_room(model, space) -> dict:
     if flag is not None and not isinstance(flag, bool):     # a flag that can't be read is never left to the name
         sleeping, why = None, f"{where} is {flag!r}, not true or false: the architect says"
     else:
-        sleeping, why = sleeping_from_names(texts, flag)
+        sleeping, why = sleeping_from_names(texts, flag, where)
     if sleeping is False:
         doubt = description_doubt(model, space)
         if doubt:

@@ -74,7 +74,7 @@ def _flag(model, element, sets_names):
     t = model.type_of(element)
     for level, holders in enumerate(model.levels(element)):
         # review round 5: a mark inherited from the type (every door of it) says so, by the type's name
-        whose = f" (from its type {t.Name or t.is_a()} #{t.id()})" if level and t is not None else ""
+        whose = model.from_type(t) if level else ""
         got = [(v, w + whose) for s, name in sets_names
                for v, w, _ in model.find_all(element, lambda n, s=s: n == s, name, holders)]
         if not got:
@@ -149,6 +149,10 @@ def read_window(model, window, floors: dict) -> dict:
     if partitioning:
         info["partitioning"] = " and ".join(partitioning)
     more = [p for p in partitioning if p not in ("SINGLE_PANEL", "NOTDEFINED")]
+    # review round 7: a lone panel placed LEFT, RIGHT, TOP or BOTTOM says there is more beside it
+    beside = [p.PanelPosition for p in panels if getattr(p, "PanelPosition", None) not in (None, "MIDDLE", "NOTDEFINED")]
+    if len(panels) == 1 and beside:
+        more.append(f"its one panel placed {beside[0]}")
     single = len(panels) == 1 and not more
     if not single:
         why = (f"the window has {len(panels)} panels ({', '.join(kinds)})" if len(panels) > 1 else
