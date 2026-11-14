@@ -52,8 +52,8 @@ Every window and door that could be an escape opening (only those marked `escape
 | `escape` | true if the architect marks it as the room's emergency escape and rescue opening |
 | `operation` | `casement`, `side_hinged_door` (hinged); `double_hung`, `single_hung`, `horizontal_slider`, `sliding_door` (sliding); `fixed`; or `awning`, `hopper`, `pivot`, `tilt_turn`, `other` (these need `stated_clear`) |
 | `frame` | the frame's clear inside opening in the opening's own elevation: `{left, right, bottom, top}` (u, u, z, z) |
-| `sashes` | a sliding window or door: each sash (rails and stiles included: glass isn't a way out) as `{left, right, bottom, top}`, **in its fully open position** |
-| `hinged` | a hinged one: `{side: left|right, open_angle, sash_width, sash_thickness, hinge_offset}`: the jamb it hinges on, the angle it opens to by its normal operation (its hardware's stop, in degrees from closed), and how far its hinge edge stands off that jamb when open (0 for a sash hinged right at the jamb; hardware that slides the sash in from the jamb makes it more) |
+| `sashes` | a sliding window or door: each sash (rails and stiles included: glass isn't a way out) as `{left, right, bottom, top}`, **in its fully open position**, within the frame |
+| `hinged` | a hinged one: `{side: left|right, open_angle, sash_width, sash_thickness, hinge_offset}` (one sash closing the whole frame; a pair or a sash beside fixed glass isn't measured yet): the jamb it hinges on, the angle it opens to by its normal operation (its hardware's stop, in degrees from closed), and how far its hinge edge stands off that jamb when open (0 for a sash hinged right at the jamb; hardware that slides the sash in from the jamb makes it more) |
 | `stated_clear` | the maker's net clear opening: `{width, height, bottom, source}`, bottom an elevation. Required for the operations that need it; allowed for any (then it and the drawn one must agree within 1/16 in) |
 | `ground_outside` | the finished ground level adjacent to the opening outside: one elevation, or a list (at each end, for sloping ground) |
 | `area_well` | for an opening below the ground: `{floor_elevation, width, projection}`: the well's floor, its size along the wall and out from it |
@@ -91,7 +91,7 @@ Either a guard at a level walking surface, or one along a stair (give `walking_s
 | `walking_surface` | the finished walking surface the guard protects (a loft's floor, a landing) |
 | `top` | the top of the guard |
 | `extent` | `{left, right}`: the u of what the guard ends against at each end (a wall, a newel post): solid beyond |
-| `members` | every rail, baluster, post and panel in the guard's elevation, `{left, right, bottom, top}`; a member must reach the top (the top rail) |
+| `members` | every rail, baluster, post and panel in the guard's elevation, `{left, right, bottom, top}`; some member (the top rail) must reach `top`, or the guard gets no height |
 | `stair` | for a guard along a stair: the stair's id |
 | `top_line` | for a guard along a stair: the top of the guard as 3D points, running the flight's whole length |
 

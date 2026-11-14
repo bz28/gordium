@@ -45,6 +45,9 @@ STOPS = {
     "clear_differs": "the maker's clear opening and the drawn one differ ({which}): which is right is unclear",
     "clear_outside_frame": "the maker's clear opening is bigger than its frame, or reaches outside it: which is right "
                            "is unclear",
+    "sash_outside_frame": "open sash {n} reaches outside the frame: a sliding sash opens within it",
+    "sash_smaller_than_frame": "the hinged sash ({width} in wide, {thickness} in thick) doesn't close the "
+                               "{frame} in frame: the rest of the frame isn't an opening",
     "no_clear_opening": "the opening doesn't open (no clear opening), so it has no bottom",
     "no_ground": "the finished ground level outside the opening isn't given",
     "ground_mixed": "the ground outside the opening is within 44 in of its bottom at some points and not at others",
@@ -60,6 +63,7 @@ STOPS = {
     "sides_cross": "the stair's sides meet or cross (clear width {width} in)",
     "handrail_side": "a handrail's side is {got!r}, not left or right",
     # guards
+    "guard_top_not_drawn": "no member of the guard reaches its stated top: the drawn guard is lower",
     "guard_kind": "say whether the guard is along a stair (`stair`) or at a level walking surface "
                   "(`walking_surface`): give one",
     "guard_open_at_top": "the guard's members don't reach its top: an opening runs up out of it",

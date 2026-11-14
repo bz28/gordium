@@ -634,12 +634,61 @@ def test_a_solid_panel_lets_nothing_through():
     assert guard(d)[0]["guard_opening_sphere"] == 0.0
 
 
-def test_a_guard_with_nothing_at_its_top():
+def test_a_guard_whose_top_rail_runs_part_way():
     d = base()
-    d["guards"][0]["members"] = [{"left": 0, "right": 10, "bottom": 100, "top": 130}]
-    assert "don't reach its top" in guard(d)[1]["guard_opening_sphere"]
-    d["guards"][0]["members"] = []
-    assert "don't reach its top" in guard(d)[1]["guard_opening_sphere"]
+    d["guards"][0]["members"] = [{"left": 0, "right": 5, "bottom": 134, "top": 136}]
+    m, stopped = guard(d)
+    assert m == {"guard_height": 36.0} and "don't reach its top" in stopped["guard_opening_sphere"]
+
+
+@pytest.mark.parametrize("members", [[{"left": 0, "right": 10, "bottom": 100, "top": 130}], []])
+def test_a_guard_height_is_the_drawn_guards(members):
+    """Review round 2: the height came from the stated top though no member reached it (drawn 30 in, read 36)."""
+    d = base()
+    d["guards"][0]["members"] = members
+    m, stopped = guard(d)
+    assert m == {} and "drawn guard is lower" in stopped["guard_height"]
+
+
+def test_a_sliding_sash_outside_its_frame_gives_no_value():
+    """Review round 2: a sash drawn wholly above the frame left the whole frame clear (12.5 sq ft)."""
+    _, stopped, _ = opening_measures(sliding([{"left": 0, "right": 30, "bottom": 60, "top": 90}]))
+    assert "reaches outside the frame" in stopped["opening_net_clear_area"]
+    m, _, _ = opening_measures(sliding([{"left": 0, "right": 30.05, "bottom": 40, "top": 60.05}]))   # within 1/16
+    assert m["opening_net_clear_height"] == 20.0
+
+
+@pytest.mark.parametrize("key, value", [("sash_width", 2), ("sash_thickness", 0)])
+def test_a_hinged_sash_that_doesnt_close_its_frame_gives_no_value(key, value):
+    """Review round 2: a 2 in sash in a 30 in frame read as 27.9 in clear at 45 degrees (the rest is fixed)."""
+    _, stopped, _ = opening_measures(changed(("openings", 0, "hinged", key), value))
+    assert "doesn't close" in stopped["opening_net_clear_width"]
+
+
+def test_a_tilted_nosing_is_read_at_its_worst_end():
+    """Review round 2: a nosing's ends were averaged, so a riser 1/32 in taller at one end read as the mean."""
+    d = flight([7, 7, 7, 7], [10, 10, 10])
+    n = d["stairs"][0]["nosings"]
+    n[1] = [[10.03125, 0, 14.03125], [9.96875, 36, 13.96875]]      # nosing 2 tilted 1/32 in each way
+    m, _, more = stair(d)
+    assert m["stair_riser_height"] == 7.03125                       # 14.03125 - 7
+    assert more["stair_riser_variation"] == 0.0625                  # 7.03125 - 6.96875 (21 - 14.03125)
+    assert m["stair_tread_depth"] == 9.96875 and more["stair_tread_variation"] == 0.0625
+    n[1] = [[10, 0, 14], [10, 36, 13.9375]]                         # one end 1/16 in low: the riser above it
+    m, _, _ = stair(d)
+    assert m["stair_riser_height"] == 7.0625                        # 21 - 13.9375
+
+
+def test_a_surface_point_below_its_fitted_plane_counts():
+    """Review round 2: a ceiling point 0.05 in under the fitted plane (83.97 in) read as 84.02: area given."""
+    _, stopped, more = room(ceilings([[0, 0, 84.05], [60, 0, 83.97], [120, 0, 84.05], [120, 120, 84.05],
+                                      [0, 120, 84.05]]))
+    assert more["least_ceiling_height"] <= 83.97 and "R312.3" in stopped["sleeping_room_floor_area"]
+
+
+def test_an_integer_too_big_for_a_float_is_not_a_length():
+    _, stopped = door(changed(("doors", 0, "head_stop_bottom"), 10 ** 400))
+    assert "isn't a length" in stopped["door_clear_height"]
 
 
 def test_an_l_shaped_opening():
@@ -903,7 +952,10 @@ STOP_CASES = {
     "sides_cross": _stair(sides={"left": [[-5, 0], [40, 0]], "right": [[-5, 36], [40, 36]]}),
     "handrail_side": _stair(handrails=[{"side": "up", "inner_edge": [[0, 4], [30, 4]]}]),
     "guard_kind": _guard(stair="s"),
-    "guard_open_at_top": _guard(members=[]),
+    "guard_open_at_top": _guard(members=[{"left": 0, "right": 5, "bottom": 134, "top": 136}]),
+    "guard_top_not_drawn": _guard(members=[]),
+    "sash_outside_frame": lambda: sliding([{"left": 0, "right": 30, "bottom": 60, "top": 90}]),
+    "sash_smaller_than_frame": _set(("openings", 0, "hinged", "sash_width"), 2),
     "guard_opening_shape": _guard(members=[{"left": 0, "right": 10, "bottom": 134, "top": 136},
                                            {"left": 0, "right": 5, "bottom": 100, "top": 120}]),
     "stair_unknown": lambda: stair_guard([[0, 36, 41], [30, 36, 64]], "elsewhere"),

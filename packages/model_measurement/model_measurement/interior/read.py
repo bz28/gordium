@@ -18,9 +18,15 @@ def number(value, what: str) -> float:
     """A plain number (never true/false, never infinite or NaN)."""
     if value is None:
         raise Stop("missing", what=what)
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value):
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
         raise Stop("not_a_length", what=what)
-    return float(value)
+    try:
+        value = float(value)
+    except OverflowError:                                    # an integer too big for a float
+        raise Stop("not_a_length", what=what) from None
+    if not math.isfinite(value):
+        raise Stop("not_a_length", what=what)
+    return value
 
 
 def choice(value, choices, what: str):

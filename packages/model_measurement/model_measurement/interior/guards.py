@@ -23,12 +23,23 @@ def level_guard(g: dict, reader) -> tuple[dict, dict]:
     top = reader.length(g.get("top"), "the top of the guard")
     if top - walk <= 0:
         raise Stop("not_positive", what="the guard's height", value=tidy(top - walk))
+    if not top_drawn(g, reader, top):
+        raise Stop("guard_top_not_drawn")
     measures["guard_height"] = tidy(top - walk)
     try:
         measures["guard_opening_sphere"] = tidy(largest_sphere(g, reader, walk, top))
     except Stop as s:
         stopped["guard_opening_sphere"] = s.reason
     return measures, stopped
+
+
+def top_drawn(g: dict, reader, top: float) -> bool:
+    """Whether some member (the top rail) reaches the guard's stated top: its height is the drawn guard's."""
+    members = g.get("members")
+    if not isinstance(members, list):
+        raise Stop("missing", what="the guard's members (`members`: rails, balusters, posts, panels)")
+    tops = [reader.rectangle(m, f"guard member {n}")[3] for n, m in enumerate(members, 1)]
+    return any(t >= top - 1e-9 for t in tops)
 
 
 def largest_sphere(g: dict, reader, walk: float, top: float) -> float:

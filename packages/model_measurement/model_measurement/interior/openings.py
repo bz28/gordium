@@ -50,6 +50,8 @@ def drawn_clear(o: dict, reader, operation: str):
             raise Stop("hinge_angle", angle=angle)
         width = reader.size(h.get("sash_width"), "the hinged sash's width")
         thick = reader.size(h.get("sash_thickness"), "the hinged sash's thickness")
+        if width < right - left - AGREE or thick <= 0:      # one sash closes the whole frame; it has a thickness
+            raise Stop("sash_smaller_than_frame", width=tidy(width), thickness=tidy(thick), frame=tidy(right - left))
         offset = reader.size(h.get("hinge_offset"), "the hinged sash's offset from the jamb when open")
         a = math.radians(angle)
         covered = offset + max(0.0, width * math.cos(a)) + thick * math.sin(a)
@@ -62,6 +64,8 @@ def drawn_clear(o: dict, reader, operation: str):
         blocks = []
         for n, s in enumerate(sashes, 1):
             l, r, b, t = reader.rectangle(s, f"open sash {n}")
+            if l < left - AGREE or r > right + AGREE or b < bottom - AGREE or t > top + AGREE:
+                raise Stop("sash_outside_frame", n=n)
             blocks.append(box(l, b, r, t))
     free = box(left, bottom, right, top).difference(unary_union(blocks))
     if free.is_empty or free.area <= 0:

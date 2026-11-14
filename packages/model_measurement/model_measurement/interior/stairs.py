@@ -33,10 +33,15 @@ class Flight:
             (x1, y1, z1), (x2, y2, z2) = ends
             if abs(z1 - z2) > LEVEL:
                 raise Stop("nosing_not_level", n=n, off=tidy(abs(z1 - z2)))
-            self.nosings.append(((x1, y1), (x2, y2), (z1 + z2) / 2))
-        self.z = [z for _, _, z in self.nosings]
-        self.risers = [b - a for a, b in zip([self.bottom] + self.z, self.z)]
-        for n, rise in enumerate(self.risers, 1):
+            self.nosings.append(((x1, y1), (x2, y2), (min(z1, z2), max(z1, z2))))
+        # a nosing's ends may differ by drawing noise: each riser is read at its tallest and its shortest (ends
+        # paired the worst way), and the line connecting the nosings at their higher ends (less headroom above it)
+        low = [self.bottom] + [z[0] for _, _, z in self.nosings]
+        high = [self.bottom] + [z[1] for _, _, z in self.nosings]
+        self.z = high[1:]
+        self.risers = [b - a for a, b in zip(low, high[1:])]               # tallest
+        self.risers_least = [b - a for a, b in zip(high, low[1:])]         # shortest
+        for n, rise in enumerate(self.risers_least, 1):
             if rise <= 0:
                 raise Stop("not_bottom_to_top", n=n, rise=tidy(rise))
 
@@ -55,15 +60,18 @@ class Flight:
         if rx * mid[0] + ry * mid[1] < 0:                         # pointing up the flight
             rx, ry = -rx, -ry
         self.origin, self.r, self.a = p1, (rx, ry), (-ry, rx)     # a: the run turned left
-        self.s, self.ends = [], []
+        self.s, self.s_ends, self.ends = [], [], []
         for n, (e1, e2, _) in enumerate(self.nosings, 1):
             s1, s2 = self.s_of(*e1), self.s_of(*e2)
             if abs(s1 - s2) > LEVEL:
                 raise Stop("winders", n=n, off=tidy(abs(s1 - s2)))
             self.s.append((s1 + s2) / 2)
+            self.s_ends.append((min(s1, s2), max(s1, s2)))
             a1, a2 = self.a_of(*e1), self.a_of(*e2)
             self.ends.append((min(a1, a2), max(a1, a2)))          # (right end, left end)
-        self.treads = [b - a for a, b in zip(self.s, self.s[1:])]
+        # each tread at its shallowest and its deepest (the nosings' ends paired the worst way)
+        self.treads = [b[0] - a[1] for a, b in zip(self.s_ends, self.s_ends[1:])]
+        self.treads_most = [b[1] - a[0] for a, b in zip(self.s_ends, self.s_ends[1:])]
         for n, depth in enumerate(self.treads, 1):
             if depth <= 0:
                 raise Stop("nosings_not_forward", n=n, depth=tidy(depth))
@@ -197,7 +205,7 @@ def measure_stair(st: dict, reader) -> tuple[dict, dict, dict, Flight | None]:
         stop(names, s.reason)
         return measures, more, stopped, None
     measures["stair_riser_height"] = tidy(max(flight.risers))
-    more.update(stair_riser_variation=tidy(max(flight.risers) - min(flight.risers)),
+    more.update(stair_riser_variation=tidy(max(flight.risers) - min(flight.risers_least)),
                 stair_total_rise=tidy(flight.z[-1] - flight.bottom), stair_risers=len(flight.risers))
     try:
         flight.plan()
@@ -205,7 +213,7 @@ def measure_stair(st: dict, reader) -> tuple[dict, dict, dict, Flight | None]:
         stop(names, s.reason)
         return measures, more, stopped, None
     measures["stair_tread_depth"] = tidy(min(flight.treads))
-    more["stair_tread_variation"] = tidy(max(flight.treads) - min(flight.treads))
+    more["stair_tread_variation"] = tidy(max(flight.treads_most) - min(flight.treads))
     try:
         measures["stair_headroom"] = tidy(headroom(st, flight, reader))
     except Stop as s:

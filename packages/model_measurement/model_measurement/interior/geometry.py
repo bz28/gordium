@@ -37,10 +37,16 @@ class Surface:
         if not plan.is_valid or plan.area <= 0:
             raise Stop("not_an_outline", what=what)
         self.plan = plan
+        # how far the drawn points stand below the fitted plane, at most: the plane is lowered by it, so no drawn
+        # point is ever lower than the surface read (the cautious side for headroom and ceiling height)
+        self.below = max(0.0, max(self._fit(x, y) - z for x, y, z in points))
 
-    def z(self, x: float, y: float) -> float:
+    def _fit(self, x: float, y: float) -> float:
         (a, b, c), (cx, cy, cz) = self.n, self.c
         return cz - (a * (x - cx) + b * (y - cy)) / c
+
+    def z(self, x: float, y: float) -> float:
+        return self._fit(x, y) - self.below
 
 
 def corners(geom) -> list[tuple]:
