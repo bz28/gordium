@@ -85,6 +85,11 @@ public enum ElementKind
 
     /// <summary>A linked Revit model (<c>RevitLinkInstance</c>), with <see cref="RevitElement.Link"/>.</summary>
     LinkInstance,
+
+    /// <summary>A coordination model (Navisworks, <c>CoordinationModelLinkUtils.IsCoordinationModelInstance</c>,
+    /// Revit 2024 and later): drawn for show only, so Revit gives no geometry for it, yet it may hold a building.
+    /// Left out as a linked model whose contents aren't known, wherever it stands.</summary>
+    CoordinationModel,
 }
 
 /// <summary>Gordium's own marks on an element (proposed: a DirectShape carrying a Gordium parameter, as Rhino's

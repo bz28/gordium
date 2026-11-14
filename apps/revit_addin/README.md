@@ -115,7 +115,7 @@ nothing. So the decisions are built and tested here, on the Mac.
    with straight edges are sent; a curved face or edge, an open solid or a mesh not known to be closed is reported,
    never sent as if it were flat. A building element with nothing to send is never skipped: it is sent as an object
    that couldn't be (`unsent`), so every building measure needs review.
-3. **Left out:** every other solid or mesh, every family instance and CAD import whatever it holds, Gordium's
+3. **Left out:** every other solid or mesh, every family instance and CAD import whatever it holds (a nested family of lines only is skipped inside it, as at the top), every coordination model (its contents aren't read: on the lot and touching), Gordium's
    neighbourhood objects, a Toposolid. **Which of them are on the lot and which touch the house is the worker's
    decision** (`objects.left_out`, the one copy every host uses), never the reader's.
 4. **Linked models:** one holding any building element (at any depth) or a closed workset is not sent (every

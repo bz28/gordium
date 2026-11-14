@@ -63,6 +63,9 @@ internal sealed class Read(RevitModel model)
             case { Kind: ElementKind.LinkInstance }:
                 Link(e);
                 break;
+            case { Kind: ElementKind.CoordinationModel }:
+                CoordinationModel(e);
+                break;
             case { Mark: GordiumMark.Context, Kind: ElementKind.FamilyInstance or ElementKind.CadImport }:
                 Family(e, context: true);
                 break;
@@ -108,7 +111,7 @@ internal sealed class Read(RevitModel model)
         {
             if (e.Kind == ElementKind.CurtainWallHost && g is { MissingPart: false })
                 return;                  // its panels and mullions are their own elements; it has no faces of its own
-            Unsend(e, $"a {e.Category} with no geometry", RevitBox(e, ToShared));
+            Unsend(e, $"a {e.Category} element with no geometry", RevitBox(e, ToShared));
             return;
         }
         if (g.MissingPart)               // a nested family that gave nothing: the building may be bigger than its faces
@@ -193,6 +196,16 @@ internal sealed class Read(RevitModel model)
         Candidates.Add(Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, context, "Family", true));
     }
 
+    /// <summary>A coordination model: Revit gives no geometry for it (it is drawn for show only), so what it holds
+    /// can't be told; left out as a linked model whose contents aren't known (as Rhino's linked block: on the lot
+    /// and touching wherever it stands), never skipped as an element with no geometry (review round 5).</summary>
+    private void CoordinationModel(RevitElement e)
+    {
+        var key = e.UniqueId;
+        Definitions[key] = new JsonObject { ["status"] = SiteReader.CoordinationModelStatus, ["parts"] = new JsonArray() };
+        Candidates.Add(Make(e, new Gathered(), RevitBox(e, ToShared), key, e.Mark == GordiumMark.Context, "Family", true));
+    }
+
     /// <summary>A Toposolid: left out (a closed solid that could be a building until the architect says it is the
     /// ground); never labelled as looking like the ground in the first reader. One whose geometry can't be read has
     /// no box (Revit's own box is never trusted alone).</summary>
@@ -233,8 +246,9 @@ internal sealed class Read(RevitModel model)
     }
 
     /// <summary>What a family holds, each piece a part as host_core reads it: a solid or mesh with faces, its box; a
-    /// nested family, its own definition (<paramref name="key"/>/n), with a box only when it gives geometry; a piece
-    /// of a kind the reader doesn't know, no box.</summary>
+    /// nested family, its own definition (<paramref name="key"/>/n), with a box only when it gives geometry, and left
+    /// out when it holds only lines and empty solids (as Walk skips them); a piece of a kind the reader doesn't know,
+    /// no box.</summary>
     private JsonArray Parts(IReadOnlyList<GeometryItem> items, Transform3 t, string key, RevitElement e)
     {
         var parts = new JsonArray();
@@ -249,9 +263,11 @@ internal sealed class Read(RevitModel model)
                     parts.Add(new JsonObject { ["box"] = null });
                     break;
                 case InstanceItem { Items: { } inner }:
+                    var g = Walk([items[i]], t, e);   // the instance itself: one that gives nothing is MissingPart
+                    if (!g.HasFaces && !g.MissingPart && !g.Other)
+                        break;                   // lines and empty solids only: nothing that could be a building (review round 5)
                     var nested = $"{key}/{i}";
                     Definitions[nested] = new JsonObject { ["status"] = SiteReader.NotLinked, ["parts"] = Parts(inner, t, nested, e) };
-                    var g = Walk(inner, t, e);
                     parts.Add(new JsonObject { ["box"] = Numbers(g.Box.Box?.ToArray()), ["definition"] = nested });
                     break;
             }
@@ -337,7 +353,8 @@ internal sealed class Read(RevitModel model)
             }
             if (el.Mark is GordiumMark.SpotGrade or GordiumMark.FinishedGrade)
                 continue;
-            var anyGeometry = el.Kind is ElementKind.FamilyInstance or ElementKind.CadImport or ElementKind.Toposolid;
+            var anyGeometry = el.Kind is ElementKind.FamilyInstance or ElementKind.CadImport or ElementKind.Toposolid
+                or ElementKind.CoordinationModel;
             if (el.GeometryFailed)
             {
                 inside.MissingPart = true;

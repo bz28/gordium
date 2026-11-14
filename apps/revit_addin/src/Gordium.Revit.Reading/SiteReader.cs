@@ -58,6 +58,10 @@ public static class SiteReader
     /// <summary>The status a family's or a CAD import's definition is sent with: not linked to a file.</summary>
     public const string NotLinked = "NotALinkedInstanceDefinition";
 
+    /// <summary>The status a coordination model's definition is sent with: what it holds isn't read, so it is not one
+    /// of <c>host_core.left_out.BLOCK_CONTENTS_KNOWN</c> (contents_not_known: on the lot and touching).</summary>
+    public const string CoordinationModelStatus = "CoordinationModelNotRead";
+
     /// <summary>The model as a site description, with the lot facts the architect saved (<c>lot_id</c>,
     /// <c>grade_from</c>, the street lines: in shared coordinates).</summary>
     public static async Task<ReadResult> DescribeAsync(RevitModel model, JsonObject facts, ILeftOutAsker asker,
@@ -130,10 +134,10 @@ public static class SiteReader
 
     /// <summary>Whether the element is looked at at all: a model element, not drawn in one view only, not a
     /// category with no building in it, not a model group (its members are read on their own).</summary>
-    /// <remarks>A linked model or a CAD import is looked at whatever type Revit gives its category (whether "RVT
+    /// <remarks>A linked model, a coordination model or a CAD import is looked at whatever type Revit gives its category (whether "RVT
     /// Links" is a model category is to check): skipping one would skip a house it holds.</remarks>
     internal static bool Looked(RevitElement e) =>
-        (e.CategoryType == CategoryType.Model || e.Kind is ElementKind.LinkInstance or ElementKind.CadImport)
+        (e.CategoryType == CategoryType.Model || e.Kind is ElementKind.LinkInstance or ElementKind.CadImport or ElementKind.CoordinationModel)
         && !e.ViewSpecific && !NotLookedAt.Contains(e.BuiltInCategory) && e.Kind != ElementKind.Group;
 
     /// <summary>Whether the element is on the lot in the design checked (proposed, design note, section 1):

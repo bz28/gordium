@@ -226,7 +226,7 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
         var unsent = site["unsent"]!.AsArray().ToDictionary(u => u!["id"]!.GetValue<string>(), u => u!["kind"]!.GetValue<string>());
         Assert.Equal(new Dictionary<string, string>
         {
-            ["w_none"] = "a Walls with no geometry", ["w_failed"] = "Walls", ["w_lines"] = "a Walls with no geometry",
+            ["w_none"] = "a Walls element with no geometry", ["w_failed"] = "Walls", ["w_lines"] = "a Walls element with no geometry",
             ["w_other"] = "Walls",
         }, unsent);
         Assert.All(site["unsent"]!.AsArray(), u => Assert.Equal("not_a_solid", u!["problem"]!["code"]!.GetValue<string>()));
@@ -273,6 +273,38 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
         // like a family, whatever it holds, even nothing (review round 1: an empty import was skipped as Ordinary)
         var empty = cad with { UniqueId = "cad_empty", Geometry = null, BoundingBox = null };
         Assert.Null(LeftOut(await Site(House(empty)), "cad_empty")["touching"]);
+    }
+
+    [Fact]
+    public async Task A_coordination_model_is_left_out_as_touching_wherever_it_stands()
+    {
+        // review round 5: a Navisworks coordination model gives no geometry (Revit draws it for show only) yet may
+        // hold a garage on the lot; it was skipped as an element with no geometry. Far off the lot, and whatever type
+        // Revit gives its category, it still counts as on the lot and touching (contents not known, as a linked block)
+        var nwc = new RevitElement { UniqueId = "nwc", BuiltInCategory = "OST_Coordination_Model", Category = "Coordination Model",
+                                     Kind = ElementKind.CoordinationModel, CategoryType = CategoryType.Internal,
+                                     BoundingBox = new RevitBox(new(1000, 1000, 0), new(1010, 1010, 10)) };
+        var o = LeftOut(await Site(House(nwc)), "nwc");
+        Assert.Null(o["touching"]);
+        // inside a linked model too: its place can't be told, so the link has no box
+        var far = FakeRevit.Directshape("far", [Block(1000, 1000, 1010, 1010)]);
+        var doc = new RevitModel { Document = "consultant.rvt", Elements = [nwc, far] };
+        Assert.Null(LeftOut(await Site(House(FakeRevit.LinkOf("link", doc))), "link")["touching"]);
+    }
+
+    [Fact]
+    public async Task A_nested_family_of_lines_only_does_not_put_a_far_family_on_the_lot()
+    {
+        // review round 5: a nested family holding only lines (or only empty solids) was sent as a part with no box,
+        // so a family 1000 ft off the lot counted as on it and touching; Walk skips such pieces, and so must Parts
+        foreach (var inner in new GeometryItem[] { new LineworkItem(), new SolidItem([], []) })
+        {
+            var car = FakeRevit.Family("car", [Block(1000, 1000, 1010, 1010), new InstanceItem([inner])]);
+            Assert.DoesNotContain("car", Ids(await Site(House(car)), "left_out"));
+        }
+        // a nested family that gives nothing still leaves it with no box (touching: null)
+        var empty = FakeRevit.Family("car", [Block(1000, 1000, 1010, 1010), new InstanceItem([])]);
+        Assert.Null(LeftOut(await Site(House(empty)), "car")["touching"]);
     }
 
     [Fact]
