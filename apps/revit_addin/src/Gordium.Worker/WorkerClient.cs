@@ -144,14 +144,17 @@ public sealed class WorkerClient : IDisposable
         return Guard(() => WorkerAbout.Parse(answer.Result, "result"));
     }
 
-    /// <summary><c>check_site {site, facts, report?, extras?}</c>: the check of a site description.</summary>
+    /// <summary><c>check_site {site, facts, report?, extras?, today?}</c>: the check of a site description.</summary>
     /// <param name="site">The site description (gordium.site/1).</param>
     /// <param name="facts">The lot facts the architect states.</param>
     /// <param name="report">Where to write the zoning report (.xlsx), or null for none.</param>
     /// <param name="extras">What the host adds to the check (as the Rhino command's <c>extras</c>), or null.</param>
+    /// <param name="today">The day of the check as YYYY-MM-DD, the place's own day (how old a saved address lookup
+    /// is), or null: then no lookup counts as recent and the overlays row stays. The checker never reads the clock.</param>
     /// <param name="cancel">Cancels the wait; the worker is then stopped.</param>
     public async Task<CheckResult> CheckSiteAsync(JsonNode site, JsonNode facts, string? report = null,
-                                                  JsonNode? extras = null, CancellationToken cancel = default)
+                                                  JsonNode? extras = null, string? today = null,
+                                                  CancellationToken cancel = default)
     {
         ArgumentNullException.ThrowIfNull(site);
         ArgumentNullException.ThrowIfNull(facts);
@@ -160,6 +163,8 @@ public sealed class WorkerClient : IDisposable
             fields["report"] = report;
         if (extras is not null)
             fields["extras"] = extras.DeepClone();
+        if (today is not null)
+            fields["today"] = today;
         var answer = await ExchangeAsync("check_site", fields, _options.RequestTimeout, cancel).ConfigureAwait(false);
         return Guard(() => CheckResult.Parse(answer));
     }
