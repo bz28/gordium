@@ -19,7 +19,7 @@ from pathlib import Path
 
 import yaml
 
-from .rulebook import REPO
+from .rulebook import REPO, STATE_SETTINGS
 
 SETTINGS = "jurisdiction.yaml"
 JURISDICTIONS = "regulations/jurisdictions"
@@ -110,6 +110,12 @@ class Place:
         return None if not s else {"folder": REPO / s["folder"], "address": s["address"]}
 
     @property
+    def inherits(self) -> tuple[Path, ...]:
+        """The state law folders whose law applies here too (jurisdiction.yaml `inherits`, each <state>/<name>,
+        a folder with a state.yaml), in the order listed: New York's Residential Code for Ithaca."""
+        return tuple(self.folder.parent.parent / k for k in self.settings.get("inherits") or ())
+
+    @property
     def test_sites(self) -> Path:
         """test_data/test_sites/<state>/<place>: the place's real lots and hand-worked scenarios."""
         return REPO / "test_data/test_sites" / self.key
@@ -153,6 +159,7 @@ def _read(folder: str) -> Place:
     except yaml.YAMLError as e:
         raise UnknownPlace(f"{_shown(path)} can't be read: {e}") from None
     problems = settings_problems(settings)
+    problems += inherit_problems(f, settings) if not problems else []
     if problems:
         raise UnknownPlace(f"{_shown(path)}: " + "; ".join(problems))
     return Place(f, settings)
@@ -217,6 +224,32 @@ def settings_problems(settings) -> list[str]:
     if site is not None and not (isinstance(site, dict) and all(str(site.get(k) or "").strip()
                                                                for k in ("folder", "address"))):
         out.append("sample_site must give a folder and an address")
+    return out
+
+
+def inherit_problems(folder: Path, settings: dict) -> list[str]:
+    """What's wrong with a place's `inherits`: a list of <state>/<name>, each a state law folder (one with a
+    state.yaml) in the place's own state. Required (and not empty) once the place's state has a state law folder.
+    A name that is no such folder is refused, never ignored: a place that silently inherited nothing would be
+    checked against too little law."""
+    names = settings.get("inherits", [])
+    if not (isinstance(names, list) and all(isinstance(n, str) and n.strip() for n in names)):
+        return ["inherits must be a list of state law folders (<state>/<name>)"]
+    out = []
+    for n in names:
+        target = folder.parent.parent / n          # regulations/jurisdictions/<state>/<name>, beside the place
+        if len(Path(n).parts) != 2 or Path(n).is_absolute():
+            out.append(f"inherits {n!r}: name it as <state>/<name>")
+        elif not (target / STATE_SETTINGS).is_file():
+            out.append(f"inherits {n!r}: no state law folder there ({_shown(target / STATE_SETTINGS)} is missing)")
+        elif Path(n).parts[0] != folder.parent.name:
+            out.append(f"inherits {n!r}: a place inherits only its own state's law")
+    if len(set(names)) != len(names):
+        out.append("inherits names a folder twice")
+    state_law = sorted(f"{folder.parent.name}/{s.parent.name}" for s in folder.parent.glob(f"*/{STATE_SETTINGS}"))
+    if state_law and not names:
+        out.append(f"inherits names no state law, but {', '.join(state_law)} is this state's: list it under inherits "
+                   "(a place that silently inherited nothing would be checked against too little law)")
     return out
 
 

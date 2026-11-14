@@ -361,6 +361,27 @@ def test_a_refused_request_leaves_the_earlier_report_and_its_site_alone(tmp_path
     assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before
 
 
+def test_a_district_with_no_rules_is_refused_on_every_path_before_any_file_is_touched(tmp_path):
+    """Main's plain refusal of a district with no rulebook (PR 67's audit: no_rules_for) on the description's paths
+    too: check() and check_description refuse it before the site file or the report is written (the earlier report
+    and its site stay as they were), and start() and start_description refuse it too (review of the main merge)."""
+    path, facts = MODELS[1]
+    report = tmp_path / "house.xlsx"
+    doc = site_json.read_model(path, facts, inventory_complete=True)
+    check_description(site_json.through_json(doc), _facts(facts), report)
+    before = {p.name: p.read_bytes() for p in tmp_path.iterdir()}
+    no_rules = "Gordium doesn't have rules for district B-1a yet"
+    with pytest.raises(ValueError, match=no_rules):
+        check_description(site_json.through_json(doc), {**_facts(facts), "zone": "B-1a"}, report)
+    with pytest.raises(ValueError, match=no_rules):
+        check(path, {**facts, "zone": "B-1a"}, report)
+    assert {p.name: p.read_bytes() for p in tmp_path.iterdir()} == before
+    with pytest.raises(ValueError, match=no_rules):
+        start(path, {**facts, "zone": "B-1a"})
+    with pytest.raises(ValueError, match=no_rules):
+        start_description(site_json.through_json(doc), {**_facts(facts), "zone": "B-1a"})
+
+
 def test_a_description_with_no_buildings_whose_lot_wasnt_all_looked_at_leaves_no_building_measure_complying():
     """Review round 4 (PR 4): with no building sent, the stories were 0 and complied, though the tool said it
     hadn't sent everything."""
