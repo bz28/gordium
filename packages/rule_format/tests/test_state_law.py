@@ -288,9 +288,24 @@ def test_an_edited_cache_is_a_problem_even_where_no_quote_covers_the_edit(tmp_pa
     assert any("words are not the ones its piece was cut from" in p for p in Context.for_jurisdiction(NY_STATE).problems)
 
 
+# Every brought-in piece that points to law not brought in, as the pointer test finds it in the whole piece (where
+# the code cache has the book). Kept here so CI, which has no cache and sees only the labels' quotes, still checks
+# each one's label; with the cache, the test proves this list is exactly what the pieces say.
+POINTING_OUT = {
+    ("R102.6.1", "BO"), ("R102.6.2", "BO"), ("R314.3", "P2904"), ("R315.4", "P2904"), ("R316.2", "R312"),
+    ("R316.3", "P2904"), ("R319.1", "P2904"), ("R319.7", "BO"), ("R320.7", "R507.2.2"), ("R321.1.4", "R507.2.2"),
+    ("R325.6", "E3401.2.1"), ("R325.7", "E3401.2.1"), ("R507.10", "R301.5"), ("R507.10.3", "R507.2.2"),
+    ("BO101.1", "R101.2"), ("BO102.6", "BO102.6.1"), ("BO105.1", "R301.1.3"), ("BO105.1.1", "BO105.2"),
+    ("BO105.1.2", "BO105.2"), ("BO105.8", "702"), ("BO106.1", "R301.1.3"), ("BO106.1.2", "BO104"),
+    ("BO106.1.2", "BO105"), ("BO107.1", "BO105"), ("BF103.1", "R324"),
+}
+
+
 def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
     # review round 5: R319.7 sends existing basements to Appendix BO, not brought in; as a reference nobody sees it.
-    # Step 1b's review round 4: a pointer past the label's quote, or worded "the scoping requirements of", was missed
+    # Step 1b's review round 4: a pointer past the label's quote, or worded "the scoping requirements of", was missed.
+    # Step 1b's review rounds 5 and 6: without the cache (CI) a pointer past the quote was never seen, so a rule
+    # turned into a reference passed CI; POINTING_OUT checks those labels with or without the cache
     import re
     src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
     brought, alone = src["brought_in"]["sections"], src["brought_in"].get("alone") or []
@@ -301,21 +316,107 @@ def test_a_pointer_to_law_not_brought_in_is_flagged_never_a_silent_reference():
     from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
     entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
     words = {pid: " ".join(s["quote"] for s in e["sources"]) for pid, e in labels.items()}
-    if cached_text(entry).exists():             # the whole piece where the book is here, not only its quote
+    whole = cached_text(entry).exists()
+    if whole:                                   # the whole piece where the book is here, not only its quote
         text = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
         for p in read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]:
             words[p["id"]] = " ".join(text[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1))
+    found = {(pid, target) for pid in labels for target in (m[1] for m in points.finditer(" ".join(words[pid].split())))
+             if not (target in alone or any(target == b or target.startswith(b + ".") for b in brought))}
+    if whole:
+        assert found == POINTING_OUT, (sorted(found - POINTING_OUT), sorted(POINTING_OUT - found))
     readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
-    seen, wrong = 0, []
-    for pid, e in labels.items():
-        for target in (m[1] for m in points.finditer(" ".join(words[pid].split()))):
-            inside = target in alone or any(target == b or target.startswith(b + ".") for b in brought)
-            seen += not inside
-            # a definition sets no requirement, so it is no rule or flag; its pointer is named in the README instead,
-            # since the pieces using the term never show it (review round 8: R202:sleeping_loft -> Section R315)
-            if not inside and (e["label"] not in ("rule", "flag") if ":" not in pid else target not in readme):
-                wrong.append((pid, target, e["label"]))
-    assert seen >= 3 and wrong == []          # R319.7 (Appendix BO), R320.7 and R321.1.4 (R507.2.2)
+    wrong = []
+    for pid, target in sorted(found | POINTING_OUT):
+        label = labels[pid]["label"]
+        # a definition sets no requirement, so it is no rule or flag; its pointer is named in the README instead,
+        # since the pieces using the term never show it (review round 8: R202:sleeping_loft -> Section R315)
+        if (label not in ("rule", "flag") if ":" not in pid else target not in readme):
+            wrong.append((pid, target, label))
+    assert wrong == []
+
+
+def _readme_gaps(found: dict[str, list[str]], readme: str) -> tuple[list, list]:
+    """(references the README's "not brought in" list never names, (reference, piece) pairs where the piece pointing
+    to it is not named in the README's words about that reference)."""
+    import re
+    part = readme.split("## References in the brought-in sections that are not brought in")[1].split("\n## ")[0]
+    bullets = [b for b in part.splitlines() if b.startswith("- ")]
+    named = lambda code, text: re.search(rf"(?<![\w.]){re.escape(code)}(?!\w|\.\d)", text)
+    misprinted = {"B0109": "BO109"}            # the book's zero for the letter O (README: the book's own misnumbering)
+    spelled = lambda code: [code, misprinted.get(code)] + ([code.split()[1]] if code.startswith("Appendix ") else [])
+
+    def said_for(code, bullet):
+        """The bullet's words about this reference: from where it is named to the next reference, unless only words
+        like "and" come between, so "R405.1 and Table R401.4.1(2) (...; from R319.4.3)" gives R319.4.3 to both, but
+        "R301.5 (guard loads), R301.1.3 (...; from ...)" gives R301.5 nothing."""
+        if code.startswith("Appendix ") and not bullet.startswith("- Appendices ") and not named(code, bullet):
+            return []
+        others = sorted(m.start() for c in found if c != code for s in spelled(c) if s
+                        for m in re.finditer(rf"(?<![\w.]){re.escape(s)}(?!\w|\.\d)", bullet))
+        said = []
+        for s in filter(None, spelled(code)):
+            for m in re.finditer(rf"(?<![\w.]){re.escape(s)}(?!\w|\.\d)", bullet):
+                start = m.end()
+                end = next((o for o in others if o > start and re.search(r"from |[;)]", bullet[start:o])), len(bullet))
+                said.append(bullet[start:end])
+        return said
+
+    unlisted, missing = [], []
+    for code, by in found.items():
+        mine = [w for b in bullets for w in said_for(code, b)]
+        if not mine:
+            unlisted.append(code)
+        missing += [(code, p) for p in by if mine and not any(named(p, w) for w in mine)]
+    return unlisted, missing
+
+
+def test_the_readmes_references_not_brought_in_name_every_piece_the_code_finds_pointing_to_them():
+    # step 1b's review round 5: R507.10.3 also points to R507.2.2, but the README named only the step-1 pieces.
+    # Round 6: the check read only references heading a bullet with "from", so 31 of 42 went unchecked.
+    # Round 7: a piece named anywhere in a bullet passed for every reference in it; now only its own words count.
+    # Round 8: a reference with no "from" of its own took the next one's, across a ";" or ")"
+    from document_extraction.icc_references import ways_out
+    from rule_format.rulebook import cached_text, kept_text, load, read_jsonl
+    entry = load(NY_STATE / "1_source_documents/sources.yaml")["documents"][0]
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with New York's Residential Code is not on this machine (CI)")
+    lines = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
+    cut = read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]
+    found = ways_out(cut, lines, entry["brought_in"]["sections"], entry["brought_in"].get("alone") or [])
+    readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
+    assert len(found) >= 40 and _readme_gaps(found, readme) == ([], [])
+    # a piece filed under the wrong reference is a gap: BO108.1 points to BO107, not BO109
+    was = "BO107's other parts from BO108.1; BO109's other parts from BO107.1,"
+    assert was in readme
+    moved = readme.replace(was, "BO107's other parts; BO109's other parts from BO108.1, BO107.1,")
+    assert ("BO107", "BO108.1") in _readme_gaps(found, moved)[1]
+
+
+def test_the_readmes_chapter_2_count_is_the_r202_definitions_brought_in():
+    # review round 7: Chapter 2 is not all brought in, only R201 and the R202 definitions the brought-in parts use.
+    # Round 8: checked without the code cache (CI too), since it reads only files in the repo
+    from rule_format.rulebook import read_jsonl
+    cut = read_jsonl(NY_STATE / "2_extracted_text/gov.ny.residential.2025.sections.jsonl")[1:]
+    used = sum(p["id"].startswith("R202:") for p in cut)
+    readme = (NY_STATE / "README.md").read_text(encoding="utf-8")
+    chapter_2 = next(b for b in readme.splitlines() if b.startswith("- Chapter 2 "))
+    assert used > 0 and f"R201 and the {used} R202 definitions" in chapter_2, chapter_2
+
+
+def test_a_range_of_sections_named_as_brought_in_has_every_section_in_it_brought_in():
+    # step 1b's review round 5: "R314-R321" read as if R317 (garages and carports) were brought in; it is not
+    import re
+    src = yaml.safe_load((NY_STATE / "1_source_documents/sources.yaml").read_text(encoding="utf-8"))["documents"][0]
+    brought = set(src["brought_in"]["sections"])
+    files = [REPO / "docs/README.md", NY_STATE / "README.md", NY_STATE / "1_source_documents/sources.yaml",
+             NY_STATE / "4_term_definitions/definitions.yaml"]
+    ranges, wrong = 0, []
+    for f in files:
+        for a, b in re.findall(r"\bR(\d{3})[-\u2013]R(\d{3})\b", f.read_text(encoding="utf-8")):
+            ranges += 1
+            wrong += [(f.name, f"R{a}-R{b}", f"R{n}") for n in range(int(a), int(b) + 1) if f"R{n}" not in brought]
+    assert ranges >= 3 and wrong == [], wrong
 
 
 def test_every_term_definition_is_quoted_whole():

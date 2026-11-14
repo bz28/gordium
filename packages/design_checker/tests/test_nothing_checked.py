@@ -47,12 +47,13 @@ def test_no_counted_item_is_never_complies():
     assert present.state(not_covered) == present.REVIEW
 
 
-def test_one_complying_item_beside_not_checked_ones_still_complies():
-    # today's design, unchanged here: the not-checked rows show in their own group and the summary counts them.
-    # Whether a rule waiting on an interior fact (bedrooms) should hold the whole design at needs review is open
+def test_one_complying_item_beside_a_not_checked_one_needs_review():
+    # Ben, 2026-11-09: a row still waiting (a fact to answer, a rule not in this release) holds the whole design at
+    # needs review, whatever else complies (test_headline_waits_on_facts.py has the real checks)
     items = [{"group": "building", "status": present.COMPLIES},
              {"group": "not_checked", "status": present.NOT_CHECKED}]
-    assert present.state(items) == present.COMPLIES
+    assert present.state(items) == present.REVIEW
+    assert present.state(items[:1]) == present.COMPLIES
 
 
 def test_the_summary_of_no_rows_is_never_a_pass():

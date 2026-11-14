@@ -10,7 +10,7 @@ All pictures are the sample project, 106 Ithaca Rd (zone R-1b, one-family house)
 |---|---|
 | [gordium_demo.gif](gordium_demo.gif) | The whole flow in under a minute: the start box, the largest legal starting house, then a series of edits (stretch the rear wall, raise the roof, widen the house, add a shed, place spot grades), each re-checked live and then undone |
 | [1_start_box.png](1_start_box.png) | The start box on an empty file, prefilled with the sample project (as it was then; since 2026-10-27 a new file's box starts empty, and 106 Ithaca Rd is looked up) |
-| [2_starting_house.png](2_starting_house.png) | After Draw: the lot, the buildable envelope (blue, see-through) and the largest legal starting house. Status: 2 need review · 8 comply · 2 not checked |
+| [2_starting_house.png](2_starting_house.png) | After Draw: the lot, the buildable envelope (blue, see-through) and the largest legal starting house. Status: 2 need review · 8 comply · 2 not checked (as it was then; since 2026-11-09 the two read "1 to answer · 1 not checked in this release") |
 | [3_edit_does_not_comply.png](3_edit_does_not_comply.png) | The house widened 4 ft into the side yard: red only on the part that is over, and a notice naming the 2 items that no longer comply (lot coverage, east side yard) |
 | [4_panel.png](4_panel.png) | The panel: every item, bad news first, with proposed, required and margin |
 | [5_zoning_report_button.png](5_zoning_report_button.png) | The panel after pressing **Zoning report…**: it writes the report in the architects' spreadsheet format, opens it and says where it was saved |

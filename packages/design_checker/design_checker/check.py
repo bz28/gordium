@@ -577,12 +577,39 @@ def _rules_pass(n: int) -> str:
     return f"{n} rule passes" if n == 1 else f"{n} rules pass"
 
 
-def summary(rows: list[dict]) -> dict:
-    """One line for the viewport corner: all pass; it complies under every reading (rules waiting only on how the
-    law is read, each passing whichever way it goes); or what fails and what needs review. A rule that passes only
-    with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not yet surveyed is a
-    missing fact, not a reading, so it is never shown as complying. No row at all is "Nothing checked", needs review:
-    a check that decided nothing never passes."""
+def summary(rows: list[dict], items: list[dict] | None = None) -> dict:
+    """The check's own one-line answer (the result's "summary"): all pass; it complies under every reading (rules
+    waiting only on how the law is read, each passing whichever way it goes); or what fails and what needs review. A
+    rule that passes only with the lot as drawn still needs review (amber) until the survey is confirmed: a lot not
+    yet surveyed is a missing fact, not a reading, so it is never shown as complying. No row at all is "Nothing
+    checked", needs review: a check that decided nothing never passes.
+
+    Given the view's `items`, it is never less cautious than the panel (Ben, 2026-11-09): its state is the panel's
+    (present.state) whenever that is the more cautious one, and its text is the panel's own line (present.summary, one
+    summary everywhere: D3), so a row still waiting (a fact to answer, the bedrooms; a rule not in this release, the
+    overlays), a rule's row the panel holds at needs review (a doubtful looked-up fact, a tax-map reading) and a row
+    that isn't a rule's (objects on the lot not included, lot facts that disagree) are never left out of it. Its
+    lines: the rule rows' own, then each counted row of the view that fails, needs review or waits and isn't already
+    among them."""
+    s = _rows_summary(rows)
+    if items is None:
+        return s
+    view = present.state(items)
+    caution = {"fail": 3, "review": 2, "complies": 1, "pass": 0}
+    floor = {present.FAILS: "fail", present.REVIEW: "review"}.get(view, s["state"])
+    state = max(s["state"], floor, key=caution.__getitem__)
+    fails, review, _ = _sorted_rows(rows)
+    said = {r.get("Rule id") for r in fails + review}          # the rows its own lines already say
+    # (a rule the rows hold at review but the panel says fails gets the panel's reason too: review round 4)
+    failed = {r.get("Rule id") for r in fails}
+    extra = [i for i in present._building_items(items) if i["status"] != present.COMPLIES
+             and not (i.get("rule") and i["rule"] in (failed if i["status"] == present.FAILS else said))]
+    return {"state": state, "text": present.summary(items), "lines": s["lines"] + [
+        f"{short(i['name'])}: {i['reason']}" if i.get("reason") else short(i["name"]) for i in extra]}
+
+
+def _sorted_rows(rows: list[dict]) -> tuple[list, list, list]:
+    """The rule rows as (fails, review, passes)."""
     # counted from the checker's one decision (row_verdict) only: a needs-review row never counts as passing,
     # whatever its named readings say (review round 20); a row without a verdict, by its outcome
     def verdict_of(r):
@@ -591,6 +618,12 @@ def summary(rows: list[dict]) -> dict:
     fails = [r for r in rows if verdict_of(r) == present.FAILS or r.get("Fails")]
     review = [r for r in rows if verdict_of(r) == present.REVIEW and r not in fails]
     passes = [r for r in rows if verdict_of(r) == present.COMPLIES and r not in fails]
+    return fails, review, passes
+
+
+def _rows_summary(rows: list[dict]) -> dict:
+    """summary() from the rule rows alone: a line for each of its fails and review rows."""
+    fails, review, passes = _sorted_rows(rows)
     if not fails and not review and not passes:     # nothing checked is never a pass (principle 4)
         return {"state": "review", "text": "Nothing checked", "lines": []}
     if not fails and not review:
@@ -727,11 +760,15 @@ def _quiet(text: str) -> None:
 
 
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
-          extras: dict | None = None, step=None) -> dict:
+          extras: dict | None = None, step=None, today: str | None = None) -> dict:
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
     building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
-    it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source."""
+    it sent (scope), objects on the lot it didn't send (each makes the check need review), the grade source.
+    `today` is the day of the check as YYYY-MM-DD, given by the host (the plugin: rhino_logic.city_day): how old a
+    saved lookup is (present.overlays_lookup). The checker never reads the clock; without it, no lookup counts as
+    recent, so the overlays row stays."""
+    today = present.checked_today(today)       # a day that isn't one: refused before anything is read
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
     problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
@@ -741,7 +778,7 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     site = read_site(model_path, facts)
     if building_problems:
         site["buildings"].append({"id": "Building layer", "faces": [], "problems": list(building_problems)})
-    return check_site(site, facts, model_path.name, report_path, extras, step=step)
+    return check_site(site, facts, model_path.name, report_path, extras, step=step, today=today)
 
 
 def no_rules_for(facts: dict) -> str | None:
@@ -759,9 +796,10 @@ def no_rules_for(facts: dict) -> str | None:
 
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
-               extras: dict | None = None, step=None) -> dict:
+               extras: dict | None = None, step=None, today: str | None = None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file."""
+    today = present.checked_today(today)
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
@@ -830,7 +868,10 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
                   if o != lot_id})
     values = {k: m["value"] for k, m in measured.items()}
     dims = [d for r in rows if r["Error"] == "FAIL" for d in _failing_distances(by_id[r["Rule id"]], measured, values)]
-    extras = {**(extras or {}), "side_lines": side_lines(site, facts)}   # compass names when a side isn't measured
+    extras = {**(extras or {}), "side_lines": side_lines(site, facts),   # compass names when a side isn't measured
+              # the lookup's "no overlay here", only for the lot it was found on and only while recent on the
+              # host's day (never taken from the caller)
+              "overlays_none_found": present.overlays_lookup(site.get("lot"), facts, today)}
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     report_error = None
@@ -858,7 +899,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     # the notice (spec G): the items that don't comply now and did at the last check the command sent ("before")
     statuses, notice_text = present.notice((extras or {}).get("before"), v["items"])
     return {"rows": rows, "interior": waiting, "not_applicable": [dict(zip(COLUMNS, r)) for r in t["not_applicable"]],
-            "summary": summary(rows), "red": red, "dims": dims, "measurements": measured,
+            "summary": summary(rows, v["items"]), "red": red, "dims": dims, "measurements": measured,
             "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": drawn,
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text}
@@ -1705,15 +1746,18 @@ def sample_site() -> dict:
 
 
 def _use_lists(body) -> list:
-    """The use names a formula lists in `use in [...]` (the chart's own rows), in order."""
+    """The use names a formula lists in `use in [...]` (the chart's own rows) or names in `use == "..."` (one row, as
+    the bed-and-breakfast inn's review in R-1 and R-2), in order. Missing the second once left the box saying a use
+    "won't comply" while its rule said needs review (review round 1 of PR 65)."""
     import ast
     out = []
     for node in ast.walk(body):
-        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use" and \
-                any(isinstance(op, ast.In) for op in node.ops):
-            for comp in node.comparators:
-                if isinstance(comp, ast.List):
+        if isinstance(node, ast.Compare) and isinstance(node.left, ast.Name) and node.left.id == "use":
+            for op, comp in zip(node.ops, node.comparators):
+                if isinstance(op, ast.In) and isinstance(comp, ast.List):
                     out += [e.value for e in comp.elts if isinstance(e, ast.Constant) and isinstance(e.value, str)]
+                elif isinstance(op, ast.Eq) and isinstance(comp, ast.Constant) and isinstance(comp.value, str):
+                    out.append(comp.value)
     return out
 
 

@@ -87,7 +87,7 @@ def uses(f: dict, *keys: str) -> dict:
 # What the lookup is doing, in the architect's words, as it goes (the start box shows the latest one live).
 STEPS = {"address": "Finding the address…", "parcel": "Finding the tax parcel…",
          "streets": "Finding which lot lines face a street…", "ground": "Reading the ground elevations…",
-         "zoning": "Reading the City zoning map…", "overlays": "Checking the historic and gorge maps…"}
+         "zoning": "Reading the City zoning map…", "overlays": "Checking the historic, gorge and flood maps…"}
 
 
 def lookup(address: str, http, now: dt.datetime | None = None, step=None) -> dict:
@@ -350,7 +350,7 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     _lookup hands to _overlays after it, whatever this finds."""
     src = ENDPOINTS["city_zoning"]
     try:
-        polys = f.zoning_near(ring)
+        polys = f.zoning_near(ring, pad=OVERLAY_MARGIN_FT)
         edited = f.zoning_last_edited()
     except (Offline, ServiceError):
         facts["zone"] = fact(None, src["name"], src["url"], today, "needs_review",
@@ -361,23 +361,37 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
     # every polygon under each point counts, never only the first: the map draws overlays (SHOD...) on top of the
     # base districts, and the service returns them in no set order (review of lookup-names, round 1)
     counts: dict[str, int] = {}
-    over: dict[str, int] = {}
     on_map = 0
+    off_map_inside = False       # a point the map doesn't cover, well inside the lot (not edge noise)
     for p in samples:
         here = {z["zone"] for z in polys if g.inside_any(p, z["rings"])}
         base = {district(c)[0] for c in here if c not in OVERLAYS}
-        for c in here & set(OVERLAYS):
-            over[c] = over.get(c, 0) + 1
         for z in base:
             counts[z] = counts.get(z, 0) + 1
         on_map += bool(base)
+        off_map_inside |= not base and min(g.seg_distance(p, a, b) for a, b in g.edges(ring)) > MAP_EDGE_FT
     shares = {z: n / len(samples) for z, n in counts.items()} if samples else {}
     zones = sorted((z for z, s in shares.items() if s >= ZONE_SHARE_MIN), key=lambda z: -shares[z])
+    # an overlay counts wherever it touches the lot or 2 ft around it, however little (never the 2% a base district
+    # needs, nor only where a grid point falls: a thin strip of SHOD along one side is an overlay on the lot)
+    near = _shape(ring).buffer(OVERLAY_MARGIN_FT)
     map_overlays = [f"{_overlay_name(c)} on the City's zoning map"
-                    for c in sorted(over) if samples and over[c] / len(samples) >= ZONE_SHARE_MIN]
+                    for c in sorted({z["zone"] for z in polys if z["zone"] in OVERLAYS and z["rings"]
+                                     and _shape_of(z["rings"]).intersects(near)})]
     when = edited.isoformat() if edited else "unknown"
     source = f"{src['name']}, last edited {when}: a suggestion to confirm"
     covered = on_map / len(samples) if samples else 0.0
+    # a code the map draws inside the lot (more than the edge noise in) that is neither a district Gordium knows nor a
+    # listed overlay may be an overlay names.yaml doesn't list yet: never "none" (however little of the lot it covers)
+    inner = _shape(ring).buffer(-MAP_EDGE_FT)
+    strange = sorted({z["zone"] for z in polys if z["zone"] not in OVERLAYS and district(z["zone"])[1] == "unknown"
+                      and z["rings"] and _shape_of(z["rings"]).intersects(inner)}, key=str)
+    if strange:
+        map_overlays.append(f"Overlays on the City's zoning map: couldn't check ({', '.join(map(str, strange))} drawn on "
+                            "this lot isn't a district or overlay Gordium knows)")
+    if off_map_inside or not on_map:   # where the map draws no district it says nothing about overlays: never "none"
+        map_overlays.append(f"Overlays on the City's zoning map: couldn't check {'this lot' if not on_map else 'all of this lot'}"
+                            " (the map doesn't cover it)")
     if not zones:
         facts["zone"] = fact(None, source, src["url"], today, "needs_review",
                              "This lot isn't on the City's zoning map: choose the district.", key="city_zoning", lot=lot)
@@ -411,11 +425,40 @@ def _zoning(f: Fetcher, ring, address_street: str, facts: dict, asks: list, toda
         if why:
             asks.append(f"{line} and {why}: check the current zoning map.")
             escalate(z, "needs_review", asks[-1])
+            # the same map may not show what the ordinance drew here: its overlays can't be said to be none either
+            map_overlays.append(f"Overlays on the City's zoning map: couldn't check (Ord. {a['ordinance']} may have "
+                                "changed this lot's map)")
         else:
             notes.append(line + "; this lot is outside the area it rezoned.")
     if notes:
         z["note"] = " ".join(([z["note"]] if z.get("note") else []) + notes)
     return map_overlays
+
+
+# The zoning map and the tax map are drawn separately: along a lot line they disagree by a few feet (read 2026-11-11:
+# up to 2.3 ft at 106 Ithaca Rd and 601 Hancock St), so a point the zoning map misses that close to the line is that,
+# not a lot off the map. Farther in, the map doesn't cover the lot, and its overlays can't be said to be none.
+MAP_EDGE_FT = 5.0
+OVERLAY_MARGIN_FT = TAX_MAP_TOLERANCE_FT   # an overlay this close to the tax-map lot may be on the real one
+
+
+def _shape(ring):
+    """A ring as a shapely polygon (made valid: a tax-map ring can touch itself)."""
+    from shapely.geometry import Polygon
+    from shapely.validation import make_valid
+    return make_valid(Polygon(ring))
+
+
+def _shape_of(rings):
+    """Several rings (an ArcGIS polygon: outer rings and holes) as one shape: the even-odd union of the rings, as
+    ArcGIS draws them."""
+    out = None
+    for r in rings:
+        if len(r) >= 3:
+            p = _shape(r)
+            out = p if out is None else out.symmetric_difference(p)
+    from shapely.geometry import Polygon
+    return out if out is not None else Polygon()
 
 
 def _overlay_name(code: str) -> str:
@@ -450,7 +493,7 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
     for key, field, label in (("historic_districts", "DISTRICT", "Historic district"),
                               ("gorge_zones", "ZONE", "Gorge protection zone")):
         try:
-            found += [f"{label}: {n}" for n in f.overlays(key, field, ring)]
+            found += [f"{label}: {n}" for n in f.overlays(key, field, ring, margin_ft=OVERLAY_MARGIN_FT)]
         except (Offline, ServiceError):
             found.append(f"{label}: couldn't check")
     if not city_parcel:
@@ -461,14 +504,74 @@ def _overlays(f: Fetcher, ring, city_parcel, src: dict, today: str, facts: dict,
             found.append(f"Secondary zones on the parcel: {city_parcel['secondary_zones']}")
         if city_parcel.get("overlay_zones"):   # the parcel's own record of an overlay (SHOD...), beside the map's
             found.append(f"Overlay zones on the parcel: {city_parcel['overlay_zones']}")
-        if str(city_parcel.get("historic_property") or "").upper() == "YES":
-            found.append("Historic property")
-        if str(city_parcel.get("landmarks_review") or "").upper() == "YES":
-            found.append("Landmarks Preservation Commission review")
-    facts["overlays"] = fact(found, "City of Ithaca overlay maps (live)", src["url"], today,
+        # the City writes YES or NO (and, read 2026-11-11, "NR" on 57 parcels and "chk" on one for the review flag, and
+        # no value on 3 for the historic one): only NO is none; any other value, or none, is said and needs review
+        for field, name in (("historic_property", "Historic property"),
+                            ("landmarks_review", "Landmarks Preservation Commission review")):
+            flag = str(city_parcel.get(field) or "").strip()
+            if flag.upper() == "YES":
+                found.append(name)
+            elif flag.upper() != "NO":
+                found.append(f"{name}: the City's parcel record says {flag!r}" if flag else
+                             f"{name}: the City's parcel record doesn't say")
+    found += _flood(f, ring)
+    facts["overlays"] = fact(found, "City of Ithaca overlay maps (live) and FEMA's flood maps", src["url"], today,
                              "needs_review" if found else "suggested",
                              "Overlays aren't checked in this release: check these by hand." if found else "",
-                             key=("historic_districts", "gorge_zones", "city_parcels", "city_zoning"), lot=lot)
+                             key=("historic_districts", "gorge_zones", "city_parcels", "city_zoning", "fema_flood",
+                                  "fema_pending", "fema_preliminary"), lot=lot)
+
+
+# The one FEMA answer that is "no flood zone": Zone X (unshaded), "the areas of minimal flood hazard, which are the
+# areas outside the SFHA and higher than the elevation of the 0.2-percent-annual-chance flood" (FEMA glossary, "Flood
+# Zones", fema.gov/about/glossary/flood-zones, read 2026-11-11). Anything else keeps the overlays row: every Special
+# Flood Hazard Area (SFHA_TF "T": A, AE and its floodway, AH, AO, AR, A99, V, VE), Zone X shaded (moderate: the 0.2%
+# chance flood, or the 1% chance flood under a foot deep), Zone D ("possible but undetermined flood hazards",
+# fema.gov/glossary/zone-d), and any value not listed here (FLD_ZONE, ZONE_SUBTY, SFHA_TF, matched exactly).
+FLOOD_NONE = ("X", "AREA OF MINIMAL FLOOD HAZARD", "F")
+FLOOD_MARGIN_FT = TAX_MAP_TOLERANCE_FT     # the lot and this much around it: a tax-map line may be 2 ft off
+
+
+# FEMA's shaded Zone X ("moderate flood hazard", fema.gov/about/glossary/flood-zones), as NFHL layer 28 spells it
+FLOOD_SHADED_X = ("0.2 PCT ANNUAL CHANCE FLOOD HAZARD", "1 PCT DEPTH LESS THAN 1 FOOT")
+
+
+def _flood_name(z: dict) -> str:
+    """A FEMA zone as the architect reads it."""
+    sub = f", {str(z['subtype']).lower()}" if z.get("subtype") else ""
+    if z.get("sfha") == "T":
+        return f"Zone {z['zone']}{sub} (Special Flood Hazard Area: the 1% annual chance flood)"
+    if z.get("zone") == "X" and z.get("subtype") in FLOOD_SHADED_X:
+        return f"Zone X{sub} (moderate flood hazard)"
+    if z.get("zone") == "X":                     # a subtype FEMA didn't give, or one Gordium doesn't know: no hazard claimed
+        return f"Zone X{sub} (outside the Special Flood Hazard Area)"
+    if z.get("zone") == "D":
+        return "Zone D (possible but undetermined flood hazard)"
+    return f"Zone {z.get('zone') or 'not given'}{sub}"
+
+
+def _flood(f: Fetcher, ring) -> list[str]:
+    """FEMA's flood zones on the lot, as overlay lines ([] only when FEMA positively says none). None is said only when
+    every zone touching the lot (and 2 ft around it) is Zone X unshaded, the whole lot lies inside one such zone (no
+    unmapped part, no second zone), and no pending or preliminary new map covers it. A service that doesn't answer, a
+    lot FEMA hasn't mapped, or one that straddles two areas can't be told: the row stays (principle 4)."""
+    label = "FEMA flood zone"
+    try:
+        touching = f.flood_zones(ring, margin_ft=FLOOD_MARGIN_FT)
+        if not touching:
+            return [f"{label}: couldn't tell (FEMA's flood map shows no zone here)"]
+        named = sorted({_flood_name(z) for z in touching if (z["zone"], z["subtype"], z["sfha"]) != FLOOD_NONE})
+        if named:                                            # any part of the lot, however small, counts
+            return [f"{label}: {n}" for n in named]
+        inside = f.flood_zones(ring, within=True, margin_ft=FLOOD_MARGIN_FT)
+        if not any((z["zone"], z["subtype"], z["sfha"]) == FLOOD_NONE for z in inside):
+            return [f"{label}: couldn't tell (the lot isn't wholly inside one area FEMA maps as minimal flood hazard)"]
+        for key, kind in (("fema_pending", "pending"), ("fema_preliminary", "preliminary")):
+            if f.flood_study_here(key, ring, margin_ft=FLOOD_MARGIN_FT):
+                return [f"{label}: couldn't tell (a {kind} new FEMA flood map covers this lot)"]
+        return []
+    except (Offline, ServiceError, KeyError, TypeError, AttributeError):   # down, or an answer not as expected:
+        return [f"{label}: couldn't check (FEMA's flood map didn't answer)"]   # never the whole lookup lost
 
 
 USED_LIVE = "(used live, not stored)"

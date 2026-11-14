@@ -143,7 +143,7 @@ def split(rows: list[dict], brought_in: dict) -> dict:
         if page_before is not None and any(n not in pages for n in range(page_before + 1, r["page"])):
             # A page after a gap in the pages read: what it starts with continues a part on a page not read.
             before_gap.append((len(units) - 1, page_before))
-            section, last, last_letter = None, (), ""
+            section, last, last_letter, defining_part = None, (), "", None
             units.append({"id": f"before the first heading on p.{r['page']}", "title": "", "kind": "before",
                           "members": []})
         page_before = r["page"]
