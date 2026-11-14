@@ -36,8 +36,8 @@ def level_guard(g: dict, reader) -> tuple[dict, dict]:
 
 def drawn_top(g: dict, reader, walk: float, top: float) -> float:
     """The drawn guard's top where it is lowest along its length: at each point between its ends, the highest
-    member there (no higher than the stated top). The guard's height is the stated top only if the members reach
-    it all along."""
+    member there that starts below the stated top (counted no higher than it). The guard's height is the stated
+    top only if the members reach it all along."""
     extent, members = g.get("extent"), g.get("members")
     if not isinstance(extent, dict):
         raise Stop("missing", what="the guard's extent (`extent`: left, right)")
@@ -52,7 +52,8 @@ def drawn_top(g: dict, reader, walk: float, top: float) -> float:
     lowest = top
     for a, b in zip(cuts, cuts[1:]):                 # the highest member over each stretch between cuts
         mid = (a + b) / 2
-        here = [r[3] for r in rects if r[0] <= mid <= r[1]]
+        # a member counts only within the guard, below its stated top: one wholly above it is no part of it
+        here = [r[3] for r in rects if r[0] <= mid <= r[1] and r[2] < top]
         lowest = min(lowest, min(max(here), top) if here else walk)      # nothing there: no guard at all
     return lowest
 
