@@ -63,9 +63,9 @@ Every reference in the brought-in sections was followed (found by code, `documen
 - R101.2 (which buildings the code covers; from BO101.1)
 - R311.7 (from BO108.4): no such part in this book (above)
 - Section 702 of the Property Maintenance Code of New York State (from BO105.8) and the Existing Building Code of New York State (from R102.6.1): other New York codes, named in words, so the code's search (which finds section numbers) does not list them
-- Appendices BA, BB, BE, BF, BG, BH, BI, BJ, BK, BL, BM, BN, CA, CB, CC, CD, CE, CF and CG (from R101.2.1, which only lists them)
+- Appendices BA, BB, BE, BG, BH, BI, BJ, BK, BL, BM, BN, CA, CB, CC, CD, CE, CF and CG (from R101.2.1, which only lists them)
 - E3401.2.1 (when a house has electrical power; from the exceptions of R325.6 and R325.7)
-- BF104 to BF106 (from BF101.1: height, structure and hurricane-region screen enclosures; above) and R324 (glass; from BF103.1)
+- Appendix BF's other parts, BF104 to BF106 (from R101.2.1, which adopts it, and BF101.1: height, structure and hurricane-region screen enclosures; above), and R324 (glass; from BF103.1)
 - P2904 also from R314.3, R315.4, R316.3, BO105.13, BO106.7, BO108.4 (sprinklered houses get larger mezzanines and lofts)
 - the outside standards ICC 500 (storm shelters; from R319.1) and ASTM F2090 (window opening control devices; from R319.1.1, R321.2.1)
 - "accessed", printed in italics but not defined in Section R202: R201.3 sends such a word to another New York code's definition; that code is not brought in.
