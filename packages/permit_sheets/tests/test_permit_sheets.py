@@ -494,8 +494,10 @@ def test_the_sections_not_checked_yet_are_printed_as_needs_review(name):
     assert f"Not checked yet by Gordium: {len(sections)} code sections, check them by hand (code analysis line " \
            f"{row['Line']})" in flat
     assert f"NEEDS REVIEW: not checked yet by Gordium, check these {len(sections)} code sections by hand:" in flat
-    for s in sections:
-        assert s in flat
+    # the banner lists exactly the check's sections, in its order (never a substring match)
+    [banner] = [b for b in sheets.code_table(got(name)) if b[0] == "__banner__"]
+    assert banner == ["__banner__", sheets.NOT_YET_BANNER.format(result="NEEDS REVIEW", n=len(sections),
+                                                               sections=", ".join(sections)), present.REVIEW]
 
 
 def test_while_egress_waits_the_sheets_stay_waiting_and_still_list_the_sections():
@@ -511,3 +513,22 @@ def test_while_egress_waits_the_sheets_stay_waiting_and_still_list_the_sections(
     assert f"Not checked yet by Gordium: {len(sections)} code sections, check them by hand" in flat
     assert f"WAITING: NO ROOMS DRAWN YET: not checked yet by Gordium, check these {len(sections)} code sections" in flat
     assert "NEEDS REVIEW: not checked yet" not in flat
+
+
+@pytest.mark.parametrize("name", ["1_ranch_compliant", "0_no_rooms_yet"])
+def test_a_list_of_sections_that_cant_be_read_says_check_the_whole_law(name, monkeypatch):
+    """Review round 1 (permit sheets): a check that can't tell which sections it skips had no line under the result
+    and no banner, the sheet saying less than the check."""
+    from design_checker import egress
+    real = egress._not_checked_yet
+    monkeypatch.setattr(egress, "_not_checked_yet", lambda folder, rules: ([], "no 6_coverage_report/*.rules.yaml"))
+    house = _house(name)
+    r = check_site(goldens.site(), dict(goldens.FACTS), name=name, today=goldens.DATE, interior=house)
+    g = source.gather(r, about(), house)
+    banners = [b for b in sheets.code_table(g) if b[0] == "__banner__"]
+    assert len(banners) == 1 and "check the whole law by hand" in banners[0][1]
+    lines = [r_ for r_ in tables.code_rows(g) if sheets.not_checked_yet(r_) is None]
+    assert len(lines) == 1
+    monkeypatch.setattr(egress, "_not_checked_yet", real)
+    status, _ = source.overall(g)
+    assert status == (present.NOT_CHECKED if name == "0_no_rooms_yet" else present.REVIEW)
