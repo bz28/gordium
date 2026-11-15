@@ -1,0 +1,278 @@
+{
+ "host": "rhino3dm",
+ "ids": {
+  "3698580d-40b3-5f81-8a53-c0eb866b8ee0": "lot",
+  "7dd3dc81-dd0f-57ea-873c-6f74ed89bc33": "house_floor2",
+  "da4e5233-f592-5434-b6c3-3494dd7a9ac1": "house_floor1"
+ },
+ "recorded": {
+  "by": "python -m design_checker.conformance --write",
+  "tool": "rhino3dm 8.35.0"
+ },
+ "scene": "02_curved_wall",
+ "steps": {
+  "as drawn": {
+   "buildings": [
+    {
+     "faces": [
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         15.0,
+         30.0,
+         10.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         45.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         80.0,
+         0.0
+        ],
+        [
+         45.0,
+         80.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.000000000000007,
+         80.0,
+         0.0
+        ],
+        [
+         15.0,
+         30.0,
+         0.0
+        ],
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         15.000000000000007,
+         80.0,
+         10.0
+        ]
+       ]
+      }
+     ],
+     "floor": 10.0,
+     "id": "da4e5233-f592-5434-b6c3-3494dd7a9ac1",
+     "layer": "Building",
+     "problems": [
+      {
+       "args": {},
+       "code": "curved_edge"
+      },
+      {
+       "args": {},
+       "code": "curved_surface"
+      }
+     ],
+     "role": "building"
+    },
+    {
+     "faces": [
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         20.0
+        ],
+        [
+         15.0,
+         30.0,
+         20.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         80.0,
+         10.0
+        ],
+        [
+         45.0,
+         80.0,
+         20.0
+        ],
+        [
+         45.0,
+         30.0,
+         20.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.000000000000007,
+         80.0,
+         10.0
+        ],
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         15.0,
+         30.0,
+         20.0
+        ],
+        [
+         15.000000000000007,
+         80.0,
+         20.0
+        ]
+       ]
+      }
+     ],
+     "floor": 10.0,
+     "id": "7dd3dc81-dd0f-57ea-873c-6f74ed89bc33",
+     "layer": "Building",
+     "problems": [
+      {
+       "args": {},
+       "code": "curved_edge"
+      },
+      {
+       "args": {},
+       "code": "curved_surface"
+      }
+     ],
+     "role": "building"
+    }
+   ],
+   "grade": {
+    "points": [],
+    "source": "none"
+   },
+   "host": {
+    "document": "02_curved_wall.3dm",
+    "model_units": "Feet",
+    "name": "rhino3dm",
+    "version": "8.35.0"
+   },
+   "inventory_complete": true,
+   "left_out": [],
+   "lot": {
+    "edges": [
+     {
+      "curved": false,
+      "points": [
+       [
+        0.0,
+        0.0
+       ],
+       [
+        60.0,
+        0.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        60.0,
+        0.0
+       ],
+       [
+        60.0,
+        120.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        60.0,
+        120.0
+       ],
+       [
+        0.0,
+        120.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        0.0,
+        120.0
+       ],
+       [
+        0.0,
+        0.0
+       ]
+      ]
+     }
+    ],
+    "id": "3698580d-40b3-5f81-8a53-c0eb866b8ee0"
+   },
+   "problems": [],
+   "schema": "gordium.site/1",
+   "units": "ft",
+   "unsent": []
+  }
+ }
+}

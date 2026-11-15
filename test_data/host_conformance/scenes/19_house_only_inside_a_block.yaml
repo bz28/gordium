@@ -1,0 +1,36 @@
+title: The house only inside a block on another layer
+what: >-
+  The box house's two floor blocks, drawn on the Building layer but inside a block (as a linked model holds them),
+  and the block placed on the Default layer; the model has only the lot besides. Nothing on the Building layer is
+  placed, so a host that read only what is placed there would send no buildings, and an empty lot complies with
+  every yard, the height and coverage. The host must say the block holds building parts it can't send (not_a_solid,
+  "a block"), so every building measure needs review; and, as Rhino's reader does for any block off the Building
+  layer, list the block itself as left out (it could be a building). Nothing is sent as a building, so it touches
+  none.
+guards: >-
+  The Revit reading design note, new scene B's first case: section 1, "a linked Revit model ... that holds any
+  building-category element at any depth" is unsent, not_a_solid; and, as here, also listed as left out (the note's
+  row said only unsent; Rhino's reader lists it as both, and this scene fixes both for every host). In Rhino:
+  read_3dm._block_holds (a block on any layer holding Building-layer objects is reported) and
+  conformance_rhino._left_out (a block off the Building layer is a candidate).
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10], in_block: house_link}
+others:
+  - {id: house_link, layer: Default, holds_buildings: true, touching: false}
+grade: {elevation: 0}
+expected:
+  scope.not_included: needs_review               # the block on the lot isn't measured
+  R-1b.lot_area_one_family_detached: complies    # the lot alone
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review                  # building parts couldn't be sent: no building measure is known
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review
+  R-1b.lot_area_each_primary_building: needs_review   # as scenes 04 and 14 (nothing measurable sent)
+  R-1b.yards_not_shared: needs_review
+  R-1b.south_hill_overlay: needs_review
+  R-1b.accessory_buildings: needs_review

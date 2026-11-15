@@ -1,0 +1,16 @@
+# How the rule-drafting script calls the AI. Every value here is recorded in every run record.
+#
+# model: one setting for the whole run. Drafting a formula is harder than labeling, so the default is the
+#   mid-tier model; prices for each model are in packages/section_labeling/section_labeling/prices.yaml.
+# effort: how hard the model thinks before answering (low · medium · high). Thinking is billed as output.
+# There is no temperature setting: current Claude models reject a non-default temperature, so runs are
+#   not bit-for-bit repeatable. Repeatability comes from recording every call (prompt, input, answer).
+model: claude-sonnet-5-5
+effort: medium
+max_tokens: 8192          # a section's templates can run to a few thousand tokens; the rest is thinking room
+book_max_tokens: 16384    # a building code's rules for each part carry whole small designs as examples (egress step 3)
+max_attempts: 3           # the first answer plus up to 2 retries when code rejects it
+# A hard cap on total spending across all drafting runs, in US dollars, separate from labeling's. Kept in
+# ~/.config/gordium/rule_drafting_ledger.json (shared by every checkout), never taken as less than the
+# repository's run records add up to. Ben set $20 on 2026-11-14 ("u have 20 dollar ai cap").
+budget_usd: 20.00

@@ -1,0 +1,289 @@
+# PR 15 build spec: Gordium in Rhino, UI
+
+**Purpose:** the approved build spec for Gordium's Rhino screens (start box, panel, viewport): each acceptance criterion and how it is verified.\
+**For:** engineers building the Rhino side, and designers reviewing it.\
+**Kept current by:** the engineer who changes the Rhino UI, in that PR; a change of design needs a new critique round first.
+
+Status: approved by Claude on Ben's delegation (2026-10-20), after three critique rounds (each round: a practicing architect and a pro-tools product designer, both cold). Mockup: https://claude.ai/artifact/E18rXU59kG8rLUZa1hgktQ (boards 1–8). Example throughout: 106 Ithaca Rd, R-1b, one-family dwelling.
+
+**How to read this.** Each item is one acceptance criterion. The tag says how it is verified:
+- **[code]**: a pytest test, with no Rhino (plain Python: measurement, rules, result model, formatting, report).
+- **[rhino]**: a scripted check inside Rhino 8 via `rhinocode`, with evidence (a viewport capture or the panel's data dumped to JSON).
+- **[both]**: the logic is tested in code, and the behavior is confirmed once in Rhino.
+
+A PR is done when every item has its test, and each test fails if the behavior is removed.
+
+**Terms used below.**
+- **Item:** one row of the result list (e.g. Rear yard).
+- **Status:** one of four:
+  - **complies** ✓
+  - **does not comply** ✕
+  - **needs review** ?
+  - **not checked**: needs input, or not in this release.
+- **Setup problem** (⚠) is never an item status.
+- **At limit:** zero margin at 1/8" resolution.
+
+---
+
+## A. Start box (board 1; simplified as approved by Ben, 2026-10-20: this section supersedes the earlier one)
+
+A1 [rhino] **Command and dialog.** `GordiumStart` (and `GordiumCheck` on an empty file) opens one modal box, titled "New zoning check". `GordiumFacts` and the panel's **Edit site…** open the same box, titled "Zoning check · site". A Change or Pick button closes the box, runs the pick in the model, and opens the box again with the result.
+
+A2 [code] **Rows, in this order** (`rhino_logic.box_rows`, tested in CI):
+1. **Address** and **[Look up]** (or Enter). Type-ahead: 0.3 s after the last key, with 4 or more characters typed, a list under the field offers up to 8 City of Ithaca addresses starting that way (the City's address layer, `city_addresses` in endpoints.yaml: City only, live, never kept); Down/Up/Enter or a click picks, Esc closes the list; an answer for something no longer typed is dropped and its request stopped; offline or slower than 4 s: "Suggestions unavailable…", quietly, and typing works. A pick is only typing: Look up still decides (the State geocoder, then the parcel's SWIS code: City or not). No town typed: Look up asks for "…, Ithaca, NY". After a lookup that finds no lot, the box adds "The lot shown is still …'s: nothing in the model changed." The lookup (packages/site_lookup) runs in its own short-lived process, never in Rhino; the box says what it is doing, live ("Looking up … · Finding the tax parcel…", a moving mark, the seconds, "stops at 45 s"), its Look up button becomes **Cancel lookup** (nothing the lookup would have filled in changes; the box's ticks stay as the architect left them while it ran, never put back from before Look up: rhino_logic.ticks_after_pick), and it stops after 45 s. Found: the lot (the State's tax map, drawn with its street side at the bottom of Top view), the street side, the corner lot, today's ground (USGS spot grades) and a suggested zone, each with its source and never confirmed ("I confirm" stays unticked). A doubtful fact is amber with its reason and "I checked this"; until it is ticked or changed, every item measured from it needs review. What the box can't settle it asks (corner lot, two zones, several matches). Offline, not found, outside the City or too slow: the box says why and works by hand. Only what each source allows is saved (endpoints.yaml `store`): the City's outline is a guide on screen only.
+2. **Zoning district**, with its source ("entered by you" today; "from City map" once the lookup exists), a dropdown, and **☐ I confirm**. One district today; more than one later.
+3. **Use** (Ben, 2026-10-25): a dropdown of the uses the district's own chart row lists, read from its rulebook's use rule (never a hand-kept list): the permitted ones first, then those by special permit, which show an amber line saying so with the chart's page. A saved use the district doesn't list stays picked, with a line saying its Use row won't comply. After it, **only the questions this district's rules need for this use** (`check.follow_up_facts`: every fact only the architect can state that a rule able to apply to the use reads; never bedrooms or parking, which are on hold, nor stories, which are measured), e.g. R-3a's multiple dwelling: dwelling units, new construction or conversion (rooms let for profit is a use detail, like the household and a home business: asked later, in the panel's collapsed "Use details (for later)" group, each row starting "Answer when you plan the interior: …", needing review until answered). R-1b's rules need none, so it asks none. A fact the use itself fixes by the City's definition (§325-3: a one-family detached dwelling is 1 unit, a two-family dwelling 2) is never asked; an attached or semi-detached one-family dwelling's units are (the rules count the whole building). Each answer is saved "entered by you"; a blank, or text that isn't a whole number (said at once beside the field), leaves the fact unset, so its rule needs review and never passes. Draw is never held back by an unanswered question. Another use or district opens the box again with its own questions. The box changes only the answers it shows (`rhino_logic.box_applied`; P0 seen in Rhino 2026-10-28: Use picked and picked back blanked every answer): an answer typed (or quick-picked) is never dropped or replaced by an older one; an answer the new use doesn't ask stays stored with its source, unread, and shows again when a use that asks it comes back; a use detail stays as answered whatever the use (unread where the new use's rules don't read it); what a use itself said (a two-family's 2 units, known by its source) goes when the use changes, so it is never read as an architect's count. A row waiting on any of these facts or a use detail (or on bedrooms, parking spaces or the stories) says "Needs …, which the model doesn't show", and its button ("Enter dwelling units…", or "Answer 3 questions…" when the facts' names run past 40 characters: `rhino_logic.answer_words`) opens a small dialog asking only those facts (coordinator, 2026-10-28, agreed with Ben; it replaced "Tell Gordium in Edit site…", which opened this whole box): OK saves exactly them, each "entered by you" with the day, as one Undo step, then checks; Cancel or Esc changes nothing. The box reads its answers from the same saved facts (`rhino_logic.box_answers`), so an answer given there shows here and Draw keeps it. A row missing a site fact (lot, district, street side, Corner lot?) keeps an Edit site… button (`rhino_logic.row_buttons`).
+4. **Lot**: "<area> sf · from the tax map (±2 ft, approximate)" or "… · from your survey", with **Use my survey…** (pick the surveyed outline).
+5. **Street side**: the street's name, or "the highlighted line", with **Change…** (pick another lot line), and **Corner lot?** (Not answered / No: one street / Yes: two streets). It is never guessed: while it is unanswered the amber line asks it and the yards need review (§325-19C).
+6. **Ground**: what the ground is and where it came from. Today that is "flat at the lot level · as drawn", or the spot grades or terrain with their range. Its actions are **Place spot grades…**, **Pick terrain…** and **I'll regrade: set finished ground…**, plus one tick, **☐ No regrading near the house**.
+7. One line: "Not checked yet: overlays (historic, gorge, flood) · pitched roofs".
+8. An uncertain case the box can't settle shows as **one amber line with the action**:
+   - a corner lot → "This lot faces two streets: pick the front";
+   - two zones → "This lot is in two zones: pick the zone that applies";
+   - (with the lookup) not found or offline → manual entry.
+   With nothing to ask, the line takes no room (no blank line in the box); when a question comes back (Corner lot? set back to Not answered) the box grows to show it whole, and never shrinks as answers change (2026-10-28).
+9. **[Cancel] [Draw]**.
+
+A3 [code] **"I confirm" is unticked on every new project.** On an existing project it is ticked only if the same district was confirmed at an earlier Draw. Picking another district in the box unticks it (`rhino_logic.zone_picked`): a tick is never carried to a district it wasn't given. **Draw is enabled only when it is ticked**, with "Confirm the district to continue." beside it (`rhino_logic.district_confirmed`, `can_draw`).
+
+A4 [code] **No regrading near the house.** Ticked, the ground shown counts as the finished grade, and height is checked normally. Unticked, with only the existing ground, height and stories need review (C5). Ground set with "I'll regrade" is finished ground (`rhino_logic.ground_facts`).
+
+A5 [code] **Every fact has a source.** Each fact the box sets is saved as {value, source, confirmed_by, date} in the .3dm (`Gordium / fact_sources`). A Change records the source "entered by you". A box default left as it was (the use, the street, the corner lot) is confirmed by no one, shown "default, not changed by you": pressing Draw is not saying yes to a dropdown never opened (2026-10-28). Ticking the street row's "I checked this" confirms the street and the corner answer shown on it. The checker never reads the sources, only the values. The panel shows them (Site facts, when no row is selected), and the report's Check tab lists them (`rhino_logic.fact_sources`, `present.source_lines`).
+
+A6 [rhino] **Removed from the box:**
+- existing building, roof, floor-to-floor, the "Ground is" select, and the massing radio;
+- the starting building is always drawn with the envelope (a "Hide starting house" toggle sits in the panel, and hiding it doesn't stop it being checked);
+- floor-to-floor stays 11'-8" in code, editable later through GordiumFacts.
+
+A6b [rhino] **The neighbourhood (context map).** After Draw on a looked-up lot, the 1500 ft × 1500 ft square around it is drawn as a site context drawing: neighbouring parcels and street centerlines (the State's, `store: raw`) as grey curves on locked `Gordium::Context::Parcels` / `::Streets`, the square, a north arrow (the lot is turned so its street runs along the bottom, so north is rarely up), a 100 ft scale bar and the source lines on `::Notes`; the building footprints (kept, Ben's decision 2026-10-21) as outlines without heights on the unlocked `::Buildings` layer, editable: an outline the architect edits is theirs and Gordium never removes or redraws it. Never measured (`rhino_logic.classify`); a solid on those layers over the lot is said. A "Show neighbourhood" tick in the panel, kept with the file. (`design_checker.context_box`, `site_lookup.adapters.ithaca_city.context`.)
+
+A7 [rhino] **Look.** System default buttons and checkboxes; no brand accent color.
+
+## B. Generated massing and envelope (board 2)
+
+B1 [code] **All numbers come from the drawn lot.** No figure is typed in from elsewhere. For the example (73'-0" × 90'-0"):
+- lot area 6,570 sf;
+- coverage allowance 25% = 1,642.5 sf;
+- envelope 53'-0" × 42'-6" = 2,252 sf;
+- on a survey: massing 53'-0" × 30'-11" = 1,639 sf (24.94%), placed at the 25'-0" front yard; rear yard 34'-1";
+- from the tax map (the sample): massing 49'-0" × 30'-3" = 1,482 sf (22.56%), at 27'-0" from the street, side
+  yards 12'-0", rear yard 32'-9" (see B7).
+
+B2 [both] **The starting massing is legal by construction.** It is the largest box inside every yard, no taller than 35'-0", at or under the coverage limit, with stories = floor count. A code test asserts every rule result is complies or needs review, never does not comply, for the generated massing on any test lot.
+
+B7 [both] **Kept back on a tax-map lot (Ben, 2026-10-20).** On a lot not from a survey, the starting house keeps the tax-map tolerance (2'-0") inside every yard line and its coverage under the limit for the smallest lot the tax map allows (every lot line 2'-0" in: 25% of 69' × 86' = 1,483.5 sf; Ben, 2026-10-21), so every item about the house complies at the worst case: nothing about it needs review because of the tax map (the lot's own size may: 106 Ithaca Rd's lot area is 5,934 sf at worst, under 6,000 sf) (a code test proves it, and steps it back 3 in. more if a rule that grows with the lot, like the rear yard, would still need it). Only height and stories may need review, while the ground is existing grade. On a survey it goes exactly to the limits. An optional **Design buffer** (Advanced in the GordiumStart box, default 0'-0"; Draw stays off if it can't be read) is added on top of either, and the note then says how much is which. The note says what it is and what limited it, with the number (Ben, 2026-10-21): "Largest house that complies even if the tax-map lines are 2'-0" off; limited by lot coverage 25%. Use my survey… for the full size." (or "limited by the yards (front 25'-0", sides 10'-0", rear 30'-0")"; on a survey "Largest house the rules allow; limited by …"); the panel's Site facts show it as "Starting house: as first drawn, the largest house that complies … · suggested by Gordium · not confirmed" (Gordium's figure, never "confirmed by you"; about the house as drawn, which the architect may since have changed), cleared when GordiumStart runs again and saved only once the house is drawn.
+
+B3 [rhino] **One group.** The massing is a single group of N floor solids, each on its own sublayer `Gordium::Massing::Floor 1`, `Floor 2`, … (a `Gordium::Massing::Roof` sublayer is made for the roof; Ben, 2026-10-21), so a Move moves the house, and the command line reports "Moved 1 group". On a tax-map lot the blue envelope is the cautious one, every lot line 2'-0" nearer.
+
+B4 [both] **A floor moved alone** gives needs review on Stories: "Floors misaligned".
+
+B5 [rhino] **Buildable envelope.**
+- **Plan:** the area inside the yards, drawn see-through.
+- **3D views:** a see-through height plane at 35'-0".
+- **Toggle:** "Show buildable envelope" in the panel.
+- **Label:** "Buildable envelope 2,252 sf · Coverage allows 1,642 sf (25%) · Height plane 35'-0" (3D views)".
+
+B6 [rhino] **Command line.** GordiumStart prints one line: "created 1 group (3 floor solids) on Gordium::Massing".
+
+## C. Measurement honesty (needs-review triggers)
+
+C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies — unless the rule provably fails at every value the missing number could take (`check.fails_whatever`): then does not comply ([decision](../decisions/2026-10-21_fails_whatever_the_missing_number.md)). Missing data never complies.
+
+C2 [code] **Tax-map tolerance** of ±2'-0".
+- Each lot-dependent value is evaluated at the worst case, with every lot line up to 2'-0" the unlucky way (Ben, 2026-10-21): a yard (to one line) ±2'-0", a lot width or depth (between two lines) ±4'-0", and areas and percentages from the outline offset 2'-0" (73' × 90' → 69' × 86' = 5,934 sf at the smallest). One definition: `model_measurement.places.ithaca_city.measure.TAX_MAP_SLACK` and `tax_map_lot_area`, used by the measurement, the checker and the starting house.
+- If the item would not comply at that worst case, it needs review, with the reason "Lot lines are from the tax map (±2'-0")…" plus the worst-case value.
+- The same both ways (Ben, 2026-10-21): an item that does not comply as drawn but would comply with the lines off in its favour needs review ("as drawn it does not comply, but at best …"); it does not comply only if it fails under every tax-map reading. A survey removes both.
+- On the example lot this flags Front yard, both Side yards and Lot coverage; Rear yard (+11'-7"), Lot width (+23'-0") still comply; Lot area (6,570 sf; 5,934 sf at the worst case, 69' × 86', under 6,000 sf) needs review until a survey (2026-10-21). (Corrected 2026-10-20: lot area was listed by mistake; the worst-case method applies to every lot-dependent item, areas and percentages as well as lengths.)
+
+C3 [code] **Grade not set** → Building height and Stories need review ("no grade").
+
+C4 [both] **Grade recomputed after every footprint change** from the terrain, or from the spot-grade points, at the new wall locations. If it can't be recomputed (e.g. points no longer at the walls), Height and Stories need review: "Spot grades no longer at building walls · Set grade…". This happens on board 4: the house moved 13'-7" and 2 of 6 points are off the walls.
+
+C5 [code] **"Existing grade" selected** → Height and Stories need review: "Measured from existing grade; code uses finished grade".
+
+C6 [code] **Pitched and mansard roofs** (PR #18) → the height is measured as §325-3 defines it for each (a pitched roof: midway between eave and ridge; a mansard: its highest level) under every reading of which eave counts; it complies only if it complies under every reading, does not comply only if it fails under every one, and otherwise needs review naming the readings.
+
+C7 [code] **Height** follows §325-3 verbatim. It is measured from the grade plane (the average of finished ground level at the exterior walls, per the GRADE PLANE definition) to the highest level of a flat roof. Where roof sections vary, the highest section counts.
+
+C8 [both] **Measured scope.**
+- Every item states what was measured, e.g. "1 group, 3 solids on Gordium::Massing · footprint 1,639 sf"; selecting the item highlights those objects.
+- Any closed solid or polysurface on the lot outside the checked set adds a needs-review row: "2 objects on the lot not included · Add to check…".
+
+C9 [code] **Precision.**
+- Measured to 1/8 in.; values are never rounded toward compliance.
+- Near a limit, values are shown with one more decimal (24.94%).
+- At a limit, values are shown at 1/8" resolution ("25'-0" exact").
+- "at limit" means zero margin at 1/8".
+
+C10 [code] **Fails under every reading.** When an item fails under every reading the code allows, the detail says "Fails under every reading considered (…)". If any reading would comply, the item needs review instead of failing.
+
+C11 [code] **Interpretation notes for the user.** A note on a reading Gordium chose is phrased for the user, e.g. "Gordium reads X as Y; confirm with the zoning office". Internal phrasing such as "question for the architects" never appears in the UI.
+
+## D. Panel (boards 3, 4)
+
+D1 [rhino] **Structure.** A docked Eto panel:
+- a header;
+- a TreeGridView list on top;
+- a splitter;
+- a lower pane showing the selected row, following keyboard up/down;
+- no back arrow.
+
+D2 [code] **Header contents.**
+- Address, district and use, with an "Edit site…" button.
+- The code edition the rulebook was compiled from: "Ch. 325 as on eCode360, retrieved 2026-10-19 (incl. Ord. 2025-12) · District Regulations Chart, Apr 2026".
+- The summary.
+- A "Draft rulebook" tag.
+- The lot and grade sources, with "Pick survey lot lines…" and "Set grade…" while they are approximate or unset.
+
+D3 [code] **Summary rule.** One function produces the summary used by the panel, the viewport status and the report, with identical text everywhere.
+- It counts every row, Site rows included.
+- Bad news comes first; zero counts are dropped; ✓ is never shown.
+- Examples: "7 need review · 3 comply · 3 not checked" (board 2) and "1 does not comply · 2 need review · 7 comply · 3 not checked" (board 4), drawn before the rows not checked were split by what to do next (below); today the parking rule (waiting on the bedrooms) and the overlays row read "1 to answer · 1 not checked in this release".
+- The rows not checked are counted by what the architect does next: "N to answer" (a rule waiting on a fact the model doesn't show, such as the bedrooms: its row's "Enter …" button answers it) and "N not checked in this release" (the overlays: checked by hand for now). The use details still to answer come last ("· 2 use details to answer").
+- **The overall state waits on the facts** (Ben, 2026-11-09; principle 4). The design complies only when every counted row complies. A row not checked, or a use detail still to answer, holds it at needs review even when every decided row complies, and the line then says so first: "needs review · 15 comply · 1 to answer · 1 not checked in this release". A rule not in Gordium yet (the "Not checked yet" group) is listed but never counted, so it doesn't hold the state. The overlays row is on every Ithaca result, holding it at needs review, except when the address lookup positively found no overlay on this very lot (Ben, 2026-11-11, option A): the City's historic, gorge and zoning-map overlays, the parcel's own record and FEMA's flood maps all answered, all said none, and the lot is still the outline the lookup drew. Then the row is left out, a site line says "Overlays: none found · flood map and City maps looked up 2 months ago (2026-08-14) …", and the design can comply. Any doubt (a flood zone or shaded Zone X, a map that didn't answer or doesn't cover the lot, a parcel flag other than NO, a lot FEMA can't settle, a doubtful or redrawn lot, another address, the architect answering that the lot is in the South Hill Overlay, a saved lookup) keeps the row. The finding keeps its day and counts for 90 days (Ben, 2026-11-12): the plugin says the day of each check, and the checker never reads the clock, so the same file on the same day always gives the same answer. Older, the row is back with "the address lookup found none 123 days ago (2026-07-12), but a lookup counts for 90 days only (flood maps change): look the address up again in the start box, or check them by hand" (and likewise for a lookup dated after today or with a date that can't be read; a check given no day says to check them by hand); Look up again refreshes it.
+
+D4 [both] **Columns.**
+- Mark | Item | Proposed | Req. ≥/≤ | Delta (renamed from Margin, MVP list 2026-10-20).
+- The column header carries the ≥ / ≤, so value cells hold plain values ("22'-6"", "25%"). Deltas read like "+11'-7"" (to spare), "−2'-6" short" (a minimum not met), "1'-6" over" or "2 over" (a maximum passed), "at limit", "+0.06%", kept short so they fit the Delta column in two lines (2026-10-28). On a tax-map lot the margin as drawn comes first, then what it is if the lines are 2 ft off: "+2'-0 1/2" (+0'-0 1/2" if the tax-map lines are 2 ft off)", in the list on two lines, "+2'-0 1/2"" then "worst +0'-0 1/2"" (2026-10-29; the Delta column 100 px so each fits one line). The list cell is never kinder than the row's status: a row in review with room under every reading reads "worst +0'-5 1/4"" then "if confirmed"; a row that does not comply for another reason reads "2'-0" room" then "see why", never with a "+". A length whose readings disagree (which lot line is the rear) shows its tightest reading's pair in the list, each marked "(varies)", with both ranges in the detail. Not checked rows carry their reason in the Item text ("Parking · needs input"), so they never widen the value columns. The use row names the use in its Item cell ("✓ Use: One-family dwelling, detached | stated | permitted"), and its detail is headed with the same text: no use's name fits the Proposed column at the panel's width (2026-10-28). A longer name, or any at 380 px, ends "…" in the list like every long Item, and is whole in the detail. With no use stated it reads "Use (site)" with "—".
+- The value columns are sized to their content and never truncated; only Item truncates. Minimum panel width 320.
+
+D5 [code] **Groups,** in order: Does not comply · Needs review · Complies (Site rows included, labelled "Site · …") · Not checked · Not checked yet (the rules not in Gordium yet). Section headers aren't selectable.
+
+D6 [both] **Side yards** are two rows, "Side yard, West" and "Side yard, East", and the plan shows the same values.
+
+D7 [code] **Not checked.**
+- Rows: "Parking · needs input", "Dwelling units · needs input" (the Enter… buttons live in the lower pane: "Enter bedrooms and parking spaces…", "Enter dwelling units…", each opening a small dialog that asks only those facts), and "Overlays · not in this release" (historic, gorge, flood).
+- **Not checked yet** (Ben, 2026-10-21; was "Not covered by this rulebook"): a collapsible group listing the sections not in Gordium yet, each row "Not in Gordium yet — coming in a later version. Check this by hand for now: <section>" (the report's Check sheet the same): §325-16A and B height exceptions, §325-18 yard projections, §325-19C corner lots, §325-25 accessory structures, §325-28 ADUs.
+
+D8 [rhino] **Refresh** keeps the selected item (by item id), the expanded groups and the scroll position.
+
+D9 [rhino] **Zoom to and row clicks.**
+- "Zoom to" is disabled until a row is selected.
+- Each item defines its own view: yards → Top; height → front elevation.
+- A double-click on a row zooms too.
+
+D10 [rhino] **Footer:**
+- the "Show buildable envelope" checkbox;
+- "?" for the legend and symbols;
+- "Zoom to";
+- "Zoning report…".
+
+## E. Detail (lower pane; board 5)
+
+E1 [code] **Contents.** Each detail shows:
+- the status;
+- the proposed vs required line, e.g. "20'-0" proposed < 22'-6" required → short 2'-6"";
+- the measured scope (C8);
+- the code text quoted verbatim, including the chart row label and the R-1B cell, plus any footnote. Example: "Rear (minimum, % of depth or feet, whichever is less)" · R-1B "25% / 50 ft" ¹⁶ · "(16) But not less than 20 ft.";
+- the citation;
+- the calculation;
+- a "to comply" hint where one exists;
+- the precision sentence (C9).
+
+Plain words come first (2026-10-28, `rhino_logic.detail_parts`): the calculation's result ("Required: 24'-1 7/8" to 32'-10 1/8""), the law's words and the footnotes, the citation and its links are in view; the formula with its values, the measured scope, the chart's own cell ("R-1B: 25%/ 50 ft [fn16]") and the precision sentence sit under **How it's worked out**, closed until the architect opens it. Nothing is dropped.
+
+E2 [code] **Citation format,** as an examiner writes it: "§325-8, District Regulations Chart, R-1b, Rear yard column, note 16" and "§325-8A(14)". The PDF page appears only as the link target. One format on every surface, the report included.
+
+E3 [code] **Link targets.** Each cited section has its own link target; no two sections share a URL (a test enforces this). Every link resolves to a real document, never a placeholder.
+
+E4 [code] **Chart-cell quotes** exist for Rear yard, Front yard ("Front (minimum)" · R-1B "25 ft"), Lot coverage ("Percent of lot area" · R-1B "25%", plus the §325-8A(10) sentence) and Height ("Height in feet" · R-1B "35 ft", note 10).
+
+E5 [both] **Building height detail.**
+- The full §325-3 HEIGHT OF BUILDING and GRADE PLANE definitions.
+- The spot-grade points listed individually with their locations and elevations.
+- A section diagram labelled "Diagram, not to scale", showing the lot lines and yards.
+- "Zoom to opens the front elevation".
+
+## F. Viewport drawing (boards 2, 4, 6b)
+
+F1 [rhino] **All plan graphics come from a DisplayConduit;** no model objects are added for annotation.
+
+F2 [rhino] **Plan contents:**
+- a phantom-pattern property line;
+- one dimension per lot edge, with "(approx.)" on a tax-map lot;
+- dimensions for the front yard, the rear yard, and the West and East side yards;
+- a translucent hatch in the required yards;
+- dashed yard lines and envelope;
+- the street labelled "ITHACA RD · R.O.W. / FRONT LOT LINE";
+- yard labels.
+
+There is no scale bar, north arrow, legend or section marker; the legend is behind "?".
+
+F3 [rhino] **Labels** are screen-size, horizontal 2D text with a halo or backing so they stay readable on light and dark viewports.
+
+F4 [code] **Status symbols in the plan** match the panel: review labels are prefixed "? " and drawn amber; failing labels are prefixed "✕ " and drawn red.
+
+F5 [rhino] **Red** appears only on the encroachment strip, hatched between the wall and the yard line; the massing itself stays neutral.
+
+F6 [both] **Status box,** top right: the summary (D3) plus a second line ("Draft rulebook", plus the lot and grade sources when approximate).
+
+F7 [both] **Out of date.** When the model changes, the viewport and the panel go to "Checking…" / "Out of date" on the same 300 ms rule. In that state:
+- the status colors and the red hatch are dropped;
+- the dimensions draw neutral;
+- the status box shows "Out of date" or "Checking…".
+
+F8 [rhino] **Theme colors.** They follow Rhino's viewport background brightness, so the same drawing works in dark and light.
+
+## G. Notice (board 4)
+
+G1 [both] **When it appears.** Drawn by the DisplayConduit in the active viewport only, bottom left, at the end of a command (never during a drag), only for items that newly stop complying. It has no window and no button.
+
+G2 [code] **Several new failures in one command** merge into one notice: "2 items no longer comply: Rear yard, Lot coverage".
+
+G3 [rhino] **It clears** at the next command or after about 6 s. While it shows, the status box still shows "Draft rulebook".
+
+G4 [rhino] **No command-line echo** except on Gordium's own commands; Move prints only Rhino's own message.
+
+## H. States (boards 6, 6b)
+
+H1 [code] **Checking…** appears only while a check is due or running: 300 ms after an edit (live mode starts the re-check at 500 ms), or, for a check the architect starts, once it has run 0.4 s (Rhino doesn't repaint before then, so a quick check never flashes it). Rows keep their names, show no mark and "—", and Zoom to is disabled. Under it, what the checker is doing now ("Measuring the building…"), a moving mark, the seconds so far, and **Cancel**. Rhino never waits on a check: a live re-check runs in the background (the viewport draws nothing as complying or not while it runs) and is drawn only if the model hasn't changed since it read it; a check the architect started (and the starting house, the report) shows a small window with the same line and Cancel after 0.4 s.
+
+H1b [code] **Check cancelled**: the checker is stopped, nothing in the model changes, nothing is shown as checked (rows "—", the drawing cleared), with **Check again**. A Draw cancelled while the starting house is worked out rolls the box back (nothing drawn); once drawn, Cancel stops only the check that follows. A cancelled report leaves the file as it was, except when Cancel comes in the moment after the new report was moved into place: then it says the report was already saved (never hidden).
+
+H2 [code] **Check could not run** is a separate state: "⚠ Check could not run" with a Retry button and the reason in the lower pane. Rows show no mark and "—".
+
+H3 [code] **Setup problems** use ⚠ with a real fix button and never count as rule results:
+- (with the later site-lookup PR: address not found, multiple parcels, City map offline);
+- district not supported → "Edit site…";
+- building not found → "Pick building…";
+- model units not feet/inches → "Units…";
+- massing extends outside the lot → "Zoom to";
+- rulebook damaged → "Reinstall…".
+
+H4 [code] **Rule-level problems** are needs review (?) with a reason: measurement failed (e.g. an open solid), floors misaligned, objects on the lot not included.
+
+H5 [code] **"–"** means only not checked (needs input, or not in this release). Stale rows draw no mark.
+
+## I. Zoning report (button "Zoning report…")
+
+I1 [code] **The report** is the architects'-format workbook from PR 10, plus:
+- the draft-rulebook label;
+- the lot source and grade source;
+- the summary (D3, identical text);
+- the not-checked and not-covered lists;
+- every citation in the E2 format, with links.
+
+I2 [code] **The report shows the same statuses as the panel.** No result appears in the report that the panel doesn't show, and the other way round.
+
+## J. Visual system
+
+J1 [rhino] **Type:** the system font; 13 regular, 13 semibold, 11 small, and 15 for the summary only.
+
+J2 [rhino] **Colors:** Eto SystemColors for all chrome. The only added colors are red (does not comply) and amber (needs review), with shades keyed to panel and viewport brightness. No teal or brand accent.
+
+J3 [code] **Symbols:** ✕ does not comply, ? needs review, ✓ complies, – not checked, ⚠ setup problem. Every status is a shape plus words, never color alone.
+
+J4 [rhino] **Contrast:** hint text is at least 4.5:1 on its background in both themes.
+
+J5 [code] **Vocabulary** uses the code's own terms: Front yard, Side yard (West/East), Rear yard, Lot coverage, Building height, Stories, "R-1b" written the same way everywhere. "Proposed" is used, not "provided".
+
+## K. Out of scope for this release
+
+- Existing buildings and nonconforming conditions (Existing | Proposed | Required).
+- Notes and a "variance requested" state.
+- "Bake zoning graphics" to layers, and a zoning table on a Layout for permit sets.
+- Overlay districts (historic, gorge protection, flood); they are listed under Not checked.
+- Pitched, hip and gambrel roof height; gable and hip massing.
+- Corner lots (§325-19C) and accessory structures (§325-25); they are listed under Not covered.
+- Districts other than R-1b, which give "District not supported".
+- Survey-to-parcel comparison and automatic lot-line lookup; that is the separate site-lookup proposal.

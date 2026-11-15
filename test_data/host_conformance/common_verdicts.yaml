@@ -1,0 +1,26 @@
+# The rows every scene's check gives the same status: each depends only on the facts every scene states alike (an
+# R-1b one-family house; nothing said yet about streams, an accessory dwelling unit, a home occupation, garages,
+# bedrooms or overlays) and on rules Gordium doesn't check yet. A scene's own `expected` adds the rows its drawing
+# decides (and may replace one of these). The suite needs exactly these rows plus the scene's: no row more or less.
+verdicts:
+  R-1b.use: complies                         # one-family detached is allowed in R-1b
+  R-1b.stream_setback: needs_review          # whether a stream is within 20 ft isn't said
+  R-1b.occupancy_one_family: needs_review    # whether there is an ADU isn't said
+  R-1b.home_occupation_size: needs_review    # whether a home occupation is planned isn't said
+  R-1b.home_occupation: needs_review
+  R-1b.private_garage: needs_review          # how many cars the garages hold isn't said
+  R-1b.adu_one_per_parcel: needs_review      # whether there is an ADU isn't said
+  R-1b.adu_bedrooms: needs_review
+  R-1b.adu_front_yard: needs_review
+  R-1b.adu_attached_size: needs_review
+  R-1b.adu_detached_size: needs_review
+  R-1b.adu_detached_setbacks: needs_review
+  R-1b.parking_one_family: not_checked       # bedrooms and parking spaces aren't in the model
+  release.overlays: not_checked              # overlay districts aren't in Gordium yet
+  gap.height_exceptions: not_checked         # rules not in Gordium yet: checked by hand
+  gap.small_projections: not_checked
+  gap.corner_visibility: not_checked
+  gap.accessory_below_grade: not_checked
+  gap.adu_sale_and_subdivision: not_checked
+  gap.front_yard_parking: not_checked
+  gap.parking_areas: not_checked

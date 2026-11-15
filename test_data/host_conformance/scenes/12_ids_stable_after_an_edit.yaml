@@ -1,0 +1,34 @@
+title: Ids that stay the same after an edit
+what: >-
+  The box house, then moved 10 ft back in the model (each floor block moved in place, not redrawn). The host must
+  send each object under the same id before and after: results point back to objects by id (the items shown in
+  red, the main building picked), so an id that changes on an edit points the architect at nothing. After the
+  move, the house is 40 ft from the street and 30 ft from the rear line, exactly the least allowed: still complies.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: complies
+  R-1b.side_yards#east: complies
+  R-1b.side_yards#west: complies
+  R-1b.rear_yard: complies
+  R-1b.yard_projections: complies
+  R-1b.height: complies
+  R-1b.stories: complies
+  R-1b.lot_coverage: complies
+then:
+  what: The house moved 10 ft back (y 40 to 90), each floor block moved in place.
+  move: [0, 10]
+  expected:
+    R-1b.lot_area_one_family_detached: complies
+    R-1b.lot_width_one_family_detached: complies
+    R-1b.front_yard: complies                    # 40 ≥ 25
+    R-1b.side_yards#east: complies
+    R-1b.side_yards#west: complies
+    R-1b.rear_yard: complies                     # 120 − 90 = 30 ≥ 30, at the limit
+    R-1b.yard_projections: complies
+    R-1b.height: complies
+    R-1b.stories: complies
+    R-1b.lot_coverage: complies

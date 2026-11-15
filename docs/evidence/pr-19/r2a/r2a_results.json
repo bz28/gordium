@@ -1,0 +1,301 @@
+{
+ "head": "7efb1bd",
+ "run": "2026-10-22, Rhino 8 (macOS): the real start box driven through its own controls (never the scripted auto path); recorded lookup answers (the 106_ithaca_rd fixture) with the City map's zone set to each case's value in the answer",
+ "script": "r2a_in_rhino.py + r2a_drive.py (PR 15 fork's scratchpad); the box captured by its window id",
+ "cases": {
+  "single": {
+   "zone_given": "R-2a",
+   "ok": true,
+   "claims": {
+    "2 no district preselected; the zone row reads not set": {
+     "ok": true,
+     "detail": {
+      "title": "New zoning check",
+      "zone_selected": null,
+      "zone_items": [
+       "R-1b"
+      ],
+      "source": "not set",
+      "reason": "Pick the district to continue.",
+      "amber": "",
+      "confirm": false,
+      "draw_enabled": false,
+      "labels": [
+       "Address",
+       "Zoning district",
+       "not set",
+       "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+       "Use",
+       "Lot",
+       "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public",
+       "Street side",
+       "Ithaca Rd",
+       "Corner lot?",
+       "Not checked yet: overlays (historic, gorge, flood) · pitched roofs",
+       "",
+       "Pick the district to continue."
+      ],
+      "stage": "after lookup"
+     }
+    },
+    "3 the amber line reads the City map says R-2a, no rules yet": {
+     "ok": true,
+     "detail": ""
+    },
+    "4 Draw is off, with Pick the district to continue.": {
+     "ok": true,
+     "detail": {
+      "title": "New zoning check",
+      "zone_selected": null,
+      "zone_items": [
+       "R-1b"
+      ],
+      "source": "not set",
+      "reason": "Pick the district to continue.",
+      "amber": "",
+      "confirm": false,
+      "draw_enabled": false,
+      "labels": [
+       "Address",
+       "Zoning district",
+       "not set",
+       "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+       "Use",
+       "Lot",
+       "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public",
+       "Street side",
+       "Ithaca Rd",
+       "Corner lot?",
+       "Not checked yet: overlays (historic, gorge, flood) · pitched roofs",
+       "",
+       "Pick the district to continue."
+      ],
+      "stage": "after lookup"
+     }
+    },
+    "5 picking R-1b sets its source at once: entered by you": {
+     "ok": true,
+     "detail": {
+      "title": "New zoning check",
+      "zone_selected": "R-1b",
+      "zone_items": [
+       "R-1b"
+      ],
+      "source": "entered by you",
+      "reason": "Confirm the district to continue.",
+      "amber": "",
+      "confirm": false,
+      "draw_enabled": false,
+      "labels": [
+       "Address",
+       "Zoning district",
+       "entered by you",
+       "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+       "Use",
+       "Lot",
+       "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public",
+       "Street side",
+       "Ithaca Rd",
+       "Corner lot?",
+       "Not checked yet: overlays (historic, gorge, flood) · pitched roofs",
+       "",
+       "Confirm the district to continue."
+      ],
+      "stage": "R-1b picked"
+     }
+    },
+    "6 ticking I confirm turns Draw on at once, with an empty reason line": {
+     "ok": true,
+     "detail": {
+      "title": "New zoning check",
+      "zone_selected": "R-1b",
+      "zone_items": [
+       "R-1b"
+      ],
+      "source": "entered by you",
+      "reason": "",
+      "amber": "",
+      "confirm": true,
+      "draw_enabled": true,
+      "labels": [
+       "Address",
+       "Zoning district",
+       "entered by you",
+       "? The City map says R-2a; Gordium doesn't have R-2a's rules yet: pick a district only if you know it applies.",
+       "Use",
+       "Lot",
+       "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public",
+       "Street side",
+       "Ithaca Rd",
+       "Corner lot?",
+       "Not checked yet: overlays (historic, gorge, flood) · pitched roofs",
+       "",
+       ""
+      ],
+      "stage": "ticked"
+     }
+    },
+    "7 after Draw, reopened: R-1b, still entered by you": {
+     "ok": true,
+     "detail": {
+      "title": "Zoning check · site",
+      "zone_selected": "R-1b",
+      "zone_items": [
+       "R-1b"
+      ],
+      "source": "entered by you",
+      "reason": "",
+      "amber": "",
+      "confirm": true,
+      "draw_enabled": true,
+      "labels": [
+       "Address",
+       "Zoning district",
+       "entered by you",
+       "Use",
+       "Lot",
+       "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public",
+       "Street side",
+       "the highlighted line",
+       "Corner lot?",
+       "Not checked yet: overlays (historic, gorge, flood) · pitched roofs",
+       "",
+       ""
+      ],
+      "stage": "reopened"
+     }
+    }
+   },
+   "shows": [
+    {
+     "stage": "after lookup",
+     "zone_selected": null,
+     "source": "not set",
+     "reason": "Pick the district to continue.",
+     "confirm": false,
+     "draw_enabled": false,
+     "amber": ""
+    },
+    {
+     "stage": "R-1b picked",
+     "zone_selected": "R-1b",
+     "source": "entered by you",
+     "reason": "Confirm the district to continue.",
+     "confirm": false,
+     "draw_enabled": false,
+     "amber": ""
+    },
+    {
+     "stage": "ticked",
+     "zone_selected": "R-1b",
+     "source": "entered by you",
+     "reason": "",
+     "confirm": true,
+     "draw_enabled": true,
+     "amber": ""
+    },
+    {
+     "stage": "reopened",
+     "zone_selected": "R-1b",
+     "source": "entered by you",
+     "reason": "",
+     "confirm": true,
+     "draw_enabled": true,
+     "amber": ""
+    }
+   ]
+  },
+  "two": {
+   "zone_given": [
+    "R-2a",
+    "R-1b"
+   ],
+   "ok": true,
+   "claims": {
+    "8 two zones (R-2a, R-1b): nothing preselected, the box asks This lot is in two zones": {
+     "ok": true,
+     "detail": {
+      "title": "New zoning check",
+      "zone_selected": null,
+      "zone_items": [
+       "R-1b"
+      ],
+      "source": "not set",
+      "reason": "Pick the district to continue.",
+      "amber": "?  This lot is in two zones: pick the zone that applies",
+      "confirm": false,
+      "draw_enabled": false,
+      "labels": [
+       "Address",
+       "Zoning district",
+       "not set",
+       "? The City map puts this lot in R-2a and R-1b; Gordium doesn't have R-2a's rules yet: pick the district that applies only if you know it.",
+       "Use",
+       "Lot",
+       "7,033 sf · from the tax map (±2 ft, approximate) · NYS Tax Parcels Public",
+       "Street side",
+       "Ithaca Rd",
+       "Corner lot?",
+       "Not checked yet: overlays (historic, gorge, flood) · pitched roofs",
+       "?  This lot is in two zones: pick the zone that applies",
+       "Pick the district to continue."
+      ],
+      "stage": "after lookup"
+     }
+    }
+   },
+   "shows": [
+    {
+     "stage": "after lookup",
+     "zone_selected": null,
+     "source": "not set",
+     "reason": "Pick the district to continue.",
+     "confirm": false,
+     "draw_enabled": false,
+     "amber": "?  This lot is in two zones: pick the zone that applies"
+    }
+   ]
+  },
+  "suggested": {
+   "zone_given": "R-1b",
+   "ok": true,
+   "claims": {
+    "9 a found district: suggested by Gordium · City zoning map says R-1b (checked <date>)": {
+     "ok": true,
+     "detail": "suggested by Gordium · City zoning map says R-1b (checked 2026-10-20)"
+    }
+   },
+   "shows": [
+    {
+     "stage": "after lookup",
+     "zone_selected": "R-1b",
+     "source": "suggested by Gordium · City zoning map says R-1b (checked 2026-10-20)",
+     "reason": "Confirm the district to continue.",
+     "confirm": false,
+     "draw_enabled": false,
+     "amber": ""
+    },
+    {
+     "stage": "ticked",
+     "zone_selected": "R-1b",
+     "source": "suggested by Gordium · City zoning map says R-1b (checked 2026-10-20)",
+     "reason": "",
+     "confirm": true,
+     "draw_enabled": true,
+     "amber": ""
+    },
+    {
+     "stage": "reopened",
+     "zone_selected": "R-1b",
+     "source": "suggested by Gordium · City of Ithaca zoning map, used live",
+     "reason": "",
+     "confirm": true,
+     "draw_enabled": true,
+     "amber": ""
+    }
+   ],
+   "reopened_source": "suggested by Gordium · City of Ithaca zoning map, used live"
+  }
+ },
+ "all_ok": true
+}

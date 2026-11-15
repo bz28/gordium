@@ -1,0 +1,34 @@
+# What Gordium does not check yet for this city, listed on every result (the Rhino panel's "Not checked" and
+# "Not covered by this rulebook" groups, and the report), so a list of items that comply never reads as a full
+# zoning review. Plain data: each entry names the code section and says why in plain words.
+not_in_this_release:
+  - id: overlays
+    name: Overlays (historic, gorge, flood)
+    why: Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).
+    # Left out of a result only when the address lookup positively found none on this very lot: the City's historic,
+    # gorge and zoning-map overlays and the parcel's own record, and FEMA's flood maps all answered and all said none
+    # (lot fact overlays_none_found, honoured while the lot is still the outline it was found for, and at most 90 days
+    # old on the day of the check: design_checker.present.LOOKUP_FRESH_DAYS). Any doubt: shown.
+    left_out_when: overlays_none_found
+not_covered:
+  - id: height_exceptions
+    section: "§325-16A, §325-16B"
+    name: Height exceptions (chimneys, spires, parapets)
+  - id: small_projections
+    section: "§325-18B"
+    name: Windowsills, belt courses and cornices in yards (a massing model shows eaves only)
+  - id: corner_visibility
+    section: "§325-17B"
+    name: Corner lots, the clear triangle at the street corner
+  - id: accessory_below_grade
+    section: "§325-25B, §325-25D"
+    name: Accessory structures below grade or across a common lot line
+  - id: adu_sale_and_subdivision
+    section: "§325-28C(5), §325-28C(6)"
+    name: An accessory dwelling unit may not be sold separately from the house, nor the lot subdivided to separate it
+  - id: front_yard_parking
+    section: "§325-20E"
+    name: Parking in front yards (lots over 50 ft wide, up to 25% of the front yard; narrower lots, a driveway up to 12 ft wide; cars square to the street)
+  - id: parking_areas
+    section: "§325-20D(2), §325-20F"
+    name: Driveways and parking areas (every driveway at least 8 ft wide; parking for 3 or more cars, its share of the side and rear yards)

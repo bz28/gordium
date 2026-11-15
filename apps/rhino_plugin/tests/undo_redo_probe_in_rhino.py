@@ -1,0 +1,195 @@
+#! python3
+"""Which kind of change breaks Redo of an undo record begun outside a command (RHINO_QUEUE: the Redo after a
+re-lookup's Draw did nothing at demo e631aae). Run in Rhino 8, not in CI; Gordium's own code is not loaded.
+
+Each case, in a fresh copy of Rhino's feet template and outside any command (as the panel's Edit site… runs):
+BeginUndoRecord, one curve added plus the case's extra change, EndUndoRecord, Rhino's _Undo, then _Redo. A case
+passes when Undo removes the curve and Redo brings it back, and its own change follows too: the held object really
+held (moved onto the hidden layer, that layer deleted), back on its own layer after Undo and gone after Redo; the
+document string empty or missing after Undo and exactly as written after Redo. The extras are what a re-lookup's
+Draw does inside its one record (gordium_rhino._draw_prepare to edit_facts): document strings written (the
+facts, the box's choices, the sources), an object's attribute user strings set, a layer added then deleted (the
+hidden holding layer), an object moved onto a hidden layer then deleted (held, then gone at commit), a layer's
+visibility set directly, and a Rhino command run inside the record (frame_site's _-Zoom). Rhino's undo events are
+recorded for each. _Undo and _Redo are Rhino's own commands run in the document (RhinoApp.ExecuteCommand, as Cmd+Z
+runs _Undo): RunScript("_Undo") does nothing while no Rhino window is on screen (2026-11-12). Writes <temp>/gordium_undo_probe/out.json ("done": true at the end)."""
+import json
+import os
+import sys
+import tempfile
+import traceback
+
+import Rhino
+import System
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from test_docs_in_rhino import TestDocs, close  # noqa: E402
+
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(
+    os.path.abspath(__file__))))), "packages", "design_checker", "design_checker"))
+import rhino_logic as logic  # noqa: E402  (its guard: no callback may raise into Rhino)
+
+S = os.path.join(tempfile.gettempdir(), "gordium_undo_probe") + "/"
+os.makedirs(S, exist_ok=True)
+log = {"cases": {}, "events": []}
+rg = Rhino.Geometry
+
+
+def event(sender, e):
+    log["events"].append(dict({k: bool(getattr(e, k, False)) for k in (
+        "IsBeginRecording", "IsEndRecording", "IsBeginUndo", "IsEndUndo", "IsBeginRedo", "IsEndRedo",
+        "IsPurgeRecord")}, serial=int(getattr(e, "UndoSerialNumber", 0) or 0), case=log.get("case")))
+
+
+def curve(doc, x=0.0, layer=None):
+    attrs = Rhino.DocObjects.ObjectAttributes()
+    if layer is not None:
+        attrs.LayerIndex = layer
+    return doc.Objects.AddCurve(rg.LineCurve(rg.Point3d(x, 0, 0), rg.Point3d(x + 10, 0, 0)), attrs)
+
+
+WRITTEN = "{\"lot\": 1}"                          # the document string a case writes inside its record
+
+
+def strings(doc):
+    doc.Strings.SetString("gordium_probe", "facts", WRITTEN)
+
+
+def user_strings(doc):
+    o = doc.Objects.FindId(curve(doc, 20))
+    attrs = o.Attributes.Duplicate()
+    attrs.SetUserString("gordium_added_by", "probe")
+    doc.Objects.ModifyAttributes(o, attrs, True)
+
+
+def layer_added_then_deleted(doc):
+    layer = Rhino.DocObjects.Layer()
+    layer.Name = "Gordium probe holding"
+    index = doc.Layers.Add(layer)
+    doc.Layers.Delete(index, True)
+
+
+def held_then_deleted(doc, keep):
+    """`keep` made before the record began, as the sample's lot and house are before a Draw's record."""
+    layer = Rhino.DocObjects.Layer()
+    layer.Name = "Gordium probe held"
+    index = doc.Layers.Add(layer)
+    doc.Layers[index].IsVisible = False
+    attrs = keep.Attributes.Duplicate()
+    attrs.LayerIndex = index
+    log["held"] = {"moved": bool(doc.Objects.ModifyAttributes(keep, attrs, True))}
+    log["held"]["deleted"] = bool(doc.Objects.Delete(doc.Objects.FindId(keep.Id), True))   # re-found, as the plugin
+    log["held"]["layer_deleted"] = bool(doc.Layers.Delete(index, True))
+
+
+def visibility(doc):
+    doc.Layers[doc.Layers.CurrentLayerIndex].IsVisible = True
+
+
+def command_inside(doc):
+    Rhino.RhinoApp.RunScript("_-Zoom _All _Extents", False)
+
+
+CASES = [("baseline", None), ("document strings", strings), ("attribute user strings", user_strings),
+         ("layer added then deleted", layer_added_then_deleted), ("held then deleted", held_then_deleted),
+         ("layer visibility set", visibility), ("a command inside the record", command_inside),
+         ("all of them", None)]
+
+
+def all_of_them(doc, keep):
+    for f in (strings, user_strings, layer_added_then_deleted, visibility):
+        f(doc)
+    held_then_deleted(doc, keep)        # the Draw's commit deletes what it held, then frame_site runs its _-Zoom
+    command_inside(doc)
+
+
+def one(docs, name, extra):
+    log["case"] = name
+    doc = docs.open("Large Objects - Feet")
+    try:
+        before = doc.Objects.FindId(curve(doc, 40))   # an object that exists before the record (the sample's lot)
+        before_layer = before.Attributes.LayerIndex
+        in_command = bool(Rhino.Commands.Command.InCommand())
+        serial = doc.BeginUndoRecord("Gordium probe: " + name)
+        added = curve(doc)
+        if name == "all of them":
+            all_of_them(doc, before)
+        elif extra is held_then_deleted:
+            extra(doc, before)
+        elif extra is not None:
+            extra(doc)
+        ended = doc.EndUndoRecord(serial)
+        held = name in ("held then deleted", "all of them")    # the object made before the record is deleted
+        wrote = name in ("document strings", "all of them")       # the document string written in the record
+        kept_id = before.Id
+        kept_layer = before_layer
+        undo = Rhino.RhinoApp.ExecuteCommand(doc, "_Undo") == Rhino.Commands.Result.Success
+        gone = doc.Objects.FindId(added) is None
+        back_obj = doc.Objects.FindId(kept_id)
+        held_back = back_obj is not None and back_obj.Attributes.LayerIndex == kept_layer   # back, on its own layer
+        string_after_undo = doc.Strings.GetValue("gordium_probe", "facts")
+        string_undone = not string_after_undo                    # gone, or emptied
+        redo = Rhino.RhinoApp.ExecuteCommand(doc, "_Redo") == Rhino.Commands.Result.Success
+        back = doc.Objects.FindId(added) is not None
+        held_gone = doc.Objects.FindId(kept_id) is None            # and Redo deletes it again
+        string_after_redo = doc.Strings.GetValue("gordium_probe", "facts")
+        string_redone = string_after_redo == WRITTEN             # exactly what was written
+        steps = log.pop("held", None) or {}
+        hold_made = bool(steps.get("moved") and steps.get("layer_deleted"))   # the hidden-layer hold really happened
+        ok = gone and back and (not held or (hold_made and held_back and held_gone)) and (
+            not wrote or (string_undone and string_redone))
+        log["cases"][name] = {"ok": ok, "serial": int(serial), "ended": bool(ended),
+                              "in_command": in_command, "undo_ran": undo, "undone": gone, "redo_ran": redo,
+                              "redone": back, "held_back_on_undo": held_back if held else None,
+                              "held_gone_on_redo": held_gone if held else None,
+                              "held_steps": steps if held else None,
+                              "string_after_undo": string_after_undo if wrote else None,
+                              "string_after_redo": string_after_redo if wrote else None}
+    except Exception:
+        log["cases"][name] = {"ok": False, "trace": traceback.format_exc(), "held_steps": log.pop("held", None)}
+    finally:
+        close(doc)
+
+
+def main():
+    handler = System.EventHandler[Rhino.Commands.UndoRedoEventArgs](logic.guard(event, "record an undo event"))
+    Rhino.Commands.Command.UndoRedo += handler
+    try:
+        docs = TestDocs("undo_probe").__enter__()
+        for name, extra in CASES:
+            one(docs, name, extra)
+        log["ok"] = all(c.get("ok") for c in log["cases"].values()) and len(log["cases"]) == len(CASES)
+    except Exception:
+        log["ok"] = False                  # a case that could not even open or close its document
+        log["trace"] = traceback.format_exc()
+        raise
+    finally:
+        Rhino.Commands.Command.UndoRedo -= handler
+        log["done"] = True
+        json.dump(log, open(S + "out.json", "w", encoding="utf-8"), default=str, indent=1)
+        Rhino.RhinoApp.WriteLine("undo_redo_probe: " + ", ".join(
+            "%s %s" % (n, "ok" if c.get("ok") else "FAILS (see out.json)") for n, c in log["cases"].items()))
+
+
+def run_outside_a_command():
+    """As the panel runs: now if no command is running, else at the next idle once this one has ended. Nothing
+    may raise into Rhino from the idle (on the Mac that aborts it)."""
+    if os.path.exists(S + "out.json"):          # never an earlier run's result read as this one's
+        os.remove(S + "out.json")
+    if not Rhino.Commands.Command.InCommand():
+        main()
+        return
+
+    def once(sender, e):
+        Rhino.RhinoApp.Idle -= idle
+        try:
+            main()
+        except Exception:
+            Rhino.RhinoApp.WriteLine("undo_redo_probe FAILED: see " + S + "out.json")
+    idle = System.EventHandler(logic.guard(once, "run outside a command"))
+    Rhino.RhinoApp.Idle += idle
+    Rhino.RhinoApp.WriteLine("undo_redo_probe: runs when this command ends; wait for " + S +
+                             "out.json to say \"done\": true")
+
+
+run_outside_a_command()

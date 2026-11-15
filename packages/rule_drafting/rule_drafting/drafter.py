@@ -1,0 +1,713 @@
+"""Draft rules with one recorded AI call per unit, and check every answer with code.
+
+A unit is one chart section (e.g. page 3, "Yard Dimensions") or one piece of the law labeled rule or
+flag. For one unit:
+  1. Send the fixed instructions (drafting_rules.md, the rule format, every measure, use, district and
+     topic, and the residential chart's rows; cached, so repeats are cheap) and the unit's text, with the
+     footnotes and sections of the law it points to and the definitions it uses.
+  2. The model must answer with rule templates (structured output: no other shape is possible). Chart
+     numbers are slots, never typed; code fills them from each district's own cell (templates.py).
+  3. Code resolves every quote to its exact lines, fills the slots, and runs the inspector on every rule.
+     If no rule passes, the model is told why and asked again (up to max_attempts); after that the unit
+     is listed for a person. Districts whose cells don't fit a template are listed for a person too.
+  4. Every attempt is recorded: settings, prompt and input fingerprints, the raw answer, tokens, cost.
+
+The hand-drafted R-1b rulebook is never shown to the model: it is the answer key the drafts are graded on.
+The client is passed in, so tests use a fake one and never need a key or the network.
+"""
+
+import datetime
+import json
+import re
+from pathlib import Path
+
+import yaml
+
+from document_extraction.sections import piece_text
+from rule_format import code_numbers, parts
+from rule_format.rulebook import (MEASURES_FILE, REPO, VOCABULARY_FILE, Context, _source_problems, district_name,
+                                  locate, source_numbers, validate)
+from section_labeling.budget import worst_case
+from section_labeling.labeler import PRICES, cost, find_quote, numbered, sha
+from section_labeling.term_index import related as related_pieces
+
+from .chart_values import FOOTNOTE, NOT_APPLICABLE, footnotes, section_refs
+from .templates import (fill_template, formula_slots, number_places, template_problems,
+                        with_occurrence_nudged)
+
+HERE = Path(__file__).parent
+GUIDE_FILE = REPO / "regulations/document_extraction_guide/drafting_rules.md"
+SETTINGS = yaml.safe_load((HERE / "settings.yaml").read_text(encoding="utf-8"))
+UNITS = ("ft", "sf", "count", "text", "yes_no")
+OUTCOMES = ["pass", "fail", "needs_review", "not_applicable"]
+
+FORMAT = """\
+## Who you are, and why this matters
+
+You are a senior zoning plan examiner and licensed architect. You have years of experience reading municipal
+zoning codes and their dimensional charts (use districts, lot size and width, yards, height and stories, lot
+coverage, parking, exceptions), and you know how a plan examiner checks a building design against them.
+
+You are turning one section of a city's zoning chart, or one piece of its zoning law, into rule templates for
+Gordium. Gordium checks every building design against every rule with plain code (no AI) and tells the
+architect pass, fail or needs review. So:
+- Never a false pass. A rule that is too loose, or a number that is wrong, tells an architect an illegal design
+  is fine. When something the text leaves unclear can change the result, add a review_when for that case (or
+  make the template a flag) so the result is "needs review"; never settle it in the formula. An open question
+  records the doubt for the architects but doesn't change any result on its own.
+- Every number is traceable. A chart number is never typed: it is a slot that code fills from each district's
+  own cell. A number you type must be written in evidence that belongs to this rule (see "numbers" below).
+- Code checks everything you write (every quote, number, formula and worked example) and sends back what it
+  can't verify, with the reason. Nothing is trusted on your word.
+
+## The process, in order
+
+1. Read the whole text given, every line, with the footnotes, sections of the law and definitions given with it.
+2. List each requirement it sets for the residential districts listed below: a limit, a minimum, a
+   prohibition, a condition, an allowed or forbidden use. A sentence that names several things ("each required
+   front, side and rear yard") sets a requirement for each one: every one gets a rule. Procedures
+   (applications, permits, fees, notices) are not requirements on a design.
+3. Draft only this text's own requirements. A requirement or exception that lives in another section of the
+   law is drafted when that section is drafted, not folded into this rule. For example, the chart's height row
+   is drafted as "building_height <= {height}"; the extra height that section 325-16C allows (with larger
+   yards) is drafted from 325-16C itself.
+4. For each requirement write one template: the formula, a slot for every chart number, the quotes, every
+   number you type with where it is written, and worked examples.
+5. Before answering, check each number you typed against the "numbers" rules, and each example against the
+   "examples" rules.
+6. If the text sets nothing for the residential districts listed (it is only for other districts, or only
+   procedure), return no templates and say why in no_rule_reason.
+
+## What to write
+
+Answer with rule templates in the JSON shape required. Each template becomes one rule per district (when
+it has slots) or one rule for every district (when it has none).
+
+- kind: "rule" when code can decide it from measurements; "flag" when it needs an architect's judgment
+  (a flag has no check: leave check "").
+- check / applies_when / review_when.when: formulas in the formula language. Allowed: measure names,
+  numbers, quoted text ("one_family_detached", "R-1b"), + - * /, < <= > >= == !=, in / not in a [list],
+  and / or / not, `a if condition else b`, min(a, b, ...) and max(a, b, ...). A yes/no measure is a test on
+  its own (`adu_separate_entrance`). check and applies_when must be true/false tests.
+- applies_when: only a condition the text itself states (a use, a kind of lot, a size). Leave it "" when the
+  rule applies to every lot in the district. Never write a placeholder test (true, lot_area > 0, use != "",
+  stories >= 0): it makes the rule depend on a measure it doesn't need, so the rule can't be decided without
+  it. A template with slots is filled once per district, so don't test the district in it; test the
+  district only in a template with no slots that applies to some districts, written exactly as listed below.
+- Use only the measures listed below. If a rule needs a fact that isn't listed, name it in new_measures
+  (lowercase_with_underscores, a unit from ft, sf, count, text, yes_no, and what it means); an engineer
+  adds it before the rule is used. Never invent a measure without listing it there.
+- Slots. A number that comes from the zoning chart is never typed: write a slot {name} and define it in
+  slots: the chart page, section and row label exactly as listed, which number in the cell (1 = first),
+  how many numbers the cell must have, whether that number is a percent, and the footnote markers the cell
+  must carry (["16"] for "50 ft [fn16]"). Code fills the slot from each district's own cell; a district
+  whose cell doesn't have that shape gets no rule and goes to a person.
+- numbers: one entry for every number you type in applies_when, check or review_when (not slots, not 0),
+  naming the one place it is written. A typed number is trusted only from evidence that belongs to this rule:
+  - {value, from: "law_quote", quote: <index in quotes>, slot: "", footnote: ""}: a sentence of the paragraph
+    being drafted (the text given above, quoted in quotes);
+  - {value, from: "slot_footnote", quote: -1, slot: <slot name>, footnote: <note number>}: a footnote whose
+    marker is on the slot's own cell ("50 ft [fn16]": note 16);
+  - {value, from: "slot_row_label", quote: -1, slot: <slot name>, footnote: ""}: that slot's own row label
+    ("First three bed or sleeping rooms").
+  Anything else is refused: a sentence of another section of the law, a footnote on another cell, row label
+  or section heading, another row's label. A slot's footnote or row label backs a number only where the
+  number stands with that slot (in the same arithmetic or min/max, or in the condition that picks the slot's
+  value), and only if changing that slot there changes the result of some worked example. A percent is typed
+  as its fraction (25% is 0.25); work numbers out in the formula from their inputs (0.02 * 1000), never as a
+  result (20).
+- Footnotes: a chart cell's footnote marker ([fn16]) points to a note printed under that page's table
+  (listed below). Every footnote on a slot's cell, its row label or its section heading has to be quoted,
+  and applied in the rule.
+- quotes: the exact words that support the rule, as whole sentences, copied character for character
+  (footnote markers like [fn11] included). document "chart" only for a footnote under a chart table, with
+  its page; document "law" with the piece id for text from a piece of the law given here (page 0). A quote
+  must occur once.
+- examples: for a rule, at least one that passes and one that fails, chosen so they exercise the whole
+  formula: both sides of every `if` and of every comparison in applies_when; for min or max, an example
+  where each part decides; for a tiered rule (parking by bedrooms: up to 3, 4 to 5, more than 5), an example
+  in every tier, the top one included. Each given is {measure, value}: measure is a measure name (never a
+  slot); value is text: a number, arithmetic on slots ("{front} - 1"), true or false, a use id or a district
+  name.
+- open_questions: anything the law leaves unclear, for the architects. Never settle it in the formula. An open
+  question doesn't change a result: if the unclear point can change one, also add a review_when for it.
+- id_suffix: lowercase_with_underscores; the rule's id is the district (or "general") plus this suffix.
+"""
+
+
+PARTS_FORMAT = """\
+## Rules for each part (bedrooms, escape openings, stairs, exit doors)
+
+A requirement that every part of a kind must meet ("each sleeping room shall have an emergency escape opening",
+"stair risers shall not exceed ...") is a rule for each part: one result per part, never one for the building.
+- for_each: the part kind it repeats over (listed below); "" for a rule about the whole building or lot.
+- within: the kind those parts sit in, when the law says "of each" ("each sleeping room's escape opening": for_each
+  emergency_escape_opening, within sleeping_room); else "".
+- when_none: what the law says when there is nothing to check: "fail" (a sleeping room with no escape opening,
+  when the law requires one), "not_applicable" (a house with no stairs, for a stair rule), or "needs_review" when
+  the text doesn't settle it (and say why in open_questions). Never "pass".
+- Formulas use the building's measures and that part kind's own measures, nothing else. A rule that must find a part
+  (when_none not "not_applicable") never tests the part's measures in applies_when: say how parts differ inside check
+  (`opening_net_clear_area >= (5.0 if opening_at_grade else 5.7)`).
+- examples: each is a small design. given: the building's measures. parts: every part, {kind, id, name, within: the
+  id of the part it sits in or "", measures: [{measure, value}]}. rows: every row the rule gives, {part: the part's
+  id, within: the id of the part it sits in, outcome}, with part "" for a row about no one part (a room with no
+  escape opening: part "", within the room's id). expect: the rule's one answer (fail if any row fails, else needs
+  review if any does, else pass if any passes). At least one example has a part that passes the check, one a part
+  that fails it (a row for nothing to check doesn't count), and one shows when_none (a room with none, or a building
+  with none): code refuses a rule for each part without them.
+For any other rule, leave for_each, within and when_none "" and every example's parts and rows empty.
+"""
+
+
+def output_schema(topics: list[str], for_parts: bool = False, book: bool = False) -> dict:
+    """The answer's shape. With for_parts (a building code's rules for each part: rule_format/parts.py), each
+    template also carries for_each, within and when_none, and each example the parts and the rows expected; without
+    (the zoning chart and law), exactly the shape it always was."""
+    text = {"type": "string"}
+    slot = {"type": "object", "additionalProperties": False,
+            "required": ["name", "page", "section", "row", "number", "numbers_in_cell", "percent", "footnotes"],
+            "properties": {"name": text, "page": {"type": "integer"}, "section": text, "row": text,
+                           "number": {"type": "integer"}, "numbers_in_cell": {"type": "integer"},
+                           "percent": {"type": "boolean"}, "footnotes": {"type": "array", "items": text}}}
+    template = {"type": "object", "additionalProperties": False,
+                "required": ["id_suffix", "title", "topic", "kind", "applies_when", "check", "slots", "review_when",
+                             "quotes", "numbers", "examples", "open_questions", "new_measures"],
+                "properties": {
+                    "id_suffix": text, "title": text, "topic": {"type": "string", "enum": topics},
+                    "kind": {"type": "string", "enum": ["rule", "flag"]}, "applies_when": text, "check": text,
+                    "slots": {"type": "array", "items": slot},
+                    "review_when": {"type": "array", "items": {
+                        "type": "object", "additionalProperties": False, "required": ["when", "reason"],
+                        "properties": {"when": text, "reason": text}}},
+                    "quotes": {"type": "array", "items": {
+                        "type": "object", "additionalProperties": False, "required": ["document", "page", "piece", "text"],
+                        "properties": {"document": {"type": "string", "enum": ["chart", "law"]}, "page": {"type": "integer"},
+                                       "piece": text, "text": text}}},
+                    "numbers": {"type": "array", "items": {
+                        "type": "object", "additionalProperties": False,
+                        "required": ["value", "from", "quote", "slot", "footnote"],
+                        "properties": {"value": {"type": "number"},
+                                       "from": {"type": "string", "enum": ["law_quote", "slot_footnote", "slot_row_label"]},
+                                       "quote": {"type": "integer"}, "slot": text, "footnote": text}}},
+                    "examples": {"type": "array", "items": {
+                        "type": "object", "additionalProperties": False, "required": ["given", "expect"],
+                        "properties": {"given": {"type": "array", "items": {
+                            "type": "object", "additionalProperties": False, "required": ["measure", "value"],
+                            "properties": {"measure": text, "value": text}}},
+                            "expect": {"type": "string", "enum": OUTCOMES}}}},
+                    "open_questions": {"type": "array", "items": text},
+                    "new_measures": {"type": "array", "items": {
+                        "type": "object", "additionalProperties": False, "required": ["name", "unit", "meaning"],
+                        "properties": {"name": text, "unit": {"type": "string", "enum": list(UNITS)}, "meaning": text}}}}}
+    if for_parts:
+        kinds = sorted(parts.registry())
+        given = {"type": "array", "items": {"type": "object", "additionalProperties": False,
+                                            "required": ["measure", "value"], "properties": {"measure": text, "value": text}}}
+        template["required"] += list(parts.PART_FIELDS)
+        template["properties"] |= {"for_each": {"type": "string", "enum": [""] + kinds},
+                                   "within": {"type": "string", "enum": [""] + kinds},
+                                   "when_none": {"type": "string", "enum": [""] + list(parts.WHEN_NONE)}}
+        example = template["properties"]["examples"]["items"]
+        example["required"] += ["parts", "rows"]
+        example["properties"] |= {
+            "parts": {"type": "array", "items": {
+                "type": "object", "additionalProperties": False, "required": ["kind", "id", "name", "within", "measures"],
+                "properties": {"kind": {"type": "string", "enum": kinds}, "id": text, "name": text, "within": text,
+                               "measures": given}}},
+            "rows": {"type": "array", "items": {
+                "type": "object", "additionalProperties": False, "required": ["part", "within", "outcome"],
+                "properties": {"part": text, "within": text, "outcome": {"type": "string", "enum": OUTCOMES}}}}}
+    if book:                        # a building code: no chart, so no slots and nothing but law quotes (book_answer)
+        props, req = template["properties"], template["required"]
+        for k in ("slots",):
+            props.pop(k)
+            req.remove(k)
+        props["topic"] = text           # validation checks it; an enum of every topic makes the grammar too large
+        props["quotes"]["items"] = {"type": "object", "additionalProperties": False, "required": ["piece", "text"],
+                                    "properties": {"piece": text, "text": text}}
+        props["numbers"]["items"] = {"type": "object", "additionalProperties": False, "required": ["value", "quote"],
+                                     "properties": {"value": {"type": "number"}, "quote": {"type": "integer"}}}
+    return {"type": "json_schema", "schema": {
+        "type": "object", "additionalProperties": False, "required": ["templates", "no_rule_reason"],
+        "properties": {"templates": {"type": "array", "items": template}, "no_rule_reason": text}}}
+
+
+def book_answer(answer: dict) -> dict:
+    """A building code's answer (output_schema's book shape) in the full shape check_answer reads: no slots, every
+    quote a law quote, every number bound to one of them. Nothing else changes."""
+    out = dict(answer, templates=[])
+    for t in answer.get("templates") or []:
+        out["templates"].append(t | {
+            "slots": [],
+            "quotes": [{"document": "law", "page": 0, "piece": q.get("piece"), "text": q.get("text")} for q in t["quotes"]],
+            "numbers": [{"value": n.get("value"), "from": "law_quote", "quote": n.get("quote"), "slot": "", "footnote": ""}
+                        for n in t["numbers"]]})
+    return out
+
+
+def chart_table(sections: list[tuple[int, str]], rows_of) -> str:
+    """Every chart row the drafter may make a slot from, with each district's value."""
+    out = []
+    for page, section in sections:
+        out.append(f"\nPage {page}, section {section!r}:")
+        for label, cells in rows_of(page, section).items():
+            out.append(f"- row {label!r}: " + " | ".join(f"{col}: {c['value']}" for col, c in cells.items()))
+    return "\n".join(out)
+
+
+def chart_notes(notes: dict[int, dict]) -> str:
+    """The footnotes printed under each chart table, by page."""
+    return "\n".join(f"- page {page}: {n['text']}" for page, by_number in sorted(notes.items())
+                     for n in by_number.values())
+
+
+def system_prompt(ctx: Context, uses: dict, districts: list[str], table: str, notes: dict[int, dict],
+                  for_parts: bool = False) -> str:
+    """The fixed instructions: identical for every unit, so they're cached after the first call. With for_parts,
+    also how to write a rule for each part, and the part kinds with their measures (output_schema's for_parts);
+    without, exactly what they always were."""
+    measures = yaml.safe_load(MEASURES_FILE.read_text(encoding="utf-8"))
+    topics = yaml.safe_load(VOCABULARY_FILE.read_text(encoding="utf-8"))["topics"]
+    kinds = ("" if not for_parts else f"{PARTS_FORMAT}\n## Part kinds (for for_each and within), with their measures\n"
+             + "\n".join(f"- {k}: {d['meaning']}" + (f" (within {', '.join(d['within'])})" if d.get("within") else "")
+                         + "".join(f"\n  - {m} ({md['unit']}): {md['meaning']}" for m, md in d["measures"].items())
+                         for k, d in parts.registry().items()) + "\n")
+    return (f"{GUIDE_FILE.read_text(encoding="utf-8")}\n{FORMAT}\n{kinds}## Measures (with units)\n"
+            + "\n".join(f"- {n} ({m['unit']}): {m['meaning']}" for n, m in measures.items())
+            + "\n\n## Use ids (for the use measure)\n" + "\n".join(f"- {k}: {v['name']}" for k, v in uses.items())
+            + "\n\n## Residential districts (for the district measure: write them like this)\n"
+            + ", ".join(districts)
+            + "\n\n## Topics\n" + "\n".join(f"- {k}: {' '.join(v.split())}" for k, v in topics.items())
+            + "\n\n## The zoning chart's rows (for slots)" + table
+            + "\n\n## Footnotes under the chart tables (document \"chart\", with the page)\n" + chart_notes(notes) + "\n")
+
+
+def _sentences(text: str) -> str:
+    return " ".join(text.split())
+
+
+def unit_message(unit: dict, context: dict) -> str:
+    """The unit's whole text (a law piece's every line, numbered) plus what it points to: the lines its label
+    cites (hints only), footnotes, sections of the law, definitions."""
+    number = {(p, n): i for i, (p, n, _) in enumerate(unit.get("lines", []), 1)}
+    if unit.get("lines"):
+        parts = [unit["intro"] + " Its whole text follows, every line numbered L1, L2, ... (the numbers are not part "
+                 "of the city's words: never put them in a quote). A '--- page N ---' line marks a page break; a quote "
+                 "can't run across one. Draft every requirement in the whole text.", numbered(unit["lines"])]
+    else:
+        parts = [unit["intro"], unit["text"]]
+    if unit.get("requirements"):
+        def where(s):
+            first, last = number.get((s["page"], s["lines"][0])), number.get((s["page"], s["lines"][1]))
+            return f"L{first}-L{last}" if first and last else f"page {s['page']}, lines {s['lines'][0]}-{s['lines'][1]}"
+        parts.append("Lines its reviewed label cites (hints only: a label may cite just a heading or a lead-in, so "
+                     "don't stop at these; every requirement in the whole text needs a rule):\n" + "\n".join(
+                         f"- {where(s)}: {s['quote']}" for s in unit["requirements"]))
+    if context["notes"]:
+        parts.append("Footnotes under the chart (document \"chart\"):\n" + "\n".join(
+            f"- page {n['page']}: {n['text']}" for n in context["notes"]))
+    if context["pieces"]:
+        parts.append("Sections of the law it points to (document \"law\", by piece id):\n" + "\n\n".join(
+            f"[piece {p['id']}] {p['title']}\n{p['text']}" for p in context["pieces"]))
+    if context.get("dropped"):
+        parts.append("It also points to these sections, left out for length (don't draft from them; a person checks "
+                     "them): " + ", ".join(context["dropped"]))
+    if context.get("unfound"):
+        parts.append("It also points to these sections, which match no section of the law it was given (don't draft "
+                     "from them; a person checks them): " + ", ".join(context["unfound"]))
+    if context.get("related"):
+        parts.append("Related sections (the term index lists them for words this text uses). Background only, for "
+                     "what the words mean and what else applies: each sets its own rules, so don't draft or quote "
+                     "from them here; if this text's rule depends on one, say so in open_questions:\n" + "\n\n".join(
+                         f"[piece {p['id']}] {p['title']}\n{p['text']}" for p in context["related"]))
+    if context.get("related_dropped"):
+        parts.append("More related sections, left out for length: " + ", ".join(context["related_dropped"]))
+    if context["definitions"]:
+        parts.append("Definitions used (for meaning; quote them only if a rule rests on them):\n" + "\n".join(
+            f"- {d}" for d in context["definitions"]))
+    return "\n\n".join(parts)
+
+
+RELATED_LIMIT = 12_000      # characters of related sections (by the term index) shown as background
+
+
+def gather_context(unit: dict, law: dict, chart: dict, definitions: dict) -> dict:
+    """Footnotes, sections and definitions the unit's text points to, and (law["terms"], the term index) the
+    related sections that use the same words, as background only: never quotable, never a source of numbers.
+    law: {file, pieces, rows, terms?};
+    chart: {notes: {page: {n: note}}}. A reference to §325-29 takes 325-29 and its lettered subsections
+    (325-29A, 325-29B ...), never 325-29.1, a section of its own. The sections stop at 20,000 characters;
+    whatever doesn't fit is named in "dropped" (and in the message), never left out silently. A reference that
+    matches no section of the law is named in "unfound" the same way."""
+    text = unit["text"]
+    markers = sorted({n for m in re.findall(r"\[fn([^\]]*)\]", text) for n in m.split(",") if n.strip()}, key=int)
+    notes = [{"page": unit["page"], **chart["notes"][unit["page"]][n]} for n in markers
+             if unit.get("page") in chart["notes"] and n in chart["notes"][unit["page"]]]
+    refs = section_refs(text + " " + " ".join(n["text"] for n in notes))
+    pieces, dropped, unfound, size = [], [], [], 0
+    for ref in refs:
+        matches = [pid for pid in law["pieces"] if pid == ref or pid.startswith(ref) and pid[len(ref):len(ref) + 1].isalpha()]
+        if not matches:
+            unfound.append(ref)
+        for pid in matches:
+            piece = law["pieces"][pid]
+            if pid != unit.get("piece") and all(p["id"] != pid for p in pieces) and pid not in dropped:
+                body = piece_text(law["rows"], piece)
+                if size + len(body) > 20_000:
+                    dropped.append(pid)
+                    continue
+                pieces.append({"id": pid, "title": piece["title"], "text": body})
+                size += len(body)
+    lower = text.lower()
+    defs = [f"{v['term']}: " + " ".join(_sentences(s["quote"]) for s in v["sources"])
+            for v in definitions.values() if v["term"].split("(")[0].strip().lower() in lower]
+    related, related_dropped, size = [], [], 0
+    seen = {unit.get("piece")} | {p["id"] for p in pieces} | set(dropped)
+    # Only sections that set requirements (labeled rule or flag: law["requires"]) are worth the space; the most
+    # relevant first, so the limit cuts the least relevant (definitions are given separately, above).
+    candidates = {pid: piece_text(law["rows"], law["pieces"][pid])
+                  for pid in (related_pieces(law["terms"], text) if law.get("terms") else [])
+                  if pid in law["pieces"] and pid not in seen and pid in law.get("requires", law["pieces"])}
+    for pid in related_pieces(law["terms"], text, candidates) if candidates else []:
+        body = candidates[pid]
+        if size + len(body) > RELATED_LIMIT:
+            related_dropped.append(pid)
+            continue
+        related.append({"id": pid, "title": law["pieces"][pid]["title"], "text": body})
+        size += len(body)
+    return {"notes": notes, "pieces": pieces, "dropped": dropped, "unfound": unfound, "definitions": defs,
+            "related": related, "related_dropped": related_dropped}
+
+
+def _within(lines: list[int], span: list[int]) -> bool:
+    return span[0] <= lines[0] and lines[1] <= span[1]
+
+
+def resolve_quotes(template: dict, unit: dict, context: dict, law: dict, ctx: Context,
+                   notes: dict[int, dict]) -> tuple[list[dict], list[str]]:
+    """Each quote as a source with its exact lines. A chart quote must be a footnote printed under a chart
+    table (never a table row: a row's numbers reach a rule only through a slot filled from the district's own
+    cell). A law quote must be inside the unit's own piece or a piece it points to."""
+    sources, p = [], []
+    allowed = {unit["piece"]} if unit.get("piece") else set()
+    allowed |= {x["id"] for x in context["pieces"]}
+    for q in template["quotes"]:
+        if q["document"] == "chart":
+            page = q.get("page") or unit.get("page")
+            found = locate(q["text"], ctx.pages.get(law["chart"], {}).get(page, {})) if page else []
+            if len(found) != 1:
+                p.append(f"chart quote {q['text']!r} occurs {len(found)} times on chart page {page}; quote it exactly, once")
+                continue
+            lines = list(found[0])
+            if not any(_within(lines, n["lines"]) for n in notes.get(page, {}).values()):
+                p.append(f"chart quote {q['text']!r} isn't a footnote under the table on page {page}; chart numbers "
+                         "come only from slots")
+                continue
+            source = {"file": law["chart"], "page": page, "lines": lines, "quote": q["text"]}
+            if problems := _source_problems([source], ctx):
+                p += problems
+                continue
+        else:
+            if q["piece"] not in allowed:
+                p.append(f"law quote cites piece {q['piece']!r}, which isn't one given here ({sorted(allowed)})")
+                continue
+            source, why = find_quote(q["text"], law["pieces"][q["piece"]], law["file"], ctx)
+            if why:
+                p.append(f"law quote {q['text']!r} in piece {q['piece']}: {why}")
+                continue
+        if source not in sources:
+            sources.append(source)
+    return sources, p
+
+
+def _footnote_problems(template: dict, sources: list[dict], notes: dict[int, dict], chart: str) -> list[str]:
+    """Every footnote a slot's cell, row or section carries is quoted: the note changes what the number means
+    ("(16) But not less than 20 ft."), so a rule that fills the number must also apply the note."""
+    quoted = [(s["page"], s["lines"]) for s in sources if s.get("file") == chart and "lines" in s]
+    p = []
+    for slot in template["slots"]:
+        # the cell's own notes, and the notes on its row label and section heading ("Minimum Lot Size [fn3]")
+        for n in sorted(set(slot["footnotes"]) | footnotes(slot["row"]) | footnotes(slot["section"]),
+                        key=lambda n: (len(n), n)):
+            note = notes.get(slot["page"], {}).get(n)
+            if note is None:
+                p.append(f"slot {slot['name']}: footnote {n} isn't under the table on page {slot['page']}")
+            elif not any(page == slot["page"] and _within(lines, note["lines"]) for page, lines in quoted):
+                p.append(f"slot {slot['name']}: footnote {n} of {slot['row']!r} isn't quoted: {note['text']!r}")
+    return p
+
+
+def _binding_items(template: dict, notes: dict[int, dict], own_piece: str | None = None,
+                   book: dict | None = None) -> tuple[list[str], list[dict]]:
+    """Check each entry of `numbers` names ONE evidence item that holds its value and that can be trusted
+    (Ben's policy, 2026-10-20). Code can check that evidence holds a number, never what the number is about,
+    so only evidence that belongs to the rule itself is trusted:
+    - law_quote: a sentence of the piece being drafted (a chart unit has none; another section's sentence,
+      such as 325-16B's parapet "five feet or less", is never trusted);
+    - slot_footnote: a footnote whose marker is on that slot's own cell ("50 ft [fn16]": note 16), never a
+      note on another cell, the row label or the section heading;
+    - slot_row_label: that slot's own row label ("First three bed or sleeping rooms").
+    Anything else is rejected, so the unit is retried and in the end listed for a person: an untrusted
+    number never reaches a rule. A number that only labels or points ("(3)", "§ 325-20D(1)") doesn't count;
+    a percent counts only as its fraction (25% is 0.25). book: a building code read twice (the law file's entry in
+    ctx.verification): a law quote then backs only its piece's second-reading numbers that it states, in the units
+    they stand for (8 1/4 inches is 8.25, 6 feet 8 inches is 80; rule_format/code_numbers.py), and validation checks
+    how each is used. Returns (problems, the valid entries)."""
+    slots = {s["name"]: s for s in template["slots"]}
+    live = formula_slots(template)
+    p, valid = [], []
+    for i, b in enumerate(template.get("numbers", [])):
+        v, where = b["value"], f"numbers[{i}] ({b['value']:g} from {b['from']})"
+        if b["from"] == "law_quote":
+            q = template["quotes"][b["quote"]] if 0 <= b["quote"] < len(template["quotes"]) else None
+            if q is None or q["document"] != "law":
+                p.append(f"{where}: quote {b['quote']} isn't one of this template's law quotes")
+                continue
+            if q["piece"] != own_piece:
+                p.append(f"{where}: the sentence is from §{q['piece']}, not the text being drafted; a number is "
+                         "trusted only from a sentence of the text being drafted")
+                continue
+            text = q["text"]
+        else:
+            slot = slots.get(b["slot"])
+            if slot is None or b["slot"] not in live:
+                p.append(f"{where}: slot {b['slot']!r} isn't one this rule's formulas use")
+                continue
+            if b["from"] == "slot_row_label":
+                text = slot["row"]
+            else:
+                note = notes.get(slot["page"], {}).get(b["footnote"])
+                if b["footnote"] not in slot["footnotes"] or note is None:
+                    p.append(f"{where}: footnote {b['footnote']!r} isn't marked on slot {b['slot']!r}'s own cell; a "
+                             "number is trusted only from a footnote on the slot's own cell")
+                    continue
+                text = note["text"]
+        stated = (code_numbers.book_values(text, book["pieces"].get(own_piece) or {}) if book and b["from"] == "law_quote"
+                  else source_numbers(text, percent_as_number=False))
+        if not v_close(v, stated):
+            p.append(f"{where}: {v:g} isn't written in it: {text!r}")
+            continue
+        valid.append(b)
+    for _, text, n, near in number_places(template):           # (whether a backing slot decides: after filling)
+        if not any(abs(b["value"] - n) < 1e-9 and (b["from"] == "law_quote" or b["slot"] in {s for s, _ in near})
+                   for b in valid):
+            p.append(_unbacked(n, text))
+    return p, valid
+
+
+def _unbacked(n: float, text: str) -> str:
+    return (f"number {n:g} in {text!r} isn't backed where it stands: bind it to a sentence of the text being drafted, "
+            "or to the own-cell footnote or the row label of a slot it stands with (the same arithmetic, or the "
+            "condition that picks the slot's value) where that slot decides something; a chart number must be a slot")
+
+
+def _backing(template: dict, valid: list[dict], filled: list[tuple[str, dict]], cells: dict, sources: list[dict],
+             drafted_by: str, allowed: dict, chart: str) -> list[str]:
+    """Every place a number is typed must be backed where it stands. A trusted law quote binding with that value
+    backs it. A slot binding backs it only through an occurrence of that slot the number stands with which itself
+    decides something: changed alone, some worked example in some district comes out differently (so
+    `3 + 0 * {x}` or `min(3, {x})` with a large {x} back nothing there, whatever else {x} does)."""
+    decides = {}
+
+    def occurrence_decides(key, k):
+        if (key, k) not in decides:
+            changed = with_occurrence_nudged(template, key, k)
+            decides[key, k] = any(
+                # a rule for each part: its rows and its one answer (parts.worked_example), never outcome(), which
+                # always says needs review for one (so no number could ever be shown to decide anything)
+                parts.worked_example(new, ex, allowed) != parts.worked_example(rule, ex, allowed)
+                for column, rule in filled for new in [fill_template(changed, column, cells, sources, drafted_by, chart)[0]]
+                if new is not None for ex in rule["examples"])
+        return decides[key, k]
+
+    problems = []
+    for key, text, n, near in number_places(template):
+        same = [b for b in valid if abs(b["value"] - n) < 1e-9]
+        if any(b["from"] == "law_quote" for b in same):
+            continue
+        if not any(name == b["slot"] and occurrence_decides(key, k) for b in same for name, k in sorted(near)):
+            problems.append(_unbacked(n, text))
+    return problems
+
+
+def v_close(v: float, values) -> bool:
+    return any(abs(v - x) < 1e-9 for x in values)
+
+
+def check_answer(answer: dict, unit: dict, context: dict, law: dict, ctx: Context, columns: list[str],
+                 cells: dict, notes: dict[int, dict], drafted_by: str) -> dict:
+    """Turn an answer into rules, every one checked by the inspector. Returns {rules: {district: [rule]},
+    unresolved: [{rule, why}] (districts whose cells don't fit a working template), rejected: [{rule, why}]
+    (templates that work nowhere), proposed: {name: measure}, problems: [...] (the rejections, as text)}."""
+    out = {"rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}
+    suffixes = [unit.get("prefix", "") + t["id_suffix"] for t in answer["templates"]]
+    for t in answer["templates"]:
+        t = t | {"id_suffix": unit.get("prefix", "") + t["id_suffix"]}   # a law piece's rules carry its id
+        p = template_problems(t)
+        if suffixes.count(t["id_suffix"]) > 1:
+            p.append(f"id_suffix {t['id_suffix']!r} is used by more than one template in this answer")
+        proposed = {}
+        for m in t["new_measures"]:
+            if not re.fullmatch(r"[a-z][a-z0-9_]*", m["name"]):
+                p.append(f"new measure {m['name']!r} must be lowercase_with_underscores")
+            elif m["name"] not in ctx.measures:
+                proposed[m["name"]] = {"unit": m["unit"], "meaning": m["meaning"]}
+        sources, quote_problems = resolve_quotes(t, unit, context, law, ctx, notes)
+        p += quote_problems + (_footnote_problems(t, sources, notes, law["chart"]) if not quote_problems else [])
+        binding_problems, valid = _binding_items(t, notes, unit.get("piece"), ctx.verification.get(law["file"]))
+        p += binding_problems
+        if p:
+            out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}", "why": "; ".join(p)})
+            continue
+        good, gaps = [], []                     # filled and valid; or (where, why) for a person
+        saved, ctx.proposed = ctx.proposed, ctx.proposed | proposed
+        try:
+            for column in (columns if t["slots"] else [None]):
+                rule, why = fill_template(t, column, cells, sources, drafted_by, law["chart"])
+                if why is None and (problems := validate({"district": rule["id"].split(".")[0], "rules": [rule]}, ctx)):
+                    why = "; ".join(problems[:3])
+                if why is None:
+                    good.append((column, rule))
+                else:                           # the cells it couldn't fill, so they aren't listed a second time
+                    gaps.append({"rule": f"{district_name(column) if column else 'general'}.{t['id_suffix']}", "why": why,
+                                 "cells": [[s["page"], s["section"], s["row"].strip(), column] for s in t["slots"]]})
+            if good:
+                if unbacked := _backing(t, valid, good, cells, sources, drafted_by, ctx.allowed(), law["chart"]):
+                    gaps, good = [{"rule": f"{unit['id']}.{t['id_suffix']}", "why": w} for w in unbacked], []
+        finally:
+            ctx.proposed = saved
+        good = [rule for _, rule in good]
+        if good:                                # the template works: districts that don't fit go to a person
+            out["templates"].append(t)
+            out["proposed"] |= proposed
+            for rule in good:
+                out["rules"].setdefault(rule["id"].split(".")[0], []).append(rule)
+            out["unresolved"] += gaps
+        else:                                   # it works nowhere: the drafter is told why and tries again
+            out["rejected"].append({"rule": f"{unit['id']}.{t['id_suffix']}",
+                                    "why": "; ".join(f"{g['rule']}: {g['why']}" for g in gaps[:3])})
+    out["problems"] = [f"{r['rule']}: {r['why']}" for r in out["rejected"]]
+    return out
+
+
+def requirement_gaps(unit: dict, result: dict, chart: str) -> list[dict]:
+    """The lines the unit's label cites that no drafted rule cites: for a person. The label's sources are hints
+    (it may cite only a heading), so this can list a line with no rule in it; a person says so. Never silent."""
+    cited = {(s["page"], n) for rules in result["rules"].values() for r in rules for s in r["sources"]
+             if s.get("file") != chart and "lines" in s for n in range(s["lines"][0], s["lines"][1] + 1)}
+    return [{"rule": f"{unit['id']}.requirement_p{s['page']}_l{s['lines'][0]}",
+             "why": f"the label cites this and no drafted rule does (a person checks whether it sets a rule): {s['quote']!r}"}
+            for s in unit.get("requirements", [])
+            if not any((s["page"], n) in cited for n in range(s["lines"][0], s["lines"][1] + 1))]
+
+
+def chart_gaps(unit: dict, result: dict, cells: dict, columns: list[str], chart: str) -> list[dict]:
+    """For a chart unit: every district cell of its section that states something ("-" and empty state
+    nothing) and that no saved rule cites, for a person. So a row the drafter skipped can't vanish, in any
+    district; a cell a template couldn't fill is already listed (by fill_template's reason) and isn't repeated."""
+    if "section" not in unit:
+        return []
+    cited = {(s["page"], s["cell"]["section"], s["cell"]["row"], s["cell"]["column"]) for rules in result["rules"].values()
+             for r in rules for s in r["sources"] if s.get("file") == chart and "cell" in s}
+    listed = {tuple(c) for g in result["unresolved"] for c in g.get("cells", [])}
+    out = []
+    for key, cell in cells.items():
+        page, section, row, column = key
+        if (page, section) != (unit["page"], unit["section"]) or column not in columns:
+            continue
+        if FOOTNOTE.sub("", cell["value"]).strip() in NOT_APPLICABLE or key in cited or key in listed:
+            continue
+        district = district_name(column)
+        out.append({"rule": f"{district}.{unit['id']}",
+                    "why": f"chart page {page}, {section!r}, row {row!r}: the {column} cell {cell['value']!r} has no "
+                           "drafted rule (a person checks the requirement it sets)"})
+    return out
+
+
+def keep(result: dict, unit: dict, cells: dict, columns: list[str], context: dict, last_attempt: bool = False, *,
+         chart: str) -> dict:
+    """The answer kept for a unit, with everything it leaves for a person: on the last attempt its rejected
+    templates, and always whatever the unit's input states that no saved rule covers (the law lines its
+    label cites, the chart cells of its section, the sections it points to that were left out for length). The
+    one way an answer is kept, by drafting and by replays."""
+    if last_attempt:
+        result["unresolved"] += result["rejected"]
+        result["problems"] = []
+    result["unresolved"] += requirement_gaps(unit, result, chart) + chart_gaps(unit, result, cells, columns, chart) + [
+        {"rule": unit["id"], "why": f"it points to {pid}, which was left out of the drafter's input for length "
+                                    "(a person checks it)"} for pid in context.get("dropped", [])] + [
+        {"rule": unit["id"], "why": f"it points to {pid}, which matches no section of the law, so the drafter never "
+                                    "saw it (a person checks it)"} for pid in context.get("unfound", [])]
+    return result
+
+
+def draft_unit(client, unit: dict, context: dict, system: str, law: dict, ctx: Context, columns: list[str],
+               cells: dict, notes: dict[int, dict], record, settings: dict = SETTINGS, budget=None,
+               for_parts: bool = False, book: bool = False) -> dict:
+    """Draft one unit. Every template that works nowhere sends the answer back with the reasons (keeping
+    nothing from it) until max_attempts; after the last attempt, the rules that work are kept and every
+    rejected template and every requirement no rule cites goes to a person. Returns check_answer's result
+    plus "reason" (no rules, and why) or "failed" (no usable answer). for_parts: the answer may hold rules for each
+    part (output_schema's for_parts; `system` must then be system_prompt(..., for_parts=True)); recorded when set."""
+    topics = sorted(ctx.topics)
+    drafted_by = f"rule_drafting/{settings['model']}"
+    messages = [{"role": "user", "content": unit_message(unit, context)}]
+    why, last = "no answer", None
+    for attempt in range(1, settings["max_attempts"] + 1):
+        worst = worst_case(len(system) + len(json.dumps(messages, default=str)), settings, PRICES)
+        if budget is not None:
+            budget.reserve(worst)
+        response = client.messages.create(                   # if this raises, the worst case stays charged
+            model=settings["model"], max_tokens=settings["max_tokens"],
+            system=[{"type": "text", "text": system, "cache_control": {"type": "ephemeral"}}],
+            messages=messages,
+            output_config={"effort": settings["effort"],
+                           "format": output_schema(topics, for_parts=for_parts, book=book)})
+        usage = {k: getattr(response.usage, k, 0) or 0 for k in
+                 ("input_tokens", "cache_creation_input_tokens", "cache_read_input_tokens", "output_tokens")}
+        spent = cost(usage, settings["model"])
+        if budget is not None:
+            budget.settle(worst, spent)
+        text = next((b.text for b in response.content if b.type == "text"), "")
+        result, crash = None, None
+        if response.stop_reason != "end_turn":
+            why = f"stopped early ({response.stop_reason})"
+        else:
+            try:
+                answer = json.loads(text)
+                answer = book_answer(answer) if book else answer
+                result = check_answer(answer, unit, context, law, ctx, columns, cells, notes, drafted_by)
+                if result["problems"]:
+                    why = "; ".join(result["problems"][:6])
+                    last = result if result["rules"] else last
+                elif result["rules"] or answer["no_rule_reason"].strip():
+                    why = None
+                    result["reason"] = "" if result["rules"] else answer["no_rule_reason"].strip()
+                else:
+                    why = "no rules and no reason given"
+            except (json.JSONDecodeError, KeyError, TypeError, ValueError) as e:
+                why = f"unreadable answer ({type(e).__name__})"
+            except Exception as e:                   # a bug of ours: record the paid attempt, then stop loudly
+                why, crash = f"crashed while checking the answer ({type(e).__name__}: {e})", e
+        record({"unit": unit["id"], "attempt": attempt, "date": datetime.datetime.now(datetime.UTC).isoformat(),
+                "model": settings["model"], "effort": settings["effort"], "max_tokens": settings["max_tokens"],
+                "system_sha256": sha(system), "input_sha256": sha(json.dumps(messages, sort_keys=True, default=str)),
+                "request_id": getattr(response, "_request_id", None), "stop_reason": response.stop_reason,
+                "context_dropped": context.get("dropped", []), "context_unfound": context.get("unfound", []),
+                "answer": text, "problem": why, "usage": usage, "cost_usd": round(spent, 6),
+                "budget_usd": settings["budget_usd"], "ledger_spent_usd": round(budget.spent, 6) if budget else None}
+               | ({"for_parts": True} if for_parts else {}) | ({"book": True} if book else {}))
+        if crash is not None:
+            raise crash
+        if why is None:
+            return keep(result, unit, cells, columns, context, chart=law["chart"])
+        if response.stop_reason == "refusal":
+            break
+        if response.stop_reason == "end_turn":
+            messages += [{"role": "assistant", "content": response.content},
+                         {"role": "user", "content": f"That answer can't be used: {why}. Answer again for the same "
+                                                     "text, with every template (the ones that worked too)."}]
+    if last is not None:                        # the last answer that had working rules: keep those
+        return keep(last, unit, cells, columns, context, last_attempt=True, chart=law["chart"])
+    return {"failed": why, "rules": {}, "unresolved": [], "rejected": [], "proposed": {}, "problems": [], "templates": []}

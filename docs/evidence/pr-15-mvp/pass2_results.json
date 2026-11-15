@@ -1,0 +1,506 @@
+{
+ "open": {
+  "ok": true,
+  "claims": {
+   "0 the sample's lot is from the tax map": {
+    "ok": true,
+    "detail": false
+   },
+   "8 the address is there too": {
+    "ok": true,
+    "detail": "106 Ithaca Rd, Ithaca, NY"
+   },
+   "8 the sample's Street side reads Ithaca Rd, from the lookup": {
+    "ok": true,
+    "detail": {
+     "text": "Ithaca Rd",
+     "source": "the State tax map (the sample's lookup)"
+    }
+   }
+  }
+ },
+ "side_yard": {
+  "ok": true,
+  "claims": {
+   "1 on the tax map: every part at least the requirement plus the 2'-0\" margin, as drawn; now 3'-0\" short": {
+    "ok": true,
+    "detail": {
+     "name": "Side yard, Northeast",
+     "status": "does_not_comply",
+     "hint": "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines ±2'-0\") — now 7'-0\" at its closest.",
+     "reason": null
+    }
+   },
+   "1 the panel shows it": {
+    "ok": true,
+    "detail": [
+     "✕ Side yard, Northeast · Does not comply",
+     "7'-0\" proposed, 10'-0\" required as drawn · with the tax map's ±2'-0\": at least 1'-0\" short",
+     "To comply whatever the survey shows: keep every part of the building at least 12'-0\" from the northeast side lot line as drawn (10'-0\" required, the lot lines ±2'-0\") — now 7'-0\" at its closest.",
+     "In the model: red is the part over the yard line whichever way the tax map's lot lines (±2'-0\") really lie (certain); amber is the part that depends on where a survey puts them.",
+     "Measured: 1 group, 3 solids on Gordium::Massing · footprint 1,341 sf",
+     "“Yard Dimensions · Side (one side minimum) · R-1B: 10 ft”",
+     "City of Ithaca Zoning Charts (April 2026), p.3, line 38",
+     "“Yard Dimensions · Side (other side minimum) · R-1B: 10 ft”",
+     "City of Ithaca Zoning Charts (April 2026), p.3, line 40",
+     "§325-8, District Regulations Chart, R-1b, Side yard, one side column; §325-8, District Regulations Chart, R-1b, Side yard, other side column",
+     "Measured to 1/8 in.; values are never rounded toward compliance; near a limit they are shown with one more decimal."
+    ]
+   }
+  }
+ },
+ "apply_move": {
+  "ok": true,
+  "claims": {
+   "1 doing exactly what it said: the row complies": {
+    "ok": true,
+    "detail": {
+     "name": "Side yard, Northeast",
+     "status": "complies",
+     "reason": null,
+     "delta": "at the limit at worst"
+    }
+   },
+   "1 and no other row worse": {
+    "ok": true,
+    "detail": []
+   }
+  }
+ },
+ "zoom": {
+  "ok": true,
+  "claims": {
+   "3 Zoom to selects the row's objects": {
+    "ok": true,
+    "detail": {
+     "objects": [
+      "7515ad11-954f-44bf-942a-3ab70ced26da",
+      "6ccec176-5121-4a8d-b3eb-e058a53b5b82",
+      "75c2a320-2596-44c9-aff5-0fefdd1fab67",
+      "f3a56792-8036-49f7-b79f-b728b46912ec"
+     ],
+     "selected": [
+      "f3a56792-8036-49f7-b79f-b728b46912ec",
+      "75c2a320-2596-44c9-aff5-0fefdd1fab67",
+      "6ccec176-5121-4a8d-b3eb-e058a53b5b82",
+      "7515ad11-954f-44bf-942a-3ab70ced26da"
+     ]
+    }
+   }
+  }
+ },
+ "button": {
+  "ok": true,
+  "claims": {
+   "2 the button comes right after the reason": {
+    "ok": true,
+    "detail": {
+     "reason": 1,
+     "button": 3,
+     "between": []
+    }
+   },
+   "2 its words aren't repeated as text": {
+    "ok": true,
+    "detail": [
+     [
+      "Label",
+      "– Parking · needs input · Not checked"
+     ],
+     [
+      "Label",
+      "Needs bedrooms and parking spaces, which the model doesn't show"
+     ],
+     [
+      "StackLayout",
+      null
+     ],
+     [
+      "Button",
+      "Enter bedrooms and parking spaces…"
+     ],
+     [
+      "Label",
+      "“First three bed or sleeping rooms per dwelling 1 space per dwelling unit”"
+     ],
+     [
+      "Label",
+      "City of Ithaca Zoning Charts (April 2026), p.14, lines 9–10"
+     ],
+     [
+      "Label",
+      "“4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit”"
+     ],
+     [
+      "Label",
+      "City of Ithaca Zoning Charts (April 2026), p.14, line 12"
+     ],
+     [
+      "Label",
+      "“Each additional bed or sleeping room + 1 space per room”"
+     ],
+     [
+      "Label",
+      "City of Ithaca Zoning Charts (April 2026), p.14, line 13"
+     ]
+    ]
+   },
+   "2 the button is on screen without scrolling": {
+    "ok": true,
+    "detail": {
+     "scroll_top": 623.0,
+     "scroll_height": 85,
+     "button_top": 655.0,
+     "button_height": 20
+    }
+   }
+  }
+ },
+ "grey": {
+  "ok": true,
+  "claims": {
+   "9 the rules not in Gordium yet are grouped as Not checked yet": {
+    "ok": true,
+    "detail": [
+     "Does not comply",
+     "Needs review",
+     "Complies",
+     "Not checked",
+     "Not checked yet"
+    ]
+   },
+   "9 the row says it's not in Gordium yet and which section to check by hand": {
+    "ok": true,
+    "detail": {
+     "groups": [
+      "Does not comply",
+      "Needs review",
+      "Complies",
+      "Not checked",
+      "Not checked yet"
+     ],
+     "row": "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets)",
+     "detail": [
+      "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets) · Not checked yet",
+      "Not in Gordium yet — coming in a later version. Check this by hand for now: §325-16A, §325-16B",
+      "§325-16A, §325-16B"
+     ]
+    }
+   },
+   "9 its detail is headed Not checked yet": {
+    "ok": true,
+    "detail": [
+     "§325-16A, §325-16B Height exceptions (chimneys, spires, parapets) · Not checked yet"
+    ]
+   }
+  }
+ },
+ "corner": {
+  "ok": true,
+  "claims": {
+   "10 a corner lot's street side takes every line clicked, Enter when done": {
+    "ok": true,
+    "detail": {
+     "prompts": [
+      "Click each lot line on a street (0 picked); Enter when done",
+      "Click each lot line on a street (1 picked); Enter when done",
+      "Click each lot line on a street (2 picked); Enter when done"
+     ],
+     "lines": [
+      [
+       [
+        76.916,
+        0.2317
+       ],
+       [
+        67.113,
+        0.1516
+       ]
+      ],
+      [
+       [
+        10.7167,
+        0.8339
+       ],
+       [
+        1.1492,
+        0.2317
+       ]
+      ]
+     ],
+     "name": null
+    }
+   },
+   "12 answering No in the box drops both streets' lines (picked again: review round 5, P0)": {
+    "ok": true,
+    "detail": {
+     "street_line": null,
+     "corner_lot": false
+    }
+   }
+  }
+ },
+ "labels": {
+  "ok": true,
+  "claims": {
+   "4 the Height limit label is 13 pt": {
+    "ok": true,
+    "detail": [
+     {
+      "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+      "rows": [
+       "Height limit 35'-0\""
+      ],
+      "size": 13
+     },
+     {
+      "view": "16926896-dffc-4a86-acf1-64661a232111",
+      "rows": [
+       "Height limit 35'-0\""
+      ],
+      "size": 13
+     }
+    ]
+   },
+   "5 every view was drawn": {
+    "ok": true,
+    "detail": [
+     "16926896-dffc-4a86-acf1-64661a232111",
+     "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+     "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+     "d1f7eee1-dedb-403c-8460-d77604e8e086"
+    ]
+   },
+   "5 the status box once, in the active view": {
+    "ok": true,
+    "detail": {
+     "views": [
+      "16926896-dffc-4a86-acf1-64661a232111",
+      "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+      "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+      "d1f7eee1-dedb-403c-8460-d77604e8e086"
+     ],
+     "active": "c44270f9-f702-4de2-887d-8c2fad8bf5be",
+     "height": [
+      {
+       "view": "928fb961-b613-4e6b-9d24-d77f5fa0bb2e",
+       "rows": [
+        "Height limit 35'-0\""
+       ],
+       "size": 13
+      },
+      {
+       "view": "16926896-dffc-4a86-acf1-64661a232111",
+       "rows": [
+        "Height limit 35'-0\""
+       ],
+       "size": 13
+      }
+     ],
+     "status_views": [
+      "c44270f9-f702-4de2-887d-8c2fad8bf5be"
+     ],
+     "status_rows": [
+      "Gordium · ✕ 1 does not comply · 1 needs review · 8 comply · 2 not checked",
+      "Draft rulebook · Lot lines: tax map, approximate (±2'-0\")"
+     ]
+    }
+   }
+  }
+ },
+ "scale": {
+  "ok": true,
+  "claims": {
+   "7 zoomed out to the 1,500 ft square: no plan labels drawn": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
+     }
+    }
+   },
+   "7 the status box stays": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
+     },
+     "frames": {
+      "scale_neighbourhood": 7,
+      "scale_lot": 7
+     }
+    }
+   },
+   "7 zoomed to the lot: every edge's length is back, the yards' too": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
+     }
+    }
+   },
+   "7 106's short 10'-4 1/8\" edge keeps its length, led to it": {
+    "ok": true,
+    "detail": {
+     "neighbourhood": {
+      "labels": [],
+      "status_box": 1
+     },
+     "lot": {
+      "labels": [
+       "✓ Front yard 27'-6 3/8\" (approx.)",
+       "✕ Side yard, Northeast 7'-0\", needs 10'-0\" (approx.)",
+       "✓ Side yard, Southwest 32'-4 7/8\" (approx.)",
+       "? Rear yard 7'-5 7/8\" to 27'-0 3/8\" (approx.)",
+       "75'-10\"",
+       "101'-1 1/2\"",
+       "10'-4 1/8\"",
+       "69'-6 1/8\"",
+       "92'-1 3/8\""
+      ],
+      "status_box": 1,
+      "edges": [
+       "10'-4 1/8\"",
+       "101'-1 1/2\"",
+       "69'-6 1/8\"",
+       "75'-10\"",
+       "92'-1 3/8\""
+      ],
+      "led": [
+       "10'-4 1/8\""
+      ]
+     }
+    }
+   }
+  }
+ },
+ "box": {
+  "ok": true,
+  "claims": {
+   "6 the box was shown with no lot": {
+    "ok": true,
+    "detail": [
+     "Address",
+     "Zoning district",
+     "entered by you",
+     "Use",
+     "Lot",
+     "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)",
+     "Front lot line (on the street)",
+     "set from the lot, once there is one",
+     "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+     "Corner lot?",
+     "Not checked yet: overlays (historic, gorge, flood)",
+     "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+     "Confirm the district to continue."
+    ]
+   },
+   "6 no Use my survey… or Change… until a lot exists": {
+    "ok": true,
+    "detail": [
+     "Look up (coming soon)",
+     "Cancel",
+     "Draw"
+    ]
+   },
+   "11 the box says Front lot line (on the street), what it is, and This is the lot's district": {
+    "ok": true,
+    "detail": {
+     "labels": [
+      "Address",
+      "Zoning district",
+      "entered by you",
+      "Use",
+      "Lot",
+      "no lot yet: draw it on the Site layer, or Draw puts down the sample lot (106 Ithaca Rd)",
+      "Front lot line (on the street)",
+      "set from the lot, once there is one",
+      "the highlighted blue line is the lot line on the street; Gordium measures the front yard from it",
+      "Corner lot?",
+      "Not checked yet: overlays (historic, gorge, flood)",
+      "?  Does this lot face two streets? Answer Corner lot? under Front lot line (on the street)",
+      "Confirm the district to continue."
+     ],
+     "ticks": [
+      "This is the lot's district"
+     ]
+    }
+   }
+  }
+ }
+}

@@ -1,0 +1,711 @@
+"""The district coverage audit: is each district's zoning covered?
+
+One generated table (`6_coverage_report/residential_districts.md`) answers it for every piece of the law labeled
+`rule` or `flag` (3_section_labels) and every district a jurisdiction's audit lists. Each cell says one of:
+
+    rulebook        the district's rulebook has a rule for it (which rule ids)
+    flag            the district's rulebook flags it, so the architect sees NEEDS REVIEW (which ids)
+    parked          deliberately deferred: Ben's later list, or the brief that parked it (the item says which)
+    open_question   waiting on the architects or the City (a link to the question)
+    not_applicable  the law itself keeps it out of this district, or it is a pointer with no requirement of its own
+                    (the reason says which, with the law's own words)
+    missing         nothing covers it (why, how important, and whether every result already says so)
+
+What a person decides (why a piece doesn't apply, what is parked, what is missing) is written once, by hand, in
+`<jurisdiction>/residential_coverage.yaml`. Code checks what the files can show, and shows the rest for a person:
+
+- a rule named as covering a piece must exist in that district's rulebook, be of the right kind (`rulebook`: a
+  rule; `flag`: a flag, or a rule that sends some cases to review), and cite the piece (a source or a finding's
+  source inside the piece's lines, or a definition in 4_term_definitions that cites the piece and defines a
+  measure the rule's formulas use). A rule that doesn't cite it may only be named with `mapped:`, the reason in
+  words, shown in the table as Gordium's mapping, not a citation;
+- every rule that cites a piece must be named in that piece's decisions for that district (`rules` or `also`),
+  so a rulebook change can't leave a stale "not applicable" or "missing" beside a rule that now covers it;
+- a decision that rests on a reading (not applicable, parked, flag) quotes the law, and the quote must be the law's
+  own words exactly where it says (the same matcher rule sources use; not page furniture; a chart quote names its
+  cell, which must be "-" for that district). Code can't prove the words support the decision, so the table marks
+  each such cell [R#] and lists every reading with its quote, and the summary counts the cells that rest on one;
+- a parked item must be one the decisions file lists (Ben's later list, or the brief that parked it); an open question's link must exist;
+- every rule and flag piece has decisions for every district, exactly once.
+
+The second half lists every rule in every district's rulebook with the measures its formulas need (measured
+from the model by model_measurement, stated by the architect, or neither) and the tests that check it on a
+model in test_data/test_sites (a real Rhino model, or a scenario drawn by code from hand-worked YAML).
+
+Plain code, no AI. The output is generated, never hand-edited; `python -m section_labeling audit --check` (CI)
+fails when it differs from a fresh build, so a rulebook change that isn't regenerated fails.
+"""
+
+from __future__ import annotations
+
+import re
+from collections import Counter
+from pathlib import Path
+
+from document_extraction.sections import piece_keys
+from rule_format import formula
+from rule_format.labels import load_pieces
+from rule_format.place import place
+from rule_format.rulebook import REPO, Context, district_name, load, locate, read_jsonl, rulebook_for, tokenize
+
+DECISIONS = "residential_coverage.yaml"
+OUTPUT = "6_coverage_report/residential_districts.md"
+STATUSES = ("missing", "open_question", "parked", "flag", "rulebook", "not_applicable")    # worst first
+WORDS = {"missing": "MISSING", "open_question": "open question", "parked": "parked", "flag": "flag (needs review)",
+         "rulebook": "in the rulebook", "not_applicable": "not applicable"}
+PRIORITIES = {"high": "a real design rule that should exist; a design can pass today that the law forbids",
+              "medium": "a real rule that should exist; it turns on facts Gordium doesn't ask for yet",
+              "low": "a narrow or cautious gap (a permission not used, a rare case, or a pointer)",
+              "operational": "how a property is run or permitted, not what is drawn",
+              "other_project": "a different kind of project (not a building on a residential lot)"}
+DECISION_FIELDS = {"status", "rules", "also", "mapped", "why", "quote", "file", "page", "piece", "cell", "item", "link",
+                   "priority", "note"}
+READINGS = ("not_applicable", "parked", "flag")      # decisions resting on a person's reading: each quotes the law
+
+
+def _law(j: Path) -> str:
+    """The place's zoning code (its jurisdiction.yaml law.zoning_code: Ithaca's Chapter 325)."""
+    return place(j).law_file("zoning_code")
+
+
+def _law_rows(j: Path):
+    law = _law(j)
+    header, pieces = load_pieces(j / "2_extracted_text" / f"{Path(law).stem}.sections.jsonl")
+    labels = (load(j / "3_section_labels" / f"{Path(law).stem}.yaml") or {}).get("labels", {})
+    return header, pieces, labels
+
+
+def _formula_names(rule: dict) -> set[str]:
+    texts = [rule.get("check"), rule.get("applies_when")] + [r.get("when") for r in rule.get("review_when") or []]
+    return set().union(*(formula.names(t) for t in texts if t)) if any(texts) else set()
+
+
+def _source_lines(sources, law: str) -> list[tuple[int, int]]:
+    """Every (page, line) of the law (the zoning code's file name) the sources quote."""
+    return [(s.get("page"), n) for s in sources or [] if s.get("file") == law and len(s.get("lines") or []) == 2
+            for n in range(s["lines"][0], s["lines"][1] + 1)]
+
+
+def citations(rule: dict, owner: dict, definitions: dict, law: str) -> dict[str, dict]:
+    """{piece id: {"how": how this rule cites it first, "lines": every (page, line) of the piece it reaches}}: a
+    source, a finding's source, or a definition (definitions.yaml) of a measure its formulas use. `law`: the zoning
+    code's file name."""
+    out: dict[str, dict] = {}
+
+    def add(keys, how):
+        for key in keys:
+            if pid := owner.get(key):
+                out.setdefault(pid, {"how": how, "lines": set()})["lines"].add(key)
+    add(_source_lines(rule.get("sources"), law), "cited")
+    for f in rule.get("findings") or []:
+        add(_source_lines(f.get("sources"), law), f"cited in finding {f.get('id', '?')}")
+    used = _formula_names(rule)
+    for term, (keys, measures) in definitions.items():
+        if used & measures:
+            add(keys, f"via definition {term}")
+    return out
+
+
+def _definitions(j: Path, owner: dict) -> dict[str, tuple[list, set]]:
+    """{term: (the (page, line)s its sources quote, the measures it defines)} from definitions.yaml."""
+    path = j / "4_term_definitions/definitions.yaml"
+    return {term: (_source_lines(e.get("sources"), _law(j)), set(e.get("measures") or []))
+            for term, e in ((load(path) or {}) if path.exists() else {}).items()}
+
+
+def disclosed_sections(j: Path) -> list[str]:
+    """The sections every result already lists as not checked (not_checked_yet.yaml), as '325-16A'."""
+    path = j / "not_checked_yet.yaml"
+    entries = (load(path) or {}).get("not_covered", []) if path.exists() else []
+    return [m for e in entries for m in re.findall(r"§\s*(325-[\dA-Z.]+)", str(e.get("section", "")))]
+
+
+def is_disclosed(pid: str, sections: list[str]) -> bool:
+    """§325-28 covers 325-28B and 325-28C; §325-2 doesn't cover 325-28C."""
+    return any(pid == s or (pid.startswith(s) and pid[len(s)].isalpha() and pid[len(s)].isupper()) for s in sections)
+
+
+def model_tests(j: Path) -> dict[str, list[str]]:
+    """{rule id: [what checks it on a model]}, from test_data/test_sites/<place>: a design file's `compare` (each
+    row of the architects' spreadsheet, checked on the site's Rhino models by model_measurement/tests/test_models.py)
+    and a scenario's `expected` (and its `then`'s; design_checker/tests/test_scenarios.py for scenarios/,
+    test_sites.py for the real lots in deep_run/)."""
+    place = j.relative_to(REPO / "regulations/jurisdictions")
+    root = REPO / "test_data/test_sites" / place
+    out: dict[str, list[str]] = {}
+    for path in sorted(root.rglob("*.yaml")) if root.exists() else []:
+        data = load(path)
+        if not isinstance(data, dict):
+            continue
+        rel = path.relative_to(root).as_posix()
+        if isinstance(data.get("compare"), dict) and any(path.parent.glob("*.3dm")):
+            for rid in data["compare"].values():
+                out.setdefault(rid, []).append(f"real model {path.parent.name} ({rel})")
+        expected = dict(data.get("expected") or {}) if isinstance(data.get("expected"), dict) else {}
+        then = data.get("then")
+        if isinstance(then, dict) and isinstance(then.get("expected"), dict):
+            expected |= then["expected"]
+        for rid in expected:
+            out.setdefault(rid, []).append(f"scenario {path.stem.split('_')[0]}")
+    return {k: list(dict.fromkeys(v)) for k, v in out.items()}
+
+
+# Stated by the architect, but measured from the model when it is drawn that way: stories are counted from the floor
+# blocks drawn (model_measurement/places/ithaca_city/measure.py _stories_whole); the typed count is the fallback, or a cross-check.
+DRAWN_OR_STATED = {"stories"}
+
+
+def measure_sources() -> tuple[set, set]:
+    """(measured from the model, stated by the architect): the names model_measurement fills in. A name in
+    DRAWN_OR_STATED is in both."""
+    from model_measurement.plugin_measuring import STATED, UNITS
+    return set(UNITS) | (DRAWN_OR_STATED & set(STATED)), set(STATED) | {"district"}
+
+
+class Audit:
+    """Every decision resolved and checked, for one jurisdiction."""
+
+    def __init__(self, j: Path, data: dict | None = None, books: dict[str, Path] | None = None):
+        """`data`: the decisions (default: the jurisdiction's file); `books`: a rulebook file per district in
+        place of rulebook_for's (tests change one without touching the repository)."""
+        self.j = j
+        self.law, self.chart = place(j).law_file("zoning_code"), place(j).law_file("zoning_chart")   # their file names
+        self.problems: list[str] = []
+        self.header, self.pieces, self.labels = _law_rows(j)
+        self.data = (load(j / DECISIONS) or {}) if data is None else data
+        self.districts: list[str] = list(self.data.get("districts") or [])
+        self.parked: dict = dict(self.data.get("parked") or {})
+        self.furniture = {tuple(k) for k in self.header.get("furniture", [])}
+        self.ctx = Context.for_jurisdiction(j)
+        self.owner = {k: pid for pid, p in self.pieces.items() for k in piece_keys(p)}
+        self.definitions = _definitions(j, self.owner)
+        self.books: dict[str, dict[str, dict]] = {}
+        for d in self.districts:
+            path = (books or {}).get(d) or rulebook_for(j, d)
+            if path is None:
+                self.problems.append(f"{d}: no rulebook")
+                self.books[d] = {}
+                continue
+            self.books[d] = {r["id"]: r for r in (load(path) or {}).get("rules", [])}
+        self.cites = {d: {rid: citations(r, self.owner, self.definitions, self.law) for rid, r in rules.items()}
+                      for d, rules in self.books.items()}
+        self.disclosed = disclosed_sections(j)
+        self.rows = [pid for pid in self.pieces if self.labels.get(pid, {}).get("label") in ("rule", "flag")]
+        self.cells: dict[str, dict[str, list[tuple[str, dict]]]] = {}   # piece -> district -> [(part what, decision)]
+        self.part_lines: dict[str, list[set]] = {}                         # piece -> each part's (page, line)s
+        self._resolve()
+
+    # -- reading and checking the decisions ------------------------------------------------------------------
+
+    def _resolve(self):
+        self.problems += [f"{DECISIONS}: unknown key {k!r} (reused decisions start with _)" for k in self.data
+                          if k not in ("districts", "parked", "pieces") and not str(k).startswith("_")]
+        self.problems += [f"parked {k}: needs `name` and `decided`" for k, v in self.parked.items()
+                          if not (isinstance(v, dict) and v.get("name") and v.get("decided"))]
+        given = self.data.get("pieces") or {}
+        for pid in sorted(given.keys() - set(self.rows)):
+            self.problems.append(f"{pid}: has decisions but isn't a rule or flag piece")
+        for pid in self.rows:
+            parts = given.get(pid)
+            if not isinstance(parts, list) or not parts:
+                self.problems.append(f"{pid}: no decisions (a list of parts, each with `what`)")
+                continue
+            cell = self.cells[pid] = {d: [] for d in self.districts}
+            spans = self.part_lines[pid] = self._part_lines(pid, parts)
+            for i, part in enumerate(parts):
+                where = f"{pid} part {i + 1}"
+                if not isinstance(part, dict) or not part.get("what"):
+                    self.problems.append(f"{where}: needs `what`")
+                    continue
+                for d, decision in self._spread(part, where).items():
+                    self._check(pid, d, decision, f"{where} ({d})", spans[i])
+                    cell[d].append((part["what"], decision))
+                    # every rule that cites lines of this part is named on this part: a stale "not applicable" or
+                    # "missing" can't stand beside a rule that now reaches it
+                    named = set(self._expand(d, decision.get("rules")) if decision.get("status") in ("rulebook", "flag")
+                                else []) | set(decision.get("also") or [])
+                    for rid, cited in self.cites[d].items():
+                        if pid in cited and cited[pid]["lines"] & spans[i] and rid.split(".", 1)[1] not in named:
+                            self.problems.append(f"{where} ({d}): {rid} {cited[pid]['how']} but this part doesn't "
+                                                 "name it (add it to `rules`, or to `also` if it covers none of it)")
+
+    def _part_lines(self, pid: str, parts: list) -> list[set]:
+        """The (page, line)s each part covers: the whole piece for a piece of one part; else each part's `lines`
+        ([[page, first, last], ...]), all inside the piece and together covering every line of it."""
+        whole = set(piece_keys(self.pieces[pid]))
+        if len(parts) == 1 and not (isinstance(parts[0], dict) and parts[0].get("lines")):
+            return [whole]
+        out = []
+        for i, part in enumerate(parts):
+            spec = part.get("lines") if isinstance(part, dict) else None
+            keys = {(pg, n) for pg, a, b in spec or [] for n in range(a, b + 1)} if isinstance(spec, list) else set()
+            if not keys:
+                self.problems.append(f"{pid} part {i + 1}: a piece of several parts gives each part its `lines` "
+                                     "([[page, first, last], ...])")
+            elif keys - whole:
+                self.problems.append(f"{pid} part {i + 1}: lines outside the piece: {sorted(keys - whole)[:3]}")
+            out.append(keys & whole)
+        if left := whole - set().union(*out):
+            self.problems.append(f"{pid}: lines in no part: {sorted(left)[:5]}")
+        return out
+
+    def _spread(self, part: dict, where: str) -> dict[str, dict]:
+        out: dict[str, dict] = {}
+        own: set[str] = set()                      # districts a key other than `all` decided
+        for key, decision in part.items():
+            if key in ("what", "note", "lines", "quote", "file", "page", "piece"):
+                continue
+            names = self.districts if key == "all" else [k.strip() for k in str(key).split(",")]
+            for d in names:
+                if d not in self.districts:
+                    self.problems.append(f"{where}: unknown district {d!r}")
+                elif key != "all" and d in own:
+                    self.problems.append(f"{where}: {d} decided twice")
+                elif key == "all" and d in out:
+                    continue                      # a district's own decision wins over `all`
+                else:
+                    out[d] = decision if isinstance(decision, dict) else {}
+                    if key != "all":
+                        own.add(d)
+        for d in self.districts:
+            if d not in out:
+                self.problems.append(f"{where}: no decision for {d}")
+        if part.get("note"):
+            out = {d: dict(dec, note=dec.get("note") or part["note"]) for d, dec in out.items()}
+        if part.get("quote"):                      # the part's law words, for any decision that gives none of its own
+            words = {k: part[k] for k in ("quote", "file", "page", "piece") if k in part}
+            out = {d: dec if dec.get("quote") else dict(dec, **words) for d, dec in out.items()}
+        return out
+
+    def _expand(self, d: str, rules) -> list[str]:
+        """Rule id suffixes; a trailing * matches every rule with that prefix."""
+        out = []
+        for r in rules or []:
+            ids = [i.split(".", 1)[1] for i in self.books[d]]
+            out += [i for i in ids if r[:-1] and i.startswith(r[:-1])] if str(r).endswith("*") else [r]
+        return out
+
+    def _check(self, pid: str, d: str, dec: dict, where: str, span: set):
+        p = self.problems
+        status = dec.get("status")
+        p += [f"{where}: unknown field {k!r}" for k in sorted(dec.keys() - DECISION_FIELDS)]
+        if status not in STATUSES:
+            p.append(f"{where}: status must be one of {STATUSES}")
+            return
+        if status in ("rulebook", "flag"):
+            ids = self._expand(d, dec.get("rules"))
+            if not ids:
+                p.append(f"{where}: name the rules (`rules`)")
+            uncited, reviews = [], False
+            for rid in ids:
+                rule = self.books[d].get(f"{d}.{rid}")
+                if rule is None:
+                    p.append(f"{where}: {d}.{rid} isn't in the rulebook")
+                    continue
+                if status == "rulebook" and rule.get("kind") != "rule":
+                    p.append(f"{where}: {d}.{rid} is a {rule.get('kind')}, not a rule (status flag?)")
+                reviews |= rule.get("kind") == "flag" or bool(rule.get("review_when"))
+                if not self._reaches(d, rid, pid, span):         # cites none of this part's lines
+                    uncited.append(rid)
+            if status == "flag" and ids and not reviews:
+                p.append(f"{where}: none of {', '.join(ids)} ever says needs review (no flag, no review_when)")
+            if uncited and not dec.get("mapped"):
+                p.append(f"{where}: {', '.join(uncited)} don't cite the piece: say why in `mapped`, or name others")
+            if dec.get("mapped") and not uncited and ids:
+                p.append(f"{where}: every rule named cites the piece; drop `mapped`")
+        if status not in ("rulebook", "flag"):
+            p += [f"{where}: `{k}` only goes with rulebook or flag (a rule that cites the piece but covers none of "
+                  "it goes in `also`)" for k in ("rules", "mapped") if k in dec]
+        for rid in dec.get("also") or []:
+            if not self._reaches(d, rid, pid, span):
+                p.append(f"{where}: `also` names {d}.{rid}, which doesn't cite the piece")
+        if status in ("not_applicable", "missing", "open_question") and not dec.get("why"):
+            p.append(f"{where}: say why (`why`)")
+        if status in READINGS or dec.get("quote"):     # any quote shown as the law's words is checked
+            # A reading: code can't prove the law's words support it, only that they are the law's words, exactly
+            # where the decision says (the same standard as a rule's sources). The table shows each one beside its
+            # cell for a person to check.
+            if not dec.get("quote"):
+                p.append(f"{where}: a {WORDS[status]} decision gives the law's own words (`quote`) and where they are")
+            elif dec.get("file", self.law) not in (self.law, self.chart):
+                p.append(f"{where}: quote Chapter 325 or its chart, not {dec['file']}")
+            elif len(hits := self._quote_hits(pid, dec)) != 1:
+                p.append(f"{where}: quote " + ("not found" if not hits else f"found {len(hits)} times (quote enough to "
+                         "be unique, as a rule's source must be)") + f" at {self._location(pid, dec)}: {dec['quote']!r}")
+            elif dec.get("file", self.law) == self.law and (keys := hits[0]) <= self.furniture:
+                p.append(f"{where}: the quote is only page furniture (a running header or footer), not the law")
+            if dec.get("file") == self.chart and not dec.get("cell"):
+                p.append(f"{where}: a chart quote names its `cell` ({{section, row}}), so the district's own cell is shown")
+            if dec.get("cell") and dec.get("quote") and (cell := self._cell_record(d, dec)) and \
+                    {(dec.get("page", 2), n) for n in cell.get("row_lines") or []} != self._quote_keys(pid, dec):
+                p.append(f"{where}: the quote isn't the line of the cell it names (row {dec['cell'].get('row')!r})")
+            if dec.get("cell") and (got := self._cell(d, dec)) != "-":
+                p.append(f"{where}: the chart's {d} cell for {dec['cell'].get('row')!r} is {got!r}, not '-'")
+        if status == "parked" and dec.get("item") not in self.parked:
+            p.append(f"{where}: parked item must be one of {sorted(self.parked)}")
+        if status == "open_question":
+            path, _, heading = str(dec.get("link", "")).partition("#")
+            target = REPO / path
+            if not path or not target.is_file():
+                p.append(f"{where}: link {dec.get('link')!r} isn't a file in the repository")
+            elif heading and heading not in target.read_text(encoding="utf-8"):
+                p.append(f"{where}: {path} has no {heading!r}")
+        if status == "missing" and dec.get("priority") not in PRIORITIES:
+            p.append(f"{where}: priority must be one of {list(PRIORITIES)}")
+
+    def _reaches(self, d: str, rid: str, pid: str, span: set) -> bool:
+        """The rule cites (a source, a finding, or a definition of a measure it uses) a line of this part."""
+        return bool(self.cites[d].get(f"{d}.{rid}", {}).get(pid, {}).get("lines", set()) & span)
+
+    def _cell_record(self, d: str, dec: dict) -> dict | None:
+        """The district's own chart cell for the decision's row, as the chart reader read it (None if it has none)."""
+        c = dec["cell"]
+        column = next((col for (pg, sec, row, col) in self.ctx.cells.get(self.chart, {})
+                       if district_name(col) == d), None)
+        return self.ctx.cells.get(self.chart, {}).get((dec.get("page", 2), c.get("section"), c.get("row"), column))
+
+    def _cell(self, d: str, dec: dict):
+        cell = self._cell_record(d, dec)
+        return None if cell is None else cell.get("value")
+
+    def _quote_hits(self, pid: str, dec: dict) -> list[set]:
+        """Each place the decision's quote occurs, as the (page, line)s it spans: on `page` (of `file`), else inside
+        `piece` (default: this piece), across its page breaks."""
+        file = dec.get("file", self.law)
+        pages = self.ctx.pages.get(file, {})
+        quote = dec.get("quote") or ""
+        if "page" in dec:
+            return [{(dec["page"], n) for n in range(a, b + 1)} for a, b in locate(quote, pages.get(dec["page"], {}))]
+        if dec.get("piece") not in (None, *self.pieces):
+            return []
+        keys = list(piece_keys(self.pieces[dec.get("piece", pid)]))
+        joined = {i: pages.get(pg, {}).get(n, []) for i, (pg, n) in enumerate(keys)}
+        return [{keys[i] for i in range(a, b + 1)} for a, b in locate(quote, joined)]
+
+    def _quote_keys(self, pid: str, dec: dict) -> set:
+        """The (page, line)s of the quote's one place (empty when it occurs nowhere, or more than once)."""
+        hits = self._quote_hits(pid, dec)
+        return hits[0] if len(hits) == 1 else set()
+
+    def _quote_found(self, pid: str, dec: dict) -> bool:
+        return bool(self._quote_keys(pid, dec))
+
+    def _location(self, pid: str, dec: dict) -> str:
+        """Where the quote is, as a reader finds it: file, page and lines (or where it was looked for)."""
+        keys = sorted(self._quote_keys(pid, dec)) if dec.get("quote") else []
+        file = dec.get("file", self.law)
+        name = "Ch. 325" if file == self.law else "zoning chart" if file == self.chart else file
+        if keys:
+            pages = sorted({pg for pg, _ in keys})
+            spans = "; ".join(f"p.{pg} l.{min(n for g, n in keys if g == pg)}"
+                              + (f"–{m}" if (m := max(n for g, n in keys if g == pg)) != min(n for g, n in keys if g == pg)
+                                 else "") for pg in pages)
+            return f"{name} {spans}"
+        return f"{name} p.{dec['page']}" if "page" in dec else f"§{dec.get('piece', pid)}"
+
+    # -- the table ---------------------------------------------------------------------------------------
+
+    def status(self, pid: str, d: str) -> str:
+        found = {dec.get("status") for _, dec in self.cells.get(pid, {}).get(d, [])}
+        return next((s for s in STATUSES if s in found), "missing")
+
+    def _title(self, pid: str) -> str:
+        return " ".join(self.pieces[pid]["title"].replace("|", "/").split())
+
+    def mapped_only(self, pid: str, d: str, kinds=("rulebook", "flag")) -> bool:
+        """Some part (of these statuses) names a rule that covers it only through Gordium's stated mapping (the rule
+        cites none of the part's lines)."""
+        return any(dec.get("status") in kinds and not all(
+            self._reaches(d, r, pid, self.part_lines[pid][i]) for r in self._expand(d, dec.get("rules")))
+            for i, (_, dec) in enumerate(self.cells.get(pid, {}).get(d, [])))
+
+    def _pages(self, pid: str) -> str:
+        pages = sorted({pg for pg, _, _ in self.pieces[pid]["lines"]})
+        return f"p.{pages[0]}" if len(pages) == 1 else f"pp.{pages[0]}–{pages[-1]}"
+
+    def readings(self) -> list[dict]:
+        """Every decision that rests on a person's reading, not a citation: not applicable, parked, flag (each quoting
+        the law, checked only for being the law's words where it says), and any rule named by a stated mapping.
+        One entry per (piece, part, decision); `cells` are the districts it decides. Numbered R1, R2, ... in order."""
+        found: dict[tuple, dict] = {}
+        for pid in self.rows:
+            for i, what in enumerate(self._parts(pid)):
+                for d in self.districts:
+                    dec = self.cells[pid][d][i][1]
+                    span = self.part_lines[pid][i]
+                    mapped = [r for r in self._expand(d, dec.get("rules")) if dec.get("status") in ("rulebook", "flag")
+                              and not self._reaches(d, r, pid, span)]
+                    if dec.get("status") not in READINGS and not mapped:
+                        continue
+                    key = (pid, i, repr(sorted(dec.items(), key=lambda kv: kv[0])), tuple(sorted(set(mapped))),
+                           tuple(self._expand(d, dec.get("rules"))))
+                    entry = found.setdefault(key, {"piece": pid, "what": what, "status": dec.get("status"),
+                                                   "dec": dec, "mapped": sorted(set(mapped)), "cells": []})
+                    entry["cells"].append(d)
+        out = list(found.values())
+        for k, e in enumerate(out, 1):
+            e["id"] = f"R{k}"
+        return out
+
+    def _reading_ids(self, pid: str, d: str) -> list[str]:
+        if not hasattr(self, "_reading_index"):
+            self._reading_index = {}
+            for e in self.readings():
+                for dd in e["cells"]:
+                    self._reading_index.setdefault((e["piece"], dd), []).append(e["id"])
+        return self._reading_index.get((pid, d), [])
+
+    def _short(self, pid: str, d: str) -> str:
+        marks = self._reading_ids(pid, d)
+        return self._short_status(pid, d) + (f" [{', '.join(marks)}]" if marks else "")
+
+    def _short_status(self, pid: str, d: str) -> str:
+        parts = self.cells.get(pid, {}).get(d, [])
+        worst = self.status(pid, d)
+        def ids(status):
+            found = list(dict.fromkeys(r for _, dec in parts if dec.get("status") == status
+                                       for r in self._expand(d, dec.get("rules"))))
+            return (", ".join(found[:3]) + (f" +{len(found) - 3} more" if len(found) > 3 else "")) if found else ""
+        checked, flagged = ids("rulebook"), ids("flag")
+        if self.mapped_only(pid, d, ("rulebook",)) and checked:
+            checked += " (mapped)"
+        if self.mapped_only(pid, d, ("flag",)) and flagged:
+            flagged += " (mapped)"
+        if worst == "rulebook":
+            return f"✓ {checked}"
+        also = ([f"partly ✓ {checked}"] if checked else []) + ([f"partly flagged: {flagged}"] if flagged else [])
+        if worst == "flag":
+            return f"flag: {flagged}" + (f" ({also[0]})" if checked else "")
+        text = {"missing": "**MISSING**", "open_question": "open question", "parked": "parked: " + ", ".join(
+            dict.fromkeys(dec.get("item", "") for _, dec in parts if dec.get("status") == "parked")),
+            "not_applicable": "n/a"}[worst]
+        return text + (f" ({'; '.join(also)})" if also and worst != "not_applicable" else "")
+
+    def counts(self) -> dict[str, Counter]:
+        return {d: Counter(self.status(pid, d) for pid in self.rows) for d in self.districts}
+
+    def missing(self) -> list[dict]:
+        """The gaps: each (what, why, priority, note, districts) once, with every piece it applies to (eleven
+        nonconforming-use sections are one gap). Ranked by priority, then silent before already disclosed on every
+        result, then the most districts, then the law's order."""
+        found: dict[tuple, dict] = {}
+        for order, pid in enumerate(self.rows):
+            for i, what in enumerate(self._parts(pid)):
+                groups: dict[tuple, list[str]] = {}
+                for d in self.districts:
+                    dec = self.cells[pid][d][i][1]
+                    if dec.get("status") == "missing":
+                        groups.setdefault((dec.get("priority"), dec.get("why"), dec.get("note", "")), []).append(d)
+                for (priority, why, note), ds in groups.items():
+                    key = (what, priority, why, note, tuple(ds), is_disclosed(pid, self.disclosed))
+                    gap = found.setdefault(key, {"pieces": [], "what": what, "districts": ds, "priority": priority,
+                                                 "why": why, "note": note, "disclosed": key[-1], "order": order})
+                    gap["pieces"].append(pid)
+        rank = list(PRIORITIES)
+        return sorted(found.values(), key=lambda m: (rank.index(m["priority"]) if m["priority"] in rank else 9,
+                                                     m["disclosed"], -len(m["districts"]), m["order"]))
+
+    def _parts(self, pid: str) -> list[str]:
+        first = self.districts[0] if self.districts else None
+        return [what for what, _ in self.cells.get(pid, {}).get(first, [])]
+
+    def _where(self, ds: list[str]) -> str:
+        return f"all {len(ds)} districts" if ds == self.districts else ", ".join(ds)
+
+    def _sections(self, pids: list[str]) -> str:
+        if len(pids) == 1:
+            return f"§{pids[0]} {self._title(pids[0])}"
+        return ", ".join(f"§{p}" for p in pids)
+
+    def _decision_text(self, pid: str, d: str, dec: dict, index: int) -> str:
+        """One decision in words. Rule ids without the district, so districts decided alike read as one line."""
+        s = dec["status"]
+        if s in ("rulebook", "flag"):
+            ids = self._expand(d, dec.get("rules"))
+            span = self.part_lines[pid][index]
+            how = [f"`{rid}`" + (f" ({self.cites[d][f'{d}.{rid}'][pid]['how']})" if self._reaches(d, rid, pid, span)
+                                 else " (mapped)") for rid in ids]
+            text = f"{WORDS[s]}: " + ", ".join(how)
+            if dec.get("mapped"):
+                text += f". Gordium's mapping, not a citation: {dec['mapped']}"
+        elif s == "not_applicable":
+            text = f"not applicable: {dec['why']}"
+        elif s == "parked":
+            item = self.parked[dec["item"]]
+            text = f"parked: {item['name']} ({item['decided']})" + (f". {dec['why']}" if dec.get("why") else "")
+        elif s == "open_question":
+            text = f"open question: {dec['why']} ({dec['link']})"
+        else:
+            text = f"**MISSING** ({dec['priority']}): {dec['why']}"
+        if s in READINGS and dec.get("quote"):
+            cell = f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else ""
+            text += f" The law: “{dec['quote']}” ({self._location(pid, dec)}{cell})."
+        if dec.get("also"):
+            text += f" (also cites the piece: {', '.join(f'`{r}`' for r in dec['also'])}; covers none of this part)"
+        if dec.get("note"):
+            text += f" Note: {dec['note']}"
+        return text
+
+    def render(self) -> str:
+        n, ds = len(self.rows), self.districts
+        counts = self.counts()
+        total = Counter()
+        for c in counts.values():
+            total.update(c)
+        labels = Counter(self.labels[pid]["label"] for pid in self.rows)
+        missing = self.missing()
+        top = [m for m in missing if m["priority"] in ("high", "medium")]
+        rest = [m for m in missing if m["priority"] not in ("high", "medium")]
+        everywhere = lambda ok: [pid for pid in self.rows if all(self.status(pid, d) in ok for d in ds)]
+        every = lambda ok: len(everywhere(ok))
+        anywhere = sum(1 for pid in self.rows if any(self.status(pid, d) == "missing" for d in ds))
+        cells_by = {d: Counter(m["priority"] for m in missing for _ in m["pieces"] if d in m["districts"]) for d in ds}
+        out = ["# Residential coverage: is each district's zoning covered?", "",
+               "Generated by `python -m section_labeling audit` from the rulebooks (5_zoning_rules), the section labels, "
+               f"the term definitions, model_measurement and test_data, with the decisions in `{DECISIONS}`. Never "
+               "hand-edit; CI fails if it is out of date.", "",
+               "## Summary", "",
+               f"Every piece of Chapter 325 labeled **rule** ({labels['rule']}) or **flag** ({labels['flag']}), "
+               f"{n} pieces, against each of the {len(ds)} residential districts ({', '.join(ds)}): {n * len(ds)} "
+               "cells.", "",
+               f"**In short.** {every({'rulebook', 'flag'})} pieces are in every district's rulebook (or flagged for "
+               f"review): {', '.join('§' + p + (' (mapped)' if any(self.mapped_only(p, d) for d in ds) else '') for p in everywhere({'rulebook', 'flag'}))}; "
+               "(mapped) = some part is covered only by Gordium's stated mapping, not a citation. "
+               f"{every({'not_applicable'})} don't apply in any of these districts or are pointers with nothing of their "
+               f"own to check; {every({'parked'})} are "
+               f"parked (deliberately deferred); {anywhere} are MISSING in at least one district. Of the gaps, {len(top)} are "
+               "real rules that should exist (high or medium, listed first below); the rest are narrow or cautious "
+               "gaps, how a property is run, or other kinds of project. Nothing here is a rule written in this table: "
+               "the list says what is missing, ranked.", "",
+               "Each cell says one of:", "",
+               "- **in the rulebook**: the district's rulebook has a rule for it (the rule ids);",
+               "- **flag (needs review)**: the rulebook flags it, so the result says NEEDS REVIEW (a person judges it);",
+               "- **parked**: deliberately deferred (Ben's later list, or the brief that parked it; the item says which);",
+               "- **open question**: waiting on the architects or the City;",
+               "- **not applicable**: the law itself keeps it out of the district, or it is a pointer with no "
+               "requirement of its own (the reason says which, with the law's words);",
+               "- **MISSING**: nothing covers it.", "",
+               "A piece with several parts takes its worst part's status (MISSING first, then open question, parked, "
+               "flag, in the rulebook, not applicable), so a cell never says more is covered than its weakest part. "
+               "A rule counts as covering a piece only if it cites the piece (a source or finding inside its lines, "
+               "or a definition from the piece that defines a measure the rule uses); otherwise the table marks it "
+               "*mapped* and says why. The zoning chart's own cells are not rows here (each chart number is checked "
+               "against the chart reader); the rules tables at the end list every rule, chart-based ones too.", "",
+               "| Status | " + " | ".join(ds) + " | All |", "|---|" + "---|" * (len(ds) + 1)]
+        for s in STATUSES:
+            out.append(f"| {WORDS[s]} | " + " | ".join(str(counts[d][s]) for d in ds) + f" | {total[s]} |")
+        out.append("| **pieces** | " + " | ".join(str(n) for _ in ds) + f" | {n * len(ds)} |")
+        rested = {(e["piece"], d) for e in self.readings() for d in e["cells"]}
+        by = Counter(e["status"] for e in self.readings() if e["status"] in READINGS for _ in e["cells"])
+        mapped = sum(len(e["cells"]) for e in self.readings() if e["mapped"])
+        mapped_flags = sum(len(e["cells"]) for e in self.readings() if e["mapped"] and e["status"] == "flag")
+        out += ["", f"**Resting on a reading:** {len(rested)} of the {n * len(ds)} cells rest, in at least one part, on a "
+                "person's reading rather than a citation (counted once per part of a cell: not applicable "
+                f"{by['not_applicable']}, parked {by['parked']}, flag {by['flag']}; and {mapped} with rules named by "
+                f"mapping, {mapped_flags} of them on flags). Each not applicable, parked or flag reading quotes the law; code checks only that the quote is the law's words where it "
+                "says, not that it supports the decision; a mapping gives its reason in words. They are listed after "
+               "the table, for a person to check."]
+        out += ["", "MISSING cells by priority (a piece missing in two parts counts twice):", "",
+                "| Priority | " + " | ".join(ds) + " |", "|---|" + "---|" * len(ds)]
+        out += [f"| {k} | " + " | ".join(str(cells_by[d][k]) for d in ds) + " |" for k in PRIORITIES]
+        out += ["", f"### MISSING, ranked ({len(missing)} gaps)", "",
+                "Ranked by how much each matters, then gaps no result mentions before ones every result already lists "
+                "as not checked (`not_checked_yet.yaml`), then how many districts. Priorities:", ""]
+        out += [f"- **{k}**: {v}" for k, v in PRIORITIES.items()]
+        for heading, group, start in (("**Real rules that should exist** (high and medium; listed here, not written):",
+                                       top, 1),
+                                      ("**The rest** (low, operational, other projects):", rest, len(top) + 1)):
+            out += ["", heading, ""]
+            for k, m in enumerate(group, start):
+                said = "every result lists it as not checked" if m["disclosed"] else "no result mentions it"
+                out.append(f"{k}. **{m['what']}** ({self._sections(m['pieces'])}). {self._where(m['districts'])}; "
+                           f"{m['priority']}; {said}. {m['why']}" + (f" Note: {m['note']}" if m["note"] else ""))
+        out += ["", "## The table", "",
+                "✓ = in the rulebook (rule ids; (mapped) = at least one of these rules covers it only by Gordium's stated mapping, see the reading); flag = the rulebook flags it (NEEDS REVIEW); n/a = not applicable; "
+                "(partly ✓ …) = some parts are covered by those rules, the rest not. [R12] = this cell rests on "
+                "reading R12, listed right after this table with its quote of the law (or, for a mapping, its reason), "
+                "for a person to check. Each piece's reasons are in the section after that.", "",
+                "| Piece | Title | Label | " + " | ".join(ds) + " |", "|---|---|---|" + "---|" * len(ds)]
+        for pid in self.rows:
+            out.append(f"| §{pid} | {self._title(pid)} | {self.labels[pid]['label']} | "
+                       + " | ".join(self._short(pid, d) for d in ds) + " |")
+        out += ["", "## Decisions resting on a reading", "",
+                "Code can't prove that the law's words support a decision; it proves only that the quote is the law's "
+                "own words, exactly where it says (the same standard as a rule's sources). Each decision below rests "
+                "on a person's reading of that quote (Claude's, drafted from the law; architect sign-off is deferred). "
+                "Read the quote and judge it.", "",
+                "| Reading | Piece and part | Districts | Decision | The law's words (where) |", "|---|---|---|---|---|"]
+        for e in self.readings():
+            dec = e["dec"]
+            if e["mapped"]:
+                decision = f"{WORDS[e['status']]} by mapping: {', '.join(e['mapped'])}. {dec.get('mapped', '')}"
+            elif e["status"] == "parked":
+                decision = f"parked: {self.parked[dec['item']]['name']}"
+            elif e["status"] == "flag":
+                decision = f"flag: {', '.join(self._expand(e['cells'][0], dec.get('rules')))}"
+            else:
+                decision = f"not applicable: {dec.get('why', '')}"
+            law = (f"“{dec['quote']}” ({self._location(e['piece'], dec)}"
+                   + (f"; the district's own cell in row “{dec['cell']['row']}” is “-”" if dec.get("cell") else "")
+                   + ")") if dec.get("quote") else "—"
+            if dec.get("note"):
+                decision += f" Note: {dec['note']}"
+            out.append(f"| {e['id']} | §{e['piece']}: {e['what']} | {self._where(e['cells'])} | "
+                       f"{decision.replace('|', '/')} | {law.replace('|', '/')} |")
+        out += ["", "## Each piece, part by part", ""]
+        for pid in self.rows:
+            out += [f"### §{pid} {self._title(pid)} ({self.labels[pid]['label']}, {self._pages(pid)})", ""]
+            for i, what in enumerate(self._parts(pid)):
+                out.append(f"- **{what}**")
+                groups: dict[str, list[str]] = {}
+                for d in ds:
+                    groups.setdefault(self._decision_text(pid, d, self.cells[pid][d][i][1], i), []).append(d)
+                out += [f"  - {self._where(g)}: {t}" for t, g in groups.items()]
+            out.append("")
+        out += self._rules_section()
+        return "\n".join(out) + "\n"
+
+    def _rules_section(self) -> list[str]:
+        model, stated = measure_sources()
+        tests = model_tests(self.j)
+        out = ["## Every rule in each rulebook: measured? tested on a model?", "",
+               "**Measures**: each name the rule's formulas use, and where its value comes from: *model* = "
+               "model_measurement measures it from the Rhino model; *stated* = the architect states it (the model "
+               "can't show it); *model or stated* = counted from the floor blocks drawn, else the architect's count; "
+               "*none* = nothing fills it in, so the rule can only say needs review. A flag has no "
+               "check: it always says needs review where it applies. **Tested on a model**: *real model* = the "
+               "architects' Rhino models of a test site (model_measurement/tests/test_models.py checks this rule's "
+               "result on them); *scenario* = a design worked by hand from the law, drawn by code and checked "
+               "(design_checker/tests/test_scenarios.py for test_data/test_sites/…/scenarios; "
+               "design_checker/tests/test_sites.py for the real lots in test_data/test_sites/…/deep_run).", ""]
+        for d in self.districts:
+            rules = self.books[d]
+            kinds = Counter(r.get("kind") for r in rules.values())
+            tested = sum(1 for rid in rules if tests.get(rid))
+            out += [f"### {d}: {kinds['rule']} rules, {kinds['flag']} flags; {tested} checked on a model", "",
+                    "| Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |", "|---|---|---|---|---|"]
+            for rid, rule in rules.items():
+                links = self.cites[d][rid]
+                cited = ", ".join(f"§{p}" + (" (via definition)" if links[p]["how"].startswith("via definition") else "")
+                                  for p in self.pieces if p in links) or "— (the chart only)"
+                names = sorted(_formula_names(rule))
+                where = lambda n: ("model or stated" if n in model and n in stated else "model" if n in model
+                                   else "stated" if n in stated else "**none**")
+                measures = ", ".join(f"{n} ({where(n)})" for n in names) or "—"
+                out.append(f"| `{rid}` | {rule.get('kind')} | {cited} | {measures} | "
+                           + (", ".join(tests.get(rid, [])) or "**none**") + " |")
+            out.append("")
+        return out
+
+
+def build(j: Path, **kw) -> tuple[str | None, list[str]]:
+    """(the report, problems). With any problem there is no report: a decision the files don't back is refused."""
+    audit = Audit(j, **kw)
+    if audit.problems:
+        return None, audit.problems
+    return audit.render(), []
+
+
+def places() -> list[Path]:
+    """Every jurisdiction with an audit decisions file."""
+    return sorted(p.parent for p in (REPO / "regulations/jurisdictions").rglob(DECISIONS))

@@ -1,0 +1,345 @@
+"""The largest legal starting building on a lot: the footprint the architect starts designing from.
+
+Plain code reading the zone's rules (no AI, no hard-coded numbers): the footprint sits inside every required yard
+(the envelope), its area stays at or under every lot-coverage limit, and it is drawn as stacked floor blocks, one
+per story, up to the height limit and the story limit. Another zone's rules give that zone's building.
+
+The shape: a rectangle square to the street, set right at the front yard line and as wide as the side yards
+allow, then as deep as the coverage limit and the rear yard allow, its sides in whole inches (rounded down). On
+the 73'-0" x 90'-0" lot: 53'-0" x 30'-11" = 1,639 sf, 24.94% of the lot, under the 25% limit. So growing it on any side breaks a rule: the
+front yard, a side yard, or (in depth) the coverage limit or the rear yard.
+
+Where a limit can't be worked out for the lot, it says so, and the generator takes the strictest reading it can
+(the envelope already takes the largest yard any reading of the lot could need). Lot coverage on a lot that isn't
+from a survey is sized from the lot as drawn, and said so: the check itself still says NEEDS REVIEW until the
+architect confirms the survey.
+"""
+
+import ast
+import math
+
+from shapely import affinity
+from shapely.geometry import LineString, Point, Polygon, box
+
+from model_measurement.places import measuring
+from model_measurement.plugin_measuring import Lot
+from rule_format import formula
+from rule_format.rulebook import REPO, Context, outcome
+
+from .envelope import LOT_MEASURES, _applies, _worst, envelope
+
+STEP = 0.1        # ft: how finely the footprint's depth is searched
+SAFETY = 0.01     # ft: pulled in when a corner falls between samples
+INCH = 1 / 12     # the footprint's sides are whole inches, rounded down (never toward a limit)
+CANT = "Gordium can't generate a starting building on this lot shape yet; draw one and Gordium will check it"
+
+
+def _story_limit(rules: list[dict], measured: dict):
+    """The lowest `stories <= N` (or `< N`) any rule that applies sets, whose limit depends only on the lot."""
+    found = []
+    for rule in rules:
+        if rule.get("kind") == "flag" or not rule.get("check") or not _applies(rule, measured):
+            continue
+        for node in ast.walk(formula.parse(rule["check"]).body):
+            if (isinstance(node, ast.Compare) and len(node.ops) == 1 and isinstance(node.left, ast.Name)
+                    and node.left.id == "stories" and isinstance(node.ops[0], (ast.LtE, ast.Lt))):
+                limit = ast.unparse(node.comparators[0])
+                if formula.names(limit) <= LOT_MEASURES:
+                    worst = _worst(limit, ast.LtE, measured)
+                    if worst is not None:     # whole stories: at most N, or under N
+                        found.append(math.ceil(worst) - 1 if isinstance(node.ops[0], ast.Lt) else math.floor(worst))
+    return min(found) if found else None
+
+
+def _as_drawn(measured: dict) -> tuple[dict, bool]:
+    """The measurements with the lot area as drawn when it is waiting for a survey (one reading, no value)."""
+    lot_area = measured.get("lot_area") or {}
+    readings = lot_area.get("readings") or []
+    if lot_area.get("value") is None and len(readings) == 1:
+        return {**measured, "lot_area": {**lot_area, "value": readings[0]["value"]}}, True
+    return measured, False
+
+
+def _frame(lot: Lot):
+    """(angle, origin): the street's direction, so x runs along the street and y into the lot."""
+    chain = lot.ordered_street()
+    a, b = lot.edges[chain[0]][0], lot.edges[chain[-1]][-1]
+    angle = math.atan2(b[1] - a[1], b[0] - a[0])
+    inside = lot.polygon.representative_point()
+    # turn so the street runs along x; flip if the lot then lies below the street
+    turned = affinity.rotate(LineString([a, b]), -angle, origin=a, use_radians=True)
+    point = affinity.rotate(inside, -angle, origin=a, use_radians=True)
+    if point.y < turned.coords[0][1]:
+        angle += math.pi
+    return angle, a
+
+
+def _x_range(shape: Polygon, y: float, around: float):
+    """The stretch of a level line through the shape at height y that contains x = `around` (or the longest)."""
+    x0, _, x1, _ = shape.bounds
+    cut = shape.intersection(LineString([(x0 - 1, y), (x1 + 1, y)]))
+    pieces = [g for g in getattr(cut, "geoms", [cut]) if isinstance(g, LineString) and not g.is_empty]
+    if not pieces:
+        return None
+    spans = [sorted([c[0] for c in g.coords]) for g in pieces]
+    hit = [s for s in spans if s[0] <= around <= s[-1]]
+    s = hit[0] if hit else max(spans, key=lambda s: s[-1] - s[0])
+    return s[0], s[-1]
+
+
+def _footprint(shape: Polygon, around: float, allowed, front_line: float, front_limit: float):
+    """(x0, x1, front, depth): the largest rectangle square to the street inside the buildable area, at or under
+    the coverage limit. The fronts tried run from the bottom of the buildable area up to `front_limit`: the front
+    yard line (`front_line`, always tried exactly), or on a bent or curved street the deepest point of that line
+    plus one STEP. From each, the width only narrows going back, so it grows deeper until coverage or the rear
+    stops it; the largest wins, the widest on a tie. So when a front exists at the front yard line, the building
+    sits on it, never slides back for a wider rear, and the search stays short. (A flag lot or a narrow neck, where
+    the side yards close the frontage, gets none: the caller says it can't generate one on that shape yet.)"""
+    y0, y1 = shape.bounds[1], shape.bounds[3]
+    n = max(1, int(math.ceil((y1 - y0) / STEP)))
+    levels = sorted({y0 + (y1 - y0) * k / n for k in range(n + 1)} | ({front_line} if y0 <= front_line <= y1 else set()))
+    n = len(levels) - 1
+    spans = [_x_range(shape, y, around) for y in levels]
+    best, best_key = None, (0.0, 0.0)   # the largest area, then the widest (square to the side yards)
+    for i, first in enumerate(spans):
+        if levels[i] > front_limit + 1e-9:
+            break                       # behind the front yard line (or its strip, on a bent street)
+        if first is None or first[1] - first[0] <= 0:
+            continue
+        width = first[1] - first[0]
+        if allowed is not None and best_key[0] >= allowed - 1e-6 and width <= best_key[1] + 1e-9:
+            continue                    # the coverage limit is reached: only a wider front could still win
+        if width * (y1 - levels[i]) < best_key[0] - 1e-6 or (                 # can't be larger,
+                width * (y1 - levels[i]) <= best_key[0] + 1e-6 and width <= best_key[1] + 1e-9):  # nor as large and wider
+            continue
+        lo, hi = first
+        for j in range(i + 1, n + 1):
+            span = spans[j]
+            if span is None or min(hi, span[1]) - max(lo, span[0]) <= 0:
+                break
+            lo, hi = max(lo, span[0]), min(hi, span[1])
+            depth = levels[j] - levels[i]
+            area = (hi - lo) * depth
+            if allowed is not None and area >= allowed:
+                area, depth = allowed, allowed / (hi - lo)
+            key = (round(area, 6), hi - lo)
+            if key > best_key:
+                best, best_key = (lo, hi, levels[i], depth), key
+            if allowed is not None and area >= allowed:
+                break
+    return best
+
+
+def largest_legal_building(site: dict, facts: dict, measured: dict, rules: list[dict], uses=None,
+                           floor_to_floor: float | None = None, keep_back: float = 0.0,
+                           coverage_scale: float = 1.0, verdict=None, larger_side: str | None = None) -> dict:
+    """{"floors": [{"outline": [[x, y], ...], "base": z, "top": z}, ...], "stories", "height", "area",
+    "coverage_allowed", "side_split", "notes"}: the starting building, or no floors and the notes that say why.
+
+    The guarantee, on any lot shape: the building returned has been measured and checked against every rule (each
+    passes or needs review), or no building is returned and the notes say "Gordium can't generate..." (`CANT`).
+    `uses`: the city's use names (read from the jurisdiction in the facts when not given). `keep_back` (ft) moves
+    every yard line that much further in (the tax-map tolerance, a design buffer); `coverage_scale` scales the
+    coverage allowed (below 1: sized for the smallest lot the tax map allows). `verdict`: the checker's own result
+    for one rule (design_checker.check.verdict, which also counts a rule that fails under every reading); the
+    checker passes it, since this package can't import the checker.
+
+    Unequal side yards (R-2b: one 5 ft, the other 10 ft): the house takes the larger yard on one side only, the
+    side that gives the larger house; on a tie the left as seen from the street (on a corner lot, once the envelope
+    draws corner lots, §325-19C: the side away from the side street, _tie_side). `larger_side` ("left" or "right") asks for that side instead (Switch side yards). Each
+    house is proven like any other; one that would break a rule is never returned: the other side is tried (unless
+    asked for), then the larger yard on both sides, as the envelope draws it. `side_split` says which was drawn:
+    {"larger_side", "larger", "smaller", "left", "right", "left_toward", "right_toward", "asked"} (each side's
+    yard; the plan direction, x and y, from the house towards each side line), or None."""
+    sized, drawn = _as_drawn(measured)       # coverage on a lot not yet surveyed: from the lot as drawn (said below)
+    # the rectangle's sides lie on straight yard lines, so the exact region is used (no rounding margin): the yards
+    # come out at their limits, 25'-0" and 10'-0", not a hair over
+    env = envelope(site, facts, sized, rules, margin=0.0)
+    args = (site, facts, sized, drawn, rules, uses, floor_to_floor, keep_back, coverage_scale, verdict)
+    split = env.get("side_split")
+    lot = Lot(site, facts) if split and env["outline"] else None
+    if lot is None or lot.problems or lot.street_problem or not lot.readings():
+        return _building(env, *args)
+    angle, origin = _frame(lot)
+    x = {i: affinity.rotate(LineString(e), -angle, origin=origin, use_radians=True).centroid.x
+         for i, e in enumerate(lot.edges)}
+    ways = {}
+    for side in ("left", "right") if larger_side is None else (larger_side,):
+        other = {"left": "right", "right": "left"}[side]
+        sides = {side: split["larger"], other: split["smaller"], "x": x}
+        ways[side] = _building(envelope(site, facts, sized, rules, margin=0.0, sides=sides), *args, prove=False)
+    if larger_side is None:              # the larger house first; a tie: away from the street (a corner), else left
+        tie = _tie_side(lot, facts, angle, origin)
+        order = sorted(ways, key=lambda k: (-round(ways[k]["area"] or 0.0, 2), k != tie))
+    else:
+        order = [larger_side]
+    tried = []
+    for side in order:
+        out = ways[side]
+        if not out["floors"]:
+            continue
+        failing = _failing(site, facts, out["floors"], rules, uses, verdict)
+        if not failing:
+            back = (math.cos(angle), math.sin(angle))          # the street's direction: from the left to the right
+            out["side_split"] = {"larger_side": side, "larger": split["larger"], "smaller": split["smaller"],
+                                 "left": split["larger"] if side == "left" else split["smaller"],
+                                 "right": split["smaller"] if side == "left" else split["larger"],
+                                 "left_toward": [-back[0], -back[1]], "right_toward": [back[0], back[1]],
+                                 "asked": larger_side is not None}
+            if tried:
+                out["notes"].append("; ".join(tried))
+            return out
+        tried.append(f"the larger side yard on the {side} would break {', '.join(failing)}")
+    out = _building(env, *args)          # the larger yard on both sides, as the envelope draws it
+    if tried:
+        out["notes"].append("side yards kept at the larger on both sides: " + "; ".join(tried))
+    return out
+
+
+def _tie_side(lot: Lot, facts: dict, angle: float, origin) -> str:
+    """Where the larger side yard goes when either side gives as large a house: on a corner lot, the side whose
+    side lines lie farther from a street line (away from the side street); else the left, seen from the street.
+    (Corner lots get no envelope yet, so today only the left is reached; this is ready for when they do.)"""
+    if facts.get("corner_lot") is not True:
+        return "left"
+    streets = [LineString(line) for line in facts.get("street_line") or [] if len(line) >= 2]
+    reading = (lot.readings() or [None])[0]
+    if not streets or reading is None:
+        return "left"
+    _, a, b, _ = reading
+
+    def x(group):
+        return sum(affinity.rotate(LineString(lot.edges[i]), -angle, origin=origin, use_radians=True).centroid.x
+                   for i in group) / len(group)
+
+    def away(group):                     # how far its side lines' middles are from the nearest street line
+        return min(min(s.distance(LineString(lot.edges[i]).interpolate(0.5, normalized=True)) for s in streets)
+                   for i in group)
+
+    left, right = (a, b) if x(a) <= x(b) else (b, a)
+    return "right" if away(right) > away(left) + 1e-6 else "left"
+
+
+def _building(env: dict, site: dict, facts: dict, sized: dict, drawn: bool, rules: list[dict], uses,
+              floor_to_floor, keep_back: float, coverage_scale: float, verdict, prove: bool = True) -> dict:
+    """The starting building inside one buildable area (`env`): proven with the checker's rules unless `prove` is
+    False (the caller proves it)."""
+    out = {"floors": [], "stories": None, "height": None, "area": None, "coverage_allowed": None, "notes": [],
+           "limited_by": None, "yards": None, "side_split": None}
+    notes = out["notes"]
+    notes += env["notes"]
+    if not env["outline"]:
+        notes.append("no buildable area to start from")
+        if any("leave no room" in n for n in env["notes"]):     # the yards close the lot: the architect draws one
+            notes.append(CANT)
+        return out
+    if env["height"] is None or env["base"] is None:
+        notes.append("no height limit or ground level: the building's height can't be set")
+        return out
+    allowed = env["coverage"]["allowed"] * coverage_scale if env["coverage"] else None
+    if drawn and allowed is not None and coverage_scale >= 1:     # below 1: sized for the worst case, it complies
+        notes.append("lot coverage sized from the lot as drawn, which isn't from a survey: the check says NEEDS "
+                     "REVIEW for coverage until the survey is confirmed")
+    stories = _story_limit(rules, sized)
+    if stories is None or stories < 1:
+        notes.append("no story limit applies: drawn as one story up to the height limit")
+        stories = 1
+
+    lot = Lot(site, facts)
+    angle, origin = _frame(lot)
+    buildable = affinity.rotate(Polygon(env["outline"], env["holes"]), -angle, origin=origin, use_radians=True)
+    if keep_back > 0:                   # every yard line further in by the same distance (square corners kept)
+        buildable = buildable.buffer(-keep_back, join_style=2)
+        if buildable.is_empty:
+            notes.append("no buildable area left after keeping back " + f"{keep_back:g} ft from every limit")
+            return out
+        if buildable.geom_type != "Polygon":
+            buildable = max(buildable.geoms, key=lambda p: p.area)
+    street = [affinity.rotate(Point(p), -angle, origin=origin, use_radians=True).y
+              for i in lot.ordered_street() for p in lot.edges[i]]
+    bend = max(street) - min(street)
+    front_line = max(street) + env["yards"]["front"] + keep_back    # the front yard line, in the street's frame
+    found = _footprint(buildable, buildable.centroid.x, allowed, front_line,
+                       front_line + (STEP if bend > 1e-9 else 0.0))
+    if found is None:
+        notes.append(CANT)
+        return out
+    lo, hi, y0, depth = found
+    best = box(lo, y0, hi, y0 + depth)
+    while not best.within(buildable.buffer(1e-9)) and best.bounds[2] - best.bounds[0] > 2 * SAFETY:
+        best = box(best.bounds[0] + SAFETY, y0, best.bounds[2] - SAFETY, y0 + depth)   # a corner between slices
+    # what stopped it growing: the coverage limit (its area reached it and no corner narrowed it after), else the
+    # yards, the buildable area's edges (review of feature 5, F4)
+    narrowed = best.bounds[2] - best.bounds[0] < (hi - lo) - 1e-9
+    out["limited_by"] = "coverage" if allowed is not None and not narrowed and (hi - lo) * depth >= allowed - 1e-6 \
+        else "yards"
+    out["yards"] = dict(env["yards"])
+    if not best.within(buildable.buffer(1e-9)):
+        notes.append(CANT)
+        return out
+    x0, _, x1, y1b = best.bounds                 # whole inches, rounded down, centred where it was
+    width = math.floor((x1 - x0) / INCH + 1e-6) * INCH
+    depth = math.floor((y1b - y0) / INCH + 1e-6) * INCH
+    if width < INCH or depth < INCH:            # under an inch: no building to draw
+        notes.append(CANT)
+        return out
+    x0 += ((x1 - x0) - width) / 2
+    best = box(x0, y0, x0 + width, y0 + depth)
+    outline = affinity.rotate(best, angle, origin=origin, use_radians=True)
+    ring = [[x, y] for x, y in list(outline.exterior.coords)[:-1]]
+    base, top = env["base"], env["base"] + env["height"]
+    story = env["height"] / stories
+    if floor_to_floor:                  # the architect's floor-to-floor height: as many stories as fit, at most the limit
+        stories = max(1, min(stories, math.floor(env["height"] / floor_to_floor + 1e-9)))
+        story = floor_to_floor
+        top = base + stories * story
+    out["floors"] = [{"outline": ring, "base": base + i * story, "top": top if i == stories - 1 else base + (i + 1) * story}
+                     for i in range(stories)]
+    out.update(stories=stories, height=top - base, area=outline.area, coverage_allowed=allowed)
+    failing = _failing(site, facts, out["floors"], rules, uses, verdict) if prove else []
+    if failing:                          # never a wrong building: it is proven with the checker's own rules first
+        notes.append(f"{CANT} (the rectangle found would break: {', '.join(failing)})")
+        out.update(floors=[], stories=None, height=None, area=None)
+    return out
+
+
+def floor_solids(floors: list[dict]) -> list[dict]:
+    """The floor blocks as solids the measuring code reads (as GordiumStart draws them), each marked as one story."""
+    solids = []
+    for i, f in enumerate(floors):
+        ring, z0, z1 = [tuple(p) for p in f["outline"]], f["base"], f["top"]
+        n = len(ring)
+        walls = [{"points": [[*ring[k], z0], [*ring[(k + 1) % n], z0], [*ring[(k + 1) % n], z1], [*ring[k], z1]]}
+                 for k in range(n)]
+        solids.append({"id": f"floor {i + 1}", "floor": z1 - z0, "problems": [],
+                       "faces": [{"points": [[x, y, z0] for x, y in ring]}, {"points": [[x, y, z1] for x, y in ring]},
+                                 *walls]})
+    return solids
+
+
+def _failing(site: dict, facts: dict, floors: list[dict], rules: list[dict], uses, verdict=None) -> list[str]:
+    """The ids of the rules the building breaks, measured and checked exactly as the checker does (measure, then
+    the checker's verdict: a FAIL, or a needs review that fails under every reading, the lot as drawn included;
+    plain outcome() when no verdict is given). A FAIL counts, and so does a building the measuring code can't read (no footprint or no height):
+    its rules would only say "needs review", which proves nothing. Any other needs review (no survey yet, the
+    bedrooms not drawn) is the architect's to answer, and the check says so. A rule the lot itself already fails,
+    with no building on it (a frontage narrower than the lot-width rule), is the lot's, not the building's: the
+    check still shows it."""
+    if uses is None:
+        j = facts.get("jurisdiction")
+        uses = Context.for_jurisdiction(REPO / j).uses if j and (REPO / j).is_dir() else set()
+
+    def judged(rule, measured):
+        if verdict is not None:
+            return verdict(rule, measured, {"use": uses})
+        return outcome(rule, {k: v["value"] for k, v in measured.items()}, {"use": uses})
+
+    def fails(buildings):
+        measured = measuring(facts.get("jurisdiction")).measure({**site, "buildings": buildings}, facts)
+        values = {k: v["value"] for k, v in measured.items()}
+        return [r["id"] for r in rules if judged(r, measured) == "fail"], values
+
+    lot_own = set(fails([])[0])
+    failing, values = fails(floor_solids(floors))
+    unread = [k for k in ("building_area", "building_height") if not values.get(k)]
+    return [f"{k} (not measurable)" for k in unread] + [i for i in failing if i not in lot_own]

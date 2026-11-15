@@ -1,0 +1,226 @@
+# Every part kind a rule may repeat over ("for each sleeping room", "for each stair"), and the measures each part of
+# that kind carries. Written by engineers, like measures.yaml; a rule's `for_each` must name one of these
+# (docs/decisions/2026-11-12_rules_for_each_part.md).
+#
+# A part's measure names are unique across every kind and never a measures.yaml name, so a formula's names can't
+# mean two things. Units as in measures.yaml, plus `in` (inches: windows, doors and stairs are sized in inches).
+# `within`: the kinds a part of this kind can sit in (a rule's `within` must be one of them).
+
+sleeping_room:
+  meaning: "A room used, or intended to be used, for sleeping (a bedroom), as the architect labels it (a sleeping loft is not one: it is part of the story below, R315.1, and its escape opening is in the room it is open to, R319.1: loft_room)"
+  measures:
+    sleeping_room_floor_area: {unit: sf, meaning: "Floor area of the room"}
+    sleeping_room_in_addition: {unit: yes_no, meaning: "The room is a new sleeping room in a dwelling unit addition (R319.6), as the architect marks it"}
+
+# Egress step 3 (2026-11-13): the spaces besides sleeping rooms that R319.1 says need an escape opening, as the
+# architect labels them.
+basement:
+  meaning: "A basement (R202 BASEMENT: a story that is not a story above grade plane), as the architect labels it"
+  measures:
+    basement_floor_area:      {unit: sf, meaning: "Floor area of the basement"}
+    basement_mechanical_only: {unit: yes_no, meaning: "The basement is used only to house mechanical equipment"}
+    basement_in_addition:     {unit: yes_no, meaning: "The basement is a new basement of a dwelling unit addition (R319.6), as the architect marks it"}
+    basement_has_sleeping_room_with_opening: {unit: yes_no, meaning: "The basement contains a sleeping room that has an emergency escape and rescue opening"}
+    basement_reaches_existing_basement_opening: {unit: yes_no, meaning: "The basement is reached from (opens into) an existing basement that has an emergency escape and rescue opening"}
+
+habitable_attic:
+  meaning: "A habitable attic (R202 ATTIC, HABITABLE; R316), as the architect labels it"
+  measures:
+    habitable_attic_floor_area: {unit: sf, meaning: "Floor area of the habitable attic"}
+
+loft_room:
+  meaning: "The room a sleeping loft is open to (R202 SLEEPING LOFT: \"open on one or more sides to the room in which the space is located\"), as the architect labels it; R319.1 requires it to have an escape opening"
+  measures:
+    loft_room_floor_area: {unit: sf, meaning: "Floor area of the room"}
+
+emergency_escape_opening:
+  meaning: "An opening (a window or door) the architect marks as a room's emergency escape and rescue opening"
+  within: [sleeping_room, basement, habitable_attic, loft_room]
+  measures:
+    opening_net_clear_area:   {unit: sf, meaning: "Net clear opening area with the window or door fully open"}
+    opening_net_clear_height: {unit: in, meaning: "Net clear opening height with the window or door fully open"}
+    opening_net_clear_width:  {unit: in, meaning: "Net clear opening width with the window or door fully open"}
+    opening_sill_height:      {unit: in, meaning: "Height of the bottom of the clear opening above the floor"}
+    opening_at_grade:         {unit: yes_no, meaning: "The opening's sill is at or near the ground outside it (a grade-floor opening)"}
+    opening_operable:         {unit: yes_no, meaning: "The opening can be opened (an operable window or a door, not fixed glass)"}
+    opening_opens_to_yard:    {unit: yes_no, meaning: "The opening opens directly into a public way, or to a yard or court that opens to a public way (directly, or for a yard by an unobstructed path at least 36 inches wide to the public way: R319.1 exception 4)"}
+    opening_is_door:          {unit: yes_no, meaning: "The opening is a door (not a window)"}
+    opening_door_hinged_or_sliding: {unit: yes_no, meaning: "For a door: it is a side-hinged door or a sliding door"}
+    opening_under_projection: {unit: yes_no, meaning: "The opening is under a deck, porch or cantilever"}
+    opening_fully_openable:   {unit: yes_no, meaning: "The window or door, as installed, opens fully (to its whole net clear opening): nothing outside it, such as an area well wall, a deck or a porch, stops it"}
+    opening_path_height:      {unit: in, meaning: "Least clear height of the path from the opening to a yard or court (under a deck, porch or cantilever)"}
+    opening_path_width:       {unit: in, meaning: "Least clear width of the path from the opening to a yard or court (under a deck, porch or cantilever)"}
+    opening_below_grade:      {unit: yes_no, meaning: "The bottom of the clear opening is below the adjacent ground (grade) outside it"}
+    area_well_area:           {unit: sf, meaning: "Horizontal area of the area well outside the opening"}
+    area_well_projection:     {unit: in, meaning: "Horizontal projection of the area well, measured out from the wall"}
+    area_well_width:          {unit: in, meaning: "Width of the area well, measured along the wall"}
+    area_well_depth:          {unit: in, meaning: "Vertical depth of the area well"}
+    area_well_ladder:         {unit: yes_no, meaning: "The area well has a permanently affixed ladder or steps, not obstructed by the open window or door"}
+    area_well_steps:          {unit: yes_no, meaning: "What the area well has is steps (not a ladder)"}
+    area_well_ladder_width:   {unit: in, meaning: "Least inside width of the area well's ladder (between its rails) or steps"}
+    area_well_ladder_projection: {unit: in, meaning: "Least distance the ladder's rungs stand out from the wall they are fixed to"}
+    area_well_rung_spacing:   {unit: in, meaning: "Greatest vertical spacing of the ladder's rungs, center to center"}
+    area_well_ladder_full_height: {unit: yes_no, meaning: "The ladder or steps run the full height of the area well, from its floor to the top"}
+    area_well_step_tread:     {unit: in, meaning: "Least tread depth of the area well's steps"}
+    area_well_step_riser:     {unit: in, meaning: "Greatest riser height of the area well's steps (the top and bottom steps included)"}
+    opening_into_patio_cover: {unit: yes_no, meaning: "The opening opens into a patio cover (Appendix BF: a roofed structure with open or glazed walls)"}
+    patio_cover_openings_open: {unit: yes_no, meaning: "Nothing fills the wall openings of the patio cover it opens into: no insect screening, plastic or glass"}
+
+stair:
+  meaning: "A flight of stairs (one run of steps between landings)"
+  measures:
+    stair_riser_height:  {unit: in, meaning: "Height of the tallest riser in the flight"}
+    stair_tread_depth:   {unit: in, meaning: "Depth of the shallowest tread in the flight"}
+    stair_headroom:      {unit: in, meaning: "Least clear height above the flight, measured from the tread nosings"}
+    stair_clear_width:   {unit: in, meaning: "Least clear width of the flight above the handrail height (and below the headroom height)"}
+    stair_clear_width_at_handrail: {unit: in, meaning: "Least clear width of the flight at and below the handrail height, treads and landings included"}
+    stair_handrail_sides: {unit: count, meaning: "Sides of the flight with a handrail (0, 1 or 2)"}
+    stair_riser_count:   {unit: count, meaning: "Risers in the flight"}
+    stair_riser_variation: {unit: in, meaning: "Greatest riser height in the flight minus the smallest"}
+    stair_tread_variation: {unit: in, meaning: "Greatest tread depth in the flight minus the smallest"}
+    stair_spiral:        {unit: yes_no, meaning: "The flight is a spiral stairway"}
+    stair_serves_sleeping_loft: {unit: yes_no, meaning: "The flight is a stairway providing egress from a sleeping loft (R315.5.2)"}
+    # Egress step 3, the remaining stair sections (2026-11-14): rise, landings, spiral and bulkhead stairs.
+    stair_vertical_rise: {unit: in, meaning: "Vertical rise of the flight, from the floor level or landing at its bottom to the one at its top"}
+    stair_exterior:      {unit: yes_no, meaning: "The flight is an exterior stairway (outside the building)"}
+    stair_top_landing:   {unit: yes_no, meaning: "There is a floor or landing at the top of the flight, on the stair's side of any door there"}
+    stair_bottom_landing: {unit: yes_no, meaning: "There is a floor or landing at the bottom of the flight"}
+    stair_width:         {unit: in, meaning: "Width of the flight served by its landings (side to side, finished surfaces)"}
+    stair_top_landing_width: {unit: in, meaning: "Width of the floor or landing at the top of the flight, perpendicular to the direction of travel (where it is on the other side of a door at the top, R318.7.6 exception 1, that floor's)"}
+    stair_bottom_landing_width: {unit: in, meaning: "Width of the floor or landing at the bottom of the flight, perpendicular to the direction of travel"}
+    stair_landing_depth: {unit: in, meaning: "Least depth, in the direction of travel, of the floors or landings at the top and bottom of the flight (a top landing on the other side of a door at the top counted as that floor)"}
+    stair_straight_run:  {unit: yes_no, meaning: "The stairway has a straight run (the direction of travel does not turn at the landing)"}
+    stair_landings_rectangular: {unit: yes_no, meaning: "The floors or landings at the top and bottom of the flight are square or rectangular"}
+    stair_top_door:      {unit: yes_no, meaning: "There is a door at the top of the flight, with the top floor or landing on its other side"}
+    stair_top_door_swings_over: {unit: yes_no, meaning: "The door at the top of the flight swings over the stairs"}
+    stair_top_door_exterior: {unit: yes_no, meaning: "The door at the top of the flight is an exterior door of the building"}
+    stair_at_enclosed_garage: {unit: yes_no, meaning: "The flight is at an enclosed garage (the door at its top is between the garage and the house)"}
+    stair_top_landing_drop: {unit: in, meaning: "How far the floor or landing at the top of the flight is below the top of the threshold of the door there"}
+    stair_to_grade_serving_deck: {unit: yes_no, meaning: "The flight is an exterior stairway to grade serving a deck, porch or patio"}
+    stair_egress_door_access: {unit: yes_no, meaning: "The flight is the required access to grade serving the required egress door (R318.3.1)"}
+    stair_walkline_radius: {unit: in, meaning: "For a spiral stairway: radius of its walkline (the line 12 inches from the inside of the turn, R318.7.4), from the center of the stairway"}
+    stair_walkline_tread_depth: {unit: in, meaning: "Least tread depth measured at the walkline (for a spiral stairway or winders)"}
+    stair_treads_identical: {unit: yes_no, meaning: "Every tread of the flight has the same shape and size"}
+    stair_bulkhead:      {unit: yes_no, meaning: "The flight serves a bulkhead enclosure, giving access from the outside grade level to the basement"}
+    stair_required_egress: {unit: yes_no, meaning: "The flight is part of the building's required egress"}
+    stair_basement_to_grade: {unit: in, meaning: "Height from the basement finished floor level to the grade beside the stairway"}
+    stair_bulkhead_hinged_doors: {unit: yes_no, meaning: "The grade-level opening to the stairway is covered by a bulkhead enclosure with hinged doors"}
+
+egress_door:
+  meaning: "A door the architect marks as the dwelling's required exit door"
+  measures:
+    door_clear_width:  {unit: in, meaning: "Clear width of the opening with the door open"}
+    door_clear_height: {unit: in, meaning: "Clear height of the opening with the door open"}
+    door_side_hinged:  {unit: yes_no, meaning: "The door is side-hinged"}
+    egress_door_given_as_exterior_door: {unit: yes_no, meaning: "The same door is also given as an exterior_door part with exterior_door_is_egress_door yes, so R318.3 and R318.3.1 check its landings and floor drops"}
+
+handrail:
+  meaning: "A handrail along a flight of stairs or a ramp, as the architect marks it"
+  within: [stair, ramp]
+  measures:
+    handrail_height:         {unit: in, meaning: "Height of the handrail, measured vertically from the sloped plane adjoining the tread nosings, or from the finish surface of the ramp slope for a ramp's handrail (least and greatest alike: the least here)"}
+    handrail_height_max:     {unit: in, meaning: "Greatest height of the handrail along the flight, measured the same way"}
+    handrail_adjacent_to_wall: {unit: yes_no, meaning: "The handrail runs beside a wall"}
+    handrail_wall_clearance: {unit: in, meaning: "Least space between the handrail and the wall beside it"}
+    handrail_projection:     {unit: in, meaning: "How far the handrail projects into the stairway or ramp from its side"}
+    # Egress step 3, the remaining handrail sections (2026-11-14): R320.3's exception, R320.5's continuity, R320.6's grip.
+    handrail_at_projecting_nosing: {unit: yes_no, meaning: "Nosings of landings, floors or passing flights project into the stairway where the handrail passes them, reducing its clearance"}
+    handrail_continuous:     {unit: yes_no, meaning: "The handrail runs unbroken the full length of the flight (from directly above the nosing of the top landing to directly above the lowest nosing) or of the ramp"}
+    handrail_breaks_newel_or_volute: {unit: yes_no, meaning: "Where the handrail is not continuous: it still reaches from directly above the nosing of the top landing to directly above the lowest nosing (or the ramp's full length), and every place it is interrupted or ends short of those points is a newel post (at a turn in a flight with winders, at a landing or over the lowest tread) or a volute, turnout or starting easing ending over the lowest tread (a rail that just stops short is no)"}
+    handrail_ends_returned:  {unit: yes_no, meaning: "Each end of the handrail is returned, continuous to itself or toward a wall, guard or walking surface"}
+    handrail_returns_to_wall: {unit: yes_no, meaning: "An end of the handrail is returned toward a wall (whether or not the rail itself runs beside one)"}
+    handrail_return_gap:     {unit: in, meaning: "Greatest gap between a handrail return and the wall it runs beside or returns toward"}
+    handrail_circular:       {unit: yes_no, meaning: "The handrail's cross section is a circle"}
+    handrail_diameter:       {unit: in, meaning: "Outside diameter of a circular handrail"}
+    handrail_perimeter:      {unit: in, meaning: "Perimeter of the handrail's cross section"}
+    handrail_cross_section:  {unit: in, meaning: "Greatest dimension of the handrail's cross section"}
+    handrail_edge_radius:    {unit: in, meaning: "Least radius of the edges of the handrail's profile"}
+    handrail_recess_both_sides: {unit: yes_no, meaning: "The profile has a finger recess on both sides"}
+    handrail_recess_start:   {unit: in, meaning: "Vertical distance from the tallest portion of the profile down to where the finger recess begins"}
+    handrail_recess_depth:   {unit: in, meaning: "Depth of the finger recess, at its deepest point within 7/8 inch below the widest portion of the profile"}
+    handrail_recess_run:     {unit: in, meaning: "Vertical extent over which the finger recess keeps the depth given by handrail_recess_depth"}
+    handrail_recess_bottom:  {unit: in, meaning: "How far below the tallest portion of the profile the finger recess keeps that depth down to"}
+    handrail_width_above_recess: {unit: in, meaning: "Width of the handrail above the finger recess"}
+
+open_side:
+  meaning: "An open side of a walking surface (a floor, stair, ramp, landing, porch, balcony or deck edge), as the architect marks it"
+  measures:
+    open_side_drop:      {unit: in, meaning: "Greatest vertical distance from the walking surface to the floor or grade below, at any point within 36 inches horizontally of the edge of the open side"}
+    open_side_on_stair:  {unit: yes_no, meaning: "The open side is the open side of a stair"}
+    guard_present:       {unit: yes_no, meaning: "A guard is installed along the open side (insect screening is not a guard)"}
+    guard_height:        {unit: in, meaning: "Least height of the guard, measured vertically above the walking surface (on a stair: from the line connecting the nosings)"}
+    guard_is_handrail:   {unit: yes_no, meaning: "The top of the guard serves as the stair's handrail"}
+    guard_height_max:    {unit: in, meaning: "Greatest height of the guard's top, measured the same way"}
+    guard_opening_sphere: {unit: in, meaning: "Diameter of the largest sphere that can pass through an opening in the guard, from the walking surface up to the required guard height (the triangle under a stair's bottom rail left out)"}
+    guard_triangle_sphere: {unit: in, meaning: "On a stair: diameter of the largest sphere that can pass through the triangle formed by a riser, a tread and the guard's bottom rail"}
+
+sleeping_loft:
+  meaning: "A space the architect marks as a sleeping loft that Section R315 applies to (R202 SLEEPING LOFT; not one of R315.1's exceptions: 3 feet deep or more, 35 square feet or more, with a permanent means of egress)"
+  measures:
+    loft_floor_area:          {unit: sf, meaning: "Floor area of the sleeping loft (sloped spaces under 3 feet of ceiling height left out, R315.3)"}
+    loft_floor_area_over_7ft: {unit: sf, meaning: "Part of the loft's floor area where the ceiling is higher than 7 feet"}
+    loft_clear_height_below:  {unit: in, meaning: "Least clear height below the loft's floor construction"}
+    loft_ceiling_height:      {unit: in, meaning: "Least ceiling height above the loft's finished floor (over its counted floor area)"}
+    loft_egress_ceiling_height: {unit: in, meaning: "Least ceiling height over the whole width of the loft's means of egress"}
+
+# Egress step 3, the remaining sections (2026-11-14): exterior doors' landings (R318.3), ramps (R318.8), alternating
+# tread devices (R318.7.12) and ship's ladders (R318.7.13), as the architect marks them.
+exterior_door:
+  meaning: "An exterior door of the dwelling (the required egress door among them; a storm or screen door is not one), as the architect marks it"
+  measures:
+    exterior_door_is_egress_door: {unit: yes_no, meaning: "The door is the required egress door (R318.2)"}
+    exterior_door_width:      {unit: in, meaning: "Width of the door (the door leaf or leaves it serves)"}
+    exterior_door_inside_landing: {unit: yes_no, meaning: "There is a landing or floor on the inside of the door"}
+    exterior_door_outside_landing: {unit: yes_no, meaning: "There is a landing or floor on the outside of the door"}
+    exterior_door_landing_width: {unit: in, meaning: "Least width of the landings or floors on the door's two sides (across the direction of travel)"}
+    exterior_door_landing_depth: {unit: in, meaning: "Least dimension of the landings or floors on the door's two sides, measured in the direction of travel"}
+    exterior_door_outside_slope: {unit: count, meaning: "Greatest slope of the exterior landing or floor at the door, as rise over run (1/4 in 12 is 0.0208)"}
+    exterior_door_inside_drop: {unit: in, meaning: "How far the landing or floor on the inside is below the top of the threshold"}
+    exterior_door_outside_drop: {unit: in, meaning: "How far the landing or floor on the outside is below the top of the threshold"}
+    exterior_door_swings_outward: {unit: yes_no, meaning: "The door swings over the exterior landing, floor or stairway"}
+    exterior_door_outside_stair_risers: {unit: count, meaning: "Where there is no landing or floor on the outside: risers of the stairway on the outside of the door"}
+    exterior_door_outside_at_grade: {unit: yes_no, meaning: "The landing or floor on the outside of the door is at grade"}
+    exterior_door_access_to_grade: {unit: text, meaning: "How the exterior landing or floor reaches grade: ramp, stairway or none"}
+    exterior_door_onto_balcony: {unit: yes_no, meaning: "The door opens onto an exterior balcony accessed only from a door"}
+    exterior_door_balcony_area: {unit: sf, meaning: "Area of the exterior balcony the door opens onto"}
+
+ramp:
+  meaning: "A ramp within or serving the building, a porch or a deck (R318.8; a ramp not within or serving one is not marked), as the architect marks it"
+  measures:
+    ramp_slope:              {unit: count, meaning: "Greatest slope of the ramp, as rise over run (1 in 12 is 0.0833)"}
+    ramp_serves_egress_door: {unit: yes_no, meaning: "The ramp serves the egress door required by R318.2"}
+    ramp_site_constrained:   {unit: yes_no, meaning: "The architect states that complying with the 1 in 12 slope is technically infeasible because of site constraints"}
+    ramp_width:              {unit: in, meaning: "Least width of the ramp"}
+    ramp_landings_present:   {unit: yes_no, meaning: "There is a floor or landing at the top and bottom of the ramp, where each door opens onto it and where it changes direction"}
+    ramp_landing_width:      {unit: in, meaning: "Least width of its landings, perpendicular to the ramp slope"}
+    ramp_landing_depth:      {unit: in, meaning: "Least depth of its landings, in the direction of the ramp slope"}
+    ramp_handrail_sides:     {unit: count, meaning: "Sides of the ramp with a handrail (0, 1 or 2)"}
+
+alternating_tread_device:
+  meaning: "An alternating tread device (R202: a device with steps alternately attached to a center rail or to side rails), as the architect marks it"
+  measures:
+    atd_means_of_egress:     {unit: yes_no, meaning: "The device is an element of a means of egress: no required means of egress stairway or ramp serves the same space at each adjoining level, and the space needs a means of egress"}
+    atd_area_served:         {unit: sf, meaning: "Gross floor area of the loft, mezzanine or similar area the device serves"}
+    atd_area_is_loft_or_mezzanine: {unit: yes_no, meaning: "The area the device serves is a loft, mezzanine or similar area"}
+    atd_only_access_kitchen_or_bath: {unit: yes_no, meaning: "The device provides the only access to a kitchen or bathroom"}
+    atd_clear_width_at_handrail: {unit: in, meaning: "Least clear width of the device at and below its handrails"}
+    atd_tread_depth:         {unit: in, meaning: "Least tread depth, measured horizontally between the vertical planes of the foremost projections of adjacent treads"}
+    atd_projected_tread_depth: {unit: in, meaning: "Least projected tread depth"}
+    atd_tread_width:         {unit: in, meaning: "Least tread width"}
+    atd_riser_height:        {unit: in, meaning: "Greatest riser height, measured vertically between the leading edges of adjacent treads"}
+    atd_angle:               {unit: count, meaning: "Angle of ascent from the horizontal that its riser height and tread depth give, in degrees (least and greatest alike: the device's one angle)"}
+    atd_first_tread_at_floor: {unit: yes_no, meaning: "The initial tread begins at the same elevation as the platform, landing or floor surface"}
+    atd_handrail_sides:      {unit: count, meaning: "Sides of the device with a handrail (0, 1 or 2)"}
+
+ships_ladder:
+  meaning: "A ship's ladder (a steep stair with open risers and handrails on both sides), as the architect marks it"
+  measures:
+    ladder_means_of_egress:  {unit: yes_no, meaning: "The ship's ladder is an element of a means of egress: no required means of egress stairway or ramp serves the same space at each adjoining level, and the space needs a means of egress"}
+    ladder_area_served:      {unit: sf, meaning: "Gross floor area of the loft, mezzanine or similar area the ladder serves"}
+    ladder_area_is_loft_or_mezzanine: {unit: yes_no, meaning: "The area the ladder serves is a loft, mezzanine or similar area"}
+    ladder_only_access_kitchen_or_bath: {unit: yes_no, meaning: "The ladder provides the only access to a kitchen or bathroom"}
+    ladder_clear_width_at_handrail: {unit: in, meaning: "Least clear width of the ladder at and below its handrails"}
+    ladder_tread_depth:      {unit: in, meaning: "Least tread depth"}
+    ladder_tread_plus_nosing: {unit: in, meaning: "Least total of the tread depth plus the nosing projection"}
+    ladder_riser_height:     {unit: in, meaning: "Greatest riser height"}
+    ladder_handrail_sides:   {unit: count, meaning: "Sides of the ladder with a handrail (0, 1 or 2)"}

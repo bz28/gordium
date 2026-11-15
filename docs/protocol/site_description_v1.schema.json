@@ -1,0 +1,351 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "https://github.com/bz28/gordium/docs/protocol/site_description_v1.schema.json",
+ "title": "Gordium site description, gordium.site/1",
+ "description": "The lot and buildings a design tool sends Gordium's checker, in feet. The words: site_description_v1.md. Checks this schema can't state (Gordium refuses them too): every id unique across the lot, buildings, unsent and left_out; each problem's args exactly its code's blanks; the lot outline at least 3 different points; grade source 'none' exactly when there are no grade points; numbers finite.",
+ "type": "object",
+ "additionalProperties": false,
+ "required": [
+  "schema",
+  "units",
+  "host",
+  "lot",
+  "buildings",
+  "unsent",
+  "left_out",
+  "grade",
+  "inventory_complete",
+  "problems"
+ ],
+ "properties": {
+  "schema": {
+   "const": "gordium.site/1"
+  },
+  "units": {
+   "const": "ft",
+   "description": "Feet only: the tool converts once, at its own boundary."
+  },
+  "host": {
+   "$ref": "#/$defs/host"
+  },
+  "lot": {
+   "oneOf": [
+    {
+     "type": "null"
+    },
+    {
+     "$ref": "#/$defs/lot"
+    }
+   ]
+  },
+  "buildings": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/building"
+   }
+  },
+  "unsent": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/unsent"
+   }
+  },
+  "left_out": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/left_out"
+   }
+  },
+  "grade": {
+   "$ref": "#/$defs/grade"
+  },
+  "inventory_complete": {
+   "type": "boolean",
+   "description": "true only when the tool looked at everything on the lot: false makes every building's measuring need review."
+  },
+  "problems": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/problem"
+   },
+   "description": "Problems with the site as a whole (the lot outline, the file)."
+  }
+ },
+ "$defs": {
+  "host": {
+   "type": "object",
+   "description": "Which tool, version and file sent this, and the file's own units. For tracing only: never used in a decision.",
+   "properties": {
+    "name": {
+     "type": "string"
+    },
+    "version": {
+     "type": "string"
+    },
+    "document": {
+     "type": "string"
+    },
+    "model_units": {
+     "type": "string"
+    }
+   },
+   "required": [
+    "name",
+    "version",
+    "document",
+    "model_units"
+   ],
+   "additionalProperties": false
+  },
+  "point2": {
+   "type": "array",
+   "items": {
+    "type": "number"
+   },
+   "minItems": 2,
+   "maxItems": 2
+  },
+  "point3": {
+   "type": "array",
+   "items": {
+    "type": "number"
+   },
+   "minItems": 3,
+   "maxItems": 3
+  },
+  "lot": {
+   "type": "object",
+   "description": "The lot outline as its lot lines, in order.",
+   "properties": {
+    "id": {
+     "type": "string",
+     "minLength": 1,
+     "pattern": "\\S"
+    },
+    "edges": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/edge"
+     },
+     "minItems": 1
+    }
+   },
+   "required": [
+    "id",
+    "edges"
+   ],
+   "additionalProperties": false
+  },
+  "edge": {
+   "type": "object",
+   "description": "One lot line: a straight line's two ends, or points closely along a curved one (curved: true).",
+   "properties": {
+    "points": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/point2"
+     },
+     "minItems": 2
+    },
+    "curved": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "points",
+    "curved"
+   ],
+   "additionalProperties": false
+  },
+  "building": {
+   "type": "object",
+   "description": "One solid on the building layer, as its flat faces.",
+   "properties": {
+    "id": {
+     "type": "string",
+     "minLength": 1,
+     "pattern": "\\S"
+    },
+    "role": {
+     "const": "building"
+    },
+    "layer": {
+     "type": "string"
+    },
+    "name": {
+     "type": "string"
+    },
+    "floor": {
+     "type": [
+      "number",
+      "null"
+     ],
+     "description": "A floor block's height as drawn (ft); null or left out for any other solid."
+    },
+    "faces": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/face"
+     }
+    },
+    "problems": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/problem"
+     }
+    }
+   },
+   "required": [
+    "id",
+    "role",
+    "layer",
+    "faces",
+    "problems"
+   ],
+   "additionalProperties": false
+  },
+  "face": {
+   "type": "object",
+   "description": "A flat face: its outline and any holes, each at least 3 points [x, y, z].",
+   "properties": {
+    "points": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/point3"
+     },
+     "minItems": 3
+    },
+    "holes": {
+     "type": "array",
+     "items": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/point3"
+      },
+      "minItems": 3
+     }
+    }
+   },
+   "required": [
+    "points"
+   ],
+   "additionalProperties": false
+  },
+  "unsent": {
+   "type": "object",
+   "description": "An object that may be building but couldn't be sent (a block, a surface).",
+   "properties": {
+    "id": {
+     "type": "string",
+     "minLength": 1,
+     "pattern": "\\S"
+    },
+    "layer": {
+     "type": "string"
+    },
+    "kind": {
+     "type": "string",
+     "minLength": 1
+    },
+    "problem": {
+     "$ref": "#/$defs/problem"
+    }
+   },
+   "required": [
+    "id",
+    "layer",
+    "kind",
+    "problem"
+   ],
+   "additionalProperties": false
+  },
+  "left_out": {
+   "type": "object",
+   "description": "An object on the lot that wasn't sent. Each one makes the check need review.",
+   "properties": {
+    "id": {
+     "type": "string",
+     "minLength": 1,
+     "pattern": "\\S"
+    },
+    "layer": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "could_be_building": {
+     "type": "boolean"
+    },
+    "touching": {
+     "type": [
+      "boolean",
+      "null"
+     ],
+     "description": "Whether it touches a building sent; null: not known (then it counts as touching)."
+    },
+    "ground_like": {
+     "type": "boolean"
+    },
+    "context": {
+     "type": "boolean"
+    }
+   },
+   "required": [
+    "id",
+    "layer",
+    "could_be_building",
+    "touching",
+    "ground_like",
+    "context"
+   ],
+   "additionalProperties": false
+  },
+  "grade": {
+   "type": "object",
+   "description": "The ground: the spot grades or terrain points read, or none.",
+   "properties": {
+    "source": {
+     "enum": [
+      "spot",
+      "finished_spots",
+      "terrain",
+      "none"
+     ]
+    },
+    "points": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/point3"
+     }
+    }
+   },
+   "required": [
+    "source",
+    "points"
+   ],
+   "additionalProperties": false
+  },
+  "problem": {
+   "type": "object",
+   "description": "Why something can't be measured: a measuring stop's code and the text for its blanks.",
+   "properties": {
+    "code": {
+     "type": "string",
+     "description": "A key of model_measurement/stops.py STOPS."
+    },
+    "args": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "string"
+     }
+    }
+   },
+   "required": [
+    "code",
+    "args"
+   ],
+   "additionalProperties": false
+  }
+ }
+}

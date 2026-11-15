@@ -1,0 +1,151 @@
+title: "R-1a, 111 Eastwood Ave: a three-story house and a frame garage on a real 100 ft lot"
+what: >-
+  The real tax lot at 111 Eastwood Avenue (parcel 500700-111.-2-2, NYS Tax Parcels Public, looked up 2026-10-27;
+  zone R-1a on the City's zoning map, checked live that day), turned so its street line (Eastwood Ave, the 100 ft
+  line) runs from (0, 0) along +x and the lot lies in +y. Treated as surveyed for this run (the tax map is ±2 ft), on
+  flat ground at elevation 0 (the real ground falls about 21 ft across the lot; Gordium's MVP assumes flat ground).
+  A 40 × 50 ft house of three 10 ft stories, 30 ft back from the street, and a detached 20 × 22 ft frame garage behind
+  it. Every applicable R-1a rule is worked out by hand from Chapter 325 and the zoning charts; distances to the
+  slightly slanted lot lines use the point-to-line distance (the perpendicular from the house corner to the line).
+  Then the house and garage move 6 ft toward the street: the front yard falls to 24 ft and fails.
+district: R-1a
+use: one_family_detached
+lot:
+  # tax-map corners in the local frame (ft): street line first
+  points: [[0.0, 0.0], [100.0, 0.0], [99.96, 129.88], [-0.04, 129.93]]
+  surveyed: true
+buildings:
+  - id: house
+    outline: [[30, 30], [70, 30], [70, 80], [30, 80]]
+    base: 0
+    floors: [10, 10, 10]
+  - id: garage
+    outline: [[72, 95], [92, 95], [92, 117], [72, 117]]
+    base: 0
+    top: 12
+grade: {elevation: 0}
+stated:
+  accessory_buildings: [garage]      # the garage is an accessory building (the architect says so)
+  accessory_frame: true              # a wood-frame garage: §325-25C's distances apply
+  sleeping_rooms: 4
+  parking_spaces: 2
+  unrelated_persons: 1               # one lodger with the family
+  unrelated_persons_with_children: 1
+  owner_occupied: true
+  accessory_dwelling_unit: false
+  functional_family_unit: false
+  home_occupation: false
+expected:
+  R-1a.use:
+    status: complies
+    working: "a one-family dwelling, detached: marked • for R-1A"
+    cites: "§325-8A(2); zoning chart p.2, One-family dwelling, detached, R-1A •"
+  R-1a.lot_area_one_family_detached:
+    status: complies
+    values: {row: [12990.5, 10000]}       # [proposed, required] worked by hand
+    working: "shoelace area of the four corners = 12,990.5 sf ≥ 10,000 sf"
+    cites: "§325-8A(6); chart p.3, Minimum Lot Size, One-family dwelling, detached, R-1A 10,000 sf"
+  R-1a.lot_width_one_family_detached:
+    status: complies
+    values: {row: [100.0, 75]}       # [proposed, required] worked by hand
+    working: "frontage on Eastwood Ave (0,0)–(100,0) = 100.0 ft ≥ 75 ft"
+    cites: "§325-8A(7) (frontage measured on a public right-of-way); chart p.3, Minimum Lot Width, R-1A 75 ft"
+  R-1a.stories:
+    status: complies
+    values: {row: [3, 3]}       # [proposed, required] worked by hand
+    working: "3 floor blocks of 10 ft on the ground = 3 stories ≤ 3"
+    cites: "§325-3B STORY; §325-8A(8); chart p.3, Number of stories, R-1A 3"
+  R-1a.height:
+    status: complies
+    values: {row: [30.0, 35]}       # [proposed, required] worked by hand
+    working: "flat roof at 10 + 10 + 10 = 30 ft above flat grade 0 = 30 ft ≤ 35 ft (no bonus used)"
+    cites: "§325-3B HEIGHT OF BUILDING; chart p.3, Height in feet, R-1A 35 ft"
+  R-1a.lot_coverage:
+    status: complies
+    values: {row: [18.78, 20]}       # [proposed, required] worked by hand
+    working: "house 40 × 50 = 2,000 + garage 20 × 22 = 440 → 2,440 sf ≤ 20% × 12,990.5 = 2,598.1 sf (accessory buildings count)"
+    cites: "§325-8A(10); §325-3B BUILDING AREA; chart p.3, Percent of lot area, R-1A 20%"
+  R-1a.front_yard:
+    status: complies
+    values: {row: [30.0, 25]}       # [proposed, required] worked by hand
+    working: "street line y = 0 to the house front y = 30: 30.0 ft ≥ 25 ft"
+    cites: "§325-3B YARD, FRONT; chart p.3, Front (minimum), R-1A 25 ft"
+  R-1a.side_yards:
+    status: complies
+    values: {east: [29.98, 10], west: [30.01, 10]}       # [proposed, required] worked by hand
+    working: >-
+      west line (0,0)–(−0.04,129.93), nearest house corner (30,30): 30.01 ft; east line (100,0)–(99.96,129.88),
+      nearest corner (70,80): 29.98 ft; smaller 29.98 ≥ 10 and larger 30.01 ≥ 10 (to the principal building;
+      §325-25 exempts the garage from the chart's side yards)
+    cites: "§325-3B YARD, SIDE; chart p.3, Side (one side / other side minimum), R-1A 10 ft / 10 ft; §325-25"
+  R-1a.rear_yard:
+    status: complies
+    values: {row: [49.90, 32.48]}       # [proposed, required] worked by hand
+    working: >-
+      lot depth = average of the side lines (129.93 + 129.88) ÷ 2 = 129.905 ft; 25% = 32.48 ft, under the 50 ft cap
+      and over the 20 ft floor → 32.48 ft required; rear line (99.96,129.88)–(−0.04,129.93) to the house back y = 80:
+      49.90 ft ≥ 32.48 ft
+    cites: "§325-8A(14)(a)-(b); chart p.3, Rear, R-1A 25% / 50 ft, note 16 (not less than 20 ft)"
+  R-1a.yard_projections:
+    status: complies
+    values: {row: [30.0, 23]}       # [proposed, required] worked by hand
+    working: "a flat-roofed box with no eaves: the yards to its outermost part equal the yards above, all within §325-18B's 2 ft allowance; the tightest is the front: 30.0 ft to the outermost part, ≥ 25 − 2 = 23 ft"
+    cites: "§325-18B"
+  R-1a.accessory_buildings:
+    status: complies
+    values: {row: [95.0, 25]}       # [proposed, required] worked by hand
+    working: >-
+      garage to the street line 95.0 ft (not in the 25 ft front yard); frame, in an R-1 district: east side line
+      7.96 ft ≥ 6 ft, rear line 12.88 ft ≥ 3 ft
+    cites: "§325-25A (not in a required front yard); §325-25C (frame: R-1 side 6 ft, rear 3 ft)"
+  R-1a.parking_one_family:
+    status: complies
+    values: {row: [2, 2]}       # [proposed, required] worked by hand
+    working: "4 bedrooms → 2 spaces (4–5 bed or sleeping rooms per dwelling unit); 2 provided ≥ 2"
+    cites: "chart p.14, Minimum Parking Requirement, Residential, R-1A"
+  R-1a.occupancy_one_family:
+    status: complies
+    working: "a family and one unrelated person: one-family dwelling allows a family and not more than one unrelated individual (two if owner-occupied in R-1)"
+    cites: "§325-3B DWELLING, ONE-FAMILY (p.7)"
+  R-1a.stream_setback:
+    status: needs_review
+    working: >-
+      §325-26: no new structure nearer than 20 ft to an inlet wall or a stream bank (at average water level), in every
+      district. This site states nothing about a stream or inlet near the lot (no stream_near_lot, no stream_distance),
+      and the model can't show one, so it can't be settled: needs review until the architect says (never assumed)
+    cites: "§325-26 (chapter p.67); §325-3B STRUCTURE (p.19)"
+  R-1a.private_garage:
+    status: needs_review
+    working: >-
+      Chart p.2 line 32 and note 6: a private garage in R-1a is "For not more than three cars". The design draws a detached 20 × 22 ft garage, but nothing says how many cars it holds
+      (garage_cars is not stated, and a massing model can't show it): needs review until the architect says how many
+      cars the lot's private garages hold (never assumed 0)
+    cites: "chart p.2 line 32 and note 6; §325-3B GARAGE, PRIVATE (chapter p.11)"
+then:
+  move: [0, -6]
+  expected:
+    R-1a.front_yard:
+      status: does_not_comply
+      values: {row: [24.0, 25]}       # [proposed, required] worked by hand
+      working: "the house front at y = 24: 24.0 ft < 25 ft, 1'-0\" short"
+      cites: "chart p.3, Front (minimum), R-1A 25 ft"
+    R-1a.rear_yard:
+      status: complies
+      values: {row: [55.90, 32.48]}       # [proposed, required] worked by hand
+      working: "rear line to the house back y = 74: 55.90 ft ≥ 32.48 ft"
+      cites: "§325-8A(14)"
+    R-1a.side_yards:
+      status: complies
+      values: {east: [29.98, 10], west: [30.01, 10]}       # [proposed, required] worked by hand
+      working: "unchanged: 29.98 and 30.01 ≥ 10"
+      cites: "chart p.3, Side, R-1A"
+    R-1a.yard_projections:
+      status: complies
+      values: {row: [24.0, 23]}       # [proposed, required] worked by hand
+      working: "no eaves: the outermost part is the moved front wall, 24.0 ft ≥ 25 − 2 = 23 ft (§325-18B's 2 ft allowance)"
+      cites: "§325-18B"
+    R-1a.accessory_buildings:
+      status: complies
+      values: {row: [89.0, 25]}       # [proposed, required] worked by hand
+      working: "garage to the street 89.0 ft; east side 7.97 ≥ 6; rear 18.88 ≥ 3"
+      cites: "§325-25A, §325-25C"

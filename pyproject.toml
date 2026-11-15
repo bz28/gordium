@@ -1,0 +1,45 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gordium"
+version = "0.1.0"
+# The Pythons CI tests (3.12 on Linux; 3.12 and 3.14 on Windows; Mac checked on 3.14). The upper bound makes pip
+# refuse a newer Python with "requires a different Python" before it tries to build rhino3dm, shapely and pyyaml
+# from source (no 3.15 wheels yet: on Windows that ends in "Microsoft Visual C++ 14.0 or greater is required").
+requires-python = ">=3.12,<3.15"
+# pdfplumber and pdfminer.six are pinned exactly: a different version could extract text differently.
+# shapely, numpy and rhino3dm are pinned too: measuring a model must give the same numbers on every machine
+# (numpy fits the roof planes, model_measurement.places.ithaca_city.measure._planes).
+dependencies = ["pyyaml>=6", "pdfplumber==0.11.10", "pdfminer.six==20260107", "shapely==2.1.2", "numpy==2.5.4",
+                "rhino3dm==8.35.0"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "openpyxl==3.1.5",   # openpyxl reads the architects' spreadsheets and writes the rules workbook
+       "rhino3dm==8.35.0"]               # reads the architects' Rhino models in tests, without Rhino
+# Only for writing the rules workbook outside the dev setup.
+export = ["openpyxl==3.1.5"]
+# Only for running the AI labeling and rule-drafting scripts on your own machine (never in CI; tests use
+# a fake client).
+labeling = ["anthropic==1.15.0"]
+
+[tool.setuptools.packages.find]
+where = ["packages/rule_format", "packages/document_extraction", "packages/section_labeling", "packages/rule_drafting",
+         "packages/rule_export", "packages/project_report", "packages/model_measurement", "packages/design_checker",
+         "packages/envelope_builder", "packages/site_lookup"]
+include = ["rule_format*", "document_extraction*", "section_labeling*", "rule_drafting*", "rule_export*", "project_report*",
+           "model_measurement*", "design_checker*", "envelope_builder*", "site_lookup*"]
+
+[tool.setuptools.package-data]
+rule_format = ["*.yaml"]
+section_labeling = ["*.yaml"]
+rule_drafting = ["*.yaml"]
+site_lookup = ["*.yaml", "adapters/*/*.yaml"]   # each place's lookup data
+design_checker = ["place.json"]   # the plugin's copy of its place's settings (rule_format/place.py)
+
+[tool.pytest.ini_options]
+testpaths = ["packages"]
+addopts = "--import-mode=importlib"
+# a test still running after 5 minutes prints every thread's stack (the run then shows where it hangs)
+faulthandler_timeout = 300

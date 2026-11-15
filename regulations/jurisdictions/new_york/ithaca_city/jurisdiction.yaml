@@ -1,0 +1,51 @@
+# Gordium's settings for this place: what the code needs to know about it that its law doesn't say. Kept by hand.
+# Read only through the registry (packages/rule_format/rule_format/place.py); each field says what it is for. A new
+# place starts from a copy of this file (docs/adding_a_place.md).
+
+name: City of Ithaca                  # as the architect reads it ("Gordium checks City of Ithaca lots only")
+
+inherits:                             # state law folders whose law applies here too (each <state>/<name>, a folder
+  - new_york/new_york_state           # with a state.yaml): New York's Residential Code (egress, R318-R321)
+
+boundary:                             # which land this code covers (the address lookup's test)
+  swis: ["500700"]                    # NYS municipality codes (SWIS) on a tax parcel that are this place
+  neighbours:                         # nearby places' SWIS codes, named when an address is in one of them
+    "503089": Town of Ithaca          # (the Town of Ithaca has its own zoning code)
+    "503000": Town of Ithaca
+
+coordinates:                          # what every map service is asked in; a looked-up lot's origin is kept in it
+  epsg: 2261                          # NAD83 / New York Central
+  unit: us_survey_ft                  # US survey feet (1200/3937 m); Gordium itself works in international feet
+
+time_zone:                            # the place's own day: the date a lookup was checked and a Draw saved
+  name: America/New_York
+  standard_utc_offset_hours: -5
+  daylight_saving: us_federal         # one hour ahead from the 2nd Sunday of March to the 1st Sunday of November
+                                      # (15 U.S.C. 260a); Rhino's Python has no time-zone database
+
+districts:
+  chart_column: 'R-\d[A-Z]*|RU'       # a zoning-chart column that is a district, as the chart prints it (R-1B, RU)
+
+law:                                  # the documents in 1_source_documents/ the code reads, by what they are
+  zoning_code: chapter_325_zoning_2026-10.pdf
+  zoning_chart: zoning_charts_2026-04.pdf
+
+addresses:                            # how an address here is written (the start box and the type-ahead)
+  tail: ", Ithaca, NY"                # added to an address typed with no town, before it is looked up
+  own_words: [ithaca]                 # the place's own name in an address
+  also_written: [city of ithaca, ithaca city]       # read as its own name
+  zip_codes: ["14850", "14851", "14852", "14853"]
+  state_words: [ny, new, york]
+  county_words: [tompkins, county]
+  nearby_places: [lansing, dryden, danby, enfield, newfield, caroline, ulysses, groton, trumansburg, freeville,
+                  varna, etna, slaterville, brooktondale, cayuga]   # share its mail and ZIP codes: another town
+  shares_mail_as: Ithaca, NY 14850    # the "is this lot in the City?" question: the mail address it shares ...
+  shares_mail_with: [Town of Ithaca, Cayuga Heights, Lansing, Dryden]   # ... with these places
+
+adapters:                             # the place's own code, by folder name
+  lookup: ithaca_city                 # packages/site_lookup/site_lookup/adapters/<name>/
+  measurement: ithaca_city            # packages/model_measurement/model_measurement/places/<name>/
+
+sample_site:                          # the real lot GordiumStart offers as a sample
+  folder: test_data/test_sites/new_york/ithaca_city/106_ithaca_rd
+  address: 106 Ithaca Rd, Ithaca, NY

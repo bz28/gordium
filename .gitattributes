@@ -1,0 +1,8 @@
+# Text is stored and checked out with LF line endings on every computer (Windows too), so the extracted law,
+# rulebooks and generated files compare the same everywhere. Binary files are never touched.
+* text=auto eol=lf
+*.pdf binary
+*.3dm binary
+*.xlsx binary
+*.png binary
+*.xz binary

@@ -1,0 +1,40 @@
+# A made-up second place for the registry's tests (packages/rule_format/tests/test_place.py): every value differs
+# from the City of Ithaca's, so a test can tell whose settings were used. Not a real place; no law, no rulebooks.
+
+name: Town of Testville
+
+boundary:
+  swis: ["999901", "999902"]
+  neighbours:
+    "999900": Village of Elsewhere
+
+coordinates:
+  epsg: 2262
+  unit: us_survey_ft
+
+time_zone:
+  name: America/Chicago
+  standard_utc_offset_hours: -6
+  daylight_saving: us_federal
+
+districts:
+  chart_column: 'T-\d'
+
+law:
+  zoning_code: testville_zoning_code.pdf
+  zoning_chart: testville_chart.pdf
+
+addresses:
+  tail: ", Testville, TS"
+  own_words: [testville]
+  also_written: [town of testville]
+  zip_codes: ["99999"]
+  state_words: [ts]
+  county_words: [test, county]
+  nearby_places: [elsewhere]
+  shares_mail_as: Testville, TS 99999
+  shares_mail_with: [Elsewhere, Nowhere]
+
+adapters:
+  lookup: fake_town
+  measurement: fake_town
