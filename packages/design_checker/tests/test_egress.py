@@ -326,6 +326,7 @@ def test_a_state_rule_not_written_for_each_part_needs_review_never_dropped():
     [row] = [i for i in got["items"] if i["rule"] == "general.whole_building"]
     assert row["status"] == present.REVIEW and row["reason"] == egress.NOT_PER_PART
     assert row["code"]["section"]                               # still names its code section
+    assert row["name"] == f"Egress · {whole['title']}"           # round 4: its title once, never twice
 
 
 @pytest.mark.parametrize("settings", ["results_title: 5\n", "- a list\n", "name: [\n"])
@@ -358,3 +359,8 @@ def test_a_saved_report_names_the_interior_it_was_checked_against(tmp_path):
     assert f"Interior checked: sha256 {egress.fingerprint(house)}" in cells
     check_site(SITE, dict(FACTS), report_path=out)
     assert "Interior: none drawn yet" in [c.value for c in load_workbook(out)["Check"]["A"] if c.value]
+    # round 4: an interior with no rooms was fingerprinted but not checked: never said "checked"
+    empty = dict(ranch(), rooms=[])
+    check_site(SITE, dict(FACTS), interior=empty, report_path=out)
+    cells = [c.value for c in load_workbook(out)["Check"]["A"] if c.value]
+    assert f"Interior: sha256 {egress.fingerprint(empty)} (no rooms drawn yet, egress not checked)" in cells

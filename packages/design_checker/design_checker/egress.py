@@ -155,7 +155,7 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
                          "summary": WAITING_WORDS if waiting and not law["problems"] else present._summary(mine),
                          "rules": len(law["rules"]), "rulebook": _shown(law["rulebook"]),
                          "problems": list(law["problems"])})
-    return {"sections": sections, "items": items, "rows": rows, "results": results,
+    return {"sections": sections, "items": items, "rows": rows, "results": results, "waiting": waiting,
             "interior": None if measured is None else {k: measured[k] for k in ("parts", "problems", "not_checked")},
             "interior_sha256": fingerprint(interior)}
 
@@ -207,8 +207,7 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
             key = each_part._key(rule, n)
             results[key] = part_rules.rule_result([{"outcome": "needs_review"}] + ([{"outcome": results[key]}]
                                                                                    if key in results else []))
-            item = _own_item(law, f"{law['short'].lower()}.{key}", rule.get("title") if isinstance(
-                rule.get("title"), str) else key, present.REVIEW, NOT_PER_PART)
+            item = _own_item(law, f"{law['short'].lower()}.{key}", law["short"], present.REVIEW, NOT_PER_PART)
             out.append({**_decorated({**item, "rule": key}, law, rule), "reason": NOT_PER_PART})
     out += [_own_item(law, f"{law['short'].lower()}.interior#{n}", "Interior drawing", present.REVIEW,
                       INTERIOR_PROBLEM.format(why=why)) for n, why in enumerate(measured["problems"], 1)]
