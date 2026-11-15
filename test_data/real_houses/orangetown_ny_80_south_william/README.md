@@ -17,8 +17,10 @@
 | `house.yaml` | The house in the interior description format (`gordium.interior/1`). Every value has a `cite` (sheet, drawing, callout); every key the drawings can't fill is under `absent`, with why |
 | `expected.yaml` | What the measuring code should return, worked by hand before the code ran (its own commit) |
 | `answer_key.yaml` | For each egress rule: what the drawings give, the arithmetic, and the outcome (complies / fails / needs review) |
+| `hand_check.yaml` | All 115 rules of New York State's egress rulebook worked by hand before the checker ran: what the code says about the house (`truth`) and what the checker should say given the description (`predicted`) |
+| `evaluation.md` | **The full egress check on this house**: every rule's answer from the checker beside the hand-check, and why they differ. Start here |
 
-`packages/model_measurement/tests/test_real_houses.py` checks all three.
+`packages/model_measurement/tests/test_real_houses.py` checks the first three; `packages/design_checker/tests/test_real_house_egress.py` checks the full check against `hand_check.yaml` and `evaluation.md`.
 
 ## What the drawings give, and what they don't
 
