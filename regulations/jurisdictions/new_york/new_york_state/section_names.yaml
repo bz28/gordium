@@ -1,12 +1,13 @@
-# Plain names for the sections (labeled rule) of the 2025 Residential Code of New York State that Gordium doesn't check yet, as the
-# check names them to an architect ("Not checked yet by Gordium: window fall protection (R321.2.1), hallway width
+# Plain names for the sections (labeled rule, then some labeled flag) of the 2025 Residential Code of New York State
+# that Gordium doesn't check yet, as the check names them to an architect ("Not checked yet by Gordium: window fall protection (R321.2.1), hallway width
 # (R318.6) and 84 more: check these by hand"). Kept by hand; wording only.
 #
 # WHICH sections are not checked yet is never kept here: it is generated from the labels and the rulebook
 # (6_coverage_report/gov.ny.residential.2025.rules.yaml, `not_checked_yet`, by `python -m section_labeling coverage`;
 # CI checks it is current). A section that list names and this file doesn't is still named, by the law's own
-# heading (as every piece labeled flag is: listed after these, as calling for a judgment Gordium doesn't raise yet).
-# The order here is the order the check lists them in: what most houses have first.
+# heading. The order of the rule pieces here is the order the check lists them in: what most houses have first.
+# Pieces labeled flag are listed after every rule piece, in the book's order, as calling for a judgment Gordium
+# doesn't raise yet; the names below for Appendix BF's and BO's flags tell their many "General" headings apart.
 names:
   R321.2.1: window fall protection
   R318.6: hallway width
@@ -38,3 +39,43 @@ names:
   BO105.11: "existing buildings: escape openings in a reworked basement"
   BO108.2: "existing buildings: bed and breakfast occupancy"
   BO108.3: "existing buildings: bed and breakfast conversions"
+  # labeled flag (listed in the book's order, after the rule pieces): Appendix BF's and Appendix BO's, whose headings
+  # alone repeat "General", "Replacement windows"
+  BF101.1: "patio covers: what Appendix BF covers"
+  BF101.2: "patio covers: permitted uses"
+  BF103.1: "patio covers: enclosure walls"
+  R102.6: "existing buildings: which code applies"
+  R102.6.1: "existing buildings: additions, alterations and repairs go to Appendix BO"
+  R102.6.2: "existing buildings: change of use"
+  BO101.1: "existing buildings: purpose of Appendix BO"
+  BO102.1: "existing buildings: alterations, general"
+  BO102.1.2: "existing buildings: nonconforming features"
+  BO102.6: "existing buildings: replacement windows"
+  BO104.1: "existing buildings: repairs, general"
+  BO104.1.1: "existing buildings: repairs keep fire and life safety"
+  BO105.1: "existing buildings: alteration levels, general"
+  BO105.1.1: "existing buildings: Level 1 alterations"
+  BO105.1.2: "existing buildings: Level 2 alterations"
+  BO105.1.3: "existing buildings: alterations keep fire and life safety"
+  BO105.2.2: "existing buildings: replacement door and window sizes"
+  BO105.2.3: "existing buildings: replacement escape windows"
+  BO105.3: "existing buildings: nonconformities in alterations"
+  BO105.8: "existing buildings: means of egress in alterations"
+  BO105.10.1: "existing buildings: existing stair width"
+  BO105.10.2: "existing buildings: existing stair headroom"
+  BO105.10.3: "existing buildings: existing stair landings"
+  BO105.10.4: "existing buildings: existing stair treads and risers"
+  BO105.13: "existing buildings: habitable attics above the second story"
+  BO106.1: "existing buildings: additions, general"
+  BO106.1.1: "existing buildings: additions creating or extending a nonconformity"
+  BO106.1.2: "existing buildings: other work in additions"
+  BO106.7: "existing buildings: sprinklers in additions"
+  BO107.1: "existing buildings: change of occupancy, general"
+  BO107.2: "existing buildings: change of occupancy, compliance"
+  BO107.2.1: "existing buildings: existing escape openings after a change of occupancy"
+  BO107.2.2: "existing buildings: existing stairs after a change of occupancy"
+  BO108.4: "existing buildings: bed and breakfast means of egress"
+  BO109.1: "existing buildings: historic buildings, general"
+  BO109.8.1: "existing buildings: historic buildings' means of egress"
+  BO109.8.5: "existing buildings: historic stair railings"
+  BO109.8.6: "existing buildings: historic guard openings"

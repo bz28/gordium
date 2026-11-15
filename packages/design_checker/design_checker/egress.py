@@ -122,8 +122,8 @@ def laws(jurisdiction) -> dict:
 
 def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:
     """([{section, name, label, file}] the law's pieces labeled rule or flag that have no rules in the rules loaded:
-    the rule pieces first, in the order section_names.yaml gives, then the book's; then the flag pieces, the book's
-    order], the problem reading the list or None). Read from the generated coverage list, never from code. A piece
+    the rule pieces first, in the order section_names.yaml gives, then the book's; then the flag pieces, in the
+    book's order], the problem reading the list or None). Read from the generated coverage list, never from code. A piece
     it says has rules counts as not checked unless every one of those rules is among `rules` (a rulebook refused, or
     a list older than the rulebook, never makes a section look checked), and so does every piece its own
     `not_checked_yet` names (the two never disagree in a generated list; if they do, the more cautious stands)."""
@@ -152,7 +152,8 @@ def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]
     except Exception:               # wording only: the law's own headings stand in
         names = {}
     order = {pid: n for n, pid in enumerate(names)}
-    missing.sort(key=lambda m: (m["label"] == "flag", order.get(m["section"], len(order))))   # stable: the book's
+    # the rule pieces in section_names.yaml's order, then the book's; the flag pieces after them, in the book's order
+    missing.sort(key=lambda m: (1, 0) if m["label"] == "flag" else (0, order.get(m["section"], len(order))))
     return [{**m, "name": names[m["section"]] if isinstance(names.get(m["section"]), str) and
              names[m["section"]].strip() else m["heading"]} for m in missing], None
 

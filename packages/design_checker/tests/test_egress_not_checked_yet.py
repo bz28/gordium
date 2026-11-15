@@ -77,6 +77,9 @@ def test_the_flag_sections_are_listed_too_after_the_rule_sections():
     assert "(R321.2.1)" in rules_part and "(R319.5)" not in rules_part
     for p in flags:
         assert f"({p})" in flags_part
+    assert sorted(flags, key=lambda p: flags_part.index(f"({p})")) == flags         # in the book's order
+    assert "existing buildings: alterations, general (BO102.1)" in flags_part      # round 2: no bare "General"
+    assert "General (" not in flags_part
     assert "Window fall protection" not in flags_part
     assert f"and {len(uncovered()) - 2} more" in line["name"]
 
