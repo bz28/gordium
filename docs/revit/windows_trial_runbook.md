@@ -19,7 +19,7 @@ edit. The trial ends with a go / no-go and a filled-in results table, not with a
 
 | # | Question | Go if | How it is answered |
 |---|---|---|---|
-| Q1 | Does Revit run acceptably on this laptop (the Windows laptop of section 2, 32 GB) with the add-in and the worker running? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the laptop is not short of memory (Windows stays under 90% of RAM in use: a proposed number, section 6) | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
+| Q1 | Does Revit run acceptably on this laptop (the Windows laptop of section 2, 32 GB) (Revit alone first, then with the add-in and the worker running)? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the laptop is not short of memory (Windows RAM in use stays below 90% while working: a proposed number, section 6) | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
 | Q2 | Can a minimal C# add-in start the Python worker and get an answer back? | The add-in starts `python -m design_checker serve`, sends `hello`, then `check_site` for the box-house scene, and the answer matches what the Mac gives | Days 3 to 4 |
 | Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each real model (Snowdon Towers alone answers the reading half only, as "provisional (Snowdon)": it has no Ithaca lot, and its survey coordinates stay "not tested"; Q3 is not a go until the architects' models are read), the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
 | Q4 | How long does reading take after an edit? | Within the targets in section 6, or the miss recorded and the MVP planned as "check on a button" (section 6: a slow read is not a stop) | Day 10, measured in section 5 |
@@ -163,7 +163,7 @@ details that matter here:
 
 ## 5. What to measure and write down
 
-Fill these in as you go; this page is where the results live. "Mac" below is only where the Python checker also runs; Revit and the add-in run on the laptop.
+Fill these in as you go; this page is where the results live. "Mac" below is the reference machine whose answers the laptop must match; Revit and the add-in run on the laptop.
 
 **The machine** (day 1)
 
@@ -186,7 +186,6 @@ Fill these in as you go; this page is where the results live. "Mac" below is onl
 | Orbit and select in each model in hand: smooth, laggy, or unusable | | |
 | Memory use in Task Manager (percent of RAM in use, and whether it pages heavily), Revit alone (day 2) | | |
 | Memory use in Task Manager, Revit with the add-in and the worker running (day 4) | | |
-| Windows free RAM with Revit open | | |
 
 **Q2: the worker from the add-in** (days 3 to 4)
 
@@ -238,8 +237,8 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 
 | If | Then |
 |---|---|
-| By the end of day 2, opening a model (Snowdon Towers or an architect's) takes longer than 3 minutes, orbiting is unusable, or Windows memory stays above 90% in use with only Revit running | Switch to a cloud Windows machine with more memory than the laptop (64 GB or more) and restart the setup list there (Revit's licence there: Open items 3). Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
-| Revit runs but the add-in plus Revit leaves Windows above 90% of RAM in use | Same switch. Q1 is "no" for this laptop, whatever else the trial finds |
+| By the end of day 2, opening a model (Snowdon Towers or an architect's) takes longer than 3 minutes, orbiting is unusable, or Windows RAM in use reaches 90% or more during ordinary work with only Revit running | Switch to a cloud Windows machine with more memory than the laptop (64 GB or more) and restart the setup list there (Revit's licence there: Open items 3). Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
+| Revit runs but the add-in plus Revit takes Windows to 90% or more of RAM in use during ordinary work | Same switch. Q1 is "no" for this laptop, whatever else the trial finds |
 | The cloud machine is also too slow | Stop. Report: the Revit plan needs a faster Windows machine before anything else is built |
 | The worker cannot be started from the add-in, or its answers differ from the Mac's for the same site and facts | Stop and find out why. A different answer is a bug in the add-in, the install, or the worker, and nothing else is built until it is understood (the same description and the same rulebook must give the same answer) |
 | The add-in cannot tell a curved face from a flat one on a real model, or cannot give stable ids | Stop reading work and write up what Revit's API gives. A reader that cannot report curved faces cannot pass the suite, so no check from it can be trusted |
