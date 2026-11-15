@@ -1,0 +1,14 @@
+{
+ "files": {
+  "A-601.svg": "991b303d11e32248e2ff9103fc18f1f82c015f8a65009f39b8b80e3280905799",
+  "G-001.svg": "1cdd9497c6a52f5dc8866a1dfbd73017f9acc2feab52c6e6744113ef02219478",
+  "LS-101.svg": "3776aa35d626b8d459a089269d22c124cfce6308b705889fd16b307edcc82c49",
+  "code_analysis.csv": "bdb070ed67ee9719e5e101f778ad68e8a015b63f687bd1fbb1737915d030a1de",
+  "escape_window_schedule.csv": "f48bb7d02cf0be4a3f7265814eb11ddce95db2a8660fae76c0488d121555cd3a",
+  "permit_sheets.pdf": "ce8f7a42db1fd2debc76d2b22fad8ce9d4936c1b92880cca1dfd6c6108cf2123"
+ },
+ "rules_fingerprints": {
+  "new_york/ithaca_city": "b1959da3327498f21c03366e05e7da6e8f8e455fb78deb2cab3e908b1458ec80"
+ },
+ "worker_fingerprint": "a6c221d0accf8bfd359ab36a60674cb9cc68f6f05f44b16db1e38e9c32d591ac"
+}

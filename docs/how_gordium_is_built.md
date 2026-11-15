@@ -41,6 +41,7 @@ An architect edits a design in Rhino, and Gordium says, for every zoning rule: *
 | Rules spreadsheet | every rule, definition, use, open question and piece → one workbook with links to the City's words | `rule_export` | 9 |
 | Project report | a project's measurements + its zone's rules → the architects' own two-tab format, PASS / FAIL / NEEDS REVIEW per requirement | `project_report` | 10 |
 | Questions for the architects | every open question → one plain-English page | `docs/questions_for_architects.md` | 11 |
+| Egress permit sheets | a house's egress check + its interior description → G-001 code analysis, LS-101 life-safety plan, A-601 escape-window schedule (PDF, SVG, CSV, XLSX), each result the check's own ([plan](permit_sheets/plan.md)) | `permit_sheets` | 109 |
 
 ## Part 2: checking a design in Rhino
 

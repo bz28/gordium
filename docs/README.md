@@ -124,6 +124,7 @@ Kept on claude.ai, not in this repository, so they can be read without GitHub.
 | [rule_drafting](../packages/rule_drafting/README.md) | Step 5: AI drafts rules for every district; code checks every draft | Engineers | Drafting changes |
 | [rule_export](../packages/rule_export/README.md) | The rules spreadsheet people read, with links to the City's words | Engineers | The spreadsheet changes |
 | [project_report](../packages/project_report/README.md) | A project's compliance report in the architects' own spreadsheet format | Engineers | The report changes |
+| [permit_sheets](../packages/permit_sheets/README.md) | The egress sheets an architect attaches to a permit: code analysis, life-safety plan, escape-window schedule, printed from the check ([plan](permit_sheets/plan.md)) | Engineers, architects | The sheets change |
 | [site_lookup](../packages/site_lookup/README.md) | Type an address, get the site: the lot, street side, corner lot, ground and a zoning suggestion, each with its source | Engineers | The lookup changes |
 | [model_measurement](../packages/model_measurement/README.md) | Measures a Rhino model the way the City defines each measurement (lot, yards, building area, height) | Engineers | A measurement is added or changes |
 | [interior/interior_description_format.md](interior/interior_description_format.md) | The host-neutral interior description (`gordium.interior/1`) a Rhino, Revit or IFC reader sends for egress: rooms, escape openings, stairs, guards, the exit door | Engineers writing a reader | The format changes |
