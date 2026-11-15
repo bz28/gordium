@@ -19,7 +19,7 @@ edit. The trial ends with a go / no-go and a filled-in results table, not with a
 
 | # | Question | Go if | How it is answered |
 |---|---|---|---|
-| Q1 | Does Revit run acceptably on this laptop (the Windows laptop of section 2, 32 GB) with the add-in and the worker running? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the laptop is not short of memory (Windows is not near full RAM) | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
+| Q1 | Does Revit run acceptably on this laptop (the Windows laptop of section 2, 32 GB) with the add-in and the worker running? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the laptop is not short of memory (Windows stays under 90% of RAM in use: a proposed number, section 6) | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
 | Q2 | Can a minimal C# add-in start the Python worker and get an answer back? | The add-in starts `python -m design_checker serve`, sends `hello`, then `check_site` for the box-house scene, and the answer matches what the Mac gives | Days 3 to 4 |
 | Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each real model (Snowdon Towers alone answers the reading half only, as "provisional (Snowdon)": it has no Ithaca lot, and its survey coordinates stay "not tested"; Q3 is not a go until the architects' models are read), the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
 | Q4 | How long does reading take after an edit? | Within the targets in section 6, or the miss recorded and the MVP planned as "check on a button" (section 6: a slow read is not a stop) | Day 10, measured in section 5 |
@@ -33,11 +33,11 @@ Do these in order. Tick each when done and write the version you got in the note
 
 | Done | Step | Notes |
 |---|---|---|
-| [ ] | The new Windows laptop set up (GIGABYTE Gaming A16: Intel Core i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64; due 2026-11-18) | Windows 11 Home is fine for Revit. 32 GB meets Autodesk's recommendation for Revit 2027; Q1 still measures it with the add-in running |
+| [ ] | The new Windows laptop set up (GIGABYTE Gaming A16: Intel Core i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64; due 2026-11-18) | Windows 11 Home is expected to be fine for Revit (not yet checked against Autodesk's system requirements: confirm when installing). 32 GB meets Autodesk's recommendation for Revit 2027; Q1 still measures it with the add-in running |
 | [ ] | Windows updated; a note made of the laptop's RAM, cores, disk and graphics | Fills the machine rows of the results table |
 | [ ] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x), and the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and 10.x) | The worker client is built for both (see the first check the trial settles, section 7) |
 | [ ] | Git for Windows installed | |
-| [ ] | Python installed: the 64-bit Intel (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an Intel machine, so the Intel build is the one proven; this laptop is that machine type, so the normal build is used |
+| [ ] | Python installed: the 64-bit (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an x64 machine, so the 64-bit (x64) build is the one proven, and it is what this laptop runs |
 | [ ] | `git clone https://github.com/bz28/gordium.git`, then check out the branch the trial uses (see Open items) | |
 | [ ] | From the clone: `py -3.12 -m venv .venv`, then `.venv\Scripts\activate`, then `pip install -e ".[dev]"` | Matches the install step of the Windows job in `.github/workflows/ci.yml` |
 | [ ] | `pytest` passes | The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `ci.yml`); running them all is optional here, `pytest` is the one that proves the install |
@@ -96,7 +96,7 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 | 10 | Timing runs: the edit loop on every model in hand (Snowdon Towers too), five repeats each. Re-run `python -m design_checker.conformance` on the Mac with the final recordings | Section 5 complete |
 | 11 to 12 | Spare. Re-record anything that failed; chase the worst timing; test the other Revit version if only one was used | |
 | 13 | Write the go / no-go: answer Q1 to Q5 in section 1 with the numbers, list what surprised us, and what the add-in MVP plan must change | The section 5 tables filled in and signed off by Ben |
-| 14 | Commit the recordings and results in a PR (never push to main; Ben merges) and shut the cloud machine down if one was used | PR open |
+| 14 | Commit the recordings and results in a PR (never push to main; Ben merges) and shut the cloud machine down if the section 6 switch was used | PR open |
 
 ## 4. Recording the scenes from Revit
 
@@ -228,7 +228,7 @@ Fill these in as you go; this page is where the results live. "Mac" below is onl
 
 | Result | Count |
 |---|---|
-| Scenes recorded (of 15) | |
+| Scenes recorded (of 24) | |
 | Scenes passing `python -m design_checker.conformance` | |
 | Scenes that failed, with the reason for each | |
 
@@ -238,8 +238,8 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 
 | If | Then |
 |---|---|
-| By the end of day 2, opening a model (Snowdon Towers or an architect's) takes longer than 3 minutes, orbiting is unusable, or Windows memory stays near full with only Revit running | Switch to a cloud Windows machine (with 32 GB or more) and restart the setup list there (Revit's licence there: Open items 3). Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
-| Revit runs but the add-in plus Revit leaves Windows near full memory | Same switch. Q1 is "no" for this laptop, whatever else the trial finds |
+| By the end of day 2, opening a model (Snowdon Towers or an architect's) takes longer than 3 minutes, orbiting is unusable, or Windows memory stays above 90% in use with only Revit running | Switch to a cloud Windows machine with more memory than the laptop (64 GB or more) and restart the setup list there (Revit's licence there: Open items 3). Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
+| Revit runs but the add-in plus Revit leaves Windows above 90% of RAM in use | Same switch. Q1 is "no" for this laptop, whatever else the trial finds |
 | The cloud machine is also too slow | Stop. Report: the Revit plan needs a faster Windows machine before anything else is built |
 | The worker cannot be started from the add-in, or its answers differ from the Mac's for the same site and facts | Stop and find out why. A different answer is a bug in the add-in, the install, or the worker, and nothing else is built until it is understood (the same description and the same rulebook must give the same answer) |
 | The add-in cannot tell a curved face from a flat one on a real model, or cannot give stable ids | Stop reading work and write up what Revit's API gives. A reader that cannot report curved faces cannot pass the suite, so no check from it can be trusted |
@@ -256,7 +256,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
    repo in `~/Documents/gordium_archive/revit/sample_models/`): a multi-storey mixed-use building with real walls,
    floors, roofs and stairs, enough for Q1 and the reading half of Q3 (flat versus curved faces, `UniqueId`s, units).
    It has no Ithaca lot, so it cannot show a real zoning check: the architects' models are still needed for that.
-2. **The Windows machine: decided.** A native Windows laptop, a GIGABYTE Gaming A16 (i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64), arriving 2026-11-18 (Ben, 2026-11-14). It replaces the Parallels plan of 2026-11-05. The trial starts when it arrives. The Autodesk account for the
+2. **The Windows machine: decided.** A native Windows laptop, a GIGABYTE Gaming A16 (i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64), arriving 2026-11-18 (Ben, 2026-11-14). It replaces the plan of 2026-11-05 to run Windows as a virtual machine (a pretend computer) on the Mac. The trial starts when it arrives. The Autodesk account for the
    30-day Revit trial is in hand (Ben, 2026-11-11; its login is kept outside the repo, never in it).
 3. **The cloud Windows option**, decided up front so a switch on day 2 costs no time: which provider, and who
    pays, and how Revit is licensed there. The setup list ends with installing Revit, and whether Autodesk allows a
@@ -264,7 +264,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
    its own trial account or a paid licence.
 4. **Which branch the trial clones.** This page sits on the tidy-up stack's top branch (PR #78); the trial needs
    the stack merged, or that branch, since `recorded/revit/` and the conformance command only exist there.
-5. **Confirm the numbers in section 6** (3 minutes to open a model, 2 and 10 seconds per edit).
+5. **Confirm the numbers in section 6** (3 minutes to open a model, 90% of RAM in use, 2 and 10 seconds per edit).
 
 **Checks the trial itself settles** (nothing in the repo answers them today):
 
