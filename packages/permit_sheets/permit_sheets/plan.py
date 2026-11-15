@@ -103,7 +103,13 @@ def levels(got: dict, schedule: list[dict]) -> dict:
         if not placed:
             notes.append({"text": f"Stair {stair['name']}: no floor drawn at its foot or head to show it on",
                           "status": status})
-    if interior.get("rooms") is None:           # a list left out: not read, never "no rooms"
+    # what the check read (its measured parts), never the description's keys: a list left out or malformed is "not
+    # read", never "none"
+    parts = (got["measured"] or {}).get("parts") or {}
+    rooms_read = parts.get("sleeping_room") is not None
+    if parts.get("emergency_escape_opening") is None:
+        notes.insert(0, {"text": "Escape openings: not read from the drawing", "status": present.REVIEW})
+    if not rooms_read:
         notes.insert(0, {"text": "Rooms: not read from the drawing", "status": present.REVIEW})
     # an escape opening the schedule lists whose room is on no floor drawn here (its room not read, or unknown):
     # named in the notes with its result, never dropped from the plan
@@ -113,13 +119,14 @@ def levels(got: dict, schedule: list[dict]) -> dict:
             notes.append({"text": f"{tag_words(s)} (in {s.get('Room') or 'a room not read'}, not on this plan)",
                           "status": s["status"], "tag": True})
     return {"levels": out, "undrawn": undrawn, "notes": notes, "doors": _door_lines(got, interior),
-            "rooms_read": interior.get("rooms") is not None}
+            "rooms_read": rooms_read}
 
 
 def tag_words(row: dict, short: bool = False) -> str:
     """An escape opening's tag: its mark (the schedule's) and its result; `short` leaves out its name (on the plan,
     where the schedule names it)."""
     if row["Mark"] == "-":
-        return f"No escape opening marked: {row['Result']}"
+        return (f"No escape opening marked: {row['Result']}" if row["Opening"] == "none marked"
+                else f"{row['Opening'].capitalize()}: {row['Result']}")
     return f"{row['Mark']}: {row['Result']}" if short else f"{row['Mark']} {row['Opening']}: {row['Result']}"
 

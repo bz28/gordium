@@ -425,3 +425,28 @@ def test_schedule_banners_say_their_result_once():
     out, _, _ = goldens.build("0_no_rooms_yet")
     texts = [t for t in out["A-601.svg"].decode("utf-8").split(">") if "WAITING" in t]
     assert any("WAITING: NO ROOMS DRAWN YET: no escape openings to schedule yet<" in t + "<" for t in texts)
+
+
+# ---- review round 3 -------------------------------------------------------------------------------------------------
+
+def _ranch_sheets(change):
+    house = goldens.interior_of("1_ranch_compliant")
+    change(house)
+    g = source.checked(lambda: check_site(goldens.site(), dict(goldens.FACTS), name="x", today=goldens.DATE,
+                                          interior=house), house)
+    pages = sheets.sheets(g, goldens.project_of("1_ranch_compliant"))
+    return {n[:2]: " | ".join(t for m, _, p in pages if m.startswith(n[:2]) for t in p.texts()) for n in ("LS", "A-")}
+
+
+def test_malformed_rooms_are_not_read_never_no_rooms():
+    texts = _ranch_sheets(lambda h: h.update(rooms="oops"))
+    assert "Rooms not read from the drawing: NEEDS REVIEW" in texts["LS"] and "No rooms drawn" not in texts["LS"]
+
+
+@pytest.mark.parametrize("change", [lambda h: h.pop("openings"), lambda h: h.update(openings="oops")])
+def test_openings_not_read_never_say_none_marked(change):
+    texts = _ranch_sheets(change)
+    assert "Escape openings: not read from the drawing: NEEDS REVIEW" in texts["LS"]
+    for t in texts.values():
+        assert "none marked" not in t and "No escape opening marked" not in t
+    assert "Escape openings not read: NEEDS REVIEW" in texts["LS"]

@@ -11,6 +11,7 @@ from . import words
 from .words import NOT_MEASURED, result_words, worst
 
 OPENING = "emergency_escape_opening"
+NOT_READ = "escape openings not read"          # a room's line when the drawing's openings weren't read (never "none")
 # the schedule's measured columns: the measure each shows, and its heading
 COLUMNS = (("opening_net_clear_width", "Net clear width", "Width"), ("opening_net_clear_height", "Net clear height", "Height"),
            ("opening_net_clear_area", "Net clear area", "Area"), ("opening_sill_height", "Sill height", "Sill"))
@@ -130,6 +131,7 @@ def schedule_rows(got: dict) -> tuple[list[dict], list[str]]:
         notes.append("sleeping rooms not read from the drawing: every escape-opening rule needs review")
     if openings is None:
         notes.append("escape openings not read from the drawing")
+    openings_read = openings is not None
     rooms, openings = rooms or [], openings or []
     room_name = {r["id"]: r.get("name") or r["id"] for r in rooms}
 
@@ -150,12 +152,15 @@ def schedule_rows(got: dict) -> tuple[list[dict], list[str]]:
         if review:
             why.append(f"{len(review)} rule{'s' if len(review) != 1 else ''} need{'s' if len(review) == 1 else ''} "
                        f"review: code analysis lines {', '.join(str(n) for n in review)}")
-        if not xs:
+        if not o and not openings_read:
+            why.append("escape openings not read from the drawing")
+        elif not xs:
             why.append("the check gave no row for this opening")
         shown = [x for m, _, _ in COLUMNS for x in xs if x["item"].get("rule") in cells[m][3]]
         src = given.get(o["id"]) if o else None
         return {
-            "Mark": (str(o["id"]).upper() if o else "-"), "Opening": (o.get("name") or o["id"]) if o else "none marked",
+            "Mark": (str(o["id"]).upper() if o else "-"), "Opening": (o.get("name") or o["id"]) if o else
+            "none marked" if openings_read else NOT_READ,
             "Room": room_name.get(room_id, room_id or ""), "Type": OPERATION.get((src or {}).get("operation"),
                                                                                  (src or {}).get("operation") or ""),
             **{h: cells[m][0] for m, h, _ in COLUMNS},
