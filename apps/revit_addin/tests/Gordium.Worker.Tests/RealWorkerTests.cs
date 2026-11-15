@@ -96,7 +96,7 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
     }
 
     [Fact]
-    public async Task A_real_check_that_complies_is_read_as_complying()
+    public async Task A_real_check_whose_zoning_complies_waits_on_egress()
     {
         // the box house with every question the common rows ask answered: the worker's state is "complies", and the
         // client's own check (the rows must back it) accepts it. Since PR 82 (the headline waits on the facts) a row
@@ -115,11 +115,19 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
             """).ToList())
             facts[k] = v!.DeepClone();
         var result = await Client.CheckSiteAsync(c.Site, facts, today: "2026-11-12");
-        Assert.Equal(Verdict.Complies, result.State);
-        Assert.Equal("complies", result.Raw.GetProperty("view").GetProperty("state").GetString());
+        // zoning complies; since egress was switched on (PR 106) the state's egress rules wait for rooms, which no
+        // host sends yet, so the whole check holds at needs review (never "complies" with egress unchecked) and the
+        // client reads that, with the zoning section complying and the egress section waiting
+        Assert.Equal(Verdict.NeedsReview, result.State);
+        var sections = result.Raw.GetProperty("sections");
+        Assert.Equal("zoning", sections[0].GetProperty("key").GetString());
+        Assert.Equal("complies", sections[0].GetProperty("state").GetString());
+        Assert.Equal("waiting", sections[1].GetProperty("state").GetString());
+        Assert.Contains(result.Items, i => i.Id == "egress.waiting" && i.Status == Verdict.NotChecked);
         // without the day of the check the finding's age can't be told: the overlays row stays, never a pass
         var undated = await Client.CheckSiteAsync(c.Site, facts);
         Assert.Equal(Verdict.NeedsReview, undated.State);
+        Assert.Equal("needs_review", undated.Raw.GetProperty("sections")[0].GetProperty("state").GetString());
     }
 
     [Fact]

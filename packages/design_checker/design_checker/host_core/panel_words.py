@@ -8,7 +8,7 @@ where none of the .venv's packages are installed."""
 __all__ = ['panel_header', 'status_words', 'row_name', 'USE_STATED', 'list_cells', 'list_values', 'highlight',
     'red_last', 'newly_failing', 'WORKED_OUT', 'detail_parts', 'coloured_info', 'labels_on', 'context_shown',
     'yard_label_shown', 'legend_text', 'COLUMN_DELTA', 'CELL_FRACTIONS', 'cell_text', 'shorten', 'link_text',
-    'height_limit_text']
+    'height_limit_text', 'WAITING', 'WAITING_RGB', 'headline_state', 'headline_mark', 'headline_rgb']
 
 
 def panel_header(head):
@@ -22,9 +22,12 @@ def panel_header(head):
 
 def status_words(item):
     """The status a row's detail is headed with: "Does not comply", "Needs review", "Complies", "Not checked"; a rule
-    not in Gordium yet, "Not checked yet" (Ben, 2026-10-21: its group's name)."""
+    not in Gordium yet, "Not checked yet" (Ben, 2026-10-21: its group's name); a law waiting for the interior
+    (egress, before any room is drawn), "Waiting": a quiet status, never a pass (design_checker/egress.py)."""
     if item.get("group") == "not_covered":
         return "Not checked yet"
+    if item.get("waiting"):
+        return "Waiting"
     return {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
             "not_checked": "Not checked"}[item["status"]]
 
@@ -216,3 +219,28 @@ def height_limit_text(checker_top, height):
     if checker_top is not None:
         return "Height limit " + height
     return "Height limit " + height + " (no grade plane yet: shown from the lot's level)"
+
+
+WAITING = "waiting"       # the headline's look while only a law waiting for rooms holds the design (choice B)
+# (light viewport or panel, dark one): a neutral mid grey, apart from amber (nothing is wrong yet) and from the plain
+# ink a complying design is drawn in (waiting is never a pass: Ben, choice B, 2026-11-15)
+WAITING_RGB = ((112, 117, 122), (150, 155, 160))
+
+
+def headline_state(view):
+    """How the check's headline is shown: the design's state, or WAITING when the check said `waiting_only` (zoning
+    complies, a law waits for rooms, none fails or needs review: design_checker/egress.py). Only a needs review is
+    ever shown as waiting, never a fail; a view with no state is needs review, never complies."""
+    state = (view or {}).get("state") or "needs_review"
+    return WAITING if state == "needs_review" and (view or {}).get("waiting_only") is True else state
+
+
+def headline_mark(state):
+    """The headline's mark: "✕" does not comply, "?" needs review; none for waiting (its words say why), complies,
+    or out of date."""
+    return {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")
+
+
+def headline_rgb(state, dark):
+    """The waiting headline's grey (r, g, b), or None for any other state (its own colour: red, amber, plain ink)."""
+    return WAITING_RGB[1 if dark else 0] if state == WAITING else None

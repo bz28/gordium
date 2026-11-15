@@ -61,8 +61,20 @@ def worker_fingerprint() -> str:
 
 def rulebook_fingerprints() -> dict:
     """{place: sha256 over the files of its folder a check can read (place_files)}, read now: the rules are read
-    again at every check, so a rule edited while the worker runs shows here at once."""
-    return {p.key: _sha(place_files(p.folder), p.folder) for p in places()}
+    again at every check, so a rule edited while the worker runs shows here at once. A place that inherits a state's
+    law (Ithaca: New York's house code, design_checker/egress.py) has that folder's files counted too: its own
+    folder's sha256, then each inherited folder's, by name, hashed together."""
+    out = {}
+    for p in places():
+        own = _sha(place_files(p.folder), p.folder)
+        if p.inherits:
+            h = hashlib.sha256(own.encode("utf-8"))
+            for folder in p.inherits:
+                h.update(b"\0" + f"{folder.parent.name}/{folder.name}".encode("utf-8") + b"\0"
+                         + _sha(place_files(folder), folder).encode("utf-8"))
+            own = h.hexdigest()
+        out[p.key] = own
+    return out
 
 
 def about() -> dict:

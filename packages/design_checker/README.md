@@ -59,9 +59,17 @@ may differ between a Mac and Linux or Windows). Both run in CI.
 rulebook's per-part rules (`for_each`: bedrooms, escape openings, stairs; `rule_format/parts.py`) over the parts
 given, one row per part with a line naming it ("Bedroom 2 › Window 5: net clear area 5.1 sq ft, needs ≥ 5.7 sq ft"),
 and gives panel items whose overall answer is `present.state`'s with the zoning rows. Parts `None` (the interior
-isn't being checked) is one counted "Interior: not checked yet" item, needs review. Not wired into `check()` yet:
-parts don't arrive in the site description until egress step 4
+isn't being checked) is one counted "Interior: not checked yet" item, needs review
 ([decision](../../docs/decisions/2026-11-12_rules_for_each_part.md)).
+
+**Egress** (`egress.py`): every check also runs the building-code rules of each state law its place inherits
+(Ithaca: New York's house code, `inherits:`), on the parts `model_measurement.interior` measures from an interior
+description given beside the site (`check_site(..., interior=...)`; `python -m design_checker <model> <facts>
+--interior <house.yaml>`). The view's `sections` give zoning's and egress's states apart; with no interior drawn,
+egress is one "waiting, no rooms drawn yet" item, never a pass (with zoning complying, the headline reads "Zoning
+complies · Egress waiting: no rooms drawn yet", shown grey with `waiting_only`, its state still needs review: choice
+B, Ben 2026-11-15); handrails, guards and sleeping lofts aren't read
+from the drawing yet, so their rules need review (decision item 12).
 
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
 `rhino_logic.py` runs in Rhino's Python, which can't read YAML, so `host_core/place.py` reads `place.json` beside

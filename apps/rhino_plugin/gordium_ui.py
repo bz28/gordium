@@ -79,7 +79,11 @@ def viewport_dark():
 
 
 def status_color(status, dark, drawing=True):
-    """Red for does not comply, amber for needs review, else the plain ink (complies is never colored)."""
+    """Red for does not comply, amber for needs review, a neutral grey for waiting (logic.headline_rgb: only a law
+    waiting for rooms holds the design, choice B), else the plain ink (complies is never colored)."""
+    grey = logic.headline_rgb(status, dark)
+    if grey is not None:
+        return System.Drawing.Color.FromArgb(*grey)
     if status == "does_not_comply":
         return System.Drawing.Color.FromArgb(240, 122, 112) if dark else System.Drawing.Color.FromArgb(184, 55, 31)
     if status == "needs_review":
@@ -88,9 +92,10 @@ def status_color(status, dark, drawing=True):
 
 
 def eto_status_color(status):
-    """Red or amber in the shade for the panel's own background; anything else is the system's text color (J2):
+    """Red, amber or the waiting grey in the shade for the panel's own background; anything else is the system's
+    text color (J2):
     a fixed dark ink was unreadable on the dark panel."""
-    if status not in ("does_not_comply", "needs_review"):
+    if status not in ("does_not_comply", "needs_review", logic.WAITING):
         return ed.SystemColors.ControlText
     c = status_color(status, _dark_panel())
     return ed.Color.FromArgb(c.R, c.G, c.B)
@@ -638,7 +643,10 @@ def _header(parts, view, error, out_of_date, job=None, cancelled=False, checking
         h.AddRow(_wide(logic.out_of_date_line(parts.get("auto_check"), parts.get("checked_before", True)), bold=True,
                        size=15))
     else:
-        h.AddRow(_wide((view or {}).get("summary") or "No check yet", bold=True, size=15))
+        # the waiting grey when only a law waiting for rooms holds the design (choice B); else the plain ink
+        waiting = view is not None and logic.headline_state(view) == logic.WAITING
+        h.AddRow(_wide((view or {}).get("summary") or "No check yet", eto_status_color(logic.WAITING) if waiting
+                       else None, bold=True, size=15))
     draft, lot, grade = lines["below"]
     h.AddRow(_wide(draft, eto_status_color("needs_review"), size=11))
     h.AddRow(_wide(lot, size=11))          # each fact on its line, its buttons below it: a

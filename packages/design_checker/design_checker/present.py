@@ -1848,7 +1848,35 @@ def waiting_parts(items: list[dict]) -> list[str]:
     return [f"{len(rows)} {words[0 if len(rows) == 1 else 1]}" for words, rows in kinds if rows]
 
 
+LAW_GROUP = "law"         # an item of a law a place inherits (egress: design_checker/egress.py), grouped by that law
+
+
 def summary(items: list[dict]) -> str:
+    """The check's one line, grouped by law (Ben, 2026-11-12: zoning and egress are two separate results): with no
+    item of an inherited law, zoning's line alone (_summary), exactly as before; with them, "Zoning complies ·
+    Egress waiting: no rooms drawn yet" or "Zoning: 1 needs review · Egress: 1 does not comply · 12 need review", each
+    law's words counted over its own items only. A law still waiting says so in words ("waiting", never a count of
+    passes), so the line never reads as all complying while it waits; the design's state (state(), over every item)
+    is then needs review at best."""
+    laws = {}
+    for i in items:
+        if i["group"] == LAW_GROUP:
+            laws.setdefault(i.get("law_short") or "Building code", []).append(i)
+    if not laws:
+        return _summary(items)
+    zoning = [i for i in items if i["group"] != LAW_GROUP]
+    # choice B (Ben, 2026-11-15): while a law waits, the headline says each law's own answer in words, "Zoning
+    # complies · Egress waiting: no rooms drawn yet"; never one overall pass, and zoning's counts once it doesn't
+    out = ["Zoning complies" if zoning and state(zoning) == COMPLIES else "Zoning: " + _summary(zoning)]
+    for name, mine in laws.items():
+        waiting = [i for i in mine if i.get("waiting")]
+        # the waiting item's own reason ("no rooms drawn yet"), so another reason a law waits is said as it is
+        out.append(f"{name} waiting: {waiting[0]['waiting']}" if waiting and len(waiting) == len(mine)
+                   else f"{name}: " + _summary(mine))
+    return " · ".join(out)
+
+
+def _summary(items: list[dict]) -> str:
     """One line, the same everywhere: every item counted (site rows too), bad news first, no zero counts, never
     a check mark: "1 does not comply · 2 need review · 7 comply · 1 to answer · 1 not checked in this release" (the
     rows not checked, by what to do next: waiting_parts). The use details still to answer are counted apart, last:
@@ -2150,14 +2178,22 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
 
 
 def grouped(items: list[dict]) -> list[dict]:
-    """The panel's groups in order (empty ones left out); site items carry "Site · " in their group label."""
+    """The panel's groups in order (empty ones left out); site items carry "Site · " in their group label. Each law a
+    place inherits (egress) is one group of its own after zoning's, titled by its law ("Egress (NY State
+    Residential Code 2025)"), its items in the order given (egress.py puts what fails first)."""
     by = {"fails": [], "review": [], "complies": [], "use_details": [], "not_checked": [], "not_covered": []}
+    laws = {}                                        # an inherited law's items: one group of their own, after zoning's
     for i in items:
+        if i["group"] == LAW_GROUP:
+            key = i.get("law_key") or "law"
+            laws.setdefault(key, {"key": key, "title": i.get("law") or "Building code", "items": []})["items"].append(
+                i["id"])
+            continue
         key = ("not_covered" if i["group"] == "not_covered" else "use_details" if i.get("use_detail") else
                "not_checked" if i["status"] == NOT_CHECKED else
                {FAILS: "fails", REVIEW: "review", COMPLIES: "complies"}[i["status"]])
         by[key].append(i["id"])
-    return [{"key": k, "title": t, "items": by[k]} for k, t in GROUPS if by[k]]
+    return [{"key": k, "title": t, "items": by[k]} for k, t in GROUPS if by[k]] + list(laws.values())
 
 
 def grade_label(facts: dict) -> str:

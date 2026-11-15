@@ -5,5 +5,7 @@
 
 name: New York State
 
+results_title: Egress (NY State Residential Code 2025)   # how a check's results of this law are headed
+
 law:                                  # the documents in 1_source_documents/sources.yaml, by what they are
   residential_code: gov.ny.residential.2025.pdf    # 2025 Residential Code of New York State (kept outside the repo)

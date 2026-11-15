@@ -45,12 +45,14 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     # garage's cars aren't in their spreadsheet: those eleven rules wait (never a pass; six are the ADU's, §325-28)
     # its words are the panel's own (one summary everywhere, D3), the overlays among them (Ben, 2026-11-09)
     assert s["state"] == "fail" and s["text"] == result["view"]["summary"] == (
-        "1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to answer")
+        "Zoning: 1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to "
+        "answer · Egress waiting: no rooms drawn yet")                    # no interior drawn: egress waits
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
-    assert len(s["lines"]) == 13 and s["lines"][-1].startswith("Overlays · not in this release: ")
+    assert len(s["lines"]) == 14 and s["lines"][-2].startswith("Overlays · not in this release: ")
+    assert s["lines"][-1].startswith("Egress: waiting: Escape windows")      # no interior drawn (egress.py)
     assert all("enter who lives" in x or "home occupation" in x or "inlet wall or stream bank" in x
-               or "private garages hold" in x or "accessory dwelling unit (ADU)" in x for x in s["lines"][1:-1])
+               or "private garages hold" in x or "accessory dwelling unit (ADU)" in x for x in s["lines"][1:-2])
     assert len(result["red"]) == 1                       # the house, not the lot
     assert result["dims"] == []                          # coverage isn't a distance
 
@@ -160,7 +162,8 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     replies = [json.loads(line) for line in out.getvalue().splitlines()]
     assert [r["ok"] for r in replies] == [True, False, False, True]
     assert replies[0]["result"]["summary"]["text"] == replies[0]["result"]["view"]["summary"] == (
-        "1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to answer")
+        "Zoning: 1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to "
+        "answer · Egress waiting: no rooms drawn yet")                    # no interior drawn: egress waits
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 

@@ -978,8 +978,8 @@ def draw_screen(o, e):
     if not boxed:
         return
     state = "stale" if old else o.message[0]
-    color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review"}.get(state, "complies"),
-                            dark)
+    color = ui.status_color({"does_not_comply": "does_not_comply", "needs_review": "needs_review",
+                             logic.WAITING: logic.WAITING}.get(state, "complies"), dark)
     rows = _status_rows(o, old)
     x, y, _, _ = logic.status_box(e.Viewport.Bounds.Width, rows)
     ui.draw_text_box(d, rows, color, int(x), y, dark, 13)
@@ -1053,7 +1053,7 @@ def _status_rows(o, old):
         front = Rhino.RhinoDoc.ActiveDoc
         never = logic.last_check_at(STATE.get("checked_at"), front.RuntimeSerialNumber if front else None) is None
         state, text, lines = "stale", logic.out_of_date_line(_auto(front), not never), lines[:1]
-    mark = {"does_not_comply": "✕", "needs_review": "?"}.get(state, "")
+    mark = logic.headline_mark(state)
     return ["Gordium · " + (mark + " " if mark else "") + text] + list(lines)[:3]
 
 
@@ -3378,7 +3378,8 @@ def _check_apply(doc, o, begun, result):
     head = view["header"]
     second = [head["draft"].split(" · ")[0]] + [t for t in (head["lot"], head["grade"])
                                                  if "approximate" in t or "not set" in t or "existing" in t]
-    o.message = (view["state"], view["summary"], [" · ".join(second)])
+    # choice B: a design held at needs review only by egress waiting for rooms gets the calm grey headline, no "?"
+    o.message = (logic.headline_state(view), view["summary"], [" · ".join(second)])
     # on a tax-map lot the cautious envelope, every lot line 2'-0" nearer (logic.envelope_outlines)
     outlines = logic.envelope_outlines(result.get("envelope"), result.get("plan"))
     shown = _drawn_envelope(doc, facts, dict(result.get("envelope") or {}, outline=outlines[0])) if outlines \

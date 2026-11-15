@@ -26,7 +26,7 @@ from pathlib import Path
 import shapely
 import yaml
 
-from design_checker import present, reading_set, site_json
+from design_checker import egress, present, reading_set, site_json
 from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
@@ -669,7 +669,8 @@ def _failing_distances(rule: dict, measured: dict, values: dict) -> list[dict]:
     return found
 
 
-def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = None) -> None:
+def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = None,
+            interior_sha256: str | None = None, interior_waiting: bool = True) -> None:
     """The architects'-format workbook (PR 10), saying what the panel says (spec I1, I2): each rule's Error and
     Comparison are its items' most cautious status (a rule the panel shows as needing review is never PASS here),
     and a Check tab lists every item, the summary, the draft-rulebook label and the lot and grade sources."""
@@ -718,6 +719,10 @@ def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = Non
     title(ws, f"GORDIUM | {view['summary']}")
     lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + ([h["main"]] if h.get("main") else []) + \
         (h.get("sources") or [])   # where each fact came from
+    # which interior the egress rows were worked out from (its fingerprint), so a saved report is traceable to it
+    lines.append("Interior: none drawn yet" if not interior_sha256 else
+                 f"Interior: sha256 {interior_sha256} (no rooms drawn yet, egress not checked)" if interior_waiting
+                 else f"Interior checked: sha256 {interior_sha256}")
     note = next((i["detail"]["outline"] for i in view["items"] if (i.get("detail") or {}).get("outline")), None)
     if note:                            # the lot lines read from a cleaned outline: said once, with the lot (PR 18)
         lines.append("Lot lines: " + note)
@@ -775,7 +780,7 @@ def _quiet(text: str) -> None:
 
 
 def check(model_path: Path, facts: dict, report_path: Path | None = None, building_problems: list | None = None,
-          extras: dict | None = None, step=None, today: str | None = None) -> dict:
+          extras: dict | None = None, step=None, today: str | None = None, interior: dict | None = None) -> dict:
     """Everything the Rhino command shows, for one model and its lot facts. `building_problems` are what the
     Rhino command found on the Building layer and couldn't send (a block, a surface): each one makes every
     building measure need review, never silently dropped. `extras` is what the command adds for the panel: what
@@ -786,7 +791,8 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
     JSON text and read back, then checked by check_description, so Rhino's check takes the path Revit's will.
     `today` is the day of the check as YYYY-MM-DD, given by the host (the plugin: rhino_logic.city_day): how old a
     saved lookup is (present.overlays_lookup). The checker never reads the clock; without it, no lookup counts as
-    recent, so the overlays row stays."""
+    recent, so the overlays row stays. `interior`: the interior description (gordium.interior/1), or None when
+    no interior is drawn (egress then waits: egress.py)."""
     today = present.checked_today(today)       # a day that isn't one: refused before anything is read
     problems = fact_problems(facts)            # the same check as a facts file: a plain refusal, never a crash
     problems += [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
@@ -798,7 +804,7 @@ def check(model_path: Path, facts: dict, report_path: Path | None = None, buildi
                                        _host(model_path))
     return check_description(site_json.through_json(doc), _without(facts, ("grade_points",)), report_path,
                              _without(extras or {}, site_json.LEFT_OUT_EXTRAS), step=step, name=model_path.name,
-                             today=today)
+                             today=today, interior=interior)
 
 
 def _without(d: dict, keys) -> dict:
@@ -830,7 +836,7 @@ def _aside(site_file: Path) -> Path:
 
 
 def check_description(doc: dict, facts: dict, report_path: Path | None = None, extras: dict | None = None,
-                      step=None, name: str | None = None, today: str | None = None) -> dict:
+                      step=None, name: str | None = None, today: str | None = None, interior: dict | None = None) -> dict:
     """check() for a site description (gordium.site/1: site_json; the worker's check_site): refused whole if it
     isn't exactly v1 (site_json.SiteRefused), else measured and checked as check_site does. With a report, the
     description is kept beside it (<report name>.site.json), so any report can be traced to exactly the site it was
@@ -839,7 +845,9 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     set aside only once the new report is saved, put back if that report can't be moved in, and dropped once it is;
     then the new one is moved in. A site file that can't be written means no report is written, and the earlier
     report keeps its site (report_error says why); at worst, a check stopped between the two leaves a report with no
-    site file beside it, never a wrong one. `today`: the host's day, as check() takes it."""
+    site file beside it, never a wrong one. `today`: the host's day, as check() takes it; `interior`: the interior
+    description, as check_site takes it (beside the site description, never inside it: gordium.site/1 is
+    unchanged)."""
     today = present.checked_today(today)     # a day that isn't one: refused before any file is touched
     site, facts, extras = site_json.for_measuring(site_json.to_site(doc), facts, extras)
     _refuse_bad_facts(facts)                 # a refused request leaves the earlier report and its site alone
@@ -855,7 +863,7 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     try:                                     # a site that can't be kept: no report written (the earlier one stays)
         out = check_site(site, facts, name or doc["host"]["document"] or "model",
                          None if site_error else report_path, extras, step=step,
-                         site_file=None if site_error else kept, today=today)
+                         site_file=None if site_error else kept, today=today, interior=interior)
     except BaseException:                    # stopped or failed: no half-written site file left behind; an earlier
         if part is not None:                 # site still set aside is the replaced report's (_report puts it back
             _unlink(part)                    # when its report isn't moved in), so it goes
@@ -889,6 +897,7 @@ def _refuse_bad_facts(facts: dict) -> None:
     problems = fact_problems(facts) + [f"no {k} given" for k in ("jurisdiction", "zone") if not facts.get(k)]
     if problems:
         raise ValueError("lot facts: " + "; ".join(problems))
+    egress.refuse_state_alone(facts["jurisdiction"])     # a state's law is checked only through a place
     if no_rules_for(facts):                    # said plainly, never the report's temporary file and its words
         raise ValueError(no_rules_for(facts))
 
@@ -916,10 +925,15 @@ def no_rules_for(facts: dict) -> str | None:
 
 def check_site(site: dict, facts: dict, name: str = "model", report_path: Path | None = None,
                extras: dict | None = None, step=None, site_file: Path | None = None,
-               today: str | None = None) -> dict:
+               today: str | None = None, interior: dict | None = None) -> dict:
     """check() for a site already read (the lot and the buildings, in feet), e.g. one a test or a scenario
     generator builds. Exactly the same measuring, rules and presentation as a model read from a file. `site_file`
-    (check_description's) is set aside while the report is moved in, and put back if it can't be."""
+    (check_description's) is set aside while the report is moved in, and put back if it can't be.
+
+    The place's zoning, and every state law it inherits (egress: New York's house code for Ithaca) run on the
+    interior's parts: `interior` is the interior description (gordium.interior/1), or None when none is drawn, and
+    then each inherited law waits ("waiting, no rooms drawn yet"), never a pass (egress.py). The view's `sections`
+    give each law's own state; its state and summary are over both."""
     today = present.checked_today(today)
     _refuse_bad_facts(facts)
     model_path = Path(name)
@@ -991,11 +1005,14 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
               "overlays_none_found": present.overlays_lookup(site.get("lot"), facts, today)}
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
+    found = egress.laws(facts["jurisdiction"])        # by place: the state law it inherits, its rules checked
+    law = egress.check(found, interior, values, allowed)
+    egress.add_to_view(v, law, found["place"])
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
             say(STEPS["report"])
-            _report(t, v, report_path, site_file)
+            _report(t, v, report_path, site_file, law["interior_sha256"], law["waiting"])
         except OSError as e:
             report_error = e.words if isinstance(e, _SiteInTheWay) else f"{e.strerror or e} ({report_path})"
     # one guard for the whole check (review round 21): geometry the measuring couldn't work out draws nothing
@@ -1019,7 +1036,9 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             "summary": summary(rows, v["items"]), "red": red, "dims": dims, "measurements": measured,
             "envelope": env, "problems": site.get("problems") or [], "view": v, "plan": drawn,
             "report_error": report_error,
-            "statuses": statuses, "notice": notice_text}
+            "statuses": statuses, "notice": notice_text,
+            "sections": v["sections"],          # zoning's, then each inherited law's, each with its own state
+            "egress": {k: law[k] for k in ("rows", "results", "interior", "interior_sha256")}}
 
 
 def _envelope_facts(site: dict, facts: dict) -> dict:

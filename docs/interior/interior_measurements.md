@@ -4,7 +4,7 @@
 **For:** engineers changing `model_measurement.interior`, reviewers checking a measure, architects asking "what does this number mean?".\
 **Kept current by:** the engineer who changes `packages/model_measurement/model_measurement/interior/` in that PR (a test fails if a reason below is missing).
 
-The input is the [interior description](interior_description_format.md); the code is `packages/model_measurement/model_measurement/interior/` (one module per kind); the hand-worked houses are in [test_data/interior_houses/](../../test_data/interior_houses/README.md). Plain code written by engineers, no AI (principle 6).
+The input is the [interior description](interior_description_format.md); the checker runs New York's house rules on these measures in every Ithaca check ([rules for each part](../decisions/2026-11-12_rules_for_each_part.md), item 12); the code is `packages/model_measurement/model_measurement/interior/` (one module per kind); the hand-worked houses are in [test_data/interior_houses/](../../test_data/interior_houses/README.md). Plain code written by engineers, no AI (principle 6).
 
 **The code text.** The 2025 Residential Code of New York State (RCNYS), read from the working copy in the code cache (the Public.Resource.Org scan, archive.org `gov.ny.residential.2025`, kept outside the repository). Quotes are short and exact; "p." is the book's own page number.
 
