@@ -1360,6 +1360,100 @@ rules:
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
+  - id: general.r320_2_ramp_handrail_height
+    kind: rule
+    topic: means_of_egress
+    title: "Ramp handrail height: 34 to 38 in above the ramp surface (R320.2)"
+    for_each: handrail
+    within: ramp
+    when_none: not_applicable
+    check: handrail_height >= 34 and handrail_height_max <= 38
+    review_when:
+      - when: handrail_height >= 34 and handrail_height <= 38 and handrail_height_max > 38
+        reason: >-
+          Exception 2: at fittings or bendings (the transition from handrail to guard among them) a handrail may
+          exceed 38 in. Whether this one's highest point is at such a fitting isn't measured; a person checks.
+    sources:
+      - file: gov.ny.residential.2025.pdf
+        page: 103
+        lines: [54, 55]
+        quote: "Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface of ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)."
+      - file: gov.ny.residential.2025.pdf
+        page: 104
+        lines: [3, 5]
+        quote: "2. Where handrail fittings or bendings are used to provide continuous transition between flights, transitions at winder treads, the transition from handrail to guard, or used at the start of a flight, the handrail height at the fittings or bendings shall be permitted to exceed 38 inches (965 mm)."
+    examples:
+      - given: {}
+        parts:
+          ramp: [{id: r1}]
+          handrail: [{id: h1, within: r1, measures: {handrail_height: 36, handrail_height_max: 36}}]
+        rows: [{part: h1, within: r1, outcome: pass}]
+        expect: pass
+      - given: {}
+        parts:
+          ramp: [{id: r1}]
+          handrail: [{id: h1, within: r1, measures: {handrail_height: 30, handrail_height_max: 30}}]
+        rows: [{part: h1, within: r1, outcome: fail}]
+        expect: fail
+      - given: {}
+        parts:
+          ramp: [{id: r1}]
+          handrail: [{id: h1, within: r1, measures: {handrail_height: 36, handrail_height_max: 40}}]
+        rows: [{part: h1, within: r1, outcome: needs_review}]
+        expect: needs_review
+      - given: {}
+        parts:
+          ramp: [{id: r1}]
+          handrail: []
+        rows: [{within: r1, outcome: not_applicable}]
+        expect: not_applicable
+    notes: >-
+      Added after the comparison with the drafts, 2026-11-15 (review round 1): a handrail may now sit within a ramp
+      (parts.yaml), and general.r320_2_handrail_height reads only handrails within a stair, so a ramp's handrail was
+      checked by nothing in the key. R320.2 measures it from the "finish surface of ramp slope". Numbers as there:
+      34 (>=) and 38 (<=).
+    drafted_by: claude_code/claude-opus-5-5 (answer key helper)
+    status: draft
+
+  - id: general.r320_4_ramp_handrail_wall_clearance
+    kind: rule
+    topic: means_of_egress
+    title: "Ramp handrail beside a wall: 1 1/2 in clear of it (R320.4)"
+    for_each: handrail
+    within: ramp
+    when_none: not_applicable
+    applies_when: handrail_adjacent_to_wall
+    check: handrail_wall_clearance >= 1.5
+    sources:
+      - file: gov.ny.residential.2025.pdf
+        page: 104
+        lines: [10, 11]
+        quote: "Handrails adjacent to a wall shall have a space of not less than 1 1/2 inches (38 mm) between the wall and the handrails."
+    examples:
+      - given: {}
+        parts:
+          ramp: [{id: r1}]
+          handrail: [{id: h1, within: r1, measures: {handrail_adjacent_to_wall: true, handrail_wall_clearance: 2}}]
+        rows: [{part: h1, within: r1, outcome: pass}]
+        expect: pass
+      - given: {}
+        parts:
+          ramp: [{id: r1}]
+          handrail: [{id: h1, within: r1, measures: {handrail_adjacent_to_wall: true, handrail_wall_clearance: 0.5}}]
+        rows: [{part: h1, within: r1, outcome: fail}]
+        expect: fail
+      - given: {}
+        parts:
+          ramp: [{id: r1}]
+          handrail: []
+        rows: [{within: r1, outcome: not_applicable}]
+        expect: not_applicable
+    notes: >-
+      Added after the comparison with the drafts, 2026-11-15 (review round 1), as general.r320_2_ramp_handrail_height:
+      general.r320_4_handrail_wall_clearance reads only handrails within a stair. Number: 1 1/2 = 1.5 (>=).
+    drafted_by: claude_code/claude-opus-5-5 (answer key helper)
+    status: draft
+
   # --- R321 guards -----------------------------------------------------------------------------------------------
 
   - id: general.r321_1_1_guard_required
@@ -2459,7 +2553,7 @@ rules:
     applies_when: >-
       not (stair_bulkhead and not stair_required_egress and stair_basement_to_grade <= 96 and stair_bulkhead_hinged_doors)
     check: >-
-      (not stair_top_landing or stair_top_landing_width >= stair_width) and stair_bottom_landing_width >=
+      (not (stair_top_landing or stair_top_door) or stair_top_landing_width >= stair_width) and stair_bottom_landing_width >=
       (36 if stair_exterior and stair_to_grade_serving_deck and stair_riser_count <= 3 and not stair_egress_door_access else stair_width)
     review_when:
       - when: stair_bulkhead and not stair_required_egress and stair_basement_to_grade <= 96 and not stair_bulkhead_hinged_doors
@@ -2512,8 +2606,11 @@ rules:
       Numbers (R318.7.6 second reading): 36 (exception 4: not less than 36 inch, >=); three ("three or fewer", <=), in
       the if's test that picks exception 4; 8 feet = 96 (R318.7.11.2, <=) in the bulkhead exemption. Exception 4 is
       read as replacing the flight's width with 36 in for the bottom landing only. A top landing beyond a door
-      (exception 1) or left out (exception 3) is the floor beyond the door, not measured here (stair_top_landing
-      false); general.r318_7_6_landings_required says whether it may be.
+      (exception 1) or left out (exception 3) is the floor beyond the door (stair_top_landing false);
+      general.r318_7_6_landings_required says whether it may be. Fixed after the comparison with the drafts,
+      2026-11-15 (review round 1): the top landing beyond a door was skipped here, but exception 1 only lets "the top
+      landing" be "on the other side of a door", it is still the top landing and its width is checked
+      (stair_top_landing_width, the floor at the top, either side of the door).
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
@@ -2604,11 +2701,17 @@ rules:
   - id: general.r318_7_6_garage_top_landing
     kind: rule
     topic: means_of_egress
-    title: "Garage stair: top landing 8 1/4 in below the threshold at most (R318.7.6)"
+    title: "Top landing below a top door's threshold: 8 1/4 in at a garage (R318.7.6)"
     for_each: stair
     when_none: not_applicable
-    applies_when: stair_at_enclosed_garage and stair_top_door
-    check: stair_top_landing_drop <= 8.25
+    applies_when: stair_top_door
+    check: not stair_at_enclosed_garage or stair_top_landing_drop <= 8.25
+    review_when:
+      - when: not stair_at_enclosed_garage and stair_top_landing_drop > 0
+        reason: >-
+          A top landing below the threshold of the door at the top of a stair that is not at an enclosed garage:
+          R318.7.6 gives a drop (8 1/4 in) only at a garage, and says nothing of other doors (open question). A
+          person checks.
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 101
@@ -2627,7 +2730,18 @@ rules:
         expect: fail
       - given: {}
         parts:
-          stair: [{id: s1, measures: {stair_at_enclosed_garage: false, stair_top_door: true}}]
+          stair: [{id: s1, measures: {stair_at_enclosed_garage: false, stair_top_door: true, stair_top_landing_drop: 0}}]
+        rows: [{part: s1, outcome: pass}]
+        expect: pass
+      - given: {}
+        parts:
+          stair: [{id: s1, measures: {stair_at_enclosed_garage: false, stair_top_door: true, stair_top_landing_drop: 7}}]
+        rows: [{part: s1, outcome: needs_review}]
+        expect: needs_review
+        note: not at a garage, the landing 7 in below the threshold; the law gives no number (fixed after the comparison, review round 1)
+      - given: {}
+        parts:
+          stair: [{id: s1, measures: {stair_top_door: false}}]
         rows: [{part: s1, outcome: not_applicable}]
         expect: not_applicable
       - given: {}
@@ -2638,7 +2752,9 @@ rules:
       Number (R318.7.6 second reading): 8 1/4 = 8.25 (not more than, <=). Read as a limit: the exception permits the
       garage stair's top landing to sit up to 8 1/4 in below the threshold of the door into the house, and no lower.
       Elsewhere R318.7.6 sets no number for a top landing below a door's threshold (exterior doors: R318.3.1 and
-      R318.3.2), so other stairs are not applicable here (open question).
+      R318.3.2), an open question. Fixed after the comparison with the drafts, 2026-11-15 (review round 1): other
+      stairs with a top door were not applicable here, a pass on a question the law leaves open; a landing below
+      such a door's threshold now needs review, one level with it passes.
     open_questions:
       - 'R318.7.6 exception 2: "At an enclosed garage, the top landing at the stair shall be permitted to be not more than 8 1/4 inches (209 mm) below the top of the threshold." For an interior stair that is not at a garage, with a door at its top (exception 1), how far below the door''s threshold may the top landing be: level with it, or some threshold height?'
     research:
