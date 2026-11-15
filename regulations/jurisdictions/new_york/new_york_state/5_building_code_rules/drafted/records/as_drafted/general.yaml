@@ -3612,3 +3612,3661 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.r318_3_exterior_door_landing_each_side
+  kind: rule
+  topic: means_of_egress
+  title: Landing or floor on each side of each exterior door (R318.3)
+  check: exterior_door_inside_landing and exterior_door_outside_landing
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 50
+    - 50
+    quote: There shall be a landing or floor on each side of each exterior door.
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Front door
+        measures:
+          exterior_door_inside_landing: true
+          exterior_door_outside_landing: true
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_inside_landing: true
+          exterior_door_outside_landing: false
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R318.7.11.2 exempts some bulkhead enclosure stairways from R318.3; the design must not mark such a bulkhead
+    as an exterior door.
+  research:
+  - question: R318.7.11.2 exempts some bulkhead enclosure stairways from R318.3; the design must not mark such a
+      bulkhead as an exterior door.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_3_exterior_door_landing_width
+  kind: rule
+  topic: means_of_egress
+  title: Landing width not less than the door served (R318.3)
+  check: exterior_door_landing_width >= exterior_door_width
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 50
+    - 51
+    quote: The width of each landing shall be not less than the door served.
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Front door
+        measures:
+          exterior_door_landing_width: 48
+          exterior_door_width: 36
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_landing_width: 30
+          exterior_door_width: 36
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_3_exterior_door_landing_depth
+  kind: rule
+  topic: means_of_egress
+  title: Landing dimension at least 36 in. in direction of travel (R318.3)
+  check: exterior_door_landing_depth >= 36 or (exterior_door_onto_balcony and exterior_door_balcony_area < 60)
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 51
+    - 52
+    quote: Landings shall have a dimension of not less than 36 inches (914 mm) measured in the direction of travel.
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 53
+    - 54
+    quote: 'Exception: Exterior balconies less than 60 square feet (5.6 m[fn2]) and only accessed from a door are
+      permitted to have a landing that is less than 36 inches (914 mm) measured in the direction of travel.'
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Front door
+        measures:
+          exterior_door_landing_depth: 40
+          exterior_door_onto_balcony: false
+          exterior_door_balcony_area: 0
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Balcony door
+        measures:
+          exterior_door_landing_depth: 30
+          exterior_door_onto_balcony: true
+          exterior_door_balcony_area: 50
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Balcony door
+        measures:
+          exterior_door_landing_depth: 30
+          exterior_door_onto_balcony: true
+          exterior_door_balcony_area: 70
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_landing_depth: 30
+          exterior_door_onto_balcony: false
+          exterior_door_balcony_area: 0
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The exception says the landing may be less than 36 inches but sets no smaller minimum; none is applied.
+  research:
+  - question: The exception says the landing may be less than 36 inches but sets no smaller minimum; none is applied.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_3_exterior_door_landing_slope
+  kind: rule
+  topic: means_of_egress
+  title: Slope at exterior landings not over 1/4 in 12 (R318.3)
+  check: exterior_door_outside_slope * 12 <= 0.25
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 52
+    - 52
+    quote: The slope at exterior landings shall not exceed 1/4 unit vertical in 12 units horizontal (2 percent).
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Front door
+        measures:
+          exterior_door_outside_slope: 0.02
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_outside_slope: 0.05
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The text limits the slope only at exterior landings; the slope of an interior landing or floor is not limited.
+  research:
+  - question: The text limits the slope only at exterior landings; the slope of an interior landing or floor is
+      not limited.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_3_1_egress_door_inside_floor_drop
+  kind: rule
+  topic: means_of_egress
+  title: Inside floor at required egress door at most 1 1/2 in below threshold
+  applies_when: exterior_door_is_egress_door and exterior_door_inside_landing
+  check: exterior_door_inside_drop <= 1.5
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 55
+    - 56
+    quote: Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower
+      than the top of the threshold.
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Front door
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_inside_landing: true
+          exterior_door_inside_drop: 1.5
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Front door
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_inside_landing: true
+          exterior_door_inside_drop: 2
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The code does not say how the drop is measured where the inside floor is a landing at a different level from
+    the finished floor; the architect's marked drop is used.
+  - The required egress door is the one the architect marks (R318.2); this rule applies only to it.
+  research:
+  - question: The code does not say how the drop is measured where the inside floor is a landing at a different
+      level from the finished floor; the architect's marked drop is used.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The required egress door is the one the architect marks (R318.2); this rule applies only to it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_3_1_egress_door_outside_floor_drop
+  kind: rule
+  topic: means_of_egress
+  title: Outside landing drop at required egress door (1 1/2 or 8 1/4 in)
+  applies_when: exterior_door_is_egress_door and exterior_door_outside_landing
+  check: exterior_door_outside_drop <= (1.5 if exterior_door_swings_outward else 8.25)
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 55
+    - 56
+    quote: Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower
+      than the top of the threshold.
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 3
+    - 4
+    quote: 'Exception: The landing or floor on the exterior side shall be not more than 8 1/4 inches (209 mm) below
+      the top of the threshold provided that the door does not swing over the landing or floor.'
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_outside_landing: true
+          exterior_door_swings_outward: false
+          exterior_door_outside_drop: 8.25
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_outside_landing: true
+          exterior_door_swings_outward: false
+          exterior_door_outside_drop: 9
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_outside_landing: true
+          exterior_door_swings_outward: true
+          exterior_door_outside_drop: 2
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_outside_landing: true
+          exterior_door_swings_outward: true
+          exterior_door_outside_drop: 1
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The exception says the door must not swing over the landing or floor; the marked measure also counts a stairway
+    the door swings over, which may be stricter than the code.
+  research:
+  - question: The exception says the door must not swing over the landing or floor; the marked measure also counts
+      a stairway the door swings over, which may be stricter than the code.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_3_2_other_exterior_door_floor_elevation
+  kind: rule
+  topic: means_of_egress
+  title: Floor elevation at exterior doors other than the egress door (R318.3.2)
+  applies_when: not exterior_door_is_egress_door
+  check: exterior_door_inside_landing and exterior_door_inside_drop <= 8.25 and ((exterior_door_outside_landing
+    and exterior_door_outside_drop <= 8.25) or (not exterior_door_outside_landing and exterior_door_outside_stair_risers
+    <= 2 and not exterior_door_swings_outward))
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 7
+    - 8
+    quote: Exterior doors other than the required egress door shall be provided with landings or floors not more
+      than 8 1/4 inches (209 mm) below the top of the threshold.
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 9
+    - 10
+    quote: 'Exception: An exterior landing or floor is not required at the exterior doorway where a stairway of
+      not more than two risers is located on the exterior side of the door, provided that the door does not swing
+      over the stairway.'
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Side door
+        measures:
+          exterior_door_is_egress_door: false
+          exterior_door_inside_landing: true
+          exterior_door_inside_drop: 8
+          exterior_door_outside_landing: true
+          exterior_door_outside_drop: 8.25
+          exterior_door_swings_outward: false
+          exterior_door_outside_stair_risers: 0
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Side door
+        measures:
+          exterior_door_is_egress_door: false
+          exterior_door_inside_landing: true
+          exterior_door_inside_drop: 8
+          exterior_door_outside_landing: true
+          exterior_door_outside_drop: 9
+          exterior_door_swings_outward: false
+          exterior_door_outside_stair_risers: 0
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_is_egress_door: false
+          exterior_door_inside_landing: true
+          exterior_door_inside_drop: 2
+          exterior_door_outside_landing: false
+          exterior_door_outside_drop: 0
+          exterior_door_swings_outward: false
+          exterior_door_outside_stair_risers: 2
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_is_egress_door: false
+          exterior_door_inside_landing: true
+          exterior_door_inside_drop: 2
+          exterior_door_outside_landing: false
+          exterior_door_outside_drop: 0
+          exterior_door_swings_outward: true
+          exterior_door_outside_stair_risers: 2
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        name: Back door
+        measures:
+          exterior_door_is_egress_door: false
+          exterior_door_inside_landing: true
+          exterior_door_inside_drop: 2
+          exterior_door_outside_landing: false
+          exterior_door_outside_drop: 0
+          exterior_door_swings_outward: false
+          exterior_door_outside_stair_risers: 3
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does the 8 1/4 inch limit apply to the landing or floor on the inside of the door as well as the outside? The
+    text says 'landings or floors' without naming a side, and the exception speaks only of the exterior landing,
+    so this rule applies it to both sides.
+  - 'The exception''s stairway of not more than two risers: does the exterior landing at the top of the stairs count
+    as part of the stairway? Landings and floors at exterior doors are also governed by R318.3 (landing on each
+    side, width and depth), which is drafted separately.'
+  research:
+  - question: Does the 8 1/4 inch limit apply to the landing or floor on the inside of the door as well as the outside?
+      The text says 'landings or floors' without naming a side, and the exception speaks only of the exterior landing,
+      so this rule applies it to both sides.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: 'The exception''s stairway of not more than two risers: does the exterior landing at the top of the
+      stairs count as part of the stairway? Landings and floors at exterior doors are also governed by R318.3 (landing
+      on each side, width and depth), which is drafted separately.'
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_stair_top_landing
+  kind: rule
+  topic: means_of_egress
+  title: Floor or landing at the top of each flight (R318.7.6)
+  check: stair_top_landing or (stair_top_door and not stair_top_door_swings_over and not stair_exterior) or (stair_exterior
+    and stair_top_door_exterior and stair_riser_count <= 2 and not stair_top_door_swings_over)
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 13
+    - 13
+    quote: There shall be a floor or landing at the top and bottom of each flight of stairs.
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 19
+    - 20
+    quote: The top landing of an interior stairway, including those in an enclosed garage, shall be permitted to
+      be on the other side of a door located at the top of the stairway, provided that the door does not swing over
+      the stairs.
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 23
+    - 24
+    quote: At exterior doors, a top landing is not required for an exterior stairway of not more than two risers,
+      provided that the door does not swing over the stairway.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_top_landing: true
+          stair_top_door: false
+          stair_top_door_swings_over: false
+          stair_exterior: false
+          stair_top_door_exterior: false
+          stair_riser_count: 5
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Exterior stair
+        measures:
+          stair_top_landing: false
+          stair_top_door: true
+          stair_top_door_swings_over: false
+          stair_exterior: true
+          stair_top_door_exterior: true
+          stair_riser_count: 2
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Exterior stair
+        measures:
+          stair_top_landing: false
+          stair_top_door: true
+          stair_top_door_swings_over: false
+          stair_exterior: true
+          stair_top_door_exterior: true
+          stair_riser_count: 3
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_stair_bottom_landing
+  kind: rule
+  topic: means_of_egress
+  title: Floor or landing at the bottom of each flight (R318.7.6)
+  check: stair_bottom_landing
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 13
+    - 13
+    quote: There shall be a floor or landing at the top and bottom of each flight of stairs.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_bottom_landing: true
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_bottom_landing: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_garage_top_landing_drop
+  kind: rule
+  topic: means_of_egress
+  title: Top landing at enclosed garage stair, drop below threshold (R318.7.6 exc. 2)
+  applies_when: stair_at_enclosed_garage and stair_top_door
+  check: stair_top_landing_drop <= 8.25
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 21
+    - 22
+    quote: At an enclosed garage, the top landing at the stair shall be permitted to be not more than 8 1/4 inches
+      (209 mm) below the top of the threshold.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Garage stair
+        measures:
+          stair_at_enclosed_garage: true
+          stair_top_door: true
+          stair_top_landing_drop: 8
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Garage stair
+        measures:
+          stair_at_enclosed_garage: true
+          stair_top_door: true
+          stair_top_landing_drop: 9
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Interior stair
+        measures:
+          stair_at_enclosed_garage: false
+          stair_top_door: true
+          stair_top_landing_drop: 9
+    rows:
+    - part: s1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The exception only permits a garage top landing up to 8 1/4 inches below the threshold; it is read here as a
+    limit that fails a greater drop. Drops at other doors are not set by this section (see R318.3.1 for the egress
+    door).
+  research:
+  - question: The exception only permits a garage top landing up to 8 1/4 inches below the threshold; it is read
+      here as a limit that fails a greater drop. Drops at other doors are not set by this section (see R318.3.1
+      for the egress door).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_top_landing_width
+  kind: rule
+  topic: means_of_egress
+  title: Top landing width not less than flight width (R318.7.6)
+  applies_when: stair_top_landing or stair_top_door
+  check: stair_top_landing_width >= stair_width
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 13
+    - 14
+    quote: The width perpendicular to the direction of travel shall be not less than the width of the flight served.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_top_landing: true
+          stair_top_door: false
+          stair_top_landing_width: 40
+          stair_width: 36
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_top_landing: true
+          stair_top_door: false
+          stair_top_landing_width: 30
+          stair_width: 36
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Where the top landing is on the other side of a door, the landing width measured there is taken as the top landing
+    width.
+  research:
+  - question: Where the top landing is on the other side of a door, the landing width measured there is taken as
+      the top landing width.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_bottom_landing_width
+  kind: rule
+  topic: means_of_egress
+  title: Bottom landing width not less than flight width (R318.7.6)
+  applies_when: stair_bottom_landing and not (stair_to_grade_serving_deck and stair_riser_count <= 3 and not stair_egress_door_access)
+  check: stair_bottom_landing_width >= stair_width
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 13
+    - 14
+    quote: The width perpendicular to the direction of travel shall be not less than the width of the flight served.
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 25
+    - 27
+    quote: Exterior stairways to grade with three or fewer risers serving a deck, porch or patio shall have a bottom
+      landing width of not less than 36 inches (914 mm), provided that the stairway is not the required access to
+      grade serving the required egress door.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_bottom_landing: true
+          stair_to_grade_serving_deck: false
+          stair_riser_count: 5
+          stair_egress_door_access: false
+          stair_bottom_landing_width: 40
+          stair_width: 36
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_bottom_landing: true
+          stair_to_grade_serving_deck: false
+          stair_riser_count: 5
+          stair_egress_door_access: false
+          stair_bottom_landing_width: 30
+          stair_width: 36
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Deck stair
+        measures:
+          stair_bottom_landing: true
+          stair_to_grade_serving_deck: true
+          stair_riser_count: 3
+          stair_egress_door_access: false
+          stair_bottom_landing_width: 30
+          stair_width: 36
+    rows:
+    - part: s1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_deck_stair_bottom_landing_width
+  kind: rule
+  topic: means_of_egress
+  title: Bottom landing width, exterior stair to grade serving deck (R318.7.6 exc. 4)
+  applies_when: stair_bottom_landing and stair_to_grade_serving_deck and stair_riser_count <= 3 and not stair_egress_door_access
+  check: stair_bottom_landing_width >= 36
+  review_when:
+  - when: stair_width > 36
+    reason: The exception sets a 36 inch bottom landing width for these stairways; whether it replaces the requirement
+      that the landing be at least as wide as a wider flight is not settled.
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 25
+    - 27
+    quote: Exterior stairways to grade with three or fewer risers serving a deck, porch or patio shall have a bottom
+      landing width of not less than 36 inches (914 mm), provided that the stairway is not the required access to
+      grade serving the required egress door.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Deck stair
+        measures:
+          stair_bottom_landing: true
+          stair_to_grade_serving_deck: true
+          stair_riser_count: 3
+          stair_egress_door_access: false
+          stair_bottom_landing_width: 36
+          stair_width: 36
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Deck stair
+        measures:
+          stair_bottom_landing: true
+          stair_to_grade_serving_deck: true
+          stair_riser_count: 3
+          stair_egress_door_access: false
+          stair_bottom_landing_width: 30
+          stair_width: 36
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Wide deck stair
+        measures:
+          stair_bottom_landing: true
+          stair_to_grade_serving_deck: true
+          stair_riser_count: 3
+          stair_egress_door_access: false
+          stair_bottom_landing_width: 40
+          stair_width: 48
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does the 36 inch bottom landing width replace the flight-width requirement for these stairways, or only relax
+    it?
+  research:
+  - question: Does the 36 inch bottom landing width replace the flight-width requirement for these stairways, or
+      only relax it?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_straight_run_landing_depth
+  kind: rule
+  topic: means_of_egress
+  title: Landing depth at a straight run (R318.7.6)
+  applies_when: stair_straight_run and not stair_serves_sleeping_loft
+  check: stair_landing_depth >= 36
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 16
+    - 17
+    quote: Where the stairway has a straight run, the depth in the direction of travel shall be not less than 36
+      inches (914 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_straight_run: true
+          stair_serves_sleeping_loft: false
+          stair_landing_depth: 40
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Stair 1
+        measures:
+          stair_straight_run: true
+          stair_serves_sleeping_loft: false
+          stair_landing_depth: 30
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Loft stair
+        measures:
+          stair_straight_run: true
+          stair_serves_sleeping_loft: true
+          stair_landing_depth: 30
+    rows:
+    - part: s1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Sleeping loft stairs follow R315.5.2.3's depth instead and are left out here.
+  research:
+  - question: Sleeping loft stairs follow R315.5.2.3's depth instead and are left out here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_6_nonrectangular_landing
+  kind: flag
+  topic: means_of_egress
+  title: Landings other than square or rectangular (R318.7.6)
+  applies_when: not stair_landings_rectangular
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 14
+    - 16
+    quote: For landings of shapes other than square or rectangular, the depth at the walk line and the total area
+      shall be not less than that of a quarter circle with a radius equal to the required landing width.
+  examples:
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - A person checks that the depth at the walk line and the total area of each landing that is not square or rectangular
+    are at least those of a quarter circle whose radius is the required landing width.
+  research:
+  - question: A person checks that the depth at the walk line and the total area of each landing that is not square
+      or rectangular are at least those of a quarter circle whose radius is the required landing width.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_11_1_spiral_stair_clear_width
+  kind: rule
+  topic: means_of_egress
+  title: Spiral stairway clear width at handrails (R318.7.11.1)
+  applies_when: stair_spiral
+  check: stair_clear_width_at_handrail >= 26
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 38
+    - 39
+    quote: The clear width at and below the handrails at spiral stairways shall be not less than 26 inches (660
+      mm) and the walkline radius shall be not greater than 24 1/2 inches (622 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_clear_width_at_handrail: 26
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_clear_width_at_handrail: 25.5
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_11_1_spiral_stair_walkline_radius
+  kind: rule
+  topic: means_of_egress
+  title: Spiral stairway walkline radius (R318.7.11.1)
+  applies_when: stair_spiral
+  check: stair_walkline_radius <= 24.5
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 38
+    - 39
+    quote: The clear width at and below the handrails at spiral stairways shall be not less than 26 inches (660
+      mm) and the walkline radius shall be not greater than 24 1/2 inches (622 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_walkline_radius: 24.5
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_walkline_radius: 25
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_11_1_spiral_stair_tread_depth
+  kind: rule
+  topic: means_of_egress
+  title: Spiral stairway tread depth at walkline (R318.7.11.1)
+  applies_when: stair_spiral
+  check: stair_walkline_tread_depth >= 6.75
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 39
+    - 40
+    quote: Each tread shall have a depth of not less than 6 3/4 inches (171 mm) at the walkline.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_walkline_tread_depth: 6.75
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_walkline_tread_depth: 6.5
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_11_1_spiral_stair_identical_treads
+  kind: rule
+  topic: means_of_egress
+  title: Spiral stairway treads identical (R318.7.11.1)
+  applies_when: stair_spiral
+  check: stair_treads_identical
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 40
+    - 40
+    quote: Treads shall be identical, and the rise shall be not more than 9 1/2 inches (241 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_treads_identical: true
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_treads_identical: false
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_11_1_spiral_stair_rise
+  kind: rule
+  topic: means_of_egress
+  title: Spiral stairway rise (R318.7.11.1)
+  applies_when: stair_spiral
+  check: stair_riser_height <= 9.5
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 40
+    - 40
+    quote: Treads shall be identical, and the rise shall be not more than 9 1/2 inches (241 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_riser_height: 9.5
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_riser_height: 9.75
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_11_1_spiral_stair_headroom
+  kind: rule
+  topic: means_of_egress
+  title: Spiral stairway headroom (R318.7.11.1)
+  applies_when: stair_spiral
+  check: stair_headroom >= 78
+  for_each: stair
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 40
+    - 41
+    quote: Head- room shall be not less than 6 feet 6 inches (1982 mm).
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_headroom: 78
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_headroom: 77
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_atd_clear_width
+  kind: rule
+  topic: means_of_egress
+  title: Alternating tread device clear width at handrails (R318.7.12)
+  check: atd_clear_width_at_handrail >= 20
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 49
+    - 49
+    quote: ing level or where a means of egress is not required. The clear width at and below the handrails shall
+      be not less than 20 inches
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Ladder wide
+        measures:
+          atd_clear_width_at_handrail: 22
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Ladder exactly 20
+        measures:
+          atd_clear_width_at_handrail: 20
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Ladder narrow
+        measures:
+          atd_clear_width_at_handrail: 18
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The text places the 20 inch width sentence after the permission sentence; it is read here as applying to every
+    alternating tread device, including those allowed by the exception.
+  research:
+  - question: The text places the 20 inch width sentence after the permission sentence; it is read here as applying
+      to every alternating tread device, including those allowed by the exception.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_1_atd_tread_depth
+  kind: rule
+  topic: means_of_egress
+  title: ATD tread depth at least 5 in (R318.7.12.1)
+  check: atd_tread_depth >= 5
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 53
+    - 55
+    quote: Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread
+      depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser
+      height of not more than 9 1/2 inches (241 mm).
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_tread_depth: 5
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_tread_depth: 4.5
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_1_atd_projected_tread_depth
+  kind: rule
+  topic: means_of_egress
+  title: ATD projected tread depth at least 8 1/2 in (R318.7.12.1)
+  check: atd_projected_tread_depth >= 8.5
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 53
+    - 55
+    quote: Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread
+      depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser
+      height of not more than 9 1/2 inches (241 mm).
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_projected_tread_depth: 8.5
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_projected_tread_depth: 8
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_1_atd_tread_width
+  kind: rule
+  topic: means_of_egress
+  title: ATD tread width at least 7 in (R318.7.12.1)
+  check: atd_tread_width >= 7
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 53
+    - 55
+    quote: Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread
+      depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser
+      height of not more than 9 1/2 inches (241 mm).
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_tread_width: 7
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_tread_width: 6
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_1_atd_riser_height
+  kind: rule
+  topic: means_of_egress
+  title: ATD riser height at most 9 1/2 in (R318.7.12.1)
+  check: atd_riser_height <= 9.5
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 53
+    - 55
+    quote: Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread
+      depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser
+      height of not more than 9 1/2 inches (241 mm).
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_riser_height: 9.5
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_riser_height: 10
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_1_atd_angle
+  kind: rule
+  topic: means_of_egress
+  title: ATD angle of ascent between 50 and 70 degrees (R318.7.12.1)
+  check: atd_angle >= 50 and atd_angle <= 70
+  review_when:
+  - when: atd_angle == 50 or atd_angle == 70
+    reason: The code says 'between 50 and 70 degrees' and does not say whether the end values are included.
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 57
+    - 58
+    quote: The riser height and tread depth provided shall result in an angle of ascent from the horizontal of between
+      50 and 70 degrees (0.87 and 1.22 rad).
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_angle: 60
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_angle: 45
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_angle: 75
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_angle: 50
+    rows:
+    - part: atd1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Does 'between 50 and 70 degrees' include 50 and 70 themselves?
+  research:
+  - question: Does 'between 50 and 70 degrees' include 50 and 70 themselves?
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_1_atd_first_tread_at_floor
+  kind: rule
+  topic: means_of_egress
+  title: ATD initial tread at platform elevation (R318.7.12.1)
+  check: atd_first_tread_at_floor
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 58
+    - 59
+    quote: The initial tread of the device shall begin at the same elevation as the platform, landing or floor surface.
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_first_tread_at_floor: true
+    rows:
+    - part: atd1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: atd1
+        name: Loft device
+        measures:
+          atd_first_tread_at_floor: false
+    rows:
+    - part: atd1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_2_atd_handrails_both_sides
+  kind: flag
+  topic: means_of_egress
+  title: Handrails on both sides of alternating tread devices (R318.7.12.2)
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 3
+    - 4
+    quote: Handrails shall be provided on both sides of alternating tread devices and shall comply with Section
+      R320.
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Every alternating tread device needs a handrail on each of its two sides; a person checks that each device has
+    them.
+  research:
+  - question: Every alternating tread device needs a handrail on each of its two sides; a person checks that each
+      device has them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_12_2_atd_handrails_comply_r320
+  kind: flag
+  topic: means_of_egress
+  title: Handrails of alternating tread devices comply with R320 (R318.7.12.2)
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 3
+    - 4
+    quote: Handrails shall be provided on both sides of alternating tread devices and shall comply with Section
+      R320.
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R320's own requirements are drafted from R320 itself; a person checks that each handrail of an alternating tread
+    device meets them.
+  research:
+  - question: R320's own requirements are drafted from R320 itself; a person checks that each handrail of an alternating
+      tread device meets them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_13_ship_ladder_clear_width
+  kind: rule
+  topic: means_of_egress
+  title: Ship's ladder clear width at handrails (R318.7.13)
+  check: ladder_clear_width_at_handrail >= 20
+  for_each: ships_ladder
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 7
+    - 7
+    quote: The clear width at and below the handrails shall be not less than 20 inches (508 mm).
+  examples:
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_clear_width_at_handrail: 20
+    rows:
+    - part: l1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_clear_width_at_handrail: 19
+    rows:
+    - part: l1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ships_ladder: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_13_1_ships_ladder_tread_depth
+  kind: rule
+  topic: means_of_egress
+  title: Ship's ladder tread depth at least 5 in (R318.7.13.1)
+  check: ladder_tread_depth >= 5
+  for_each: ships_ladder
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 10
+    - 10
+    quote: Treads shall have a depth of not less than 5 inches (127 mm).
+  examples:
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_tread_depth: 5
+    rows:
+    - part: l1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_tread_depth: 4.5
+    rows:
+    - part: l1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ships_ladder: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_13_1_ships_ladder_tread_plus_nosing
+  kind: rule
+  topic: means_of_egress
+  title: Ship's ladder tread plus nosing at least 8 1/2 in (R318.7.13.1)
+  check: ladder_tread_plus_nosing >= 8.5
+  for_each: ships_ladder
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 10
+    - 11
+    quote: 'The tread shall be
+
+      projected such that the total of the tread depth plus the nosing projection is not less than 8 1/2 inches
+      (216 mm).'
+  examples:
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_tread_plus_nosing: 8.5
+    rows:
+    - part: l1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_tread_plus_nosing: 8
+    rows:
+    - part: l1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ships_ladder: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_7_13_1_ships_ladder_riser_height
+  kind: rule
+  topic: means_of_egress
+  title: Ship's ladder riser height at most 9 1/2 in (R318.7.13.1)
+  check: ladder_riser_height <= 9.5
+  for_each: ships_ladder
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 11
+    - 12
+    quote: 'The riser height
+
+      shall be not more than 9 1/2 inches (241 mm).'
+  examples:
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_riser_height: 9.5
+    rows:
+    - part: l1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        name: Ladder
+        measures:
+          ladder_riser_height: 10
+    rows:
+    - part: l1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ships_ladder: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_8_1_ramp_max_slope_egress_door
+  kind: rule
+  topic: means_of_egress
+  title: Maximum slope of ramp serving the required egress door (R318.8.1)
+  applies_when: ramp_serves_egress_door and not ramp_site_constrained
+  check: ramp_slope * 12 <= 1
+  for_each: ramp
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 17
+    - 18
+    quote: Ramps serving the egress door required by Section R318.2 shall have a slope of not more than 1 unit vertical
+      in 12 units horizontal (8.3-percent slope).
+  examples:
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_serves_egress_door: true
+          ramp_site_constrained: false
+          ramp_slope: 0.0833
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_serves_egress_door: true
+          ramp_site_constrained: false
+          ramp_slope: 0.1
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_8_1_ramp_max_slope_other
+  kind: rule
+  topic: means_of_egress
+  title: Maximum slope of other ramps (R318.8.1)
+  applies_when: not ramp_serves_egress_door
+  check: ramp_slope * 8 <= 1
+  for_each: ramp
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 19
+    - 19
+    quote: Other ramps shall have a slope of not more than 1 unit vertical in 8 units horizontal (12.5 percent).
+  examples:
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Deck ramp
+        measures:
+          ramp_serves_egress_door: false
+          ramp_slope: 0.1
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Deck ramp
+        measures:
+          ramp_serves_egress_door: false
+          ramp_slope: 0.15
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_8_1_ramp_max_slope_infeasible
+  kind: rule
+  topic: means_of_egress
+  title: Maximum slope where technically infeasible due to site constraints (R318.8.1)
+  applies_when: ramp_serves_egress_door and ramp_site_constrained
+  check: ramp_slope * 8 <= 1
+  for_each: ramp
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 20
+    - 21
+    quote: 'Exception: Where it is technically infeasible to comply because of site constraints, ramps shall have
+      a slope of not more than 1 unit vertical in 8 units horizontal (12.5 percent).'
+  examples:
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Entry ramp
+        measures:
+          ramp_serves_egress_door: true
+          ramp_site_constrained: true
+          ramp_slope: 0.1
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Entry ramp
+        measures:
+          ramp_serves_egress_door: true
+          ramp_site_constrained: true
+          ramp_slope: 0.15
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Who decides that compliance is technically infeasible because of site constraints is not stated; the rule relies
+    on the stated measure ramp_site_constrained.
+  research:
+  - question: Who decides that compliance is technically infeasible because of site constraints is not stated; the
+      rule relies on the stated measure ramp_site_constrained.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_8_2_ramp_landings_present
+  kind: rule
+  topic: means_of_egress
+  title: Floor or landing at top and bottom of each ramp (R318.8.2)
+  check: ramp_landings_present
+  for_each: ramp
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 22
+    - 23
+    quote: There shall be a floor or landing at the top and bottom of each ramp, where doors open onto ramps, and
+      where ramps change directions.
+  examples:
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_landings_present: true
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_landings_present: false
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_8_2_ramp_landing_width
+  kind: rule
+  topic: means_of_egress
+  title: Ramp landing width not less than ramp width (R318.8.2)
+  applies_when: ramp_landings_present
+  check: ramp_landing_width >= ramp_width
+  for_each: ramp
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 23
+    - 24
+    quote: The width of the landing perpendicular to the ramp slope shall be not less than the width of the ramp.
+  examples:
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_landings_present: true
+          ramp_landing_width: 36
+          ramp_width: 36
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_landings_present: true
+          ramp_landing_width: 30
+          ramp_width: 36
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Where a ramp has no landing, this rule is not applicable and the rule requiring landings fails the ramp.
+  research:
+  - question: Where a ramp has no landing, this rule is not applicable and the rule requiring landings fails the
+      ramp.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_8_2_ramp_landing_depth
+  kind: rule
+  topic: means_of_egress
+  title: Ramp landing depth at least 36 inches (R318.8.2)
+  applies_when: ramp_landings_present
+  check: ramp_landing_depth >= 36
+  for_each: ramp
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 24
+    - 24
+    quote: The depth of the landing in the direction of the ramp slope shall be not less than 36 inches (914 mm).
+  examples:
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_landings_present: true
+          ramp_landing_depth: 36
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_landings_present: true
+          ramp_landing_depth: 30
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r318_8_3_ramp_handrail_one_side
+  kind: rule
+  topic: means_of_egress
+  title: Handrail on at least one side of ramps steeper than 1 in 12 (R318.8.3)
+  applies_when: ramp_slope * 12 > 1
+  check: ramp_handrail_sides >= 1
+  for_each: ramp
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 25
+    - 26
+    quote: Handrails shall be provided on not less than one side of ramps exceeding a slope of 1 unit vertical in
+      12 units horizontal (8.33-percent slope) and shall comply with Section R320.
+  examples:
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_slope: 0.1
+          ramp_handrail_sides: 1
+    rows:
+    - part: r1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Front ramp
+        measures:
+          ramp_slope: 0.1
+          ramp_handrail_sides: 0
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Gentle ramp
+        measures:
+          ramp_slope: 0.05
+          ramp_handrail_sides: 0
+    rows:
+    - part: r1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      ramp: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The handrail's own requirements (height, grip size, continuity, ends) are in Section R320 and are checked by
+    its own rules, not here.
+  - A ramp at exactly 1 in 12 does not exceed that slope, so this rule does not apply to it.
+  research:
+  - question: The handrail's own requirements (height, grip size, continuity, ends) are in Section R320 and are
+      checked by its own rules, not here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: A ramp at exactly 1 in 12 does not exceed that slope, so this rule does not apply to it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_2_1_area_well_ladder_width
+  kind: rule
+  topic: means_of_egress
+  title: Area well ladder inside width (R319.4.2.1)
+  applies_when: area_well_ladder and not area_well_steps
+  check: area_well_ladder_width >= 12
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 19
+    - 21
+    quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
+      than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
+      for the full height of the area well.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 12
+    rows:
+    - part: eeo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_width: 11
+    rows:
+    - part: eeo1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: true
+          area_well_ladder_width: 11
+    rows:
+    - part: eeo1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Steps (as opposed to a ladder) are left out of this rule, because the sentence speaks of ladders and rungs;
+    R319.4.2 allows ladder or steps. Whether the ladder rule also applies to steps is not stated here.
+  research:
+  - question: Steps (as opposed to a ladder) are left out of this rule, because the sentence speaks of ladders and
+      rungs; R319.4.2 allows ladder or steps. Whether the ladder rule also applies to steps is not stated here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_2_1_area_well_ladder_projection
+  kind: rule
+  topic: means_of_egress
+  title: Area well ladder projection from wall (R319.4.2.1)
+  applies_when: area_well_ladder and not area_well_steps
+  check: area_well_ladder_projection >= 3
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 19
+    - 21
+    quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
+      than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
+      for the full height of the area well.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_projection: 3
+    rows:
+    - part: eeo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_projection: 2
+    rows:
+    - part: eeo1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: true
+          area_well_ladder_projection: 2
+    rows:
+    - part: eeo1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_2_1_area_well_ladder_rung_spacing
+  kind: rule
+  topic: means_of_egress
+  title: Area well ladder rung spacing (R319.4.2.1)
+  applies_when: area_well_ladder and not area_well_steps
+  check: area_well_rung_spacing <= 18
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 19
+    - 21
+    quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
+      than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
+      for the full height of the area well.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_rung_spacing: 18
+    rows:
+    - part: eeo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_rung_spacing: 19
+    rows:
+    - part: eeo1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: true
+          area_well_rung_spacing: 19
+    rows:
+    - part: eeo1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_2_1_area_well_ladder_full_height
+  kind: rule
+  topic: means_of_egress
+  title: Area well ladder rungs for full height (R319.4.2.1)
+  applies_when: area_well_ladder and not area_well_steps
+  check: area_well_ladder_full_height
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 19
+    - 21
+    quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
+      than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
+      for the full height of the area well.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_full_height: true
+    rows:
+    - part: eeo1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: false
+          area_well_ladder_full_height: false
+    rows:
+    - part: eeo1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: eeo1
+        name: Opening 1
+        measures:
+          area_well_ladder: true
+          area_well_steps: true
+          area_well_ladder_full_height: false
+    rows:
+    - part: eeo1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The text says rungs are spaced for the full height of the area well; it is not stated whether 'for the full
+    height' also governs the width and projection (this rule reads it as requiring the ladder to run the full height).
+  research:
+  - question: The text says rungs are spaced for the full height of the area well; it is not stated whether 'for
+      the full height' also governs the width and projection (this rule reads it as requiring the ladder to run
+      the full height).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_4_2_2_area_well_steps_requirements
+  kind: rule
+  topic: means_of_egress
+  title: 'Area well steps: width, tread, riser (R319.4.2.2)'
+  applies_when: area_well_steps
+  check: area_well_ladder_width >= 12 and area_well_step_tread >= 5 and area_well_step_riser <= 18 and area_well_ladder_full_height
+  for_each: emergency_escape_opening
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 22
+    - 22
+    quote: Steps shall have an inside width of not less than 12 inches (305 mm), a minimum tread depth of 5 inches
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 23
+    - 23
+    quote: (127 mm) and a maximum riser height of 18 inches (457 mm) for the full height of the area well.
+  examples:
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening
+        measures:
+          area_well_steps: true
+          area_well_ladder_width: 14
+          area_well_step_tread: 6
+          area_well_step_riser: 12
+          area_well_ladder_full_height: true
+    rows:
+    - part: o1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening
+        measures:
+          area_well_steps: true
+          area_well_ladder_width: 11
+          area_well_step_tread: 6
+          area_well_step_riser: 12
+          area_well_ladder_full_height: true
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening
+        measures:
+          area_well_steps: true
+          area_well_ladder_width: 14
+          area_well_step_tread: 4
+          area_well_step_riser: 12
+          area_well_ladder_full_height: true
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening
+        measures:
+          area_well_steps: true
+          area_well_ladder_width: 14
+          area_well_step_tread: 6
+          area_well_step_riser: 19
+          area_well_ladder_full_height: true
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening
+        measures:
+          area_well_steps: true
+          area_well_ladder_width: 14
+          area_well_step_tread: 6
+          area_well_step_riser: 12
+          area_well_ladder_full_height: false
+    rows:
+    - part: o1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      emergency_escape_opening:
+      - id: o1
+        name: Opening
+        measures:
+          area_well_steps: false
+    rows:
+    - part: o1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The text does not say whether the 5 inch tread depth and 18 inch riser height are measured for every step including
+    the top and bottom ones; the riser measure includes them.
+  research:
+  - question: The text does not say whether the 5 inch tread depth and 18 inch riser height are measured for every
+      step including the top and bottom ones; the riser measure includes them.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_6_addition_sleeping_room_escape_opening
+  kind: flag
+  topic: means_of_egress
+  title: Escape opening in each new sleeping room of an addition (R319.6)
+  applies_when: sleeping_room_in_addition
+  for_each: sleeping_room
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 42
+    - 43
+    quote: Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening shall be
+      provided in each new sleeping room.
+  examples:
+  - given: {}
+    parts:
+      sleeping_room: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      sleeping_room:
+      - id: r1
+        name: New bedroom
+        measures:
+          sleeping_room_in_addition: true
+    rows:
+    - part: r1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      sleeping_room:
+      - id: r1
+        name: Existing bedroom
+        measures:
+          sleeping_room_in_addition: false
+    rows:
+    - part: r1
+      outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r319_6_addition_basement_escape_opening
+  kind: flag
+  topic: means_of_egress
+  title: Escape opening in the new basement of an addition (R319.6)
+  applies_when: basement_in_addition and not basement_has_sleeping_room_with_opening and not basement_reaches_existing_basement_opening
+  for_each: basement
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 43
+    - 44
+    quote: Where dwelling unit additions have basements, an emergency escape and rescue opening shall be provided
+      in the new basement.
+  examples:
+  - given: {}
+    parts:
+      basement: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      basement:
+      - id: b1
+        name: New basement
+        measures:
+          basement_in_addition: true
+          basement_has_sleeping_room_with_opening: false
+          basement_reaches_existing_basement_opening: false
+    rows:
+    - part: b1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      basement:
+      - id: b1
+        name: New basement
+        measures:
+          basement_in_addition: true
+          basement_has_sleeping_room_with_opening: true
+          basement_reaches_existing_basement_opening: false
+    rows:
+    - part: b1
+      outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_3_handrail_projection
+  kind: rule
+  topic: means_of_egress
+  title: Handrail projection, 4 1/2 in (6 1/2 in at nosings) (R320.3)
+  check: handrail_projection <= (6.5 if handrail_at_projecting_nosing else 4.5)
+  review_when:
+  - when: handrail_at_projecting_nosing and handrail_projection > 4.5 and handrail_projection <= 6.5
+    reason: The 6 1/2 inch exception applies only where the stair width and handrail clearance are not reduced to
+      less than required; a person checks that.
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 6
+    - 6
+    quote: Handrails shall not project more than 4 1/2 inches (114 mm) on either side of the stairway or ramp.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 8
+    - 8
+    quote: rails, handrails shall project not more than 6 1/2 inches (165 mm) into the stairway, provided that the
+      stair width and handrail
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail
+        measures:
+          handrail_projection: 4
+          handrail_at_projecting_nosing: false
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail
+        measures:
+          handrail_projection: 4
+          handrail_at_projecting_nosing: true
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail
+        measures:
+          handrail_projection: 5
+          handrail_at_projecting_nosing: false
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail
+        measures:
+          handrail_projection: 7
+          handrail_at_projecting_nosing: true
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Handrail
+        measures:
+          handrail_projection: 6
+          handrail_at_projecting_nosing: true
+    rows:
+    - part: h1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The exception requires that the stair width and handrail clearance are not reduced to less than that required;
+    those minimums are set in other sections, so a person checks them where the exception is used.
+  - The code says projection 'on either side of the stairway or ramp'; it is read here as the handrail's projection
+    into the stairway or ramp from its side.
+  research:
+  - question: The exception requires that the stair width and handrail clearance are not reduced to less than that
+      required; those minimums are set in other sections, so a person checks them where the exception is used.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The code says projection 'on either side of the stairway or ramp'; it is read here as the handrail's
+      projection into the stairway or ramp from its side.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_5_handrail_continuity
+  kind: rule
+  topic: means_of_egress
+  title: Handrail continuous full length of flight or ramp (R320.5)
+  check: handrail_continuous or handrail_breaks_newel_or_volute
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 12
+    - 13
+    quote: Handrails shall be continuous for the full length of the flight, from a point directly above the nosing
+      of the landing at the top of the flight to a point directly above the lowest nosing of the flight.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 13
+    - 14
+    quote: Handrails where required for ramps shall be continuous for the full length of the ramp.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 17
+    - 18
+    quote: Handrail continuity shall be permitted to be interrupted by a newel post at a turn in a flight with winders,
+      at a landing, or over the lowest tread.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 19
+    - 19
+    quote: A volute, turnout or starting easing shall be allowed to terminate over the lowest tread.
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_continuous: true
+          handrail_breaks_newel_or_volute: false
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_continuous: false
+          handrail_breaks_newel_or_volute: true
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_continuous: false
+          handrail_breaks_newel_or_volute: false
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Handrails of ramps, alternating tread devices and ship's ladders are required by other sections (R318.8.3, R318.7.12.2,
+    R318.7.13.2); this rule checks every handrail a design marks.
+  research:
+  - question: Handrails of ramps, alternating tread devices and ship's ladders are required by other sections (R318.8.3,
+      R318.7.12.2, R318.7.13.2); this rule checks every handrail a design marks.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_5_handrail_end_returned
+  kind: rule
+  topic: means_of_egress
+  title: Handrail end returned (R320.5)
+  check: handrail_ends_returned
+  review_when:
+  - when: handrail_breaks_newel_or_volute and not handrail_ends_returned
+    reason: A volute, turnout or starting easing may terminate over the lowest tread (exception 2), so the unreturned
+      end may be allowed; a person checks it.
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 14
+    - 14
+    quote: A handrail end shall be returned continuous to itself or toward a wall, guard or walking surface.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 19
+    - 19
+    quote: A volute, turnout or starting easing shall be allowed to terminate over the lowest tread.
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_ends_returned: true
+          handrail_breaks_newel_or_volute: false
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_ends_returned: false
+          handrail_breaks_newel_or_volute: false
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_ends_returned: false
+          handrail_breaks_newel_or_volute: true
+    rows:
+    - part: h1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_5_handrail_return_gap
+  kind: rule
+  topic: means_of_egress
+  title: Handrail return gap from wall at most 1/4 inch (R320.5)
+  applies_when: handrail_adjacent_to_wall
+  check: handrail_return_gap <= 0.25
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 15
+    - 15
+    quote: rail returns shall not form a gap more than 1/4 inch (6.4 mm) from the adjacent wall.
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_adjacent_to_wall: true
+          handrail_return_gap: 0.25
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_adjacent_to_wall: true
+          handrail_return_gap: 0.5
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Stair handrail
+        measures:
+          handrail_adjacent_to_wall: false
+          handrail_return_gap: 0.5
+    rows:
+    - part: h1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The law says the gap is measured from the adjacent wall; a handrail not beside a wall is treated as having no
+    such gap.
+  research:
+  - question: The law says the gap is measured from the adjacent wall; a handrail not beside a wall is treated as
+      having no such gap.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_6_handrail_edge_radius
+  kind: rule
+  topic: means_of_egress
+  title: Handrail edge radius (R320.6)
+  check: handrail_edge_radius >= 0.01
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 22
+    - 24
+    quote: If the handrail is not circular, it shall have a perimeter of not less than 4 inches (102 mm) and not
+      greater than 6 1/4 inches (160 mm) and a cross section of not more than 2 1/4 inches (57 mm). Edges shall
+      have a radius of not less than 0.01 inch (0.25 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 20
+    - 20
+    quote: Required handrails shall be of one of the following types or provide equivalent graspability.
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Rail
+        measures:
+          handrail_edge_radius: 0.05
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h2
+        name: Sharp rail
+        measures:
+          handrail_edge_radius: 0
+    rows:
+    - part: h2
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas cannot judge
+    equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+  research:
+  - question: R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas
+      cannot judge equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_6_handrail_circular_diameter
+  kind: rule
+  topic: means_of_egress
+  title: Circular handrail outside diameter, Type I (R320.6)
+  applies_when: handrail_circular
+  check: handrail_diameter >= 1.25 and handrail_diameter <= 2
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 21
+    - 22
+    quote: Handrails with a circular cross section shall have an outside diameter of not less than 1 1/4 inches
+      (32 mm) and not greater than 2 inches (51 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 20
+    - 20
+    quote: Required handrails shall be of one of the following types or provide equivalent graspability.
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Round rail
+        measures:
+          handrail_circular: true
+          handrail_diameter: 1.5
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h2
+        name: Thick round rail
+        measures:
+          handrail_circular: true
+          handrail_diameter: 2.5
+    rows:
+    - part: h2
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h3
+        name: Thin round rail
+        measures:
+          handrail_circular: true
+          handrail_diameter: 1
+    rows:
+    - part: h3
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h4
+        name: Non-round rail
+        measures:
+          handrail_circular: false
+    rows:
+    - part: h4
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas cannot judge
+    equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+  research:
+  - question: R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas
+      cannot judge equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_6_handrail_type_i_noncircular
+  kind: rule
+  topic: means_of_egress
+  title: Non-circular handrail perimeter and cross section, Type I (R320.6)
+  applies_when: not handrail_circular and handrail_perimeter <= 6.25
+  check: handrail_perimeter >= 4 and handrail_perimeter <= 6.25 and handrail_cross_section <= 2.25
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 22
+    - 24
+    quote: If the handrail is not circular, it shall have a perimeter of not less than 4 inches (102 mm) and not
+      greater than 6 1/4 inches (160 mm) and a cross section of not more than 2 1/4 inches (57 mm). Edges shall
+      have a radius of not less than 0.01 inch (0.25 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 20
+    - 20
+    quote: Required handrails shall be of one of the following types or provide equivalent graspability.
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Rail
+        measures:
+          handrail_circular: false
+          handrail_perimeter: 5
+          handrail_cross_section: 2
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h2
+        name: Small rail
+        measures:
+          handrail_circular: false
+          handrail_perimeter: 3
+          handrail_cross_section: 1
+    rows:
+    - part: h2
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h3
+        name: Deep rail
+        measures:
+          handrail_circular: false
+          handrail_perimeter: 5
+          handrail_cross_section: 2.5
+    rows:
+    - part: h3
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h4
+        name: Round rail
+        measures:
+          handrail_circular: true
+          handrail_perimeter: 4.7
+    rows:
+    - part: h4
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas cannot judge
+    equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+  research:
+  - question: R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas
+      cannot judge equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft
+- id: general.r320_6_handrail_type_ii_recess
+  kind: rule
+  topic: means_of_egress
+  title: 'Handrail with perimeter over 6 1/4 in: finger recess, Type II (R320.6)'
+  applies_when: not handrail_circular and handrail_perimeter > 6.25
+  check: handrail_recess_both_sides and handrail_recess_start <= 0.75 and handrail_recess_depth >= 0.3125 and handrail_recess_run
+    >= 0.375 and handrail_recess_bottom >= 1.75 and handrail_width_above_recess >= 1.25 and handrail_width_above_recess
+    <= 2.75
+  for_each: handrail
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 25
+    - 26
+    quote: Handrails with a perimeter greater than 6 1/4 inches (160 mm) shall have a graspable finger recess area
+      on both sides of the profile.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 26
+    - 27
+    quote: The finger recess shall begin within 3/4 inch (19 mm) measured vertically from the tallest portion of
+      the profile and have a depth of not less than 5/16 inch (8 mm) within 7/8 inch (22 mm) below the widest portion
+      of the profile.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 27
+    - 29
+    quote: This required depth shall continue for not less than 3/8 inch (10 mm) to a level that is not less than
+      1 3/4 inches (45 mm) below the tallest portion of the profile.
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 29
+    - 30
+    quote: The width of the handrail above the recess shall be not less than 1 1/4 inches (32 mm) and not more than
+      2 3/4 inches (70 mm). Edges shall have a radius of not less than 0.01 inch (0.25 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 104
+    lines:
+    - 20
+    - 20
+    quote: Required handrails shall be of one of the following types or provide equivalent graspability.
+  examples:
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Type II rail
+        measures:
+          handrail_circular: false
+          handrail_perimeter: 7
+          handrail_recess_both_sides: true
+          handrail_recess_start: 0.5
+          handrail_recess_depth: 0.4
+          handrail_recess_run: 0.5
+          handrail_recess_bottom: 2
+          handrail_width_above_recess: 2
+    rows:
+    - part: h1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      handrail:
+      - id: h2
+        name: Shallow recess rail
+        measures:
+          handrail_circular: false
+          handrail_perimeter: 7
+          handrail_recess_both_sides: true
+          handrail_recess_start: 0.5
+          handrail_recess_depth: 0.2
+          handrail_recess_run: 0.5
+          handrail_recess_bottom: 2
+          handrail_width_above_recess: 2
+    rows:
+    - part: h2
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h3
+        name: Wide top rail
+        measures:
+          handrail_circular: false
+          handrail_perimeter: 7
+          handrail_recess_both_sides: true
+          handrail_recess_start: 0.5
+          handrail_recess_depth: 0.4
+          handrail_recess_run: 0.5
+          handrail_recess_bottom: 2
+          handrail_width_above_recess: 3
+    rows:
+    - part: h3
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      handrail:
+      - id: h4
+        name: Small rail
+        measures:
+          handrail_circular: false
+          handrail_perimeter: 5
+    rows:
+    - part: h4
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      handrail: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas cannot judge
+    equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+  - The text says the finger recess depth must be reached 'within 7/8 inch below the widest portion of the profile'.
+    How the handrail_recess_depth measure captures this 7/8 inch limit is not settled by the text.
+  research:
+  - question: R320.6 lets a handrail 'provide equivalent graspability' instead of Type I or Type II. The formulas
+      cannot judge equivalence, so a handrail outside the type limits fails although it might be accepted as equivalent.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The text says the finger recess depth must be reached 'within 7/8 inch below the widest portion of
+      the profile'. How the handrail_recess_depth measure captures this 7/8 inch limit is not settled by the text.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: Drafted by the rule-drafting script.
+  drafted_by: rule_drafting/claude-sonnet-5-5
+  status: draft

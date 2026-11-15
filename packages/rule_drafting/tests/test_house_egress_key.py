@@ -76,6 +76,9 @@ def test_each_verdict_matches_its_rows(ctx, key, drafts):
     rank = book_eval.STRICTNESS
     for f in book_eval.compare(key, drafts, ctx):
         r = resolutions[f["id"]]
+        if f["id"].endswith("/only"):                  # a piece one side has no rules for: no rows to rank
+            assert r["verdict"] != "draft_wrong" or r["false_pass_risk"], f["id"]
+            continue
         k, d = rank[f["key"]], rank[f["draft"]]
         if r["verdict"] == "drafts_stricter":
             assert d > k, (f["id"], r["cause"], f["key"], f["draft"])
@@ -162,7 +165,10 @@ def test_each_draft_fix_says_what_why_and_the_law(drafts):
     for fix in fixes():
         assert fix["verdict"] in VERDICTS and fix["why"].strip() and fix["fixed"].strip() and fix["law"].strip()
         assert (type(fix.get("false_pass_risk")) is bool) == (fix["verdict"] == "draft_wrong"), fix["cause"]
-        assert fix["cases"] and fix["rules"], fix["cause"]
+        # the disagreements it settled, or (a fix no worked example shows: found reading the drafts, or a rule the AI's
+        # refused answer left out) the test in this file that pins it
+        pin = globals().get(fix.get("pinned_by") or "")
+        assert (fix["cases"] or (callable(pin) and fix["cause"] in (pin.__doc__ or ""))) and fix["rules"], fix["cause"]
         for rid in fix["rules"]:           # each rule it changed records the change, naming the cause
             assert any(fix["cause"] in r["why"] for r in by_id[rid].get("revised") or []), (fix["cause"], rid)
 
@@ -304,3 +310,165 @@ def test_a_guard_top_that_is_the_stairs_handrail_is_held_to_r320_2_at_any_drop_a
         assert piece_result(rules, "R321.1.2", design(35, 40, drop=36), {}, ctx) == "needs_review"
         assert piece_result(rules, "R321.1.2", design(39, 40, drop=36), {}, ctx) == "fail"
         assert piece_result(rules, "R321.1.2", design(33, 36, drop=36), {}, ctx) == "fail"
+
+
+# ---- the remaining egress pieces (2026-11-14): fixes no worked example shows, each pinned here -----------------------
+
+def test_every_piece_but_the_bulkhead_exemption_has_draft_rules(ctx, drafts):
+    """Every piece drafted has draft rules (causes r318_7_3_example_shape, r318_7_13_2_example_shape: the AI's answers
+    for R318.7.3 and R318.7.13.2 were refused only for their examples' shape, so a 13 ft flight and a ship's ladder's
+    handrails were checked by nothing); R318.7.11.2, an exemption with nothing to check, is the one piece with none."""
+    from rule_drafting.book import SCOPE
+    have = {book_eval.own_piece(r) for r in drafts}
+    assert set(SCOPE) - have == {"R318.7.11.2"}, sorted(set(SCOPE) - have)
+    by_id = {r["id"]: r for r in drafts}
+    assert by_id["general.r318_7_3_stair_vertical_rise_max"]["check"] == "stair_vertical_rise <= 151"
+    ladder = {"ships_ladder": [{"id": "l1", "measures": {"ladder_handrail_sides": 1}}]}
+    assert piece_result(drafts, "R318.7.13.2", ladder, {}, ctx) == "needs_review"
+
+
+def test_a_small_balcony_door_with_a_short_inside_landing_never_passes(ctx, drafts, as_drafted):
+    """Cause r318_3_balcony_side: the depth given is the least of the door's two landings, so a door onto a small
+    balcony with a 30 in landing inside may fail R318.3 on its inside landing: needs review, never pass (the AI's
+    rule passed it)."""
+    door = {"exterior_door": [{"id": "d1", "measures": {"exterior_door_landing_depth": 30, "exterior_door_onto_balcony": True,
+                                                        "exterior_door_balcony_area": 40}}]}
+    rid = "general.r318_3_exterior_door_landing_depth"
+    assert piece_result([r for r in drafts if r["id"] == rid], "R318.3", door, {}, ctx) == "needs_review"
+    assert piece_result([r for r in as_drafted if r["id"] == rid], "R318.3", door, {}, ctx) == "pass"
+
+
+def test_a_loft_stair_with_a_shallow_landing_never_passes(ctx, drafts, as_drafted):
+    """Cause r318_7_6_loft_landing_unchecked: a loft stair with a 12 in landing fails (R315.5.2.3's least is 24 in);
+    24 to 36 in needs review. The AI's rule left loft stairs out (nothing checked them)."""
+    def stair(depth):
+        return {"stair": [{"id": "s1", "measures": {"stair_straight_run": True, "stair_serves_sleeping_loft": True,
+                                                    "stair_landing_depth": depth}}]}
+    rid = "general.r318_7_6_straight_run_landing_depth"
+    fixed, ai = [r for r in drafts if r["id"] == rid], [r for r in as_drafted if r["id"] == rid]
+    assert piece_result(fixed, "R318.7.6", stair(12), {}, ctx) == "fail"
+    assert piece_result(fixed, "R318.7.6", stair(30), {}, ctx) == "needs_review"
+    assert piece_result(ai, "R318.7.6", stair(12), {}, ctx) == "not_applicable"
+
+
+@pytest.mark.parametrize("measure, value", [("stair_clear_width_at_handrail", 24), ("stair_walkline_tread_depth", 6),
+                                            ("stair_riser_height", 10), ("stair_headroom", 72)])
+def test_a_loft_spiral_stair_outside_r318_7_11_1_needs_review(ctx, key, drafts, as_drafted, measure, value):
+    """Cause r318_7_11_1_loft_spiral: a spiral stair serving a sleeping loft outside one of R318.7.11.1's numbers
+    needs review on both sides (R315.5.2 may let it follow the loft's limits); the AI's rules failed it."""
+    from rule_format import parts
+    good = {"stair_spiral": True, "stair_serves_sleeping_loft": True, "stair_clear_width_at_handrail": 26,
+            "stair_walkline_tread_depth": 7, "stair_riser_height": 9, "stair_headroom": 80}
+    design = {"stair": [{"id": "s1", "measures": dict(good, **{measure: value})}]}
+
+    def worst(rules):
+        got = {row["outcome"] for r in rules if book_eval.own_piece(r) == "R318.7.11.1" and measure in parts.formula_names(r)
+               for row in parts.rows(r, design, {}, ctx.allowed())}
+        return min(got, key=book_eval.WORST.index)
+    assert worst(key) == worst(drafts) == "needs_review"
+    assert worst(as_drafted) == "fail"
+
+
+def test_a_lawful_spiral_stair_passes_the_stair_rules_and_r318_7_11_1_checks_it(ctx, key, drafts, as_drafted):
+    """Cause spiral_placeholder_removed: R318.7.11.1 is drafted, so a spiral stair that meets it passes the stair rules
+    on both sides (no longer needs review everywhere), and one that misses it fails. The AI's own rules (the
+    placeholders back) still need review for the lawful one."""
+    from rule_format import parts
+    ok = {"stair_spiral": True, "stair_serves_sleeping_loft": False, "stair_clear_width": 26,
+          "stair_clear_width_at_handrail": 26, "stair_walkline_radius": 24, "stair_walkline_tread_depth": 7,
+          "stair_treads_identical": True, "stair_riser_height": 9.5, "stair_headroom": 78, "stair_tread_depth": 7,
+          "stair_riser_variation": 0, "stair_tread_variation": 0, "stair_riser_count": 14, "stair_handrail_sides": 1,
+          "stair_vertical_rise": 133, "stair_bulkhead": False}
+    pieces = ("R318.7.1", "R318.7.2", "R318.7.5.1", "R318.7.5.2", "R318.7.8", "R318.7.11.1")
+    flags = {"general.r318_7_2_stair_floor_opening_headroom", "general.r318_7_5_1_stair_riser_slope"}  # known flags
+
+    def worst(rules, m):
+        design = {"stair": [{"id": "s1", "measures": m}]}
+        got = {row["outcome"] for r in rules if book_eval.own_piece(r) in pieces and r["id"] not in flags
+               for row in parts.rows(r, design, {}, ctx.allowed())}
+        return min(got, key=book_eval.WORST.index)
+    assert worst(key, ok) == worst(drafts, ok) == "pass"
+    assert worst(key, dict(ok, stair_headroom=76)) == worst(drafts, dict(ok, stair_headroom=76)) == "fail"
+    assert worst(as_drafted, ok) == "needs_review"
+
+
+# ---- review round 1 (2026-11-15) --------------------------------------------------------------------------------
+
+def test_an_egress_door_onto_a_raised_landing_never_passes(ctx, key, drafts, as_drafted):
+    """Cause r318_3_1_access_to_grade_unchecked: an egress door whose outside landing is a raised deck, every drop and
+    size good, needs review for R318.3.1's access to grade on both sides; the AI's own rules (its flag refused) pass it."""
+    good = {"exterior_door_is_egress_door": True, "exterior_door_inside_landing": True, "exterior_door_outside_landing": True,
+            "exterior_door_outside_at_grade": False, "exterior_door_inside_drop": 0.5, "exterior_door_outside_drop": 1,
+            "exterior_door_swings_outward": False}
+    door = {"exterior_door": [{"id": "d1", "measures": good}]}
+    assert piece_result(key, "R318.3.1", door, {}, ctx) == piece_result(drafts, "R318.3.1", door, {}, ctx) == "needs_review"
+    assert piece_result(as_drafted, "R318.3.1", door, {}, ctx) == "pass"
+
+
+def test_a_top_landing_below_a_top_door_elsewhere_than_a_garage_needs_review(ctx, key, drafts, as_drafted):
+    """Cause r318_7_6_top_door_drop_open: R318.7.6 gives a drop below a top door's threshold only at a garage; an
+    interior stair elsewhere with its top landing 7 in below the door needs review on both sides (the AI's rule and
+    the key before review round 1: not applicable), level with it passes, a garage's 10 in fails."""
+    def stair(**m):
+        return {"stair": [{"id": "s1", "measures": dict({"stair_top_door": True, "stair_at_enclosed_garage": False}, **m)}]}
+
+    def drop_rules(rules):
+        return [r for r in rules if r["id"] in ("general.r318_7_6_garage_top_landing", "general.r318_7_6_garage_top_landing_drop")]
+    for rules in (key, drafts):
+        assert piece_result(drop_rules(rules), "R318.7.6", stair(stair_top_landing_drop=7), {}, ctx) == "needs_review"
+        assert piece_result(drop_rules(rules), "R318.7.6", stair(stair_top_landing_drop=0), {}, ctx) == "pass"
+        assert piece_result(drop_rules(rules), "R318.7.6", stair(stair_top_landing_drop=10, stair_at_enclosed_garage=True),
+                            {}, ctx) == "fail"
+    assert piece_result(drop_rules(as_drafted), "R318.7.6", stair(stair_top_landing_drop=7), {}, ctx) == "not_applicable"
+
+
+def test_a_handrail_that_stops_short_is_never_read_as_broken_only_at_a_newel():
+    """R320.5's continuity passes on handrail_breaks_newel_or_volute; a rail that just stops short of the nosings has
+    no break, so the measure's meaning must say the rail still reaches both ends (review round 1)."""
+    from rule_format import parts
+    meaning = parts.registry()["handrail"]["measures"]["handrail_breaks_newel_or_volute"]["meaning"]
+    assert "still reaches" in meaning and "just stops short is no" in meaning
+
+
+def test_a_ramp_handrail_is_checked_by_the_key(ctx, key):
+    """Handrails may sit within a ramp (parts.yaml): the key checks a ramp's handrail height and wall clearance
+    (review round 1: its R320.2 and R320.4 rules read only handrails within a stair, so a 30 in ramp rail got no row)."""
+    design = {"stair": [], "ramp": [{"id": "r1"}],
+              "handrail": [{"id": "h1", "within": "r1", "measures": {"handrail_height": 30, "handrail_height_max": 30,
+                                                                     "handrail_adjacent_to_wall": True, "handrail_wall_clearance": 0.5}}]}
+    assert piece_result(key, "R320.2", design, {}, ctx) == "fail"
+    assert piece_result(key, "R320.4", design, {}, ctx) == "fail"
+
+
+def test_a_narrow_top_landing_beyond_a_door_fails_in_the_key(ctx, key):
+    """R318.7.6 exception 1 moves the top landing beyond a door; it is still the top landing, so a 20 in one at a 36 in
+    stair fails its width (review round 1: the key skipped it)."""
+    design = {"stair": [{"id": "s1", "measures": {"stair_top_landing": False, "stair_top_door": True, "stair_exterior": False,
+                                                  "stair_top_landing_width": 20, "stair_width": 36, "stair_bottom_landing_width": 40,
+                                                  "stair_bulkhead": False, "stair_to_grade_serving_deck": False}}]}
+    width = [r for r in key if r["id"] == "general.r318_7_6_landing_width"]
+    assert piece_result(width, "R318.7.6", design, {}, ctx) == "fail"
+
+
+# ---- review round 2 (2026-11-15) --------------------------------------------------------------------------------
+
+def test_an_egress_door_not_given_as_an_exterior_door_needs_review(ctx, key, drafts, as_drafted):
+    """Cause r318_3_1_egress_door_not_given_as_exterior: an egress door the model gives only as R318.2's egress_door
+    (no exterior_door marked as it) needs review in R318.3.1 on both sides; the AI's own rules give not applicable."""
+    door = {"egress_door": [{"id": "e1", "measures": {"door_clear_width": 36, "door_clear_height": 80, "door_side_hinged": True,
+                                                      "egress_door_given_as_exterior_door": False}}], "exterior_door": []}
+    assert piece_result(key, "R318.3.1", door, {}, ctx) == piece_result(drafts, "R318.3.1", door, {}, ctx) == "needs_review"
+    assert piece_result(as_drafted, "R318.3.1", door, {}, ctx) == "not_applicable"
+
+
+def test_a_return_toward_a_wall_from_an_open_side_is_held_to_the_gap(ctx, key, drafts, as_drafted):
+    """Cause r320_5_return_toward_a_wall: a rail on an open side whose end returns toward a wall 2 in short of it
+    fails R320.5's 1/4 in gap on both sides; the AI's own rule gives not applicable."""
+    design = {"stair": [{"id": "s1"}], "handrail": [{"id": "h1", "within": "s1", "measures": {
+        "handrail_adjacent_to_wall": False, "handrail_returns_to_wall": True, "handrail_return_gap": 2,
+        "handrail_ends_returned": True}}]}
+
+    def gap(rules):
+        return [r for r in rules if r["id"] in ("general.r320_5_handrail_returns", "general.r320_5_handrail_return_gap")]
+    assert piece_result(gap(key), "R320.5", design, {}, ctx) == piece_result(gap(drafts), "R320.5", design, {}, ctx) == "fail"
+    assert piece_result(gap(as_drafted), "R320.5", design, {}, ctx) == "not_applicable"

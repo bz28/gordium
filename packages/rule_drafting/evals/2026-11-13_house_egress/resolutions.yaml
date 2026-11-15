@@ -70,6 +70,59 @@ key_fixes:
       required guard too, as which of R320.2 exception 2 and R321.1.2 exception 2 governs at a fitting is open
       (review round 8).
     law: 'R320.2: "Handrail height ... shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)."'
+  - rule: general.r318_7_1_stair_width
+    what: >-
+      A spiral stairway needed review here until R318.7.11.1 was drafted (2026-11-13). It is now drafted
+      (general.r318_7_11_1_*, 2026-11-14), so a spiral stair is left out of this rule (not applicable): R318.7.1
+      exception (width) sends it to R318.7.11.1, whose rules check it.
+    law: 'R318.7.11: "Spiral stairways and bulkhead enclosure stairways shall comply with the requirements of Section R318.7 except as specified in Sections R318.7.11.1 and R318.7.11.2."'
+  - rule: general.r318_7_2_stair_headroom
+    what: >-
+      A spiral stairway needed review here until R318.7.11.1 was drafted (2026-11-13). It is now drafted
+      (general.r318_7_11_1_*, 2026-11-14), so a spiral stair is left out of this rule (not applicable): R318.7.2
+      exception 2 (headroom) sends it to R318.7.11.1, whose rules check it.
+    law: 'R318.7.11: "Spiral stairways and bulkhead enclosure stairways shall comply with the requirements of Section R318.7 except as specified in Sections R318.7.11.1 and R318.7.11.2."'
+  - rule: general.r318_7_5_1_riser_height
+    what: >-
+      A spiral stairway needed review here until R318.7.11.1 was drafted (2026-11-13). It is now drafted
+      (general.r318_7_11_1_*, 2026-11-14), so a spiral stair is left out of this rule (not applicable):
+      R318.7.5.1 exception 2 (riser height) sends it to R318.7.11.1, whose rules check it.
+    law: 'R318.7.11: "Spiral stairways and bulkhead enclosure stairways shall comply with the requirements of Section R318.7 except as specified in Sections R318.7.11.1 and R318.7.11.2."'
+  - rule: general.r318_7_5_2_tread_depth
+    what: >-
+      A spiral stairway needed review here until R318.7.11.1 was drafted (2026-11-13). It is now drafted
+      (general.r318_7_11_1_*, 2026-11-14), so a spiral stair is left out of this rule (not applicable):
+      R318.7.11 (tread) sends it to R318.7.11.1, whose rules check it.
+    law: 'R318.7.11: "Spiral stairways and bulkhead enclosure stairways shall comply with the requirements of Section R318.7 except as specified in Sections R318.7.11.1 and R318.7.11.2."'
+  - rule: general.r320_2_ramp_handrail_height
+    what: >-
+      Added (review round 1, 2026-11-15): handrails may now sit within a ramp, and the key's R320.2 rule reads only
+      handrails within a stair, so a ramp's handrail was checked by nothing in the key (a 30 in rail: not applicable).
+    law: 'R320.2: "Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface of ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)."'
+  - rule: general.r320_4_ramp_handrail_wall_clearance
+    what: >-
+      Added (review round 1), as for R320.2: the key's R320.4 rule reads only handrails within a stair.
+    law: 'R320.4: "Handrails adjacent to a wall shall have a space of not less than 1 1/2 inches (38 mm) between the wall and the handrails."'
+  - rule: general.r318_7_6_landing_width
+    what: >-
+      A top landing on the other side of a door at the top (exception 1) was skipped; it is still the top landing, so
+      its width is checked (review round 1).
+    law: 'R318.7.6 exception 1: "The top landing of an interior stairway, including those in an enclosed garage, shall be permitted to be on the other side of a door located at the top of the stairway, provided that the door does not swing over the stairs."'
+  - rule: general.r318_7_6_garage_top_landing
+    what: >-
+      A top landing below the threshold of a top door elsewhere than at a garage was not applicable, a pass on a
+      question the law leaves open; it now needs review, a landing level with the threshold passes (review round 1).
+    law: 'R318.7.6 exception 2: "At an enclosed garage, the top landing at the stair shall be permitted to be not more than 8 1/4 inches (209 mm) below the top of the threshold."'
+  - rule: general.r318_3_1_egress_door_given_as_exterior_door
+    what: >-
+      Added (review round 2): an egress door the model does not also give as a marked exterior door had its landings
+      and drops unchecked; it now needs review.
+    law: 'R318.3.1: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold."'
+  - rule: general.r320_5_handrail_returns
+    what: >-
+      A rail on an open side returned toward a wall was not held to the 1/4 in gap; handrail_returns_to_wall now reads
+      it (review round 2).
+    law: 'R320.5: "Handrail returns shall not form a gap more than 1/4 inch (6.4 mm) from the adjacent wall."'
 draft_fixes:
 - cause: r318_2_doors_counted
   verdict: draft_wrong
@@ -253,6 +306,324 @@ draft_fixes:
   cases:
   - R315.5.2.2/key/general.r315_5_2_2_loft_stair_risers#3/s1
   - R318.7.1/key/general.r318_7_1_stair_width#8/s1
+- cause: r318_3_two_riser_door
+  verdict: draft_wrong
+  false_pass_risk: false
+  rules:
+  - general.r318_3_exterior_door_landing_each_side
+  why: >-
+    The drafts required a landing or floor outside every exterior door; the key lets a door other than the
+    required egress door have, instead, a stairway of not more than two risers outside it that the door doesn't
+    swing over (R318.3.2's exception). The drafts failed such a side door, which the law allows: stricter, never
+    a pass.
+  fixed: >-
+    R318.3's landing rule takes the exception: a door other than the egress door may have a stairway of two
+    risers or fewer outside, the door not swinging over it.
+  law: 'R318.3.2 exception: "An exterior landing or floor is not required at the exterior doorway where a stairway of not more than two risers is located on the exterior side of the door, provided that the door does not swing over the stairway."'
+  cases:
+  - R318.3/key/general.r318_3_door_landings#3/d1
+  - R318.3/draft/general.r318_3_exterior_door_landing_each_side#2/d1
+- cause: r318_3_balcony_side
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_3_exterior_door_landing_depth
+  why: >-
+    Found reading the drafts, not by a worked example (other rules' rows hid it). The drafts passed any door
+    onto an exterior balcony under 60 square feet with a landing under 36 in, but the depth measure is the least
+    of the door's two sides, so a door with a 30 in landing inside and a small balcony outside passed though its
+    inside landing fails R318.3.
+  fixed: >-
+    Such a door needs review (a person checks which side is short), as in the key.
+  law: 'R318.3 exception: "Exterior balconies less than 60 square feet (5.6 m2) and only accessed from a door are permitted to have a landing that is less than 36 inches (914 mm) measured in the direction of travel."'
+  cases: []
+  pinned_by: test_a_small_balcony_door_with_a_short_inside_landing_never_passes
+- cause: r318_3_1_tied_to_landing
+  verdict: draft_wrong
+  false_pass_risk: false
+  rules:
+  - general.r318_3_1_egress_door_inside_floor_drop
+  - general.r318_3_1_egress_door_outside_floor_drop
+  why: >-
+    The drafts checked the egress door's drops only where the landing on that side is marked present; the key
+    checks the egress door. A door whose landing isn't marked had its drop unchecked here, but R318.3's landing
+    rule fails it, so the rulebook never passes it.
+  fixed: >-
+    Each drop rule applies to the egress door; a drop not given needs review.
+  law: 'R318.3.1: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold."'
+  cases:
+  - R318.3.1/key/general.r318_3_1_egress_door_landing_drop#1/d1
+  - R318.3.1/key/general.r318_3_1_egress_door_landing_drop#2/d1
+  - R318.3.1/key/general.r318_3_1_egress_door_landing_drop#3/d1
+  - R318.3.1/key/general.r318_3_1_egress_door_landing_drop#4/d1
+  - R318.3.1/key/general.r318_3_1_egress_door_landing_drop#5/d1
+  - R318.3.1/draft/general.r318_3_1_egress_door_inside_floor_drop#1/d1
+- cause: r318_7_3_example_shape
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_7_3_stair_vertical_rise_max
+  why: >-
+    Code refused the AI's R318.7.3 rule three times, only for an example with no rows, so the drafts had no rule
+    for it: a flight rising more than 12 ft 7 in was checked by nothing.
+  fixed: >-
+    The AI's own check (stair_vertical_rise <= 151) added by hand with its example given its row, and
+    R318.7.11.2's bulkhead stairs left out or needing review as in the key.
+  law: 'R318.7.3: "A flight of stairs shall not have a vertical rise greater than 12 feet 7 inches (3835 mm) between floor levels or landings."'
+  cases: []
+  pinned_by: test_every_piece_but_the_bulkhead_exemption_has_draft_rules
+- cause: r318_7_6_loft_landing_unchecked
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_7_6_straight_run_landing_depth
+  why: >-
+    Found reading the drafts. The drafts left a sleeping loft's stair out of the 36 in landing depth, and
+    nothing else checks a loft stair's landings (R315.5.2.3 isn't drafted): a loft stair with a 12 in landing
+    passed.
+  fixed: >-
+    A loft stair is checked: under 24 in fails, 24 to 36 in needs review (R315.5.2.3's 24 in, not drafted yet),
+    as in the key.
+  law: 'R315.5.2.3: "Landings at stairways providing egress from sleeping lofts shall comply with Section R318.7.6, except that the depth of landings in the direction of travel shall be not less than 24 inches (610 mm)."'
+  cases: []
+  pinned_by: test_a_loft_stair_with_a_shallow_landing_never_passes
+- cause: r318_7_11_1_loft_spiral
+  verdict: drafts_stricter
+  rules:
+  - general.r318_7_11_1_spiral_stair_clear_width
+  - general.r318_7_11_1_spiral_stair_headroom
+  - general.r318_7_11_1_spiral_stair_rise
+  - general.r318_7_11_1_spiral_stair_tread_depth
+  why: >-
+    The drafts failed a spiral stair serving a sleeping loft on R318.7.11.1's numbers; R315.5.2 lets a loft's
+    stair follow its own limits, and whether a loft stair may mix the two sets is open (the key needs review, as
+    for straight loft stairs). Stricter, never a pass.
+  fixed: >-
+    Each of the four numbers needs review for a loft's spiral stair outside it, as in the key.
+  law: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3."'
+  cases: []
+  pinned_by: test_a_loft_spiral_stair_outside_r318_7_11_1_needs_review
+- cause: atd_egress_use_unchecked
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_7_12_atd_not_in_means_of_egress
+  why: >-
+    Code refused the AI's rule that an alternating tread device is not an element of a means of egress (the
+    number check doesn't read "200 gross square feet" as square feet), so nothing checked it: a device that is a
+    space's only means of egress passed.
+  fixed: >-
+    A rule added whole: such a device fails; one serving a loft, mezzanine or similar area, not the only way to
+    a kitchen or bathroom, needs review (its 200 square feet a person checks).
+  law: 'R318.7.12: "Alternating tread devices shall not be used as an element of a means of egress."'
+  cases:
+  - R318.7.12/key/general.r318_7_12_atd_means_of_egress#3/a1
+  - R318.7.12/key/general.r318_7_12_atd_means_of_egress#4/a1
+- cause: ladder_egress_use_unchecked
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_7_13_ship_ladder_egress_use
+  why: >-
+    As for alternating tread devices: the AI's rule that a ship's ladder is not an element of a means of egress
+    was refused, so a ladder that is a space's only means of egress passed.
+  fixed: >-
+    A rule added whole, as for alternating tread devices.
+  law: 'R318.7.13: "Ship’s ladders shall not be used as an element of a means of egress."'
+  cases:
+  - R318.7.13/key/general.r318_7_13_ships_ladder_means_of_egress#3/l1
+  - R318.7.13/key/general.r318_7_13_ships_ladder_means_of_egress#4/l1
+- cause: r318_7_13_2_example_shape
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_7_13_2_ships_ladder_handrails_both_sides
+  why: >-
+    Code refused the AI's flag for R318.7.13.2 (an example measure parts.yaml lacks, then no "none" example), so
+    no rule asked for a ship's ladder's two handrails.
+  fixed: >-
+    The AI's own flag added by hand with its examples corrected: each ship's ladder needs review for its
+    handrails.
+  law: 'R318.7.13.2: "Handrails shall be provided on both sides of ship’s ladders and shall comply with Section R320."'
+  cases: []
+  pinned_by: test_every_piece_but_the_bulkhead_exemption_has_draft_rules
+- cause: r318_8_1_infeasible_judged
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_8_1_ramp_max_slope_infeasible
+  why: >-
+    The drafts passed a ramp at the egress door between 1 in 12 and 1 in 8 wherever the architect says 1 in 12
+    is technically infeasible because of site constraints; that is a judgment (the code official's), so the key
+    needs review.
+  fixed: >-
+    Between 1 in 12 and 1 in 8 such a ramp needs review; steeper than 1 in 8 still fails.
+  law: 'R318.8.1 exception: "Where it is technically infeasible to comply because of site constraints, ramps shall have a slope of not more than 1 unit vertical in 8 units horizontal (12.5 percent)."'
+  cases:
+  - R318.8.1/key/general.r318_8_1_ramp_slope#3/r1
+  - R318.8.1/draft/general.r318_8_1_ramp_max_slope_infeasible#1/r1
+- cause: r319_4_2_required_ladder_only
+  verdict: drafts_stricter
+  rules:
+  - general.r319_4_2_1_area_well_ladder_full_height
+  - general.r319_4_2_1_area_well_ladder_projection
+  - general.r319_4_2_1_area_well_ladder_rung_spacing
+  - general.r319_4_2_1_area_well_ladder_width
+  - general.r319_4_2_2_area_well_steps_requirements
+  why: >-
+    The drafts sized every ladder or set of steps in an area well; R319.4.2.1 and R319.4.2.2 size the ones
+    R319.4.2 requires (a well deeper than 44 in at a below-grade opening). They failed optional ones: stricter,
+    never a pass.
+  fixed: >-
+    Each applies to a below-grade opening whose well is deeper than 44 in, with a ladder (or steps).
+  law: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps."; "Ladders or steps required by this section shall not be required to comply with Section R318.7."'
+  cases:
+  - R319.4.2.1/key/general.r319_4_2_1_area_well_ladder_size#6/w1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_width#1/eeo1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_width#2/eeo1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_projection#1/eeo1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_projection#2/eeo1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_rung_spacing#1/eeo1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_rung_spacing#2/eeo1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_full_height#1/eeo1
+  - R319.4.2.1/draft/general.r319_4_2_1_area_well_ladder_full_height#2/eeo1
+  - R319.4.2.2/draft/general.r319_4_2_2_area_well_steps_requirements#1/o1
+  - R319.4.2.2/draft/general.r319_4_2_2_area_well_steps_requirements#2/o1
+  - R319.4.2.2/draft/general.r319_4_2_2_area_well_steps_requirements#3/o1
+  - R319.4.2.2/draft/general.r319_4_2_2_area_well_steps_requirements#4/o1
+  - R319.4.2.2/draft/general.r319_4_2_2_area_well_steps_requirements#5/o1
+- cause: r319_6_room_flagged_not_checked
+  verdict: draft_wrong
+  false_pass_risk: false
+  rules:
+  - general.r319_6_addition_sleeping_room_escape_opening
+  why: >-
+    The drafts flagged each new sleeping room for a person instead of checking its escape opening; the key
+    checks the openings within each sleeping room, none failing. R319.1's rule checks the same openings in every
+    sleeping room, so the drafts never passed a room without one.
+  fixed: >-
+    The flag became the key's rule: for each escape opening within each sleeping room, operable; none: fail.
+  law: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening shall be provided in each new sleeping room."'
+  cases:
+  - R319.6/key/general.r319_6_new_sleeping_room_escape_opening#1/br1
+  - R319.6/key/general.r319_6_new_sleeping_room_escape_opening#1/w1
+  - R319.6/key/general.r319_6_new_sleeping_room_escape_opening#2/br1
+  - R319.6/key/general.r319_6_new_sleeping_room_escape_opening#2/w1
+  - R319.6/key/general.r319_6_new_sleeping_room_escape_opening#3/none in br1
+  - R319.6/key/general.r319_6_new_sleeping_room_escape_opening#3/br1
+  - R319.6/draft/general.r319_6_addition_sleeping_room_escape_opening#2/r1
+  - R319.6/draft/general.r319_6_addition_sleeping_room_escape_opening#3/r1
+- cause: r320_6_equivalent_graspability
+  verdict: drafts_stricter
+  rules:
+  - general.r320_6_handrail_circular_diameter
+  - general.r320_6_handrail_edge_radius
+  - general.r320_6_handrail_type_i_noncircular
+  - general.r320_6_handrail_type_ii_recess
+  why: >-
+    The drafts failed a handrail outside Type I's or Type II's dimensions; R320.6 also allows one that provides
+    equivalent graspability, a judgment, so the key needs review. Stricter, never a pass.
+  fixed: >-
+    Each is a flag on a handrail outside its dimensions.
+  law: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."'
+  cases:
+  - R320.6/key/general.r320_6_round_handrail_grip#1/h1
+  - R320.6/key/general.r320_6_round_handrail_grip#2/h1
+  - R320.6/key/general.r320_6_round_handrail_grip#3/h1
+  - R320.6/key/general.r320_6_profile_handrail_grip#1/h1
+  - R320.6/key/general.r320_6_profile_handrail_grip#2/h1
+  - R320.6/key/general.r320_6_profile_handrail_grip#3/h1
+  - R320.6/key/general.r320_6_profile_handrail_grip#4/h1
+  - R320.6/key/general.r320_6_profile_handrail_grip#5/h1
+  - R320.6/draft/general.r320_6_handrail_edge_radius#2/h2
+  - R320.6/draft/general.r320_6_handrail_circular_diameter#1/h1
+  - R320.6/draft/general.r320_6_handrail_circular_diameter#2/h2
+  - R320.6/draft/general.r320_6_handrail_circular_diameter#3/h3
+  - R320.6/draft/general.r320_6_handrail_type_i_noncircular#2/h2
+  - R320.6/draft/general.r320_6_handrail_type_i_noncircular#3/h3
+  - R320.6/draft/general.r320_6_handrail_type_ii_recess#2/h2
+  - R320.6/draft/general.r320_6_handrail_type_ii_recess#3/h3
+- cause: spiral_placeholder_removed
+  verdict: drafts_stricter
+  rules:
+  - general.r318_7_1_stair_clear_width_above_handrail
+  - general.r318_7_1_stair_clear_width_at_handrail
+  - general.r318_7_2_stair_headroom
+  - general.r318_7_5_1_stair_riser_height_max
+  - general.r318_7_5_1_stair_riser_variation_max
+  - general.r318_7_5_2_stair_tread_depth_min
+  - general.r318_7_5_2_stair_tread_variation_max
+  - general.r318_7_8_stair_handrail_one_side
+  why: >-
+    Until R318.7.11.1 was drafted, the stair rules made every spiral stair need review. It is now drafted on
+    both sides, so the width, headroom, riser height and tread depth rules leave spiral stairs out
+    (R318.7.11.1's rules check them), the handrail and tread-variation rules hold them like any stair
+    (R318.7.11.1 says nothing of handrails, and its identical treads meet the 3/8 in variation), and the riser-variation rule needs review only above 3/8 in (as the
+    key). The old cause r318_7_8_spiral_review is this one.
+  fixed: >-
+    The drafts' spiral review_whens removed (applies_when not stair_spiral where R318.7.11.1 sets the number),
+    as the key now reads.
+  law: 'R318.7.11: "Spiral stairways and bulkhead enclosure stairways shall comply with the requirements of Section R318.7 except as specified in Sections R318.7.11.1 and R318.7.11.2."'
+  cases:
+  - R318.7.1/key/general.r318_7_1_stair_width#7/s1
+  - R318.7.1/key/general.r318_7_1_stair_width#8/s1
+  - R318.7.1/draft/general.r318_7_1_stair_clear_width_above_handrail#3/s1
+  - R318.7.1/draft/general.r318_7_1_stair_clear_width_at_handrail#6/s1
+  - R318.7.8/draft/general.r318_7_8_stair_handrail_one_side#4/s1
+- cause: r318_3_1_access_to_grade_unchecked
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_3_1_egress_door_exterior_landing_access_to_grade
+  why: >-
+    Found by review round 1, not by a worked example (the key's examples leave out the drops, so both sides needed
+    review). The AI's flag for R318.3.1's access to grade was refused by code for a missing "none" example, so the
+    drafts had nothing for it: an egress door onto a raised deck with no ramp or stairway to grade passed.
+  fixed: >-
+    The AI's last recorded flag added by hand with its examples: an egress door whose outside landing is not at grade
+    needs review.
+  law: 'R318.3.1: "Where exterior landings or floors serving the required egress door are not at grade, they shall be provided with access to grade by means of a ramp in accordance with Section R318.8 or a stairway in accordance with Section R318.7."'
+  cases: []
+  pinned_by: test_an_egress_door_onto_a_raised_landing_never_passes
+- cause: r318_7_6_top_door_drop_open
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_7_6_garage_top_landing_drop
+  why: >-
+    Found by review round 1 (the key had the same gap, fixed with it). R318.7.6 gives a top landing's drop below a
+    top door's threshold only at an enclosed garage; for any other top door the drafts were not applicable, so an
+    interior stair whose top landing sits 7 in below the door's threshold passed on a question the law leaves open.
+  fixed: Every stair with a top door is read; elsewhere than a garage a landing below the threshold needs review, one level with it passes.
+  law: 'R318.7.6 exception 2: "At an enclosed garage, the top landing at the stair shall be permitted to be not more than 8 1/4 inches (209 mm) below the top of the threshold."'
+  cases: []
+  pinned_by: test_a_top_landing_below_a_top_door_elsewhere_than_a_garage_needs_review
+- cause: r318_3_1_egress_door_not_given_as_exterior
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_3_1_egress_door_given_as_exterior_door
+  why: >-
+    Found by review round 2 (the key had the same gap, fixed with it). R318.3 and R318.3.1 read exterior_door parts,
+    R318.2 the egress_door part, and nothing tied them: an egress door not also given as an exterior door marked as
+    the egress door had its landings and its 1 1/2 in drop not applicable (or held to 8 1/4 in as another door).
+  fixed: A flag for each egress door not given as a marked exterior door (needs review), added by hand.
+  law: 'R318.3.1: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold."'
+  cases: []
+  pinned_by: test_an_egress_door_not_given_as_an_exterior_door_needs_review
+- cause: r320_5_return_toward_a_wall
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r320_5_handrail_return_gap
+  why: >-
+    Found by review round 2 (the key had the same gap, fixed with it). The gap rule read only a rail beside a wall;
+    R320.5's gap is the return's, so a rail on an open side whose end returns toward a wall 2 in short of it was not
+    applicable.
+  fixed: The gap is read where the rail runs beside a wall or returns toward one (handrail_returns_to_wall).
+  law: 'R320.5: "Handrail returns shall not form a gap more than 1/4 inch (6.4 mm) from the adjacent wall."'
+  cases: []
+  pinned_by: test_a_return_toward_a_wall_from_an_open_side_is_held_to_the_gap
 causes:
   r318_2_readily_openable_flag:
     verdict: drafts_stricter
@@ -303,12 +674,6 @@ causes:
       allow: stricter than the law there). Neither passes a stair the law fails. A measure for the exception is a
       to-do.
     law: 'R318.7.2 exception 1: "Where the nosings of treads at the side of a flight extend under the edge of a floor opening through which the stair passes, the floor opening shall not project horizontally into the required headroom more than 4 3/4 inches (121 mm)."'
-  r318_7_8_spiral_review:
-    verdict: drafts_stricter
-    why: >-
-      Spiral stairs need a handrail like any flight of four or more risers (R318.7.11 keeps R318.7, R318.7.11.1 says
-      nothing of handrails); the drafts make them need review, the key passes one with a handrail.
-    law: 'R318.7.8: "Handrails shall be provided on not less than one side of each flight of stairs with four or more risers."'
   opening_examples_without_a_room:
     verdict: both_follow_the_law
     why: >-
@@ -331,6 +696,42 @@ causes:
       unplaced (needs review), and the key's examples give a stair with no handrail, a "none" row the drafts don't
       have. On a model where each handrail sits in its stair, both give the same answers.
     law: 'R320.2: "Handrail height ... shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)"; R320.4: "Handrails adjacent to a wall shall have a space of not less than 1 1/2 inches (38 mm) between the wall and the handrails."'
+  yes_no_left_out:
+    verdict: both_follow_the_law
+    why: >-
+      An example written for one side's rules leaves out a yes/no the other side's rules read, which the
+      comparison takes as no (book_eval.completed): an inside landing not given (R318.3.2), treads not said to
+      be identical (R318.7.11.1), a handrail not said to be continuous (R320.5). The other side then fails or
+      needs review for that, not for the law; with the yes/no given, both give the same answer.
+    law: 'R318.3.2: "Exterior doors other than the required egress door shall be provided with landings or floors not more than 8 1/4 inches (209 mm) below the top of the threshold."; R318.7.11.1: "Treads shall be identical"; R320.5: "Handrails shall be continuous for the full length of the flight"'
+  handrail_examples_without_a_stair_or_ramp:
+    verdict: both_follow_the_law
+    why: >-
+      The key's R320.5 continuity rules group handrails by the stair or the ramp they sit in (a ramp's handrail
+      is required only on a steep ramp, so it is a flag); an example that gives no ramps (or no stairs) is read
+      by the key as those parts not read, a needs-review row for the building, and a stair or ramp with no
+      handrail as a "none" row the drafts don't have. On a model where each handrail sits in its stair or ramp,
+      both give the same answers but one: a ramp's handrail broken at a newel post at a ramp landing, which the
+      drafts pass (R320.5's exception 1, "at a landing", read as reaching a ramp's landings) and the key's ramp flag
+      sends to a person. Neither passes what the law clearly fails; the reading is open for the architects.
+    law: 'R320.5: "Handrails shall be continuous for the full length of the flight ... Handrails where required for ramps shall be continuous for the full length of the ramp."'
+  r318_7_5_1_riser_slope_flag:
+    verdict: drafts_stricter
+    why: >-
+      The drafts flag every stair for R318.7.5.1's riser slope (vertical, or sloped not more than 30 degrees),
+      which no measure gives; the key doesn't check it. Shown now that a spiral stair's riser height is
+      R318.7.11.1's: the key passes the riser rules where the drafts' flag needs review. Never a pass by either.
+    law: 'R318.7.5.1: "Risers shall be vertical or sloped from the underside of the nosing of the tread above at an angle not more than 30 degrees (0.51 rad) from the vertical."'
+  r318_7_11_2_exemption_only:
+    verdict: both_follow_the_law
+    why: >-
+      R318.7.11.2 only exempts some bulkhead stairs from R318.3 and R318.7. The AI drafted no rule for it
+      (nothing to check); the key flags a bulkhead stair whose cover isn't hinged doors ("or other approved
+      means": a judgment), and leaves an exempt one out of its new stair rules. In the drafts such a stair stays
+      under R318.7's rules, which it passes or fails on their numbers: stricter where it is exempt, never a pass
+      the law fails. (The older stair rules on both sides don't read the exemption yet: the decision record's
+      "Not yet".)
+    law: 'R318.7.11.2: "Stairways serving bulkhead enclosures, not part of the required building egress, providing access from the outside grade level to the basement shall be exempt from the requirements of Sections R318.3 and R318.7 where the height from the basement finished floor level to grade adjacent to the stairway is not more than 8 feet (2438 mm) and the grade level opening to the stairway is covered by a bulkhead enclosure with hinged doors or other approved means."'
 ids:
   "BF103.2/key/general.bf103_2_escape_opening_into_patio_cover#1/the building": bf103_2_every_exit_door
   "BF103.2/key/general.bf103_2_escape_opening_into_patio_cover#2/the building": bf103_2_every_exit_door
@@ -352,7 +753,6 @@ ids:
   "R318.7.2/key/general.r318_7_2_stair_headroom#4/s1": loft_stair_may_follow_r318_7
   "R318.7.2/draft/general.r318_7_2_stair_headroom#1/s1": r318_7_2_floor_opening_flag
   "R318.7.5.2/draft/general.r318_7_5_2_stair_tread_variation_max#3/s1": loft_stair_may_follow_r318_7
-  "R318.7.8/draft/general.r318_7_8_stair_handrail_one_side#4/s1": r318_7_8_spiral_review
   "R319.1/draft/general.r319_1_escape_opening_opens_to_public_way_or_yard#1/o1": opening_examples_without_a_room
   "R319.1/draft/general.r319_1_escape_opening_opens_to_public_way_or_yard#2/o1": opening_examples_without_a_room
   "R319.4.2/key/general.r319_4_2_area_well_ladder#1/w1": pass_or_not_applicable
@@ -377,3 +777,65 @@ ids:
   "R319.4.2/draft/general.r319_4_2_area_well_ladder_over_44#3/eeo1": pass_or_not_applicable
   "R320.2/draft/general.r320_2_handrail_height_34_38#4/h1": handrail_examples_without_a_stair
   "R320.2/draft/general.r320_2_handrail_height_34_38#5/the building": handrail_examples_without_a_stair
+  "R318.3.2/key/general.r318_3_2_other_door_landing_drop#1/d1": yes_no_left_out
+  "R318.3.2/key/general.r318_3_2_other_door_landing_drop#3/d1": yes_no_left_out
+  "R318.7.11.1/key/general.r318_7_11_1_spiral_width#3/s1": yes_no_left_out
+  "R318.7.11.1/key/general.r318_7_11_1_spiral_riser_height#3/s1": yes_no_left_out
+  "R318.7.11.1/key/general.r318_7_11_1_spiral_headroom#3/s1": yes_no_left_out
+  "R318.7.11.1/draft/general.r318_7_11_1_spiral_stair_clear_width#3/s1": yes_no_left_out
+  "R318.7.11.1/draft/general.r318_7_11_1_spiral_stair_tread_depth#3/s1": yes_no_left_out
+  "R318.7.11.1/draft/general.r318_7_11_1_spiral_stair_rise#3/s1": yes_no_left_out
+  "R318.7.11.1/draft/general.r318_7_11_1_spiral_stair_headroom#3/s1": yes_no_left_out
+  "R318.7.11.2/only": r318_7_11_2_exemption_only
+  "R318.7.2/key/general.r318_7_2_stair_headroom#5/s1": r318_7_2_floor_opening_flag
+  "R318.7.2/draft/general.r318_7_2_stair_headroom#3/s1": r318_7_2_floor_opening_flag
+  "R318.7.5.1/draft/general.r318_7_5_1_stair_riser_variation_max#3/s1": r318_7_5_1_riser_slope_flag
+  "R320.5/key/general.r320_5_stair_handrail_continuity#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_stair_handrail_continuity#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_stair_handrail_continuity#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_stair_handrail_continuity#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_stair_handrail_continuity#4/none in s1": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_ramp_handrail_continuity#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_ramp_handrail_continuity#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_ramp_handrail_continuity#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_ramp_handrail_continuity#3/none in r1": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#1/h1": yes_no_left_out
+  "R320.5/key/general.r320_5_handrail_returns#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#5/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#5/h1": yes_no_left_out
+  "R320.5/key/general.r320_5_handrail_returns#6/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#7/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_continuity#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_continuity#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_continuity#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_continuity#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_end_returned#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_end_returned#1/h1": yes_no_left_out
+  "R320.5/draft/general.r320_5_handrail_end_returned#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_end_returned#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_end_returned#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_return_gap#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_return_gap#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_return_gap#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_return_gap#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_return_gap#5/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_handrail_height#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_handrail_height#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_handrail_height#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_handrail_height#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_handrail_height#5/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_ramp_handrail_height#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_ramp_handrail_height#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_ramp_handrail_height#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_ramp_handrail_height#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.2/key/general.r320_2_ramp_handrail_height#4/none in r1": handrail_examples_without_a_stair_or_ramp
+  "R320.4/key/general.r320_4_handrail_wall_clearance#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.4/key/general.r320_4_handrail_wall_clearance#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.4/key/general.r320_4_handrail_wall_clearance#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.4/key/general.r320_4_ramp_handrail_wall_clearance#1/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.4/key/general.r320_4_ramp_handrail_wall_clearance#2/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.4/key/general.r320_4_ramp_handrail_wall_clearance#3/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.4/key/general.r320_4_ramp_handrail_wall_clearance#3/none in r1": handrail_examples_without_a_stair_or_ramp
