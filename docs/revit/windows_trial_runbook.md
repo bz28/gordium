@@ -19,7 +19,7 @@ edit. The trial ends with a go / no-go and a filled-in results table, not with a
 
 | # | Question | Go if | How it is answered |
 |---|---|---|---|
-| Q1 | Does Revit run acceptably in Parallels on this Mac (16 GB M2)? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the Mac is not swapping heavily | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
+| Q1 | Does Revit run acceptably on the Windows laptop of section 2 (32 GB), first alone, then with the add-in and the worker running? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the laptop is not short of memory (Windows RAM in use stays below 90% while working: a proposed number, section 6) | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
 | Q2 | Can a minimal C# add-in start the Python worker and get an answer back? | The add-in starts `python -m design_checker serve`, sends `hello`, then `check_site` for the box-house scene, and the answer matches what the Mac gives | Days 3 to 4 |
 | Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each real model (Snowdon Towers alone answers the reading half only, as "provisional (Snowdon)": it has no Ithaca lot, and its survey coordinates stay "not tested"; Q3 is not a go until the architects' models are read), the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
 | Q4 | How long does reading take after an edit? | Within the targets in section 6, or the miss recorded and the MVP planned as "check on a button" (section 6: a slow read is not a stop) | Day 10, measured in section 5 |
@@ -33,18 +33,18 @@ Do these in order. Tick each when done and write the version you got in the note
 
 | Done | Step | Notes |
 |---|---|---|
-| [ ] | Parallels Desktop installed on the Mac; a Windows 11 ARM virtual machine created | Give the VM at least 8 cores and as much RAM as the Mac can spare (Autodesk recommends 32 GB for Revit 2027; this Mac has 16 GB, which is exactly what Q1 tests) |
-| [ ] | Windows updated; a note made of the VM's RAM, cores and disk | Fills the machine rows of the results table |
+| [ ] | The new Windows laptop set up (GIGABYTE Gaming A16: Intel Core i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64; arriving 2026-11-18) | Windows 11 Home is expected to be fine for Revit (not yet checked against Autodesk's system requirements: confirm when installing). 32 GB meets Autodesk's recommendation for Revit 2027; Q1 still measures it with the add-in running |
+| [ ] | Windows updated; a note made of the laptop's RAM, cores, disk and graphics | Fills the machine rows of the results table |
 | [ ] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x), and the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and 10.x) | The worker client is built for both (see the first check the trial settles, section 7) |
 | [ ] | Git for Windows installed | |
-| [ ] | Python installed: the 64-bit Intel (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an Intel machine, so the Intel build is the one proven; it runs on Windows 11 ARM under Windows' own emulation. Whether ARM builds of the pinned packages (`rhino3dm`, `shapely`, `numpy`) exist was not checked |
+| [ ] | Python installed: the 64-bit (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an x64 machine, so the 64-bit (x64) build is the one proven, and it is what this laptop runs |
 | [ ] | `git clone https://github.com/bz28/gordium.git`, then check out the branch the trial uses (see Open items) | |
 | [ ] | From the clone: `py -3.12 -m venv .venv`, then `.venv\Scripts\activate`, then `pip install -e ".[dev]"` | Matches the install step of the Windows job in `.github/workflows/ci.yml` |
 | [ ] | `pytest` passes | The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `ci.yml`); running them all is optional here, `pytest` is the one that proves the install |
 | [ ] | `python -m design_checker.conformance` prints `OK: every scene conforms` | Proves the Windows install reads the scenes and recordings as the Mac does |
 | [ ] | The worker answers by hand (below) | |
-| [ ] | Autodesk's Snowdon Towers sample copied onto the VM, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Keep copies out of the repo clone. The architects' models are the firms' files |
-| [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and at least the Snowdon Towers sample is on the VM**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
+| [ ] | Autodesk's Snowdon Towers sample copied onto the laptop, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Keep copies out of the repo clone. The architects' models are the firms' files |
+| [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and at least the Snowdon Towers sample is on the laptop**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
 | [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The add-in is built twice: .NET 8 for Revit 2026, .NET 10 for Revit 2027. See the first check the trial settles, section 7 |
 
 **Worker smoke test** (from the clone, venv active). Type or pipe one request per line; each gets one answer line:
@@ -61,7 +61,7 @@ page was written. End it by closing its input (Ctrl+Z then Enter on Windows).
 
 **The scene's facts and verdicts.** `check_site` needs the lot facts the architect states, and the suite compares the
 answer with hand-worked verdicts. Neither is in a committed file; both come from the scene in Python. On the Mac or
-the VM (venv active), for scene 01:
+the laptop (venv active), for scene 01:
 
 ```
 python -c "import json; from design_checker import conformance as c; s = c.scenes()['01_box_house']; print(json.dumps(c.facts(s))); print(json.dumps(c.expected_verdicts(s), indent=1))"
@@ -84,7 +84,7 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 
 | Day | Do | Done when |
 |---|---|---|
-| 1 | Section 2 in order, Revit last: Parallels, Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only once at least the Snowdon Towers sample is on the VM: Open items 1). Open Autodesk's Snowdon Towers sample (`Snowdon Towers Sample Architectural.rvt`, saved in Revit 2024; Revit upgrades it on opening) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows and on the Mac (Activity Monitor) | Setup list ticked; first Q1 numbers written down |
+| 1 | Section 2 in order, Revit last: Windows, Python, the clone, `pytest`, conformance and the worker smoke test. Then install Revit and start its 30-day clock (only once at least the Snowdon Towers sample is on the laptop: Open items 1). Open Autodesk's Snowdon Towers sample (`Snowdon Towers Sample Architectural.rvt`, saved in Revit 2024; Revit upgrades it on opening) and use it for half an hour: orbit, select, edit a wall. Note memory use in Windows (Task Manager) | Setup list ticked; first Q1 numbers written down |
 | 2 | Open Snowdon Towers and each architect model already in hand, timing the open. Use each for a while as an architect would. Decide Q1 for Revit alone on those: go, or switch (section 6); the add-in half is re-checked on day 4. An architect model arriving later is timed when it arrives, and can reopen Q1 | The models in hand open; Q1 has a yes or no, with numbers, and says which models it rests on |
 | 3 | Make the smallest add-in that loads in Revit 2027 and adds one ribbon button (nothing else). Build it twice, like the worker client (`net8.0` and `net10.0`). Confirm which .NET runtime Revit 2027 and 2026 load (Revit 2026's may be .NET 10 after an update: section 7), and which build each loads | The button appears in both Revit versions, the note says which build each loaded, or which version refused it |
 | 4 | Use the worker client, `Gordium.Worker` ([apps/revit_addin](../../apps/revit_addin/README.md): already tested against the real worker on the Mac), for all of this. The button starts the worker (venv Python, clone as working folder, `serve`), sends `hello`, shows the `about` fingerprints in a message box, and stops the worker when Revit closes. Then send `check_site` with `test_data/host_conformance/expected/01_box_house.site.json` as the `site` and the scene's facts (see "The scene's facts and verdicts" below) | Q2 answered. The `check_site` answer's rows are exactly the scene's expected verdicts. Q1 re-checked with Revit, the add-in and the worker all running (the second memory row in section 5) |
@@ -96,7 +96,7 @@ If a day's question is answered early, move on; if a go / no-go question is answ
 | 10 | Timing runs: the edit loop on every model in hand (Snowdon Towers too), five repeats each. Re-run `python -m design_checker.conformance` on the Mac with the final recordings | Section 5 complete |
 | 11 to 12 | Spare. Re-record anything that failed; chase the worst timing; test the other Revit version if only one was used | |
 | 13 | Write the go / no-go: answer Q1 to Q5 in section 1 with the numbers, list what surprised us, and what the add-in MVP plan must change | The section 5 tables filled in and signed off by Ben |
-| 14 | Commit the recordings and results in a PR (never push to main; Ben merges) and hand the machine back or shut the cloud VM down | PR open |
+| 14 | Commit the recordings and results in a PR (never push to main; Ben merges) and shut the cloud machine down if the section 6 switch was used | PR open |
 
 ## 4. Recording the scenes from Revit
 
@@ -163,19 +163,19 @@ details that matter here:
 
 ## 5. What to measure and write down
 
-Fill these in as you go; this page is where the results live. "Mac" below means the Parallels VM host.
+Fill these in as you go; this page is where the results live. "Mac" below is the reference machine whose answers the laptop must match; Revit and the add-in run on the laptop.
 
 **The machine** (day 1)
 
 | Item | Value |
 |---|---|
-| Parallels version | |
-| Windows 11 ARM build | |
-| VM cores, RAM, disk | |
-| Mac RAM used by Parallels while Revit is open (Activity Monitor) | |
+| Laptop (expected: GIGABYTE Gaming A16, i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD; write what Windows reports) | |
+| Windows 11 Home build | |
+| Cores, RAM, disk, graphics driver | |
+| RAM in use by Revit while it is open (Task Manager) | |
 | Revit version(s) installed | |
 | .NET runtime each Revit version loads | |
-| Python and `pip` versions in the VM | |
+| Python and `pip` versions on the laptop | |
 
 **Q1: is Revit usable here** (days 1 to 2)
 
@@ -184,9 +184,8 @@ Fill these in as you go; this page is where the results live. "Mac" below means 
 | Revit start to ready | | |
 | Open Snowdon Towers; real model 1 / 2 / 3 (those in hand) | | |
 | Orbit and select in each model in hand: smooth, laggy, or unusable | | |
-| Memory pressure on the Mac (Activity Monitor: green, yellow, red), Revit alone (day 2) | | |
-| Memory pressure on the Mac, Revit with the add-in and the worker running (day 4) | | |
-| Windows free RAM with Revit open | | |
+| Memory use in Task Manager (percent of RAM in use, and whether it pages heavily), Revit alone (day 2) | | |
+| Memory use in Task Manager, Revit with the add-in and the worker running (day 4) | | |
 
 **Q2: the worker from the add-in** (days 3 to 4)
 
@@ -228,7 +227,7 @@ Fill these in as you go; this page is where the results live. "Mac" below means 
 
 | Result | Count |
 |---|---|
-| Scenes recorded (of 15) | |
+| Scenes recorded (of 24) | |
 | Scenes passing `python -m design_checker.conformance` | |
 | Scenes that failed, with the reason for each | |
 
@@ -238,8 +237,8 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
 
 | If | Then |
 |---|---|
-| By the end of day 2, opening a model (Snowdon Towers or an architect's) takes longer than 3 minutes, orbiting is unusable, or the Mac's memory pressure stays red with only Revit running | Switch to a cloud Windows machine (a Windows VM with 32 GB or more) and restart the setup list there (Revit's licence there: Open items 3). Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
-| Revit runs but the add-in plus Revit pushes the Mac into red memory pressure | Same switch. Q1 is "no" for the 16 GB Mac, whatever else the trial finds |
+| By the end of day 2, opening a model (Snowdon Towers or an architect's) takes longer than 3 minutes, orbiting is unusable, or Windows RAM in use reaches 90% or more during ordinary work with only Revit running | Switch to a cloud Windows machine with more memory than the laptop (64 GB or more) and restart the setup list there (Revit's licence there: Open items 3). Keep the days already spent; do not extend the two weeks for the switch more than 2 days |
+| Revit runs but the add-in plus Revit takes Windows to 90% or more of RAM in use during ordinary work | Same switch. Q1 is "no" for this laptop, whatever else the trial finds |
 | The cloud machine is also too slow | Stop. Report: the Revit plan needs a faster Windows machine before anything else is built |
 | The worker cannot be started from the add-in, or its answers differ from the Mac's for the same site and facts | Stop and find out why. A different answer is a bug in the add-in, the install, or the worker, and nothing else is built until it is understood (the same description and the same rulebook must give the same answer) |
 | The add-in cannot tell a curved face from a flat one on a real model, or cannot give stable ids | Stop reading work and write up what Revit's API gives. A reader that cannot report curved faces cannot pass the suite, so no check from it can be trusted |
@@ -256,7 +255,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
    repo in `~/Documents/gordium_archive/revit/sample_models/`): a multi-storey mixed-use building with real walls,
    floors, roofs and stairs, enough for Q1 and the reading half of Q3 (flat versus curved faces, `UniqueId`s, units).
    It has no Ithaca lot, so it cannot show a real zoning check: the architects' models are still needed for that.
-2. **A Windows ARM machine** (Parallels on the Mac, per the plan taken on 2026-11-05). The Autodesk account for the
+2. **The Windows machine: decided.** A native Windows laptop, a GIGABYTE Gaming A16 (i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64), arriving 2026-11-18 (Ben, 2026-11-14). It replaces the plan of 2026-11-05 to run Windows as a virtual machine (a pretend computer) on the Mac. The trial starts when it arrives. The Autodesk account for the
    30-day Revit trial is in hand (Ben, 2026-11-11; its login is kept outside the repo, never in it).
 3. **The cloud Windows option**, decided up front so a switch on day 2 costs no time: which provider, and who
    pays, and how Revit is licensed there. The setup list ends with installing Revit, and whether Autodesk allows a
@@ -264,7 +263,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
    its own trial account or a paid licence.
 4. **Which branch the trial clones.** This page sits on the tidy-up stack's top branch (PR #78); the trial needs
    the stack merged, or that branch, since `recorded/revit/` and the conformance command only exist there.
-5. **Confirm the numbers in section 6** (3 minutes to open a model, 2 and 10 seconds per edit).
+5. **Confirm the numbers in section 6** (3 minutes to open a model, 90% of RAM in use, 64 GB for a cloud machine, 2 and 10 seconds per edit).
 
 **Checks the trial itself settles** (nothing in the repo answers them today):
 
@@ -273,12 +272,11 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
   are built on .NET 8, and Autodesk plans to move them to .NET 10 ([call for preview testing](https://blog.autodesk.io/call-for-preview-testing-revit-2026-2025-migration-to-net-10/),
   2026-04-29: a Revit 2026 preview on .NET 10 tested until 2026-06-03, no release date). So the worker client is built
   and tested for both; note the Revit 2026 update installed and the runtime it reports. Whether the .NET 8 build also loads in Revit 2027 is not settled by Autodesk's pages either.
-- Whether ARM builds of `rhino3dm`, `shapely` and `numpy` exist, if we ever want a native ARM Python.
 - Which survey coordinates the description carries (scene 10), and what each Rhino layer becomes in Revit: the
   [reading design note](revit_reading_design.md) proposes both, and lists the rest of its "to check" items.
 
 **Where the facts above come from.** Checked on 2026-11-05 on Autodesk's pages and the projects' own documents:
-Autodesk lists Parallels Desktop on Apple silicon as supported for Revit 2027 and recommends 32 GB of RAM; Revit has
+Autodesk recommends 32 GB of RAM for Revit 2027; Revit has
 a 30-day free trial; `PropertyLine.GetBoundary` exists only in the Revit 2027 API; Rhino.Inside.Revit has no
 stable Revit 2027 release and pyRevit v7's CPython is experimental, which is why the add-in is C# talking to the
 same Python worker. CI already runs the tests on Windows (`.github/workflows/ci.yml`, job `windows`). The commands
