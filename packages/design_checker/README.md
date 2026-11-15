@@ -71,7 +71,7 @@ complies · Egress waiting: no rooms drawn yet", shown grey with `waiting_only`,
 B, Ben 2026-11-15); handrails, guards and sleeping lofts aren't read
 from the drawing yet, so their rules need review (decision item 12). The code sections the law's rulebook has no
 rules for yet (the generated `6_coverage_report/<book>.rules.yaml`, `not_checked_yet`) are one needs-review line,
-"Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 28 more: check these by
+"Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 84 more: check these by
 hand", so egress never reads as complying while whole sections were never checked; their plain names are the state
 folder's `section_names.yaml`. While egress waits, the waiting row's detail lists them instead (Ben, 2026-11-15).
 

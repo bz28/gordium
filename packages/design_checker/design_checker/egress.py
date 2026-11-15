@@ -22,9 +22,9 @@ the most cautious of both:
   for, needs review with that reason (each_part.cautious), unless the part fails whatever it is (2026-10-21).
 - **Rules that don't pass the rule checks** (`python -m rule_format`'s, as zoning's rulebook must): one item, needs
   review, naming the problem; never a row from them. Zoning is still checked.
-- **Sections not checked yet** (Ben, 2026-11-15): the law's pieces labeled rule that have no rules in the rulebook
+- **Sections not checked yet** (Ben, 2026-11-15): the law's pieces labeled rule or flag that have no rules in the rulebook
   (the generated 6_coverage_report/<book>.rules.yaml's `not_checked_yet`, never a list in code) are one needs-review
-  item, "Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 28 more: check
+  item, "Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 84 more: check
   these by hand", every one listed in its detail; so the law never reads as complying while whole sections were
   never checked (principle 4). A piece the list says has rules but none of them is in the rules loaded counts as not
   checked, and a list that can't be read is itself needs review. While the law waits it stays waiting: the waiting
@@ -66,8 +66,8 @@ COVERAGE = "6_coverage_report/*.rules.yaml"      # which pieces labeled rule hav
 NAMES = "section_names.yaml"                      # plain names for them, by hand (wording only)
 NOT_YET_ID = "not_checked_yet"
 NOT_YET_NAME = "Not checked yet by Gordium: {first}{more}: check these by hand"
-NOT_YET_WHY = ("Gordium doesn't check these sections of the {title} yet, so {short} can't read as complying until "
-               "each is checked by hand: {all}. (The list: {file}.)")
+NOT_YET_WHY = ("Gordium doesn't check these sections of the {title} yet, so it never says {short} complies while any "
+               "is left: check each by hand. {all}. (The list: {file}.)")
 NOT_YET_WAITING = ". Not checked yet by Gordium, even once the rooms are drawn (check these by hand): {all}"
 NO_COVERAGE = ("Gordium can't tell which sections of the {title} it doesn't check yet ({why}): check the whole law by "
                "hand")
@@ -121,10 +121,12 @@ def laws(jurisdiction) -> dict:
 
 
 def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:
-    """([{section, name, file}] the law's pieces labeled rule that have no rules in the rules loaded, in the order
-    section_names.yaml gives, then the book's], the problem reading the list or None). Read from the generated
-    coverage list, never from code. A piece it says has rules counts as not checked unless every one of those rules
-    is among `rules` (a rulebook refused, or a list older than the rulebook, never makes a section look checked)."""
+    """([{section, name, label, file}] the law's pieces labeled rule or flag that have no rules in the rules loaded:
+    the rule pieces first, in the order section_names.yaml gives, then the book's; then the flag pieces, the book's
+    order], the problem reading the list or None). Read from the generated coverage list, never from code. A piece
+    it says has rules counts as not checked unless every one of those rules is among `rules` (a rulebook refused, or
+    a list older than the rulebook, never makes a section look checked), and so does every piece its own
+    `not_checked_yet` names (the two never disagree in a generated list; if they do, the more cautious stands)."""
     loaded = {r.get("id") for r in rules if isinstance(r, dict)}
     files = sorted(folder.glob(COVERAGE))
     if not files:
@@ -133,11 +135,15 @@ def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]
     try:
         for path in files:
             data = load(path)
+            where = f"{folder.name}/{path.relative_to(folder).as_posix()}"
+            listed = [str(p) for p in data.get("not_checked_yet") or []]
             for pid, entry in data["pieces"].items():
                 ids = entry["rules"]
-                if not ids or not set(ids) <= loaded:
+                if not ids or not set(ids) <= loaded or str(pid) in listed:
                     missing.append({"section": str(pid), "heading": str(entry.get("heading") or pid),
-                                    "file": f"{folder.name}/{path.relative_to(folder).as_posix()}"})
+                                    "label": "flag" if entry.get("label") == "flag" else "rule", "file": where})
+            seen = {m["section"] for m in missing}
+            missing += [{"section": p, "heading": p, "label": "rule", "file": where} for p in listed if p not in seen]
     except Exception as e:          # a list that can't be read is needs review, never "everything is checked"
         return [], f"{path.name} can't be read ({type(e).__name__}: {e})"
     try:
@@ -146,7 +152,7 @@ def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]
     except Exception:               # wording only: the law's own headings stand in
         names = {}
     order = {pid: n for n, pid in enumerate(names)}
-    missing.sort(key=lambda m: order.get(m["section"], len(order)))      # stable: the book's order after
+    missing.sort(key=lambda m: (m["label"] == "flag", order.get(m["section"], len(order))))   # stable: the book's
     return [{**m, "name": names[m["section"]] if isinstance(names.get(m["section"]), str) and
              names[m["section"]].strip() else m["heading"]} for m in missing], None
 
@@ -307,8 +313,14 @@ def _own_item(law: dict, item_id: str, name: str, status: str, reason: str, **mo
             "code": None, **more}
 
 
+FLAGS_WORDS = "Sections that call for a judgment Gordium doesn't raise yet: "
+
+
 def _listed(missing: list[dict]) -> str:
-    return "; ".join(f"{m['name']} ({m['section']})" for m in missing)
+    """Every section by name: the ones with requirements to check, then the ones calling for a judgment (flag)."""
+    rules = "; ".join(f"{m['name']} ({m['section']})" for m in missing if m.get("label") != "flag")
+    flags = "; ".join(f"{m['name']} ({m['section']})" for m in missing if m.get("label") == "flag")
+    return ". ".join(x for x in (rules, FLAGS_WORDS + flags if flags else "") if x)
 
 
 def _not_yet_items(law: dict) -> list[dict]:
@@ -325,7 +337,8 @@ def _not_yet_items(law: dict) -> list[dict]:
     more = f" and {len(missing) - 2} more" if len(missing) > 2 else ""
     item = _own_item(law, f"{law['short'].lower()}.{NOT_YET_ID}", NOT_YET_NAME.format(first=first, more=more),
                      present.REVIEW, NOT_YET_WHY.format(title=_book(law), short=law["short"].lower(),
-                                                        all=_listed(missing), file=missing[0]["file"]))
+                                                        all=_listed(missing),
+                                                        file=", ".join(dict.fromkeys(m["file"] for m in missing))))
     item["detail"]["citation"] = ", ".join(m["section"] for m in missing)
     return [item]
 

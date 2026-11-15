@@ -1,11 +1,12 @@
-# Plain names for the sections of the 2025 Residential Code of New York State that Gordium doesn't check yet, as the
+# Plain names for the sections (labeled rule) of the 2025 Residential Code of New York State that Gordium doesn't check yet, as the
 # check names them to an architect ("Not checked yet by Gordium: window fall protection (R321.2.1), hallway width
-# (R318.6) and 28 more: check these by hand"). Kept by hand; wording only.
+# (R318.6) and 84 more: check these by hand"). Kept by hand; wording only.
 #
 # WHICH sections are not checked yet is never kept here: it is generated from the labels and the rulebook
 # (6_coverage_report/gov.ny.residential.2025.rules.yaml, `not_checked_yet`, by `python -m section_labeling coverage`;
 # CI checks it is current). A section that list names and this file doesn't is still named, by the law's own
-# heading. The order here is the order the check lists them in: what most houses have first.
+# heading (as every piece labeled flag is: listed after these, as calling for a judgment Gordium doesn't raise yet).
+# The order here is the order the check lists them in: what most houses have first.
 names:
   R321.2.1: window fall protection
   R318.6: hallway width

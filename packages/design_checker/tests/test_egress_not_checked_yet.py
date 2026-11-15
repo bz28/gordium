@@ -1,5 +1,5 @@
 """Egress names the code sections Gordium doesn't check yet (Ben, 2026-11-15): one needs-review line, "Not checked yet
-by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 28 more: check these by hand", every
+by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 84 more: check these by hand", every
 section in its detail. Without it, a design whose every checked egress rule complies would read "Egress complies"
 while whole sections (window fall protection, hallway width...) were never checked: a false pass.
 
@@ -12,6 +12,8 @@ What is pinned here (each fails on revert):
   added, and the waiting row's detail lists the sections instead;
 - the list comes from data: 6_coverage_report/<book>.rules.yaml (generated from the labels and the rulebook, never
   a list in code); a section whose rules aren't loaded counts as not checked; a missing list needs review;
+- the pieces labeled flag (a judgment, e.g. R319.5 replacement windows) are listed too, after the rule pieces (review
+  round 1: they were raised nowhere);
 - the generated list: a rule counts for a piece only when its id names the piece and it quotes that piece.
 """
 
@@ -62,6 +64,35 @@ def test_the_line_is_on_a_checked_house_and_lists_every_section_not_checked_yet(
     assert line["reason"].startswith("Gordium doesn't check these sections of the NY State Residential Code 2025 yet")
     assert "new_york_state/6_coverage_report/gov.ny.residential.2025.rules.yaml" in line["reason"]
     assert result["sections"][1]["state"] != present.COMPLIES
+
+
+def test_the_flag_sections_are_listed_too_after_the_rule_sections():
+    """Review round 1 (F1, two sceptics): the 56 pieces labeled flag had no rule and were raised nowhere."""
+    data = load(LIST)
+    flags = [p for p, e in data["pieces"].items() if e["label"] == "flag"]
+    assert {"R319.5", "R507.10", "R316.2", "R320.7"} <= set(flags) <= set(uncovered())
+    law = egress.laws(ITHACA)["laws"][0]
+    [line] = egress._not_yet_items(law)
+    rules_part, _, flags_part = line["reason"].partition(egress.FLAGS_WORDS)
+    assert "(R321.2.1)" in rules_part and "(R319.5)" not in rules_part
+    for p in flags:
+        assert f"({p})" in flags_part
+    assert "Window fall protection" not in flags_part
+    assert f"and {len(uncovered()) - 2} more" in line["name"]
+
+
+def test_a_list_whose_own_not_checked_yet_disagrees_is_read_the_cautious_way(tmp_path):
+    folder = tmp_path / "new_york_state"
+    (folder / "6_coverage_report").mkdir(parents=True)
+    data = load(LIST)
+    data["not_checked_yet"].append("R319.2.3")                  # has rules, but the list's own key names it
+    (folder / "6_coverage_report" / LIST.name).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    data["not_checked_yet"].append("R399.8")                    # and one its pieces leave out
+    (folder / "6_coverage_report" / LIST.name).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
+    missing, _ = egress._not_checked_yet(folder, egress.laws(ITHACA)["laws"][0]["rules"])
+    by = {m["section"]: m for m in missing}
+    assert by["R319.2.3"]["heading"] == data["pieces"]["R319.2.3"]["heading"]      # read with its piece
+    assert by["R399.8"]["heading"] == "R399.8"
 
 
 def complying_law():
@@ -137,8 +168,10 @@ def test_the_sections_come_from_the_coverage_list_and_a_missing_list_needs_revie
     missing, problem = egress._not_checked_yet(folder, rules)
     assert problem is None
     assert [m["section"] for m in missing][:2] == ["R321.2.1", "R318.6"]        # section_names.yaml's order first
-    assert missing[-1] == {"section": "R399.9", "heading": "Made up › Test piece", "name": "Made up › Test piece",
-                           "file": "new_york_state/6_coverage_report/gov.ny.residential.2025.rules.yaml"}
+    made_up = next(m for m in missing if m["section"] == "R399.9")
+    assert made_up == {"section": "R399.9", "heading": "Made up › Test piece", "name": "Made up › Test piece",
+                       "label": "rule", "file": "new_york_state/6_coverage_report/gov.ny.residential.2025.rules.yaml"}
+    assert all(m["label"] == "flag" for m in missing[missing.index(made_up) + 1:])    # flags after every rule piece
     (folder / "6_coverage_report" / LIST.name).unlink()
     missing, problem = egress._not_checked_yet(folder, rules)
     assert missing == [] and "no 6_coverage_report/*.rules.yaml" in problem
@@ -157,7 +190,8 @@ def test_the_generated_list_matches_the_labels_and_the_rulebook():
     text = coverage.rule_coverage(BOOK, pieces, labels, "5_building_code_rules/drafted/general.yaml", rules)
     assert text == LIST.read_text(encoding="utf-8")
     data = yaml.safe_load(text)
-    assert set(data["pieces"]) == {p for p, e in labels.items() if e["label"] == "rule"}
+    assert set(data["pieces"]) == {p for p, e in labels.items() if e["label"] in ("rule", "flag")}
+    assert all(e["label"] == labels[p]["label"] for p, e in data["pieces"].items())
     assert data["not_checked_yet"] == [p for p, e in data["pieces"].items() if not e["rules"]]
     # R315.5.2.3 is quoted by R318.7.6's loft-landing rule, which doesn't check it: quoting alone isn't a rule for it
     assert "R315.5.2.3" in data["not_checked_yet"]
@@ -172,5 +206,5 @@ def test_every_plain_name_is_for_a_rule_piece_and_every_section_not_checked_has_
     names = load(STATE / egress.NAMES)["names"]
     pieces = load(LIST)["pieces"]
     assert set(names) <= set(pieces)
-    assert set(uncovered()) <= set(names)
+    assert {p for p in uncovered() if pieces[p]["label"] == "rule"} <= set(names)
     assert all(isinstance(v, str) and v.strip() for v in names.values())
