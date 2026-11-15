@@ -1,0 +1,20 @@
+{
+ "files": {
+  "A-601.svg": "feecbeca1f8eceff4f758c5a56033d36a1300518b5cab8556d65ec45797cae99",
+  "G-001.svg": "c79d75a02ef3646d5e523150e4ccefab4effa4be92b408bdd0455d0d70474bdd",
+  "G-002.svg": "feb49254916c780b965abfbf8196fdbed2113a0c3c2bb2129016adef92606d96",
+  "G-003.svg": "4f64e3c8958622201bbce0135100649b32afda67b6e0f03e69fd6d6fea2bf6b8",
+  "G-004.svg": "de9df7a8c76771e01407b373ac81a77c25c7805d5cbc94fccb91b82f289a389a",
+  "G-005.svg": "0806f37cfa03929b3497c3f36e9c2ddbd0e70cdbfe7492ada7ca4bd51071d815",
+  "G-006.svg": "c24f5025301077c699a248decafeba23fb8e05152deea3ff79943e0b8ae6719d",
+  "LS-101.svg": "456a3c198a910f51f337d11a715e162b69723d8784c99fcd64f1cf0d967a0d11",
+  "LS-102.svg": "38f25248b9b36fc5a28bc388d9911e8f604a267c05a159f7d8e8d3f3a236c802",
+  "code_analysis.csv": "87f133e8359eac9b20daa5ac79c09a6fd6df93c19e157b694b1874a1aae3e5d4",
+  "escape_window_schedule.csv": "2b612993677688d7adaed330d6a2971a97d2ee201c982af6a1e8a624adcc682b",
+  "permit_sheets.pdf": "0c55be21d5df0db4922505864f3be24239d4e20291ecc84f6c45a93efd6d81e1"
+ },
+ "rules_fingerprints": {
+  "new_york/ithaca_city": "b1959da3327498f21c03366e05e7da6e8f8e455fb78deb2cab3e908b1458ec80"
+ },
+ "worker_fingerprint": "d1c983dec1c441455a30f1af1b5308bfbe1ff11ffc2cedc5d170a51a1d3dd797"
+}
