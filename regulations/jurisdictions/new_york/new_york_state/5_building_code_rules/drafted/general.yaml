@@ -361,8 +361,6 @@ rules:
   applies_when: stair_riser_count >= 4
   check: stair_handrail_sides >= 1
   review_when:
-  - when: stair_spiral
-    reason: Spiral stairways are sent to R318.7.11.1, not drafted by this rule.
   - when: stair_serves_sleeping_loft
     reason: A sleeping loft's stair may follow other limits (R315.5), so this rule does not decide it.
   for_each: stair
@@ -429,8 +427,8 @@ rules:
           stair_handrail_sides: 1
     rows:
     - part: s1
-      outcome: needs_review
-    expect: needs_review
+      outcome: pass
+    expect: pass
   - given: {}
     parts:
       stair: []
@@ -456,6 +454,21 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: &id003 2026-11-14
+    why: 'R318.7.11.1 is now drafted: a spiral stairway follows R318.7 except where R318.7.11.1 says otherwise (R318.7.11),
+      and it says nothing of handrails or of a tread variation (its treads must be identical, which meets 3/8 in).
+      So this limit holds for a spiral stair as for any; the review the AI added until R318.7.11.1 was drafted is
+      removed. Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted: a spiral stairway follows R318.7 except where R318.7.11.1 says otherwise (R318.7.11),
+      and it says nothing of handrails or of a tread variation (its treads must be identical, which meets 3/8 in).
+      So this limit holds for a spiral stair as for any; the review the AI added until R318.7.11.1 was drafted is
+      removed. Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r319_2_1_escape_opening_min_net_clear_area
   kind: rule
   topic: means_of_egress
@@ -1480,7 +1493,7 @@ rules:
     quote: Required guards at open-sided walking surfaces, including stairs, porches, balconies or landings, shall
       be not less than 36 inches (914 mm) in height as measured vertically above the adjacent walking surface or
       the line connecting the nosings.
-  - &id003
+  - &id004
     file: gov.ny.residential.2025.pdf
     page: 104
     lines:
@@ -1597,7 +1610,7 @@ rules:
     - 43
     quote: Guards on the open sides of stairs shall have a height of not less than 34 inches (864 mm) measured vertically
       from a line connecting the nosings.
-  - *id003
+  - *id004
   examples:
   - given: {}
     parts:
@@ -1938,7 +1951,7 @@ rules:
     - 47
     quote: R321.1.3 Opening limitations. Required guards shall not have openings from the walking surface to the
       required guard height that allow passage of a sphere 4 inches (102 mm) in diameter.
-  - *id003
+  - *id004
   examples:
   - given: {}
     parts:
@@ -2030,7 +2043,7 @@ rules:
     - 50
     quote: 1. The triangular openings at the open side of stair, formed by the riser, tread and bottom rail of a
       guard, shall not allow passage of a sphere 6 inches (153 mm) in diameter.
-  - *id003
+  - *id004
   examples:
   - given: {}
     parts:
@@ -2116,7 +2129,7 @@ rules:
     - 52
     quote: 2. Guards on the open side of stairs shall not have openings that allow passage of a sphere 4 3/8 inches
       (111 mm) in diameter.
-  - *id003
+  - *id004
   examples:
   - given: {}
     parts:
@@ -2430,7 +2443,7 @@ rules:
     - 31
     quote: Risers for stairs providing egress from a sleeping loft shall be not less than 7 inches (178 mm) and
       not more than 12 inches (305 mm) in height.
-  - &id004
+  - &id005
     file: gov.ny.residential.2025.pdf
     page: 98
     lines:
@@ -3361,11 +3374,8 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Stairway clear width above handrail height (R318.7.1)
-  applies_when: not stair_serves_sleeping_loft
+  applies_when: not stair_serves_sleeping_loft and not stair_spiral
   check: stair_clear_width >= 36
-  review_when:
-  - when: stair_spiral
-    reason: Spiral stairways follow R318.7.11.1, which no other rule checks yet; a person checks the width.
   for_each: stair
   when_none: not_applicable
   sources:
@@ -3376,7 +3386,7 @@ rules:
     - 23
     quote: Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted
       handrail
-  - *id004
+  - *id005
   examples:
   - given: {}
     parts:
@@ -3415,8 +3425,8 @@ rules:
           stair_spiral: true
     rows:
     - part: s1
-      outcome: needs_review
-    expect: needs_review
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       stair:
@@ -3475,15 +3485,34 @@ rules:
       whose widths (17 and 20 in) are below R318.7.1''s, and R315.5.2.1 is checked by its own rules. The AI applied
       R318.7.1''s widths to loft stairs, failing a 20 in loft stair the law allows; loft stairs are now left out
       here. Cause loft_stair_may_follow_r318_7, resolutions.yaml.'
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r318_7_1_stair_clear_width_at_handrail
   kind: rule
   topic: means_of_egress
   title: Stairway clear width at and below handrail (R318.7.1)
-  applies_when: not stair_serves_sleeping_loft
+  applies_when: not stair_serves_sleeping_loft and not stair_spiral
   check: stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides == 1 else 27)
   review_when:
-  - when: stair_spiral
-    reason: Spiral stairways follow R318.7.11.1, which no other rule checks yet; a person checks the width.
   - when: stair_handrail_sides == 0
     reason: The text sets no width for a stairway with no handrail; a person checks it.
   for_each: stair
@@ -3502,7 +3531,7 @@ rules:
     - 25
     quote: and landings, shall be not less than 31 1/2 inches (787 mm) where a handrail is installed on one side
       and 27 inches (698 mm) where
-  - *id004
+  - *id005
   examples:
   - given: {}
     parts:
@@ -3586,8 +3615,8 @@ rules:
           stair_spiral: true
     rows:
     - part: s1
-      outcome: needs_review
-    expect: needs_review
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       stair:
@@ -3653,15 +3682,33 @@ rules:
       whose widths (17 and 20 in) are below R318.7.1''s, and R315.5.2.1 is checked by its own rules. The AI applied
       R318.7.1''s widths to loft stairs, failing a 20 in loft stair the law allows; loft stairs are now left out
       here. Cause loft_stair_may_follow_r318_7, resolutions.yaml.'
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r318_7_2_stair_headroom
   kind: rule
   topic: means_of_egress
   title: Minimum stairway headroom, 6 ft 8 in (R318.7.2)
   check: stair_headroom >= 80
   review_when:
-  - when: stair_spiral
-    reason: Exception 2 sends the headroom of spiral stairways to Section R318.7.11.1, which is not checked by this
-      rule.
   - when: stair_serves_sleeping_loft
     reason: A sleeping loft's stairway follows Section R318 as modified by Sections R315.5.1 through R315.5.3, which
       may change the headroom limit.
@@ -3720,8 +3767,8 @@ rules:
           stair_serves_sleeping_loft: false
     rows:
     - part: s1
-      outcome: needs_review
-    expect: needs_review
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       stair: []
@@ -3740,6 +3787,29 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  applies_when: not stair_spiral
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r318_7_2_stair_floor_opening_headroom
   kind: flag
   topic: means_of_egress
@@ -3775,14 +3845,131 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.r318_7_3_stair_vertical_rise_max
+  kind: rule
+  topic: means_of_egress
+  title: Maximum vertical rise of a flight of stairs (R318.7.3)
+  applies_when: not (stair_bulkhead and not stair_required_egress and stair_basement_to_grade <= 96 and stair_bulkhead_hinged_doors)
+  check: stair_vertical_rise <= 151
+  for_each: stair
+  when_none: not_applicable
+  review_when:
+  - when: stair_bulkhead and not stair_required_egress and stair_basement_to_grade <= 96 and not stair_bulkhead_hinged_doors
+    reason: A bulkhead stairway, not part of the required egress, with the basement floor 8 ft or less below grade,
+      is exempt from R318.7 if its grade-level opening is covered by a bulkhead enclosure with hinged doors or other
+      approved means; this one has no hinged doors. A person checks whether its cover is an approved means.
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 34
+    - 35
+    quote: A flight of stairs shall not have a vertical rise greater than 12 feet 7 inches (3835 mm) between floor
+      levels or landings.
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 42
+    - 46
+    quote: Stairways serving bulkhead enclosures, not part of the required building egress, providing access from
+      the outside grade level to the basement shall be exempt from the requirements of Sections R318.3 and R318.7
+      where the height from the basement finished floor level to grade adjacent to the stairway is not more than
+      8 feet (2438 mm) and the grade level opening to the stairway is covered by a bulkhead enclosure with hinged
+      doors or other approved means.
+  examples:
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        measures:
+          stair_vertical_rise: 120
+          stair_bulkhead: false
+        name: Main stair
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        measures:
+          stair_vertical_rise: 151
+          stair_bulkhead: false
+        name: Tall stair at the limit
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        measures:
+          stair_vertical_rise: 152
+          stair_bulkhead: false
+        name: Tall stair
+    rows:
+    - part: s1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        measures:
+          stair_vertical_rise: 160
+          stair_bulkhead: true
+          stair_required_egress: false
+          stair_basement_to_grade: 90
+          stair_bulkhead_hinged_doors: true
+        name: Bulkhead stair
+    rows:
+    - part: s1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      stair: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The sentence ends 'or landings' on the next line; the rule reads the rise of one flight between its floor level
+    or landing at the bottom and the one at the top.
+  - R315.5 lets a sleeping loft's means of egress follow R318 as modified by R315.5.1 through R315.5.3; whether
+    those modify this vertical rise limit is not settled here.
+  research:
+  - question: The sentence ends 'or landings' on the next line; the rule reads the rise of one flight between its
+      floor level or landing at the bottom and the one at the top.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: R315.5 lets a sleeping loft's means of egress follow R318 as modified by R315.5.1 through R315.5.3;
+      whether those modify this vertical rise limit is not settled here.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: The AI's last recorded answer (2026-11-14 run), refused only for an example's shape; added by hand.
+  drafted_by: claude_code/claude-opus-5-5 (for Ben, after the AI's draft)
+  status: draft
+  revised:
+  - field: rule
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'The AI''s rule for R318.7.3 ("A flight of stairs shall not have a vertical rise greater than 12 feet 7
+      inches (3835 mm) between floor levels or landings.") was refused by code on all three tries only for the shape
+      of its "none" example (no rows); its check stair_vertical_rise <= 151 is kept as the AI wrote it, with the
+      example given its row. Added to it: R318.7.11.2''s bulkhead stairs ("shall be exempt from the requirements
+      of Sections R318.3 and R318.7 where ...") are left out where every condition is met, and need review where
+      the cover is not hinged doors ("or other approved means": a judgment); the AI''s rule failed an exempt bulkhead
+      stair. Cause r318_7_3_example_shape, resolutions.yaml.'
 - id: general.r318_7_5_1_stair_riser_height_max
   kind: rule
   topic: means_of_egress
   title: Maximum stair riser height (R318.7.5.1)
   check: stair_riser_height <= 8.25
   review_when:
-  - when: stair_spiral
-    reason: The riser height of spiral stairways is set by Section R318.7.11.1, which this rule does not check.
   - when: stair_serves_sleeping_loft
     reason: A stairway from a sleeping loft may follow the limits of Section R315.5 instead of this one.
   for_each: stair
@@ -3838,8 +4025,8 @@ rules:
           stair_serves_sleeping_loft: false
     rows:
     - part: s1
-      outcome: needs_review
-    expect: needs_review
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       stair: []
@@ -3858,14 +4045,38 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  applies_when: not stair_spiral
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r318_7_5_1_stair_riser_variation_max
   kind: rule
   topic: means_of_egress
   title: Riser height variation within a flight (R318.7.5.1)
   check: stair_riser_variation <= 0.375
   review_when:
-  - when: stair_spiral
-    reason: Spiral stairways follow Section R318.7.11.1 for riser height, which this rule does not check.
+  - when: stair_spiral and stair_riser_variation > 0.375
+    reason: A spiral stairway's riser height is R318.7.11.1's (exception 2), which says nothing of the variation;
+      whether the 3/8 in limit holds for it is open. A person checks.
   - when: stair_serves_sleeping_loft
     reason: A stairway from a sleeping loft may follow the limits of Section R315.5 instead of this one.
   for_each: stair
@@ -3916,8 +4127,8 @@ rules:
           stair_serves_sleeping_loft: false
     rows:
     - part: s1
-      outcome: needs_review
-    expect: needs_review
+      outcome: pass
+    expect: pass
   - given: {}
     parts:
       stair: []
@@ -3927,6 +4138,21 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted: R318.7.5.1 exception 2 sends a spiral stairway''s "riser height" to it, which
+      sets its rise but says nothing of the 3/8 in variation; whether the variation still holds is open, so a spiral
+      stair needs review only where its risers vary by more than 3/8 in (the AI''s review, added until R318.7.11.1
+      was drafted, held every spiral stair). Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted: R318.7.5.1 exception 2 sends a spiral stairway''s "riser height" to it, which
+      sets its rise but says nothing of the 3/8 in variation; whether the variation still holds is open, so a spiral
+      stair needs review only where its risers vary by more than 3/8 in (the AI''s review, added until R318.7.11.1
+      was drafted, held every spiral stair). Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r318_7_5_1_stair_riser_slope
   kind: flag
   topic: means_of_egress
@@ -4029,9 +4255,6 @@ rules:
   title: Minimum stair tread depth (R318.7.5.2)
   check: stair_tread_depth >= 9
   review_when:
-  - when: stair_spiral
-    reason: Spiral stairways are sent to another section (R318.7.11.1), so this section's tread depth does not decide
-      them; a person checks them.
   - when: stair_serves_sleeping_loft
     reason: R315.5 lets a sleeping loft's stairway follow Section R318 as modified by R315.5.1 through R315.5.3;
       a person checks which tread limits apply.
@@ -4082,8 +4305,8 @@ rules:
           stair_serves_sleeping_loft: false
     rows:
     - part: s1
-      outcome: needs_review
-    expect: needs_review
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       stair: []
@@ -4109,15 +4332,35 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  applies_when: not stair_spiral
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted (2026-11-14): a spiral stairway''s width, rise, tread and headroom are checked
+      by its rules, so this rule leaves spiral stairs out (applies_when) instead of making them need review until
+      it was. R318.7.11: "Spiral stairways ... shall comply with the requirements of Section R318.7 except as specified
+      in Sections R318.7.11.1 and R318.7.11.2." Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r318_7_5_2_stair_tread_variation_max
   kind: rule
   topic: means_of_egress
   title: Tread depth variation within a flight (R318.7.5.2)
   check: stair_tread_variation <= 0.375
   review_when:
-  - when: stair_spiral
-    reason: Spiral stairways are sent to another section (R318.7.11.1), so this section's tread variation limit
-      does not decide them; a person checks them.
   - when: stair_serves_sleeping_loft
     reason: R315.5 lets a sleeping loft's stairway follow Section R318 as modified by R315.5.1 through R315.5.3;
       a person checks which limits apply.
@@ -4187,6 +4430,14 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.11.1 is now drafted: a spiral stairway follows R318.7 except where R318.7.11.1 says otherwise (R318.7.11),
+      and it says nothing of handrails or of a tread variation (its treads must be identical, which meets 3/8 in).
+      So this limit holds for a spiral stair as for any; the review the AI added until R318.7.11.1 was drafted is
+      removed. Cause spiral_placeholder_removed, resolutions.yaml.'
 - id: general.r319_1_sleeping_room_escape_opening_operable
   kind: rule
   topic: means_of_egress
@@ -4631,7 +4882,8 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Landing or floor on each side of each exterior door (R318.3)
-  check: exterior_door_inside_landing and exterior_door_outside_landing
+  check: exterior_door_inside_landing and (exterior_door_outside_landing or (not exterior_door_is_egress_door and
+    exterior_door_outside_stair_risers <= 2 and not exterior_door_swings_outward))
   for_each: exterior_door
   when_none: not_applicable
   sources:
@@ -4641,6 +4893,21 @@ rules:
     - 50
     - 50
     quote: There shall be a landing or floor on each side of each exterior door.
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 7
+    - 8
+    quote: Exterior doors other than the required egress door shall be provided with landings or floors not more
+      than 8 1/4 inches (209 mm) below the top of the threshold.
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 9
+    - 10
+    quote: 'Exception: An exterior landing or floor is not required at the exterior doorway where a stairway of
+      not more than two risers is located on the exterior side of the door, provided that the door does not swing
+      over the stairway.'
   examples:
   - given: {}
     parts:
@@ -4650,6 +4917,7 @@ rules:
         measures:
           exterior_door_inside_landing: true
           exterior_door_outside_landing: true
+          exterior_door_is_egress_door: false
     rows:
     - part: d1
       outcome: pass
@@ -4662,6 +4930,39 @@ rules:
         measures:
           exterior_door_inside_landing: true
           exterior_door_outside_landing: false
+          exterior_door_is_egress_door: false
+          exterior_door_outside_stair_risers: 3
+          exterior_door_swings_outward: false
+    rows:
+    - part: d1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        measures:
+          exterior_door_is_egress_door: false
+          exterior_door_inside_landing: true
+          exterior_door_outside_landing: false
+          exterior_door_outside_stair_risers: 2
+          exterior_door_swings_outward: false
+        name: Side door
+    rows:
+    - part: d1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_inside_landing: true
+          exterior_door_outside_landing: false
+          exterior_door_outside_stair_risers: 2
+          exterior_door_swings_outward: false
+        name: Front door
     rows:
     - part: d1
       outcome: fail
@@ -4684,6 +4985,31 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3.2 exception: "An exterior landing or floor is not required at the exterior doorway where a stairway
+      of not more than two risers is located on the exterior side of the door, provided that the door does not swing
+      over the stairway." The AI required a landing outside every exterior door, failing a side door with two risers
+      outside that R318.3.2 lets go without one (the required egress door keeps R318.3.1''s landing). Cause r318_3_two_riser_door,
+      resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3.2 exception: "An exterior landing or floor is not required at the exterior doorway where a stairway
+      of not more than two risers is located on the exterior side of the door, provided that the door does not swing
+      over the stairway." The AI required a landing outside every exterior door, failing a side door with two risers
+      outside that R318.3.2 lets go without one (the required egress door keeps R318.3.1''s landing). Cause r318_3_two_riser_door,
+      resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3.2 exception: "An exterior landing or floor is not required at the exterior doorway where a stairway
+      of not more than two risers is located on the exterior side of the door, provided that the door does not swing
+      over the stairway." The AI required a landing outside every exterior door, failing a side door with two risers
+      outside that R318.3.2 lets go without one (the required egress door keeps R318.3.1''s landing). Cause r318_3_two_riser_door,
+      resolutions.yaml.'
 - id: general.r318_3_exterior_door_landing_width
   kind: rule
   topic: means_of_egress
@@ -4736,7 +5062,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Landing dimension at least 36 in. in direction of travel (R318.3)
-  check: exterior_door_landing_depth >= 36 or (exterior_door_onto_balcony and exterior_door_balcony_area < 60)
+  check: exterior_door_landing_depth >= 36
   for_each: exterior_door
   when_none: not_applicable
   sources:
@@ -4778,8 +5104,8 @@ rules:
           exterior_door_balcony_area: 50
     rows:
     - part: d1
-      outcome: pass
-    expect: pass
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       exterior_door:
@@ -4822,6 +5148,36 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: exterior_door_onto_balcony and exterior_door_balcony_area < 60 and exterior_door_landing_depth < 36
+    reason: A door onto an exterior balcony under 60 square feet reached only from a door may have a landing under
+      36 in on the balcony side, not on the other; the depth given is the least of the two sides. A person checks
+      which side is short.
+  revised:
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3 exception: exterior balconies under 60 square feet reached only from a door "are permitted to have
+      a landing that is less than 36 inches"; the other side''s landing keeps the 36 in. exterior_door_landing_depth
+      is the least of the two sides, so it can''t tell which side is short: the AI passed a door onto a small balcony
+      with a 30 in landing inside, a false pass on missing data. Such a door now needs review. Cause r318_3_balcony_side,
+      resolutions.yaml.'
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3 exception: exterior balconies under 60 square feet reached only from a door "are permitted to have
+      a landing that is less than 36 inches"; the other side''s landing keeps the 36 in. exterior_door_landing_depth
+      is the least of the two sides, so it can''t tell which side is short: the AI passed a door onto a small balcony
+      with a 30 in landing inside, a false pass on missing data. Such a door now needs review. Cause r318_3_balcony_side,
+      resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3 exception: exterior balconies under 60 square feet reached only from a door "are permitted to have
+      a landing that is less than 36 inches"; the other side''s landing keeps the 36 in. exterior_door_landing_depth
+      is the least of the two sides, so it can''t tell which side is short: the AI passed a door onto a small balcony
+      with a 30 in landing inside, a false pass on missing data. Such a door now needs review. Cause r318_3_balcony_side,
+      resolutions.yaml.'
 - id: general.r318_3_exterior_door_landing_slope
   kind: rule
   topic: means_of_egress
@@ -4880,7 +5236,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Inside floor at required egress door at most 1 1/2 in below threshold
-  applies_when: exterior_door_is_egress_door and exterior_door_inside_landing
+  applies_when: exterior_door_is_egress_door
   check: exterior_door_inside_drop <= 1.5
   for_each: exterior_door
   when_none: not_applicable
@@ -4942,11 +5298,20 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3.1: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches
+      (38 mm) lower than the top of the threshold." The AI applied each drop limit only where the landing on that
+      side was marked present, so a door whose landing wasn''t marked had its drop unchecked here (R318.3 fails
+      it, so no false pass in the rulebook). Each now applies to the egress door; a drop not given needs review.
+      Cause r318_3_1_tied_to_landing, resolutions.yaml.'
 - id: general.r318_3_1_egress_door_outside_floor_drop
   kind: rule
   topic: means_of_egress
   title: Outside landing drop at required egress door (1 1/2 or 8 1/4 in)
-  applies_when: exterior_door_is_egress_door and exterior_door_outside_landing
+  applies_when: exterior_door_is_egress_door
   check: exterior_door_outside_drop <= (1.5 if exterior_door_swings_outward else 8.25)
   for_each: exterior_door
   when_none: not_applicable
@@ -5040,6 +5405,15 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.3.1: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches
+      (38 mm) lower than the top of the threshold." The AI applied each drop limit only where the landing on that
+      side was marked present, so a door whose landing wasn''t marked had its drop unchecked here (R318.3 fails
+      it, so no false pass in the rulebook). Each now applies to the egress door; a drop not given needs review.
+      Cause r318_3_1_tied_to_landing, resolutions.yaml.'
 - id: general.r318_3_2_other_exterior_door_floor_elevation
   kind: rule
   topic: means_of_egress
@@ -5626,7 +6000,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Landing depth at a straight run (R318.7.6)
-  applies_when: stair_straight_run and not stair_serves_sleeping_loft
+  applies_when: stair_straight_run
   check: stair_landing_depth >= 36
   for_each: stair
   when_none: not_applicable
@@ -5638,6 +6012,13 @@ rules:
     - 17
     quote: Where the stairway has a straight run, the depth in the direction of travel shall be not less than 36
       inches (914 mm).
+  - file: gov.ny.residential.2025.pdf
+    page: 98
+    lines:
+    - 35
+    - 36
+    quote: Landings at stairways providing egress from sleeping lofts shall comply with Section R318.7.6, except
+      that the depth of landings in the direction of travel shall be not less than 24 inches (610 mm).
   examples:
   - given: {}
     parts:
@@ -5676,8 +6057,8 @@ rules:
           stair_landing_depth: 30
     rows:
     - part: s1
-      outcome: not_applicable
-    expect: not_applicable
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       stair: []
@@ -5694,6 +6075,42 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: stair_serves_sleeping_loft and stair_landing_depth >= 24 and stair_landing_depth < 36
+    reason: A sleeping loft's stair may have landings 24 in deep (R315.5.2.3), not drafted yet. A person checks.
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5: a sleeping loft''s means of egress complies "with Section R318 as modified by Sections R315.5.1
+      through R315.5.3"; R315.5.2.3 isn''t drafted. The AI left loft stairs out of the 36 in landing depth (not
+      applicable), so a loft stair with a 12 in landing was checked by nothing: a false pass. A loft stair is now
+      checked, needing review from 24 in up to 36 in (R315.5.2.3''s depth for it, not yet drafted) and failing under
+      24 in. Cause r318_7_6_loft_landing_unchecked, resolutions.yaml.'
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5: a sleeping loft''s means of egress complies "with Section R318 as modified by Sections R315.5.1
+      through R315.5.3"; R315.5.2.3 isn''t drafted. The AI left loft stairs out of the 36 in landing depth (not
+      applicable), so a loft stair with a 12 in landing was checked by nothing: a false pass. A loft stair is now
+      checked, needing review from 24 in up to 36 in (R315.5.2.3''s depth for it, not yet drafted) and failing under
+      24 in. Cause r318_7_6_loft_landing_unchecked, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5: a sleeping loft''s means of egress complies "with Section R318 as modified by Sections R315.5.1
+      through R315.5.3"; R315.5.2.3 isn''t drafted. The AI left loft stairs out of the 36 in landing depth (not
+      applicable), so a loft stair with a 12 in landing was checked by nothing: a false pass. A loft stair is now
+      checked, needing review from 24 in up to 36 in (R315.5.2.3''s depth for it, not yet drafted) and failing under
+      24 in. Cause r318_7_6_loft_landing_unchecked, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5: a sleeping loft''s means of egress complies "with Section R318 as modified by Sections R315.5.1
+      through R315.5.3"; R315.5.2.3 isn''t drafted. The AI left loft stairs out of the 36 in landing depth (not
+      applicable), so a loft stair with a 12 in landing was checked by nothing: a false pass. A loft stair is now
+      checked, needing review from 24 in up to 36 in (R315.5.2.3''s depth for it, not yet drafted) and failing under
+      24 in. Cause r318_7_6_loft_landing_unchecked, resolutions.yaml.'
 - id: general.r318_7_6_nonrectangular_landing
   kind: flag
   topic: means_of_egress
@@ -5753,6 +6170,7 @@ rules:
         measures:
           stair_spiral: true
           stair_clear_width_at_handrail: 26
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: pass
@@ -5765,10 +6183,24 @@ rules:
         measures:
           stair_spiral: true
           stair_clear_width_at_handrail: 25.5
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: fail
     expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_clear_width_at_handrail: 25.5
+          stair_serves_sleeping_loft: true
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       stair: []
@@ -5778,6 +6210,25 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: stair_serves_sleeping_loft and stair_clear_width_at_handrail < 26
+    reason: A spiral stair serving a sleeping loft may follow R315.5.2's limits instead (R315.5.2), and whether
+      a loft stair may mix those limits with R318.7's is open. A person checks.
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
 - id: general.r318_7_11_1_spiral_stair_walkline_radius
   kind: rule
   topic: means_of_egress
@@ -5852,6 +6303,7 @@ rules:
         measures:
           stair_spiral: true
           stair_walkline_tread_depth: 6.75
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: pass
@@ -5864,10 +6316,24 @@ rules:
         measures:
           stair_spiral: true
           stair_walkline_tread_depth: 6.5
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: fail
     expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_walkline_tread_depth: 6.5
+          stair_serves_sleeping_loft: true
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       stair: []
@@ -5877,6 +6343,25 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: stair_serves_sleeping_loft and stair_walkline_tread_depth < 6.75
+    reason: A spiral stair serving a sleeping loft may follow R315.5.2's limits instead (R315.5.2), and whether
+      a loft stair may mix those limits with R318.7's is open. A person checks.
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
 - id: general.r318_7_11_1_spiral_stair_identical_treads
   kind: rule
   topic: means_of_egress
@@ -5950,6 +6435,7 @@ rules:
         measures:
           stair_spiral: true
           stair_riser_height: 9.5
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: pass
@@ -5962,10 +6448,24 @@ rules:
         measures:
           stair_spiral: true
           stair_riser_height: 9.75
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: fail
     expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_riser_height: 9.75
+          stair_serves_sleeping_loft: true
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       stair: []
@@ -5975,6 +6475,25 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: stair_serves_sleeping_loft and stair_riser_height > 9.5
+    reason: A spiral stair serving a sleeping loft may follow R315.5.2's limits instead (R315.5.2), and whether
+      a loft stair may mix those limits with R318.7's is open. A person checks.
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
 - id: general.r318_7_11_1_spiral_stair_headroom
   kind: rule
   topic: means_of_egress
@@ -5999,6 +6518,7 @@ rules:
         measures:
           stair_spiral: true
           stair_headroom: 78
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: pass
@@ -6011,10 +6531,24 @@ rules:
         measures:
           stair_spiral: true
           stair_headroom: 77
+          stair_serves_sleeping_loft: false
     rows:
     - part: s1
       outcome: fail
     expect: fail
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        name: Spiral stair
+        measures:
+          stair_spiral: true
+          stair_headroom: 77
+          stair_serves_sleeping_loft: true
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       stair: []
@@ -6024,6 +6558,25 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: stair_serves_sleeping_loft and stair_headroom < 78
+    reason: A spiral stair serving a sleeping loft may follow R315.5.2's limits instead (R315.5.2), and whether
+      a loft stair may mix those limits with R318.7's is open. A person checks.
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R315.5.2: "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1
+      through R315.5.2.3." The AI failed a spiral stair serving a sleeping loft on R318.7.11.1''s numbers, which
+      the loft''s own limits may relax (and whether a loft stair may mix the two sets is open, as for straight stairs).
+      It now needs review. Cause r318_7_11_1_loft_spiral, resolutions.yaml.'
 - id: general.r318_7_12_atd_clear_width
   kind: rule
   topic: means_of_egress
@@ -6091,6 +6644,107 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.r318_7_12_atd_not_in_means_of_egress
+  kind: rule
+  topic: means_of_egress
+  title: Alternating tread devices not an element of a means of egress (R318.7.12)
+  check: not atd_means_of_egress
+  review_when:
+  - when: atd_means_of_egress and atd_area_is_loft_or_mezzanine and not atd_only_access_kitchen_or_bath
+    reason: The exception allows the device as the means of egress of a loft, mezzanine or similar area of 200 gross
+      square feet or less that it isn't the only way to a kitchen or bathroom; the area's 200 square feet can't
+      be compared here. A person checks.
+  for_each: alternating_tread_device
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 47
+    - 47
+    quote: Alternating tread devices shall not be used as an element of a means of egress.
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 47
+    - 49
+    quote: Alternating tread devices shall be permitted provided that a required means of egress stairway or ramp
+      serves the same space at each adjoin-ing level or where a means of egress is not required.
+  - file: gov.ny.residential.2025.pdf
+    page: 101
+    lines:
+    - 51
+    - 52
+    quote: 'Exception: Alternating tread devices are allowed to be used as an element of a means of egress for lofts,
+      mezzanines and simi-lar areas of 200 gross square feet (18.6 m[fn2]) or less where such devices do not provide
+      exclusive access to a kitchen or bathroom.'
+  examples:
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: a1
+        measures:
+          atd_means_of_egress: false
+    rows:
+    - part: a1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: a1
+        measures:
+          atd_means_of_egress: true
+          atd_area_is_loft_or_mezzanine: false
+    rows:
+    - part: a1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: a1
+        measures:
+          atd_means_of_egress: true
+          atd_area_is_loft_or_mezzanine: true
+          atd_only_access_kitchen_or_bath: false
+          atd_area_served: 150
+    rows:
+    - part: a1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      alternating_tread_device:
+      - id: a1
+        measures:
+          atd_means_of_egress: true
+          atd_area_is_loft_or_mezzanine: true
+          atd_only_access_kitchen_or_bath: true
+    rows:
+    - part: a1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      alternating_tread_device: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Added after the AI's draft (its own was refused by code); written from the law, the AI's attempt kept in
+    the drafting records.
+  drafted_by: claude_code/claude-opus-5-5 (for Ben, after the AI's draft)
+  status: draft
+  revised:
+  - field: rule
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.12: "Alternating tread devices shall not be used as an element of a means of egress." The AI''s
+      rule for this was refused by code (the 200 gross square feet of the exception isn''t read as square feet by
+      the number check), so nothing checked it: a device that is a space''s only means of egress passed. Added whole:
+      fails such a device, and needs review where the exception may apply (a loft, mezzanine or similar area, not
+      the only way to a kitchen or bathroom: its 200 square feet a person checks). Cause atd_egress_use_unchecked,
+      resolutions.yaml.'
 - id: general.r318_7_12_1_atd_tread_depth
   kind: rule
   topic: means_of_egress
@@ -6520,6 +7174,106 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.r318_7_13_ship_ladder_egress_use
+  kind: rule
+  topic: means_of_egress
+  title: Ship's ladders not an element of a means of egress (R318.7.13)
+  check: not ladder_means_of_egress
+  review_when:
+  - when: ladder_means_of_egress and ladder_area_is_loft_or_mezzanine and not ladder_only_access_kitchen_or_bath
+    reason: The exception allows the ladder as the means of egress of a loft, mezzanine or similar area of 200 gross
+      square feet or less that it isn't the only way to a kitchen or bathroom; the area's 200 square feet can't
+      be compared here. A person checks.
+  for_each: ships_ladder
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 5
+    - 5
+    quote: Ship’s ladders shall not be used as an element of a means of egress.
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 5
+    - 7
+    quote: Ship’s ladders shall be permitted provided that a required means of egress stairway or ramp serves the
+      same space at each adjoining level or where a means of egress is not required.
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 8
+    - 9
+    quote: 'Exception: Ship’s ladders are allowed to be used as an element of a means of egress for lofts, mezzanines
+      and similar areas of 200 gross square feet (18.6 m[fn2]) or less that do not provide exclusive access to a
+      kitchen or bathroom.'
+  examples:
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: a1
+        measures:
+          ladder_means_of_egress: false
+    rows:
+    - part: a1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: a1
+        measures:
+          ladder_means_of_egress: true
+          ladder_area_is_loft_or_mezzanine: false
+    rows:
+    - part: a1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: a1
+        measures:
+          ladder_means_of_egress: true
+          ladder_area_is_loft_or_mezzanine: true
+          ladder_only_access_kitchen_or_bath: false
+          ladder_area_served: 150
+    rows:
+    - part: a1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: a1
+        measures:
+          ladder_means_of_egress: true
+          ladder_area_is_loft_or_mezzanine: true
+          ladder_only_access_kitchen_or_bath: true
+    rows:
+    - part: a1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ships_ladder: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: Added after the AI's draft (its own was refused by code); written from the law, the AI's attempt kept in
+    the drafting records.
+  drafted_by: claude_code/claude-opus-5-5 (for Ben, after the AI's draft)
+  status: draft
+  revised:
+  - field: rule
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.13: "Ship’s ladders shall not be used as an element of a means of egress." The AI''s rule for this
+      was refused by code (the 200 gross square feet of the exception isn''t read as square feet by the number check),
+      so nothing checked it: a ladder that is a space''s only means of egress passed. Added whole: fails such a
+      ladder, and needs review where the exception may apply (a loft, mezzanine or similar area, not the only way
+      to a kitchen or bathroom: its 200 square feet a person checks). Cause ladder_egress_use_unchecked, resolutions.yaml.'
 - id: general.r318_7_13_1_ships_ladder_tread_depth
   kind: rule
   topic: means_of_egress
@@ -6663,6 +7417,64 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+- id: general.r318_7_13_2_ships_ladder_handrails_both_sides
+  kind: flag
+  topic: means_of_egress
+  title: Handrails on both sides of ship's ladders (R318.7.13.2)
+  for_each: ships_ladder
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 13
+    - 14
+    quote: Handrails shall be provided on both sides of ship’s ladders and shall comply with Section R320.
+  examples:
+  - given: {}
+    parts:
+      ships_ladder:
+      - id: l1
+        measures:
+          ladder_handrail_sides: 2
+    rows:
+    - part: l1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      ships_ladder: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - The law says handrails are required on both sides of a ship's ladder, but the text has no number for how many
+    sides that is, so a person checks that each ship's ladder has a handrail on each of its two sides (ladder_handrail_sides).
+  - The handrails shall comply with Section R320; that section is drafted from its own text, so this flag does not
+    check it.
+  research:
+  - question: The law says handrails are required on both sides of a ship's ladder, but the text has no number for
+      how many sides that is, so a person checks that each ship's ladder has a handrail on each of its two sides
+      (ladder_handrail_sides).
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  - question: The handrails shall comply with Section R320; that section is drafted from its own text, so this flag
+      does not check it.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: The AI's last recorded answer (2026-11-14 run), refused only for its examples; added by hand.
+  drafted_by: claude_code/claude-opus-5-5 (for Ben, after the AI's draft)
+  status: draft
+  revised:
+  - field: rule
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.7.13.2: "Handrails shall be provided on both sides of ship’s ladders and shall comply with Section
+      R320." The AI''s flag was refused by code (an example measure parts.yaml lacks, then no "none" example); kept
+      as the AI wrote it, a flag on each ship''s ladder, with its examples given the right measure and rows. Cause
+      r318_7_13_2_example_shape, resolutions.yaml.'
 - id: general.r318_8_1_ramp_max_slope_egress_door
   kind: rule
   topic: means_of_egress
@@ -6780,6 +7592,13 @@ rules:
     - 21
     quote: 'Exception: Where it is technically infeasible to comply because of site constraints, ramps shall have
       a slope of not more than 1 unit vertical in 8 units horizontal (12.5 percent).'
+  - file: gov.ny.residential.2025.pdf
+    page: 102
+    lines:
+    - 17
+    - 18
+    quote: Ramps serving the egress door required by Section R318.2 shall have a slope of not more than 1 unit vertical
+      in 12 units horizontal (8.3-percent slope).
   examples:
   - given: {}
     parts:
@@ -6792,13 +7611,37 @@ rules:
           ramp_slope: 0.1
     rows:
     - part: r1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        name: Entry ramp
+        measures:
+          ramp_serves_egress_door: true
+          ramp_site_constrained: true
+          ramp_slope: 0.15
+    rows:
+    - part: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      ramp:
+      - id: r1
+        measures:
+          ramp_serves_egress_door: true
+          ramp_site_constrained: true
+          ramp_slope: 0.08
+    rows:
+    - part: r1
       outcome: pass
     expect: pass
   - given: {}
     parts:
       ramp:
       - id: r1
-        name: Entry ramp
         measures:
           ramp_serves_egress_door: true
           ramp_site_constrained: true
@@ -6825,6 +7668,32 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: ramp_slope * 12 > 1 and ramp_slope * 8 <= 1
+    reason: Steeper than 1 in 12 at the required egress door, allowed only where 1 in 12 is technically infeasible
+      because of site constraints. A person checks that it is.
+  revised:
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.8.1 exception: "Where it is technically infeasible to comply because of site constraints, ramps shall
+      have a slope of not more than 1 unit vertical in 8 units horizontal." Whether it is technically infeasible
+      is a judgment (the code official''s); the AI passed a 1 in 8 ramp at the egress door on the architect''s statement
+      alone. Between 1 in 12 and 1 in 8 it now needs review. Cause r318_8_1_infeasible_judged, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.8.1 exception: "Where it is technically infeasible to comply because of site constraints, ramps shall
+      have a slope of not more than 1 unit vertical in 8 units horizontal." Whether it is technically infeasible
+      is a judgment (the code official''s); the AI passed a 1 in 8 ramp at the egress door on the architect''s statement
+      alone. Between 1 in 12 and 1 in 8 it now needs review. Cause r318_8_1_infeasible_judged, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R318.8.1 exception: "Where it is technically infeasible to comply because of site constraints, ramps shall
+      have a slope of not more than 1 unit vertical in 8 units horizontal." Whether it is technically infeasible
+      is a judgment (the code official''s); the AI passed a 1 in 8 ramp at the egress door on the architect''s statement
+      alone. Between 1 in 12 and 1 in 8 it now needs review. Cause r318_8_1_infeasible_judged, resolutions.yaml.'
 - id: general.r318_8_2_ramp_landings_present
   kind: rule
   topic: means_of_egress
@@ -7060,7 +7929,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Area well ladder inside width (R319.4.2.1)
-  applies_when: area_well_ladder and not area_well_steps
+  applies_when: opening_below_grade and area_well_depth > 44 and area_well_ladder and not area_well_steps
   check: area_well_ladder_width >= 12
   for_each: emergency_escape_opening
   when_none: not_applicable
@@ -7073,6 +7942,14 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
+  - &id006
+    file: gov.ny.residential.2025.pdf
+    page: 103
+    lines:
+    - 15
+    - 16
+    quote: Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved,
+      permanently affixed ladder or steps.
   examples:
   - given: {}
     parts:
@@ -7080,6 +7957,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_ladder_width: 12
@@ -7093,6 +7972,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_ladder_width: 11
@@ -7106,6 +7987,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: true
           area_well_ladder_width: 11
@@ -7131,11 +8014,36 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
 - id: general.r319_4_2_1_area_well_ladder_projection
   kind: rule
   topic: means_of_egress
   title: Area well ladder projection from wall (R319.4.2.1)
-  applies_when: area_well_ladder and not area_well_steps
+  applies_when: opening_below_grade and area_well_depth > 44 and area_well_ladder and not area_well_steps
   check: area_well_ladder_projection >= 3
   for_each: emergency_escape_opening
   when_none: not_applicable
@@ -7148,6 +8056,7 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
+  - *id006
   examples:
   - given: {}
     parts:
@@ -7155,6 +8064,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_ladder_projection: 3
@@ -7168,6 +8079,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_ladder_projection: 2
@@ -7181,6 +8094,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: true
           area_well_ladder_projection: 2
@@ -7197,11 +8112,36 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
 - id: general.r319_4_2_1_area_well_ladder_rung_spacing
   kind: rule
   topic: means_of_egress
   title: Area well ladder rung spacing (R319.4.2.1)
-  applies_when: area_well_ladder and not area_well_steps
+  applies_when: opening_below_grade and area_well_depth > 44 and area_well_ladder and not area_well_steps
   check: area_well_rung_spacing <= 18
   for_each: emergency_escape_opening
   when_none: not_applicable
@@ -7214,6 +8154,7 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
+  - *id006
   examples:
   - given: {}
     parts:
@@ -7221,6 +8162,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_rung_spacing: 18
@@ -7234,6 +8177,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_rung_spacing: 19
@@ -7247,6 +8192,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: true
           area_well_rung_spacing: 19
@@ -7263,11 +8210,36 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
 - id: general.r319_4_2_1_area_well_ladder_full_height
   kind: rule
   topic: means_of_egress
   title: Area well ladder rungs for full height (R319.4.2.1)
-  applies_when: area_well_ladder and not area_well_steps
+  applies_when: opening_below_grade and area_well_depth > 44 and area_well_ladder and not area_well_steps
   check: area_well_ladder_full_height
   for_each: emergency_escape_opening
   when_none: not_applicable
@@ -7280,6 +8252,7 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
+  - *id006
   examples:
   - given: {}
     parts:
@@ -7287,6 +8260,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_ladder_full_height: true
@@ -7300,6 +8275,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: false
           area_well_ladder_full_height: false
@@ -7313,6 +8290,8 @@ rules:
       - id: eeo1
         name: Opening 1
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
           area_well_ladder: true
           area_well_steps: true
           area_well_ladder_full_height: false
@@ -7339,11 +8318,36 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
 - id: general.r319_4_2_2_area_well_steps_requirements
   kind: rule
   topic: means_of_egress
   title: 'Area well steps: width, tread, riser (R319.4.2.2)'
-  applies_when: area_well_steps
+  applies_when: opening_below_grade and area_well_depth > 44 and area_well_ladder and area_well_steps
   check: area_well_ladder_width >= 12 and area_well_step_tread >= 5 and area_well_step_riser <= 18 and area_well_ladder_full_height
   for_each: emergency_escape_opening
   when_none: not_applicable
@@ -7360,6 +8364,7 @@ rules:
     - 23
     - 23
     quote: (127 mm) and a maximum riser height of 18 inches (457 mm) for the full height of the area well.
+  - *id006
   examples:
   - given: {}
     parts:
@@ -7367,6 +8372,9 @@ rules:
       - id: o1
         name: Opening
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
+          area_well_ladder: true
           area_well_steps: true
           area_well_ladder_width: 14
           area_well_step_tread: 6
@@ -7382,6 +8390,9 @@ rules:
       - id: o1
         name: Opening
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
+          area_well_ladder: true
           area_well_steps: true
           area_well_ladder_width: 11
           area_well_step_tread: 6
@@ -7397,6 +8408,9 @@ rules:
       - id: o1
         name: Opening
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
+          area_well_ladder: true
           area_well_steps: true
           area_well_ladder_width: 14
           area_well_step_tread: 4
@@ -7412,6 +8426,9 @@ rules:
       - id: o1
         name: Opening
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
+          area_well_ladder: true
           area_well_steps: true
           area_well_ladder_width: 14
           area_well_step_tread: 6
@@ -7427,6 +8444,9 @@ rules:
       - id: o1
         name: Opening
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
+          area_well_ladder: true
           area_well_steps: true
           area_well_ladder_width: 14
           area_well_step_tread: 6
@@ -7442,6 +8462,9 @@ rules:
       - id: o1
         name: Opening
         measures:
+          opening_below_grade: true
+          area_well_depth: 60
+          area_well_ladder: true
           area_well_steps: false
     rows:
     - part: o1
@@ -7465,13 +8488,37 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: sources
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.4.2: "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an
+      approved, permanently affixed ladder or steps"; R319.4.2.1 and R319.4.2.2 size that ladder or those steps
+      ("Ladders or steps required by this section"). The AI sized any ladder or steps, failing optional ones in
+      a shallow well or above grade. Each now applies to a below-grade opening whose well is deeper than 44 in.
+      Cause r319_4_2_required_ladder_only, resolutions.yaml.'
 - id: general.r319_6_addition_sleeping_room_escape_opening
-  kind: flag
+  kind: rule
   topic: means_of_egress
   title: Escape opening in each new sleeping room of an addition (R319.6)
-  applies_when: sleeping_room_in_addition
-  for_each: sleeping_room
-  when_none: not_applicable
+  for_each: emergency_escape_opening
+  when_none: fail
   sources:
   - file: gov.ny.residential.2025.pdf
     page: 103
@@ -7483,35 +8530,111 @@ rules:
   examples:
   - given: {}
     parts:
-      sleeping_room: []
-    rows:
-    - outcome: not_applicable
-    expect: not_applicable
-  - given: {}
-    parts:
       sleeping_room:
       - id: r1
         name: New bedroom
+      emergency_escape_opening:
+      - id: w1
+        within: r1
         measures:
-          sleeping_room_in_addition: true
+          opening_operable: true
     rows:
-    - part: r1
-      outcome: needs_review
-    expect: needs_review
+    - part: w1
+      within: r1
+      outcome: pass
+    expect: pass
   - given: {}
     parts:
       sleeping_room:
       - id: r1
-        name: Existing bedroom
+      emergency_escape_opening:
+      - id: w1
+        within: r1
         measures:
-          sleeping_room_in_addition: false
+          opening_operable: false
     rows:
-    - part: r1
-      outcome: not_applicable
+    - part: w1
+      within: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      sleeping_room:
+      - id: r1
+      emergency_escape_opening: []
+    rows:
+    - within: r1
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      sleeping_room: []
+      emergency_escape_opening: []
+    rows:
+    - outcome: not_applicable
     expect: not_applicable
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  within: sleeping_room
+  check: opening_operable
+  revised:
+  - field: kind
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening
+      shall be provided in each new sleeping room." The AI flagged each new sleeping room for a person instead of
+      checking its opening (a rule for each room can''t see the openings in it). It now checks the openings within
+      each sleeping room, none failing, as R319.1 does for every sleeping room (a rule for each opening can''t read
+      whether its room is new, and R319.1 asks the same of every room). Cause r319_6_room_flagged_not_checked, resolutions.yaml.'
+  - field: for_each
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening
+      shall be provided in each new sleeping room." The AI flagged each new sleeping room for a person instead of
+      checking its opening (a rule for each room can''t see the openings in it). It now checks the openings within
+      each sleeping room, none failing, as R319.1 does for every sleeping room (a rule for each opening can''t read
+      whether its room is new, and R319.1 asks the same of every room). Cause r319_6_room_flagged_not_checked, resolutions.yaml.'
+  - field: within
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening
+      shall be provided in each new sleeping room." The AI flagged each new sleeping room for a person instead of
+      checking its opening (a rule for each room can''t see the openings in it). It now checks the openings within
+      each sleeping room, none failing, as R319.1 does for every sleeping room (a rule for each opening can''t read
+      whether its room is new, and R319.1 asks the same of every room). Cause r319_6_room_flagged_not_checked, resolutions.yaml.'
+  - field: when_none
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening
+      shall be provided in each new sleeping room." The AI flagged each new sleeping room for a person instead of
+      checking its opening (a rule for each room can''t see the openings in it). It now checks the openings within
+      each sleeping room, none failing, as R319.1 does for every sleeping room (a rule for each opening can''t read
+      whether its room is new, and R319.1 asks the same of every room). Cause r319_6_room_flagged_not_checked, resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening
+      shall be provided in each new sleeping room." The AI flagged each new sleeping room for a person instead of
+      checking its opening (a rule for each room can''t see the openings in it). It now checks the openings within
+      each sleeping room, none failing, as R319.1 does for every sleeping room (a rule for each opening can''t read
+      whether its room is new, and R319.1 asks the same of every room). Cause r319_6_room_flagged_not_checked, resolutions.yaml.'
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening
+      shall be provided in each new sleeping room." The AI flagged each new sleeping room for a person instead of
+      checking its opening (a rule for each room can''t see the openings in it). It now checks the openings within
+      each sleeping room, none failing, as R319.1 does for every sleeping room (a rule for each opening can''t read
+      whether its room is new, and R319.1 asks the same of every room). Cause r319_6_room_flagged_not_checked, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R319.6: "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening
+      shall be provided in each new sleeping room." The AI flagged each new sleeping room for a person instead of
+      checking its opening (a rule for each room can''t see the openings in it). It now checks the openings within
+      each sleeping room, none failing, as R319.1 does for every sleeping room (a rule for each opening can''t read
+      whether its room is new, and R319.1 asks the same of every room). Cause r319_6_room_flagged_not_checked, resolutions.yaml.'
 - id: general.r319_6_addition_basement_escape_opening
   kind: flag
   topic: means_of_egress
@@ -7904,10 +9027,9 @@ rules:
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
 - id: general.r320_6_handrail_edge_radius
-  kind: rule
+  kind: flag
   topic: means_of_egress
   title: Handrail edge radius (R320.6)
-  check: handrail_edge_radius >= 0.01
   for_each: handrail
   when_none: not_applicable
   sources:
@@ -7935,8 +9057,8 @@ rules:
           handrail_edge_radius: 0.05
     rows:
     - part: h1
-      outcome: pass
-    expect: pass
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail:
@@ -7946,8 +9068,8 @@ rules:
           handrail_edge_radius: 0
     rows:
     - part: h2
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail: []
@@ -7966,12 +9088,41 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  applies_when: not (handrail_edge_radius >= 0.01 and not handrail_circular) and not handrail_circular
+  revised:
+  - field: kind
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
 - id: general.r320_6_handrail_circular_diameter
-  kind: rule
+  kind: flag
   topic: means_of_egress
   title: Circular handrail outside diameter, Type I (R320.6)
-  applies_when: handrail_circular
-  check: handrail_diameter >= 1.25 and handrail_diameter <= 2
+  applies_when: (handrail_circular) and not (handrail_diameter >= 1.25 and handrail_diameter <= 2)
   for_each: handrail
   when_none: not_applicable
   sources:
@@ -7999,8 +9150,8 @@ rules:
           handrail_diameter: 1.5
     rows:
     - part: h1
-      outcome: pass
-    expect: pass
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       handrail:
@@ -8011,8 +9162,8 @@ rules:
           handrail_diameter: 2.5
     rows:
     - part: h2
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail:
@@ -8023,8 +9174,8 @@ rules:
           handrail_diameter: 1
     rows:
     - part: h3
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail:
@@ -8054,12 +9205,41 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: kind
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
 - id: general.r320_6_handrail_type_i_noncircular
-  kind: rule
+  kind: flag
   topic: means_of_egress
   title: Non-circular handrail perimeter and cross section, Type I (R320.6)
-  applies_when: not handrail_circular and handrail_perimeter <= 6.25
-  check: handrail_perimeter >= 4 and handrail_perimeter <= 6.25 and handrail_cross_section <= 2.25
+  applies_when: (not handrail_circular and handrail_perimeter <= 6.25) and not (handrail_perimeter >= 4 and handrail_perimeter
+    <= 6.25 and handrail_cross_section <= 2.25)
   for_each: handrail
   when_none: not_applicable
   sources:
@@ -8089,8 +9269,8 @@ rules:
           handrail_cross_section: 2
     rows:
     - part: h1
-      outcome: pass
-    expect: pass
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       handrail:
@@ -8102,8 +9282,8 @@ rules:
           handrail_cross_section: 1
     rows:
     - part: h2
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail:
@@ -8115,8 +9295,8 @@ rules:
           handrail_cross_section: 2.5
     rows:
     - part: h3
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail:
@@ -8147,14 +9327,42 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: kind
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
 - id: general.r320_6_handrail_type_ii_recess
-  kind: rule
+  kind: flag
   topic: means_of_egress
   title: 'Handrail with perimeter over 6 1/4 in: finger recess, Type II (R320.6)'
-  applies_when: not handrail_circular and handrail_perimeter > 6.25
-  check: handrail_recess_both_sides and handrail_recess_start <= 0.75 and handrail_recess_depth >= 0.3125 and handrail_recess_run
-    >= 0.375 and handrail_recess_bottom >= 1.75 and handrail_width_above_recess >= 1.25 and handrail_width_above_recess
-    <= 2.75
+  applies_when: (not handrail_circular and handrail_perimeter > 6.25) and not (handrail_recess_both_sides and handrail_recess_start
+    <= 0.75 and handrail_recess_depth >= 0.3125 and handrail_recess_run >= 0.375 and handrail_recess_bottom >= 1.75
+    and handrail_width_above_recess >= 1.25 and handrail_width_above_recess <= 2.75)
   for_each: handrail
   when_none: not_applicable
   sources:
@@ -8210,8 +9418,8 @@ rules:
           handrail_width_above_recess: 2
     rows:
     - part: h1
-      outcome: pass
-    expect: pass
+      outcome: not_applicable
+    expect: not_applicable
   - given: {}
     parts:
       handrail:
@@ -8228,8 +9436,8 @@ rules:
           handrail_width_above_recess: 2
     rows:
     - part: h2
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail:
@@ -8246,8 +9454,8 @@ rules:
           handrail_width_above_recess: 3
     rows:
     - part: h3
-      outcome: fail
-    expect: fail
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       handrail:
@@ -8285,3 +9493,32 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: kind
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, after the comparison)
+    date: *id003
+    why: 'R320.6: "Required handrails shall be of one of the following types or provide equivalent graspability."
+      The AI failed a handrail outside Type I''s or Type II''s dimensions, which may still provide equivalent graspability
+      (a judgment). Each is now a flag on a handrail outside its dimensions, for a person. Cause r320_6_equivalent_graspability,
+      resolutions.yaml.'
