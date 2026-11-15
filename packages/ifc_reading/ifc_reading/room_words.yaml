@@ -1,0 +1,143 @@
+# Which room names say a room is, or isn't, a sleeping room. Read by ifc_reading.rooms (README: "Rooms").
+#
+# A room's words are taken from its IFC LongName, Name, ObjectType, classification names and stated use
+# (OccupancyType, Category), and its space type's LongName, Name, ElementType and classification names (Unicode-normalised,
+# cut at every character that isn't a letter, lowercased) and each is looked up here, whole (never part of a word):
+#   - a `sleeping` word and no `not_sleeping` or `ask` word          -> sleeping: true
+#   - only `not_sleeping` words (and `neutral` ones)                 -> sleeping: false
+#   - anything else: an `ask` word, both kinds, a word not listed here beside a `not_sleeping` word ("Elternzimmer +
+#     Bad": an unlisted word may mean bedroom), or nothing listed     -> sleeping not given (unknown): the rooms aren't
+#     read and every sleeping-room rule needs review.
+# A room is never read as a bedroom, or as not one, from its size.
+# `ask` holds rooms often slept in though not named for it (an office, a den, a loft): a code official may count
+# one as a sleeping room, so the architect says. `neutral` words say nothing about use ("room", "No.", "general").
+# English and German (the KIT test house, test_data/ifc_models/ac20_fzk_haus, is German).
+
+sleeping:
+  - bedroom
+  - bedrooms
+  - bed
+  - bdrm
+  - sleeping
+  - nursery
+  - bunkroom
+  - schlafzimmer
+  - schlafraum
+  - elternschlafzimmer
+  - elternzimmer
+  - bunk
+  - kinderzimmer
+  - gästezimmer
+  - gaestezimmer
+
+not_sleeping:
+  - bath
+  - bathroom
+  - bathrooms
+  - toilet
+  - wc
+  - lavatory
+  - powder
+  - washroom
+  - restroom
+  - shower
+  - kitchen
+  - kitchenette
+  - pantry
+  - dining
+  - living
+  - hall
+  - hallway
+  - corridor
+  - foyer
+  - entry
+  - vestibule
+  - mudroom
+  - stair
+  - stairs
+  - stairway
+  - stairwell
+  - closet
+  - laundry
+  - utility
+  - mechanical
+  - boiler
+  - furnace
+  - storage
+  - garage
+  - porch
+  - balcony
+  - terrace
+  - patio
+  - bad
+  - badezimmer
+  - toilette
+  - dusche
+  - küche
+  - kueche
+  - esszimmer
+  - wohnen
+  - wohnzimmer
+  - flur
+  - diele
+  - korridor
+  - windfang
+  - treppe
+  - treppenhaus
+  - abstellraum
+  - speisekammer
+  - hauswirtschaftsraum
+  - heizraum
+  - garderobe
+
+ask:
+  - office
+  - study
+  - den
+  - library
+  - loft
+  - gallery
+  - attic
+  - basement
+  - bonus
+  - flex
+  - family
+  - recreation
+  - media
+  - playroom
+  - studio
+  - sitting
+  - lounge
+  - spare
+  - guest
+  - büro
+  - buero
+  - arbeitszimmer
+  - galerie
+  - dachboden
+  - keller
+  - hobbyraum
+  - gast
+  - suite
+  - eltern
+
+neutral:
+  - room
+  - rooms
+  - rm
+  - space
+  - "no"
+  - nr
+  - general
+  - main
+  - upper
+  - lower
+  - half
+  - full
+  - walk
+  - in
+  - mud
+  - zimmer
+  - raum
+  - allgemeines
+  - allgemein

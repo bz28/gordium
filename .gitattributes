@@ -1,8 +1,10 @@
 # Text is stored and checked out with LF line endings on every computer (Windows too), so the extracted law,
-# rulebooks and generated files compare the same everywhere. Binary files are never touched.
+# rulebooks and generated files compare the same everywhere. Binary files are never touched (an IFC model too:
+# kept byte for byte as downloaded, its SHA-256 recorded, its lines ending CRLF).
 * text=auto eol=lf
 *.pdf binary
 *.3dm binary
 *.xlsx binary
 *.png binary
+*.ifc binary
 *.xz binary

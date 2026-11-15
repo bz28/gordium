@@ -4,7 +4,7 @@
 **For:** engineers writing a reader that produces it (Rhino tags, the Revit add-in, an IFC reader) and anyone writing a test house by hand.\
 **Kept current by:** the engineer who changes `packages/model_measurement/model_measurement/interior/` in that PR.
 
-The measuring code is `model_measurement.interior` (`measure(description)`); what each measure means and which code section it serves is in [interior_measurements.md](interior_measurements.md). Five worked houses written in this format are in [test_data/interior_houses/](../../test_data/interior_houses/README.md).
+The measuring code is `model_measurement.interior` (`measure(description)`); what each measure means and which code section it serves is in [interior_measurements.md](interior_measurements.md). Five worked houses written in this format are in [test_data/interior_houses/](../../test_data/interior_houses/README.md). The readers that write it: the IFC reader, [packages/ifc_reading](../../packages/ifc_reading/README.md) (rooms, windows and doors from an IFC model; no stairs or guards), with a real house read in [test_data/ifc_models/](../../test_data/ifc_models/README.md). A reader may add keys the measuring code doesn't read (the IFC reader's `not_given`, `ifc` and `source`: what it couldn't fill and where each value came from); the measuring code ignores them.
 
 ## Why a format of its own
 
