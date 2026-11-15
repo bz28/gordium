@@ -1,6 +1,9 @@
 """Check a design from the command line, or serve the Rhino command.
 
     python -m design_checker <model.3dm> <model_facts.yaml>   # prints the summary and every row
+    python -m design_checker <model.3dm> <model_facts.yaml> --interior <house.yaml>
+                                                              # ... with the house's interior (gordium.interior/1):
+                                                              # egress checked too; without it, egress waits
     python -m design_checker serve                            # Rhino: one JSON request per line in, one answer out
 
 Requests (one JSON object per line): {"id": 1, "cmd": "check", "model": "<.3dm>", "facts": {...}, "report":
@@ -138,16 +141,28 @@ def main(argv: list[str]) -> int:
         sys.stdout = sys.stderr
         serve(stdin=sys.stdin.buffer, stdout=replies)
         return 0
+    interior = None
+    if len(argv) == 4 and argv[2] == "--interior":
+        import yaml
+        try:
+            interior = yaml.safe_load(Path(argv[3]).read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, yaml.YAMLError) as e:
+            print(f"✗ the interior description can't be read: {e}")
+            return 1
+        argv = argv[:2]
     if len(argv) != 2:
         print(__doc__)
         return 2
     try:
-        result = check(Path(argv[0]), load_facts(Path(argv[1])), today=city_day())   # this host's day, said here
+        result = check(Path(argv[0]), load_facts(Path(argv[1])), today=city_day(),   # this host's day, said here
+                       interior=interior)
     except ValueError as e:
         print(f"✗ {e}")
         return 1
     v = result["view"]                  # the panel's own summary and rows (D3: one summary everywhere, never a ✓)
     print("Gordium ·", v["summary"])
+    for s in v.get("sections") or []:     # each law's own state: zoning's, then egress's
+        print(f"  {s['title']}: {s['summary']}")
     for i in v["items"]:
         if i["group"] != "not_covered":
             print(f"  {i['mark'] or ' '} {i['name']:34} {i['proposed']:>14} {i['required']:>12} {i['margin']:>10}"

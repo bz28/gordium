@@ -22,9 +22,12 @@ def panel_header(head):
 
 def status_words(item):
     """The status a row's detail is headed with: "Does not comply", "Needs review", "Complies", "Not checked"; a rule
-    not in Gordium yet, "Not checked yet" (Ben, 2026-10-21: its group's name)."""
+    not in Gordium yet, "Not checked yet" (Ben, 2026-10-21: its group's name); a law waiting for the interior
+    (egress, before any room is drawn), "Waiting": a quiet status, never a pass (design_checker/egress.py)."""
     if item.get("group") == "not_covered":
         return "Not checked yet"
+    if item.get("waiting"):
+        return "Waiting"
     return {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
             "not_checked": "Not checked"}[item["status"]]
 

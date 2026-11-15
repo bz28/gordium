@@ -17,6 +17,7 @@ verdicts:
   R-1b.adu_detached_setbacks: needs_review
   R-1b.parking_one_family: not_checked       # bedrooms and parking spaces aren't in the model
   release.overlays: not_checked              # overlay districts aren't in Gordium yet
+  egress.waiting: not_checked                # no interior drawn: egress (NY house code) waits, never a pass
   gap.height_exceptions: not_checked         # rules not in Gordium yet: checked by hand
   gap.small_projections: not_checked
   gap.corner_visibility: not_checked
