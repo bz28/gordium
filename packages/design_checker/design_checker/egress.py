@@ -22,6 +22,13 @@ the most cautious of both:
   for, needs review with that reason (each_part.cautious), unless the part fails whatever it is (2026-10-21).
 - **Rules that don't pass the rule checks** (`python -m rule_format`'s, as zoning's rulebook must): one item, needs
   review, naming the problem; never a row from them. Zoning is still checked.
+- **Sections not checked yet** (Ben, 2026-11-15): the law's pieces labeled rule that have no rules in the rulebook
+  (the generated 6_coverage_report/<book>.rules.yaml's `not_checked_yet`, never a list in code) are one needs-review
+  item, "Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 28 more: check
+  these by hand", every one listed in its detail; so the law never reads as complying while whole sections were
+  never checked (principle 4). A piece the list says has rules but none of them is in the rules loaded counts as not
+  checked, and a list that can't be read is itself needs review. While the law waits it stays waiting: the waiting
+  row's detail lists them instead.
 
 Loading is by place: a place's `inherits` (rule_format/place.py) names the state law folders, and each one's
 rulebook is building_code_rulebook's. A state folder is never checked on its own (refuse_state_alone).
@@ -55,6 +62,15 @@ SKIPPED = ("{name} is marked as an escape opening but isn't checked: {why}. An e
            "basement or habitable attic (R319.1), which aren't read from the drawing yet: check it by hand")
 NOT_PER_PART = ("this rule isn't written for each part (no for_each), and a state law's rules are checked only part "
                 "by part: it isn't checked, so check it by hand")
+COVERAGE = "6_coverage_report/*.rules.yaml"      # which pieces labeled rule have rules (python -m section_labeling coverage)
+NAMES = "section_names.yaml"                      # plain names for them, by hand (wording only)
+NOT_YET_ID = "not_checked_yet"
+NOT_YET_NAME = "Not checked yet by Gordium: {first}{more}: check these by hand"
+NOT_YET_WHY = ("Gordium doesn't check these sections of the {title} yet, so {short} can't read as complying until "
+               "each is checked by hand: {all}. (The list: {file}.)")
+NOT_YET_WAITING = ". Not checked yet by Gordium, even once the rooms are drawn (check these by hand): {all}"
+NO_COVERAGE = ("Gordium can't tell which sections of the {title} it doesn't check yet ({why}): check the whole law by "
+               "hand")
 NOTHING_APPLIED = ("None of the {title} rules applied to the parts drawn (every one not applicable): nothing of this law "
                    "was checked, so check it by hand")
 ORDER = {present.FAILS: 0, present.REVIEW: 1, present.NOT_CHECKED: 2, present.COMPLIES: 3}
@@ -83,7 +99,8 @@ def laws(jurisdiction) -> dict:
     out = []
     for folder, book in p.inherited_rulebooks():
         law = {"key": f"{folder.parent.name}/{folder.name}", "title": _title(folder), "folder": folder,
-               "rulebook": book, "rules": [], "problems": [], "section_of": None, "documents": {}}
+               "rulebook": book, "rules": [], "problems": [], "section_of": None, "documents": {},
+               "not_checked_yet": [], "coverage_problem": None}
         law["short"] = law["title"].split(" (")[0]
         if book is None:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
@@ -98,8 +115,40 @@ def laws(jurisdiction) -> dict:
             except Exception as e:
                 law["problems"], law["rules"], law["section_of"] = \
                     [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
+        law["not_checked_yet"], law["coverage_problem"] = _not_checked_yet(folder, law["rules"])
         out.append(law)
     return {"place": p.name, "laws": out}
+
+
+def _not_checked_yet(folder: Path, rules: list) -> tuple[list[dict], str | None]:
+    """([{section, name, file}] the law's pieces labeled rule that have no rules in the rules loaded, in the order
+    section_names.yaml gives, then the book's], the problem reading the list or None). Read from the generated
+    coverage list, never from code. A piece it says has rules counts as not checked unless every one of those rules
+    is among `rules` (a rulebook refused, or a list older than the rulebook, never makes a section look checked)."""
+    loaded = {r.get("id") for r in rules if isinstance(r, dict)}
+    files = sorted(folder.glob(COVERAGE))
+    if not files:
+        return [], f"no {COVERAGE} in {folder.name}"
+    missing = []
+    try:
+        for path in files:
+            data = load(path)
+            for pid, entry in data["pieces"].items():
+                ids = entry["rules"]
+                if not ids or not set(ids) <= loaded:
+                    missing.append({"section": str(pid), "heading": str(entry.get("heading") or pid),
+                                    "file": f"{folder.name}/{path.relative_to(folder).as_posix()}"})
+    except Exception as e:          # a list that can't be read is needs review, never "everything is checked"
+        return [], f"{path.name} can't be read ({type(e).__name__}: {e})"
+    try:
+        names = (load(folder / NAMES) or {}).get("names") or {} if (folder / NAMES).is_file() else {}
+        names = names if isinstance(names, dict) else {}
+    except Exception:               # wording only: the law's own headings stand in
+        names = {}
+    order = {pid: n for n, pid in enumerate(names)}
+    missing.sort(key=lambda m: order.get(m["section"], len(order)))      # stable: the book's order after
+    return [{**m, "name": names[m["section"]] if isinstance(names.get(m["section"]), str) and
+             names[m["section"]].strip() else m["heading"]} for m in missing], None
 
 
 def _title(folder: Path) -> str:
@@ -147,6 +196,8 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
         # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
         mine = _law_items(law, measured, values, allowed, rows, results) if not waiting or law["problems"] \
             else [_waiting_item(law)]
+        if not waiting and not law["problems"]:   # rules refused: none was used (BAD_RULES says so); waiting stays
+            mine += _not_yet_items(law)           # waiting, its row lists them (_waiting_item)
         mine.sort(key=lambda i: ORDER[i["status"]])          # what fails first, then needs review (stable)
         for i in mine:                                       # one id per item, across laws too (hosts refuse twins)
             if i["id"] in ids:
@@ -256,9 +307,41 @@ def _own_item(law: dict, item_id: str, name: str, status: str, reason: str, **mo
             "code": None, **more}
 
 
+def _listed(missing: list[dict]) -> str:
+    return "; ".join(f"{m['name']} ({m['section']})" for m in missing)
+
+
+def _not_yet_items(law: dict) -> list[dict]:
+    """The law's one needs-review line for the sections it has no rules for (none when every one has), or for a list
+    of them that can't be read. One line in the panel; every section in its detail."""
+    if law["coverage_problem"]:
+        why = NO_COVERAGE.format(title=_book(law), why=law["coverage_problem"])
+        return [_own_item(law, f"{law['short'].lower()}.{NOT_YET_ID}", "Not checked yet by Gordium: can't tell which "
+                          "sections", present.REVIEW, why)]
+    missing = law["not_checked_yet"]
+    if not missing:
+        return []
+    first = ", ".join(f"{m['name']} ({m['section']})" for m in missing[:2])
+    more = f" and {len(missing) - 2} more" if len(missing) > 2 else ""
+    item = _own_item(law, f"{law['short'].lower()}.{NOT_YET_ID}", NOT_YET_NAME.format(first=first, more=more),
+                     present.REVIEW, NOT_YET_WHY.format(title=_book(law), short=law["short"].lower(),
+                                                        all=_listed(missing), file=missing[0]["file"]))
+    item["detail"]["citation"] = ", ".join(m["section"] for m in missing)
+    return [item]
+
+
+def _book(law: dict) -> str:
+    """The law's book from its title: "NY State Residential Code 2025" from "Egress (NY State Residential Code 2025)"."""
+    t = law["title"]
+    return t[t.index(" (") + 2:-1] if " (" in t and t.endswith(")") else t
+
+
 def _waiting_item(law: dict) -> dict:
+    why = WAITING_WHY + (NOT_YET_WAITING.format(all=_listed(law["not_checked_yet"])) if law["not_checked_yet"] else "")
+    if law["coverage_problem"]:
+        why += ". " + NO_COVERAGE.format(title=_book(law), why=law["coverage_problem"])
     return _own_item(law, f"{law['short'].lower()}.waiting", f"{law['short']}: {WAITING_WORDS}", present.NOT_CHECKED,
-                     WAITING_WHY, waiting=WAITING_REASON)
+                     why, waiting=WAITING_REASON)
 
 
 def add_to_view(view: dict, got: dict, place_name: str) -> None:
