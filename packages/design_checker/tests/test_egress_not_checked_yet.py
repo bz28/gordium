@@ -89,7 +89,6 @@ def test_a_list_whose_own_not_checked_yet_disagrees_is_read_the_cautious_way(tmp
     (folder / "6_coverage_report").mkdir(parents=True)
     data = load(LIST)
     data["not_checked_yet"].append("R319.2.3")                  # has rules, but the list's own key names it
-    (folder / "6_coverage_report" / LIST.name).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
     data["not_checked_yet"].append("R399.8")                    # and one its pieces leave out
     (folder / "6_coverage_report" / LIST.name).write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
     missing, _ = egress._not_checked_yet(folder, egress.laws(ITHACA)["laws"][0]["rules"])
@@ -184,6 +183,8 @@ def test_the_sections_come_from_the_coverage_list_and_a_missing_list_needs_revie
     law = dict(egress.laws(ITHACA)["laws"][0], not_checked_yet=[], coverage_problem=problem)
     [item] = egress._not_yet_items(law)
     assert item["status"] == present.REVIEW and "check the whole law by hand" in item["reason"]
+    waiting = egress._waiting_item(law)              # while no rooms are drawn: said in the waiting row (round 4)
+    assert waiting["status"] == present.NOT_CHECKED and "check the whole law by hand" in waiting["reason"]
 
 
 def test_the_generated_list_matches_the_labels_and_the_rulebook():

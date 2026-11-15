@@ -39,7 +39,7 @@ names:
   BO105.11: "existing buildings: escape openings in a reworked basement"
   BO108.2: "existing buildings: bed and breakfast occupancy"
   BO108.3: "existing buildings: bed and breakfast conversions"
-  # labeled flag (listed in the book's order, after the rule pieces)
+  # labeled flag (wording only: a check lists them after the rule pieces, in the book's order, whatever the order here)
   R316.2: "habitable attic floor area and ceiling height"
   R318.5: "anchoring of exterior landings, decks, balconies and stairs"
   R318.7.5.4: "plastic composite stair treads (material)"
