@@ -83,12 +83,12 @@ stair:
     # Egress step 3, the remaining stair sections (2026-11-14): rise, landings, spiral and bulkhead stairs.
     stair_vertical_rise: {unit: in, meaning: "Vertical rise of the flight, from the floor level or landing at its bottom to the one at its top"}
     stair_exterior:      {unit: yes_no, meaning: "The flight is an exterior stairway (outside the building)"}
-    stair_top_landing:   {unit: yes_no, meaning: "There is a floor or landing at the top of the flight"}
+    stair_top_landing:   {unit: yes_no, meaning: "There is a floor or landing at the top of the flight, on the stair's side of any door there"}
     stair_bottom_landing: {unit: yes_no, meaning: "There is a floor or landing at the bottom of the flight"}
     stair_width:         {unit: in, meaning: "Width of the flight served by its landings (side to side, finished surfaces)"}
-    stair_top_landing_width: {unit: in, meaning: "Width of the floor or landing at the top of the flight, perpendicular to the direction of travel"}
+    stair_top_landing_width: {unit: in, meaning: "Width of the floor or landing at the top of the flight, perpendicular to the direction of travel (where it is on the other side of a door at the top, R318.7.6 exception 1, that floor's)"}
     stair_bottom_landing_width: {unit: in, meaning: "Width of the floor or landing at the bottom of the flight, perpendicular to the direction of travel"}
-    stair_landing_depth: {unit: in, meaning: "Least depth, in the direction of travel, of the floors or landings at the top and bottom of the flight"}
+    stair_landing_depth: {unit: in, meaning: "Least depth, in the direction of travel, of the floors or landings at the top and bottom of the flight (a top landing on the other side of a door at the top counted as that floor)"}
     stair_straight_run:  {unit: yes_no, meaning: "The stairway has a straight run (the direction of travel does not turn at the landing)"}
     stair_landings_rectangular: {unit: yes_no, meaning: "The floors or landings at the top and bottom of the flight are square or rectangular"}
     stair_top_door:      {unit: yes_no, meaning: "There is a door at the top of the flight, with the top floor or landing on its other side"}
@@ -117,7 +117,7 @@ handrail:
   meaning: "A handrail along a flight of stairs or a ramp, as the architect marks it"
   within: [stair, ramp]
   measures:
-    handrail_height:         {unit: in, meaning: "Height of the handrail, measured vertically from the sloped plane adjoining the tread nosings (least and greatest alike: the least here)"}
+    handrail_height:         {unit: in, meaning: "Height of the handrail, measured vertically from the sloped plane adjoining the tread nosings, or from the finish surface of the ramp slope for a ramp's handrail (least and greatest alike: the least here)"}
     handrail_height_max:     {unit: in, meaning: "Greatest height of the handrail along the flight, measured the same way"}
     handrail_adjacent_to_wall: {unit: yes_no, meaning: "The handrail runs beside a wall"}
     handrail_wall_clearance: {unit: in, meaning: "Least space between the handrail and the wall beside it"}
@@ -125,7 +125,7 @@ handrail:
     # Egress step 3, the remaining handrail sections (2026-11-14): R320.3's exception, R320.5's continuity, R320.6's grip.
     handrail_at_projecting_nosing: {unit: yes_no, meaning: "Nosings of landings, floors or passing flights project into the stairway where the handrail passes them, reducing its clearance"}
     handrail_continuous:     {unit: yes_no, meaning: "The handrail runs unbroken the full length of the flight (from directly above the nosing of the top landing to directly above the lowest nosing) or of the ramp"}
-    handrail_breaks_newel_or_volute: {unit: yes_no, meaning: "Every break in the handrail is a newel post (at a turn in a flight with winders, at a landing or over the lowest tread) or a volute, turnout or starting easing ending over the lowest tread"}
+    handrail_breaks_newel_or_volute: {unit: yes_no, meaning: "Where the handrail is not continuous: it still reaches from directly above the nosing of the top landing to directly above the lowest nosing (or the ramp's full length), and every place it is interrupted or ends short of those points is a newel post (at a turn in a flight with winders, at a landing or over the lowest tread) or a volute, turnout or starting easing ending over the lowest tread (a rail that just stops short is no)"}
     handrail_ends_returned:  {unit: yes_no, meaning: "Each end of the handrail is returned, continuous to itself or toward a wall, guard or walking surface"}
     handrail_return_gap:     {unit: in, meaning: "Greatest gap between a handrail return and the wall beside it"}
     handrail_circular:       {unit: yes_no, meaning: "The handrail's cross section is a circle"}
