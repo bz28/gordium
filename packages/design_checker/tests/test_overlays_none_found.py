@@ -49,7 +49,8 @@ def test_no_overlay_found_on_this_lot_leaves_the_row_out_and_the_design_complies
     assert release_rows(v) == []
     # zoning complies (its own section); the design waits on egress, no rooms drawn yet (egress.py): never a pass
     assert v["sections"][0]["state"] == present.COMPLIES and v["sections"][0]["summary"] == "15 comply"
-    assert v["summary"] == "Zoning: 15 comply · Egress: waiting, no rooms drawn yet"
+    assert v["summary"] == "Zoning complies · Egress waiting: no rooms drawn yet"     # choice B (Ben, 2026-11-15)
+    assert v["waiting_only"] is True                                              # the grey headline, no "?"
     assert v["state"] == present.REVIEW and r["summary"]["state"] == "review"
     assert present.OVERLAYS_NONE_LINE.format(date="2026-11-11", age="yesterday") in v["header"]["sources"]   # said where it came from
 

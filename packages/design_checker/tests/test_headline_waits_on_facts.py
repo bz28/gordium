@@ -42,7 +42,7 @@ def test_every_decided_row_complies_but_the_parking_waits_on_the_bedrooms_needs_
     assert _waiting(v) == ["R-1b.parking_one_family", "egress.waiting", "release.overlays"]   # the rest comply
     assert v["state"] == present.REVIEW
     assert v["summary"] == ("Zoning: needs review · 14 comply · 1 to answer · 1 not checked in this release · "
-                            "Egress: waiting, no rooms drawn yet")     # no interior drawn: egress waits (egress.py)
+                            "Egress waiting: no rooms drawn yet")     # no interior drawn: egress waits (egress.py)
     assert openpyxl.load_workbook(report)["Check"]["A1"].value == "GORDIUM | " + v["summary"]   # the report says it
     s = r["summary"]                                                           # the result's own line too
     assert s["state"] == "review" and s["text"] == v["summary"]               # the panel's own words
@@ -54,7 +54,7 @@ def test_the_bedrooms_answered_leave_only_the_overlays_still_needs_review():
     v = r["view"]
     assert _waiting(v) == ["egress.waiting", "release.overlays"]               # the parking rule now complies
     assert v["state"] == present.REVIEW and "to answer" not in v["summary"]
-    assert v["summary"] == "Zoning: needs review · 15 comply · 1 not checked in this release · Egress: waiting, no " \
+    assert v["summary"] == "Zoning: needs review · 15 comply · 1 not checked in this release · Egress waiting: no " \
                            "rooms drawn yet"
     assert r["summary"]["state"] == "review"
 

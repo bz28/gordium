@@ -1853,8 +1853,8 @@ LAW_GROUP = "law"         # an item of a law a place inherits (egress: design_ch
 
 def summary(items: list[dict]) -> str:
     """The check's one line, grouped by law (Ben, 2026-11-12: zoning and egress are two separate results): with no
-    item of an inherited law, zoning's line alone (_summary), exactly as before; with them, "Zoning: 7 comply ·
-    Egress: waiting, no rooms drawn yet" or "Zoning: 7 comply · Egress: 1 does not comply · 12 need review", each
+    item of an inherited law, zoning's line alone (_summary), exactly as before; with them, "Zoning complies ·
+    Egress waiting: no rooms drawn yet" or "Zoning: 1 needs review · Egress: 1 does not comply · 12 need review", each
     law's words counted over its own items only. A law still waiting says so in words ("waiting", never a count of
     passes), so the line never reads as all complying while it waits; the design's state (state(), over every item)
     is then needs review at best."""
@@ -1864,10 +1864,15 @@ def summary(items: list[dict]) -> str:
             laws.setdefault(i.get("law_short") or "Building code", []).append(i)
     if not laws:
         return _summary(items)
-    out = ["Zoning: " + _summary([i for i in items if i["group"] != LAW_GROUP])]
+    zoning = [i for i in items if i["group"] != LAW_GROUP]
+    # choice B (Ben, 2026-11-15): while a law waits, the headline says each law's own answer in words, "Zoning
+    # complies · Egress waiting: no rooms drawn yet"; never one overall pass, and zoning's counts once it doesn't
+    out = ["Zoning complies" if zoning and state(zoning) == COMPLIES else "Zoning: " + _summary(zoning)]
     for name, mine in laws.items():
         waiting = [i for i in mine if i.get("waiting")]
-        out.append(f"{name}: " + (waiting[0]["waiting"] if waiting and len(waiting) == len(mine) else _summary(mine)))
+        # the waiting item's own reason ("no rooms drawn yet"), so another reason a law waits is said as it is
+        out.append(f"{name} waiting: {waiting[0]['waiting']}" if waiting and len(waiting) == len(mine)
+                   else f"{name}: " + _summary(mine))
     return " · ".join(out)
 
 

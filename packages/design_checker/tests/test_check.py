@@ -46,7 +46,7 @@ def test_the_spreadsheet_model_gives_ten_passes_and_the_coverage_fail(facts, tmp
     # its words are the panel's own (one summary everywhere, D3), the overlays among them (Ben, 2026-11-09)
     assert s["state"] == "fail" and s["text"] == result["view"]["summary"] == (
         "Zoning: 1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to "
-        "answer · Egress: waiting, no rooms drawn yet")                    # no interior drawn: egress waits
+        "answer · Egress waiting: no rooms drawn yet")                    # no interior drawn: egress waits
     assert sorted(i for i, e in errors.items() if e == "NEEDS REVIEW") == WAITING_ON_THE_HOUSEHOLD
     assert s["lines"][0] == "Lot coverage by buildings 1,855 sf, needs ≤ 1,642.5 sf (212.5 sf over)"
     assert len(s["lines"]) == 14 and s["lines"][-2].startswith("Overlays · not in this release: ")
@@ -163,7 +163,7 @@ def test_the_worker_answers_line_by_line_and_never_stops_on_a_bad_request(facts)
     assert [r["ok"] for r in replies] == [True, False, False, True]
     assert replies[0]["result"]["summary"]["text"] == replies[0]["result"]["view"]["summary"] == (
         "Zoning: 1 does not comply · 9 need review · 11 comply · 1 not checked in this release · 2 use details to "
-        "answer · Egress: waiting, no rooms drawn yet")                    # no interior drawn: egress waits
+        "answer · Egress waiting: no rooms drawn yet")                    # no interior drawn: egress waits
     assert replies[3]["result"]["zones"] == ["R-1a", "R-1b", "R-2a", "R-2b", "R-2c", "R-3a", "R-3aa", "R-3b",
                                              "RU"]   # every hand-drafted rulebook
 

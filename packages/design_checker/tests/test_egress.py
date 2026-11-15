@@ -105,7 +105,7 @@ def test_no_interior_egress_waits_and_is_never_a_pass(interior):
     assert result["sections"][1]["summary"] == "waiting, no rooms drawn yet"
     assert result["egress"]["rows"] == [] and result["egress"]["results"] == {}
     assert (result["egress"]["interior_sha256"] is None) == (interior is None)
-    assert result["view"]["summary"].endswith(" · Egress: waiting, no rooms drawn yet")
+    assert result["view"]["summary"].endswith(" · Egress waiting: no rooms drawn yet")
     assert result["view"]["state"] != present.COMPLIES and result["summary"]["state"] != "pass"
 
 
@@ -120,7 +120,8 @@ def test_zoning_may_comply_while_egress_waits_but_the_design_never_reads_as_comp
                                    "summary": "1 complies"}
     assert view["sections"][1]["state"] == egress.WAITING
     assert view["state"] == present.REVIEW                         # never complies while egress waits
-    assert view["summary"] == "Zoning: 1 complies · Egress: waiting, no rooms drawn yet"
+    assert view["summary"] == "Zoning complies · Egress waiting: no rooms drawn yet"      # choice B (2026-11-15)
+    assert view["waiting_only"] is True and view["state"] == present.REVIEW       # shown grey, still needs review
     passing = [{"Error": "PASS", "Requirement": "Rear yard", "Rule id": "R-1b.rear_yard"}]
     assert summary(passing, zoning)["state"] == "pass"              # zoning alone: a pass, as before
     assert summary(passing, view["items"])["state"] == "review"     # with egress waiting: never a pass

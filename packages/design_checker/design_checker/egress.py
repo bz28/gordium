@@ -12,8 +12,10 @@ the most cautious of both:
 
 - **No interior read** (no interior description, or one whose `rooms` list is empty): each law is one item, "waiting, no rooms
   drawn yet", not checked. Never a pass and never a fail; the design is then needs review at best, and the summary
-  says "Egress: waiting, no rooms drawn yet", so it never reads as all complying while egress waits. Zoning's own
-  section can still say it complies.
+  says "Egress waiting: no rooms drawn yet", so it never reads as all complying while egress waits. Zoning's own
+  section can still say it complies; then the headline is "Zoning complies · Egress waiting: no rooms drawn yet",
+  shown in a neutral grey "waiting" style with no "?" (`waiting_only`, choice B: Ben, 2026-11-15), the state still
+  needs review.
 - **An interior read:** every rule's rows (design_checker/each_part.py, the same outcome() as zoning's), each item
   naming its part ("Bedroom 2 › Window 5"), the code section and the rule's exact quote, and for a fail the change
   the rule asks ("sill height 48 in, needs ≤ 44 in"). A measure the measuring left without a value, or gave a reason
@@ -41,7 +43,8 @@ from rule_format.state_law import state_settings_problems
 from design_checker import each_part, present
 
 WAITING = "waiting"                                 # a law's section state while no interior is read
-WAITING_WORDS = "waiting, no rooms drawn yet"
+WAITING_REASON = "no rooms drawn yet"              # why a law waits: its waiting item's own `waiting` (the headline's words)
+WAITING_WORDS = "waiting, " + WAITING_REASON
 WAITING_WHY = ("Escape windows (size and sill), stairs (risers, treads, headroom, width) and the exit door are checked "
                "once the rooms are drawn; handrails, guards and sleeping lofts aren't read from the drawing yet, so "
                "their rules will need review. Until then this is not a pass")
@@ -255,7 +258,7 @@ def _own_item(law: dict, item_id: str, name: str, status: str, reason: str, **mo
 
 def _waiting_item(law: dict) -> dict:
     return _own_item(law, f"{law['short'].lower()}.waiting", f"{law['short']}: {WAITING_WORDS}", present.NOT_CHECKED,
-                     WAITING_WHY, waiting=WAITING_WORDS)
+                     WAITING_WHY, waiting=WAITING_REASON)
 
 
 def add_to_view(view: dict, got: dict, place_name: str) -> None:
@@ -269,6 +272,12 @@ def add_to_view(view: dict, got: dict, place_name: str) -> None:
                                                for s in got["sections"]]
     view["state"] = min(states, key=[present.FAILS, present.REVIEW, present.COMPLIES].index)
     view["summary"] = present.summary(view["items"])
+    # choice B (Ben, 2026-11-15): held at needs review only by a law still waiting (zoning complies, at least one law
+    # waits, none fails or needs review), the headline is calm: grey, its words say why, no "?" mark. Only how the
+    # headline looks: the state stays needs review, never a pass
+    sections = [s["state"] for s in got["sections"]]
+    view["waiting_only"] = (view["state"] == present.REVIEW and present.state(zoning) == present.COMPLIES
+                            and WAITING in sections and all(s in (WAITING, present.COMPLIES) for s in sections))
     view["groups"] = present.grouped(view["items"])
     view["sections"] = [{"key": "zoning", "title": f"Zoning ({place_name})", "state": present.state(zoning),
                          "summary": present._summary(zoning)}] + [

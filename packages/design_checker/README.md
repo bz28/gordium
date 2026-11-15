@@ -66,7 +66,9 @@ isn't being checked) is one counted "Interior: not checked yet" item, needs revi
 (Ithaca: New York's house code, `inherits:`), on the parts `model_measurement.interior` measures from an interior
 description given beside the site (`check_site(..., interior=...)`; `python -m design_checker <model> <facts>
 --interior <house.yaml>`). The view's `sections` give zoning's and egress's states apart; with no interior drawn,
-egress is one "waiting, no rooms drawn yet" item, never a pass; handrails, guards and sleeping lofts aren't read
+egress is one "waiting, no rooms drawn yet" item, never a pass (with zoning complying, the headline reads "Zoning
+complies · Egress waiting: no rooms drawn yet", shown grey with `waiting_only`, its state still needs review: choice
+B, Ben 2026-11-15); handrails, guards and sleeping lofts aren't read
 from the drawing yet, so their rules need review (decision item 12).
 
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
