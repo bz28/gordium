@@ -1,0 +1,35 @@
+title: Blocks with nothing to measure in them
+what: >-
+  The box house, and two blocks on the Default layer that a box can't place. The first holds only an empty solid
+  (no faces), as a family instance with no geometry does: it has no box, so where it is can't be told. The second
+  is an 8 × 8 × 8 ft shed behind the house near the east line (x 48 to 56, y 90 to 98), 10 ft from the house, holding beside its solid a nested
+  block whose only solid is empty: the shed's own box says it touches nothing, but the block's whole box can't be
+  known (its nested part has none). Neither may be dropped or placed by the part that can be read: both are listed
+  as left out with touching not known (null, which counts as touching), so the yards, height and stories need
+  review, as they do for a porch against the house. Either one alone keeps those rows at needs review, so a host
+  that placed only the shed by its readable solid gives the same verdicts: the description comparison
+  (touching false where null is expected) is what catches it.
+guards: >-
+  The Revit reading design note, new scene H (the cases Rhino can draw): section 4, "Not known" (no box or no
+  points: on the lot with touching null, never skipped; an element any of whose nested geometry gives nothing has
+  no box). In Rhino: conformance_rhino._box and gordium_rhino._whole_box (a block whose definition, at any depth,
+  holds a part with no box has none).
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+others:
+  - {id: empty_block, layer: Default, block: true, empty: true, touching: null}
+  - {id: shed_with_empty_part, layer: Default, outline: [[48, 90], [56, 90], [56, 98], [48, 98]], base: 0, top: 8,
+     block: true, nested_empty: true, touching: null}
+grade: {elevation: 0}
+expected:
+  scope.not_included: needs_review               # 2 blocks on the lot aren't measured
+  R-1b.lot_area_one_family_detached: complies    # the lot alone
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review                  # touching not known counts as touching: they may be part of it
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review                # left out: 1,500 + 64 + a block of unknown size

@@ -13,6 +13,8 @@ Revit add-in can send the same description later and get exactly the same checki
 - **The code that reads it:** `packages/design_checker/design_checker/site_json.py` (`validate`, `to_site`,
   `from_site`). Its tests prove the schema file and the code list the same fields.
 - **Changes:** [CHANGELOG.md](CHANGELOG.md).
+- **How a tool proves it sends the right description:** the [host conformance suite](../../test_data/host_conformance/README.md)
+  (fixed scenes, the description each must give, and the verdicts it must lead to).
 
 ## Why it is strict
 
@@ -80,7 +82,7 @@ length), flat ground not yet given, and nothing else on the lot.
 ## How the worker uses it
 
 The worker (`python -m design_checker serve`) answers JSON requests one per line. The new-style commands name
-the protocol they speak, `"protocol": "1.0"` (a different major version is refused):
+the protocol they speak, `"protocol": "1.1"` (a different major version is refused):
 
 - `hello`: the protocol, the site description version, and fingerprints of the worker's code and of each place's
   rules (`protocol.about()`). Every new-style answer carries the same under `"about"`.
@@ -109,6 +111,14 @@ use is the one every Rhino check already takes, and both give the same answers (
   the description's grade source, or extras that also list left-out objects are refused: one source for each
   thing. A flat ground stated in the facts (`ground_is_flat` with `grade_elevation`) is still used when the
   description has no grade points, as it always has been.
+- **What the architect can do about a left-out object** (`extras.left_out_advice`, `{object id: words}`): the
+  tool's own words, said once each on the "Objects on the lot not included" row, for example Rhino's "Linked file
+  'garage.3dm' has changed since it was loaded: reload it (Edit ▸ Blocks ▸ Block Definitions, select it, then
+  Update; or type -BlockManager, Update, All) so Gordium can see where it is". Words only: the object is still left out and the answer is the same.
+  Advice for an id that isn't in `left_out`, or that isn't words, is refused. The Rhino plugin makes them with
+  `host_core/left_out.py`'s `linked_file_problems` and `linked_file_words` (in its own Python); no worker command
+  serves those yet, so another tool words its own advice (a Revit add-in's would be Manage Links ▸ Reload, or
+  Reload From for a moved file) until one does, with the Revit reader.
 - **A problem in the tool's own words.** A tool that found a problem the measuring has no code for sends
   `{"code": "tool_words", "args": {"words": "…"}}`. It still makes the building's measuring need review. Words the
   measuring does have a code for are refused this way (send that code).

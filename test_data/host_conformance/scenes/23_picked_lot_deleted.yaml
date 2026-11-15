@@ -1,0 +1,28 @@
+title: The picked lot deleted
+what: >-
+  The architect picked the lot, then deleted its outline: the facts still name it (lot_id), and the only outline left
+  on the Site layer is the neighbour's, to the east. The host must say the picked lot isn't there (lot_not_found)
+  and send no lot; it must never fall back to the one outline left, which is the wrong lot (the house stands
+  outside it, 15 ft west of its west line, so its yards would be measured against a lot it isn't on). Every measure that
+  needs the lot needs review; height and stories comply.
+guards: >-
+  The Revit reading design note, new scene G: section 4, "The picked lot no longer there" (lot null,
+  lot_not_found). In Rhino: read_3dm.read_site, lot_id naming no closed curve on the Site layer.
+lots:
+  - [[60, 0], [120, 0], [120, 120], [60, 120]]
+picked: lot_deleted
+facts: {street_line: [[[0, 0], [60, 0]]]}
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: needs_review
+  R-1b.lot_width_one_family_detached: needs_review
+  R-1b.front_yard: needs_review
+  R-1b.side_yards#narrower: needs_review         # no lot: which side line is which isn't known
+  R-1b.side_yards#wider: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: complies                          # the house alone: 20 − 0 = 20 ≤ 35, no lot needed
+  R-1b.stories: complies                         # 2 floor blocks ≤ 3
+  R-1b.lot_coverage: needs_review                # coverage is a share of the lot's area

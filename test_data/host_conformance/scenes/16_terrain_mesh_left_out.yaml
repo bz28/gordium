@@ -1,0 +1,25 @@
+title: A terrain mesh over the lot, left out
+what: >-
+  The box house standing on a flat terrain mesh (an open mesh of 16 squares at z = 0, a little bigger than the lot)
+  on a Terrain layer, as a site model often has. Gordium never decides on its own that a mesh is the ground: it is
+  left out, marked as looking like the ground (so the panel offers "This is the ground"), and, since it meets the
+  house's base, as touching. Until the architect says it is the ground, the check needs review wherever it could
+  matter.
+buildings:
+  - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
+others:
+  - {id: terrain, layer: Terrain, outline: [[-5, -5], [65, -5], [65, 125], [-5, 125]], base: 0, top: 0,
+     mesh: {cells: 4}, touching: true, ground_like: true}
+grade: {elevation: 0}
+expected:
+  scope.not_included: needs_review
+  R-1b.lot_area_one_family_detached: complies
+  R-1b.lot_width_one_family_detached: complies
+  R-1b.front_yard: needs_review                  # left out and touching: it may be part of the building
+  R-1b.side_yards#east: needs_review
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review
+  R-1b.stories: needs_review
+  R-1b.lot_coverage: needs_review

@@ -74,3 +74,39 @@ jobs:
         run: python -m project_report --check
       - name: Every golden answer is the same (check and start on the test sites, scenarios and 200 stress designs)
         run: python -m design_checker.goldens --check
+
+  # The Revit add-in's worker client (apps/revit_addin: C#, no Revit needed) against the real Python worker,
+  # installed with the Windows job's install step (Python 3.12, the version the trial installs). Windows is where the add-in runs; Ubuntu is a cheap second.
+  revit_worker_client:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [windows-latest, ubuntu-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -e ".[dev]"
+      # the pinned SDK (global.json, which brings the .NET 10 runtime) and the .NET 8 runtime: the client is built
+      # for both (Revit 2025-2026 load add-ins on .NET 8, Revit 2027 on .NET 10) and tested on each
+      - uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: apps/revit_addin/global.json
+          dotnet-version: 8.0.x
+      # run from apps/revit_addin: dotnet reads global.json (the pinned SDK) from the folder it runs in, upward
+      - name: Restore the pinned test packages (fails if a version differs from the lock files)
+        working-directory: apps/revit_addin
+        run: dotnet restore --locked-mode
+      - name: The worker client's and the Revit reader's tests on .NET 8 (every conformance scene, read from fake Revit records too; crashes, timeouts, bad answers)
+        working-directory: apps/revit_addin
+        run: dotnet test --no-restore --framework net8.0
+        env:
+          GORDIUM_PYTHON: python
+      - name: The worker client's and the Revit reader's tests on .NET 10 (the same, plus our duplicate-key check against .NET 10's own)
+        working-directory: apps/revit_addin
+        run: dotnet test --no-restore --framework net10.0
+        env:
+          GORDIUM_PYTHON: python

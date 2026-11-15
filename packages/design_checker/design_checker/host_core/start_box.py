@@ -526,7 +526,9 @@ def preview_lookup(answer, facts, saved_ui, zones=()):
     w = answer.get("writes") or {}
     undo = [(where, k, before.get(k, MISSING), after.get(k, MISSING))
             for where, before, after in (("facts", before_f, facts), ("saved", before_s, saved_ui))
-            for k in set(before) | set(after) if k not in ("_lookup", "_pending", "_outside_for")   # (the
+            for k in sorted(set(before) | set(after))     # (sorted: a set's order changes with each process's
+            # string hashing, so the same lookup gave its undo list in another order in the worker: protocol 1.0)
+            if k not in ("_lookup", "_pending", "_outside_for")   # (the
             # session's, never one preview's: set aside, it brought back an address found since: round 16)
             and before.get(k, MISSING) is not after.get(k, MISSING) and before.get(k, MISSING) != after.get(k, MISSING)]
     if new_lot:                                  # the corner answer always goes back with the preview (drop_pending),

@@ -5,26 +5,29 @@ Rhino script (apps/rhino_plugin/gordium_rhino.py) imports this file directly.
 import contextlib
 import json
 import math
-import os
-import queue
-import re
 import sys
-import threading
-import time
 import types
 
-# Host-neutral code lives in host_core/ (facts, streets, lookup, the start box, the place), moved there unchanged
-# so a second host (a Revit add-in) can use it too. Every moved name is still offered here, the very same object
-# (logic.X is host_core.<module>.X), so the Rhino plugin and its tests are unchanged.
+# Host-neutral code lives in host_core/ (facts, streets, lookup, the start box, the place, freshness, the report's
+# and the panel's words, the neighbourhood, the box's edits, the worker client, which objects are left out), moved
+# there so a second host (a Revit add-in) can use it too. Every moved name is still offered here, the very same
+# object (logic.X is host_core.<module>.X), so the Rhino plugin and its tests are unchanged.
 if __package__:              # design_checker.rhino_logic: the checker, the tests
     from .host_core import facts as _facts, lookup as _lookup, place as _place, start_box as _start_box
     from .host_core import streets as _streets
+    from .host_core import context as _context, edits as _edits, freshness as _freshness, report as _report
+    from .host_core import panel_words as _panel_words, worker_client as _worker_client
+    from .host_core import left_out as _left_out
 else:                        # Rhino: this file by its folder on sys.path (gordium_rhino.py), so host_core is beside it
     for _name in [n for n in sys.modules if n == "host_core" or n.startswith("host_core.")]:
         del sys.modules[_name]           # a copy loaded before (another checkout, an older load): this folder's
     from host_core import facts as _facts, lookup as _lookup, place as _place, start_box as _start_box
     from host_core import streets as _streets
-HOST_CORE = (_place, _streets, _facts, _lookup, _start_box)
+    from host_core import context as _context, edits as _edits, freshness as _freshness, report as _report
+    from host_core import panel_words as _panel_words, worker_client as _worker_client
+    from host_core import left_out as _left_out
+HOST_CORE = (_place, _streets, _facts, _lookup, _start_box, _freshness, _report, _panel_words, _context, _edits,
+             _worker_client, _left_out)
 MOVED = {name: module for module in HOST_CORE for name in module.__all__}   # name -> the module that defines it
 globals().update({name: getattr(module, name) for name, module in MOVED.items()})
 
@@ -78,7 +81,6 @@ HELD_FROM = "gordium_held_from"                          # on each held object: 
 ADDED_BY = "gordium_added"                               # on each object a start box drew: its session, until Draw
 HELD_BY = "gordium_held_by"                              # on each held object: the session holding it
 OPEN_SESSIONS = set()          # the sessions of start boxes open now (recovery never touches theirs: review round 4)
-BOX_BUSY = "Finish or cancel the open start box first."
 
 
 class BoxGate:
@@ -174,59 +176,6 @@ def own_buildings(objects):
             if not on_layer(layer, MASSING) and classify(layer, kind, holds) not in (None, "lot")]
 
 
-def panel_header(head):
-    """The panel's header lines above the summary and below it, from the check's header: where (place), then the
-    draft notice, the lot and the grade. The code's edition line ("Ch. 325 as amended through Ord. No. …") is the
-    report's, not the panel's (Ben's team, MVP list, 2026-10-20)."""
-    head = head or {}
-    return {"above": [head.get("place") or "Gordium"],
-            "below": [head.get("draft") or "Draft rulebook", head.get("lot") or "", head.get("grade") or ""]}
-
-
-def status_words(item):
-    """The status a row's detail is headed with: "Does not comply", "Needs review", "Complies", "Not checked"; a rule
-    not in Gordium yet, "Not checked yet" (Ben, 2026-10-21: its group's name)."""
-    if item.get("group") == "not_covered":
-        return "Not checked yet"
-    return {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
-            "not_checked": "Not checked"}[item["status"]]
-
-
-def row_name(item):
-    """A panel row's Item text: the name, "(site)" for a site fact, and its note ("Building height · assuming flat
-    ground")."""
-    name = item["name"] + (" (site)" if item.get("group") == "site" else "")
-    return name + (" · " + item["note"] if item.get("note") else "")
-
-
-USE_STATED = "stated"
-
-
-def list_cells(item):
-    """A row's Item and Proposed text in the panel's list, and its name heading the detail. The use row names the
-    use itself, "Use: One-family dwelling, detached", with "stated" under Proposed: no use's name fits the 64 px
-    Proposed column ("One-family" alone takes two lines), and the Item cell has the room (coordinator, 2026-10-28,
-    option A: the whole name, no made-up short forms). "Use:" keeps what the row is about; "(site)" is left off:
-    measured in Rhino, "Use: One-family dwelling, detached" fits two lines of the Item cell at the panel's 400 px
-    only without it. A longer name ("…, semi-detached"), or any at 380 px, ends "…" in the list like every long
-    Item; the detail, headed with this same text, has it whole. With no use stated, "Use (site)" and its "—"."""
-    proposed = item.get("proposed")
-    if item.get("name") == "Use" and proposed and proposed != "—":
-        return "Use: " + proposed + (" · " + item["note"] if item.get("note") else ""), USE_STATED
-    return row_name(item), proposed
-
-
-def list_values(item):
-    """A row's four cells in the panel's list (Item, Proposed, Required, Delta), before cell_text shortens them: the
-    list's own shorter forms where the checker gave one (present: a tax-map lot's Delta, delta_cell, "+2'-0 1/2";
-    worst +0'-0 1/2""; a span of readings' tightest pair, cells, "35'-0 5/8" (varies)"), else the row's words. The
-    detail below the list always has the words whole (the audit of main, 2026-10-29)."""
-    name, proposed = list_cells(item)
-    cells = item.get("cells") or {}
-    return (name, cells.get("proposed") or proposed, cells.get("required") or item.get("required"),
-            item.get("delta_cell") or item.get("delta") or "")
-
-
 def dock_host(hosts, serial):
     """The docked panel to fill for the document in front: Rhino makes one per document window (keyed by the
     document's number); a panel made without one (key 0) serves when the front document has none."""
@@ -240,69 +189,6 @@ def place_panel_now(placed):
     200 x 200 window), never again after ("docked" or "floating"): the architect's own size and place stay
     (round 1: it jumped back to the right edge on every live re-check)."""
     return placed is None
-
-
-def highlight(status):
-    """The colour a part of the model is shaded, from its rule's result only (never from the envelope): red for
-    does not comply (under every reading), amber for needs review, nothing for complies or anything else."""
-    return {"does_not_comply": "red", "needs_review": "amber"}.get(status)
-
-
-def red_last(coloured):
-    """The coloured parts, (shape, status) each, split into (the rest, the red): the red (does not comply) is drawn
-    after everything else, so nothing covers it. In Top view a needs-review amber strip (the eaves) lay over the
-    failing red wall below it and hid the one thing that certainly has to change (the architect's review,
-    2026-10-28)."""
-    rest = [c for c in coloured or [] if highlight(c[1]) != "red"]
-    return rest, [c for c in coloured or [] if highlight(c[1]) == "red"]
-
-
-def newly_failing(before, view):
-    """The row to bring into view after a re-check: the first, in the panel's order, that does not comply now and
-    did not at the check before (`before`: {item id: status} then, None on a document's first check). None when
-    nothing newly fails, so a re-check that changes nothing for the worse never moves the list (the architect's
-    review, 2026-10-28: after an edit the newly failing row was out of sight below the rows that need review)."""
-    if before is None or not view:
-        return None
-    status = {i["id"]: i["status"] for i in view.get("items") or []}
-    for g in view.get("groups") or []:
-        for item_id in g.get("items") or []:
-            if status.get(item_id) == "does_not_comply" and before.get(item_id) != "does_not_comply":
-                return item_id
-    return None
-
-
-WORKED_OUT = "How it's worked out"
-
-
-def detail_parts(det):
-    """The selected item's detail, split for the panel (the architect's review, 2026-10-28: the formula
-    "max(min(25% × lot depth —, 50), 20)", the measuring notes and the chart's shorthand "R-1B: 25%/ 50 ft [fn16]"
-    read as jargon). Plain words first, in view: the notes, the result of the working ("Required: 24'-1 7/8" to
-    32'-10 1/8"") and the law's own words. Behind WORKED_OUT, collapsed until opened: the formula with the values
-    written in, what was measured, the chart's own cell and the precision rule. Nothing is dropped: every quote,
-    with where it is from, is in one or the other, and the citation and its links stay in view.
-      notes          texts shown in view (at the limit, the colours, the plain result)
-      quotes         the law's words and the chart's footnotes, in view
-      worked         texts behind the toggle (the whole working, what was measured, the precision)
-      worked_quotes  the chart's own cells, behind the toggle"""
-    det = det or {}
-    calc = det.get("calc") or ""
-    head, _, rest = calc.partition(": ")
-    working, equals, result = rest.partition(" = ")
-    plain = head + ": " + result if equals and head in ("Required", "Allowed") else calc
-    quotes = [q for q in det.get("quotes") or [] if q.get("text")]
-    return {"notes": [t for t in (det.get("at_limit"), det.get("colours"), plain, det.get("outline")) if t],
-            "quotes": [q for q in quotes if not q.get("chart")],
-            "worked": [t for t in (calc if plain != calc else None, det.get("scope"), det.get("precision")) if t],
-            "worked_quotes": [q for q in quotes if q.get("chart")]}
-
-
-def coloured_info(entry):
-    """What a coloured piece is, kept with it in the drawn list: why (yard or height), the row it is for (its
-    measure and name) and its building, from the plan's block (check.plan). The in-Rhino checks read exactly the
-    list that is drawn, so a claim can't mistake the rear yard's strip for the side yard's (Rhino check of #28)."""
-    return {k: entry.get(k) for k in ("why", "measure", "row", "building")}
 
 
 def block_span(entry, solid_bottom=None, solid_top=None):
@@ -328,103 +214,10 @@ def offending_pieces(pieces, block):
     return kept or [block]
 
 
-def labels_on(ui_state):
-    """Whether the viewport shows its on-screen labels (each yard's and lot edge's label, and the status box): off
-    unless the architect ticked Show on-screen labels in this document (MVP list, 2026-10-20). The yard lines and the
-    red stay either way."""
-    return bool((ui_state or {}).get("show_labels", False))
-
-
-def context_shown(ui_state):
-    """Whether the neighbourhood (the context map) is shown: on unless the architect unticked Show neighbourhood in
-    this document. Kept per file, like Show on-screen labels (coordinator's decision, 2026-10-21: an architect
-    reopening a file expects the same view)."""
-    return bool((ui_state or {}).get("show_context", True))
-
-
-def yard_label_shown(labels, status):
-    """A yard's label in plan: with Show on-screen labels on, every one; off, still a failing yard's shortfall
-    ("✕ Rear yard 21'-2", needs 22'-6""): it is the live feedback (coordinator, 2026-10-20)."""
-    return bool(labels) or status == "does_not_comply"
-
-
-def legend_text(code=None):
-    """The legend ("?"): the marks, what the plan shows, the precision, and which version of the law was checked
-    (the code-edition line, no longer in the panel's header)."""
-    text = ("✕ does not comply · ? needs review · ✓ complies · – not checked · ⚠ setup problem\n\n"
-            "In the plan: the property line, the required yards (shaded), the buildable envelope (dashed), each yard "
-            "dimensioned square to its lot line from the wall facing it, as a drawing is: red where it fails, amber "
-            "where it needs review, complying ones neutral grey (colour only what's wrong); its number only, on its "
-            "line (✕ or ? before it when wrong; its name and what it needs are in the panel), the required line "
-            "dashed across it, tagged \"min\" where the yard fails or needs review; in the elevations the height, "
-            "dimensioned up from the grade plane, with the limit faint. In plan these lines are drawn over "
-            "everything; in every other view they hide behind the solids in front of them, as the model's own lines "
-            "do. Values are measured to 1/8 in. and never rounded toward compliance.\n\n"
-            "Delta: how far over or under each limit (+ to spare, ≥ + at least that much to spare, − short of a "
-            "minimum, over past a maximum).\n\n"
-            "In the model, only the offending part of a building is coloured, in its row's colour: the part inside "
-            "a required yard, or what rises above the height limit (a cantilever, not the ground under it; a roof's "
-            "ridge, not its eaves; a mesh, or a solid Rhino can't cut, is coloured over its whole strip instead; a "
-            "block isn't measured until it is exploded). RED: it "
-            "fails there under every reading. AMBER: it fails there under some readings only (for example within the tax map's 2'-0\" of a lot line, which a survey settles). "
-            "Nothing where it complies. The buildable envelope is only a see-through guide: colours come from the "
-            "rules' results.")
-    return text + ("\n\nChecked against: " + code if code else "")
-
-
-COLUMN_DELTA = "Delta"          # the panel's and the report's column for how far over or under (was "Margin")
-
-# eighths of an inch as one character each, in the panel's narrow cells only (the detail and the report keep "7/8")
-CELL_FRACTIONS = {"1/8": "⅛", "1/4": "¼", "3/8": "⅜", "1/2": "½", "5/8": "⅝", "3/4": "¾", "7/8": "⅞"}
-
-
-def cell_text(text):
-    """A Proposed, Required or Delta value as the panel's list draws it, in its two lines of a narrow column (the
-    architect's review, 2026-10-28: "34'-11 7/8" to 36'-3 3/8"" and "at least 0'-5 1/4" if confirmed" were cut
-    off; the panel is not made wider). The same words, shorter: each fraction of an inch one character ("34'-11⅞"")
-    and a range one value per line ("34'-11⅞"–" then "36'-3⅜""), so a line never breaks inside a number. The
-    selected item's detail below the list shows the words whole, as everywhere else."""
-    import re
-    text = re.sub(r'(\d) ([1357]/8|1/4|1/2|3/4)"', lambda m: m.group(1) + CELL_FRACTIONS[m.group(2)] + '"', text or "")
-    return re.sub(r'(["%]|\d sf) to (?=[\d+−])', "\\1–\n", text)        # after a value, before the next
-
-
-def venv_python(root, os_name):
-    """Where the repo's virtual environment keeps Python: bin/python (Mac, Linux), Scripts\\python.exe (Windows)."""
-    if os_name == "nt":
-        return "\\".join((root, ".venv", "Scripts", "python.exe"))
-    return "/".join((root, ".venv", "bin", "python"))
-
-
 def draws_in(checked, viewport):
     """Whether a result is drawn in a viewport: only in the document it is the result for (Rhino for Mac keeps
     several models open side by side; one model's verdict never shows on another)."""
     return checked is not None and checked == viewport
-
-
-def code_fingerprint(packages_dir):
-    """What the checker's code is now: every file under packages/ (code and the data it loads) with its size and
-    time, as one text. The
-    background checker is started again whenever this changes (an update while Rhino is open), so results never
-    come from code that is no longer there."""
-    import os
-    found = []
-    for root, dirs, files in os.walk(packages_dir):         # code and the data it loads (measures.yaml), not caches
-        dirs[:] = sorted(d for d in dirs if d != "__pycache__" and not d.startswith(".") and not d.endswith(".egg-info"))
-        for name in sorted(files):
-            if not name.endswith((".pyc", ".pyo")) and not name.startswith("."):
-                path = os.path.join(root, name)
-                try:
-                    st = os.stat(path)
-                    found.append("%s:%d:%d" % (os.path.relpath(path, packages_dir), st.st_size, st.st_mtime_ns))
-                except OSError:         # gone between listing and reading (an editor's temporary file): changed
-                    found.append("%s:gone" % os.path.relpath(path, packages_dir))
-    return "|".join(found)
-
-
-def restart_checker(alive, started_with, now):
-    """Whether to start the background checker again: it stopped, or the code changed since it started."""
-    return not alive or started_with != now
 
 
 def after_confirm(choice):
@@ -715,15 +508,6 @@ def _over(box, other):
     """Whether two (left, top, w, h) boxes overlap (touching edges don't)."""
     return min(box[0] + box[2], other[0] + other[2]) > max(box[0], other[0]) and \
         min(box[1] + box[3], other[1] + other[3]) > max(box[1], other[1])
-
-
-def _inside(x, y, poly):
-    """Whether a point is inside a polygon (screen points; even-odd)."""
-    inside = False
-    for (ax, ay), (bx, by) in zip(poly, poly[1:] + poly[:1]):
-        if (ay > y) != (by > y) and x < ax + (y - ay) * (bx - ax) / (by - ay):
-            inside = not inside
-    return inside
 
 
 def box_over_shape(box, poly):
@@ -1369,99 +1153,6 @@ def looks_like_ground(kind, closed, extents, lot_extents, reach=1.0):
     return x0 <= a0 + reach and y0 <= b0 + reach and x1 >= a1 - reach and y1 >= b1 - reach
 
 
-ON_LOT_REACH = 0.1        # ft: how far into the lot an object must reach to count as on it (a neighbour drawn
-                          # touching the lot line, or a hair over it, stays off)
-
-
-def _ring_area(ring):
-    """The signed area of a closed ring of (x, y) points (counterclockwise: positive)."""
-    return sum(ring[i - 1][0] * ring[i][1] - ring[i][0] * ring[i - 1][1] for i in range(len(ring))) / 2
-
-
-def _hull(points):
-    """The convex hull of (x, y) points, counterclockwise (Andrew's monotone chain)."""
-    pts = sorted(set((float(x), float(y)) for x, y in points))
-    if len(pts) < 3:
-        return pts
-
-    def turn(o, a, b):
-        return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
-    lower, upper = [], []
-    for p in pts:
-        while len(lower) >= 2 and turn(lower[-2], lower[-1], p) <= 0:
-            lower.pop()
-        lower.append(p)
-    for p in reversed(pts):
-        while len(upper) >= 2 and turn(upper[-2], upper[-1], p) <= 0:
-            upper.pop()
-        upper.append(p)
-    return lower[:-1] + upper[:-1]
-
-
-def _clip(subject, convex):
-    """The part of the ring `subject` (any simple polygon) inside the counterclockwise convex ring `convex`
-    (Sutherland-Hodgman). Its area is the overlap's area."""
-    out = list(subject)
-    for i in range(len(convex)):
-        a, b = convex[i - 1], convex[i]
-        inside = [(b[0] - a[0]) * (p[1] - a[1]) - (b[1] - a[1]) * (p[0] - a[0]) >= 0 for p in out]
-        nxt = []
-        for k in range(len(out)):
-            p, q, pin, qin = out[k - 1], out[k], inside[k - 1], inside[k]
-            if pin != qin:
-                dx, dy = q[0] - p[0], q[1] - p[1]
-                den = (b[0] - a[0]) * dy - (b[1] - a[1]) * dx
-                t = ((b[1] - a[1]) * (p[0] - a[0]) - (b[0] - a[0]) * (p[1] - a[1])) / den if den else 0.0
-                nxt.append((p[0] + t * dx, p[1] + t * dy))
-            if qin:
-                nxt.append(q)
-        out = nxt
-        if not out:
-            break
-    return out
-
-
-def box_near_lot(box, lot_box, reach):
-    """Whether a plan box (x0, y0, x1, y1) comes within `reach` of the lot's plan box: a quick test before any
-    outline work. Exact in the cautious direction: an object whose box misses the lot's box grown by `reach`
-    can't reach into the lot (its footprint lies inside its box, and the lot inside the lot's)."""
-    x0, y0, x1, y1 = box
-    a0, b0, a1, b1 = lot_box
-    return x0 <= a1 + reach and a0 - reach <= x1 and y0 <= b1 + reach and b0 - reach <= y1
-
-
-def reaches_into_lot(lot_ring, points, reach, box=None):
-    """Whether an object whose plan points (any (x, y) of it: vertices, points along its edges) are `points`
-    reaches into the lot (`lot_ring`, its outline's points) by more than `reach` (model units): the part of its
-    plan footprint (their convex hull) inside the lot, averaged across (twice its area over its perimeter), is
-    wider than `reach`. Wholly on the lot, straddling a lot line or mostly past it: on the lot. Touching the
-    line from outside, a hair over it, or off the lot but inside the lot's bounding box (a rotated or jogged
-    lot, the neighbour's house): not. The hull only ever makes an object bigger, the cautious direction.
-    `box`, the object's plan bounding box (x0, y0, x1, y1), is its footprint whenever the points don't outline
-    one (fewer than 3, or all in a line, as a sphere's seam is): a solid always covers some ground, so such
-    points under-describe it."""
-    lot = [(float(x), float(y)) for x, y in lot_ring]
-    if len(lot) > 1 and lot[0] == lot[-1]:
-        lot = lot[:-1]
-    if len(lot) < 3:
-        return False
-    if _ring_area(lot) < 0:
-        lot.reverse()
-    hull = _hull(points)
-    if (len(hull) < 3 or _ring_area(hull) <= 1e-12) and box is not None:
-        x0, y0, x1, y1 = box
-        hull = _hull([(x0, y0), (x1, y0), (x1, y1), (x0, y1)])
-    if len(hull) < 3 or _ring_area(hull) <= 1e-12:
-        return False
-    part = _clip(lot, hull)
-    if len(part) < 3:
-        return False
-    area = abs(_ring_area(part))
-    perimeter = sum(((part[i][0] - part[i - 1][0]) ** 2 + (part[i][1] - part[i - 1][1]) ** 2) ** 0.5
-                    for i in range(len(part)))
-    return perimeter > 0 and 2 * area / perimeter > reach
-
-
 # ---- every callback Rhino or Eto calls goes through guard() -----------------------------------------------------
 # On the Mac an exception that escapes a callback into native code (a view's paint, a cell formatting event, a
 # display conduit's draw, an idle or document event) aborts Rhino outright (seen 2026-10-20: an Eto paint handler
@@ -1563,23 +1254,6 @@ def list_step(index, count, key):
     return index
 
 
-def report_message(path, written, error=None, opened=True, open_error=None, stale=False):
-    """What the panel says after a report was asked for (Zoning report… or GordiumCheck): never nothing (Ben's
-    test, 2026-10-20: the button did nothing after GordiumStart, because only GordiumCheck wrote the report).
-    `stale`: an earlier report is still at that path, so it is said to be out of date."""
-    if not written:
-        return ("Zoning report not saved: " + (error or "the check could not run") + "." +
-                (" The report already at " + path + " is from an earlier check: out of date." if stale else ""))
-    if opened:
-        return "Report saved to " + path + " (opened)."
-    return ("Report saved to " + path + ". It couldn't be opened here" + (": " + open_error if open_error else "") +
-            "; open it with Excel, Numbers or any spreadsheet app.")
-
-
-BUSY = "A check is running: try again in a moment."
-NO_DOCUMENT = "Open a Rhino model first."
-
-
 def grown_height(client_height, content_height, padding):
     """The start box's new inner height when a line shown again needs more room (the amber line back after "Corner
     lot?" is set to Not answered): the content's own height plus the box's padding above and below, if that is more
@@ -1603,16 +1277,6 @@ def north_vector(plan_north_deg):
     return (-math.sin(t), math.cos(t))
 
 
-def shorten(text, most):
-    """`text` in at most `most` characters, cut at a word and ended "…" when longer (a link can't wrap: the
-    architect's review found one pushing the docked panel's text off its right edge)."""
-    text = text or ""
-    if len(text) <= most:
-        return text
-    cut = text[:max(1, most - 1)].rsplit(" ", 1)[0].rstrip(" ,·;:")
-    return (cut or text[:max(1, most - 1)]) + "…"
-
-
 def building_name(layer, name, grouped):
     """What the panel calls a building: the starting house Gordium drew (its floors grouped on the massing layer),
     else the object's name, else its layer ("a solid on Building")."""
@@ -1621,26 +1285,6 @@ def building_name(layer, name, grouped):
     if name:
         return name + (" (and its group)" if grouped else "")
     return ("a group on " if grouped else "a solid on ") + layer
-
-
-def link_text(citation, most):
-    """A citation link's words in at most `most` characters, keeping what tells it apart: "District Regulations
-    Chart" said "chart", and if still too long its front cut, never its end (district, column, note: review round
-    1, eight links read "Open §325-8, District Regulations Chart…")."""
-    text = "Open " + (citation or "").replace("District Regulations Chart", "chart")
-    if len(text) <= most:
-        return text
-    tail = text[len(text) - (most - 7):]
-    tail = tail.split(" ", 1)[1] if " " in tail[1:] else tail
-    return "Open …" + tail.lstrip(" ,·;")
-
-
-def height_limit_text(checker_top, height):
-    """The height limit's label in an elevation: plain when the checker has the grade plane (its top), else said to
-    be shown from the lot's level, a drawing aid ("height" is the limit as text, 35'-0")."""
-    if checker_top is not None:
-        return "Height limit " + height
-    return "Height limit " + height + " (no grade plane yet: shown from the lot's level)"
 
 
 def prune_hosts(hosts, open_serials):
@@ -1687,19 +1331,6 @@ def model_ticks(a, b, size):
         return []
     s = size / 2 / 3 ** 0.5                  # a slash of length `size` along (1, -1, 1)
     return [((p[0] - s, p[1] + s, p[2] - s), (p[0] + s, p[1] - s, p[2] + s)) for p in (a, b)]
-
-
-# ---- the start box as one transaction (review rounds 1-2 of PR #19) ----------------------------------------------
-#
-# The box's model edits go through one BoxSession, owned by the box (gordium_rhino.confirm) and never copied. An object
-# the session replaces is never deleted while the box is open: it is HELD, moved to a hidden holding layer with the
-# layer it came from written on it, so Cancel (or Esc, or any error) puts the very same object back, and so does the
-# next GordiumStart if Rhino closed in between (recover_held). Draw deletes what is held. Nothing on the holding layer
-# is ever measured or sent to the checker (classify). `table` is the model, as a few plain calls (gordium_rhino's
-# RhinoTable; a fake in the tests).
-
-class Cancelled(Exception):
-    """Esc at a prompt: the whole edit is cancelled and nothing is saved (Enter keeps what is there)."""
 
 
 class BoxSession:
@@ -1779,19 +1410,6 @@ def recover_held(table, live=None):
     return len(removed), len(back)
 
 
-def should_recheck(dirty_at, now, running, box_open, wait, last_at=None, auto=True):
-    """Live mode's re-check after an edit: only when the architect asked for it (`auto`: Check after every edit,
-    off by default; otherwise the Check button checks), once the model has been still for `wait` seconds, no check
-    is running, no start box is open (its own edits mark the model changed; the check waits for the box to close,
-    then runs: verification round of PR #19), and no check has finished since that edit (`last_at`: GordiumStart's
-    own check after its box already covers the box's edits)."""
-    if not auto:
-        return False
-    if last_at is not None and dirty_at and last_at >= dirty_at:
-        return False
-    return bool(dirty_at) and now - dirty_at >= wait and not running and not box_open
-
-
 # ---- edits made without touching an object (the audit of main, 2026-10-29): live mode heard only objects added,
 # deleted, replaced or re-attributed, so these left a ✓ showing as current over a model that had changed.
 def layer_edit_counts(event, old, new):
@@ -1825,98 +1443,6 @@ def units_edit_counts(seen, now):
     return seen is None or seen != now
 
 
-# ---- the Check button (Ben, 2026-10-21): no check after every edit unless asked ---------------------------------
-CHANGED_SINCE = "Model changed since the last check — press Check"
-AUTO_CHECK_LABEL = "Check after every edit"
-AUTO_CHECK_TIP = "Off: the results grey out after an edit until you press Check. On: Gordium checks again by itself."
-
-
-def changed_after_box(before, now, drawn, failed=False):
-    """When the model counts as changed after a start box closes (STATE["dirty"]): Cancel rolled the box's own edits
-    back, so the model is as it was when the box opened (`before`: changed then, or not); Draw's edits are checked
-    by Draw's own check, and any change left counts (`now`). A box that ended in an error is no Cancel: its rollback
-    may have stopped partway, so any edit seen during it counts (`now`, else `before`): the results grey out, never
-    shown as current for a model that may differ (the headless check-15, demo review of #26 with #27)."""
-    if failed:
-        return now or before
-    return now if drawn else before
-
-
-def auto_check(ui_state):
-    """Whether this document checks again by itself after every edit: off unless the architect ticked Check after
-    every edit in it (saved with the file)."""
-    return bool((ui_state or {}).get("auto_check", False))
-
-
-NEVER_CHECKED = "No check yet for this model — press Check"
-
-
-def out_of_date_line(auto, checked_before=True):
-    """What the panel's header and the viewport's status box say while the results are older than the model: a
-    check is on its way ("Checking…") only when one will run by itself; otherwise the architect is told to press
-    Check (the results stay greyed, never shown as if current); "since the last check" only when there was one."""
-    if auto:
-        return "Checking… (the model changed)"
-    return CHANGED_SINCE if checked_before else NEVER_CHECKED
-
-
-def draw_one_hint(auto):
-    """GordiumStart's line when no starting house could be drawn: who checks the one the architect draws."""
-    return ("draw one and Gordium will check it" if auto else
-            "draw one, then press Check in the Gordium panel")
-
-
-def should_check_front(front_pending, running, box_open):
-    """A document come to the front (new, opened, switched to): checked once, whatever Check after every edit says
-    (it is not an edit, and nothing of it is on screen yet), when no check is running and no start box is open."""
-    return bool(front_pending) and not running and not box_open
-
-
-def controls_enabled(box_open, zoom_ok):
-    """(the panel's controls, Zoom to): all off while a start box is open; on closing, worked out from the panel as
-    it is now, never restored from a list saved when the box opened (the header's buttons may have been rebuilt in
-    between, after a document switch: verification round 4 of PR #19). Zoom to also needs a selected, current item
-    (`zoom_ok`, as gordium_ui.show decides it)."""
-    return (not box_open, (not box_open) and bool(zoom_ok))
-
-
-def zoom_state(selected_ok, stale, box_open):
-    """(Zoom to on or off, its tooltip saying why when off): on only for a selected, current item with no start box
-    open. Worked out every time the selection, the results or the box change (UX review 2026-10-27: selecting a row
-    left it greyed until the panel next redrew, with nothing saying why)."""
-    if box_open:
-        return False, "Close the start box first."
-    if not selected_ok:
-        return False, "Select a row to zoom to it."
-    if stale:
-        return False, "Out of date: press Check, then zoom."
-    return True, "Zoom to the selected item (or double-click its row)."
-
-
-def last_check_at(checked_at, document):
-    """When the last completed check of THIS document finished (None: none yet). Never a placeholder's time, and
-    never another document's (verification round 4: switching documents dropped the pending re-check)."""
-    return (checked_at or {}).get(document)
-
-
-# Each panel change is one Rhino undo step, named in Edit > Undo by what it did (a change written outside any undo
-# record is skipped by Ctrl+Z, which undoes the architect's own earlier edit instead: #32's review, 2026-10-26)
-UNDO_WORDS = {"survey": "Gordium: use my survey", "enter": "Gordium: enter the row's facts",   # (enter: undo_enter)
-              "main": "Gordium: pick the main building", "adu": "Gordium: pick the ADU's building",
-              "add": "Gordium: add to check",
-              "ground": "Gordium: this is the ground", "not_ground": "Gordium: not the ground",
-              "massing": "Gordium: hide or show the starting house", "labels": "Gordium: on-screen labels",
-              "edit_site": "Gordium: the start box", "grade": "Gordium: the start box",
-              "context": "Gordium: show or hide the neighbourhood", "auto_check": "Gordium: check after every edit"}
-
-
-def undo_enter(needs):
-    """A row's Enter step, named in Edit > Undo by what was entered ("Gordium: enter the number of stories"), not
-    the same words for every row (the audit of main, 2026-10-29); UNDO_WORDS["enter"] with no facts named."""
-    words = enter_words(needs)
-    return "Gordium: " + words[:1].lower() + words[1:] if words else UNDO_WORDS["enter"]
-
-
 @contextlib.contextmanager
 def undo_step(doc, words):
     """Everything written to `doc` inside it is one undo step called `words` (Rhino's BeginUndoRecord /
@@ -1930,394 +1456,11 @@ def undo_step(doc, words):
             doc.EndUndoRecord(serial)
 
 
-def undo_record_to_end(held, doc_serial):
-    """Whether the plugin ends the Draw's undo record `held` ((document serial, record serial) from
-    BeginUndoRecord, or None) in the document `doc_serial`: only a record it began (serial above 0: 0 means a
-    command is already recording, or undo is off, and the record is Rhino's to end, RhinoCommon), in the same
-    document."""
-    return bool(held) and bool(held[1]) and doc_serial is not None and held[0] == doc_serial
-
-
-def after_undo_redo(is_end_undo, is_end_redo):
-    """Whether Rhino's undo event is an Undo or a Redo just finished: then what the last check drew is cleared and
-    the model checked again (gordium_rhino._undo_redo). Never on its start, a record begun or ended, or a purge."""
-    return bool(is_end_undo or is_end_redo)
-
-
-def dirty_after_undo(dirty_at, now):
-    """When the model last changed, once Rhino's Undo or Redo ended at `now`: never earlier than an edit already
-    noted (its object events, gordium_rhino._changed) and never earlier than now, so a check that finished just
-    before the Undo can never count as covering it (should_recheck: last_at >= dirty_at; review round 2, P1: an Undo
-    within 0.5 s of a check left the screen cleared and the panel showing the model as it was before)."""
-    return max(dirty_at or 0, now)
-
-
-def gate_actions(actions, box_open, say, open_ok=("legend",)):
-    """The panel's actions, each doing nothing but saying BOX_BUSY while a start box is open (one choke point: none of
-    them writes to the model, runs a check or opens another box under an open one; verification round of PR #19).
-    `open_ok`: the ones that only show something (the legend)."""
-    def gated(name, fn):
-        def run(*args, **kwargs):
-            if box_open() and name not in open_ok:
-                say(BOX_BUSY)
-                return REFUSED              # (a checkbox puts its tick back: gordium_ui._tick)
-            return fn(*args, **kwargs)
-        return run
-    return {name: gated(name, fn) for name, fn in actions.items()}
-
-
-WORKING = "Gordium is working (its window says on what): wait for it, or press Cancel there."
-
-
-REFUSED = object()        # what a gated panel action returns when it did nothing (its checkbox puts its tick back)
-
-
-def busy_actions(actions, busy, say, open_ok=("legend",)):
-    """The panel's actions, each saying WORKING instead while Gordium waits for an answer (busy()): the wait window is
-    a plain one while Rhino keeps answering, so a button pressed meanwhile must never start a second piece of work
-    on top of it (another check, a start box). `open_ok`: the ones that only show something. A refused action
-    returns REFUSED, so a checkbox that called it shows its setting as it still is (independent review of #32)."""
-    def gated(name, fn):
-        def run(*args, **kwargs):
-            if busy() and name not in open_ok:
-                say(WORKING)
-                return REFUSED
-            return fn(*args, **kwargs)
-        return run
-    return {name: gated(name, fn) for name, fn in actions.items()}
-
-
-class NotInFront(Exception):
-    """Another file came to the front while Gordium read this one's facts (Rhino runs during the checker's wait):
-    whatever was about to prompt or save stops (gordium_rhino.current_facts)."""
-
-
-def front_actions(actions, say):
-    """The panel's actions, each saying why (NotInFront's words) and doing nothing more when the file it was
-    reading is no longer the one in front."""
-    def guarded(fn):
-        def run(*args, **kwargs):
-            try:
-                return fn(*args, **kwargs)
-            except NotInFront as e:
-                say(str(e))
-                return REFUSED
-        return run
-    return {name: guarded(fn) for name, fn in actions.items()}
-
-
-def recovery_message(removed, back):
-    """What recovery did, in words (None when it did nothing)."""
-    def n(k):
-        return "%d object%s" % (k, "s" if k != 1 else "")
-    parts = (["removed %s an unfinished start box drew" % n(removed)] if removed else []) + \
-        (["put back %s it had set aside" % n(back)] if back else [])
-    return " and ".join(parts) or None
-
-
-def draw_then_commit(session, save):
-    """Draw: everything that can fail first (the facts, the box's choices, the sources: `save`), the session's
-    commit last, so a failure leaves the session to be rolled back (run_box) with nothing lost."""
-    result = save()
-    session.commit()
-    return result
-
-
-def run_box(session, loop):
-    """The box's loop: any way out but Draw's (Cancel returns None from it; Esc, an error) rolls the session back."""
-    try:
-        result = loop()
-    except BaseException:
-        session.rollback()
-        raise
-    if result is None:
-        session.rollback()
-    return result
-
-
-def pick_or_nothing(pick, facts, saved_ui):
-    """One pick the box asked for: Esc at its prompt changes nothing."""
-    try:
-        return pick()
-    except Cancelled:
-        return facts, saved_ui
-
-
-def apply_lookup(table, session, answer, facts, saved_ui, zones=()):
-    """(facts, saved_ui, guide ring or None) after a lookup's answer, with its model edits made through the session:
-    the lot it may replace (lookup_may_replace) and every spot grade drawn for that lot (a lookup's or the
-    architect's: grades never mix across lots) held; the State's outline drawn as the lot curve and USGS ground as
-    spot grades (only what lookup_box.writes allows); the City's outline only as a guide. The architect's own lot,
-    its street side and ground are never touched."""
-    replaces = lookup_may_replace(facts, saved_ui)
-    facts, saved_ui = lookup_choices(answer, facts, saved_ui, zones, replaces=replaces)
-    if (answer or {}).get("status") != "found":
-        return facts, saved_ui, None
-    facts.pop("overlays_none_found", None)       # a found lookup decides it again, for its own lot only
-    if not replaces:
-        saved_ui["_lookup"]["says"] = "Your own lot is kept: the lookup filled in the address and the district only."
-        return facts, saved_ui, None
-    w = answer.get("writes") or {}
-    for old in [facts.get("lot_id")] + list(table.ground_points()):
-        session.hold(old)
-    for k in ("lot_id", "plan_north_deg"):
-        facts.pop(k, None)
-    set_street_lines(facts, None)                # the old lot's street lines and their names go with it
-    saved_ui.update(from_sample=False, replaceable_lot=None, lookup_frame=None, ground_kind="flat", lookup_spots=[])
-    saved_ui.pop("city_by_hand", None)           # the looked-up lot replaces the one said by hand to be the City's
-    guide = None
-    if w.get("lot_ring"):
-        lot_id = table.add_lot(w["lot_ring"], "Lot · " + (facts.get("address") or "looked up"))
-        session.add([lot_id])
-        facts["lot_id"] = lot_id
-        if w.get("street_line"):
-            set_street_lines(facts, w["street_line"])    # no ids: one street's lines (a corner lot's yards and
-            #   lot width wait for the street pick, #18 reading its streets only from the ids; one street: as drawn)
-        if (w.get("frame") or {}).get("rotation_deg") is not None:   # the plan is turned: name sides by true north
-            facts["plan_north_deg"] = w["frame"]["rotation_deg"]
-        none_found = overlays_none_found(answer, w["lot_ring"])
-        if none_found:
-            facts["overlays_none_found"] = none_found
-        spots = [] if FLAT_GROUND else [table.add_spot(p) for p in w.get("spots") or []]   # flat: none drawn
-        session.add(spots)
-        saved_ui.update(replaceable_lot=lot_id, lookup_frame=w.get("frame"), lookup_spots=spots)
-        if spots:
-            saved_ui["ground_kind"] = "spot"
-    elif w.get("guide_ring"):
-        guide = w["guide_ring"]
-    saved_ui["lookup_snapshot"] = w.get("snapshot")
-    return facts, saved_ui, guide
-
-
-OVERLAYS_NONE_SOURCE = ("address lookup: FEMA flood maps, the City's historic, gorge and zoning maps and parcel "
-                        "record, every one answering none")
-
-
-def overlays_none_found(answer, lot_ring):
-    """The lot fact a live lookup's positive "no overlay on this lot" becomes (project.OVERLAYS_NONE_FIELDS), for the
-    lot it draws (`lot_ring`, in feet, as drawn), or None. Only when its overlays fact is "suggested" with nothing in
-    it: every overlay source answered, none found, and nothing doubtful about the lot it was worked out on (site_lookup
-    raises it to needs review otherwise). Never from a saved lookup (an old answer, offered when the services are
-    down), nor without the lot: the checker honours it only while the lot is still this outline."""
-    answer = answer or {}
-    got = ((answer.get("facts") or {}).get("overlays") or {})
-    status = ((answer.get("details") or {}).get("overlays") or {}).get("status")
-    if answer.get("status") != "found" or answer.get("saved_on") or status != "suggested":
-        return None
-    if not isinstance(got.get("value"), list) or got["value"] or not lot_ring or len(lot_ring) < 3:
-        return None
-    date = answer.get("checked")   # the place's own day (lookup_box: city_day), the day the host compares it with;
-    address = found_address(answer)   # never the overlays fact's UTC day (a day ahead after about 8 pm in Ithaca)
-    if not date or not address:
-        return None
-    return {"value": True, "lot_outline": [[float(p[0]), float(p[1])] for p in lot_ring], "address": address,
-            "source": OVERLAYS_NONE_SOURCE, "date": str(date)}
-
-
-# ---- long work: a line that says what Gordium is doing, and a Cancel that stops it --------------------------------
-# The checker's and the lookup's work runs in their own processes; the plugin waits for them on a Job's thread,
-# never on Rhino's, so Rhino keeps drawing and answering while they work (a slow one shows a small window after
-# WAIT_WINDOW_S with the current step, the seconds so far and Cancel). Cancel stops the process: its answer is never
-# used, so nothing it would have changed changes.
-
-class WorkCancelled(Exception):
-    """The architect pressed Cancel while Gordium worked: the work was stopped and nothing it would have changed was
-    changed."""
-
-
-WAIT_WINDOW_S = 0.4        # s: work quicker than this shows no window at all (no flash on a quick check)
-CANCELLING = "Cancelling…"
-STOP_HINT = "Esc or Cancel to stop"     # the wait window's own hint, while it has the keyboard (Esc reaches it)
-STOP_HINT_CLICK = "Click Cancel to stop"   # ... and while it hasn't: never a promise Esc can't keep
-FIRST_STEP = {"check": "Checking…", "start": "Finding the largest building that complies…",
-              "options": "Starting Gordium's checker…", "facts": "Reading the lot facts…",
-              "sample_site": "Loading the sample lot…"}
-CHECK_CANCELLED = "Check cancelled"
-CHECK_CANCELLED_NOTE = ("Nothing in the model changed. Nothing is shown as checked until the next check: press "
-                        "Check again.")
-DRAW_CANCELLED = ("Draw cancelled: nothing was drawn, and the model is as it was before the box opened (Draw again "
-                  "when you're ready).")
-REPORT_CANCELLED = "Zoning report cancelled: the report file wasn't changed."
-REPORT_CANCELLED_LATE = ("Zoning report cancelled as it finished: the new report had already been saved to {path} "
-                         "(not opened).")
-
-
-def report_cancelled(path, changed):
-    """What Zoning report… says when its check was cancelled: the file as it was, or (Cancel pressed in the moment
-    after the checker moved the new report in) that it was saved anyway."""
-    return REPORT_CANCELLED_LATE.format(path=path) if changed else REPORT_CANCELLED
-SETTLING = "Finishing the check that is running…"
-CHECK_OUTDATED = "The model changed while it was being checked: nothing is shown as checked. Press Retry."
-SITE_SUFFIX = ".site.json"   # the site description kept beside a report (design_checker.check.SITE_SUFFIX)
-
-
-def check_not_done(last, since):
-    """Why a Check gave no result, for the command line (STATE["last"], set by that check at or after `since`):
-    cancelled, the model changed while it ran, or it could not run; None when nothing was set by it (a box open, a
-    check already running: nothing happened, so nothing is said)."""
-    last = last or {}
-    if not last.get("error") or last.get("at", 0) < since:
-        return None
-    if last.get("cancelled"):
-        return CHECK_CANCELLED + ". " + CHECK_CANCELLED_NOTE
-    if last.get("outdated"):
-        return CHECK_OUTDATED
-    return "Check could not run: " + str(last["error"])[:200]
-REPORT_OUTDATED = ("The zoning report at {path} is of the model as it was when this check began (it was edited "
-                   "meanwhile, or another file came to the front): run the check again (Zoning report… in the "
-                   "panel) for a report of the model now.")
-NOT_IN_FRONT = ("Another file came to the front while Gordium was getting ready, so nothing was started: run the "
-                "command again in the file you want.")
-def outdated_report_message(path, report_error, had_report):
-    """What a check whose model changed while it ran says of its report: written, but of the model as it was; or,
-    when the checker couldn't write it, that it wasn't written and why (never that it was: independent review of
-    #32)."""
-    if report_error:                     # (its own full stop dropped: report_message adds one)
-        return report_message(path, False, str(report_error).rstrip(". "), stale=bool(had_report))
-    return REPORT_OUTDATED.format(path=path)
-
-
-HOUSE_OUTDATED = ("The model changed while Gordium worked out the starting house, so none was drawn: draw one, and "
-                  "Gordium will check it.")
-DRAW_OUTDATED = ("The model changed while Gordium worked out the starting house, so nothing was drawn and the model "
-                 "is as it was: Draw again.")
-
-
-class ModelChanged(WorkCancelled):
-    """The model was edited (or another document came to the front) while Gordium worked out something to draw for
-    it: nothing is drawn; `said` is what the architect is told."""
-    said = DRAW_OUTDATED
-
-
-class Job:
-    """One piece of long work on its own thread, never Rhino's: work(step) returns the result; step(text) says what
-    it is doing now. Rhino's thread only reads it (done, step, elapsed()), waits a moment for it (wait), and may
-    cancel it: `stop` (run on the caller's thread) stops the process doing the work, and from then on the work's
-    result is never used (outcome() says "cancelled" even if an answer still arrives)."""
-
-    def __init__(self, work, step, stop=None, clock=time.monotonic):
-        self.step, self.done, self.cancelled = step, False, False
-        self.result = self.error = None
-        self._stop, self._clock = stop, clock
-        self.started = clock()
-        self._thread = threading.Thread(target=self._run, args=(work,), daemon=True, name="gordium-job")
-        self._thread.start()
-
-    def say(self, text):
-        if text and not self.cancelled:
-            self.step = text
-
-    def _run(self, work):
-        try:
-            self.result = work(self.say)
-        except BaseException as e:            # noqa: BLE001  (kept for the caller, on its own thread)
-            self.error = e
-        finally:
-            self.done = True
-
-    def elapsed(self):
-        return self._clock() - self.started
-
-    def finished(self):
-        """Nothing more to wait for: the work is done, or it was cancelled (its answer is dropped)."""
-        return self.done or self.cancelled
-
-    def wait(self, timeout):
-        """Wait at most `timeout` s for the work; whether there is nothing more to wait for."""
-        self._thread.join(timeout)
-        return self.finished()
-
-    def cancellable(self):
-        return self._stop is not None and not self.finished()
-
-    def cancel(self):
-        """Stop the work (once; never after it is done; never work with no way to stop it, whose thread would go on
-        reading the checker's answers: review round 2): True when it was stopped."""
-        if not self.cancellable():
-            return False
-        self.cancelled = True
-        self.step = CANCELLING
-        if self._stop is not None:
-            self._stop()
-        return True
-
-    def outcome(self):
-        """("cancelled", None), ("error", the exception) or ("done", the result)."""
-        if self.cancelled:
-            return "cancelled", None
-        if self.error is not None:
-            return "error", self.error
-        return "done", self.result
-
-
-def plans_house(mode, redraw, caller_draws):
-    """Whether Draw works out a starting house before the box commits: GordiumStart's box always draws one; another
-    box only when its Draw reset the site (`redraw`) AND its caller draws the house after (`caller_draws`: Edit
-    site…). GordiumCheck's box never draws one, so it never asks for one (review round 1: a "start" request for
-    nothing, and its Cancel escaped the command)."""
-    return mode == "start" or bool(redraw and caller_draws)
-
-
-def result_stale(dirty_at, shown_at, now, after, rechecking):
-    """Whether the result on screen is out of date, so nothing is drawn as complying or not (F7, H1): the model
-    changed more than `after` s ago and no check has finished since, or a background re-check is running (live mode
-    clears the pending edit when it starts one, and the result on screen is of the model before that edit: review
-    round 1, P1, a false pass shown while the re-check ran)."""
-    if rechecking:
-        return True
-    return bool(dirty_at and now - dirty_at >= after and (shown_at or 0) < dirty_at)
-
-
-def checked_while_still(begun_at, dirty_at):
-    """Whether a check that read the model at `begun_at` still shows the model: no edit since (`dirty_at`, the last
-    edit not yet re-checked, None for none). A live re-check runs while the architect may keep editing; its result
-    is shown only if nothing changed after it read the model, else it is dropped and the model checked again."""
-    return not dirty_at or dirty_at < begun_at
-
-
 # ---- the context map (design_checker.context_box): the neighbourhood around a looked-up lot ---------------------
 CONTEXT_LIMIT_S = 20                    # the whole fetch (three map requests, about 1 s); the Rhino side stops it then
 CONTEXT_ENTRY = "context"               # the document string holding the context's snapshot (records, never data)
 NO_CONTEXT = ("No neighbourhood to show: it is drawn around a lot the start box looked up (GordiumStart, type the "
               "address, Look up, Draw).")
-
-
-def context_command(python, frame, fixture=None):
-    """The context_box command for a lookup's saved frame (the box's `lookup_frame`), or None when there is no
-    looked-up lot to centre it on (the sample lot, a drawn or picked lot, a file saved before the context map)."""
-    frame = frame or {}
-    origin, shift = frame.get("origin_epsg2261_us_survey_ft"), frame.get("shift_ft")
-    if not origin or not shift or frame.get("rotation_deg") is None:
-        return None
-    args = [python, "-m", "design_checker.context_box", "--origin", repr(float(origin[0])), repr(float(origin[1])),
-            "--rotation", repr(float(frame["rotation_deg"])), "--shift", repr(float(shift[0])), repr(float(shift[1]))]
-    if frame.get("parcel_id"):
-        args += ["--parcel", str(frame["parcel_id"])]
-    return args + (["--fixture", fixture] if fixture else [])
-
-
-def context_frame(facts, saved_ui):
-    """The lookup frame to draw the neighbourhood around, only while the lot in the model is the one that lookup drew
-    (still its `replaceable_lot`): a lot the architect drew, picked or surveyed, or one a later lookup couldn't
-    place (no frame), has no neighbourhood drawn around an earlier address."""
-    saved_ui = saved_ui or {}
-    lot = (facts or {}).get("lot_id")
-    frame = saved_ui.get("lookup_frame")
-    if saved_ui.get("from_sample"):      # the sample lot (review round 3: it kept an earlier lookup's frame)
-        return None
-    return frame if frame and lot and lot == saved_ui.get("replaceable_lot") else None
-
-
-def same_frame(a, b):
-    """Whether two lookup frames are the same placement (one definition for every caller: context_step,
-    context_merge, and through it draw_context; review round 7)."""
-    return bool(a) and bool(b) and a == b
-
-
-def is_stored(layer):
-    """Whether a context layer's source may be kept in the file (store raw): its objects are in the .3dm. One
-    definition for writing (context_objects), keeping (context_merge) and the live footprints (keeps_live)."""
-    return (layer or {}).get("store") == "raw"
 
 
 def guides_of(held, doc_serial):
@@ -2347,106 +1490,6 @@ def needs_refetch(held, record, doc_serial):
     if any(not is_stored(v) for v in layers) and not guides_of(held, doc_serial):
         return True              # (the footprints are kept since 2026-10-21: a reopened file has them, nothing to fetch)
     return any((v or {}).get("status") not in DREW for v in layers)
-
-
-def context_step(frame, drawn, on):
-    """What a box's Draw does to the neighbourhood: frame = the lot's (context_frame), drawn = the frame the one in
-    the file was drawn around (context_record), on = the panel's tick.
-    "keep": nothing to change (the same lot, or no lot of a lookup's and nothing drawn);
-    "clear": the lot isn't a lookup's any more, so the earlier neighbourhood goes;
-    "draw": a lookup's lot without its neighbourhood: the earlier one goes, this one is drawn;
-    "off": the same, with Show neighbourhood off: the earlier one goes, and the box says it wasn't drawn."""
-    if not frame:
-        return "clear" if drawn else "keep"
-    if same_frame(drawn, frame):
-        return "keep"
-    return "draw" if on else "off"
-
-
-def context_record(payload, frame):
-    """What the document's strings keep of a drawn neighbourhood: its snapshot (records and the storable layers'
-    counts, never a live-only source's data) and the frame it was drawn around."""
-    return dict((payload or {}).get("snapshot") or {}, frame=frame)
-
-
-DREW = ("found", "partial")             # a context layer whose service answered (its objects are replaced)
-
-
-def context_replaces(payload):
-    """The sources whose saved objects a fetch replaces: each layer whose service answered (found or partial), and
-    Gordium's own marks when any did. A layer whose service failed keeps what was saved (review of PR #23: one
-    service down deleted every layer's objects, and the record then said they had failed)."""
-    layers = (payload or {}).get("layers") or {}
-    out = set(v.get("source") for v in layers.values() if v.get("status") in DREW and v.get("source"))
-    return out | ({"gordium"} if out else set())
-
-
-LIVE_ONLY = "shown live, not saved in this file."   # site_lookup.adapters.ithaca_city.context's mark on a live-only layer's credit line
-NOTE_WIDTH = 60                          # characters per line of the Sources note (it sits inside the square)
-NOTE_HEIGHT_FT = 2.5                     # its text height (about the scale bar label's): ~95 ft wide at 60 characters
-NOTE_LINE_FT = 1.7 * NOTE_HEIGHT_FT      # the most one displayed line may take, spacing included (the in-Rhino claim)
-
-
-def note_text(credits):
-    """The Sources note: each credit line wrapped to NOTE_WIDTH characters (Rhino job's screenshots, PR #23: one long
-    line ran off the view). One helper for context_box (the first draw) and context_merge (a kept layer's line)."""
-    import textwrap
-    out = []
-    for line in credits or []:
-        out += textwrap.wrap(line, NOTE_WIDTH) or [""]
-    return "\n".join(out)
-
-
-def keeps_live(kept, old_record):
-    """Whether a live-only layer is among the kept ones (its guides on screen stay, its credit line is carried)."""
-    layers = (old_record or {}).get("layers") or {}
-    return any(not is_stored(layers.get(n)) for n in kept or [])
-
-
-def context_merge(payload, old_record, frame, live_on_screen=False):
-    """The plan for drawing a fetch over the neighbourhood already in the file: the ONE decision the panel's message,
-    the record, the objects deleted and the footprints on screen all follow (review rounds 6-7). A dict:
-    payload (what to draw and say), record (what the file keeps), kept (the layers kept), replace (the sources
-    whose objects go: rhino_logic.context_replaces around the same frame; None, every one, around another),
-    keep_guides (the footprints on screen stay).
-    Around the same frame, each layer whose service failed and that is still there is kept: a stored layer is in
-    the file; a live-only one (a source that may not be kept) only when its guides are on screen for this document
-    (`live_on_screen`, from guides_on_screen). A kept layer's record entries (the layer, its requests, its credit
-    line, when it was fetched) are carried over and the Sources dot still lists it. Around another frame (or none
-    saved) nothing is carried over: the earlier address's go."""
-    record = context_record(payload, frame)
-    old = old_record or {}
-    plan = {"payload": payload, "record": record, "kept": [], "replace": None, "keep_guides": False}
-    if not same_frame(old.get("frame"), frame):
-        return plan
-    plan["replace"] = context_replaces(payload)
-    was = old.get("layers") or {}
-    kept = [n for n, v in ((payload or {}).get("layers") or {}).items()
-            if v.get("status") not in DREW and (was.get(n) or {}).get("status") in DREW
-            and (is_stored(was.get(n)) or live_on_screen)]
-    if not kept:
-        return plan
-    live_kept = keeps_live(kept, old)
-    sources = set(was[n]["source"] for n in kept)
-    record["layers"] = dict(record.get("layers") or {}, **{n: was[n] for n in kept})
-    record["sources"] = list(record.get("sources") or []) + [r for r in old.get("sources") or []
-                                                              if r.get("source") in sources]
-    credits = list(record.get("credits") or [])
-    credits += [c for c in old.get("credits") or [] if c not in credits and (live_kept or LIVE_ONLY not in c)]
-    record["credits"] = credits
-    # when each layer kept in THIS fetch was really fetched (review round 6: never a layer fetched again since)
-    record["kept_from"] = {n: (old.get("kept_from") or {}).get(n) or old.get("fetched") for n in kept}
-    objects = []
-    for o in payload.get("objects") or []:
-        if o.get("source") == "gordium" and o.get("name") == "Sources":
-            o = dict(o, text=note_text(credits))
-        objects.append(o)
-    note = "Kept the %s drawn earlier (the service didn't answer)." % " and ".join(kept)
-    counts = dict(payload.get("counts") or {}, **{n: was[n]["count"] for n in kept if "count" in was[n]})
-    plan.update(kept=kept, keep_guides=live_kept,
-                payload=dict(payload, objects=objects, counts=counts,
-                             message=((payload.get("message") or "") + " " + note).strip()))
-    return plan
 
 
 CONTEXT_EDITABLE = (CONTEXT + "::Buildings",)   # left unlocked: the architect drags and edits the footprints (Ben)
@@ -2578,6 +1621,41 @@ def context_left_out(layers_by_id):
     return sorted(i for i, layer in (layers_by_id or {}).items() if on_layer(layer or "", CONTEXT))
 
 
+# Where to click in Rhino 8 (Mac and Windows alike) to put a linked block's file right (left_out.linked_file_words'
+# `how`). Checked 2026-11-12 against the installed Rhino 8.35 for Mac: its Edit menu's "Blocks" holds "Block
+# Definitions" (MainMenu.nib: ID_EDIT_BLOCK_BLOCKMANAGER, which runs -BlockManager), and Rhino.UI.dll's "Update all
+# linked blocks" runs "-BlockManager Update All"; and against the Rhino 8 help for Block Definitions
+# (docs.mcneel.com/rhino/8/help/en-us/commands/block.htm): "Update: Reloads the external file to see the latest
+# changes", and a definition's Properties have its Filename with "Browse: Change the path of the external file".
+LINK_HOW = {
+    "missing": "Edit ▸ Blocks ▸ Block Definitions, select it, then Properties ▸ Filename: Browse to the file",
+    "unreadable": "Edit ▸ Blocks ▸ Block Definitions, select it, then Update",
+    "changed": "Edit ▸ Blocks ▸ Block Definitions, select it, then Update; or type -BlockManager, Update, All",
+    "not_known": "Edit ▸ Blocks ▸ Block Definitions, select it, then Update",
+}
+
+
+def linked_file_advice(problems, files):
+    """{object id: the sentence telling the architect what to do} for each left-out object whose linked file isn't
+    up to date (`problems`: left_out.linked_file_problems), in Rhino's words (LINK_HOW). `files`: {definition id:
+    (its linked file's full path as Rhino has it, or "", its definition's name)}; the file is named by its own name,
+    else by the definition's, with the definition's name too when it differs (but for capitals: the Block
+    Definitions list shows that name). A status Rhino couldn't give ("not_known") with no file path may not be a linked block
+    at all: no advice (the row says it isn't measured, as for any block). Words only: those objects stay left out
+    and count as touching whatever this says."""
+    out = {}
+    for p in problems or []:
+        if not p.get("problem"):
+            continue
+        path, name = (files or {}).get(p["definition"]) or ("", "")
+        if p["problem"] == "not_known" and not path:
+            continue
+        shown = (path.replace("\\", "/").rsplit("/", 1)[-1] if path else "") or name or "(no name)"
+        block = name if name and name.lower() not in (shown.lower(), shown.rsplit(".", 1)[0].lower()) else None
+        out[p["id"]] = linked_file_words(shown, p["problem"], LINK_HOW[p["problem"]], path or None, block)
+    return out
+
+
 def context_objects(payload):
     """What may be written into the .3dm: objects from a source whose store is raw (the payload's layers say which),
     and Gordium's own marks (frame, north arrow, scale bar, credits). Anything else is never written, whatever the
@@ -2609,171 +1687,6 @@ def context_says(payload):
         said += ", %d buildings (footprints %s%s)" % (n["buildings"], "from " + dates if dates else "of unknown date",
                                                        "" if is_stored(layer) else ", shown only")
     return "Neighbourhood drawn: " + said + "." + (" " + payload["message"] if payload.get("message") else "")
-
-
-ASK_LIMIT_S = 60          # s: the longest the plugin waits for one answer (the first also starts Python, loads rules)
-ASK_LIMITS_S = {"start": 120}   # s, per command that can take longer: the largest building, on a deep lot
-
-
-def ask_limit(cmd):
-    """How long the plugin waits for the checker's answer to one `cmd` request."""
-    return ASK_LIMITS_S.get(cmd, ASK_LIMIT_S)
-
-
-class CheckerOutOfStep(RuntimeError):
-    """The checker's next line can't be trusted to be this request's answer: the plugin restarts the checker and
-    shows nothing from it."""
-
-
-def pipes(process):
-    """The checker's two pipes, each served by its own thread: (sends, lines). Rhino's thread never reads or writes
-    a pipe, so a checker that stops answering (or stops reading a large request) can never freeze Rhino; the
-    plugin only puts on `sends` and waits on `lines` with a time limit (answer_for). Put None on `sends` to end
-    the writer."""
-    sends, lines = queue.Queue(), queue.Queue()
-    threading.Thread(target=_read_lines, args=(process.stdout, lines), daemon=True,
-                     name="gordium-reader-%s" % getattr(process, "pid", "")).start()
-    threading.Thread(target=_write_lines, args=(process.stdin, sends, process), daemon=True,
-                     name="gordium-writer-%s" % getattr(process, "pid", "")).start()
-    return sends, lines
-
-
-def _read_lines(stream, lines):
-    """The reader thread: every line the checker writes, then None when it stops."""
-    try:
-        for line in stream:
-            lines.put(line)
-    except (OSError, ValueError):            # the pipe closed under it (the checker was stopped)
-        pass
-    finally:
-        lines.put(None)
-
-
-def _write_lines(stream, sends, process=None):
-    """The writer thread: each request, in order, until None, the checker stops reading (then the reader sees it
-    stop, or ask's time limit runs out), or the checker process ends (however it was stopped)."""
-    try:
-        while True:
-            try:
-                text = sends.get(timeout=1)
-            except queue.Empty:
-                if process is not None and process.poll() is not None:
-                    return
-                continue
-            if text is None:
-                return
-            stream.write(text)
-            stream.flush()
-    except (OSError, ValueError):
-        pass
-
-
-def exchange(sends, lines, request, limit, on_step=None, record=None):
-    """Send one request (a dict with its "id") and wait at most `limit` s for its answer (answer_for); each progress
-    line before it goes to `on_step`. `record`: a Recorder that saves the request, its progress lines and its answer
-    (the plugin passes one only when RECORD_ENV names a folder; None, the default, records nothing)."""
-    if record is not None:
-        return record.exchange(sends, lines, request, limit, on_step)
-    sends.put(json.dumps(request) + "\n")
-    return answer_for(lines, request["id"], limit, on_step)
-
-
-RECORD_ENV = "GORDIUM_RECORD_SESSION"     # a folder: every request to the checker and its answer saved there
-
-
-class Recorder:
-    """Saves a session's traffic with the checker, for the replay test (design_checker/tests/test_replay.py): one
-    line per request in `folder`/session.jsonl, {"n", "request", "steps", "reply"}, where "reply" is the answer
-    line as the checker writes it (json.dumps of its reply: the line read back and written again gives the same
-    text; None if no answer came) and "steps" its progress lines. The model file a
-    request names is copied first, byte for byte, to files/<n>/<its own name> (its own name: the checker's answer
-    quotes it), and the request records that copy's path relative to the folder; a report path is recorded the
-    same way (the report itself is the checker's to write). Every request keeps its own copy of the model, so a long
-    session takes room (one model's size per check). Off unless the plugin is started with RECORD_ENV set
-    (`from_env`). Recording never stops a check: a recording that fails is noted in `failed` (the plugin says so
-    once, on Rhino's thread: `take_failure`) and the exchange goes on unrecorded."""
-
-    def __init__(self, folder, copy=None):
-        self.folder = folder
-        self.failed = None
-        self._copy = copy or _copy_file
-        self._lock = threading.Lock()
-        self._n = None
-        self._told = False
-
-    @classmethod
-    def from_env(cls, environ):
-        folder = (environ.get(RECORD_ENV) or "").strip()
-        return cls(folder) if folder else None
-
-    def take_failure(self):
-        """Why the recording failed, the first time it is asked after a failure (to say once), else None."""
-        if self.failed is None or self._told:
-            return None
-        self._told = True
-        return self.failed
-
-    def _next(self):
-        if self._n is None:             # a folder recorded into before: carry on after its last request (or its
-            path = os.path.join(self.folder, "session.jsonl")      # last copied model, if that one's line was lost)
-            n = 0
-            if os.path.exists(path):
-                with open(path, encoding="utf-8") as f:
-                    n = sum(1 for line in f if line.strip())
-            files = os.path.join(self.folder, "files")
-            if os.path.isdir(files):        # only the recorder's own folders (0001…; never "²" or "x")
-                n = max([n] + [int(d) for d in os.listdir(files) if re.fullmatch(r"[0-9]+", d)])
-            self._n = n                     # set only once worked out: a failure is tried again next time
-        self._n += 1
-        return self._n
-
-    def _begin(self, request):
-        with self._lock:
-            n = self._next()
-            saved = dict(request)
-            for key in ("model", "report"):
-                if saved.get(key):
-                    rel = "files/%04d/%s" % (n, os.path.basename(str(saved[key])))
-                    if key == "model":
-                        target = os.path.join(self.folder, *rel.split("/"))
-                        os.makedirs(os.path.dirname(target), exist_ok=True)
-                        self._copy(str(saved[key]), target)
-                    saved[key] = rel
-            return {"n": n, "request": saved}
-
-    def _end(self, entry, steps, reply):
-        line = json.dumps(dict(entry, steps=steps, reply=None if reply is None else json.dumps(reply)))
-        with self._lock:
-            os.makedirs(self.folder, exist_ok=True)
-            with open(os.path.join(self.folder, "session.jsonl"), "a", encoding="utf-8", newline="\n") as f:
-                f.write(line + "\n")
-
-    def exchange(self, sends, lines, request, limit, on_step=None):
-        try:
-            entry = self._begin(request)
-        except Exception as e:                 # noqa: BLE001  (never a check lost to its recording)
-            self.failed, entry = "%s: %s" % (type(e).__name__, e), None
-        steps = []
-
-        def step(text):
-            steps.append(text)
-            if on_step is not None:
-                on_step(text)
-        reply = None
-        try:
-            reply = exchange(sends, lines, request, limit, step)
-            return reply
-        finally:
-            if entry is not None:
-                try:
-                    self._end(entry, steps, reply)
-                except Exception as e:         # noqa: BLE001
-                    self.failed = "%s: %s" % (type(e).__name__, e)
-
-
-def _copy_file(source, target):
-    with open(source, "rb") as a, open(target, "wb") as b:
-        b.write(a.read())
 
 
 HANDLES = ("hooks", "doc_hooks", "command_hook", "overlay", "panel", "panel_parts", "toast_timer", "label_timer",
@@ -2814,35 +1727,6 @@ def current_only(fn, is_current):
             return None
         return fn(*args)
     return run
-
-
-def answer_for(lines, request_id, limit, on_step=None, clock=time.monotonic):
-    """The checker's answer to request `request_id`, from `lines` (a queue the plugin's reader thread fills with
-    every line the checker writes, then None when it stops); None if it stopped. This request's progress lines
-    ({"id", "step"}, sent before its answer) go to `on_step`. Raises CheckerOutOfStep when the answer doesn't come
-    within `limit` seconds of asking (progress lines don't extend it), when a line isn't this request's, or isn't
-    an answer: then later lines may belong to earlier requests, so the plugin restarts the checker rather than ever
-    showing an earlier check's result as this one's."""
-    deadline = clock() + limit
-    while True:
-        try:
-            line = lines.get(timeout=max(0.0, deadline - clock()))
-        except queue.Empty:
-            raise CheckerOutOfStep("the Gordium checker gave no answer in %d s, so it was restarted" % limit)
-        if line is None:
-            return None
-        try:
-            answer = json.loads(line)
-        except ValueError:
-            answer = None
-        if not isinstance(answer, dict) or answer.get("id") != request_id:
-            raise CheckerOutOfStep("the Gordium checker's answer didn't match the request, so it was restarted and "
-                                   "nothing from it is shown")
-        if "step" in answer and "ok" not in answer:      # a progress line: what it is doing now
-            if on_step is not None:
-                on_step(str(answer["step"]))
-            continue
-        return answer
 
 
 # ---- processes started from Rhino: never a console window (Windows) -----------------------------------------------
@@ -2925,50 +1809,3 @@ class ServerBook:
         """A new checker of this Rhino: its earlier ones stopped, this one recorded (another Rhino's untouched)."""
         self.stop_all(keep={"pid": pid, "start": self.started_at(pid), "owner": self.me["pid"],
                             "owner_start": self.me["start"]})
-
-
-def apply_reset(table, session, facts, saved_ui, choice, zones=()):
-    """(facts, saved_ui, redraw_house, guide) at Draw: the pending answer drawn for good through the session (one
-    Cancel, one undo), by apply_lookup itself (only what each source allows is written; the lot drawn and its spot
-    grades held), the lot drawn now replaceable whoever drew it (they chose: own_work asked). A new address is a new
-    site (Ben, 2026-10-25): the lot is replaced whichever they answer, their own lot too. Unless they keep their
-    building (`choice` KEEP_MINE), the starting house and every building on the lot are held too. `redraw_house`:
-    the starting house is to be drawn again for the new lot. `guide`: the City's outline when that is all the
-    answer had (no lot drawn: the architect draws it over the guide, the box still open, then Draw)."""
-    pending = (saved_ui or {}).get("_pending") or {}
-    saved_ui = dict(saved_ui, replaceable_lot=(facts or {}).get("lot_id"))
-    saved_ui.pop("_pending", None)
-    keep = choice == KEEP_MINE
-    if not keep:
-        for old in list(table.massing()) + list(table.buildings()):
-            session.hold(old)
-    # the box's own choices stay as the architect left them (the district they ticked, the use, the address); the
-    # lookup's answer fills only the lot, the street side, the corner and the ground (review round 1)
-    chosen_f = {k: facts.get(k, MISSING) for k in BOX_CHOSEN_FACTS}
-    chosen_s = {k: saved_ui.get(k, MISSING) for k in BOX_CHOSEN_UI}
-    # the box's Corner lot? answer: the lookup's, shown since its preview (preview_lookup), or the architect's
-    # change of it, which is theirs and is kept (UX walkthrough 2026-10-28, P0: "Yes: two streets" picked after
-    # Look up was saved as the lookup's "no", so a corner lot's second street had a side yard's limit)
-    corner, corner_source = facts.get("corner_lot"), saved_ui.get("corner_source")
-    facts, saved_ui, guide = apply_lookup(table, session, pending.get("answer") or {}, facts, saved_ui, zones)
-    if facts.get("corner_lot") != corner:       # changed in the box: theirs (its street lines picked again)
-        facts, saved_ui = corner_answered(facts, saved_ui, corner)
-        saved_ui["corner_source"] = corner_source or ENTERED
-    found_source = saved_ui.get("address_source")          # the lookup's, for the address as found
-    for target, chosen in ((facts, chosen_f), (saved_ui, chosen_s)):
-        for k, v in chosen.items():
-            if v is MISSING:
-                target.pop(k, None)
-            else:
-                target[k] = v
-    # the lot is the new address's now: the address the box opened with is no longer this lot's (typed back, it is
-    # a new address, to be looked up: review round 1 of the typed-address rule, P1)
-    saved_ui.update(drawn_address=pending.get("address"), house_fingerprint=None, _box_address=pending.get("address"))
-    if (pending.get("address") and same_address(facts.get("address"), pending.get("query"))
-            and not same_address(facts.get("address"), pending.get("address"))):
-        facts["address"] = pending["address"]   # the address as found, never a loose query typed back (round 2),
-        if found_source:                        # with the lookup's source: value and source agree (round 3)
-            saved_ui["address_source"] = found_source
-    if not keep:
-        saved_ui["_redrawn_for"] = pending.get("address")     # Draw now draws (the box's button says so)
-    return facts, saved_ui, not keep, guide

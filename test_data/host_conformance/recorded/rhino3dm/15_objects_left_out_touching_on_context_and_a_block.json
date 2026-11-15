@@ -1,0 +1,438 @@
+{
+ "host": "rhino3dm",
+ "ids": {
+  "17d8b61a-9d03-54ca-92f7-41ddffb0166e": "shed_block",
+  "56028c7f-5e43-5fbb-8e04-6b64cc01f862": "lot",
+  "def60370-9e0e-5f17-8e30-4dd868c45dc3": "house_floor2",
+  "df68d349-f975-5939-ac52-c800d50baae6": "neighbour_solid",
+  "e46b1e82-1411-5cbc-a4ce-13931b30541b": "porch",
+  "fdb99c9f-9798-5c9e-a763-0da9ffc4af8b": "house_floor1"
+ },
+ "recorded": {
+  "by": "python -m design_checker.conformance --write",
+  "tool": "rhino3dm 8.35.0"
+ },
+ "scene": "15_objects_left_out_touching_on_context_and_a_block",
+ "steps": {
+  "as drawn": {
+   "buildings": [
+    {
+     "faces": [
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         15.0,
+         30.0,
+         10.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         45.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         80.0,
+         0.0
+        ],
+        [
+         45.0,
+         80.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         45.0,
+         80.0,
+         0.0
+        ],
+        [
+         15.0,
+         80.0,
+         0.0
+        ],
+        [
+         15.0,
+         80.0,
+         10.0
+        ],
+        [
+         45.0,
+         80.0,
+         10.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         80.0,
+         0.0
+        ],
+        [
+         15.0,
+         30.0,
+         0.0
+        ],
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         15.0,
+         80.0,
+         10.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         30.0,
+         0.0
+        ],
+        [
+         45.0,
+         80.0,
+         0.0
+        ],
+        [
+         15.0,
+         80.0,
+         0.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         80.0,
+         10.0
+        ],
+        [
+         15.0,
+         80.0,
+         10.0
+        ]
+       ]
+      }
+     ],
+     "floor": 10.0,
+     "id": "fdb99c9f-9798-5c9e-a763-0da9ffc4af8b",
+     "layer": "Building",
+     "problems": [],
+     "role": "building"
+    },
+    {
+     "faces": [
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         20.0
+        ],
+        [
+         15.0,
+         30.0,
+         20.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         80.0,
+         10.0
+        ],
+        [
+         45.0,
+         80.0,
+         20.0
+        ],
+        [
+         45.0,
+         30.0,
+         20.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         45.0,
+         80.0,
+         10.0
+        ],
+        [
+         15.0,
+         80.0,
+         10.0
+        ],
+        [
+         15.0,
+         80.0,
+         20.0
+        ],
+        [
+         45.0,
+         80.0,
+         20.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         80.0,
+         10.0
+        ],
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         15.0,
+         30.0,
+         20.0
+        ],
+        [
+         15.0,
+         80.0,
+         20.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         30.0,
+         10.0
+        ],
+        [
+         45.0,
+         80.0,
+         10.0
+        ],
+        [
+         15.0,
+         80.0,
+         10.0
+        ]
+       ]
+      },
+      {
+       "holes": [],
+       "points": [
+        [
+         15.0,
+         30.0,
+         20.0
+        ],
+        [
+         45.0,
+         30.0,
+         20.0
+        ],
+        [
+         45.0,
+         80.0,
+         20.0
+        ],
+        [
+         15.0,
+         80.0,
+         20.0
+        ]
+       ]
+      }
+     ],
+     "floor": 10.0,
+     "id": "def60370-9e0e-5f17-8e30-4dd868c45dc3",
+     "layer": "Building",
+     "problems": [],
+     "role": "building"
+    }
+   ],
+   "grade": {
+    "points": [],
+    "source": "none"
+   },
+   "host": {
+    "document": "15_objects_left_out_touching_on_context_and_a_block.3dm",
+    "model_units": "Feet",
+    "name": "rhino3dm",
+    "version": "8.35.0"
+   },
+   "inventory_complete": true,
+   "left_out": [
+    {
+     "context": false,
+     "could_be_building": true,
+     "ground_like": false,
+     "id": "e46b1e82-1411-5cbc-a4ce-13931b30541b",
+     "layer": "Default",
+     "touching": true
+    },
+    {
+     "context": true,
+     "could_be_building": true,
+     "ground_like": false,
+     "id": "df68d349-f975-5939-ac52-c800d50baae6",
+     "layer": "Gordium::Context",
+     "touching": false
+    },
+    {
+     "context": false,
+     "could_be_building": true,
+     "ground_like": false,
+     "id": "17d8b61a-9d03-54ca-92f7-41ddffb0166e",
+     "layer": "Default",
+     "touching": false
+    }
+   ],
+   "lot": {
+    "edges": [
+     {
+      "curved": false,
+      "points": [
+       [
+        0.0,
+        0.0
+       ],
+       [
+        60.0,
+        0.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        60.0,
+        0.0
+       ],
+       [
+        60.0,
+        120.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        60.0,
+        120.0
+       ],
+       [
+        0.0,
+        120.0
+       ]
+      ]
+     },
+     {
+      "curved": false,
+      "points": [
+       [
+        0.0,
+        120.0
+       ],
+       [
+        0.0,
+        0.0
+       ]
+      ]
+     }
+    ],
+    "id": "56028c7f-5e43-5fbb-8e04-6b64cc01f862"
+   },
+   "problems": [],
+   "schema": "gordium.site/1",
+   "units": "ft",
+   "unsent": []
+  }
+ }
+}

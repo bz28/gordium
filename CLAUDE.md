@@ -38,7 +38,7 @@ packages/        LOGIC: one package per job (rule_format, document_extraction, s
                  model_labeling, model_measurement, envelope_builder, design_checker). A place's own code
                  has its own folder, chosen by its jurisdiction.yaml: site_lookup/adapters/<place>/ (its map
                  services, names, rezonings) and model_measurement/places/<place>/ (its measurement definitions)
-apps/            PRODUCTS people use (command_line, rule_review_app; later rhino_plugin, api)
+apps/            PRODUCTS people use (command_line, rule_review_app, revit_addin; later rhino_plugin, api)
 test_data/       answer_keys/ (architects' hand-checked rules), test_sites/ (real lots + models + expected results)
 docs/            design notes, decisions/ (one short file per big decision)
 ```
@@ -50,7 +50,7 @@ Planned but not created until their code is written: `packages/ai_designer`, `pa
 - Lowercase names with underscores everywhere. Dates as YYYY-MM or YYYY-MM-DD so files sort.
 - District files named exactly as the city writes them (`R-1b.yaml`).
 - Each package has a README, its code, and its own `tests/`.
-- Python for packages. Rhino plugin language (C# vs Rhino 8 Python) is not decided yet.
+- Python for packages. Rhino plugin language (C# vs Rhino 8 Python) is not decided yet. The Revit add-in is C# talking to the Python worker (Ben, 2026-11-05); it is built for .NET 8 (Revit 2025–2026) and .NET 10 (Revit 2027), to confirm in the Windows trial (docs/revit/windows_trial_runbook.md).
 
 ## How we work
 

@@ -1,0 +1,54 @@
+title: No lot, and no reason given
+what: >-
+  A description only (no drawing gives this in Rhino, whose reader always says why there is no lot): the box house
+  with `lot: null` and no problem saying why. The site description allows it rather than refusing the whole check,
+  so the checker must still never pass what needs the lot: lot area and width, the yards, coverage and projections
+  need review ("no lot outline"); height and stories don't need the lot and comply.
+site:
+  schema: gordium.site/1
+  units: ft
+  host: {name: scene, version: "", document: 13_no_lot_and_no_reason, model_units: Feet}
+  lot: null
+  buildings:
+    - id: house_floor1
+      role: building
+      layer: Building
+      floor: 10
+      faces:
+        - points: [[15, 30, 0], [45, 30, 0], [45, 80, 0], [15, 80, 0]]
+        - points: [[15, 30, 10], [45, 30, 10], [45, 80, 10], [15, 80, 10]]
+        - points: [[15, 30, 0], [45, 30, 0], [45, 30, 10], [15, 30, 10]]
+        - points: [[45, 30, 0], [45, 80, 0], [45, 80, 10], [45, 30, 10]]
+        - points: [[45, 80, 0], [15, 80, 0], [15, 80, 10], [45, 80, 10]]
+        - points: [[15, 80, 0], [15, 30, 0], [15, 30, 10], [15, 80, 10]]
+      problems: []
+    - id: house_floor2
+      role: building
+      layer: Building
+      floor: 10
+      faces:
+        - points: [[15, 30, 10], [45, 30, 10], [45, 80, 10], [15, 80, 10]]
+        - points: [[15, 30, 20], [45, 30, 20], [45, 80, 20], [15, 80, 20]]
+        - points: [[15, 30, 10], [45, 30, 10], [45, 30, 20], [15, 30, 20]]
+        - points: [[45, 30, 10], [45, 80, 10], [45, 80, 20], [45, 30, 20]]
+        - points: [[45, 80, 10], [15, 80, 10], [15, 80, 20], [45, 80, 20]]
+        - points: [[15, 80, 10], [15, 30, 10], [15, 30, 20], [15, 80, 20]]
+      problems: []
+  unsent: []
+  left_out: []
+  grade: {source: none, points: []}
+  inventory_complete: true
+  problems: []
+grade: {elevation: 0}
+expected:
+  R-1b.lot_area_one_family_detached: needs_review
+  R-1b.lot_width_one_family_detached: needs_review
+  R-1b.front_yard: needs_review
+  # found on running: with no lot the side lot lines can't be named by compass, so the rows are the narrower and wider
+  R-1b.side_yards#narrower: needs_review
+  R-1b.side_yards#wider: needs_review
+  R-1b.rear_yard: needs_review
+  R-1b.yard_projections: needs_review
+  R-1b.height: complies
+  R-1b.stories: complies
+  R-1b.lot_coverage: needs_review
