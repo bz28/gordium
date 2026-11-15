@@ -26,9 +26,12 @@ def _poly(points, k):
 
 
 def _door_lines(got: dict, interior: dict) -> list[dict]:
-    """The exit door(s), each with its result (the most cautious of its rows), or the statement of what wasn't read."""
+    """The exit door(s), each with its result (the most cautious of its rows), or the statement of what wasn't read.
+    "Not read" is judged from what the check read (its measured parts), never the description's key: a `doors` list
+    left out or malformed is "not read", never "none marked"."""
+    parts = (got["measured"] or {}).get("parts") or {}
     doors = interior.get("doors")
-    if doors is None:
+    if parts.get("egress_door") is None or not isinstance(doors, list):
         return [{"text": "Exit door: not read from the drawing", "status": present.REVIEW}]
     xs = [x for law in got["laws"] for x in law["items"] if (x["item"].get("part") or {}).get("part") == "egress_door"]
     exits = [d for d in doors if isinstance(d, dict) and d.get("exit") is True]
@@ -64,10 +67,12 @@ def levels(got: dict, schedule: list[dict]) -> dict:
             continue
         room["poly"] = poly
         by_level.setdefault(round(float(elev) * k, 6), []).append(room)
-    stairs = interior.get("stairs")
-    if stairs is None:
+    # stairs read or not: from what the check read (its measured parts), never the description's key
+    read_stairs = ((got["measured"] or {}).get("parts") or {}).get("stair")
+    stairs = interior.get("stairs") if read_stairs is not None else None
+    if read_stairs is None:
         notes.append({"text": "Stairs: not read from the drawing", "status": present.REVIEW})
-    elif not stairs:
+    elif not read_stairs:
         notes.append({"text": "No stairs in the drawing", "status": None})
     stair_rows = [x for law in got["laws"] for x in law["items"] if (x["item"].get("part") or {}).get("part") == "stair"]
     out = []

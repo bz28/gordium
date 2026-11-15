@@ -450,3 +450,19 @@ def test_openings_not_read_never_say_none_marked(change):
     for t in texts.values():
         assert "none marked" not in t and "No escape opening marked" not in t
     assert "Escape openings not read: NEEDS REVIEW" in texts["LS"]
+
+
+# ---- review round 4 -------------------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("bad", ["oops", [1]])
+def test_malformed_doors_are_not_read_never_none_marked(bad):
+    texts = _ranch_sheets(lambda h: h.update(doors=bad))
+    assert "Exit door: not read from the drawing: NEEDS REVIEW" in texts["LS"]
+    assert "none marked" not in texts["LS"]
+
+
+@pytest.mark.parametrize("bad", ["oops", [1]])
+def test_malformed_stairs_are_not_read_never_silent(bad):
+    texts = _ranch_sheets(lambda h: h.update(stairs=bad))
+    assert "Stairs: not read from the drawing: NEEDS REVIEW" in texts["LS"]
+    assert "No stairs in the drawing" not in texts["LS"]
