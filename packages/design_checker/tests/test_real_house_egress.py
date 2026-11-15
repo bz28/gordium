@@ -84,11 +84,17 @@ def test_every_answer_is_the_predicted_one_and_never_a_false_pass(found, name):
     assert {k: v for k, v in got["results"].items()} == {k: r["predicted"] for k, r in by_id.items()}
     false_passes = [k for k, v in got["results"].items() if v == "pass" and by_id[k]["truth"] != "complies"]
     assert false_passes == []
+    # nor a false "not applicable": such a rule makes no row in the panel, so an open question would vanish from it
+    # (review round 3)
+    hidden = [k for k, v in got["results"].items() if v == "not_applicable" and by_id[k]["truth"] != "not_applicable"]
+    assert hidden == []
     # no item of the section is kinder than its rule's truth either (one row per part)
     for item in got["items"]:
         if item.get("rule") in by_id and item["status"] == "complies":
             assert by_id[item["rule"]]["truth"] == "complies", item["id"]
     assert got["sections"][0]["state"] == hand["predicted_section_state"]
+    if got["sections"][0]["state"] == "complies":        # a section that complies only where every truth allows it
+        assert all(r["truth"] in ("complies", "not_applicable") for r in hand["rules"])
     # the items besides the rules' rows: the interior drawing's one problem, and each marked escape opening not in a
     # sleeping room
     others = sorted(i["name"] for i in got["items"] if not i.get("rule"))

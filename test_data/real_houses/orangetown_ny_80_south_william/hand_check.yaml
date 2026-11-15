@@ -84,7 +84,7 @@ rules:
     because: "a flag (no check formula): always for a person"
   - id: general.bf103_2_exit_into_patio_cover_r318_exits
     truth: not_applicable
-    why: "the front door opens onto a covered porch (A-2), a porch roofed with the house, not an Appendix BF patio cover; no patio cover is drawn"
+    why: "the front door opens onto a covered porch (A-2), open-sided, and no patio cover is drawn. Even if the porch were read as a patio cover, BF103.2 asks for R318 exits only where the patio structure is not 'unenclosed' (PDF p.898), and this one is open"
     predicted: needs_review
     because: "a flag with no applies_when: it asks about every egress door"
   - id: general.r318_3_1_egress_door_given_as_exterior_door
@@ -203,7 +203,7 @@ rules:
     because: "opening_below_grade, opening_fully_openable not measured"
   - id: general.r319_1_sleeping_room_escape_opening_operable
     truth: complies
-    why: "this rule's clause only: each bedroom has an operable window marked as its escape opening (double-hungs and casements, A-3, A-5). Whether that window qualifies is R319.2's rules (all needs review; area escape_opening_designated)"
+    why: "this rule's clause only: each bedroom has an operable window marked as its escape opening (double-hungs and casements, A-3, A-5). Whether that window qualifies is R319.2's rules (all needs review): that is what makes area escape_opening_designated needs review for R319.1 as a whole"
     predicted: needs_review
     because: "opening_operable not measured (the measuring doesn't turn `operation` into it)"
   - id: general.r319_1_basement_escape_opening_operable
@@ -469,7 +469,7 @@ rules:
   # ------------------------------------------------------------------------------------------- open sides and guards
   - id: general.r321_1_1_guard_required_open_side
     truth: complies
-    why: "every open side drawn on the second floor and along the main stair's open side has a railing (A-3, A-5; more than 30 in over the main floor), and so has the garage landing ('RAILING AS PER RES. CODE', A-2). The other raised surfaces are under 30 in: the porch about 24 in (240.4' over 238.4'), the rear slider steps' top tread under 30 in with four or more risers down to 238.2' grade (A-4) (area guard_height_level)"
+    why: "every open side drawn on the second floor and along the main stair's open side has a railing (A-3, A-5; more than 30 in over the main floor), and so has the garage landing ('RAILING AS PER RES. CODE', A-2). The other raised surfaces are under 30 in: the porch at most about 24 in (the entry floor 240.4' over 238.4' grade; the porch is a step down from the entry), the rear slider steps' top tread under 30 in with four or more risers down to 238.2' grade (A-4) (area guard_height_level)"
     predicted: needs_review
     because: "open sides aren't a part the description carries (open_side not read; the measuring's `guard` is not a rule part kind)"
   - id: general.r321_1_2_guard_height_open_side_not_stair
