@@ -529,6 +529,28 @@ def test_a_list_of_sections_that_cant_be_read_says_check_the_whole_law(name, mon
     assert len(banners) == 1 and "check the whole law by hand" in banners[0][1]
     lines = [r_ for r_ in tables.code_rows(g) if sheets.not_checked_yet(r_) is None]
     assert len(lines) == 1
+    # and said under the egress result, on the sheets themselves (review round 2)
+    pages = sheets.sheets(g, goldens.project_of(name))
+    said = sheets.UNKNOWN_LINE.format(line=lines[0]["Line"])
+    words_ = _page_words(pages)
+    assert said in words_[0]                                             # G-001, under the result
+    assert all(said in w for (number, _, _), w in zip(pages, words_) if number in ("LS-101", "A-601"))
     monkeypatch.setattr(egress, "_not_checked_yet", real)
     status, _ = source.overall(g)
     assert status == (present.NOT_CHECKED if name == "0_no_rooms_yet" else present.REVIEW)
+
+
+def _page_words(pages):
+    """The words drawn on each page (its text marks), in drawing order."""
+    from permit_sheets.draw import svg
+    import re as _re
+    import html as _html
+    return [" ".join(_html.unescape(_re.sub(r"<[^>]+>", " ", svg(pg, number))).split()) for number, _, pg in pages]
+
+
+def test_a_not_checked_yet_row_renamed_across_laws_still_gets_its_banner():
+    """Review round 2 (permit sheets): an id made unique across laws ("egress.not_checked_yet#<law>") lost its banner."""
+    row = {"Item id": "egress.not_checked_yet#new_york/other", "Citation": "R321.2.1, R318.6", "Why / what to change": ""}
+    assert sheets.not_checked_yet(row) == ["R321.2.1", "R318.6"]
+    assert sheets.not_checked_yet(dict(row, **{"Item id": "egress.waiting#new_york/other"})) == ["R321.2.1", "R318.6"]
+    assert sheets.not_checked_yet(dict(row, Citation="")) is None

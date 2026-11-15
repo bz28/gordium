@@ -215,7 +215,8 @@ def not_checked_yet(r: dict) -> list[str] | None:
     """The code sections a row says Gordium doesn't check yet: the egress not-checked-yet line's, or the waiting
     row's (design_checker/egress.py, each item's detail citation); None when the row says it can't tell which (its
     list can't be read: the whole law is to be checked by hand); [] for any other row, or a waiting row with none."""
-    mine, waiting = r["Item id"].endswith("." + egress.NOT_YET_ID), r["Item id"].endswith(".waiting")
+    own = r["Item id"].partition("#")[0]          # an id made unique across laws keeps its own name before "#"
+    mine, waiting = own.endswith("." + egress.NOT_YET_ID), own.endswith(".waiting")
     if not (mine or waiting):
         return []
     sections = [s for s in r["Citation"].split(", ") if s]
@@ -234,7 +235,7 @@ def code_table(got: dict) -> list[list]:
             last = r["Law"]
         missing = not_checked_yet(r)
         item, requirement, why = r["Item"], r["Requirement"] or r["Item"], r["Why / what to change"]
-        if missing and r["Item id"].endswith("." + egress.NOT_YET_ID):       # one line; the sections in a banner
+        if missing and r["Item id"].partition("#")[0].endswith("." + egress.NOT_YET_ID):    # one line; a banner
             item, why = NOT_YET_ITEM, NOT_YET_WHY.format(n=len(missing))
         elif missing:                                                         # waiting: its own words, then them
             why = WAITING_WHY_SHORT.format(why=egress.WAITING_WHY, n=len(missing))
