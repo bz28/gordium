@@ -354,8 +354,11 @@ def _waiting_item(law: dict) -> dict:
     why = WAITING_WHY + (NOT_YET_WAITING.format(all=_listed(law["not_checked_yet"])) if law["not_checked_yet"] else "")
     if law["coverage_problem"]:
         why += ". " + NO_COVERAGE.format(title=_book(law), why=law["coverage_problem"])
-    return _own_item(law, f"{law['short'].lower()}.waiting", f"{law['short']}: {WAITING_WORDS}", present.NOT_CHECKED,
+    item = _own_item(law, f"{law['short'].lower()}.waiting", f"{law['short']}: {WAITING_WORDS}", present.NOT_CHECKED,
                      why, waiting=WAITING_REASON)
+    # the sections, as the not-checked-yet line's detail gives them (the permit sheets print them from here)
+    item["detail"]["citation"] = ", ".join(m["section"] for m in law["not_checked_yet"])
+    return item
 
 
 def add_to_view(view: dict, got: dict, place_name: str) -> None:

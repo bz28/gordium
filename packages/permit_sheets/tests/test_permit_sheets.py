@@ -466,3 +466,48 @@ def test_malformed_stairs_are_not_read_never_silent(bad):
     texts = _ranch_sheets(lambda h: h.update(stairs=bad))
     assert "Stairs: not read from the drawing: NEEDS REVIEW" in texts["LS"]
     assert "No stairs in the drawing" not in texts["LS"]
+
+
+# ---- the sections Gordium doesn't check yet (design_checker/egress.py): never a set that reads as complete --------
+
+def _not_yet(r):
+    return [i for i in law_items(r) if i["id"].endswith(".not_checked_yet")]
+
+
+def _fresh_text(name):
+    """Every page's words of a fresh build of the house's sheets (never the committed golden)."""
+    out, _, _ = goldens.build(name)
+    with pdfplumber.open(io.BytesIO(out["permit_sheets.pdf"])) as pdf:
+        return " ".join(" ".join((p.extract_text() or "") for p in pdf.pages).split())
+
+
+@pytest.mark.parametrize("name", ["1_ranch_compliant", ORANGETOWN])
+def test_the_sections_not_checked_yet_are_printed_as_needs_review(name):
+    r = result(name)
+    [item] = _not_yet(r)
+    sections = item["detail"]["citation"].split(", ")
+    assert {"R321.2.1", "R318.6", "R319.5"} <= set(sections) and len(sections) > 50
+    [row] = [x for x in tables.code_rows(got(name)) if x["Item id"] == item["id"]]
+    assert row["Result"] == "NEEDS REVIEW" and row["Why / what to change"] == item["reason"]    # in full, in the CSV
+    flat = _fresh_text(name)
+    # G-001's result lines say so, and the table's banner lists every section, under the NEEDS REVIEW line
+    assert f"Not checked yet by Gordium: {len(sections)} code sections, check them by hand (code analysis line " \
+           f"{row['Line']})" in flat
+    assert f"NEEDS REVIEW: not checked yet by Gordium, check these {len(sections)} code sections by hand:" in flat
+    for s in sections:
+        assert s in flat
+
+
+def test_while_egress_waits_the_sheets_stay_waiting_and_still_list_the_sections():
+    r = result("0_no_rooms_yet")
+    assert _not_yet(r) == []                                       # waiting stays waiting: no needs-review line
+    [waiting] = law_items(r)
+    sections = waiting["detail"]["citation"].split(", ")
+    assert {"R321.2.1", "R318.6"} <= set(sections)
+    status, waits = source.overall(got("0_no_rooms_yet"))
+    assert status == present.NOT_CHECKED and waits                 # the headline is still WAITING
+    flat = _fresh_text("0_no_rooms_yet")
+    assert "Egress result: WAITING: NO ROOMS DRAWN YET" in flat
+    assert f"Not checked yet by Gordium: {len(sections)} code sections, check them by hand" in flat
+    assert f"WAITING: NO ROOMS DRAWN YET: not checked yet by Gordium, check these {len(sections)} code sections" in flat
+    assert "NEEDS REVIEW: not checked yet" not in flat

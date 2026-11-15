@@ -4,7 +4,7 @@ Prints the three egress sheets an architect attaches to a permit application, fr
 
 | Sheet | What it shows |
 |---|---|
-| **G-001 Code analysis: egress** (G-002… if it runs long) | Every egress item the check gave: the part ("Bedroom 3 › Window 5"), the requirement and its rule id, the required value, the proposed (measured) value, the result, the code section, and why for anything not complying |
+| **G-001 Code analysis: egress** (G-002… if it runs long) | Every egress item the check gave: the part ("Bedroom 3 › Window 5"), the requirement and its rule id, the required value, the proposed (measured) value, the result, the code section, and why for anything not complying. The check's "Not checked yet by Gordium" line (the code sections Gordium has no rules for yet) is printed as a NEEDS REVIEW row with every section listed in a banner under it, and said under the egress result, so a set never reads as complete; while egress waits (no rooms drawn) the waiting row carries the same list and the result stays WAITING |
 | **LS-101 Life-safety plan** (one per floor) | The floor's rooms from their outlines, sleeping rooms marked, each escape opening tagged with its result, stairs with UP/DN, the exit door, and a schematic of the way out (labelled "not checked by Gordium") |
 | **A-601 Escape-window schedule** | Each sleeping room's escape openings: type, net clear width, height and area, sill height, grade floor, each against its limit with that rule's result, and the opening's result over all its rules |
 
