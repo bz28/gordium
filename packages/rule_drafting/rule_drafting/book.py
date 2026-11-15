@@ -6,8 +6,8 @@ stairs, handrails, guards).
 
 What differs from zoning (Inputs in __main__.py):
 - The units are the pieces of the book labeled rule (3_section_labels/) that this step drafts (SCOPE): R318.2's exit
-  door, R318.7's stairs, R319's escape openings, R320's handrails, R321's guards, R315's sleeping lofts and BF103.2's
-  patio covers. Every other labeled piece waits for a later step (Appendix BO stays flags, in the labels).
+  door, R318.3's landings, R318.7's stairs (the special ones too), R318.8's ramps, R319's escape openings, R320's
+  handrails, R321's guards, R315's sleeping lofts and BF103.2's patio covers. Every other labeled piece waits for a later step (Appendix BO stays flags, in the labels).
 - There is no chart and no district: no slots; every number is typed, from a sentence of the piece being drafted, and
   must be one of that piece's second-reading numbers (text_verification.yaml; rule_format/code_numbers.py), which the
   message shows with each number's comparison and any flag.
@@ -34,7 +34,14 @@ PLACES = REPO / "regulations/jurisdictions"
 SCOPE = ("R318.2", "R318.7.1", "R318.7.2", "R318.7.5.1", "R318.7.5.2", "R318.7.8",
          "R319.1", "R319.2.1", "R319.2.2", "R319.2.3", "R319.2.4", "R319.3", "R319.4", "R319.4.1", "R319.4.2",
          "BF103.2", "R320.2", "R320.4", "R321.1.1", "R321.1.2", "R321.1.3",
-         "R315.2", "R315.3", "R315.5.2.1", "R315.5.2.2")
+         "R315.2", "R315.3", "R315.5.2.1", "R315.5.2.2",
+         # the remaining egress pieces (2026-11-14): landings at exterior doors and stairs, a flight's rise, the
+         # special stairs (spiral, bulkhead, alternating tread devices, ship's ladders), ramps, area well ladders
+         # and steps, additions, handrail projection, continuity and grip
+         "R318.3", "R318.3.1", "R318.3.2", "R318.7.3", "R318.7.6",
+         "R318.7.11.1", "R318.7.11.2", "R318.7.12", "R318.7.12.1", "R318.7.12.2",
+         "R318.7.13", "R318.7.13.1", "R318.7.13.2", "R318.8.1", "R318.8.2", "R318.8.3",
+         "R319.4.2.1", "R319.4.2.2", "R319.6", "R320.3", "R320.5", "R320.6")
 CONTEXT_LIMIT = 20_000          # characters of the sections a piece points to
 RELATED_LIMIT = 12_000          # characters of the sections that point to it (background only)
 DEFINITIONS_LIMIT = 12_000      # characters of the definitions it uses
@@ -61,9 +68,13 @@ city's zoning law. Read the instructions above with these changes:
 - A limit stands as the law's own comparison where it must hold (`stair_riser_height <= 8.25`, not
   `not (stair_riser_height > 8.25)`); a condition the law sets for when a requirement applies ("more than 30
   inches", "four or more risers") goes in applies_when when the rule's when_none is "not_applicable".
-- An exception that sends a part to another section (spiral stairways to R318.7.11.1) is not drafted here: make
-  that part need review (review_when), never a pass by this rule's numbers and never not applicable (until that
-  section is drafted, nothing else checks it).
+- An exception that sends a part to another section is not drafted in this rule. Where that section is one of the
+  pieces drafted ({drafted}), leave the part out of this rule (applies_when): that section's own rules check it
+  (spiral stairways' width, rise, tread and headroom are R318.7.11.1's). Where it is not, make that part need
+  review (review_when), never a pass by this rule's numbers and never not applicable (until that section is
+  drafted, nothing else checks it).
+- A slope is a measure of rise over run: "not more than 1 unit vertical in 12 units horizontal" is
+  `ramp_slope * 12 <= 1` (never `ramp_slope <= 1/12` or the percent, a conversion).
 - A sleeping loft is not a sleeping room: its escape opening is in the room it is open to (R319.1), a loft_room part.
 - Most rules here are rules for each part (below). A rule for each part reads only its own part kind's measures and
   the building's. Use `within` only where the law ties the requirement to the part it sits in ("every sleeping room
@@ -112,7 +123,8 @@ class BookInputs:
         self.columns, self.cells, self.notes = [], {}, {}
 
     def system(self) -> str:
-        return drafter.system_prompt(self.ctx, {}, [], "", {}, for_parts=True) + "\n" + BOOK_NOTE
+        return (drafter.system_prompt(self.ctx, {}, [], "", {}, for_parts=True) + "\n"
+                + BOOK_NOTE.replace("{drafted}", ", ".join(SCOPE)))
 
     def units(self) -> list[dict]:
         out = []
