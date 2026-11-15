@@ -113,8 +113,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (ec80) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (d1c983dec1c441455a30f1af1b5308bfbe1ff11ffc2cedc5d170a51a1d3dd7) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (97) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (2e8d1d8653a63095157f72da1d482bbd3237e15412c56731b92faed573b) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (9efe6) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -196,8 +196,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (ec80) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (d1c983dec1c441455a30f1af1b5308bfbe1ff11ffc2cedc5d170a51a1d3dd7) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (97) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (2e8d1d8653a63095157f72da1d482bbd3237e15412c56731b92faed573b) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (9efe6) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -218,7 +218,7 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 1224 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
 endobj
 9 0 obj
-<< /Length 5300 >>
+<< /Length 5316 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (ESCAPE-WINDOW SCHEDULE) Tj ET
 BT /F2 7.5 Tf 0.29 0.29 0.29 rg 68 728.4 Td (Egress result: WAITING: NO ROOMS DRAWN YET) Tj ET
@@ -241,7 +241,7 @@ BT /F2 7 Tf 0 0 0 rg 782.28 692.4 Td (Code sections) Tj ET
 BT /F2 7 Tf 0 0 0 rg 862.8 692.4 Td (Why) Tj ET
 0.6 w [] 0 d
 0.93 0.93 0.93 rg 0.1 0.1 0.1 RG 68 678.4 m 994 678.4 l 994 650.4 l 68 650.4 l h B
-BT /F2 10 Tf 0.29 0.29 0.29 rg 357.92 661.4 Td (WAITING: NO ROOMS DRAWN YET: no escape openings to schedule yet) Tj ET
+BT /F2 10 Tf 0.29 0.29 0.29 rg 315.97 661.4 Td (WAITING: NO ROOMS DRAWN YET: no rooms drawn yet: no escape openings to schedule) Tj ET
 0.6 w [] 0 d
 0.1 0.1 0.1 RG 68 650.4 m 994 650.4 l S
 BT /F1 6 Tf 0.35 0.35 0.35 rg 68 636.4 Td (Each measured cell shows the opening's value, the code's limit and that rule's result; the opening's Result is the most cautious of every rule Gordium checked for it \(see the code analysis for each\). An opening the check gave no row for, or marked but not checked, is NEEDS REVIEW, never complies. Net clear sizes are with the sash fully open by) Tj ET
@@ -289,8 +289,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (ec80) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (d1c983dec1c441455a30f1af1b5308bfbe1ff11ffc2cedc5d170a51a1d3dd7) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (97) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (2e8d1d8653a63095157f72da1d482bbd3237e15412c56731b92faed573b) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (9efe6) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -325,10 +325,10 @@ xref
 0000007187 00000 n 
 0000012075 00000 n 
 0000012212 00000 n 
-0000017563 00000 n 
-0000017701 00000 n 
+0000017579 00000 n 
+0000017717 00000 n 
 trailer
 << /Size 12 /Root 1 0 R /Info 11 0 R >>
 startxref
-17836
+17852
 %%EOF

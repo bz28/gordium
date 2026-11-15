@@ -233,9 +233,12 @@ SCHEDULE_COLUMNS = [("Mark", 0.5), ("Opening", 1.55), ("Room", 1.15), ("Type", 0
 
 
 def schedule(got: dict, headline_lines) -> list[Page]:
-    rows_, notes = schedule_rows(got)
+    rows_, _ = schedule_rows(got)
     rows = []
     for r in rows_:
+        if r.get("statement"):          # what wasn't read, or nothing to schedule: a whole-width line, never blank
+            rows.append(["__banner__", f"{r['Result']}: {r['Why']}", r["status"]])
+            continue
         cells = []
         for m, h, s in COLUMNS:
             st = r["cell_status"][h]
@@ -243,14 +246,7 @@ def schedule(got: dict, headline_lines) -> list[Page]:
             cells.append((r[h], None, f"{req + ' · ' if req else ''}{result_words(st)}"))
         rows.append([r["Mark"], r["Opening"], r["Room"], r["Type"], *cells, r["Grade floor"],
                      (r["Result"], r["status"]), r["Code sections"], r["Why"]])
-    lines = list(headline_lines) + [(n, present.REVIEW) for n in notes]
-    if got["waiting"]:
-        waiting = next(x["waiting"] for law in got["laws"] for x in law["items"] if x["waiting"])
-        rows.append(["__banner__", result_words(present.NOT_CHECKED, waiting) + ": no escape openings to schedule yet",
-                     present.NOT_CHECKED])
-    elif not rows_:
-        rows.append(["__banner__", "No sleeping room and no escape opening in the drawing: "
-                     + result_words(present.REVIEW), present.REVIEW])
+    lines = list(headline_lines)
     made = []
 
     def page():
@@ -302,10 +298,12 @@ def life_safety(got: dict, headline_lines) -> list[Page]:
         y0 = _heading(p, name, headline_lines)
         sx = area_x1 + 14
         y = y0
-        if got["waiting"]:
-            waiting = next(x["waiting"] for law in got["laws"] for x in law["items"] if x["waiting"])
-            p.text((area_x0 + area_x1) / 2, (y0 + p.h) / 2, result_words(present.NOT_CHECKED, waiting), size=16,
-                   bold=True, anchor="middle", fill=LOOK[present.NOT_CHECKED][0])
+        if got["waiting"]:              # no interior checked: the check's own answer for it (waiting, or why not)
+            from .source import overall
+            status, waiting = overall(got)
+            words = result_words(status, waiting) + ("" if waiting else ": no interior was checked")
+            p.text((area_x0 + area_x1) / 2, (y0 + p.h) / 2, words, size=16, bold=True, anchor="middle",
+                   fill=LOOK[status][0])
         elif level:
             _draw_level(p, level, area_x0, y0 + 10, area_x1, p.h - EDGE - 40)
         elif not lv["undrawn"]:

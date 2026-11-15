@@ -13,6 +13,7 @@ can't say which rules decided it. <project.yaml> gives the title block: `title`,
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -25,6 +26,9 @@ from . import goldens
 from .build import files, project_problems, workbook
 from .source import checked
 from .words import Refused
+
+SHEET = re.compile(r"^(G|LS|A)-\d{3}\.svg$")          # the sheet files this command writes, and only those
+OURS = {"permit_sheets.pdf", "code_analysis.csv", "escape_window_schedule.csv", "permit_sheets.xlsx"}
 
 
 def make(house_path: Path, facts_path: Path, project_path: Path, out: Path, model: Path | None = None,
@@ -45,6 +49,9 @@ def make(house_path: Path, facts_path: Path, project_path: Path, out: Path, mode
         run = lambda: check_description(doc, facts, today=day, interior=house)             # noqa: E731
     got = checked(run, house)
     out.mkdir(parents=True, exist_ok=True)
+    for old in out.iterdir():           # an earlier set's pages never stay beside this one (fewer pages this time)
+        if old.is_file() and (SHEET.match(old.name) or old.name in OURS):
+            old.unlink()
     written = []
     for name, data in files(got, project).items():
         (out / name).write_bytes(data)

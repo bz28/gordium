@@ -331,3 +331,70 @@ def test_the_command_checks_a_model_and_writes_every_file(tmp_path):
     assert main([str(house), "--model", str(site / "model.3dm"), "--facts", str(site / "model_facts.yaml"),
                  "--project", str(tmp_path / "bad.yaml"), "--out", str(tmp_path / "out2")]) == 1
     assert not (tmp_path / "out2").exists()
+
+
+# ---- review round 1 -------------------------------------------------------------------------------------------------
+
+def test_no_rooms_and_rules_refused_prints_needs_review_not_a_crash(monkeypatch):
+    """No interior, and the state's rulebook refused by the rule checks: the check gives the law's needs-review item,
+    no waiting item. Every sheet says NEEDS REVIEW (never complies) and nothing crashes."""
+    from design_checker import egress
+    real = egress.laws
+
+    def refused(jurisdiction):
+        found = real(jurisdiction)
+        for law in found["laws"]:
+            law["problems"], law["rules"] = ["simulated: a rule fails its checks"], []
+        return found
+    monkeypatch.setattr(egress, "laws", refused)
+    r = check_site(goldens.site(), dict(goldens.FACTS), name="x", today=goldens.DATE, interior=None)
+    g = source.gather(r, about(), None)
+    out = build.files(g, goldens.project_of("0_no_rooms_yet"))
+    with pdfplumber.open(io.BytesIO(out["permit_sheets.pdf"])) as pdf:
+        for p in pdf.pages:
+            text = p.extract_text() or ""
+            assert "NEEDS REVIEW" in text
+            assert "COMPLIES" not in text.replace("DOES NOT COMPLY", "").replace("Results: COMPLIES", "")
+    sched = list(csv.DictReader(io.StringIO(out["escape_window_schedule.csv"].decode("utf-8"))))
+    assert [s["Result"] for s in sched] == ["NEEDS REVIEW"]
+
+
+def test_the_schedule_files_are_never_an_empty_table():
+    out, wb, _ = goldens.build("0_no_rooms_yet")           # built fresh, not read from the committed golden
+    sched = list(csv.DictReader(io.StringIO(out["escape_window_schedule.csv"].decode("utf-8"))))
+    assert [s["Result"] for s in sched] == ["WAITING: NO ROOMS DRAWN YET"]
+    ws = wb["Escape-window schedule"]
+    assert any(c.value == "WAITING: NO ROOMS DRAWN YET" for row in ws.iter_rows() for c in row)
+    # a house with no sleeping room and no escape opening: one NEEDS REVIEW line saying so
+    house = goldens.interior_of("1_ranch_compliant")
+    for room in house["rooms"]:
+        room["sleeping"] = False
+    for o in house["openings"]:
+        o["escape"] = False
+    r = check_site(goldens.site(), dict(goldens.FACTS), name="x", today=goldens.DATE, interior=house)
+    rows, _ = tables.schedule_rows(source.gather(r, about(), house))
+    assert [(x["Result"], x["Why"]) for x in rows] == [
+        ("NEEDS REVIEW", "no sleeping room and no escape opening in the drawing")]
+
+
+def test_every_csv_row_carries_the_project_date_and_draft_warning():
+    for name in ("0_no_rooms_yet", "2_two_story_small_window"):
+        out, _, _ = goldens.build(name)                       # built fresh
+        for file in ("code_analysis.csv", "escape_window_schedule.csv"):
+            for row in csv.DictReader(io.StringIO(out[file].decode("utf-8"))):
+                assert row["Status"] == sheets.DISCLAIMER
+                assert row["Date"] == goldens.DATE and row["Project"] == goldens.project_of(name)["title"]
+
+
+def test_an_earlier_sets_pages_are_removed(tmp_path):
+    from permit_sheets.__main__ import main
+    site = goldens.REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
+    (tmp_path / "project.yaml").write_text('title: 106 Ithaca Rd\ndate: "2026-11-15"\n', encoding="utf-8")
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "G-009.svg").write_text("<svg/>", encoding="utf-8")        # a page from an earlier, longer set
+    (out / "notes.txt").write_text("the architect's own file", encoding="utf-8")
+    house = goldens.REPO / "test_data/interior_houses/1_ranch_compliant/house.yaml"
+    assert main([str(house), "--model", str(site / "model.3dm"), "--facts", str(site / "model_facts.yaml"),
+                 "--project", str(tmp_path / "project.yaml"), "--out", str(out)]) == 0
+    assert not (out / "G-009.svg").exists() and (out / "notes.txt").exists()

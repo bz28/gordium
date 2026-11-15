@@ -42,14 +42,23 @@ def _csv(headers: list[str], rows: list[list]) -> bytes:
     return buf.getvalue().encode("utf-8")
 
 
+def _stamped(headers: list[str], rows: list[list], project: dict) -> tuple[list[str], list[list]]:
+    """Every CSV row also says which project, which day, and that the rules are drafts: a CSV attached on its own
+    never reads as final."""
+    extra = ["Project", "Date", "Status"]
+    stamp = [project["title"], project["date"], sheets_mod.DISCLAIMER]
+    return headers + extra, [row + stamp for row in rows]
+
+
 def files(got: dict, project: dict) -> dict[str, bytes]:
     pages = sheets_mod.sheets(got, project)
     name = f"{project['title']}: egress permit sheets"
     out = {f"{number}.svg": svg(page, f"{number} {title} · {project['title']}").encode("utf-8")
            for number, title, page in pages}
     out["permit_sheets.pdf"] = pdf([page for _, _, page in pages], name)
-    out["code_analysis.csv"] = _csv(CODE_HEADERS, plain_rows(code_rows(got), CODE_HEADERS))
-    out["escape_window_schedule.csv"] = _csv(SCHEDULE_HEADERS, plain_rows(schedule_rows(got)[0], SCHEDULE_HEADERS))
+    out["code_analysis.csv"] = _csv(*_stamped(CODE_HEADERS, plain_rows(code_rows(got), CODE_HEADERS), project))
+    out["escape_window_schedule.csv"] = _csv(*_stamped(SCHEDULE_HEADERS, plain_rows(schedule_rows(got)[0],
+                                                                                    SCHEDULE_HEADERS), project))
     return out
 
 

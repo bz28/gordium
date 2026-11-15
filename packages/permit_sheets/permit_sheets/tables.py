@@ -117,8 +117,12 @@ def schedule_rows(got: dict) -> tuple[list[dict], list[str]]:
     marked but not checked; and the notes the schedule must carry (what wasn't read)."""
     measured, interior = got["measured"], got["interior"] or {}
     notes, out = [], []
-    if measured is None:
-        return [], []
+    if measured is None:            # no interior checked: one line saying so, never an empty schedule
+        from .source import overall
+        status, waiting = overall(got)
+        why = "no rooms drawn yet: no escape openings to schedule" if waiting else \
+            "no interior was checked: see the code analysis"
+        return [statement(got, status, why, waiting)], []
     given = {o.get("id"): o for o in interior.get("openings") or [] if isinstance(o, dict)}
     parts = measured.get("parts") or {}
     rooms, openings = parts.get("sleeping_room"), parts.get(OPENING)
@@ -192,7 +196,19 @@ def schedule_rows(got: dict) -> tuple[list[dict], list[str]]:
                     "Part id": s.get("id") or "", "Room id": src.get("room") or "",
                     "Interior sha256": got["interior_sha256"] or "",
                     "cell_status": {h: present.REVIEW for _, h, _ in COLUMNS}})
+    out = [statement(got, present.REVIEW, n) for n in notes] + out
+    if not out:
+        out.append(statement(got, present.REVIEW, "no sleeping room and no escape opening in the drawing"))
     return out, notes
+
+
+def statement(got: dict, status: str, why: str, waiting: str | None = None) -> dict:
+    """A schedule line that is no opening's: what wasn't read, or why there is nothing to schedule, with its result
+    (never complies), so the schedule is never an empty table."""
+    words = result_words(status, waiting)
+    return {**{h: "" for h in SCHEDULE_HEADERS}, "Mark": "-", "Result": words, "status": status, "Why": why,
+            **{f"{s} result": words for _, _, s in COLUMNS}, "Interior sha256": got["interior_sha256"] or "",
+            "cell_status": {h: status for _, h, _ in COLUMNS}, "statement": True}
 
 
 def plain_rows(rows: list[dict], headers: list[str]) -> list[list]:
