@@ -39,9 +39,10 @@ def test_every_decided_row_complies_but_the_parking_waits_on_the_bedrooms_needs_
     report = tmp_path / "r.xlsx"
     r = check_site(SITE, ANSWERED, report_path=report)
     v = r["view"]
-    assert _waiting(v) == ["R-1b.parking_one_family", "release.overlays"]     # every other row complies
+    assert _waiting(v) == ["R-1b.parking_one_family", "egress.waiting", "release.overlays"]   # the rest comply
     assert v["state"] == present.REVIEW
-    assert v["summary"] == "needs review · 14 comply · 1 to answer · 1 not checked in this release"
+    assert v["summary"] == ("Zoning: needs review · 14 comply · 1 to answer · 1 not checked in this release · "
+                            "Egress: waiting, no rooms drawn yet")     # no interior drawn: egress waits (egress.py)
     assert openpyxl.load_workbook(report)["Check"]["A1"].value == "GORDIUM | " + v["summary"]   # the report says it
     s = r["summary"]                                                           # the result's own line too
     assert s["state"] == "review" and s["text"] == v["summary"]               # the panel's own words
@@ -51,16 +52,17 @@ def test_every_decided_row_complies_but_the_parking_waits_on_the_bedrooms_needs_
 def test_the_bedrooms_answered_leave_only_the_overlays_still_needs_review():
     r = check_site(SITE, dict(ANSWERED, **BEDROOMS))
     v = r["view"]
-    assert _waiting(v) == ["release.overlays"]                                 # the parking rule now complies
+    assert _waiting(v) == ["egress.waiting", "release.overlays"]               # the parking rule now complies
     assert v["state"] == present.REVIEW and "to answer" not in v["summary"]
-    assert v["summary"] == "needs review · 15 comply · 1 not checked in this release"
+    assert v["summary"] == "Zoning: needs review · 15 comply · 1 not checked in this release · Egress: waiting, no " \
+                           "rooms drawn yet"
     assert r["summary"]["state"] == "review"
 
 
 def test_with_nothing_left_waiting_it_complies_and_says_only_the_counts():
-    # the same real rows without the overlays row (a release that checks them): every counted row complies
+    # the same real zoning rows without the overlays row (a release that checks them): every counted row complies
     v = check_site(SITE, dict(ANSWERED, **BEDROOMS))["view"]
-    items = [i for i in v["items"] if not i["id"].startswith(present.RELEASE)]
+    items = [i for i in v["items"] if not i["id"].startswith(present.RELEASE) and i["group"] != present.LAW_GROUP]
     assert present.state(items) == present.COMPLIES
     assert present.summary(items) == "15 comply"
 
