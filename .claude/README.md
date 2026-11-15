@@ -9,10 +9,10 @@ The commands in `commands/`, tailored to this repo (this index lives here, not i
 | `/plan` | Before building anything non-trivial: approaches, recommendation, evals. No code. |
 | `/implement` | Build commit by commit; large changes get a `/review` round before they're committed. |
 | `/autopilot` | Run a scoped PR stack end to end; Ben approves at merge. |
-| `/review` | Loop: cold reviewer + 2 skeptics per finding, fix every confirmed finding with a pinned test, until a round comes back clean (cap 4). Runs `workflows/review-loop.js`. |
+| `/review` | Loop: cold reviewer + skeptics per finding (2 for false-pass risk, 1 for UI or wording), fix every confirmed finding with a pinned test, until a round comes back clean (cap 4). Runs `workflows/review-loop.js`. |
 | `/debug` | Something is wrong: find the root cause, propose a fix. |
 | `/explain-simple` | Plain-English summary for architects and shareholders. |
 
 **Loop per PR:** `/plan` → (Ben approves) → `/implement` or `/autopilot` → `/review` → `/explain-simple` → Ben merges.
 
-Every command follows `CLAUDE.md`: the six core principles, the git workflow, and "flag zoning interpretations for the architects, never guess".
+Every command follows `CLAUDE.md`: the six core principles, the git workflow, and "resolve before asking" (never guess a zoning or egress interpretation; research it, then ask the architects what is still unclear).

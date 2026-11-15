@@ -65,7 +65,7 @@ Rhino only draws. Measuring and checking happen in a background Python process, 
 | **The inspector** (`python -m rule_format`) | Rejects any rule, definition, use or label with no source, a quote not on its lines, a changed PDF, a typo or wrong examples | The plan examiner |
 | **Shared helpers** (`rule_format.rulebook`) | One reader for every `.jsonl` file and one list of jurisdictions (tests fail if a second copy appears); one list of rulebook files | One ruler for the whole office |
 | **Automatic checks (CI)** | On every change, GitHub re-runs the tests, re-extracts the PDFs, runs the inspector, and rebuilds the coverage report, the spreadsheet, the measured models and the report to prove the saved copies are current (the full list: `.github/workflows/ci.yml`) | An inspection before anything is accepted |
-| **Review loop** (`/review`) | A fresh reviewer looks for mistakes, two skeptics try to disprove each one, the rest get fixed with a test, and it repeats until clean | Peer review with a second opinion |
+| **Review loop** (`/review`) | A fresh reviewer looks for mistakes, skeptics try to disprove each one (two for anything that could give a false pass, one for wording), the rest get fixed with a test, and it repeats until clean | Peer review with a second opinion |
 
 ## How the pull requests build on each other
 
@@ -73,7 +73,7 @@ Rhino only draws. Measuring and checking happen in a background Python process, 
 |---|---|---|
 | 0 | Folders, the City's PDFs, the architects' example | The foundation |
 | 1 | The rule form, the calculator, the inspector, CI | Everything after it writes rules, so the form comes first |
-| 2 | Gordium's own instructions for the AI, the review loop, the PR template (side branch off main; its files join when it merges) | How every later PR is built and reviewed |
+| 2 | Gordium's own instructions for the AI, the review loop, the PR template | How every later PR is built and reviewed |
 | 3 | Text extracted from the PDFs (`document_extraction`) | The inspector needs it to verify quotes |
 | 4 | Definitions and use names, this document | Rules depend on these words |
 | 5 | R-1b rules drafted by Claude in conversation, matched against the architects' spreadsheet (11/11) | A second, independent reading; an answer key once architects approve it (deferred for now) |

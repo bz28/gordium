@@ -33,7 +33,7 @@
 
 ## Test Plan
 
-- [ ] `pytest`
-- [ ] `python -m rule_format`
+- [ ] Targeted `pytest` for the touched packages (the full suite runs on GitHub CI)
+- [ ] `python -m rule_format` (if rule data changed)
 - [ ] GitHub checks green
 - [ ] Review rounds until one comes back clean

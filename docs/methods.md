@@ -121,7 +121,7 @@ The chart reader is built on its own branch (PR 6). Rule drafting (PR 8, also a 
 
 ## 12. Reviews (process)
 
-- **Review loop:** for every PR, a fresh reviewer with no context looks for problems, two skeptics try to disprove each one, confirmed findings are fixed and pinned with a test that fails on revert, and rounds repeat until one finds nothing. Large changes are reviewed before they're committed.
+- **Review loop:** for every PR, a fresh reviewer with no context looks for problems, skeptics try to disprove each one (two for anything that could give a false pass, one for UI or wording), confirmed findings are fixed and pinned with a test that fails on revert, and rounds repeat until one finds nothing. Large changes are reviewed before they're committed.
 - **Lesson learned:** fix the pattern, not the instance: several rounds re-found the same mistake elsewhere after a narrow fix.
 - **Pins:** every safeguard is switched off once on purpose to confirm a test fails.
 

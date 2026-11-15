@@ -16,7 +16,7 @@ export const meta = {
 //   priorConfirmed: [...],          // findings confirmed in the previous round (now supposedly fixed)
 //   sinceLastRound: '<sha>',        // round >= 2: the commit the previous round reviewed, so the reviewer
 //                                   //   can `git diff <sha>..head` to see exactly what the fixes changed
-//   skeptics: 2,
+//   skeptics: 2,                    // 2 for anything that could cause a false pass; 1 for a UI- or wording-only diff
 //   intent: 'what the PR is trying to do (one paragraph, from the session)',
 //   verifyOnly: [...],              // skip the reviewer; run the skeptics on these findings (the
 //                                   //   in-session review's own findings, so they earn "confirmed" the same way)
@@ -47,6 +47,8 @@ const SKEPTICS = cfg.skeptics || 2
 const INTENT = cfg.intent || '(not provided)'
 const VERIFY_ONLY = cfg.verifyOnly || null
 const CWD = cfg.cwd || null
+// At most 3 agents run at once (Ben's limit: a 16 GB Mac that also runs Rhino and the tests).
+const MAX_AGENTS = 3
 if (ROUND >= 2 && !VERIFY_ONLY && (!SINCE || !PRIOR.length)) {
   throw new Error('review-loop: round >= 2 needs sinceLastRound and priorConfirmed, so the prior fixes are re-checked')
 }
@@ -61,7 +63,7 @@ const FINDING_ITEM = {
     file: { type: 'string', description: 'repo-relative path' },
     line: { type: 'string', description: 'line number or range' },
     severity: { type: 'string', enum: ['P0', 'P1', 'P2', 'P3'] },
-    category: { type: 'string', description: 'false-pass, traceability, approval, zoning-accuracy, reproducibility, correctness, edge-case, security, regression-in-caller, DRY, consistency, docs' },
+    category: { type: 'string', description: 'false-pass, traceability, approval, code-accuracy, reproducibility, correctness, edge-case, security, regression-in-caller, DRY, consistency, docs' },
     title: { type: 'string' },
     detail: { type: 'string', description: 'what is wrong and what a user would see' },
     evidence: { type: 'string', description: 'the exact code / call sites that prove it — quote them' },
@@ -108,7 +110,7 @@ Check for:
 - TRACEABILITY: every rule/definition cites file, page and an exact quote; fingerprints and extracted text match the source PDF version
 - NO AI IN THE CHECKER: nothing at check time calls a model or depends on non-deterministic output
 - APPROVAL INTEGRITY: nothing marked approved without a listed reviewer; AI never approves
-- ZONING ACCURACY: numbers and quotes match the source documents (open the PDF page / extracted text); interpretations are flagged, not guessed
+- CODE ACCURACY (zoning and egress): numbers and quotes match the source documents (open the PDF page / extracted text); interpretations are flagged, not guessed
 - REPRODUCIBILITY: generated files (2_extracted_text, 6_coverage_report, generated rules) come out identical when re-run
 - Correctness and logic errors; edge cases and boundaries (empty, zero, NaN, irregular lots, odd PDF layouts)
 - Regressions in callers/peers NOT in the diff — a focused diff review misses these
@@ -194,16 +196,19 @@ if (!findings.length) {
 }
 
 phase('Verify')
-const judged = await parallel(findings.map(f => () =>
-  parallel(Array.from({ length: SKEPTICS }, (_, i) => () =>
-    agent(verifyPrompt(f, i), { label: `verify:${f.file.split('/').pop()}`, phase: 'Verify', schema: VERDICT_SCHEMA })
-  )).then(votes => {
-    const answered = votes.filter(Boolean)
-    // Strict: survives only if EVERY skeptic answered and NONE refuted it.
-    const survives = answered.length === SKEPTICS && answered.every(v => v.refuted === false)
-    return { finding: f, survives, votes: answered.map(v => v.reasoning), unanswered: SKEPTICS - answered.length }
-  })
-))
+// One task per (finding, skeptic), run MAX_AGENTS at a time.
+const tasks = findings.flatMap(f => Array.from({ length: SKEPTICS }, (_, i) => () =>
+  agent(verifyPrompt(f, i), { label: `verify:${f.file.split('/').pop()}`, phase: 'Verify', schema: VERDICT_SCHEMA })))
+const verdicts = []
+for (let k = 0; k < tasks.length; k += MAX_AGENTS) {
+  verdicts.push(...await parallel(tasks.slice(k, k + MAX_AGENTS)))
+}
+const judged = findings.map((f, n) => {
+  const answered = verdicts.slice(n * SKEPTICS, (n + 1) * SKEPTICS).filter(Boolean)
+  // Strict: survives only if EVERY skeptic answered and NONE refuted it.
+  const survives = answered.length === SKEPTICS && answered.every(v => v.refuted === false)
+  return { finding: f, survives, votes: answered.map(v => v.reasoning), unanswered: SKEPTICS - answered.length }
+})
 
 const confirmed = judged.filter(j => j && j.survives).map(j => ({ ...j.finding, skeptics: j.votes }))
 const refuted = judged.filter(j => j && !j.survives).map(j => ({
