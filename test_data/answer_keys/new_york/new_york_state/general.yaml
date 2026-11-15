@@ -99,13 +99,9 @@ rules:
     title: "Stair clear width: 36 in; 31 1/2 or 27 in at the handrail (R318.7.1)"
     for_each: stair
     when_none: not_applicable
-    applies_when: not stair_serves_sleeping_loft
+    applies_when: not stair_serves_sleeping_loft and not stair_spiral
     check: stair_clear_width >= 36 and stair_clear_width_at_handrail >= (31.5 if stair_handrail_sides <= 1 else 27)
     review_when:
-      - when: stair_spiral
-        reason: >-
-          A spiral stairway: R318.7.11.1 sets its own clear width (26 in at and below the handrails), and R318.7.11.1 isn't drafted yet. A person checks it
-          (needs review, never not applicable, until it is).
       - when: stair_handrail_sides == 0 and stair_clear_width_at_handrail < 36
         reason: >-
           R318.7.1 gives the clear width at and below the handrail height only where a handrail is installed on one
@@ -166,9 +162,9 @@ rules:
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_clear_width: 26, stair_clear_width_at_handrail: 26, stair_handrail_sides: 1, stair_spiral: true, stair_serves_sleeping_loft: false}}]
-        rows: [{part: s1, outcome: needs_review}]
-        expect: needs_review
-        note: a spiral stairway's width is R318.7.11.1's (not in this key)
+        rows: [{part: s1, outcome: not_applicable}]
+        expect: not_applicable
+        note: a spiral stairway is R318.7.11.1's (general.r318_7_11_1_*), not this rule's
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_clear_width: 20, stair_clear_width_at_handrail: 22, stair_handrail_sides: 1, stair_spiral: false, stair_serves_sleeping_loft: true}}]
@@ -191,7 +187,7 @@ rules:
       those sections instead, and they are the looser ones (17 and 20 in), so a loft stair meeting R318.7.1 meets
       them too. R318.7's exceptions (a stair not within or serving a building, porch or deck; one leading to a
       nonhabitable attic or a crawl space) and R318.7.11.2's bulkhead stairs: such stairs should not be marked; the
-      parts have no measure saying so (a stair marked anyway can only fail wrongly, never pass wrongly).
+      parts have no measure saying so (a stair marked anyway can only fail wrongly, never pass wrongly). Fixed after the comparison with the drafts, 2026-11-14: R318.7.11.1 is now drafted (general.r318_7_11_1_*), so a spiral stairway is left out of this rule (not applicable) instead of needing review: R318.7.11.1's rules check it.
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
@@ -201,12 +197,9 @@ rules:
     title: "Stair headroom: 6 ft 8 in (R318.7.2)"
     for_each: stair
     when_none: not_applicable
+    applies_when: not stair_spiral
     check: stair_headroom >= 80
     review_when:
-      - when: stair_spiral
-        reason: >-
-          A spiral stairway: R318.7.11.1 sets its own headroom (6 ft 6 in), and R318.7.11.1 isn't drafted yet. A person checks it
-          (needs review, never not applicable, until it is).
       - when: stair_serves_sleeping_loft and stair_headroom < 80
         reason: >-
           A sleeping loft's means of egress follows R318 "as modified by" R315.5.1 to R315.5.3 (R315.5), and R315.5.1
@@ -254,9 +247,9 @@ rules:
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_headroom: 78, stair_spiral: true}}]
-        rows: [{part: s1, outcome: needs_review}]
-        expect: needs_review
-        note: a spiral stairway's headroom is R318.7.11.1's (6 ft 6 in; not in this key)
+        rows: [{part: s1, outcome: not_applicable}]
+        expect: not_applicable
+        note: a spiral stairway is R318.7.11.1's (general.r318_7_11_1_*), not this rule's
       - given: {}
         parts: {stair: []}
         rows: [{outcome: not_applicable}]
@@ -283,7 +276,7 @@ rules:
       Number (R318.7.2 second reading): 6 feet 8 inches = 80 (not less than, >=; its flag: one length, recorded as
       '6 foot' and '8 inch'). 4 3/4 in (exception 1, <=) is not used: the floor opening may project into the
       headroom up to 4 3/4 in where the nosings run under its edge, which stair_headroom (the least clear height)
-      can't tell apart, so such a stair can only fail wrongly (measure lacking: the floor-opening projection).
+      can't tell apart, so such a stair can only fail wrongly (measure lacking: the floor-opening projection). Fixed after the comparison with the drafts, 2026-11-14: R318.7.11.1 is now drafted (general.r318_7_11_1_*), so a spiral stairway is left out of this rule (not applicable) instead of needing review: R318.7.11.1's rules check it.
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
@@ -293,13 +286,8 @@ rules:
     title: "Riser height: not more than 8 1/4 in (R318.7.5.1)"
     for_each: stair
     when_none: not_applicable
-    applies_when: not stair_serves_sleeping_loft
+    applies_when: not stair_serves_sleeping_loft and not stair_spiral
     check: stair_riser_height <= 8.25
-    review_when:
-      - when: stair_spiral
-        reason: >-
-          A spiral stairway: R318.7.11.1 sets its own rise (9 1/2 in at most), and R318.7.11.1 isn't drafted yet. A person checks it
-          (needs review, never not applicable, until it is).
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 100
@@ -344,7 +332,7 @@ rules:
       Spiral stairways need review here until R318.7.11.1 is drafted (fixed after the comparison with the drafts,
       2026-11-13: they were not applicable, which left a spiral stair's rise, width and headroom unchecked).
       Number (R318.7.5.1 second reading): 8 1/4 = 8.25 (not more than, <=). New York's own riser (the [NY] mark).
-      Measured between leading edges of adjacent treads, exclusive of carpets, rugs or runners (R318.7.5).
+      Measured between leading edges of adjacent treads, exclusive of carpets, rugs or runners (R318.7.5). Fixed after the comparison with the drafts, 2026-11-14: R318.7.11.1 is now drafted (general.r318_7_11_1_*), so a spiral stairway is left out of this rule (not applicable) instead of needing review: R318.7.11.1's rules check it.
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
@@ -407,13 +395,8 @@ rules:
     title: "Tread depth: not less than 9 in (R318.7.5.2)"
     for_each: stair
     when_none: not_applicable
-    applies_when: not stair_serves_sleeping_loft
+    applies_when: not stair_serves_sleeping_loft and not stair_spiral
     check: stair_tread_depth >= 9
-    review_when:
-      - when: stair_spiral
-        reason: >-
-          A spiral stairway: R318.7.11.1 sets its own tread depth (6 3/4 in at the walkline), and R318.7.11.1 isn't drafted yet. A person checks it
-          (needs review, never not applicable, until it is).
     sources:
       - file: gov.ny.residential.2025.pdf
         page: 100
@@ -445,9 +428,9 @@ rules:
       - given: {}
         parts:
           stair: [{id: s1, measures: {stair_tread_depth: 7, stair_spiral: true, stair_serves_sleeping_loft: false}}]
-        rows: [{part: s1, outcome: needs_review}]
-        expect: needs_review
-        note: a spiral stairway's tread is R318.7.11.1's (6 3/4 in at the walkline; not in this key)
+        rows: [{part: s1, outcome: not_applicable}]
+        expect: not_applicable
+        note: a spiral stairway is R318.7.11.1's (general.r318_7_11_1_*), not this rule's
       - given: {}
         parts: {stair: []}
         rows: [{outcome: not_applicable}]
@@ -459,7 +442,7 @@ rules:
       R318.7.5.2 prints no spiral exception of its own; R318.7.11 sends a spiral stair's tread to R318.7.11.1.
       Winder treads (R318.7.5.2.1: 10 in at the walkline, 6 in at any point) are not this rule's: stair_tread_depth
       is the shallowest tread, so a flight with winders can only fail wrongly here, never pass wrongly (measure
-      lacking: whether the flight has winders, and their depths at the walkline).
+      lacking: whether the flight has winders, and their depths at the walkline). Fixed after the comparison with the drafts, 2026-11-14: R318.7.11.1 is now drafted (general.r318_7_11_1_*), so a spiral stairway is left out of this rule (not applicable) instead of needing review: R318.7.11.1's rules check it.
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
