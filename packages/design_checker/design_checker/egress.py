@@ -47,6 +47,8 @@ WAITING_WHY = ("Escape windows (size and sill), stairs (risers, treads, headroom
 BAD_RULES = "The {title} rules don't pass the rule checks (python -m rule_format), so none of them was used: {why}"
 NO_RULES = "No rulebook in {folder}/5_building_code_rules/: nothing of this law was checked"
 INTERIOR_PROBLEM = "The interior drawing: {why}"
+SKIPPED = ("{name} is marked as an escape opening but isn't checked: {why}. An escape opening may also be required in a "
+           "basement or habitable attic (R319.1), which aren't read from the drawing yet: check it by hand")
 NOTHING_APPLIED = ("None of the {title} rules applied to the parts drawn (every one not applicable): nothing of this law "
                    "was checked, so check it by hand")
 ORDER = {present.FAILS: 0, present.REVIEW: 1, present.NOT_CHECKED: 2, present.COMPLIES: 3}
@@ -124,7 +126,9 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
     measured = None if waiting else measure_interior(interior)
     sections, items, rows, results, ids = [], [], [], {}, set()
     for law in found["laws"]:
-        mine = _law_items(law, measured, values, allowed, rows, results) if not waiting else [_waiting_item(law)]
+        # rules that can't be used are said whether or not rooms are drawn: never hidden behind "waiting"
+        mine = _law_items(law, measured, values, allowed, rows, results) if not waiting or law["problems"] \
+            else [_waiting_item(law)]
         mine.sort(key=lambda i: ORDER[i["status"]])          # what fails first, then needs review (stable)
         for i in mine:                                       # one id per item, across laws too (hosts refuse twins)
             if i["id"] in ids:
@@ -132,8 +136,8 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
             ids.add(i["id"])
         items += mine
         sections.append({"key": law["key"], "title": law["title"],
-                         "state": WAITING if waiting else present.state(mine),
-                         "summary": WAITING_WORDS if waiting else present._summary(mine),
+                         "state": WAITING if waiting and not law["problems"] else present.state(mine),
+                         "summary": WAITING_WORDS if waiting and not law["problems"] else present._summary(mine),
                          "rules": len(law["rules"]), "rulebook": _shown(law["rulebook"]),
                          "problems": list(law["problems"])})
     return {"sections": sections, "items": items, "rows": rows, "results": results,
@@ -146,8 +150,18 @@ def fingerprint(interior) -> str | None:
     it was worked out from; None when none was given."""
     if interior is None:
         return None
-    text = json.dumps(interior, sort_keys=True, ensure_ascii=True, default=str, allow_nan=True)
+    text = json.dumps(_plain(interior), sort_keys=True, ensure_ascii=True, default=repr, allow_nan=True)
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def _plain(x):
+    """The description with every mapping key as text (a YAML key may be a number: `1: a`), each non-text key
+    written with its type so `1` and `"1"` stay apart, for a fingerprint that never fails."""
+    if isinstance(x, dict):
+        return {(k if isinstance(k, str) else f"{type(k).__name__}:{k!r}"): _plain(v) for k, v in x.items()}
+    if isinstance(x, (list, tuple)):
+        return [_plain(v) for v in x]
+    return x
 
 
 def _shown(path) -> str | None:
@@ -174,6 +188,9 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
     out = [_decorated(i, law, by_id.get(i["rule"])) for i in got["items"]]
     out += [_own_item(law, f"{law['short'].lower()}.interior#{n}", "Interior drawing", present.REVIEW,
                       INTERIOR_PROBLEM.format(why=why)) for n, why in enumerate(measured["problems"], 1)]
+    out += [_own_item(law, f"{law['short'].lower()}.skipped#{n}", f"{skip.get('name') or skip.get('id')}: not checked",
+                      present.REVIEW, SKIPPED.format(name=skip.get("name") or skip.get("id"), why=skip.get("why")))
+            for n, skip in enumerate(measured["not_checked"], 1)]
     if not out:          # every row not applicable (left out of the panel): never a law that vanishes from the answer
         out.append(_own_item(law, f"{law['short'].lower()}.nothing_applied", f"{law['short']}: nothing checked",
                              present.REVIEW, NOTHING_APPLIED.format(title=law["title"])))

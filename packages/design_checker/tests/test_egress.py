@@ -284,3 +284,31 @@ def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer(
     view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
     egress.add_to_view(view, dict(got, items=[]), "City of Ithaca")
     assert view["state"] == present.REVIEW
+
+
+def test_an_interior_with_number_keys_is_fingerprinted_never_a_crash():
+    """Review round 2 (F1): YAML allows `1: a`; the fingerprint once raised TypeError and took the check down."""
+    house = ranch()
+    house["rooms"][0][1] = "a"
+    assert egress.fingerprint(house) != egress.fingerprint(dict(ranch(), rooms=[dict(ranch()["rooms"][0], **{"1": "a"})]
+                                                            + ranch()["rooms"][1:]))
+    result = check_site(SITE, dict(FACTS), interior=house)
+    assert result["egress"]["interior_sha256"] and present.COMPLIES != result["view"]["state"]
+
+
+def test_rules_that_cant_be_used_are_said_even_while_no_rooms_are_drawn(monkeypatch):
+    """Review round 2 (F2): "waiting" would hide that the state's rules don't pass the rule checks."""
+    monkeypatch.setattr(egress, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
+    result = check_site(SITE, dict(FACTS))
+    assert [(i["id"], i["status"]) for i in law_items(result)] == [("egress.rules", present.REVIEW)]
+    assert result["sections"][1]["state"] == present.REVIEW
+
+
+def test_an_escape_opening_the_measuring_skips_is_shown_never_silent():
+    """Review round 2 (F3): an escape window in a room that isn't a sleeping room is left out of the parts; the
+    panel says so (it may be a basement's or an attic's, not read yet)."""
+    house = ranch()
+    next(o for o in house["openings"] if o["id"] == "w3")["escape"] = True
+    [row] = [i for i in law_items(check_site(SITE, dict(FACTS), interior=house)) if i["id"] == "egress.skipped#1"]
+    assert row["status"] == present.REVIEW and row["name"] == "Window 3: not checked"
+    assert "in a room that isn't a sleeping room" in row["reason"]
