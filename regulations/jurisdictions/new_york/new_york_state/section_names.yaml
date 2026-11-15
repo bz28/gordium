@@ -1,0 +1,39 @@
+# Plain names for the sections of the 2025 Residential Code of New York State that Gordium doesn't check yet, as the
+# check names them to an architect ("Not checked yet by Gordium: window fall protection (R321.2.1), hallway width
+# (R318.6) and 28 more: check these by hand"). Kept by hand; wording only.
+#
+# WHICH sections are not checked yet is never kept here: it is generated from the labels and the rulebook
+# (6_coverage_report/gov.ny.residential.2025.rules.yaml, `not_checked_yet`, by `python -m section_labeling coverage`;
+# CI checks it is current). A section that list names and this file doesn't is still named, by the law's own
+# heading. The order here is the order the check lists them in: what most houses have first.
+names:
+  R321.2.1: window fall protection
+  R318.6: hallway width
+  R318.1: a clear egress path to the egress door
+  R319.1.1: escape openings opening from inside without keys or tools
+  R321.2.2: window opening control devices on escape openings
+  R318.7.5.3: stair nosings
+  R318.7.5.2.1: winder treads
+  R318.7.7: slope of stair treads and landings
+  R325.6: interior stair lighting
+  R325.7: exterior stair lighting
+  R318.4: a stair or ramp from each level without an egress door
+  R318.7.11.2: bulkhead enclosure stairs
+  R316.3: a habitable attic counted as a story
+  R314.2: mezzanine headroom
+  R314.3: mezzanine area
+  R314.5: mezzanine openness
+  R315.1: which sleeping lofts the loft rules apply to
+  R315.4: sleeping loft area
+  R315.5: a sleeping loft's means of egress
+  R315.5.1: headroom over a sleeping loft's means of egress
+  R315.5.2.3: sleeping loft stair landings
+  R315.5.3.1: sleeping loft ladder rungs
+  R315.5.3.2: sleeping loft ladder slope
+  BO102.6.3: "existing buildings: fall protection at replacement windows"
+  BO105.10.5: "existing buildings: stair lighting in altered areas"
+  BO105.10.6: "existing buildings: handrails and guards on altered stairs"
+  BO105.10.7: "existing buildings: guards in altered areas"
+  BO105.11: "existing buildings: escape openings in a reworked basement"
+  BO108.2: "existing buildings: bed and breakfast occupancy"
+  BO108.3: "existing buildings: bed and breakfast conversions"
