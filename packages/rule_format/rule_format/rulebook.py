@@ -354,7 +354,11 @@ class Context:
         self.file_problems.setdefault(name, []).append(message)
 
     @classmethod
-    def for_jurisdiction(cls, jurisdiction_dir) -> "Context":
+    def for_jurisdiction(cls, jurisdiction_dir, use_cache: bool = True) -> "Context":
+        """Everything a folder's rules are checked against. `use_cache=False`: a book kept outside the repo is never
+        read from the code cache (its quotes are listed as not checked here, exactly as on a machine without the
+        cache), so a design's check gives the same answer on every machine (design_checker/egress.py); the quotes
+        are checked word for word by `python -m rule_format` where the cache exists."""
         j = Path(jurisdiction_dir)
         uses_file = j / "4_term_definitions/uses.yaml"
         documents = load(j / "1_source_documents/sources.yaml")["documents"]
@@ -383,6 +387,9 @@ class Context:
                 ctx._problem(name, "is kept outside the repo (kept_outside_repo), but its text is in 2_extracted_text")
             elif not sha:
                 ctx._problem(name, "no sha256 in sources.yaml")
+            elif outside and not use_cache:         # a design's check: the same on every machine (skipped, as below)
+                ctx.uncached[name] = "kept outside the repo; its quotes are checked by python -m rule_format where " \
+                                     "the code cache exists, never at a design's check"
             elif outside and not pdf.exists():      # skipped, never passed: every quote of it is listed as not checked
                 ctx.uncached[name] = (f"kept outside the repo, and not in the code cache here ({_shown_cache(pdf)}); "
                                       "checked where the cache exists")

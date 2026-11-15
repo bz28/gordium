@@ -66,7 +66,8 @@ isn't being checked) is one counted "Interior: not checked yet" item, needs revi
 (Ithaca: New York's house code, `inherits:`), on the parts `model_measurement.interior` measures from an interior
 description given beside the site (`check_site(..., interior=...)`; `python -m design_checker <model> <facts>
 --interior <house.yaml>`). The view's `sections` give zoning's and egress's states apart; with no interior drawn,
-egress is one "waiting, no rooms drawn yet" item, never a pass (decision item 12).
+egress is one "waiting, no rooms drawn yet" item, never a pass; handrails, guards and sleeping lofts aren't read
+from the drawing yet, so their rules need review (decision item 12).
 
 **The place.** The plugin checks one place, the registry's only one (`rule_format.place.plugin_place`).
 `rhino_logic.py` runs in Rhino's Python, which can't read YAML, so `host_core/place.py` reads `place.json` beside

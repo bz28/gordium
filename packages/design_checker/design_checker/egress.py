@@ -10,7 +10,7 @@ One check, one result, grouped by law (Ben, 2026-11-12: zoning and egress are tw
 its own state. Its items join the panel's, in a group of their own, so the design's one state (present.state) is
 the most cautious of both:
 
-- **No interior read** (no interior description, or one with no rooms): each law is one item, "waiting, no rooms
+- **No interior read** (no interior description, or one whose `rooms` list is empty): each law is one item, "waiting, no rooms
   drawn yet", not checked. Never a pass and never a fail; the design is then needs review at best, and the summary
   says "Egress: waiting, no rooms drawn yet", so it never reads as all complying while egress waits. Zoning's own
   section can still say it complies.
@@ -41,11 +41,14 @@ from design_checker import each_part, present
 
 WAITING = "waiting"                                 # a law's section state while no interior is read
 WAITING_WORDS = "waiting, no rooms drawn yet"
-WAITING_WHY = ("Escape windows (size and sill), stairs (risers, treads, headroom, width), handrails, guards and the "
-               "exit door are checked once the rooms are drawn. Until then this is not a pass")
+WAITING_WHY = ("Escape windows (size and sill), stairs (risers, treads, headroom, width) and the exit door are checked "
+               "once the rooms are drawn; handrails, guards and sleeping lofts aren't read from the drawing yet, so "
+               "their rules will need review. Until then this is not a pass")
 BAD_RULES = "The {title} rules don't pass the rule checks (python -m rule_format), so none of them was used: {why}"
 NO_RULES = "No rulebook in {folder}/5_building_code_rules/: nothing of this law was checked"
 INTERIOR_PROBLEM = "The interior drawing: {why}"
+NOTHING_APPLIED = ("None of the {title} rules applied to the parts drawn (every one not applicable): nothing of this law "
+                   "was checked, so check it by hand")
 ORDER = {present.FAILS: 0, present.REVIEW: 1, present.NOT_CHECKED: 2, present.COMPLIES: 3}
 
 
@@ -79,7 +82,7 @@ def laws(jurisdiction) -> dict:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
         else:
             try:
-                ctx = Context.for_jurisdiction(folder)
+                ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
                 law["problems"] = ctx.problems + rulebook_file_problems(book, ctx)
                 law["documents"] = ctx.sources
             except Exception as e:                    # never a crash, never a rule used unchecked
@@ -106,11 +109,11 @@ def _sections(folder: Path):
 
 
 def _no_rooms(interior) -> bool:
-    """No interior read yet: none given, or a readable description that draws no rooms at all (massing)."""
+    """No interior read yet: none given, or a readable description whose list of rooms is empty (massing). A
+    description that leaves `rooms` out isn't waiting: the measuring says the rooms weren't read (needs review)."""
     if interior is None:
         return True
-    return isinstance(interior, dict) and interior.get("format") == INTERIOR_FORMAT \
-        and interior.get("rooms") in (None, [])
+    return isinstance(interior, dict) and interior.get("format") == INTERIOR_FORMAT and interior.get("rooms") == []
 
 
 def check(found: dict, interior, values: dict, allowed: dict) -> dict:
@@ -171,6 +174,9 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
     out = [_decorated(i, law, by_id.get(i["rule"])) for i in got["items"]]
     out += [_own_item(law, f"{law['short'].lower()}.interior#{n}", "Interior drawing", present.REVIEW,
                       INTERIOR_PROBLEM.format(why=why)) for n, why in enumerate(measured["problems"], 1)]
+    if not out:          # every row not applicable (left out of the panel): never a law that vanishes from the answer
+        out.append(_own_item(law, f"{law['short'].lower()}.nothing_applied", f"{law['short']}: nothing checked",
+                             present.REVIEW, NOTHING_APPLIED.format(title=law["title"])))
     return out
 
 
@@ -218,7 +224,10 @@ def add_to_view(view: dict, got: dict, place_name: str) -> None:
     kinder than any section's (a law waiting holds it at needs review)."""
     zoning = [i for i in view["items"] if i["group"] != present.LAW_GROUP]
     view["items"] = zoning + got["items"]
-    view["state"] = present.state(view["items"])
+    # the most cautious of every item's and every law's own state (a law waiting counts as needs review)
+    states = [present.state(view["items"])] + [present.REVIEW if s["state"] == WAITING else s["state"]
+                                               for s in got["sections"]]
+    view["state"] = min(states, key=[present.FAILS, present.REVIEW, present.COMPLIES].index)
     view["summary"] = present.summary(view["items"])
     view["groups"] = present.grouped(view["items"])
     view["sections"] = [{"key": "zoning", "title": f"Zoning ({place_name})", "state": present.state(zoning),
