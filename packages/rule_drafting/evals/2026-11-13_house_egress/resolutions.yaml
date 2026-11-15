@@ -711,7 +711,9 @@ causes:
       is required only on a steep ramp, so it is a flag); an example that gives no ramps (or no stairs) is read
       by the key as those parts not read, a needs-review row for the building, and a stair or ramp with no
       handrail as a "none" row the drafts don't have. On a model where each handrail sits in its stair or ramp,
-      both give the same answers.
+      both give the same answers but one: a ramp's handrail broken at a newel post at a ramp landing, which the
+      drafts pass (R320.5's exception 1, "at a landing", read as reaching a ramp's landings) and the key's ramp flag
+      sends to a person. Neither passes what the law clearly fails; the reading is open for the architects.
     law: 'R320.5: "Handrails shall be continuous for the full length of the flight ... Handrails where required for ramps shall be continuous for the full length of the ramp."'
   r318_7_5_1_riser_slope_flag:
     verdict: drafts_stricter
