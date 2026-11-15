@@ -78,10 +78,12 @@ def fast_reads():
     real_context = rulebook.Context.for_jurisdiction
     contexts = {}
 
-    def for_jurisdiction(cls, j):      # built once; nothing changes a Context after it is built
-        key = str(j)
+    def for_jurisdiction(cls, j, use_cache=True):   # built once; nothing changes a Context after it is built
+        # the same arguments as the real reader's (egress reads the state's sources with use_cache=False): a kept
+        # copy that refused one made the state's rules "can't be read" on this path only
+        key = (str(j), use_cache)
         if key not in contexts:
-            contexts[key] = real_context.__func__(cls, j)
+            contexts[key] = real_context.__func__(cls, j, use_cache=use_cache)
         return contexts[key]
     real_terms, real_book = report.term_file_problems, report.rulebook_file_problems
     checked = {}

@@ -233,6 +233,18 @@ def test_reading_the_citys_files_once_changes_no_result():
     assert json.dumps(slow, sort_keys=True, default=str) == json.dumps(quick, sort_keys=True, default=str)
 
 
+def test_the_kept_copies_read_the_state_rules_as_the_real_readers_do():
+    """PR 106: the kept Context reader refused egress's use_cache=False, so on the quick path the state's rules read
+    as "can't be read" (needs review) while the real path waited: the two must read the state law the same."""
+    from design_checker import egress
+    harness.fast_reads()
+    try:
+        found = egress.laws("regulations/jurisdictions/new_york/ithaca_city")
+    finally:
+        harness.slow_reads()
+    assert [law["problems"] for law in found["laws"]] == [[]] and found["laws"][0]["rules"]
+
+
 @pytest.mark.parametrize("designs", [pytest.param(DESIGNS, id="ci"), pytest.param(FULL, id="full", marks=pytest.mark.slow)])
 def test_the_architect_stress_sample(fast, capsys, designs):
     out = harness.run(designs, SEED, workers=1, shrink_each=False, known=known)
