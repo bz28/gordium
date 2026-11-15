@@ -137,14 +137,16 @@ def _table_pages(columns, rows, make_page, size=7.0):
     for row in rows:
         if row and row[0] == "__banner__":            # a whole-width line in its result's colours (waiting…)
             text, status = row[1], row[2]
-            hh = 2 * lead + 10
+            lines = wrap(text, size + 3, sum(widths) - 16, bold=True)
+            hh = (size + 6) * len(lines) + 12
             if y + hh > bottom:
                 pages.append(page)
                 page, y = make_page()
                 y = header(page, y)
             page.rect(x_left, y, sum(widths), hh, stroke=INK, fill=LOOK[status][1], lw=0.6)
-            page.text(x_left + sum(widths) / 2, y + hh / 2 + 3, text, size=size + 3, bold=True, anchor="middle",
-                      fill=LOOK[status][0])
+            for i, ln in enumerate(lines):
+                page.text(x_left + sum(widths) / 2, y + 8 + (size + 6) * (i + 1) - 3, ln, size=size + 3, bold=True,
+                          anchor="middle", fill=LOOK[status][0])
             y += hh
             continue
         if row and row[0] == "__group__":
@@ -287,7 +289,7 @@ def _tag(page, x, y, text, status):
 def life_safety(got: dict, headline_lines) -> list[Page]:
     sched, _ = schedule_rows(got)
     lv = plan_mod.levels(got, sched) if not got["waiting"] else {"levels": [], "undrawn": [], "notes": [],
-                                                                 "doors": []}
+                                                                 "doors": [], "rooms_read": True}
     side_w = 3.3 * PT
     area_x0, area_x1 = LEFT + 14, W_IN * PT - EDGE - TB_W - side_w - 18
     pages = []
@@ -307,7 +309,10 @@ def life_safety(got: dict, headline_lines) -> list[Page]:
         elif level:
             _draw_level(p, level, area_x0, y0 + 10, area_x1, p.h - EDGE - 40)
         elif not lv["undrawn"]:
-            p.text((area_x0 + area_x1) / 2, (y0 + p.h) / 2, "No rooms drawn", size=14, bold=True, anchor="middle")
+            words, st = ("No rooms drawn", None) if lv["rooms_read"] else \
+                ("Rooms not read from the drawing: " + result_words(present.REVIEW), present.REVIEW)
+            p.text((area_x0 + area_x1) / 2, (y0 + p.h) / 2, words, size=14, bold=True, anchor="middle",
+                   fill=LOOK[st][0])
         # the right column: legend, exits, notes, the schematic way out
         y = _legend_box(p, sx, y, side_w, "LEGEND", [
             ("Heavy outline, tinted: sleeping room (each needs an escape opening, R319.1)", None),
@@ -316,8 +321,8 @@ def life_safety(got: dict, headline_lines) -> list[Page]:
             ("Results: COMPLIES · DOES NOT COMPLY · NEEDS REVIEW · WAITING (word always printed)", None)])
         y = _legend_box(p, sx, y, side_w, "EXITS", [(f"{d['text']}: {result_words(d['status'])}", d["status"])
                                                     for d in lv["doors"]] or [("-", None)])
-        notes = [(f"{x['text']}" + (f": {result_words(x['status'])}" if x["status"] else ""), x["status"])
-                 for x in lv["notes"]]
+        notes = [(x["text"] if x.get("tag") else x["text"] + (f": {result_words(x['status'])}" if x["status"] else ""),
+                  x["status"]) for x in lv["notes"]]
         if level and level["apart"]:
             notes.append(("Rooms are drawn apart: the drawing gives each room from its own corner, not its place in "
                           "the house. Each room is to scale; their positions are not.", None))

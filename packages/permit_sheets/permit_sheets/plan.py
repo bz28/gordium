@@ -103,7 +103,17 @@ def levels(got: dict, schedule: list[dict]) -> dict:
         if not placed:
             notes.append({"text": f"Stair {stair['name']}: no floor drawn at its foot or head to show it on",
                           "status": status})
-    return {"levels": out, "undrawn": undrawn, "notes": notes, "doors": _door_lines(got, interior)}
+    if interior.get("rooms") is None:           # a list left out: not read, never "no rooms"
+        notes.insert(0, {"text": "Rooms: not read from the drawing", "status": present.REVIEW})
+    # an escape opening the schedule lists whose room is on no floor drawn here (its room not read, or unknown):
+    # named in the notes with its result, never dropped from the plan
+    known = {r["id"] for lv in out for r in lv["rooms"]} | {r["id"] for r in undrawn}
+    for s in schedule:
+        if not s.get("statement") and s.get("Room id") not in known:
+            notes.append({"text": f"{tag_words(s)} (in {s.get('Room') or 'a room not read'}, not on this plan)",
+                          "status": s["status"], "tag": True})
+    return {"levels": out, "undrawn": undrawn, "notes": notes, "doors": _door_lines(got, interior),
+            "rooms_read": interior.get("rooms") is not None}
 
 
 def tag_words(row: dict, short: bool = False) -> str:

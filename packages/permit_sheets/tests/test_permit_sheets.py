@@ -398,3 +398,30 @@ def test_an_earlier_sets_pages_are_removed(tmp_path):
     assert main([str(house), "--model", str(site / "model.3dm"), "--facts", str(site / "model_facts.yaml"),
                  "--project", str(tmp_path / "project.yaml"), "--out", str(out)]) == 0
     assert not (out / "G-009.svg").exists() and (out / "notes.txt").exists()
+
+
+# ---- review round 2 -------------------------------------------------------------------------------------------------
+
+def _no_rooms_key():
+    house = goldens.interior_of("1_ranch_compliant")
+    del house["rooms"]                                   # left out: the rooms weren't read (never "no rooms")
+    g = source.checked(lambda: check_site(goldens.site(), dict(goldens.FACTS), name="x", today=goldens.DATE,
+                                          interior=house), house)
+    return g, sheets.sheets(g, goldens.project_of("1_ranch_compliant"))
+
+
+def test_rooms_not_read_is_said_on_the_plan_and_its_windows_kept():
+    g, pages = _no_rooms_key()
+    plan = " ".join(t for n, _, p in pages if n.startswith("LS") for t in p.texts())
+    assert "Rooms not read from the drawing: NEEDS REVIEW" in plan and "No rooms drawn" not in plan
+    marks = [s["Mark"] for s in tables.schedule_rows(g)[0] if not s.get("statement")]
+    assert marks and all(f"{m} " in plan for m in marks)
+
+
+def test_schedule_banners_say_their_result_once():
+    _, pages = _no_rooms_key()
+    banners = [t for n, _, p in pages if n.startswith("A-") for t in p.texts() if t.startswith("NEEDS REVIEW:")]
+    assert banners and all(t.count("NEEDS REVIEW") == 1 for t in banners)
+    out, _, _ = goldens.build("0_no_rooms_yet")
+    texts = [t for t in out["A-601.svg"].decode("utf-8").split(">") if "WAITING" in t]
+    assert any("WAITING: NO ROOMS DRAWN YET: no escape openings to schedule yet<" in t + "<" for t in texts)

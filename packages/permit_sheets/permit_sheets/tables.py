@@ -120,16 +120,16 @@ def schedule_rows(got: dict) -> tuple[list[dict], list[str]]:
     if measured is None:            # no interior checked: one line saying so, never an empty schedule
         from .source import overall
         status, waiting = overall(got)
-        why = "no rooms drawn yet: no escape openings to schedule" if waiting else \
+        why = "no escape openings to schedule yet" if waiting else \
             "no interior was checked: see the code analysis"
         return [statement(got, status, why, waiting)], []
     given = {o.get("id"): o for o in interior.get("openings") or [] if isinstance(o, dict)}
     parts = measured.get("parts") or {}
     rooms, openings = parts.get("sleeping_room"), parts.get(OPENING)
     if rooms is None:
-        notes.append("Sleeping rooms: not read from the drawing (NEEDS REVIEW): every escape-opening rule needs review")
+        notes.append("sleeping rooms not read from the drawing: every escape-opening rule needs review")
     if openings is None:
-        notes.append("Escape openings: not read from the drawing (NEEDS REVIEW)")
+        notes.append("escape openings not read from the drawing")
     rooms, openings = rooms or [], openings or []
     room_name = {r["id"]: r.get("name") or r["id"] for r in rooms}
 
