@@ -669,7 +669,8 @@ def _failing_distances(rule: dict, measured: dict, values: dict) -> list[dict]:
     return found
 
 
-def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = None) -> None:
+def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = None,
+            interior_sha256: str | None = None) -> None:
     """The architects'-format workbook (PR 10), saying what the panel says (spec I1, I2): each rule's Error and
     Comparison are its items' most cautious status (a rule the panel shows as needing review is never PASS here),
     and a Check tab lists every item, the summary, the draft-rulebook label and the lot and grade sources."""
@@ -718,6 +719,8 @@ def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = Non
     title(ws, f"GORDIUM | {view['summary']}")
     lines = [h["place"], h["code"], h["draft"], h["lot"], h["grade"]] + ([h["main"]] if h.get("main") else []) + \
         (h.get("sources") or [])   # where each fact came from
+    # which interior the egress rows were worked out from (its fingerprint), so a saved report is traceable to it
+    lines.append(f"Interior checked: sha256 {interior_sha256}" if interior_sha256 else "Interior: none drawn yet")
     note = next((i["detail"]["outline"] for i in view["items"] if (i.get("detail") or {}).get("outline")), None)
     if note:                            # the lot lines read from a cleaned outline: said once, with the lot (PR 18)
         lines.append("Lot lines: " + note)
@@ -1007,7 +1010,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     if report_path is not None:      # a report that can't be written never takes the check's result with it
         try:
             say(STEPS["report"])
-            _report(t, v, report_path, site_file)
+            _report(t, v, report_path, site_file, law["interior_sha256"])
         except OSError as e:
             report_error = e.words if isinstance(e, _SiteInTheWay) else f"{e.strerror or e} ({report_path})"
     # one guard for the whole check (review round 21): geometry the measuring couldn't work out draws nothing

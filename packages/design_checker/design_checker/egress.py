@@ -36,6 +36,7 @@ from rule_format import parts as part_rules
 from rule_format.labels import load_pieces
 from rule_format.place import place as place_of
 from rule_format.rulebook import REPO, STATE_SETTINGS, Context, load, rulebook_file_problems
+from rule_format.state_law import state_settings_problems
 
 from design_checker import each_part, present
 
@@ -49,6 +50,8 @@ NO_RULES = "No rulebook in {folder}/5_building_code_rules/: nothing of this law 
 INTERIOR_PROBLEM = "The interior drawing: {why}"
 SKIPPED = ("{name} is marked as an escape opening but isn't checked: {why}. An escape opening may also be required in a "
            "basement or habitable attic (R319.1), which aren't read from the drawing yet: check it by hand")
+NOT_PER_PART = ("this rule isn't written for each part (no for_each), and a state law's rules are checked only part "
+                "by part: it isn't checked, so check it by hand")
 NOTHING_APPLIED = ("None of the {title} rules applied to the parts drawn (every one not applicable): nothing of this law "
                    "was checked, so check it by hand")
 ORDER = {present.FAILS: 0, present.REVIEW: 1, present.NOT_CHECKED: 2, present.COMPLIES: 3}
@@ -76,24 +79,36 @@ def laws(jurisdiction) -> dict:
     p = place_of(_folder(jurisdiction))
     out = []
     for folder, book in p.inherited_rulebooks():
-        settings = load(folder / STATE_SETTINGS) or {}
-        title = settings.get("results_title") or f"{settings.get('name') or folder.name} building code"
-        law = {"key": f"{folder.parent.name}/{folder.name}", "title": title, "short": title.split(" (")[0],
-               "folder": folder, "rulebook": book, "rules": [], "problems": [], "section_of": None, "documents": {}}
+        law = {"key": f"{folder.parent.name}/{folder.name}", "title": _title(folder), "folder": folder,
+               "rulebook": book, "rules": [], "problems": [], "section_of": None, "documents": {}}
+        law["short"] = law["title"].split(" (")[0]
         if book is None:
             law["problems"] = [NO_RULES.format(folder=law["key"])]
         else:
-            try:
+            try:          # never a crash (zoning's answer goes with it), never a rule used unchecked
                 ctx = Context.for_jurisdiction(folder, use_cache=False)   # the same answer on every machine
-                law["problems"] = ctx.problems + rulebook_file_problems(book, ctx)
+                law["problems"] = ctx.problems + state_settings_problems(folder, ctx) + rulebook_file_problems(book, ctx)
                 law["documents"] = ctx.sources
-            except Exception as e:                    # never a crash, never a rule used unchecked
-                law["problems"] = [f"its sources can't be read ({type(e).__name__}: {e})"]
-            if not law["problems"]:
-                law["rules"] = load(book)["rules"]
-                law["section_of"] = _sections(folder)
+                if not law["problems"]:
+                    law["rules"] = load(book)["rules"]
+                    law["section_of"] = _sections(folder)
+            except Exception as e:
+                law["problems"], law["rules"], law["section_of"] = \
+                    [f"its sources can't be read ({type(e).__name__}: {e})"], [], None
         out.append(law)
     return {"place": p.name, "laws": out}
+
+
+def _title(folder: Path) -> str:
+    """How the law's results are headed: state.yaml's results_title, else "<name> building code"; a state.yaml that
+    can't be read gives the folder's name (its problem is said by state_settings_problems, never a crash)."""
+    try:
+        s = load(folder / STATE_SETTINGS)
+    except Exception:
+        s = None
+    s = s if isinstance(s, dict) else {}
+    words = lambda v: v.strip() if isinstance(v, str) and v.strip() else None
+    return words(s.get("results_title")) or f"{words(s.get('name')) or folder.name.replace('_', ' ')} building code"
 
 
 def _sections(folder: Path):
@@ -186,6 +201,15 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
                                                                        if key in results else []))
     by_id = {r["id"]: r for r in law["rules"] if isinstance(r, dict) and isinstance(r.get("id"), str)}
     out = [_decorated(i, law, by_id.get(i["rule"])) for i in got["items"]]
+    # a rule not written for each part is never dropped in silence: its own needs-review row and answer
+    for n, rule in enumerate(law["rules"], 1):
+        if isinstance(rule, dict) and not part_rules.is_part_rule(rule):
+            key = each_part._key(rule, n)
+            results[key] = part_rules.rule_result([{"outcome": "needs_review"}] + ([{"outcome": results[key]}]
+                                                                                   if key in results else []))
+            item = _own_item(law, f"{law['short'].lower()}.{key}", rule.get("title") if isinstance(
+                rule.get("title"), str) else key, present.REVIEW, NOT_PER_PART)
+            out.append({**_decorated({**item, "rule": key}, law, rule), "reason": NOT_PER_PART})
     out += [_own_item(law, f"{law['short'].lower()}.interior#{n}", "Interior drawing", present.REVIEW,
                       INTERIOR_PROBLEM.format(why=why)) for n, why in enumerate(measured["problems"], 1)]
     out += [_own_item(law, f"{law['short'].lower()}.skipped#{n}", f"{skip.get('name') or skip.get('id')}: not checked",

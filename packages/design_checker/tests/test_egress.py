@@ -85,9 +85,9 @@ def test_a_state_folder_is_never_checked_on_its_own():
 def test_a_hand_written_state_rulebook_comes_before_the_drafted_one(tmp_path):
     (tmp_path / "5_building_code_rules/drafted").mkdir(parents=True)
     assert building_code_rulebook(tmp_path) is None
-    (tmp_path / "5_building_code_rules/drafted/general.yaml").write_text("rules: []\n")
+    (tmp_path / "5_building_code_rules/drafted/general.yaml").write_text("rules: []\n", encoding="utf-8")
     assert building_code_rulebook(tmp_path) == tmp_path / "5_building_code_rules/drafted/general.yaml"
-    (tmp_path / "5_building_code_rules/general.yaml").write_text("rules: []\n")
+    (tmp_path / "5_building_code_rules/general.yaml").write_text("rules: []\n", encoding="utf-8")
     assert building_code_rulebook(tmp_path) == tmp_path / "5_building_code_rules/general.yaml"
 
 
@@ -312,3 +312,49 @@ def test_an_escape_opening_the_measuring_skips_is_shown_never_silent():
     [row] = [i for i in law_items(check_site(SITE, dict(FACTS), interior=house)) if i["id"] == "egress.skipped#1"]
     assert row["status"] == present.REVIEW and row["name"] == "Window 3: not checked"
     assert "in a room that isn't a sleeping room" in row["reason"]
+
+
+def test_a_state_rule_not_written_for_each_part_needs_review_never_dropped():
+    """Review round 3 (F1, confirmed by two sceptics): check_parts keeps only rules for each part, so a state rule
+    without for_each got no row and no answer, and the section could read as complying with it unchecked."""
+    found = egress.laws(ITHACA)
+    whole = {k: v for k, v in copy.deepcopy(found["laws"][0]["rules"][0]).items() if k not in egress.part_rules.PART_FIELDS}
+    whole["id"] = "general.whole_building"
+    found["laws"][0]["rules"].append(whole)
+    got = egress.check(found, ranch(), {}, {"use": set()})
+    assert got["results"]["general.whole_building"] == "needs_review"
+    [row] = [i for i in got["items"] if i["rule"] == "general.whole_building"]
+    assert row["status"] == present.REVIEW and row["reason"] == egress.NOT_PER_PART
+    assert row["code"]["section"]                               # still names its code section
+
+
+@pytest.mark.parametrize("settings", ["results_title: 5\n", "- a list\n", "name: [\n"])
+def test_a_bad_state_settings_file_needs_review_never_takes_zoning_down(settings, tmp_path, monkeypatch):
+    """Review round 3 (F2): state.yaml was read outside the guard: a results_title that isn't words, or a file that
+    isn't a mapping, crashed the whole check (zoning's answer with it)."""
+    real = egress.load
+    monkeypatch.setattr(egress, "load", lambda p: yaml.safe_load(settings) if Path(p).name == "state.yaml"
+                        else real(p))
+    import rule_format.state_law as sl
+    monkeypatch.setattr(sl, "load", lambda p: yaml.safe_load(settings) if Path(p).name == "state.yaml" else real(p))
+    if settings == "name: [\n":
+        bad = lambda p: (_ for _ in ()).throw(yaml.YAMLError("bad")) if Path(p).name == "state.yaml" else real(p)
+        monkeypatch.setattr(egress, "load", bad)
+        monkeypatch.setattr(sl, "load", bad)
+    result = check_site(SITE, dict(FACTS), interior=sill_too_high())
+    assert result["sections"][0]["key"] == "zoning"
+    [only] = law_items(result)
+    assert only["status"] == present.REVIEW and only["id"].endswith(".rules")
+    assert result["egress"]["results"] == {}
+
+
+def test_a_saved_report_names_the_interior_it_was_checked_against(tmp_path):
+    """Review round 3 (F3): the report listed egress rows but not which interior they came from."""
+    from openpyxl import load_workbook
+    out = tmp_path / "report.xlsx"
+    house = sill_too_high()
+    check_site(SITE, dict(FACTS), interior=house, report_path=out)
+    cells = [c.value for c in load_workbook(out)["Check"]["A"] if c.value]
+    assert f"Interior checked: sha256 {egress.fingerprint(house)}" in cells
+    check_site(SITE, dict(FACTS), report_path=out)
+    assert "Interior: none drawn yet" in [c.value for c in load_workbook(out)["Check"]["A"] if c.value]
