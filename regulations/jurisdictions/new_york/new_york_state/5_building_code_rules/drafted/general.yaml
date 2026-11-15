@@ -5483,6 +5483,63 @@ rules:
       with Section R318.7." The AI''s flag for it was refused by code (no "none" example), so nothing checked it:
       an egress door onto a raised landing with no way down passed. Its last recorded answer added by hand with
       the example. Found by review round 1. Cause r318_3_1_access_to_grade_unchecked, resolutions.yaml.'
+- id: general.r318_3_1_egress_door_given_as_exterior_door
+  kind: flag
+  topic: means_of_egress
+  title: 'Egress door not given as an exterior door: its landings unchecked (R318.3.1)'
+  applies_when: not egress_door_given_as_exterior_door
+  for_each: egress_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 99
+    lines:
+    - 55
+    - 56
+    quote: Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower
+      than the top of the threshold.
+  examples:
+  - given: {}
+    parts:
+      egress_door:
+      - id: e1
+        name: Front door
+        measures:
+          egress_door_given_as_exterior_door: false
+    rows:
+    - part: e1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      egress_door:
+      - id: e1
+        measures:
+          egress_door_given_as_exterior_door: true
+    rows:
+    - part: e1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      egress_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  notes: 'A tie between parts, not a law limit: R318.3.1''s drop rules read the exterior_door part marked as the
+    egress door, so an egress door the model does not also give as one needs review (R318.2 checks that the egress
+    door exists).'
+  drafted_by: claude_code/claude-opus-5-5 (for Ben, after the AI's draft)
+  status: draft
+  revised:
+  - field: rule
+    by: Claude for Ben (house egress, remaining pieces, review round 2)
+    date: &id008 2026-11-15
+    why: 'R318.3: "There shall be a landing or floor on each side of each exterior door." R318.3.1: "Landings or
+      finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top
+      of the threshold." R318.3 and R318.3.1 read exterior_door parts; R318.2 reads the egress_door part, and nothing
+      tied the two: an egress door not also given as a marked exterior door had its landings and drops not applicable
+      (or held to 8 1/4 in). Found by review round 2. Cause r318_3_1_egress_door_not_given_as_exterior, resolutions.yaml.'
 - id: general.r318_3_2_other_exterior_door_floor_elevation
   kind: rule
   topic: means_of_egress
@@ -9086,7 +9143,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Handrail return gap from wall at most 1/4 inch (R320.5)
-  applies_when: handrail_adjacent_to_wall
+  applies_when: handrail_adjacent_to_wall or handrail_returns_to_wall
   check: handrail_return_gap <= 0.25
   for_each: handrail
   when_none: not_applicable
@@ -9130,6 +9187,7 @@ rules:
         measures:
           handrail_adjacent_to_wall: false
           handrail_return_gap: 0.5
+          handrail_returns_to_wall: false
     rows:
     - part: h1
       outcome: not_applicable
@@ -9140,6 +9198,19 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
+  - given: {}
+    parts:
+      handrail:
+      - id: h1
+        name: Open-side rail returned to the end wall
+        measures:
+          handrail_adjacent_to_wall: false
+          handrail_returns_to_wall: true
+          handrail_return_gap: 2
+    rows:
+    - part: h1
+      outcome: fail
+    expect: fail
   open_questions:
   - The law says the gap is measured from the adjacent wall; a handrail not beside a wall is treated as having no
     such gap.
@@ -9152,6 +9223,20 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, review round 2)
+    date: *id008
+    why: 'R320.5: "A handrail end shall be returned continuous to itself or toward a wall, guard or walking surface."
+      and "Handrail returns shall not form a gap more than 1/4 inch (6.4 mm) from the adjacent wall." The gap is
+      the return''s, so a rail on an open side whose return turns to a wall is held to it too (it was not applicable).
+      Found by review round 2. Cause r320_5_return_toward_a_wall, resolutions.yaml.'
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, review round 2)
+    date: 2026-11-15
+    why: 'With the gap read for a return toward a wall: the examples of a rail not beside a wall say its ends do
+      not return to one (handrail_returns_to_wall no), and an open-side rail returned toward the end wall 2 in short
+      of it fails. Cause r320_5_return_toward_a_wall, resolutions.yaml.'
 - id: general.r320_6_handrail_edge_radius
   kind: flag
   topic: means_of_egress

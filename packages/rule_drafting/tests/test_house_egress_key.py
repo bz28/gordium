@@ -448,3 +448,27 @@ def test_a_narrow_top_landing_beyond_a_door_fails_in_the_key(ctx, key):
                                                   "stair_bulkhead": False, "stair_to_grade_serving_deck": False}}]}
     width = [r for r in key if r["id"] == "general.r318_7_6_landing_width"]
     assert piece_result(width, "R318.7.6", design, {}, ctx) == "fail"
+
+
+# ---- review round 2 (2026-11-15) --------------------------------------------------------------------------------
+
+def test_an_egress_door_not_given_as_an_exterior_door_needs_review(ctx, key, drafts, as_drafted):
+    """Cause r318_3_1_egress_door_not_given_as_exterior: an egress door the model gives only as R318.2's egress_door
+    (no exterior_door marked as it) needs review in R318.3.1 on both sides; the AI's own rules give not applicable."""
+    door = {"egress_door": [{"id": "e1", "measures": {"door_clear_width": 36, "door_clear_height": 80, "door_side_hinged": True,
+                                                      "egress_door_given_as_exterior_door": False}}], "exterior_door": []}
+    assert piece_result(key, "R318.3.1", door, {}, ctx) == piece_result(drafts, "R318.3.1", door, {}, ctx) == "needs_review"
+    assert piece_result(as_drafted, "R318.3.1", door, {}, ctx) == "not_applicable"
+
+
+def test_a_return_toward_a_wall_from_an_open_side_is_held_to_the_gap(ctx, key, drafts, as_drafted):
+    """Cause r320_5_return_toward_a_wall: a rail on an open side whose end returns toward a wall 2 in short of it
+    fails R320.5's 1/4 in gap on both sides; the AI's own rule gives not applicable."""
+    design = {"stair": [{"id": "s1"}], "handrail": [{"id": "h1", "within": "s1", "measures": {
+        "handrail_adjacent_to_wall": False, "handrail_returns_to_wall": True, "handrail_return_gap": 2,
+        "handrail_ends_returned": True}}]}
+
+    def gap(rules):
+        return [r for r in rules if r["id"] in ("general.r320_5_handrail_returns", "general.r320_5_handrail_return_gap")]
+    assert piece_result(gap(key), "R320.5", design, {}, ctx) == piece_result(gap(drafts), "R320.5", design, {}, ctx) == "fail"
+    assert piece_result(gap(as_drafted), "R320.5", design, {}, ctx) == "not_applicable"

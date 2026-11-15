@@ -113,6 +113,16 @@ key_fixes:
       A top landing below the threshold of a top door elsewhere than at a garage was not applicable, a pass on a
       question the law leaves open; it now needs review, a landing level with the threshold passes (review round 1).
     law: 'R318.7.6 exception 2: "At an enclosed garage, the top landing at the stair shall be permitted to be not more than 8 1/4 inches (209 mm) below the top of the threshold."'
+  - rule: general.r318_3_1_egress_door_given_as_exterior_door
+    what: >-
+      Added (review round 2): an egress door the model does not also give as a marked exterior door had its landings
+      and drops unchecked; it now needs review.
+    law: 'R318.3.1: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold."'
+  - rule: general.r320_5_handrail_returns
+    what: >-
+      A rail on an open side returned toward a wall was not held to the 1/4 in gap; handrail_returns_to_wall now reads
+      it (review round 2).
+    law: 'R320.5: "Handrail returns shall not form a gap more than 1/4 inch (6.4 mm) from the adjacent wall."'
 draft_fixes:
 - cause: r318_2_doors_counted
   verdict: draft_wrong
@@ -588,6 +598,32 @@ draft_fixes:
   law: 'R318.7.6 exception 2: "At an enclosed garage, the top landing at the stair shall be permitted to be not more than 8 1/4 inches (209 mm) below the top of the threshold."'
   cases: []
   pinned_by: test_a_top_landing_below_a_top_door_elsewhere_than_a_garage_needs_review
+- cause: r318_3_1_egress_door_not_given_as_exterior
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r318_3_1_egress_door_given_as_exterior_door
+  why: >-
+    Found by review round 2 (the key had the same gap, fixed with it). R318.3 and R318.3.1 read exterior_door parts,
+    R318.2 the egress_door part, and nothing tied them: an egress door not also given as an exterior door marked as
+    the egress door had its landings and its 1 1/2 in drop not applicable (or held to 8 1/4 in as another door).
+  fixed: A flag for each egress door not given as a marked exterior door (needs review), added by hand.
+  law: 'R318.3.1: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold."'
+  cases: []
+  pinned_by: test_an_egress_door_not_given_as_an_exterior_door_needs_review
+- cause: r320_5_return_toward_a_wall
+  verdict: draft_wrong
+  false_pass_risk: true
+  rules:
+  - general.r320_5_handrail_return_gap
+  why: >-
+    Found by review round 2 (the key had the same gap, fixed with it). The gap rule read only a rail beside a wall;
+    R320.5's gap is the return's, so a rail on an open side whose end returns toward a wall 2 in short of it was not
+    applicable.
+  fixed: The gap is read where the rail runs beside a wall or returns toward one (handrail_returns_to_wall).
+  law: 'R320.5: "Handrail returns shall not form a gap more than 1/4 inch (6.4 mm) from the adjacent wall."'
+  cases: []
+  pinned_by: test_a_return_toward_a_wall_from_an_open_side_is_held_to_the_gap
 causes:
   r318_2_readily_openable_flag:
     verdict: drafts_stricter
@@ -769,6 +805,7 @@ ids:
   "R320.5/key/general.r320_5_handrail_returns#5/the building": handrail_examples_without_a_stair_or_ramp
   "R320.5/key/general.r320_5_handrail_returns#5/h1": yes_no_left_out
   "R320.5/key/general.r320_5_handrail_returns#6/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/key/general.r320_5_handrail_returns#7/the building": handrail_examples_without_a_stair_or_ramp
   "R320.5/draft/general.r320_5_handrail_continuity#1/the building": handrail_examples_without_a_stair_or_ramp
   "R320.5/draft/general.r320_5_handrail_continuity#2/the building": handrail_examples_without_a_stair_or_ramp
   "R320.5/draft/general.r320_5_handrail_continuity#3/the building": handrail_examples_without_a_stair_or_ramp
@@ -782,6 +819,7 @@ ids:
   "R320.5/draft/general.r320_5_handrail_return_gap#2/the building": handrail_examples_without_a_stair_or_ramp
   "R320.5/draft/general.r320_5_handrail_return_gap#3/the building": handrail_examples_without_a_stair_or_ramp
   "R320.5/draft/general.r320_5_handrail_return_gap#4/the building": handrail_examples_without_a_stair_or_ramp
+  "R320.5/draft/general.r320_5_handrail_return_gap#5/the building": handrail_examples_without_a_stair_or_ramp
   "R320.2/key/general.r320_2_handrail_height#1/the building": handrail_examples_without_a_stair_or_ramp
   "R320.2/key/general.r320_2_handrail_height#2/the building": handrail_examples_without_a_stair_or_ramp
   "R320.2/key/general.r320_2_handrail_height#3/the building": handrail_examples_without_a_stair_or_ramp
