@@ -42,7 +42,8 @@ REVIEWED = {"general.r319_4_1_area_well_min_projection": "needs_review",
             # review round 2: the step at the mudroom door onto the garage landing, its railing, the A-5 well
             "general.r318_7_6_garage_top_landing_drop": "needs_review",
             "general.r321_1_2_guard_height_open_side_not_stair": "needs_review",
-            "general.r319_4_2_2_area_well_steps_requirements": "needs_review"}
+            "general.r319_4_2_2_area_well_steps_requirements": "needs_review",
+            "general.r318_7_6_stair_bottom_landing": "needs_review"}     # review round 4: the porch steps' bare grade
 TOTALS = re.compile(r"^\| All egress rules \| (\d+) \| (\d+) \| (\d+) \| (\d+) \| (\d+) \|$")
 
 
@@ -131,6 +132,8 @@ def test_the_evaluation_table_is_current(found, name):
     assert f"The panel shows {len(got['items'])} items. {len(got['rows'])} are the rules' rows" in text
     cautious_rules = sum(CHECKER[got["results"][r]] != TRUTH[truth[r]] for r in truth)
     assert f"It is cautious in {cautious_rules} places" in text
+    meets = sum(t == "complies" for t in truth.values())
+    assert f"{cautious_rules} rules: {meets} the house meets and {cautious_rules - meets} that don't apply" in text
     answers = list(got["results"].values())
     assert totals == [(len(answers), answers.count("pass"), answers.count("fail"), answers.count("needs_review"),
                        answers.count("not_applicable"))]

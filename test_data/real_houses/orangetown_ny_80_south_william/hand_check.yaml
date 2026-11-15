@@ -54,6 +54,8 @@
 #                                          and its drop may be over 30 in)
 #   r319_4_2_2_area_well_steps_requirements  not_applicable -> needs_review (rests on the A-5 well detail, which may
 #                                          not be what is built at the CW14s)
+# and by review round 4:
+#   r318_7_6_stair_bottom_landing         complies -> needs_review (the porch steps end on bare grade)
 
 rules:
   # ------------------------------------------------------------------------------------------- the exit door
@@ -96,7 +98,7 @@ rules:
   # ------------------------------------------------------------------------------------------- exterior doors
   - id: general.r318_3_exterior_door_landing_each_side
     truth: needs_review
-    why: "front door: the entry inside, the covered porch outside (A-2): complies. Rear sliders: steps down to the PATIO (A-2 'DN'), no landing drawn at the door; the two-riser exception can't be confirmed (riser count not given)"
+    why: "front door: the entry inside, the covered porch outside (A-2): complies. Rear sliders: steps down to the PATIO (A-2 'DN'), no landing drawn at the door; the two-riser exception is ruled out as drawn (26.4 in floor over grade needs at least four risers)"
     predicted: needs_review
     because: "exterior doors aren't a part the description carries (exterior_door not read)"
   - id: general.r318_3_exterior_door_landing_width
@@ -349,8 +351,8 @@ rules:
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_stair_bottom_landing
-    truth: complies
-    why: "every flight lands on a floor: the main floor, the basement slab, the garage slab, the bridge, grade, the patio (A-2, A-3); their sizes are other rules"
+    truth: needs_review
+    why: "the interior flights land on floors (the main floor, the basement slab, the garage slab, the bridge) and the rear steps on the patio (A-2, A-3); the porch steps run 'DOWN' to bare grade with no walk drawn at their foot, and whether grade counts as R318.7.6's 'floor or landing' isn't settled by the text"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_garage_top_landing_drop
