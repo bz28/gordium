@@ -168,4 +168,9 @@ def test_each_open_truth_names_its_question(name):
     grade = text.split('2. **Is bare grade a "floor or landing"', 1)
     assert len(grade) == 2 and "Searched:" in grade[1].split("\n\n", 1)[0]
     assert "common practice says yes" not in text
-    assert "README question 9" in text.split("**Why no rule fails", 1)[1].split("\n", 1)[0]
+    fails = text.split("**Why no rule fails", 1)[1].split("\n", 1)[0]
+    assert "README question 9" in fails and "architect question 1" in fails
+    # a source is cited only if it was read (round 5, second pass: a cited link returned 404)
+    assert "raymore.com/" not in text and "IRC 71-13" not in text
+    # the area-well row (M) is explained by the basement windows, not the second-floor bedrooms
+    assert "bedrooms are on the second floor, yet `opening_below_grade`" not in text and "`bsw1`, `bsw2`" in text
