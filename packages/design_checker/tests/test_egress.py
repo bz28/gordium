@@ -232,3 +232,55 @@ def test_the_workers_fingerprint_of_a_place_follows_the_state_rules_it_inherits(
     book = root / "new_york_state/5_building_code_rules/drafted/general.yaml"
     book.write_text(book.read_text(encoding="utf-8") + "\n# edited\n", encoding="utf-8")
     assert protocol.rulebook_fingerprints() != before
+
+
+def test_a_description_that_leaves_out_its_rooms_needs_review_never_waits():
+    """Review round 1 (F4): only an empty list of rooms is massing; a description without `rooms` wasn't read."""
+    house = ranch()
+    del house["rooms"]
+    mine = law_items(check_site(SITE, dict(FACTS), interior=house))
+    assert not any(i.get("waiting") for i in mine) and present.COMPLIES not in {i["status"] for i in mine} - {
+        i["status"] for i in mine if i["rule"] and "door" in i["rule"]}
+    assert any("rooms weren't read" in i["reason"] for i in mine if i["name"] == "Interior drawing")
+
+
+def test_the_waiting_words_never_promise_parts_the_drawing_isnt_read_for():
+    """Review round 1 (F1): guards, handrails and lofts aren't read yet; the waiting row says so."""
+    assert "handrails, guards and sleeping lofts aren't read from the drawing yet" in egress.WAITING_WHY
+    assert "handrails, guards and the exit door are checked" not in egress.WAITING_WHY
+
+
+def test_a_check_validates_the_state_rules_the_same_with_or_without_the_code_cache(monkeypatch, tmp_path):
+    """Review round 1 (F2): the book's quotes are checked by python -m rule_format where the cache is, never at a
+    design's check, so the same design gets the same answer on every machine."""
+    with_cache = egress.laws(ITHACA)
+    monkeypatch.setenv("GORDIUM_CODE_CACHE", str(tmp_path / "none"))
+    without = egress.laws(ITHACA)
+    assert [(l["problems"], l["rules"]) for l in with_cache["laws"]] == [(l["problems"], l["rules"])
+                                                                         for l in without["laws"]]
+    from rule_format.rulebook import Context
+    assert Context.for_jurisdiction(STATE, use_cache=False).pages == {}       # the book's text is never read
+    asked = []
+    real = Context.for_jurisdiction.__func__
+    monkeypatch.setattr(Context, "for_jurisdiction",
+                        classmethod(lambda cls, j, **kw: asked.append(kw) or real(cls, j, **kw)))
+    egress.laws(ITHACA)
+    assert asked == [{"use_cache": False}]                                  # a design's check never reads it
+
+
+def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer():
+    """Review round 1 (F3, confirmed by two sceptics): rows not applicable are left out of the panel, so a law whose
+    every row is not applicable had no item, and the design read "complies" beside its needs-review section."""
+    found = egress.laws(ITHACA)
+    stairs = [r for r in found["laws"][0]["rules"] if r.get("for_each") == "stair"]
+    found["laws"][0]["rules"] = stairs                          # a house with no stairs: every row not applicable
+    house = dict(ranch(), stairs=[])
+    got = egress.check(found, house, {}, {"use": set()})
+    assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW)]
+    view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
+    egress.add_to_view(view, got, "City of Ithaca")
+    assert view["state"] == present.REVIEW and "Egress: 1 needs review" in view["summary"]
+    # and the design's state is never kinder than a section's, even given a section with no item at all
+    view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
+    egress.add_to_view(view, dict(got, items=[]), "City of Ithaca")
+    assert view["state"] == present.REVIEW

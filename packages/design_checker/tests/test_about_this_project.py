@@ -225,7 +225,8 @@ def test_use_details_unanswered_are_their_own_collapsed_group_and_never_a_pass()
     assert v["summary"].count("need review") + v["summary"].count("needs review") == (1 if building_review else 0)
     assert v["state"] != present.COMPLIES, "a question left open is never a pass"
     # with every building row decided, the use details alone still hold the state at needs review
-    only = [dict(i, status=present.COMPLIES) for i in v["items"] if not i.get("use_detail")] + details
+    only = [dict(i, status=present.COMPLIES) for i in v["items"] if not i.get("use_detail")
+            and i["group"] != present.LAW_GROUP] + details             # the zoning rows (egress waits apart)
     assert present.state(only) == present.REVIEW and present.summary(only).endswith("to answer")
 
 

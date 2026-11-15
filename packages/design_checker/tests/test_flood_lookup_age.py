@@ -54,7 +54,7 @@ def test_how_long_ago_is_said_in_plain_words(found, today, words):
 
 def test_a_recent_lookup_clears_the_row_and_the_site_lines_say_how_old_it_is():
     v = check_site(SITE, facts_found_on("2026-08-14"), today=TODAY)["view"]
-    assert release_rows(v) == [] and v["state"] == present.COMPLIES
+    assert release_rows(v) == [] and v["sections"][0]["state"] == present.COMPLIES     # zoning (egress waits)
     assert ("Overlays: none found · flood map and City maps looked up 2 months ago (2026-08-14): FEMA Zone X, minimal "
             "flood hazard; the City's historic, gorge and zoning maps and parcel record · not confirmed"
             in v["header"]["sources"])
@@ -123,7 +123,7 @@ def test_same_design_same_facts_same_day_same_answer_and_the_day_is_the_only_clo
     a, b = (check_site(SITE, facts, today=TODAY)["view"] for _ in range(2))
     assert (a["state"], a["summary"], a["header"]["sources"]) == (b["state"], b["summary"], b["header"]["sources"])
     later = check_site(SITE, facts, today="2026-11-13")["view"]
-    assert a["state"] == present.COMPLIES and later["state"] == present.REVIEW
+    assert a["sections"][0]["state"] == present.COMPLIES and later["sections"][0]["state"] == present.REVIEW
 
 
 def test_nothing_on_the_check_path_reads_the_clock():
