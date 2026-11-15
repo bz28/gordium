@@ -5414,6 +5414,75 @@ rules:
       side was marked present, so a door whose landing wasn''t marked had its drop unchecked here (R318.3 fails
       it, so no false pass in the rulebook). Each now applies to the egress door; a drop not given needs review.
       Cause r318_3_1_tied_to_landing, resolutions.yaml.'
+- id: general.r318_3_1_egress_door_exterior_landing_access_to_grade
+  kind: flag
+  topic: means_of_egress
+  title: 'Exterior landing not at grade: ramp or stairway to grade'
+  applies_when: exterior_door_is_egress_door and exterior_door_outside_landing and not exterior_door_outside_at_grade
+  for_each: exterior_door
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.residential.2025.pdf
+    page: 100
+    lines:
+    - 5
+    - 6
+    quote: Where exterior landings or floors serving the required egress door are not at grade, they shall be provided
+      with access to grade by means of a ramp in accordance with Section R318.8 or a stairway in accordance with
+      Section R318.7.
+  examples:
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_outside_landing: true
+          exterior_door_outside_at_grade: false
+        name: Front door onto a deck
+    rows:
+    - part: d1
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      exterior_door:
+      - id: d1
+        measures:
+          exterior_door_is_egress_door: true
+          exterior_door_outside_landing: true
+          exterior_door_outside_at_grade: true
+    rows:
+    - part: d1
+      outcome: not_applicable
+    expect: not_applicable
+  - given: {}
+    parts:
+      exterior_door: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+  open_questions:
+  - Whether a ramp or stairway to grade is provided, and whether it complies with R318.8 or R318.7, is a person's
+    check; those sections' own rules check the ramp or stairway itself.
+  research:
+  - question: Whether a ramp or stairway to grade is provided, and whether it complies with R318.8 or R318.7, is
+      a person's check; those sections' own rules check the ramp or stairway itself.
+    searched: []
+    sources: []
+    why_open: 'pending: raised by the drafting script (the AI''s draft); not searched yet'
+  notes: The AI's last recorded answer (2026-11-14 run), refused only for a missing example; added by hand.
+  drafted_by: claude_code/claude-opus-5-5 (for Ben, after the AI's draft)
+  status: draft
+  revised:
+  - field: rule
+    by: Claude for Ben (house egress, remaining pieces, review round 1)
+    date: &id006 2026-11-15
+    why: 'R318.3.1: "Where exterior landings or floors serving the required egress door are not at grade, they shall
+      be provided with access to grade by means of a ramp in accordance with Section R318.8 or a stairway in accordance
+      with Section R318.7." The AI''s flag for it was refused by code (no "none" example), so nothing checked it:
+      an egress door onto a raised landing with no way down passed. Its last recorded answer added by hand with
+      the example. Found by review round 1. Cause r318_3_1_access_to_grade_unchecked, resolutions.yaml.'
 - id: general.r318_3_2_other_exterior_door_floor_elevation
   kind: rule
   topic: means_of_egress
@@ -5693,8 +5762,8 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Top landing at enclosed garage stair, drop below threshold (R318.7.6 exc. 2)
-  applies_when: stair_at_enclosed_garage and stair_top_door
-  check: stair_top_landing_drop <= 8.25
+  applies_when: stair_top_door
+  check: not stair_at_enclosed_garage or stair_top_landing_drop <= 8.25
   for_each: stair
   when_none: not_applicable
   sources:
@@ -5743,8 +5812,32 @@ rules:
           stair_top_landing_drop: 9
     rows:
     - part: s1
-      outcome: not_applicable
-    expect: not_applicable
+      outcome: needs_review
+    expect: needs_review
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        measures:
+          stair_top_door: true
+          stair_at_enclosed_garage: false
+          stair_top_landing_drop: 0
+    rows:
+    - part: s1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      stair:
+      - id: s1
+        measures:
+          stair_top_door: true
+          stair_at_enclosed_garage: false
+          stair_top_landing_drop: 7
+    rows:
+    - part: s1
+      outcome: needs_review
+    expect: needs_review
   - given: {}
     parts:
       stair: []
@@ -5765,6 +5858,39 @@ rules:
   notes: Drafted by the rule-drafting script.
   drafted_by: rule_drafting/claude-sonnet-5-5
   status: draft
+  review_when:
+  - when: not stair_at_enclosed_garage and stair_top_landing_drop > 0
+    reason: The top landing is below the threshold of the door at the top of a stair not at an enclosed garage;
+      R318.7.6 gives a drop only at a garage. A person checks.
+  revised:
+  - field: applies_when
+    by: Claude for Ben (house egress, remaining pieces, review round 1)
+    date: *id006
+    why: R318.7.6 exception 2 gives a top landing's drop below the door's threshold (8 1/4 in) only "at an enclosed
+      garage"; for a top door elsewhere the law gives no number (open question). The AI's rule was not applicable
+      there, a pass on a question the law leaves open. A landing below such a door's threshold now needs review;
+      one level with it passes. Found by review round 1. Cause r318_7_6_top_door_drop_open, resolutions.yaml.
+  - field: check
+    by: Claude for Ben (house egress, remaining pieces, review round 1)
+    date: *id006
+    why: R318.7.6 exception 2 gives a top landing's drop below the door's threshold (8 1/4 in) only "at an enclosed
+      garage"; for a top door elsewhere the law gives no number (open question). The AI's rule was not applicable
+      there, a pass on a question the law leaves open. A landing below such a door's threshold now needs review;
+      one level with it passes. Found by review round 1. Cause r318_7_6_top_door_drop_open, resolutions.yaml.
+  - field: review_when
+    by: Claude for Ben (house egress, remaining pieces, review round 1)
+    date: *id006
+    why: R318.7.6 exception 2 gives a top landing's drop below the door's threshold (8 1/4 in) only "at an enclosed
+      garage"; for a top door elsewhere the law gives no number (open question). The AI's rule was not applicable
+      there, a pass on a question the law leaves open. A landing below such a door's threshold now needs review;
+      one level with it passes. Found by review round 1. Cause r318_7_6_top_door_drop_open, resolutions.yaml.
+  - field: examples
+    by: Claude for Ben (house egress, remaining pieces, review round 1)
+    date: *id006
+    why: R318.7.6 exception 2 gives a top landing's drop below the door's threshold (8 1/4 in) only "at an enclosed
+      garage"; for a top door elsewhere the law gives no number (open question). The AI's rule was not applicable
+      there, a pass on a question the law leaves open. A landing below such a door's threshold now needs review;
+      one level with it passes. Found by review round 1. Cause r318_7_6_top_door_drop_open, resolutions.yaml.
 - id: general.r318_7_6_top_landing_width
   kind: rule
   topic: means_of_egress
@@ -7942,7 +8068,7 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
-  - &id006
+  - &id007
     file: gov.ny.residential.2025.pdf
     page: 103
     lines:
@@ -8056,7 +8182,7 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
-  - *id006
+  - *id007
   examples:
   - given: {}
     parts:
@@ -8154,7 +8280,7 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
-  - *id006
+  - *id007
   examples:
   - given: {}
     parts:
@@ -8252,7 +8378,7 @@ rules:
     quote: Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less
       than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically
       for the full height of the area well.
-  - *id006
+  - *id007
   examples:
   - given: {}
     parts:
@@ -8364,7 +8490,7 @@ rules:
     - 23
     - 23
     quote: (127 mm) and a maximum riser height of 18 inches (457 mm) for the full height of the area well.
-  - *id006
+  - *id007
   examples:
   - given: {}
     parts:
