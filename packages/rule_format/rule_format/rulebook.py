@@ -234,6 +234,18 @@ def rules_folder(folder) -> Path:
     return folder / (BUILDING_CODE_RULES if (folder / STATE_SETTINGS).is_file() else ZONING_RULES)
 
 
+GENERAL_RULES = "general.yaml"                   # a state folder's one rulebook: its building code's rules, every house
+
+
+def building_code_rulebook(folder, exists=Path.is_file) -> Path | None:
+    """A state law folder's rulebook (its building code's rules, for every house, not by district): the
+    5_building_code_rules/general.yaml written by hand when it exists, else the AI-drafted drafted/general.yaml, else
+    None, as rulebook_for picks a zone's. Read only for a place that inherits the folder (place.Place.inherits): a
+    state folder is never checked on its own."""
+    base = Path(folder) / BUILDING_CODE_RULES
+    return next((p for p in (base / GENERAL_RULES, base / "drafted" / GENERAL_RULES) if exists(p)), None)
+
+
 def jurisdictions(repo: Path = REPO) -> list[Path]:
     """Every place folder, regulations/jurisdictions/<state>/<place> under `repo`, in a stable order (a state's own
     law folder, which has a state.yaml, is not a place: state_folders)."""

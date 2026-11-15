@@ -19,7 +19,7 @@ from pathlib import Path
 
 import yaml
 
-from .rulebook import REPO, STATE_SETTINGS
+from .rulebook import REPO, STATE_SETTINGS, building_code_rulebook
 
 SETTINGS = "jurisdiction.yaml"
 JURISDICTIONS = "regulations/jurisdictions"
@@ -114,6 +114,12 @@ class Place:
         """The state law folders whose law applies here too (jurisdiction.yaml `inherits`, each <state>/<name>,
         a folder with a state.yaml), in the order listed: New York's Residential Code for Ithaca."""
         return tuple(self.folder.parent.parent / k for k in self.settings.get("inherits") or ())
+
+    def inherited_rulebooks(self) -> tuple[tuple[Path, Path | None], ...]:
+        """(state law folder, its rulebook or None) for each folder this place inherits, in the order listed: the
+        building code rules a check of a design here runs beside the place's zoning (design_checker/egress.py).
+        The one way a state's rules reach a check: through a place that inherits them."""
+        return tuple((folder, building_code_rulebook(folder)) for folder in self.inherits)
 
     @property
     def test_sites(self) -> Path:

@@ -31,14 +31,18 @@ PIECE_FIELDS = {"piece_sha256", "numbers", "second_reading", "second_reading_num
 
 
 def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
-    """What's wrong with a state law folder's state.yaml: a name, and its law naming documents in sources.yaml."""
+    """What's wrong with a state law folder's state.yaml: a name, the heading a check's results of its law go
+    under (results_title, if given), and its law naming documents in sources.yaml."""
     try:
         s = load(Path(folder) / STATE_SETTINGS)
     except Exception as e:  # reported, never raised
         return [f"{STATE_SETTINGS} can't be read ({type(e).__name__}: {e})"]
-    if not isinstance(s, dict) or set(s) - {"name", "law"}:
-        return [f"{STATE_SETTINGS} must be a mapping of name and law only"]
+    if not isinstance(s, dict) or set(s) - {"name", "law", "results_title"}:
+        return [f"{STATE_SETTINGS} must be a mapping of name, law and results_title only"]
     out = [] if isinstance(s.get("name"), str) and s["name"].strip() else ["no name"]
+    if "results_title" in s and not (isinstance(s["results_title"], str) and s["results_title"].strip()):
+        out.append("results_title must be words: how a check's results of this law are headed, e.g. "
+                   "\"Egress (NY State Residential Code 2025)\" (left out: \"<name> building code\")")
     law = s.get("law")
     if not (isinstance(law, dict) and law):
         return out + ["law names no document"]
