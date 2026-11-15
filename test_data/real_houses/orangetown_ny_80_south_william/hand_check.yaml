@@ -1,0 +1,629 @@
+# The full egress check on this house, worked by hand for EVERY rule in the New York State rulebook
+# (regulations/jurisdictions/new_york/new_york_state/5_building_code_rules/drafted/general.yaml, 115 rules),
+# BEFORE the checker was run on the house (this file is committed on its own, ahead of the checker's results).
+#
+# Two answers per rule, kept apart on purpose:
+#   truth      what the 2025 Residential Code of New York State says about this house AS DRAWN, from the code text and
+#              the drawings, whatever Gordium can read. One of: complies, does_not_comply, needs_review,
+#              not_applicable. Most rest on answer_key.yaml (worked in PR #97, before any checker existed): `area`
+#              names its entry. A rule about several parts (four bedrooms, five flights) takes the most cautious.
+#   predicted  what the checker SHOULD say, given house.yaml as written (what the description can carry, what the
+#              measuring code reads: docs/interior/interior_measurements.md and expected.yaml) and the rule's own
+#              formulas. One of the checker's answers: pass, fail, needs_review, not_applicable.
+# Where predicted and the checker's answer differ, the checker (or the prediction) is wrong. Where predicted and
+# truth differ, the difference is what the description or the rulebook can't yet carry (evaluation.md says which).
+# The one thing that must never happen: the checker says pass where truth isn't complies (a false pass).
+#
+# Building values given to the check: dwelling_units 1 (A-1 project data table, use "SINGLE-FAMILY DWELLING").
+# Zoning: this lot is in the Town of Orangetown, not the City of Ithaca, so no zoning rulebook applies to it; only the
+# state code (egress) is checked.
+#
+# Parts of the house the truth is worked over (sheets A-1 to A-5, see README.md):
+#   bedrooms: master, bed2, bed3, bed4 (second floor); their 10 marked escape windows (m1-m4, b2a-b4b)
+#   other marked escape windows: bonus room x1, x2; basement bsw1, bsw2 (CW14 in areaways)
+#   flights: main stair, basement stair, the two one-riser steps onto the bridge, the garage steps, the porch steps
+#   exit door: the front door; other exterior doors: two rear sliders ('60611 SL DR', A-2) onto the PATIO, the
+#   mudroom door into the garage is interior to the building
+#   guards: the second-floor railings g_hall, g_bridge_n, g_bridge_s, g_east, and the stair guard g_stair_w
+#   none drawn: sleeping lofts, ramps, alternating tread devices, ship's ladders, spiral stairs, patio covers, an
+#   addition (this is a new house). The attic is unfinished roof space over insulated ceiling joists (A-5 section,
+#   'ATTIC'), reached by a pull-down attic stair (A-3 'ATTIC STAIR DETAILS'): not a habitable attic (R202: an
+#   occupiable floor area of at least 70 sq ft with a 7 ft ceiling; none is drawn) and its folding ladder is attic
+#   access, not a stairway serving an occupied floor (Gordium's reading, stated).
+
+rules:
+  # ------------------------------------------------------------------------------------------- the exit door
+  - id: general.r318_2_egress_door_per_dwelling_unit
+    truth: needs_review
+    why: "one side-hinged door straight outside (the front door, A-2); its clear width and height aren't given (area exit_door_clear_width, exit_door_clear_height)"
+    predicted: needs_review
+    because: "door_clear_width and door_clear_height not measured (expected.yaml: no hinge side, no threshold)"
+  - id: general.r318_2_egress_door_side_hinged
+    truth: complies
+    why: "A-2: the front door is drawn with a swing arc (area exit_door_type)"
+    predicted: needs_review
+    because: "door_side_hinged isn't among the measures expected.yaml gives the front door (measures: {})"
+  - id: general.r318_2_egress_door_clear_width
+    truth: needs_review
+    why: "3'-0\" leaf; thickness and stops not given (area exit_door_clear_width)"
+    predicted: needs_review
+    because: "door_clear_width not measured"
+  - id: general.r318_2_egress_door_clear_height
+    truth: needs_review
+    why: "8'-0\" leaf; threshold and head stop not given (area exit_door_clear_height)"
+    predicted: needs_review
+    because: "door_clear_height not measured"
+  - id: general.r318_2_egress_door_readily_openable
+    truth: needs_review
+    why: "no hardware shown (area exit_door_hardware)"
+    predicted: needs_review
+    because: "a flag (no check formula): always for a person"
+  - id: general.bf103_2_exit_into_patio_cover_r318_exits
+    truth: not_applicable
+    why: "the front door opens onto a covered porch (A-2), a porch roofed with the house, not an Appendix BF patio cover; no patio cover is drawn"
+    predicted: needs_review
+    because: "a flag with no applies_when: it asks about every egress door"
+  - id: general.r318_3_1_egress_door_given_as_exterior_door
+    truth: needs_review
+    why: "the front door's landings and drops are R318.3's (see the exterior door rules): not all given"
+    predicted: needs_review
+    because: "egress_door_given_as_exterior_door not measured (the format has no exterior doors)"
+
+  # ------------------------------------------------------------------------------------------- exterior doors
+  - id: general.r318_3_exterior_door_landing_each_side
+    truth: needs_review
+    why: "front door: the entry inside, the covered porch outside (A-2): complies. Rear sliders: the PATIO outside (A-2), drawn but not dimensioned or levelled: not settled"
+    predicted: needs_review
+    because: "exterior doors aren't a part the description carries (exterior_door not read)"
+  - id: general.r318_3_exterior_door_landing_width
+    truth: needs_review
+    why: "front porch 6'-8\" >= the 3'-0\" door (area exit_door_landing): complies; the patio outside the 6'-0\" sliders isn't dimensioned"
+    predicted: needs_review
+    because: "exterior_door not read"
+  - id: general.r318_3_exterior_door_landing_depth
+    truth: needs_review
+    why: "front porch 4'-0\" = 48 >= 36 (area exit_door_landing): complies; the patio's depth isn't dimensioned"
+    predicted: needs_review
+    because: "exterior_door not read"
+  - id: general.r318_3_exterior_door_landing_slope
+    truth: needs_review
+    why: "no slope given for the porch or the patio (area exit_door_porch)"
+    predicted: needs_review
+    because: "exterior_door not read"
+  - id: general.r318_3_1_egress_door_inside_floor_drop
+    truth: needs_review
+    why: "the threshold isn't detailed (area exit_door_threshold)"
+    predicted: needs_review
+    because: "exterior_door not read"
+  - id: general.r318_3_1_egress_door_outside_floor_drop
+    truth: needs_review
+    why: "'DOWN' onto the porch, drop not given; the door swings in, so the limit is 8 1/4 in (area exit_door_threshold)"
+    predicted: needs_review
+    because: "exterior_door not read"
+  - id: general.r318_3_1_egress_door_exterior_landing_access_to_grade
+    truth: needs_review
+    why: "steps 'DOWN' from the porch to grade, not dimensioned (area exit_door_porch)"
+    predicted: needs_review
+    because: "exterior_door not read"
+  - id: general.r318_3_2_other_exterior_door_floor_elevation
+    truth: needs_review
+    why: "the rear sliders' drop to the patio isn't given"
+    predicted: needs_review
+    because: "exterior_door not read"
+
+  # ------------------------------------------------------------------------------------------- escape openings
+  - id: general.r319_2_1_escape_opening_min_net_clear_area
+    truth: needs_review
+    why: "size codes only, no clear opening; bedrooms 2 and 3 (3046) are close to 5.7 sf (area escape_opening_area)"
+    predicted: needs_review
+    because: "opening_net_clear_area not measured for any of the 10 bedroom openings (no frame)"
+  - id: general.r319_2_2_escape_opening_min_net_clear_height
+    truth: needs_review
+    why: "area escape_opening_height"
+    predicted: needs_review
+    because: "opening_net_clear_height not measured"
+  - id: general.r319_2_2_escape_opening_min_net_clear_width
+    truth: needs_review
+    why: "area escape_opening_width"
+    predicted: needs_review
+    because: "opening_net_clear_width not measured"
+  - id: general.r319_2_3_escape_opening_max_sill_height
+    truth: needs_review
+    why: "area escape_opening_sill (the double-hungs very likely comply, resting on a framed header '+/-' and nominal sizes)"
+    predicted: needs_review
+    because: "opening_sill_height not measured"
+  - id: general.r319_2_4_under_projection_openable_path
+    truth: not_applicable
+    why: "the bedroom windows are on the second floor (bedroom 4's over a 'ROOF BELOW', A-3: a roof, not a deck, porch or cantilever over the opening); the basement areaways (A-2) are not under the porch, and the rear PATIO is at grade, not a deck"
+    predicted: needs_review
+    because: "applies_when opening_under_projection: not measured, so it may apply"
+  - id: general.r319_3_escape_door_side_hinged_or_sliding
+    truth: not_applicable
+    why: "every marked escape opening is a window (A-3, A-5 schedule)"
+    predicted: needs_review
+    because: "applies_when opening_is_door: not measured (the measuring doesn't turn `operation` into it)"
+  - id: general.r319_4_area_well_required
+    truth: complies
+    why: "the only openings below grade are the basement's two CW14s, each in a 'BOWMAN KEMP AREAWAY' (A-2); the bedroom windows are above grade"
+    predicted: needs_review
+    because: "applies_when opening_below_grade not measured; the basement openings aren't checked at all (not in a sleeping room: not_checked)"
+  - id: general.r319_4_2_area_well_ladder_over_44
+    truth: needs_review
+    why: "the well's depth isn't given; the ladder is called for only 'WHEN EXIT HEIGHT EXCEEDS 44\"' (A-5; area area_well_ladder)"
+    predicted: needs_review
+    because: "opening_below_grade, area_well_depth not measured"
+  - id: general.bf103_2_escape_opening_into_patio_cover_unenclosed
+    truth: not_applicable
+    why: "no patio cover is drawn; no bedroom window opens into one"
+    predicted: needs_review
+    because: "applies_when opening_into_patio_cover not measured"
+  - id: general.r319_4_1_area_well_min_area
+    truth: needs_review
+    why: "the well tapers outward and its outer edge isn't dimensioned (area area_well_size)"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_4_1_area_well_min_projection
+    truth: complies
+    why: "A-5 'PLAN VIEW WINDOW WELL': '36\" WELL PROJECTION' >= 36 (area area_well_size), if the A-5 well is the one built at both CW14s (A-2 calls them 'BOWMAN KEMP AREAWAY')"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_4_1_area_well_min_width
+    truth: needs_review
+    why: "52 in at the wall, narrower outward, not dimensioned: R319.4.1 needs 36 in (area area_well_size)"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_4_1_area_well_allows_full_opening
+    truth: needs_review
+    why: "CW14 casement on the plan, 4040 in the detail: whether it opens fully in the well isn't shown (area area_well_size)"
+    predicted: needs_review
+    because: "opening_below_grade, opening_fully_openable not measured"
+  - id: general.r319_1_sleeping_room_escape_opening_operable
+    truth: complies
+    why: "this rule's clause only: each bedroom has an operable window marked as its escape opening (double-hungs and casements, A-3, A-5). Whether that window qualifies is R319.2's rules (all needs review; area escape_opening_designated)"
+    predicted: needs_review
+    because: "opening_operable not measured (the measuring doesn't turn `operation` into it)"
+  - id: general.r319_1_basement_escape_opening_operable
+    truth: needs_review
+    why: "two CW14 casements marked for the basement, but the A-5 detail draws a different window (area basement_escape_opening)"
+    predicted: needs_review
+    because: "basements aren't a part the measuring reads (the format has no basement flag): not read"
+  - id: general.r319_1_habitable_attic_escape_opening_operable
+    truth: not_applicable
+    why: "no habitable attic: the attic is unfinished, insulated roof space (A-5), reached by a pull-down attic stair (A-3)"
+    predicted: needs_review
+    because: "habitable attics aren't read"
+  - id: general.r319_1_loft_room_escape_opening_operable
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "loft rooms aren't read"
+  - id: general.r319_1_escape_opening_opens_to_public_way_or_yard
+    truth: needs_review
+    why: "no site plan in the set; bedroom 4's windows open over a roof (area escape_opening_opens_outside)"
+    predicted: needs_review
+    because: "opening_opens_to_yard not measured"
+  - id: general.r319_4_2_1_area_well_ladder_width
+    truth: needs_review
+    why: "the well's depth (does R319.4.2 apply?) and the ladder's rungs aren't given (area area_well_ladder)"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_4_2_1_area_well_ladder_projection
+    truth: needs_review
+    why: "area area_well_ladder"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_4_2_1_area_well_ladder_rung_spacing
+    truth: needs_review
+    why: "area area_well_ladder"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_4_2_1_area_well_ladder_full_height
+    truth: needs_review
+    why: "area area_well_ladder"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_4_2_2_area_well_steps_requirements
+    truth: not_applicable
+    why: "the well has a ladder (A-5 'ESCAPE LADDER'), not steps"
+    predicted: needs_review
+    because: "opening_below_grade not measured"
+  - id: general.r319_6_addition_sleeping_room_escape_opening
+    truth: not_applicable
+    why: "a new house, not a dwelling unit addition"
+    predicted: needs_review
+    because: "no applies_when: it runs on every sleeping room; opening_operable not measured"
+  - id: general.r319_6_addition_basement_escape_opening
+    truth: not_applicable
+    why: "a new house, not an addition"
+    predicted: needs_review
+    because: "basements aren't read"
+
+  # ------------------------------------------------------------------------------------------- stairs (flights)
+  - id: general.r318_7_8_stair_handrail_one_side
+    truth: needs_review
+    why: "main and basement stairs: a handrail is drawn (area stair_handrail); garage steps: 'RAILING AS PER RES. CODE' (A-2); the porch steps' riser count and rail aren't given"
+    predicted: needs_review
+    because: "the stairs aren't read (no `stairs` in the description)"
+  - id: general.r315_5_2_2_sleeping_loft_stair_riser_height
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r315_5_2_2_sleeping_loft_stair_tread_riser_formula
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r315_5_2_1_sleeping_loft_stair_clear_width_at_or_above_handrail
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_1_stair_clear_width_above_handrail
+    truth: needs_review
+    why: "basement stair 3'-0\" to framing (35 in finished); the bonus room's step in a 2'-8\" doorway, about 30 in (areas stair_width, bridge_step_bonus_room)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_1_stair_clear_width_at_handrail
+    truth: needs_review
+    why: "area stair_width"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_2_stair_headroom
+    truth: needs_review
+    why: "not dimensioned; borderline with treads near 10 in (area stair_headroom)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_2_stair_floor_opening_headroom
+    truth: needs_review
+    why: "the main stair runs under the edge of the second-floor opening (A-3 9'-8\" opening; A-5 section): the projection into the headroom isn't given"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_3_stair_vertical_rise_max
+    truth: complies
+    why: "the tallest flight is the main stair: about 118.5 in floor to floor from the given framing (area stair_riser: 108 in ceiling + 1/2 in board + 9 1/4 in joists + 3/4 in subfloor), far under 151 in (12'-7\"); the basement stair about 108 in; the others a few risers"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_5_1_stair_riser_height_max
+    truth: needs_review
+    why: "main stair about 7.41 in; the basement stair 8.31 in (fails) at 13 risers with the section's 2x12 joists, 7.71 in at 14: the sheets give both (area stair_riser)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_5_1_stair_riser_variation_max
+    truth: needs_review
+    why: "no riser heights given"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_5_1_stair_riser_slope
+    truth: needs_review
+    why: "a flag (risers vertical or sloped no more than 30 degrees): the A-2 stair detail draws vertical risers, but the main stair isn't detailed beyond the typical detail"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_5_1_stair_open_riser_sphere
+    truth: needs_review
+    why: "garage steps 'CLOSED RISERS' (A-2); whether the main stair's risers are open isn't stated"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_5_2_stair_tread_depth_min
+    truth: needs_review
+    why: "garage steps 9\" to the nearest inch, exactly the minimum; the main stair's treads aren't dimensioned (area stair_tread, garage_steps)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_5_2_stair_tread_variation_max
+    truth: needs_review
+    why: "no tread depths given for the main stair"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_stair_top_landing
+    truth: complies
+    why: "every flight has a floor or landing at its top: main stair the bridge (A-3 4'-0\"); basement stair the 3'-4\" landing (A-2); garage steps the 3'-8\" x 3'-4\" landing (A-2); the bridge steps the hallway and the bonus room floor (the bonus room's door swings into the room, not over the step); the porch steps the porch (areas stair_top_landing, stair_other_landings)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_stair_bottom_landing
+    truth: complies
+    why: "every flight lands on a floor: the main floor, the basement slab, the garage slab, the bridge, grade (A-2, A-3); their sizes are other rules"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_garage_top_landing_drop
+    truth: not_applicable
+    why: "applies to a flight with a door at its top and its top floor on the far side: only the bonus room's step onto the bridge, which isn't at a garage. The garage steps have their own landing on the stair's side of the mudroom door (A-2)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_top_landing_width
+    truth: needs_review
+    why: "main stair 80 >= 40; basement stair 36 = 36 (both to framing); the garage and porch steps' widths aren't given"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_bottom_landing_width
+    truth: needs_review
+    why: "the main and basement stairs' feet aren't dimensioned (area stair_other_landings)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_deck_stair_bottom_landing_width
+    truth: not_applicable
+    why: "the only exterior steps to grade are the porch steps, the required egress door's access to grade (excluded by this rule's applies_when)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_straight_run_landing_depth
+    truth: needs_review
+    why: "tops: main 48, basement 40 (comply); the main and basement stairs' bottom landings aren't dimensioned (area stair_other_landings)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_6_nonrectangular_landing
+    truth: not_applicable
+    why: "every landing drawn is rectangular (A-2, A-3)"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_11_1_spiral_stair_clear_width
+    truth: not_applicable
+    why: "no spiral stair"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_11_1_spiral_stair_walkline_radius
+    truth: not_applicable
+    why: "no spiral stair"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_11_1_spiral_stair_tread_depth
+    truth: not_applicable
+    why: "no spiral stair"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_11_1_spiral_stair_identical_treads
+    truth: not_applicable
+    why: "no spiral stair"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_11_1_spiral_stair_rise
+    truth: not_applicable
+    why: "no spiral stair"
+    predicted: needs_review
+    because: "stairs not read"
+  - id: general.r318_7_11_1_spiral_stair_headroom
+    truth: not_applicable
+    why: "no spiral stair"
+    predicted: needs_review
+    because: "stairs not read"
+
+  # ------------------------------------------------------------------------------------------- handrails
+  - id: general.r320_2_handrail_height_34_38
+    truth: needs_review
+    why: "no handrail height above the nosings is dimensioned (area stair_handrail)"
+    predicted: needs_review
+    because: "handrails aren't a part the description carries (handrail not read)"
+  - id: general.r320_4_handrail_wall_clearance
+    truth: needs_review
+    why: "the basement stair's wall handrail: clearance not given"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_3_handrail_projection
+    truth: needs_review
+    why: "not given"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_5_handrail_continuity
+    truth: needs_review
+    why: "not detailed"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_5_handrail_end_returned
+    truth: needs_review
+    why: "not detailed"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_5_handrail_return_gap
+    truth: needs_review
+    why: "not detailed"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_6_handrail_edge_radius
+    truth: needs_review
+    why: "the handrail profile isn't given"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_6_handrail_circular_diameter
+    truth: needs_review
+    why: "the handrail profile isn't given"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_6_handrail_type_i_noncircular
+    truth: needs_review
+    why: "the handrail profile isn't given"
+    predicted: needs_review
+    because: "handrail not read"
+  - id: general.r320_6_handrail_type_ii_recess
+    truth: needs_review
+    why: "the handrail profile isn't given"
+    predicted: needs_review
+    because: "handrail not read"
+
+  # ------------------------------------------------------------------------------------------- open sides and guards
+  - id: general.r321_1_1_guard_required_open_side
+    truth: complies
+    why: "every open side drawn on the second floor and along the main stair's open side has a railing (A-3, A-5); each is over the main floor, more than 30 in down (area guard_height_level)"
+    predicted: needs_review
+    because: "open sides aren't a part the description carries (open_side not read; the measuring's `guard` is not a rule part kind)"
+  - id: general.r321_1_2_guard_height_open_side_not_stair
+    truth: complies
+    why: "each level railing labelled '36\" HIGH RAILING' (A-3), 36 >= 36 (area guard_height_level)"
+    predicted: needs_review
+    because: "open_side not read"
+  - id: general.r321_1_2_guard_height_stair_open_side
+    truth: needs_review
+    why: "the stair guard's height above the nosing line isn't given (area guard_height_stair)"
+    predicted: needs_review
+    because: "open_side not read"
+  - id: general.r321_1_2_guard_height_stair_guard_as_handrail
+    truth: needs_review
+    why: "whether the stair guard's top rail serves as the handrail, and its height, aren't given"
+    predicted: needs_review
+    because: "open_side not read"
+  - id: general.r321_1_3_guard_opening_4_inch_sphere
+    truth: needs_review
+    why: "no baluster spacing; the A-1 note's 'NOT ... GREATER THAN 4\"' is looser than the code (area guard_openings)"
+    predicted: needs_review
+    because: "open_side not read"
+  - id: general.r321_1_3_guard_stair_triangle_6_inch_sphere
+    truth: needs_review
+    why: "not detailed"
+    predicted: needs_review
+    because: "open_side not read"
+  - id: general.r321_1_3_guard_stair_opening_4_3_8_sphere
+    truth: needs_review
+    why: "no baluster spacing"
+    predicted: needs_review
+    because: "open_side not read"
+
+  # ------------------------------------------------------------------------------------------- none drawn
+  - id: general.r315_2_sleeping_loft_floor_area_limit
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "sleeping lofts aren't read"
+  - id: general.r315_2_sleeping_loft_ceiling_height_limit
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "sleeping lofts aren't read"
+  - id: general.r315_3_sleeping_loft_clear_height_below
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "sleeping lofts aren't read"
+  - id: general.r315_3_sleeping_loft_ceiling_height
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "sleeping lofts aren't read"
+  - id: general.r319_1_room_a_sleeping_loft_is_open_to
+    truth: not_applicable
+    why: "no sleeping loft"
+    predicted: needs_review
+    because: "sleeping lofts aren't read"
+  - id: general.r318_8_1_ramp_max_slope_egress_door
+    truth: not_applicable
+    why: "no ramp drawn"
+    predicted: needs_review
+    because: "ramps aren't read"
+  - id: general.r318_8_1_ramp_max_slope_other
+    truth: not_applicable
+    why: "no ramp drawn"
+    predicted: needs_review
+    because: "ramps aren't read"
+  - id: general.r318_8_1_ramp_max_slope_infeasible
+    truth: not_applicable
+    why: "no ramp drawn"
+    predicted: needs_review
+    because: "ramps aren't read"
+  - id: general.r318_8_2_ramp_landings_present
+    truth: not_applicable
+    why: "no ramp drawn"
+    predicted: needs_review
+    because: "ramps aren't read"
+  - id: general.r318_8_2_ramp_landing_width
+    truth: not_applicable
+    why: "no ramp drawn"
+    predicted: needs_review
+    because: "ramps aren't read"
+  - id: general.r318_8_2_ramp_landing_depth
+    truth: not_applicable
+    why: "no ramp drawn"
+    predicted: needs_review
+    because: "ramps aren't read"
+  - id: general.r318_8_3_ramp_handrail_one_side
+    truth: not_applicable
+    why: "no ramp drawn"
+    predicted: needs_review
+    because: "ramps aren't read"
+  - id: general.r318_7_12_atd_clear_width
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_atd_not_in_means_of_egress
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_1_atd_tread_depth
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_1_atd_projected_tread_depth
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_1_atd_tread_width
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_1_atd_riser_height
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_1_atd_angle
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_1_atd_first_tread_at_floor
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_2_atd_handrails_both_sides
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_12_2_atd_handrails_comply_r320
+    truth: not_applicable
+    why: "no alternating tread device"
+    predicted: needs_review
+    because: "alternating tread devices aren't read"
+  - id: general.r318_7_13_ship_ladder_clear_width
+    truth: not_applicable
+    why: "no ship's ladder (the pull-down attic stair is attic access, not a ship's ladder serving an occupied floor: Gordium's reading)"
+    predicted: needs_review
+    because: "ship's ladders aren't read"
+  - id: general.r318_7_13_ship_ladder_egress_use
+    truth: not_applicable
+    why: "no ship's ladder"
+    predicted: needs_review
+    because: "ship's ladders aren't read"
+  - id: general.r318_7_13_1_ships_ladder_tread_depth
+    truth: not_applicable
+    why: "no ship's ladder"
+    predicted: needs_review
+    because: "ship's ladders aren't read"
+  - id: general.r318_7_13_1_ships_ladder_tread_plus_nosing
+    truth: not_applicable
+    why: "no ship's ladder"
+    predicted: needs_review
+    because: "ship's ladders aren't read"
+  - id: general.r318_7_13_1_ships_ladder_riser_height
+    truth: not_applicable
+    why: "no ship's ladder"
+    predicted: needs_review
+    because: "ship's ladders aren't read"
+  - id: general.r318_7_13_2_ships_ladder_handrails_both_sides
+    truth: not_applicable
+    why: "no ship's ladder"
+    predicted: needs_review
+    because: "ship's ladders aren't read"
+
+# Items the checker should add besides the rules' rows (predicted, from egress.py and expected.yaml):
+predicted_other_items:
+  - "the interior drawing: the stairs weren't read (no `stairs` in the description): needs review"
+  - "Bonus room double-hung 1 of 2 and 2 of 2 (x1, x2): marked as escape openings but not checked (not in a sleeping room): needs review"
+  - "Basement window CW14 in areaway, north and west (bsw1, bsw2): marked as escape openings but not checked: needs review"
+predicted_section_state: needs_review    # no fail, no pass on anything the truth doesn't settle
