@@ -67,7 +67,7 @@ NAMES = "section_names.yaml"                      # plain names for them, by han
 NOT_YET_ID = "not_checked_yet"
 NOT_YET_NAME = "Not checked yet by Gordium: {first}{more}: check these by hand"
 NOT_YET_WHY = ("Gordium doesn't check these sections of the {title} yet, so it never says {short} complies while any "
-               "is left: check each by hand. {all}. (The list: {file}.)")
+               "is left. Check each by hand: {all}. (The list: {file}.)")
 NOT_YET_WAITING = ". Not checked yet by Gordium, even once the rooms are drawn (check these by hand): {all}"
 NO_COVERAGE = ("Gordium can't tell which sections of the {title} it doesn't check yet ({why}): check the whole law by "
                "hand")

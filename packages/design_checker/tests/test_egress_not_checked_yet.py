@@ -78,7 +78,7 @@ def test_the_flag_sections_are_listed_too_after_the_rule_sections():
     for p in flags:
         assert f"({p})" in flags_part
     assert sorted(flags, key=lambda p: flags_part.index(f"({p})")) == flags         # in the book's order
-    assert "existing buildings: alterations, general (BO102.1)" in flags_part      # round 2: no bare "General"
+    assert "existing buildings: work must not make the building unsafe or less compliant (BO102.1)" in flags_part
     assert "General (" not in flags_part
     assert "Window fall protection" not in flags_part
     assert f"and {len(uncovered()) - 2} more" in line["name"]
@@ -209,5 +209,5 @@ def test_every_plain_name_is_for_a_rule_piece_and_every_section_not_checked_has_
     names = load(STATE / egress.NAMES)["names"]
     pieces = load(LIST)["pieces"]
     assert set(names) <= set(pieces)
-    assert {p for p in uncovered() if pieces[p]["label"] == "rule"} <= set(names)
+    assert set(uncovered()) <= set(names)              # rule and flag pieces alike (review round 3)
     assert all(isinstance(v, str) and v.strip() for v in names.values())

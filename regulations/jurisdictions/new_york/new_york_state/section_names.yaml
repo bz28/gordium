@@ -1,4 +1,4 @@
-# Plain names for the sections (labeled rule, then some labeled flag) of the 2025 Residential Code of New York State
+# Plain names for the sections (labeled rule, then labeled flag) of the 2025 Residential Code of New York State
 # that Gordium doesn't check yet, as the check names them to an architect ("Not checked yet by Gordium: window fall protection (R321.2.1), hallway width
 # (R318.6) and 84 more: check these by hand"). Kept by hand; wording only.
 #
@@ -7,7 +7,7 @@
 # CI checks it is current). A section that list names and this file doesn't is still named, by the law's own
 # heading. The order of the rule pieces here is the order the check lists them in: what most houses have first.
 # Pieces labeled flag are listed after every rule piece, in the book's order, as calling for a judgment Gordium
-# doesn't raise yet; the names below for Appendix BF's and BO's flags tell their many "General" headings apart.
+# doesn't raise yet (their names here are for the wording only; their order is the book's).
 names:
   R321.2.1: window fall protection
   R318.6: hallway width
@@ -39,8 +39,25 @@ names:
   BO105.11: "existing buildings: escape openings in a reworked basement"
   BO108.2: "existing buildings: bed and breakfast occupancy"
   BO108.3: "existing buildings: bed and breakfast conversions"
-  # labeled flag (listed in the book's order, after the rule pieces): Appendix BF's and Appendix BO's, whose headings
-  # alone repeat "General", "Replacement windows"
+  # labeled flag (listed in the book's order, after the rule pieces)
+  R316.2: "habitable attic floor area and ceiling height"
+  R318.5: "anchoring of exterior landings, decks, balconies and stairs"
+  R318.7.5.4: "plastic composite stair treads (material)"
+  R318.7.9: "altering stairs in existing buildings"
+  R319.4.3: "area well drainage"
+  R319.4.4: "bars, grilles, covers and screens over escape openings"
+  R319.5: "replacement windows in existing escape openings"
+  R319.5.1: "control and fall protection device height on replacement windows"
+  R319.7: "alterations or repairs of existing basements"
+  R320.7: "plastic composite handrails (material)"
+  R321.1.4: "plastic composite guards (material)"
+  R507.10: "deck guards: loads"
+  R507.10.1: "deck guards: load path to the deck framing"
+  R507.10.1.1: "deck guards: fastened to the side of deck framing"
+  R507.10.1.2: "deck guards: fastened on top of deck framing"
+  R507.10.2: "deck guards: wood posts not notched"
+  R507.10.3: "deck guards: plastic composite (material)"
+  R507.10.4: "deck guards: other kinds, per the manufacturer"
   BF101.1: "patio covers: what Appendix BF covers"
   BF101.2: "patio covers: permitted uses"
   BF103.1: "patio covers: enclosure walls"
@@ -48,7 +65,7 @@ names:
   R102.6.1: "existing buildings: additions, alterations and repairs go to Appendix BO"
   R102.6.2: "existing buildings: change of use"
   BO101.1: "existing buildings: purpose of Appendix BO"
-  BO102.1: "existing buildings: alterations, general"
+  BO102.1: "existing buildings: work must not make the building unsafe or less compliant"
   BO102.1.2: "existing buildings: nonconforming features"
   BO102.6: "existing buildings: replacement windows"
   BO104.1: "existing buildings: repairs, general"
