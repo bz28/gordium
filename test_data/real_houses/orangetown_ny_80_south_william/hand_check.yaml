@@ -21,12 +21,18 @@
 # Parts of the house the truth is worked over (sheets A-1 to A-5, see README.md):
 #   bedrooms: master, bed2, bed3, bed4 (second floor); their 10 marked escape windows (m1-m4, b2a-b4b)
 #   other marked escape windows: bonus room x1, x2; basement bsw1, bsw2 (CW14 in areaways)
-#   flights: main stair, basement stair, the two one-riser steps onto the bridge, the garage steps, the porch steps,
-#   and the steps down from each rear slider to the patio (A-2 'DN' at each '60611 SL DR'; A-2 basement plan 'CHEEK
-#   WALLS FOR STEPS ABOVE'; A-4 'CONC. PAVER STONE STEPS'; drawn with no landing at the door, riser count not given)
+#   flights: main stair, basement stair, the two one-riser steps onto the bridge, the step down at the mudroom door
+#   onto the garage landing (A-2 'DN' at the door; its height isn't given), the garage steps, the porch steps, and
+#   the steps down from each rear slider to the patio (A-2 'DN' at each '60611 SL DR'; A-2 basement plan 'CHEEK
+#   WALLS FOR STEPS ABOVE'; A-4 'CONC. PAVER STONE STEPS'; no landing drawn at the door; main floor 240.4' (A-2)
+#   over rear grade 238.2' (A-4) is 26.4 in, so at least four risers at 8 1/4 in)
 #   exit door: the front door; other exterior doors: two rear sliders ('60611 SL DR', A-2) onto the PATIO, the
-#   mudroom door into the garage is interior to the building
-#   guards: the second-floor railings g_hall, g_bridge_n, g_bridge_s, g_east, and the stair guard g_stair_w
+#   garage's side door ('2'-8"x6'-8"', A-2 east wall) and its overhead door (A-4); the mudroom door into the garage
+#   is interior to the building
+#   guards: the second-floor railings g_hall, g_bridge_n, g_bridge_s, g_east, the stair guard g_stair_w, and the
+#   garage landing's railing ('RAILING AS PER RES. CODE', A-2, no height)
+#   elevations disagree: A-2 spot elevations put the garage slab (237.8') 31.2 in below the main floor (240.4'); A-4
+#   gives 'GAR SLAB' to 'CLG' 10'-3" against the main floor's 9'-0", about 15 in if the ceilings line up
 #   none drawn: sleeping lofts, ramps, alternating tread devices, ship's ladders, spiral stairs, patio covers, an
 #   addition (this is a new house). The attic is unfinished roof space over insulated ceiling joists (A-5 section,
 #   'ATTIC'), reached by a pull-down attic stair (A-3 'ATTIC STAIR DETAILS'): not a habitable attic (R202: "A
@@ -38,9 +44,16 @@
 #   r319_4_1_area_well_min_projection     complies -> needs_review (the 36 in is to the well's outside, with the
 #                                          ladder inside it; which window and well are built isn't settled)
 #   r318_7_6_stair_top_landing            complies -> needs_review (the rear slider steps were missed: no landing
-#                                          drawn at the door, and the framing needs about 3 risers, more than the
+#                                          drawn at the door, and the floor's 26.4 in above grade needs at least 4 risers, more than the
 #                                          two-riser exception allows)
 #   r318_7_6_deck_stair_bottom_landing_width  not_applicable -> needs_review (the same rear steps serve the patio)
+# and by review round 2:
+#   r318_7_6_garage_top_landing_drop      not_applicable -> needs_review (a step down at the mudroom door onto the
+#                                          garage landing, height not given: R318.7.6 Exception 2's 8 1/4 in)
+#   r321_1_2_guard_height_open_side_not_stair  complies -> needs_review (the garage landing's railing has no height,
+#                                          and its drop may be over 30 in)
+#   r319_4_2_2_area_well_steps_requirements  not_applicable -> needs_review (rests on the A-5 well detail, which may
+#                                          not be what is built at the CW14s)
 
 rules:
   # ------------------------------------------------------------------------------------------- the exit door
@@ -234,8 +247,8 @@ rules:
     predicted: needs_review
     because: "opening_below_grade not measured"
   - id: general.r319_4_2_2_area_well_steps_requirements
-    truth: not_applicable
-    why: "the well has a ladder (A-5 'ESCAPE LADDER'), not steps"
+    truth: needs_review
+    why: "the A-5 well detail has a ladder, not steps, but which well and window are built at the CW14s isn't settled (area basement_escape_opening)"
     predicted: needs_review
     because: "opening_below_grade not measured"
   - id: general.r319_6_addition_sleeping_room_escape_opening
@@ -332,7 +345,7 @@ rules:
     because: "stairs not read"
   - id: general.r318_7_6_stair_top_landing
     truth: needs_review
-    why: "the interior flights and the porch steps have one: main stair the bridge (A-3 4'-0\"); basement stair the 3'-4\" landing (A-2); garage steps the 3'-8\" x 3'-4\" landing (A-2); the bridge steps the hallway and the bonus room floor (the door swings into the room); the porch steps the porch. The rear slider steps (A-2 'DN', A-4 'CONC. PAVER STONE STEPS') have no landing drawn at the door, and R318.7.6 Exception 3 waives it only for 'not more than two risers': the riser count isn't given, and the floor's framing above grade (A-5: 8\" min. foundation, sill, 2x10 joists, subfloor, about 19.5 in) needs at least three"
+    why: "the interior flights and the porch steps have one: main stair the bridge (A-3 4'-0\"); basement stair the 3'-4\" landing (A-2); garage steps the 3'-8\" x 3'-4\" landing (A-2); the bridge steps the hallway and the bonus room floor (the door swings into the room); the porch steps the porch. The rear slider steps (A-2 'DN', A-4 'CONC. PAVER STONE STEPS') have no landing drawn at the door, and R318.7.6 Exception 3 waives it only for 'not more than two risers': the riser count isn't given, and the floor stands 26.4 in above the rear grade (240.4', A-2; 238.2', A-4), so it needs at least four"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_stair_bottom_landing
@@ -341,8 +354,8 @@ rules:
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_garage_top_landing_drop
-    truth: not_applicable
-    why: "applies to a flight with a door at its top and its top floor on the far side: only the bonus room's step onto the bridge, which isn't at a garage. The garage steps have their own landing on the stair's side of the mudroom door (A-2)"
+    truth: needs_review
+    why: "A-2 marks 'DN' at the mudroom door onto the garage landing: a step down from the threshold, at an enclosed garage. R318.7.6 Exception 2: 'the top landing at the stair shall be permitted to be not more than 8 1/4 inches (209 mm) below the top of the threshold' (PDF p.101). The step's height isn't given"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_top_landing_width
@@ -357,7 +370,7 @@ rules:
     because: "stairs not read"
   - id: general.r318_7_6_deck_stair_bottom_landing_width
     truth: needs_review
-    why: "the rear slider steps go down to the patio, are not the egress door's access to grade, and may have three or fewer risers (riser count not given), so Exception 4's 36 in bottom landing may govern them; the patio isn't dimensioned. The porch steps are the egress door's access (excluded)"
+    why: "the rear slider steps go down to the patio and are not the egress door's access to grade. Exception 4 (a 36 in bottom landing) covers steps of three or fewer risers; these need at least four (26.4 in, see the top landing), but no count is given, so which limit governs, and whether the undimensioned patio meets it, isn't settled. The porch steps are the egress door's access (excluded)"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_straight_run_landing_depth
@@ -456,12 +469,12 @@ rules:
   # ------------------------------------------------------------------------------------------- open sides and guards
   - id: general.r321_1_1_guard_required_open_side
     truth: complies
-    why: "every open side drawn on the second floor and along the main stair's open side has a railing (A-3, A-5); each is over the main floor, more than 30 in down (area guard_height_level)"
+    why: "every open side drawn on the second floor and along the main stair's open side has a railing (A-3, A-5; more than 30 in over the main floor), and so has the garage landing ('RAILING AS PER RES. CODE', A-2). The other raised surfaces are under 30 in: the porch about 24 in (240.4' over 238.4'), the rear slider steps' top tread under 30 in with four or more risers down to 238.2' grade (A-4) (area guard_height_level)"
     predicted: needs_review
     because: "open sides aren't a part the description carries (open_side not read; the measuring's `guard` is not a rule part kind)"
   - id: general.r321_1_2_guard_height_open_side_not_stair
-    truth: complies
-    why: "each level railing labelled '36\" HIGH RAILING' (A-3), 36 >= 36 (area guard_height_level)"
+    truth: needs_review
+    why: "the second-floor railings are each labelled '36\" HIGH RAILING' (A-3): 36 >= 36 (area guard_height_level). The garage landing's railing is 'AS PER RES. CODE' with no height, and its drop to the slab is 31.2 in by the A-2 spot elevations (about 15 in by A-4): not settled"
     predicted: needs_review
     because: "open_side not read"
   - id: general.r321_1_2_guard_height_stair_open_side
@@ -633,8 +646,12 @@ rules:
     because: "ship's ladders aren't read"
 
 # Items the checker should add besides the rules' rows (predicted, from egress.py and expected.yaml):
+# (their names as the panel shows them; each needs review: the stairs weren't read; the bonus room's and basement's
+# marked windows aren't checked, not being in a sleeping room)
 predicted_other_items:
-  - "the interior drawing: the stairs weren't read (no `stairs` in the description): needs review"
-  - "Bonus room double-hung 1 of 2 and 2 of 2 (x1, x2): marked as escape openings but not checked (not in a sleeping room): needs review"
-  - "Basement window CW14 in areaway, north and west (bsw1, bsw2): marked as escape openings but not checked: needs review"
+  - "Interior drawing"
+  - "Bonus room double-hung 1 of 2: not checked"
+  - "Bonus room double-hung 2 of 2: not checked"
+  - "Basement window CW14 in areaway (north wall): not checked"
+  - "Basement window CW14 in areaway (west wall): not checked"
 predicted_section_state: needs_review    # no fail, no pass on anything the truth doesn't settle

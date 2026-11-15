@@ -34,11 +34,16 @@ TRUTH = {"complies": "complies", "does_not_comply": "does not comply", "needs_re
 ROW = re.compile(r"^\| \d+ \| .*\(`([a-z0-9_]+)`\) \| [^|]* \| [^|]* \| ([a-z ]+) \| ([a-z ]+) \| (yes|no) \| ([A-Z]?) \|$")
 COUNT = re.compile(r"^\| (complies|does not comply|needs review|not applicable) \| (\d+) \| (\d+) \| (\d+) \|$")
 WHY = set("DFGMR")             # the evaluation's classes for a rule the checker is more cautious about
-# truths corrected by review round 1 (each a "complies" or "not applicable" the drawings don't establish: the rear
-# slider steps, the area well's projection); a revert lets the false-pass guard accept a pass there
+# truths corrected by review (each a "complies" or "not applicable" the drawings don't establish); a revert lets the
+# false-pass guard accept a pass there
 REVIEWED = {"general.r319_4_1_area_well_min_projection": "needs_review",
             "general.r318_7_6_stair_top_landing": "needs_review",
-            "general.r318_7_6_deck_stair_bottom_landing_width": "needs_review"}
+            "general.r318_7_6_deck_stair_bottom_landing_width": "needs_review",
+            # review round 2: the step at the mudroom door onto the garage landing, its railing, the A-5 well
+            "general.r318_7_6_garage_top_landing_drop": "needs_review",
+            "general.r321_1_2_guard_height_open_side_not_stair": "needs_review",
+            "general.r319_4_2_2_area_well_steps_requirements": "needs_review"}
+TOTALS = re.compile(r"^\| All egress rules \| (\d+) \| (\d+) \| (\d+) \| (\d+) \| (\d+) \|$")
 
 
 @pytest.fixture(scope="module")
@@ -84,12 +89,11 @@ def test_every_answer_is_the_predicted_one_and_never_a_false_pass(found, name):
         if item.get("rule") in by_id and item["status"] == "complies":
             assert by_id[item["rule"]]["truth"] == "complies", item["id"]
     assert got["sections"][0]["state"] == hand["predicted_section_state"]
-    # the items besides the rules' rows (predicted_other_items, the bonus room's and basement's pairs on one line
-    # each): the interior drawing's one problem, and each marked escape opening not in a sleeping room
+    # the items besides the rules' rows: the interior drawing's one problem, and each marked escape opening not in a
+    # sleeping room
     others = sorted(i["name"] for i in got["items"] if not i.get("rule"))
-    assert others == sorted(["Interior drawing"] + [f"{n}: not checked" for n in (
-        "Bonus room double-hung 1 of 2", "Bonus room double-hung 2 of 2", "Basement window CW14 in areaway (north wall)",
-        "Basement window CW14 in areaway (west wall)")])
+    assert others == sorted(hand["predicted_other_items"])
+    assert all(i["status"] == "needs_review" for i in got["items"] if not i.get("rule"))
     assert got["interior"]["problems"] == ["the stairs weren't read (no `stairs` in the description)"]
 
 
@@ -110,11 +114,20 @@ def test_the_evaluation_table_is_current(found, name):
         assert hand_says == TRUTH[truth[rid]], rid
         assert agree == ("yes" if checker == hand_says else "no"), rid
         assert (why in WHY) if agree == "no" else why == "", rid
-    # the count table (truth, rules, checker agrees, checker more cautious) is today's
-    counts = {}
+    # the count tables are today's: the checker's totals, then (truth, rules, checker agrees, more cautious)
+    counts, totals = {}, []
     for line in (REAL / name / "evaluation.md").read_text(encoding="utf-8").splitlines():
         if m := COUNT.match(line):
             counts[m.group(1)] = tuple(int(x) for x in m.groups()[1:])
+        if m := TOTALS.match(line):
+            totals.append(tuple(int(x) for x in m.groups()))
+    text = (REAL / name / "evaluation.md").read_text(encoding="utf-8")
+    assert f"The panel shows {len(got['items'])} items. {len(got['rows'])} are the rules' rows" in text
+    cautious_rules = sum(CHECKER[got["results"][r]] != TRUTH[truth[r]] for r in truth)
+    assert f"It is cautious in {cautious_rules} places" in text
+    answers = list(got["results"].values())
+    assert totals == [(len(answers), answers.count("pass"), answers.count("fail"), answers.count("needs_review"),
+                       answers.count("not_applicable"))]
     assert set(counts) == set(TRUTH.values())
     for t, (n, same, cautious) in counts.items():
         mine = [rid for rid in truth if TRUTH[truth[rid]] == t]

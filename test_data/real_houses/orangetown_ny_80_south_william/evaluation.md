@@ -8,7 +8,7 @@
 
 - **No false pass.** The checker gave **needs review** for all 115 of New York State's egress rules. None passed, none failed. Nowhere did it say "complies" where the code and the drawings don't settle it.
 - **The checker did what it should, every time.** Before the run, the hand-check predicted the checker's answer for each rule from the description and the rules' own formulas. All 115 matched. Each reason the checker gave was compared by hand with the predicted one (the `because` in hand_check.yaml), and they agree. **Checker bugs found: 0. Description errors found: 0.**
-- **It is cautious in 56 places.** The hand-check could settle 56 rules: 7 the house meets and 49 that don't apply to it (no ramps, sleeping lofts, ship's ladders and so on). The checker leaves each of these at needs review, for one of five reasons (the "Why they differ" column below). That is safe but noisy. An architect would see 115 "needs review" rows, more than half of them about things this house doesn't have.
+- **It is cautious in 53 places.** The hand-check could settle 53 rules: 6 the house meets and 47 that don't apply to it (no ramps, sleeping lofts, ship's ladders and so on). The checker leaves each of these at needs review, for one of five reasons (the "Why they differ" column below). That is safe but noisy. An architect would see 115 "needs review" rows, more than half of them about things this house doesn't have.
 - **Rule-drafting points: 2, both on the cautious side.** One rule asks about a patio cover at every exit door (an error). Another applies R319.6 (additions) to every bedroom of a new house (a trade-off already recorded in the rule).
 - **Zoning doesn't apply to this lot.** The house is in the Town of Orangetown, Rockland County. Gordium's only zoning rulebook is the City of Ithaca's. So only the state code was checked: the 2025 Residential Code of New York State (RCNYS), which the drawings' title sheet (A-1) cites.
 
@@ -37,24 +37,24 @@
 
 | Hand-check (truth) | Rules | Checker agrees | Checker more cautious |
 |---|---|---|---|
-| complies | 7 | 0 | 7 |
+| complies | 6 | 0 | 6 |
 | does not comply | 0 | 0 | 0 |
-| needs review | 59 | 59 | 0 |
-| not applicable | 49 | 0 | 49 |
+| needs review | 62 | 62 | 0 |
+| not applicable | 47 | 0 | 47 |
 
 **Why no rule fails although the answer key finds real risks.** The basement stair's risers are 8.31 in at 13 risers with the section's 2x12 joists, over the 8 1/4 in limit. A 3046 double-hung may come in under 5.7 sq ft. The bonus room's step is about 30 in wide. Each of these is a "does not comply" only under one reading of drawings that disagree with themselves (13 or 14 risers; 2x10 or 2x12 joists), or under assumed sizes. So the hand-check itself says needs review for them, and so does the checker. They are listed for the drawing's architect in the [README](README.md).
 
-The panel shows 309 rows, one per rule and part: each of the 10 bedroom windows gets every escape-opening rule except the three about basements, habitable attics and loft rooms. Besides the rules' rows, the checker added the 5 items the hand-check predicted:
+The panel shows 309 items. 304 are the rules' rows, one per rule and part: each of the 10 bedroom windows gets every escape-opening rule except the three about basements, habitable attics and loft rooms. The other 5 are the items the hand-check predicted:
 
 - "the stairs weren't read"
 - the bonus room's 2 marked windows and the basement's 2, each "marked as an escape opening but isn't checked"
 
 **Why they differ** (only where the hand-check settles a rule and the checker doesn't):
 
-- **D (drawings):** the drawings give no stair geometry, so the description has no stairs and every stair rule needs review. The hand-check settles 14 stair rules anyway: 2 the flights meet (their rise; a floor at every foot) and 12 that don't apply (spiral, sleeping-loft, non-rectangular landing, the garage top-landing case).
+- **D (drawings):** the drawings give no stair geometry, so the description has no stairs and every stair rule needs review. The hand-check settles 13 stair rules anyway: 2 the flights meet (their rise; a floor at every foot) and 11 that don't apply (spiral, sleeping-loft, non-rectangular landing).
 - **F (format):** the description has no way to say a kind of part exists or doesn't (sleeping lofts, ramps, alternating tread devices, ship's ladders, basements, habitable attics, loft rooms, patio covers). So the measuring never says "none", and every rule for these needs review, never "not applicable". This is the 2026-11-14 decision's known gap ("Measuring code", Not yet).
-- **G (guards):** the five railings are in the description and measured, as `guard` parts. But the guard rules read `open_side` parts, which nothing produces yet. So "a guard is required" and "36 in high", which the drawings settle (each labelled `36" HIGH RAILING`, A-3), stay needs review.
-- **M (not measured yet):** a fact the description already holds that the measuring doesn't yet turn into the rule's measure. The front door is `operation: side_hinged`, yet `door_side_hinged` isn't given. Every escape window is a double-hung or casement, yet `opening_operable` and `opening_is_door` aren't given. The bedrooms are on the second floor, yet `opening_below_grade` and `opening_under_projection` aren't given. (For the two area-well rows the truth comes from the basement windows, which the checker doesn't check at all: those are listed as "not checked" items.)
+- **G (guards):** the five railings are in the description and measured, as `guard` parts. But the guard rules read `open_side` parts, which nothing produces yet. So "a guard is required", which the drawings settle (every open side over 30 in has a railing drawn), stays needs review.
+- **M (not measured yet):** a fact the description already holds that the measuring doesn't yet turn into the rule's measure. The front door is `operation: side_hinged`, yet `door_side_hinged` isn't given. Every escape window is a double-hung or casement, yet `opening_operable` and `opening_is_door` aren't given. The bedrooms are on the second floor, yet `opening_below_grade` and `opening_under_projection` aren't given. (For the area-well row the truth comes from the basement windows, which the checker doesn't check at all: those are listed as "not checked" items.)
 - **R (rule drafting):** see the two drafting points below.
 
 
@@ -101,7 +101,7 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 | 35 | Area well ladder projection from wall (`r319_4_2_1_area_well_ladder_projection`) | R319.4.2.1 | emergency escape opening | needs review | needs review | yes |  |
 | 36 | Area well ladder rung spacing (`r319_4_2_1_area_well_ladder_rung_spacing`) | R319.4.2.1 | emergency escape opening | needs review | needs review | yes |  |
 | 37 | Area well ladder inside width (`r319_4_2_1_area_well_ladder_width`) | R319.4.2.1 | emergency escape opening | needs review | needs review | yes |  |
-| 38 | Area well steps: width, tread, riser (`r319_4_2_2_area_well_steps_requirements`) | R319.4.2.2 | emergency escape opening | needs review | not applicable | no | M |
+| 38 | Area well steps: width, tread, riser (`r319_4_2_2_area_well_steps_requirements`) | R319.4.2.2 | emergency escape opening | needs review | needs review | yes |  |
 | 39 | Escape opening in each new sleeping room of an addition (`r319_6_addition_sleeping_room_escape_opening`) | R319.6 | emergency escape opening | needs review | not applicable | no | R |
 | 40 | Escape opening in the new basement of an addition (`r319_6_addition_basement_escape_opening`) | R319.6 | basement | needs review | not applicable | no | F |
 | 41 | Sleeping loft stairway clear width at or above handrail (`r315_5_2_1_sleeping_loft_stair_clear_width_at_or_above_handrail`) | R315.5.2.1 | stair | needs review | not applicable | no | D |
@@ -127,7 +127,7 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 | 61 | Tread depth variation within a flight (`r318_7_5_2_stair_tread_variation_max`) | R318.7.5.2 | stair | needs review | needs review | yes |  |
 | 62 | Bottom landing width not less than flight width (`r318_7_6_bottom_landing_width`) | R318.7.6 | stair | needs review | needs review | yes |  |
 | 63 | Bottom landing width, exterior stair to grade serving deck (`r318_7_6_deck_stair_bottom_landing_width`) | R318.7.6 | stair | needs review | needs review | yes |  |
-| 64 | Top landing at enclosed garage stair, drop below threshold (`r318_7_6_garage_top_landing_drop`) | R318.7.6 | stair | needs review | not applicable | no | D |
+| 64 | Top landing at enclosed garage stair, drop below threshold (`r318_7_6_garage_top_landing_drop`) | R318.7.6 | stair | needs review | needs review | yes |  |
 | 65 | Landings other than square or rectangular (`r318_7_6_nonrectangular_landing`) | R318.7.6 | stair | needs review | not applicable | no | D |
 | 66 | Floor or landing at the bottom of each flight (`r318_7_6_stair_bottom_landing`) | R318.7.6 | stair | needs review | complies | no | D |
 | 67 | Floor or landing at the top of each flight (`r318_7_6_stair_top_landing`) | R318.7.6 | stair | needs review | needs review | yes |  |
@@ -145,7 +145,7 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 | 79 | Non-circular handrail perimeter and cross section, Type I (`r320_6_handrail_type_i_noncircular`) | R320.6 | handrail | needs review | needs review | yes |  |
 | 80 | Handrail with perimeter over 6 1/4 in: finger recess, Type II (`r320_6_handrail_type_ii_recess`) | R320.6 | handrail | needs review | needs review | yes |  |
 | 81 | Guard required at open sides over 30 in. drop (`r321_1_1_guard_required_open_side`) | R321.1.1 | open side | needs review | complies | no | G |
-| 82 | Guard height, open sides other than stairs (`r321_1_2_guard_height_open_side_not_stair`) | R321.1.2 | open side | needs review | complies | no | G |
+| 82 | Guard height, open sides other than stairs (`r321_1_2_guard_height_open_side_not_stair`) | R321.1.2 | open side | needs review | needs review | yes |  |
 | 83 | Guard top serving as stair handrail, 34 to 38 in (`r321_1_2_guard_height_stair_guard_as_handrail`) | R321.1.2 | open side | needs review | needs review | yes |  |
 | 84 | Guard height, open sides of stairs (`r321_1_2_guard_height_stair_open_side`) | R321.1.2 | open side | needs review | needs review | yes |  |
 | 85 | Guard openings stop a 4 inch sphere (`r321_1_3_guard_opening_4_inch_sphere`) | R321.1.3 | open side | needs review | needs review | yes |  |
@@ -186,12 +186,14 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 
 **Description errors: none found.** The new facts the hand-check needed were read from the drawings for this PR:
 
-- the patio at the rear sliders (A-2 'PATIO', at grade), and the steps down to it from each slider (A-2 'DN'; A-4 'CONC. PAVER STONE STEPS'), drawn with no landing at the door: about three risers if the floor's framing (A-5) stands as drawn above grade, more than R318.7.6 Exception 3's two (review round 1 found these; three hand-check truths were corrected, listed at the top of hand_check.yaml);
+- the patio at the rear sliders (A-2 'PATIO', at grade), and the steps down to it from each slider (A-2 'DN'; A-4 'CONC. PAVER STONE STEPS'), drawn with no landing at the door: the main floor (240.4', A-2) is 26.4 in over the rear grade (238.2', A-4), so at least four risers, more than R318.7.6 Exception 3's two;
+- the step down at the mudroom door onto the garage landing (A-2 'DN' at the door), and the garage landing's railing ('RAILING AS PER RES. CODE', no height); the sheets disagree on the garage slab's depth (31.2 in by A-2's spot elevations, about 15 in by A-4);
+- the garage's side door and overhead door (A-2, A-4), more exterior doors whose landings aren't given;
 - the folding attic stair (A-3 'ATTIC STAIR DETAILS': 'FAKRO OR EQUAL INSUL. ATTIC STAIR ASSY.', 'LOCATION TO BE DETERMINED');
 - the unfinished attic (A-5 section);
 - the single-family use (A-1).
 
-None of them changes house.yaml.
+None of them changes house.yaml. Review rounds 1 and 2 found the rear steps, the garage step and the area well's projection, and six hand-check truths were corrected from complies or not applicable to needs review, each listed at the top of hand_check.yaml and pinned by the test.
 
 **Rule-drafting points: 2.** Both are cautious, so neither can pass what the law fails.
 
