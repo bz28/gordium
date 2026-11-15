@@ -12,5 +12,5 @@ book_max_tokens: 16384    # a building code's rules for each part carry whole sm
 max_attempts: 3           # the first answer plus up to 2 retries when code rejects it
 # A hard cap on total spending across all drafting runs, in US dollars, separate from labeling's. Kept in
 # ~/.config/gordium/rule_drafting_ledger.json (shared by every checkout), never taken as less than the
-# repository's run records add up to.
-budget_usd: 5.00
+# repository's run records add up to. Ben set $20 on 2026-11-14 ("u have 20 dollar ai cap").
+budget_usd: 20.00
