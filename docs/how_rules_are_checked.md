@@ -56,7 +56,7 @@ If a measurement is missing or unusable (no value, not a real number, negative, 
 | Method | What it shows | Status |
 |---|---|---|
 | **Tests**: mostly "take a good rule, break one thing, confirm it is rejected", plus "confirm good rules pass" | The checks do their job | All passing; GitHub re-runs them on every change (counts are in each PR) |
-| **Repeated independent review**: a fresh reviewer who didn't write the code looks for holes, two skeptics try to disprove each one, survivors get fixed, and it repeats until a round finds nothing | Catches what the author didn't think of, including problems the fixes themselves created | Recorded per round in the PR |
+| **Repeated independent review**: a fresh reviewer who didn't write the code looks for holes, skeptics try to disprove each one (two for anything that could give a false pass, one for wording), survivors get fixed, and it repeats until a round finds nothing | Catches what the author didn't think of, including problems the fixes themselves created | Recorded per round in the PR |
 | **Breaking each fix on purpose** ("pins"): undo a fix and confirm a test notices | No fix is unguarded | Every fix pinned; recorded per review round in the PR |
 | **Planted mistakes in real rules**: wrong numbers, wrong pages, invented quotes in copies of the real R-1b | How many real-world mistakes get caught | Planned with R-1b |
 | **The architects' own mistakes** from their worked example | Real errors from practice are caught | Planned with R-1b |
