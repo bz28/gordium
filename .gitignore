@@ -18,3 +18,7 @@ build/
 # Editors
 .vscode/
 .idea/
+
+# Claude Code (personal settings and scratch worktrees; commands are shared)
+.claude/settings.local.json
+.claude/worktrees/
