@@ -17,8 +17,10 @@
 | `house.yaml` | The house in the interior description format (`gordium.interior/1`). Every value has a `cite` (sheet, drawing, callout); every key the drawings can't fill is under `absent`, with why |
 | `expected.yaml` | What the measuring code should return, worked by hand before the code ran (its own commit) |
 | `answer_key.yaml` | For each egress rule: what the drawings give, the arithmetic, and the outcome (complies / fails / needs review) |
+| `hand_check.yaml` | All 115 rules of New York State's egress rulebook worked by hand before the checker ran: what the code says about the house (`truth`) and what the checker should say given the description (`predicted`) |
+| `evaluation.md` | **The full egress check on this house**: every rule's answer from the checker beside the hand-check, and why they differ. Start here |
 
-`packages/model_measurement/tests/test_real_houses.py` checks all three.
+`packages/model_measurement/tests/test_real_houses.py` checks the first three; `packages/design_checker/tests/test_real_house_egress.py` checks the full check against `hand_check.yaml` and `evaluation.md`.
 
 ## What the drawings give, and what they don't
 
@@ -55,3 +57,5 @@ Construction drawings for a house like this state **requirements more than sizes
 6. The basement escape windows: the CW14 on the plan or the 4040 in the detail? And the well's size at its outer edge (the detail draws it tapered, dimensioned only at the wall), and does the window open fully in it?
 7. The front door: the porch's slope and its steps to grade (risers, treads, width); and how far below the threshold is the covered porch (R318.3.1: at most 1 1/2 in, or 8 1/4 in for a door that doesn't swing over it)?
 8. The bonus room's step down onto the bridge: it is drawn in the 2'-8" doorway, so about 30 in wide; a stair (one riser or more) must be 36 in. Can the step move out onto the bridge, or the door be 3'-0"? (Not yet researched with Ithaca's or the State's interpretations.)
+9. The steps from each rear slider ('60611 SL DR') down to the patio (A-2 'DN', A-4 'CONC. PAVER STONE STEPS'): how many risers, and is there a landing at the door? None is drawn, and R318.7.6 waives it only for two risers or fewer; the main floor (240.4', A-2) stands 26.4 in over the rear grade (238.2', A-4): at least four.
+10. The garage: how far below the mudroom door's threshold is the garage landing (A-2 marks 'DN' at the door; R318.7.6 allows 8 1/4 in), how high is its railing, and how far down is the slab? The A-2 spot elevations (240.4' and 237.8') give 31.2 in; A-4's 'GAR SLAB' to 'CLG' 10'-3" against the main floor's 9'-0" gives about 15 in.

@@ -1,0 +1,334 @@
+%PDF-1.4
+%栒鞠
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [6 0 R 8 0 R 10 0 R] /Count 3 >>
+endobj
+3 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
+endobj
+4 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
+endobj
+5 0 obj
+<< /Length 6666 >>
+stream
+BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (CODE ANALYSIS: EGRESS) Tj ET
+BT /F2 7.5 Tf 0.29 0.29 0.29 rg 68 728.4 Td (Egress result: WAITING: NO ROOMS DRAWN YET) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): waiting, no rooms drawn yet \(the check's own count\)) Tj ET
+0.6 w [] 0 d
+0.9 0.9 0.9 rg 0.1 0.1 0.1 RG 68 702.4 m 994 702.4 l 994 687.4 l 68 687.4 l h B
+BT /F2 7 Tf 0 0 0 rg 71 692.4 Td (#) Tj ET
+BT /F2 7 Tf 0 0 0 rg 94.83 692.4 Td (Item) Tj ET
+BT /F2 7 Tf 0 0 0 rg 210.58 692.4 Td (Requirement \(rule id below\)) Tj ET
+BT /F2 7 Tf 0 0 0 rg 408.04 692.4 Td (Required) Tj ET
+BT /F2 7 Tf 0 0 0 rg 506.76 692.4 Td (Proposed \(as measured\)) Tj ET
+BT /F2 7 Tf 0 0 0 rg 605.49 692.4 Td (Result) Tj ET
+BT /F2 7 Tf 0 0 0 rg 687.2 692.4 Td (Code section) Tj ET
+BT /F2 7 Tf 0 0 0 rg 745.07 692.4 Td (Why / what to change) Tj ET
+0.4 w [] 0 d
+0.96 0.96 0.96 rg 0.1 0.1 0.1 RG 68 687.4 m 994 687.4 l 994 672.4 l 68 672.4 l h B
+BT /F2 7.5 Tf 0 0 0 rg 71 677.4 Td (Egress \(NY State Residential Code 2025\)) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 663.4 Td (1) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 663.4 Td (Egress: waiting, no rooms drawn) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 654.4 Td (yet) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 663.4 Td (Egress: waiting, no rooms drawn yet) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 663.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 663.4 Td () Tj ET
+0.5 w [] 0 d
+0.93 0.93 0.93 rg 602.49 672.4 m 684.2 672.4 l 684.2 632.4 l 602.49 632.4 l h f
+BT /F2 7 Tf 0.29 0.29 0.29 rg 605.49 663.4 Td (WAITING: NO ROOMS) Tj ET
+BT /F2 7 Tf 0.29 0.29 0.29 rg 605.49 654.4 Td (DRAWN YET) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 663.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 663.4 Td (Escape windows \(size and sill\), stairs \(risers, treads, headroom, width\) and the) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 654.4 Td (exit door are checked once the rooms are drawn; handrails, guards and) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 645.4 Td (sleeping lofts aren't read from the drawing yet, so their rules will need review.) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 636.4 Td (Until then this is not a pass) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 68 632.4 m 994 632.4 l S
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 91.83 672.4 m 91.83 632.4 l S
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 207.58 672.4 m 207.58 632.4 l S
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 405.04 672.4 m 405.04 632.4 l S
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 503.76 672.4 m 503.76 632.4 l S
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 602.49 672.4 m 602.49 632.4 l S
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 684.2 672.4 m 684.2 632.4 l S
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 742.07 672.4 m 742.07 632.4 l S
+0.6 w [] 0 d
+0.1 0.1 0.1 RG 68 672.4 m 68 632.4 l S
+0.6 w [] 0 d
+0.1 0.1 0.1 RG 994 672.4 m 994 632.4 l S
+0.6 w [] 0 d
+0.1 0.1 0.1 RG 68 632.4 m 994 632.4 l S
+BT /F1 6 Tf 0.35 0.35 0.35 rg 68 618.4 Td (Every row is a result of Gordium's check, in its order, with the check's own result. Required and Proposed are shown for reading: worked out from the rule's formula and the measured values, never rounded toward compliance; they never decide a result. Rows that don't apply are not listed. The CSV beside this sheet carries each row's rule id, part,) Tj ET
+BT /F1 6 Tf 0.35 0.35 0.35 rg 68 610.4 Td (measured values, citation and the code's words.) Tj ET
+1.2 w [] 0 d
+0.1 0.1 0.1 RG 54 770.4 m 1202.4 770.4 l 1202.4 21.6 l 54 21.6 l h S
+1.2 w [] 0 d
+0.1 0.1 0.1 RG 1008 770.4 m 1008 21.6 l S
+1 w [] 0 d
+0.98 0.89 0.88 rg 0.7 0.15 0.12 RG 1016 762.4 m 1194.4 762.4 l 1194.4 728.4 l 1016 728.4 l h B
+BT /F2 9 Tf 0.7 0.15 0.12 rg 1020 748.4 Td (Prepared with Gordium: draft rules,) Tj ET
+BT /F2 9 Tf 0.7 0.15 0.12 rg 1020 737.4 Td (verify before submission) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 716.4 Td (PROJECT) Tj ET
+BT /F2 9 Tf 0.1 0.1 0.1 rg 1016 707.4 Td (Made-up house: massing only, no rooms) Tj ET
+BT /F2 9 Tf 0.1 0.1 0.1 rg 1016 695.9 Td (drawn yet) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 682.4 m 1202.4 682.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 674.4 Td (ADDRESS) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 665.4 Td (Made-up house on a test lot) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 653.4 m 1202.4 653.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 645.4 Td (CODE CHECKED) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 636.4 Td (Egress \(NY State Residential Code 2025\)) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 624.4 m 1202.4 624.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 616.4 Td (EGRESS RESULT \(GORDIUM'S CHECK\)) Tj ET
+BT /F2 8 Tf 0.1 0.1 0.1 rg 1016 607.4 Td (WAITING: NO ROOMS DRAWN YET) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 594.9 m 1202.4 594.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 586.9 Td (DATE) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 577.9 Td (2026-11-15) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 565.9 m 1202.4 565.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 557.9 Td (RULEBOOK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 548.9 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 540.9 Td (s/drafted/general.yaml � status: draft � sha256) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 532.9 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 524.9 Td (2b8) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 514.9 m 1202.4 514.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 506.9 Td (RULES FINGERPRINT AT CHECK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 497.9 Td (new_york/ithaca_city) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 489.9 Td (b1959da3327498f21c03366e05e7da6e8f8e455fb78deb2cab3e908b1458) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (ec80) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (a6c221d0accf8bfd359ab36a60674cb9cc68f6f05f44b16db1e38e9c32d59) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (1ac) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 419.9 Td (none drawn yet) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 409.9 m 1202.4 409.9 l S
+0.5 w [2 2] 0 d
+0.55 0.55 0.55 RG 1016 401.9 m 1194.4 401.9 l 1194.4 304.7 l 1016 304.7 l h S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1053.49 351.3 Td (ARCHITECT'S STAMP AND SIGNATURE) Tj ET
+1 w [] 0 d
+0.1 0.1 0.1 RG 1008 104.4 m 1202.4 104.4 l S
+BT /F2 8.5 Tf 0 0 0 rg 1016 90.4 Td (CODE ANALYSIS: EGRESS) Tj ET
+BT /F1 6 Tf 0.35 0.35 0.35 rg 1016 31.6 Td (SHEET 1 OF 3) Tj ET
+BT /F2 22 Tf 0 0 0 rg 1133.26 31.6 Td (G-001) Tj ET
+endstream
+endobj
+6 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1224 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
+endobj
+7 0 obj
+<< /Length 4837 >>
+stream
+BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (LIFE-SAFETY PLAN) Tj ET
+BT /F2 7.5 Tf 0.29 0.29 0.29 rg 68 728.4 Td (Egress result: WAITING: NO ROOMS DRAWN YET) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): waiting, no rooms drawn yet \(the check's own count\)) Tj ET
+BT /F2 16 Tf 0.29 0.29 0.29 rg 275.54 351.2 Td (WAITING: NO ROOMS DRAWN YET) Tj ET
+BT /F2 7 Tf 0 0 0 rg 766.4 702.4 Td (LEGEND) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 692.4 Td (Heavy outline, tinted: sleeping room \(each needs an escape opening, R319.1\)) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 681.9 Td (Tag: escape opening marked by the architect, with Gordium's result for it) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 671.4 Td (Stair: treads from the nosings drawn; arrow UP or DN from this floor) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 660.9 Td (Results: COMPLIES � DOES NOT COMPLY � NEEDS REVIEW � WAITING \(word) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 652.4 Td (always printed\)) Tj ET
+BT /F2 7 Tf 0 0 0 rg 766.4 635.9 Td (EXITS) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 625.9 Td (-) Tj ET
+BT /F2 7 Tf 0 0 0 rg 766.4 609.4 Td (NOTES) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 599.4 Td (Windows and doors have no position in the plan in the interior drawing: escape) Tj ET
+BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 590.9 Td (openings are tagged inside their room, the exit door is named above.) Tj ET
+BT /F2 7 Tf 0 0 0 rg 766.4 574.4 Td (WAY OUT \(SCHEMATIC, NOT CHECKED BY GORDIUM\)) Tj ET
+1.2 w [] 0 d
+0.1 0.1 0.1 RG 54 770.4 m 1202.4 770.4 l 1202.4 21.6 l 54 21.6 l h S
+1.2 w [] 0 d
+0.1 0.1 0.1 RG 1008 770.4 m 1008 21.6 l S
+1 w [] 0 d
+0.98 0.89 0.88 rg 0.7 0.15 0.12 RG 1016 762.4 m 1194.4 762.4 l 1194.4 728.4 l 1016 728.4 l h B
+BT /F2 9 Tf 0.7 0.15 0.12 rg 1020 748.4 Td (Prepared with Gordium: draft rules,) Tj ET
+BT /F2 9 Tf 0.7 0.15 0.12 rg 1020 737.4 Td (verify before submission) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 716.4 Td (PROJECT) Tj ET
+BT /F2 9 Tf 0.1 0.1 0.1 rg 1016 707.4 Td (Made-up house: massing only, no rooms) Tj ET
+BT /F2 9 Tf 0.1 0.1 0.1 rg 1016 695.9 Td (drawn yet) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 682.4 m 1202.4 682.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 674.4 Td (ADDRESS) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 665.4 Td (Made-up house on a test lot) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 653.4 m 1202.4 653.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 645.4 Td (CODE CHECKED) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 636.4 Td (Egress \(NY State Residential Code 2025\)) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 624.4 m 1202.4 624.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 616.4 Td (EGRESS RESULT \(GORDIUM'S CHECK\)) Tj ET
+BT /F2 8 Tf 0.1 0.1 0.1 rg 1016 607.4 Td (WAITING: NO ROOMS DRAWN YET) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 594.9 m 1202.4 594.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 586.9 Td (DATE) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 577.9 Td (2026-11-15) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 565.9 m 1202.4 565.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 557.9 Td (RULEBOOK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 548.9 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 540.9 Td (s/drafted/general.yaml � status: draft � sha256) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 532.9 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 524.9 Td (2b8) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 514.9 m 1202.4 514.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 506.9 Td (RULES FINGERPRINT AT CHECK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 497.9 Td (new_york/ithaca_city) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 489.9 Td (b1959da3327498f21c03366e05e7da6e8f8e455fb78deb2cab3e908b1458) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (ec80) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (a6c221d0accf8bfd359ab36a60674cb9cc68f6f05f44b16db1e38e9c32d59) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (1ac) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 419.9 Td (none drawn yet) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 409.9 m 1202.4 409.9 l S
+0.5 w [2 2] 0 d
+0.55 0.55 0.55 RG 1016 401.9 m 1194.4 401.9 l 1194.4 304.7 l 1016 304.7 l h S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1053.49 351.3 Td (ARCHITECT'S STAMP AND SIGNATURE) Tj ET
+1 w [] 0 d
+0.1 0.1 0.1 RG 1008 104.4 m 1202.4 104.4 l S
+BT /F2 8.5 Tf 0 0 0 rg 1016 90.4 Td (LIFE-SAFETY PLAN) Tj ET
+BT /F1 6 Tf 0.35 0.35 0.35 rg 1016 31.6 Td (SHEET 2 OF 3) Tj ET
+BT /F2 22 Tf 0 0 0 rg 1122.26 31.6 Td (LS-101) Tj ET
+endstream
+endobj
+8 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1224 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
+endobj
+9 0 obj
+<< /Length 5300 >>
+stream
+BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (ESCAPE-WINDOW SCHEDULE) Tj ET
+BT /F2 7.5 Tf 0.29 0.29 0.29 rg 68 728.4 Td (Egress result: WAITING: NO ROOMS DRAWN YET) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): waiting, no rooms drawn yet \(the check's own count\)) Tj ET
+0.6 w [] 0 d
+0.9 0.9 0.9 rg 0.1 0.1 0.1 RG 68 702.4 m 994 702.4 l 994 678.4 l 68 678.4 l h B
+BT /F2 7 Tf 0 0 0 rg 71 692.4 Td (Mark) Tj ET
+BT /F2 7 Tf 0 0 0 rg 104.55 692.4 Td (Opening) Tj ET
+BT /F2 7 Tf 0 0 0 rg 208.56 692.4 Td (Room) Tj ET
+BT /F2 7 Tf 0 0 0 rg 285.72 692.4 Td (Type) Tj ET
+BT /F2 7 Tf 0 0 0 rg 349.47 692.4 Td (Net clear width) Tj ET
+BT /F2 7 Tf 0 0 0 rg 426.64 692.4 Td (Net clear height) Tj ET
+BT /F2 7 Tf 0 0 0 rg 503.8 692.4 Td (Net clear area) Tj ET
+BT /F2 7 Tf 0 0 0 rg 580.97 692.4 Td (Sill height \(above) Tj ET
+BT /F2 7 Tf 0 0 0 rg 580.97 683.4 Td (floor\)) Tj ET
+BT /F2 7 Tf 0 0 0 rg 658.14 692.4 Td (Grade) Tj ET
+BT /F2 7 Tf 0 0 0 rg 658.14 683.4 Td (floor) Tj ET
+BT /F2 7 Tf 0 0 0 rg 698.4 692.4 Td (Result \(all its rules\)) Tj ET
+BT /F2 7 Tf 0 0 0 rg 782.28 692.4 Td (Code sections) Tj ET
+BT /F2 7 Tf 0 0 0 rg 862.8 692.4 Td (Why) Tj ET
+0.6 w [] 0 d
+0.93 0.93 0.93 rg 0.1 0.1 0.1 RG 68 678.4 m 994 678.4 l 994 653.4 l 68 653.4 l h B
+BT /F2 10 Tf 0.29 0.29 0.29 rg 357.92 660.4 Td (WAITING: NO ROOMS DRAWN YET: no escape openings to schedule yet) Tj ET
+0.6 w [] 0 d
+0.1 0.1 0.1 RG 68 653.4 m 994 653.4 l S
+BT /F1 6 Tf 0.35 0.35 0.35 rg 68 639.4 Td (Each measured cell shows the opening's value, the code's limit and that rule's result; the opening's Result is the most cautious of every rule Gordium checked for it \(see the code analysis for each\). An opening the check gave no row for, or marked but not checked, is NEEDS REVIEW, never complies. Net clear sizes are with the sash fully open by) Tj ET
+BT /F1 6 Tf 0.35 0.35 0.35 rg 68 631.4 Td (its normal operation; values never rounded toward compliance.) Tj ET
+1.2 w [] 0 d
+0.1 0.1 0.1 RG 54 770.4 m 1202.4 770.4 l 1202.4 21.6 l 54 21.6 l h S
+1.2 w [] 0 d
+0.1 0.1 0.1 RG 1008 770.4 m 1008 21.6 l S
+1 w [] 0 d
+0.98 0.89 0.88 rg 0.7 0.15 0.12 RG 1016 762.4 m 1194.4 762.4 l 1194.4 728.4 l 1016 728.4 l h B
+BT /F2 9 Tf 0.7 0.15 0.12 rg 1020 748.4 Td (Prepared with Gordium: draft rules,) Tj ET
+BT /F2 9 Tf 0.7 0.15 0.12 rg 1020 737.4 Td (verify before submission) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 716.4 Td (PROJECT) Tj ET
+BT /F2 9 Tf 0.1 0.1 0.1 rg 1016 707.4 Td (Made-up house: massing only, no rooms) Tj ET
+BT /F2 9 Tf 0.1 0.1 0.1 rg 1016 695.9 Td (drawn yet) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 682.4 m 1202.4 682.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 674.4 Td (ADDRESS) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 665.4 Td (Made-up house on a test lot) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 653.4 m 1202.4 653.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 645.4 Td (CODE CHECKED) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 636.4 Td (Egress \(NY State Residential Code 2025\)) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 624.4 m 1202.4 624.4 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 616.4 Td (EGRESS RESULT \(GORDIUM'S CHECK\)) Tj ET
+BT /F2 8 Tf 0.1 0.1 0.1 rg 1016 607.4 Td (WAITING: NO ROOMS DRAWN YET) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 594.9 m 1202.4 594.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 586.9 Td (DATE) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 1016 577.9 Td (2026-11-15) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 565.9 m 1202.4 565.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 557.9 Td (RULEBOOK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 548.9 Td (regulations/jurisdictions/new_york/new_york_state/5_building_code_rule) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 540.9 Td (s/drafted/general.yaml � status: draft � sha256) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 532.9 Td (ad3c8b4e4d41b9bab7c33c93cbd02b9b930a87e1ffc7b35a91b8a5cfc70f2) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 524.9 Td (2b8) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 514.9 m 1202.4 514.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 506.9 Td (RULES FINGERPRINT AT CHECK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 497.9 Td (new_york/ithaca_city) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 489.9 Td (b1959da3327498f21c03366e05e7da6e8f8e455fb78deb2cab3e908b1458) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (ec80) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (a6c221d0accf8bfd359ab36a60674cb9cc68f6f05f44b16db1e38e9c32d59) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (1ac) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 419.9 Td (none drawn yet) Tj ET
+0.3 w [] 0 d
+0.55 0.55 0.55 RG 1008 409.9 m 1202.4 409.9 l S
+0.5 w [2 2] 0 d
+0.55 0.55 0.55 RG 1016 401.9 m 1194.4 401.9 l 1194.4 304.7 l 1016 304.7 l h S
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1053.49 351.3 Td (ARCHITECT'S STAMP AND SIGNATURE) Tj ET
+1 w [] 0 d
+0.1 0.1 0.1 RG 1008 104.4 m 1202.4 104.4 l S
+BT /F2 8.5 Tf 0 0 0 rg 1016 90.4 Td (ESCAPE-WINDOW SCHEDULE) Tj ET
+BT /F1 6 Tf 0.35 0.35 0.35 rg 1016 31.6 Td (SHEET 3 OF 3) Tj ET
+BT /F2 22 Tf 0 0 0 rg 1134.49 31.6 Td (A-601) Tj ET
+endstream
+endobj
+10 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 1224 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 9 0 R >>
+endobj
+11 0 obj
+<< /Title (Made-up house: massing only, no rooms drawn yet: egress permit sheets) /Producer (Gordium permit_sheets) >>
+endobj
+xref
+0 12
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000134 00000 n 
+0000000231 00000 n 
+0000000333 00000 n 
+0000007050 00000 n 
+0000007187 00000 n 
+0000012075 00000 n 
+0000012212 00000 n 
+0000017563 00000 n 
+0000017701 00000 n 
+trailer
+<< /Size 12 /Root 1 0 R /Info 11 0 R >>
+startxref
+17836
+%%EOF
