@@ -44,6 +44,13 @@ REVIEWED = {"general.r319_4_1_area_well_min_projection": "needs_review",
             "general.r321_1_2_guard_height_open_side_not_stair": "needs_review",
             "general.r319_4_2_2_area_well_steps_requirements": "needs_review",
             "general.r318_7_6_stair_bottom_landing": "needs_review"}     # review round 4: the porch steps' bare grade
+# classes the review loop corrected (round 5: the area well's `opening_below_grade` is a fact not yet measured, M,
+# not a gap in the format, F: the format carries `ground_outside`)
+CLASSES = {"general.r319_4_area_well_required": "M", "general.r319_2_4_under_projection_openable_path": "F"}
+# needs-review truths whose `why` leans to a fail or a reading: each names the open question that keeps it there, and
+# the question records what was searched (round 5)
+OPEN = {"general.r318_3_exterior_door_landing_each_side": "README question 9",
+        "general.r318_7_6_stair_bottom_landing": "architect question 2"}
 TOTALS = re.compile(r"^\| All egress rules \| (\d+) \| (\d+) \| (\d+) \| (\d+) \| (\d+) \|$")
 
 
@@ -121,6 +128,7 @@ def test_the_evaluation_table_is_current(found, name):
         assert hand_says == TRUTH[truth[rid]], rid
         assert agree == ("yes" if checker == hand_says else "no"), rid
         assert (why in WHY) if agree == "no" else why == "", rid
+    assert {k: rows[k][3] for k in CLASSES} == CLASSES
     # the count tables are today's: the checker's totals, then (truth, rules, checker agrees, more cautious)
     counts, totals = {}, []
     for line in (REAL / name / "evaluation.md").read_text(encoding="utf-8").splitlines():
@@ -149,3 +157,15 @@ def test_the_evaluation_table_is_current(found, name):
 def test_the_truths_review_corrected_stay_corrected(name):
     truth = {r["id"]: r["truth"] for r in load_yaml(name, "hand_check.yaml")["rules"]}
     assert {k: truth[k] for k in REVIEWED} == REVIEWED
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_each_open_truth_names_its_question(name):
+    by_id = {r["id"]: r for r in load_yaml(name, "hand_check.yaml")["rules"]}
+    for rid, question in OPEN.items():
+        assert by_id[rid]["truth"] == "needs_review" and question in by_id[rid]["why"], rid
+    text = (REAL / name / "evaluation.md").read_text(encoding="utf-8")
+    grade = text.split('2. **Is bare grade a "floor or landing"', 1)
+    assert len(grade) == 2 and "Searched:" in grade[1].split("\n\n", 1)[0]
+    assert "common practice says yes" not in text
+    assert "README question 9" in text.split("**Why no rule fails", 1)[1].split("\n", 1)[0]

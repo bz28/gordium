@@ -42,7 +42,7 @@
 | needs review | 63 | 63 | 0 |
 | not applicable | 47 | 0 | 47 |
 
-**Why no rule fails although the answer key finds real risks.** The basement stair's risers are 8.31 in at 13 risers with the section's 2x12 joists, over the 8 1/4 in limit. A 3046 double-hung may come in under 5.7 sq ft. The bonus room's step is about 30 in wide. Each of these is a "does not comply" only under one reading of drawings that disagree with themselves (13 or 14 risers; 2x10 or 2x12 joists), or under assumed sizes. So the hand-check itself says needs review for them, and so does the checker. They are listed for the drawing's architect in the [README](README.md).
+**Why no rule fails although the answer key finds real risks.** The basement stair's risers are 8.31 in at 13 risers with the section's 2x12 joists, over the 8 1/4 in limit. A 3046 double-hung may come in under 5.7 sq ft. The bonus room's step is about 30 in wide. The rear sliders have no landing drawn at the door, over steps that need at least four risers, but no sheet details the steps or a landing, so whether one is built is a question for the drawing's architect (README question 9). Each of the others is a "does not comply" only under one reading of drawings that disagree with themselves (13 or 14 risers; 2x10 or 2x12 joists), or under assumed sizes. So the hand-check itself says needs review for them, and so does the checker. They are listed for the drawing's architect in the [README](README.md).
 
 The panel shows 309 items. 304 are the rules' rows, one per rule and part: each of the 10 bedroom windows gets every escape-opening rule except the three about basements, habitable attics and loft rooms. The other 5 are the items the hand-check predicted:
 
@@ -52,9 +52,9 @@ The panel shows 309 items. 304 are the rules' rows, one per rule and part: each 
 **Why they differ** (only where the hand-check settles a rule and the checker doesn't):
 
 - **D (drawings):** the drawings give no stair geometry, so the description has no stairs and every stair rule needs review. The hand-check settles 12 stair rules anyway: 1 the flights meet (their rise) and 11 that don't apply (spiral, sleeping-loft, non-rectangular landing).
-- **F (format):** the description has no way to say a kind of part exists or doesn't (sleeping lofts, ramps, alternating tread devices, ship's ladders, basements, habitable attics, loft rooms, patio covers, decks and porches over windows, the ground outside a window that isn't placed). So the measuring never says "none", and every rule for these needs review, never "not applicable". This is the 2026-11-14 decision's known gap ("Measuring code", Not yet).
+- **F (format):** the description has no way to say a kind of part exists or doesn't (sleeping lofts, ramps, alternating tread devices, ship's ladders, basements, habitable attics, loft rooms, patio covers, decks and porches over windows). So the measuring never says "none", and every rule for these needs review, never "not applicable". This is the 2026-11-14 decision's known gap ("Measuring code", Not yet).
 - **G (guards):** the five railings are in the description, read as `guard` parts (nothing about them is measured yet: their members aren't given). But the guard rules read `open_side` parts, which nothing produces yet. So "a guard is required", which the drawings settle (every open side over 30 in has a railing drawn), stays needs review.
-- **M (not measured yet):** a fact the description already holds that the measuring doesn't yet turn into the rule's measure. The front door is `operation: side_hinged`, yet `door_side_hinged` isn't given. Every escape window is a double-hung or casement, yet `opening_operable` and `opening_is_door` aren't given. The marked escape openings are all windows, yet `opening_is_door` isn't given.
+- **M (not measured yet):** a fact the description already holds that the measuring doesn't yet turn into the rule's measure. The front door is `operation: side_hinged`, yet `door_side_hinged` isn't given. Every escape window is a double-hung or casement, yet `opening_operable` isn't given. The marked escape openings are all windows, yet `opening_is_door` isn't given. The bedrooms are on the second floor, yet `opening_below_grade` isn't given (for the area-well row the truth comes from the basement windows, which the checker doesn't check at all: those are listed as "not checked" items).
 - **R (rule drafting):** see the two drafting points below.
 
 
@@ -91,7 +91,7 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 | 25 | Escape opening bottom of clear opening max height (`r319_2_3_escape_opening_max_sill_height`) | R319.2.3 | emergency escape opening | needs review | needs review | yes |  |
 | 26 | Escape openings under decks, porches, cantilevers (`r319_2_4_under_projection_openable_path`) | R319.2.4 | emergency escape opening | needs review | not applicable | no | F |
 | 27 | Emergency escape and rescue door: side-hinged or sliding (`r319_3_escape_door_side_hinged_or_sliding`) | R319.3 | emergency escape opening | needs review | not applicable | no | M |
-| 28 | Area well where opening is below grade (`r319_4_area_well_required`) | R319.4 | emergency escape opening | needs review | complies | no | F |
+| 28 | Area well where opening is below grade (`r319_4_area_well_required`) | R319.4 | emergency escape opening | needs review | complies | no | M |
 | 29 | Area well size allows opening to fully open (`r319_4_1_area_well_allows_full_opening`) | R319.4.1 | emergency escape opening | needs review | needs review | yes |  |
 | 30 | Area well horizontal area at least 9 sf (`r319_4_1_area_well_min_area`) | R319.4.1 | emergency escape opening | needs review | needs review | yes |  |
 | 31 | Area well horizontal projection at least 36 in (`r319_4_1_area_well_min_projection`) | R319.4.1 | emergency escape opening | needs review | needs review | yes |  |
@@ -207,17 +207,19 @@ None of them changes house.yaml. Review rounds 1 to 4 found the rear steps, the 
 
 ## Questions for the architects
 
-Only one is a question of the law's meaning that research didn't settle. The rest are questions for this drawing's own architect, kept in the [README](README.md).
+Two are questions of the law's meaning that research didn't settle. The rest are questions for this drawing's own architect, kept in the [README](README.md).
 
 1. **Is a single step in a doorway a "stairway" that must be 36 in wide?** The bonus room's 7 1/2 in step down onto the bridge is drawn in its 2'-8" doorway (A-3), about 30 in wide.
    - Searched: RCNYS 2025 R202 ("STAIR. A change in elevation, consisting of one or more risers"; STAIRWAY: "One or more flights of stairs"); R318.7.1 (its only exception is spiral stairs); R318.7.6 Exception 1 (the door at the top); the NY Department of State's Technical Bulletin TB-1005, "Residential Exit Doors, Stairways, Landings, Handrails, and Guards" ([dos.ny.gov](https://dos.ny.gov/system/files/documents/2019/10/tb-1005-rcnys-residential-exit-doors-stairs-and.pdf), read 2026-11-15), which quotes the 36 in width but says nothing of single risers.
    - Building-code forum opinion is split ([thebuildingcodeforum.com](https://www.thebuildingcodeforum.com/forum/threads/measuring-risers-at-thresholds.33867/), read 2026-11-15).
    - Ithaca's own interpretations: nothing found.
    - Still open, because the code calls one riser a stair, but whether a step with no tread is a "flight", and so part of a stairway, isn't settled by the text.
+2. **Is bare grade a "floor or landing" at the foot of exterior steps?** The porch steps run 'DOWN' to grade with no walk drawn at their foot (A-2). R318.7.6: "There shall be a floor or landing at the top and bottom of each stairway"; it says nothing of the landing's material.
+   - Searched: RCNYS 2025 R318.7.6 and R202 (no definition of LANDING); the NY Department of State's TB-1005 (above), which repeats the landing sizes only. Two building-department interpretations of the same IRC wording disagree: the City of Raymore, MO, 2012 IRC Interpretation 12 says a sloped gravel surface is not a landing ([raymore.com](https://raymore.com/home/showpublisheddocument/476/636002138131430000), read 2026-11-15); a 2014 ICC interpretation (IRC 71-13), as reported in the same search, says the code doesn't regulate the landing's material.
+   - Orangetown's and Ithaca's own interpretations: not yet searched.
+   - Still open, so the hand-check leaves R318.7.6's bottom landing at needs review.
 
 Two of the hand-check's answers are Gordium's readings, stated here for the architects to confirm. Neither changes a checker answer.
 
 - **The attic is not a habitable attic.** "ATTIC, HABITABLE. A finished or unfinished habitable space within an attic" (PDF p.35). "HABITABLE SPACE. A space in a building for living, sleeping, eating or cooking. Bathrooms, toilet rooms, closets, halls, storage" … are not (p.44).
 - **Its folding attic stair is attic access, not a stairway or ship's ladder** that R318.7 governs.
-
-One the hand-check leaves at needs review rather than read: whether bare grade at the foot of the porch steps counts as R318.7.6's "floor or landing" (common practice says yes; the text doesn't).

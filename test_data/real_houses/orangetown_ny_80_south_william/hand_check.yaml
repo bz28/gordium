@@ -98,7 +98,7 @@ rules:
   # ------------------------------------------------------------------------------------------- exterior doors
   - id: general.r318_3_exterior_door_landing_each_side
     truth: needs_review
-    why: "front door: the entry inside, the covered porch outside (A-2): complies. Rear sliders: steps down to the PATIO (A-2 'DN'), no landing drawn at the door; the two-riser exception is ruled out as drawn (26.4 in floor over grade needs at least four risers)"
+    why: "front door: the entry inside, the covered porch outside (A-2): complies. Rear sliders: steps down to the PATIO (A-2 'DN'), no landing drawn at the door; the two-riser exception looks ruled out (26.4 in floor over grade needs at least four risers), but no sheet details the steps or a landing, so whether one is built is open (README question 9), not a does_not_comply"
     predicted: needs_review
     because: "exterior doors aren't a part the description carries (exterior_door not read)"
   - id: general.r318_3_exterior_door_landing_width
@@ -352,7 +352,7 @@ rules:
     because: "stairs not read"
   - id: general.r318_7_6_stair_bottom_landing
     truth: needs_review
-    why: "the interior flights land on floors (the main floor, the basement slab, the garage slab, the bridge) and the rear steps on the patio (A-2, A-3); the porch steps run 'DOWN' to bare grade with no walk drawn at their foot, and whether grade counts as R318.7.6's 'floor or landing' isn't settled by the text"
+    why: "the interior flights land on floors (the main floor, the basement slab, the garage slab, the bridge), the mudroom step on the garage landing, and the rear steps on the patio (A-2, A-3); the porch steps run 'DOWN' to bare grade with no walk drawn at their foot, and whether grade counts as R318.7.6's 'floor or landing' isn't settled by the text (evaluation.md, architect question 2)"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_garage_top_landing_drop
