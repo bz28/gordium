@@ -151,4 +151,180 @@ units:
     - general.r315_5_2_2_sleeping_loft_stair_tread_riser_formula
     unresolved: []
     problems: []
+  R318.3:
+    rules:
+    - general.r318_3_exterior_door_landing_each_side
+    - general.r318_3_exterior_door_landing_width
+    - general.r318_3_exterior_door_landing_depth
+    - general.r318_3_exterior_door_landing_slope
+    unresolved: []
+    problems: []
+  R318.3.1:
+    rules:
+    - general.r318_3_1_egress_door_inside_floor_drop
+    - general.r318_3_1_egress_door_outside_floor_drop
+    unresolved:
+    - rule: R318.3.1.r318_3_1_egress_door_exterior_landing_access_to_grade
+      why: 'general.r318_3_1_egress_door_exterior_landing_access_to_grade: general.r318_3_1_egress_door_exterior_landing_access_to_grade:
+        no worked example shows when_none (not_applicable): give one with a building that has no exterior door,
+        whose row is not_applicable'
+    problems: []
+  R318.3.2:
+    rules:
+    - general.r318_3_2_other_exterior_door_floor_elevation
+    unresolved: []
+    problems: []
+  R318.7.3:
+    rules: []
+    unresolved: []
+    problems: []
+    failed: 'R318.7.3.r318_7_3_stair_vertical_rise_max: general.r318_7_3_stair_vertical_rise_max: general.r318_7_3_stair_vertical_rise_max:
+      example 4: a rule for each part needs ''rows'': every row it gives, [{part: id, within: id, outcome}]'
+  R318.7.6:
+    rules:
+    - general.r318_7_6_stair_top_landing
+    - general.r318_7_6_stair_bottom_landing
+    - general.r318_7_6_garage_top_landing_drop
+    - general.r318_7_6_top_landing_width
+    - general.r318_7_6_bottom_landing_width
+    - general.r318_7_6_deck_stair_bottom_landing_width
+    - general.r318_7_6_straight_run_landing_depth
+    - general.r318_7_6_nonrectangular_landing
+    unresolved: []
+    problems: []
+  R318.7.11.1:
+    rules:
+    - general.r318_7_11_1_spiral_stair_clear_width
+    - general.r318_7_11_1_spiral_stair_walkline_radius
+    - general.r318_7_11_1_spiral_stair_tread_depth
+    - general.r318_7_11_1_spiral_stair_identical_treads
+    - general.r318_7_11_1_spiral_stair_rise
+    - general.r318_7_11_1_spiral_stair_headroom
+    unresolved: []
+    problems: []
+  R318.7.11.2:
+    rules: []
+    unresolved:
+    - rule: R318.7.11.2.requirement_p101_l42
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''R318.7.11.2
+        Bulkhead enclosure stairways. Stairways serving bulkhead enclosures, not part of the required building egress,
+        providing access from the outside grade level to the basement shall be exempt'''
+    problems: []
+    reason: R318.7.11.2 sets no requirement on a design. It only exempts bulkhead enclosure stairways from R318.3
+      and R318.7 when the stairway is not part of the required building egress, the basement-floor-to-grade height
+      is not more than 8 feet, and the grade-level opening is covered by a bulkhead enclosure with hinged doors
+      or other approved means. The exemption belongs in the rules drafted from R318.3 and R318.7, which can leave
+      out or flag such stairways. Drafting it here would give a rule with nothing to check.
+  R318.7.12:
+    rules:
+    - general.r318_7_12_atd_clear_width
+    unresolved:
+    - rule: R318.7.12.r318_7_12_atd_not_in_means_of_egress
+      why: 'general.r318_7_12_atd_not_in_means_of_egress: general.r318_7_12_atd_not_in_means_of_egress: no worked
+        example shows when_none (not_applicable): give one with a building that has no alternating tread device,
+        whose row is not_applicable'
+    - rule: R318.7.12.requirement_p101_l47
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''R318.7.12
+        Alternating tread devices. Alternating tread devices shall not be used as an element of a means of egress.'''
+    problems: []
+  R318.7.12.1:
+    rules:
+    - general.r318_7_12_1_atd_tread_depth
+    - general.r318_7_12_1_atd_projected_tread_depth
+    - general.r318_7_12_1_atd_tread_width
+    - general.r318_7_12_1_atd_riser_height
+    - general.r318_7_12_1_atd_angle
+    - general.r318_7_12_1_atd_first_tread_at_floor
+    unresolved: []
+    problems: []
+  R318.7.12.2:
+    rules:
+    - general.r318_7_12_2_atd_handrails_both_sides
+    - general.r318_7_12_2_atd_handrails_comply_r320
+    unresolved: []
+    problems: []
+  R318.7.13:
+    rules:
+    - general.r318_7_13_ship_ladder_clear_width
+    unresolved:
+    - rule: R318.7.13.r318_7_13_ship_ladder_egress_use
+      why: 'general.r318_7_13_ship_ladder_egress_use: general.r318_7_13_ship_ladder_egress_use: number 200 in ''check''
+        isn''t one of the second-reading numbers (text_verification.yaml) of the pieces its quotes cite, stated
+        in those quotes, in sf'
+    - rule: R318.7.13.requirement_p102_l5
+      why: 'the label cites this and no drafted rule does (a person checks whether it sets a rule): ''R318.7.13
+        Ship’s ladders. Ship’s ladders shall not be used as an element of a means of egress.'''
+    problems: []
+  R318.7.13.1:
+    rules:
+    - general.r318_7_13_1_ships_ladder_tread_depth
+    - general.r318_7_13_1_ships_ladder_tread_plus_nosing
+    - general.r318_7_13_1_ships_ladder_riser_height
+    unresolved: []
+    problems: []
+  R318.7.13.2:
+    rules: []
+    unresolved: []
+    problems: []
+    failed: 'R318.7.13.2.r318_7_13_2_ships_ladder_handrails_both_sides: general.r318_7_13_2_ships_ladder_handrails_both_sides:
+      general.r318_7_13_2_ships_ladder_handrails_both_sides: no worked example shows when_none (not_applicable):
+      give one with a building that has no ships ladder, whose row is not_applicable'
+  R318.8.1:
+    rules:
+    - general.r318_8_1_ramp_max_slope_egress_door
+    - general.r318_8_1_ramp_max_slope_other
+    - general.r318_8_1_ramp_max_slope_infeasible
+    unresolved: []
+    problems: []
+  R318.8.2:
+    rules:
+    - general.r318_8_2_ramp_landings_present
+    - general.r318_8_2_ramp_landing_width
+    - general.r318_8_2_ramp_landing_depth
+    unresolved: []
+    problems: []
+  R318.8.3:
+    rules:
+    - general.r318_8_3_ramp_handrail_one_side
+    unresolved: []
+    problems: []
+  R319.4.2.1:
+    rules:
+    - general.r319_4_2_1_area_well_ladder_width
+    - general.r319_4_2_1_area_well_ladder_projection
+    - general.r319_4_2_1_area_well_ladder_rung_spacing
+    - general.r319_4_2_1_area_well_ladder_full_height
+    unresolved: []
+    problems: []
+  R319.4.2.2:
+    rules:
+    - general.r319_4_2_2_area_well_steps_requirements
+    unresolved: []
+    problems: []
+  R319.6:
+    rules:
+    - general.r319_6_addition_sleeping_room_escape_opening
+    - general.r319_6_addition_basement_escape_opening
+    unresolved: []
+    problems: []
+  R320.3:
+    rules:
+    - general.r320_3_handrail_projection
+    unresolved: []
+    problems: []
+  R320.5:
+    rules:
+    - general.r320_5_handrail_continuity
+    - general.r320_5_handrail_end_returned
+    - general.r320_5_handrail_return_gap
+    unresolved: []
+    problems: []
+  R320.6:
+    rules:
+    - general.r320_6_handrail_edge_radius
+    - general.r320_6_handrail_circular_diameter
+    - general.r320_6_handrail_type_i_noncircular
+    - general.r320_6_handrail_type_ii_recess
+    unresolved: []
+    problems: []
 complete: true
