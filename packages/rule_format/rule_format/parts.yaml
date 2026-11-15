@@ -112,6 +112,7 @@ egress_door:
     door_clear_width:  {unit: in, meaning: "Clear width of the opening with the door open"}
     door_clear_height: {unit: in, meaning: "Clear height of the opening with the door open"}
     door_side_hinged:  {unit: yes_no, meaning: "The door is side-hinged"}
+    egress_door_given_as_exterior_door: {unit: yes_no, meaning: "The same door is also given as an exterior_door part with exterior_door_is_egress_door yes, so R318.3 and R318.3.1 check its landings and floor drops"}
 
 handrail:
   meaning: "A handrail along a flight of stairs or a ramp, as the architect marks it"
@@ -127,7 +128,8 @@ handrail:
     handrail_continuous:     {unit: yes_no, meaning: "The handrail runs unbroken the full length of the flight (from directly above the nosing of the top landing to directly above the lowest nosing) or of the ramp"}
     handrail_breaks_newel_or_volute: {unit: yes_no, meaning: "Where the handrail is not continuous: it still reaches from directly above the nosing of the top landing to directly above the lowest nosing (or the ramp's full length), and every place it is interrupted or ends short of those points is a newel post (at a turn in a flight with winders, at a landing or over the lowest tread) or a volute, turnout or starting easing ending over the lowest tread (a rail that just stops short is no)"}
     handrail_ends_returned:  {unit: yes_no, meaning: "Each end of the handrail is returned, continuous to itself or toward a wall, guard or walking surface"}
-    handrail_return_gap:     {unit: in, meaning: "Greatest gap between a handrail return and the wall beside it"}
+    handrail_returns_to_wall: {unit: yes_no, meaning: "An end of the handrail is returned toward a wall (whether or not the rail itself runs beside one)"}
+    handrail_return_gap:     {unit: in, meaning: "Greatest gap between a handrail return and the wall it runs beside or returns toward"}
     handrail_circular:       {unit: yes_no, meaning: "The handrail's cross section is a circle"}
     handrail_diameter:       {unit: in, meaning: "Outside diameter of a circular handrail"}
     handrail_perimeter:      {unit: in, meaning: "Perimeter of the handrail's cross section"}
