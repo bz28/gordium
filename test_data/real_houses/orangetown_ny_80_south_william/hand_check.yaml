@@ -6,7 +6,7 @@
 #   truth      what the 2025 Residential Code of New York State says about this house AS DRAWN, from the code text and
 #              the drawings, whatever Gordium can read. One of: complies, does_not_comply, needs_review,
 #              not_applicable. Most rest on answer_key.yaml (worked in PR #97, before any checker existed): `area`
-#              names its entry. A rule about several parts (four bedrooms, five flights) takes the most cautious.
+#              names its entry. A rule about several parts (four bedrooms, every flight) takes the most cautious.
 #   predicted  what the checker SHOULD say, given house.yaml as written (what the description can carry, what the
 #              measuring code reads: docs/interior/interior_measurements.md and expected.yaml) and the rule's own
 #              formulas. One of the checker's answers: pass, fail, needs_review, not_applicable.
@@ -21,15 +21,26 @@
 # Parts of the house the truth is worked over (sheets A-1 to A-5, see README.md):
 #   bedrooms: master, bed2, bed3, bed4 (second floor); their 10 marked escape windows (m1-m4, b2a-b4b)
 #   other marked escape windows: bonus room x1, x2; basement bsw1, bsw2 (CW14 in areaways)
-#   flights: main stair, basement stair, the two one-riser steps onto the bridge, the garage steps, the porch steps
+#   flights: main stair, basement stair, the two one-riser steps onto the bridge, the garage steps, the porch steps,
+#   and the steps down from each rear slider to the patio (A-2 'DN' at each '60611 SL DR'; A-2 basement plan 'CHEEK
+#   WALLS FOR STEPS ABOVE'; A-4 'CONC. PAVER STONE STEPS'; drawn with no landing at the door, riser count not given)
 #   exit door: the front door; other exterior doors: two rear sliders ('60611 SL DR', A-2) onto the PATIO, the
 #   mudroom door into the garage is interior to the building
 #   guards: the second-floor railings g_hall, g_bridge_n, g_bridge_s, g_east, and the stair guard g_stair_w
 #   none drawn: sleeping lofts, ramps, alternating tread devices, ship's ladders, spiral stairs, patio covers, an
 #   addition (this is a new house). The attic is unfinished roof space over insulated ceiling joists (A-5 section,
-#   'ATTIC'), reached by a pull-down attic stair (A-3 'ATTIC STAIR DETAILS'): not a habitable attic (R202: an
-#   occupiable floor area of at least 70 sq ft with a 7 ft ceiling; none is drawn) and its folding ladder is attic
-#   access, not a stairway serving an occupied floor (Gordium's reading, stated).
+#   'ATTIC'), reached by a pull-down attic stair (A-3 'ATTIC STAIR DETAILS'): not a habitable attic (R202: "A
+#   finished or unfinished habitable space within an attic"; HABITABLE SPACE: "for living, sleeping, eating or
+#   cooking", storage is not) and its folding ladder is attic access, not a stairway serving an occupied floor
+#   (Gordium's reading, stated).
+#
+# Corrected after the run, by review round 1 (cold reviewer, two sceptics each; the first commit has the originals):
+#   r319_4_1_area_well_min_projection     complies -> needs_review (the 36 in is to the well's outside, with the
+#                                          ladder inside it; which window and well are built isn't settled)
+#   r318_7_6_stair_top_landing            complies -> needs_review (the rear slider steps were missed: no landing
+#                                          drawn at the door, and the framing needs about 3 risers, more than the
+#                                          two-riser exception allows)
+#   r318_7_6_deck_stair_bottom_landing_width  not_applicable -> needs_review (the same rear steps serve the patio)
 
 rules:
   # ------------------------------------------------------------------------------------------- the exit door
@@ -72,7 +83,7 @@ rules:
   # ------------------------------------------------------------------------------------------- exterior doors
   - id: general.r318_3_exterior_door_landing_each_side
     truth: needs_review
-    why: "front door: the entry inside, the covered porch outside (A-2): complies. Rear sliders: the PATIO outside (A-2), drawn but not dimensioned or levelled: not settled"
+    why: "front door: the entry inside, the covered porch outside (A-2): complies. Rear sliders: steps down to the PATIO (A-2 'DN'), no landing drawn at the door; the two-riser exception can't be confirmed (riser count not given)"
     predicted: needs_review
     because: "exterior doors aren't a part the description carries (exterior_door not read)"
   - id: general.r318_3_exterior_door_landing_width
@@ -163,8 +174,8 @@ rules:
     predicted: needs_review
     because: "opening_below_grade not measured"
   - id: general.r319_4_1_area_well_min_projection
-    truth: complies
-    why: "A-5 'PLAN VIEW WINDOW WELL': '36\" WELL PROJECTION' >= 36 (area area_well_size), if the A-5 well is the one built at both CW14s (A-2 calls them 'BOWMAN KEMP AREAWAY')"
+    truth: needs_review
+    why: "A-5 'PLAN VIEW WINDOW WELL': '36\" WELL PROJECTION' is to the well's outside line, with the 'ESCAPE LADDER' drawn inside it; R319.4.1's 6 in ladder allowance holds only for a ladder R319.4.2 requires (the well's depth isn't given); and the A-5 well and 4040 window may not be what is built at the CW14s (area area_well_size)"
     predicted: needs_review
     because: "opening_below_grade not measured"
   - id: general.r319_4_1_area_well_min_width
@@ -320,13 +331,13 @@ rules:
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_stair_top_landing
-    truth: complies
-    why: "every flight has a floor or landing at its top: main stair the bridge (A-3 4'-0\"); basement stair the 3'-4\" landing (A-2); garage steps the 3'-8\" x 3'-4\" landing (A-2); the bridge steps the hallway and the bonus room floor (the bonus room's door swings into the room, not over the step); the porch steps the porch (areas stair_top_landing, stair_other_landings)"
+    truth: needs_review
+    why: "the interior flights and the porch steps have one: main stair the bridge (A-3 4'-0\"); basement stair the 3'-4\" landing (A-2); garage steps the 3'-8\" x 3'-4\" landing (A-2); the bridge steps the hallway and the bonus room floor (the door swings into the room); the porch steps the porch. The rear slider steps (A-2 'DN', A-4 'CONC. PAVER STONE STEPS') have no landing drawn at the door, and R318.7.6 Exception 3 waives it only for 'not more than two risers': the riser count isn't given, and the floor's framing above grade (A-5: 8\" min. foundation, sill, 2x10 joists, subfloor, about 19.5 in) needs at least three"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_stair_bottom_landing
     truth: complies
-    why: "every flight lands on a floor: the main floor, the basement slab, the garage slab, the bridge, grade (A-2, A-3); their sizes are other rules"
+    why: "every flight lands on a floor: the main floor, the basement slab, the garage slab, the bridge, grade, the patio (A-2, A-3); their sizes are other rules"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_garage_top_landing_drop
@@ -345,8 +356,8 @@ rules:
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_deck_stair_bottom_landing_width
-    truth: not_applicable
-    why: "the only exterior steps to grade are the porch steps, the required egress door's access to grade (excluded by this rule's applies_when)"
+    truth: needs_review
+    why: "the rear slider steps go down to the patio, are not the egress door's access to grade, and may have three or fewer risers (riser count not given), so Exception 4's 36 in bottom landing may govern them; the patio isn't dimensioned. The porch steps are the egress door's access (excluded)"
     predicted: needs_review
     because: "stairs not read"
   - id: general.r318_7_6_straight_run_landing_depth

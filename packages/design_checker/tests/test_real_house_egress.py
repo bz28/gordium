@@ -31,7 +31,14 @@ CHECKER = {"pass": "complies", "fail": "does not comply", "needs_review": "needs
            "not_applicable": "not applicable"}
 TRUTH = {"complies": "complies", "does_not_comply": "does not comply", "needs_review": "needs review",
          "not_applicable": "not applicable"}
-ROW = re.compile(r"^\| \d+ \| .*\(`([a-z0-9_]+)`\) \| [^|]* \| [^|]* \| ([a-z ]+) \| ([a-z ]+) \| (yes|no) \|")
+ROW = re.compile(r"^\| \d+ \| .*\(`([a-z0-9_]+)`\) \| [^|]* \| [^|]* \| ([a-z ]+) \| ([a-z ]+) \| (yes|no) \| ([A-Z]?) \|$")
+COUNT = re.compile(r"^\| (complies|does not comply|needs review|not applicable) \| (\d+) \| (\d+) \| (\d+) \|$")
+WHY = set("DFGMR")             # the evaluation's classes for a rule the checker is more cautious about
+# truths corrected by review round 1 (each a "complies" or "not applicable" the drawings don't establish: the rear
+# slider steps, the area well's projection); a revert lets the false-pass guard accept a pass there
+REVIEWED = {"general.r319_4_1_area_well_min_projection": "needs_review",
+            "general.r318_7_6_stair_top_landing": "needs_review",
+            "general.r318_7_6_deck_stair_bottom_landing_width": "needs_review"}
 
 
 @pytest.fixture(scope="module")
@@ -98,7 +105,25 @@ def test_the_evaluation_table_is_current(found, name):
             assert rid not in rows, rid
             rows[rid] = m.groups()[1:]
     assert set(rows) == set(truth)
-    for rid, (checker, hand_says, agree) in rows.items():
+    for rid, (checker, hand_says, agree, why) in rows.items():
         assert checker == CHECKER[got["results"][rid]], rid
         assert hand_says == TRUTH[truth[rid]], rid
         assert agree == ("yes" if checker == hand_says else "no"), rid
+        assert (why in WHY) if agree == "no" else why == "", rid
+    # the count table (truth, rules, checker agrees, checker more cautious) is today's
+    counts = {}
+    for line in (REAL / name / "evaluation.md").read_text(encoding="utf-8").splitlines():
+        if m := COUNT.match(line):
+            counts[m.group(1)] = tuple(int(x) for x in m.groups()[1:])
+    assert set(counts) == set(TRUTH.values())
+    for t, (n, same, cautious) in counts.items():
+        mine = [rid for rid in truth if TRUTH[truth[rid]] == t]
+        assert n == len(mine), t
+        assert same == sum(CHECKER[got["results"][rid]] == t for rid in mine), t
+        assert cautious == n - same, t
+
+
+@pytest.mark.parametrize("name", NAMES)
+def test_the_truths_review_corrected_stay_corrected(name):
+    truth = {r["id"]: r["truth"] for r in load_yaml(name, "hand_check.yaml")["rules"]}
+    assert {k: truth[k] for k in REVIEWED} == REVIEWED
