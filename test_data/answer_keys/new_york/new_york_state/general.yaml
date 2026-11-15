@@ -2333,6 +2333,40 @@ rules:
     drafted_by: claude_code/claude-opus-5-5 (answer key helper)
     status: draft
 
+  - id: general.r318_3_1_egress_door_given_as_exterior_door
+    kind: flag
+    topic: means_of_egress
+    title: "Egress door not given as an exterior door: its landings unchecked (R318.3.1)"
+    for_each: egress_door
+    when_none: not_applicable
+    applies_when: not egress_door_given_as_exterior_door
+    sources:
+      - file: gov.ny.residential.2025.pdf
+        page: 99
+        lines: [55, 56]
+        quote: "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold."
+    examples:
+      - given: {}
+        parts:
+          egress_door: [{id: e1, name: Front door, measures: {egress_door_given_as_exterior_door: false}}]
+        rows: [{part: e1, outcome: needs_review}]
+        expect: needs_review
+      - given: {}
+        parts:
+          egress_door: [{id: e1, measures: {egress_door_given_as_exterior_door: true}}]
+        rows: [{part: e1, outcome: not_applicable}]
+        expect: not_applicable
+      - given: {}
+        parts: {egress_door: []}
+        rows: [{outcome: not_applicable}]
+        expect: not_applicable
+    notes: >-
+      Added after the comparison with the drafts, 2026-11-15 (review round 2): R318.3.1's drop rule reads the
+      exterior_door part marked as the egress door, R318.2 the egress_door part; an egress door the model does not
+      also give as a marked exterior door had its landings and drops unchecked (not applicable), so it needs review.
+    drafted_by: claude_code/claude-opus-5-5 (answer key helper)
+    status: draft
+
   - id: general.r318_3_2_other_door_landing_drop
     kind: rule
     topic: means_of_egress
@@ -4168,7 +4202,9 @@ rules:
     title: "Handrail ends returned; returns 1/4 in from the wall at most (R320.5)"
     for_each: handrail
     when_none: not_applicable
-    check: handrail_ends_returned and (not handrail_adjacent_to_wall or handrail_return_gap <= 0.25)
+    check: >-
+      handrail_ends_returned and (not (handrail_adjacent_to_wall or handrail_returns_to_wall) or handrail_return_gap
+      <= 0.25)
     review_when:
       - when: not handrail_ends_returned and handrail_breaks_newel_or_volute
         reason: >-
@@ -4217,10 +4253,16 @@ rules:
         note: the open-side rail ends in a volute over the first tread
       - given: {}
         parts:
-          handrail: [{id: h1, measures: {handrail_ends_returned: true, handrail_adjacent_to_wall: false}}]
+          handrail: [{id: h1, measures: {handrail_ends_returned: true, handrail_adjacent_to_wall: false, handrail_returns_to_wall: false}}]
         rows: [{part: h1, outcome: pass}]
         expect: pass
         note: a guard-side rail returned to the guard
+      - given: {}
+        parts:
+          handrail: [{id: h1, measures: {handrail_ends_returned: true, handrail_adjacent_to_wall: false, handrail_returns_to_wall: true, handrail_return_gap: 2}}]
+        rows: [{part: h1, outcome: fail}]
+        expect: fail
+        note: an open-side rail returned toward the end wall, 2 in short of it
       - given: {}
         parts: {handrail: []}
         rows: [{outcome: not_applicable}]
@@ -4228,7 +4270,9 @@ rules:
     notes: >-
       Number (R320.5 second reading): 1/4 = 0.25 (not form a gap more than, <=). Every handrail, stair or ramp. The gap
       is read only for a rail beside a wall (handrail_adjacent_to_wall), the wall its return turns to; a free-standing
-      rail returned toward some other wall isn't told apart (measure lacking: which way each return turns).
+      rail returned toward some other wall isn't told apart (measure lacking: which way each return turns). Fixed after
+      the comparison with the drafts, 2026-11-15 (review round 2): handrail_returns_to_wall now tells it apart, and
+      the gap is read for it too.
     open_questions:
       - 'R320.5: "A handrail end shall be returned continuous to itself or toward a wall, guard or walking surface." and exception 2: "A volute, turnout or starting easing shall be allowed to terminate over the lowest tread." Does a handrail end at a newel post (exception 1) or a volute, turnout or starting easing (exception 2) also have to be returned, or do those exceptions stand for the return?'
     research:
