@@ -18,13 +18,16 @@ from openpyxl import load_workbook
 
 from design_checker.check import check_site
 from rule_export.workbook import contents
+from rule_format.place import only_place
 from rule_format.rulebook import REPO
 
 from .build import files, workbook
 from .source import checked
 
 GOLDENS = REPO / "test_data/goldens/permit_sheets"
-FACTS = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "street_line": [[[0, 0], [60, 0]]],
+# the test lot's place comes from the registry (only Ithaca has settings today), never named in shared code
+FACTS = {"jurisdiction": only_place("the permit-sheet goldens", "name the test lot's place first").jurisdiction,
+         "street_line": [[[0, 0], [60, 0]]],
          "corner_lot": False, "lot_surveyed": True, "ground_is_flat": True, "grade_elevation": 0,
          "use": "one_family_detached", "stories": 2, "zone": "R-1b"}
 DATE = "2026-11-15"
