@@ -19,7 +19,7 @@ edit. The trial ends with a go / no-go and a filled-in results table, not with a
 
 | # | Question | Go if | How it is answered |
 |---|---|---|---|
-| Q1 | Does Revit run acceptably on this laptop (the Windows laptop of section 2, 32 GB) (Revit alone first, then with the add-in and the worker running)? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the laptop is not short of memory (Windows RAM in use stays below 90% while working: a proposed number, section 6) | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
+| Q1 | Does Revit run acceptably on the Windows laptop of section 2 (32 GB), first alone, then with the add-in and the worker running? | Opening a model (Snowdon Towers, and each architect model in hand by day 2) and orbiting, selecting and editing is usable with Revit and the add-in both running, and the laptop is not short of memory (Windows RAM in use stays below 90% while working: a proposed number, section 6) | Days 1 to 2 for Revit alone; re-checked on day 4 with the add-in and the worker running. Measured in section 5 |
 | Q2 | Can a minimal C# add-in start the Python worker and get an answer back? | The add-in starts `python -m design_checker serve`, sends `hello`, then `check_site` for the box-house scene, and the answer matches what the Mac gives | Days 3 to 4 |
 | Q3 | Can it read 3 real architect models: which faces are flat and which curved, stable ids (`UniqueId`), units, survey coordinates? | For each real model (Snowdon Towers alone answers the reading half only, as "provisional (Snowdon)": it has no Ithaca lot, and its survey coordinates stay "not tested"; Q3 is not a go until the architects' models are read), the add-in's site description is valid, curved things are reported (never sent as flat), ids do not change after an edit, and points are in feet | Days 8 to 9 |
 | Q4 | How long does reading take after an edit? | Within the targets in section 6, or the miss recorded and the MVP planned as "check on a button" (section 6: a slow read is not a stop) | Day 10, measured in section 5 |
@@ -263,7 +263,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
    its own trial account or a paid licence.
 4. **Which branch the trial clones.** This page sits on the tidy-up stack's top branch (PR #78); the trial needs
    the stack merged, or that branch, since `recorded/revit/` and the conformance command only exist there.
-5. **Confirm the numbers in section 6** (3 minutes to open a model, 90% of RAM in use, 2 and 10 seconds per edit).
+5. **Confirm the numbers in section 6** (3 minutes to open a model, 90% of RAM in use, 64 GB for a cloud machine, 2 and 10 seconds per edit).
 
 **Checks the trial itself settles** (nothing in the repo answers them today):
 
