@@ -414,7 +414,7 @@ def test_a_concern_from_a_rule_that_may_not_apply_to_the_guard_says_which_rule()
     from rule_format.rulebook import REPO
     from design_checker import each_part
     rules = yaml.safe_load((REPO / "regulations/jurisdictions/new_york/new_york_state/5_building_code_rules/drafted/"
-                                   "general.yaml").read_text())
+                                   "general.yaml").read_text(encoding="utf-8"))
     [rule] = [r for r in rules["rules"] if r["id"] == "general.r321_1_2_guard_height_open_side_not_stair"]
     given = {"guard": [{"id": "sg", "name": "Stair guard", "measures": {"guard_height": 35.0}, "not_measured": {}}]}
     got = each_part._stand_ins(rule, ["open_side"], given, {})
@@ -428,7 +428,7 @@ def _height_rule():
     import yaml
     from rule_format.rulebook import REPO
     rules = yaml.safe_load((REPO / "regulations/jurisdictions/new_york/new_york_state/5_building_code_rules/drafted/"
-                                   "general.yaml").read_text())
+                                   "general.yaml").read_text(encoding="utf-8"))
     [rule] = [r for r in rules["rules"] if r["id"] == "general.r321_1_2_guard_height_open_side_not_stair"]
     return rule
 
