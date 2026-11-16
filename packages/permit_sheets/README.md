@@ -33,7 +33,7 @@ The command runs the check itself (`design_checker`, as the plugin does) and pri
 - **Results:** each line's result is the check's item status, word for word: COMPLIES, DOES NOT COMPLY, NEEDS
   REVIEW, or WAITING: <the check's own reason> (`words.result_words`; any other status is refused); a grouped G-001
   row's is the most cautious of its rules'. An item about a part is paired with its raw row and the two must agree;
-  every row the panel shows must be printed (in the CSV, and cited by exactly one G-001 row); each law's summary
+  every row the panel shows must be printed in the CSV (that each is cited by exactly one G-001 row holds by how G-001 is built, and is pinned by a test, not refused at run time); each law's summary
   must equal the checker's own count of its items (`present._law_summary`).
 - **Never kinder than the worst row:** a window's line is the most cautious of all its rows; a bedroom with no window
   marked takes its own rows' result; no rows at all, or a window marked but not checked, is NEEDS REVIEW

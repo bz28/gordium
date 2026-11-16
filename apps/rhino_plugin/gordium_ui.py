@@ -610,7 +610,7 @@ def _item_row(parts, i, title=None):
     and its values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)."""
     stale_row = parts["stale"] and i["status"] != "not_checked"
     name, proposed, required, delta = logic.list_values(i)   # the use row: the use's own name as its Item;
-    values = [name if stale_row else i["mark"] + "  " + (title or name),     # out of date: no line words (results)   # a tax-map Delta and a span: short forms
+    values = [name if stale_row else i["mark"] + "  " + (title or name),     # out of date: no line words (results)
               "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
               "" if stale_row else logic.cell_text(required),
               "" if stale_row else logic.cell_text(delta)]
