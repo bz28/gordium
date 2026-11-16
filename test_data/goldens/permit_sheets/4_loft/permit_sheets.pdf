@@ -13,11 +13,11 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 29596 >>
+<< /Length 28368 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (CODE ANALYSIS: EGRESS) Tj ET
 BT /F2 7.5 Tf 0.7 0.15 0.12 rg 68 728.4 Td (Egress result: DOES NOT COMPLY) Tj ET
-BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 12 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 11 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
 BT /F2 7.5 Tf 0.54 0.33 0 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code_analysis.csv line 112\)) Tj ET
 0.6 w [] 0 d
 0.9 0.9 0.9 rg 0.1 0.1 0.1 RG 68 692.4 m 994 692.4 l 994 677.4 l 68 677.4 l h B
@@ -183,407 +183,377 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 482.4 Td (no egress doors) Tj ET
 0.1 0.1 0.1 RG 994 491.4 m 994 470.9 l S
 BT /F1 7 Tf 0.1 0.1 0.1 rg 71 461.9 Td (5) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 461.9 Td (Bedroom › Window A) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 461.9 Td (4 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 461.9 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 452.9 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 443.9 Td (Escape opening minimum net clear width \(R319.2.2\); and 1) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 443.9 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 434.9 Td (more) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 426.4 Td (code_analysis.csv lines 5–8) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 426.4 Td (code_analysis.csv lines 5–13, 29–32, 46, 51, 97–102) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 461.9 Td () Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 461.9 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 470.9 m 684.2 470.9 l 684.2 423.4 l 602.49 423.4 l h f
+1 0.95 0.84 rg 602.49 470.9 m 684.2 470.9 l 684.2 358.9 l 602.49 358.9 l h f
 BT /F2 7 Tf 0.54 0.33 0 rg 605.49 461.9 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 461.9 Td (R319.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 452.9 Td (R319.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 443.9 Td (R319.2.3) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 461.9 Td (BF103.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 452.9 Td (R319.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 443.9 Td (R319.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 434.9 Td (R319.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 425.9 Td (R319.2.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 416.9 Td (R319.2.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 407.9 Td (R319.3, R319.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 398.9 Td (R319.4.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 389.9 Td (R319.4.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 380.9 Td (R319.4.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 371.9 Td (R319.4.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 362.9 Td (R319.6) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 461.9 Td (to give: an awning window's clear opening depends on how far it opens and its) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 452.9 Td (hardware: give the maker's net clear opening \(`stated_clear`\)) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 452.9 Td (hardware: give the maker's net clear opening \(`stated_clear`\) · not read yet:) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 443.9 Td (fully openable, path height and 20 more) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 423.4 m 994 423.4 l S
+0.55 0.55 0.55 RG 68 358.9 m 994 358.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 470.9 m 91.83 423.4 l S
+0.55 0.55 0.55 RG 91.83 470.9 m 91.83 358.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 470.9 m 207.58 423.4 l S
+0.55 0.55 0.55 RG 207.58 470.9 m 207.58 358.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 470.9 m 405.04 423.4 l S
+0.55 0.55 0.55 RG 405.04 470.9 m 405.04 358.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 470.9 m 503.76 423.4 l S
+0.55 0.55 0.55 RG 503.76 470.9 m 503.76 358.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 470.9 m 602.49 423.4 l S
+0.55 0.55 0.55 RG 602.49 470.9 m 602.49 358.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 470.9 m 684.2 423.4 l S
+0.55 0.55 0.55 RG 684.2 470.9 m 684.2 358.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 470.9 m 742.07 423.4 l S
+0.55 0.55 0.55 RG 742.07 470.9 m 742.07 358.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 470.9 m 68 423.4 l S
+0.1 0.1 0.1 RG 68 470.9 m 68 358.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 470.9 m 994 423.4 l S
+0.1 0.1 0.1 RG 994 470.9 m 994 358.9 l S
 0.4 w [] 0 d
-0.96 0.96 0.96 rg 0.1 0.1 0.1 RG 68 423.4 m 994 423.4 l 994 408.4 l 68 408.4 l h B
-BT /F2 7.5 Tf 0 0 0 rg 71 413.4 Td (Check by hand: not read by Gordium yet) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 399.4 Td (6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 399.4 Td (Handrails) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 399.4 Td (10 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 390.9 Td (code_analysis.csv lines 14–15, 104–111) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 399.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 399.4 Td () Tj ET
+0.96 0.96 0.96 rg 0.1 0.1 0.1 RG 68 358.9 m 994 358.9 l 994 343.9 l 68 343.9 l h B
+BT /F2 7.5 Tf 0 0 0 rg 71 348.9 Td (Check by hand: not read by Gordium yet) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 334.9 Td (6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 334.9 Td (Handrails) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 334.9 Td (10 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 326.4 Td (code_analysis.csv lines 14–15, 104–111) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 334.9 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 334.9 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 408.4 m 684.2 408.4 l 684.2 377.4 l 602.49 377.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 399.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 399.4 Td (R320.2, R320.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 390.4 Td (R320.4, R320.5,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 381.4 Td (R320.6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 399.4 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 343.9 m 684.2 343.9 l 684.2 312.9 l 602.49 312.9 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 334.9 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 334.9 Td (R320.2, R320.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 325.9 Td (R320.4, R320.5,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 316.9 Td (R320.6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 334.9 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 377.4 m 994 377.4 l S
+0.55 0.55 0.55 RG 68 312.9 m 994 312.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 408.4 m 91.83 377.4 l S
+0.55 0.55 0.55 RG 91.83 343.9 m 91.83 312.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 408.4 m 207.58 377.4 l S
+0.55 0.55 0.55 RG 207.58 343.9 m 207.58 312.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 408.4 m 405.04 377.4 l S
+0.55 0.55 0.55 RG 405.04 343.9 m 405.04 312.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 408.4 m 503.76 377.4 l S
+0.55 0.55 0.55 RG 503.76 343.9 m 503.76 312.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 408.4 m 602.49 377.4 l S
+0.55 0.55 0.55 RG 602.49 343.9 m 602.49 312.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 408.4 m 684.2 377.4 l S
+0.55 0.55 0.55 RG 684.2 343.9 m 684.2 312.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 408.4 m 742.07 377.4 l S
+0.55 0.55 0.55 RG 742.07 343.9 m 742.07 312.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 408.4 m 68 377.4 l S
+0.1 0.1 0.1 RG 68 343.9 m 68 312.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 408.4 m 994 377.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 368.4 Td (7) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 368.4 Td (Guards \(open sides\)) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 368.4 Td (7 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 359.9 Td (code_analysis.csv lines 16–21, 28) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 368.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 368.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 343.9 m 994 312.9 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 303.9 Td (7) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 303.9 Td (Guards \(open sides\)) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 303.9 Td (7 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 295.4 Td (code_analysis.csv lines 16–21, 28) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 303.9 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 303.9 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 377.4 m 684.2 377.4 l 684.2 346.4 l 602.49 346.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 368.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 368.4 Td (R321.1.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 359.4 Td (R321.1.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 350.4 Td (R321.1.3) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 368.4 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 312.9 m 684.2 312.9 l 684.2 281.9 l 602.49 281.9 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 303.9 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 303.9 Td (R321.1.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 294.9 Td (R321.1.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 285.9 Td (R321.1.3) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 303.9 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 346.4 m 994 346.4 l S
+0.55 0.55 0.55 RG 68 281.9 m 994 281.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 377.4 m 91.83 346.4 l S
+0.55 0.55 0.55 RG 91.83 312.9 m 91.83 281.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 377.4 m 207.58 346.4 l S
+0.55 0.55 0.55 RG 207.58 312.9 m 207.58 281.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 377.4 m 405.04 346.4 l S
+0.55 0.55 0.55 RG 405.04 312.9 m 405.04 281.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 377.4 m 503.76 346.4 l S
+0.55 0.55 0.55 RG 503.76 312.9 m 503.76 281.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 377.4 m 602.49 346.4 l S
+0.55 0.55 0.55 RG 602.49 312.9 m 602.49 281.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 377.4 m 684.2 346.4 l S
+0.55 0.55 0.55 RG 684.2 312.9 m 684.2 281.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 377.4 m 742.07 346.4 l S
+0.55 0.55 0.55 RG 742.07 312.9 m 742.07 281.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 377.4 m 68 346.4 l S
+0.1 0.1 0.1 RG 68 312.9 m 68 281.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 377.4 m 994 346.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 337.4 Td (8) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 337.4 Td (Sleeping lofts) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 337.4 Td (5 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 328.9 Td (code_analysis.csv lines 22–25, 50) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 337.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 337.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 312.9 m 994 281.9 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 272.9 Td (8) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 272.9 Td (Sleeping lofts) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 272.9 Td (5 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 264.4 Td (code_analysis.csv lines 22–25, 50) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 272.9 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 272.9 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 346.4 m 684.2 346.4 l 684.2 324.4 l 602.49 324.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 337.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 337.4 Td (R315.2, R315.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 328.4 Td (R319.1) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 337.4 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 281.9 m 684.2 281.9 l 684.2 259.9 l 602.49 259.9 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 272.9 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 272.9 Td (R315.2, R315.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 263.9 Td (R319.1) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 272.9 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 324.4 m 994 324.4 l S
+0.55 0.55 0.55 RG 68 259.9 m 994 259.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 346.4 m 91.83 324.4 l S
+0.55 0.55 0.55 RG 91.83 281.9 m 91.83 259.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 346.4 m 207.58 324.4 l S
+0.55 0.55 0.55 RG 207.58 281.9 m 207.58 259.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 346.4 m 405.04 324.4 l S
+0.55 0.55 0.55 RG 405.04 281.9 m 405.04 259.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 346.4 m 503.76 324.4 l S
+0.55 0.55 0.55 RG 503.76 281.9 m 503.76 259.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 346.4 m 602.49 324.4 l S
+0.55 0.55 0.55 RG 602.49 281.9 m 602.49 259.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 346.4 m 684.2 324.4 l S
+0.55 0.55 0.55 RG 684.2 281.9 m 684.2 259.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 346.4 m 742.07 324.4 l S
+0.55 0.55 0.55 RG 742.07 281.9 m 742.07 259.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 346.4 m 68 324.4 l S
+0.1 0.1 0.1 RG 68 281.9 m 68 259.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 346.4 m 994 324.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 315.4 Td (9) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 315.4 Td (Basements) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 315.4 Td (2 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 306.9 Td (code_analysis.csv lines 47, 103) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 315.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 315.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 281.9 m 994 259.9 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 250.9 Td (9) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 250.9 Td (Basements) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 250.9 Td (2 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 242.4 Td (code_analysis.csv lines 47, 103) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 250.9 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 250.9 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 324.4 m 684.2 324.4 l 684.2 303.9 l 602.49 303.9 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 315.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 315.4 Td (R319.1, R319.6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 315.4 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 259.9 m 684.2 259.9 l 684.2 239.4 l 602.49 239.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 250.9 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 250.9 Td (R319.1, R319.6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 250.9 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 303.9 m 994 303.9 l S
+0.55 0.55 0.55 RG 68 239.4 m 994 239.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 324.4 m 91.83 303.9 l S
+0.55 0.55 0.55 RG 91.83 259.9 m 91.83 239.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 324.4 m 207.58 303.9 l S
+0.55 0.55 0.55 RG 207.58 259.9 m 207.58 239.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 324.4 m 405.04 303.9 l S
+0.55 0.55 0.55 RG 405.04 259.9 m 405.04 239.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 324.4 m 503.76 303.9 l S
+0.55 0.55 0.55 RG 503.76 259.9 m 503.76 239.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 324.4 m 602.49 303.9 l S
+0.55 0.55 0.55 RG 602.49 259.9 m 602.49 239.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 324.4 m 684.2 303.9 l S
+0.55 0.55 0.55 RG 684.2 259.9 m 684.2 239.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 324.4 m 742.07 303.9 l S
+0.55 0.55 0.55 RG 742.07 259.9 m 742.07 239.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 324.4 m 68 303.9 l S
+0.1 0.1 0.1 RG 68 259.9 m 68 239.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 324.4 m 994 303.9 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 294.9 Td (10) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 294.9 Td (Habitable attics) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 294.9 Td (1 rule) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 286.4 Td (code_analysis.csv line 48) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 294.9 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 294.9 Td () Tj ET
+0.1 0.1 0.1 RG 994 259.9 m 994 239.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 230.4 Td (10) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 230.4 Td (Habitable attics) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 230.4 Td (1 rule) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 221.9 Td (code_analysis.csv line 48) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 230.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 230.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 303.9 m 684.2 303.9 l 684.2 283.4 l 602.49 283.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 294.9 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 294.9 Td (R319.1) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 294.9 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 239.4 m 684.2 239.4 l 684.2 218.9 l 602.49 218.9 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 230.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 230.4 Td (R319.1) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 230.4 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 283.4 m 994 283.4 l S
+0.55 0.55 0.55 RG 68 218.9 m 994 218.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 303.9 m 91.83 283.4 l S
+0.55 0.55 0.55 RG 91.83 239.4 m 91.83 218.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 303.9 m 207.58 283.4 l S
+0.55 0.55 0.55 RG 207.58 239.4 m 207.58 218.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 303.9 m 405.04 283.4 l S
+0.55 0.55 0.55 RG 405.04 239.4 m 405.04 218.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 303.9 m 503.76 283.4 l S
+0.55 0.55 0.55 RG 503.76 239.4 m 503.76 218.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 303.9 m 602.49 283.4 l S
+0.55 0.55 0.55 RG 602.49 239.4 m 602.49 218.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 303.9 m 684.2 283.4 l S
+0.55 0.55 0.55 RG 684.2 239.4 m 684.2 218.9 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 303.9 m 742.07 283.4 l S
+0.55 0.55 0.55 RG 742.07 239.4 m 742.07 218.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 303.9 m 68 283.4 l S
+0.1 0.1 0.1 RG 68 239.4 m 68 218.9 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 303.9 m 994 283.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 274.4 Td (11) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 274.4 Td (Rooms a loft opens to) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 274.4 Td (1 rule) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 265.9 Td (code_analysis.csv line 49) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 274.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 274.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 239.4 m 994 218.9 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 209.9 Td (11) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 209.9 Td (Rooms a loft opens to) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 209.9 Td (1 rule) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 201.4 Td (code_analysis.csv line 49) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 209.9 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 209.9 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 283.4 m 684.2 283.4 l 684.2 262.9 l 602.49 262.9 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 274.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 274.4 Td (R319.1) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 274.4 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 218.9 m 684.2 218.9 l 684.2 198.4 l 602.49 198.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 209.9 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 209.9 Td (R319.1) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 209.9 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 262.9 m 994 262.9 l S
+0.55 0.55 0.55 RG 68 198.4 m 994 198.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 283.4 m 91.83 262.9 l S
+0.55 0.55 0.55 RG 91.83 218.9 m 91.83 198.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 283.4 m 207.58 262.9 l S
+0.55 0.55 0.55 RG 207.58 218.9 m 207.58 198.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 283.4 m 405.04 262.9 l S
+0.55 0.55 0.55 RG 405.04 218.9 m 405.04 198.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 283.4 m 503.76 262.9 l S
+0.55 0.55 0.55 RG 503.76 218.9 m 503.76 198.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 283.4 m 602.49 262.9 l S
+0.55 0.55 0.55 RG 602.49 218.9 m 602.49 198.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 283.4 m 684.2 262.9 l S
+0.55 0.55 0.55 RG 684.2 218.9 m 684.2 198.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 283.4 m 742.07 262.9 l S
+0.55 0.55 0.55 RG 742.07 218.9 m 742.07 198.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 283.4 m 68 262.9 l S
+0.1 0.1 0.1 RG 68 218.9 m 68 198.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 283.4 m 994 262.9 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 253.9 Td (12) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 253.9 Td (Exterior doors) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 253.9 Td (8 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 245.4 Td (code_analysis.csv lines 52–59) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 253.9 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 253.9 Td () Tj ET
+0.1 0.1 0.1 RG 994 218.9 m 994 198.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 189.4 Td (12) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 189.4 Td (Exterior doors) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 189.4 Td (8 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 180.9 Td (code_analysis.csv lines 52–59) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 189.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 189.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 262.9 m 684.2 262.9 l 684.2 231.9 l 602.49 231.9 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 253.9 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 253.9 Td (R318.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 244.9 Td (R318.3.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 235.9 Td (R318.3.2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 253.9 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 198.4 m 684.2 198.4 l 684.2 167.4 l 602.49 167.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 189.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 189.4 Td (R318.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 180.4 Td (R318.3.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 171.4 Td (R318.3.2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 189.4 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 231.9 m 994 231.9 l S
+0.55 0.55 0.55 RG 68 167.4 m 994 167.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 262.9 m 91.83 231.9 l S
+0.55 0.55 0.55 RG 91.83 198.4 m 91.83 167.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 262.9 m 207.58 231.9 l S
+0.55 0.55 0.55 RG 207.58 198.4 m 207.58 167.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 262.9 m 405.04 231.9 l S
+0.55 0.55 0.55 RG 405.04 198.4 m 405.04 167.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 262.9 m 503.76 231.9 l S
+0.55 0.55 0.55 RG 503.76 198.4 m 503.76 167.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 262.9 m 602.49 231.9 l S
+0.55 0.55 0.55 RG 602.49 198.4 m 602.49 167.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 262.9 m 684.2 231.9 l S
+0.55 0.55 0.55 RG 684.2 198.4 m 684.2 167.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 262.9 m 742.07 231.9 l S
+0.55 0.55 0.55 RG 742.07 198.4 m 742.07 167.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 262.9 m 68 231.9 l S
+0.1 0.1 0.1 RG 68 198.4 m 68 167.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 262.9 m 994 231.9 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 222.9 Td (13) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 222.9 Td (Alternating tread devices) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 222.9 Td (10 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 214.4 Td (code_analysis.csv lines 74–83) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 222.9 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 222.9 Td () Tj ET
+0.1 0.1 0.1 RG 994 198.4 m 994 167.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 158.4 Td (13) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 158.4 Td (Alternating tread devices) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 158.4 Td (10 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 149.9 Td (code_analysis.csv lines 74–83) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 158.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 158.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 231.9 m 684.2 231.9 l 684.2 200.9 l 602.49 200.9 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 222.9 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 222.9 Td (R318.7.12,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 213.9 Td (R318.7.12.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 204.9 Td (R318.7.12.2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 222.9 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 167.4 m 684.2 167.4 l 684.2 136.4 l 602.49 136.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 158.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 158.4 Td (R318.7.12,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 149.4 Td (R318.7.12.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 140.4 Td (R318.7.12.2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 158.4 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 200.9 m 994 200.9 l S
+0.55 0.55 0.55 RG 68 136.4 m 994 136.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 231.9 m 91.83 200.9 l S
+0.55 0.55 0.55 RG 91.83 167.4 m 91.83 136.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 231.9 m 207.58 200.9 l S
+0.55 0.55 0.55 RG 207.58 167.4 m 207.58 136.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 231.9 m 405.04 200.9 l S
+0.55 0.55 0.55 RG 405.04 167.4 m 405.04 136.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 231.9 m 503.76 200.9 l S
+0.55 0.55 0.55 RG 503.76 167.4 m 503.76 136.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 231.9 m 602.49 200.9 l S
+0.55 0.55 0.55 RG 602.49 167.4 m 602.49 136.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 231.9 m 684.2 200.9 l S
+0.55 0.55 0.55 RG 684.2 167.4 m 684.2 136.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 231.9 m 742.07 200.9 l S
+0.55 0.55 0.55 RG 742.07 167.4 m 742.07 136.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 231.9 m 68 200.9 l S
+0.1 0.1 0.1 RG 68 167.4 m 68 136.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 231.9 m 994 200.9 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 191.9 Td (14) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 191.9 Td (Ship's ladders) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 191.9 Td (6 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 183.4 Td (code_analysis.csv lines 84–89) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 191.9 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 191.9 Td () Tj ET
+0.1 0.1 0.1 RG 994 167.4 m 994 136.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 127.4 Td (14) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 127.4 Td (Ship's ladders) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 127.4 Td (6 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 118.9 Td (code_analysis.csv lines 84–89) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 127.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 127.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 200.9 m 684.2 200.9 l 684.2 169.9 l 602.49 169.9 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 191.9 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 191.9 Td (R318.7.13,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 182.9 Td (R318.7.13.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 173.9 Td (R318.7.13.2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 191.9 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 136.4 m 684.2 136.4 l 684.2 105.4 l 602.49 105.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 127.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 127.4 Td (R318.7.13,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 118.4 Td (R318.7.13.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 109.4 Td (R318.7.13.2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 127.4 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 169.9 m 994 169.9 l S
+0.55 0.55 0.55 RG 68 105.4 m 994 105.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 200.9 m 91.83 169.9 l S
+0.55 0.55 0.55 RG 91.83 136.4 m 91.83 105.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 200.9 m 207.58 169.9 l S
+0.55 0.55 0.55 RG 207.58 136.4 m 207.58 105.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 200.9 m 405.04 169.9 l S
+0.55 0.55 0.55 RG 405.04 136.4 m 405.04 105.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 200.9 m 503.76 169.9 l S
+0.55 0.55 0.55 RG 503.76 136.4 m 503.76 105.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 200.9 m 602.49 169.9 l S
+0.55 0.55 0.55 RG 602.49 136.4 m 602.49 105.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 200.9 m 684.2 169.9 l S
+0.55 0.55 0.55 RG 684.2 136.4 m 684.2 105.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 200.9 m 742.07 169.9 l S
+0.55 0.55 0.55 RG 742.07 136.4 m 742.07 105.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 200.9 m 68 169.9 l S
+0.1 0.1 0.1 RG 68 136.4 m 68 105.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 200.9 m 994 169.9 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 160.9 Td (15) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 160.9 Td (Ramps) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 160.9 Td (7 rules) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 152.4 Td (code_analysis.csv lines 90–96) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 160.9 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 160.9 Td () Tj ET
+0.1 0.1 0.1 RG 994 136.4 m 994 105.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 96.4 Td (15) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 96.4 Td (Ramps) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 96.4 Td (7 rules) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 87.9 Td (code_analysis.csv lines 90–96) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 96.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 96.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 169.9 m 684.2 169.9 l 684.2 138.9 l 602.49 138.9 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 160.9 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 160.9 Td (R318.8.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 151.9 Td (R318.8.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 142.9 Td (R318.8.3) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 160.9 Td (Not read from the model yet: check by hand) Tj ET
+1 0.95 0.84 rg 602.49 105.4 m 684.2 105.4 l 684.2 74.4 l 602.49 74.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 96.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 96.4 Td (R318.8.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 87.4 Td (R318.8.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 78.4 Td (R318.8.3) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 96.4 Td (Not read from the model yet: check by hand) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 138.9 m 994 138.9 l S
+0.55 0.55 0.55 RG 68 74.4 m 994 74.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 169.9 m 91.83 138.9 l S
+0.55 0.55 0.55 RG 91.83 105.4 m 91.83 74.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 169.9 m 207.58 138.9 l S
+0.55 0.55 0.55 RG 207.58 105.4 m 207.58 74.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 169.9 m 405.04 138.9 l S
+0.55 0.55 0.55 RG 405.04 105.4 m 405.04 74.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 169.9 m 503.76 138.9 l S
+0.55 0.55 0.55 RG 503.76 105.4 m 503.76 74.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 169.9 m 602.49 138.9 l S
+0.55 0.55 0.55 RG 602.49 105.4 m 602.49 74.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 169.9 m 684.2 138.9 l S
+0.55 0.55 0.55 RG 684.2 105.4 m 684.2 74.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 169.9 m 742.07 138.9 l S
+0.55 0.55 0.55 RG 742.07 105.4 m 742.07 74.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 169.9 m 68 138.9 l S
+0.1 0.1 0.1 RG 68 105.4 m 68 74.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 169.9 m 994 138.9 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 129.9 Td (16) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 129.9 Td (Escape window details: fully) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 120.9 Td (openable, path height and 20 more) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 129.9 Td (17 rules on 2 escape windows) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 121.4 Td (code_analysis.csv lines 9–13, 29–32, 46, 51, 97–102) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 129.9 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 129.9 Td () Tj ET
-0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 138.9 m 684.2 138.9 l 684.2 53.9 l 602.49 53.9 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 129.9 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 129.9 Td (BF103.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 120.9 Td (R319.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 111.9 Td (R319.2.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 102.9 Td (R319.3, R319.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 93.9 Td (R319.4.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 84.9 Td (R319.4.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 75.9 Td (R319.4.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 66.9 Td (R319.4.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 57.9 Td (R319.6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 129.9 Td (Not measured from the model yet: check by hand) Tj ET
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 53.9 m 994 53.9 l S
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 138.9 m 91.83 53.9 l S
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 138.9 m 207.58 53.9 l S
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 138.9 m 405.04 53.9 l S
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 138.9 m 503.76 53.9 l S
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 138.9 m 602.49 53.9 l S
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 138.9 m 684.2 53.9 l S
-0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 138.9 m 742.07 53.9 l S
-0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 138.9 m 68 53.9 l S
-0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 138.9 m 994 53.9 l S
+0.1 0.1 0.1 RG 994 105.4 m 994 74.4 l S
 1.2 w [] 0 d
 0.1 0.1 0.1 RG 54 770.4 m 1202.4 770.4 l 1202.4 21.6 l 54 21.6 l h S
 1.2 w [] 0 d
@@ -626,8 +596,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (e374424e9eb58175db60645cb92e767e66c78b3f32708a8de99ad221febf) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (b0f5) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (d469) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -663,7 +633,7 @@ BT /F2 7 Tf 0 0 0 rg 506.76 712.4 Td (Proposed \(as measured\)) Tj ET
 BT /F2 7 Tf 0 0 0 rg 605.49 712.4 Td (Result) Tj ET
 BT /F2 7 Tf 0 0 0 rg 687.2 712.4 Td (Code section) Tj ET
 BT /F2 7 Tf 0 0 0 rg 745.07 712.4 Td (Why / what to change) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 698.4 Td (17) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 698.4 Td (16) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 698.4 Td (Stair details: serves sleeping loft,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 689.4 Td (basement to grade and 25 more) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 698.4 Td (14 rules on Loft stair) Tj ET
@@ -699,7 +669,7 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 698.4 Td (Not measured from the model yet: che
 0.1 0.1 0.1 RG 68 707.4 m 68 658.4 l S
 0.6 w [] 0 d
 0.1 0.1 0.1 RG 994 707.4 m 994 658.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 649.4 Td (18) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 649.4 Td (17) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 649.4 Td (Not checked yet by Gordium) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 649.4 Td (Not checked yet by Gordium: window fall protection) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 640.4 Td (\(R321.2.1\), hallway width \(R318.6\) and 84 more: check these) Tj ET
@@ -787,8 +757,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (e374424e9eb58175db60645cb92e767e66c78b3f32708a8de99ad221febf) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (b0f5) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (d469) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -815,7 +785,7 @@ endobj
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (LIFE-SAFETY PLAN: FLOOR AT 0'-0") Tj ET
 BT /F2 7.5 Tf 0.7 0.15 0.12 rg 68 728.4 Td (Egress result: DOES NOT COMPLY) Tj ET
-BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 12 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 11 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
 BT /F2 7.5 Tf 0.54 0.33 0 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code_analysis.csv line 112\)) Tj ET
 1.6 w [] 0 d
 0.93 0.95 0.98 rg 0.1 0.1 0.1 RG 158.2 240.4 m 662.2 240.4 l 662.2 672.4 l 158.2 672.4 l h B
@@ -940,8 +910,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (e374424e9eb58175db60645cb92e767e66c78b3f32708a8de99ad221febf) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (b0f5) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (d469) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -968,7 +938,7 @@ endobj
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (LIFE-SAFETY PLAN: FLOOR AT 9'-0") Tj ET
 BT /F2 7.5 Tf 0.7 0.15 0.12 rg 68 728.4 Td (Egress result: DOES NOT COMPLY) Tj ET
-BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 12 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 11 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
 BT /F2 7.5 Tf 0.54 0.33 0 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code_analysis.csv line 112\)) Tj ET
 1.6 w [] 0 d
 0.93 0.95 0.98 rg 0.1 0.1 0.1 RG 230.2 384.4 m 590.2 384.4 l 590.2 672.4 l 230.2 672.4 l h B
@@ -1093,8 +1063,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (e374424e9eb58175db60645cb92e767e66c78b3f32708a8de99ad221febf) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (b0f5) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (d469) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1121,7 +1091,7 @@ endobj
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (ESCAPE-WINDOW SCHEDULE) Tj ET
 BT /F2 7.5 Tf 0.7 0.15 0.12 rg 68 728.4 Td (Egress result: DOES NOT COMPLY) Tj ET
-BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 12 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): 2 do not comply · 3 to review · 11 parts not read yet · 86 sections not checked yet \(the check's own count\)) Tj ET
 BT /F2 7.5 Tf 0.54 0.33 0 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code_analysis.csv line 112\)) Tj ET
 0.6 w [] 0 d
 0.9 0.9 0.9 rg 0.1 0.1 0.1 RG 68 692.4 m 994 692.4 l 994 668.4 l 68 668.4 l h B
@@ -1283,8 +1253,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (e374424e9eb58175db60645cb92e767e66c78b3f32708a8de99ad221febf) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (b0f5) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (d469) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1317,18 +1287,18 @@ xref
 0000000148 00000 n 
 0000000245 00000 n 
 0000000347 00000 n 
-0000029995 00000 n 
-0000030132 00000 n 
-0000039657 00000 n 
-0000039794 00000 n 
-0000047805 00000 n 
-0000047943 00000 n 
-0000055999 00000 n 
-0000056138 00000 n 
-0000066020 00000 n 
-0000066159 00000 n 
+0000028767 00000 n 
+0000028904 00000 n 
+0000038429 00000 n 
+0000038566 00000 n 
+0000046577 00000 n 
+0000046715 00000 n 
+0000054771 00000 n 
+0000054910 00000 n 
+0000064792 00000 n 
+0000064931 00000 n 
 trailer
 << /Size 16 /Root 1 0 R /Info 15 0 R >>
 startxref
-66277
+65049
 %%EOF
