@@ -28,6 +28,29 @@ source:
   sheets: "A-1 title sheet and general notes; A-2 basement and main floor plans; A-3 2nd floor and roof plans; A-4 elevations; A-5 building section and details"
   code_cited: "A-1: '2025 RESIDENTIAL CODE OF NEW YORK STATE' (the stair and railing notes on A-1, A-2 and A-5 cite the 2020 code)"
 
+# What the house has none of (part of the format: each claim sets aside the rules about that kind, shown as "not
+# applicable" with its source). Only kinds the drawings show there is none of; the basement is drawn, so it isn't
+# here. `reading: true` where the claim rests on a reading of the law, not the drawings alone (the attic, the attic
+# stair, the porch): the checker shows each as one to confirm.
+has_none:
+  - kind: sleeping_loft
+    source: "none drawn: A-2 basement and main floor plans, A-3 2nd floor plan (bedrooms, bonus room, baths, closets, hall, bridge) and A-5 building section (the space over the second floor is the unfinished 'ATTIC')"
+  - kind: habitable_attic
+    source: "A-5 building section: the 'ATTIC' is unfinished roof space over insulated ceiling joists, reached by a pull-down attic stair (A-3 'ATTIC STAIR DETAILS': 'FAKRO OR EQUAL INSUL. ATTIC STAIR ASSY.'); storage is not habitable space (R202 ATTIC, HABITABLE; HABITABLE SPACE): Gordium's reading, evaluation.md"
+    reading: true
+  - kind: ramp
+    source: "none drawn: A-2 main floor plan and A-4 elevations; the front porch reaches grade by steps ('DOWN', A-2), the rear sliders by steps to the patio ('DN', A-2; 'CONC. PAVER STONE STEPS', A-4), the garage landing by steps (A-2)"
+  - kind: alternating_tread_device
+    source: "none drawn: A-2 and A-3; every stair drawn is a flight of risers and treads ('UP 16R' / 'DN 15R', 'DN 13R' / 'UP 14R', A-2 and A-3; A-2 'TYPICAL INT. STAIR DETAIL')"
+  - kind: ships_ladder
+    source: "none drawn: A-2 and A-3; the only steep stair is the pull-down attic stair (A-3 'ATTIC STAIR DETAILS', 'LOCATION TO BE DETERMINED'), attic access to unfinished roof space, not a ship's ladder serving an occupied floor: Gordium's reading, evaluation.md"
+    reading: true
+  - kind: patio_cover
+    source: "none drawn: A-2 and A-4; the rear 'PATIO' (A-2) is open paving at grade with no roof over it, and the front porch is the house's covered entry porch, open-sided, under its main roof (A-2, A-4), not a separate patio structure"
+    reading: true
+  - kind: deck_porch_or_cantilever_over_escape_opening
+    source: "A-3 and A-4: every bedroom's marked escape window is a second-floor window with only the house's roof above it (bedroom 4's has a 'ROOF BELOW', A-3: below, not over); the basement windows' areaways (A-2) are on the north and west walls, not under the front porch; the rear 'PATIO' is at grade (A-2), not a deck; no cantilever is drawn (A-5 section)"
+
 rooms:
   - id: master
     name: Master bedroom

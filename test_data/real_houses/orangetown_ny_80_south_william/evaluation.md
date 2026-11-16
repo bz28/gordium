@@ -6,9 +6,10 @@
 
 ## The headline
 
-- **No false pass.** The checker gave **needs review** for all 115 of New York State's egress rules. None passed, none failed. Nowhere did it say "complies" where the code and the drawings don't settle it.
+- **No false pass.** Of New York State's 115 egress rules, the checker says **complies** for 1 (the front door is side-hinged), **not applicable** for 33, and **needs review** for 81. None fails. Every "complies" and every "not applicable" is the hand-check's own answer: nowhere does it say either where the code and the drawings don't settle it.
 - **The checker did what it should, every time.** Before the run, the hand-check predicted the checker's answer for each rule from the description and the rules' own formulas. All 115 matched. Each reason the checker gave was compared by hand with the predicted one (the `because` in hand_check.yaml) when this page was written, and they agree. **Checker bugs found: 0. Description errors found: 0.**
-- **It is cautious in 52 places.** The hand-check could settle 52 rules: 5 the house meets and 47 that don't apply to it (no ramps, sleeping lofts, ship's ladders and so on). The checker leaves each of these at needs review, for one of five reasons (the "Why they differ" column below). That is safe but noisy. An architect would see 310 items, all needing review, and 47 of the 115 rules behind them are about things this house doesn't have.
+- **What changed since the first run (all 115 needed review).** The description can now say what the house has none of (`has_none`: no sleeping lofts, ramps, alternating tread devices, ship's ladders, patio covers, or decks, porches or cantilevers over an escape opening; no habitable attic), each with its sheet. And the measuring now reads two facts the description already held: the front door is side-hinged, and every escape opening is a window. 34 rules moved from needs review to the hand-check's answer ([decision](../../../docs/decisions/2026-11-16_interior_absent_parts.md)).
+- **It is cautious in 18 places.** The hand-check could settle 52 rules: 5 the house meets and 47 that don't apply to it. The checker now agrees on 34 of them. It leaves the other 18 rules: 4 the house meets and 14 that don't apply at needs review, for one of five reasons (the "Why they differ" column below). An architect sees 257 items: 7 say what the house has none of (4 not applicable, 3 readings to confirm), and the rest need review.
 - **Rule-drafting points: 2, both on the cautious side.** One rule asks about a patio cover at every exit door (an error). Another applies R319.6 (additions) to every bedroom of a new house (a trade-off already recorded in the rule).
 - **Zoning doesn't apply to this lot.** The house is in the Town of Orangetown, Rockland County. Gordium's only zoning rulebook is the City of Ithaca's. So only the state code was checked: the 2025 Residential Code of New York State (RCNYS), which the drawings' title sheet (A-1) cites.
 
@@ -22,7 +23,7 @@
 ## What was checked, and how
 
 1. **The drawings.** The "Proposed Bennington Model" by Eric Knute Osborn, Architect: five sheets, A-1 to A-5, dated 30 Dec 2025. It was filed with the Town of Orangetown planning board ([public PDF](https://www.orangetown.com/wp-content/uploads/2026/02/68.20-2-76.2-80-South-William-Street-Lot-2-Arch-Plans.pdf), SHA-256 `c6879996…`). It is a new two-story, four-bedroom single-family house with a basement and an attached garage. The drawings are the architect's copyright and are not kept in this repository. Every value here cites a sheet and a callout ([README](README.md)).
-2. **The interior description: [house.yaml](house.yaml).** Written by hand from the drawings in PR #97, with a citation for every value. Every value the drawings don't give is listed as absent, with the reason. This PR leaves it unchanged. It holds the 4 bedrooms (floor, ceiling), the 10 bedroom windows marked as escape openings, the bonus room's 2 and the basement's 2, the front door, the 4 second-floor railings and the guard along the main stair. It has **no stairs**: the drawings give no floor-to-floor height and no tread depths, so the nosings the format needs can't be written without inventing them.
+2. **The interior description: [house.yaml](house.yaml).** Written by hand from the drawings in PR #97, with a citation for every value. Every value the drawings don't give is listed as absent, with the reason. Since then it also says what the house has none of (`has_none`), each claim with its sheet; three of them (the attic, the attic stair, the porch) rest on a reading of the law and are marked so. It holds the 4 bedrooms (floor, ceiling), the 10 bedroom windows marked as escape openings, the bonus room's 2 and the basement's 2, the front door, the 4 second-floor railings and the guard along the main stair. It has **no stairs**: the drawings give no floor-to-floor height and no tread depths, so the nosings the format needs can't be written without inventing them.
 3. **The hand-check: [hand_check.yaml](hand_check.yaml).** Every one of the 115 rules was worked out by hand and committed on its own, before the checker ran (see the PR's commits). For each rule it gives two things:
    - the *truth*: what the code says about the house as drawn. Most of these build on PR #97's [answer_key.yaml](answer_key.yaml), which was worked before any checker existed.
    - the *prediction*: what the checker should say, given what the description holds.
@@ -33,29 +34,32 @@
 
 | | Rules | Checker: complies | Checker: does not comply | Checker: needs review | Checker: not applicable |
 |---|---|---|---|---|---|
-| All egress rules | 115 | 0 | 0 | 115 | 0 |
+| All egress rules | 115 | 1 | 0 | 81 | 33 |
 
 | Hand-check (truth) | Rules | Checker agrees | Checker more cautious |
 |---|---|---|---|
-| complies | 5 | 0 | 5 |
+| complies | 5 | 1 | 4 |
 | does not comply | 0 | 0 | 0 |
 | needs review | 63 | 63 | 0 |
-| not applicable | 47 | 0 | 47 |
+| not applicable | 47 | 33 | 14 |
+
+Before `has_none` and the two facts: 0 complies, 0 does not comply, 115 needs review, 0 not applicable.
 
 **Why no rule fails although the answer key finds real risks.** The basement stair's risers are 8.31 in at 13 risers with the section's 2x12 joists, over the 8 1/4 in limit. A 3046 double-hung may come in under 5.7 sq ft. The bonus room's step is about 30 in wide. The rear sliders have no landing drawn at the door, over steps that need at least four risers, but no sheet details the steps or a landing, so whether one is built is a question for the drawing's architect (README question 9). The basement stair and the 3046 are each a "does not comply" only under one reading of drawings that disagree with themselves (13 or 14 risers; 2x10 or 2x12 joists), or under assumed sizes; the bonus room's step only if a single step is a stairway (architect question 1). So the hand-check itself says needs review for them, and so does the checker. They are listed for the drawing's architect in the [README](README.md).
 
-The panel shows 310 items. 304 are the rules' rows, one per rule and part: each of the 10 bedroom windows gets every escape-opening rule except the three about basements, habitable attics and loft rooms. The other 6 are the items the hand-check predicted:
+The panel shows 257 items. 304 are the rules' rows, one per rule and part: each of the 10 bedroom windows gets every escape-opening rule except the three about basements, habitable attics and loft rooms. The panel shows 244 of them; the other 60 are not applicable, and each of those is listed in its claim's item (or, for R319.3, comes from the windows being windows). The other 13 items are the ones the hand-check predicted:
 
 - "the stairs weren't read"
 - the bonus room's 2 marked windows and the basement's 2, each "marked as an escape opening but isn't checked"
 - "Not checked yet by Gordium": the 86 egress sections Gordium has no rules for yet, window fall protection (R321.2.1) and hallway width (R318.6) first (added by PR #110)
+- one for each thing house.yaml says the house has none of. Four are **not applicable**, with the claim's sheet and every rule it sets aside: "Sleeping lofts: not applicable", "Ramps", "Alternating tread devices", "Decks, porches or cantilevers over an escape opening". Three rest on a reading and **need review** as readings to confirm: "Habitable attics", "Ship's ladders", "Patio covers: not applicable if this reading is confirmed". They count toward nothing: never a pass, and (for the four) never a reason to review
 
 **Why they differ** (only where the hand-check settles a rule and the checker doesn't):
 
-- **D (drawings):** the drawings give no stair geometry, so the description has no stairs and every stair rule needs review. The hand-check settles 12 stair rules anyway: 1 the flights meet (their rise) and 11 that don't apply (spiral, sleeping-loft, non-rectangular landing).
-- **F (format):** the description has no way to say a kind of part exists or doesn't (sleeping lofts, ramps, alternating tread devices, ship's ladders, basements, habitable attics, loft rooms, patio covers, decks and porches over windows). So the measuring never says "none", and every rule for these needs review, never "not applicable". This is the 2026-11-14 decision's known gap ("Measuring code", Not yet).
+- **D (drawings):** the drawings give no stair geometry, so the description has no stairs and every stair rule needs review. The hand-check settles 12 stair rules anyway: 1 the flights meet (their rise) and 11 that don't apply (spiral, sleeping-loft, non-rectangular landing). The sleeping-loft claim would settle the four sleeping-loft stair rules (`stair_serves_sleeping_loft: false` on every stair), but only once stairs are given.
+- **F (format):** the description can say what the house has none of (`has_none`), but not yet that it *has* a basement: R319.6's basement rule needs to know whether the basement is a new one in an addition, and the format has no basement to say it of. (Before `has_none`, 32 more rules were here: sleeping lofts, ramps, alternating tread devices, ship's ladders, habitable attics, loft rooms, patio covers, decks and porches over windows.)
 - **G (guards):** the five railings are in the description, read as `guard` parts (nothing about them is measured yet: their members aren't given). But the guard rules read `open_side` parts, which nothing produces yet. So "a guard is required", which the drawings settle (every open side over 30 in has a railing drawn), stays needs review.
-- **M (not measured yet):** a fact the description already holds that the measuring doesn't yet turn into the rule's measure. The front door is `operation: side_hinged`, yet `door_side_hinged` isn't given. Every escape window is a double-hung or casement, yet `opening_operable` isn't given. The marked escape openings are all windows, yet `opening_is_door` isn't given. The basement's two CW14s in their areaways are in the description (`bsw1`, `bsw2`), yet nothing measures `opening_below_grade` yet, and the checker doesn't check those windows at all: they are listed as "not checked" items. The area-well row's truth comes from them.
+- **M (not measured yet):** a fact the description already holds that the measuring doesn't yet turn into the rule's measure. Every escape window is a double-hung or casement, yet `opening_operable` isn't given: it would follow from `operation`, but R319.6's rule (below) would then say "complies" on every bedroom of a new house, where the law doesn't apply, so it waits for that rule's fix (a question for Ben). (`door_side_hinged` and `opening_is_door` are now measured from `operation`.) The basement's two CW14s in their areaways are in the description (`bsw1`, `bsw2`), yet nothing measures `opening_below_grade` yet, and the checker doesn't check those windows at all: they are listed as "not checked" items. The area-well row's truth comes from them.
 - **R (rule drafting):** see the two drafting points below.
 
 
@@ -70,7 +74,7 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 | 3 | Egress door clear width at least 32 in (`r318_2_egress_door_clear_width`) | R318.2 | egress door | needs review | needs review | yes |  |
 | 4 | One egress door for each dwelling unit (`r318_2_egress_door_per_dwelling_unit`) | R318.2 | egress door | needs review | needs review | yes |  |
 | 5 | Egress doors readily openable without key (`r318_2_egress_door_readily_openable`) | R318.2 | egress door | needs review | needs review | yes |  |
-| 6 | Egress door shall be side-hinged (`r318_2_egress_door_side_hinged`) | R318.2 | egress door | needs review | complies | no | M |
+| 6 | Egress door shall be side-hinged (`r318_2_egress_door_side_hinged`) | R318.2 | egress door | complies | complies | yes |  |
 | 7 | Egress door not given as an exterior door: its landings unchecked (`r318_3_1_egress_door_given_as_exterior_door`) | R318.3.1 | egress door | needs review | needs review | yes |  |
 | 8 | Landing dimension at least 36 in. in direction of travel (`r318_3_exterior_door_landing_depth`) | R318.3 | exterior door | needs review | needs review | yes |  |
 | 9 | Landing or floor on each side of each exterior door (`r318_3_exterior_door_landing_each_side`) | R318.3 | exterior door | needs review | needs review | yes |  |
@@ -80,18 +84,18 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 | 13 | Inside floor at required egress door at most 1 1/2 in below threshold (`r318_3_1_egress_door_inside_floor_drop`) | R318.3.1 | exterior door | needs review | needs review | yes |  |
 | 14 | Outside landing drop at required egress door (`r318_3_1_egress_door_outside_floor_drop`) | R318.3.1 | exterior door | needs review | needs review | yes |  |
 | 15 | Floor elevation at exterior doors other than the egress door (`r318_3_2_other_exterior_door_floor_elevation`) | R318.3.2 | exterior door | needs review | needs review | yes |  |
-| 16 | Escape opening into a patio cover: unenclosed (`bf103_2_escape_opening_into_patio_cover_unenclosed`) | BF103.2 | emergency escape opening | needs review | not applicable | no | F |
+| 16 | Escape opening into a patio cover: unenclosed (`bf103_2_escape_opening_into_patio_cover_unenclosed`) | BF103.2 | emergency escape opening | not applicable | not applicable | yes |  |
 | 17 | Every basement: operable escape opening (`r319_1_basement_escape_opening_operable`) | R319.1 | emergency escape opening | needs review | needs review | yes |  |
 | 18 | Escape openings open to a public way, yard or court (`r319_1_escape_opening_opens_to_public_way_or_yard`) | R319.1 | emergency escape opening | needs review | needs review | yes |  |
-| 19 | Every habitable attic: operable escape opening (`r319_1_habitable_attic_escape_opening_operable`) | R319.1 | emergency escape opening | needs review | not applicable | no | F |
-| 20 | Room a sleeping loft is open to: operable escape opening (`r319_1_loft_room_escape_opening_operable`) | R319.1 | emergency escape opening | needs review | not applicable | no | F |
+| 19 | Every habitable attic: operable escape opening (`r319_1_habitable_attic_escape_opening_operable`) | R319.1 | emergency escape opening | not applicable | not applicable | yes |  |
+| 20 | Room a sleeping loft is open to: operable escape opening (`r319_1_loft_room_escape_opening_operable`) | R319.1 | emergency escape opening | not applicable | not applicable | yes |  |
 | 21 | Every sleeping room: operable escape opening (`r319_1_sleeping_room_escape_opening_operable`) | R319.1 | emergency escape opening | needs review | complies | no | M |
 | 22 | Escape opening minimum net clear area (`r319_2_1_escape_opening_min_net_clear_area`) | R319.2.1 | emergency escape opening | needs review | needs review | yes |  |
 | 23 | Escape opening minimum net clear height (`r319_2_2_escape_opening_min_net_clear_height`) | R319.2.2 | emergency escape opening | needs review | needs review | yes |  |
 | 24 | Escape opening minimum net clear width (`r319_2_2_escape_opening_min_net_clear_width`) | R319.2.2 | emergency escape opening | needs review | needs review | yes |  |
 | 25 | Escape opening bottom of clear opening max height (`r319_2_3_escape_opening_max_sill_height`) | R319.2.3 | emergency escape opening | needs review | needs review | yes |  |
-| 26 | Escape openings under decks, porches, cantilevers (`r319_2_4_under_projection_openable_path`) | R319.2.4 | emergency escape opening | needs review | not applicable | no | F |
-| 27 | Emergency escape and rescue door: side-hinged or sliding (`r319_3_escape_door_side_hinged_or_sliding`) | R319.3 | emergency escape opening | needs review | not applicable | no | M |
+| 26 | Escape openings under decks, porches, cantilevers (`r319_2_4_under_projection_openable_path`) | R319.2.4 | emergency escape opening | not applicable | not applicable | yes |  |
+| 27 | Emergency escape and rescue door: side-hinged or sliding (`r319_3_escape_door_side_hinged_or_sliding`) | R319.3 | emergency escape opening | not applicable | not applicable | yes |  |
 | 28 | Area well where opening is below grade (`r319_4_area_well_required`) | R319.4 | emergency escape opening | needs review | complies | no | M |
 | 29 | Area well size allows opening to fully open (`r319_4_1_area_well_allows_full_opening`) | R319.4.1 | emergency escape opening | needs review | needs review | yes |  |
 | 30 | Area well horizontal area at least 9 sf (`r319_4_1_area_well_min_area`) | R319.4.1 | emergency escape opening | needs review | needs review | yes |  |
@@ -152,34 +156,34 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 | 85 | Guard openings stop a 4 inch sphere (`r321_1_3_guard_opening_4_inch_sphere`) | R321.1.3 | open side | needs review | needs review | yes |  |
 | 86 | Stair guard openings stop a 4 3/8 inch sphere (`r321_1_3_guard_stair_opening_4_3_8_sphere`) | R321.1.3 | open side | needs review | needs review | yes |  |
 | 87 | Stair guard triangle stops a 6 inch sphere (`r321_1_3_guard_stair_triangle_6_inch_sphere`) | R321.1.3 | open side | needs review | needs review | yes |  |
-| 88 | Sleeping loft ceiling over 7 ft on at most half the floor area (`r315_2_sleeping_loft_ceiling_height_limit`) | R315.2 | sleeping loft | needs review | not applicable | no | F |
-| 89 | Sleeping loft floor area less than 70 sf (`r315_2_sleeping_loft_floor_area_limit`) | R315.2 | sleeping loft | needs review | not applicable | no | F |
-| 90 | Sleeping loft: ceiling height above finished floor (`r315_3_sleeping_loft_ceiling_height`) | R315.3 | sleeping loft | needs review | not applicable | no | F |
-| 91 | Sleeping loft: clear height below floor construction (`r315_3_sleeping_loft_clear_height_below`) | R315.3 | sleeping loft | needs review | not applicable | no | F |
-| 92 | The room a sleeping loft is open to has an escape opening (`r319_1_room_a_sleeping_loft_is_open_to`) | R319.1 | sleeping loft | needs review | not applicable | no | F |
-| 93 | Maximum slope of ramp serving the required egress door (`r318_8_1_ramp_max_slope_egress_door`) | R318.8.1 | ramp | needs review | not applicable | no | F |
-| 94 | Maximum slope where technically infeasible due to site constraints (`r318_8_1_ramp_max_slope_infeasible`) | R318.8.1 | ramp | needs review | not applicable | no | F |
-| 95 | Maximum slope of other ramps (`r318_8_1_ramp_max_slope_other`) | R318.8.1 | ramp | needs review | not applicable | no | F |
-| 96 | Ramp landing depth at least 36 inches (`r318_8_2_ramp_landing_depth`) | R318.8.2 | ramp | needs review | not applicable | no | F |
-| 97 | Ramp landing width not less than ramp width (`r318_8_2_ramp_landing_width`) | R318.8.2 | ramp | needs review | not applicable | no | F |
-| 98 | Floor or landing at top and bottom of each ramp (`r318_8_2_ramp_landings_present`) | R318.8.2 | ramp | needs review | not applicable | no | F |
-| 99 | Handrail on at least one side of ramps steeper than 1 in 12 (`r318_8_3_ramp_handrail_one_side`) | R318.8.3 | ramp | needs review | not applicable | no | F |
-| 100 | Alternating tread device clear width at handrails (`r318_7_12_atd_clear_width`) | R318.7.12 | alternating tread device | needs review | not applicable | no | F |
-| 101 | Alternating tread devices not an element of a means of egress (`r318_7_12_atd_not_in_means_of_egress`) | R318.7.12 | alternating tread device | needs review | not applicable | no | F |
-| 102 | ATD angle of ascent between 50 and 70 degrees (`r318_7_12_1_atd_angle`) | R318.7.12.1 | alternating tread device | needs review | not applicable | no | F |
-| 103 | ATD initial tread at platform elevation (`r318_7_12_1_atd_first_tread_at_floor`) | R318.7.12.1 | alternating tread device | needs review | not applicable | no | F |
-| 104 | ATD projected tread depth at least 8 1/2 in (`r318_7_12_1_atd_projected_tread_depth`) | R318.7.12.1 | alternating tread device | needs review | not applicable | no | F |
-| 105 | ATD riser height at most 9 1/2 in (`r318_7_12_1_atd_riser_height`) | R318.7.12.1 | alternating tread device | needs review | not applicable | no | F |
-| 106 | ATD tread depth at least 5 in (`r318_7_12_1_atd_tread_depth`) | R318.7.12.1 | alternating tread device | needs review | not applicable | no | F |
-| 107 | ATD tread width at least 7 in (`r318_7_12_1_atd_tread_width`) | R318.7.12.1 | alternating tread device | needs review | not applicable | no | F |
-| 108 | Handrails on both sides of alternating tread devices (`r318_7_12_2_atd_handrails_both_sides`) | R318.7.12.2 | alternating tread device | needs review | not applicable | no | F |
-| 109 | Handrails of alternating tread devices comply with R320 (`r318_7_12_2_atd_handrails_comply_r320`) | R318.7.12.2 | alternating tread device | needs review | not applicable | no | F |
-| 110 | Ship's ladder clear width at handrails (`r318_7_13_ship_ladder_clear_width`) | R318.7.13 | ships ladder | needs review | not applicable | no | F |
-| 111 | Ship's ladders not an element of a means of egress (`r318_7_13_ship_ladder_egress_use`) | R318.7.13 | ships ladder | needs review | not applicable | no | F |
-| 112 | Ship's ladder riser height at most 9 1/2 in (`r318_7_13_1_ships_ladder_riser_height`) | R318.7.13.1 | ships ladder | needs review | not applicable | no | F |
-| 113 | Ship's ladder tread depth at least 5 in (`r318_7_13_1_ships_ladder_tread_depth`) | R318.7.13.1 | ships ladder | needs review | not applicable | no | F |
-| 114 | Ship's ladder tread plus nosing at least 8 1/2 in (`r318_7_13_1_ships_ladder_tread_plus_nosing`) | R318.7.13.1 | ships ladder | needs review | not applicable | no | F |
-| 115 | Handrails on both sides of ship's ladders (`r318_7_13_2_ships_ladder_handrails_both_sides`) | R318.7.13.2 | ships ladder | needs review | not applicable | no | F |
+| 88 | Sleeping loft ceiling over 7 ft on at most half the floor area (`r315_2_sleeping_loft_ceiling_height_limit`) | R315.2 | sleeping loft | not applicable | not applicable | yes |  |
+| 89 | Sleeping loft floor area less than 70 sf (`r315_2_sleeping_loft_floor_area_limit`) | R315.2 | sleeping loft | not applicable | not applicable | yes |  |
+| 90 | Sleeping loft: ceiling height above finished floor (`r315_3_sleeping_loft_ceiling_height`) | R315.3 | sleeping loft | not applicable | not applicable | yes |  |
+| 91 | Sleeping loft: clear height below floor construction (`r315_3_sleeping_loft_clear_height_below`) | R315.3 | sleeping loft | not applicable | not applicable | yes |  |
+| 92 | The room a sleeping loft is open to has an escape opening (`r319_1_room_a_sleeping_loft_is_open_to`) | R319.1 | sleeping loft | not applicable | not applicable | yes |  |
+| 93 | Maximum slope of ramp serving the required egress door (`r318_8_1_ramp_max_slope_egress_door`) | R318.8.1 | ramp | not applicable | not applicable | yes |  |
+| 94 | Maximum slope where technically infeasible due to site constraints (`r318_8_1_ramp_max_slope_infeasible`) | R318.8.1 | ramp | not applicable | not applicable | yes |  |
+| 95 | Maximum slope of other ramps (`r318_8_1_ramp_max_slope_other`) | R318.8.1 | ramp | not applicable | not applicable | yes |  |
+| 96 | Ramp landing depth at least 36 inches (`r318_8_2_ramp_landing_depth`) | R318.8.2 | ramp | not applicable | not applicable | yes |  |
+| 97 | Ramp landing width not less than ramp width (`r318_8_2_ramp_landing_width`) | R318.8.2 | ramp | not applicable | not applicable | yes |  |
+| 98 | Floor or landing at top and bottom of each ramp (`r318_8_2_ramp_landings_present`) | R318.8.2 | ramp | not applicable | not applicable | yes |  |
+| 99 | Handrail on at least one side of ramps steeper than 1 in 12 (`r318_8_3_ramp_handrail_one_side`) | R318.8.3 | ramp | not applicable | not applicable | yes |  |
+| 100 | Alternating tread device clear width at handrails (`r318_7_12_atd_clear_width`) | R318.7.12 | alternating tread device | not applicable | not applicable | yes |  |
+| 101 | Alternating tread devices not an element of a means of egress (`r318_7_12_atd_not_in_means_of_egress`) | R318.7.12 | alternating tread device | not applicable | not applicable | yes |  |
+| 102 | ATD angle of ascent between 50 and 70 degrees (`r318_7_12_1_atd_angle`) | R318.7.12.1 | alternating tread device | not applicable | not applicable | yes |  |
+| 103 | ATD initial tread at platform elevation (`r318_7_12_1_atd_first_tread_at_floor`) | R318.7.12.1 | alternating tread device | not applicable | not applicable | yes |  |
+| 104 | ATD projected tread depth at least 8 1/2 in (`r318_7_12_1_atd_projected_tread_depth`) | R318.7.12.1 | alternating tread device | not applicable | not applicable | yes |  |
+| 105 | ATD riser height at most 9 1/2 in (`r318_7_12_1_atd_riser_height`) | R318.7.12.1 | alternating tread device | not applicable | not applicable | yes |  |
+| 106 | ATD tread depth at least 5 in (`r318_7_12_1_atd_tread_depth`) | R318.7.12.1 | alternating tread device | not applicable | not applicable | yes |  |
+| 107 | ATD tread width at least 7 in (`r318_7_12_1_atd_tread_width`) | R318.7.12.1 | alternating tread device | not applicable | not applicable | yes |  |
+| 108 | Handrails on both sides of alternating tread devices (`r318_7_12_2_atd_handrails_both_sides`) | R318.7.12.2 | alternating tread device | not applicable | not applicable | yes |  |
+| 109 | Handrails of alternating tread devices comply with R320 (`r318_7_12_2_atd_handrails_comply_r320`) | R318.7.12.2 | alternating tread device | not applicable | not applicable | yes |  |
+| 110 | Ship's ladder clear width at handrails (`r318_7_13_ship_ladder_clear_width`) | R318.7.13 | ships ladder | not applicable | not applicable | yes |  |
+| 111 | Ship's ladders not an element of a means of egress (`r318_7_13_ship_ladder_egress_use`) | R318.7.13 | ships ladder | not applicable | not applicable | yes |  |
+| 112 | Ship's ladder riser height at most 9 1/2 in (`r318_7_13_1_ships_ladder_riser_height`) | R318.7.13.1 | ships ladder | not applicable | not applicable | yes |  |
+| 113 | Ship's ladder tread depth at least 5 in (`r318_7_13_1_ships_ladder_tread_depth`) | R318.7.13.1 | ships ladder | not applicable | not applicable | yes |  |
+| 114 | Ship's ladder tread plus nosing at least 8 1/2 in (`r318_7_13_1_ships_ladder_tread_plus_nosing`) | R318.7.13.1 | ships ladder | not applicable | not applicable | yes |  |
+| 115 | Handrails on both sides of ship's ladders (`r318_7_13_2_ships_ladder_handrails_both_sides`) | R318.7.13.2 | ships ladder | not applicable | not applicable | yes |  |
 
 ## The disagreements, explained
 
@@ -194,12 +198,12 @@ Grouped by the part the rule repeats over. "Section" is the code section the che
 - the unfinished attic (A-5 section);
 - the single-family use (A-1).
 
-None of them changes house.yaml. Review rounds 1 to 4 found the rear steps, the garage door step and the garage landing's railing, the area well's projection and steps, and the porch steps ending on bare grade, and seven hand-check truths were corrected from complies or not applicable to needs review, each listed at the top of hand_check.yaml and pinned by the test.
+None of them changes house.yaml's values (only its `has_none` claims, added later, rest on some of them). Review rounds 1 to 4 found the rear steps, the garage door step and the garage landing's railing, the area well's projection and steps, and the porch steps ending on bare grade, and seven hand-check truths were corrected from complies or not applicable to needs review, each listed at the top of hand_check.yaml and pinned by the test.
 
 **Rule-drafting points: 2.** Both are cautious, so neither can pass what the law fails.
 
 1. `bf103_2_exit_into_patio_cover_r318_exits` (BF103.2) has no `applies_when`. It asks "does this exit door open into a patio cover?" of *every* egress door, so it needs review on every house, forever. That alone means the Egress section can never say "complies". The law: "Where such exterior openings serve as an exit from the dwelling unit, the patio structure, unless unenclosed, shall be provided with exits conforming to the provisions of Section R318" (RCNYS 2025, PDF p.898). A patio cover is "A structure with open or glazed walls that is used for recreational, outdoor living purposes associated with a dwelling" (same page). Here the front door opens onto an open-sided covered porch, so even read as a patio cover it is "unenclosed" and the rule asks nothing of it. The fix: a measure for "this egress door opens into a patio cover", as its escape-opening twin already has (`opening_into_patio_cover`), and an `applies_when` on it. It goes through the drafting record (`draft_fixes`, `revised`), so it is left for its own PR.
-2. `r319_6_addition_sleeping_room_escape_opening` (R319.6, "Where dwelling unit additions contain sleeping rooms") applies to *every* sleeping room, not only those of an addition. This is a known trade-off, already recorded in the rule's `revised` history: a rule over a bedroom's escape openings can't read whether its room is new, and R319.1 asks the same of every room. Today it only adds needs review. Once `opening_operable` is measured, it would show "complies with R319.6" on a new house: true of nothing, but never a pass of a failing house. The real fix, letting a rule read a measure of the part it sits within, is for its own PR.
+2. `r319_6_addition_sleeping_room_escape_opening` (R319.6, "Where dwelling unit additions contain sleeping rooms") applies to *every* sleeping room, not only those of an addition. This is a known trade-off, already recorded in the rule's `revised` history: a rule over a bedroom's escape openings can't read whether its room is new, and R319.1 asks the same of every room. Today it only adds needs review. Once `opening_operable` is measured, it would show "complies with R319.6" on a new house: a pass where the law doesn't apply. So `opening_operable` is not measured yet, though it follows from `operation`. The real fix, letting a rule read a measure of the part it sits within (or a stated "this is an addition"), is for its own PR.
 
 ## Found on the way (for Ben; no false pass today)
 
@@ -220,7 +224,8 @@ Two are questions of the law's meaning that research didn't settle. The rest are
    - Orangetown's and Ithaca's own interpretations: not yet searched.
    - Still open, so the hand-check leaves R318.7.6's bottom landing at needs review.
 
-Two of the hand-check's answers are Gordium's readings, stated here for the architects to confirm. Neither changes a checker answer.
+Three of house.yaml's `has_none` claims rest on Gordium's readings, stated here for the architects to confirm. Each is marked `reading: true`, so the panel and the permit sheets show it as its own needs-review item ("… not applicable if this reading is confirmed"): the rules it sets aside are not applicable, but the egress result can't read as settled while any of the three is unconfirmed.
 
 - **The attic is not a habitable attic.** "ATTIC, HABITABLE. A finished or unfinished habitable space within an attic" (PDF p.35). "HABITABLE SPACE. A space in a building for living, sleeping, eating or cooking. Bathrooms, toilet rooms, closets, halls, storage" … are not (p.44).
 - **Its folding attic stair is attic access, not a stairway or ship's ladder** that R318.7 governs.
+- **The front porch is not a patio cover.** "PATIO COVER. A structure with open or glazed walls that is used for recreational, outdoor living purposes associated with a dwelling" (Appendix BF, PDF p.898). The porch is the house's covered entry, under its main roof (A-2, A-4). Even read as a patio cover, no bedroom window opens into it (they are all on the second floor), so BF103.2's escape-opening rule wouldn't apply either way.
