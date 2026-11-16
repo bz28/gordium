@@ -295,3 +295,25 @@ def test_a_parts_failures_are_shown_open_and_its_line_keeps_its_key_when_lines_r
     keys = {ln["key"]: ln["items"] for ln in every_line(grouping.lines(items))}
     keys_reversed = {ln["key"]: ln["items"] for ln in every_line(grouping.lines(list(reversed(items))))}
     assert set(keys) == set(keys_reversed) and all(sorted(keys[k]) == sorted(keys_reversed[k]) for k in keys)
+
+
+# ---- review round 2 on #111 -----------------------------------------------------------------------------------------
+
+def test_an_out_of_date_list_shows_each_lines_name_never_its_result(checked):
+    """While a check runs, or after an edit, the panel blanks each row's result; a line's words carry its result
+    ("4 comply"), so an out-of-date list shows the line's name alone (gordium_ui reads `name` when stale)."""
+    for name in ("2_two_story_small_window", "5_basement_window_well"):
+        for g in logic.list_tree(checked[name]["view"]):
+            for c in g["children"]:
+                if c.get("title"):
+                    assert c["name"] and not any(w in c["name"] for w in ("comply", "need review", "needs review"))
+    from host_source import host_text
+    ui = host_text("rhino", "ui", purpose="wiring")
+    assert '(c.get("name") or "") if parts["stale"]' in ui and 'name if stale_row else' in ui
+
+
+def test_everything_the_architect_has_to_give_is_named_never_shortened(checked):
+    items = law_items(checked["orangetown_ny_80_south_william"])
+    [door] = [ln for ln in grouping.lines(items)[grouping.REVIEW_T] if ln["title"].startswith("Front entry door")]
+    given = [w for i in items if i["id"] in door["items"] for w in (i.get("open") or {}).get("inputs") or []]
+    assert len(set(given)) >= 3 and all(w in door["title"] for w in given)
