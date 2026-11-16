@@ -259,7 +259,7 @@ def _cell_style(parts, item, index):
     tag = item.Tag if item is not None else None
     if isinstance(tag, str) and tag.startswith("group:"):
         return True, None
-    found = parts["by_id"].get(tag)
+    found = parts["by_id"].get(tag) or parts.get("line_status", {}).get(tag)   # a line: its most cautious status
     if found is not None and not parts.get("stale") and found["status"] in ("does_not_comply", "needs_review") \
             and index in (0, 1, 3):
         return False, eto_status_color(found["status"])
@@ -323,8 +323,8 @@ def make_panel(actions, host=None, context_on=True):
     def selected(sender, e):
         item = tree.SelectedItem
         tag = item.Tag if item is not None else None
-        if isinstance(tag, str) and tag.startswith("group:"):
-            return                           # section headers aren't selectable (D5)
+        if isinstance(tag, str) and tag.startswith(("group:", "line:")):
+            return                           # section headers and a line of several items aren't selectable (D5)
         parts["selected"] = tag
         set_zoom(parts)                      # on as soon as a row is picked (never waiting for the next redraw)
         show_detail(parts)
@@ -552,58 +552,122 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
         parts["by_id"], parts["groups"] = {}, []
         show_detail(parts)
         return
-    for g in parts.get("groups") or []:      # which groups were open, kept by group (D8)
-        parts["expanded"][g.Tag] = g.Expanded
+    for g in parts.get("groups") or []:      # which groups and lines were open, kept by their tag (D8)
+        _remember_open(parts, g)
     by_id = {i["id"]: i for i in view["items"]}
     parts["by_id"] = by_id
-    if select in by_id:                      # the newly failing row: selected, its group open, scrolled to below
+    nodes = logic.list_tree(view)            # groups, a law's lines (design_checker/grouping.py) and the items
+    if select in by_id:                      # the newly failing row: selected, its group and line open, scrolled to
         parts["selected"] = select
-        for g in view["groups"]:
-            if select in g["items"]:
-                parts["expanded"]["group:" + g["key"]] = True
+        for g in nodes:
+            for c in g["children"]:
+                if c.get("item") == select or any(x["item"] == select for x in c.get("children") or []):
+                    parts["expanded"][g["tag"]] = True
+                    if c.get("children"):
+                        parts["expanded"][c["tag"]] = True
     store = ef.TreeGridItemCollection()
-    selected_item = None
     parts["groups"] = []
-    for g in view["groups"]:
+    for g in nodes:
         gi = ef.TreeGridItem()
-        gi.Tag = "group:" + g["key"]
-        title = ("Site · " if g["key"] == "complies" and all(by_id[i]["group"] == "site" for i in g["items"]) else "")
-        gi.Values = System.Array[System.Object]([title + g["title"] + " · " + str(len(g["items"])), "", "", ""])
-        gi.Expanded = parts["expanded"].get(gi.Tag, g["key"] not in ("complies", "not_covered", "use_details"))
-        for item_id in g["items"]:
-            i = by_id[item_id]
-            stale_row = parts["stale"] and i["status"] != "not_checked"
-            # the values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)
-            name, proposed, required, delta = logic.list_values(i)   # the use row: the use's own name as its Item;
-            values = [("" if stale_row else i["mark"] + "  ") + name,   # a tax-map Delta and a span: their short forms
-                      "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
-                      "" if stale_row else logic.cell_text(required),
-                      "" if stale_row else logic.cell_text(delta)]
-            ci = ef.TreeGridItem()
-            ci.Tag = item_id
-            ci.Values = System.Array[System.Object](values)
-            gi.Children.Add(ci)
-            if item_id == parts["selected"]:
-                selected_item = ci
+        gi.Tag = g["tag"]
+        mine = [by_id[c["item"]] for c in g["children"] if c.get("item")] + \
+            [by_id[x["item"]] for c in g["children"] for x in c.get("children") or []]
+        title = ("Site · " if g["tag"] == "group:complies" and mine and all(i["group"] == "site" for i in mine) else "")
+        heading = g.get("name") if parts["stale"] and g.get("name") else g["title"]   # a law's tier: out of date,
+        gi.Values = System.Array[System.Object]([title + heading + " · " + str(g["count"]), "", "", ""])  # no tier
+        gi.Expanded = parts["expanded"].get(gi.Tag, not g["folded"])
+        for c in g["children"]:
+            if c.get("children") is not None:            # a line of several items: its words, its items under it
+                parts.setdefault("line_status", {})[c["tag"]] = {"status": c.get("status") or "needs_review"}
+                li = ef.TreeGridItem()
+                li.Tag = c["tag"]
+                li.Values = System.Array[System.Object]([(c.get("name") or "") if parts["stale"]   # out of date:
+                                                         else c["mark"] + "  " + c["title"],     # no result words
+                                                         "", "", ""])
+                li.Expanded = parts["expanded"].get(li.Tag, not c["folded"])
+                for x in c["children"]:
+                    li.Children.Add(_item_row(parts, by_id[x["item"]]))
+                gi.Children.Add(li)
+            else:
+                gi.Children.Add(_item_row(parts, by_id[c["item"]], c.get("title")))
         store.Add(gi)
         parts["groups"].append(gi)
     tree.DataStore = store
-    shape = tuple((gi.Tag, gi.Expanded, gi.Children.Count) for gi in parts["groups"])
+    shape = tuple(_shape(gi) for gi in parts["groups"])
     if shape != parts.get("shape"):         # a new list (first fill, rows or groups changed): its first group's heading
-        _scroll_to(tree, 0, len(shape))     # whole at the top, never half under the column titles (the Rhino job at
-    parts["shape"] = shape                  # 6361a3f); the same rows again (every live refresh): where it was (review)
-    if selected_item is not None:           # SelectedItem is read-only here: select by row in the visible list
-        k = 0
-        for gi in parts["groups"]:
-            if gi.Expanded:
-                for c in range(gi.Children.Count):
-                    if gi.Children[c] is selected_item or gi.Children[c].Tag == selected_item.Tag:
-                        tree.SelectedRow = k + 1 + c
-                        _scroll_to(tree, k + 1 + c, k + 2 + c)    # the selected row just into view
-                k += gi.Children.Count
-            k += 1
+        _scroll_to(tree, 0, _visible_rows(parts["groups"]))   # whole at the top, never half under the column titles
+    parts["shape"] = shape                  # (the Rhino job at 6361a3f); the same rows again (every live refresh): where it was
+    at = _visible_index(parts["groups"], parts["selected"]) if parts["selected"] in by_id else None
+    if at is not None:                      # SelectedItem is read-only here: select by row in the visible list
+        tree.SelectedRow = at
+        _scroll_to(tree, at, at + 1)        # the selected row just into view
     set_zoom(parts)
     show_detail(parts)
+
+
+def _item_row(parts, i, title=None):
+    """One item's row: its mark and name (or its line's words, for a line of one item: design_checker/grouping.py),
+    and its values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)."""
+    stale_row = parts["stale"] and i["status"] != "not_checked"
+    name, proposed, required, delta = logic.list_values(i)   # the use row: the use's own name as its Item;
+    values = [name if stale_row else i["mark"] + "  " + (title or name),     # out of date: no line words (results)
+              "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
+              "" if stale_row else logic.cell_text(required),
+              "" if stale_row else logic.cell_text(delta)]
+    ci = ef.TreeGridItem()
+    ci.Tag = i["id"]
+    ci.Values = System.Array[System.Object](values)
+    return ci
+
+
+def _remember_open(parts, gi):
+    """Which groups and lines were open (D8), by tag, before the list is filled again."""
+    parts["expanded"][gi.Tag] = gi.Expanded
+    for c in range(gi.Children.Count):
+        child = gi.Children[c]
+        if isinstance(child.Tag, str) and child.Tag.startswith("line:"):
+            parts["expanded"][child.Tag] = child.Expanded
+
+
+def _shape(gi):
+    """A group's shape: its tag, whether it is open, and its rows (a line's own tag, openness and count)."""
+    rows = []
+    for c in range(gi.Children.Count):
+        child = gi.Children[c]
+        rows.append((child.Tag, child.Expanded, child.Children.Count) if child.Children.Count else child.Tag)
+    return (gi.Tag, gi.Expanded, tuple(rows))
+
+
+def _visible_rows(groups):
+    """How many rows the list shows: each group's heading, and the rows of each open group and open line."""
+    n = 0
+    for gi in groups:
+        n += 1
+        if gi.Expanded:
+            for c in range(gi.Children.Count):
+                child = gi.Children[c]
+                n += 1 + (child.Children.Count if child.Children.Count and child.Expanded else 0)
+    return n
+
+
+def _visible_index(groups, tag):
+    """The row the item `tag` is shown at in the visible list, or None when it is in a folded group or line."""
+    k = 0
+    for gi in groups:
+        k += 1
+        if not gi.Expanded:
+            continue
+        for c in range(gi.Children.Count):
+            child = gi.Children[c]
+            if child.Tag == tag:
+                return k
+            k += 1
+            if child.Children.Count and child.Expanded:
+                for x in range(child.Children.Count):
+                    if child.Children[x].Tag == tag:
+                        return k
+                    k += 1
+    return None
 
 
 def _scroll_to(tree, row, rows):

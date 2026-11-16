@@ -122,12 +122,16 @@ def test_egress_never_complies_while_sections_are_not_checked_even_when_every_ch
     assert rules_rows and {i["status"] for i in rules_rows} == {present.COMPLIES}    # every checked rule complies
     assert [i["id"] for i in got["items"] if i["status"] != present.COMPLIES] == [NOT_YET]
     assert got["sections"][0]["state"] == present.REVIEW
-    assert got["sections"][0]["summary"] == f"1 needs review · {len(rules_rows)} comply"
+    sections = len(found["laws"][0]["not_checked_yet"])
+    # grouped (docs/decisions/2026-11-16_results_grouping.md): only Gordium's gap left, so "needs review" first
+    assert got["sections"][0]["summary"] == \
+        f"needs review · {len(rules_rows)} comply · {sections} sections not checked yet"
     view = {"items": copy.deepcopy(COMPLYING_ZONING)}
     egress.add_to_view(view, got, "City of Ithaca")
     assert view["sections"][0]["state"] == present.COMPLIES and view["sections"][1]["state"] == present.REVIEW
     assert view["state"] == present.REVIEW and view["waiting_only"] is False
-    assert view["summary"] == f"Zoning complies · Egress: 1 needs review · {len(rules_rows)} comply"
+    assert view["summary"] == (f"Zoning complies · Egress: needs review · {len(rules_rows)} comply · {sections} "
+                               "sections not checked yet")
     passing = [{"Error": "PASS", "Requirement": "Rear yard", "Rule id": "R-1b.rear_yard"}]
     assert summary(passing, view["items"])["state"] == "review"
 

@@ -1871,9 +1871,15 @@ def summary(items: list[dict]) -> str:
     for name, mine in laws.items():
         waiting = [i for i in mine if i.get("waiting")]
         # the waiting item's own reason ("no rooms drawn yet"), so another reason a law waits is said as it is
+        # a law's own counts as an architect counts them (design_checker/grouping.py: grouping only, never a status)
         out.append(f"{name} waiting: {waiting[0]['waiting']}" if waiting and len(waiting) == len(mine)
-                   else f"{name}: " + _summary(mine))
+                   else f"{name}: " + _law_summary(mine))
     return " · ".join(out)
+
+
+def _law_summary(items: list[dict]) -> str:
+    from design_checker import grouping
+    return grouping.summary(items)
 
 
 def _summary(items: list[dict]) -> str:
@@ -2178,22 +2184,52 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
 
 
 def grouped(items: list[dict]) -> list[dict]:
-    """The panel's groups in order (empty ones left out); site items carry "Site · " in their group label. Each law a
-    place inherits (egress) is one group of its own after zoning's, titled by its law ("Egress (NY State
-    Residential Code 2025)"), its items in the order given (egress.py puts what fails first)."""
+    """The panel's groups in order (empty ones left out); site items carry "Site · " in their group label.
+
+    Each law a place inherits (egress) is grouped by design_checker/grouping.py (docs/decisions/
+    2026-11-16_results_grouping.md): its own "Does not comply" right after zoning's, its "Needs review" (what the
+    architect can act on) after zoning's, then its "Check by hand: not read by Gordium yet", then its "Complies"
+    (folded) after zoning's. Each of these groups has `lines` (a part's rules, or one cause Gordium can't read yet,
+    each with its items) and `count` (what the headline counts). A law still waiting for rooms is one group titled
+    by its law ("Egress (NY State Residential Code 2025)"), as before (#106)."""
+    from design_checker import grouping
     by = {"fails": [], "review": [], "complies": [], "use_details": [], "not_checked": [], "not_covered": []}
-    laws = {}                                        # an inherited law's items: one group of their own, after zoning's
+    laws = {}                                        # an inherited law's items, by law, in the order given
     for i in items:
         if i["group"] == LAW_GROUP:
             key = i.get("law_key") or "law"
-            laws.setdefault(key, {"key": key, "title": i.get("law") or "Building code", "items": []})["items"].append(
-                i["id"])
+            laws.setdefault(key, {"key": key, "title": i.get("law") or "Building code",
+                                  "short": i.get("law_short") or i.get("law") or "Building code", "items": []}
+                            )["items"].append(i)
             continue
         key = ("not_covered" if i["group"] == "not_covered" else "use_details" if i.get("use_detail") else
                "not_checked" if i["status"] == NOT_CHECKED else
                {FAILS: "fails", REVIEW: "review", COMPLIES: "complies"}[i["status"]])
         by[key].append(i["id"])
-    return [{"key": k, "title": t, "items": by[k]} for k, t in GROUPS if by[k]] + list(laws.values())
+    zoning = [{"key": k, "title": t, "items": by[k]} for k, t in GROUPS if by[k]]
+    after = {grouping.FAILS_T: "fails", grouping.REVIEW_T: "review", grouping.BY_HAND_T: "review",
+             grouping.COMPLIES_T: "complies"}       # each law tier goes after this zoning group (or where it would be)
+    place = {k: n for n, (k, _) in enumerate(GROUPS)}
+    tail, placed = [], []
+    for law in laws.values():
+        mine = law["items"]
+        if all(i.get("waiting") for i in mine):      # waiting for rooms: shown as it always was
+            tail.append({"key": law["key"], "title": law["title"], "items": [i["id"] for i in mine]})
+            continue
+        lines = grouping.lines(mine)
+        c = grouping.counts(mine)
+        count = {grouping.FAILS_T: c["fails"], grouping.REVIEW_T: c["review"],
+                 grouping.BY_HAND_T: len(lines[grouping.BY_HAND_T]),
+                 grouping.COMPLIES_T: c["complies"] + c["not_applicable"]}
+        for rank, t in enumerate(grouping.TIERS):
+            if lines[t]:
+                placed.append(((place[after[t]], rank), {
+                    "key": f"{law['key']}:{t}", "title": f"{law['short']} · {grouping.TITLES[t]}",
+                    "items": [x for ln in lines[t] for x in ln["items"]], "lines": lines[t], "count": count[t],
+                    "folded": t in grouping.FOLDED, "law": law["title"],
+                    "name": law["short"]}))       # its heading without its result, while the list is out of date
+    out = [((place[g["key"]], -1), g) for g in zoning] + placed       # zoning's group first, then the law's
+    return [g for _, g in sorted(out, key=lambda x: x[0])] + tail
 
 
 def grade_label(facts: dict) -> str:

@@ -4,12 +4,12 @@ Prints the three egress sheets an architect attaches to a permit application, fr
 
 | Sheet | What it shows |
 |---|---|
-| **G-001 Code analysis: egress** (G-002… if it runs long) | Every egress item the check gave: the part ("Bedroom 3 › Window 5"), the requirement and its rule id, the required value, the proposed (measured) value, the result, the code section, and why for anything not complying. The check's "Not checked yet by Gordium" line (the code sections Gordium has no rules for yet) is printed as a NEEDS REVIEW row with every section listed in a banner under it, and said under the egress result, so a set never reads as complete; while egress waits (no rooms drawn) the waiting row carries the same list and the result stays WAITING |
+| **G-001 Code analysis: egress** (G-002… if it runs long) | The check's results grouped as the panel groups them ([results grouping](../../docs/decisions/2026-11-16_results_grouping.md)): each failing rule on its own row (the part, the requirement and its rule id, required, proposed, the code section, what to change); then one row per part that needs review the architect can act on; then one row per cause Gordium can't read yet ("Handrails · 10 rules · not read from the model yet: check by hand"); then one row per part that complies. Each row's result is the most cautious of its rules and it gives every code section and the `code_analysis.csv` lines of its rules. The check's "Not checked yet by Gordium" line (the code sections Gordium has no rules for yet) is printed as a NEEDS REVIEW row with every section listed in a banner under it, and said under the egress result, so a set never reads as complete; while egress waits (no rooms drawn) the waiting row carries the same list and the result stays WAITING |
 | **LS-101 Life-safety plan** (one per floor) | The floor's rooms from their outlines, sleeping rooms marked, each escape opening tagged with its result, stairs with UP/DN, the exit door, and a schematic of the way out (labelled "not checked by Gordium") |
 | **A-601 Escape-window schedule** | Each sleeping room's escape openings: type, net clear width, height and area, sill height, grade floor, each against its limit with that rule's result, and the opening's result over all its rules |
 
-Files: one SVG per sheet, `permit_sheets.pdf` (every sheet, 11 x 17 in), `code_analysis.csv`,
-`escape_window_schedule.csv` and `permit_sheets.xlsx`. Each sheet has a title block: project, address, date, the
+Files: one SVG per sheet, `permit_sheets.pdf` (every sheet, 11 x 17 in), `code_analysis.csv` (every rule's own row,
+with "Shown on G-001 as" naming its line on the sheet), `escape_window_schedule.csv` and `permit_sheets.xlsx`. Each sheet has a title block: project, address, date, the
 rulebook (file, sha256, "draft"), the rules and code fingerprints, the interior's fingerprint, a blank stamp box,
 and **"Prepared with Gordium: draft rules, verify before submission"**. Plain code, no AI; no new dependency (SVG
 and PDF are written by `draw.py`, the XLSX by openpyxl as `project_report` does). The design and its review:
@@ -31,9 +31,10 @@ The command runs the check itself (`design_checker`, as the plugin does) and pri
 (`source.checked`). It stops, printing nothing, when anything doesn't add up:
 
 - **Results:** each line's result is the check's item status, word for word: COMPLIES, DOES NOT COMPLY, NEEDS
-  REVIEW, or WAITING: <the check's own reason> (`words.result_words`; any other status is refused). An item about a
-  part is paired with its raw row and the two must agree; every row the panel shows must be printed; each law's
-  summary must equal the checker's own count of its items (`present._summary`).
+  REVIEW, or WAITING: <the check's own reason> (`words.result_words`; any other status is refused); a grouped G-001
+  row's is the most cautious of its rules'. An item about a part is paired with its raw row and the two must agree;
+  every row the panel shows must be printed in the CSV (that each is cited by exactly one G-001 row holds by how G-001 is built, and is pinned by a test, not refused at run time); each law's summary
+  must equal the checker's own count of its items (`present._law_summary`).
 - **Never kinder than the worst row:** a window's line is the most cautious of all its rows; a bedroom with no window
   marked takes its own rows' result; no rows at all, or a window marked but not checked, is NEEDS REVIEW
   (`words.worst`, `tables.schedule_rows`).

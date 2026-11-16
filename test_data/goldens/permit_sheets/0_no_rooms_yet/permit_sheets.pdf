@@ -13,12 +13,12 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 8324 >>
+<< /Length 8594 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (CODE ANALYSIS: EGRESS) Tj ET
 BT /F2 7.5 Tf 0.29 0.29 0.29 rg 68 728.4 Td (Egress result: WAITING: NO ROOMS DRAWN YET) Tj ET
 BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): waiting, no rooms drawn yet \(the check's own count\)) Tj ET
-BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code analysis line 1\)) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code_analysis.csv line 1\)) Tj ET
 0.6 w [] 0 d
 0.9 0.9 0.9 rg 0.1 0.1 0.1 RG 68 692.4 m 994 692.4 l 994 677.4 l 68 677.4 l h B
 BT /F2 7 Tf 0 0 0 rg 71 682.4 Td (#) Tj ET
@@ -36,6 +36,7 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 71 653.4 Td (1) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 653.4 Td (Egress: waiting, no rooms drawn) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 644.4 Td (yet) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 653.4 Td (Egress: waiting, no rooms drawn yet) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 644.9 Td (code_analysis.csv line 1) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 653.4 Td () Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 653.4 Td () Tj ET
 0.5 w [] 0 d
@@ -78,8 +79,8 @@ BT /F2 10 Tf 0.29 0.29 0.29 rg 93.53 543.4 Td (BO105.2.3, BO105.3, BO105.8, BO10
 BT /F2 10 Tf 0.29 0.29 0.29 rg 430.11 530.4 Td (BO109.1, BO109.8.1, BO109.8.5, BO109.8.6) Tj ET
 0.6 w [] 0 d
 0.1 0.1 0.1 RG 68 523.4 m 994 523.4 l S
-BT /F1 6 Tf 0.35 0.35 0.35 rg 68 509.4 Td (Every row is a result of Gordium's check, in its order, with the check's own result. Required and Proposed are shown for reading: worked out from the rule's formula and the measured values, never rounded toward compliance; they never decide a result. Rows that don't apply are not listed. The CSV beside this sheet carries each row's rule id, part,) Tj ET
-BT /F1 6 Tf 0.35 0.35 0.35 rg 68 501.4 Td (measured values, citation and the code's words.) Tj ET
+BT /F1 6 Tf 0.35 0.35 0.35 rg 68 509.4 Td (Grouped as Gordium's panel groups the check: what does not comply \(each rule, with Required and Proposed\), what needs review, what to check by hand because Gordium can't read it yet, and what complies. A row's result is the most cautious of its rules \(the check's own results\). Every rule's own row, with its rule id, part, measured values,) Tj ET
+BT /F1 6 Tf 0.35 0.35 0.35 rg 68 501.4 Td (citation and the code's words, is in code_analysis.csv and permit_sheets.xlsx at the lines given. Required and Proposed are for reading: never rounded toward compliance; they never decide a result. Rules that don't apply are not listed.) Tj ET
 1.2 w [] 0 d
 0.1 0.1 0.1 RG 54 770.4 m 1202.4 770.4 l 1202.4 21.6 l 54 21.6 l h S
 1.2 w [] 0 d
@@ -123,8 +124,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (b485ce48e3b34ece6821c846f1edf9ef551b7732e3e292f3ba8d70cca702) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (1d4f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (61aafc0668a620f6d0ae15d1de35dbda39814a955c1e98133fe8abbed9d4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (faaa) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -145,12 +146,12 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 1224 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 5 0 R >>
 endobj
 7 0 obj
-<< /Length 4976 >>
+<< /Length 4980 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (LIFE-SAFETY PLAN) Tj ET
 BT /F2 7.5 Tf 0.29 0.29 0.29 rg 68 728.4 Td (Egress result: WAITING: NO ROOMS DRAWN YET) Tj ET
 BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): waiting, no rooms drawn yet \(the check's own count\)) Tj ET
-BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code analysis line 1\)) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code_analysis.csv line 1\)) Tj ET
 BT /F2 16 Tf 0.29 0.29 0.29 rg 275.54 346.2 Td (WAITING: NO ROOMS DRAWN YET) Tj ET
 BT /F2 7 Tf 0 0 0 rg 766.4 692.4 Td (LEGEND) Tj ET
 BT /F1 6.5 Tf 0.1 0.1 0.1 rg 766.4 682.4 Td (Heavy outline, tinted: sleeping room \(each needs an escape opening, R319.1\)) Tj ET
@@ -207,8 +208,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (b485ce48e3b34ece6821c846f1edf9ef551b7732e3e292f3ba8d70cca702) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (1d4f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (61aafc0668a620f6d0ae15d1de35dbda39814a955c1e98133fe8abbed9d4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (faaa) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -229,12 +230,12 @@ endobj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 1224 792] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents 7 0 R >>
 endobj
 9 0 obj
-<< /Length 5439 >>
+<< /Length 5443 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (ESCAPE-WINDOW SCHEDULE) Tj ET
 BT /F2 7.5 Tf 0.29 0.29 0.29 rg 68 728.4 Td (Egress result: WAITING: NO ROOMS DRAWN YET) Tj ET
 BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 718.4 Td (Egress \(NY State Residential Code 2025\): waiting, no rooms drawn yet \(the check's own count\)) Tj ET
-BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code analysis line 1\)) Tj ET
+BT /F1 7.5 Tf 0.1 0.1 0.1 rg 68 708.4 Td (Not checked yet by Gordium: 86 code sections, check them by hand \(code_analysis.csv line 1\)) Tj ET
 0.6 w [] 0 d
 0.9 0.9 0.9 rg 0.1 0.1 0.1 RG 68 692.4 m 994 692.4 l 994 668.4 l 68 668.4 l h B
 BT /F2 7 Tf 0 0 0 rg 71 682.4 Td (Mark) Tj ET
@@ -301,8 +302,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 481.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 471.9 m 1202.4 471.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 463.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (b485ce48e3b34ece6821c846f1edf9ef551b7732e3e292f3ba8d70cca702) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (1d4f) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 454.9 Td (61aafc0668a620f6d0ae15d1de35dbda39814a955c1e98133fe8abbed9d4) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 446.9 Td (faaa) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 436.9 m 1202.4 436.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 428.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -333,14 +334,14 @@ xref
 0000000134 00000 n 
 0000000231 00000 n 
 0000000333 00000 n 
-0000008708 00000 n 
-0000008845 00000 n 
-0000013872 00000 n 
-0000014009 00000 n 
-0000019499 00000 n 
-0000019637 00000 n 
+0000008978 00000 n 
+0000009115 00000 n 
+0000014146 00000 n 
+0000014283 00000 n 
+0000019777 00000 n 
+0000019915 00000 n 
 trailer
 << /Size 12 /Root 1 0 R /Info 11 0 R >>
 startxref
-19772
+20050
 %%EOF

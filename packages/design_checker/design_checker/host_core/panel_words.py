@@ -8,7 +8,8 @@ where none of the .venv's packages are installed."""
 __all__ = ['panel_header', 'status_words', 'row_name', 'USE_STATED', 'list_cells', 'list_values', 'highlight',
     'red_last', 'newly_failing', 'WORKED_OUT', 'detail_parts', 'coloured_info', 'labels_on', 'context_shown',
     'yard_label_shown', 'legend_text', 'COLUMN_DELTA', 'CELL_FRACTIONS', 'cell_text', 'shorten', 'link_text',
-    'height_limit_text', 'WAITING', 'WAITING_RGB', 'headline_state', 'headline_mark', 'headline_rgb']
+    'height_limit_text', 'WAITING', 'WAITING_RGB', 'headline_state', 'headline_mark', 'headline_rgb', 'list_tree',
+    'FOLDED_GROUPS']
 
 
 def panel_header(head):
@@ -95,6 +96,41 @@ def newly_failing(before, view):
             if status.get(item_id) == "does_not_comply" and before.get(item_id) != "does_not_comply":
                 return item_id
     return None
+
+
+FOLDED_GROUPS = ("complies", "not_covered", "use_details")     # zoning's groups shown folded (D8's defaults)
+
+
+def list_tree(view):
+    """The panel's list as a tree, from the check's groups: [{tag, title, count, folded, children}], each child an
+    item row {tag: the item id, item: the id, title: None or the line's words, mark} or, for a line of several
+    items (design_checker/grouping.py: a part's rules, or a cause Gordium can't read yet), a line row {tag:
+    "line:<group>:<line>", title, mark, folded, children: [item rows]}. `name` is a line's name without its result
+    (the part, or the cause), for a list whose results are out of date. A line of one item is that item's row,
+    named by the line's words. A group with no lines lists its items as before. Every id in a group's `items` is
+    a row of it exactly once (a line row is no item: nothing is hidden by grouping, only folded)."""
+    out = []
+    for g in (view or {}).get("groups") or []:
+        node = {"tag": "group:" + g["key"], "title": g["title"], "name": g.get("name"),
+                "count": g.get("count", len(g["items"])),
+                "folded": g.get("folded", g["key"] in FOLDED_GROUPS), "children": []}
+        lines = g.get("lines")
+        if lines:
+            for ln in lines:
+                if len(ln["items"]) == 1:
+                    node["children"].append({"tag": ln["items"][0], "item": ln["items"][0], "title": ln["title"],
+                                             "name": ln.get("name"), "mark": ln.get("mark") or ""})
+                else:
+                    node["children"].append({"tag": "line:" + g["key"] + ":" + ln["key"], "title": ln["title"],
+                                             "name": ln.get("name"),
+                                             "mark": ln.get("mark") or "", "status": ln.get("status"),
+                                             "folded": ln.get("folded", True),
+                                             "children": [{"tag": x, "item": x, "title": None, "mark": None}
+                                                          for x in ln["items"]]})
+        else:
+            node["children"] = [{"tag": x, "item": x, "title": None, "mark": None} for x in g["items"]]
+        out.append(node)
+    return out
 
 
 WORKED_OUT = "How it's worked out"
