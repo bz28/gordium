@@ -13,7 +13,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 19909 >>
+<< /Length 19995 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (CODE ANALYSIS: EGRESS) Tj ET
 BT /F2 7.5 Tf 0.54 0.33 0 rg 68 728.4 Td (Egress result: NEEDS REVIEW) Tj ET
@@ -44,270 +44,271 @@ BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 611.9 Td (code_analysis.csv lines 1–5, 97
 BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 638.4 Td () Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 638.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 647.4 m 684.2 647.4 l 684.2 607.4 l 602.49 607.4 l h f
+1 0.95 0.84 rg 602.49 647.4 m 684.2 647.4 l 684.2 598.4 l 602.49 598.4 l h f
 BT /F2 7 Tf 0.54 0.33 0 rg 605.49 638.4 Td (NEEDS REVIEW) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 638.4 Td (BF103.2,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 629.4 Td (R318.2,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 620.4 Td (R318.3.1) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 638.4 Td (a person decides: Egress doors readily openable without key \(R318.2\), Exit) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 629.4 Td (into a patio cover not unenclosed: exits per R318 \(BF103.2\) · to give: the top of) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 620.4 Td (the threshold isn't given, the door's hinge side isn't given and 1 more · not read) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 611.4 Td (yet: side hinged, egress given as exterior door) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 620.4 Td (the threshold isn't given, the door's hinge side isn't given, dwelling units not) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 611.4 Td (measured \(or not usable\) · not read yet: side hinged, egress given as exterior) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 602.4 Td (door) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 607.4 m 994 607.4 l S
+0.55 0.55 0.55 RG 68 598.4 m 994 598.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 647.4 m 91.83 607.4 l S
+0.55 0.55 0.55 RG 91.83 647.4 m 91.83 598.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 647.4 m 207.58 607.4 l S
+0.55 0.55 0.55 RG 207.58 647.4 m 207.58 598.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 647.4 m 405.04 607.4 l S
+0.55 0.55 0.55 RG 405.04 647.4 m 405.04 598.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 647.4 m 503.76 607.4 l S
+0.55 0.55 0.55 RG 503.76 647.4 m 503.76 598.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 647.4 m 602.49 607.4 l S
+0.55 0.55 0.55 RG 602.49 647.4 m 602.49 598.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 647.4 m 684.2 607.4 l S
+0.55 0.55 0.55 RG 684.2 647.4 m 684.2 598.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 647.4 m 742.07 607.4 l S
+0.55 0.55 0.55 RG 742.07 647.4 m 742.07 598.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 647.4 m 68 607.4 l S
+0.1 0.1 0.1 RG 68 647.4 m 68 598.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 647.4 m 994 607.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 598.4 Td (2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 598.4 Td (Stairs) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 598.4 Td (30 rules: Handrail on one side of flights with four or more) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 589.4 Td (risers \(R318.7.8\); Sleeping loft stair riser height, 7 to 12 in) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 580.4 Td (\(R315.5.2.2\); Sleeping loft stair tread/riser formula) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 571.4 Td (\(R315.5.2.2\); and 27 more) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 562.9 Td (code_analysis.csv lines 6, 110–111, 153–165, 199–212) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 598.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 598.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 647.4 m 994 598.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 589.4 Td (2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 589.4 Td (Stairs) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 589.4 Td (30 rules: Handrail on one side of flights with four or more) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 580.4 Td (risers \(R318.7.8\); Sleeping loft stair riser height, 7 to 12 in) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 571.4 Td (\(R315.5.2.2\); Sleeping loft stair tread/riser formula) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 562.4 Td (\(R315.5.2.2\); and 27 more) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 553.9 Td (code_analysis.csv lines 6, 110–111, 153–165, 199–212) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 589.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 589.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 607.4 m 684.2 607.4 l 684.2 513.4 l 602.49 513.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 598.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 598.4 Td (R315.5.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 589.4 Td (R315.5.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 580.4 Td (R318.7.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 571.4 Td (R318.7.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 562.4 Td (R318.7.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 553.4 Td (R318.7.5.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 544.4 Td (R318.7.5.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 535.4 Td (R318.7.6,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 526.4 Td (R318.7.8,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 517.4 Td (R318.7.11.1) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 598.4 Td (to give: the stairs aren't in the interior drawing \(no `stairs` list\)) Tj ET
+1 0.95 0.84 rg 602.49 598.4 m 684.2 598.4 l 684.2 504.4 l 602.49 504.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 589.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 589.4 Td (R315.5.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 580.4 Td (R315.5.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 571.4 Td (R318.7.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 562.4 Td (R318.7.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 553.4 Td (R318.7.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 544.4 Td (R318.7.5.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 535.4 Td (R318.7.5.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 526.4 Td (R318.7.6,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 517.4 Td (R318.7.8,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 508.4 Td (R318.7.11.1) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 589.4 Td (to give: the stairs aren't in the interior drawing \(no `stairs` list\)) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 513.4 m 994 513.4 l S
+0.55 0.55 0.55 RG 68 504.4 m 994 504.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 607.4 m 91.83 513.4 l S
+0.55 0.55 0.55 RG 91.83 598.4 m 91.83 504.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 607.4 m 207.58 513.4 l S
+0.55 0.55 0.55 RG 207.58 598.4 m 207.58 504.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 607.4 m 405.04 513.4 l S
+0.55 0.55 0.55 RG 405.04 598.4 m 405.04 504.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 607.4 m 503.76 513.4 l S
+0.55 0.55 0.55 RG 503.76 598.4 m 503.76 504.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 607.4 m 602.49 513.4 l S
+0.55 0.55 0.55 RG 602.49 598.4 m 602.49 504.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 607.4 m 684.2 513.4 l S
+0.55 0.55 0.55 RG 684.2 598.4 m 684.2 504.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 607.4 m 742.07 513.4 l S
+0.55 0.55 0.55 RG 742.07 598.4 m 742.07 504.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 607.4 m 68 513.4 l S
+0.1 0.1 0.1 RG 68 598.4 m 68 504.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 607.4 m 994 513.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 504.4 Td (3) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 504.4 Td (Master bedroom › Master bedroom) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 495.4 Td (double-hung 1 of 2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 504.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 495.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 486.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 477.4 Td (more) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 468.9 Td (code_analysis.csv lines 7, 17, 27, 37, 47, 57, 67, 77, 87, 113, 123, 133, 143,) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 461.4 Td (166, 180, 236, 246, 256, 266, 276, 286) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 504.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 504.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 598.4 m 994 504.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 495.4 Td (3) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 495.4 Td (Master bedroom › Master bedroom) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 486.4 Td (double-hung 1 of 2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 495.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 486.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 477.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 468.4 Td (more) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 459.9 Td (code_analysis.csv lines 7, 17, 27, 37, 47, 57, 67, 77, 87, 113, 123, 133, 143,) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 452.4 Td (166, 180, 236, 246, 256, 266, 276, 286) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 495.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 495.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 513.4 m 684.2 513.4 l 684.2 401.4 l 602.49 401.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 504.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 504.4 Td (BF103.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 495.4 Td (R319.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 486.4 Td (R319.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 477.4 Td (R319.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 468.4 Td (R319.2.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 459.4 Td (R319.2.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 450.4 Td (R319.3, R319.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 441.4 Td (R319.4.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 432.4 Td (R319.4.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 423.4 Td (R319.4.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 414.4 Td (R319.4.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 405.4 Td (R319.6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 504.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 495.4 Td (read yet: fully openable, path height and 20 more) Tj ET
+1 0.95 0.84 rg 602.49 504.4 m 684.2 504.4 l 684.2 392.4 l 602.49 392.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 495.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 495.4 Td (BF103.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 486.4 Td (R319.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 477.4 Td (R319.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 468.4 Td (R319.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 459.4 Td (R319.2.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 450.4 Td (R319.2.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 441.4 Td (R319.3, R319.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 432.4 Td (R319.4.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 423.4 Td (R319.4.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 414.4 Td (R319.4.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 405.4 Td (R319.4.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 396.4 Td (R319.6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 495.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 486.4 Td (read yet: fully openable, path height and 20 more) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 401.4 m 994 401.4 l S
+0.55 0.55 0.55 RG 68 392.4 m 994 392.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 513.4 m 91.83 401.4 l S
+0.55 0.55 0.55 RG 91.83 504.4 m 91.83 392.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 513.4 m 207.58 401.4 l S
+0.55 0.55 0.55 RG 207.58 504.4 m 207.58 392.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 513.4 m 405.04 401.4 l S
+0.55 0.55 0.55 RG 405.04 504.4 m 405.04 392.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 513.4 m 503.76 401.4 l S
+0.55 0.55 0.55 RG 503.76 504.4 m 503.76 392.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 513.4 m 602.49 401.4 l S
+0.55 0.55 0.55 RG 602.49 504.4 m 602.49 392.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 513.4 m 684.2 401.4 l S
+0.55 0.55 0.55 RG 684.2 504.4 m 684.2 392.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 513.4 m 742.07 401.4 l S
+0.55 0.55 0.55 RG 742.07 504.4 m 742.07 392.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 513.4 m 68 401.4 l S
+0.1 0.1 0.1 RG 68 504.4 m 68 392.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 513.4 m 994 401.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 392.4 Td (4) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 392.4 Td (Master bedroom › Master bedroom) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 383.4 Td (double-hung 2 of 2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 392.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 383.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 374.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 365.4 Td (more) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 356.9 Td (code_analysis.csv lines 8, 18, 28, 38, 48, 58, 68, 78, 88, 114, 124, 134, 144,) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 349.4 Td (167, 181, 237, 247, 257, 267, 277, 287) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 392.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 392.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 504.4 m 994 392.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 383.4 Td (4) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 383.4 Td (Master bedroom › Master bedroom) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 374.4 Td (double-hung 2 of 2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 383.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 374.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 365.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 356.4 Td (more) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 347.9 Td (code_analysis.csv lines 8, 18, 28, 38, 48, 58, 68, 78, 88, 114, 124, 134, 144,) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 340.4 Td (167, 181, 237, 247, 257, 267, 277, 287) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 383.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 383.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 401.4 m 684.2 401.4 l 684.2 289.4 l 602.49 289.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 392.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 392.4 Td (BF103.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 383.4 Td (R319.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 374.4 Td (R319.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 365.4 Td (R319.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 356.4 Td (R319.2.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 347.4 Td (R319.2.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 338.4 Td (R319.3, R319.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 329.4 Td (R319.4.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 320.4 Td (R319.4.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 311.4 Td (R319.4.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 302.4 Td (R319.4.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 293.4 Td (R319.6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 392.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 383.4 Td (read yet: fully openable, path height and 20 more) Tj ET
+1 0.95 0.84 rg 602.49 392.4 m 684.2 392.4 l 684.2 280.4 l 602.49 280.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 383.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 383.4 Td (BF103.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 374.4 Td (R319.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 365.4 Td (R319.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 356.4 Td (R319.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 347.4 Td (R319.2.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 338.4 Td (R319.2.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 329.4 Td (R319.3, R319.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 320.4 Td (R319.4.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 311.4 Td (R319.4.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 302.4 Td (R319.4.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 293.4 Td (R319.4.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 284.4 Td (R319.6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 383.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 374.4 Td (read yet: fully openable, path height and 20 more) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 289.4 m 994 289.4 l S
+0.55 0.55 0.55 RG 68 280.4 m 994 280.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 401.4 m 91.83 289.4 l S
+0.55 0.55 0.55 RG 91.83 392.4 m 91.83 280.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 401.4 m 207.58 289.4 l S
+0.55 0.55 0.55 RG 207.58 392.4 m 207.58 280.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 401.4 m 405.04 289.4 l S
+0.55 0.55 0.55 RG 405.04 392.4 m 405.04 280.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 401.4 m 503.76 289.4 l S
+0.55 0.55 0.55 RG 503.76 392.4 m 503.76 280.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 401.4 m 602.49 289.4 l S
+0.55 0.55 0.55 RG 602.49 392.4 m 602.49 280.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 401.4 m 684.2 289.4 l S
+0.55 0.55 0.55 RG 684.2 392.4 m 684.2 280.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 401.4 m 742.07 289.4 l S
+0.55 0.55 0.55 RG 742.07 392.4 m 742.07 280.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 401.4 m 68 289.4 l S
+0.1 0.1 0.1 RG 68 392.4 m 68 280.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 401.4 m 994 289.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 280.4 Td (5) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 280.4 Td (Master bedroom › Master bedroom) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 271.4 Td (casement C15, 1 of 2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 280.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 271.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 262.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 253.4 Td (more) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 244.9 Td (code_analysis.csv lines 9, 19, 29, 39, 49, 59, 69, 79, 89, 115, 125, 135, 145,) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 237.4 Td (168, 182, 238, 248, 258, 268, 278, 288) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 280.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 280.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 392.4 m 994 280.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 271.4 Td (5) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 271.4 Td (Master bedroom › Master bedroom) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 262.4 Td (casement C15, 1 of 2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 271.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 262.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 253.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 244.4 Td (more) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 235.9 Td (code_analysis.csv lines 9, 19, 29, 39, 49, 59, 69, 79, 89, 115, 125, 135, 145,) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 228.4 Td (168, 182, 238, 248, 258, 268, 278, 288) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 271.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 271.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 289.4 m 684.2 289.4 l 684.2 177.4 l 602.49 177.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 280.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 280.4 Td (BF103.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 271.4 Td (R319.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 262.4 Td (R319.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 253.4 Td (R319.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 244.4 Td (R319.2.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 235.4 Td (R319.2.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 226.4 Td (R319.3, R319.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 217.4 Td (R319.4.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 208.4 Td (R319.4.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 199.4 Td (R319.4.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 190.4 Td (R319.4.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 181.4 Td (R319.6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 280.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 271.4 Td (read yet: fully openable, path height and 20 more) Tj ET
+1 0.95 0.84 rg 602.49 280.4 m 684.2 280.4 l 684.2 168.4 l 602.49 168.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 271.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 271.4 Td (BF103.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 262.4 Td (R319.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 253.4 Td (R319.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 244.4 Td (R319.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 235.4 Td (R319.2.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 226.4 Td (R319.2.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 217.4 Td (R319.3, R319.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 208.4 Td (R319.4.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 199.4 Td (R319.4.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 190.4 Td (R319.4.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 181.4 Td (R319.4.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 172.4 Td (R319.6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 271.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 262.4 Td (read yet: fully openable, path height and 20 more) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 177.4 m 994 177.4 l S
+0.55 0.55 0.55 RG 68 168.4 m 994 168.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 289.4 m 91.83 177.4 l S
+0.55 0.55 0.55 RG 91.83 280.4 m 91.83 168.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 289.4 m 207.58 177.4 l S
+0.55 0.55 0.55 RG 207.58 280.4 m 207.58 168.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 289.4 m 405.04 177.4 l S
+0.55 0.55 0.55 RG 405.04 280.4 m 405.04 168.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 289.4 m 503.76 177.4 l S
+0.55 0.55 0.55 RG 503.76 280.4 m 503.76 168.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 289.4 m 602.49 177.4 l S
+0.55 0.55 0.55 RG 602.49 280.4 m 602.49 168.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 289.4 m 684.2 177.4 l S
+0.55 0.55 0.55 RG 684.2 280.4 m 684.2 168.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 289.4 m 742.07 177.4 l S
+0.55 0.55 0.55 RG 742.07 280.4 m 742.07 168.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 289.4 m 68 177.4 l S
+0.1 0.1 0.1 RG 68 280.4 m 68 168.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 289.4 m 994 177.4 l S
-BT /F1 7 Tf 0.1 0.1 0.1 rg 71 168.4 Td (6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 168.4 Td (Master bedroom › Master bedroom) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 159.4 Td (casement C15, 2 of 2) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 168.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 159.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 150.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 141.4 Td (more) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 132.9 Td (code_analysis.csv lines 10, 20, 30, 40, 50, 60, 70, 80, 90, 116, 126, 136, 146,) Tj ET
-BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 125.4 Td (169, 183, 239, 249, 259, 269, 279, 289) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 168.4 Td () Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 168.4 Td () Tj ET
+0.1 0.1 0.1 RG 994 280.4 m 994 168.4 l S
+BT /F1 7 Tf 0.1 0.1 0.1 rg 71 159.4 Td (6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 159.4 Td (Master bedroom › Master bedroom) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 94.83 150.4 Td (casement C15, 2 of 2) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 159.4 Td (21 rules: Escape opening minimum net clear area \(R319.2.1\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 150.4 Td (Escape opening minimum net clear height \(R319.2.2\);) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 141.4 Td (Escape opening minimum net clear width \(R319.2.2\); and 18) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 210.58 132.4 Td (more) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 123.9 Td (code_analysis.csv lines 10, 20, 30, 40, 50, 60, 70, 80, 90, 116, 126, 136, 146,) Tj ET
+BT /F1 5.5 Tf 0.35 0.35 0.35 rg 210.58 116.4 Td (169, 183, 239, 249, 259, 269, 279, 289) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 408.04 159.4 Td () Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 506.76 159.4 Td () Tj ET
 0.5 w [] 0 d
-1 0.95 0.84 rg 602.49 177.4 m 684.2 177.4 l 684.2 65.4 l 602.49 65.4 l h f
-BT /F2 7 Tf 0.54 0.33 0 rg 605.49 168.4 Td (NEEDS REVIEW) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 168.4 Td (BF103.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 159.4 Td (R319.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 150.4 Td (R319.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 141.4 Td (R319.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 132.4 Td (R319.2.3,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 123.4 Td (R319.2.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 114.4 Td (R319.3, R319.4,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 105.4 Td (R319.4.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 96.4 Td (R319.4.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 87.4 Td (R319.4.2.1,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 78.4 Td (R319.4.2.2,) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 69.4 Td (R319.6) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 168.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 159.4 Td (read yet: fully openable, path height and 20 more) Tj ET
+1 0.95 0.84 rg 602.49 168.4 m 684.2 168.4 l 684.2 56.4 l 602.49 56.4 l h f
+BT /F2 7 Tf 0.54 0.33 0 rg 605.49 159.4 Td (NEEDS REVIEW) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 159.4 Td (BF103.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 150.4 Td (R319.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 141.4 Td (R319.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 132.4 Td (R319.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 123.4 Td (R319.2.3,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 114.4 Td (R319.2.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 105.4 Td (R319.3, R319.4,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 96.4 Td (R319.4.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 87.4 Td (R319.4.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 78.4 Td (R319.4.2.1,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 69.4 Td (R319.4.2.2,) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 60.4 Td (R319.6) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 159.4 Td (to give: the opening's frame isn't given \(and no maker's clear opening\) · not) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 150.4 Td (read yet: fully openable, path height and 20 more) Tj ET
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 68 65.4 m 994 65.4 l S
+0.55 0.55 0.55 RG 68 56.4 m 994 56.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 91.83 177.4 m 91.83 65.4 l S
+0.55 0.55 0.55 RG 91.83 168.4 m 91.83 56.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 207.58 177.4 m 207.58 65.4 l S
+0.55 0.55 0.55 RG 207.58 168.4 m 207.58 56.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 405.04 177.4 m 405.04 65.4 l S
+0.55 0.55 0.55 RG 405.04 168.4 m 405.04 56.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 503.76 177.4 m 503.76 65.4 l S
+0.55 0.55 0.55 RG 503.76 168.4 m 503.76 56.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 602.49 177.4 m 602.49 65.4 l S
+0.55 0.55 0.55 RG 602.49 168.4 m 602.49 56.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 684.2 177.4 m 684.2 65.4 l S
+0.55 0.55 0.55 RG 684.2 168.4 m 684.2 56.4 l S
 0.3 w [] 0 d
-0.55 0.55 0.55 RG 742.07 177.4 m 742.07 65.4 l S
+0.55 0.55 0.55 RG 742.07 168.4 m 742.07 56.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 68 177.4 m 68 65.4 l S
+0.1 0.1 0.1 RG 68 168.4 m 68 56.4 l S
 0.6 w [] 0 d
-0.1 0.1 0.1 RG 994 177.4 m 994 65.4 l S
+0.1 0.1 0.1 RG 994 168.4 m 994 56.4 l S
 1.2 w [] 0 d
 0.1 0.1 0.1 RG 54 770.4 m 1202.4 770.4 l 1202.4 21.6 l 54 21.6 l h S
 1.2 w [] 0 d
@@ -353,8 +354,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 461.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 451.9 m 1202.4 451.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 443.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (d469) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (eae37ba0e8faf5e4fe15c995eb2cd856513ad02cece49b4f1202c95288b6) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (2cfc) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 416.9 m 1202.4 416.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 408.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -675,8 +676,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 461.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 451.9 m 1202.4 451.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 443.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (d469) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (eae37ba0e8faf5e4fe15c995eb2cd856513ad02cece49b4f1202c95288b6) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (2cfc) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 416.9 m 1202.4 416.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 408.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1336,8 +1337,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 461.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 451.9 m 1202.4 451.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 443.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (d469) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (eae37ba0e8faf5e4fe15c995eb2cd856513ad02cece49b4f1202c95288b6) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (2cfc) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 416.9 m 1202.4 416.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 408.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1430,8 +1431,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 461.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 451.9 m 1202.4 451.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 443.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (d469) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (eae37ba0e8faf5e4fe15c995eb2cd856513ad02cece49b4f1202c95288b6) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (2cfc) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 416.9 m 1202.4 416.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 408.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1611,8 +1612,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 461.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 451.9 m 1202.4 451.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 443.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (d469) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (eae37ba0e8faf5e4fe15c995eb2cd856513ad02cece49b4f1202c95288b6) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (2cfc) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 416.9 m 1202.4 416.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 408.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -2386,8 +2387,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 461.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 451.9 m 1202.4 451.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 443.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (d469) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (eae37ba0e8faf5e4fe15c995eb2cd856513ad02cece49b4f1202c95288b6) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (2cfc) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 416.9 m 1202.4 416.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 408.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -2532,8 +2533,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 461.9 Td (3b79) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 451.9 m 1202.4 451.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 443.9 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (9d6e310df5f7a987cedaf35634234cb0cbd3f48e04850aada0e97917ecb0) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (d469) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 434.9 Td (eae37ba0e8faf5e4fe15c995eb2cd856513ad02cece49b4f1202c95288b6) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 426.9 Td (2cfc) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 416.9 m 1202.4 416.9 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 408.9 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -2566,22 +2567,22 @@ xref
 0000000162 00000 n 
 0000000259 00000 n 
 0000000361 00000 n 
-0000020322 00000 n 
-0000020459 00000 n 
-0000038014 00000 n 
-0000038151 00000 n 
-0000068692 00000 n 
-0000068830 00000 n 
-0000075363 00000 n 
-0000075502 00000 n 
-0000086464 00000 n 
-0000086603 00000 n 
-0000124697 00000 n 
-0000124836 00000 n 
-0000132808 00000 n 
-0000132947 00000 n 
+0000020408 00000 n 
+0000020545 00000 n 
+0000038100 00000 n 
+0000038237 00000 n 
+0000068778 00000 n 
+0000068916 00000 n 
+0000075449 00000 n 
+0000075588 00000 n 
+0000086550 00000 n 
+0000086689 00000 n 
+0000124783 00000 n 
+0000124922 00000 n 
+0000132894 00000 n 
+0000133033 00000 n 
 trailer
 << /Size 20 /Root 1 0 R /Info 19 0 R >>
 startxref
-133088
+133174
 %%EOF
