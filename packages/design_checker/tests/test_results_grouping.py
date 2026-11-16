@@ -254,3 +254,21 @@ def test_the_rhino_panel_draws_the_lines_and_never_selects_one():
     ui = host_text("rhino", "ui", purpose="wiring")
     assert "logic.list_tree(view)" in ui
     assert 'tag.startswith(("group:", "line:"))' in ui
+
+
+def test_a_rule_reading_a_worked_out_value_stays_with_the_architect_even_when_it_passes(checked):
+    """The main stair's riser variation (0 in, worked out, not given to the rules yet) is something Gordium read:
+    its rule is the architect's to look at, never folded with what Gordium can't read."""
+    [item] = [i for i in law_items(checked["2_two_story_small_window"])
+              if i["id"] == "general.r318_7_5_1_stair_riser_variation_max@-/s1"]
+    assert not item["open"].get("concern") and "riser variation 0 in" in item["open"]["worked"]
+    assert grouping.tier(item) == grouping.REVIEW_T
+
+
+def test_a_waiting_item_among_others_is_never_dropped():
+    items = [{"id": "w", "group": present.LAW_GROUP, "status": present.NOT_CHECKED, "waiting": "no rooms drawn yet",
+              "name": "Egress: waiting", "reason": "why"},
+             {"id": "r", "group": present.LAW_GROUP, "status": present.REVIEW, "name": "Egress rules",
+              "reason": "refused"}]
+    ids = [x for ln in every_line(grouping.lines(items)) for x in ln["items"]]
+    assert sorted(ids) == ["r", "w"]
