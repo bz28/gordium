@@ -3,8 +3,8 @@
 <rect x="0" y="0" width="1224" height="792" fill="#ffffff"/>
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">CODE ANALYSIS: EGRESS</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Egress result: NEEDS REVIEW</text>
-<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 114 need review · 3 comply (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code analysis line 114)</text>
+<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 113 need review · 3 comply (the check's own count)</text>
+<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code analysis line 113)</text>
 <polygon points="68,99.6 994,99.6 994,114.6 68,114.6" fill="#e6e6e6" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">#</text>
 <text x="94.83" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Item</text>
@@ -197,343 +197,341 @@
 <line x1="994" y1="306.1" x2="994" y2="346.1" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">9</text>
 <text x="94.83" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window</text>
-<text x="210.58" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Emergency escape and rescue door: side-hinged or sliding</text>
-<text x="210.58" y="364.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R319.3)</text>
-<text x="210.58" y="372.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r319_3_escape_door_side_hinged_or_sliding</text>
-<text x="408.04" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">yes</text>
+<text x="210.58" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Area well where opening is below grade (R319.4)</text>
+<text x="210.58" y="363.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r319_4_area_well_required</text>
+<text x="408.04" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">more than 0 sq ft</text>
 <text x="506.76" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,346.1 684.2,346.1 684.2,375.6 602.49,375.6" fill="#fff1d6"/>
+<polygon points="602.49,346.1 684.2,346.1 684.2,368.1 602.49,368.1" fill="#fff1d6"/>
 <text x="605.49" y="355.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.3</text>
-<text x="745.07" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window: hinged or sliding not measured: Gordium doesn't measure</text>
-<text x="745.07" y="364.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">this yet; is door not measured: Gordium doesn't measure this yet</text>
-<line x1="68" y1="375.6" x2="994" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="346.1" x2="91.83" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="346.1" x2="207.58" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="346.1" x2="405.04" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="346.1" x2="503.76" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="346.1" x2="602.49" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="346.1" x2="684.2" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="346.1" x2="742.07" y2="375.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="346.1" x2="68" y2="375.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="346.1" x2="994" y2="375.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="384.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10</text>
-<text x="94.83" y="384.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window</text>
-<text x="210.58" y="384.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Area well where opening is below grade (R319.4)</text>
-<text x="210.58" y="393.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r319_4_area_well_required</text>
-<text x="408.04" y="384.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">more than 0 sq ft</text>
-<text x="506.76" y="384.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,375.6 684.2,375.6 684.2,397.6 602.49,397.6" fill="#fff1d6"/>
-<text x="605.49" y="384.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="384.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4</text>
-<text x="745.07" y="384.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window: area well area not measured: Gordium doesn't measure</text>
-<text x="745.07" y="393.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">this yet; below grade not measured: Gordium doesn't measure this yet</text>
-<line x1="68" y1="397.6" x2="994" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="375.6" x2="91.83" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="375.6" x2="207.58" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="375.6" x2="405.04" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="375.6" x2="503.76" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="375.6" x2="602.49" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="375.6" x2="684.2" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="375.6" x2="742.07" y2="397.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="375.6" x2="68" y2="397.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="375.6" x2="994" y2="397.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="406.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">11</text>
-<text x="94.83" y="406.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window</text>
-<text x="210.58" y="406.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Area well deeper than 44 in: ladder or steps (R319.4.2)</text>
-<text x="210.58" y="415.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r319_4_2_area_well_ladder_over_44</text>
-<text x="408.04" y="406.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">yes</text>
-<text x="506.76" y="406.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,397.6 684.2,397.6 684.2,428.6 602.49,428.6" fill="#fff1d6"/>
-<text x="605.49" y="406.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="406.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2</text>
-<text x="745.07" y="406.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window: area well depth not measured: Gordium doesn't measure</text>
-<text x="745.07" y="415.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">this yet; area well ladder not measured: Gordium doesn't measure this yet;</text>
-<text x="745.07" y="424.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">below grade not measured: Gordium doesn't measure this yet</text>
-<line x1="68" y1="428.6" x2="994" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="397.6" x2="91.83" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="397.6" x2="207.58" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="397.6" x2="405.04" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="397.6" x2="503.76" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="397.6" x2="602.49" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="397.6" x2="684.2" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="397.6" x2="742.07" y2="428.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="397.6" x2="68" y2="428.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="397.6" x2="994" y2="428.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="437.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">12</text>
-<text x="94.83" y="437.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window</text>
-<text x="210.58" y="437.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Escape opening into a patio cover: unenclosed (BF103.2)</text>
-<text x="210.58" y="446.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.bf103_2_escape_opening_into_patio_cover_unenclosed</text>
-<text x="408.04" y="437.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
-<text x="408.04" y="446.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
-<text x="506.76" y="437.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,428.6 684.2,428.6 684.2,450.6 602.49,450.6" fill="#fff1d6"/>
-<text x="605.49" y="437.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="437.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">BF103.2</text>
-<text x="745.07" y="437.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window: into patio cover not measured: Gordium doesn't measure</text>
-<text x="745.07" y="446.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">this yet</text>
+<text x="687.2" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4</text>
+<text x="745.07" y="355.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window: area well area not measured: Gordium doesn't measure</text>
+<text x="745.07" y="364.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">this yet; below grade not measured: Gordium doesn't measure this yet</text>
+<line x1="68" y1="368.1" x2="994" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="346.1" x2="91.83" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="346.1" x2="207.58" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="346.1" x2="405.04" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="346.1" x2="503.76" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="346.1" x2="602.49" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="346.1" x2="684.2" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="346.1" x2="742.07" y2="368.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="346.1" x2="68" y2="368.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="346.1" x2="994" y2="368.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="377.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10</text>
+<text x="94.83" y="377.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window</text>
+<text x="210.58" y="377.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Area well deeper than 44 in: ladder or steps (R319.4.2)</text>
+<text x="210.58" y="385.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r319_4_2_area_well_ladder_over_44</text>
+<text x="408.04" y="377.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">yes</text>
+<text x="506.76" y="377.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
+<polygon points="602.49,368.1 684.2,368.1 684.2,399.1 602.49,399.1" fill="#fff1d6"/>
+<text x="605.49" y="377.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="377.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2</text>
+<text x="745.07" y="377.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window: area well depth not measured: Gordium doesn't measure</text>
+<text x="745.07" y="386.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">this yet; area well ladder not measured: Gordium doesn't measure this yet;</text>
+<text x="745.07" y="395.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">below grade not measured: Gordium doesn't measure this yet</text>
+<line x1="68" y1="399.1" x2="994" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="368.1" x2="91.83" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="368.1" x2="207.58" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="368.1" x2="405.04" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="368.1" x2="503.76" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="368.1" x2="602.49" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="368.1" x2="684.2" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="368.1" x2="742.07" y2="399.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="368.1" x2="68" y2="399.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="368.1" x2="994" y2="399.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="408.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">11</text>
+<text x="94.83" y="408.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window</text>
+<text x="210.58" y="408.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Escape opening into a patio cover: unenclosed (BF103.2)</text>
+<text x="210.58" y="416.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.bf103_2_escape_opening_into_patio_cover_unenclosed</text>
+<text x="408.04" y="408.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
+<text x="408.04" y="417.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
+<text x="506.76" y="408.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,399.1 684.2,399.1 684.2,421.1 602.49,421.1" fill="#fff1d6"/>
+<text x="605.49" y="408.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="408.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">BF103.2</text>
+<text x="745.07" y="408.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window: into patio cover not measured: Gordium doesn't measure</text>
+<text x="745.07" y="417.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">this yet</text>
+<line x1="68" y1="421.1" x2="994" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="399.1" x2="91.83" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="399.1" x2="207.58" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="399.1" x2="405.04" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="399.1" x2="503.76" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="399.1" x2="602.49" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="399.1" x2="684.2" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="399.1" x2="742.07" y2="421.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="399.1" x2="68" y2="421.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="399.1" x2="994" y2="421.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="430.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">12</text>
+<text x="94.83" y="430.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress doors</text>
+<text x="210.58" y="430.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exit into a patio cover not unenclosed: exits per R318</text>
+<text x="210.58" y="439.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(BF103.2)</text>
+<text x="210.58" y="447.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.bf103_2_exit_into_patio_cover_r318_exits</text>
+<text x="408.04" y="430.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
+<text x="408.04" y="439.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
+<text x="506.76" y="430.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,421.1 684.2,421.1 684.2,450.6 602.49,450.6" fill="#fff1d6"/>
+<text x="605.49" y="430.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="430.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">BF103.2</text>
+<text x="745.07" y="430.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress doors: the egress doors aren't read yet</text>
 <line x1="68" y1="450.6" x2="994" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="428.6" x2="91.83" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="428.6" x2="207.58" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="428.6" x2="405.04" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="428.6" x2="503.76" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="428.6" x2="602.49" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="428.6" x2="684.2" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="428.6" x2="742.07" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="428.6" x2="68" y2="450.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="428.6" x2="994" y2="450.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="91.83" y1="421.1" x2="91.83" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="421.1" x2="207.58" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="421.1" x2="405.04" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="421.1" x2="503.76" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="421.1" x2="602.49" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="421.1" x2="684.2" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="421.1" x2="742.07" y2="450.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="421.1" x2="68" y2="450.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="421.1" x2="994" y2="450.6" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">13</text>
-<text x="94.83" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress doors</text>
-<text x="210.58" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exit into a patio cover not unenclosed: exits per R318</text>
-<text x="210.58" y="468.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(BF103.2)</text>
-<text x="210.58" y="477.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.bf103_2_exit_into_patio_cover_r318_exits</text>
-<text x="408.04" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
-<text x="408.04" y="468.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
-<text x="506.76" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,450.6 684.2,450.6 684.2,480.1 602.49,480.1" fill="#fff1d6"/>
+<text x="94.83" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails</text>
+<text x="210.58" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrail height 34 to 38 in (R320.2)</text>
+<text x="210.58" y="468.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r320_2_handrail_height_34_38</text>
+<text x="408.04" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height 2'-10&quot; min; height max</text>
+<text x="408.04" y="468.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3'-2&quot; max</text>
+<text x="506.76" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height not measured; height</text>
+<text x="506.76" y="468.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">max not measured</text>
+<polygon points="602.49,450.6 684.2,450.6 684.2,472.6 602.49,472.6" fill="#fff1d6"/>
 <text x="605.49" y="459.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">BF103.2</text>
-<text x="745.07" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress doors: the egress doors aren't read yet</text>
-<line x1="68" y1="480.1" x2="994" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="450.6" x2="91.83" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="450.6" x2="207.58" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="450.6" x2="405.04" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="450.6" x2="503.76" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="450.6" x2="602.49" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="450.6" x2="684.2" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="450.6" x2="742.07" y2="480.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="450.6" x2="68" y2="480.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="450.6" x2="994" y2="480.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="489.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">14</text>
-<text x="94.83" y="489.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails</text>
-<text x="210.58" y="489.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrail height 34 to 38 in (R320.2)</text>
-<text x="210.58" y="497.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r320_2_handrail_height_34_38</text>
-<text x="408.04" y="489.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height 2'-10&quot; min; height max</text>
-<text x="408.04" y="498.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3'-2&quot; max</text>
-<text x="506.76" y="489.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height not measured; height</text>
-<text x="506.76" y="498.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">max not measured</text>
-<polygon points="602.49,480.1 684.2,480.1 684.2,502.1 602.49,502.1" fill="#fff1d6"/>
-<text x="605.49" y="489.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="489.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.2</text>
-<text x="745.07" y="489.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails: the handrails aren't read yet</text>
-<line x1="68" y1="502.1" x2="994" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="480.1" x2="91.83" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="480.1" x2="207.58" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="480.1" x2="405.04" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="480.1" x2="503.76" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="480.1" x2="602.49" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="480.1" x2="684.2" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="480.1" x2="742.07" y2="502.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="480.1" x2="68" y2="502.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="480.1" x2="994" y2="502.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="511.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">15</text>
-<text x="94.83" y="511.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails</text>
-<text x="210.58" y="511.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrail clearance from wall (R320.4)</text>
-<text x="210.58" y="519.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r320_4_handrail_wall_clearance</text>
-<text x="408.04" y="511.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 1/2&quot; min</text>
-<text x="506.76" y="511.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,502.1 684.2,502.1 684.2,522.6 602.49,522.6" fill="#fff1d6"/>
-<text x="605.49" y="511.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="511.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.4</text>
-<text x="745.07" y="511.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails: the handrails aren't read yet</text>
-<line x1="68" y1="522.6" x2="994" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="502.1" x2="91.83" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="502.1" x2="207.58" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="502.1" x2="405.04" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="502.1" x2="503.76" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="502.1" x2="602.49" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="502.1" x2="684.2" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="502.1" x2="742.07" y2="522.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="502.1" x2="68" y2="522.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="502.1" x2="994" y2="522.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="531.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">16</text>
-<text x="94.83" y="531.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
-<text x="210.58" y="531.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard height, open sides other than stairs (R321.1.2)</text>
-<text x="210.58" y="540.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_2_guard_height_open_side_not_stair</text>
-<text x="408.04" y="531.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3'-0&quot; min</text>
-<text x="506.76" y="531.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,522.6 684.2,522.6 684.2,543.1 602.49,543.1" fill="#fff1d6"/>
-<text x="605.49" y="531.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="531.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2</text>
-<text x="745.07" y="531.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
-<line x1="68" y1="543.1" x2="994" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="522.6" x2="91.83" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="522.6" x2="207.58" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="522.6" x2="405.04" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="522.6" x2="503.76" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="522.6" x2="602.49" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="522.6" x2="684.2" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="522.6" x2="742.07" y2="543.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="522.6" x2="68" y2="543.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="522.6" x2="994" y2="543.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">17</text>
-<text x="94.83" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
-<text x="210.58" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard height, open sides of stairs (R321.1.2 Exc. 1)</text>
-<text x="210.58" y="560.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_2_guard_height_stair_open_side</text>
-<text x="408.04" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2'-10&quot; min</text>
-<text x="506.76" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,543.1 684.2,543.1 684.2,563.6 602.49,563.6" fill="#fff1d6"/>
-<text x="605.49" y="552.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2</text>
-<text x="745.07" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
+<text x="687.2" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.2</text>
+<text x="745.07" y="459.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails: the handrails aren't read yet</text>
+<line x1="68" y1="472.6" x2="994" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="450.6" x2="91.83" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="450.6" x2="207.58" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="450.6" x2="405.04" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="450.6" x2="503.76" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="450.6" x2="602.49" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="450.6" x2="684.2" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="450.6" x2="742.07" y2="472.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="450.6" x2="68" y2="472.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="450.6" x2="994" y2="472.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="481.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">14</text>
+<text x="94.83" y="481.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails</text>
+<text x="210.58" y="481.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrail clearance from wall (R320.4)</text>
+<text x="210.58" y="490.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r320_4_handrail_wall_clearance</text>
+<text x="408.04" y="481.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 1/2&quot; min</text>
+<text x="506.76" y="481.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
+<polygon points="602.49,472.6 684.2,472.6 684.2,493.1 602.49,493.1" fill="#fff1d6"/>
+<text x="605.49" y="481.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="481.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R320.4</text>
+<text x="745.07" y="481.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails: the handrails aren't read yet</text>
+<line x1="68" y1="493.1" x2="994" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="472.6" x2="91.83" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="472.6" x2="207.58" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="472.6" x2="405.04" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="472.6" x2="503.76" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="472.6" x2="602.49" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="472.6" x2="684.2" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="472.6" x2="742.07" y2="493.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="472.6" x2="68" y2="493.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="472.6" x2="994" y2="493.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="502.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">15</text>
+<text x="94.83" y="502.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
+<text x="210.58" y="502.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard height, open sides other than stairs (R321.1.2)</text>
+<text x="210.58" y="510.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_2_guard_height_open_side_not_stair</text>
+<text x="408.04" y="502.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3'-0&quot; min</text>
+<text x="506.76" y="502.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
+<polygon points="602.49,493.1 684.2,493.1 684.2,513.6 602.49,513.6" fill="#fff1d6"/>
+<text x="605.49" y="502.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="502.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2</text>
+<text x="745.07" y="502.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
+<line x1="68" y1="513.6" x2="994" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="493.1" x2="91.83" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="493.1" x2="207.58" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="493.1" x2="405.04" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="493.1" x2="503.76" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="493.1" x2="602.49" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="493.1" x2="684.2" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="493.1" x2="742.07" y2="513.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="493.1" x2="68" y2="513.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="493.1" x2="994" y2="513.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="522.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">16</text>
+<text x="94.83" y="522.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
+<text x="210.58" y="522.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard height, open sides of stairs (R321.1.2 Exc. 1)</text>
+<text x="210.58" y="531.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_2_guard_height_stair_open_side</text>
+<text x="408.04" y="522.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2'-10&quot; min</text>
+<text x="506.76" y="522.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
+<polygon points="602.49,513.6 684.2,513.6 684.2,534.1 602.49,534.1" fill="#fff1d6"/>
+<text x="605.49" y="522.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="522.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2</text>
+<text x="745.07" y="522.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
+<line x1="68" y1="534.1" x2="994" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="513.6" x2="91.83" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="513.6" x2="207.58" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="513.6" x2="405.04" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="513.6" x2="503.76" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="513.6" x2="602.49" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="513.6" x2="684.2" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="513.6" x2="742.07" y2="534.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="513.6" x2="68" y2="534.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="513.6" x2="994" y2="534.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="543.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">17</text>
+<text x="94.83" y="543.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
+<text x="210.58" y="543.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard top serving as stair handrail, 34 to 38 in (R321.1.2</text>
+<text x="210.58" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exc. 2)</text>
+<text x="210.58" y="560.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_2_guard_height_stair_guard_as_handrail</text>
+<text x="408.04" y="543.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height 2'-10&quot; min; height max</text>
+<text x="408.04" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3'-2&quot; max</text>
+<text x="506.76" y="543.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height not measured; height</text>
+<text x="506.76" y="552.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">max not measured</text>
+<polygon points="602.49,534.1 684.2,534.1 684.2,563.6 602.49,563.6" fill="#fff1d6"/>
+<text x="605.49" y="543.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="543.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2</text>
+<text x="745.07" y="543.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
 <line x1="68" y1="563.6" x2="994" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="543.1" x2="91.83" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="543.1" x2="207.58" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="543.1" x2="405.04" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="543.1" x2="503.76" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="543.1" x2="602.49" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="543.1" x2="684.2" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="543.1" x2="742.07" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="543.1" x2="68" y2="563.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="543.1" x2="994" y2="563.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="91.83" y1="534.1" x2="91.83" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="534.1" x2="207.58" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="534.1" x2="405.04" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="534.1" x2="503.76" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="534.1" x2="602.49" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="534.1" x2="684.2" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="534.1" x2="742.07" y2="563.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="534.1" x2="68" y2="563.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="534.1" x2="994" y2="563.6" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">18</text>
 <text x="94.83" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
-<text x="210.58" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard top serving as stair handrail, 34 to 38 in (R321.1.2</text>
-<text x="210.58" y="581.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exc. 2)</text>
-<text x="210.58" y="590.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_2_guard_height_stair_guard_as_handrail</text>
-<text x="408.04" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height 2'-10&quot; min; height max</text>
-<text x="408.04" y="581.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3'-2&quot; max</text>
-<text x="506.76" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height not measured; height</text>
-<text x="506.76" y="581.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">max not measured</text>
-<polygon points="602.49,563.6 684.2,563.6 684.2,593.1 602.49,593.1" fill="#fff1d6"/>
+<text x="210.58" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard openings stop a 4 inch sphere (R321.1.3)</text>
+<text x="210.58" y="581.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_3_guard_opening_4_inch_sphere</text>
+<text x="408.04" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
+<text x="408.04" y="581.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
+<text x="506.76" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,563.6 684.2,563.6 684.2,585.6 602.49,585.6" fill="#fff1d6"/>
 <text x="605.49" y="572.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.2</text>
+<text x="687.2" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
 <text x="745.07" y="572.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
-<line x1="68" y1="593.1" x2="994" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="563.6" x2="91.83" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="563.6" x2="207.58" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="563.6" x2="405.04" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="563.6" x2="503.76" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="563.6" x2="602.49" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="563.6" x2="684.2" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="563.6" x2="742.07" y2="593.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="563.6" x2="68" y2="593.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="563.6" x2="994" y2="593.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="602.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">19</text>
-<text x="94.83" y="602.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
-<text x="210.58" y="602.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Guard openings stop a 4 inch sphere (R321.1.3)</text>
-<text x="210.58" y="610.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_3_guard_opening_4_inch_sphere</text>
-<text x="408.04" y="602.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
-<text x="408.04" y="611.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
-<text x="506.76" y="602.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,593.1 684.2,593.1 684.2,615.1 602.49,615.1" fill="#fff1d6"/>
-<text x="605.49" y="602.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="602.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
-<text x="745.07" y="602.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
-<line x1="68" y1="615.1" x2="994" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="593.1" x2="91.83" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="593.1" x2="207.58" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="593.1" x2="405.04" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="593.1" x2="503.76" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="593.1" x2="602.49" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="593.1" x2="684.2" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="593.1" x2="742.07" y2="615.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="593.1" x2="68" y2="615.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="593.1" x2="994" y2="615.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="624.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">20</text>
-<text x="94.83" y="624.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
-<text x="210.58" y="624.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Stair guard triangle stops a 6 inch sphere (R321.1.3 Exc. 1)</text>
-<text x="210.58" y="632.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_3_guard_stair_triangle_6_inch_sphere</text>
-<text x="408.04" y="624.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
-<text x="408.04" y="633.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
-<text x="506.76" y="624.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,615.1 684.2,615.1 684.2,637.1 602.49,637.1" fill="#fff1d6"/>
-<text x="605.49" y="624.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="624.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
-<text x="745.07" y="624.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
+<line x1="68" y1="585.6" x2="994" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="563.6" x2="91.83" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="563.6" x2="207.58" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="563.6" x2="405.04" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="563.6" x2="503.76" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="563.6" x2="602.49" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="563.6" x2="684.2" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="563.6" x2="742.07" y2="585.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="563.6" x2="68" y2="585.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="563.6" x2="994" y2="585.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="594.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">19</text>
+<text x="94.83" y="594.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
+<text x="210.58" y="594.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Stair guard triangle stops a 6 inch sphere (R321.1.3 Exc. 1)</text>
+<text x="210.58" y="603.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_3_guard_stair_triangle_6_inch_sphere</text>
+<text x="408.04" y="594.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
+<text x="408.04" y="603.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
+<text x="506.76" y="594.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,585.6 684.2,585.6 684.2,607.6 602.49,607.6" fill="#fff1d6"/>
+<text x="605.49" y="594.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="594.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
+<text x="745.07" y="594.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
+<line x1="68" y1="607.6" x2="994" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="585.6" x2="91.83" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="585.6" x2="207.58" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="585.6" x2="405.04" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="585.6" x2="503.76" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="585.6" x2="602.49" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="585.6" x2="684.2" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="585.6" x2="742.07" y2="607.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="585.6" x2="68" y2="607.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="585.6" x2="994" y2="607.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="616.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">20</text>
+<text x="94.83" y="616.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
+<text x="210.58" y="616.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Stair guard openings stop a 4 3/8 inch sphere (R321.1.3 Exc.</text>
+<text x="210.58" y="625.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2)</text>
+<text x="210.58" y="634.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_3_guard_stair_opening_4_3_8_sphere</text>
+<text x="408.04" y="616.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
+<text x="408.04" y="625.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
+<text x="506.76" y="616.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
+<polygon points="602.49,607.6 684.2,607.6 684.2,637.1 602.49,637.1" fill="#fff1d6"/>
+<text x="605.49" y="616.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="616.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
+<text x="745.07" y="616.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
 <line x1="68" y1="637.1" x2="994" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="615.1" x2="91.83" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="615.1" x2="207.58" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="615.1" x2="405.04" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="615.1" x2="503.76" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="615.1" x2="602.49" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="615.1" x2="684.2" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="615.1" x2="742.07" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="615.1" x2="68" y2="637.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="615.1" x2="994" y2="637.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="91.83" y1="607.6" x2="91.83" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="607.6" x2="207.58" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="607.6" x2="405.04" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="607.6" x2="503.76" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="607.6" x2="602.49" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="607.6" x2="684.2" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="607.6" x2="742.07" y2="637.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="607.6" x2="68" y2="637.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="607.6" x2="994" y2="637.1" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">21</text>
-<text x="94.83" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides</text>
-<text x="210.58" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Stair guard openings stop a 4 3/8 inch sphere (R321.1.3 Exc.</text>
-<text x="210.58" y="655.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2)</text>
-<text x="210.58" y="663.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r321_1_3_guard_stair_opening_4_3_8_sphere</text>
-<text x="408.04" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">see the code's words (no</text>
-<text x="408.04" y="655.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">formula: a person decides)</text>
-<text x="506.76" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
-<polygon points="602.49,637.1 684.2,637.1 684.2,666.6 602.49,666.6" fill="#fff1d6"/>
+<text x="94.83" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
+<text x="210.58" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping loft floor area less than 70 sf (R315.2 item 1)</text>
+<text x="210.58" y="654.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r315_2_sleeping_loft_floor_area_limit</text>
+<text x="408.04" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">less than 70 sq ft</text>
+<text x="506.76" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
+<polygon points="602.49,637.1 684.2,637.1 684.2,657.6 602.49,657.6" fill="#fff1d6"/>
 <text x="605.49" y="646.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R321.1.3</text>
-<text x="745.07" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Open sides: the open sides aren't read yet</text>
-<line x1="68" y1="666.6" x2="994" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="637.1" x2="91.83" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="637.1" x2="207.58" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="637.1" x2="405.04" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="637.1" x2="503.76" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="637.1" x2="602.49" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="637.1" x2="684.2" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="637.1" x2="742.07" y2="666.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="637.1" x2="68" y2="666.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="637.1" x2="994" y2="666.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">22</text>
-<text x="94.83" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
-<text x="210.58" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping loft floor area less than 70 sf (R315.2 item 1)</text>
-<text x="210.58" y="684.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r315_2_sleeping_loft_floor_area_limit</text>
-<text x="408.04" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">less than 70 sq ft</text>
-<text x="506.76" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,666.6 684.2,666.6 684.2,687.1 602.49,687.1" fill="#fff1d6"/>
-<text x="605.49" y="675.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.2</text>
-<text x="745.07" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts: the sleeping lofts aren't read yet</text>
+<text x="687.2" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.2</text>
+<text x="745.07" y="646.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts: the sleeping lofts aren't read yet</text>
+<line x1="68" y1="657.6" x2="994" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="637.1" x2="91.83" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="637.1" x2="207.58" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="637.1" x2="405.04" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="637.1" x2="503.76" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="637.1" x2="602.49" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="637.1" x2="684.2" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="637.1" x2="742.07" y2="657.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="637.1" x2="68" y2="657.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="637.1" x2="994" y2="657.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="666.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">22</text>
+<text x="94.83" y="666.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
+<text x="210.58" y="666.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping loft ceiling over 7 ft on at most half the floor area</text>
+<text x="210.58" y="675.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R315.2 item 2)</text>
+<text x="210.58" y="684.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r315_2_sleeping_loft_ceiling_height_limit</text>
+<text x="408.04" y="666.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">max 0.5 * loft floor area sq ft</text>
+<text x="506.76" y="666.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
+<polygon points="602.49,657.6 684.2,657.6 684.2,687.1 602.49,687.1" fill="#fff1d6"/>
+<text x="605.49" y="666.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="666.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.2</text>
+<text x="745.07" y="666.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts: the sleeping lofts aren't read yet</text>
 <line x1="68" y1="687.1" x2="994" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="666.6" x2="91.83" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="666.6" x2="207.58" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="666.6" x2="405.04" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="666.6" x2="503.76" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="666.6" x2="602.49" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="666.6" x2="684.2" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="666.6" x2="742.07" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="666.6" x2="68" y2="687.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="666.6" x2="994" y2="687.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="91.83" y1="657.6" x2="91.83" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="657.6" x2="207.58" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="657.6" x2="405.04" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="657.6" x2="503.76" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="657.6" x2="602.49" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="657.6" x2="684.2" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="657.6" x2="742.07" y2="687.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="657.6" x2="68" y2="687.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="657.6" x2="994" y2="687.1" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">23</text>
 <text x="94.83" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
-<text x="210.58" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping loft ceiling over 7 ft on at most half the floor area</text>
-<text x="210.58" y="705.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R315.2 item 2)</text>
-<text x="210.58" y="713.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r315_2_sleeping_loft_ceiling_height_limit</text>
-<text x="408.04" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">max 0.5 * loft floor area sq ft</text>
+<text x="210.58" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping loft: clear height below floor construction (R315.3)</text>
+<text x="210.58" y="704.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r315_3_sleeping_loft_clear_height_below</text>
+<text x="408.04" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7'-0&quot; min</text>
 <text x="506.76" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,687.1 684.2,687.1 684.2,716.6 602.49,716.6" fill="#fff1d6"/>
+<polygon points="602.49,687.1 684.2,687.1 684.2,707.6 602.49,707.6" fill="#fff1d6"/>
 <text x="605.49" y="696.1" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.2</text>
+<text x="687.2" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.3</text>
 <text x="745.07" y="696.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts: the sleeping lofts aren't read yet</text>
-<line x1="68" y1="716.6" x2="994" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="687.1" x2="91.83" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="687.1" x2="207.58" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="687.1" x2="405.04" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="687.1" x2="503.76" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="687.1" x2="602.49" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="687.1" x2="684.2" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="687.1" x2="742.07" y2="716.6" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="687.1" x2="68" y2="716.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="687.1" x2="994" y2="716.6" stroke="#1a1a1a" stroke-width="0.6"/>
-<text x="71" y="725.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">24</text>
-<text x="94.83" y="725.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
-<text x="210.58" y="725.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping loft: clear height below floor construction (R315.3)</text>
-<text x="210.58" y="734.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r315_3_sleeping_loft_clear_height_below</text>
-<text x="408.04" y="725.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7'-0&quot; min</text>
-<text x="506.76" y="725.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
-<polygon points="602.49,716.6 684.2,716.6 684.2,737.1 602.49,737.1" fill="#fff1d6"/>
-<text x="605.49" y="725.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
-<text x="687.2" y="725.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.3</text>
-<text x="745.07" y="725.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts: the sleeping lofts aren't read yet</text>
-<line x1="68" y1="737.1" x2="994" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="91.83" y1="716.6" x2="91.83" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="207.58" y1="716.6" x2="207.58" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="405.04" y1="716.6" x2="405.04" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="503.76" y1="716.6" x2="503.76" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="602.49" y1="716.6" x2="602.49" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="684.2" y1="716.6" x2="684.2" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="742.07" y1="716.6" x2="742.07" y2="737.1" stroke="#8c8c8c" stroke-width="0.3"/>
-<line x1="68" y1="716.6" x2="68" y2="737.1" stroke="#1a1a1a" stroke-width="0.6"/>
-<line x1="994" y1="716.6" x2="994" y2="737.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="68" y1="707.6" x2="994" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="687.1" x2="91.83" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="687.1" x2="207.58" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="687.1" x2="405.04" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="687.1" x2="503.76" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="687.1" x2="602.49" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="687.1" x2="684.2" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="687.1" x2="742.07" y2="707.6" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="687.1" x2="68" y2="707.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="687.1" x2="994" y2="707.6" stroke="#1a1a1a" stroke-width="0.6"/>
+<text x="71" y="716.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">24</text>
+<text x="94.83" y="716.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
+<text x="210.58" y="716.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping loft: ceiling height above finished floor (R315.3)</text>
+<text x="210.58" y="725.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">general.r315_3_sleeping_loft_ceiling_height</text>
+<text x="408.04" y="716.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3'-0&quot; min</text>
+<text x="506.76" y="716.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">not measured</text>
+<polygon points="602.49,707.6 684.2,707.6 684.2,728.1 602.49,728.1" fill="#fff1d6"/>
+<text x="605.49" y="716.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="687.2" y="716.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R315.3</text>
+<text x="745.07" y="716.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts: the sleeping lofts aren't read yet</text>
+<line x1="68" y1="728.1" x2="994" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="91.83" y1="707.6" x2="91.83" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="207.58" y1="707.6" x2="207.58" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="405.04" y1="707.6" x2="405.04" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="503.76" y1="707.6" x2="503.76" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="602.49" y1="707.6" x2="602.49" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="684.2" y1="707.6" x2="684.2" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="742.07" y1="707.6" x2="742.07" y2="728.1" stroke="#8c8c8c" stroke-width="0.3"/>
+<line x1="68" y1="707.6" x2="68" y2="728.1" stroke="#1a1a1a" stroke-width="0.6"/>
+<line x1="994" y1="707.6" x2="994" y2="728.1" stroke="#1a1a1a" stroke-width="0.6"/>
 <polygon points="54,21.6 1202.4,21.6 1202.4,770.4 54,770.4" fill="none" stroke="#1a1a1a" stroke-width="1.2"/>
 <line x1="1008" y1="21.6" x2="1008" y2="770.4" stroke="#1a1a1a" stroke-width="1.2"/>
 <polygon points="1016,29.6 1194.4,29.6 1194.4,63.6 1016,63.6" fill="#fbe3e1" stroke="#b3261e" stroke-width="1"/>
@@ -566,8 +564,8 @@
 <text x="1016" y="298.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3b79</text>
 <line x1="1008" y1="308.6" x2="1202.4" y2="308.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="316.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">GORDIUM CODE FINGERPRINT AT CHECK</text>
-<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">b485ce48e3b34ece6821c846f1edf9ef551b7732e3e292f3ba8d70cca702</text>
-<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1d4f</text>
+<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1c4accc6957472fa7c57c0c2439df45e992747eec281f3ffa2a894ffb1eda4</text>
+<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">94</text>
 <line x1="1008" y1="343.6" x2="1202.4" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="351.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="360.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fingerprint</text>
