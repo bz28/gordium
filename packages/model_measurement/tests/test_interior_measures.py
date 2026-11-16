@@ -1965,6 +1965,12 @@ def test_has_none_not_a_list_reads_no_claim():
     # a stair's foot below every ground given (review round 5)
     (lambda d: d["stairs"][0].update(bottom_elevation=-100), "stair Stair is below the ground outside an opening"),
     (lambda d: [o.pop("ground_outside") for o in d["openings"]], None),          # no ground given: nothing compared
+    # a ground, floor or stair foot that can't be read could be below the ground: refused, never a crash (round 6)
+    (lambda d: d["openings"][0].update(ground_outside=float("inf")), "the ground outside opening Window can't be read"),
+    (lambda d: d["openings"][0].update(ground_outside=10 ** 400), "the ground outside opening Window can't be read"),
+    (lambda d: d["openings"][0].update(ground_outside=[0, "6"]), "the ground outside opening Window can't be read"),
+    (lambda d: d["rooms"][0].update(floor_elevation=-10 ** 400), "the floor of room Bedroom can't be read"),
+    (lambda d: d["stairs"][0].update(bottom_elevation=float("nan")), "the foot of stair Stair can't be read"),
     (lambda d: d["openings"][0].update(ground_outside=-30), None),               # ground below the floor: taken
     (lambda d: d["openings"][0].update(area_well={"floor_elevation": -10, "width": 40, "projection": 36}),
      "has an area well"),
@@ -2004,16 +2010,33 @@ def _loft(floor_elevation=100):
 
 @pytest.mark.parametrize("change, refused", [
     (lambda d: None, None),                                                       # one room: taken
-    (lambda d: d["rooms"].append(_loft(50)), "room Loft's floor is within room Bedroom"),
+    (lambda d: d["rooms"].append(_loft(50)), "room Loft's floor is over room Bedroom's and below its ceiling"),
+    # a room that isn't a sleeping room, drawn with no floor at all (Orangetown's basement): not compared
+    (lambda d: d["rooms"].append({"id": "x", "name": "Basement", "sleeping": False}), None),
     (lambda d: d["rooms"].append(_loft(96)), None),                               # upstairs: taken
     (lambda d: d["rooms"].append({**_loft(50), "floor": [[200, 0], [260, 0], [260, 60], [200, 60]]}), None),  # beside
     # a ceiling given as pieces: the highest point counts
     (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"][0].update(
         ceilings=[[[0, 0, 40], [120, 0, 40], [120, 120, 120], [0, 120, 120]]]), d["rooms"].append(_loft(100))),
-     "room Loft's floor is within room Bedroom"),
+     "room Loft's floor is over room Bedroom's and below its ceiling"),
     # the room below's ceiling can't be read: it could be above the loft, so refused
     (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"].append(_loft(100))),
-     "room Loft's floor is within room Bedroom"),
+     "room Bedroom's ceiling can't be read"),
+    # a ceiling piece partly given as text: never read from the pieces that can be (review round 6)
+    (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"][0].update(
+        ceilings=[[[0, 0, 40], [120, 0, 40], [120, 60, 40]], [[0, 60, "120"], [120, 60, "120"], [0, 120, "120"]]]),
+        d["rooms"].append(_loft(60))), "room Bedroom's ceiling can't be read"),
+    # a floor that can't be read can't be told not to be within another room (review round 6)
+    (lambda d: d["rooms"].append({**_loft(50), "floor": [[0, 0, 0], [60, 0, 0], [60, 60, 0]]}),
+     "room Loft's floor can't be read"),
+    (lambda d: d["rooms"].append({**_loft(50), "floor": [[0, 0], [60, 60], [60, 0], [0, 60]]}),   # self-crossing
+     "room Loft's floor can't be read"),
+    (lambda d: (d["rooms"].append(_loft(50)), d["rooms"][0].update(floor_elevation="0")),
+     "room Bedroom's floor can't be read"),
+    (lambda d: d["rooms"].append({**_loft(50), "floor_elevation": float("nan")}), "room Loft's floor can't be read"),
+    (lambda d: d["rooms"].append({**_loft(50), "floor_elevation": 10 ** 400}), "room Loft's floor can't be read"),
+    (lambda d: d["rooms"].append({**_loft(50), "floor": [[0, 0], [10 ** 400, 0], [60, 60]]}),
+     "room Loft's floor can't be read"),
 ])
 def test_a_no_sleeping_lofts_claim_cant_stand_beside_a_room_drawn_within_another(change, refused):
     """The format draws a sleeping loft as a room whose floor is within another room's volume: "no sleeping lofts"
@@ -2026,5 +2049,5 @@ def test_a_no_sleeping_lofts_claim_cant_stand_beside_a_room_drawn_within_another
     else:
         assert got["parts"].get("sleeping_loft") is None and got["parts"].get("loft_room") is None
         assert "sleeping_loft" not in got["has_none"]
-        assert all("stair_serves_sleeping_loft" not in (s.get("stated") or {}) for s in got["parts"]["stair"])
+        assert all("stair_serves_sleeping_loft" not in (s.get("stated") or {}) for s in got["parts"]["stair"] or [])
         assert any(refused in p for p in got["problems"]), got["problems"]

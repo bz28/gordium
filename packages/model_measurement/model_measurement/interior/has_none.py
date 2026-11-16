@@ -52,8 +52,15 @@ def words(kind: str) -> str:
     return SAID.format(words=KINDS[kind]["words"])
 
 
-def _number(v) -> bool:
-    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+def _value(v):
+    """A plain finite number as a float, or None where it can't be read (text, true/false, NaN, infinite, too big)."""
+    if isinstance(v, bool) or not isinstance(v, (int, float)):
+        return None
+    try:
+        v = float(v)
+    except OverflowError:
+        return None
+    return v if math.isfinite(v) else None
 
 
 def _rooms(description: dict) -> list[dict]:
@@ -65,12 +72,13 @@ def _name(part: dict):
 
 
 def below_ground(description: dict) -> str | None:
-    """What in the description shows a space below the ground, which a "no basements" claim can't stand beside (the
-    first found), or None. Only what it states: an opening with an area well (the format's "for an opening below the
-    ground"), or a room's floor or a stair's foot below the highest ground given outside any opening (the ground at
-    the room's own openings, or anywhere else: a walk-out below the uphill ground is one to confirm too). It never
-    says there is a basement (grade plane is an average, measured elsewhere): it only refuses the claim, so the
-    rules need review. Where no ground is given at all, nothing is compared."""
+    """What in the description shows a space below the ground, or may, which a "no basements" claim can't stand
+    beside (the first found), or None. Only what it states: an opening with an area well (the format's "for an
+    opening below the ground"), or a room's floor or a stair's foot below the highest ground given outside any opening
+    (the ground at the room's own openings, or anywhere else: a walk-out below the uphill ground is one to confirm
+    too); a ground, floor or foot given that can't be read could be either, so it refuses too. It never says there is a
+    basement (grade plane is an average, measured elsewhere): it only refuses the claim, so the rules need review.
+    Where no ground is given at all, nothing is compared."""
     grounds = []
     for o in description.get("openings") or []:
         if not isinstance(o, dict):
@@ -78,55 +86,92 @@ def below_ground(description: dict) -> str | None:
         if o.get("area_well") is not None:
             return f"opening {_name(o)} has an area well"
         ground = o.get("ground_outside")
-        grounds += [g for g in (ground if isinstance(ground, list) else [ground]) if _number(g)]
+        if ground is None:
+            continue
+        got = [_value(g) for g in (ground if isinstance(ground, list) else [ground])]
+        if not got or None in got:
+            return f"the ground outside opening {_name(o)} can't be read"
+        grounds += got
     if not grounds:
         return None
     top = max(grounds)
-    for r in _rooms(description):
-        if _number(r.get("floor_elevation")) and r["floor_elevation"] < top:
-            return f"the floor of room {_name(r)} is below the ground outside an opening"
-    for s in description.get("stairs") or []:
-        if isinstance(s, dict) and _number(s.get("bottom_elevation")) and s["bottom_elevation"] < top:
-            return f"the foot of stair {_name(s)} is below the ground outside an opening"
+    for what, key, parts in (("the floor of room", "floor_elevation", _rooms(description)),
+                             ("the foot of stair", "bottom_elevation",
+                              [s for s in description.get("stairs") or [] if isinstance(s, dict)])):
+        for part in parts:
+            if part.get(key) is None:        # not drawn (a room that isn't a sleeping room needn't be): not compared
+                continue
+            level = _value(part.get(key))
+            if level is None:
+                return f"{what} {_name(part)} can't be read, to compare with the ground outside the openings"
+            if level < top:
+                return f"{what} {_name(part)} is below the ground outside an opening"
     return None
 
 
-def _top(room: dict):
-    """The highest the room's finished ceiling reaches, or None where it can't be read."""
-    floor = room.get("floor_elevation")
-    if not _number(floor):
+def _top(room: dict, floor: float):
+    """The highest the room's finished ceiling reaches, or None where any of it can't be read."""
+    height = room.get("ceiling_height")
+    if height is not None:
+        h = _value(height)
+        return None if h is None else floor + h
+    pieces = room.get("ceilings")
+    if not isinstance(pieces, list) or not pieces:
         return None
-    if _number(room.get("ceiling_height")):
-        return floor + room["ceiling_height"]
-    zs = [p[2] for piece in room.get("ceilings") or [] if isinstance(piece, list)
-          for p in piece if isinstance(p, (list, tuple)) and len(p) == 3 and _number(p[2])]
-    return max(zs) if zs else None
+    zs = []
+    for piece in pieces:
+        if not isinstance(piece, list) or not piece:
+            return None
+        for p in piece:
+            if not isinstance(p, (list, tuple)) or len(p) != 3 or None in (xyz := [_value(v) for v in p]):
+                return None
+            zs.append(xyz[2])
+    return max(zs)
 
 
 def _plan(room: dict):
+    """The room's floor outline in plan, or None where it can't be read."""
+    points = room.get("floor")
+    if not isinstance(points, list) or len(points) < 3:
+        return None
+    xy = []
+    for p in points:
+        if not isinstance(p, (list, tuple)) or len(p) != 2 or None in (got := [_value(v) for v in p]):
+            return None
+        xy.append(got)
     try:
-        poly = Polygon([(x, y) for x, y in room.get("floor")])
+        poly = Polygon(xy)
     except (TypeError, ValueError, GEOSException):
         return None
     return poly if poly.is_valid and poly.area > 0 else None
 
 
-def open_into(description: dict) -> str | None:
-    """A room the description draws inside another room's volume (its floor over the other's in plan, above the
-    other's floor and below its ceiling, or a ceiling that can't be read: a floor level within a room, open to it, as the format draws a loft), which
-    a "no sleeping lofts" claim can't stand beside (the first found), or None. A room upstairs is at or above the
-    ceiling of the room below, so it never is. Only refuses the claim: it never says the room is a loft."""
-    rooms = [(r, _plan(r)) for r in _rooms(description)]
-    for r, plan in rooms:
-        if plan is None or not _number(r.get("floor_elevation")):
-            continue
-        for other, under in rooms:
-            if other is r or under is None or not _number(other.get("floor_elevation")):
+def room_within(description: dict) -> str | None:
+    """A room the description draws within another room's height (its floor over the other's floor in plan, above
+    it and below that room's ceiling: a floor level within a room, as a loft is), or one whose floor or ceiling can't
+    be read to tell, which a "no sleeping lofts" claim can't stand beside (the first found), or None. A room upstairs
+    is at or above the ceiling of the room below, so it never is. A partial check: a loft over a low room, open to a
+    taller room beside it, is over no room it is within, and a room drawn with no floor at all isn't compared. Only
+    refuses the claim: it never says the room is a loft."""
+    # a room drawn with neither (the format asks a floor only of a sleeping room) isn't drawn to compare
+    rooms = [r for r in _rooms(description) if r.get("floor") is not None or r.get("floor_elevation") is not None]
+    if len(rooms) < 2:
+        return None
+    read = []
+    for r in rooms:
+        plan, floor = _plan(r), _value(r.get("floor_elevation"))
+        if plan is None or floor is None:
+            return f"room {_name(r)}'s floor can't be read, to tell whether it is within another room"
+        read.append((r, plan, floor))
+    for r, plan, floor in read:
+        for other, under, below in read:
+            if other is r or not below < floor or plan.intersection(under).area <= 0:
                 continue
-            top = _top(other)            # a ceiling that can't be read could be above it: refused too
-            if other["floor_elevation"] < r["floor_elevation"] and (top is None or r["floor_elevation"] < top) \
-                    and plan.intersection(under).area > 0:
-                return f"room {_name(r)}'s floor is within room {_name(other)}, open to it"
+            top = _top(other, below)
+            if top is None:
+                return f"room {_name(other)}'s ceiling can't be read, to tell whether room {_name(r)} is within it"
+            if floor < top:
+                return f"room {_name(r)}'s floor is over room {_name(other)}'s and below its ceiling"
     return None
 
 
@@ -181,7 +226,7 @@ def read(description: dict) -> tuple[dict, list[str]]:
         if kind == "basement" and (below := below_ground(description)):
             problems.append(Stop("has_none_below_ground", what=below).reason)
             continue
-        if kind == "sleeping_loft" and (inside := open_into(description)):
+        if kind == "sleeping_loft" and (inside := room_within(description)):
             problems.append(Stop("has_none_room_within", what=inside).reason)
             continue
         k = KINDS[kind]
