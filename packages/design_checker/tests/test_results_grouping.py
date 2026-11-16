@@ -406,7 +406,7 @@ def test_every_guard_is_named_on_the_line_the_measured_and_the_one_not_measured(
         return [g]
     items, got, guards = _loft(second_guard)
     titles = " ".join(ln["title"] for ln in got[grouping.REVIEW_T])
-    assert "Loft guard: guard height 36 in" in titles and "Second guard: guard height not measured" in titles
+    assert "Loft guard: guard height 36 in" in titles and "Second guard: guard height and guard opening sphere not measured" in titles
 
 
 def test_a_concern_from_a_rule_that_may_not_apply_to_the_guard_says_which_rule():
@@ -420,3 +420,42 @@ def test_a_concern_from_a_rule_that_may_not_apply_to_the_guard_says_which_rule()
     got = each_part._stand_ins(rule, ["open_side"], given, {})
     assert got["concern"] == "Stair guard: guard height 35 in, needs ≥ 36 in, if Guard height, open sides other " \
                              "than stairs (R321.1.2) applies to it"
+
+
+# ---- review round 6 on #111: a guard's reasons, each said once, each where it belongs; a host's bad part is no value
+
+def _height_rule():
+    import yaml
+    from rule_format.rulebook import REPO
+    rules = yaml.safe_load((REPO / "regulations/jurisdictions/new_york/new_york_state/5_building_code_rules/drafted/"
+                                   "general.yaml").read_text())
+    [rule] = [r for r in rules["rules"] if r["id"] == "general.r321_1_2_guard_height_open_side_not_stair"]
+    return rule
+
+
+def test_a_guard_reason_for_two_measures_is_said_once():
+    def no_top_rail(house):
+        house["guards"][0]["members"] = house["guards"][0]["members"][1:]
+        return []
+    items, got, guards = _loft(no_top_rail)
+    [line] = [ln for ln in got[grouping.REVIEW_T] if "stated top" in ln["title"]]
+    assert line["title"].count("stated top") == 1 and "guard height and guard opening sphere not measured" \
+        in line["title"]
+
+
+def test_a_stair_guard_opening_gordium_does_not_measure_yet_is_listed_as_not_read_never_as_to_fix():
+    from design_checker import each_part
+    from model_measurement.interior.stops import STOPS
+    given = {"guard": [{"id": "sg", "name": "Stair guard", "measures": {"guard_height": 35.25},
+                        "not_measured": {"guard_opening_sphere": STOPS["stair_guard_openings"]}}]}
+    got = each_part._stand_ins(_height_rule(), ["open_side"], given, {})
+    assert got["gordium"] is None and got["gaps"] == ["Stair guard: guard opening sphere"]
+    assert not any("openings" in n for n in got["notes"])
+
+
+def test_a_guard_part_a_host_sends_malformed_is_no_value_never_a_crash():
+    from design_checker import each_part
+    bad = [{"id": "a", "measures": [1], "not_measured": {5: "x"}},
+           {"id": "b", "measures": {"guard_height": True, 7: 30.0, "guard_opening_sphere": "30"}}]
+    got = each_part._stand_ins(_height_rule(), ["open_side"], {"guard": bad}, {})
+    assert got["notes"] == ["a: 5 not measured (x)"] and "concern" not in got

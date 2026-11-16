@@ -85,6 +85,9 @@ def _unread(rule: dict, given) -> list[str]:
 # a part kind the rules name that the measuring measures under another kind: the rules' open sides are the
 # description's guards (model_measurement.interior measures each guard's height and openings)
 STAND_INS = {"open_side": "guard"}
+# a stand-in's measures the measuring says it doesn't measure yet (a stair guard's openings): Gordium's to measure,
+# listed as "not read yet", never as something the architect can fix (the row stays to review: words only)
+STAND_IN_GAPS = GORDIUM_GAPS + (STOPS["stair_guard_openings"], STOPS["guard_opening_shape"])
 
 
 def _stand_ins(rule: dict, unread: list, given, allowed: dict) -> dict | None:
@@ -103,12 +106,16 @@ def _stand_ins(rule: dict, unread: list, given, allowed: dict) -> dict | None:
             if not isinstance(p, dict):
                 continue
             who = p.get("name") or p.get("id")
-            got = {m: v for m, v in (p.get("measures") or {}).items() if v is not None}
+            # only what the measuring gives (text names, numbers): anything else a host sends is no value
+            got = {m: v for m, v in (p.get("measures") if isinstance(p.get("measures"), dict) else {}).items()
+                   if isinstance(m, str) and isinstance(v, (int, float)) and not isinstance(v, bool)}
             worked += [f"{who}: {m.replace('_', ' ')} {_n(v)}{_unit(rule, m)}" for m, v in got.items()]
-            why = p.get("not_measured") if isinstance(p.get("not_measured"), dict) else {}
-            found += [f"{who}: {m.replace('_', ' ')} not measured ({w})" for m, w in why.items()
-                      if w not in GORDIUM_GAPS]
-            gaps += [f"{who}: {m.replace('_', ' ')}" for m, w in why.items() if w in GORDIUM_GAPS]
+            why = {}           # {reason: the measures it stopped}: one reason said once, with every measure it stops
+            for m, w in (p.get("not_measured") if isinstance(p.get("not_measured"), dict) else {}).items():
+                why.setdefault(str(w), []).append(str(m).replace("_", " "))
+            found += [f"{who}: {' and '.join(ms)} not measured ({w})" for w, ms in why.items()
+                      if w not in STAND_IN_GAPS]
+            gaps += [f"{who}: {m}" for w, ms in why.items() if w in STAND_IN_GAPS for m in ms]
             read = {m: v for m, v in got.items() if m in names}
             try:
                 c = _first_failing(rule, read, allowed, if_it_applies=True) \
@@ -120,7 +127,7 @@ def _stand_ins(rule: dict, unread: list, given, allowed: dict) -> dict | None:
                                                  else ""))
     if not worked and not found:
         return None
-    # the measuring's reasons are shown as it gave them (some are the drawing's to give, some Gordium's to measure)
+    # the measuring's other reasons are shown as it gave them (the drawing's to give or fix)
     out = {"gordium": None, "measures": [], "gaps": list(dict.fromkeys(gaps)), "worked": [],
            "notes": (["measured as guards, not yet given to these rules: " + ", ".join(dict.fromkeys(worked))]
                      if worked else []) + list(dict.fromkeys(found)),
