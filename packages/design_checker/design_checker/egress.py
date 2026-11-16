@@ -59,7 +59,11 @@ BAD_RULES = "The {title} rules don't pass the rule checks (python -m rule_format
 NO_RULES = "No rulebook in {folder}/5_building_code_rules/: nothing of this law was checked"
 INTERIOR_PROBLEM = "The interior drawing: {why}"
 SKIPPED = ("{name} is marked as an escape opening but isn't checked: {why}. An escape opening may also be required in a "
-           "basement or habitable attic (R319.1), which aren't read from the drawing yet: check it by hand")
+           "{where} (R319.1), which {are} read from the drawing yet: check it by hand")
+# the spaces R319.1 also asks for one in, unless the description says (as a settled claim) the house has none
+SKIPPED_SPACES = (("basement", "basement"), ("habitable_attic", "habitable attic"))
+SKIPPED_ALL_CLAIMED = ("{name} is marked as an escape opening but isn't checked: {why}. The description says the house "
+                       "has no basements and no habitable attics, where R319.1 would also ask for one: check it by hand")
 NOT_PER_PART = ("this rule isn't written for each part (no for_each), and a state law's rules are checked only part "
                 "by part: it isn't checked, so check it by hand")
 COVERAGE = "6_coverage_report/*.rules.yaml"      # which pieces labeled rule have rules (python -m section_labeling coverage)
@@ -284,7 +288,7 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
     out += [_own_item(law, f"{law['short'].lower()}.interior#{n}", "Interior drawing", present.REVIEW,
                       INTERIOR_PROBLEM.format(why=why)) for n, why in enumerate(measured["problems"], 1)]
     out += [_own_item(law, f"{law['short'].lower()}.skipped#{n}", f"{skip.get('name') or skip.get('id')}: not checked",
-                      present.REVIEW, SKIPPED.format(name=skip.get("name") or skip.get("id"), why=skip.get("why")))
+                      present.REVIEW, _skipped(skip, claims))
             for n, skip in enumerate(measured["not_checked"], 1)]
     out += [_has_none_item(law, kind, claim, got["set_aside"].get(kind) or [], by_id) for kind, claim in claims.items()]
     # every row not applicable (left out of the panel; a claim's item counts toward nothing): never a law that
@@ -293,6 +297,17 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
         out.append(_own_item(law, f"{law['short'].lower()}.nothing_applied", f"{law['short']}: nothing checked",
                              present.REVIEW, NOTHING_APPLIED.format(title=law["title"])))
     return out
+
+
+def _skipped(skip: dict, claims: dict) -> str:
+    """Why an escape opening isn't checked, naming only the spaces R319.1 also asks for one in that aren't settled by
+    a claim (a reading claim still to confirm leaves its space named)."""
+    name = skip.get("name") or skip.get("id")
+    unread = [words for kind, words in SKIPPED_SPACES if (claims.get(kind) or {}).get("reading") is not False]
+    if not unread:
+        return SKIPPED_ALL_CLAIMED.format(name=name, why=skip.get("why"))
+    return SKIPPED.format(name=name, why=skip.get("why"), where=" or ".join(unread),
+                          are="isn't" if len(unread) == 1 else "aren't")
 
 
 def _section(law: dict, rule: dict) -> str:

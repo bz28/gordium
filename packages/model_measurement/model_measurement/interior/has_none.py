@@ -48,7 +48,7 @@ def words(kind: str) -> str:
 
 
 def read(description: dict) -> tuple[dict, list[str]]:
-    """({kind: {"source", "words", "parts", "openings"}} for every claim that can be trusted, [the problem with each
+    """({kind: {"source", "reading", "words", "parts", "openings", "stairs"}} for every claim that can be trusted, [the problem with each
     one that can't]). No `has_none` is no claim."""
     given = description.get(KEY)
     if given is None:
@@ -60,6 +60,9 @@ def read(description: dict) -> tuple[dict, list[str]]:
         kind = entry.get("kind") if isinstance(entry, dict) else None
         if not isinstance(entry, dict) or not isinstance(kind, str):
             problems.append(Stop("has_none_entry", n=n).reason)
+            continue
+        if kind == "sleeping_room":     # `rooms: []` is a house not drawn yet, never "no sleeping rooms"
+            problems.append(Stop("has_none_sleeping_room").reason)
             continue
         if kind in LISTED:
             problems.append(Stop("has_none_listed", kind=kind, key=LISTED[kind]).reason)

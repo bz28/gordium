@@ -231,3 +231,23 @@ def test_a_pass_that_reads_a_reading_claims_measure_needs_review(found):
     assert row["outcome"] == "needs_review" and row["has_none"] == "sleeping_loft"
     assert row["reason"].startswith("complies only if this reading is confirmed: ")
     assert got["results"]["general.r318_7_1_stair_clear_width_above_handrail"] == "needs_review"
+
+
+@pytest.mark.parametrize("claims, says", [
+    ([], "required in a basement or habitable attic (R319.1), which aren't read from the drawing yet"),
+    ([{"kind": "basement", "source": "A-1"}], "required in a habitable attic (R319.1), which isn't read from the drawing"),
+    ([{"kind": "basement", "source": "A-1"}, {"kind": "habitable_attic", "source": "A-5", "reading": True}],
+     "required in a habitable attic (R319.1), which isn't read from the drawing"),
+    ([{"kind": "basement", "source": "A-1"}, {"kind": "habitable_attic", "source": "A-5"}],
+     "The description says the house has no basements and no habitable attics, where R319.1 would also ask for one"),
+])
+def test_an_unchecked_escape_opening_names_only_the_spaces_not_settled(found, claims, says):
+    """An office's escape window isn't checked (not a sleeping room): its words never call a basement "not read"
+    beside a "Basements: not applicable" item, and it stays needs review either way (review round 3)."""
+    desc = house(*claims)
+    desc["rooms"].append({"id": "o", "name": "Office", "sleeping": False, "floor": [[200, 0], [300, 0], [300, 100],
+                                                                                    [200, 100]],
+                          "floor_elevation": 0, "ceiling_height": 96})
+    desc["openings"].append(dict(desc["openings"][0], id="ow", name="Office window", room="o"))
+    item = next(i for i in run(found, desc)["items"] if i["name"] == "Office window: not checked")
+    assert item["status"] == present.REVIEW and says in item["reason"]
