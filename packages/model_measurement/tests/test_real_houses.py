@@ -146,7 +146,10 @@ def test_the_answer_key_is_worked_for_every_part(name):
             assert "reading" not in area, area["id"]
     measured = measure_file(REAL / name / "house.yaml")
     got = measured["parts"]["emergency_escape_opening"] or []
-    unsized = {p["id"] for p in got if not p["measures"]} | {n["id"] for n in measured["not_checked"]}
+    # unsized: no clear opening measured (an opening may have other measures, such as being a window, and still not be
+    # sized)
+    unsized = {p["id"] for p in got if "opening_net_clear_area" not in p["measures"]} | \
+        {n["id"] for n in measured["not_checked"]}
     sized_rooms = {o["room"] for o in house["openings"] if o["id"] in {p["id"] for p in got} - unsized}
     unsized |= {r["id"] for r in house["rooms"] if r["sleeping"]} - sized_rooms
     openings = {o["id"] for o in house["openings"]}

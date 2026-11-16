@@ -13,7 +13,8 @@ parts:
         opening_net_clear_height: 36.0      # 2..5 ft
         opening_net_clear_area: 6.0         # 2 x 3 ft
         opening_sill_height: 24.0
-      not_measured: [opening_at_grade]      # no ground level outside it
+        opening_is_door: false   # its operation names a window
+      not_measured: [opening_at_grade, opening_door_hinged_or_sliding]   # no ground level outside it; a window
   stair:
     s:
       measures:

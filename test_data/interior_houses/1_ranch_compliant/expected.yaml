@@ -16,6 +16,8 @@ parts:
         opening_net_clear_area: 6.125       # 24.5 x 36 = 882 / 144
         opening_sill_height: 30.0           # clear bottom 30 - floor 0
         opening_at_grade: true              # |30 - (-8)| = 38 <= 44
+        opening_is_door: false   # its operation names a window
+      not_measured: [opening_door_hinged_or_sliding]   # a window: asked only of a door
     w2:
       within: bed2
       measures:
@@ -24,10 +26,13 @@ parts:
         opening_net_clear_area: 5.416667    # 30 x 26 = 780 / 144
         opening_sill_height: 24.0
         opening_at_grade: true              # |24 + 8| = 32
+        opening_is_door: false   # its operation names a window
+      not_measured: [opening_door_hinged_or_sliding]   # a window: asked only of a door
   egress_door:
     d1:
       measures:
         door_clear_width: 32.25             # latch stop 34.25 - door face at 90 deg (pin 0.25 + leaf 1.75 = 2.0)
         door_clear_height: 80.0             # 80.5 - 0.5
+        door_side_hinged: true   # operation: side_hinged
   stair: {}
   guard: {}

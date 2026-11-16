@@ -10,9 +10,10 @@ parts:
   emergency_escape_opening:
     wa:
       within: main
-      measures: {}                          # an awning window: its clear opening is the maker's to state
+      measures:                          # an awning window: its clear opening is the maker's to state
+        opening_is_door: false   # its operation names a window
       not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width,
-                     opening_sill_height, opening_at_grade]
+                     opening_sill_height, opening_at_grade, opening_door_hinged_or_sliding]
   stair:
     ls:
       measures:
