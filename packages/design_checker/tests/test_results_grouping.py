@@ -317,3 +317,24 @@ def test_everything_the_architect_has_to_give_is_named_never_shortened(checked):
     [door] = [ln for ln in grouping.lines(items)[grouping.REVIEW_T] if ln["title"].startswith("Front entry door")]
     given = [w for i in items if i["id"] in door["items"] for w in (i.get("open") or {}).get("inputs") or []]
     assert len(set(given)) >= 3 and all(w in door["title"] for w in given)
+
+
+# ---- review round 3 on #111 -----------------------------------------------------------------------------------------
+
+def test_an_out_of_date_list_names_each_cause_and_each_laws_heading_without_its_result(checked):
+    items = law_items(checked["1_ranch_compliant"])
+    assert [ln["name"] for ln in grouping.lines(items)[grouping.BY_HAND_T]] == [
+        "Not read from the model yet", "Not measured from the model yet", "Not checked yet by Gordium"]
+    heads = [g for g in logic.list_tree(checked["2_two_story_small_window"]["view"]) if g.get("name")]
+    assert heads and all(g["name"] == "Egress" for g in heads)
+    from host_source import host_text
+    assert 'g.get("name") if parts["stale"] and g.get("name") else g["title"]' in \
+        host_text("rhino", "ui", purpose="wiring")
+
+
+def test_every_decision_is_named_never_shortened():
+    items = [{"id": f"r{n}", "group": present.LAW_GROUP, "status": present.REVIEW, "name": f"Rule {n}",
+              "element": "Front door", "part": {"part": "egress_door", "id": "d", "name": "Front door"},
+              "rule": f"rule_{n}", "open": {"gordium": None, "decide": True}} for n in range(4)]
+    [line] = grouping.lines(items)[grouping.REVIEW_T]
+    assert "more" not in line["title"] and line["title"].count("Rule") == 4
