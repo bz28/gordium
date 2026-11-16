@@ -10,6 +10,11 @@ marked `reading: true` rests on a reading of the law (an unfinished attic is not
 drawings alone: it is taken, and the checker shows it as one to confirm (needs review), never as settled.
 """
 
+import math
+
+from shapely.errors import GEOSException
+from shapely.geometry import Polygon
+
 from model_measurement.interior.stops import Stop
 
 KEY = "has_none"
@@ -48,26 +53,80 @@ def words(kind: str) -> str:
 
 
 def _number(v) -> bool:
-    return isinstance(v, (int, float)) and not isinstance(v, bool)
+    return isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v)
+
+
+def _rooms(description: dict) -> list[dict]:
+    return [r for r in description.get("rooms") or [] if isinstance(r, dict)]
+
+
+def _name(part: dict):
+    return part.get("name") or part.get("id")
 
 
 def below_ground(description: dict) -> str | None:
     """What in the description shows a space below the ground, which a "no basements" claim can't stand beside (the
     first found), or None. Only what it states: an opening with an area well (the format's "for an opening below the
-    ground"), or a room whose floor is below the ground outside one of its openings. It never says there is a
-    basement (grade plane is an average, measured elsewhere): it only refuses the claim, so the rules need review."""
-    rooms = {r.get("id"): r for r in description.get("rooms") or [] if isinstance(r, dict)}
+    ground"), or a room's floor or a stair's foot below the highest ground given outside any opening (the ground at
+    the room's own openings, or anywhere else: a walk-out below the uphill ground is one to confirm too). It never
+    says there is a basement (grade plane is an average, measured elsewhere): it only refuses the claim, so the
+    rules need review. Where no ground is given at all, nothing is compared."""
+    grounds = []
     for o in description.get("openings") or []:
         if not isinstance(o, dict):
             continue
-        name = o.get("name") or o.get("id")
         if o.get("area_well") is not None:
-            return f"opening {name} has an area well"
-        floor = (rooms.get(o.get("room")) or {}).get("floor_elevation")
+            return f"opening {_name(o)} has an area well"
         ground = o.get("ground_outside")
-        grounds = [g for g in (ground if isinstance(ground, list) else [ground]) if _number(g)]
-        if _number(floor) and grounds and floor < max(grounds):
-            return f"the floor of opening {name}'s room is below the ground outside it"
+        grounds += [g for g in (ground if isinstance(ground, list) else [ground]) if _number(g)]
+    if not grounds:
+        return None
+    top = max(grounds)
+    for r in _rooms(description):
+        if _number(r.get("floor_elevation")) and r["floor_elevation"] < top:
+            return f"the floor of room {_name(r)} is below the ground outside an opening"
+    for s in description.get("stairs") or []:
+        if isinstance(s, dict) and _number(s.get("bottom_elevation")) and s["bottom_elevation"] < top:
+            return f"the foot of stair {_name(s)} is below the ground outside an opening"
+    return None
+
+
+def _top(room: dict):
+    """The highest the room's finished ceiling reaches, or None where it can't be read."""
+    floor = room.get("floor_elevation")
+    if not _number(floor):
+        return None
+    if _number(room.get("ceiling_height")):
+        return floor + room["ceiling_height"]
+    zs = [p[2] for piece in room.get("ceilings") or [] if isinstance(piece, list)
+          for p in piece if isinstance(p, (list, tuple)) and len(p) == 3 and _number(p[2])]
+    return max(zs) if zs else None
+
+
+def _plan(room: dict):
+    try:
+        poly = Polygon([(x, y) for x, y in room.get("floor")])
+    except (TypeError, ValueError, GEOSException):
+        return None
+    return poly if poly.is_valid and poly.area > 0 else None
+
+
+def open_into(description: dict) -> str | None:
+    """A room the description draws inside another room's volume (its floor over the other's in plan, above the
+    other's floor and below its ceiling, or a ceiling that can't be read: a floor level within a room, open to it, as the format draws a loft), which
+    a "no sleeping lofts" claim can't stand beside (the first found), or None. A room upstairs is at or above the
+    ceiling of the room below, so it never is. Only refuses the claim: it never says the room is a loft."""
+    rooms = [(r, _plan(r)) for r in _rooms(description)]
+    for r, plan in rooms:
+        if plan is None or not _number(r.get("floor_elevation")):
+            continue
+        for other, under in rooms:
+            if other is r or under is None or not _number(other.get("floor_elevation")):
+                continue
+            top = _top(other)            # a ceiling that can't be read could be above it: refused too
+            if other["floor_elevation"] < r["floor_elevation"] and (top is None or r["floor_elevation"] < top) \
+                    and plan.intersection(under).area > 0:
+                return f"room {_name(r)}'s floor is within room {_name(other)}, open to it"
     return None
 
 
@@ -121,6 +180,9 @@ def read(description: dict) -> tuple[dict, list[str]]:
             continue
         if kind == "basement" and (below := below_ground(description)):
             problems.append(Stop("has_none_below_ground", what=below).reason)
+            continue
+        if kind == "sleeping_loft" and (inside := open_into(description)):
+            problems.append(Stop("has_none_room_within", what=inside).reason)
             continue
         k = KINDS[kind]
         claims[kind] = {"source": sources[0][0], "reading": sources[0][1], "words": words(kind),

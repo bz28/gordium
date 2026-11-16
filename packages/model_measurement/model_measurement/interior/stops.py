@@ -33,6 +33,8 @@ STOPS = {
                      "has `kind`, `source` and, optionally, `reading`): it isn't taken, so their rules need review",
     "has_none_below_ground": "the description says the house has no basements, yet {what}: which is right is "
                              "unclear, so their rules need review",
+    "has_none_room_within": "the description says the house has no sleeping lofts, yet {what}: which is right is "
+                            "unclear, so their rules need review",
     "has_none_contradicted": "the description says the house has no {words}, yet it also gives `{key}`, which isn't "
                              "an empty list: which is right is unclear, so their rules need review",
     # values

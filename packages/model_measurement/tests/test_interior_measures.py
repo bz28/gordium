@@ -1672,9 +1672,10 @@ STOP_CASES = {
     "has_none_not_a_list": _set(("has_none",), "ramps"),
     "has_none_entry": _set(("has_none",), [1]),
     "has_none_listed": _set(("has_none",), [{"kind": "stair", "source": "A-2"}]),
-    "has_none_below_ground": _set(("has_none",), [{"kind": "basement", "source": "A-1"}]),
     "has_none_below_ground": _with(base, lambda d: d.update(has_none=[{"kind": "basement", "source": "A-1"}]),
                                    lambda d: d["openings"][0].update(ground_outside=12)),
+    "has_none_room_within": _with(base, lambda d: d.update(has_none=[{"kind": "sleeping_loft", "source": "A-3"}]),
+                                  lambda d: d["rooms"].append(_loft(50))),
     "has_none_sleeping_room": _set(("has_none",), [{"kind": "sleeping_room", "source": "A-2"}]),
     "has_none_kind": _set(("has_none",), [{"kind": "elevator", "source": "A-2"}]),
     "has_none_no_source": _set(("has_none",), [{"kind": "ramp", "source": " "}]),
@@ -1956,8 +1957,14 @@ def test_has_none_not_a_list_reads_no_claim():
 
 @pytest.mark.parametrize("change, refused", [
     (lambda d: None, None),                                                       # on the ground: taken
-    (lambda d: d["openings"][0].update(ground_outside=12), "below the ground outside it"),
-    (lambda d: d["openings"][0].update(ground_outside=[-12, 6]), "below the ground outside it"),   # the higher end
+    (lambda d: d["openings"][0].update(ground_outside=12), "room Bedroom is below the ground outside an opening"),
+    (lambda d: d["openings"][0].update(ground_outside=[-12, 6]), "below the ground outside an opening"),  # higher end
+    # a room with no openings of its own, below the ground at another room's opening (review round 5)
+    (lambda d: d["rooms"].append({**d["rooms"][0], "id": "low", "name": "Rec room", "floor_elevation": -48}),
+     "room Rec room is below the ground outside an opening"),
+    # a stair's foot below every ground given (review round 5)
+    (lambda d: d["stairs"][0].update(bottom_elevation=-100), "stair Stair is below the ground outside an opening"),
+    (lambda d: [o.pop("ground_outside") for o in d["openings"]], None),          # no ground given: nothing compared
     (lambda d: d["openings"][0].update(ground_outside=-30), None),               # ground below the floor: taken
     (lambda d: d["openings"][0].update(area_well={"floor_elevation": -10, "width": 40, "projection": 36}),
      "has an area well"),
@@ -1973,4 +1980,51 @@ def test_a_no_basements_claim_cant_stand_beside_a_space_below_the_ground(change,
         assert got["parts"]["basement"] == [] and "basement" in got["has_none"]
     else:
         assert got["parts"].get("basement") is None and "basement" not in got["has_none"]
+        assert any(refused in p for p in got["problems"]), got["problems"]
+
+
+@pytest.mark.parametrize("change", [
+    lambda d: d["rooms"][0].update(id=["b"]),
+    lambda d: d["openings"][0].update(room=["b"]),
+])
+def test_a_no_basements_claim_beside_an_id_that_isnt_text_doesnt_stop_the_measuring(change):
+    """A room id, or an opening's room, that isn't text measures as it would without the claim (review round 5:
+    it raised TypeError)."""
+    d = _claims({"kind": "basement", "source": "A-1"})
+    change(d)
+    measure(d)
+
+
+def _loft(floor_elevation=100):
+    """A sleeping room over part of base()'s bedroom (floor 0, ceiling 96 in): inside its volume at 50, as 4_loft
+    draws a loft; at 96 or more it is a room upstairs."""
+    return {"id": "l", "name": "Loft", "sleeping": True, "floor": [[0, 0], [60, 0], [60, 60], [0, 60]],
+            "floor_elevation": floor_elevation, "ceiling_height": 84}
+
+
+@pytest.mark.parametrize("change, refused", [
+    (lambda d: None, None),                                                       # one room: taken
+    (lambda d: d["rooms"].append(_loft(50)), "room Loft's floor is within room Bedroom"),
+    (lambda d: d["rooms"].append(_loft(96)), None),                               # upstairs: taken
+    (lambda d: d["rooms"].append({**_loft(50), "floor": [[200, 0], [260, 0], [260, 60], [200, 60]]}), None),  # beside
+    # a ceiling given as pieces: the highest point counts
+    (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"][0].update(
+        ceilings=[[[0, 0, 40], [120, 0, 40], [120, 120, 120], [0, 120, 120]]]), d["rooms"].append(_loft(100))),
+     "room Loft's floor is within room Bedroom"),
+    # the room below's ceiling can't be read: it could be above the loft, so refused
+    (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"].append(_loft(100))),
+     "room Loft's floor is within room Bedroom"),
+])
+def test_a_no_sleeping_lofts_claim_cant_stand_beside_a_room_drawn_within_another(change, refused):
+    """The format draws a sleeping loft as a room whose floor is within another room's volume: "no sleeping lofts"
+    beside one is refused, and the loft rules need review (review round 5). Only refused, never "there is a loft"."""
+    d = _claims({"kind": "sleeping_loft", "source": "A-3"})
+    change(d)
+    got = measure(d)
+    if refused is None:
+        assert got["parts"]["sleeping_loft"] == [] and "sleeping_loft" in got["has_none"], got["problems"]
+    else:
+        assert got["parts"].get("sleeping_loft") is None and got["parts"].get("loft_room") is None
+        assert "sleeping_loft" not in got["has_none"]
+        assert all("stair_serves_sleeping_loft" not in (s.get("stated") or {}) for s in got["parts"]["stair"])
         assert any(refused in p for p in got["problems"]), got["problems"]
