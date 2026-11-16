@@ -111,7 +111,8 @@ def list_tree(view):
     a row of it exactly once (a line row is no item: nothing is hidden by grouping, only folded)."""
     out = []
     for g in (view or {}).get("groups") or []:
-        node = {"tag": "group:" + g["key"], "title": g["title"], "count": g.get("count", len(g["items"])),
+        node = {"tag": "group:" + g["key"], "title": g["title"], "name": g.get("name"),
+                "count": g.get("count", len(g["items"])),
                 "folded": g.get("folded", g["key"] in FOLDED_GROUPS), "children": []}
         lines = g.get("lines")
         if lines:

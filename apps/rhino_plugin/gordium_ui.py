@@ -573,7 +573,8 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
         mine = [by_id[c["item"]] for c in g["children"] if c.get("item")] + \
             [by_id[x["item"]] for c in g["children"] for x in c.get("children") or []]
         title = ("Site · " if g["tag"] == "group:complies" and mine and all(i["group"] == "site" for i in mine) else "")
-        gi.Values = System.Array[System.Object]([title + g["title"] + " · " + str(g["count"]), "", "", ""])
+        heading = g.get("name") if parts["stale"] and g.get("name") else g["title"]   # a law's tier: out of date,
+        gi.Values = System.Array[System.Object]([title + heading + " · " + str(g["count"]), "", "", ""])  # no tier
         gi.Expanded = parts["expanded"].get(gi.Tag, not g["folded"])
         for c in g["children"]:
             if c.get("children") is not None:            # a line of several items: its words, its items under it

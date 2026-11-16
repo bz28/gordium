@@ -144,7 +144,7 @@ def _review_title(mine: list[dict]) -> str:
         said.append("may not comply: " + "; ".join(dict.fromkeys(concerns)))
     decide = [_title_of_rule(i) for i, o in zip(mine, opens) if o.get("decide")]
     if decide:
-        said.append("a person decides: " + _some(decide))
+        said.append("a person decides: " + ", ".join(dict.fromkeys(decide)))   # never shortened: each to decide
     notes = [w for o in opens for w in o.get("notes") or []]
     if notes:                                          # the row's own reason ("no egress doors"), as it is
         said.append(", ".join(dict.fromkeys(notes)))  # never shortened: what the architect has to act on
@@ -259,8 +259,8 @@ def lines(items: list[dict]) -> dict:
                     else _own_title(mine[0])
             line["mark"] = present.MARK.get(line["status"], present.MARK[present.REVIEW])
             # its name alone, without its result: what the panel shows while its results are out of date
-            line["name"] = mine[0].get("element") or (line["title"].split(": ")[0] if t == BY_HAND_T
-                                                      else mine[0].get("name") or line["title"])
+            line["name"] = line["title"].split(": ")[0] if t == BY_HAND_T \
+                else (mine[0].get("element") or mine[0].get("name") or line["title"])
             out[t].append(line)
     return out
 

@@ -2226,7 +2226,8 @@ def grouped(items: list[dict]) -> list[dict]:
                 placed.append(((place[after[t]], rank), {
                     "key": f"{law['key']}:{t}", "title": f"{law['short']} · {grouping.TITLES[t]}",
                     "items": [x for ln in lines[t] for x in ln["items"]], "lines": lines[t], "count": count[t],
-                    "folded": t in grouping.FOLDED, "law": law["title"]}))
+                    "folded": t in grouping.FOLDED, "law": law["title"],
+                    "name": law["short"]}))       # its heading without its result, while the list is out of date
     out = [((place[g["key"]], -1), g) for g in zoning] + placed       # zoning's group first, then the law's
     return [g for _, g in sorted(out, key=lambda x: x[0])] + tail
 
