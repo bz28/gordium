@@ -3,8 +3,8 @@
 <rect x="0" y="0" width="1224" height="792" fill="#ffffff"/>
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">LIFE-SAFETY PLAN: FLOOR AT 0'-0&quot;</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Egress result: NEEDS REVIEW</text>
-<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 97 need review · 10 comply (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code analysis line 97)</text>
+<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 1 to review · 10 comply · 12 parts not read yet · 86 sections not checked yet (the check's own count)</text>
+<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 97)</text>
 <polygon points="203.2,569.6 419.2,569.6 419.2,371.6 203.2,371.6" fill="#eef3fb" stroke="#1a1a1a" stroke-width="1.6"/>
 <text x="311.2" y="466.6" font-size="7" font-weight="bold" text-anchor="middle" fill="#000000" xml:space="preserve">BEDROOM 1</text>
 <text x="311.2" y="475.6" font-size="5.5" text-anchor="middle" fill="#5a5a5a" xml:space="preserve">SLEEPING ROOM</text>
@@ -79,8 +79,8 @@
 <text x="1016" y="298.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3b79</text>
 <line x1="1008" y1="308.6" x2="1202.4" y2="308.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="316.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">GORDIUM CODE FINGERPRINT AT CHECK</text>
-<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">b485ce48e3b34ece6821c846f1edf9ef551b7732e3e292f3ba8d70cca702</text>
-<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1d4f</text>
+<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">e374424e9eb58175db60645cb92e767e66c78b3f32708a8de99ad221febf</text>
+<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">b0f5</text>
 <line x1="1008" y1="343.6" x2="1202.4" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="351.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="360.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fingerprint</text>
@@ -91,6 +91,6 @@
 <text x="1105.2" y="445.2" font-size="5.5" text-anchor="middle" fill="#5a5a5a" xml:space="preserve">ARCHITECT'S STAMP AND SIGNATURE</text>
 <line x1="1008" y1="687.6" x2="1202.4" y2="687.6" stroke="#1a1a1a" stroke-width="1"/>
 <text x="1016" y="701.6" font-size="8.5" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">LIFE-SAFETY PLAN</text>
-<text x="1016" y="760.4" font-size="6" text-anchor="start" fill="#5a5a5a" xml:space="preserve">SHEET 6 OF 7</text>
+<text x="1016" y="760.4" font-size="6" text-anchor="start" fill="#5a5a5a" xml:space="preserve">SHEET 3 OF 4</text>
 <text x="1194.4" y="760.4" font-size="22" font-weight="bold" text-anchor="end" fill="#000000" xml:space="preserve">LS-101</text>
 </svg>
