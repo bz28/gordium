@@ -1675,6 +1675,7 @@ STOP_CASES = {
     "has_none_kind": _set(("has_none",), [{"kind": "elevator", "source": "A-2"}]),
     "has_none_no_source": _set(("has_none",), [{"kind": "ramp", "source": " "}]),
     "has_none_reading": _set(("has_none",), [{"kind": "ramp", "source": "A-2", "reading": "yes"}]),
+    "has_none_keys": _set(("has_none",), [{"kind": "ramp", "source": "A-2", "reding": True}]),
     "has_none_twice": _set(("has_none",), [{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-4"}]),
     "has_none_contradicted": _with(base, lambda d: d.update(has_none=[{"kind": "ramp", "source": "A-2"}],
                                                             ramps=[{"id": "r1"}])),
@@ -1916,11 +1917,14 @@ def test_each_claim_empties_its_kinds_or_gives_its_measures():
 
 
 @pytest.mark.parametrize("entries, lists, words", [
-    ([{"kind": "ramp", "source": "A-2"}], {"ramps": [{"id": "r1"}]}, "yet it lists some (`ramps`)"),
-    ([{"kind": "ramp", "source": "A-2"}], {"ramps": "a ramp"}, "yet it lists some (`ramps`)"),
+    ([{"kind": "ramp", "source": "A-2"}], {"ramps": [{"id": "r1"}]}, "yet it also gives `ramps`, which isn't an empty list"),
+    ([{"kind": "ramp", "source": "A-2"}], {"ramps": "a ramp"}, "yet it also gives `ramps`, which isn't an empty list"),
     ([{"kind": "ramp"}], {}, "not where that comes from"),
     ([{"kind": "ramp", "source": ""}], {}, "not where that comes from"),
+    ([{"kind": "ramp", "source": "A-2"}], {"ramps": None}, "yet it also gives `ramps`, which isn't an empty list"),
     ([{"kind": "ramp", "source": "A-2", "reading": 1}], {}, "`reading` isn't true or false"),
+    ([{"kind": "ramp", "source": "A-2", "reding": True}], {}, "keys it doesn't know (reding;"),
+    ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-2", "reding": True}], {}, "2 times"),
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp", "source": "A-4"}], {}, "2 times"),
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp"}], {}, "2 times"),
     ([{"kind": "ramps", "source": "A-2"}], {}, "not a kind it can say"),

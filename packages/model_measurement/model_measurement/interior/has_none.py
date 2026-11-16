@@ -39,6 +39,7 @@ KINDS = {
 LISTED = {"sleeping_room": "rooms", "emergency_escape_opening": "openings", "stair": "stairs",
           "egress_door": "doors", "guard": "guards"}
 SAID = "the description says the house has no {words}"
+ENTRY_KEYS = {"kind", "source", "reading"}
 
 
 def words(kind: str) -> str:
@@ -65,6 +66,10 @@ def read(description: dict) -> tuple[dict, list[str]]:
             continue
         if kind not in KINDS:
             problems.append(Stop("has_none_kind", kind=kind, kinds=", ".join(KINDS)).reason)
+            continue
+        if extra := sorted(set(entry) - ENTRY_KEYS, key=str):    # a mistyped `reading` must never read as settled
+            problems.append(Stop("has_none_keys", words=KINDS[kind]["words"], keys=", ".join(map(str, extra))).reason)
+            seen.setdefault(kind, []).append(None)
             continue
         source, reading = entry.get("source"), entry.get("reading", False)
         if not isinstance(source, str) or not source.strip():

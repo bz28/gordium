@@ -119,7 +119,8 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `has_none_no_source` | the description says the house has no {words} but not where that comes from (`source`, such as the sheet): it isn't taken, so their rules need review |
 | `has_none_reading` | the description says the house has no {words}, but its `reading` isn't true or false: it isn't taken, so their rules need review |
 | `has_none_twice` | the description says {count} times that the house has no {words}: it isn't taken, so their rules need review |
-| `has_none_contradicted` | the description says the house has no {words}, yet it lists some (`{key}`): which is right is unclear, so their rules need review |
+| `has_none_keys` | the description says the house has no {words}, with keys it doesn't know ({keys}; an entry has `kind`, `source` and, optionally, `reading`): it isn't taken, so their rules need review |
+| `has_none_contradicted` | the description says the house has no {words}, yet it also gives `{key}`, which isn't an empty list: which is right is unclear, so their rules need review |
 | `missing` | {what} isn't given |
 | `not_a_length` | {what} isn't a length (a number) |
 | `too_far` | {what} is more than 1,000,000,000 in (about 15,800 miles) from the origin: not a place in a house |

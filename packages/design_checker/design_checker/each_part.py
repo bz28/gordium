@@ -52,8 +52,14 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
         for row in got:
             if not row.get("within") and row["id"] is not None:   # a window checked on its own: its room named too
                 row["home"] = home.get((row["part"], row["id"]))
-            claim = _claim_of(rule, row, given, claims, stated)
-            if claim is not None:
+            claim = _claim_of(rule, row, given, claims, stated, values, allowed)
+            if claim is None and row["outcome"] == "pass" and (doubt := _reading_read(rule, row, claims, stated)):
+                # a pass that reads a measure resting on a reading still to confirm: never a pass on it
+                row["outcome"] = "needs_review"
+                row["reason"] = (f"complies only if this reading is confirmed: {claims[doubt]['words']} "
+                                 f"({claims[doubt]['source']})")
+                row["has_none"] = doubt
+            elif claim is not None:
                 row["reason"] = ("not applicable if confirmed: " if claims[claim].get("reading") is True else
                                  "not applicable: ") + f"{claims[claim]['words']} ({claims[claim]['source']})"
                 row["has_none"] = claim
@@ -81,7 +87,24 @@ def _stated(given) -> dict:
     return out
 
 
-def _claim_of(rule: dict, row: dict, given: dict, claims: dict, stated: dict) -> str | None:
+def _reading_read(rule: dict, row: dict, claims: dict, stated: dict) -> str | None:
+    """The reading claim (one marked `reading: true`) that gave a measure this rule reads anywhere (applies_when,
+    check, review_when) on this row's part, or None."""
+    gave = stated.get((rule.get("for_each"), row["id"])) or {}
+    try:
+        names = parts.formula_names(rule)
+    except formula.FormulaError:
+        return None
+    hit = [gave[m] for m in sorted(names) if m in gave and claims.get(gave[m], {}).get("reading") is True]
+    return hit[0] if hit else None
+
+
+def _part(given: dict, kind, part_id):
+    return next((p for p in given.get(kind) or [] if isinstance(p, dict) and p.get("id") == part_id), None)
+
+
+def _claim_of(rule: dict, row: dict, given: dict, claims: dict, stated: dict, values: dict | None = None,
+              allowed: dict | None = None) -> str | None:
     """The claim ("the house has no ramps") that makes this row not applicable, or None. Only a row that is not
     applicable, and only for the reason the claim gives: the rule's "none" row for a kind the claim empties (a
     ramp rule, no ramps; the row for no part a rule's parts sit within: no habitable attics), or a part whose
@@ -100,8 +123,16 @@ def _claim_of(rule: dict, row: dict, given: dict, claims: dict, stated: dict) ->
             names = formula.names(rule["applies_when"])
         except formula.FormulaError:
             return None
-        hit = [gave[m] for m in sorted(names) if m in gave and gave[m] in claims]
-        return hit[0] if hit else None
+        hit = [m for m in sorted(names) if m in gave and gave[m] in claims]
+        part = _part(given, kind, row["id"])
+        if not hit or part is None:
+            return None
+        # only where the claim decides it: without the claim's measures, the row would not be not applicable (a
+        # spiral stair is not applicable to R318.7.1 whatever a loft claim says)
+        own = set(parts.measure_kinds(kind))
+        mine = {m: v for m, v in (part.get("measures") or {}).items() if m in own and m not in hit}
+        without = part_outcome(rule, {**parts.building_values(values or {}), **mine}, allowed or {})
+        return gave[hit[0]] if without != "not_applicable" else None
     return None
 
 

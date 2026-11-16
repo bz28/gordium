@@ -140,7 +140,7 @@ def test_a_claim_not_taken_is_a_problem_item_and_its_rules_need_review(found, cl
 
 def test_a_contradicted_claim_says_which_list(found):
     got = run(found, house({"kind": "ramp", "source": SOURCE}, ramps=[{"id": "r1"}]))
-    assert any("yet it lists some (`ramps`)" in i["reason"] for i in got["items"] if i["name"] == "Interior drawing")
+    assert any("yet it also gives `ramps`, which isn't an empty list" in i["reason"] for i in got["items"] if i["name"] == "Interior drawing")
 
 
 def test_a_claim_about_the_openings_sets_aside_only_the_rules_that_turn_on_it(found):
@@ -192,3 +192,46 @@ def test_the_description_given_is_never_changed(found):
     before = copy.deepcopy(desc)
     run(found, desc)
     assert desc == before
+
+
+# --- a claim is credited only where it decides the row; a reading never gives a pass (review round 1) ---------------
+
+def _stair_rule(found, rule_id):
+    return next(r for law in found["laws"] for r in law["rules"] if r["id"] == rule_id)
+
+
+def _stair(spiral):
+    return {"id": "s1", "name": "Stair", "measures": {"stair_serves_sleeping_loft": False, "stair_spiral": spiral,
+                                                      "stair_clear_width": 40},
+            "not_measured": {}, "stated": {"stair_serves_sleeping_loft": "sleeping_loft"}}
+
+
+LOFT = {"sleeping_loft": {"source": "A-3", "reading": False, "words": "the description says the house has no "
+                          "sleeping lofts", "parts": ["sleeping_loft", "loft_room"], "openings": {},
+                          "stairs": {"stair_serves_sleeping_loft": False}}}
+
+
+def test_a_row_not_applicable_for_another_reason_is_not_the_claims(found):
+    """R318.7.1 applies to a stair that is not a loft stair and not spiral: a spiral stair is not applicable
+    whatever the loft claim says, so the row keeps its own reason and the claim doesn't list the rule."""
+    from design_checker import each_part
+    rule = _stair_rule(found, "general.r318_7_1_stair_clear_width_above_handrail")
+    got = each_part.check_parts([rule], {"stair": [_stair(True)], "sleeping_loft": [], "loft_room": []},
+                                {"dwelling_units": 1}, {"use": set()}, LOFT)
+    row = next(r for r in got["rows"] if r["id"] == "s1")
+    assert row["outcome"] == "not_applicable" and "has_none" not in row
+    assert got["set_aside"] == {"sleeping_loft": []}
+
+
+def test_a_pass_that_reads_a_reading_claims_measure_needs_review(found):
+    from design_checker import each_part
+    rule = _stair_rule(found, "general.r318_7_1_stair_clear_width_above_handrail")
+    given = {"stair": [_stair(False)], "sleeping_loft": [], "loft_room": []}
+    settled = each_part.check_parts([rule], given, {"dwelling_units": 1}, {"use": set()}, LOFT)
+    assert next(r for r in settled["rows"] if r["id"] == "s1")["outcome"] == "pass"     # a stated fact: a real pass
+    reading = {"sleeping_loft": dict(LOFT["sleeping_loft"], reading=True)}
+    got = each_part.check_parts([rule], given, {"dwelling_units": 1}, {"use": set()}, reading)
+    row = next(r for r in got["rows"] if r["id"] == "s1")
+    assert row["outcome"] == "needs_review" and row["has_none"] == "sleeping_loft"
+    assert row["reason"].startswith("complies only if this reading is confirmed: ")
+    assert got["results"]["general.r318_7_1_stair_clear_width_above_handrail"] == "needs_review"
