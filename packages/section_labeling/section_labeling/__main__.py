@@ -1,7 +1,8 @@
 """Label the pieces of a law, estimate what it costs, and report coverage.
 
     python -m section_labeling coverage [--check]   # write (or check) 6_coverage_report/<document>.md and the
-                                                    # review list 3_section_labels/<document>.review.md; no AI
+                                                    # review list 3_section_labels/<document>.review.md (a state
+                                                    # law also 6_coverage_report/<document>.rules.yaml); no AI
     python -m section_labeling estimate [--limit N] [--model M]
                                                     # cost before any call: exact input counts with a key
                                                     # (free token counting), a rough count without one
@@ -26,8 +27,8 @@ from pathlib import Path
 import yaml
 
 from rule_format.labels import load_pieces
-from rule_format.rulebook import (REPO, STATE_SETTINGS, Context, cached_text, jurisdictions, kept_text, law_folders,
-                                  load, read_jsonl, utf8_console)
+from rule_format.rulebook import (REPO, STATE_SETTINGS, Context, building_code_rulebook, cached_text, jurisdictions,
+                                  kept_text, law_folders, load, read_jsonl, utf8_console)
 
 from . import coverage, district_audit, labeler, term_index
 from .budget import Budget, BudgetExceeded
@@ -109,6 +110,11 @@ def cmd_coverage(args) -> int:
                   "the code cache); checked where the cache exists")
         else:
             outputs[review] = coverage.review_list(header, pieces, labels, coverage.cited_by(j, file, pieces), rows)
+        if (j / STATE_SETTINGS).is_file():   # a state law: which of its rule pieces its check has rules for
+            book = building_code_rulebook(j)
+            outputs[j / "6_coverage_report" / coverage.RULE_COVERAGE.format(stem=Path(file).stem)] = \
+                coverage.rule_coverage(file, pieces, labels, book.relative_to(j).as_posix() if book else None,
+                                       (load(book) or {}).get("rules") or [] if book else [])
         for out, text in outputs.items():
             failed += not _write_or_check(out, text, args.check)
         if bad:

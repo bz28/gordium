@@ -1,0 +1,98 @@
+# Plain names for the sections (labeled rule, then labeled flag) of the 2025 Residential Code of New York State
+# that Gordium doesn't check yet, as the check names them to an architect ("Not checked yet by Gordium: window fall protection (R321.2.1), hallway width
+# (R318.6) and 84 more: check these by hand"). Kept by hand; wording only.
+#
+# WHICH sections are not checked yet is never kept here: it is generated from the labels and the rulebook
+# (6_coverage_report/gov.ny.residential.2025.rules.yaml, `not_checked_yet`, by `python -m section_labeling coverage`;
+# CI checks it is current). A section that list names and this file doesn't is still named, by the law's own
+# heading. The order of the rule pieces here is the order the check lists them in: what most houses have first.
+# Pieces labeled flag are listed after every rule piece, in the book's order, as calling for a judgment Gordium
+# doesn't raise yet (their names here are for the wording only; their order is the book's).
+names:
+  R321.2.1: window fall protection
+  R318.6: hallway width
+  R318.1: a clear egress path to the egress door
+  R319.1.1: escape openings opening from inside without keys or tools
+  R321.2.2: window opening control devices on escape openings
+  R318.7.5.3: stair nosings
+  R318.7.5.2.1: winder treads
+  R318.7.7: slope of stair treads and landings
+  R325.6: interior stair lighting
+  R325.7: exterior stair lighting
+  R318.4: a stair or ramp from each level without an egress door
+  R318.7.11.2: bulkhead enclosure stairs
+  R316.3: a habitable attic counted as a story
+  R314.2: mezzanine headroom
+  R314.3: mezzanine area
+  R314.5: mezzanine openness
+  R315.1: which sleeping lofts the loft rules apply to
+  R315.4: sleeping loft area
+  R315.5: a sleeping loft's means of egress
+  R315.5.1: headroom over a sleeping loft's means of egress
+  R315.5.2.3: sleeping loft stair landings
+  R315.5.3.1: sleeping loft ladder rungs
+  R315.5.3.2: sleeping loft ladder slope
+  BO102.6.3: "existing buildings: fall protection at replacement windows"
+  BO105.10.5: "existing buildings: stair lighting in altered areas"
+  BO105.10.6: "existing buildings: handrails and guards on altered stairs"
+  BO105.10.7: "existing buildings: guards in altered areas"
+  BO105.11: "existing buildings: escape openings in a reworked basement"
+  BO108.2: "existing buildings: bed and breakfast occupancy"
+  BO108.3: "existing buildings: bed and breakfast conversions"
+  # labeled flag (wording only: a check lists them after the rule pieces, in the book's order, whatever the order here)
+  R316.2: "habitable attic floor area and ceiling height"
+  R318.5: "anchoring of exterior landings, decks, balconies and stairs"
+  R318.7.5.4: "plastic composite stair treads (material)"
+  R318.7.9: "altering stairs in existing buildings"
+  R319.4.3: "area well drainage"
+  R319.4.4: "bars, grilles, covers and screens over escape openings"
+  R319.5: "replacement windows in existing escape openings"
+  R319.5.1: "control and fall protection device height on replacement windows"
+  R319.7: "alterations or repairs of existing basements"
+  R320.7: "plastic composite handrails (material)"
+  R321.1.4: "plastic composite guards (material)"
+  R507.10: "deck guards: loads"
+  R507.10.1: "deck guards: load path to the deck framing"
+  R507.10.1.1: "deck guards: fastened to the side of deck framing"
+  R507.10.1.2: "deck guards: fastened on top of deck framing"
+  R507.10.2: "deck guards: wood posts not notched"
+  R507.10.3: "deck guards: plastic composite (material)"
+  R507.10.4: "deck guards: other kinds, per the manufacturer"
+  BF101.1: "patio covers: what Appendix BF covers"
+  BF101.2: "patio covers: permitted uses"
+  BF103.1: "patio covers: enclosure walls"
+  R102.6: "existing buildings: which code applies"
+  R102.6.1: "existing buildings: additions, alterations and repairs go to Appendix BO"
+  R102.6.2: "existing buildings: change of use"
+  BO101.1: "existing buildings: purpose of Appendix BO"
+  BO102.1: "existing buildings: work must not make the building unsafe or less compliant"
+  BO102.1.2: "existing buildings: nonconforming features"
+  BO102.6: "existing buildings: replacement windows"
+  BO104.1: "existing buildings: repairs, general"
+  BO104.1.1: "existing buildings: repairs keep fire and life safety"
+  BO105.1: "existing buildings: alteration levels, general"
+  BO105.1.1: "existing buildings: Level 1 alterations"
+  BO105.1.2: "existing buildings: Level 2 alterations"
+  BO105.1.3: "existing buildings: alterations keep fire and life safety"
+  BO105.2.2: "existing buildings: replacement door and window sizes"
+  BO105.2.3: "existing buildings: replacement escape windows"
+  BO105.3: "existing buildings: nonconformities in alterations"
+  BO105.8: "existing buildings: means of egress in alterations"
+  BO105.10.1: "existing buildings: existing stair width"
+  BO105.10.2: "existing buildings: existing stair headroom"
+  BO105.10.3: "existing buildings: existing stair landings"
+  BO105.10.4: "existing buildings: existing stair treads and risers"
+  BO105.13: "existing buildings: habitable attics above the second story"
+  BO106.1: "existing buildings: additions, general"
+  BO106.1.1: "existing buildings: additions creating or extending a nonconformity"
+  BO106.1.2: "existing buildings: other work in additions"
+  BO106.7: "existing buildings: sprinklers in additions"
+  BO107.1: "existing buildings: change of occupancy, general"
+  BO107.2: "existing buildings: change of occupancy, compliance"
+  BO107.2.1: "existing buildings: existing escape openings after a change of occupancy"
+  BO107.2.2: "existing buildings: existing stairs after a change of occupancy"
+  BO108.4: "existing buildings: bed and breakfast means of egress"
+  BO109.1: "existing buildings: historic buildings, general"
+  BO109.8.1: "existing buildings: historic buildings' means of egress"
+  BO109.8.5: "existing buildings: historic stair railings"
+  BO109.8.6: "existing buildings: historic guard openings"

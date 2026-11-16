@@ -8,7 +8,7 @@
 
 - **No false pass.** The checker gave **needs review** for all 115 of New York State's egress rules. None passed, none failed. Nowhere did it say "complies" where the code and the drawings don't settle it.
 - **The checker did what it should, every time.** Before the run, the hand-check predicted the checker's answer for each rule from the description and the rules' own formulas. All 115 matched. Each reason the checker gave was compared by hand with the predicted one (the `because` in hand_check.yaml) when this page was written, and they agree. **Checker bugs found: 0. Description errors found: 0.**
-- **It is cautious in 52 places.** The hand-check could settle 52 rules: 5 the house meets and 47 that don't apply to it (no ramps, sleeping lofts, ship's ladders and so on). The checker leaves each of these at needs review, for one of five reasons (the "Why they differ" column below). That is safe but noisy. An architect would see 309 items, all needing review, and 47 of the 115 rules behind them are about things this house doesn't have.
+- **It is cautious in 52 places.** The hand-check could settle 52 rules: 5 the house meets and 47 that don't apply to it (no ramps, sleeping lofts, ship's ladders and so on). The checker leaves each of these at needs review, for one of five reasons (the "Why they differ" column below). That is safe but noisy. An architect would see 310 items, all needing review, and 47 of the 115 rules behind them are about things this house doesn't have.
 - **Rule-drafting points: 2, both on the cautious side.** One rule asks about a patio cover at every exit door (an error). Another applies R319.6 (additions) to every bedroom of a new house (a trade-off already recorded in the rule).
 - **Zoning doesn't apply to this lot.** The house is in the Town of Orangetown, Rockland County. Gordium's only zoning rulebook is the City of Ithaca's. So only the state code was checked: the 2025 Residential Code of New York State (RCNYS), which the drawings' title sheet (A-1) cites.
 
@@ -44,10 +44,11 @@
 
 **Why no rule fails although the answer key finds real risks.** The basement stair's risers are 8.31 in at 13 risers with the section's 2x12 joists, over the 8 1/4 in limit. A 3046 double-hung may come in under 5.7 sq ft. The bonus room's step is about 30 in wide. The rear sliders have no landing drawn at the door, over steps that need at least four risers, but no sheet details the steps or a landing, so whether one is built is a question for the drawing's architect (README question 9). The basement stair and the 3046 are each a "does not comply" only under one reading of drawings that disagree with themselves (13 or 14 risers; 2x10 or 2x12 joists), or under assumed sizes; the bonus room's step only if a single step is a stairway (architect question 1). So the hand-check itself says needs review for them, and so does the checker. They are listed for the drawing's architect in the [README](README.md).
 
-The panel shows 309 items. 304 are the rules' rows, one per rule and part: each of the 10 bedroom windows gets every escape-opening rule except the three about basements, habitable attics and loft rooms. The other 5 are the items the hand-check predicted:
+The panel shows 310 items. 304 are the rules' rows, one per rule and part: each of the 10 bedroom windows gets every escape-opening rule except the three about basements, habitable attics and loft rooms. The other 6 are the items the hand-check predicted:
 
 - "the stairs weren't read"
 - the bonus room's 2 marked windows and the basement's 2, each "marked as an escape opening but isn't checked"
+- "Not checked yet by Gordium": the 86 egress sections Gordium has no rules for yet, window fall protection (R321.2.1) and hallway width (R318.6) first (added by PR #110)
 
 **Why they differ** (only where the hand-check settles a rule and the checker doesn't):
 
@@ -202,7 +203,7 @@ None of them changes house.yaml. Review rounds 1 to 4 found the rear steps, the 
 
 ## Found on the way (for Ben; no false pass today)
 
-- **The Egress section could one day say "complies" while sections it doesn't check are open.** The rulebook has no rules yet for R321.2.1 (window fall protection), R318.6 (hallway width), R318.1, R318.4, R319.1.1 and others (2026-11-14 decision, "Still undrafted"). The checker doesn't name them in the Egress section. On this house that matters: the 3052 double-hungs' bottoms are about 19 in above the floor, under R321.2.1's 24 in, so fall protection is a real question (answer key `window_fall_protection`). Today this can't produce a false "complies": the exterior-door, handrail and open-side rules always need review (their parts aren't produced), and so does the patio-cover flag above. It becomes possible once those parts are measured. Suggested fix, a design choice for Ben: one needs-review item in the Egress section that lists the labeled-rule sections not yet drafted, until they are.
+- **The Egress section could one day have said "complies" while sections it doesn't check were open.** The rulebook has no rules yet for R321.2.1 (window fall protection), R318.6 (hallway width) and others. On this house that matters: the 3052 double-hungs' bottoms are about 19 in above the floor, under R321.2.1's 24 in, so fall protection is a real question (answer key `window_fall_protection`). **Fixed by PR #110 (Ben, 2026-11-15):** the Egress section now carries one needs-review item, "Not checked yet by Gordium", listing every section with no rules yet, and egress never reads "complies" while it is there.
 - **R312 and R313 (room size and ceiling height) aren't in the egress rulebook.** The measuring already gives each bedroom's floor area (128 to 230 sq ft, all over 70) and ceiling (96 in), but no rule reads them. They are habitable-room rules (Chapter 3), not egress, so this is scope, not an error.
 
 ## Questions for the architects

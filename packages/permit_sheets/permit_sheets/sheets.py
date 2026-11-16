@@ -7,7 +7,7 @@ tables (the check's), placed here.
 
 import math
 
-from design_checker import present
+from design_checker import egress, present
 
 from . import plan as plan_mod
 from .draw import PT, Page, width, wrap
@@ -200,15 +200,57 @@ CODE_COLUMNS = [("#", 0.35), ("Item", 1.7), ("Requirement (rule id below)", 2.9)
                 ("Why / what to change", 3.7)]
 
 
-def code_analysis(got: dict, headline_lines) -> list[tuple[str, Page]]:
+NOT_YET_ITEM = "Not checked yet by Gordium"
+NOT_YET_WHY = "{n} code sections Gordium doesn't check yet: check each by hand (listed below; by name in the CSV)"
+NOT_YET_BANNER = "{result}: not checked yet by Gordium, check these {n} code sections by hand: {sections}"
+WAITING_WHY_SHORT = "{why}. Not checked yet by Gordium, even once the rooms are drawn: {n} code sections (listed below)"
+UNKNOWN_BANNER = "{result}: Gordium can't tell which code sections it doesn't check yet: check the whole law by hand"
+NOT_YET_LINE = "Not checked yet by Gordium: {n} code sections, check them by hand (code analysis line {line})"
+UNKNOWN_LINE = ("Not checked yet by Gordium: it can't tell which code sections, so check the whole law by hand (code "
+                "analysis line {line})")
+UNKNOWN = egress.NO_COVERAGE.split("{")[0]          # "Gordium can't tell which sections of the ": the check's words
+
+
+def not_checked_yet(r: dict) -> list[str] | None:
+    """The code sections a row says Gordium doesn't check yet: the egress not-checked-yet line's, or the waiting
+    row's (design_checker/egress.py, each item's detail citation); None when the row says it can't tell which (its
+    list can't be read: the whole law is to be checked by hand); [] for any other row, or a waiting row with none."""
+    own = r["Item id"].partition("#")[0]          # an id made unique across laws keeps its own name before "#"
+    mine, waiting = own.endswith("." + egress.NOT_YET_ID), own.endswith(".waiting")
+    if not (mine or waiting):
+        return []
+    sections = [s for s in r["Citation"].split(", ") if s]
+    if not sections and (mine or UNKNOWN in (r["Why / what to change"] or "")):
+        return None
+    return sections
+
+
+def code_table(got: dict) -> list[list]:
+    """G-001's rows: each item of the check, and under the not-checked-yet line (or the waiting row) a whole-width
+    banner listing every code section Gordium doesn't check yet, or saying it can't tell which."""
     rows, last = [], None
     for r in code_rows(got):
         if r["Law"] != last:
             rows.append(["__group__", r["Law"]])
             last = r["Law"]
-        rows.append([str(r["Line"]), r["Item"], (r["Requirement"] or r["Item"], None, r["Rule id"] or None),
-                     r["Required"], r["Proposed"], (r["Result"], r["status"]), r["Code section"],
-                     r["Why / what to change"]])
+        missing = not_checked_yet(r)
+        item, requirement, why = r["Item"], r["Requirement"] or r["Item"], r["Why / what to change"]
+        if missing and r["Item id"].partition("#")[0].endswith("." + egress.NOT_YET_ID):    # one line; a banner
+            item, why = NOT_YET_ITEM, NOT_YET_WHY.format(n=len(missing))
+        elif missing:                                                         # waiting: its own words, then them
+            why = WAITING_WHY_SHORT.format(why=egress.WAITING_WHY, n=len(missing))
+        rows.append([str(r["Line"]), item, (requirement, None, r["Rule id"] or None),
+                     r["Required"], r["Proposed"], (r["Result"], r["status"]), r["Code section"], why])
+        if missing:
+            rows.append(["__banner__", NOT_YET_BANNER.format(result=r["Result"], n=len(missing),
+                                                             sections=", ".join(missing)), r["status"]])
+        elif missing is None:
+            rows.append(["__banner__", UNKNOWN_BANNER.format(result=r["Result"]), r["status"]])
+    return rows
+
+
+def code_analysis(got: dict, headline_lines) -> list[tuple[str, Page]]:
+    rows = code_table(got)
     made = []
 
     def page():
@@ -481,6 +523,13 @@ def sheets(got: dict, project: dict) -> list[tuple[str, str, Page]]:
     headline = result_words(status, waiting)
     lines = [(f"Egress result: {headline}", status)] + [
         (f"{law['title']}: {law['summary']} (the check's own count)", None) for law in got["laws"]]
+    # never a set that reads as complete: the sections Gordium doesn't check yet, said under the result
+    for r in code_rows(got):
+        missing = not_checked_yet(r)
+        if missing or missing is None:
+            words_ = (NOT_YET_LINE.format(n=len(missing), line=r["Line"]) if missing
+                      else UNKNOWN_LINE.format(line=r["Line"]))
+            lines.append((words_, present.REVIEW if r["status"] != present.NOT_CHECKED else None))
     groups = [("G", "Code analysis: egress", code_analysis(got, lines)),
               ("LS", "Life-safety plan", life_safety(got, lines)),
               ("A", "Escape-window schedule", schedule(got, lines))]

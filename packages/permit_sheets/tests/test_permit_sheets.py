@@ -466,3 +466,91 @@ def test_malformed_stairs_are_not_read_never_silent(bad):
     texts = _ranch_sheets(lambda h: h.update(stairs=bad))
     assert "Stairs: not read from the drawing: NEEDS REVIEW" in texts["LS"]
     assert "No stairs in the drawing" not in texts["LS"]
+
+
+# ---- the sections Gordium doesn't check yet (design_checker/egress.py): never a set that reads as complete --------
+
+def _not_yet(r):
+    return [i for i in law_items(r) if i["id"].endswith(".not_checked_yet")]
+
+
+def _fresh_text(name):
+    """Every page's words of a fresh build of the house's sheets (never the committed golden)."""
+    out, _, _ = goldens.build(name)
+    with pdfplumber.open(io.BytesIO(out["permit_sheets.pdf"])) as pdf:
+        return " ".join(" ".join((p.extract_text() or "") for p in pdf.pages).split())
+
+
+@pytest.mark.parametrize("name", ["1_ranch_compliant", ORANGETOWN])
+def test_the_sections_not_checked_yet_are_printed_as_needs_review(name):
+    r = result(name)
+    [item] = _not_yet(r)
+    sections = item["detail"]["citation"].split(", ")
+    assert {"R321.2.1", "R318.6", "R319.5"} <= set(sections) and len(sections) > 50
+    [row] = [x for x in tables.code_rows(got(name)) if x["Item id"] == item["id"]]
+    assert row["Result"] == "NEEDS REVIEW" and row["Why / what to change"] == item["reason"]    # in full, in the CSV
+    flat = _fresh_text(name)
+    # G-001's result lines say so, and the table's banner lists every section, under the NEEDS REVIEW line
+    assert f"Not checked yet by Gordium: {len(sections)} code sections, check them by hand (code analysis line " \
+           f"{row['Line']})" in flat
+    assert f"NEEDS REVIEW: not checked yet by Gordium, check these {len(sections)} code sections by hand:" in flat
+    # the banner lists exactly the check's sections, in its order (never a substring match)
+    [banner] = [b for b in sheets.code_table(got(name)) if b[0] == "__banner__"]
+    assert banner == ["__banner__", sheets.NOT_YET_BANNER.format(result="NEEDS REVIEW", n=len(sections),
+                                                               sections=", ".join(sections)), present.REVIEW]
+
+
+def test_while_egress_waits_the_sheets_stay_waiting_and_still_list_the_sections():
+    r = result("0_no_rooms_yet")
+    assert _not_yet(r) == []                                       # waiting stays waiting: no needs-review line
+    [waiting] = law_items(r)
+    sections = waiting["detail"]["citation"].split(", ")
+    assert {"R321.2.1", "R318.6"} <= set(sections)
+    status, waits = source.overall(got("0_no_rooms_yet"))
+    assert status == present.NOT_CHECKED and waits                 # the headline is still WAITING
+    flat = _fresh_text("0_no_rooms_yet")
+    assert "Egress result: WAITING: NO ROOMS DRAWN YET" in flat
+    assert f"Not checked yet by Gordium: {len(sections)} code sections, check them by hand" in flat
+    assert f"WAITING: NO ROOMS DRAWN YET: not checked yet by Gordium, check these {len(sections)} code sections" in flat
+    assert "NEEDS REVIEW: not checked yet" not in flat
+
+
+@pytest.mark.parametrize("name", ["1_ranch_compliant", "0_no_rooms_yet"])
+def test_a_list_of_sections_that_cant_be_read_says_check_the_whole_law(name, monkeypatch):
+    """Review round 1 (permit sheets): a check that can't tell which sections it skips had no line under the result
+    and no banner, the sheet saying less than the check."""
+    from design_checker import egress
+    real = egress._not_checked_yet
+    monkeypatch.setattr(egress, "_not_checked_yet", lambda folder, rules: ([], "no 6_coverage_report/*.rules.yaml"))
+    house = _house(name)
+    r = check_site(goldens.site(), dict(goldens.FACTS), name=name, today=goldens.DATE, interior=house)
+    g = source.gather(r, about(), house)
+    banners = [b for b in sheets.code_table(g) if b[0] == "__banner__"]
+    assert len(banners) == 1 and "check the whole law by hand" in banners[0][1]
+    lines = [r_ for r_ in tables.code_rows(g) if sheets.not_checked_yet(r_) is None]
+    assert len(lines) == 1
+    # and said under the egress result, on the sheets themselves (review round 2)
+    pages = sheets.sheets(g, goldens.project_of(name))
+    said = sheets.UNKNOWN_LINE.format(line=lines[0]["Line"])
+    words_ = _page_words(pages)
+    assert said in words_[0]                                             # G-001, under the result
+    assert all(said in w for (number, _, _), w in zip(pages, words_) if number in ("LS-101", "A-601"))
+    monkeypatch.setattr(egress, "_not_checked_yet", real)
+    status, _ = source.overall(g)
+    assert status == (present.NOT_CHECKED if name == "0_no_rooms_yet" else present.REVIEW)
+
+
+def _page_words(pages):
+    """The words drawn on each page (its text marks), in drawing order."""
+    from permit_sheets.draw import svg
+    import re as _re
+    import html as _html
+    return [" ".join(_html.unescape(_re.sub(r"<[^>]+>", " ", svg(pg, number))).split()) for number, _, pg in pages]
+
+
+def test_a_not_checked_yet_row_renamed_across_laws_still_gets_its_banner():
+    """Review round 2 (permit sheets): an id made unique across laws ("egress.not_checked_yet#<law>") lost its banner."""
+    row = {"Item id": "egress.not_checked_yet#new_york/other", "Citation": "R321.2.1, R318.6", "Why / what to change": ""}
+    assert sheets.not_checked_yet(row) == ["R321.2.1", "R318.6"]
+    assert sheets.not_checked_yet(dict(row, **{"Item id": "egress.waiting#new_york/other"})) == ["R321.2.1", "R318.6"]
+    assert sheets.not_checked_yet(dict(row, Citation="")) is None

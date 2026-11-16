@@ -277,6 +277,10 @@ def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer(
     found["laws"][0]["rules"] = stairs                          # a house with no stairs: every row not applicable
     house = dict(ranch(), stairs=[])
     got = egress.check(found, house, {}, {"use": set()})
+    assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW),
+                                                              ("egress.not_checked_yet", present.REVIEW)]
+    found["laws"][0]["not_checked_yet"] = []     # this pin is about nothing_applied alone: every section checked
+    got = egress.check(found, house, {}, {"use": set()})
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW)]
     view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
     egress.add_to_view(view, got, "City of Ithaca")
