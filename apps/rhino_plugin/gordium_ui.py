@@ -580,7 +580,8 @@ def show(parts, view, stale=False, error=None, checking=False, job=None, cancell
                 parts.setdefault("line_status", {})[c["tag"]] = {"status": c.get("status") or "needs_review"}
                 li = ef.TreeGridItem()
                 li.Tag = c["tag"]
-                li.Values = System.Array[System.Object]([("" if parts["stale"] else c["mark"] + "  ") + c["title"],
+                li.Values = System.Array[System.Object]([(c.get("name") or "") if parts["stale"]   # out of date:
+                                                         else c["mark"] + "  " + c["title"],     # no result words
                                                          "", "", ""])
                 li.Expanded = parts["expanded"].get(li.Tag, not c["folded"])
                 for x in c["children"]:
@@ -608,7 +609,7 @@ def _item_row(parts, i, title=None):
     and its values in the list's own short form (logic.cell_text: "34'-11⅞"–" over two lines, never cut)."""
     stale_row = parts["stale"] and i["status"] != "not_checked"
     name, proposed, required, delta = logic.list_values(i)   # the use row: the use's own name as its Item;
-    values = [("" if stale_row else i["mark"] + "  ") + (title or name),   # a tax-map Delta and a span: short forms
+    values = [name if stale_row else i["mark"] + "  " + (title or name),     # out of date: no line words (results)   # a tax-map Delta and a span: short forms
               "—" if stale_row else logic.cell_text(proposed if i["status"] != "not_checked" else ""),
               "" if stale_row else logic.cell_text(required),
               "" if stale_row else logic.cell_text(delta)]

@@ -147,10 +147,10 @@ def _review_title(mine: list[dict]) -> str:
         said.append("a person decides: " + _some(decide))
     notes = [w for o in opens for w in o.get("notes") or []]
     if notes:                                          # the row's own reason ("no egress doors"), as it is
-        said.append(_some(notes))
+        said.append(", ".join(dict.fromkeys(notes)))  # never shortened: what the architect has to act on
     inputs = [w for o in opens for w in o.get("inputs") or []]
     if inputs:
-        said.append("to give: " + _some(inputs))
+        said.append("to give: " + ", ".join(dict.fromkeys(inputs)))   # never shortened: each one to supply
     worked = [w for o in opens for w in o.get("worked") or []]
     if worked:
         said.append("worked out, not yet checked by the rules: " + _some(worked))
@@ -258,6 +258,9 @@ def lines(items: list[dict]) -> dict:
                 line["title"] = _sections_title(mine[0]) if (mine[0].get("open") or {}).get("gordium") == SECTIONS \
                     else _own_title(mine[0])
             line["mark"] = present.MARK.get(line["status"], present.MARK[present.REVIEW])
+            # its name alone, without its result: what the panel shows while its results are out of date
+            line["name"] = mine[0].get("element") or (line["title"].split(": ")[0] if t == BY_HAND_T
+                                                      else mine[0].get("name") or line["title"])
             out[t].append(line)
     return out
 

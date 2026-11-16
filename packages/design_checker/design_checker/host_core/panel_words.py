@@ -105,7 +105,8 @@ def list_tree(view):
     """The panel's list as a tree, from the check's groups: [{tag, title, count, folded, children}], each child an
     item row {tag: the item id, item: the id, title: None or the line's words, mark} or, for a line of several
     items (design_checker/grouping.py: a part's rules, or a cause Gordium can't read yet), a line row {tag:
-    "line:<group>:<line>", title, mark, folded, children: [item rows]}. A line of one item is that item's row,
+    "line:<group>:<line>", title, mark, folded, children: [item rows]}. `name` is a line's name without its result
+    (the part, or the cause), for a list whose results are out of date. A line of one item is that item's row,
     named by the line's words. A group with no lines lists its items as before. Every id in a group's `items` is
     a row of it exactly once (a line row is no item: nothing is hidden by grouping, only folded)."""
     out = []
@@ -117,9 +118,10 @@ def list_tree(view):
             for ln in lines:
                 if len(ln["items"]) == 1:
                     node["children"].append({"tag": ln["items"][0], "item": ln["items"][0], "title": ln["title"],
-                                             "mark": ln.get("mark") or ""})
+                                             "name": ln.get("name"), "mark": ln.get("mark") or ""})
                 else:
                     node["children"].append({"tag": "line:" + g["key"] + ":" + ln["key"], "title": ln["title"],
+                                             "name": ln.get("name"),
                                              "mark": ln.get("mark") or "", "status": ln.get("status"),
                                              "folded": ln.get("folded", True),
                                              "children": [{"tag": x, "item": x, "title": None, "mark": None}

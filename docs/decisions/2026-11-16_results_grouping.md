@@ -19,7 +19,7 @@ permit sheet G-001 says "310 need review" over 17 pages: a plan reviewer would b
 | Tier | What goes in it | One line per | Shown |
 |---|---|---|---|
 | 1. Does not comply | every failing rule | part ("Bedroom 3 › Window 5") | open, first |
-| 2. Needs review | needs review the architect can act on: a judgment (a rule a person decides), a value the drawing can give (the frame isn't given; a list the description left out, such as no `stairs`), a check that already fails on what was measured or worked out ("may not comply: riser variation 1.5 in, needs ≤ 3/8 in"), the drawing's own problems; and anything not plainly Gordium's gap | part, or item that is no part's | open; "may not comply" lines first |
+| 2. Needs review | needs review the architect can act on: a judgment (a rule a person decides), a value the drawing can give (the frame isn't given; a list the description left out, such as no `stairs`), a check that already fails on what was measured or worked out ("may not comply: riser variation 1.5 in, needs ≤ 3/8 in"), the drawing's own problems; and anything not plainly Gordium's gap | part, or item that is no part's | open; "may not comply" lines first; what to give and what to decide never shortened |
 | 3. Check by hand: not read by Gordium yet | needs review **only** because Gordium can't read it: a part kind the interior description has no list for yet ("Not read from the model yet: handrails (10 rules), guards (open sides) (7 rules)…: check by hand"); details of a part that Gordium neither measures nor works out yet, when the rule reads nothing measured of that part (whether a stair is spiral, area well ladders); the code sections with no rules yet (#110's line) | cause | open, each line folded to its rules |
 | 4. Complies | complies, and not applicable ("the description says the house has no X", from the absent-parts work) | part | folded |
 
@@ -66,7 +66,7 @@ Zoning: 9 need review · … · Egress: 1 does not comply · 2 to review · 9 co
         rules: handrail sides 2, riser variation 0 in … · not read yet: riser count, serves sleeping loft
 ▾ Egress · Check by hand: not read by Gordium yet · 3
   ▸ ? Not read from the model yet: handrails (10 rules), guards (open sides) (7 rules), sleeping lofts (5 rules), … : check by hand
-  ▸ ? Not measured from the model yet: escape window details: fully openable, path height … (17 rules on 4 escape
+  ▸ ? Not measured from the model yet: escape window details: fully openable, path height … (17 rules on 2 escape
         windows), stair details: serves sleeping loft … (14 rules on Main stair), …: check by hand
     ? Not checked yet by Gordium: 86 code sections: check by hand
 ▸ Complies · …                                            (zoning's, folded)
@@ -84,7 +84,7 @@ in `code_analysis.csv`; the full per-rule table stays in `code_analysis.csv` and
 columns, plus "Shown on G-001 as"), so every rule is traceable:
 ```
 Egress result: NEEDS REVIEW
-Egress (NY State Residential Code 2025): 17 to review · 12 parts not read yet · 86 sections not checked yet (the check's own count)
+Egress (NY State Residential Code 2025): 17 to review · 10 parts not read yet · 86 sections not checked yet (the check's own count)
 #   Item                                   Rules                         Result        Code sections   Why / what to do
 NEEDS REVIEW
 1   Front entry door                       5 rules (CSV 1–5, 46)         NEEDS REVIEW  R318.2, BF103.2 a person decides: …; to give: the top of the threshold …
