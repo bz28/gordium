@@ -1672,6 +1672,7 @@ STOP_CASES = {
     "has_none_not_a_list": _set(("has_none",), "ramps"),
     "has_none_entry": _set(("has_none",), [1]),
     "has_none_listed": _set(("has_none",), [{"kind": "stair", "source": "A-2"}]),
+    "has_none_sleeping_room": _set(("has_none",), [{"kind": "sleeping_room", "source": "A-2"}]),
     "has_none_kind": _set(("has_none",), [{"kind": "elevator", "source": "A-2"}]),
     "has_none_no_source": _set(("has_none",), [{"kind": "ramp", "source": " "}]),
     "has_none_reading": _set(("has_none",), [{"kind": "ramp", "source": "A-2", "reading": "yes"}]),
@@ -1929,6 +1930,7 @@ def test_each_claim_empties_its_kinds_or_gives_its_measures():
     ([{"kind": "ramp", "source": "A-2"}, {"kind": "ramp"}], {}, "2 times"),
     ([{"kind": "ramps", "source": "A-2"}], {}, "not a kind it can say"),
     ([{"kind": "stair", "source": "A-2"}], {}, "an empty list (`stairs: []`)"),
+    ([{"kind": "sleeping_room", "source": "A-2"}], {}, "(`sleeping: false`)"),
     (["ramp"], {}, "entry #1"),
 ])
 def test_a_claim_that_cant_be_trusted_is_a_problem_and_its_kind_stays_not_read(entries, lists, words):

@@ -52,7 +52,7 @@ The panel shows 257 items. 304 are the rules' rows, one per rule and part: each 
 - "the stairs weren't read"
 - the bonus room's 2 marked windows and the basement's 2, each "marked as an escape opening but isn't checked"
 - "Not checked yet by Gordium": the 86 egress sections Gordium has no rules for yet, window fall protection (R321.2.1) and hallway width (R318.6) first (added by PR #110)
-- one for each thing house.yaml says the house has none of. Four are **not applicable**, with the claim's sheet and every rule it sets aside: "Sleeping lofts: not applicable", "Ramps", "Alternating tread devices", "Decks, porches or cantilevers over an escape opening". Three rest on a reading and **need review** as readings to confirm: "Habitable attics", "Ship's ladders", "Patio covers: not applicable if this reading is confirmed". They count toward nothing: never a pass, and (for the four) never a reason to review
+- one for each thing house.yaml says the house has none of. Four are **not applicable**, with the claim's sheet and every rule it sets aside: "Sleeping lofts: not applicable", "Ramps", "Alternating tread devices", "Decks, porches or cantilevers over an escape opening". Three rest on a reading and **need review** as readings to confirm: "Habitable attics", "Ship's ladders", "Patio covers: not applicable if this reading is confirmed". None is ever a pass; the four not applicable count toward nothing, and the three readings count as needs review
 
 **Why they differ** (only where the hand-check settles a rule and the checker doesn't):
 

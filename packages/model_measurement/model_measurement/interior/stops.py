@@ -20,6 +20,8 @@ STOPS = {
     "has_none_entry": "`has_none` entry #{n} isn't a `kind` (with its `source`): it isn't read",
     "has_none_listed": "`has_none` names {kind!r}, which the description lists itself: say there are none with an empty "
                        "list (`{key}: []`), not in `has_none`",
+    "has_none_sleeping_room": "`has_none` names 'sleeping_room': a room that isn't a sleeping room says so itself "
+                              "(`sleeping: false`), not in `has_none`",
     "has_none_kind": "`has_none` names {kind!r}, not a kind it can say the house has none of ({kinds}): it isn't read",
     "has_none_no_source": "the description says the house has no {words} but not where that comes from (`source`, "
                           "such as the sheet): it isn't taken, so their rules need review",

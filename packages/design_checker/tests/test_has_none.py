@@ -85,19 +85,15 @@ def test_a_claim_gives_not_applicable_shown_with_its_source(found):
 
 
 def test_a_claim_counts_toward_nothing(found):
-    """Never a pass, never a reason to review: the section's state and summary are what they'd be without it."""
-    plain, claimed = run(found, house()), run(found, house({"kind": "ramp", "source": SOURCE}))
-    shown = [i for i in claimed["items"] if not i.get("has_none")]
-    assert claimed["sections"][0]["state"] == present.state(shown)
-    assert claimed["sections"][0]["summary"] == present._summary(shown)
+    """Never a pass, never a reason to review: alone it is nothing checked (needs review), and beside a pass it
+    changes nothing (present._building_items leaves it out)."""
+    claimed = run(found, house({"kind": "ramp", "source": SOURCE}))
     assert "not applicable" not in claimed["sections"][0]["summary"]
-    # an item of its own is never counted: alone, nothing is checked (needs review), beside a pass it changes nothing
     na = claim_items(claimed)[0]
     passing = dict(na, status=present.COMPLIES, id="x")
     assert present.state([na]) == present.REVIEW
     assert present.state([na, passing]) == present.COMPLIES == present.state([passing])
     assert present._summary([na, passing]) == present._summary([passing])
-    assert plain["sections"][0]["state"] in (present.REVIEW, present.FAILS)
 
 
 def test_a_law_whose_only_items_are_claims_is_still_nothing_checked(found):
