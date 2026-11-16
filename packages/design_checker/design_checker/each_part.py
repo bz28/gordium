@@ -133,7 +133,10 @@ def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not
     own = row.get("values") or {}
     gaps = [m for m in missing if m in own and why_not.get(m) in GORDIUM_GAPS]
     measured = [m for m, v in own.items() if _usable(v, kinds.get(m))] + list(worked)
-    if missing and len(gaps) == len(missing) and not measured and not concern:
+    # a reason the measuring gave about this part that is not Gordium's gap ("this door is sliding") is a fact found
+    # about it: its rules stay with the architect, never folded as unread (review round 1 on #111)
+    found = [r for r in why_not.values() if r not in GORDIUM_GAPS]
+    if missing and len(gaps) == len(missing) and not measured and not concern and not found:
         return {"gordium": NOT_MEASURED, "kind": rule.get("for_each"), "measures": [_words(rule, m) for m in gaps]}
     out = {"gordium": None, "measures": [_words(rule, m) for m in missing],
            "gaps": [_words(rule, m) for m in gaps if m not in worked],

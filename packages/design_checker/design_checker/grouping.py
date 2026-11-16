@@ -20,6 +20,8 @@ The tiers, in the order they are shown:
 4. **complies**: complies, and not applicable (the description says the house has none), one line per part, folded.
 """
 
+import hashlib
+
 from design_checker import present
 
 FAILS_T, REVIEW_T, BY_HAND_T, COMPLIES_T, WAITING_T = "fails", "review", "by_hand", "complies", "waiting"
@@ -77,7 +79,10 @@ def _element_key(item: dict) -> tuple:
     p = item.get("part")
     if isinstance(p, dict):
         within = p.get("within") if isinstance(p.get("within"), dict) else {}
-        return ("part", p.get("part"), p.get("id"), within.get("id"), item.get("element"))
+        # one line per thing the architect drew: a window read as an escape window and as an opening is one line
+        if item.get("element"):
+            return ("element", item["element"])      # its full name, room and all ("Bedroom 3 › Window 5")
+        return ("part", p.get("part"), p.get("id"), within.get("id"))
     return ("item", item.get("id"))
 
 
@@ -228,8 +233,11 @@ def lines(items: list[dict]) -> dict:
     out = {}
     for t in TIERS:
         out[t] = []
-        for n, (key, mine) in enumerate(got[t], 1):
-            line = {"key": f"{t}#{n}", "tier": t, "items": [i["id"] for i in mine],
+        for key, mine in got[t]:
+            # the key names the part or cause, not the position, so a line the architect opened stays open on the
+            # same part after an edit reorders the lines; a part's failures are shown open, never folded
+            line = {"key": f"{t}#" + hashlib.sha1(repr(key).encode()).hexdigest()[:10], "tier": t,
+                    "items": [i["id"] for i in mine], "folded": t != FAILS_T,
                     "status": min((i["status"] for i in mine), key=_caution), "rules": len(mine)}
             if t == FAILS_T:
                 line["title"] = _fails_title(mine)

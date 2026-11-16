@@ -62,8 +62,12 @@ def shown_as(got: dict) -> dict:
         if lines is None:
             out.update({x["item"]["id"]: "Waiting › " + (x["item"].get("name") or "") for x in law["items"]})
             continue
+        named = {x["item"]["id"]: x["item"].get("name") or "" for x in law["items"]}
         for t, mine in lines.items():
             for ln in mine:
+                if t == grouping.FAILS_T:        # G-001 prints each failing rule on its own row, under its name
+                    out.update({i: f"{grouping.TITLES[t]} › {named.get(i, '')} (its own row)" for i in ln["items"]})
+                    continue
                 for c in ln.get("causes") or [{"words": ln["title"], "items": ln["items"]}]:
                     title = ln["title"] if not ln.get("causes") else \
                         ln["title"].split(": ")[0] + ": " + c["words"]
