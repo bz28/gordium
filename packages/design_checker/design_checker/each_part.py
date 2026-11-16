@@ -88,31 +88,42 @@ STAND_INS = {"open_side": "guard"}
 
 
 def _stand_ins(rule: dict, unread: list, given, allowed: dict) -> dict | None:
-    """When a kind this rule needs isn't read but the measuring measured its stand-in (a guard for an open side):
-    the stand-in's values the rule reads, each part's, and a concern if the check fails on them ("guard height
-    30 in, needs ≥ 36 in"). Words only, the row's status is unchanged; None when nothing stands in."""
+    """When a kind this rule needs isn't read but the measuring read its stand-in (a guard for an open side): every
+    value measured on each stand-in (any of them can show a problem: a 31 in gap in a guard is shown on the sphere
+    rules too, though they don't read it yet), each reason the measuring gave about one ("its members don't reach its
+    stated top"), and a concern if the check fails on the values it reads ("guard height 30 in, needs ≥ 36 in", said
+    with the rule it is from when the rule may not apply to that part). Words only, the row's status is unchanged;
+    None when nothing stands in, or no stand-in has a value or a reason (review round 5 on #111)."""
     if not isinstance(given, dict):
         return None
     names = parts.formula_names(rule)
-    worked, concerns = [], []
+    worked, found, gaps, concerns = [], [], [], []
     for k in unread:
         for p in given.get(STAND_INS.get(k)) or []:
-            got = {m: v for m, v in ((p or {}).get("measures") or {}).items() if m in names and v is not None}
-            if not got:
+            if not isinstance(p, dict):
                 continue
-            worked += [f"{p.get('name') or p.get('id')}: {_words(rule, m)} {_n(v)}{_unit(rule, m)}"
-                       for m, v in got.items()]
+            who = p.get("name") or p.get("id")
+            got = {m: v for m, v in (p.get("measures") or {}).items() if v is not None}
+            worked += [f"{who}: {m.replace('_', ' ')} {_n(v)}{_unit(rule, m)}" for m, v in got.items()]
+            why = p.get("not_measured") if isinstance(p.get("not_measured"), dict) else {}
+            found += [f"{who}: {m.replace('_', ' ')} not measured ({w})" for m, w in why.items()
+                      if w not in GORDIUM_GAPS]
+            gaps += [f"{who}: {m.replace('_', ' ')}" for m, w in why.items() if w in GORDIUM_GAPS]
+            read = {m: v for m, v in got.items() if m in names}
             try:
-                c = _first_failing(rule, got, allowed, if_it_applies=True) \
-                    if isinstance(rule.get("check"), str) else None
+                c = _first_failing(rule, read, allowed, if_it_applies=True) \
+                    if read and isinstance(rule.get("check"), str) else None
             except Exception:
                 c = None
-            if c:
-                concerns.append(f"{p.get('name') or p.get('id')}: {c}")
-    if not worked:
+            if c:      # the rule's applies_when was left aside (which open side the guard is on isn't given yet)
+                concerns.append(f"{who}: {c}" + (f", if {_title(rule)} applies to it" if rule.get("applies_when")
+                                                 else ""))
+    if not worked and not found:
         return None
-    out = {"gordium": None, "measures": [], "gaps": [], "worked": [],
-           "notes": ["measured as guards, not yet given to these rules: " + ", ".join(dict.fromkeys(worked))],
+    # the measuring's reasons are shown as it gave them (some are the drawing's to give, some Gordium's to measure)
+    out = {"gordium": None, "measures": [], "gaps": list(dict.fromkeys(gaps)), "worked": [],
+           "notes": (["measured as guards, not yet given to these rules: " + ", ".join(dict.fromkeys(worked))]
+                     if worked else []) + list(dict.fromkeys(found)),
            "inputs": [], "decide": False}
     if concerns:
         out["concern"] = "; ".join(concerns)

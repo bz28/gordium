@@ -360,3 +360,63 @@ def test_a_measured_guard_that_fails_is_shown_never_folded_as_not_read():
     assert height and not any(x in ln["items"] for ln in got[grouping.BY_HAND_T] for x in height)
     assert any("may not comply" in ln["title"] and "guard height 30 in, needs ≥ 36 in" in ln["title"]
                for ln in got[grouping.REVIEW_T])
+
+
+# ---- review round 5 on #111: anything the measuring found on a guard is shown, never folded as "not read" ---------
+
+def _loft(change):
+    import copy
+    from permit_sheets import goldens as sheet_goldens
+    from design_checker.check import check_site
+    house = copy.deepcopy(sheet_goldens.interior_of("4_loft"))
+    for g in change(house):
+        house["guards"].append(g)
+    r = check_site(sheet_goldens.site(), dict(sheet_goldens.FACTS), name="4_loft", today=sheet_goldens.DATE,
+                   interior=house)
+    items = law_items(r)
+    guards = [i["id"] for i in items if "r321" in (i.get("rule") or "")]
+    return items, grouping.lines(items), guards
+
+
+def test_a_guard_the_measuring_could_not_measure_keeps_its_rules_to_review_with_its_reason():
+    def no_top_rail(house):           # its balusters stop at 30 in: "the guard's members don't reach its stated top"
+        house["guards"][0]["members"] = house["guards"][0]["members"][1:]
+        return []
+    items, got, guards = _loft(no_top_rail)
+    assert len(guards) == 7 and not any(x in ln["items"] for ln in got[grouping.BY_HAND_T] for x in guards)
+    assert any("stated top" in ln["title"] for ln in got[grouping.REVIEW_T])
+    assert all(i["status"] == present.REVIEW for i in items if i["id"] in guards)     # statuses unchanged
+
+
+def test_a_guard_value_the_rule_does_not_read_yet_is_shown_on_its_rules():
+    def two_balusters(house):         # a 31 in gap (the 4 in sphere rule doesn't read the sphere yet: a flag)
+        house["guards"][0]["members"] = house["guards"][0]["members"][:3]
+        return []
+    items, got, guards = _loft(two_balusters)
+    sphere = [i["id"] for i in items if i.get("rule") == "general.r321_1_3_guard_opening_4_inch_sphere"]
+    assert sphere and not any(x in ln["items"] for ln in got[grouping.BY_HAND_T] for x in sphere)
+    assert any("guard opening sphere 31 in" in ln["title"] for ln in got[grouping.REVIEW_T])
+
+
+def test_every_guard_is_named_on_the_line_the_measured_and_the_one_not_measured():
+    def second_guard(house):
+        import copy
+        g = copy.deepcopy(house["guards"][0])
+        g.update(id="g2", name="Second guard", members=g["members"][1:])
+        return [g]
+    items, got, guards = _loft(second_guard)
+    titles = " ".join(ln["title"] for ln in got[grouping.REVIEW_T])
+    assert "Loft guard: guard height 36 in" in titles and "Second guard: guard height not measured" in titles
+
+
+def test_a_concern_from_a_rule_that_may_not_apply_to_the_guard_says_which_rule():
+    import yaml
+    from rule_format.rulebook import REPO
+    from design_checker import each_part
+    rules = yaml.safe_load((REPO / "regulations/jurisdictions/new_york/new_york_state/5_building_code_rules/drafted/"
+                                   "general.yaml").read_text())
+    [rule] = [r for r in rules["rules"] if r["id"] == "general.r321_1_2_guard_height_open_side_not_stair"]
+    given = {"guard": [{"id": "sg", "name": "Stair guard", "measures": {"guard_height": 35.0}, "not_measured": {}}]}
+    got = each_part._stand_ins(rule, ["open_side"], given, {})
+    assert got["concern"] == "Stair guard: guard height 35 in, needs ≥ 36 in, if Guard height, open sides other " \
+                             "than stairs (R321.1.2) applies to it"
