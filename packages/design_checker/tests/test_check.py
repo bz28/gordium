@@ -4319,6 +4319,19 @@ def test_the_label_claim_counts_its_own_line_too():
     assert "not broken and not forced" in script and "not too_far" in script
     assert "for y_ in range(" in script and "s_ != own" not in script
 
+def _fake_groups():
+    """Two groups as the Rhino panel holds them (Eto TreeGridItems): A open, with a row and an open line of two;
+    B folded, with one row."""
+    class Kids(list):
+        Count = property(len)
+
+    class Row:
+        def __init__(self, tag, kids=(), expanded=True):
+            self.Tag, self.Children, self.Expanded = tag, Kids(kids), expanded
+    return [Row("group:a", [Row("a1"), Row("line:a:L", [Row("l1"), Row("l2")])]),
+            Row("group:b", [Row("b1")], expanded=False)]
+
+
 def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown():
     """The Rhino job at 6361a3f (architect's eye): with the shorter list, the panel opened with the list scrolled a
     little, "Does not comply · 1" half under the column titles. A new list (first fill, other rows or groups) now
@@ -4327,12 +4340,22 @@ def test_the_first_group_heading_is_whole_at_the_top_whenever_the_list_is_shown(
     src = host_text("rhino", "ui", purpose="wiring")
     show = src[src.index("def show(parts"):src.index("def _scroll_to(")]
     assert show.index("tree.DataStore = store") < show.index("if shape != parts.get(\"shape\"):") < \
-        show.index("_scroll_to(tree, 0, len(shape))") < show.index('parts["shape"] = shape') < \
-        show.index("tree.SelectedRow = ")
-    assert show.index("tree.SelectedRow = k + 1 + c") < show.index("_scroll_to(tree, k + 1 + c, k + 2 + c)")
+        show.index("_scroll_to(tree, 0, _visible_rows(parts[\"groups\"]))") < show.index('parts["shape"] = shape') \
+        < show.index("tree.SelectedRow = at")
+    assert show.index("tree.SelectedRow = at") < show.index("_scroll_to(tree, at, at + 1)")
     helper = src[src.index("def _scroll_to("):].split("\ndef ", 1)[0]
     ns = {}
     exec(helper, ns)                                                          # noqa: S102
+    # the list's rows as shown, with a law's lines (results grouping): a group's heading, its open rows, and an
+    # open line's rows; a folded group or line hides its rows
+    rows_ = src[src.index("def _visible_rows("):].split("\ndef ", 1)[0] + "\n" + \
+        src[src.index("def _visible_index("):].split("\ndef ", 1)[0]
+    exec(rows_, ns)                                                           # noqa: S102
+    groups = _fake_groups()
+    assert ns["_visible_rows"](groups) == 6       # A, a1, line L, l1, l2 · B (folded)
+    assert [ns["_visible_index"](groups, t) for t in ("a1", "l1", "l2", "b1")] == [1, 3, 4, None]
+    groups[0].Children[1].Expanded = False        # the line folded: its rows hidden
+    assert ns["_visible_rows"](groups) == 4 and ns["_visible_index"](groups, "l2") is None
     calls = []
     tree = type("Tree", (), {"ScrollToRow": lambda self, row: calls.append(row)})()
     ns["_scroll_to"](tree, 0, 0)                                              # an empty list: never scrolled
@@ -4621,9 +4644,12 @@ def test_a_recheck_brings_the_newly_failing_row_into_view(facts):
     ui = host_text("rhino", "ui", purpose="wiring")
     body = ui[ui.index("def show(parts, view"):ui.index("def _scroll_to(")]
     assert 'if select in by_id:' in body and 'parts["selected"] = select' in body \
-        and 'parts["expanded"]["group:" + g["key"]] = True' in body
-    # selected and scrolled to, its group opened BEFORE the list is built from parts["expanded"]
-    assert body.index('parts["expanded"]["group:" + g["key"]] = True') < body.index("gi.Expanded = parts[")
+        and 'parts["expanded"][g["tag"]] = True' in body and 'parts["expanded"][c["tag"]] = True' in body
+    # selected and scrolled to, its group and its line (results grouping) opened BEFORE the list is built from
+    # parts["expanded"], then selected at its row in the visible list
+    assert body.index('parts["expanded"][g["tag"]] = True') < body.index("gi.Expanded = parts[")
+    assert body.index('parts["expanded"][c["tag"]] = True') < body.index("li.Expanded = parts[")
+    assert 'at = _visible_index(parts["groups"], parts["selected"])' in body and "tree.SelectedRow = at" in body
     # selecting it never takes the keyboard from the viewport (Focus() is only for #32's wait window and #33's
     # address field, in their own windows)
     scroll = ui[ui.index("def _scroll_to("):ui.index("def ", ui.index("def _scroll_to(") + 10)]

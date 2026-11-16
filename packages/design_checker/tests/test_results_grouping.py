@@ -338,3 +338,25 @@ def test_every_decision_is_named_never_shortened():
               "rule": f"rule_{n}", "open": {"gordium": None, "decide": True}} for n in range(4)]
     [line] = grouping.lines(items)[grouping.REVIEW_T]
     assert "more" not in line["title"] and line["title"].count("Rule") == 4
+
+
+# ---- review round 4 on #111: a part measured under another kind is never "not read" -------------------------------
+
+def test_a_measured_guard_that_fails_is_shown_never_folded_as_not_read():
+    import copy
+    from permit_sheets import goldens as sheet_goldens
+    from design_checker.check import check_site
+    house = copy.deepcopy(sheet_goldens.interior_of("4_loft"))
+    g = house["guards"][0]
+    g["top"] = 3505.2                                   # 30 in above the loft floor (needs ≥ 36 in)
+    g["members"][0] = {"left": 0, "right": 1219.2, "bottom": 3467.1, "top": 3505.2}
+    for m in g["members"][2:]:
+        m["top"] = 3467.1
+    r = check_site(sheet_goldens.site(), dict(sheet_goldens.FACTS), name="4_loft", today=sheet_goldens.DATE,
+                   interior=house)
+    items = law_items(r)
+    got = grouping.lines(items)
+    height = [i["id"] for i in items if i["rule"] == "general.r321_1_2_guard_height_open_side_not_stair"]
+    assert height and not any(x in ln["items"] for ln in got[grouping.BY_HAND_T] for x in height)
+    assert any("may not comply" in ln["title"] and "guard height 30 in, needs ≥ 36 in" in ln["title"]
+               for ln in got[grouping.REVIEW_T])
