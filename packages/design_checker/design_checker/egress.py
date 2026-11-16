@@ -61,9 +61,11 @@ INTERIOR_PROBLEM = "The interior drawing: {why}"
 SKIPPED = ("{name} is marked as an escape opening but isn't checked: {why}. An escape opening may also be required in a "
            "{where} (R319.1), which {are} read from the drawing yet: check it by hand")
 # the spaces R319.1 also asks for one in, unless the description says (as a settled claim) the house has none
-SKIPPED_SPACES = (("basement", "basement"), ("habitable_attic", "habitable attic"))
+SKIPPED_SPACES = (("basement", "basement"), ("habitable_attic", "habitable attic"),
+                  ("sleeping_loft", "room a sleeping loft is open to"))
 SKIPPED_ALL_CLAIMED = ("{name} is marked as an escape opening but isn't checked: {why}. The description says the house "
-                       "has no basements and no habitable attics, where R319.1 would also ask for one: check it by hand")
+                       "has no basements, no habitable attics and no sleeping lofts, the other spaces R319.1 asks for "
+                       "one in: check it by hand")
 NOT_PER_PART = ("this rule isn't written for each part (no for_each), and a state law's rules are checked only part "
                 "by part: it isn't checked, so check it by hand")
 COVERAGE = "6_coverage_report/*.rules.yaml"      # which pieces labeled rule have rules (python -m section_labeling coverage)
@@ -306,7 +308,8 @@ def _skipped(skip: dict, claims: dict) -> str:
     unread = [words for kind, words in SKIPPED_SPACES if (claims.get(kind) or {}).get("reading") is not False]
     if not unread:
         return SKIPPED_ALL_CLAIMED.format(name=name, why=skip.get("why"))
-    return SKIPPED.format(name=name, why=skip.get("why"), where=" or ".join(unread),
+    where = unread[0] if len(unread) == 1 else ", ".join(unread[:-1]) + " or " + unread[-1]
+    return SKIPPED.format(name=name, why=skip.get("why"), where=where,
                           are="isn't" if len(unread) == 1 else "aren't")
 
 

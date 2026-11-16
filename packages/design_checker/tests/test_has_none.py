@@ -234,12 +234,17 @@ def test_a_pass_that_reads_a_reading_claims_measure_needs_review(found):
 
 
 @pytest.mark.parametrize("claims, says", [
-    ([], "required in a basement or habitable attic (R319.1), which aren't read from the drawing yet"),
-    ([{"kind": "basement", "source": "A-1"}], "required in a habitable attic (R319.1), which isn't read from the drawing"),
-    ([{"kind": "basement", "source": "A-1"}, {"kind": "habitable_attic", "source": "A-5", "reading": True}],
+    ([], "required in a basement, habitable attic or room a sleeping loft is open to (R319.1), which aren't read"),
+    ([{"kind": "basement", "source": "A-1"}, {"kind": "sleeping_loft", "source": "A-3"}],
+     "required in a habitable attic (R319.1), which isn't read from the drawing"),
+    ([{"kind": "basement", "source": "A-1"}, {"kind": "sleeping_loft", "source": "A-3"},
+      {"kind": "habitable_attic", "source": "A-5", "reading": True}],
      "required in a habitable attic (R319.1), which isn't read from the drawing"),
     ([{"kind": "basement", "source": "A-1"}, {"kind": "habitable_attic", "source": "A-5"}],
-     "The description says the house has no basements and no habitable attics, where R319.1 would also ask for one"),
+     "required in a room a sleeping loft is open to (R319.1), which isn't read from the drawing"),
+    ([{"kind": "basement", "source": "A-1"}, {"kind": "habitable_attic", "source": "A-5"},
+      {"kind": "sleeping_loft", "source": "A-3"}],
+     "has no basements, no habitable attics and no sleeping lofts, the other spaces R319.1 asks for one in"),
 ])
 def test_an_unchecked_escape_opening_names_only_the_spaces_not_settled(found, claims, says):
     """An office's escape window isn't checked (not a sleeping room): its words never call a basement "not read"

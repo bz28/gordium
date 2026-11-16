@@ -47,6 +47,30 @@ def words(kind: str) -> str:
     return SAID.format(words=KINDS[kind]["words"])
 
 
+def _number(v) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def below_ground(description: dict) -> str | None:
+    """What in the description shows a space below the ground, which a "no basements" claim can't stand beside (the
+    first found), or None. Only what it states: an opening with an area well (the format's "for an opening below the
+    ground"), or a room whose floor is below the ground outside one of its openings. It never says there is a
+    basement (grade plane is an average, measured elsewhere): it only refuses the claim, so the rules need review."""
+    rooms = {r.get("id"): r for r in description.get("rooms") or [] if isinstance(r, dict)}
+    for o in description.get("openings") or []:
+        if not isinstance(o, dict):
+            continue
+        name = o.get("name") or o.get("id")
+        if o.get("area_well") is not None:
+            return f"opening {name} has an area well"
+        floor = (rooms.get(o.get("room")) or {}).get("floor_elevation")
+        ground = o.get("ground_outside")
+        grounds = [g for g in (ground if isinstance(ground, list) else [ground]) if _number(g)]
+        if _number(floor) and grounds and floor < max(grounds):
+            return f"the floor of opening {name}'s room is below the ground outside it"
+    return None
+
+
 def read(description: dict) -> tuple[dict, list[str]]:
     """({kind: {"source", "reading", "words", "parts", "openings", "stairs"}} for every claim that can be trusted, [the problem with each
     one that can't]). No `has_none` is no claim."""
@@ -94,6 +118,9 @@ def read(description: dict) -> tuple[dict, list[str]]:
         listed = KINDS[kind]["list"]
         if listed is not None and listed in description and description[listed] != []:
             problems.append(Stop("has_none_contradicted", words=KINDS[kind]["words"], key=listed).reason)
+            continue
+        if kind == "basement" and (below := below_ground(description)):
+            problems.append(Stop("has_none_below_ground", what=below).reason)
             continue
         k = KINDS[kind]
         claims[kind] = {"source": sources[0][0], "reading": sources[0][1], "words": words(kind),

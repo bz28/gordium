@@ -1672,6 +1672,9 @@ STOP_CASES = {
     "has_none_not_a_list": _set(("has_none",), "ramps"),
     "has_none_entry": _set(("has_none",), [1]),
     "has_none_listed": _set(("has_none",), [{"kind": "stair", "source": "A-2"}]),
+    "has_none_below_ground": _set(("has_none",), [{"kind": "basement", "source": "A-1"}]),
+    "has_none_below_ground": _with(base, lambda d: d.update(has_none=[{"kind": "basement", "source": "A-1"}]),
+                                   lambda d: d["openings"][0].update(ground_outside=12)),
     "has_none_sleeping_room": _set(("has_none",), [{"kind": "sleeping_room", "source": "A-2"}]),
     "has_none_kind": _set(("has_none",), [{"kind": "elevator", "source": "A-2"}]),
     "has_none_no_source": _set(("has_none",), [{"kind": "ramp", "source": " "}]),
@@ -1949,3 +1952,25 @@ def test_has_none_not_a_list_reads_no_claim():
     d["has_none"] = {"kind": "ramp", "source": "A-2"}
     got = measure(d)
     assert got["parts"].get("ramp") is None and got["has_none"] == {} and got["problems"]
+
+
+@pytest.mark.parametrize("change, refused", [
+    (lambda d: None, None),                                                       # on the ground: taken
+    (lambda d: d["openings"][0].update(ground_outside=12), "below the ground outside it"),
+    (lambda d: d["openings"][0].update(ground_outside=[-12, 6]), "below the ground outside it"),   # the higher end
+    (lambda d: d["openings"][0].update(ground_outside=-30), None),               # ground below the floor: taken
+    (lambda d: d["openings"][0].update(area_well={"floor_elevation": -10, "width": 40, "projection": 36}),
+     "has an area well"),
+])
+def test_a_no_basements_claim_cant_stand_beside_a_space_below_the_ground(change, refused):
+    """The description itself shows a space below the ground (an area well, the format's "for an opening below the
+    ground", or a room's floor below the ground outside its opening): "no basements" beside it is refused, and the
+    basement rules need review (review round 4). Only refused, never "there is a basement"."""
+    d = _claims({"kind": "basement", "source": "A-1"})
+    change(d)
+    got = measure(d)
+    if refused is None:
+        assert got["parts"]["basement"] == [] and "basement" in got["has_none"]
+    else:
+        assert got["parts"].get("basement") is None and "basement" not in got["has_none"]
+        assert any(refused in p for p in got["problems"]), got["problems"]
