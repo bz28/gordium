@@ -82,6 +82,43 @@ def _unread(rule: dict, given) -> list[str]:
             not isinstance(given.get(k) if isinstance(given, dict) else None, list)]
 
 
+# a part kind the rules name that the measuring measures under another kind: the rules' open sides are the
+# description's guards (model_measurement.interior measures each guard's height and openings)
+STAND_INS = {"open_side": "guard"}
+
+
+def _stand_ins(rule: dict, unread: list, given, allowed: dict) -> dict | None:
+    """When a kind this rule needs isn't read but the measuring measured its stand-in (a guard for an open side):
+    the stand-in's values the rule reads, each part's, and a concern if the check fails on them ("guard height
+    30 in, needs ≥ 36 in"). Words only, the row's status is unchanged; None when nothing stands in."""
+    if not isinstance(given, dict):
+        return None
+    names = parts.formula_names(rule)
+    worked, concerns = [], []
+    for k in unread:
+        for p in given.get(STAND_INS.get(k)) or []:
+            got = {m: v for m, v in ((p or {}).get("measures") or {}).items() if m in names and v is not None}
+            if not got:
+                continue
+            worked += [f"{p.get('name') or p.get('id')}: {_words(rule, m)} {_n(v)}{_unit(rule, m)}"
+                       for m, v in got.items()]
+            try:
+                c = _first_failing(rule, got, allowed, if_it_applies=True) \
+                    if isinstance(rule.get("check"), str) else None
+            except Exception:
+                c = None
+            if c:
+                concerns.append(f"{p.get('name') or p.get('id')}: {c}")
+    if not worked:
+        return None
+    out = {"gordium": None, "measures": [], "gaps": [], "worked": [],
+           "notes": ["measured as guards, not yet given to these rules: " + ", ".join(dict.fromkeys(worked))],
+           "inputs": [], "decide": False}
+    if concerns:
+        out["concern"] = "; ".join(concerns)
+    return out
+
+
 def _more(given) -> dict:
     """{(kind, part id): the values the measuring worked out but doesn't give the rules yet (its `more`)}."""
     if not isinstance(given, dict):
@@ -111,6 +148,9 @@ def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not
     if row.get("reason"):
         if unread and row["reason"] == f"the {' and the '.join(parts._plural(k) for k in unread)} aren't read yet":
             drawn = [k for k in unread if k in READ_KINDS]
+            stood = _stand_ins(rule, unread, given, allowed)
+            if stood is not None:    # measured under another kind (a guard for an open side): never a gap
+                return stood
             if not drawn:            # kinds Gordium has no way to read yet: its gap
                 return {"gordium": NOT_READ, "kinds": unread}
             # a kind the description can give but left out (no `stairs` list): the drawing's to give, never a gap
