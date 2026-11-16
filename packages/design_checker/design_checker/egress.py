@@ -73,7 +73,16 @@ NO_COVERAGE = ("Gordium can't tell which sections of the {title} it doesn't chec
                "hand")
 NOTHING_APPLIED = ("None of the {title} rules applied to the parts drawn (every one not applicable): nothing of this law "
                    "was checked, so check it by hand")
-ORDER = {present.FAILS: 0, present.REVIEW: 1, present.NOT_CHECKED: 2, present.COMPLIES: 3}
+# what the interior description says the house has none of: one item per claim, never hidden, counted toward nothing
+HAS_NONE_ID = "has_none"
+HAS_NONE_NAME = "{words}: not applicable"
+HAS_NONE_WHY = "Not applicable: {said} ({source}). The rules this sets aside: {rules}"
+# a claim that rests on a reading of the law, not on the drawings alone: shown as one to confirm (needs review)
+HAS_NONE_READING_NAME = "{words}: not applicable if this reading is confirmed"
+HAS_NONE_READING_WHY = ("Confirm: {said}, a reading to confirm ({source}). If it is right, these rules don't apply: "
+                        "{rules}")
+HAS_NONE_NO_RULES = "none of the rules checked turns on it"
+ORDER = {present.FAILS: 0, present.REVIEW: 1, present.NOT_CHECKED: 2, present.COMPLIES: 3, present.NOT_APPLICABLE: 4}
 
 
 def refuse_state_alone(jurisdiction) -> None:
@@ -217,7 +226,8 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
                          "rules": len(law["rules"]), "rulebook": _shown(law["rulebook"]),
                          "problems": list(law["problems"])})
     return {"sections": sections, "items": items, "rows": rows, "results": results, "waiting": waiting,
-            "interior": None if measured is None else {k: measured[k] for k in ("parts", "problems", "not_checked")},
+            "interior": None if measured is None else {k: measured[k] for k in ("parts", "problems", "not_checked",
+                                                                                "has_none")},
             "interior_sha256": fingerprint(interior)}
 
 
@@ -255,7 +265,8 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
                                                  else "")
         return [_own_item(law, f"{law['short'].lower()}.rules", f"{law['short']} rules", present.REVIEW,
                           BAD_RULES.format(title=law["title"], why=why))]
-    got = each_part.check_parts(law["rules"], measured["parts"], values, allowed)
+    claims = measured.get("has_none") or {}
+    got = each_part.check_parts(law["rules"], measured["parts"], values, allowed, claims)
     rows += got["rows"]
     for key, answer in got["results"].items():   # one rule id in two laws: the more cautious answer, never kinder
         results[key] = part_rules.rule_result([{"outcome": answer}] + ([{"outcome": results[key]}]
@@ -275,10 +286,39 @@ def _law_items(law, measured, values, allowed, rows, results) -> list[dict]:
     out += [_own_item(law, f"{law['short'].lower()}.skipped#{n}", f"{skip.get('name') or skip.get('id')}: not checked",
                       present.REVIEW, SKIPPED.format(name=skip.get("name") or skip.get("id"), why=skip.get("why")))
             for n, skip in enumerate(measured["not_checked"], 1)]
-    if not out:          # every row not applicable (left out of the panel): never a law that vanishes from the answer
+    out += [_has_none_item(law, kind, claim, got["set_aside"].get(kind) or [], by_id) for kind, claim in claims.items()]
+    # every row not applicable (left out of the panel; a claim's item counts toward nothing): never a law that
+    # vanishes from the answer, or reads as checked when nothing was
+    if not [i for i in out if i["status"] != present.NOT_APPLICABLE]:
         out.append(_own_item(law, f"{law['short'].lower()}.nothing_applied", f"{law['short']}: nothing checked",
                              present.REVIEW, NOTHING_APPLIED.format(title=law["title"])))
     return out
+
+
+def _section(law: dict, rule: dict) -> str:
+    """The code section a rule's first quote is in ("R318.8.1"), or "" where it can't be told."""
+    first = next((s for s in rule.get("sources") or [] if isinstance(s, dict)), {})
+    lines = first.get("lines") if isinstance(first.get("lines"), list) else []
+    return law["section_of"](first.get("file"), first.get("page"), lines[0]) if law["section_of"] and lines else ""
+
+
+def _has_none_item(law: dict, kind: str, claim: dict, keys: list, by_id: dict) -> dict:
+    """One claim's item: "Ramps: not applicable", its words and source, and every rule it set aside (by title and
+    section; the sections also as its citation). Status not applicable: shown, never counted (present.state). A
+    claim marked as a reading ("an unfinished attic is not a habitable attic") is one to confirm: needs review."""
+    rules = [by_id.get(k) or {"title": k} for k in keys]
+    titled = [(str(r.get("title") or r.get("id") or ""), _section(law, r)) for r in rules]
+    named = "; ".join(t if not sec or sec in t else f"{t} ({sec})" for t, sec in titled) or HAS_NONE_NO_RULES
+    reading = claim.get("reading") is True
+    why = (HAS_NONE_READING_WHY if reading else HAS_NONE_WHY).format(said=claim["words"], source=claim["source"],
+                                                                      rules=named)
+    words = claim["words"].rsplit(" has no ", 1)[-1]
+    item = _own_item(law, f"{law['short'].lower()}.{HAS_NONE_ID}.{kind}",
+                     (HAS_NONE_READING_NAME if reading else HAS_NONE_NAME).format(words=words[:1].upper() + words[1:]),
+                     present.REVIEW if reading else present.NOT_APPLICABLE, why,
+                     has_none={"kind": kind, "source": claim["source"], "reading": reading, "rules": list(keys)})
+    item["detail"]["citation"] = ", ".join(dict.fromkeys(sec for _, sec in titled if sec))
+    return item
 
 
 def _decorated(item: dict, law: dict, rule: dict | None) -> dict:

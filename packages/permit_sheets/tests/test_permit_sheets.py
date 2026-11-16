@@ -102,11 +102,14 @@ def test_result_words_are_exact_and_unknown_ones_are_refused():
 def test_needs_review_never_prints_as_complying_anywhere():
     for name in goldens.names():
         for row in csv_rows(name, "code_analysis.csv"):
-            assert row["Result"] in ("COMPLIES", "DOES NOT COMPLY", "NEEDS REVIEW", "WAITING: NO ROOMS DRAWN YET")
+            assert row["Result"] in ("COMPLIES", "DOES NOT COMPLY", "NEEDS REVIEW", "WAITING: NO ROOMS DRAWN YET",
+                                     "NOT APPLICABLE")
         statuses = {i["id"]: i["status"] for i in law_items(result(name))}
         for row in csv_rows(name, "code_analysis.csv"):
             if statuses[row["Item id"]] != present.COMPLIES:
                 assert row["Result"] != "COMPLIES"
+            # not applicable only for what the house description says it has none of (has_none), with the source
+            assert (row["Result"] == "NOT APPLICABLE") == (statuses[row["Item id"]] == present.NOT_APPLICABLE)
 
 
 def test_waiting_prints_waiting_on_all_three_sheets():

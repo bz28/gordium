@@ -27,25 +27,38 @@ def part_rules(rules: list[dict]) -> list[dict]:
     return [r for r in rules if parts.is_part_rule(r)]
 
 
-def check_parts(rules: list[dict], given, values: dict, allowed: dict) -> dict:
+def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none: dict | None = None) -> dict:
     """Every per-part rule's rows, each rule's one answer, and the panel items.
 
     given: the parts read, {kind: [part, …]} (parts.rows), or None when the interior isn't being checked at all
     (the architect hasn't started it): then no part is checked and one counted item says so, so the design is never
-    shown as complying with rules nobody checked (needs review: principle 4). values: the building's measures."""
+    shown as complying with rules nobody checked (needs review: principle 4). values: the building's measures.
+    has_none: what the interior description says the house has none of ({kind: {"source", "words", "parts"}},
+    model_measurement.interior's): each row it makes not applicable says so, with its source, and `set_aside` lists
+    them by claim ({kind: [rule key, …]}) for the panel to show (egress.py)."""
     rules = part_rules(rules)
     if given is None:
         items = [_item(INTERIOR_NOT_STARTED, None, "Interior", present.REVIEW, INTERIOR_NOT_STARTED_WHY)] \
             if rules else []
-        return {"rows": [], "results": {_key(r, n): "needs_review" for n, r in enumerate(rules, 1)}, "items": items}
+        return {"rows": [], "results": {_key(r, n): "needs_review" for n, r in enumerate(rules, 1)}, "items": items,
+                "set_aside": {}}
+    stated = _stated(given)
     given, why_not = cautious(given)
     home = _homes(given)
-    out, results = [], {}
+    claims = has_none if isinstance(has_none, dict) else {}
+    out, results, set_aside = [], {}, {k: [] for k in claims}
     for n, rule in enumerate(rules, 1):
         got = parts.rows(rule, given, values, allowed)
         for row in got:
             if not row.get("within") and row["id"] is not None:   # a window checked on its own: its room named too
                 row["home"] = home.get((row["part"], row["id"]))
+            claim = _claim_of(rule, row, given, claims, stated)
+            if claim is not None:
+                row["reason"] = ("not applicable if confirmed: " if claims[claim].get("reading") is True else
+                                 "not applicable: ") + f"{claims[claim]['words']} ({claims[claim]['source']})"
+                row["has_none"] = claim
+                if _key(rule, n) not in set_aside[claim]:
+                    set_aside[claim].append(_key(rule, n))
             row["line"] = line(row, rule, values, allowed, why_not.get((row["part"], row["id"])))
         out += got
         key = _key(rule, n)          # two rules with one id (never validated so): one answer from both, never kinder
@@ -54,7 +67,42 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict) -> dict:
     for r in out:
         if r["outcome"] in STATUS:
             items.append(_item(_row_id(r, ids), r["rule"], label(r), STATUS[r["outcome"]], r["line"], r))
-    return {"rows": out, "results": results, "items": items}
+    return {"rows": out, "results": results, "items": items, "set_aside": set_aside}
+
+
+def _stated(given) -> dict:
+    """{(kind, part id): {measure: the claim that gave it}}: the measures a part has from what the description says
+    the house has none of (model_measurement.interior gives them in the part's `stated`)."""
+    out = {}
+    for kind, listed in (given.items() if isinstance(given, dict) else []):
+        for part in listed if isinstance(listed, list) else []:
+            if isinstance(part, dict) and isinstance(part.get("stated"), dict) and isinstance(part.get("id"), str):
+                out[(kind, part["id"])] = part["stated"]
+    return out
+
+
+def _claim_of(rule: dict, row: dict, given: dict, claims: dict, stated: dict) -> str | None:
+    """The claim ("the house has no ramps") that makes this row not applicable, or None. Only a row that is not
+    applicable, and only for the reason the claim gives: the rule's "none" row for a kind the claim empties (a
+    ramp rule, no ramps; the row for no part a rule's parts sit within: no habitable attics), or a part whose
+    applies_when reads a measure the claim gave it (no patio covers, so no window opens into one)."""
+    if row["outcome"] != "not_applicable" or not claims:
+        return None
+    emptied = {k: c for c, claim in claims.items() for k in claim.get("parts") or []}
+    kind, parent = rule.get("for_each"), rule.get("within")
+    if row.get("none") and kind in emptied and given.get(kind) == []:
+        return emptied[kind]
+    if row["id"] is None and not row.get("within") and parent in emptied and given.get(parent) == []:
+        return emptied[parent]
+    gave = stated.get((kind, row["id"])) or {}
+    if gave and isinstance(rule.get("applies_when"), str):
+        try:
+            names = formula.names(rule["applies_when"])
+        except formula.FormulaError:
+            return None
+        hit = [gave[m] for m in sorted(names) if m in gave and gave[m] in claims]
+        return hit[0] if hit else None
+    return None
 
 
 def cautious(given) -> tuple:

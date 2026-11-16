@@ -14,10 +14,14 @@ from rule_format import formula, parts
 from rule_format.rulebook import _kinds
 
 # the four results a sheet prints, word for word, never shortened (plan: "Never a false pass")
-RESULT = {present.COMPLIES: "COMPLIES", present.FAILS: "DOES NOT COMPLY", present.REVIEW: "NEEDS REVIEW"}
+# (and NOT APPLICABLE: rules the interior description sets aside by saying the house has none of a kind, printed so
+# they are never hidden; never a pass)
+RESULT = {present.COMPLIES: "COMPLIES", present.FAILS: "DOES NOT COMPLY", present.REVIEW: "NEEDS REVIEW",
+          present.NOT_APPLICABLE: "NOT APPLICABLE"}
 WAITING = "WAITING"
-# most cautious first: what a window's or a sheet's one result is, over several
-CAUTION = [present.FAILS, present.REVIEW, present.NOT_CHECKED, present.COMPLIES]
+# most cautious first: what a window's or a sheet's one result is, over several (not applicable is the least: it
+# never makes a result kinder than one it sits beside, and a law with nothing else is needs review, egress.py)
+CAUTION = [present.FAILS, present.REVIEW, present.NOT_CHECKED, present.COMPLIES, present.NOT_APPLICABLE]
 SIGN = {ast.GtE: "min", ast.Gt: "more than", ast.LtE: "max", ast.Lt: "less than"}
 MIRROR = {ast.GtE: ast.LtE, ast.Gt: ast.Lt, ast.LtE: ast.GtE, ast.Lt: ast.Gt}
 NOT_MEASURED = "not measured"
@@ -28,8 +32,8 @@ class Refused(ValueError):
 
 
 def result_words(status: str, waiting: str | None = None) -> str:
-    """COMPLIES, DOES NOT COMPLY, NEEDS REVIEW, or WAITING: <the check's own reason, in capitals>. Anything else is
-    refused, never printed as something kinder."""
+    """COMPLIES, DOES NOT COMPLY, NEEDS REVIEW, NOT APPLICABLE, or WAITING: <the check's own reason, in capitals>.
+    Anything else is refused, never printed as something kinder."""
     if status in RESULT:
         return RESULT[status]
     if status == present.NOT_CHECKED and isinstance(waiting, str) and waiting.strip():
