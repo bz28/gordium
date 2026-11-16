@@ -656,4 +656,6 @@ predicted_other_items:
   - "Bonus room double-hung 2 of 2: not checked"
   - "Basement window CW14 in areaway (north wall): not checked"
   - "Basement window CW14 in areaway (west wall): not checked"
+  # PR #110: the egress sections Gordium has no rules for yet, listed so egress never reads complies while any is left
+  - "Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 84 more: check these by hand"
 predicted_section_state: needs_review    # no fail, no pass on anything the truth doesn't settle
