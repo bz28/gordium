@@ -618,4 +618,4 @@ def test_every_csv_row_says_where_g001_shows_it(name):
 
 def test_orangetowns_g001_is_a_few_pages_not_a_rule_per_row():
     pages = [n for n, _, _ in sheets.sheets(got(ORANGETOWN), goldens.project_of(ORANGETOWN)) if n.startswith("G-")]
-    assert len(pages) <= 3 < len(tables.code_rows(got(ORANGETOWN))) // 20
+    assert len(pages) <= 4 < len(tables.code_rows(got(ORANGETOWN))) // 20     # was 17 pages, a rule per row

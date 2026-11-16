@@ -272,3 +272,26 @@ def test_a_waiting_item_among_others_is_never_dropped():
               "reason": "refused"}]
     ids = [x for ln in every_line(grouping.lines(items)) for x in ln["items"]]
     assert sorted(ids) == ["r", "w"]
+
+
+# ---- review round 1 on #111 -----------------------------------------------------------------------------------------
+
+def test_a_fact_the_measuring_found_about_a_part_keeps_its_rules_with_the_architect(checked):
+    """The basement house's only exit door is sliding: its "shall be side-hinged" rule reads nothing measured, but the
+    measuring said "this door is sliding". Never folded as something Gordium can't read."""
+    items = law_items(checked["5_basement_window_well"])
+    [item] = [i for i in items if i["id"] == "general.r318_2_egress_door_side_hinged@-/de"]
+    assert item["status"] == present.REVIEW and grouping.tier(item) == grouping.REVIEW_T
+    [line] = [ln for ln in grouping.lines(items)[grouping.REVIEW_T] if item["id"] in ln["items"]]
+    assert "this door is sliding" in line["title"]
+
+
+def test_a_parts_failures_are_shown_open_and_its_line_keeps_its_key_when_lines_reorder(checked):
+    view = checked["5_basement_window_well"]["view"]
+    fails = {g["tag"]: g for g in logic.list_tree(view)}["group:new_york/new_york_state:fails"]
+    several = [c for c in fails["children"] if c["tag"].startswith("line:")]
+    assert several and not any(c["folded"] for c in several)
+    items = law_items(checked["5_basement_window_well"])
+    keys = {ln["key"]: ln["items"] for ln in every_line(grouping.lines(items))}
+    keys_reversed = {ln["key"]: ln["items"] for ln in every_line(grouping.lines(list(reversed(items))))}
+    assert set(keys) == set(keys_reversed) and all(sorted(keys[k]) == sorted(keys_reversed[k]) for k in keys)
