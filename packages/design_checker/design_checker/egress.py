@@ -73,6 +73,7 @@ NO_COVERAGE = ("Gordium can't tell which sections of the {title} it doesn't chec
                "hand")
 NOTHING_APPLIED = ("None of the {title} rules applied to the parts drawn (every one not applicable): nothing of this law "
                    "was checked, so check it by hand")
+SECTIONS = "sections"             # an item's `open` for the sections not checked yet (design_checker/grouping.py)
 ORDER = {present.FAILS: 0, present.REVIEW: 1, present.NOT_CHECKED: 2, present.COMPLIES: 3}
 
 
@@ -213,7 +214,7 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
         items += mine
         sections.append({"key": law["key"], "title": law["title"],
                          "state": WAITING if waiting and not law["problems"] else present.state(mine),
-                         "summary": WAITING_WORDS if waiting and not law["problems"] else present._summary(mine),
+                         "summary": WAITING_WORDS if waiting and not law["problems"] else present._law_summary(mine),
                          "rules": len(law["rules"]), "rulebook": _shown(law["rulebook"]),
                          "problems": list(law["problems"])})
     return {"sections": sections, "items": items, "rows": rows, "results": results, "waiting": waiting,
@@ -330,7 +331,7 @@ def _not_yet_items(law: dict) -> list[dict]:
     if law["coverage_problem"]:
         why = NO_COVERAGE.format(title=_book(law), why=law["coverage_problem"])
         return [_own_item(law, f"{law['short'].lower()}.{NOT_YET_ID}", "Not checked yet by Gordium: can't tell which "
-                          "sections", present.REVIEW, why)]
+                          "sections", present.REVIEW, why, open={"gordium": SECTIONS, "sections": None})]
     missing = law["not_checked_yet"]
     if not missing:
         return []
@@ -341,6 +342,7 @@ def _not_yet_items(law: dict) -> list[dict]:
                                                         all=_listed(missing),
                                                         file=", ".join(dict.fromkeys(m["file"] for m in missing))))
     item["detail"]["citation"] = ", ".join(m["section"] for m in missing)
+    item["open"] = {"gordium": SECTIONS, "sections": [m["section"] for m in missing]}   # for grouping: words only
     return [item]
 
 
