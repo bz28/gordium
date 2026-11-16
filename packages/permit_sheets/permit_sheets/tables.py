@@ -5,7 +5,7 @@ and the escape-window schedule (A-601). Plain code, no AI; display only (every r
 import json
 import re
 
-from design_checker import present
+from design_checker import egress, grouping, present
 
 from . import words
 from .words import NOT_MEASURED, result_words, worst
@@ -22,7 +22,7 @@ OPERATION = {"casement": "Casement", "side_hinged_door": "Side-hinged door", "do
              "other": "Other"}
 
 CODE_HEADERS = ["Line", "Item", "Requirement", "Required", "Proposed", "Result", "Code section", "Why / what to change",
-                "Rule id", "Item id", "Part kind", "Part id", "In part", "Measures (as checked)", "Citation",
+                "Shown on G-001 as", "Rule id", "Item id", "Part kind", "Part id", "In part", "Measures (as checked)", "Citation",
                 "Code's words", "Law", "Rulebook", "Rulebook sha256", "Rules fingerprint", "Code fingerprint",
                 "Interior sha256"]
 SCHEDULE_HEADERS = ["Mark", "Opening", "Room", "Type", "Net clear width", "Net clear height", "Net clear area",
@@ -45,9 +45,37 @@ def _split(item: dict, rule: dict | None) -> tuple[str, str]:
     return name, ""
 
 
+def law_lines(law: dict) -> dict | None:
+    """The law's results grouped as the panel groups them (design_checker/grouping.py): {tier: [line]}, or None for
+    a law still waiting for rooms (printed as it always was, its waiting row and banner)."""
+    if law["state"] == egress.WAITING:
+        return None
+    return grouping.lines([x["item"] for x in law["items"]])
+
+
+def shown_as(got: dict) -> dict:
+    """{item id: where G-001 shows it}: "<tier> › <line>" ("Needs review › Main stair: 16 need review: …"), so
+    every rule's own row in the CSV leads to its line on the sheet and back."""
+    out = {}
+    for law in got["laws"]:
+        lines = law_lines(law)
+        if lines is None:
+            out.update({x["item"]["id"]: "Waiting › " + (x["item"].get("name") or "") for x in law["items"]})
+            continue
+        for t, mine in lines.items():
+            for ln in mine:
+                for c in ln.get("causes") or [{"words": ln["title"], "items": ln["items"]}]:
+                    title = ln["title"] if not ln.get("causes") else \
+                        ln["title"].split(": ")[0] + ": " + c["words"]
+                    out.update({i: f"{grouping.TITLES[t]} › {title}" for i in c["items"]})
+    return out
+
+
 def code_rows(got: dict) -> list[dict]:
-    """One row per egress item, every law in turn, in the check's order."""
+    """One row per egress item, every law in turn, in the check's order: the full per-rule table (the CSV and the
+    XLSX), each row saying where G-001 shows it."""
     out = []
+    shown = shown_as(got)
     for law in got["laws"]:
         for x in law["items"]:
             item, row, rule = x["item"], x["row"], x["rule"]
@@ -62,6 +90,7 @@ def code_rows(got: dict) -> list[dict]:
                 "Line": len(out) + 1, "Item": where, "Requirement": requirement,
                 "Required": required, "Proposed": proposed, "Result": x["result"], "status": x["status"],
                 "Code section": (item.get("code") or {}).get("section") or "", "Why / what to change": why,
+                "Shown on G-001 as": shown.get(item.get("id"), ""),
                 "Rule id": item.get("rule") or "", "Item id": item.get("id") or "", "Part kind": part.get("part") or "",
                 "Part id": part.get("id") or "", "In part": within.get("id") or "" if isinstance(within, dict) else "",
                 "Measures (as checked)": json.dumps(row.get("values"), sort_keys=True) if row else "",

@@ -141,8 +141,8 @@ def gather(result: dict, about: dict | None, interior) -> dict:
             if not mine or not all(i.get("waiting") for i in mine):
                 raise Refused(f"{law['title']} says it is waiting but has items that aren't")
         else:
-            if present._summary(mine) != law["summary"]:
-                raise Refused(f"{law['title']}'s items count {present._summary(mine)!r}, its section says "
+            if present._law_summary(mine) != law["summary"]:
+                raise Refused(f"{law['title']}'s items count {present._law_summary(mine)!r}, its section says "
                               f"{law['summary']!r}: the result isn't whole")
             if worst([law["state"], present.state(mine)]) != law["state"]:
                 raise Refused(f"{law['title']}'s section says {law['state']} but its items are worse")
