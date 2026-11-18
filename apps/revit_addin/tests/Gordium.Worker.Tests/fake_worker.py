@@ -110,6 +110,7 @@ SECOND = {
                                                                 egress_view()["view"]["groups"])),
     # every row complies, but the stair's line has a word not known: the line, and so its group, opened
     "unknown_line_word_in_a_folded_group": lambda i: ok(i, egress_view(state="needs_review", line_of=STAIR_ITEM["id"], line_status="set_aside")),
+    "failing_line_word_in_a_folded_group": lambda i: ok(i, egress_view(state="does_not_comply", line_of=STAIR_ITEM["id"], line_status="does_not_comply")),
     # two rules on one part to review: the worker's heading counts the part's line (1), not its rows (2)
     "two_to_review_on_one_part": lambda i: ok(i, egress_view(state="needs_review", items=[ITEM, dict(STAIR_ITEM, status="needs_review"),
                                                                                    dict(STAIR_ITEM, id="irc.stair_rise#s1", name="Stair 1 · Riser height", status="needs_review")])),

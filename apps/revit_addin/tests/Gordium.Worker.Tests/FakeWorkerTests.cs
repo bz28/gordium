@@ -145,13 +145,15 @@ public sealed class FakeWorkerTests
         Assert.True(LineOf(result, "irc.stair_width#s1").Folded);   // the line that complies stays as the worker said
     }
 
-    [Fact]
-    public async Task A_line_word_not_known_opens_its_line_and_its_group()
+    [Theory]
+    [InlineData("unknown_line_word_in_a_folded_group", Verdict.NeedsReview)]
+    [InlineData("failing_line_word_in_a_folded_group", Verdict.DoesNotComply)]
+    public async Task A_line_word_not_known_or_failing_opens_its_line_and_its_group(string mode, Verdict status)
     {
-        using var client = await Start("unknown_line_word_in_a_folded_group");
+        using var client = await Start(mode);
         var result = await client.CheckSiteAsync(Site, Facts);
         var line = LineOf(result, "irc.stair_width#s1");
-        Assert.Equal(Verdict.NeedsReview, line.Status);
+        Assert.Equal(status, line.Status);
         Assert.False(line.Folded);
         Assert.False(Assert.Single(result.Groups, g => g.Key == "irc:complies").Folded);
     }
