@@ -123,8 +123,8 @@ their test then fails (the strict reading on both .NET 8 and .NET 10), and so we
 
 ## The reader's logic: `Gordium.Revit.Reading`
 
-The **reader** turns a Revit model into the site description (`gordium.site/1`, the same JSON the Rhino plugin
-sends), with every decision of the [design note](../../docs/revit/revit_reading_design.md). It has no Revit types at
+The **reader** turns a Revit model into the site description (`gordium.site/1`, the same JSON the worker builds from the copied `.3dm` the Rhino plugin
+sends: `check.py`, `site_json.legacy_description`), with every decision of the [design note](../../docs/revit/revit_reading_design.md). It has no Revit types at
 all: it works on plain **records** of what Revit says about the model (`Records.cs`: each element's `UniqueId`,
 category, kind, phase created and demolished, design option, workset, Revit's own box, its geometry as faces, edges
 and meshes; the property lines; the worksets, option sets, phases and links; the turn into shared coordinates). The
@@ -151,7 +151,7 @@ nothing. So the decisions are built and tested here, on the Mac.
 
 How we know it is right (`tests/Gordium.Revit.Reading.Tests`, run with the rest by `dotnet test`):
 
-- **Every drawn conformance scene (15 of the 17; 13 and 14 are descriptions only) drawn as fake Revit records**,
+- **Every drawn conformance scene (24 of the 26; 13 and 14 are descriptions only) drawn as fake Revit records**,
   the way the trial would draw it in Revit (`SceneDrawing.cs`: floor blocks as marked DirectShapes, the lot as a
   property line, the shed of scene 04 as a linked model, the block of scene 15 as a family instance, the survey
   scene near Revit's origin with shared coordinates moved), read by the reader with the real worker deciding what

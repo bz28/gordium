@@ -19,8 +19,9 @@ sends it, with the lot facts, to that Python running in the background, then sho
   live model in Rhino, so what the tests prove is what the architect gets.
 - The checker stays plain code reading frozen rules (principle 3), and the measurements stay engineer-written
   code tested on real models (principle 6), all in one place.
-- Speed: a 106 Ithaca Rd check takes about 0.2 s once the background Python is running, fast enough to
-  re-check after every edit.
+- Speed: a 106 Ithaca Rd check takes about half a second once the background Python is running (median 0.47 s,
+  re-timed 2026-11-18; about 0.2 s when this was decided, before egress, results grouping and the site-description
+  round trip were added; the first check in a fresh worker takes about 1.3 s), fast enough to re-check after every edit.
 
 **Considered:** rewriting the packages for Python 3.9 inside Rhino (two copies to keep in step); a C# plugin
 (rewrite everything, or call Python anyway); measuring with RhinoCommon inside Rhino (a second measuring code
