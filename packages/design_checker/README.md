@@ -130,7 +130,8 @@ What it adds for the Rhino command, never changing a result:
   and the rule fails under every one of those settings (`check.fails_whatever`; run before a rule waiting on an
   interior fact is set aside, so a proven fail is never hidden). The eaves rule
   is one: front eaves ≥ 25 + max(height − 35, 0) − 2 is at least 23 ft at any height, so eaves 15 ft back don't
-  comply. Never the other way: a missing number never makes a rule comply (24 ft stays needs review).
+  comply. Never the other way: a missing number never causes a pass (24 ft stays needs review); a rule complies with one
+  missing only when the known numbers already settle it, whatever the missing one is (three-valued logic).
 
 The worker stays running, so a re-check after an edit doesn't pay for starting Python again. A bad request gets a
 plain error answer; the worker keeps serving.

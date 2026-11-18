@@ -1,6 +1,6 @@
 # New York State's own law
 
-Law that every New York place inherits (a place lists this folder in its `jurisdiction.yaml` under `inherits:`; Ithaca does). For now the link is declared and checked; nothing reads this folder's rules into a place's check yet (that comes with the interior reading, egress step 4). It is not a place: its settings file is `state.yaml`, not `jurisdiction.yaml`, so the place registry and the Rhino plugin never treat it as one. Why, and how: [docs/decisions/2026-11-12_building_code_text.md](../../../../docs/decisions/2026-11-12_building_code_text.md).
+Law that every New York place inherits (a place lists this folder in its `jurisdiction.yaml` under `inherits:`; Ithaca does). The link is declared and checked, and an inheriting place's check runs this folder's rules too: its egress result sits beside the place's zoning result (`design_checker/egress.py`, `laws`; pinned by `test_egress.py::test_ithacas_check_includes_the_state_rules`; PR #106). It is not a place: its settings file is `state.yaml`, not `jurisdiction.yaml`, so the place registry and the Rhino plugin never treat it as one. Why, and how: [docs/decisions/2026-11-12_building_code_text.md](../../../../docs/decisions/2026-11-12_building_code_text.md).
 
 - **The book:** the 2025 Residential Code of New York State (one- and two-family houses and townhouses up to three stories), in force since 2025-12-31.
 - **Brought in so far:**

@@ -87,7 +87,7 @@ B6 [rhino] **Command line.** GordiumStart prints one line: "created 1 group (3 f
 
 ## C. Measurement honesty (needs-review triggers)
 
-C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies — unless the rule provably fails at every value the missing number could take (`check.fails_whatever`): then does not comply ([decision](../decisions/2026-10-21_fails_whatever_the_missing_number.md)). Missing data never complies.
+C1 [code] **Never a false pass.** Any missing, ambiguous or approximate input gives needs review, never complies — unless the rule provably fails at every value the missing number could take (`check.fails_whatever`): then does not comply ([decision](../decisions/2026-10-21_fails_whatever_the_missing_number.md)). A missing number never causes a pass: a rule complies with one missing only when the known numbers already settle it, whatever the missing one is (three-valued logic, `formula.evaluate`).
 
 C2 [code] **Tax-map tolerance** of ±2'-0".
 - Each lot-dependent value is evaluated at the worst case, with every lot line up to 2'-0" the unlucky way (Ben, 2026-10-21): a yard (to one line) ±2'-0", a lot width or depth (between two lines) ±4'-0", and areas and percentages from the outline offset 2'-0" (73' × 90' → 69' × 86' = 5,934 sf at the smallest). One definition: `model_measurement.places.ithaca_city.measure.TAX_MAP_SLACK` and `tax_map_lot_area`, used by the measurement, the checker and the starting house.

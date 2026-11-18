@@ -61,7 +61,7 @@ coverage "35%/40% /50% [fn12]" depends on the use, so a one-number template can'
 - The hand-drafted `5_zoning_rules/R-1b.yaml` is never shown to the AI: it's the answer key. The drafting rules the
   AI reads use neutral examples, not R-1b's.
 
-**Rules for each part** (egress step 3a; building-code text, not yet drafted for real): with `for_parts` (the
+**Rules for each part** (egress step 3a; building-code text; New York's house egress was drafted this way on 2026-11-13 and 2026-11-14, below): with `for_parts` (the
 answer's shape and the instructions both), a template also says `for_each`, `within` and `when_none`, and each worked
 example is a small design: the building's measures, the parts, and every row expected. Code checks it exactly like a
 zoning draft (quotes, numbers), and its examples with the checker's own rows; one must show `when_none`, and parts must
@@ -102,7 +102,7 @@ python -m rule_drafting draft --limit 10 --yes      # drafts them; --only UNIT..
 python -m rule_drafting cost                        # what the recorded runs actually cost
 ```
 
-Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $5.00).
+Settings are in `rule_drafting/settings.yaml` (default `claude-sonnet-5-5`, effort medium, budget $20.00, set by Ben on 2026-11-14).
 The budget is a hard cap kept in `~/.config/gordium/rule_drafting_ledger.json`, separate from labeling's,
 with the same rules: a run whose estimate exceeds what's left is refused, and no call is sent whose worst
 case could cross the cap. Drafting never runs in CI; the tests use a fake client.
