@@ -2227,11 +2227,15 @@ def grouped(items: list[dict]) -> list[dict]:
         c = grouping.counts(mine)
         count = {grouping.FAILS_T: c["fails"], grouping.REVIEW_T: c["review"],
                  grouping.BY_HAND_T: len(lines[grouping.BY_HAND_T]),
+                 # every item in it, under a heading that names both when it holds not-applicable rows
+                 # (grouping.tier_title): "Egress · Complies or not applicable · 9", never "Complies · 9" for 8
                  grouping.COMPLIES_T: c["complies"] + c["not_applicable"]}
+        status = {i["id"]: i.get("status") for i in mine}
         for rank, t in enumerate(grouping.TIERS):
             if lines[t]:
+                heading = grouping.tier_title(t, (status[x] for ln in lines[t] for x in ln["items"]))
                 placed.append(((place[after[t]], rank), {
-                    "key": f"{law['key']}:{t}", "title": f"{law['short']} · {grouping.TITLES[t]}",
+                    "key": f"{law['key']}:{t}", "title": f"{law['short']} · {heading}",
                     "items": [x for ln in lines[t] for x in ln["items"]], "lines": lines[t], "count": count[t],
                     "folded": t in grouping.FOLDED, "law": law["title"],
                     "name": law["short"]}))       # its heading without its result, while the list is out of date

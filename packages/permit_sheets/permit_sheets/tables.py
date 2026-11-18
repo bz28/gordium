@@ -63,15 +63,17 @@ def shown_as(got: dict) -> dict:
             out.update({x["item"]["id"]: "Waiting › " + (x["item"].get("name") or "") for x in law["items"]})
             continue
         named = {x["item"]["id"]: x["item"].get("name") or "" for x in law["items"]}
+        status = {x["item"]["id"]: x["item"].get("status") for x in law["items"]}
         for t, mine in lines.items():
+            heading = grouping.tier_title(t, (status[i] for ln in mine for i in ln["items"]))
             for ln in mine:
                 if t == grouping.FAILS_T:        # G-001 prints each failing rule on its own row, under its name
-                    out.update({i: f"{grouping.TITLES[t]} › {named.get(i, '')} (its own row)" for i in ln["items"]})
+                    out.update({i: f"{heading} › {named.get(i, '')} (its own row)" for i in ln["items"]})
                     continue
                 for c in ln.get("causes") or [{"words": ln["title"], "items": ln["items"]}]:
                     title = ln["title"] if not ln.get("causes") else \
                         ln["title"].split(": ")[0] + ": " + c["words"]
-                    out.update({i: f"{grouping.TITLES[t]} › {title}" for i in c["items"]})
+                    out.update({i: f"{heading} › {title}" for i in c["items"]})
     return out
 
 

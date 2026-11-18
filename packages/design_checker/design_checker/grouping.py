@@ -18,6 +18,8 @@ The tiers, in the order they are shown:
    parts it measures but not yet those (area wells…), and the sections it has no rules for yet. Each item keeps its
    needs-review status and is listed under its line.
 4. **complies**: complies, and not applicable (the description says the house has none), one line per part, folded.
+   Its heading names what it holds (tier_title): "Complies", "Not applicable", or "Complies or not applicable", so a
+   not-applicable row is never under a heading, or in a count, that reads as a pass.
 """
 
 import hashlib
@@ -30,6 +32,8 @@ TITLES = {FAILS_T: "Does not comply", REVIEW_T: "Needs review", BY_HAND_T: "Chec
           COMPLIES_T: "Complies"}
 FOLDED = {COMPLIES_T}                    # shown folded; every other tier open
 NOT_APPLICABLE = "not_applicable"        # an absent part's rows (the description says the house has none): folded
+# the complies tier's heading by what it holds (tier_title): a not-applicable row is never under "Complies" alone
+NOT_APPLICABLE_T, BOTH_T = "Not applicable", "Complies or not applicable"
 NOT_READ, NOT_MEASURED, SECTIONS = "not_read", "not_measured", "sections"      # each_part.unsettled, egress
 # plain names for a part kind, as an architect says them (wording only; any other kind: its own words)
 KIND_WORDS = {"sleeping_room": ("bedroom", "bedrooms"), "emergency_escape_opening": ("escape window", "escape windows"),
@@ -46,6 +50,18 @@ NOT_MEASURED_TITLE = "Not measured from the model yet: {causes}: check by hand"
 SECTIONS_TITLE = "Not checked yet by Gordium: {n} code section{s}: check by hand"
 SECTIONS_UNKNOWN = "Not checked yet by Gordium: can't tell which code sections: check the whole law by hand"
 MORE = 2                                  # a line names this many causes of a kind, then "and N more"
+
+
+def tier_title(t: str, statuses) -> str:
+    """A tier's heading, from the statuses of the items in it: the complies tier says "Not applicable" when nothing in
+    it complies and "Complies or not applicable" when it holds both, so its heading (and the count beside it, every
+    item in it) never reads as a pass for a rule the description set aside. Any other tier: its own title."""
+    if t != COMPLIES_T:
+        return TITLES[t]
+    got = set(statuses)
+    if NOT_APPLICABLE not in got:
+        return TITLES[t]
+    return BOTH_T if present.COMPLIES in got else NOT_APPLICABLE_T
 
 
 def _plural(n: int, one: str, many: str) -> str:
@@ -115,7 +131,14 @@ def _own_title(item: dict) -> str:
     name, reason = item.get("name") or item.get("id") or "", (item.get("reason") or "").strip()
     if not reason:
         return name
-    return reason if reason.lower().startswith(name.lower()) else f"{name}: {reason}"
+    if reason.lower().startswith(name.lower()):
+        return reason
+    # the reason opening with the name's own last words ("Ramps: not applicable" and "Not applicable: the description
+    # says…"): said once ("Ramps: not applicable: the description says…"), never "not applicable: Not applicable"
+    tail = name.rsplit(": ", 1)[-1].strip() if ": " in name else ""
+    if tail and reason.lower().startswith(tail.lower() + ": "):
+        reason = reason[len(tail) + 2:].lstrip()
+    return f"{name}: {reason}"
 
 
 def _section(item: dict) -> str:

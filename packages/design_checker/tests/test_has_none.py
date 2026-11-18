@@ -9,7 +9,7 @@ import copy
 
 import pytest
 
-from design_checker import egress, present
+from design_checker import egress, grouping, present
 from permit_sheets import words as sheet_words
 
 ITHACA = "regulations/jurisdictions/new_york/ithaca_city"
@@ -256,3 +256,52 @@ def test_an_unchecked_escape_opening_names_only_the_spaces_not_settled(found, cl
     desc["openings"].append(dict(desc["openings"][0], id="ow", name="Office window", room="o"))
     item = next(i for i in run(found, desc)["items"] if i["name"] == "Office window: not checked")
     assert item["status"] == present.REVIEW and says in item["reason"]
+
+
+# ---- the grouped panel: a not-applicable row is never counted or headed as a pass ---------------------------------
+
+def _law_groups(items):
+    return [g for g in present.grouped(items) if g.get("lines") is not None]
+
+
+def test_a_not_applicable_row_is_never_under_a_complies_heading_or_in_its_count(found):
+    """The ramp claim's row sits in the complies tier (folded, docs/decisions/2026-11-16_results_grouping.md) beside
+    the door and window rules that comply: its heading says "Complies or not applicable", and its count is every
+    row under it, never "Complies · 9" with 8 complying (the Revit engineer's report on #115)."""
+    items = run(found, house({"kind": "ramp", "source": SOURCE}))["items"]
+    by = {i["id"]: i for i in items}
+    na = [i["id"] for i in items if i["status"] == present.NOT_APPLICABLE]
+    assert na
+    [tier] = [g for g in _law_groups(items) if set(na) & set(g["items"])]
+    assert tier["title"].endswith(" · Complies or not applicable")
+    complying = sum(1 for x in tier["items"] if by[x]["status"] == present.COMPLIES)
+    assert complying and tier["count"] == complying + len(na) == len(tier["items"])
+    # and no heading that says only "Complies" holds a not-applicable row
+    for g in present.grouped(items):
+        if g["title"].endswith(" · Complies"):
+            assert not set(na) & set(g["items"])
+    # the headline counts only what complies
+    assert f"{complying} comply" in grouping.summary([i for i in items if i["group"] == present.LAW_GROUP])
+
+
+def test_a_complies_tier_of_only_not_applicable_rows_is_headed_not_applicable():
+    items = [{"id": "r", "group": present.LAW_GROUP, "status": present.REVIEW, "name": "Egress rules",
+              "reason": "refused", "law": "Egress law", "law_short": "Egress", "law_key": "x/egress"},
+             {"id": "n", "group": present.LAW_GROUP, "status": present.NOT_APPLICABLE, "name": "Ramps: not applicable",
+              "reason": "Not applicable: the description says the house has no ramps (A-2)", "law": "Egress law",
+              "law_short": "Egress", "law_key": "x/egress"}]
+    [tier] = [g for g in present.grouped(items) if "n" in g["items"]]
+    assert tier["title"] == "Egress · Not applicable" and tier["items"] == ["n"]
+    assert grouping.tier_title(grouping.COMPLIES_T, [present.COMPLIES]) == "Complies"
+    assert grouping.tier_title(grouping.REVIEW_T, [present.NOT_APPLICABLE]) == "Needs review"
+
+
+def test_a_not_applicable_line_says_not_applicable_once(found):
+    """"Ramps: not applicable: the description says…", never "Ramps: not applicable: Not applicable: …"."""
+    items = run(found, house({"kind": "ramp", "source": SOURCE}))["items"]
+    [line] = [ln for g in _law_groups(items) for ln in g["lines"] if ln["status"] == present.NOT_APPLICABLE]
+    assert line["title"].startswith("Ramps: not applicable: the description says the house has no ramps (" + SOURCE)
+    assert line["title"].lower().count("not applicable") == 1
+    assert line["mark"] == present.MARK[present.NOT_APPLICABLE] != present.MARK[present.COMPLIES]
+    # a reason that doesn't repeat the name's last words is kept whole
+    assert grouping._own_title({"name": "Egress rules", "reason": "Refused: bad"}) == "Egress rules: Refused: bad"

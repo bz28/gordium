@@ -306,7 +306,8 @@ def code_table(got: dict) -> list[list]:
         for t in grouping.TIERS:
             if not lines[t]:
                 continue
-            rows.append(["__group__", f"{grouping.TITLES[t]}"])
+            rows.append(["__group__", grouping.tier_title(t, (by_id[i]["status"] for ln in lines[t]
+                                                              for i in ln["items"]))])
             for ln in lines[t]:
                 mine = [by_id[i] for i in ln["items"]]
                 if t == grouping.FAILS_T:

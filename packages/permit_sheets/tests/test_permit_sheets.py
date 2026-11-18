@@ -612,11 +612,28 @@ def test_every_csv_row_says_where_g001_shows_it(name):
     assert rows and all(r["Shown on G-001 as"] for r in rows)
     for r in rows:
         tier = r["Shown on G-001 as"].split(" › ")[0]
-        expected = {"COMPLIES": "Complies", "DOES NOT COMPLY": "Does not comply"}.get(r["Result"])
+        # a not-applicable row is never under a heading that says only "Complies" (grouping.tier_title)
+        expected = {"COMPLIES": ("Complies", "Complies or not applicable"), "DOES NOT COMPLY": ("Does not comply",),
+                    "NOT APPLICABLE": ("Not applicable", "Complies or not applicable")}.get(r["Result"])
         if expected:
-            assert tier == expected
+            assert tier in expected
         elif r["Result"] == "NEEDS REVIEW":
             assert tier in ("Needs review", "Check by hand: not read by Gordium yet")
+
+
+@pytest.mark.parametrize("name", goldens.names())
+def test_a_not_applicable_row_is_never_printed_under_a_complies_heading(name):
+    """G-001's heading over the complies tier names what is under it: "Complies or not applicable" when a rule the
+    description set aside is there, never "Complies" alone over a NOT APPLICABLE row."""
+    heading, seen = None, False
+    for row in sheets.code_table(got(name)):
+        if row[0] == "__group__":
+            heading = row[1]
+        elif row[0] != "__banner__" and row[5][1] == present.NOT_APPLICABLE:
+            seen = True
+            assert heading in ("Not applicable", "Complies or not applicable"), (heading, row)
+    if any(i["status"] == present.NOT_APPLICABLE for i in law_items(result(name))):
+        assert seen
 
 
 def test_orangetowns_g001_is_a_few_pages_not_a_rule_per_row():
