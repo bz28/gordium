@@ -729,7 +729,8 @@ def _header(parts, view, error, out_of_date, job=None, cancelled=False, checking
     parts["box_buttons"] = buttons      # off while a start box is open (set_box_open)
     for b in buttons:
         b.Enabled = not parts.get("box_open")
-    h.AddRow(row(*buttons))
+    for i in range(0, len(buttons), 2):  # two to a row: all five side by side ran off the panel (review of the Retry
+        h.AddRow(row(*buttons[i:i + 2]))  # fix); the widest two, "Main building…" and "Pick survey lot lines…", fit
     h.Create()
 
 

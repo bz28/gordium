@@ -30,14 +30,22 @@ class _Host:
         self.Width = width
 
 
-def _header(ui, panel_px, docked, **state):
+# a check's header that asks for every button the header can hold: several buildings (Main building…), a lot not
+# from a survey (Pick survey lot lines…), ground not set (Set grade…), beside Check and Edit site…
+EVERY_BUTTON = {"header": {"main": "Measuring the largest of 2 buildings", "actions": ["Pick survey lot lines…",
+                                                                                      "Set grade…"]},
+                "items": [], "groups": [], "summary": "1 does not comply"}
+VIEWS = {"no check yet": None, "every button": EVERY_BUTTON}
+
+
+def _header(ui, panel_px, docked, view=None, **state):
     gordium_ui, _ = ui
     actions = {k: (lambda: None) for k in ("retry", "check", "edit_site", "main", "survey", "grade")}
     form = type("Form", (), {"host": _Host(panel_px)})() if docked else object()
     gordium_ui.DOCKED = docked
     parts = {"form": form, "tree": gordium_ui.ef.TreeGridView(), "actions": actions, "by_id": {}, "expanded": {},
              "selected": None, "header": gordium_ui.ef.DynamicLayout(), "detail": gordium_ui.ef.DynamicLayout(),
-             "view": None}
+             "view": view}
     gordium_ui.show(parts, None, **state)
     return parts["header"]
 
@@ -54,21 +62,26 @@ def _buttons(layout):
 STATES = {
     "could not run": ({"error": "the Gordium checker stopped (see gordium_worker.log in the temp folder)"}, "Retry"),
     "cancelled": ({"cancelled": True}, "Check again"),
+    "checked": ({}, "Check"),
 }
 
 
 @pytest.mark.parametrize("docked", [False, True], ids=["floating", "docked"])
 @pytest.mark.parametrize("panel_px", WIDTHS)
+@pytest.mark.parametrize("view", sorted(VIEWS))
 @pytest.mark.parametrize("state", sorted(STATES))
-def test_every_header_row_fits_the_panel(ui, state, panel_px, docked):
-    """Each header row (the headline, the reason, Retry / Check again, Check and Edit site…) no wider than the panel's
-    content, so no button is cut off at its edge."""
+def test_every_header_row_fits_the_panel(ui, state, view, panel_px, docked):
+    """Each header row (the headline, the reason, Retry / Check again, and the rows of Check, Edit site… and the
+    buttons a check can add) no wider than the panel's content, so no button is cut off at its edge."""
     gordium_ui, _ = ui
     if not docked and panel_px == 540:
         pytest.skip("the floating window is PANEL_WIDTH wide; 540 is a docked width")
     kwargs, again = STATES[state]
-    header = _header(ui, panel_px, docked, **kwargs)
-    assert again in _buttons(header), "the state's own button is laid out"
+    header = _header(ui, panel_px, docked, VIEWS[view], **kwargs)
+    shown = _buttons(header)
+    assert again in shown, "the state's own button is laid out"
+    if VIEWS[view] is not None:
+        assert {"Main building…", "Pick survey lot lines…", "Set grade…"} <= set(shown), shown
     inner = panel_px - 2 * PADDING
     wide = [(round(sum(width(c) for c in cells)), [type(c).__name__ for c in cells]) for cells in header.rows
             if sum(width(c) for c in cells) > inner]
