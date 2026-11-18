@@ -7,11 +7,11 @@ tables (the check's), placed here.
 
 import math
 
-from design_checker import egress, present
+from design_checker import egress, grouping, present
 
 from . import plan as plan_mod
 from .draw import PT, Page, width, wrap
-from .tables import COLUMNS, code_rows, schedule_rows
+from .tables import COLUMNS, _natural, code_rows, law_lines, schedule_rows
 from .words import WAITING, result_words
 
 W_IN, H_IN = 17.0, 11.0
@@ -207,9 +207,9 @@ NOT_YET_WHY = "{n} code sections Gordium doesn't check yet: check each by hand (
 NOT_YET_BANNER = "{result}: not checked yet by Gordium, check these {n} code sections by hand: {sections}"
 WAITING_WHY_SHORT = "{why}. Not checked yet by Gordium, even once the rooms are drawn: {n} code sections (listed below)"
 UNKNOWN_BANNER = "{result}: Gordium can't tell which code sections it doesn't check yet: check the whole law by hand"
-NOT_YET_LINE = "Not checked yet by Gordium: {n} code sections, check them by hand (code analysis line {line})"
-UNKNOWN_LINE = ("Not checked yet by Gordium: it can't tell which code sections, so check the whole law by hand (code "
-                "analysis line {line})")
+NOT_YET_LINE = "Not checked yet by Gordium: {n} code sections, check them by hand (code_analysis.csv line {line})"
+UNKNOWN_LINE = ("Not checked yet by Gordium: it can't tell which code sections, so check the whole law by hand "
+                "(code_analysis.csv line {line})")
 UNKNOWN = egress.NO_COVERAGE.split("{")[0]          # "Gordium can't tell which sections of the ": the check's words
 
 
@@ -227,28 +227,119 @@ def not_checked_yet(r: dict) -> list[str] | None:
     return sections
 
 
+def _spans(lines: list[int]) -> str:
+    """CSV line numbers, runs joined: "7–10, 12"."""
+    out, run = [], []
+    for n in sorted(set(lines)):
+        if run and n == run[-1] + 1:
+            run.append(n)
+            continue
+        if run:
+            out.append(f"{run[0]}–{run[-1]}" if len(run) > 1 else str(run[0]))
+        run = [n]
+    if run:
+        out.append(f"{run[0]}–{run[-1]}" if len(run) > 1 else str(run[0]))
+    return ", ".join(out)
+
+
+def _csv_lines(rows: list[dict]) -> str:
+    n = [r["Line"] for r in rows]
+    return f"code_analysis.csv line{'s' if len(n) != 1 else ''} {_spans(n)}"
+
+
+def _sections(rows: list[dict]) -> str:
+    return ", ".join(sorted({r["Code section"] for r in rows if r["Code section"]}, key=_natural))
+
+
+def _rule_row(n: int, r: dict) -> list:
+    """One rule's own row, as the full table has it (the failing rules, the sections line, a waiting law's row)."""
+    item, requirement, why = r["Item"], r["Requirement"] or r["Item"], r["Why / what to change"]
+    missing = not_checked_yet(r)
+    if missing and r["Item id"].partition("#")[0].endswith("." + egress.NOT_YET_ID):    # one line; a banner
+        item, why = NOT_YET_ITEM, NOT_YET_WHY.format(n=len(missing))
+    elif missing:                                                         # waiting: its own words, then them
+        why = WAITING_WHY_SHORT.format(why=egress.WAITING_WHY, n=len(missing))
+    small = " · ".join(x for x in (r["Rule id"], _csv_lines([r])) if x)
+    out = [[str(n), item, (requirement, None, small), r["Required"], r["Proposed"], (r["Result"], r["status"]),
+            r["Code section"], why]]
+    if missing:
+        out.append(["__banner__", NOT_YET_BANNER.format(result=r["Result"], n=len(missing),
+                                                        sections=", ".join(missing)), r["status"]])
+    elif missing is None:
+        out.append(["__banner__", UNKNOWN_BANNER.format(result=r["Result"]), r["status"]])
+    return out
+
+
+def _line_row(n: int, item: str, requirement: str, rows: list[dict], status: str, why: str) -> list:
+    """One grouped line's row: its part or cause, its rules, its result (the most cautious of its rules: the
+    line's own status), every code section its rules cite, and the CSV lines of each rule's own row."""
+    words_ = rows[0]["Result"] if all(r["status"] == status for r in rows) else None
+    if words_ is None:                                     # never kinder than its worst rule (grouping's line status)
+        from .words import result_words as _rw
+        words_ = _rw(status)
+    return [str(n), item, (requirement, None, _csv_lines(rows)), "", "", (words_, status), _sections(rows), why]
+
+
+def _titles(rows: list[dict]) -> str:
+    t = list(dict.fromkeys(r["Requirement"] or r["Item"] for r in rows))
+    return "; ".join(t[:3]) + (f"; and {len(t) - 3} more" if len(t) > 3 else "")
+
+
 def code_table(got: dict) -> list[list]:
-    """G-001's rows: each item of the check, and under the not-checked-yet line (or the waiting row) a whole-width
-    banner listing every code section Gordium doesn't check yet, or saying it can't tell which."""
-    rows, last = [], None
-    for r in code_rows(got):
-        if r["Law"] != last:
-            rows.append(["__group__", r["Law"]])
-            last = r["Law"]
-        missing = not_checked_yet(r)
-        item, requirement, why = r["Item"], r["Requirement"] or r["Item"], r["Why / what to change"]
-        if missing and r["Item id"].partition("#")[0].endswith("." + egress.NOT_YET_ID):    # one line; a banner
-            item, why = NOT_YET_ITEM, NOT_YET_WHY.format(n=len(missing))
-        elif missing:                                                         # waiting: its own words, then them
-            why = WAITING_WHY_SHORT.format(why=egress.WAITING_WHY, n=len(missing))
-        rows.append([str(r["Line"]), item, (requirement, None, r["Rule id"] or None),
-                     r["Required"], r["Proposed"], (r["Result"], r["status"]), r["Code section"], why])
-        if missing:
-            rows.append(["__banner__", NOT_YET_BANNER.format(result=r["Result"], n=len(missing),
-                                                             sections=", ".join(missing)), r["status"]])
-        elif missing is None:
-            rows.append(["__banner__", UNKNOWN_BANNER.format(result=r["Result"]), r["status"]])
+    """G-001's rows, grouped as the panel groups them (design_checker/grouping.py): per law, what does not comply
+    (each failing rule on its own row, with Required and Proposed), what needs review that the architect can act on
+    (a row per part), what to check by hand because Gordium can't read it yet (a row per cause, and the sections
+    line with its banner listing every section), and what complies (a row per part). Each row gives the CSV lines
+    of its rules' own rows (code_analysis.csv and permit_sheets.xlsx: every rule, in the check's order). A law still
+    waiting for rooms prints its waiting row and banner as before."""
+    rows, n = [], 0
+    every = code_rows(got)
+    by_id = {r["Item id"]: r for r in every}
+    for law in got["laws"]:
+        rows.append(["__group__", law["title"]])
+        lines = law_lines(law)
+        if lines is None:
+            for x in law["items"]:
+                n += 1
+                rows += _rule_row(n, by_id[x["item"]["id"]])
+            continue
+        for t in grouping.TIERS:
+            if not lines[t]:
+                continue
+            rows.append(["__group__", f"{grouping.TITLES[t]}"])
+            for ln in lines[t]:
+                mine = [by_id[i] for i in ln["items"]]
+                if t == grouping.FAILS_T:
+                    for r in mine:
+                        n += 1
+                        rows += _rule_row(n, r)
+                elif ln.get("causes"):
+                    head = ln["title"].split(": ")[0]                     # "Not read from the model yet"
+                    for c in ln["causes"]:
+                        n += 1
+                        rows.append(_line_row(n, c["what"][:1].upper() + c["what"][1:], c["rules"],
+                                              [by_id[i] for i in c["items"]], ln["status"], f"{head}: check by hand"))
+                elif len(mine) == 1 and not_checked_yet(mine[0]) != []:    # the sections line: as it was, banner
+                    n += 1
+                    rows += _rule_row(n, mine[0])
+                else:
+                    element = next((by_id[i]["Item"] for i in ln["items"] if by_id[i]["Requirement"]), None)
+                    if element and ln["title"].startswith(element + ": "):
+                        head, rest = ln["title"].split(": ", 1)
+                        count, _, why = rest.partition(": ") if t != grouping.COMPLIES_T else (rest, "", "")
+                        requirement = f"{_plural_rules(len(mine))}: {_titles(mine)}"
+                        n += 1
+                        rows.append(_line_row(n, head, requirement, mine, ln["status"], why))
+                    else:                                  # an item that is no part's: its own name and words
+                        for r in mine:
+                            n += 1
+                            rows.append(_line_row(n, r["Item"], r["Requirement"], [r], r["status"],
+                                                  r["Why / what to change"]))
     return rows
+
+
+def _plural_rules(k: int) -> str:
+    return f"{k} rule{'s' if k != 1 else ''}"
 
 
 def code_analysis(got: dict, headline_lines) -> list[tuple[str, Page]]:
@@ -262,10 +353,12 @@ def code_analysis(got: dict, headline_lines) -> list[tuple[str, Page]]:
         made.append(p)
         return p, y
     pages, y = _table_pages(CODE_COLUMNS, rows, page)
-    note = ("Every row is a result of Gordium's check, in its order, with the check's own result. Required and "
-            "Proposed are shown for reading: worked out from the rule's formula and the measured values, never "
-            "rounded toward compliance; they never decide a result. Rows that don't apply are not listed. The CSV "
-            "beside this sheet carries each row's rule id, part, measured values, citation and the code's words.")
+    note = ("Grouped as Gordium's panel groups the check: what does not comply (each rule, with Required and "
+            "Proposed), what needs review, what to check by hand because Gordium can't read it yet, and what "
+            "complies. A row's result is the most cautious of its rules (the check's own results). Every rule's own "
+            "row, with its rule id, part, measured values, citation and the code's words, is in code_analysis.csv "
+            "and permit_sheets.xlsx at the lines given. Required and Proposed are for reading: never rounded toward "
+            "compliance; they never decide a result. Rules that don't apply are not listed.")
     last_page = pages[-1]
     for i, ln in enumerate(wrap(note, 6, last_page.w - LEFT - EDGE - TB_W - 28)):
         if y + 14 + 8 * i < last_page.h - EDGE - 6:

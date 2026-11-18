@@ -284,7 +284,7 @@ def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer(
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW)]
     view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
     egress.add_to_view(view, got, "City of Ithaca")
-    assert view["state"] == present.REVIEW and "Egress: 1 needs review" in view["summary"]
+    assert view["state"] == present.REVIEW and "Egress: 1 to review" in view["summary"]   # results grouping
     # and the design's state is never kinder than a section's, even given a section with no item at all
     view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
     egress.add_to_view(view, dict(got, items=[]), "City of Ithaca")

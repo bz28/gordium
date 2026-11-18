@@ -4,7 +4,7 @@
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">LIFE-SAFETY PLAN</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#4a4a4a" xml:space="preserve">Egress result: WAITING: NO ROOMS DRAWN YET</text>
 <text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): waiting, no rooms drawn yet (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code analysis line 1)</text>
+<text x="68" y="83.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 1)</text>
 <text x="410.2" y="445.8" font-size="16" font-weight="bold" text-anchor="middle" fill="#4a4a4a" xml:space="preserve">WAITING: NO ROOMS DRAWN YET</text>
 <text x="766.4" y="99.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">LEGEND</text>
 <text x="766.4" y="109.6" font-size="6.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Heavy outline, tinted: sleeping room (each needs an escape opening, R319.1)</text>
@@ -51,8 +51,8 @@
 <text x="1016" y="310.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3b79</text>
 <line x1="1008" y1="320.1" x2="1202.4" y2="320.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="328.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">GORDIUM CODE FINGERPRINT AT CHECK</text>
-<text x="1016" y="337.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1c4accc6957472fa7c57c0c2439df45e992747eec281f3ffa2a894ffb1eda4</text>
-<text x="1016" y="345.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">94</text>
+<text x="1016" y="337.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">88cbbed11bcdf0262e4b1a9cf5747ebd02bf6ae0bd73bf20495c00a0b661</text>
+<text x="1016" y="345.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8983</text>
 <line x1="1008" y1="355.1" x2="1202.4" y2="355.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="363.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="372.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">none drawn yet</text>
