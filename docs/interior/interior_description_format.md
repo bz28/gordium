@@ -16,6 +16,7 @@ The zoning measurements read massing solids from a Rhino file. Egress needs the 
 - **Coordinates.** Plan points are `[x, y]`; 3D points `[x, y, z]`, z up. Elevations are absolute (the same z for every part of the house) and are **finished** surfaces: the finished floor, the finished ground, the tread's walking surface without carpet (R318.7.5: "exclusive of carpets, rugs or runners").
 - **An element's own elevation.** A window, door or level guard is drawn in its own elevation: `u` along the wall (any origin, increasing to the right as seen from the room, or from the walking surface for a guard), `z` the same absolute elevation as everywhere else. A door's plan adds `n`, across the wall, positive toward the side the door swings into.
 - **Not given is not zero.** A key left out means "not known", never a default. A list left out entirely (`stairs` missing) means that kind wasn't read, and every rule about it needs review; an empty list (`stairs: []`) means the house has none.
+- **None is said, never inferred.** For the kinds the format has no list for (ramps, sleeping lofts…), the house has none only where `has_none` says so, with its source. Silence is "not read" (needs review), never "none".
 - **Flags are required.** Every room says `sleeping: true|false`, every opening `escape: true|false`, every door `exit: true|false`. One missing and none of that kind is read: a bedroom nobody labelled is never quietly not a bedroom.
 
 ## The file
@@ -28,6 +29,7 @@ openings: [...]
 stairs: [...]
 doors: [...]
 guards: [...]
+has_none: [...]
 ```
 
 Every part has an `id` (unique across the whole house) and may have a `name` (what the architect calls it: "Bedroom 2", "Window 5"; the id stands in otherwise).
@@ -95,6 +97,31 @@ Either a guard at a level walking surface, or one along a stair (give `walking_s
 | `stair` | for a guard along a stair: the stair's id |
 | `top_line` | for a guard along a stair: the top of the guard as 3D points, running the flight's whole length, in plan on the side of the stair it stands along (the same line as that side's guard inside face in the stair's `sides`, within 1/16 in), else it gets no height |
 
+### has_none
+
+What the house has none of, each claim with where it comes from ([decision](../decisions/2026-11-16_interior_absent_parts.md)). Each entry:
+
+| Key | Meaning |
+|---|---|
+| `kind` | one of the kinds below |
+| `source` | where the claim comes from: the sheet and callout ("none drawn: A-2, A-3"), or the host and who ticked it ("no Ramp elements in the model; ticked by the architect"). Required: a claim without one isn't taken |
+| `reading` | optional, `true` where the claim rests on a reading of the law, not the drawings alone ("an unfinished attic is not a habitable attic"): the checker shows it as one to confirm (needs review) |
+
+| Kind | What it settles |
+|---|---|
+| `basement`, `habitable_attic`, `ramp`, `alternating_tread_device`, `ships_ladder` | that part kind (`rule_format/parts.yaml`) is an empty list: its rules, and the rules for what sits within it (R319.1's escape opening in a basement or habitable attic), are not applicable |
+| `sleeping_loft` | the same for sleeping lofts and for the room a sleeping loft is open to (`loft_room`); and every stair given gets `stair_serves_sleeping_loft: false` |
+| `patio_cover` | every escape opening measured gets `opening_into_patio_cover: false` |
+| `deck_porch_or_cantilever_over_escape_opening` | every escape opening measured gets `opening_under_projection: false` (a claim about the openings: a house may have a porch over none of them) |
+
+A claim isn't taken (its kind stays not read, its rules need review, and the reason is one of the description's problems) when: `has_none` isn't a list; an entry has no `kind`, or one not in the table (the kinds the format lists itself are said with their own list: `stairs: []`, `openings: []`, `doors: []`, `guards: []`; a room that isn't a sleeping room says `sleeping: false`, since `rooms: []` is a house not drawn yet); its `source` is missing or empty; `reading` isn't true or false; it has a key other than `kind`, `source` and `reading` (a mistyped `reading` must never read as settled); the same kind is named twice; or the description also gives that kind's list as anything but an empty list (`ramps`, `basements`, `habitable_attics`, `sleeping_lofts`, `alternating_tread_devices`, `ships_ladders`, `patio_covers`: the lists a later reader will fill), which contradicts it. A "no basements" claim is also refused beside a space the description shows below the ground, or may: an opening with an `area_well`; a room's `floor_elevation` or a stair's `bottom_elevation` below the highest `ground_outside` given at any opening (a walk-out below the uphill ground is one to confirm too); or a ground, floor or stair foot given that isn't a number. A "no sleeping lofts" claim is refused beside a room drawn within another room's height (its floor over the other's in plan, above the other's floor and below the highest point of its ceiling), or a room whose floor or ceiling is given but can't be read; a room upstairs is at or above the ceiling of the room below, so it never is. Both checks are partial: with no ground given, nothing is compared; a room drawn with no floor at all (a room that isn't a sleeping room needn't be) isn't compared; and a loft over a low room, open only to a taller room beside it, isn't caught. The claim about openings has no list to contradict yet.
+
+**How each reader fills it.** Always from the architect's statement, never from not finding something:
+
+- **Rhino:** a "the house has none of" list the architect ticks per kind, with the sheet or a note as the source.
+- **Revit** knows every element in the model, so it can *propose* a claim (no Ramp elements; no stair of a ship's-ladder type; no Room tagged as a loft), but a ramp drawn as a sloped floor, or a ship's ladder as a generic family, is invisible to that scan. A proposal is sent only once the architect ticks it, and the source says both ("no Ramp elements in the model; ticked by the architect"). The add-in's status list (`Answers.cs`) doesn't know the checker's `not_applicable` item status yet: it sends no interior today, so it never receives one, but it must learn the status before it sends `has_none`.
+- **An IFC reader** proposes the same way from element types (`IfcRamp`, `IfcStair` of type `LADDER`) and sends a claim only once it is ticked.
+
 ## What comes back
 
 ```yaml
@@ -106,9 +133,12 @@ parts:
   stair: [...]
   egress_door: [...]
   guard: [...]            # not a part kind in rule_format/parts.yaml yet
-problems: [...]           # why a kind wasn't read
+problems: [...]           # why a kind wasn't read (a has_none claim not taken among them)
 not_checked: [...]        # escape openings in rooms that aren't sleeping rooms
+has_none: {kind: {source, reading, words, parts, openings, stairs}}   # every claim taken
 ```
+
+A claim taken makes each of its part kinds `[]` in `parts`, and gives each escape opening (or stair) its measures, each such part naming in `stated` which claim gave which measure. The checker shows one item per claim, "Ramps: not applicable", with the source and every rule it set aside (a claim marked `reading`, needs review: "… not applicable if this reading is confirmed"); never a pass, and never hidden.
 
 `parts` is exactly what `rule_format.parts.rows` and `design_checker.each_part.check_parts` read: a kind not read is `null`, so its rules need review. `measures` holds only the names `rule_format/parts.yaml` gives the part's kind; `more` holds other values worked out but not yet handed to the rules; a `parts.yaml` measure kept there is listed in `not_measured` as `in_more_not_rules`, and one not worked out at all as `not_measured_yet`.
 

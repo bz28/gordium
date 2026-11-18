@@ -10,11 +10,16 @@ measure the description can't settle is left out of `measures` and its reason pu
 reading it then needs review). Other values worked out are in `more`, not yet handed to the rules; a parts.yaml
 measure kept there says so in `not_measured` (and guards are their own kind). The input format: docs/interior/interior_description_format.md; each measure's definition:
 docs/interior/interior_measurements.md.
+
+What the description says the house has none of (`has_none`, has_none.py) makes that kind's parts an empty list, or
+gives each escape opening a measure that follows from it, and is said in `has_none` ({kind: its source and words}) so
+the checker shows every rule it sets aside. A part kind no list or claim speaks of is left out of `parts` (not read).
 """
 
 import math
 
 from model_measurement.interior.doors import measure_door
+from model_measurement.interior import has_none as none_of
 from model_measurement.interior.guards import measure_guard
 from model_measurement.interior.openings import measure_opening
 from model_measurement.interior.read import FORMAT, INCHES, Reader, name_of
@@ -69,7 +74,7 @@ def _part(item: dict, measured, within=None) -> dict:
 
 def measure(description) -> dict:
     out = {"format": MEASURED_FORMAT, "units": {"length": "in", "area": "sf"},
-           "parts": {k: None for k in KINDS}, "problems": [], "not_checked": []}
+           "parts": {k: None for k in KINDS}, "problems": [], "not_checked": [], "has_none": {}}
     problems = out["problems"]
     if not isinstance(description, dict):
         problems.append(Stop("not_a_description").reason)
@@ -83,6 +88,8 @@ def measure(description) -> dict:
         return out
     reader = Reader(units)
     parts = out["parts"]
+    claims, refused = none_of.read(description)
+    problems += refused
 
     rooms = _given(description, "sleeping_room", problems)
     if rooms is not None:
@@ -148,8 +155,24 @@ def measure(description) -> dict:
             flights = {g.get("stair"): Stop("not_read", what="stairs", key="stairs").reason for g in guards
                        if isinstance(g.get("stair"), str)}
         parts["guard"] = [_part(g, measure_guard(g, reader, flights)) for g in guards]
+    _claimed(parts, claims)
+    out["has_none"] = claims
     _not_measured_yet(parts)
     return out
+
+
+def _claimed(parts: dict, claims: dict) -> None:
+    """Each claim taken: its part kinds an empty list, and its measures on every escape opening measured (each part
+    says, in `stated`, which claim gave it which measure)."""
+    for kind, claim in claims.items():
+        for k in claim["parts"]:
+            parts[k] = []
+        for each, given in (("emergency_escape_opening", claim["openings"]), ("stair", claim["stairs"])):
+            for part in parts.get(each) or []:
+                for name, value in given.items():
+                    part["measures"][name] = value
+                    part["not_measured"].pop(name, None)
+                    part.setdefault("stated", {})[name] = kind
 
 
 def _not_measured_yet(parts: dict) -> None:

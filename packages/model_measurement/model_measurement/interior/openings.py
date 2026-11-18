@@ -1,5 +1,6 @@
 """Emergency escape and rescue openings (R319): the net clear opening's area, height and width, the height of its
-bottom above the floor, and whether it is a grade-floor opening; an area well's size where one is given.
+bottom above the floor, and whether it is a grade-floor opening; whether it is a door (and a side-hinged or sliding
+one), read from its operation; an area well's size where one is given.
 
 The clear opening is what is left of the frame's opening, seen straight on (perpendicular to the wall), with the
 window or door fully open by its normal operation (R319.2.2: "the result of normal operation"):
@@ -32,6 +33,10 @@ GRADE_FLOOR = 44.0      # in: the definition of a grade-floor emergency escape a
 CLEAR = ("opening_net_clear_area", "opening_net_clear_height", "opening_net_clear_width")
 NONE = "none"           # the opening doesn't open
 BELOW = 1 / 16          # in: a sill this far under the floor is drawing noise (read as 0); more is a wrong floor
+# whether an opening is a door, read from its operation: these name a door or a window; fixed glass, pivot and
+# tilt-turn units and `other` are made as doors and as windows, so they don't say
+IS_DOOR = {"side_hinged_door": True, "sliding_door": True, "casement": False, "double_hung": False,
+           "single_hung": False, "horizontal_slider": False, "awning": False, "hopper": False}
 
 
 def drawn_clear(o: dict, reader, operation: str):
@@ -190,6 +195,18 @@ def measure_opening(o: dict, reader, floor_of) -> tuple[dict, dict, dict]:
             measures["opening_at_grade"] = grade_floor(o, reader, bottoms)
         except Stop as s:
             stopped["opening_at_grade"] = s.reason
+    try:
+        operation = choice(o.get("operation"), OPERATIONS, "the opening's operation")
+        if operation not in IS_DOOR:
+            raise Stop("operation_undecided", what="opening", operation=operation.replace("_", " "),
+                       question="whether it is a door or a window")
+        measures["opening_is_door"] = IS_DOOR[operation]
+        if IS_DOOR[operation]:           # R319.3 asks it of a door only: both door operations are one or the other
+            measures["opening_door_hinged_or_sliding"] = True
+        else:
+            stopped["opening_door_hinged_or_sliding"] = Stop("not_a_door").reason
+    except Stop as s:
+        stop_all(("opening_is_door", "opening_door_hinged_or_sliding"), s.reason)
     if o.get("area_well") is not None:
         try:
             more.update(area_well(o, reader))

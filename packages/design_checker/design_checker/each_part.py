@@ -29,26 +29,45 @@ def part_rules(rules: list[dict]) -> list[dict]:
     return [r for r in rules if parts.is_part_rule(r)]
 
 
-def check_parts(rules: list[dict], given, values: dict, allowed: dict) -> dict:
+def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none: dict | None = None) -> dict:
     """Every per-part rule's rows, each rule's one answer, and the panel items.
 
     given: the parts read, {kind: [part, …]} (parts.rows), or None when the interior isn't being checked at all
     (the architect hasn't started it): then no part is checked and one counted item says so, so the design is never
-    shown as complying with rules nobody checked (needs review: principle 4). values: the building's measures."""
+    shown as complying with rules nobody checked (needs review: principle 4). values: the building's measures.
+    has_none: what the interior description says the house has none of ({kind: {"source", "words", "parts"}},
+    model_measurement.interior's): each row it makes not applicable says so, with its source, and `set_aside` lists
+    them by claim ({kind: [rule key, …]}) for the panel to show (egress.py)."""
     rules = part_rules(rules)
     if given is None:
         items = [_item(INTERIOR_NOT_STARTED, None, "Interior", present.REVIEW, INTERIOR_NOT_STARTED_WHY)] \
             if rules else []
-        return {"rows": [], "results": {_key(r, n): "needs_review" for n, r in enumerate(rules, 1)}, "items": items}
+        return {"rows": [], "results": {_key(r, n): "needs_review" for n, r in enumerate(rules, 1)}, "items": items,
+                "set_aside": {}}
+    stated = _stated(given)
     more = _more(given)
     given, why_not = cautious(given)
     home = _homes(given)
-    out, results, open_ = [], {}, {}
+    claims = has_none if isinstance(has_none, dict) else {}
+    out, results, open_, set_aside = [], {}, {}, {k: [] for k in claims}
     for n, rule in enumerate(rules, 1):
         got = parts.rows(rule, given, values, allowed)
         for row in got:
             if not row.get("within") and row["id"] is not None:   # a window checked on its own: its room named too
                 row["home"] = home.get((row["part"], row["id"]))
+            claim = _claim_of(rule, row, given, claims, stated, values, allowed)
+            if claim is None and row["outcome"] == "pass" and (doubt := _reading_read(rule, row, claims, stated)):
+                # a pass that reads a measure resting on a reading still to confirm: never a pass on it
+                row["outcome"] = "needs_review"
+                row["reason"] = (f"complies only if this reading is confirmed: {claims[doubt]['words']} "
+                                 f"({claims[doubt]['source']})")
+                row["has_none"] = doubt
+            elif claim is not None:
+                row["reason"] = ("not applicable if confirmed: " if claims[claim].get("reading") is True else
+                                 "not applicable: ") + f"{claims[claim]['words']} ({claims[claim]['source']})"
+                row["has_none"] = claim
+                if _key(rule, n) not in set_aside[claim]:
+                    set_aside[claim].append(_key(rule, n))
             row["line"] = line(row, rule, values, allowed, why_not.get((row["part"], row["id"])))
             open_[id(row)] = unsettled(row, rule, given, values, allowed, why_not.get((row["part"], row["id"])),
                                        more.get((row["part"], row["id"])))
@@ -62,12 +81,76 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict) -> dict:
             items[-1]["element"] = items[-1]["name"]     # the part, as named: its line in the grouped results
             if open_.get(id(r)):     # why it needs review, for grouping the panel's lines (words only: never a status)
                 items[-1]["open"] = open_[id(r)]
-    return {"rows": out, "results": results, "items": items}
+    return {"rows": out, "results": results, "items": items, "set_aside": set_aside}
+
+
+def _stated(given) -> dict:
+    """{(kind, part id): {measure: the claim that gave it}}: the measures a part has from what the description says
+    the house has none of (model_measurement.interior gives them in the part's `stated`)."""
+    out = {}
+    for kind, listed in (given.items() if isinstance(given, dict) else []):
+        for part in listed if isinstance(listed, list) else []:
+            if isinstance(part, dict) and isinstance(part.get("stated"), dict) and isinstance(part.get("id"), str):
+                out[(kind, part["id"])] = part["stated"]
+    return out
+
+
+def _reading_read(rule: dict, row: dict, claims: dict, stated: dict) -> str | None:
+    """The reading claim (one marked `reading: true`) that gave a measure this rule reads anywhere (applies_when,
+    check, review_when) on this row's part, or None."""
+    gave = stated.get((rule.get("for_each"), row["id"])) or {}
+    try:
+        names = parts.formula_names(rule)
+    except formula.FormulaError:
+        return None
+    hit = [gave[m] for m in sorted(names) if m in gave and claims.get(gave[m], {}).get("reading") is True]
+    return hit[0] if hit else None
+
+
+def _part(given: dict, kind, part_id):
+    return next((p for p in given.get(kind) or [] if isinstance(p, dict) and p.get("id") == part_id), None)
+
+
+def _claim_of(rule: dict, row: dict, given: dict, claims: dict, stated: dict, values: dict | None = None,
+              allowed: dict | None = None) -> str | None:
+    """The claim ("the house has no ramps") that makes this row not applicable, or None. Only a row that is not
+    applicable, and only for the reason the claim gives: the rule's "none" row for a kind the claim empties (a
+    ramp rule, no ramps; the row for no part a rule's parts sit within: no habitable attics), or a part whose
+    applies_when reads a measure the claim gave it (no patio covers, so no window opens into one)."""
+    if row["outcome"] != "not_applicable" or not claims:
+        return None
+    emptied = {k: c for c, claim in claims.items() for k in claim.get("parts") or []}
+    kind, parent = rule.get("for_each"), rule.get("within")
+    if row.get("none") and kind in emptied and given.get(kind) == []:
+        return emptied[kind]
+    if row["id"] is None and not row.get("within") and parent in emptied and given.get(parent) == []:
+        return emptied[parent]
+    gave = stated.get((kind, row["id"])) or {}
+    if gave and isinstance(rule.get("applies_when"), str):
+        try:
+            names = formula.names(rule["applies_when"])
+        except formula.FormulaError:
+            return None
+        hit = [m for m in sorted(names) if m in gave and gave[m] in claims]
+        part = _part(given, kind, row["id"])
+        if not hit or part is None:
+            return None
+        # only where the claim decides it: without the claim's measures, the row would not be not applicable (a
+        # spiral stair is not applicable to R318.7.1 whatever a loft claim says)
+        own = set(parts.measure_kinds(kind))
+        mine = {m: v for m, v in (part.get("measures") or {}).items() if m in own and m not in hit}
+        without = part_outcome(rule, {**parts.building_values(values or {}), **mine}, allowed or {})
+        return gave[hit[0]] if without != "not_applicable" else None
+    return None
 
 
 # the measuring's own words for a measure Gordium doesn't give the rules yet (model_measurement.interior.stops):
 # a measure stopped with one of these is Gordium's gap, never something the architect left out
 GORDIUM_GAPS = (STOPS["not_measured_yet"], STOPS["in_more_not_rules"])
+# the measuring's words for a measure that isn't asked of this part at all (a window is no door: whether it is a
+# side-hinged or sliding door is asked only of a door): neither Gordium's gap nor a fact found about the part, so it
+# never keeps the part's other rules with the architect (unsettled's `found`)
+NOT_ASKED = (STOPS["not_a_door"],)
 # the part kinds the interior description can give, and its list for each (model_measurement.interior.KINDS): one
 # left out is the drawing's to give; any other kind (handrails, ramps…) Gordium has no way to read yet
 READ_KINDS = {kind: spec[0] for kind, spec in INTERIOR_KINDS.items()}
@@ -193,7 +276,7 @@ def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not
     measured = [m for m, v in own.items() if _usable(v, kinds.get(m))] + list(worked)
     # a reason the measuring gave about this part that is not Gordium's gap ("this door is sliding") is a fact found
     # about it: its rules stay with the architect, never folded as unread (review round 1 on #111)
-    found = [r for r in why_not.values() if r not in GORDIUM_GAPS]
+    found = [r for r in why_not.values() if r not in GORDIUM_GAPS + NOT_ASKED]
     if missing and len(gaps) == len(missing) and not measured and not concern and not found:
         return {"gordium": NOT_MEASURED, "kind": rule.get("for_each"), "measures": [_words(rule, m) for m in gaps]}
     out = {"gordium": None, "measures": [_words(rule, m) for m in missing],

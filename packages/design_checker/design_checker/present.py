@@ -25,11 +25,16 @@ from rule_format.rulebook import MEASURE_KINDS, REPO, _jsonl_rows, load, outcome
 from design_checker import reading_set, rhino_logic
 
 COMPLIES, FAILS, REVIEW, NOT_CHECKED = "complies", "does_not_comply", "needs_review", "not_checked"
-MARK = {FAILS: "✕", REVIEW: "?", COMPLIES: "✓", NOT_CHECKED: "–"}
+# rules the interior description sets aside by saying the house has none of a kind (egress.py: one item per claim,
+# "Ramps: not applicable: the description says the house has no ramps (A-2)"): shown, counted toward nothing, never
+# a pass (docs/decisions/2026-11-16_interior_absent_parts.md)
+NOT_APPLICABLE = "not_applicable"
+MARK = {FAILS: "✕", REVIEW: "?", COMPLIES: "✓", NOT_CHECKED: "–", NOT_APPLICABLE: "–"}
 SETUP_MARK = "⚠"                          # a setup or system problem: never an item status
 WORDS = {FAILS: ("does not comply", "do not comply"), REVIEW: ("needs review", "need review"),
-         COMPLIES: ("complies", "comply"), NOT_CHECKED: ("not checked", "not checked")}
-ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED]
+         COMPLIES: ("complies", "comply"), NOT_CHECKED: ("not checked", "not checked"),
+         NOT_APPLICABLE: ("not applicable", "not applicable")}
+ORDER = [FAILS, REVIEW, COMPLIES, NOT_CHECKED, NOT_APPLICABLE]
 # the rules not in the rulebook yet (Ben, 2026-10-21): the grey group's name, and each row's words, in the panel and
 # the report's Check sheet alike
 NOT_YET = "Not checked yet"
@@ -1710,9 +1715,11 @@ def _detail_line(proposed, required, margin_t, sign, margin) -> str:
 # ---- the whole view --------------------------------------------------------------------------------------
 
 def _building_items(items: list[dict]) -> list[dict]:
-    """The items counted as the building's: not the rules not in Gordium yet, and not the use details still waiting for
-    an answer (their own group, "use_details")."""
-    return [i for i in items if i["group"] != "not_covered" and not i.get("use_detail")]
+    """The items counted as the building's: not the rules not in Gordium yet, not the use details still waiting for
+    an answer (their own group, "use_details"), and not what the interior description says the house has none of
+    (not applicable: shown, never counted, so never a pass and never a reason to review)."""
+    return [i for i in items if i["group"] != "not_covered" and not i.get("use_detail")
+            and i["status"] != NOT_APPLICABLE]
 
 
 OUTLINE_MATCH_FT = 0.01   # the lot as drawn is the lookup's outline when every corner is within this (a hundredth of a foot)
@@ -2220,11 +2227,15 @@ def grouped(items: list[dict]) -> list[dict]:
         c = grouping.counts(mine)
         count = {grouping.FAILS_T: c["fails"], grouping.REVIEW_T: c["review"],
                  grouping.BY_HAND_T: len(lines[grouping.BY_HAND_T]),
+                 # every item in it, under a heading that names both when it holds not-applicable rows
+                 # (grouping.tier_title): "Egress · Complies or not applicable · 9", never "Complies · 9" for 8
                  grouping.COMPLIES_T: c["complies"] + c["not_applicable"]}
+        status = {i["id"]: i.get("status") for i in mine}
         for rank, t in enumerate(grouping.TIERS):
             if lines[t]:
+                heading = grouping.tier_title(t, (status[x] for ln in lines[t] for x in ln["items"]))
                 placed.append(((place[after[t]], rank), {
-                    "key": f"{law['key']}:{t}", "title": f"{law['short']} · {grouping.TITLES[t]}",
+                    "key": f"{law['key']}:{t}", "title": f"{law['short']} · {heading}",
                     "items": [x for ln in lines[t] for x in ln["items"]], "lines": lines[t], "count": count[t],
                     "folded": t in grouping.FOLDED, "law": law["title"],
                     "name": law["short"]}))       # its heading without its result, while the list is out of date

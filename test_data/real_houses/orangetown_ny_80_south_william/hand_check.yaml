@@ -56,6 +56,10 @@
 #                                          not be what is built at the CW14s)
 # and by review round 4:
 #   r318_7_6_stair_bottom_landing         complies -> needs_review (the porch steps end on bare grade)
+#
+# Predictions updated when house.yaml gained `has_none` and the measuring turned facts it holds into measures
+# (docs/decisions/2026-11-16_interior_absent_parts.md): 34 rules, each from needs_review to its truth (one to pass,
+# where the truth is complies; 33 to not_applicable, where it is not_applicable). No truth changed.
 
 rules:
   # ------------------------------------------------------------------------------------------- the exit door
@@ -67,8 +71,8 @@ rules:
   - id: general.r318_2_egress_door_side_hinged
     truth: complies
     why: "A-2: the front door is drawn with a swing arc (area exit_door_type)"
-    predicted: needs_review
-    because: "door_side_hinged isn't among the measures expected.yaml gives the front door (measures: {})"
+    predicted: pass
+    because: "door_side_hinged: yes, from the front door's `operation: side_hinged` (A-2 swing arc)"
   - id: general.r318_2_egress_door_clear_width
     truth: needs_review
     why: "3'-0\" leaf; thickness and stops not given (area exit_door_clear_width)"
@@ -161,13 +165,13 @@ rules:
   - id: general.r319_2_4_under_projection_openable_path
     truth: not_applicable
     why: "the bedroom windows are on the second floor (bedroom 4's over a 'ROOF BELOW', A-3: a roof, not a deck, porch or cantilever over the opening); the basement areaways (A-2) are not under the porch, and the rear PATIO is at grade, not a deck"
-    predicted: needs_review
-    because: "applies_when opening_under_projection: not measured, so it may apply"
+    predicted: not_applicable
+    because: "opening_under_projection: no on every bedroom opening, from has_none deck_porch_or_cantilever_over_escape_opening (house.yaml, A-3, A-4)"
   - id: general.r319_3_escape_door_side_hinged_or_sliding
     truth: not_applicable
     why: "every marked escape opening is a window (A-3, A-5 schedule)"
-    predicted: needs_review
-    because: "applies_when opening_is_door: not measured (the measuring doesn't turn `operation` into it)"
+    predicted: not_applicable
+    because: "opening_is_door: no on every bedroom opening (`operation` double_hung or casement: a window)"
   - id: general.r319_4_area_well_required
     truth: complies
     why: "the only openings below grade are the basement's two CW14s, each in a 'BOWMAN KEMP AREAWAY' (A-2); the bedroom windows are above grade"
@@ -181,8 +185,8 @@ rules:
   - id: general.bf103_2_escape_opening_into_patio_cover_unenclosed
     truth: not_applicable
     why: "no patio cover is drawn; no bedroom window opens into one"
-    predicted: needs_review
-    because: "applies_when opening_into_patio_cover not measured"
+    predicted: not_applicable
+    because: "opening_into_patio_cover: no on every bedroom opening, from has_none patio_cover (house.yaml, A-2, A-4), marked as a reading: its own needs-review item asks to confirm it"
   - id: general.r319_4_1_area_well_min_area
     truth: needs_review
     why: "the well tapers outward and its outer edge isn't dimensioned (area area_well_size)"
@@ -216,13 +220,13 @@ rules:
   - id: general.r319_1_habitable_attic_escape_opening_operable
     truth: not_applicable
     why: "no habitable attic: the attic is unfinished, insulated roof space (A-5), reached by a pull-down attic stair (A-3)"
-    predicted: needs_review
-    because: "habitable attics aren't read"
+    predicted: not_applicable
+    because: "has_none habitable_attic (house.yaml, A-5), marked as a reading: no habitable attics, and its own needs-review item asks to confirm it"
   - id: general.r319_1_loft_room_escape_opening_operable
     truth: not_applicable
     why: "no sleeping loft"
-    predicted: needs_review
-    because: "loft rooms aren't read"
+    predicted: not_applicable
+    because: "has_none sleeping_loft (house.yaml, A-2, A-3, A-5): no sleeping lofts, so none to check (and so no room one is open to)"
   - id: general.r319_1_escape_opening_opens_to_public_way_or_yard
     truth: needs_review
     why: "no site plan in the set; bedroom 4's windows open over a roof (area escape_opening_opens_outside)"
@@ -509,143 +513,143 @@ rules:
   - id: general.r315_2_sleeping_loft_floor_area_limit
     truth: not_applicable
     why: "no sleeping loft"
-    predicted: needs_review
-    because: "sleeping lofts aren't read"
+    predicted: not_applicable
+    because: "has_none sleeping_loft (house.yaml, A-2, A-3, A-5): no sleeping lofts, so none to check"
   - id: general.r315_2_sleeping_loft_ceiling_height_limit
     truth: not_applicable
     why: "no sleeping loft"
-    predicted: needs_review
-    because: "sleeping lofts aren't read"
+    predicted: not_applicable
+    because: "has_none sleeping_loft (house.yaml, A-2, A-3, A-5): no sleeping lofts, so none to check"
   - id: general.r315_3_sleeping_loft_clear_height_below
     truth: not_applicable
     why: "no sleeping loft"
-    predicted: needs_review
-    because: "sleeping lofts aren't read"
+    predicted: not_applicable
+    because: "has_none sleeping_loft (house.yaml, A-2, A-3, A-5): no sleeping lofts, so none to check"
   - id: general.r315_3_sleeping_loft_ceiling_height
     truth: not_applicable
     why: "no sleeping loft"
-    predicted: needs_review
-    because: "sleeping lofts aren't read"
+    predicted: not_applicable
+    because: "has_none sleeping_loft (house.yaml, A-2, A-3, A-5): no sleeping lofts, so none to check"
   - id: general.r319_1_room_a_sleeping_loft_is_open_to
     truth: not_applicable
     why: "no sleeping loft"
-    predicted: needs_review
-    because: "sleeping lofts aren't read"
+    predicted: not_applicable
+    because: "has_none sleeping_loft (house.yaml, A-2, A-3, A-5): no sleeping lofts, so none to check"
   - id: general.r318_8_1_ramp_max_slope_egress_door
     truth: not_applicable
     why: "no ramp drawn"
-    predicted: needs_review
-    because: "ramps aren't read"
+    predicted: not_applicable
+    because: "has_none ramp (house.yaml, A-2, A-4): no ramps, so none to check"
   - id: general.r318_8_1_ramp_max_slope_other
     truth: not_applicable
     why: "no ramp drawn"
-    predicted: needs_review
-    because: "ramps aren't read"
+    predicted: not_applicable
+    because: "has_none ramp (house.yaml, A-2, A-4): no ramps, so none to check"
   - id: general.r318_8_1_ramp_max_slope_infeasible
     truth: not_applicable
     why: "no ramp drawn"
-    predicted: needs_review
-    because: "ramps aren't read"
+    predicted: not_applicable
+    because: "has_none ramp (house.yaml, A-2, A-4): no ramps, so none to check"
   - id: general.r318_8_2_ramp_landings_present
     truth: not_applicable
     why: "no ramp drawn"
-    predicted: needs_review
-    because: "ramps aren't read"
+    predicted: not_applicable
+    because: "has_none ramp (house.yaml, A-2, A-4): no ramps, so none to check"
   - id: general.r318_8_2_ramp_landing_width
     truth: not_applicable
     why: "no ramp drawn"
-    predicted: needs_review
-    because: "ramps aren't read"
+    predicted: not_applicable
+    because: "has_none ramp (house.yaml, A-2, A-4): no ramps, so none to check"
   - id: general.r318_8_2_ramp_landing_depth
     truth: not_applicable
     why: "no ramp drawn"
-    predicted: needs_review
-    because: "ramps aren't read"
+    predicted: not_applicable
+    because: "has_none ramp (house.yaml, A-2, A-4): no ramps, so none to check"
   - id: general.r318_8_3_ramp_handrail_one_side
     truth: not_applicable
     why: "no ramp drawn"
-    predicted: needs_review
-    because: "ramps aren't read"
+    predicted: not_applicable
+    because: "has_none ramp (house.yaml, A-2, A-4): no ramps, so none to check"
   - id: general.r318_7_12_atd_clear_width
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_atd_not_in_means_of_egress
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_1_atd_tread_depth
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_1_atd_projected_tread_depth
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_1_atd_tread_width
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_1_atd_riser_height
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_1_atd_angle
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_1_atd_first_tread_at_floor
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_2_atd_handrails_both_sides
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_12_2_atd_handrails_comply_r320
     truth: not_applicable
     why: "no alternating tread device"
-    predicted: needs_review
-    because: "alternating tread devices aren't read"
+    predicted: not_applicable
+    because: "has_none alternating_tread_device (house.yaml, A-2, A-3): none to check"
   - id: general.r318_7_13_ship_ladder_clear_width
     truth: not_applicable
     why: "no ship's ladder (the pull-down attic stair is attic access, not a ship's ladder serving an occupied floor: Gordium's reading)"
-    predicted: needs_review
-    because: "ship's ladders aren't read"
+    predicted: not_applicable
+    because: "has_none ships_ladder (house.yaml, A-2, A-3), marked as a reading: none to check, and its own needs-review item asks to confirm it"
   - id: general.r318_7_13_ship_ladder_egress_use
     truth: not_applicable
     why: "no ship's ladder"
-    predicted: needs_review
-    because: "ship's ladders aren't read"
+    predicted: not_applicable
+    because: "has_none ships_ladder (house.yaml, A-2, A-3), marked as a reading: none to check, and its own needs-review item asks to confirm it"
   - id: general.r318_7_13_1_ships_ladder_tread_depth
     truth: not_applicable
     why: "no ship's ladder"
-    predicted: needs_review
-    because: "ship's ladders aren't read"
+    predicted: not_applicable
+    because: "has_none ships_ladder (house.yaml, A-2, A-3), marked as a reading: none to check, and its own needs-review item asks to confirm it"
   - id: general.r318_7_13_1_ships_ladder_tread_plus_nosing
     truth: not_applicable
     why: "no ship's ladder"
-    predicted: needs_review
-    because: "ship's ladders aren't read"
+    predicted: not_applicable
+    because: "has_none ships_ladder (house.yaml, A-2, A-3), marked as a reading: none to check, and its own needs-review item asks to confirm it"
   - id: general.r318_7_13_1_ships_ladder_riser_height
     truth: not_applicable
     why: "no ship's ladder"
-    predicted: needs_review
-    because: "ship's ladders aren't read"
+    predicted: not_applicable
+    because: "has_none ships_ladder (house.yaml, A-2, A-3), marked as a reading: none to check, and its own needs-review item asks to confirm it"
   - id: general.r318_7_13_2_ships_ladder_handrails_both_sides
     truth: not_applicable
     why: "no ship's ladder"
-    predicted: needs_review
-    because: "ship's ladders aren't read"
+    predicted: not_applicable
+    because: "has_none ships_ladder (house.yaml, A-2, A-3), marked as a reading: none to check, and its own needs-review item asks to confirm it"
 
 # Items the checker should add besides the rules' rows (predicted, from egress.py and expected.yaml):
 # (their names as the panel shows them; each needs review: the stairs weren't read; the bonus room's and basement's
@@ -658,4 +662,13 @@ predicted_other_items:
   - "Basement window CW14 in areaway (west wall): not checked"
   # PR #110: the egress sections Gordium has no rules for yet, listed so egress never reads complies while any is left
   - "Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 84 more: check these by hand"
+  # what house.yaml says the house has none of (has_none), one item each: not applicable with its source, or, for a
+  # claim marked as a reading, needs review (confirm it)
+  - "Sleeping lofts: not applicable"
+  - "Ramps: not applicable"
+  - "Alternating tread devices: not applicable"
+  - "Decks, porches or cantilevers over an escape opening: not applicable"
+  - "Habitable attics: not applicable if this reading is confirmed"
+  - "Ship's ladders: not applicable if this reading is confirmed"
+  - "Patio covers: not applicable if this reading is confirmed"
 predicted_section_state: needs_review    # no fail, no pass on anything the truth doesn't settle

@@ -14,6 +14,29 @@ STOPS = {
     "not_a_list": "`{key}` in the description isn't a list",
     "not_a_mapping": "{what} #{n} isn't a mapping",
     "flag_missing": "{what} {name}: say whether it is {question} (`{key}`: true or false)",
+    # what the description says the house has none of (has_none.py): a claim not taken leaves its kind not read
+    "has_none_not_a_list": "`has_none` in the description isn't a list (each entry a `kind` and its `source`): what the house has none of "
+                           "isn't read",
+    "has_none_entry": "`has_none` entry #{n} isn't a `kind` (with its `source`): it isn't read",
+    "has_none_listed": "`has_none` names {kind!r}, which the description lists itself: say there are none with an empty "
+                       "list (`{key}: []`), not in `has_none`",
+    "has_none_sleeping_room": "`has_none` names 'sleeping_room': a room that isn't a sleeping room says so itself "
+                              "(`sleeping: false`), not in `has_none`",
+    "has_none_kind": "`has_none` names {kind!r}, not a kind it can say the house has none of ({kinds}): it isn't read",
+    "has_none_no_source": "the description says the house has no {words} but not where that comes from (`source`, "
+                          "such as the sheet): it isn't taken, so their rules need review",
+    "has_none_reading": "the description says the house has no {words}, but its `reading` isn't true or false: it "
+                        "isn't taken, so their rules need review",
+    "has_none_twice": "the description says {count} times that the house has no {words}: it isn't taken, so their "
+                      "rules need review",
+    "has_none_keys": "the description says the house has no {words}, with keys it doesn't know ({keys}; an entry "
+                     "has `kind`, `source` and, optionally, `reading`): it isn't taken, so their rules need review",
+    "has_none_below_ground": "the description says the house has no basements, yet {what}: which is right is "
+                             "unclear, so their rules need review",
+    "has_none_room_within": "the description says the house has no sleeping lofts, yet {what}: which is right is "
+                            "unclear, so their rules need review",
+    "has_none_contradicted": "the description says the house has no {words}, yet it also gives `{key}`, which isn't "
+                             "an empty list: which is right is unclear, so their rules need review",
     # values
     "missing": "{what} isn't given",
     "not_a_length": "{what} isn't a length (a number)",
@@ -27,6 +50,7 @@ STOPS = {
     "not_a_polyline": "{what} isn't a line of at least 2 points",
     "not_a_rectangle_given": "{what} isn't a rectangle (left, right, bottom, top, with right > left and top > bottom)",
     "choice": "{what} is {got!r}, not one of {choices}",
+    "operation_undecided": "the {what}'s operation ({operation}) doesn't say {question}",
     # rooms and ceilings
     "two_ceilings": "both a ceiling height and ceiling surfaces are given: give one",
     "no_ceiling": "the room's ceiling isn't given (a ceiling height, or the ceiling surfaces)",
@@ -55,6 +79,7 @@ STOPS = {
     "sash_outside_frame": "open sash {n} reaches outside the frame: a sliding sash opens within it",
     "sash_smaller_than_frame": "the hinged sash ({width} in wide, {thickness} in thick) doesn't close the "
                                "{frame} in frame: the rest of the frame isn't an opening",
+    "not_a_door": "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door",
     "no_clear_opening": "the opening doesn't open (no clear opening), so it has no bottom",
     "sill_below_floor": "the opening's bottom is {sill} in from its room's floor, below it: check the room's floor elevation and the opening's position",
     "no_ground": "the finished ground level outside the opening isn't given",

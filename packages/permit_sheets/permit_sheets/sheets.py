@@ -19,7 +19,8 @@ LEFT, EDGE = 0.75 * PT, 0.3 * PT                # binding margin on the left, as
 TB_W = 2.7 * PT                                 # the title block's strip
 INK, GRID, HEAD, MUTED = "#1a1a1a", "#8c8c8c", "#e6e6e6", "#5a5a5a"
 LOOK = {present.FAILS: ("#b3261e", "#fbe3e1"), present.REVIEW: ("#8a5300", "#fff1d6"),
-        present.NOT_CHECKED: ("#4a4a4a", "#ececec"), present.COMPLIES: ("#1e6b34", "#e3f2e6"), None: (INK, None)}
+        present.NOT_CHECKED: ("#4a4a4a", "#ececec"), present.COMPLIES: ("#1e6b34", "#e3f2e6"),
+        present.NOT_APPLICABLE: ("#4a4a4a", "#ececec"), None: (INK, None)}
 DISCLAIMER = "Prepared with Gordium: draft rules, verify before submission"
 SCALES = [(1 / 2, '1/2" = 1\'-0"'), (3 / 8, '3/8" = 1\'-0"'), (1 / 4, '1/4" = 1\'-0"'), (3 / 16, '3/16" = 1\'-0"'),
           (1 / 8, '1/8" = 1\'-0"'), (3 / 32, '3/32" = 1\'-0"'), (1 / 16, '1/16" = 1\'-0"')]
@@ -27,7 +28,8 @@ SCALES = [(1 / 2, '1/2" = 1\'-0"'), (3 / 8, '3/8" = 1\'-0"'), (1 / 4, '1/4" = 1\
 
 def _status_of_words(words: str) -> str:
     return next((s for s, w in [(present.FAILS, "DOES NOT COMPLY"), (present.REVIEW, "NEEDS REVIEW"),
-                                (present.COMPLIES, "COMPLIES")] if words == w),
+                                (present.COMPLIES, "COMPLIES"), (present.NOT_APPLICABLE, "NOT APPLICABLE")]
+                 if words == w),
                 present.NOT_CHECKED if words.startswith(WAITING) else None)
 
 
@@ -304,7 +306,8 @@ def code_table(got: dict) -> list[list]:
         for t in grouping.TIERS:
             if not lines[t]:
                 continue
-            rows.append(["__group__", f"{grouping.TITLES[t]}"])
+            rows.append(["__group__", grouping.tier_title(t, (by_id[i]["status"] for ln in lines[t]
+                                                              for i in ln["items"]))])
             for ln in lines[t]:
                 mine = [by_id[i] for i in ln["items"]]
                 if t == grouping.FAILS_T:

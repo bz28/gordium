@@ -30,7 +30,7 @@ def status_words(item):
     if item.get("waiting"):
         return "Waiting"
     return {"does_not_comply": "Does not comply", "needs_review": "Needs review", "complies": "Complies",
-            "not_checked": "Not checked"}[item["status"]]
+            "not_checked": "Not checked", "not_applicable": "Not applicable"}[item["status"]]
 
 
 def row_name(item):

@@ -46,7 +46,7 @@ REVIEWED = {"general.r319_4_1_area_well_min_projection": "needs_review",
             "general.r318_7_6_stair_bottom_landing": "needs_review"}     # review round 4: the porch steps' bare grade
 # classes the review loop corrected (round 5: the area well's `opening_below_grade` is a fact not yet measured, M,
 # not a gap in the format, F: the format carries `ground_outside`)
-CLASSES = {"general.r319_4_area_well_required": "M", "general.r319_2_4_under_projection_openable_path": "F"}
+CLASSES = {"general.r319_4_area_well_required": "M"}
 # needs-review truths whose `why` leans to a fail or a reading: each names the open question that keeps it there, and
 # the question records what was searched (round 5)
 OPEN = {"general.r318_3_exterior_door_landing_each_side": "README question 9",
@@ -107,7 +107,26 @@ def test_every_answer_is_the_predicted_one_and_never_a_false_pass(found, name):
     # sleeping room
     others = sorted(i["name"] for i in got["items"] if not i.get("rule"))
     assert others == sorted(hand["predicted_other_items"])
-    assert all(i["status"] == "needs_review" for i in got["items"] if not i.get("rule"))
+    # each item besides the rules' rows needs review, except what house.yaml says the house has none of: one item per
+    # claim, not applicable, saying so with the claim's own source (or, a claim marked as a reading, needs review)
+    claims = {c["kind"]: c for c in load_yaml(name, "house.yaml").get("has_none") or []}
+    for i in got["items"]:
+        if i.get("rule"):
+            continue
+        claim = claims.get((i.get("has_none") or {}).get("kind"))
+        if claim is None:
+            assert i["status"] == "needs_review", i["name"]
+            continue
+        assert i["status"] == ("needs_review" if claim.get("reading") else "not_applicable"), i["name"]
+        assert " ".join(claim["source"].split()) in i["reason"], i["name"]
+        assert "the description says the house has no" in i["reason"], i["name"]
+    assert len([i for i in got["items"] if i.get("has_none")]) == len(claims)
+    # every rule a claim sets aside is named in that claim's item, so a not applicable is never hidden; the rest are
+    # not applicable from a fact the house gives (every escape opening a window), as the hand-check predicted
+    set_aside = {k for i in got["items"] for k in (i.get("has_none") or {}).get("rules", [])}
+    for k, v in got["results"].items():
+        if v == "not_applicable":
+            assert (k in set_aside) == ("has_none" in by_id[k]["because"]), k
     assert got["interior"]["problems"] == ["the stairs weren't read (no `stairs` in the description)"]
 
 
@@ -140,7 +159,8 @@ def test_the_evaluation_table_is_current(found, name):
     assert f"The panel shows {len(got['items'])} items. {len(got['rows'])} are the rules' rows" in text
     cautious_rules = sum(CHECKER[got["results"][r]] != TRUTH[truth[r]] for r in truth)
     assert f"It is cautious in {cautious_rules} places" in text
-    meets = sum(t == "complies" for t in truth.values())
+    # of the rules it is cautious about, those the house meets (the rest don't apply to it)
+    meets = sum(t == "complies" and got["results"][r] != "pass" for r, t in truth.items())
     assert f"{cautious_rules} rules: {meets} the house meets and {cautious_rules - meets} that don't apply" in text
     answers = list(got["results"].values())
     assert totals == [(len(answers), answers.count("pass"), answers.count("fail"), answers.count("needs_review"),

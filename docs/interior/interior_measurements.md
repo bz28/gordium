@@ -47,6 +47,9 @@ Why no area under a low ceiling: R312.3 leaves out "Portions of a room with a sl
 | `opening_net_clear_area` (sf) | Width times height | R319.2.1 "a net clear opening of not less than 5.7 square feet" (p.79) |
 | `opening_sill_height` (in) | The clear rectangle's bottom less the room's finished floor elevation | R319.2.3 "the bottom of the clear opening not greater than 44 inches (1118 mm) above the floor" (p.79) |
 | `opening_at_grade` (yes/no) | Yes if the clear opening's bottom is within 44 in of the finished ground outside at every point given; no if at none; mixed: no value | Definition, GRADE FLOOR EMERGENCY ESCAPE AND RESCUE OPENING: "not more than 44 inches (1118 mm) above or below the finished ground level adjacent to the opening" (p.21); R319.2.1 Exception, 5 square feet |
+| `opening_is_door` (yes/no) | From the opening's `operation` alone: yes for `side_hinged_door` and `sliding_door`; no for `casement`, `double_hung`, `single_hung`, `horizontal_slider`, `awning`, `hopper` (window types by name); no value for `fixed`, `pivot`, `tilt_turn` and `other`, which are made as doors and as windows | R319.3 "Where a door is provided as the required emergency escape and rescue opening, it shall be a side-hinged door or a sliding door" (p.80) |
+| `opening_door_hinged_or_sliding` (yes/no) | Yes for a door (both door operations are one or the other); a window gets no value (`not_a_door`): it is asked only of a door | R319.3 |
+| `opening_into_patio_cover`, `opening_under_projection` (yes/no) | No, on every escape opening, only where the description says the house has no patio covers, or no deck, porch or cantilever over an escape opening (`has_none`); else no value | Appendix BF103.2; R319.2.4 |
 | `area_well_area` (sf, `more`) | The well's width times its projection | R319.4.1 "The horizontal area of the area well shall be not less than 9 square feet" (p.80) |
 | `area_well_width`, `area_well_projection` (in, `more`) | As given | R319.4.1 "a horizontal projection and width of not less than 36 inches" (p.80) |
 | `area_well_depth` (in, `more`) | The highest ground given outside less the well's floor | R319.4.2 "vertical depth greater than 44 inches" needs a ladder or steps (p.80) |
@@ -90,6 +93,9 @@ Not measured yet: a stair guard's openings (R321.1.3 Exceptions 1 and 2: the 6 i
 |---|---|---|
 | `door_clear_width` (in) | A side-hinged door only: the leaf, drawn closed, turned 90 degrees about its hinge pin (which must hang it: at the leaf's hinge-side corner on the face it swings toward, within 1/16 in, or beyond it; else no value). The leaf must be thicker than nothing and, closed, span its opening: reach the latch-side stop (within 1/16 in), and stand no farther behind the hinge-side stop than a stop laps a leaf (3/4 in), else no value; from its face toward the latch side (or the hinge-side stop, if that stands further in) to the latch-side stop | R318.2 "measured between the face of the door and the stop, with the door open 90 degrees" (p.76) |
 | `door_clear_height` (in) | The bottom of the head stop less the top of the threshold | R318.2 "measured from the top of the threshold to the bottom of the stop" (p.76) |
+| `door_side_hinged` (yes/no) | From the door's `operation` alone: yes for `side_hinged`; no for `sliding`, `folding`, `pocket`; no value for `other` | R318.2 "The egress door shall be side-hinged" (p.76) |
+
+Not measured yet: `opening_operable`. It follows from `operation` just as plainly (fixed glass doesn't open; every other operation does), but R319.6's rule checks it on every sleeping room's openings, since a rule for each opening can't read whether its room is new in an addition: measured, R319.6 would say "complies" on every new house, where it doesn't apply ([decision](../decisions/2026-11-16_interior_absent_parts.md), item 5).
 
 A sliding, folding or pocket door gets no clear width: R318.2's measure is defined for a side-hinged door (and requires one).
 
@@ -106,10 +112,23 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `not_a_list` | `{key}` in the description isn't a list |
 | `not_a_mapping` | {what} #{n} isn't a mapping |
 | `flag_missing` | {what} {name}: say whether it is {question} (`{key}`: true or false) |
+| `has_none_not_a_list` | `has_none` in the description isn't a list (each entry a `kind` and its `source`): what the house has none of isn't read |
+| `has_none_entry` | `has_none` entry #{n} isn't a `kind` (with its `source`): it isn't read |
+| `has_none_listed` | `has_none` names {kind!r}, which the description lists itself: say there are none with an empty list (`{key}: []`), not in `has_none` |
+| `has_none_sleeping_room` | `has_none` names 'sleeping_room': a room that isn't a sleeping room says so itself (`sleeping: false`), not in `has_none` |
+| `has_none_kind` | `has_none` names {kind!r}, not a kind it can say the house has none of ({kinds}): it isn't read |
+| `has_none_no_source` | the description says the house has no {words} but not where that comes from (`source`, such as the sheet): it isn't taken, so their rules need review |
+| `has_none_reading` | the description says the house has no {words}, but its `reading` isn't true or false: it isn't taken, so their rules need review |
+| `has_none_twice` | the description says {count} times that the house has no {words}: it isn't taken, so their rules need review |
+| `has_none_keys` | the description says the house has no {words}, with keys it doesn't know ({keys}; an entry has `kind`, `source` and, optionally, `reading`): it isn't taken, so their rules need review |
+| `has_none_below_ground` | the description says the house has no basements, yet {what}: which is right is unclear, so their rules need review |
+| `has_none_room_within` | the description says the house has no sleeping lofts, yet {what}: which is right is unclear, so their rules need review |
+| `has_none_contradicted` | the description says the house has no {words}, yet it also gives `{key}`, which isn't an empty list: which is right is unclear, so their rules need review |
 | `missing` | {what} isn't given |
 | `not_a_length` | {what} isn't a length (a number) |
 | `too_far` | {what} is more than 1,000,000,000 in (about 15,800 miles) from the origin: not a place in a house |
 | `not_finite` | it came out too large to be a number (from lengths far apart) |
+| `operation_undecided` | the {what}'s operation ({operation}) doesn't say {question} |
 | `not_measured_yet` | Gordium doesn't measure this yet |
 | `in_more_not_rules` | Gordium works this out (shown with the extra values) but doesn't give it to the rules yet |
 | `negative` | {what} is {value} in: a size can't be less than zero |
@@ -139,6 +158,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `clear_outside_frame` | the maker's clear opening is bigger than its frame, or reaches outside it: which is right is unclear |
 | `sash_outside_frame` | open sash {n} reaches outside the frame: a sliding sash opens within it |
 | `sash_smaller_than_frame` | the hinged sash ({width} in wide, {thickness} in thick) doesn't close the {frame} in frame: the rest of the frame isn't an opening |
+| `not_a_door` | the opening is a window: whether it is a side-hinged or sliding door is asked only of a door |
 | `no_clear_opening` | the opening doesn't open (no clear opening), so it has no bottom |
 | `sill_below_floor` | the opening's bottom is {sill} in from its room's floor, below it: check the room's floor elevation and the opening's position |
 | `no_ground` | the finished ground level outside the opening isn't given |

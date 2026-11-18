@@ -3,8 +3,8 @@
 <rect x="0" y="0" width="1224" height="792" fill="#ffffff"/>
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">LIFE-SAFETY PLAN: FLOOR AT -8'-0&quot;</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#b3261e" xml:space="preserve">Egress result: DOES NOT COMPLY</text>
-<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 3 do not comply · 3 to review · 5 comply · 12 parts not read yet · 86 sections not checked yet (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 132)</text>
+<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 4 do not comply · 3 to review · 5 comply · 12 parts not read yet · 86 sections not checked yet (the check's own count)</text>
+<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 130)</text>
 <polygon points="212.2,479.6 608.2,479.6 608.2,119.6 212.2,119.6" fill="#eef3fb" stroke="#1a1a1a" stroke-width="1.6"/>
 <text x="410.2" y="295.6" font-size="7" font-weight="bold" text-anchor="middle" fill="#000000" xml:space="preserve">BASEMENT BEDROOM</text>
 <text x="410.2" y="304.6" font-size="5.5" text-anchor="middle" fill="#5a5a5a" xml:space="preserve">SLEEPING ROOM</text>
@@ -41,8 +41,8 @@
 <text x="766.4" y="141.1" font-size="6.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Results: COMPLIES · DOES NOT COMPLY · NEEDS REVIEW · WAITING (word</text>
 <text x="766.4" y="149.6" font-size="6.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">always printed)</text>
 <text x="766.4" y="166.1" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">EXITS</text>
-<text x="766.4" y="176.1" font-size="6.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Exit door DE: Patio door (its place in the plan isn't given in the drawing):</text>
-<text x="766.4" y="184.6" font-size="6.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
+<text x="766.4" y="176.1" font-size="6.5" font-weight="bold" text-anchor="start" fill="#b3261e" xml:space="preserve">Exit door DE: Patio door (its place in the plan isn't given in the drawing):</text>
+<text x="766.4" y="184.6" font-size="6.5" font-weight="bold" text-anchor="start" fill="#b3261e" xml:space="preserve">DOES NOT COMPLY</text>
 <text x="766.4" y="201.1" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">NOTES</text>
 <text x="766.4" y="211.1" font-size="6.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Windows and doors have no position in the plan in the interior drawing: escape</text>
 <text x="766.4" y="219.6" font-size="6.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">openings are tagged inside their room, the exit door is named above.</text>
@@ -93,8 +93,8 @@
 <text x="1016" y="298.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3b79</text>
 <line x1="1008" y1="308.6" x2="1202.4" y2="308.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="316.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">GORDIUM CODE FINGERPRINT AT CHECK</text>
-<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">61aafc0668a620f6d0ae15d1de35dbda39814a955c1e98133fe8abbed9d4</text>
-<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">faaa</text>
+<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7b3745ed68fdbcc8ba433a2bf5da10f524a81b0ba2d3b8d1a70034b55fea</text>
+<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">999d</text>
 <line x1="1008" y1="343.6" x2="1202.4" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="351.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="360.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fingerprint</text>

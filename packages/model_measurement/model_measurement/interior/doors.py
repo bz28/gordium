@@ -1,4 +1,4 @@
-"""The exit door (R318.2): its clear width and clear height.
+"""The exit door (R318.2): its clear width and clear height, and whether it is side-hinged.
 
 R318.2: the clear width is "measured between the face of the door and the stop, with the door open 90 degrees";
 the clear height "from the top of the threshold to the bottom of the stop". Drawn in the door's own plan and
@@ -12,6 +12,8 @@ from model_measurement.interior.read import choice, tidy
 from model_measurement.interior.stops import Stop
 
 OPERATIONS = ("side_hinged", "sliding", "folding", "pocket", "other")
+# whether a door is side-hinged, read straight from its operation (R318.2: "a side-hinged door"); `other` doesn't say
+SIDE_HINGED = {"side_hinged": True, "sliding": False, "folding": False, "pocket": False}
 PIN_OFF = 1 / 16        # in: how far the hinge pin may stand back from the leaf's hinge corner (drawing noise)
 # in: how far a closed leaf's hinge edge may stand behind the hinge-side stop's face: the stop laps the leaf by its
 # own projection off the jamb, 1/2 to 3/4 in for a door stop
@@ -79,8 +81,20 @@ def clear_height(d: dict, reader) -> float:
     return head - threshold
 
 
+def side_hinged(d: dict) -> bool:
+    """True for a side-hinged door, False for a sliding, folding or pocket one; `other` gives no value."""
+    operation = choice(d.get("operation"), OPERATIONS, "the door's operation")
+    if operation not in SIDE_HINGED:
+        raise Stop("operation_undecided", what="door", operation=operation, question="whether it is side-hinged")
+    return SIDE_HINGED[operation]
+
+
 def measure_door(d: dict, reader) -> tuple[dict, dict, dict]:
     measures, stopped = {}, {}
+    try:
+        measures["door_side_hinged"] = side_hinged(d)
+    except Stop as s:
+        stopped["door_side_hinged"] = s.reason
     for name, fn in (("door_clear_width", clear_width), ("door_clear_height", clear_height)):
         try:
             measures[name] = tidy(fn(d, reader))

@@ -1,6 +1,9 @@
 # What the measuring code (model_measurement.interior, PR #95) should return for house.yaml, worked out by hand
 # BEFORE the code ran on this house (committed first, in its own commit). Inches; areas in sq ft.
 # Whether each rule is met is a separate question, worked from the code text in answer_key.yaml.
+# Added later, by hand from house.yaml (docs/decisions/2026-11-16_interior_absent_parts.md): what follows from facts
+# it already held (every escape opening's `operation` is a window's, the front door's is side_hinged) and from its
+# `has_none` claims (no patio covers, nothing over an escape opening).
 not_read: [stair]                       # no `stairs` in the description: the nosings can't be placed
 parts:
   sleeping_room:
@@ -24,29 +27,29 @@ parts:
   emergency_escape_opening:
     m1:  &no_frame
       within: master
-      measures: {}
-      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+      measures: {opening_is_door: false, opening_into_patio_cover: false, opening_under_projection: false}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade, opening_door_hinged_or_sliding]
     m2: *no_frame
     m3: *no_frame
     m4: *no_frame
     b2a: &no_frame_b2
       within: bed2
-      measures: {}
-      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+      measures: {opening_is_door: false, opening_into_patio_cover: false, opening_under_projection: false}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade, opening_door_hinged_or_sliding]
     b2b: *no_frame_b2
     b3a: &no_frame_b3
       within: bed3
-      measures: {}
-      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+      measures: {opening_is_door: false, opening_into_patio_cover: false, opening_under_projection: false}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade, opening_door_hinged_or_sliding]
     b3b: *no_frame_b3
     b4a: &no_frame_b4
       within: bed4
-      measures: {}
-      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade]
+      measures: {opening_is_door: false, opening_into_patio_cover: false, opening_under_projection: false}
+      not_measured: [opening_net_clear_area, opening_net_clear_height, opening_net_clear_width, opening_sill_height, opening_at_grade, opening_door_hinged_or_sliding]
     b4b: *no_frame_b4
   egress_door:
     front:
-      measures: {}
+      measures: {door_side_hinged: true}                     # operation: side_hinged
       not_measured: [door_clear_width, door_clear_height]   # no hinge side / stops; no threshold
   guard:                                  # level guards: no members -> no height, no sphere; the stair guard:
     g_hall: &no_guard                     # its stair wasn't read
@@ -67,6 +70,16 @@ reasons:                                   # the exact reason for every measure 
   b3b: "the opening's frame isn't given (and no maker's clear opening)"
   b4a: "the opening's frame isn't given (and no maker's clear opening)"
   b4b: "the opening's frame isn't given (and no maker's clear opening)"
+  m1/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  m2/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  m3/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  m4/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  b2a/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  b2b/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  b3a/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  b3b/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  b4a/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
+  b4b/opening_door_hinged_or_sliding: "the opening is a window: whether it is a side-hinged or sliding door is asked only of a door"
   front/door_clear_width: "the door's hinge side isn't given"
   front/door_clear_height: "the top of the threshold isn't given"
   g_hall: "the guard's members (`members`: rails, balusters, posts, panels) isn't given"

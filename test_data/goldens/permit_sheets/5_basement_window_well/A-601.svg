@@ -3,8 +3,8 @@
 <rect x="0" y="0" width="1224" height="792" fill="#ffffff"/>
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">ESCAPE-WINDOW SCHEDULE</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#b3261e" xml:space="preserve">Egress result: DOES NOT COMPLY</text>
-<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 3 do not comply · 3 to review · 5 comply · 12 parts not read yet · 86 sections not checked yet (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 132)</text>
+<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 4 do not comply · 3 to review · 5 comply · 12 parts not read yet · 86 sections not checked yet (the check's own count)</text>
+<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 130)</text>
 <polygon points="68,99.6 994,99.6 994,123.6 68,123.6" fill="#e6e6e6" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Mark</text>
 <text x="104.55" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Opening</text>
@@ -39,9 +39,9 @@
 <text x="698.4" y="132.6" font-size="7" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">NEEDS REVIEW</text>
 <text x="782.28" y="132.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.2.1, R319.2.2,</text>
 <text x="782.28" y="141.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.2.3</text>
-<text x="862.8" y="132.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">18 rules need review: code analysis lines</text>
-<text x="862.8" y="141.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">9, 10, 12, 14, 16, 18, 36, 38, 40, 42, 57,</text>
-<text x="862.8" y="150.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">63, 111, 113, 115, 117, 119, 121</text>
+<text x="862.8" y="132.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">17 rules need review: code analysis lines</text>
+<text x="862.8" y="141.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">9, 10, 12, 14, 16, 34, 36, 38, 40, 55, 61,</text>
+<text x="862.8" y="150.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">109, 111, 113, 115, 117, 119</text>
 <line x1="68" y1="154.6" x2="994" y2="154.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="101.55" y1="123.6" x2="101.55" y2="154.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="205.56" y1="123.6" x2="205.56" y2="154.6" stroke="#8c8c8c" stroke-width="0.3"/>
@@ -81,10 +81,10 @@
 <text x="862.8" y="181.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Basement bedroom › Window 2: net</text>
 <text x="862.8" y="190.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">clear height 20 in, needs &gt;= 24 in;</text>
 <text x="862.8" y="199.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Basement bedroom › Window 2: sill</text>
-<text x="862.8" y="208.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height 46 in, needs &lt;= 44 in; 17 rules</text>
+<text x="862.8" y="208.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">height 46 in, needs &lt;= 44 in; 16 rules</text>
 <text x="862.8" y="217.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">need review: code analysis lines 11, 13,</text>
-<text x="862.8" y="226.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">15, 17, 19, 37, 39, 41, 43, 58, 64, 112,</text>
-<text x="862.8" y="235.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">114, 116, 118, 120, 122</text>
+<text x="862.8" y="226.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">15, 17, 35, 37, 39, 41, 56, 62, 110, 112,</text>
+<text x="862.8" y="235.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">114, 116, 118, 120</text>
 <line x1="68" y1="239.6" x2="994" y2="239.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="101.55" y1="154.6" x2="101.55" y2="239.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="205.56" y1="154.6" x2="205.56" y2="239.6" stroke="#8c8c8c" stroke-width="0.3"/>
@@ -134,8 +134,8 @@
 <text x="1016" y="298.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3b79</text>
 <line x1="1008" y1="308.6" x2="1202.4" y2="308.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="316.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">GORDIUM CODE FINGERPRINT AT CHECK</text>
-<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">61aafc0668a620f6d0ae15d1de35dbda39814a955c1e98133fe8abbed9d4</text>
-<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">faaa</text>
+<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7b3745ed68fdbcc8ba433a2bf5da10f524a81b0ba2d3b8d1a70034b55fea</text>
+<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">999d</text>
 <line x1="1008" y1="343.6" x2="1202.4" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="351.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="360.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fingerprint</text>

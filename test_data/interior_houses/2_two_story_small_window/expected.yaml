@@ -19,6 +19,8 @@ parts:
         opening_net_clear_area: 5.125       # 20.5 x 36 = 738 / 144: under 5.7
         opening_sill_height: 24.0           # 144 - 120
         opening_at_grade: false             # 144 above the ground at 0
+        opening_is_door: false   # its operation names a window
+      not_measured: [opening_door_hinged_or_sliding]   # a window: asked only of a door
     w6:
       within: bed4
       measures:
@@ -27,6 +29,8 @@ parts:
         opening_net_clear_area: 6.625       # 26.5 x 36 = 954 / 144
         opening_sill_height: 12.0
         opening_at_grade: false
+        opening_is_door: false   # its operation names a window
+      not_measured: [opening_door_hinged_or_sliding]   # a window: asked only of a door
   stair:
     s1:
       measures:
@@ -46,4 +50,5 @@ parts:
       measures:
         door_clear_width: 32.0              # 33.75 - (0 + 1.75)
         door_clear_height: 78.0             # 78.75 - 0.75
+        door_side_hinged: true   # operation: side_hinged
   guard: {}

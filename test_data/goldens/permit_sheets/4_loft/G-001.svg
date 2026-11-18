@@ -4,7 +4,7 @@
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">CODE ANALYSIS: EGRESS</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#b3261e" xml:space="preserve">Egress result: DOES NOT COMPLY</text>
 <text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 2 do not comply · 4 to review · 10 parts not read yet · 86 sections not checked yet (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 112)</text>
+<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 111)</text>
 <polygon points="68,99.6 994,99.6 994,114.6 68,114.6" fill="#e6e6e6" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">#</text>
 <text x="94.83" y="109.6" font-size="7" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">Item</text>
@@ -69,7 +69,7 @@
 <text x="210.58" y="242.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">risers (R318.7.8); Sleeping loft stair riser height, 7 to 12 in</text>
 <text x="210.58" y="251.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R315.5.2.2); Sleeping loft stairway clear width at or above</text>
 <text x="210.58" y="260.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">handrail (R315.5.2.1); and 13 more</text>
-<text x="210.58" y="269.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 4, 26, 33–38, 40–42, 44–45, 68, 72–73</text>
+<text x="210.58" y="269.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 4, 25, 32–37, 39–41, 43–44, 67, 71–72</text>
 <text x="408.04" y="233.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="233.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,224.6 684.2,224.6 684.2,300.6 602.49,300.6" fill="#fff1d6"/>
@@ -121,11 +121,11 @@
 <line x1="994" y1="300.6" x2="994" y2="321.1" stroke="#1a1a1a" stroke-width="0.6"/>
 <text x="71" y="330.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">5</text>
 <text x="94.83" y="330.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Bedroom › Window A</text>
-<text x="210.58" y="330.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">21 rules: Escape opening minimum net clear area (R319.2.1);</text>
+<text x="210.58" y="330.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">20 rules: Escape opening minimum net clear area (R319.2.1);</text>
 <text x="210.58" y="339.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Escape opening minimum net clear height (R319.2.2);</text>
-<text x="210.58" y="348.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Escape opening minimum net clear width (R319.2.2); and 18</text>
+<text x="210.58" y="348.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Escape opening minimum net clear width (R319.2.2); and 17</text>
 <text x="210.58" y="357.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">more</text>
-<text x="210.58" y="365.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 5–13, 29–32, 46, 51, 97–102</text>
+<text x="210.58" y="365.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 5–12, 28–31, 45, 50, 96–101</text>
 <text x="408.04" y="330.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="330.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,321.1 684.2,321.1 684.2,433.1 602.49,433.1" fill="#fff1d6"/>
@@ -136,7 +136,7 @@
 <text x="687.2" y="357.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.2.2,</text>
 <text x="687.2" y="366.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.2.3,</text>
 <text x="687.2" y="375.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.2.4,</text>
-<text x="687.2" y="384.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.3, R319.4,</text>
+<text x="687.2" y="384.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4,</text>
 <text x="687.2" y="393.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.1,</text>
 <text x="687.2" y="402.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2,</text>
 <text x="687.2" y="411.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.4.2.1,</text>
@@ -144,7 +144,7 @@
 <text x="687.2" y="429.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">R319.6</text>
 <text x="745.07" y="330.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">to give: an awning window's clear opening depends on how far it opens and its</text>
 <text x="745.07" y="339.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">hardware: give the maker's net clear opening (`stated_clear`) · not read yet:</text>
-<text x="745.07" y="348.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fully openable, path height and 20 more</text>
+<text x="745.07" y="348.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fully openable, path height and 18 more</text>
 <line x1="68" y1="433.1" x2="994" y2="433.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="91.83" y1="321.1" x2="91.83" y2="433.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <line x1="207.58" y1="321.1" x2="207.58" y2="433.1" stroke="#8c8c8c" stroke-width="0.3"/>
@@ -161,7 +161,7 @@
 <text x="210.58" y="451.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">(R321.1.2); Guard height, open sides of stairs (R321.1.2 Exc.</text>
 <text x="210.58" y="460.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1); Guard top serving as stair handrail, 34 to 38 in (R321.1.2</text>
 <text x="210.58" y="469.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exc. 2); and 4 more</text>
-<text x="210.58" y="477.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 16–21, 28</text>
+<text x="210.58" y="477.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 15–20, 27</text>
 <text x="408.04" y="442.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="442.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,433.1 684.2,433.1 684.2,480.6 602.49,480.6" fill="#fff1d6"/>
@@ -186,7 +186,7 @@
 <text x="71" y="504.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7</text>
 <text x="94.83" y="504.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Handrails</text>
 <text x="210.58" y="504.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10 rules</text>
-<text x="210.58" y="513.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 14–15, 104–111</text>
+<text x="210.58" y="513.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 13–14, 103–110</text>
 <text x="408.04" y="504.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="504.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,495.6 684.2,495.6 684.2,526.6 602.49,526.6" fill="#fff1d6"/>
@@ -208,7 +208,7 @@
 <text x="71" y="535.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8</text>
 <text x="94.83" y="535.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Sleeping lofts</text>
 <text x="210.58" y="535.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">5 rules</text>
-<text x="210.58" y="544.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 22–25, 50</text>
+<text x="210.58" y="544.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 21–24, 49</text>
 <text x="408.04" y="535.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="535.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,526.6 684.2,526.6 684.2,548.6 602.49,548.6" fill="#fff1d6"/>
@@ -229,7 +229,7 @@
 <text x="71" y="557.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">9</text>
 <text x="94.83" y="557.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Basements</text>
 <text x="210.58" y="557.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">2 rules</text>
-<text x="210.58" y="566.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 47, 103</text>
+<text x="210.58" y="566.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 46, 102</text>
 <text x="408.04" y="557.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="557.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,548.6 684.2,548.6 684.2,569.1 602.49,569.1" fill="#fff1d6"/>
@@ -249,7 +249,7 @@
 <text x="71" y="578.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10</text>
 <text x="94.83" y="578.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Habitable attics</text>
 <text x="210.58" y="578.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule</text>
-<text x="210.58" y="586.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 48</text>
+<text x="210.58" y="586.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 47</text>
 <text x="408.04" y="578.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="578.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,569.1 684.2,569.1 684.2,589.6 602.49,589.6" fill="#fff1d6"/>
@@ -269,7 +269,7 @@
 <text x="71" y="598.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">11</text>
 <text x="94.83" y="598.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Rooms a loft opens to</text>
 <text x="210.58" y="598.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">1 rule</text>
-<text x="210.58" y="607.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 49</text>
+<text x="210.58" y="607.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv line 48</text>
 <text x="408.04" y="598.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="598.6" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,589.6 684.2,589.6 684.2,610.1 602.49,610.1" fill="#fff1d6"/>
@@ -289,7 +289,7 @@
 <text x="71" y="619.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">12</text>
 <text x="94.83" y="619.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Exterior doors</text>
 <text x="210.58" y="619.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8 rules</text>
-<text x="210.58" y="627.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 52–59</text>
+<text x="210.58" y="627.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 51–58</text>
 <text x="408.04" y="619.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="619.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,610.1 684.2,610.1 684.2,641.1 602.49,641.1" fill="#fff1d6"/>
@@ -311,7 +311,7 @@
 <text x="71" y="650.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">13</text>
 <text x="94.83" y="650.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Alternating tread devices</text>
 <text x="210.58" y="650.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">10 rules</text>
-<text x="210.58" y="658.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 74–83</text>
+<text x="210.58" y="658.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 73–82</text>
 <text x="408.04" y="650.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="650.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,641.1 684.2,641.1 684.2,672.1 602.49,672.1" fill="#fff1d6"/>
@@ -333,7 +333,7 @@
 <text x="71" y="681.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">14</text>
 <text x="94.83" y="681.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Ship's ladders</text>
 <text x="210.58" y="681.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">6 rules</text>
-<text x="210.58" y="689.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 84–89</text>
+<text x="210.58" y="689.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 83–88</text>
 <text x="408.04" y="681.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="681.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,672.1 684.2,672.1 684.2,703.1 602.49,703.1" fill="#fff1d6"/>
@@ -355,7 +355,7 @@
 <text x="71" y="712.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">15</text>
 <text x="94.83" y="712.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Ramps</text>
 <text x="210.58" y="712.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7 rules</text>
-<text x="210.58" y="720.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 90–96</text>
+<text x="210.58" y="720.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">code_analysis.csv lines 89–95</text>
 <text x="408.04" y="712.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <text x="506.76" y="712.1" font-size="7" text-anchor="start" fill="#1a1a1a" xml:space="preserve"></text>
 <polygon points="602.49,703.1 684.2,703.1 684.2,734.1 602.49,734.1" fill="#fff1d6"/>
@@ -406,8 +406,8 @@
 <text x="1016" y="298.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3b79</text>
 <line x1="1008" y1="308.6" x2="1202.4" y2="308.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="316.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">GORDIUM CODE FINGERPRINT AT CHECK</text>
-<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">61aafc0668a620f6d0ae15d1de35dbda39814a955c1e98133fe8abbed9d4</text>
-<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">faaa</text>
+<text x="1016" y="325.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7b3745ed68fdbcc8ba433a2bf5da10f524a81b0ba2d3b8d1a70034b55fea</text>
+<text x="1016" y="333.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">999d</text>
 <line x1="1008" y1="343.6" x2="1202.4" y2="343.6" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="351.6" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="360.6" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fingerprint</text>

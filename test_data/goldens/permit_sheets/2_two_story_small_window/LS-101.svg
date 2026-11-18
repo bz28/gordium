@@ -3,8 +3,8 @@
 <rect x="0" y="0" width="1224" height="792" fill="#ffffff"/>
 <text x="68" y="47.6" font-size="14" font-weight="bold" text-anchor="start" fill="#000000" xml:space="preserve">LIFE-SAFETY PLAN: FLOOR AT 10'-0&quot;</text>
 <text x="68" y="63.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#b3261e" xml:space="preserve">Egress result: DOES NOT COMPLY</text>
-<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 1 does not comply · 2 to review · 9 comply · 13 parts not read yet · 86 sections not checked yet (the check's own count)</text>
-<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 128)</text>
+<text x="68" y="73.6" font-size="7.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">Egress (NY State Residential Code 2025): 1 does not comply · 2 to review · 10 comply · 13 parts not read yet · 86 sections not checked yet (the check's own count)</text>
+<text x="68" y="83.6" font-size="7.5" font-weight="bold" text-anchor="start" fill="#8a5300" xml:space="preserve">Not checked yet by Gordium: 86 code sections, check them by hand (code_analysis.csv line 125)</text>
 <polygon points="113.2,389.6 383.2,389.6 383.2,119.6 113.2,119.6" fill="#eef3fb" stroke="#1a1a1a" stroke-width="1.6"/>
 <text x="248.2" y="250.6" font-size="7" font-weight="bold" text-anchor="middle" fill="#000000" xml:space="preserve">BEDROOM 3</text>
 <text x="248.2" y="259.6" font-size="5.5" text-anchor="middle" fill="#5a5a5a" xml:space="preserve">SLEEPING ROOM</text>
@@ -101,8 +101,8 @@
 <text x="1016" y="310.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">3b79</text>
 <line x1="1008" y1="320.1" x2="1202.4" y2="320.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="328.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">GORDIUM CODE FINGERPRINT AT CHECK</text>
-<text x="1016" y="337.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">61aafc0668a620f6d0ae15d1de35dbda39814a955c1e98133fe8abbed9d4</text>
-<text x="1016" y="345.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">faaa</text>
+<text x="1016" y="337.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">7b3745ed68fdbcc8ba433a2bf5da10f524a81b0ba2d3b8d1a70034b55fea</text>
+<text x="1016" y="345.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">999d</text>
 <line x1="1008" y1="355.1" x2="1202.4" y2="355.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="363.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="372.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fingerprint</text>

@@ -30,7 +30,9 @@ HOUSES = [n for n in goldens.names() if n != "0_no_rooms_yet"]
 STATE = {"1_ranch_compliant": present.REVIEW, "2_two_story_small_window": present.FAILS,
          "3_tall_riser": present.REVIEW, "4_loft": present.FAILS, "5_basement_window_well": present.FAILS,
          "orangetown_ny_80_south_william": present.REVIEW}
-FAILING = {"2_two_story_small_window": 1, "4_loft": 2, "5_basement_window_well": 3}
+# 5_basement_window_well: its window's net clear area, its well's ladder, and (since the door's operation is read,
+# #112) its only exit door, a sliding one, against R318.2's "shall be side-hinged"
+FAILING = {"2_two_story_small_window": 1, "4_loft": 2, "5_basement_window_well": 4}
 
 
 @pytest.fixture(scope="module")
@@ -153,7 +155,8 @@ def test_a_missing_value_the_drawing_can_give_is_to_review_not_by_hand(checked):
 
 def test_the_headline_counts_what_an_architect_counts(checked):
     items = law_items(checked["2_two_story_small_window"])
-    assert grouping.summary(items) == ("1 does not comply · 2 to review · 9 comply · 13 parts not read yet · "
+    # 10 comply: the front door's "shall be side-hinged" among them, its operation read since #112
+    assert grouping.summary(items) == ("1 does not comply · 2 to review · 10 comply · 13 parts not read yet · "
                                        "86 sections not checked yet")
     got = grouping.lines(items)
     assert [ln["title"] for ln in got[grouping.FAILS_T]] == [
@@ -277,13 +280,27 @@ def test_a_waiting_item_among_others_is_never_dropped():
 # ---- review round 1 on #111 -----------------------------------------------------------------------------------------
 
 def test_a_fact_the_measuring_found_about_a_part_keeps_its_rules_with_the_architect(checked):
-    """The basement house's only exit door is sliding: its "shall be side-hinged" rule reads nothing measured, but the
-    measuring said "this door is sliding". Never folded as something Gordium can't read."""
+    """The basement house's only exit door is sliding: the measuring said "this door is sliding" (its clear width,
+    measured open 90 degrees, isn't asked of it). Its rules are never folded as something Gordium can't read: the
+    clear-width rule stays to review with that reason, and the "shall be side-hinged" rule, which reads the door's
+    operation (#112), does not comply."""
     items = law_items(checked["5_basement_window_well"])
-    [item] = [i for i in items if i["id"] == "general.r318_2_egress_door_side_hinged@-/de"]
-    assert item["status"] == present.REVIEW and grouping.tier(item) == grouping.REVIEW_T
-    [line] = [ln for ln in grouping.lines(items)[grouping.REVIEW_T] if item["id"] in ln["items"]]
+    [hinged] = [i for i in items if i["id"] == "general.r318_2_egress_door_side_hinged@-/de"]
+    assert hinged["status"] == present.FAILS and grouping.tier(hinged) == grouping.FAILS_T
+    width = [i for i in items if i["id"].endswith("@-/de") and i["status"] == present.REVIEW
+             and "this door is sliding" in str(i.get("open"))]
+    assert width and all(grouping.tier(i) == grouping.REVIEW_T for i in width)
+    [line] = [ln for ln in grouping.lines(items)[grouping.REVIEW_T] if width[0]["id"] in ln["items"]]
     assert "this door is sliding" in line["title"]
+
+
+def test_a_window_is_no_door_is_no_fact_that_keeps_its_rules_from_check_by_hand(checked):
+    """A window's "whether it is a side-hinged or sliding door is asked only of a door" (#112) is neither Gordium's
+    gap nor a fact about the window: the rules on what Gordium doesn't measure of it yet stay in "Check by hand",
+    never moved to "Needs review" by it (the 2-story house's two windows, as before #112)."""
+    items = law_items(checked["2_two_story_small_window"])
+    review = [ln["title"] for ln in grouping.lines(items)[grouping.REVIEW_T]]
+    assert not any(t.startswith(("Bedroom 3 › Window 5:", "Bedroom 4 › Window 6:")) for t in review), review
 
 
 def test_a_parts_failures_are_shown_open_and_its_line_keeps_its_key_when_lines_reorder(checked):

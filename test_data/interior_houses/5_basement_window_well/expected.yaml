@@ -12,7 +12,8 @@ parts:
         opening_net_clear_height: 36.0
         opening_net_clear_area: 7.125       # 28.5 x 36 = 1026 / 144
         opening_sill_height: 36.0           # -60 - (-96)
-      not_measured: [opening_at_grade]      # in an area well: 6 in above the well floor (yes) but 60 in below the ground (no)
+        opening_is_door: false   # its operation names a window
+      not_measured: [opening_at_grade, opening_door_hinged_or_sliding]      # in an area well: 6 in above the well floor (yes) but 60 in below the ground (no)
       more:
         area_well_area: 10.0                # 40 x 36 = 1440 / 144
         area_well_width: 40.0
@@ -26,6 +27,8 @@ parts:
         opening_net_clear_area: 3.333333    # 24 x 20 = 480 / 144
         opening_sill_height: 46.0           # -50 - (-96)
         opening_at_grade: true              # |-50 - (-40)| = 10
+        opening_is_door: false   # its operation names a window
+      not_measured: [opening_door_hinged_or_sliding]   # a window: asked only of a door
   stair:
     bs:
       measures:
@@ -44,5 +47,6 @@ parts:
     de:
       measures:
         door_clear_height: 80.0
+        door_side_hinged: false   # operation: not side_hinged
       not_measured: [door_clear_width]      # R318.2 measures a side-hinged door open 90 degrees; this one slides
   guard: {}
