@@ -272,6 +272,21 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
   are built on .NET 8, and Autodesk plans to move them to .NET 10 ([call for preview testing](https://blog.autodesk.io/call-for-preview-testing-revit-2026-2025-migration-to-net-10/),
   2026-04-29: a Revit 2026 preview on .NET 10 tested until 2026-06-03, no release date). So the worker client is built
   and tested for both; note the Revit 2026 update installed and the runtime it reports. Whether the .NET 8 build also loads in Revit 2027 is not settled by Autodesk's pages either.
+- **How the add-in reads a rule that doesn't apply, and a status it doesn't know.** On the Mac the worker client's
+  tests already show both, through the stand-in worker ([apps/revit_addin](../../apps/revit_addin/README.md)): a
+  row "not applicable" (the interior description says the house has none of something, PR #112) is read as
+  `NotApplicable`, with its reason, on its own line in its law's folded "Complies" group, and counted as neither a
+  pass nor a failure; a status word the add-in doesn't know is read as needs review. What only the trial shows:
+  that inside Revit, on the runtime it loads, the same answers are read the same way. On day 4, after the scene 01
+  check, point the button at the stand-in worker instead of `serve` (`WorkerOptions.Arguments`:
+  `apps\revit_addin\tests\Gordium.Worker.Tests\fake_worker.py` and the mode, run with the venv Python and the
+  clone as working folder) in mode `not_applicable`, then `unknown_status_in_review`, and list `result.Groups`
+  with each row's `Status`, `StatusWord` and `Reason` in the message box. Go if: in `not_applicable`, "Ramps: not
+  applicable" is under "IRC · Complies" (folded), with its reason, as `NotApplicable`, and the state is `Complies`;
+  in `unknown_status_in_review`, that row is `NeedsReview` with the word `set_aside`, and the state is
+  `NeedsReview`. How the panel itself shows them (the mark, the colour, a folded group on screen) waits for the
+  dockable pane, after a go. The real worker can't give a row not applicable to the add-in yet: `check_site` doesn't
+  carry an interior description.
 - Which survey coordinates the description carries (scene 10), and what each Rhino layer becomes in Revit: the
   [reading design note](revit_reading_design.md) proposes both, and lists the rest of its "to check" items.
 

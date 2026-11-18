@@ -16,7 +16,48 @@ CHECK = {"view": {"items": [ITEM], "summary": "1 complies", "state": "complies"}
 
 
 def ok(i, result, about=ABOUT):
+    """An answer. A check's view without `groups` gets one group holding every row (the cases about the rows); a
+    view whose `groups` is "-" is sent without any."""
+    view = result.get("view") if isinstance(result, dict) else None
+    if isinstance(view, dict) and isinstance(view.get("items"), list):
+        if "groups" not in view:
+            ids = [x["id"] for x in view["items"] if isinstance(x, dict) and isinstance(x.get("id"), str)]
+            view = {**view, "groups": [{"key": "rows", "title": "Rows", "items": list(dict.fromkeys(ids))}]}
+        elif view["groups"] == "-":
+            view = {k: v for k, v in view.items() if k != "groups"}
+        result = {**result, "view": view}
     return json.dumps({"id": i, "ok": True, "result": result, "about": about})
+
+
+# a check as the worker gives it once the interior description says the house has no ramps (PR #112's item: one
+# row per claim, design_checker/egress.py _has_none_item): zoning's row complies, egress's stair rule complies, and
+# the ramp rules are set aside in one row "not applicable", with its reason. Its groups are the worker's own
+# grouping of these rows (design_checker/present.grouped, PR #111), so the client is tested on the real shape: the
+# row in egress's "Complies" group, folded, on a line of its own. The state is #112's present.state (a row not
+# applicable counts toward nothing, so the rows that comply make the check comply).
+LAW = {"group": "law", "law_key": "irc", "law": "Residential Code of New York State", "law_short": "IRC"}
+NA_ITEM = {**LAW, "id": "irc.has_none.ramp", "name": "Ramps: not applicable", "status": "not_applicable", "part": None,
+           "reason": "Not applicable: the description says the house has no ramps (A-2). The rules this sets aside: "
+                     "Ramp slope (R318.8.1)"}
+STAIR_ITEM = {**LAW, "id": "irc.stair_width#s1", "name": "Stair 1 · Stair width", "status": "complies",
+              "reason": "Stair 1: Stair width: complies", "element": "Stair 1",
+              "part": {"part": "stair", "id": "s1", "name": "Stair 1", "within": None}}
+
+
+def egress_view(na=NA_ITEM, state="complies", line_status=None, items=None):
+    from design_checker import present          # the worker's own grouping (the repo's, as the real worker runs it)
+    items = items if items is not None else [ITEM, STAIR_ITEM, na]
+    groups = present.grouped([dict(i) for i in items])
+    if line_status is not None:                 # the ramps' line given another status word
+        for g in groups:
+            for ln in g.get("lines") or []:
+                if na["id"] in ln["items"]:
+                    ln["status"] = line_status
+    return {"view": {"items": items, "summary": "2 comply", "state": state, "groups": groups}, "report_error": None}
+
+
+def regroup(view, groups):
+    return {**view, "view": {**view["view"], "groups": groups}}
 
 
 def check(**change):
@@ -38,6 +79,29 @@ SECOND = {
     # a check that needs review is never refused for what its rows say (the cautious direction)
     "review_with_every_row_complying": lambda i: ok(i, {**CHECK, "view": {**CHECK["view"], "state": "needs_review"}}),
     "unknown_status": lambda i: ok(i, check(status="passes")),
+    # ---- not applicable (PR #112's rows), and a status word this add-in doesn't know ----
+    "not_applicable": lambda i: ok(i, egress_view()),
+    "not_applicable_in_review": lambda i: ok(i, egress_view(state="needs_review")),
+    # a check said to comply whose only counted rows don't apply: nothing complies, so it is refused
+    "complies_with_only_not_applicable": lambda i: ok(i, {"view": {"items": [dict(ITEM, group="not_covered", status="needs_review"), NA_ITEM],
+                                                                   "summary": "", "state": "complies"}, "report_error": None}),
+    "not_applicable_without_reason": lambda i: ok(i, egress_view(na=dict(NA_ITEM, reason=None), state="needs_review")),
+    "complies_beside_not_applicable_without_reason": lambda i: ok(i, egress_view(na=dict(NA_ITEM, reason=" "))),
+    # the worker's line kinder than its rows: never read kinder than its rows
+    "line_kinder_than_its_rows": lambda i: ok(i, egress_view(na=dict(NA_ITEM, status="needs_review"), state="needs_review", line_status="complies")),
+    "unknown_status_in_review": lambda i: ok(i, egress_view(na=dict(NA_ITEM, status="set_aside"), state="needs_review", line_status="set_aside")),
+    "complies_beside_an_unknown_status": lambda i: ok(i, egress_view(na=dict(NA_ITEM, status="set_aside"))),
+    "state_not_applicable": lambda i: ok(i, egress_view(state="not_applicable")),
+    # ---- the groups: every row in exactly one group, and in a group with lines in exactly one line ----
+    "missing_groups": lambda i: ok(i, regroup(CHECK, "-")),
+    "groups_not_a_list": lambda i: ok(i, regroup(CHECK, {"rows": [ITEM["id"]]})),
+    "row_in_no_group": lambda i: ok(i, regroup(egress_view(), egress_view()["view"]["groups"][1:])),
+    "row_in_two_groups": lambda i: ok(i, regroup(egress_view(), egress_view()["view"]["groups"] + [{"key": "again", "title": "Again", "items": [NA_ITEM["id"]]}])),
+    "group_twice": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]]}, {"key": "rows", "title": "Rows", "items": []}])),
+    "group_names_no_row": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"], "R-1b.ghost"]}])),
+    "row_in_no_line": lambda i: ok(i, regroup(egress_view(), [egress_view()["view"]["groups"][0], {**egress_view()["view"]["groups"][1], "lines": egress_view()["view"]["groups"][1]["lines"][:1]}])),
+    "line_row_not_its_groups": lambda i: ok(i, regroup(egress_view(), [egress_view()["view"]["groups"][0], {**egress_view()["view"]["groups"][1], "lines": egress_view()["view"]["groups"][1]["lines"] + [{"key": "complies#0", "title": "Height", "status": "complies", "items": [ITEM["id"]]}]}])),
+    "group_folded_not_bool": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "folded": "yes"}])),
     "missing_status": lambda i: ok(i, check(status="-")),
     "null_status": lambda i: ok(i, check(status=None)),
     "missing_id": lambda i: ok(i, check(id="-")),

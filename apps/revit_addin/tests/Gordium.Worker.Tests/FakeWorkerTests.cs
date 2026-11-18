@@ -35,6 +35,95 @@ public sealed class FakeWorkerTests
         Assert.Equal(state, (await client.CheckSiteAsync(Site, Facts)).State);
     }
 
+    // ---- not applicable, and a status this add-in doesn't know ----
+
+    [Fact]
+    public async Task A_rule_that_doesnt_apply_is_shown_with_its_reason_folded_with_what_complies_never_counted()
+    {
+        using var client = await Start("not_applicable");
+        var result = await client.CheckSiteAsync(Site, Facts);
+        var na = Assert.Single(result.Items, i => i.Id == "irc.has_none.ramp");
+        Assert.Equal(Verdict.NotApplicable, na.Status);
+        Assert.Equal("not_applicable", na.StatusWord);
+        Assert.StartsWith("Not applicable: the description says the house has no ramps (A-2)", na.Reason);
+        Assert.NotEqual(Verdict.Complies, result.ById()["irc.has_none.ramp"]);
+        // the worker's grouping, as the Rhino panel shows it: in its law's Complies group, folded, on its own line
+        var group = Assert.Single(result.Groups, g => g.Items.Contains("irc.has_none.ramp"));
+        Assert.Equal("irc:complies", group.Key);
+        Assert.True(group.Folded);
+        // the heading's number is the worker's, read as given (present.grouped decides what it counts)
+        Assert.Equal(result.Raw.GetProperty("view").GetProperty("groups")[1].GetProperty("count").GetInt32(), group.Count);
+        var line = Assert.Single(group.Lines, l => l.Items.Contains("irc.has_none.ramp"));
+        Assert.Equal(["irc.has_none.ramp"], line.Items);
+        Assert.Equal(Verdict.NotApplicable, line.Status);
+        Assert.Equal(line, LineOf(result, "irc.has_none.ramp"));
+        Assert.StartsWith("Ramps: not applicable", line.Title);
+        Assert.Contains("the description says the house has no ramps", line.Title);
+        // the design complies on the rows that comply (zoning's height, egress's stair), never on the ramps
+        Assert.Equal(Verdict.Complies, result.State);
+        Assert.Equal(["complies", "irc:complies"], result.Groups.Select(g => g.Key));
+        Assert.Equal(result.Items.Select(i => i.Id).Order(), result.Groups.SelectMany(g => g.Items).Order());
+    }
+
+    /// <summary>The line a row is on, in whichever group the worker put it.</summary>
+    private static CheckLine LineOf(CheckResult result, string id) =>
+        Assert.Single(result.Groups.SelectMany(g => g.Lines), l => l.Items.Contains(id));
+
+    [Fact]
+    public async Task A_rule_that_doesnt_apply_beside_one_to_review_leaves_the_check_to_review()
+    {
+        using var client = await Start("not_applicable_in_review");
+        var result = await client.CheckSiteAsync(Site, Facts);
+        Assert.Equal(Verdict.NeedsReview, result.State);
+        Assert.Equal(Verdict.NotApplicable, result.ById()["irc.has_none.ramp"]);
+    }
+
+    [Fact]
+    public async Task A_rule_set_aside_without_saying_why_needs_review()
+    {
+        using var client = await Start("not_applicable_without_reason");
+        var result = await client.CheckSiteAsync(Site, Facts);
+        var na = Assert.Single(result.Items, i => i.Id == "irc.has_none.ramp");
+        Assert.Equal(Verdict.NeedsReview, na.Status);
+        Assert.Equal("not_applicable", na.StatusWord);
+        Assert.Equal(Verdict.NeedsReview, LineOf(result, "irc.has_none.ramp").Status);     // its line no kinder than it
+    }
+
+    [Fact]
+    public async Task A_status_this_add_in_doesnt_know_is_shown_as_needs_review_never_a_pass()
+    {
+        using var client = await Start("unknown_status_in_review");
+        var result = await client.CheckSiteAsync(Site, Facts);
+        var row = Assert.Single(result.Items, i => i.Id == "irc.has_none.ramp");
+        Assert.Equal(Verdict.NeedsReview, row.Status);
+        Assert.Equal("set_aside", row.StatusWord);                                // its own word kept, to show
+        var line = LineOf(result, "irc.has_none.ramp");
+        Assert.Equal(Verdict.NeedsReview, line.Status);
+        Assert.Equal("set_aside", line.StatusWord);
+        Assert.Equal(Verdict.NeedsReview, Verdicts.Parse("set_aside"));
+        Assert.Equal(Verdict.NeedsReview, Verdicts.Parse(""));
+        Assert.Equal(Verdict.NeedsReview, Verdicts.Parse("Complies"));            // exactly the word, or not known
+        Assert.False(Verdicts.IsKnown("set_aside"));
+    }
+
+    [Fact]
+    public async Task A_line_is_never_read_kinder_than_its_rows()
+    {
+        using var client = await Start("line_kinder_than_its_rows");
+        var line = LineOf(await client.CheckSiteAsync(Site, Facts), "irc.has_none.ramp");
+        Assert.Equal("complies", line.StatusWord);
+        Assert.Equal(Verdict.NeedsReview, line.Status);
+    }
+
+    [Theory]
+    [InlineData("state_unknown")]
+    [InlineData("state_not_applicable")]       // a row's status, never a design's
+    public async Task An_overall_state_this_add_in_doesnt_know_is_needs_review(string mode)
+    {
+        using var client = await Start(mode);
+        Assert.Equal(Verdict.NeedsReview, (await client.CheckSiteAsync(Site, Facts)).State);
+    }
+
     // ---- hello: the versions ----
 
     [Fact]
@@ -97,7 +186,18 @@ public sealed class FakeWorkerTests
     [InlineData("missing_name")]
     [InlineData("missing_group")]
     [InlineData("missing_summary")]
-    [InlineData("state_unknown")]
+    [InlineData("complies_with_only_not_applicable")]
+    [InlineData("complies_beside_not_applicable_without_reason")]
+    [InlineData("complies_beside_an_unknown_status")]
+    [InlineData("missing_groups")]
+    [InlineData("groups_not_a_list")]
+    [InlineData("row_in_no_group")]
+    [InlineData("row_in_two_groups")]
+    [InlineData("group_twice")]
+    [InlineData("group_names_no_row")]
+    [InlineData("row_in_no_line")]
+    [InlineData("line_row_not_its_groups")]
+    [InlineData("group_folded_not_bool")]
     [InlineData("complies_beside_a_fail")]
     [InlineData("complies_beside_a_review")]
     [InlineData("complies_with_a_use_detail")]
@@ -142,7 +242,8 @@ public sealed class FakeWorkerTests
         await Assert.ThrowsAsync<WorkerStoppedException>(() => client.CheckSiteAsync(Site, Facts));
     }
 
-    // each guard on a "complies" answer is reached by its own case, never caught by another guard first
+    // each guard on a "complies" answer, and on the groups, is reached by its own case, never caught by another
+    // guard first
     [Theory]
     [InlineData("complies_beside_a_fail", "is does_not_comply")]
     [InlineData("complies_beside_a_review", "is needs_review")]
@@ -150,6 +251,17 @@ public sealed class FakeWorkerTests
     [InlineData("complies_beside_a_release_gap", "is not_checked")]
     [InlineData("complies_with_a_use_detail", "is a use detail still to answer")]
     [InlineData("complies_with_nothing_complying", "none of its rows complies")]
+    [InlineData("complies_with_only_not_applicable", "none of its rows complies")]
+    [InlineData("complies_beside_not_applicable_without_reason", "is not_applicable without saying why")]
+    [InlineData("unknown_status", "is passes, a status this add-in doesn't know")]
+    [InlineData("complies_beside_an_unknown_status", "is set_aside, a status this add-in doesn't know")]
+    [InlineData("missing_groups", "has no \"groups\"")]
+    [InlineData("row_in_no_group", "the row R-1b.height is in no group")]
+    [InlineData("row_in_two_groups", "the row irc.has_none.ramp is in two groups")]
+    [InlineData("group_twice", "the group rows is given twice")]
+    [InlineData("group_names_no_row", "\"R-1b.ghost\", not one of the check's rows")]
+    [InlineData("row_in_no_line", "the row irc.has_none.ramp is in none of its lines")]
+    [InlineData("line_row_not_its_groups", "the row R-1b.height is not one of its group's")]
     public async Task Each_complies_guard_is_what_refuses_its_case(string mode, string words)
     {
         using var client = await Start(mode);

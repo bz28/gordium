@@ -33,8 +33,10 @@ using var worker = await WorkerClient.StartAsync(new WorkerOptions
     WorkingDirectory = @"C:\gordium",                       // the clone: the worker reads its rulebooks
 });
 var result = await worker.CheckSiteAsync(site, facts);     // site: a gordium.site/1 description
-foreach (var row in result.Items)
-    Console.WriteLine($"{row.Name}: {row.Status}");        // Complies, DoesNotComply, NeedsReview, NotChecked
+foreach (var group in result.Groups)                      // the panel's headings, as the Rhino panel shows them
+    foreach (var id in group.Items)
+        Console.WriteLine($"{group.Title}: {id}: {result.ById()[id]}");
+// Complies, DoesNotComply, NeedsReview, NotChecked, NotApplicable (a word the add-in doesn't know: NeedsReview)
 ```
 
 1. **Starts the worker and says `hello`.** A worker that doesn't speak protocol 1.x, or reads a site description
@@ -50,11 +52,25 @@ foreach (var row in result.Items)
    above, so a check's or a session command's answer is always read strictly. The older commands (`check`,
    `start`...) are Rhino's and are not sent.
 4. **Reads every answer strictly.** The answer must be JSON, this request's id, `ok` true or false, with its
-   `result` and `about`. A check's every row must have an id, a name, a group, a reason (text or null) and one of
-   the checker's four statuses; a row given twice, a key given twice, NaN, or a check with no rows is an error. A
+   `result` and `about`. A check's every row must have an id, a name, a group, a reason (text or null) and a
+   status as text; a row given twice, a key given twice, NaN, or a check with no rows is an error.
+   **The statuses** are the checker's five: complies, does not comply, needs review, not checked, and **not
+   applicable** (`NotApplicable`: a rule the interior description sets aside by saying the house has none of a
+   kind, "Not applicable: the description says the house has no ramps (A-2)"; PR #112). A row not applicable is
+   shown with its reason, is counted as neither a pass nor a failure, and one that gives no reason is read as needs
+   review. A status word the add-in doesn't know (one a later 1.x worker adds) is read as `NeedsReview`, never as
+   anything kinder, and its own word is kept (`StatusWord`), as the Rhino panel's grouping does
+   (`design_checker/grouping.py`: anything unknown is to review); an overall state other than complies, does not
+   comply, needs review or not checked is needs review too.
+   **The groups** (`Groups`) are the worker's own (`present.grouped`, PR #111): zoning's by status, then each
+   law's tiers (does not comply, needs review, check by hand, complies) as lines, a not-applicable row on its own
+   line in its law's folded "Complies" group, exactly as the Rhino panel lists them (`panel_words.list_tree`). Every
+   row must be in exactly one group, and in a group with lines in exactly one line (else a row would be hidden), and
+   a line is never read kinder than its rows. A
    check whose overall state says it complies must have its rows back that (every row the check counts complying: none
-   failing, needing review or not checked, whether waiting on a fact or not checked in this release; apart from the
-   rules not in Gordium yet; no use detail waiting; at least one row complying), or it is refused. This is the
+   failing, needing review, not checked or of a status the add-in doesn't know, whether waiting on a fact or not
+   checked in this release; apart from the rules not in Gordium yet and the rules not applicable with their reason;
+   no use detail waiting; at least one row complying), or it is refused. This is the
    worker's rule from Ben's decision of 2026-11-09 (`present.state`, PR #82, which merges before this library);
    the library enforces it again, so an answer from a worker without it (one saying "complies" beside a row not
    checked) is an error, never a pass.
@@ -85,10 +101,17 @@ the message and no verdicts.
   field), and **`start_site`**, on the real worker.
 - **The worker killed mid-session:** a clear `WorkerExitedException` within seconds, never a hang or an answer.
 - **Every way an answer can go wrong**, given on purpose by `fake_worker.py`: protocol 2.0, another site schema,
-  a missing status or one Gordium doesn't give, a row without its id, name, group or reason, no summary or state,
-  a key twice, NaN, no rows, a row twice, no `about` or a wrong one on a later answer, another request's id, text
-  that isn't JSON or UTF-8, a crash, a hang, a worker that stops reading, a cancel. Each is an error and stops the
-  worker.
+  a missing status, a row without its id, name, group or reason, no summary or state, a key twice, NaN, no rows, a
+  row twice, a row in no group, in two, or in none of its group's lines, no groups, a check said to comply beside a
+  row of a status the add-in doesn't know or with only rules not applicable, no `about` or a wrong one on a later
+  answer, another request's id, text that isn't JSON or UTF-8, a crash, a hang, a worker that stops reading, a
+  cancel. Each is an error and stops the worker.
+- **Not applicable and unknown statuses**, from the stand-in worker with groups made by the worker's own grouping
+  code (`present.grouped`): a row not applicable is read as `NotApplicable` with its reason, on its own line in its
+  law's folded "Complies" group, and a check that complies beside it still complies; one without a reason, an
+  unknown status word (row, line or overall state), and a line kinder than its rows are each read as needs review,
+  never a pass. (The real worker doesn't give a row not applicable yet: PR #112 adds it, and `check_site` doesn't
+  carry an interior description yet.)
 - **What is sent:** no byte-order mark, only ASCII bytes, one line per request, ids 1, 2, 3..., non-English text
   intact.
 - **The protocol copy:** the session commands and their answer names equal the protocol document's command
