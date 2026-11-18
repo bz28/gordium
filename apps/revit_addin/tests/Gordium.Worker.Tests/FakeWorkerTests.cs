@@ -146,6 +146,17 @@ public sealed class FakeWorkerTests
     }
 
     [Fact]
+    public async Task A_line_word_not_known_opens_its_line_and_its_group()
+    {
+        using var client = await Start("unknown_line_word_in_a_folded_group");
+        var result = await client.CheckSiteAsync(Site, Facts);
+        var line = LineOf(result, "irc.stair_width#s1");
+        Assert.Equal(Verdict.NeedsReview, line.Status);
+        Assert.False(line.Folded);
+        Assert.False(Assert.Single(result.Groups, g => g.Key == "irc:complies").Folded);
+    }
+
+    [Fact]
     public async Task A_headings_number_is_the_workers_not_its_rows()
     {
         using var client = await Start("two_to_review_on_one_part");

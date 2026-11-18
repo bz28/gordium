@@ -44,14 +44,14 @@ STAIR_ITEM = {**LAW, "id": "irc.stair_width#s1", "name": "Stair 1 · Stair width
               "part": {"part": "stair", "id": "s1", "name": "Stair 1", "within": None}}
 
 
-def egress_view(na=NA_ITEM, state="complies", line_status=None, items=None):
+def egress_view(na=NA_ITEM, state="complies", line_status=None, items=None, line_of=None):
     from design_checker import present          # the worker's own grouping (the repo's, as the real worker runs it)
     items = items if items is not None else [ITEM, STAIR_ITEM, na]
     groups = present.grouped([dict(i) for i in items])
-    if line_status is not None:                 # the ramps' line given another status word
+    if line_status is not None:                 # the ramps' line (or line_of's) given another status word
         for g in groups:
             for ln in g.get("lines") or []:
-                if na["id"] in ln["items"]:
+                if (line_of or na["id"]) in ln["items"]:
                     ln["status"] = line_status
     return {"view": {"items": items, "summary": "2 comply", "state": state, "groups": groups}, "report_error": None}
 
@@ -108,6 +108,8 @@ SECOND = {
     # a word not known, grouped by a later worker with what complies (folded): the add-in opens it
     "unknown_status_in_a_folded_group": lambda i: ok(i, regroup(egress_view(state="needs_review", items=[ITEM, STAIR_ITEM, dict(NA_ITEM, status="set_aside")]),
                                                                 egress_view()["view"]["groups"])),
+    # every row complies, but the stair's line has a word not known: the line, and so its group, opened
+    "unknown_line_word_in_a_folded_group": lambda i: ok(i, egress_view(state="needs_review", line_of=STAIR_ITEM["id"], line_status="set_aside")),
     # two rules on one part to review: the worker's heading counts the part's line (1), not its rows (2)
     "two_to_review_on_one_part": lambda i: ok(i, egress_view(state="needs_review", items=[ITEM, dict(STAIR_ITEM, status="needs_review"),
                                                                                    dict(STAIR_ITEM, id="irc.stair_rise#s1", name="Stair 1 · Riser height", status="needs_review")])),

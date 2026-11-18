@@ -282,7 +282,8 @@ public sealed class CheckResult
             if (g.TryGetProperty("count", out var c) && c.ValueKind != JsonValueKind.Null
                 && (c.ValueKind != JsonValueKind.Number || !c.TryGetInt32(out count) || count < 0))
                 throw new WorkerProtocolException($"{where}.count is {StrictJson.Kind(c)}, not a whole number");
-            var open = ids.Any(id => rows[id].Status == Verdict.DoesNotComply || Doubted(rows[id]));
+            var open = ids.Any(id => rows[id].Status == Verdict.DoesNotComply || Doubted(rows[id]))
+                       || lines.Any(l => l.Status == Verdict.DoesNotComply || !Verdicts.IsKnown(l.StatusWord));   // a line opened
             groups.Add(new CheckGroup(key, StrictJson.String(g, "title", where), count,
                                       Bool(g, "folded", where, FoldedGroups.Contains(key)) && !open, ids, lines));
         }
