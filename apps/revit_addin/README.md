@@ -110,7 +110,7 @@ the message and no verdicts.
   code (`present.grouped`): a row not applicable is read as `NotApplicable` with its reason, on its own line in its
   law's folded "Complies" group, and a check that complies beside it still complies; one without a reason, an
   unknown status word (row, line or overall state) are each read as needs review, a line is read as its most cautious row
-  when its own word is kinder, and a failure is never folded: never a pass. (The real worker doesn't give a row not applicable yet: PR #112 adds it, and `check_site` doesn't
+  when its own word is kinder, and a failure, or a row read more cautiously than the worker said, is never folded: never a pass. (The real worker doesn't give a row not applicable yet: PR #112 adds it, and `check_site` doesn't
   carry an interior description yet.)
 - **What is sent:** no byte-order mark, only ASCII bytes, one line per request, ids 1, 2, 3..., non-English text
   intact.

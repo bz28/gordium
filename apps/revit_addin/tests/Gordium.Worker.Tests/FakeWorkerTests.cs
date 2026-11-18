@@ -87,6 +87,8 @@ public sealed class FakeWorkerTests
         Assert.Equal(Verdict.NeedsReview, na.Status);
         Assert.Equal("not_applicable", na.StatusWord);
         Assert.Equal(Verdict.NeedsReview, LineOf(result, "irc.has_none.ramp").Status);     // its line no kinder than it
+        Assert.False(LineOf(result, "irc.has_none.ramp").Folded);                          // and shown open
+        Assert.False(Assert.Single(result.Groups, g => g.Key == "irc:complies").Folded);
     }
 
     [Fact]
@@ -127,6 +129,20 @@ public sealed class FakeWorkerTests
         Assert.Equal(Verdict.DoesNotComply, line.Status);       // its most cautious row, not its word
         Assert.False(line.Folded);
         Assert.True(Assert.Single(result.Groups, g => g.Key == "complies").Folded);   // the rest as the worker said
+    }
+
+    [Fact]
+    public async Task A_status_not_known_is_never_shown_folded_with_what_complies()
+    {
+        using var client = await Start("unknown_status_in_a_folded_group");
+        var result = await client.CheckSiteAsync(Site, Facts);
+        var group = Assert.Single(result.Groups, g => g.Items.Contains("irc.has_none.ramp"));
+        Assert.Equal("irc:complies", group.Key);                  // where the worker put it, folded
+        Assert.False(group.Folded);
+        var line = LineOf(result, "irc.has_none.ramp");
+        Assert.Equal(Verdict.NeedsReview, line.Status);
+        Assert.False(line.Folded);
+        Assert.True(LineOf(result, "irc.stair_width#s1").Folded);   // the line that complies stays as the worker said
     }
 
     [Fact]

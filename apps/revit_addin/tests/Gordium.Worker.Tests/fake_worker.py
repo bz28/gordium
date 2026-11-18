@@ -105,6 +105,9 @@ SECOND = {
     "failing_row_in_a_folded_group": lambda i: ok(i, regroup(egress_view(state="does_not_comply", items=[ITEM, dict(STAIR_ITEM, status="does_not_comply"), NA_ITEM]),
                                                              [{**g, "folded": True, "lines": [{**ln, "status": "complies", "folded": True} for ln in g.get("lines") or []] or None}
                                                               for g in egress_view(items=[ITEM, STAIR_ITEM, NA_ITEM])["view"]["groups"]])),
+    # a word not known, grouped by a later worker with what complies (folded): the add-in opens it
+    "unknown_status_in_a_folded_group": lambda i: ok(i, regroup(egress_view(state="needs_review", items=[ITEM, STAIR_ITEM, dict(NA_ITEM, status="set_aside")]),
+                                                                egress_view()["view"]["groups"])),
     # two rules on one part to review: the worker's heading counts the part's line (1), not its rows (2)
     "two_to_review_on_one_part": lambda i: ok(i, egress_view(state="needs_review", items=[ITEM, dict(STAIR_ITEM, status="needs_review"),
                                                                                    dict(STAIR_ITEM, id="irc.stair_rise#s1", name="Stair 1 · Riser height", status="needs_review")])),
