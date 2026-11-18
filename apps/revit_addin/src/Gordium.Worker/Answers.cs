@@ -45,16 +45,23 @@ public sealed record WorkerAbout(
 /// <summary>An <c>"ok": true</c> answer: its <c>result</c> and its <c>about</c>.</summary>
 public sealed record WorkerAnswer(JsonElement Result, WorkerAbout About);
 
-/// <summary>A row's status, exactly the checker's four (design_checker/present.py: COMPLIES, FAILS, REVIEW,
-/// NOT_CHECKED). Any other word in an answer is an error, never read as one of these. The default value (0) is
-/// <see cref="NeedsReview"/>, never <see cref="Complies"/>: a verdict never set, or looked up for a row that isn't
-/// there with <c>GetValueOrDefault</c>, is never a pass.</summary>
+/// <summary>A row's status: the checker's five (design_checker/present.py: COMPLIES, FAILS, REVIEW, NOT_CHECKED, and
+/// NOT_APPLICABLE: a rule the interior description sets aside by saying the house has none of a kind). The default
+/// value (0) is <see cref="NeedsReview"/>, never <see cref="Complies"/>: a verdict never set, or looked up for a row
+/// that isn't there with <c>GetValueOrDefault</c>, is never a pass. A status word this add-in doesn't know (one a
+/// later 1.x worker adds) is read as <see cref="NeedsReview"/>, never as a kinder status, and its own word is kept
+/// (<see cref="CheckItem.StatusWord"/>): shown, never hidden, as the Rhino panel's grouping does
+/// (design_checker/grouping.py: "anything unknown is review").</summary>
 public enum Verdict
 {
     NeedsReview = 0,
     DoesNotComply = 1,
     Complies = 2,
     NotChecked = 3,
+    /// <summary>The rule doesn't apply to this house, for the reason the row gives ("Not applicable: the
+    /// description says the house has no ramps (A-2)"). Shown with that reason, folded with what complies, and
+    /// counted as neither a pass nor a failure: a check that complies needs a row that does (present.state).</summary>
+    NotApplicable = 4,
 }
 
 public static class Verdicts
@@ -66,39 +73,92 @@ public static class Verdicts
         Verdict.DoesNotComply => "does_not_comply",
         Verdict.NeedsReview => "needs_review",
         Verdict.NotChecked => "not_checked",
+        Verdict.NotApplicable => "not_applicable",
         _ => throw new ArgumentOutOfRangeException(nameof(v)),
     };
 
-    internal static Verdict Parse(string word, string where) => word switch
+    /// <summary>Whether the word is one of the checker's five statuses.</summary>
+    public static bool IsKnown(string word) => word is "complies" or "does_not_comply" or "needs_review"
+        or "not_checked" or "not_applicable";
+
+    /// <summary>The verdict for a status word: a word this add-in doesn't know is needs review, never a pass.</summary>
+    public static Verdict Parse(string word) => word switch
     {
         "complies" => Verdict.Complies,
         "does_not_comply" => Verdict.DoesNotComply,
-        "needs_review" => Verdict.NeedsReview,
         "not_checked" => Verdict.NotChecked,
-        _ => throw new WorkerProtocolException($"{where} is {JsonSerializer.Serialize(word)}, not a status Gordium gives"),
+        "not_applicable" => Verdict.NotApplicable,
+        _ => Verdict.NeedsReview,
+    };
+
+    /// <summary>A row's verdict: <see cref="Parse"/>, except that a row "not applicable" that doesn't say why (no
+    /// reason, or an empty one) is needs review: a rule is never set aside without its reason shown.</summary>
+    internal static Verdict OfRow(string word, string? reason) =>
+        Parse(word) is var v && v == Verdict.NotApplicable && string.IsNullOrWhiteSpace(reason) ? Verdict.NeedsReview : v;
+
+    /// <summary>The most cautious first: a failure, then needs review, not checked, complies, not applicable (the
+    /// order of design_checker/grouping.py's CAUTION).</summary>
+    internal static int Caution(Verdict v) => v switch
+    {
+        Verdict.DoesNotComply => 0,
+        Verdict.NeedsReview => 1,
+        Verdict.NotChecked => 2,
+        Verdict.Complies => 3,
+        Verdict.NotApplicable => 4,
+        _ => 1,
     };
 }
 
 /// <summary>One row of a check as the panel shows it (<c>result.view.items[]</c>).</summary>
 /// <param name="Id">The row's id, such as <c>R-1b.front_yard</c> or <c>R-1b.side_yards#east</c>.</param>
 /// <param name="Name">The row's name as the panel shows it.</param>
-/// <param name="Group">What the row is about: <c>building</c>, <c>site</c>, <c>not_checked</c> or <c>not_covered</c>
-/// (the item's own <c>group</c>; the panel's headings are worked out from the statuses, not from this).</param>
-/// <param name="Status">Its verdict.</param>
-/// <param name="Reason">Why it needs review or isn't checked, when the checker says (else null).</param>
+/// <param name="Group">What the row is about: <c>building</c>, <c>site</c>, <c>not_checked</c>, <c>not_covered</c>
+/// or <c>law</c> (the item's own <c>group</c>; the panel's headings are <see cref="CheckResult.Groups"/>, not this).</param>
+/// <param name="Status">Its verdict (a status word this add-in doesn't know is <see cref="Verdict.NeedsReview"/>).</param>
+/// <param name="Reason">Why it needs review, isn't checked or doesn't apply, when the checker says (else null).</param>
 /// <param name="Raw">The whole item as the worker sent it (its detail, its quotes, the objects to show red).</param>
-public sealed record CheckItem(string Id, string Name, string Group, Verdict Status, string? Reason, JsonElement Raw);
+/// <param name="StatusWord">The status word exactly as the worker sent it.</param>
+public sealed record CheckItem(string Id, string Name, string Group, Verdict Status, string? Reason, JsonElement Raw,
+                               string StatusWord);
 
-/// <summary>The answer to <c>check_site</c>: the panel's rows, its one summary line and the overall state.</summary>
+/// <summary>One line of a law's group (design_checker/grouping.py, PR #111): a part's rules, or one cause Gordium
+/// can't read yet, shown as one line that opens to its rows.</summary>
+/// <param name="Key">The line's key (the same across edits, so a line the architect opened stays open).</param>
+/// <param name="Title">Its words ("Bedroom 3 › Window 5: 1 does not comply (...)", "Ramps: not applicable").</param>
+/// <param name="Status">The most cautious of the worker's word for the line and its rows' verdicts.</param>
+/// <param name="StatusWord">The line's status as the worker sent it.</param>
+/// <param name="Folded">Whether it is shown folded (the worker's; never a line that fails or holds a row read more cautiously than the worker said: a "not applicable" with no reason, a status word not known).</param>
+/// <param name="Items">Its rows' ids, in order.</param>
+public sealed record CheckLine(string Key, string Title, Verdict Status, string StatusWord, bool Folded,
+                               IReadOnlyList<string> Items);
+
+/// <summary>One heading of the panel's list (<c>result.view.groups[]</c>, design_checker/present.grouped): zoning's
+/// groups by status, and each law's tiers (does not comply, needs review, check by hand, complies), a law's as lines.
+/// A not-applicable row is in its law's "Complies" group, which is folded.</summary>
+/// <param name="Key">The group's key: <c>fails</c>, <c>review</c>, <c>complies</c>..., or <c>&lt;law&gt;:&lt;tier&gt;</c>.</param>
+/// <param name="Title">Its heading ("IRC egress · Complies").</param>
+/// <param name="Count">The number its heading shows (the worker's: what an architect counts).</param>
+/// <param name="Folded">Whether it is shown folded (the worker's; never a group holding a failure, or a row read more cautiously than the worker said).</param>
+/// <param name="Items">Every row in it, by id.</param>
+/// <param name="Lines">Its lines (a law's group); empty for a group listed row by row.</param>
+public sealed record CheckGroup(string Key, string Title, int Count, bool Folded, IReadOnlyList<string> Items,
+                                IReadOnlyList<CheckLine> Lines);
+
+/// <summary>The answer to <c>check_site</c>: the panel's rows, its groups, its one summary line and the overall state.</summary>
 public sealed class CheckResult
 {
     /// <summary>Every row, in the worker's order.</summary>
     public IReadOnlyList<CheckItem> Items { get; }
 
+    /// <summary>The panel's list as the Rhino panel shows it (panel_words.list_tree): every row in exactly one group,
+    /// and in a group with lines, in exactly one line (checked when the answer is read: grouping folds, never hides).</summary>
+    public IReadOnlyList<CheckGroup> Groups { get; }
+
     /// <summary>The panel's summary line (<c>view.summary</c>), such as "2 need review · 7 comply".</summary>
     public string Summary { get; }
 
-    /// <summary>The panel's overall state (<c>view.state</c>).</summary>
+    /// <summary>The panel's overall state (<c>view.state</c>): complies, does not comply, needs review or not
+    /// checked; any other word (not applicable is a row's, never a design's) is needs review.</summary>
     public Verdict State { get; }
 
     /// <summary>Why the report couldn't be written, when one was asked for (<c>report_error</c>), else null.</summary>
@@ -110,10 +170,11 @@ public sealed class CheckResult
     /// <summary>The <c>about</c> of the answer: which code and rules gave it.</summary>
     public WorkerAbout About { get; }
 
-    private CheckResult(IReadOnlyList<CheckItem> items, string summary, Verdict state, string? reportError,
-                        JsonElement raw, WorkerAbout about)
+    private CheckResult(IReadOnlyList<CheckItem> items, IReadOnlyList<CheckGroup> groups, string summary,
+                        Verdict state, string? reportError, JsonElement raw, WorkerAbout about)
     {
         Items = items;
+        Groups = groups;
         Summary = summary;
         State = state;
         ReportError = reportError;
@@ -126,31 +187,149 @@ public sealed class CheckResult
     public IReadOnlyDictionary<string, Verdict> ById() => Items.ToDictionary(i => i.Id, i => i.Status);
 
     /// <summary>A check said to comply must be one the rows back (the worker's rule, present.state, from Ben's
-    /// decision of 2026-11-09; a worker from before it is refused, never read as a pass): no row it
-    /// counts (any but the rules not in Gordium yet, <c>not_covered</c>) does not comply, needs review or is not checked
-    /// (waiting on a fact, or not checked in this release: Ben, 2026-11-09), no use detail waits for an answer (<c>use_detail</c>), and at least one counted row complies. Anything else is refused,
-    /// never shown as a pass.</summary>
-    private static void CheckComplies(JsonElement items)
+    /// decision of 2026-11-09; a worker from before it is refused, never read as a pass): no row it counts (any
+    /// but the rules not in Gordium yet, <c>not_covered</c>, and a rule that doesn't apply, with its reason) does not
+    /// comply, needs review, is not checked (waiting on a fact, or not checked in this release: Ben, 2026-11-09) or
+    /// has a status this add-in doesn't know; no use detail waits for an answer (<c>use_detail</c>); and at least one
+    /// counted row complies. Anything else is refused, never shown as a pass.</summary>
+    private static void CheckComplies(IReadOnlyList<CheckItem> items)
     {
         var complies = false;
-        var n = 0;
-        foreach (var e in items.EnumerateArray())
+        for (var n = 0; n < items.Count; n++)
         {
-            var where = $"result.view.items[{n++}]";
-            var detail = e.TryGetProperty("use_detail", out var d) ? d : default;
+            var where = $"result.view.items[{n}]";
+            var row = items[n];
+            var detail = row.Raw.TryGetProperty("use_detail", out var d) ? d : default;
             if (detail.ValueKind is not (JsonValueKind.Undefined or JsonValueKind.True or JsonValueKind.False or JsonValueKind.Null))
                 throw new WorkerProtocolException($"{where}.use_detail is {StrictJson.Kind(detail)}, not true or false");
             if (detail.ValueKind == JsonValueKind.True)
                 throw new WorkerProtocolException($"the check says it complies, but {where} is a use detail still to answer");
-            if (StrictJson.String(e, "group", where) == "not_covered")
-                continue;
-            var status = Verdicts.Parse(StrictJson.String(e, "status", where), $"{where}.status");
-            if (status is Verdict.DoesNotComply or Verdict.NeedsReview or Verdict.NotChecked)
-                throw new WorkerProtocolException($"the check says it complies, but {where} is {Verdicts.Word(status)}");
+            if (row.Group == "not_covered" || row.Status == Verdict.NotApplicable)
+                continue;      // counted toward nothing: never the row that makes a check comply
+            if (row.Status != Verdict.Complies)
+                throw new WorkerProtocolException($"the check says it complies, but {where} is {row.StatusWord}" +
+                    (!Verdicts.IsKnown(row.StatusWord) ? ", a status this add-in doesn't know"
+                     : row.StatusWord == "not_applicable" ? " without saying why" : ""));
             complies = true;   // reaching here, the row complies: every other status was refused above
         }
         if (!complies)
             throw new WorkerProtocolException("the check says it complies, but none of its rows complies");
+    }
+
+    /// <summary>Zoning's groups shown folded when the answer doesn't say (panel_words.FOLDED_GROUPS).</summary>
+    private static readonly HashSet<string> FoldedGroups = new(StringComparer.Ordinal) { "complies", "not_covered", "use_details" };
+
+    /// <summary>The panel's groups (present.grouped), read strictly: every row in exactly one group, and a group with
+    /// lines has each of its rows in exactly one line (the Rhino panel lists such a group by its lines alone,
+    /// panel_words.list_tree, so a row in no line would be hidden). A group's folded and count, when not given, are
+    /// list_tree's: zoning's complies, not covered and use details folded; the count is its rows.</summary>
+    private static List<CheckGroup> ReadGroups(JsonElement view, IReadOnlyList<CheckItem> items)
+    {
+        var list = StrictJson.Field(view, "groups", "result.view");
+        if (list.ValueKind != JsonValueKind.Array)
+            throw new WorkerProtocolException($"result.view.groups is {StrictJson.Kind(list)}, not a list");
+        var rows = items.ToDictionary(i => i.Id, StringComparer.Ordinal);
+        var placed = new HashSet<string>(StringComparer.Ordinal);
+        var keys = new HashSet<string>(StringComparer.Ordinal);
+        var groups = new List<CheckGroup>();
+        var n = 0;
+        foreach (var g in list.EnumerateArray())
+        {
+            var where = $"result.view.groups[{n++}]";
+            var key = StrictJson.String(g, "key", where, nonEmpty: true);
+            if (!keys.Add(key))
+                throw new WorkerProtocolException($"{where}: the group {key} is given twice");
+            var ids = Ids(g, where, rows);
+            foreach (var id in ids)
+                if (!placed.Add(id))
+                    throw new WorkerProtocolException($"{where}: the row {id} is in two groups");
+            var lines = new List<CheckLine>();
+            var ls = g.TryGetProperty("lines", out var l) ? l : default;
+            if (ls.ValueKind is not (JsonValueKind.Undefined or JsonValueKind.Null))
+            {
+                if (ls.ValueKind != JsonValueKind.Array)
+                    throw new WorkerProtocolException($"{where}.lines is {StrictJson.Kind(ls)}, not a list");
+                var inLine = new HashSet<string>(StringComparer.Ordinal);
+                var m = 0;
+                foreach (var ln in ls.EnumerateArray())
+                {
+                    var at = $"{where}.lines[{m++}]";
+                    var mine = Ids(ln, at, rows);
+                    if (mine.Count == 0)
+                        throw new WorkerProtocolException($"{at} has no rows");
+                    foreach (var id in mine)
+                    {
+                        if (!ids.Contains(id))
+                            throw new WorkerProtocolException($"{at}: the row {id} is not one of its group's");
+                        if (!inLine.Add(id))
+                            throw new WorkerProtocolException($"{at}: the row {id} is in two lines");
+                    }
+                    var word = StrictJson.String(ln, "status", at);
+                    // never kinder than its rows: the most cautious of the worker's word and each row's verdict
+                    var status = mine.Select(id => rows[id].Status).Append(Verdicts.Parse(word)).MinBy(Verdicts.Caution);
+                    // a failure is never shown folded (grouping.lines: a line of failures is open), whatever is said;
+                    // nor a row the add-in reads more cautiously than the worker said (it was grouped as the worker read it)
+                    lines.Add(new CheckLine(StrictJson.String(ln, "key", at, nonEmpty: true),
+                                            StrictJson.String(ln, "title", at), status, word,
+                                            Bool(ln, "folded", at, true) && status != Verdict.DoesNotComply
+                                            && Verdicts.IsKnown(word) && !mine.Any(id => Doubted(rows[id])), mine));
+                }
+                if (inLine.Count != ids.Count)
+                    throw new WorkerProtocolException(
+                        $"{where}: the row {ids.First(id => !inLine.Contains(id))} is in none of its lines (it would be hidden)");
+            }
+            var count = ids.Count;
+            if (g.TryGetProperty("count", out var c) && c.ValueKind != JsonValueKind.Null
+                && (c.ValueKind != JsonValueKind.Number || !c.TryGetInt32(out count) || count < 0))
+                throw new WorkerProtocolException($"{where}.count is {StrictJson.Kind(c)}, not a whole number");
+            var open = ids.Any(id => rows[id].Status == Verdict.DoesNotComply || Doubted(rows[id]))
+                       || lines.Any(l => l.Status == Verdict.DoesNotComply || !Verdicts.IsKnown(l.StatusWord));   // a line opened
+            groups.Add(new CheckGroup(key, StrictJson.String(g, "title", where), count,
+                                      Bool(g, "folded", where, FoldedGroups.Contains(key)) && !open, ids, lines));
+        }
+        var lost = items.FirstOrDefault(i => !placed.Contains(i.Id));
+        if (lost is not null)
+            throw new WorkerProtocolException($"result.view.groups: the row {lost.Id} is in no group (it would be hidden)");
+        return groups;
+    }
+
+    /// <summary>A row the add-in reads more cautiously than the worker's word for it: a status word not known (the
+    /// worker's grouping may have folded it with what complies), or "not applicable" with no reason. Never shown
+    /// folded.</summary>
+    private static bool Doubted(CheckItem row) =>
+        !Verdicts.IsKnown(row.StatusWord) || row.Status != Verdicts.Parse(row.StatusWord);
+
+    /// <summary>A group's or line's <c>items</c>: a list of the check's row ids, each once.</summary>
+    private static List<string> Ids(JsonElement e, string where, IReadOnlyDictionary<string, CheckItem> rows)
+    {
+        var list = StrictJson.Field(e, "items", where);
+        if (list.ValueKind != JsonValueKind.Array)
+            throw new WorkerProtocolException($"{where}.items is {StrictJson.Kind(list)}, not a list");
+        var ids = new List<string>();
+        foreach (var x in list.EnumerateArray())
+        {
+            if (x.ValueKind != JsonValueKind.String)
+                throw new WorkerProtocolException($"{where}.items holds {StrictJson.Kind(x)}, not a row id");
+            var id = x.GetString()!;
+            if (!rows.ContainsKey(id))
+                throw new WorkerProtocolException($"{where}.items holds {JsonSerializer.Serialize(id)}, not one of the check's rows");
+            if (ids.Contains(id))
+                throw new WorkerProtocolException($"{where}.items holds the row {id} twice");
+            ids.Add(id);
+        }
+        return ids;
+    }
+
+    private static bool Bool(JsonElement e, string name, string where, bool otherwise)
+    {
+        if (!e.TryGetProperty(name, out var v) || v.ValueKind == JsonValueKind.Null)
+            return otherwise;
+        return v.ValueKind switch
+        {
+            JsonValueKind.True => true,
+            JsonValueKind.False => false,
+            _ => throw new WorkerProtocolException($"{where}.{name} is {StrictJson.Kind(v)}, not true or false"),
+        };
     }
 
     internal static CheckResult Parse(WorkerAnswer answer)
@@ -169,21 +348,20 @@ public sealed class CheckResult
             var id = StrictJson.String(e, "id", where, nonEmpty: true);
             if (!seen.Add(id))
                 throw new WorkerProtocolException($"{where}: the row {id} is given twice");
-            items.Add(new CheckItem(
-                id,
-                StrictJson.String(e, "name", where),
-                StrictJson.String(e, "group", where),
-                Verdicts.Parse(StrictJson.String(e, "status", where), $"{where}.status"),
-                StrictJson.StringOrNull(e, "reason", where),
-                e));
+            var name = StrictJson.String(e, "name", where);
+            var group = StrictJson.String(e, "group", where);
+            var word = StrictJson.String(e, "status", where);
+            var reason = StrictJson.StringOrNull(e, "reason", where);
+            items.Add(new CheckItem(id, name, group, Verdicts.OfRow(word, reason), reason, e, word));
         }
         // a check with no rows checked nothing: never shown as a result (the worker's own state would say "complies")
         if (items.Count == 0)
             throw new WorkerProtocolException("result.view.items is empty: a check with no rows can't be shown as a result");
-        var state = Verdicts.Parse(StrictJson.String(view, "state", "result.view"), "result.view.state");
+        var stateWord = StrictJson.String(view, "state", "result.view");
+        var state = Verdicts.Parse(stateWord) is var s && s == Verdict.NotApplicable ? Verdict.NeedsReview : s;
         if (state == Verdict.Complies)
-            CheckComplies(list);
-        return new CheckResult(items, StrictJson.String(view, "summary", "result.view"), state,
+            CheckComplies(items);
+        return new CheckResult(items, ReadGroups(view, items), StrictJson.String(view, "summary", "result.view"), state,
                                StrictJson.StringOrNull(result, "report_error", "result"), result, answer.About);
     }
 }

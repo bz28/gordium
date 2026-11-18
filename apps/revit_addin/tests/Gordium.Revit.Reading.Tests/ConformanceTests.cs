@@ -65,7 +65,10 @@ public sealed class ConformanceTests(RealWorker worker) : IClassFixture<RealWork
 
             // route 1: the worker's check_site, from C#, gives every hand-worked row and no other
             var result = await client.CheckSiteAsync(read.Site, scene.Facts);
-            var got = result.Items.ToDictionary(i => i.Id, i => Verdicts.Word(i.Status));
+            // the status as the worker wrote it (a word the client doesn't know is read as needs review, so its
+            // reading alone could hide one), and the client's reading of it the same
+            var got = result.Items.ToDictionary(i => i.Id, i => i.StatusWord);
+            Assert.All(result.Items, i => Assert.Equal(i.StatusWord, Verdicts.Word(i.Status)));
             Assert.Equal(scene.Verdicts(step).OrderBy(p => p.Key, StringComparer.Ordinal),
                          got.OrderBy(p => p.Key, StringComparer.Ordinal));
         }

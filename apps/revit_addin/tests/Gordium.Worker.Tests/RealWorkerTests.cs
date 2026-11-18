@@ -82,6 +82,8 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
         }
         // and no row more
         Assert.Empty(got.Keys.Except(c.Verdicts.Keys));
+        // the worker's groups, as the panel shows them: every row in exactly one
+        Assert.Equal(got.Keys.Order(StringComparer.Ordinal), result.Groups.SelectMany(g => g.Items).Order(StringComparer.Ordinal));
         Assert.NotEmpty(result.Summary);
         Assert.Equal(Client.About.WorkerFingerprint, result.About.WorkerFingerprint);
     }
