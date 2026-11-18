@@ -115,6 +115,29 @@ public sealed class FakeWorkerTests
         Assert.Equal(Verdict.NeedsReview, line.Status);
     }
 
+    [Fact]
+    public async Task A_failure_is_never_shown_folded_whatever_the_answer_says()
+    {
+        using var client = await Start("failing_row_in_a_folded_group");
+        var result = await client.CheckSiteAsync(Site, Facts);
+        var group = Assert.Single(result.Groups, g => g.Items.Contains("irc.stair_width#s1"));
+        Assert.False(group.Folded);
+        var line = LineOf(result, "irc.stair_width#s1");
+        Assert.Equal("complies", line.StatusWord);
+        Assert.Equal(Verdict.DoesNotComply, line.Status);       // its most cautious row, not its word
+        Assert.False(line.Folded);
+        Assert.True(Assert.Single(result.Groups, g => g.Key == "complies").Folded);   // the rest as the worker said
+    }
+
+    [Fact]
+    public async Task A_headings_number_is_the_workers_not_its_rows()
+    {
+        using var client = await Start("two_to_review_on_one_part");
+        var group = Assert.Single((await client.CheckSiteAsync(Site, Facts)).Groups, g => g.Key == "irc:review");
+        Assert.Equal(2, group.Items.Count);
+        Assert.Equal(1, group.Count);           // one part to review (present.grouped counts lines to review)
+    }
+
     [Theory]
     [InlineData("state_unknown")]
     [InlineData("state_not_applicable")]       // a row's status, never a design's
@@ -198,6 +221,11 @@ public sealed class FakeWorkerTests
     [InlineData("row_in_no_line")]
     [InlineData("line_row_not_its_groups")]
     [InlineData("group_folded_not_bool")]
+    [InlineData("group_count_not_a_number")]
+    [InlineData("group_count_negative")]
+    [InlineData("lines_not_a_list")]
+    [InlineData("line_with_no_rows")]
+    [InlineData("row_in_two_lines")]
     [InlineData("complies_beside_a_fail")]
     [InlineData("complies_beside_a_review")]
     [InlineData("complies_with_a_use_detail")]
@@ -262,6 +290,13 @@ public sealed class FakeWorkerTests
     [InlineData("group_names_no_row", "\"R-1b.ghost\", not one of the check's rows")]
     [InlineData("row_in_no_line", "the row irc.has_none.ramp is in none of its lines")]
     [InlineData("line_row_not_its_groups", "the row R-1b.height is not one of its group's")]
+    [InlineData("groups_not_a_list", "result.view.groups is an object, not a list")]
+    [InlineData("group_folded_not_bool", ".folded is text, not true or false")]
+    [InlineData("group_count_not_a_number", ".count is text, not a whole number")]
+    [InlineData("group_count_negative", ".count is a number, not a whole number")]
+    [InlineData("lines_not_a_list", ".lines is an object, not a list")]
+    [InlineData("line_with_no_rows", "lines[1] has no rows")]
+    [InlineData("row_in_two_lines", "the row R-1b.height is in two lines")]
     public async Task Each_complies_guard_is_what_refuses_its_case(string mode, string words)
     {
         using var client = await Start(mode);

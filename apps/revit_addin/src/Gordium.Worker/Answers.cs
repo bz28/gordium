@@ -127,7 +127,7 @@ public sealed record CheckItem(string Id, string Name, string Group, Verdict Sta
 /// <param name="Title">Its words ("Bedroom 3 › Window 5: 1 does not comply (...)", "Ramps: not applicable").</param>
 /// <param name="Status">The most cautious of the worker's word for the line and its rows' verdicts.</param>
 /// <param name="StatusWord">The line's status as the worker sent it.</param>
-/// <param name="Folded">Whether it is shown folded (the worker's; a line of failures never is).</param>
+/// <param name="Folded">Whether it is shown folded (the worker's; never a line that fails).</param>
 /// <param name="Items">Its rows' ids, in order.</param>
 public sealed record CheckLine(string Key, string Title, Verdict Status, string StatusWord, bool Folded,
                                IReadOnlyList<string> Items);
@@ -138,7 +138,7 @@ public sealed record CheckLine(string Key, string Title, Verdict Status, string 
 /// <param name="Key">The group's key: <c>fails</c>, <c>review</c>, <c>complies</c>..., or <c>&lt;law&gt;:&lt;tier&gt;</c>.</param>
 /// <param name="Title">Its heading ("IRC egress · Complies").</param>
 /// <param name="Count">The number its heading shows (the worker's: what an architect counts).</param>
-/// <param name="Folded">Whether it is shown folded.</param>
+/// <param name="Folded">Whether it is shown folded (the worker's; never a group holding a failure).</param>
 /// <param name="Items">Every row in it, by id.</param>
 /// <param name="Lines">Its lines (a law's group); empty for a group listed row by row.</param>
 public sealed record CheckGroup(string Key, string Title, int Count, bool Folded, IReadOnlyList<string> Items,
@@ -267,9 +267,10 @@ public sealed class CheckResult
                     var word = StrictJson.String(ln, "status", at);
                     // never kinder than its rows: the most cautious of the worker's word and each row's verdict
                     var status = mine.Select(id => rows[id].Status).Append(Verdicts.Parse(word)).MinBy(Verdicts.Caution);
+                    // a failure is never shown folded (grouping.lines: a line of failures is open), whatever is said
                     lines.Add(new CheckLine(StrictJson.String(ln, "key", at, nonEmpty: true),
                                             StrictJson.String(ln, "title", at), status, word,
-                                            Bool(ln, "folded", at, true), mine));
+                                            Bool(ln, "folded", at, true) && status != Verdict.DoesNotComply, mine));
                 }
                 if (inLine.Count != ids.Count)
                     throw new WorkerProtocolException(
@@ -279,8 +280,9 @@ public sealed class CheckResult
             if (g.TryGetProperty("count", out var c) && c.ValueKind != JsonValueKind.Null
                 && (c.ValueKind != JsonValueKind.Number || !c.TryGetInt32(out count) || count < 0))
                 throw new WorkerProtocolException($"{where}.count is {StrictJson.Kind(c)}, not a whole number");
+            var failing = ids.Any(id => rows[id].Status == Verdict.DoesNotComply);
             groups.Add(new CheckGroup(key, StrictJson.String(g, "title", where), count,
-                                      Bool(g, "folded", where, FoldedGroups.Contains(key)), ids, lines));
+                                      Bool(g, "folded", where, FoldedGroups.Contains(key)) && !failing, ids, lines));
         }
         var lost = items.FirstOrDefault(i => !placed.Contains(i.Id));
         if (lost is not null)

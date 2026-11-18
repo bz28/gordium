@@ -109,8 +109,8 @@ the message and no verdicts.
 - **Not applicable and unknown statuses**, from the stand-in worker with groups made by the worker's own grouping
   code (`present.grouped`): a row not applicable is read as `NotApplicable` with its reason, on its own line in its
   law's folded "Complies" group, and a check that complies beside it still complies; one without a reason, an
-  unknown status word (row, line or overall state), and a line kinder than its rows are each read as needs review,
-  never a pass. (The real worker doesn't give a row not applicable yet: PR #112 adds it, and `check_site` doesn't
+  unknown status word (row, line or overall state) are each read as needs review, a line is read as its most cautious row
+  when its own word is kinder, and a failure is never folded: never a pass. (The real worker doesn't give a row not applicable yet: PR #112 adds it, and `check_site` doesn't
   carry an interior description yet.)
 - **What is sent:** no byte-order mark, only ASCII bytes, one line per request, ids 1, 2, 3..., non-English text
   intact.
@@ -119,7 +119,7 @@ the message and no verdicts.
 
 The main guards (the status words, the empty and repeated rows, a key twice, an escape or line that isn't whole text, the versions, `about`, the id, the
 byte-order mark, a refused part, half an answer, stopping after a timeout) were each undone once to check that
-their test then fails (the strict reading on both .NET 8 and .NET 10).
+their test then fails (the strict reading on both .NET 8 and .NET 10), and so were the guards of not applicable, of a status word not known, of the groups and lines, and of a failure never folded.
 
 ## The reader's logic: `Gordium.Revit.Reading`
 

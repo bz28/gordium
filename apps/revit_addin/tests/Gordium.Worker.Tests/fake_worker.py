@@ -101,7 +101,21 @@ SECOND = {
     "group_names_no_row": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"], "R-1b.ghost"]}])),
     "row_in_no_line": lambda i: ok(i, regroup(egress_view(), [egress_view()["view"]["groups"][0], {**egress_view()["view"]["groups"][1], "lines": egress_view()["view"]["groups"][1]["lines"][:1]}])),
     "line_row_not_its_groups": lambda i: ok(i, regroup(egress_view(), [egress_view()["view"]["groups"][0], {**egress_view()["view"]["groups"][1], "lines": egress_view()["view"]["groups"][1]["lines"] + [{"key": "complies#0", "title": "Height", "status": "complies", "items": [ITEM["id"]]}]}])),
-    "group_folded_not_bool": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "folded": "yes"}])),
+    # a failing row in a group and line said to be folded (the worker never does: a failure is shown open)
+    "failing_row_in_a_folded_group": lambda i: ok(i, regroup(egress_view(state="does_not_comply", items=[ITEM, dict(STAIR_ITEM, status="does_not_comply"), NA_ITEM]),
+                                                             [{**g, "folded": True, "lines": [{**ln, "status": "complies", "folded": True} for ln in g.get("lines") or []] or None}
+                                                              for g in egress_view(items=[ITEM, STAIR_ITEM, NA_ITEM])["view"]["groups"]])),
+    # two rules on one part to review: the worker's heading counts the part's line (1), not its rows (2)
+    "two_to_review_on_one_part": lambda i: ok(i, egress_view(state="needs_review", items=[ITEM, dict(STAIR_ITEM, status="needs_review"),
+                                                                                   dict(STAIR_ITEM, id="irc.stair_rise#s1", name="Stair 1 · Riser height", status="needs_review")])),
+    "group_count_not_a_number": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "count": "1"}])),
+    "group_count_negative": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "count": -1}])),
+    "lines_not_a_list": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "lines": {"a": 1}}])),
+    "line_with_no_rows": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "lines": [
+        {"key": "l1", "title": "Height", "status": "complies", "items": [ITEM["id"]]}, {"key": "l2", "title": "None", "status": "complies", "items": []}]}])),
+    "row_in_two_lines": lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "lines": [
+        {"key": "l1", "title": "Height", "status": "complies", "items": [ITEM["id"]]}, {"key": "l2", "title": "Again", "status": "complies", "items": [ITEM["id"]]}]}])),
+    "group_folded_not_bool":lambda i: ok(i, regroup(CHECK, [{"key": "rows", "title": "Rows", "items": [ITEM["id"]], "folded": "yes"}])),
     "missing_status": lambda i: ok(i, check(status="-")),
     "null_status": lambda i: ok(i, check(status=None)),
     "missing_id": lambda i: ok(i, check(id="-")),
