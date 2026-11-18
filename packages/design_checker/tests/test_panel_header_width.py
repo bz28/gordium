@@ -1,7 +1,6 @@
 """The panel's header fits the panel when a check could not run (Retry) or was cancelled (Check again).
 
-The Rhino capture C7 (gordium_archive/video/captures/C7_worker_killed/02_panel_check_could_not_run_retry.png, the
-checker killed during a check) showed the Retry button cut off at the floating panel's right edge, only "Re" in view:
+A Rhino capture made for the explainer video (C7: the checker killed during a check) showed the Retry button cut off at the floating panel's right edge, only "Re" in view:
 it sat beside "⚠ Check could not run", a label as wide as the panel's content (PANEL_WIDTH - 48), so the two together
 were wider than the panel. Cancelled's "Check again" sat the same way.
 
