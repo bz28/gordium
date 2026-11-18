@@ -690,14 +690,16 @@ def _header(parts, view, error, out_of_date, job=None, cancelled=False, checking
     lines = logic.panel_header(head)
     parts["progress_label"], parts["progress_job"] = None, job
     h.AddRow(_wide(lines["above"][0], bold=True, size=13))
+    # the headline is as wide as the panel, so its button goes on a row of its own under the reason: beside the
+    # headline it ran off the panel's edge, only "Re" of Retry in view (Rhino capture C7, worker killed mid-check)
     if error is not None:
-        h.AddRow(row(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15),
-                     button("Retry", a["retry"])))
+        h.AddRow(_wide("⚠ Check could not run", eto_status_color("needs_review"), bold=True, size=15))
         h.AddRow(_wide(error, size=11))
+        h.AddRow(row(button("Retry", a["retry"])))
     elif cancelled:                        # nothing shown as checked until the next check
-        h.AddRow(row(_wide(logic.CHECK_CANCELLED, eto_status_color("needs_review"), bold=True, size=15),
-                     button("Check again", a["retry"])))
+        h.AddRow(_wide(logic.CHECK_CANCELLED, eto_status_color("needs_review"), bold=True, size=15))
         h.AddRow(_wide(logic.CHECK_CANCELLED_NOTE, size=11))
+        h.AddRow(row(button("Check again", a["retry"])))
     elif out_of_date and (checking or job is not None):   # a check running: what it is doing, the seconds, Cancel
         h.AddRow(_wide("Checking…", bold=True, size=15))
         if job is not None:
@@ -727,7 +729,8 @@ def _header(parts, view, error, out_of_date, job=None, cancelled=False, checking
     parts["box_buttons"] = buttons      # off while a start box is open (set_box_open)
     for b in buttons:
         b.Enabled = not parts.get("box_open")
-    h.AddRow(row(*buttons))
+    for i in range(0, len(buttons), 2):  # two to a row: all five side by side ran off the panel (review of the Retry
+        h.AddRow(row(*buttons[i:i + 2]))  # fix); the widest two, "Main building…" and "Pick survey lot lines…", fit
     h.Create()
 
 
