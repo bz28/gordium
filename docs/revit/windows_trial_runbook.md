@@ -33,16 +33,16 @@ Do these in order. Tick each when done and write the version you got in the note
 
 | Done | Step | Notes |
 |---|---|---|
-| [ ] | The new Windows laptop set up (GIGABYTE Gaming A16: Intel Core i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64; arriving 2026-11-18) | Windows 11 Home is expected to be fine for Revit (not yet checked against Autodesk's system requirements: confirm when installing). 32 GB meets Autodesk's recommendation for Revit 2027; Q1 still measures it with the add-in running |
-| [ ] | Windows updated; a note made of the laptop's RAM, cores, disk and graphics | Fills the machine rows of the results table |
-| [ ] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x), and the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and 10.x) | The worker client is built for both (see the first check the trial settles, section 7) |
-| [ ] | Git for Windows installed | |
-| [ ] | Python installed: the 64-bit (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an x64 machine, so the 64-bit (x64) build is the one proven, and it is what this laptop runs |
-| [ ] | `git clone https://github.com/bz28/gordium.git`, then check out the branch the trial uses (see Open items) | |
-| [ ] | From the clone: `py -3.12 -m venv .venv`, then `.venv\Scripts\activate`, then `pip install -e ".[dev]"` | Matches the install step of the Windows job in `.github/workflows/ci.yml` |
-| [ ] | `pytest` passes | The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `ci.yml`); running them all is optional here, `pytest` is the one that proves the install |
-| [ ] | `python -m design_checker.conformance` prints `OK: every scene conforms` | Proves the Windows install reads the scenes and recordings as the Mac does |
-| [ ] | The worker answers by hand (below) | |
+| [x] | The new Windows laptop set up (GIGABYTE Gaming A16: Intel Core i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64; arriving 2026-11-18) | Arrived and set up 2026-11-18 (the machine table, section 5). Windows 11 Home is expected to be fine for Revit (not yet checked against Autodesk's system requirements: confirm when installing). 32 GB meets Autodesk's recommendation for Revit 2027; Q1 still measures it with the add-in running |
+| [ ] | Windows updated; a note made of the laptop's RAM, cores, disk and graphics | Fills the machine rows of the results table. Noted 2026-11-18 (section 5). Not yet updated: 28 updates were waiting, among them the NVIDIA display driver (the RTX 5060 had none, so Windows listed it as a phantom device and Revit would draw on the Intel graphics) |
+| [x] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x), and the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and 10.x) | SDK 10.0.404 (winget), runtime 8.0.10 (came with the laptop). `dotnet test` in `apps/revit_addin` passes on both: 272 + 72 tests on net10.0, 251 + 72 on net8.0 (2026-11-18). The worker client is built for both (see the first check the trial settles, section 7) |
+| [x] | Git for Windows installed | 2.56.1 |
+| [x] | Python installed: the 64-bit (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | 3.12.10 (the last 3.12 with an installer on python.org; winget's install failed with "Fast Cache data not found", so the python.org installer was run directly, its signature checked). The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an x64 machine, so the 64-bit (x64) build is the one proven, and it is what this laptop runs |
+| [x] | `git clone https://github.com/bz28/gordium.git`, then check out the branch the trial uses (see Open items) | `main`, after PRs #112 to #115 merged (2026-11-18) |
+| [x] | From the clone: `py -3.12 -m venv .venv`, then `.venv\Scripts\activate`, then `pip install -e ".[dev]"` | pip 26.3. Matches the install step of the Windows job in `.github/workflows/ci.yml` |
+| [x] | `pytest` passes | 5,810 passed, 41 skipped, in 39.5 minutes with nothing else running (2026-11-18). The slowest test took 220 s; with the C# tests running beside it the same run took twice as long and Python crashed (an access violation, not a failed test); a re-run in 16 parallel groups showed the cause: the old 5-minute hang dump fired 3 times and crashed Python twice: `faulthandler_timeout` is now 15 minutes (`pyproject.toml`). The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `ci.yml`); running them all is optional here, `pytest` is the one that proves the install |
+| [x] | `python -m design_checker.conformance` prints `OK: every scene conforms` | Printed 2026-11-18. Proves the Windows install reads the scenes and recordings as the Mac does |
+| [x] | The worker answers by hand (below) | 2026-11-18: `hello` answered `ok: true`, protocol 1.1, `gordium.site/1`, a `worker_fingerprint` and a `new_york/ithaca_city` rulebook; an unknown command answered `ok: false` and the worker stayed up |
 | [ ] | Autodesk's Snowdon Towers sample copied onto the laptop, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Keep copies out of the repo clone. The architects' models are the firms' files |
 | [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and at least the Snowdon Towers sample is on the laptop**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
 | [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The add-in is built twice: .NET 8 for Revit 2026, .NET 10 for Revit 2027. See the first check the trial settles, section 7 |
@@ -169,13 +169,13 @@ Fill these in as you go; this page is where the results live. "Mac" below is the
 
 | Item | Value |
 |---|---|
-| Laptop (expected: GIGABYTE Gaming A16, i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD; write what Windows reports) | |
-| Windows 11 Home build | |
-| Cores, RAM, disk, graphics driver | |
+| Laptop (expected: GIGABYTE Gaming A16, i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD; write what Windows reports) | GIGABYTE GAMING A16 CVH; 13th Gen Intel Core i7-13620H; 31.6 GB usable |
+| Windows 11 Home build | 25H2, 10.0.26200.9457, 64-bit (before updates) |
+| Cores, RAM, disk, graphics driver | 10 cores, 16 threads; 2 × 16 GB DDR5-5600; GIGABYTE AG450E1024-SI NVMe, 954 GB (C: 893 GB, 781 GB free); Intel UHD Graphics driver 32.0.101.6556, NVIDIA GeForce RTX 5060 Laptop GPU with no driver before updates |
 | RAM in use by Revit while it is open (Task Manager) | |
 | Revit version(s) installed | |
 | .NET runtime each Revit version loads | |
-| Python and `pip` versions on the laptop | |
+| Python and `pip` versions on the laptop | Python 3.12.10 (64-bit), pip 26.3 |
 
 **Q1: is Revit usable here** (days 1 to 2)
 

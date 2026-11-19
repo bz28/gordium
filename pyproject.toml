@@ -41,5 +41,8 @@ design_checker = ["place.json"]   # the plugin's copy of its place's settings (r
 [tool.pytest.ini_options]
 testpaths = ["packages"]
 addopts = "--import-mode=importlib"
-# a test still running after 5 minutes prints every thread's stack (the run then shows where it hangs)
-faulthandler_timeout = 300
+# a test still running after 15 minutes prints every thread's stack (the run then shows where it hangs). Not lower:
+# the dump reads a running test's state without stopping it, and on the Windows trial laptop it crashed Python (an
+# access violation) 2 of the 3 times it fired; the slowest test takes 220 s there alone and passed 300 s when the
+# laptop was busy (docs/revit/windows_trial_runbook.md, 2026-11-18)
+faulthandler_timeout = 900
