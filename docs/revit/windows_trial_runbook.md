@@ -34,7 +34,7 @@ Do these in order. Tick each when done and write the version you got in the note
 | Done | Step | Notes |
 |---|---|---|
 | [x] | The new Windows laptop set up (GIGABYTE Gaming A16: Intel Core i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD, Windows 11 Home, x64; arriving 2026-11-18) | Arrived and set up 2026-11-18 (the machine table, section 5). Windows 11 Home is expected to be fine for Revit (not yet checked against Autodesk's system requirements: confirm when installing). 32 GB meets Autodesk's recommendation for Revit 2027; Q1 still measures it with the add-in running |
-| [ ] | Windows updated; a note made of the laptop's RAM, cores, disk and graphics | Fills the machine rows of the results table. Noted 2026-11-18 (section 5). Not yet updated: 28 updates were waiting, among them the NVIDIA display driver (the RTX 5060 had none, so Windows listed it as a phantom device and Revit would draw on the Intel graphics) |
+| [x] | Windows updated; a note made of the laptop's RAM, cores, disk and graphics | Noted 2026-11-18 (section 5). Updated 2026-11-19: build 10.0.26200.9974, no restart waiting; NVIDIA driver 32.0.15.7676 (`nvidia-smi`: 576.76), and Revit draws on the RTX 5060 (`nvidia-smi` lists `Revit.exe`). On battery, GIGABYTE Control Center's power-saving mode can switch the RTX 5060 off: use Revit on the charger |
 | [x] | .NET 10 SDK installed (`dotnet --list-sdks` shows 10.x), and the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and 10.x) | SDK 10.0.404 (winget), runtime 8.0.10 (came with the laptop). `dotnet test` in `apps/revit_addin` passes on both: 272 + 72 tests on net10.0, 251 + 72 on net8.0 (2026-11-18). The worker client is built for both (see the first check the trial settles, section 7) |
 | [x] | Git for Windows installed | 2.56.1 |
 | [x] | Python installed: the 64-bit (x64) build of 3.12 from python.org, with "Add to PATH" and the `py` launcher ticked | 3.12.10 (the last 3.12 with an installer on python.org; winget's install failed with "Fast Cache data not found", so the python.org installer was run directly, its signature checked). The repo needs Python 3.12 to 3.14 (`requires-python` in `pyproject.toml`). CI's Windows job tests 3.12 and 3.14 on an x64 machine, so the 64-bit (x64) build is the one proven, and it is what this laptop runs |
@@ -43,9 +43,9 @@ Do these in order. Tick each when done and write the version you got in the note
 | [x] | `pytest` passes | 5,810 passed, 41 skipped, in 39.5 minutes with nothing else running (2026-11-18). The slowest test took 220 s; with the C# tests running beside it the same run took twice as long and Python crashed (an access violation, not a failed test); a re-run in 16 parallel groups showed the cause: the old 5-minute hang dump fired 3 times and crashed Python twice: `faulthandler_timeout` is now 15 minutes (`pyproject.toml`). The same step CI's Windows job runs. The Windows job runs more checks after it (rule validation, the audits, the goldens: see `ci.yml`); running them all is optional here, `pytest` is the one that proves the install |
 | [x] | `python -m design_checker.conformance` prints `OK: every scene conforms` | Printed 2026-11-18. Proves the Windows install reads the scenes and recordings as the Mac does |
 | [x] | The worker answers by hand (below) | 2026-11-18: `hello` answered `ok: true`, protocol 1.1, `gordium.site/1`, a `worker_fingerprint` and a `new_york/ithaca_city` rulebook; an unknown command answered `ok: false` and the worker stayed up |
-| [ ] | Autodesk's Snowdon Towers sample copied onto the laptop, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Keep copies out of the repo clone. The architects' models are the firms' files |
-| [ ] | Revit 2027 installed from Autodesk's 30-day free trial. **Last on the list, because installing it starts the 30-day clock: do it only when every row above is ticked and at least the Snowdon Towers sample is on the laptop**, so the 30 days cover the 14 | Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
-| [ ] | Revit 2026 installed as well, if Autodesk's trial allows both on the one machine (otherwise note that it did not) | The add-in is built twice: .NET 8 for Revit 2026, .NET 10 for Revit 2027. See the first check the trial settles, section 7 |
+| [x] | Autodesk's Snowdon Towers sample copied onto the laptop, and each of the architects' 3 models as it arrives (see Open items 1; a model arriving later is added then, without restarting anything) | Snowdon Towers in `Documents/gordium_archive/revit/sample_models/` (2026-11-18). It links five other Snowdon models (Electrical, HVAC, Plumbing, Site, Structural) not copied, so Revit asks about them on opening ("Ignore and continue"). Architects' models: none yet. Keep copies out of the repo clone. The architects' models are the firms' files |
+| [x] | Revit 2027 installed. Planned as Autodesk's 30-day free trial, last on the list so the 30 days cover the 14 | Revit 2027.4 (27.4.0.31), 2026-11-19, on an **education licence** (Revit's title bar: "EDUCATION (NON COMMERCIAL)"): Gordium is an education project (Ben, 2026-11-19), so the licence fits, and it has no 30-day clock. Revit 2027 first, because `PropertyLine.GetBoundary` exists only in the 2027 API |
+| [ ] | Revit 2026 installed as well, if the licence allows both on the one machine (otherwise note that it did not) | The add-in is built twice: .NET 8 for Revit 2026, .NET 10 for Revit 2027. See the first check the trial settles, section 7 |
 
 **Worker smoke test** (from the clone, venv active). Type or pipe one request per line; each gets one answer line:
 
@@ -172,29 +172,29 @@ Fill these in as you go; this page is where the results live. "Mac" below is the
 | Laptop (expected: GIGABYTE Gaming A16, i7-13620H, 32 GB DDR5, RTX 5060, 1 TB SSD; write what Windows reports) | GIGABYTE GAMING A16 CVH; 13th Gen Intel Core i7-13620H; 31.6 GB usable |
 | Windows 11 Home build | 25H2, 10.0.26200.9457, 64-bit (before updates) |
 | Cores, RAM, disk, graphics driver | 10 cores, 16 threads; 2 × 16 GB DDR5-5600; GIGABYTE AG450E1024-SI NVMe, 954 GB (C: 893 GB, 781 GB free); Intel UHD Graphics driver 32.0.101.6556, NVIDIA GeForce RTX 5060 Laptop GPU with no driver before updates |
-| RAM in use by Revit while it is open (Task Manager) | |
-| Revit version(s) installed | |
-| .NET runtime each Revit version loads | |
+| RAM in use by Revit while it is open (Task Manager) | Revit alone at its Home screen 0.8 GB; Snowdon Towers open 1.7 GB, 2.6 GB after the 3D view, orbiting and a plan (working set, 2026-11-19) |
+| Revit version(s) installed | Revit 2027.4 (27.4.0.31), education licence |
+| .NET runtime each Revit version loads | Revit 2027.4: the `net10.0-windows` build, on .NET 10.0.15 (the add-in's About button and its startup log line, 2026-11-19). Revit 2026 not installed |
 | Python and `pip` versions on the laptop | Python 3.12.10 (64-bit), pip 26.3 |
 
 **Q1: is Revit usable here** (days 1 to 2)
 
 | Check | Value | Usable? |
 |---|---|---|
-| Revit start to ready | | |
-| Open Snowdon Towers; real model 1 / 2 / 3 (those in hand) | | |
-| Orbit and select in each model in hand: smooth, laggy, or unusable | | |
-| Memory use in Task Manager (percent of RAM in use, and whether it pages heavily), Revit alone (day 2) | | |
-| Memory use in Task Manager, Revit with the add-in and the worker running (day 4) | | |
+| Revit start to ready | 70 s from starting `Revit.exe` to its Home screen, then idle 7 s later (2026-11-19, the Gordium add-in loading; Revit had run once before that day) | Yes |
+| Open Snowdon Towers; real model 1 / 2 / 3 (those in hand) | Snowdon: 12 s from Open to its cover sheet, then Revit waits on the missing-links question; 4 s more after it. No upgrade asked. 3D view (Fine detail) 5 s; L1 plan 2 s. No architect model yet | Yes (Snowdon) |
+| Orbit and select in each model in hand: smooth, laggy, or unusable | Snowdon, driven by script (Shift + middle-drag, 1.3 s drags, 3 runs): Revit idle again 0.6 to 0.9 s after each drag. Select a wall in plan: 1 s. Nudging a party wall: 3 s, then Revit's own "Can't keep elements joined" error (cancelled, model unchanged). How smooth it *feels* is for Ben to judge by hand | Provisionally yes; Ben's hands-on check open |
+| Memory use in Task Manager (percent of RAM in use, and whether it pages heavily), Revit alone (day 2) | 35% before opening; 42% at most with Snowdon open, 3D view, orbits and a plan (day 1, 2026-11-19) | Yes (far below 90%) |
+| Memory use in Task Manager, Revit with the add-in and the worker running (day 4) | 43% of RAM in use with Snowdon open, the add-in loaded and the worker running (the worker's two Python processes: 149 MB together) | Yes (far below 90%) |
 
 **Q2: the worker from the add-in** (days 3 to 4)
 
 | Check | Value |
 |---|---|
-| Worker start to first `hello` answer | |
-| `check_site` for the box-house scene, round trip | |
-| Same rows as the Mac? | |
-| Worker stops when Revit closes? | |
+| Worker start to first `hello` answer | 7.0 s (the add-in starting the venv's Python and its `hello`, first time after Revit started); a later `hello` 0.15 s |
+| `check_site` for the box-house scene, round trip | 3.1 s the first time (the worker reads its rulebook), then 0.56 to 0.58 s (3 runs) |
+| Same rows as the Mac? | Yes: all 32 rows, each with the scene's hand-worked verdict (`conformance.expected_verdicts`, worked out by the same Python the Mac runs), 4 runs out of 4. State needs review: "Zoning: 9 need review · 11 comply · 1 to answer · 1 not checked in this release · 2 use details to answer · Egress waiting: no rooms drawn yet" |
+| Worker stops when Revit closes? | Yes: closing Revit logged `worker_stopped` with the worker's process id, and no `python.exe` was left running |
 
 **Q3: the three real models** (days 8 to 9; one column per model; the Snowdon column is provisional and never counts as one of the three)
 
@@ -271,7 +271,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
   "What's new": [Migrating Revit to .NET 10](https://help.autodesk.com/cloudhelp/2027/ENU/Revit-WhatsNew/files/GUID-8D7A4715-EAF8-4BD1-BE78-061F900D0BCE.htm)); Revit 2025 and 2026
   are built on .NET 8, and Autodesk plans to move them to .NET 10 ([call for preview testing](https://blog.autodesk.io/call-for-preview-testing-revit-2026-2025-migration-to-net-10/),
   2026-04-29: a Revit 2026 preview on .NET 10 tested until 2026-06-03, no release date). So the worker client is built
-  and tested for both; note the Revit 2026 update installed and the runtime it reports. Whether the .NET 8 build also loads in Revit 2027 is not settled by Autodesk's pages either.
+  and tested for both; note the Revit 2026 update installed and the runtime it reports. Whether the .NET 8 build also loads in Revit 2027 is not settled by Autodesk's pages either. **Settled for Revit 2027.4 (2026-11-19):** it loads the `net10.0-windows` build on .NET 10.0.15. Revit 2026 and the .NET 8 build in Revit 2027 are still open (no Revit 2026 installed).
 - **How the add-in reads a rule that doesn't apply, and a status it doesn't know.** On the Mac the worker client's
   tests already show both, through the stand-in worker ([apps/revit_addin](../../apps/revit_addin/README.md)): a
   row "not applicable" (the interior description says the house has none of something, PR #112) is read as
