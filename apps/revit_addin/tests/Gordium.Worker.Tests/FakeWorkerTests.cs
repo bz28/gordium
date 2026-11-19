@@ -189,6 +189,9 @@ public sealed class FakeWorkerTests
     [InlineData("hello_other_schema", typeof(WorkerVersionException))]
     [InlineData("hello_no_schema", typeof(WorkerProtocolException))]
     [InlineData("hello_bad_version", typeof(WorkerProtocolException))]
+    [InlineData("hello_version_newline", typeof(WorkerProtocolException))]
+    [InlineData("hello_version_other_digit", typeof(WorkerProtocolException))]
+    [InlineData("hello_version_overflow", typeof(WorkerProtocolException))]
     public async Task A_hello_that_isnt_protocol_1_and_site_1_is_refused(string mode, Type error)
     {
         var e = await Assert.ThrowsAnyAsync<WorkerProtocolException>(() => Start(mode));

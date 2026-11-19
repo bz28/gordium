@@ -54,7 +54,8 @@ python -m design_checker serve
 {"id": 1, "cmd": "hello", "protocol": "1.1"}
 ```
 
-Expected answer: `{"id": 1, "ok": true, "result": {"protocol": "1.1", "site_schema": "gordium.site/1", ...` with
+Expected answer: `{"id": 1, "ok": true, "result": {"protocol": "1.2", "site_schema": "gordium.site/1", ...` (the
+worker's own version, whatever 1.x the request names) with
 a `worker_fingerprint` and a `rulebook` entry for `new_york/ithaca_city`. An unknown command answers
 `{"id": 2, "ok": false, "error": "unknown command ..."}` and the worker stays up. This was run on the Mac when this
 page was written. End it by closing its input (Ctrl+Z then Enter on Windows).

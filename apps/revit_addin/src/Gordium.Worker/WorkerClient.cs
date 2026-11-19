@@ -163,7 +163,7 @@ public sealed class WorkerClient : IDisposable
     {
         ArgumentNullException.ThrowIfNull(site);
         ArgumentNullException.ThrowIfNull(facts);
-        if (interior is not null && ProtocolVersion.Minor(About.Protocol) < Protocol.InteriorMinor)
+        if (interior is not null && About.Minor < Protocol.InteriorMinor)
             throw new WorkerVersionException(
                 $"This Gordium checker speaks protocol {About.Protocol}; checking egress on the house's inside needs " +
                 $"1.{Protocol.InteriorMinor} or later: update the checker (an older one would say egress waits, as if " +
