@@ -21,8 +21,9 @@ Revit 2026 preview was tested until 2026-06-03; no release date given), so which
 uses is checked in the Windows trial. The refusal of a key given twice
 in an answer is the library's own (`StrictJson.RefuseDuplicateKeys`), one code path for both: .NET 10's built-in
 switch doesn't exist on .NET 8, and a .NET 10 test checks ours says the same as it on every case. Beside it is
-`Gordium.Revit.Reading`, the reader's decisions (below). The add-in itself (the ribbon button, and the thin layer that
-fills the reader's records from the Revit API) comes later, in the [Windows trial](../../docs/revit/windows_trial_runbook.md).
+`Gordium.Revit.Reading`, the reader's decisions (below). The add-in itself, `Gordium.Revit.Addin` (the ribbon
+buttons, and later the thin layer that fills the reader's records from the Revit API), is built during the
+[Windows trial](../../docs/revit/windows_trial_runbook.md): see [The add-in in Revit](#the-add-in-in-revit-windows-only).
 
 ## What it does
 
@@ -187,3 +188,39 @@ GORDIUM_PYTHON=/path/to/.venv/bin/python dotnet test --framework net8.0    # or 
 `GORDIUM_PYTHON` defaults to `python` on the PATH. CI runs it on Windows and Ubuntu (`.github/workflows/ci.yml`,
 job `revit_worker_client`). The test packages are pinned to exact versions, with lock files (`packages.lock.json`);
 CI restores in locked mode.
+
+## The add-in in Revit (Windows only)
+
+`src/Gordium.Revit.Addin` is the part that runs inside Revit. It needs Revit's own `RevitAPI.dll` and
+`RevitAPIUI.dll`, so it builds only on a Windows machine with Revit installed, and it is left out of
+`Gordium.Worker.slnx` (which CI and the Mac build and test). It is built once per Revit version installed:
+`net10.0-windows` against Revit 2027, `net8.0-windows` against Revit 2026.
+
+So far it is the trial's (runbook days 3 and 4): a **Gordium** tab with two buttons.
+
+- **About** shows and logs which build Revit loaded and on which .NET runtime.
+- **Check box house** starts the worker with the clone's venv Python (or reuses the running one), says `hello`,
+  sends `check_site` for conformance scene 01 (`test_data/host_conformance/expected/01_box_house.site.json`, with
+  the scene's facts), and compares every row with the scene's hand-worked verdicts. The facts and verdicts come
+  from `design_checker.conformance` in Python, never copied into C#. The worker stops when Revit closes.
+
+Each button appends one JSON line to `%LOCALAPPDATA%\Gordium\trial\results.jsonl` (timings, the worker's
+`about`, every row that differs), so the trial's numbers are read from a file, not off the screen.
+
+To install it for the current Windows user (from the clone, PowerShell):
+
+```
+powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps1        # Revit 2027
+powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps1 -Revit 2026
+```
+
+It builds the add-in, copies the build to `%LOCALAPPDATA%\Gordium\addin\<version>\<time>\` (Revit locks the
+files it loads, so the clone stays free to rebuild), writes the clone's path beside it (`gordium_clone.txt`: the
+worker reads its rulebooks from the clone), and writes Revit's manifest to
+`%APPDATA%\Autodesk\Revit\Addins\<version>\Gordium.addin`. On the trial laptop, Revit 2027.4 picked the add-in up
+without a restart and never asked "Always Load" (2026-11-19).
+
+**How we know it works:** the trial ran it in Revit 2027.4 on 2026-11-19 (runbook section 5, Q2): it loaded on
+.NET 10.0.15, the box house's 32 rows matched the hand-worked verdicts four times out of four, and closing Revit
+stopped the worker. There are no automated tests of this project (Revit can't run in CI); its logic is kept thin, and
+what can be tested without Revit lives in `Gordium.Worker` and `Gordium.Revit.Reading`.
