@@ -5,7 +5,8 @@ namespace Gordium.Worker;
 
 /// <summary>Runs Python once (not the worker: a short script, such as the conformance suite working out a scene's
 /// facts) and gives its standard output. A failure or a run past the time limit is an error, never an empty
-/// answer; a run past the limit is stopped, its child processes too.</summary>
+/// answer. The limit covers the whole run, its output included: a Python still running at the limit is stopped, its
+/// child processes too; one that exited while a process it started keeps its output open is an error at the limit.</summary>
 public static class PythonOnce
 {
     /// <summary>Runs <paramref name="python"/> with <paramref name="arguments"/> in
@@ -29,6 +30,7 @@ public static class PythonOnce
         foreach (var a in arguments)
             start.ArgumentList.Add(a);
         start.Environment["PYTHONIOENCODING"] = "utf-8";
+        var clock = Stopwatch.StartNew();   // one limit for the whole run: Python itself, then its output
         using var p = Process.Start(start) ?? throw new InvalidOperationException($"Python didn't start ({python})");
         p.StandardInput.Close();
         // both streams are read while waiting, so neither a full pipe nor a hung Python can block past the limit
@@ -46,7 +48,13 @@ public static class PythonOnce
             }
             throw new TimeoutException($"Python ran longer than {timeout.TotalSeconds:0.#} s and was stopped");
         }
-        p.WaitForExit();   // the streams are complete only after the parameterless wait
+        // Python has exited, but a process it started may still hold its output open: wait for the output only for
+        // the time left, never without limit
+        var left = timeout - clock.Elapsed;
+        if (left < TimeSpan.Zero || !Task.WhenAll(stdout, stderr).Wait(left))
+            throw new TimeoutException(
+                $"Python exited, but its output stayed open past the {timeout.TotalSeconds:0.#} s limit " +
+                "(a process it started still holds it)");
         if (p.ExitCode != 0)
             throw new InvalidOperationException($"Python failed (exit code {p.ExitCode}): {stderr.GetAwaiter().GetResult()}");
         return stdout.GetAwaiter().GetResult();

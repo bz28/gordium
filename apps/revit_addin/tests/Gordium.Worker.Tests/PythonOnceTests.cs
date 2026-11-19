@@ -33,6 +33,19 @@ public sealed class PythonOnceTests
     }
 
     [Fact]
+    public void A_python_that_exits_leaving_its_output_open_is_an_error_at_the_limit()
+    {
+        // Python exits at once, but a process it started holds its output open for 20 s (then ends by itself)
+        const string code = "import subprocess, sys; " +
+            "subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(20)'], stdout=sys.stdout, stderr=sys.stderr); " +
+            "print('done')";
+        var clock = Stopwatch.StartNew();
+        var e = Assert.Throws<TimeoutException>(() => Run(code, TimeSpan.FromSeconds(3)));
+        Assert.True(clock.Elapsed < TimeSpan.FromSeconds(15), $"took {clock.Elapsed}");
+        Assert.Contains("output stayed open", e.Message);
+    }
+
+    [Fact]
     public void A_python_waiting_on_its_input_gets_end_of_file_and_never_waits()
     {
         Assert.Equal("''\n", Run("import sys; print(repr(sys.stdin.read()))", TimeSpan.FromSeconds(60)).Replace("\r\n", "\n"));
