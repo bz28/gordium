@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="../Gordium.Worker/Gordium.Worker.csproj" />
+    <ProjectReference Include="../Gordium.Revit.Reading/Gordium.Revit.Reading.csproj" />
   </ItemGroup>
   <Target Name="NeedsRevit" BeforeTargets="Restore;_CheckForInvalidConfigurationAndPlatform"
           Condition="!Exists('$(ProgramW6432)\Autodesk\Revit 2027\RevitAPI.dll') And !Exists('$(ProgramW6432)\Autodesk\Revit 2026\RevitAPI.dll')">

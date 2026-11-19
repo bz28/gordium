@@ -1,0 +1,411 @@
+{
+  "host": "revit",
+  "scene": "05_garage_left_out",
+  "recorded": {
+    "by": "Gordium add-in, Record scenes (Windows trial)",
+    "date": "2026-11-19",
+    "tool": "Revit Autodesk Revit 2027, Gordium add-in (trial)"
+  },
+  "ids": {
+    "b62fe59f-4b72-47d9-a602-58c834630f6d-00000adf": "lot",
+    "b62fe59f-4b72-47d9-a602-58c834630f6d-00000ae4": "house_floor1",
+    "b62fe59f-4b72-47d9-a602-58c834630f6d-00000ae5": "house_floor2",
+    "b62fe59f-4b72-47d9-a602-58c834630f6d-00000ae6": "garage"
+  },
+  "steps": {
+    "as drawn": {
+      "schema": "gordium.site/1",
+      "units": "ft",
+      "host": {
+        "name": "revit",
+        "version": "2027",
+        "document": "Project3",
+        "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
+      },
+      "lot": {
+        "id": "b62fe59f-4b72-47d9-a602-58c834630f6d-00000adf",
+        "edges": [
+          {
+            "points": [
+              [
+                60,
+                0
+              ],
+              [
+                60,
+                120
+              ]
+            ],
+            "curved": false
+          },
+          {
+            "points": [
+              [
+                60,
+                120
+              ],
+              [
+                0,
+                120
+              ]
+            ],
+            "curved": false
+          },
+          {
+            "points": [
+              [
+                0,
+                120
+              ],
+              [
+                0,
+                0
+              ]
+            ],
+            "curved": false
+          },
+          {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                60,
+                0
+              ]
+            ],
+            "curved": false
+          }
+        ]
+      },
+      "buildings": [
+        {
+          "id": "b62fe59f-4b72-47d9-a602-58c834630f6d-00000ae4",
+          "role": "building",
+          "layer": "Generic Models",
+          "floor": 10,
+          "faces": [
+            {
+              "points": [
+                [
+                  15,
+                  30,
+                  10
+                ],
+                [
+                  45,
+                  30,
+                  10
+                ],
+                [
+                  45,
+                  80,
+                  10
+                ],
+                [
+                  15,
+                  80,
+                  10
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  15,
+                  30,
+                  0
+                ],
+                [
+                  15,
+                  80,
+                  0
+                ],
+                [
+                  45,
+                  80,
+                  0
+                ],
+                [
+                  45,
+                  30,
+                  0
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  45,
+                  30,
+                  10
+                ],
+                [
+                  15,
+                  30,
+                  10
+                ],
+                [
+                  15,
+                  30,
+                  0
+                ],
+                [
+                  45,
+                  30,
+                  0
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  45,
+                  80,
+                  10
+                ],
+                [
+                  45,
+                  30,
+                  10
+                ],
+                [
+                  45,
+                  30,
+                  0
+                ],
+                [
+                  45,
+                  80,
+                  0
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  15,
+                  80,
+                  10
+                ],
+                [
+                  45,
+                  80,
+                  10
+                ],
+                [
+                  45,
+                  80,
+                  0
+                ],
+                [
+                  15,
+                  80,
+                  0
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  15,
+                  30,
+                  10
+                ],
+                [
+                  15,
+                  80,
+                  10
+                ],
+                [
+                  15,
+                  80,
+                  0
+                ],
+                [
+                  15,
+                  30,
+                  0
+                ]
+              ]
+            }
+          ],
+          "problems": [],
+          "name": ""
+        },
+        {
+          "id": "b62fe59f-4b72-47d9-a602-58c834630f6d-00000ae5",
+          "role": "building",
+          "layer": "Generic Models",
+          "floor": 10,
+          "faces": [
+            {
+              "points": [
+                [
+                  15,
+                  30,
+                  20
+                ],
+                [
+                  45,
+                  30,
+                  20
+                ],
+                [
+                  45,
+                  80,
+                  20
+                ],
+                [
+                  15,
+                  80,
+                  20
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  15,
+                  30,
+                  10
+                ],
+                [
+                  15,
+                  80,
+                  10
+                ],
+                [
+                  45,
+                  80,
+                  10
+                ],
+                [
+                  45,
+                  30,
+                  10
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  45,
+                  30,
+                  20
+                ],
+                [
+                  15,
+                  30,
+                  20
+                ],
+                [
+                  15,
+                  30,
+                  10
+                ],
+                [
+                  45,
+                  30,
+                  10
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  45,
+                  80,
+                  20
+                ],
+                [
+                  45,
+                  30,
+                  20
+                ],
+                [
+                  45,
+                  30,
+                  10
+                ],
+                [
+                  45,
+                  80,
+                  10
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  15,
+                  80,
+                  20
+                ],
+                [
+                  45,
+                  80,
+                  20
+                ],
+                [
+                  45,
+                  80,
+                  10
+                ],
+                [
+                  15,
+                  80,
+                  10
+                ]
+              ]
+            },
+            {
+              "points": [
+                [
+                  15,
+                  30,
+                  20
+                ],
+                [
+                  15,
+                  80,
+                  20
+                ],
+                [
+                  15,
+                  80,
+                  10
+                ],
+                [
+                  15,
+                  30,
+                  10
+                ]
+              ]
+            }
+          ],
+          "problems": [],
+          "name": ""
+        }
+      ],
+      "unsent": [],
+      "left_out": [
+        {
+          "id": "b62fe59f-4b72-47d9-a602-58c834630f6d-00000ae6",
+          "layer": "Generic Models",
+          "could_be_building": true,
+          "touching": false,
+          "ground_like": false,
+          "context": false
+        }
+      ],
+      "grade": {
+        "source": "none",
+        "points": []
+      },
+      "inventory_complete": true,
+      "problems": []
+    }
+  }
+}

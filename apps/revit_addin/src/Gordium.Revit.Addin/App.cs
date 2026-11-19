@@ -35,6 +35,11 @@ public sealed class App : IExternalApplication
             ToolTip = "Starts Gordium's checker and checks conformance scene 01 (the box house), comparing every " +
                       "row with the hand-worked verdicts",
         });
+        panel.AddItem(new PushButtonData("gordium_record_scenes", "Record\nscenes", dll, typeof(RecordScenesCommand).FullName)
+        {
+            ToolTip = "Draws each conformance scene in a new Revit model, reads it as a check would, records it to " +
+                      "test_data/host_conformance/recorded/revit/ and checks it by the suite's own rules",
+        });
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
     }

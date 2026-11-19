@@ -44,6 +44,18 @@ internal static class Trial
 
     internal static WorkerOptions Options(string clone) => new() { PythonPath = Python(clone), WorkingDirectory = clone };
 
+    /// <summary>The worker this Revit session uses, started (off Revit's thread) if it isn't running.</summary>
+    internal static WorkerClient Worker()
+    {
+        if (App.Worker is null || App.Worker.IsStopped)
+        {
+            App.Worker?.Dispose();
+            var clone = Clone();
+            App.Worker = Task.Run(() => WorkerClient.StartAsync(Options(clone))).GetAwaiter().GetResult();
+        }
+        return App.Worker;
+    }
+
     /// <summary>The target framework this build was made for (<c>.NETCoreApp,Version=v10.0</c>).</summary>
     internal static string Build() =>
         Assembly.GetExecutingAssembly().GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName ?? "unknown";
