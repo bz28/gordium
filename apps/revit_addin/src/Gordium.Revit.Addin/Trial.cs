@@ -1,5 +1,4 @@
 using System.IO;
-using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -70,31 +69,7 @@ internal static class Trial
     }
 
     /// <summary>Runs the clone's Python once and gives its output (for the conformance scene's facts and verdicts,
-    /// which only Python works out). A failure is an error, never an empty answer.</summary>
-    internal static string RunPython(string clone, string code)
-    {
-        var start = new ProcessStartInfo(Python(clone))
-        {
-            WorkingDirectory = clone,
-            RedirectStandardOutput = true,
-            RedirectStandardError = true,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = new UTF8Encoding(false),
-        };
-        start.ArgumentList.Add("-c");
-        start.ArgumentList.Add(code);
-        start.Environment["PYTHONIOENCODING"] = "utf-8";
-        using var p = Process.Start(start) ?? throw new InvalidOperationException("Python didn't start");
-        var stderr = p.StandardError.ReadToEndAsync();
-        var stdout = p.StandardOutput.ReadToEnd();
-        if (!p.WaitForExit(120_000))
-        {
-            p.Kill(entireProcessTree: true);
-            throw new TimeoutException("Python took longer than 2 minutes");
-        }
-        if (p.ExitCode != 0)
-            throw new InvalidOperationException($"Python failed ({p.ExitCode}): {stderr.Result}");
-        return stdout;
-    }
+    /// which only Python works out). A failure, or a run past 2 minutes (stopped), is an error, never an empty answer.</summary>
+    internal static string RunPython(string clone, string code) =>
+        PythonOnce.Run(Python(clone), clone, ["-c", code], TimeSpan.FromMinutes(2));
 }
