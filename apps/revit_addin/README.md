@@ -45,7 +45,11 @@ foreach (var group in result.Groups)                      // the panel's heading
    `about` is checked the same way.
 2. **Sends one request per line,** UTF-8 without a byte-order mark (the worker refuses one) and in fact plain
    ASCII (any other character is written as a JSON `\u` escape, so no code page can change it), each with the next id,
-   `"protocol": "1.1"` (a 1.0 worker answers it too, all but `objects.left_out`), and only the fields the caller gave (an optional field left null is not sent).
+   `"protocol": "1.2"` (a 1.0 or 1.1 worker answers it too, all but what it doesn't have: `objects.left_out` is
+   1.1's; `check_site`'s `interior`, the house's inside, is 1.2's, and the client sends one only to a worker whose
+   `hello` said 1.2 or later, refusing with `WorkerVersionException` before sending anything otherwise: an older
+   worker would ignore it and say egress waits, as if no rooms were drawn), and only the fields the caller gave (an
+   optional field left null is not sent).
 3. **Typed commands:** `HelloAsync`, `CheckSiteAsync`, `StartSiteAsync`, `ReadModelAsync`, and `SessionAsync` for
    the 20 session commands (the start box, the panel, the live check's decisions, which objects are left out), each
    answer read by name with `Get`; `LeftOutAsync` is `objects.left_out` with its fields typed. `StartSiteAsync` and `ReadModelAsync` give their result as JSON (a building's floors, a site

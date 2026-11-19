@@ -89,8 +89,14 @@ the protocol they speak, `"protocol": "1.1"` (a different major version is refus
 - `read_model {model, facts, inventory_complete?}`: a `.3dm` file read as a site description, for recording test
   fixtures. It reads only the lot and Building layers, so it says `inventory_complete: false` unless the caller
   says it looked at the rest of the lot itself.
-- `check_site {site, facts, report?, extras?, today?}`: the check of a site description, the same answer `check`
-  gives (`today`: the day of the check, YYYY-MM-DD, as `check` takes it).
+- `check_site {site, facts, report?, extras?, today?, interior?}`: the check of a site description, the same answer
+  `check` gives (`today`: the day of the check, YYYY-MM-DD, as `check` takes it). `interior` (protocol 1.2): the
+  house's inside as an [interior description](../interior/interior_description_format.md) (`gordium.interior/1`),
+  beside the site description, never inside it. The place's inherited laws (egress, for Ithaca) are checked on it;
+  without one they wait ("no rooms drawn yet"), never pass. One that can't be read is measured as far as it can and
+  the rest needs review, as on the command line (`--interior`); the result's `egress.interior_sha256` fingerprints
+  exactly the interior it was worked out from. A tool sends it only to a worker whose `hello` says 1.2 or later:
+  an older worker ignores a field it doesn't know, and its egress would wait as if no rooms were drawn.
 - `start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}`: the largest legal starting building
   on the description's lot (its buildings are left out), the same answer `start` gives.
 

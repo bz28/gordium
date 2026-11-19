@@ -442,9 +442,37 @@ public sealed class FakeWorkerTests
             var requests = lines[..^1].Select(l => JsonNode.Parse(l)!.AsObject()).ToList();
             Assert.Equal([1L, 2L, 3L], requests.Select(r => r["id"]!.GetValue<long>()));
             Assert.Equal(["hello", "check_site", "session.undo"], requests.Select(r => r["cmd"]!.GetValue<string>()));
-            Assert.All(requests, r => Assert.Equal("1.1", r["protocol"]!.GetValue<string>()));
+            Assert.All(requests, r => Assert.Equal(Protocol.Version, r["protocol"]!.GetValue<string>()));
             Assert.Equal("Café – ½ lot", requests[1]["site"]!["name"]!.GetValue<string>());
             Assert.False(requests[1].ContainsKey("report"));      // an optional field left null is not sent
+        }
+        finally
+        {
+            File.Delete(record);
+        }
+    }
+
+    [Fact]
+    public async Task An_interior_is_never_sent_to_a_worker_older_than_1_2_and_the_worker_keeps_serving()
+    {
+        // the stand-in worker says protocol 1.0: it would ignore an interior and say egress waits, as if no rooms
+        // were drawn, so the client refuses before sending anything (protocol 1.2, check_site's interior)
+        var record = Path.Combine(Path.GetTempPath(), $"gordium_record_{Guid.NewGuid():N}.bin");
+        try
+        {
+            using (var client = await WorkerClient.StartAsync(Env.Fake("record", record)))
+            {
+                Assert.Equal("1.0", client.About.Protocol);
+                var e = await Assert.ThrowsAsync<WorkerVersionException>(
+                    () => client.CheckSiteAsync(Site, Facts, interior: Json.Obj("""{"format": "gordium.interior/1"}""")));
+                Assert.Contains("1.2 or later", e.Message);
+                Assert.False(client.IsStopped);
+                await client.CheckSiteAsync(Site, Facts);         // without one it is answered as before
+            }
+            var sent = File.ReadAllText(record).Split('\n', StringSplitOptions.RemoveEmptyEntries)
+                .Select(l => JsonNode.Parse(l)!.AsObject()).ToList();
+            Assert.Equal(["hello", "check_site"], sent.Select(r => r["cmd"]!.GetValue<string>()));
+            Assert.All(sent, r => Assert.False(r.ContainsKey("interior")));
         }
         finally
         {

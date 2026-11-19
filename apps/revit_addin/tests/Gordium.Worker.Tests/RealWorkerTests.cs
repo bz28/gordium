@@ -132,6 +132,37 @@ public sealed class RealWorkerTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal("needs_review", undated.Raw.GetProperty("sections")[0].GetProperty("state").GetString());
     }
 
+    /// <summary>A hand-worked house's interior (test_data/interior_houses), its YAML read by the repository's Python.</summary>
+    private static JsonObject Interior(string house) => JsonNode.Parse(PythonOnce.Run(Env.Python, Env.Repo,
+        ["-c", "import json, sys, yaml; print(json.dumps(yaml.safe_load(open(sys.argv[1], encoding='utf-8'))))",
+         Path.Combine(Env.Repo, "test_data", "interior_houses", house, "house.yaml")], TimeSpan.FromSeconds(60)))!.AsObject();
+
+    [Fact]
+    public async Task An_interior_sent_with_check_site_is_checked_and_egress_no_longer_waits()
+    {
+        // protocol 1.2: the house's inside beside the site description. The box house with the hand-worked ranch's
+        // interior: the egress section is checked (not waiting), and the R319.2.3 sill row is answered from it
+        Assert.True(int.Parse(Client.About.Protocol.Split('.')[1]) >= Protocol.InteriorMinor, Client.About.Protocol);
+        var c = SceneCase.All.Single(x => x.Scene == "01_box_house");
+        var ranch = Interior("1_ranch_compliant");
+        var result = await Client.CheckSiteAsync(c.Site, c.Facts, interior: ranch);
+        var sections = result.Raw.GetProperty("sections");
+        Assert.NotEqual("waiting", sections[1].GetProperty("state").GetString());
+        Assert.DoesNotContain(result.Items, i => i.Id == "egress.waiting");
+        const string sill = "general.r319_2_3_escape_opening_max_sill_height";
+        var rows = result.Items.Where(i => i.Raw.TryGetProperty("rule", out var r) && r.GetString() == sill).ToList();
+        Assert.NotEmpty(rows);
+        Assert.All(rows, r => Assert.Equal(Verdict.Complies, r.Status));
+        // the same house with Bedroom 1's casement raised to a 48 in sill: that row fails (test_egress's worked example)
+        var raised = ranch.DeepClone().AsObject();
+        var w1 = raised["openings"]!.AsArray().Single(o => o!["id"]!.GetValue<string>() == "w1")!.AsObject();
+        w1["frame"] = Json.Obj("""{"left": 0, "right": 26, "bottom": 48, "top": 84}""");
+        var failing = await Client.CheckSiteAsync(c.Site, c.Facts, interior: raised);
+        Assert.Contains(failing.Items, i => i.Raw.TryGetProperty("rule", out var r) && r.GetString() == sill
+                                            && i.Status == Verdict.DoesNotComply);
+        Assert.NotEqual(Verdict.Complies, failing.State);
+    }
+
     [Fact]
     public async Task An_unknown_command_is_refused_and_the_worker_keeps_serving()
     {

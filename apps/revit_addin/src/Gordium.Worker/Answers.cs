@@ -42,6 +42,13 @@ public sealed record WorkerAbout(
     }
 }
 
+/// <summary>The minor version of a protocol already accepted by <see cref="WorkerAbout.Parse"/> ("1.2" gives 2).</summary>
+internal static class ProtocolVersion
+{
+    internal static int Minor(string protocol) =>
+        int.Parse(protocol.Split('.')[1], System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture);
+}
+
 /// <summary>An <c>"ok": true</c> answer: its <c>result</c> and its <c>about</c>.</summary>
 public sealed record WorkerAnswer(JsonElement Result, WorkerAbout About);
 

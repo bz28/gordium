@@ -151,13 +151,23 @@ public sealed class WorkerClient : IDisposable
     /// <param name="extras">What the host adds to the check (as the Rhino command's <c>extras</c>), or null.</param>
     /// <param name="today">The day of the check as YYYY-MM-DD, the place's own day (how old a saved address lookup
     /// is), or null: then no lookup counts as recent and the overlays row stays. The checker never reads the clock.</param>
+    /// <param name="interior">The house's inside (<c>gordium.interior/1</c>, docs/interior/interior_description_format.md),
+    /// which the place's inherited laws (egress, for Ithaca) are checked on; null for none (they then wait). Sent only
+    /// to a worker whose <c>hello</c> said protocol 1.2 or later: an older one would ignore it and say egress waits, as
+    /// if no rooms were drawn, so with an older worker this throws <see cref="WorkerVersionException"/> and sends
+    /// nothing (the worker keeps running).</param>
     /// <param name="cancel">Cancels the wait; the worker is then stopped.</param>
     public async Task<CheckResult> CheckSiteAsync(JsonNode site, JsonNode facts, string? report = null,
                                                   JsonNode? extras = null, string? today = null,
-                                                  CancellationToken cancel = default)
+                                                  JsonNode? interior = null, CancellationToken cancel = default)
     {
         ArgumentNullException.ThrowIfNull(site);
         ArgumentNullException.ThrowIfNull(facts);
+        if (interior is not null && ProtocolVersion.Minor(About.Protocol) < Protocol.InteriorMinor)
+            throw new WorkerVersionException(
+                $"This Gordium checker speaks protocol {About.Protocol}; checking egress on the house's inside needs " +
+                $"1.{Protocol.InteriorMinor} or later: update the checker (an older one would say egress waits, as if " +
+                "no rooms were drawn)");
         var fields = new JsonObject { ["site"] = site.DeepClone(), ["facts"] = facts.DeepClone() };
         if (report is not null)
             fields["report"] = report;
@@ -165,6 +175,8 @@ public sealed class WorkerClient : IDisposable
             fields["extras"] = extras.DeepClone();
         if (today is not null)
             fields["today"] = today;
+        if (interior is not null)
+            fields["interior"] = interior.DeepClone();
         var answer = await ExchangeAsync("check_site", fields, _options.RequestTimeout, cancel).ConfigureAwait(false);
         return Guard(() => CheckResult.Parse(answer));
     }

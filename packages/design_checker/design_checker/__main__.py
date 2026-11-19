@@ -16,8 +16,9 @@ without it no saved address lookup counts as recent, so the overlays row stays: 
 docs/protocol/): {"id": 6, "cmd": "hello", "protocol": "1.1"} (the protocol, the site description version and the
 fingerprints of the worker's code and rules), {"id": 7, "cmd": "read_model", "protocol": "1.1", "model": "<.3dm>",
 "facts": {...}} (the model as a site description, gordium.site/1: site_json.read_model), {"id": 8, "cmd":
-"check_site", "protocol": "1.1", "site": {...}, "facts": {...}, "report": null, "extras": {...}} (check() for a site
-description: check.check_description) and {"id": 9, "cmd": "start_site", "protocol": "1.1", "site": {...}, "facts":
+"check_site", "protocol": "1.2", "site": {...}, "facts": {...}, "report": null, "extras": {...}, "interior":
+{...}} (check() for a site description: check.check_description; "interior", from protocol 1.2: the house's inside,
+gordium.interior/1, which the egress laws are checked on; without it they wait) and {"id": 9, "cmd": "start_site", "protocol": "1.1", "site": {...}, "facts":
 {...}, "floor_to_floor": null, "design_buffer": 0, "larger_side": null} (start() for one); their answers carry
 "about" (the same fingerprints) beside "result". The session commands (protocol.COMMANDS: facts.*, box.view,
 box.pick, lookup.*, streets.*, session.*, report.message, panel.rows, objects.left_out) are host_core's functions served by a fixed
@@ -53,7 +54,8 @@ def _read_model(request: dict) -> dict:
 def _check_site(request: dict, step) -> dict:
     report = request.get("report")
     return check_description(request["site"], request["facts"], Path(report) if report else None,
-                             request.get("extras"), step=step, today=request.get("today"))
+                             request.get("extras"), step=step, today=request.get("today"),
+                             interior=request.get("interior"))
 
 
 def _start_site(request: dict, step) -> dict:
