@@ -1,10 +1,11 @@
 # Revit port: how the add-in reads a house's inside for egress (design note)
 
-**Purpose:** the plan for how the Revit add-in turns a Revit model's rooms, windows, doors, stairs and railings into Gordium's [interior description](../interior/interior_description_format.md) (`gordium.interior/1`), and how that reaches the checker, so New York's egress rules can run on a Revit model end to end. A plan for Ben to agree before any code.\
+**Purpose:** the plan for how the Revit add-in turns a Revit model's rooms, windows, doors, stairs and railings into Gordium's [interior description](../interior/interior_description_format.md) (`gordium.interior/1`), and how that reaches the checker, so New York's egress rules can run on a Revit model end to end. Agreed by Ben (section 8) before any code.\
 **For:** Ben; whoever writes the Revit interior reader; reviewers checking that nothing it sends could turn a "needs review" into a "complies".\
 **Kept current by:** the PR that builds each step below, as it settles a "to check"; any PR that changes the interior description, the worker's `check_site`, or one of the decisions here.
 
-**Status: proposed, 2026-11-19.** Nothing here is built. Decisions marked **(Ben)** need his answer first.
+**Status: agreed by Ben, 2026-11-19** (his four decisions are in section 8). Nothing here is built yet; each step
+of section 7 is its own PR.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -81,7 +82,7 @@ exactly:
 
 ## 3. The marks: how the architect states the facts
 
-**Proposed (Ben): Gordium shared parameters**, added to the project by the add-in on first use:
+**Agreed (Ben, 2026-11-19, section 8): Gordium shared parameters**, added to the project by the add-in on first use:
 
 | Parameter | On | Values | Feeds |
 |---|---|---|---|
@@ -89,7 +90,7 @@ exactly:
 | `Gordium: Escape opening` | Windows, Doors (instance) | Yes / No / unset | `openings[].escape` |
 | `Gordium: Exit door` | Doors (instance) | Yes / No / unset | `doors[].exit` |
 | `Gordium: Operation` | Windows, Doors (type) | One architect-facing list (casement, double hung, side-hinged door, sliding door, …) | `openings[].operation` and `doors[].operation`, each through a fixed table to that list's own word (`side_hinged_door` for an opening, `side_hinged` for a door): the two lists use different words |
-| `Gordium: Clear width`, `Clear height`, `Clear offset`, `Clear source`, `Clear for size` | Windows (type) | The maker's net clear opening, the height of its bottom above the bottom of the unit, the catalogue it came from, and the unit size (width x height) these were entered for, filled in by the add-in when the architect enters them | `openings[].stated_clear` |
+| `Gordium: Clear width`, `Clear height`, `Clear offset`, `Clear source`, `Clear confirmed` | Windows (type) | The maker's net clear opening; the height of its bottom above the window's sill line (the line Revit's Sill Height places), required (blank: no clear opening sent, never read as 0); the maker's publication it came from; and **the confirmation stamp**: written by the add-in only when the architect confirms the values on a section of that window type, it records exactly what was confirmed, who and when: **the type itself** (its `UniqueId`), its width and height, its `Gordium: Operation`, the clear width, height and offset, the `Clear source`, and, where the clear opening was copied from a maker's family parameter, that parameter's name and value. The reader sends a clear opening only when every one of these, read now, equals the stamp: so a duplicated or copied type (Duplicate, Transfer Project Standards and copying between projects carry the stamp with them, but not the original's `UniqueId`), a resized type, any edited value (an offset typed or bulk-filled as 0 in a schedule, a changed source or operation), or a maker's value that has since changed (a hardware option switched) all leave the window unconfirmed until the architect confirms it again. Confirmed per type: the add-in offers the value of another type of the same family as a suggestion, never as a confirmation | `openings[].stated_clear` |
 | `Gordium: Top rail is handrail` | Railings (type) | Yes / No / unset | whether a stair railing's top rail is also its handrail (unset on a stair railing with a top rail: that flight's `handrails` left out, not read) |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick
@@ -146,7 +147,7 @@ a drawn ceiling.
 | `room` | The window's or door's `FromRoom` / `ToRoom` for the last phase: the room inside | Which of the two is inside for a door between two rooms |
 | `escape` | The `Gordium: Escape opening` mark | |
 | `operation` | The `Gordium: Operation` type parameter (Revit families don't say how they open in any standard way) | |
-| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when both checks hold: the type's current Width and Height are the `Clear for size` they were entered for (a type duplicated and resized keeps the old clear numbers: then none is sent; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as drawn (Clear width no more than the unit's drawn width, Clear offset plus Clear height no more than its drawn height, 1/16 in to spare). `bottom` from where the window is placed: the bottom of the instance's drawn geometry, as placed, plus `Clear offset`; and the same from its level's elevation plus its Sill Height. The two disagreeing by more than 1/16 in, or either missing: no `stated_clear` (no value, needs review). So the sill height (R319.2.3, 44 in at most) always comes from where the window actually is | Whether a family's lowest drawn point is the unit's bottom (a sill or trim below it); the unit's drawn width and height from its placed geometry |
+| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when every check holds: everything the type's `Clear confirmed` stamp records (section 3: the type's `UniqueId`, size and operation, the clear width, height, offset and source, and a mapped maker parameter's current value) equals its value read now (a duplicated or resized type, or any value edited or changed since the architect confirmed it, then sends none; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as placed, in absolute heights (the clear bottom no lower than the placed geometry's lowest point, the clear top no higher than its highest, Clear width no more than its width, 1/16 in to spare). `bottom` = the instance's level elevation + its Sill Height + `Clear offset` (the maker's height of the clear opening's bottom above that sill line). `Clear offset` blank (never read as 0): no `stated_clear`. **The sill line is checked against something drawn that doesn't come from the Sill Height parameter**: the bottom of the opening the window cuts in its host wall (or the family's Bottom reference); disagreeing by more than 1/16 in, or not found: no `stated_clear`. Not the family's lowest drawn point: exterior sills and trim hang below the unit on most real windows. **Until the trial shows this check can be made** (section 9), the first reader sends no `stated_clear` at all, so every escape opening's size and sill need review: a sill read from a typed number alone is never enough for R319.2.3 (44 in at most) | Reading the bottom of the wall opening a window cuts, or its Bottom reference (`FamilyInstance.GetReferences`), on real families; the placed geometry's extents |
 | `frame`, `sashes`, `hinged` | **Not sent by the first reader.** A family's sash geometry is modelled differently by every maker and firm (or not at all), so reading it would be guessing. The measuring code uses the maker's opening alone when no frame is given (`model_measurement/interior/openings.py`); a window with neither gets no value (needs review) | Later, perhaps: families that carry Gordium's own frame and sash parameters |
 | `ground_outside` | The ground at the opening's outside face, only from a ground the architect gave: the Toposolid picked as the ground (as the outside reader's `terrain`), probed 1 ft outside each end of the opening, or finished spot grades there; else **not given**. Never the lot facts' flat ground: that is often Gordium's own assumption (`ground_assumed: "flat"`), and an assumed ground could make a window a grade-floor opening, which needs only 5 sq ft (R319.2.1 exception) | Probing a Toposolid (as the outside reader's to-check) |
 | `area_well` | Not in Revit's vocabulary. First reader: not given. An opening whose clear bottom is below the ground outside is sent with no `ground_outside` (its grade-floor reading needs review), and the marking list asks the architect to draw its well; R319.4's well rules, which need the well, need review | How firms draw wells (a generic model, an in-place family) |
@@ -166,7 +167,7 @@ a drawn ceiling.
 ### Doors (`doors`)
 
 The exit door's clear width is measured from drawn geometry (`model_measurement/interior/doors.py`: the stops,
-the hinge pin, the closed leaf), which door families don't model consistently. **Proposed (Ben):** add a maker's
+the hinge pin, the closed leaf), which door families don't model consistently. **Agreed (Ben, 2026-11-19, section 8):** add a maker's
 stated clear width and height to the format for doors, as windows have (`stated_clear`), with its source, the less
 favourable of drawn and stated counting when both are given. That is a change to the format and the measuring code
 (engineers, its own PR, with a hand-worked house), before the Revit reader sends doors. Until then the reader sends
@@ -203,6 +204,40 @@ A small, additive change (protocol **1.2**, a minor version: a 1.1 worker refuse
   version, never the waiting row as if no rooms were drawn.
 - This can be built and tested on the Mac first, with the five hand-worked houses sent through the worker.
 
+## 5a. Seen from the architect's desk
+
+What it asks of an architect, and what a real Ithaca house will still show as "needs review", said plainly so no
+one mistakes a waiting row for a missing feature.
+
+**What the architect does, once per project.** Tick each bedroom (3 to 4 Rooms), each bedroom's escape window and
+the exit door (Gordium fields, which a schedule fills in bulk), and give each escape window type its maker's net
+clear opening, which makers publish for egress. Many makers' Revit families already carry their own clear-opening
+parameter: the architect can point Gordium at it once per family. For each type, the add-in then copies the width
+and height into the `Gordium: Clear …` fields and asks the architect to confirm them, with the offset, on the
+type's section; only that confirmation writes the `Clear confirmed` stamp, and nothing re-stamps it on a later
+read. A later change to the type's size or to the maker's value no longer equals the stamp, so the window is
+unconfirmed (no clear opening sent) until the architect confirms it again: a comparison when the model is read,
+never a write to the model. `Clear source` stays the maker's publication (catalogue, product
+line, a hardware option such as egress hinges), with the family parameter named beside it. The maker's parameter
+gives width and height only: the offset of the clear opening above the sill line is always confirmed on the
+type's section the add-in shows. Every room, window and door needs its Yes or No (a schedule fills the No's in
+bulk): one left blank leaves that whole kind not read. Then tick what the house has none of, and "these are all the
+stairs / guards". The marking list puts anything unset first.
+
+**What a real house will still show as needing review**, until each is built or drafted:
+
+| Common in Ithaca houses | Why it waits | What would end the wait |
+|---|---|---|
+| A basement or habitable attic | R319.1 needs an escape opening in each, but the interior format has no list for them yet (only a "has none" tick) | Basements and habitable attics added to the format and the reader (a format PR, with a hand-worked house) |
+| Winders (an L-shaped stair with turning treads) | The measuring code reads straight flights only, and R318.7.5.2.1 (winders) isn't drafted | Winder measuring, and the section drafted |
+| A basement escape window in an area well | Wells aren't in Revit's vocabulary; the first reader sends none | A way to draw and read wells (section 4) |
+| The exit door's clear width | Door families can't be measured reliably | Doors' stated clear width (decision 2, section 8) |
+| A structural or services link over a stair or room | Links aren't read yet (section 4) | Reading linked elements |
+
+Each of these is "needs review" with its reason in the add-in, never "complies". An existing house being altered
+also brings Appendix BO's questions (is the stair existing, was it lawful when built), which stay the architect's
+answers: they are flags in the rules, not readings of the model.
+
 ## 6. How we will know it is right: interior conformance
 
 The same idea as the outside's conformance suite, which caught every reader mistake it was built for:
@@ -226,7 +261,11 @@ The same idea as the outside's conformance suite, which caught every reader mist
    stair under a beam in a loaded structural link (its headroom must come back not measured); a multistory stair
    (stairs not read); a bedroom with a soffit under its ceiling; a room crossed by a wall set not to bound rooms; a furnished bedroom
    (its bed and wardrobe change nothing); a bedroom whose slab is in a loaded structural link, its window 44 in above
-   the level (the sill must come back not measured).
+   the level (the sill must come back not measured); and for escape windows, each expecting no stated clear opening
+   (clear and sill measures not measured): Clear offset blank; Clear offset set to 0 in a schedule after the type was
+   confirmed; a family whose wall opening sits 1 in below its Sill Height line; a family with no findable wall opening
+   or Bottom reference; a maker's mapped value changed after confirmation; a confirmed type duplicated at the same
+   size (its operation then changed, and also left unchanged); a confirmed type's Clear source edited.
 3. **A real house**: 106 Ithaca Road (the architects' R-1b lot) drawn with an interior, so one Revit model gives
    zoning and egress together; its egress answers worked out by hand first.
 
@@ -239,7 +278,9 @@ Each step is its own PR, through the review loop, with its tests:
 2. **The marks** (shared parameters, created by the add-in) and the marking list.
 3. **Rooms and marked escape windows** with the maker's clear opening: R319 (escape openings), the most common
    egress failures. A room's floor area and ceiling height are measured and recorded too, but no rule reads them
-   yet (R312 and R313, room size and ceiling height, aren't brought in). It includes finding enclosed areas with no Room (section 2), without which no
+   yet (R312 and R313, room size and ceiling height, aren't brought in). The step builds the sill line's check
+   against the wall opening (section 4) and shows on the five houses that it can be made; only then are the escape
+   openings' clear measures in its scope. If it can't be made, they stay not measured, and the step says so. It includes finding enclosed areas with no Room (section 2), without which no
    `rooms` can be sent. Recorded houses 1, 2 and 5. The step's PR lists every `parts.yaml` measure of each kind as in
    or out of scope, and the `more` values compared: in scope `sleeping_room_floor_area` (and `floor_area_drawn`,
    `least_ceiling_height`), `opening_net_clear_width`, `_height`, `_area`, `opening_sill_height`, `opening_is_door`
@@ -248,24 +289,25 @@ Each step is its own PR, through the review loop, with its tests:
    `sleeping_room_in_addition`, `opening_operable`, `opening_opens_to_yard`, `opening_fully_openable` and
    `opening_below_grade` (the measuring code doesn't work these out yet).
 4. **Stairs** (straight component runs, the cross-check), houses 2 and 3: risers, treads, widths, headroom.
-5. **Doors** (after Ben's decision on a stated clear width), then **guards**, house 4.
+5. **Doors** (after the PR adding doors' stated clear width to the format, decision 2), then **guards**, house 4.
 6. **`has_none` ticks.**
 
-## 8. Decisions for Ben
+## 8. Decisions (Ben, 2026-11-19: "go w ur recs")
 
-1. **Shared parameters as the architect's marks** (section 3). Recommended.
-2. **A stated clear width for doors in the format** (section 4, doors). Recommended: door families can't be
-   measured reliably; the maker's number, with its source, can.
-3. **Suggestions from room names** (a "Bedroom" pre-ticked as a suggestion, sent only once confirmed). Recommended,
-   as a time-saver that can't cause a false pass.
-4. **Order** (section 7): start with step 1 now, on the Mac side, while the trial's outside reading goes on.
+1. **Shared parameters as the architect's marks** (section 3). Agreed.
+2. **A stated clear width for doors in the format** (section 4, doors), the less favourable of drawn and stated
+   counting when both are given. Agreed: door families can't be measured reliably; the maker's number, with its
+   source, can. A format and measuring-code PR of its own, before step 5.
+3. **Suggestions from room names** (a "Bedroom" pre-ticked as a suggestion, sent only once confirmed). Agreed: a
+   time-saver that can't cause a false pass.
+4. **Order** (section 7): step 1 first, on the Mac side, while the trial's outside reading goes on. Agreed.
 
 ## 9. To check in the trial (the Revit API on real models)
 
 `SpatialElementBoundaryLocation.Finish` on every wall type; a room's finished floor against its slab; collecting
 the undersides above a room or a flight exactly; tread top faces in a `StairsRun`'s geometry; `Stairs.ActualRiserHeight`
-against each run's drawn risers; finding enclosed areas with no Room; a window family's lowest point against its
-sill and its drawn width and height; the floor face under a stair's first riser; a multistory stair's levels;
+against each run's drawn risers; finding enclosed areas with no Room; the bottom of the wall opening a window cuts (or its Bottom reference), and its placed
+width and height; the floor face under a stair's first riser; a multistory stair's levels;
 reading a loaded link's elements through its placement; `FromRoom`/`ToRoom` for the last phase; a railing's balusters from its geometry; probing a
 Toposolid outside a window. Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
 test only: it is not a house, and gives no verdict).
