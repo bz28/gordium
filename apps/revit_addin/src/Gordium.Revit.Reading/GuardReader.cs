@@ -64,6 +64,10 @@ public static class GuardReader
                     why.Add($"Railing \"{r.Name ?? r.UniqueId}\" stands beside a flight and isn't the stair's: it may be a guard along the stair, which isn't read yet");
                 else if (stairs is null && (records.Stairs ?? []).Any(s => SiteReader.InDesignChecked(model, s.PhaseDemolished, s.DesignOption)))
                     why.Add($"Railing \"{r.Name ?? r.UniqueId}\": the stairs aren't read, so whether it stands beside one (a guard along a stair, not read yet) isn't known");
+                // and whatever reading a flight got to (a winder, a run unread, a side refused first): by where the runs
+                // and the railing are drawn, never by how far a flight was read (review round 2)
+                else if (NearARun(model, records, r) is { } near)
+                    why.Add($"Railing \"{r.Name ?? r.UniqueId}\" {near}: it may be a guard along the stair, which isn't read yet");
                 continue;
             }
             var name = $"Railing \"{r.Name ?? r.UniqueId}\" on stair \"{stair.Name ?? stair.UniqueId}\"";
@@ -73,6 +77,42 @@ public static class GuardReader
                 why.Add($"{name} isn't read as a handrail beside a wall: a guard along a stair isn't read yet");
         }
         return why;
+    }
+
+    /// <summary>How far around a stair run a railing on no stair is held back (ft): beyond the run's own drawn extent
+    /// (its width with it) in plan, and over its top by a guard's height and more.</summary>
+    public const double NearRun = 1.0;
+
+    /// <summary>The headroom over a run within which a railing counts as near it (ft): more than any guard is tall.</summary>
+    public const double OverRun = 4.0;
+
+    /// <summary>Why a railing on no stair counts as near a stair run in the design (null when it is near none): its box
+    /// (path and parts, shared coordinates) within <see cref="NearRun"/> of a run's box in plan (the run's own faces and
+    /// path) and its height range meeting the run's, from its base to <see cref="OverRun"/> over its top. A run whose
+    /// extent can't be known (no faces read), or a railing with nothing drawn, counts as near.</summary>
+    private static string? NearARun(RevitModel model, InteriorRecords records, RailingRecord r)
+    {
+        var t = model.InternalToShared;
+        var mine = r.Path.SelectMany(c => new[] { c.Start, c.End })
+            .Concat(r.Parts.SelectMany(p => p.Solids ?? []).SelectMany(s => s).SelectMany(f => f.Points)).Select(t.Apply).ToList();
+        foreach (var stair in records.Stairs ?? [])
+        {
+            if (!SiteReader.InDesignChecked(model, stair.PhaseDemolished, stair.DesignOption))
+                continue;
+            foreach (var run in stair.Runs)
+            {
+                var pts = (run.Faces ?? []).SelectMany(f => f.Points).Concat(run.Path).Select(t.Apply).ToList();
+                if (run.Faces is not { Count: > 0 } || pts.Count == 0)
+                    return $"may stand near stair \"{stair.Name ?? stair.UniqueId}\", whose run's extent couldn't be read";
+                if (mine.Count == 0)
+                    return "has nothing drawn to tell where it stands, and stairs are drawn";
+                if (mine.Min(p => p.X) <= pts.Max(p => p.X) + NearRun && mine.Max(p => p.X) >= pts.Min(p => p.X) - NearRun
+                    && mine.Min(p => p.Y) <= pts.Max(p => p.Y) + NearRun && mine.Max(p => p.Y) >= pts.Min(p => p.Y) - NearRun
+                    && mine.Min(p => p.Z) <= pts.Max(p => p.Z) + OverRun && mine.Max(p => p.Z) >= pts.Min(p => p.Z) - NearRun)
+                    return $"stands within {NearRun:0} ft of stair \"{stair.Name ?? stair.UniqueId}\" and isn't the stair's";
+            }
+        }
+        return null;
     }
 
     /// <summary>Every railing in the design checked that isn't on a stair, as a level guard (the list is the caller's to

@@ -389,6 +389,39 @@ public sealed class DoorGuardTests
         }
     }
 
+    [Theory]
+    [InlineData("winder")]
+    [InlineData("left side refused first")]
+    [InlineData("run unread")]
+    public void A_railing_on_no_stair_near_a_run_leaves_the_guards_out_however_far_the_flight_was_read(string how)
+    {
+        // review round 2: held back by where it stands, not by whether the flight's sides were reached
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        var part = new RailingPart("free-top", RailingPartKind.TopRail, [house.StairBox(st, 0, 12.5, -1.3, -1.2, 3, 3.1)]);
+        var (x0, y0) = FakeHouse.StairAt(st, 0, -1.25);
+        var (x1, y1) = FakeHouse.StairAt(st, 12.5, -1.25);
+        house.Railings!.Add(new RailingRecord
+        {
+            UniqueId = "free", Name = "Free-standing rail", Path = [new PathCurve(house.Fake.Place(x0, y0, 0), house.Fake.Place(x1, y1, 0), true)],
+            BaseLevelElevation = 0, BaseOffset = 0, Parts = [new("free", RailingPartKind.Railing, []), part], Near = [],
+        });
+        house.AddNear("s1", FakeHouse.PartNear(part));
+        switch (how)
+        {
+            case "winder": house.SetRun("s1", r => r with { Style = "Winder" }); break;
+            case "left side refused first":
+                house.AddNear("s1", new("col", "OST_Columns", "Column", Faces: house.StairBox(st, 4, 4.5, 1.0, 1.4, 1, 6)));
+                break;
+            case "run unread": house.SetRun("s1", r => r with { Faces = null, GeometryFailed = true }); break;
+        }
+        var read = Read(house);
+        Assert.Null(read.Interior["guards"]);
+        Assert.Contains(read.GuardsNotRead, w => w.Contains("Railing \"Free-standing rail\""));
+        // house 4's loft guard, nowhere near its stair, is still read
+        Assert.NotNull(Read(FakeHouse.Draw(Loft)).Interior["guards"]);
+    }
+
     [Fact]
     public void A_newel_post_farther_in_than_the_handrail_leaves_the_width_at_the_handrail_not_measured()
     {

@@ -284,7 +284,10 @@ with none of the stairs' blockers (section 4, stairs), and with every railing on
 wall: **a guard along a stair isn't read yet** (its `top_line` and the stair's side as the guard's inside face are
 to build), so any other railing on a stair leaves `guards` out, as does a railing on no stair standing beside a
 flight (it can't be told from a guard along it), or any railing while stairs are drawn but not read (where it stands
-isn't known). Each other railing on no stair is a level guard, never
+isn't known). "Beside a flight" is judged by where things are drawn, never by how far a flight's reading got
+(review round 2: a winder, an unread run, a side refused first): a railing on no stair whose box comes within 1 ft
+in plan of a run's own drawn extent, its height between the run's base and 4 ft over its top, is held back; a run
+whose extent can't be read holds back every railing on no stair. Each other railing on no stair is a level guard, never
 dropped, each value sent only when read exactly:
 
 - its path must be one straight line (else every value out);
