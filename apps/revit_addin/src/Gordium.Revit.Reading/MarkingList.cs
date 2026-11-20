@@ -162,9 +162,10 @@ public static class MarkingList
 
     public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null)
     {
-        // the floors outside the house the check reads (SiteSlabs.OnLot): one wholly off the lot is dropped by the check,
-        // so it is never asked for, only named
-        var (slabs, offLot, lotFound) = SiteSlabs.OnLot(model);
+        // every floor outside the house (SiteSlabs), on the lot or not: which are on it is the check's own decision
+        // (objects.left_out, with the lot the check is given), never guessed here (review round 2), so the list asks for
+        // each and says that one off the lot changes nothing
+        var slabs = SiteSlabs.Find(model).Values.ToList();
         // a level is listed when it has an enclosed area with no Room (whatever its mark), or its mark is set
         var unmarkedAreas = InteriorReader.UnknownAreas(model, levelMarks: false);
         var rows = MarkReading.InDesign(model)
@@ -195,13 +196,10 @@ public static class MarkingList
             var unset = rows.Count(r => r.Kind == MarkedKind.SiteSlab && r.NeedsMarking);
             summary.Add(unset == 0
                 ? $"{Marks.SiteSlab.Name}: all {slabs.Count} floors outside the house marked."
-                : $"{Marks.SiteSlab.Name}: {unset} of {slabs.Count} floors outside the house not marked, so lot coverage " +
-                  "and the yards need review until each says what it is.");
+                : $"{Marks.SiteSlab.Name}: {unset} of {slabs.Count} floors outside the house say nothing about what they " +
+                  "are: one on the lot keeps lot coverage and the yards needing review until it says (" +
+                  string.Join(", ", SlabKinds.Words) + "); one off the lot changes nothing.");
         }
-        if (offLot.Count > 0)
-            summary.Add((offLot.Count == 1 ? "1 floor" : $"{offLot.Count} floors") + " outside the house " +
-                        (offLot.Count == 1 ? "is" : "are") + (lotFound ? " off the lot: not read (" : " not read: no lot found (draw one closed property line) (") +
-                        string.Join(", ", offLot.Select(s => SlabLabel(s.Floor)).Order(StringComparer.OrdinalIgnoreCase)) + ").");
         var inHouse = SiteSlabs.MarkedInHouse(model);
         if (inHouse.Count > 0)
             summary.Add($"{Marks.SiteSlab.Name} is set on {(inHouse.Count == 1 ? "1 floor" : $"{inHouse.Count} floors")} under " +

@@ -204,37 +204,29 @@ public sealed class SiteSlabTests(RealWorker worker) : IClassFixture<RealWorker>
         Assert.Equal(MarkState.NotUnderstood, rows["odd"].Cells.Single().State);
         Assert.Equal(MarkState.Given, rows["walk"].Cells.Single().State);
         Assert.Contains(Concrete, rows["pad"].Label);
-        Assert.Contains("Gordium: Site slab is: 2 of 3 floors outside the house not marked, so lot coverage and the yards need review until each says what it is.", list.Summary);
+        Assert.Contains("Gordium: Site slab is: 2 of 3 floors outside the house say nothing about what they are: one on " +
+                        "the lot keeps lot coverage and the yards needing review until it says (Porch, Deck, Landing, Ramp, " +
+                        "Patio, Terrace, Walk, Parking, Driveway); one off the lot changes nothing.", list.Summary);
         Assert.Contains(list.Summary, s => s.Contains("under the house's walls or roof") && s.Contains("in_house"));
         Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
     }
 
-    /// <summary>Review round 1: a floor the check drops (wholly off the lot, or only touching its line from outside, as
-    /// objects.left_out decides: ON_LOT_REACH) is never asked for, only named off the lot; one a hair over the line
-    /// (more than 0.1 ft in) is.</summary>
+    /// <summary>Review round 2: which slabs are on the lot is the check's own decision (objects.left_out, with the lot
+    /// it is given: a picked one, among neighbours' property lines), never guessed by the list, so the list asks for
+    /// every floor outside the house, on the lot or not, and says one off it changes nothing; it never says no lot was
+    /// found. With two closed property lines (the lot and a neighbour's) and no lot picked, the pad is listed.</summary>
     [Fact]
-    public async Task The_marking_list_asks_only_for_slabs_the_check_reads()
+    public void The_marking_list_lists_every_site_slab_whatever_the_property_lines()
     {
-        var m = House(Floor("neighbour", 70, 90, 80, 100), Floor("touching", 60, 90, 66, 100),
-                      Floor("over", 59.7, 90, 66, 100));
+        var m = House(Floor("pad", 50, 90, 58, 100), Floor("next_door", 70, 90, 80, 100));
+        m = m with { LotLines = [.. m.LotLines, F.PropertyLine("pl-neighbour", [(60, 0), (120, 0), (120, 120), (60, 120)])] };
         var list = MarkingList.Build(m);
-        Assert.Equal(["over"], list.Rows.Where(r => r.Kind == MarkedKind.SiteSlab).Select(r => r.Id));
-        Assert.Contains(list.Summary, s => s.StartsWith("2 floors outside the house are off the lot: not read", StringComparison.Ordinal)
-                                           && s.Contains("(neighbour)") && s.Contains("(touching)"));
-        // the check agrees: the two it doesn't ask for aren't read, the one it does is
-        Assert.Equal(["over"], Ids(await Site(m), "left_out").Where(i => i is "neighbour" or "touching" or "over"));
+        Assert.Equal(["next_door", "pad"], list.Rows.Where(r => r.Kind == MarkedKind.SiteSlab).Select(r => r.Id).Order());
+        Assert.Contains(list.Summary, s => s.Contains("2 of 2 floors outside the house say nothing") && s.Contains("one off the lot changes nothing"));
+        Assert.DoesNotContain(list.Summary, s => s.Contains("no lot found") || s.Contains("off the lot: not read"));
+        Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
 
-        // only the off-lot ones: nothing to mark
-        var off = MarkingList.Build(House(Floor("neighbour", 70, 90, 80, 100)));
-        Assert.DoesNotContain(off.Rows, r => r.Kind == MarkedKind.SiteSlab);
-        Assert.DoesNotContain(off.Summary, s => s.Contains("not marked"));
-    }
-
-    [Fact]
-    public void With_no_lot_no_slab_is_asked_for()
-    {
-        var list = MarkingList.Build(House(Floor("pad", 50, 90, 58, 100)) with { LotLines = [] });
-        Assert.DoesNotContain(list.Rows, r => r.Kind == MarkedKind.SiteSlab);
-        Assert.Contains(list.Summary, s => s.Contains("not read: no lot found"));
+        Assert.Contains(MarkingList.Build(House(Floor("pad", 50, 90, 58, 100)) with { LotLines = [] }).Rows,
+                        r => r.Id == "pad");                                        // no property line at all: listed too
     }
 }

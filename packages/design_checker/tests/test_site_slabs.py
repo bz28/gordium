@@ -134,6 +134,9 @@ def test_extras_naming_slabs_are_refused_one_source():
 def test_the_schema_file_names_the_slab_kinds_the_code_reads():
     schema = json.loads((REPO / "docs/protocol/site_description_v1.schema.json").read_text(encoding="utf-8"))
     assert schema["$defs"]["left_out"]["properties"]["slab"]["enum"] == list(site_json.SLAB_KINDS)
+    # review round 2: its words say a marked slab is the exception to "each one makes the check need review"
+    words = schema["$defs"]["left_out"]["description"]
+    assert "patio" in words and "parking (changes nothing)" in words, words
 
 
 def test_the_worker_checks_a_slab_sent_as_json():

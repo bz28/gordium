@@ -39,7 +39,6 @@ internal static class RevitMarks
         ProjectMarks = doc.ProjectInformation is { } info ? Values(info) : new Dictionary<Guid, MarkValue>(),
         VertexTolerance = doc.Application.VertexTolerance,
         Elements = RevitRead.HouseOutline(doc),          // the site slabs' rows (SiteSlabs), no geometry
-        LotLines = RevitRead.LotLines(doc),              // which of them reach into the lot (SiteSlabs.OnLot)
     };
 
     private static MarkedElement Element(Document doc, Element e)

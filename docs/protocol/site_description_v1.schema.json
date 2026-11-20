@@ -261,7 +261,7 @@
   },
   "left_out": {
    "type": "object",
-   "description": "An object on the lot that wasn't sent. Each one makes the check need review.",
+   "description": "An object on the lot that wasn't sent. Each one makes the check need review, but a slab marked patio (only the yards need review) or parking (changes nothing): see slab.",
    "properties": {
     "id": {
      "type": "string",
