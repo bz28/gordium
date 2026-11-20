@@ -61,6 +61,10 @@ public sealed record RevitModel
     /// <summary>Every parameter bound in the project (<c>Document.ParameterBindings</c>), for adding Gordium's marks
     /// without clashing (<see cref="MarkSetup"/>).</summary>
     public IReadOnlyList<BoundParameter> Bindings { get; init; } = [];
+
+    /// <summary>The house's inside beyond the marks (rooms' geometry, windows' placement, enclosed areas, links), for the
+    /// interior reader (<see cref="InteriorReader"/>); null when the Revit layer didn't read it (the marking list alone).</summary>
+    public InteriorRecords? Interior { get; init; }
 }
 
 /// <summary>One parameter's value on an element, as Revit gives it: <c>Parameter.HasValue</c>, and by its

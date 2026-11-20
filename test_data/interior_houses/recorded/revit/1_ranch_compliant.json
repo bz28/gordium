@@ -1,0 +1,389 @@
+{
+  "host": "revit",
+  "house": "1_ranch_compliant",
+  "step": 3,
+  "recorded": {
+    "by": "Gordium add-in, Record interior houses (Windows trial)",
+    "date": "2026-11-20",
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
+  },
+  "ids": {
+    "w1": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015f7",
+    "w2": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015f9",
+    "w3": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015fb",
+    "bed1": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015fd",
+    "bed2": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015ff",
+    "living": "38634244-9506-4df7-b08f-1e9c8c2517fa-00001600"
+  },
+  "interior": {
+    "format": "gordium.interior/1",
+    "units": "ft",
+    "rooms": [
+      {
+        "id": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015fd",
+        "name": "Bedroom 1 (1)",
+        "sleeping": true,
+        "floor": [
+          [
+            0,
+            0
+          ],
+          [
+            12,
+            0
+          ],
+          [
+            12,
+            11
+          ],
+          [
+            0,
+            11
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              0,
+              0,
+              8
+            ],
+            [
+              0,
+              0,
+              8
+            ],
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              6,
+              5.5,
+              8
+            ]
+          ],
+          [
+            [
+              0,
+              11,
+              8
+            ],
+            [
+              0,
+              0,
+              8
+            ],
+            [
+              0,
+              0,
+              8
+            ],
+            [
+              6,
+              5.5,
+              8
+            ]
+          ],
+          [
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              12,
+              11,
+              8
+            ],
+            [
+              12,
+              11,
+              8
+            ],
+            [
+              6,
+              5.5,
+              8
+            ]
+          ],
+          [
+            [
+              12,
+              11,
+              8
+            ],
+            [
+              12,
+              11,
+              8
+            ],
+            [
+              0,
+              11,
+              8
+            ],
+            [
+              6,
+              5.5,
+              8
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015ff",
+        "name": "Bedroom 2 (2)",
+        "sleeping": true,
+        "floor": [
+          [
+            12,
+            0
+          ],
+          [
+            23,
+            0
+          ],
+          [
+            23,
+            10
+          ],
+          [
+            12,
+            10
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              23,
+              0,
+              8
+            ],
+            [
+              17.5,
+              5,
+              8
+            ]
+          ],
+          [
+            [
+              12,
+              10,
+              8
+            ],
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              17.5,
+              5,
+              8
+            ]
+          ],
+          [
+            [
+              23,
+              0,
+              8
+            ],
+            [
+              23,
+              10,
+              8
+            ],
+            [
+              23,
+              10,
+              8
+            ],
+            [
+              17.5,
+              5,
+              8
+            ]
+          ],
+          [
+            [
+              23,
+              10,
+              8
+            ],
+            [
+              23,
+              10,
+              8
+            ],
+            [
+              12,
+              10,
+              8
+            ],
+            [
+              17.5,
+              5,
+              8
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "38634244-9506-4df7-b08f-1e9c8c2517fa-00001600",
+        "name": "Living room (3)",
+        "sleeping": false,
+        "floor": [
+          [
+            23,
+            11
+          ],
+          [
+            23,
+            25
+          ],
+          [
+            0,
+            25
+          ],
+          [
+            0,
+            11
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              0,
+              11,
+              8
+            ],
+            [
+              23,
+              11,
+              8
+            ],
+            [
+              23,
+              25,
+              8
+            ]
+          ],
+          [
+            [
+              23,
+              25,
+              8
+            ],
+            [
+              0,
+              25,
+              8
+            ],
+            [
+              0,
+              11,
+              8
+            ]
+          ]
+        ]
+      }
+    ],
+    "openings": [
+      {
+        "id": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015f7",
+        "name": "Gordium test window w1 (26 x 36 in): Family1 (Window 1)",
+        "room": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015fd",
+        "escape": true,
+        "operation": "casement",
+        "stated_clear": {
+          "width": 2.0416666666666665,
+          "height": 3,
+          "bottom": 2.5,
+          "source": "the maker\u0027s net clear opening (made up: worked out from house.yaml\u0027s frame and sash)"
+        }
+      },
+      {
+        "id": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015f9",
+        "name": "Gordium test window w2 (30 x 60 in): Family2 (Window 2)",
+        "room": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015ff",
+        "escape": true,
+        "operation": "double_hung",
+        "stated_clear": {
+          "width": 2.5,
+          "height": 2.1666666666666665,
+          "bottom": 2,
+          "source": "the maker\u0027s net clear opening (made up: worked out from house.yaml\u0027s frame and sash)"
+        }
+      },
+      {
+        "id": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015fb",
+        "name": "Gordium test window w3 (60 x 60 in): Family3 (Window 3)",
+        "room": "38634244-9506-4df7-b08f-1e9c8c2517fa-00001600",
+        "escape": false,
+        "operation": "fixed"
+      }
+    ]
+  },
+  "rooms_not_read": [],
+  "openings_not_read": [],
+  "notes": [
+    {
+      "part": "38634244-9506-4df7-b08f-1e9c8c2517fa-000015fb",
+      "field": "stated_clear",
+      "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
+    }
+  ],
+  "evidence": {
+    "38634244-9506-4df7-b08f-1e9c8c2517fa-000015f7": {
+      "sill_line": 2.5,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z 2.5..5.5, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 5582, wall 5582 38634244-9506-4df7-b08f-1e9c8c2517fa-000015ce: 14 faces; ids generating them: OST_Walls 5582, OST_Walls 5583, OST_Walls 5585, OST_Windows 5623 (this window), OST_Windows 5625"
+      ],
+      "wall_opening_bottom": 2.5,
+      "placed": {
+        "bottom": 2.5,
+        "top": 5.500000000000002,
+        "width": 2.166666666666666
+      }
+    },
+    "38634244-9506-4df7-b08f-1e9c8c2517fa-000015f9": {
+      "sill_line": 2,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z 2..7, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 5582, wall 5582 38634244-9506-4df7-b08f-1e9c8c2517fa-000015ce: 14 faces; ids generating them: OST_Walls 5582, OST_Walls 5583, OST_Walls 5585, OST_Windows 5623, OST_Windows 5625 (this window)"
+      ],
+      "wall_opening_bottom": 2,
+      "placed": {
+        "bottom": 2,
+        "top": 7.000000000000002,
+        "width": 2.5
+      }
+    }
+  },
+  "revit_layer": [
+    "enclosed areas on Level 1: 3 (0 with no Room)"
+  ]
+}

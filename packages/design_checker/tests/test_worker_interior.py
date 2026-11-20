@@ -54,27 +54,32 @@ def test_the_examples_name_the_protocol_the_worker_speaks():
     assert shown and set(shown) == {protocol.PROTOCOL}, shown
 
 
-def test_a_report_with_an_interior_keeps_its_fingerprint_and_says_the_interior_itself_isnt_kept(tmp_path):
-    """Principle 5: a saved report's egress rows trace to their interior. Today by its fingerprint, written in the
-    report; the interior itself isn't kept beside the report yet (the reader's step keeps it), and the docs say so,
-    so no one takes the report for reproducible from what is beside it."""
+def test_a_report_with_an_interior_keeps_it_beside_it_and_names_its_fingerprint(tmp_path):
+    """Principle 5: a saved report's egress rows trace to their interior, and can be worked out again from the files
+    beside it: the report names the interior's fingerprint, and the interior itself is kept beside the report
+    (<report name>.interior.json, as the site is; the Revit interior design note, sections 5 and 7 step 3). The docs
+    say so."""
     from openpyxl import load_workbook
+    from design_checker.check import INTERIOR_SUFFIX, SITE_SUFFIX
     report = tmp_path / "check.xlsx"
     result = worker_check(ranch(), report=str(report))
     assert result["report_error"] is None and report.exists()
     sha = egress.fingerprint(ranch())
     cells = [str(c.value) for ws in load_workbook(report).worksheets for row in ws.iter_rows() for c in row if c.value]
     assert any(sha in c for c in cells), "the report names the interior it was worked out from"
-    assert not list(tmp_path.glob("*interior*")), "if the interior is now kept beside the report, update the docs and this test"
+    kept = json.loads((tmp_path / ("check" + INTERIOR_SUFFIX)).read_text(encoding="utf-8"))
+    assert kept == json.loads(json.dumps(ranch())) and egress.fingerprint(kept) == sha
+    site = json.loads((tmp_path / ("check" + SITE_SUFFIX)).read_text(encoding="utf-8"))
+    again = check_description(site, dict(FACTS), interior=kept)          # worked out again from what is beside it
+    assert again["egress"]["results"] == result["egress"]["results"]
     page = (REPO / "docs/protocol/site_description_v1.md").read_text(encoding="utf-8")
-    assert "the interior itself isn't kept beside the report" in page
+    assert "isn't kept beside" not in page
     keeps = page[page.index("**A report keeps its site.**"):]
-    assert "interior_sha256" in keeps[:keeps.index("\n\n")], "the site file's paragraph says the interior isn't kept"
+    assert "<report name>.interior.json" in keeps[:keeps.index("\n\n")]
     note = (REPO / "docs/revit/revit_interior_reading_design.md").read_text(encoding="utf-8")
-    assert "don't pass it yet" not in note and "Not yet: keeping\n  the interior beside a saved report" in note
+    assert "Not yet: keeping\n  the interior beside a saved report" not in note
     step3 = note[note.index("3. **Rooms and marked escape windows**"):note.index("4. **Stairs**")]
     assert "beside its saved report" in step3, "the build order names the step that keeps the interior"
-    assert "the reader's PR (step 4)" not in note
 
 
 def test_an_interior_sent_to_the_worker_is_checked_exactly_as_a_direct_check():

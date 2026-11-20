@@ -1,0 +1,200 @@
+{
+  "host": "revit",
+  "house": "5_basement_window_well",
+  "step": 3,
+  "recorded": {
+    "by": "Gordium add-in, Record interior houses (Windows trial)",
+    "date": "2026-11-20",
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
+  },
+  "ids": {
+    "we1": "23e6269e-6da0-42ab-8b06-29c2e05f707c-00001257",
+    "we2": "23e6269e-6da0-42ab-8b06-29c2e05f707c-00001259",
+    "bbed": "23e6269e-6da0-42ab-8b06-29c2e05f707c-0000125b"
+  },
+  "interior": {
+    "format": "gordium.interior/1",
+    "units": "ft",
+    "rooms": [
+      {
+        "id": "23e6269e-6da0-42ab-8b06-29c2e05f707c-0000125b",
+        "name": "Basement bedroom (1)",
+        "sleeping": true,
+        "floor": [
+          [
+            0,
+            0
+          ],
+          [
+            11,
+            0
+          ],
+          [
+            11,
+            10
+          ],
+          [
+            0,
+            10
+          ]
+        ],
+        "floor_elevation": -8,
+        "ceilings": [
+          [
+            [
+              0,
+              0,
+              -0.5
+            ],
+            [
+              0,
+              0,
+              -0.5
+            ],
+            [
+              11,
+              0,
+              -0.5
+            ],
+            [
+              5.5,
+              5,
+              -0.5
+            ]
+          ],
+          [
+            [
+              0,
+              10,
+              -0.5
+            ],
+            [
+              0,
+              0,
+              -0.5
+            ],
+            [
+              0,
+              0,
+              -0.5
+            ],
+            [
+              5.5,
+              5,
+              -0.5
+            ]
+          ],
+          [
+            [
+              11,
+              0,
+              -0.5
+            ],
+            [
+              11,
+              10,
+              -0.5
+            ],
+            [
+              11,
+              10,
+              -0.5
+            ],
+            [
+              5.5,
+              5,
+              -0.5
+            ]
+          ],
+          [
+            [
+              11,
+              10,
+              -0.5
+            ],
+            [
+              11,
+              10,
+              -0.5
+            ],
+            [
+              0,
+              10,
+              -0.5
+            ],
+            [
+              5.5,
+              5,
+              -0.5
+            ]
+          ]
+        ]
+      }
+    ],
+    "openings": [
+      {
+        "id": "23e6269e-6da0-42ab-8b06-29c2e05f707c-00001257",
+        "name": "Gordium test window we1 (30 x 36 in): Family6 (Window 1)",
+        "room": "23e6269e-6da0-42ab-8b06-29c2e05f707c-0000125b",
+        "escape": true,
+        "operation": "casement",
+        "stated_clear": {
+          "width": 2.375,
+          "height": 3,
+          "bottom": -5,
+          "source": "the maker\u0027s net clear opening (made up: worked out from house.yaml\u0027s frame and sash)"
+        }
+      },
+      {
+        "id": "23e6269e-6da0-42ab-8b06-29c2e05f707c-00001259",
+        "name": "Gordium test window we2 (24 x 20 in): Family7 (Window 2)",
+        "room": "23e6269e-6da0-42ab-8b06-29c2e05f707c-0000125b",
+        "escape": true,
+        "operation": "awning",
+        "stated_clear": {
+          "width": 2,
+          "height": 1.6666666666666667,
+          "bottom": -4.166666666666667,
+          "source": "maker\u0027s data sheet (made up)"
+        }
+      }
+    ]
+  },
+  "rooms_not_read": [],
+  "openings_not_read": [],
+  "notes": [],
+  "evidence": {
+    "23e6269e-6da0-42ab-8b06-29c2e05f707c-00001257": {
+      "sill_line": -5,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z -5..-2, wall box z -8..-0.4167 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 4672, wall 4672 23e6269e-6da0-42ab-8b06-29c2e05f707c-00001240: 14 faces; ids generating them: OST_Walls 4672, OST_Walls 4673, OST_Walls 4675, OST_Windows 4695 (this window), OST_Windows 4697"
+      ],
+      "wall_opening_bottom": -5,
+      "placed": {
+        "bottom": -5,
+        "top": -1.9999999999999982,
+        "width": 2.4999999999999996
+      }
+    },
+    "23e6269e-6da0-42ab-8b06-29c2e05f707c-00001259": {
+      "sill_line": -4.166666666666667,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z -4.1667..-2.5, wall box z -8..-0.4167 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 4672, wall 4672 23e6269e-6da0-42ab-8b06-29c2e05f707c-00001240: 14 faces; ids generating them: OST_Walls 4672, OST_Walls 4673, OST_Walls 4675, OST_Windows 4695, OST_Windows 4697 (this window)"
+      ],
+      "wall_opening_bottom": -4.166666666666667,
+      "placed": {
+        "bottom": -4.166666666666667,
+        "top": -2.499999999999999,
+        "width": 2
+      }
+    }
+  },
+  "revit_layer": [
+    "enclosed areas on Level 1: 0 (0 with no Room)",
+    "enclosed areas on Level 2: 1 (0 with no Room)"
+  ]
+}

@@ -25,7 +25,13 @@ internal static class Env
     public static WorkerOptions Real() => new() { PythonPath = Python, WorkingDirectory = Repo };
 
     /// <summary>Runs one of the tests' own Python scripts and gives its standard output.</summary>
-    public static string RunPython(string script, params string[] args)
+    public static string RunPython(string script, params string[] args) =>
+        Run([Path.Combine(AppContext.BaseDirectory, script), .. args], script);
+
+    /// <summary>Runs a module of Gordium's Python packages (<c>python -m</c>) and gives its standard output.</summary>
+    public static string RunModule(string module, params string[] args) => Run(["-m", module, .. args], module);
+
+    private static string Run(string[] argv, string script)
     {
         var info = new ProcessStartInfo(Python)
         {
@@ -34,8 +40,7 @@ internal static class Env
             RedirectStandardError = true,
             UseShellExecute = false,
         };
-        info.ArgumentList.Add(Path.Combine(AppContext.BaseDirectory, script));
-        foreach (var a in args)
+        foreach (var a in argv)
             info.ArgumentList.Add(a);
         using var p = Process.Start(info)!;
         var stderr = p.StandardError.ReadToEndAsync();

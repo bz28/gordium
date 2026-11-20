@@ -7,7 +7,10 @@
 **Status: agreed by Ben, 2026-11-19** (his four decisions are in section 8). Each step of section 7 is its own
 PR; step 1 (protocol 1.2: the worker and the C# client take an interior) is built; step 2 (the marks and the marking
 list, [the add-in's README](../../apps/revit_addin/README.md#the-architects-marks-interior-step-2)) is built and
-tried in Revit 2027.4 on Snowdon Towers (section 9); the rest are not yet.
+tried in Revit 2027.4 on Snowdon Towers (section 9); step 3 (rooms and marked escape windows,
+[README](../../apps/revit_addin/README.md#rooms-and-escape-windows-interior-step-3)) is built and tested on fake
+records and recorded in Revit 2027.4 (houses 1, 2 and 5, trial run 6, 2026-11-20: every measure of the step equal
+to the hand-worked one); the rest are not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -68,9 +71,11 @@ exactly:
   `rooms`. So the reader also looks for enclosed areas with no Room on each level, and for Rooms that are unplaced,
   not enclosed or redundant, and for any closed workset or unloaded link (a room could be in it); while any exists,
   it is listed first in the marking list and `rooms` is left out (not read), until the architect places a Room or
-  says the area isn't a room. (**To check:** how exactly to find
-  enclosed areas with no Room; until that is settled, the reader can't claim to have seen every room, and `rooms` is
-  left out.)
+  says the area isn't a room. **Built in step 3:** the enclosed areas are Revit's own plan circuits, every level's
+  for the last phase (`Document.get_PlanTopology(level, phase).Circuits`, each `PlanCircuit.IsRoomLocated`), the
+  ones Revit's own "place rooms" uses; an area that isn't a room is said by placing a Room in it marked Sleeping
+  room No (no other way of saying it is built yet). To confirm in the trial: that a circuit with no Room shows as one
+  on real models.
 - **The reader may propose, never decide.** A room named "Bedroom 2" can be shown as a suggestion in the add-in's
   marking list, marked "suggested"; it is sent as `sleeping: true` only once the architect has accepted it
   themselves, a fact about their own design. A suggestion alone is never sent.
@@ -135,9 +140,9 @@ disagree.
 |---|---|---|
 | `id`, `name` | `Room.UniqueId`; the room's Name and Number | |
 | `sleeping` | The `Gordium: Sleeping room` mark (unset: not given) | |
-| `floor` | `Room.GetBoundarySegments` with `SpatialElementBoundaryLocation.Finish` (the finished wall faces, which the format asks for), whatever the project's own room setting is. Checked against what stands inside it: a wall, column or other building element (not furniture, casework or fixtures, as for ceilings) crossing the room's plan inside the outline that doesn't bound the room (its "Room Bounding" off, or a wall shorter than the room's computation height) means no `floor` (the room may be two rooms, or smaller than its outline). A room with more than one boundary loop (a column or a chase standing inside it) has no `floor` sent (needs review): the format's floor is one outline with no holes, and a hole is a format change of its own | That Finish gives the wall finish face for every wall type; a curved boundary segment: the room's floor not sent (needs review), never its chord |
+| `floor` | `Room.GetBoundarySegments` with `SpatialElementBoundaryLocation.Finish` (the finished wall faces, which the format asks for), whatever the project's own room setting is. Checked against what stands inside it: a wall, column or other building element (not furniture, casework or fixtures, as for ceilings; nor a window or door hosted in a wall bounding the room, which is part of that boundary, though its trim may reach in: only windows and doors, anything else such a wall hosts, a bulkhead or a shelf, counts like any other element) crossing the room's plan inside the outline that doesn't bound the room (its "Room Bounding" off, or a wall shorter than the room's computation height) means no `floor` (the room may be two rooms, or smaller than its outline). A room with more than one boundary loop (a column or a chase standing inside it) has no `floor` sent (needs review): the format's floor is one outline with no holes, and a hole is a format change of its own | That Finish gives the wall finish face for every wall type; a curved boundary segment: the room's floor not sent (needs review), never its chord |
 | `floor_elevation` | The room's level elevation plus its base offset, sent only when the top face of the floor slab under the whole room agrees with it within 1/16 in. No slab top found under the whole room, more than one at different heights, or a disagreement: not given (a window's sill height is worked from this floor, so an unchecked floor could make a high sill read low) | Finding the slab top under a room |
-| `ceilings` | The lowest undersides over the room's plan, between its floor and the floor above, of everything there that is building or services (a ceiling, a beam, a bulkhead, a soffit, a duct, a pipe, the floor or roof above): furniture, casework, furniture systems, plumbing fixtures, specialty equipment and lighting fixtures are not ceilings and are left aside, and anything in a category the reader can't place in either list leaves `ceilings` out, so what is unknown stays on the safe side: their downward planar faces, as flat pieces of absolute 3D points covering the whole floor. Anything there it can't read exactly (a curved face, a link: above): no `ceilings`. Always `ceilings`, never `ceiling_height` (a height above the floor would be worked from a floor elevation the reader may have held back): the measuring code works the height from `floor_elevation`, and gives none when it is missing | How to collect "what is above the room" exactly (each element's lowest faces clipped to the room's plan); a curved ceiling face: not given |
+| `ceilings` | The lowest undersides over the room's plan, between its floor and the floor above, of everything there that is building or services (a ceiling, a beam, a bulkhead, a soffit, a duct, a pipe, the floor or roof above): furniture, casework, furniture systems, plumbing fixtures, specialty equipment and lighting fixtures are not ceilings and are left aside, as is a window or door hosted in a wall bounding the room (never anything else that wall hosts: a wall-hosted bulkhead is a ceiling), and anything in a category the reader can't place in either list leaves `ceilings` out, so what is unknown stays on the safe side: their downward planar faces, as flat pieces of absolute 3D points covering the whole floor. Anything there it can't read exactly (a curved face, a link: above): no `ceilings`. Always `ceilings`, never `ceiling_height` (a height above the floor would be worked from a floor elevation the reader may have held back): the measuring code works the height from `floor_elevation`, and gives none when it is missing | How to collect "what is above the room" exactly (each element's lowest faces clipped to the room's plan); a curved ceiling face: not given |
 
 The room's own "Unbounded Height" or "Limit Offset" is never used as the ceiling: it is a calculation volume, not
 a drawn ceiling.
@@ -149,7 +154,7 @@ a drawn ceiling.
 | `room` | The window's or door's `FromRoom` / `ToRoom` for the last phase: the room inside | Which of the two is inside for a door between two rooms |
 | `escape` | The `Gordium: Escape opening` mark | |
 | `operation` | The `Gordium: Operation` type parameter (Revit families don't say how they open in any standard way) | |
-| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when every check holds: everything the type's `Clear confirmed` stamp records (section 3: the type's `UniqueId`, size and operation, the clear width, height, offset and source, and a mapped maker parameter's current value) equals its value read now (a duplicated or resized type, or any value edited or changed since the architect ticked it, then sends none; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as placed, in absolute heights (the clear bottom no lower than the placed geometry's lowest point, the clear top no higher than its highest, Clear width no more than its width, 1/16 in to spare). `bottom` = the instance's level elevation + its Sill Height + `Clear offset` (the maker's height of the clear opening's bottom above that sill line). `Clear offset` blank (never read as 0): no `stated_clear`. **The sill line is checked against something drawn that doesn't come from the Sill Height parameter**: the bottom of the opening the window cuts in its host wall (or the family's Bottom reference); disagreeing by more than 1/16 in, or not found: no `stated_clear`. Not the family's lowest drawn point: exterior sills and trim hang below the unit on most real windows. **Until the trial shows this check can be made** (section 9), the first reader sends no `stated_clear` at all, so every escape opening's size and sill need review: a sill read from a typed number alone is never enough for R319.2.3 (44 in at most) | Reading the bottom of the wall opening a window cuts, or its Bottom reference (`FamilyInstance.GetReferences`), on real families; the placed geometry's extents |
+| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when every check holds: everything the type's `Clear confirmed` stamp records (section 3: the type's `UniqueId`, size and operation, the clear width, height, offset and source, and a mapped maker parameter's current value) equals its value read now (a duplicated or resized type, or any value edited or changed since the architect ticked it, then sends none; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as placed, in absolute heights (the clear bottom no lower than the placed geometry's lowest point, the clear top no higher than its highest, Clear width no more than its width, 1/16 in to spare). `bottom` = the instance's level elevation + its Sill Height + `Clear offset` (the maker's height of the clear opening's bottom above that sill line). `Clear offset` blank (never read as 0): no `stated_clear`. **The sill line is checked against something drawn that doesn't come from the Sill Height parameter**: the bottom of the opening the window cuts in its host wall (or the family's Bottom reference); disagreeing by more than 1/16 in, or not found: no `stated_clear`. Not the family's lowest drawn point: exterior sills and trim hang below the unit on most real windows. **Shown possible in the trial** (section 9; step 3): the wall opening is the host wall's faces whose `Element.GetGeneratingElementIds` name the window, and on houses 1, 2 and 5 its bottom equals the sill line exactly. A window that cuts nothing found sends no `stated_clear`, so its size and sill need review: a sill read from a typed number alone is never enough for R319.2.3 (44 in at most). `HostObject.FindInserts` is not used: it listed no inserts even on walls the windows had cut | The Bottom reference (`FamilyInstance.GetReferences`), and real makers' families (whose rough openings may be larger than the unit): to try |
 | `frame`, `sashes`, `hinged` | **Not sent by the first reader.** A family's sash geometry is modelled differently by every maker and firm (or not at all), so reading it would be guessing. The measuring code uses the maker's opening alone when no frame is given (`model_measurement/interior/openings.py`); a window with neither gets no value (needs review) | Later, perhaps: families that carry Gordium's own frame and sash parameters |
 | `ground_outside` | The ground at the opening's outside face, only from a ground the architect gave: the Toposolid picked as the ground (as the outside reader's `terrain`), probed 1 ft outside each end of the opening, or finished spot grades there; else **not given**. Never the lot facts' flat ground: that is often Gordium's own assumption (`ground_assumed: "flat"`), and an assumed ground could make a window a grade-floor opening, which needs only 5 sq ft (R319.2.1 exception) | Probing a Toposolid (as the outside reader's to-check) |
 | `area_well` | Not in Revit's vocabulary. First reader: not given. An opening whose clear bottom is below the ground outside is sent with no `ground_outside` (its grade-floor reading needs review), and the marking list asks the architect to draw its well; R319.4's well rules, which need the well, need review | How firms draw wells (a generic model, an in-place family) |
@@ -199,10 +204,12 @@ A small, additive change (protocol **1.2**, a minor version: a 1.1 worker refuse
   and hands it to `check.check_site`, which already runs egress on it and fingerprints it in the report (`interior_sha256`), so every result can be
   traced to exactly the interior it was worked out from (principle 5).
 - `WorkerClient.CheckSiteAsync` gains `interior`; the add-in keeps each check's interior beside its site
-  description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Not yet: keeping
-  the interior beside a saved report. Until then a report's egress rows trace to their interior by its fingerprint
-  alone (`interior_sha256`, written in the report), so they can't be worked out again from what is kept beside it;
-  section 7's step 3, the first to send a real interior, keeps it. Today no host sends one.
+  description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Built in step 3:
+  a saved report keeps its interior beside it (`<report name>.interior.json`, `check.check_description`), written
+  first, moved in with the site, the earlier report's set aside and put back if the new report can't be moved in,
+  and never an earlier check's interior left beside a new report (a check with no interior drops it); the report
+  also names it by its fingerprint (`interior_sha256`), so its egress rows can be worked out again from what is kept
+  beside it.
 - **Only to a worker that says it understands it.** A 1.1 worker ignores a field it doesn't know, so it would answer
   "Egress waiting: no rooms drawn yet" for a house with rooms. The add-in sends `interior` only when the worker's
   `hello` says protocol 1.2 or later; with an older worker it shows that egress can't be checked with this checker
@@ -285,7 +292,10 @@ Each step is its own PR, through the review loop, with its tests:
    egress failures. A room's floor area and ceiling height are measured and recorded too, but no rule reads them
    yet (R312 and R313, room size and ceiling height, aren't brought in). The step builds the sill line's check
    against the wall opening (section 4) and shows on the five houses that it can be made; only then are the escape
-   openings' clear measures in its scope. If it can't be made, they stay not measured, and the step says so. It includes finding enclosed areas with no Room (section 2), without which no
+   openings' clear measures in its scope. If it can't be made, they stay not measured, and the step says so.
+   **Shown (Revit 2027.4, trial run 6, 2026-11-20):** on houses 1, 2 and 5 every escape window's wall opening (the
+   wall faces the window generates) has its bottom on the sill line exactly, so the clear measures are in scope, and
+   the three recordings give every in-scope measure as worked by hand. It includes finding enclosed areas with no Room (section 2), without which no
    `rooms` can be sent. Recorded houses 1, 2 and 5. The step's PR lists every `parts.yaml` measure of each kind as in
    or out of scope, and the `more` values compared: in scope `sleeping_room_floor_area` (and `floor_area_drawn`,
    `least_ceiling_height`), `opening_net_clear_width`, `_height`, `_area`, `opening_sill_height`, `opening_is_door`
@@ -324,6 +334,19 @@ on a room placed afterwards (58 of 58), so an unmarked room never reads as No; a
 nothing. Still to check: that a type's marks read through `Element.GetTypeId()` (Operation set on a window type), and that a Room's placement reads as Revit names it (no `Location`: unplaced;
 `Area` 0 with no boundary loop: not enclosed; `Area` 0 with one: redundant) and its phase from `ROOM_PHASE`. Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
 test only: it is not a house, and gives no verdict).
+
+For rooms and escape windows (step 3), **answered on houses 1, 2 and 5 drawn by the add-in (Revit 2027.4, trial runs
+1 to 6, 2026-11-20; `test_data/interior_houses/recorded/revit/`)**: the bottom of the opening a window cuts is read
+from the host wall's faces whose `Element.GetGeneratingElementIds` name the window, and equals its sill line (level +
+Sill Height) exactly on all six escape windows; `HostObject.FindInserts` listed no inserts even on those cut walls, so
+nothing relies on it; `SpatialElementBoundaryLocation.Finish` gave each room's outline at the walls' faces and the
+room separation lines; the slab top under each room agreed with its level; the enclosed areas (`PlanTopology`) are
+worked out by Revit only in a document it can change, so they are read inside a transaction that is rolled back;
+`FromRoom`/`ToRoom` for the last phase gave each window's room. Two lessons for drawing: Revit cuts a hosted window's wall only once the document is regenerated right after
+the window is placed and its Sill Height set (`Document.Regenerate()` there; without it, in runs 2 to 5 and again on
+830fbedc, every window was hosted but cut nothing; the walls are also committed first), and walls reaching past the level above enclose an area on it too (house 5's basement walls, first drawn a
+foot past its ceiling). Still to try on real models: real makers' window families (their rough openings may be
+larger than the unit), the Bottom reference, sloped and curved ceilings, links and worksets.
 
 ## Sources
 

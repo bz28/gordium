@@ -48,13 +48,25 @@ public sealed class App : IExternalApplication
             ToolTip = "Adds Gordium's egress marks to this project if they aren't there, then lists every room, window " +
                       "and door with its marks, anything not set first",
         });
+        egress.AddItem(new PushButtonData("gordium_read_interior", "Read\ninside", dll, typeof(ReadInteriorCommand).FullName)
+        {
+            ToolTip = "Reads this project's rooms and escape windows as Gordium's egress check would, and says what is " +
+                      "left out and why (logged; nothing is sent to the checker yet)",
+        });
+        egress.AddItem(new PushButtonData("gordium_record_houses", "Record\nhouses", dll, typeof(RecordHousesCommand).FullName)
+        {
+            ToolTip = "Draws each hand-worked house of the interior step in a new Revit project, reads it, records it to " +
+                      "test_data/interior_houses/recorded/revit/ and checks it against the hand-worked measures",
+        });
         application.Idling += OnIdling;
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
     }
 
-    /// <summary>A run asked for by file (RecordScenesCommand.RunRequestPath), so the trial can be driven with no
-    /// click: taken (renamed) first, so it runs once even if it fails; every result goes to the log.</summary>
+    /// <summary>A run asked for by file, so the trial can be driven with no click: the in-place source
+    /// (InPlaceSource.RequestPath), the interior houses (RecordHousesCommand.RequestPath) or the scenes
+    /// (RecordScenesCommand.RunRequestPath). Each is taken (renamed) first, so it runs once even if it fails; every result
+    /// goes to the log, and nothing ever escapes Revit's Idling event.</summary>
     private static void OnIdling(object? sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
     {
         if (sender is not UIApplication ui)
@@ -70,6 +82,20 @@ public sealed class App : IExternalApplication
             catch (Exception x)       // never out of Revit's Idling event (review round 1)
             {
                 Trial.Log("in_place_source", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
+        if (File.Exists(RecordHousesCommand.RequestPath))
+        {
+            try
+            {
+                var takenHouses = RecordHousesCommand.RequestPath + ".taken";
+                File.Move(RecordHousesCommand.RequestPath, takenHouses, overwrite: true);
+                RecordHousesCommand.Run(ui.Application, RecordHousesCommand.Requested(takenHouses));
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("record_houses", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
             }
             return;
         }
