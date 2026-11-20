@@ -331,6 +331,24 @@ public sealed class DoorGuardTests
         Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_handrail_sides = 0, expected 1"));
     }
 
+    [Fact]
+    public void Lines_only_beside_a_flight_are_nothing_physical_and_a_failed_geometry_still_refuses()
+    {
+        // a railing's path extension lines: only lines, so no faces, but a box over the right side (trial step 5 run 2)
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        var box = FakeHouse.Boxed(new NearbyElement("x", "OST_Walls", "x", Faces: house.StairBox(st, 0, 12.5, -1.5, -1.0, 0, 4))).Box;
+        house.AddNear("s1", new("lines", "OST_RailingRailPathExtensionLines", "Model Lines", Faces: [], Box: box));
+        var read = Read(house);
+        Assert.NotNull(Flight(read, "s1")["sides"]);
+        Assert.Single(Flight(read, "s1")["handrails"]!.AsArray());
+        Assert.Equal([], InteriorTests.Problems(house, read));
+        // the same box, its geometry failed: still in the way
+        house = FakeHouse.Draw(Two);
+        house.AddNear("s1", new("lines", "OST_RailingRailPathExtensionLines", "Model Lines", Faces: [], GeometryFailed: true, Box: box));
+        Assert.Null(Flight(Read(house), "s1")["sides"]);
+    }
+
     public static TheoryData<string> RailingTraps() => ["round", "too high", "not on the stair", "past the middle"];
 
     [Theory]

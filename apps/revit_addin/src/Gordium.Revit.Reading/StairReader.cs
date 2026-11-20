@@ -1026,6 +1026,11 @@ public static class StairReader
         /// (only ever bigger than what it holds); null when nothing is drawn.</summary>
         private (double S0, double S1, double A0, double A1, double Z0, double Z1)? Extent(NearbyElement e)
         {
+            // only lines and points (a railing's path extension lines, a model line), its geometry read: nothing physical,
+            // never a side, an obstruction or overhead, whatever its box (Revit 2027.4, trial step 5 run 2). Geometry that
+            // failed is still read by its box: the cautious side
+            if (e is { GeometryFailed: false, Faces.Count: 0 })
+                return null;
             var exact = !e.GeometryFailed && e.Faces is { Count: > 0 } fs && fs.All(f => f.Planar && f.Loops.All(l => l.All(c => c.IsLine)));
             if (!exact && e.Box is { } box)
                 return Hull(box);
