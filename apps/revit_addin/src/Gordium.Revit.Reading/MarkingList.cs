@@ -214,7 +214,7 @@ public static class MarkingList
             ? $"{name}: No (on Project Information): not stated as none, so " +
               (!t.Kind.IsList ? $"the rules for {t.Kind.Words} need review."
                : read.Interior[t.Kind.Kind] is not null ? $"the {t.Kind.Words} are read as drawn."
-               : $"no {t.Kind.Words} are read for egress (" + string.Join("; ", NotRead(read, t.Kind).Take(3)) + ").")
+               : $"no {t.Kind.Words} are read for egress (" + string.Join("; ", NotRead(read, t.Kind)) + ").")   // every reason: one left off could be the one still blocking (review round 2)
             : $"{name}: not set on Project Information: not stated, never read as none." + proposal;
     }
 

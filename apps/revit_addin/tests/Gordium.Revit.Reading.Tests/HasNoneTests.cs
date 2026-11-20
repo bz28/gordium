@@ -261,6 +261,23 @@ public sealed class HasNoneTests
     }
 
     [Fact]
+    public void A_list_ticked_no_names_every_reason_that_kind_is_not_read()
+    {
+        // review round 2: the reasons were cut to 3 without a word; the architect fixing those 3 would think the guards read
+        var house = FakeHouse.Draw("4_loft");
+        house.ProjectMarks[Marks.NoGuards.Guid] = No;
+        house.ProjectMarks.Remove(Marks.AllGuards.Guid);
+        house.ProjectMarks.Remove(Marks.AllStairs.Guid);
+        house.Worksets.Add(new WorksetRecord("w9", "Stair core", false));
+        house.CoordinationModels = 1;
+        var model = house.Model();
+        var reasons = InteriorReader.Read(model).GuardsNotRead;
+        Assert.True(reasons.Count > 3, $"the house must give more than 3 reasons, gave {reasons.Count}");
+        var line = MarkingList.Build(model).HasNoneLines.Single(l => l.StartsWith("Gordium: This house has no guards", StringComparison.Ordinal));
+        Assert.All(reasons, r => Assert.Contains(r, line));
+    }
+
+    [Fact]
     public void The_add_in_builds_the_marking_list_from_the_model_with_its_inside_read()
     {
         // review round 1: built from the marks alone, every Yes tick read "the model's inside wasn't read", no conflict
