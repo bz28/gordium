@@ -142,6 +142,9 @@ def test_the_drawing_is_the_houses_own_data():
     assert (w1["width"], w1["height"], w1["sill"]) == (26 / 12, 3.0, 2.5)                    # its frame, from house.yaml
     assert w1["clear"]["width"] * 12 == pytest.approx(24.5) and w1["clear"]["offset"] == 0   # the measuring code's
     assert d["not_drawn"] == ["doors"]
+    assert level["wall_height"] == pytest.approx(8 + 1 / 12)                                # up to the ceilings' top
+    basement = r.drawing("5_basement_window_well")["levels"][0]
+    assert basement["elevation"] + basement["wall_height"] < 0                              # never up past the level over it
     we2 = next(w for w in r.drawing("5_basement_window_well")["windows"] if w["id"] == "we2")
     assert we2["clear"]["source"] == "maker's data sheet (made up)" and we2["clear"]["offset"] == 0
 

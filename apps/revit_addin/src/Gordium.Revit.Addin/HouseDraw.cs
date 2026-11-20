@@ -32,7 +32,7 @@ internal static class HouseDraw
     private static (double X, double Y) P(JsonNode n) => (D(n[0]), D(n[1]));
 
     /// <summary>Draws the house; gives the house's ids to the Revit elements' <c>UniqueId</c>s.</summary>
-    internal static Dictionary<string, string> Draw(RevitApplication app, Document doc, JsonObject house)
+    internal static Dictionary<string, string> Draw(RevitApplication app, Document doc, JsonObject house, List<string> words)
     {
         var plan = MarkSetup.Plan(RevitMarks.Bindings(doc));
         if (plan.FirstOrDefault(s => s.Action == MarkSetupAction.Conflict) is { } conflict)
@@ -40,7 +40,7 @@ internal static class HouseDraw
         RevitMarks.AddMarks(doc, app, plan);
 
         var windows = house["windows"]!.AsArray().Select(n => n!.AsObject()).ToList();
-        var families = windows.ToDictionary(w => w["id"]!.GetValue<string>(), w => WindowFamily(app, doc, w));
+        var families = windows.ToDictionary(w => w["id"]!.GetValue<string>(), w => WindowFamily(app, doc, w, words));
 
         var ids = new Dictionary<string, string>();
         var wallThickness = D(house["exterior_wall"]);
@@ -145,6 +145,13 @@ internal static class HouseDraw
             ids[id] = fi.UniqueId;
         }
         doc.Regenerate();
+        foreach (var (id, uid) in ids.ToList())
+        {
+            var placed = (FamilyInstance)doc.GetElement(uid);
+            var inserts = (placed.Host as HostObject)?.FindInserts(true, true, true, true);
+            words.Add($"window {id}: host {placed.Host?.Id.Value} ({placed.Host?.GetType().Name}), its inserts {inserts?.Count}, " +
+                      $"this window among them {inserts?.Contains(placed.Id)}");
+        }
         // the stamp, from the type's values as Revit now gives them (read the way the reader reads them)
         foreach (var w in windows.Where(w => w["clear"] is JsonObject))
         {
@@ -241,7 +248,7 @@ internal static class HouseDraw
     /// <summary>A window family of this window's size, made from Window.rft (whose opening cuts the wall from the
     /// Sill reference plane to the Top one): a frame solid filling the opening, half the template wall's thickness
     /// deep, centred in it. One family per window, so each window has a type of its own. Loaded into the project.</summary>
-    private static FamilySymbol WindowFamily(RevitApplication app, Document project, JsonObject w)
+    private static FamilySymbol WindowFamily(RevitApplication app, Document project, JsonObject w, List<string> words)
     {
         var id = w["id"]!.GetValue<string>();
         double width = D(w["width"]), height = D(w["height"]);
@@ -285,6 +292,21 @@ internal static class HouseDraw
                 var frame = fdoc.FamilyCreate.NewExtrusion(true, loops, sketch, depth);
                 frame.StartOffset = -depth / 2;
                 frame.EndOffset = depth / 2;
+                // the opening it cuts in its wall: the template's own, else one made here on the template's wall (trial run 3,
+                // 2026-11-20: the drawn walls showed no cut and no insert)
+                var openings = new FilteredElementCollector(fdoc).OfClass(typeof(Opening)).GetElementCount();
+                var host = new FilteredElementCollector(fdoc).OfClass(typeof(Wall)).FirstElement() as Wall;
+                words.Add($"{name}: Window.rft has {openings} opening(s) and {(host is null ? "no" : "a")} host wall; planes left {left}, right {right}, sill {sill}, top {head}, wall centre y {y}");
+                if (openings == 0)
+                {
+                    if (host is null)
+                        throw new InvalidOperationException("Window.rft has no opening and no wall to cut one in");
+                    var cut = new CurveArray();
+                    for (var i = 0; i < 4; i++)
+                        cut.Append(Line.CreateBound(corners[i], corners[(i + 1) % 4]));
+                    fdoc.FamilyCreate.NewOpening(host, cut);
+                    words.Add($"{name}: made an opening {width} x {height} ft in the template's wall");
+                }
                 t.Commit();
             }
             var family = fdoc.LoadFamily(project) ?? throw new InvalidOperationException($"{name} didn't load into the project");

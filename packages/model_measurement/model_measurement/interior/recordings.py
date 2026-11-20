@@ -254,9 +254,12 @@ def drawing(name: str) -> dict:
                     for b in _edges(polys[j]):
                         if (s := _shared(a, b)) is not None:
                             separations.append(s)
+        # the walls stop at the top of the ceilings, never above: a basement's walls reaching past the level over it
+        # would enclose an area on that level too (trial run 3, 2026-11-20: house 5's walls, up a foot past its
+        # ceiling, closed an area on Level 1, where the hand-worked house has none)
         top = max(z for r in here for piece in r["ceilings"] for _, _, z in piece) + CEILING_THICKNESS
         out_levels.append({"elevation": fe, "box": [[x0, y0], [x1, y1]], "fillers": fillers,
-                           "separations": separations, "wall_height": top - fe + 1.0})
+                           "separations": separations, "wall_height": top - fe})
     windows = []
     by_room = {}
     for o in house.get("openings") or []:

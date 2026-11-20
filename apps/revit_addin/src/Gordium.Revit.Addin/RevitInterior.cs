@@ -384,13 +384,13 @@ internal static class RevitInterior
             words.Add($"the wall's geometry couldn't be read ({x.GetType().Name}: {x.Message})");
             return (null, null, words);
         }
-        words.Add($"wall {wall.UniqueId}: {faces.Count} faces; ids generating them: " + string.Join(", ",
+        words.Add($"host (FamilyInstance.Host) {fi.Host?.Id.Value}, wall {wall.Id.Value} {wall.UniqueId}: {faces.Count} faces; ids generating them: " + string.Join(", ",
             faces.SelectMany(f => f.By).Distinct().Select(id => wall.Document.GetElement(id) is { } e
                 ? $"{e.Category?.BuiltInCategory.ToString() ?? "?"} {id.Value}{(id == fi.Id ? " (this window)" : "")}" : $"{id.Value}")));
         var named = faces.Where(f => f.By.Contains(fi.Id)).SelectMany(f => f.Points).ToList();
         if (named.Count > 0)
             return (named, "the wall's faces Revit says this window generated (GetGeneratingElementIds)", words);
-        var inserts = wall.FindInserts(true, false, false, false);
+        var inserts = wall.FindInserts(true, true, true, true);
         words.Add($"the wall's inserts (FindInserts): {inserts.Count}, this window among them: {inserts.Contains(fi.Id)}");
         if (!inserts.Contains(fi.Id) || width is not { } w || fi.Location is not LocationPoint lp)
             return (null, null, words);
