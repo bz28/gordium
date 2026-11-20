@@ -282,6 +282,8 @@ public static class StairReader
                 _ev["head"] = hz;
                 if (Math.Abs(hz - topZ) > Sixteenth)
                     headWhy = $"the floor at its head is {In(hz - topZ)} from the run's top (a riser there taller or shorter than the run's): they must agree within 1/16 in";
+                else if (ReachesBack(hz) is { } reachesBack)
+                    headWhy = reachesBack;
                 else
                     headZ = hz;
             }
@@ -549,6 +551,51 @@ public static class StairReader
             return tops[0].Z;
         }
 
+        /// <summary>The top nosing is the floor's edge at the head only if that floor stops at the last riser's line:
+        /// a top at the head's height reaching back over the last tread (a landing nosing, a slab edge drawn past the
+        /// riser line) makes the last tread shallower than the riser line says (review round 1: 8.5 in read as 10).
+        /// Null when nothing at the head's height lies over the last tread's plan more than 1/16 in short of the line;
+        /// else why.</summary>
+        private string? ReachesBack(double headZ)
+        {
+            var last = _treads[^1];
+            if (_back - Sixteenth <= last.S)
+                return null;
+            var tread = Rect(last.S, _back - Sixteenth, last.Right, last.Left);
+            var area = PlanGeometry.Area(tread);
+            foreach (var e in run.Near!)
+            {
+                if (!InDesign(e) || Own(e) || NotPhysical(e) || (OwnStair(e) && StairIsThisRun) || e.Faces is null)
+                    continue;
+                foreach (var f in e.Faces)
+                {
+                    var pts = f.Points.Select(_t.Apply).ToList();
+                    if (pts.Count == 0 || pts.Max(p => p.Z) < headZ - Sixteenth || pts.Min(p => p.Z) > headZ + Sixteenth || f.Loops.Count == 0)
+                        continue;
+                    var loop = f.Loops[0].Select(c => Local(Plan(c.Start))).ToList();
+                    if (f.Planar && Math.Abs(TurnedNormal(f.Normal).Z) <= 1e-9)
+                        continue;                                   // a side: nothing over the tread seen from above
+                    if (!f.Planar)
+                    {
+                        if (PlanGeometry.OverlapArea(tread, Rect(loop.Concat(pts.Select(p => Local(new P2(p.X, p.Y)))).Min(p => p.X),
+                                                                 loop.Concat(pts.Select(p => Local(new P2(p.X, p.Y)))).Max(p => p.X),
+                                                                 pts.Select(p => Local(new P2(p.X, p.Y))).Min(p => p.Y),
+                                                                 pts.Select(p => Local(new P2(p.X, p.Y))).Max(p => p.Y))) is not (null or <= 0))
+                            return $"a curved face of {Named(e)} at its head's height reaches over the last tread, which isn't read exactly";
+                        continue;
+                    }
+                    if (PlanGeometry.OverlapArea(tread, loop) is not { } o || o > area * 1e-9)
+                        return $"the floor at its head ({Named(e)}) reaches back over the last tread, short of the last riser's line, " +
+                               "so the last tread is shallower than drawn by the riser: its nosing there isn't read yet";
+                }
+            }
+            return null;
+        }
+
+        /// <summary>Not a thing at all (a Room, a room separation line): everything else, furniture and fixtures too, is
+        /// in a stair's way (R311.7.2's headroom is "in all parts of the stairway"; its width is clear of all).</summary>
+        private static bool NotPhysical(NearbyElement e) => e.BuiltInCategory is "OST_Rooms" or "OST_RoomSeparationLines";
+
         // ---- the sides ----------------------------------------------------------------------------------------
 
         private JsonObject? Sides(out string? why)
@@ -567,7 +614,7 @@ public static class StairReader
                 var inBand = new List<(NearbyElement E, (double S0, double S1, double A0, double A1, double Z0, double Z1) H)>();
                 foreach (var e in run.Near!)
                 {
-                    if (!InDesign(e) || Own(e) || InteriorReader.NotBuilding.Contains(e.BuiltInCategory))
+                    if (!InDesign(e) || Own(e) || NotPhysical(e))   // furniture and fixtures too: in the way (review round 1)
                         continue;
                     if (Extent(e) is not { } hull)
                         continue;                                   // nothing drawn
@@ -706,7 +753,7 @@ public static class StairReader
             var pieces = new JsonArray();
             foreach (var e in run.Near!)
             {
-                if (!InDesign(e) || Own(e) || InteriorReader.NotBuilding.Contains(e.BuiltInCategory))
+                if (!InDesign(e) || Own(e) || NotPhysical(e))   // a pendant light, a cabinet: in the headroom too
                     continue;
                 if (OwnStair(e))
                 {
@@ -715,7 +762,7 @@ public static class StairReader
                     why = "the stair's own geometry (its runs, landings and supports together) can't be told apart run by run over this flight";
                     return null;
                 }
-                var known = InteriorReader.Building.Contains(e.BuiltInCategory);
+                var known = InteriorReader.Building.Contains(e.BuiltInCategory) || InteriorReader.NotBuilding.Contains(e.BuiltInCategory);
                 if (!known && e is { GeometryFailed: false, Faces.Count: 0 })
                     continue;
                 if (Extent(e) is not { } hull || hull.S1 <= _treads[0].S + Sixteenth || hull.S0 >= _back - Sixteenth

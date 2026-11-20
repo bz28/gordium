@@ -11,7 +11,9 @@ tried in Revit 2027.4 on Snowdon Towers (section 9); step 3 (rooms and marked es
 [README](../../apps/revit_addin/README.md#rooms-and-escape-windows-interior-step-3)) is built and tested on fake
 records and recorded in Revit 2027.4 (houses 1, 2 and 5, trial run 6, 2026-11-20: every measure of the step equal
 to the hand-worked one); step 4 (stairs, [README](../../apps/revit_addin/README.md#stairs-interior-step-4)) is built
-and tested on fake records, and waits for its Revit recording of houses 2 and 3; the rest are not yet.
+and tested on fake records and recorded in Revit 2027.4 (houses 1, 2, 3 and 5, 0 problems each: house 2's stair
+16 risers of 7.5 in, 10 in treads, 85.5 in headroom, 36 in wide; house 3's tall riser at the head held for review); the
+rest are not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -184,7 +186,9 @@ table above needed settling:
   12; house 2's a sliver 1/2 in deep along the path just past the last tread, at the run's top less the 3 in tread):
   only when exactly one too many, the top one, past the last tread, no deeper than 2 in along the run and not above
   the run's top, is it taken as that riser board's top, the head's edge, never a tread. The **top nosing** is its front edge (the last riser's line), else the top tread's back edge, at the height
-  of the floor or landing found there. Every top group's height and extent is kept in the evidence.
+  of the floor or landing found there, only if that floor stops at the last riser's line: a floor at the head reaching
+  back over the last tread (a landing nosing, a slab edge past the line) makes the last tread shallower than the line
+  says, so no nosings are sent (review round 1). Every top group's height and extent is kept in the evidence.
 - *For Ben (noted, no mark added now)*: under section 2's rule any Generic Model anywhere in a project stops stairs
   being read, with no way yet to say "this one isn't a stair".
 - *Foot and head*: the floor or landing top is looked for in a 1 in strip in front of the first nosing and past the
@@ -197,9 +201,10 @@ table above needed settling:
   are measured; its foot is read with the first straight tread, which a turning run hasn't).
 - *Sides*: the band on each side, from the flight's middle to 6 in past the tread ends, from 1 in under the line of
   nosings to 80 in over it (from the first nosing to the top one). The innermost wall face there facing the flight is
-  the side line, if it covers the whole band; nothing there is `open`; furniture is set aside; anything else (a
+  the side line, if it covers the whole band; nothing there is `open`; anything else (furniture and fixtures too, a
   column, a pipe in front of the wall, a railing, the stair's own support over its treads or rising 34 in over them)
-  leaves `sides` out. Extents are read from flat faces' corners (exact), else from Revit's box (only ever bigger).
+  leaves `sides` out (review round 1: a cabinet or a light is in a stair's way, unlike a room's ceiling, so stairs
+  never set furniture and fixtures aside, beside or overhead). Extents are read from flat faces' corners (exact), else from Revit's box (only ever bigger).
 - *Handrails and guards*: railings are read in step 5 with the guards (the same reading of a Railing's geometry), so
   step 4 sends no `handrails` (the width at the handrail and the handrail sides need review) and a railing beside or
   over a flight leaves its `sides` or `overhead` out.

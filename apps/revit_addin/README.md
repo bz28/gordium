@@ -335,7 +335,7 @@ and checks them with the interior conformance CI applies: house 2's risers, trea
 Then each trap: no tick, No, never set; nothing found; each blocker; a typed riser or tread disagreeing; the run's
 counts and ends; a winder, a curved face, a run whose geometry fails; a riser board's top under its tread; the floor at
 the foot missing, an inch high or under half the width; a link reaching the flight; a wall inside the tread ends
-(34 in); a railing, a column, a chair and a pipe behind the wall beside it; a wall not running the whole flight; the
+(34 in); a railing, a column, a chair or a wall cabinet beside it (furniture and fixtures count for a stair), a pipe behind the wall; a light in the headroom; a floor at the head reaching over the last tread; a wall not running the whole flight; the
 stair's own stringer low and outside, or over the treads; a beam over it (84 in); a mass, a failed duct, a beam
 through the flight, a handrail over it; a floor with a stairwell opening.
 

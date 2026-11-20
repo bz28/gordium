@@ -300,13 +300,48 @@ public sealed class StairTests
         house.AddNear("s", new("col", "OST_Columns", "Column", Faces: house.StairBox(st, 4, 4.5, -1.9, -1.6, -8.25, 0)));
         Assert.Contains("Columns \"Column\" stands on its right side", Note(Read(house), "s", "sides"));
 
-        house = FakeHouse.Draw(Three);                       // a chair beside it changes nothing
-        house.AddNear("s", new("chair", "OST_Furniture", "Chair", Faces: house.StairBox(st, 4, 4.5, -1.9, -1.6, -8.25, -6)));
-        Assert.Equal("open", Flight(Read(house), "s")!["sides"]!["right"]!.GetValue<string>());
+        house = FakeHouse.Draw(Three);                       // furniture too: in the way (review round 1)
+        house.AddNear("s", new("chair", "OST_Furniture", "Chair", Faces: house.StairBox(st, 4, 4.5, -1.9, -1.6, -6, -3)));
+        Assert.Contains("Furniture \"Chair\" stands on its right side", Note(Read(house), "s", "sides"));
 
         house = FakeHouse.Draw(Three);                       // something behind the wall is hidden by it
         house.AddNear("s", new("pipe", "OST_PipeCurves", "Pipe", Faces: house.StairBox(st, 4, 4.5, 1.6, 1.9, -8, -7)));
         Assert.NotNull(Flight(Read(house), "s")!["sides"]);
+    }
+
+    [Fact]
+    public void A_fixture_in_the_headroom_or_the_width_counts_review_round_1()
+    {
+        // a pendant light (Lighting Fixtures: not a room's ceiling, but in the stairway's headroom, R311.7.2) over house
+        // 2's flight, its underside 84 in over the line of nosings at 5.5 ft up the run
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        house.AddNear("s1", new("light", "OST_LightingFixtures", "Pendant", Faces: house.StairBox(st, 5, 5.5, -0.5, 0.5, 11.75, 12)));
+        Assert.Contains(InteriorTests.Problems(house, Read(house)), p => p.Contains("s1 stair_headroom = 84.0, expected 85.5"));
+        // a wall cabinet (Casework) standing 2 in into the flight's width on its right, at head height
+        house = FakeHouse.Draw(Two);
+        house.AddNear("s1", new("cabinet", "OST_Casework", "Wall cabinet", Faces: house.StairBox(st, 4, 6, -1.75, -1.5 + 2.0 / 12, 6, 8)));
+        var read = Read(house);
+        Assert.Null(Flight(read, "s1")!["sides"]);
+        Assert.Contains("Casework \"Wall cabinet\" stands on its right side", Note(read, "s1", "sides"));
+    }
+
+    [Fact]
+    public void A_floor_at_the_head_reaching_over_the_last_tread_sends_no_nosings_review_round_1()
+    {
+        // the floor at house 2's head with its edge 1.5 in over the last tread: that tread is 8.5 in nosing to
+        // nosing, never the 10 in the riser line gives
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        house.SetRun("s1", r => r with
+        {
+            Near = [.. r.Near!.Where(e => e.UniqueId != "head-s1"),
+                    FakeHouse.Boxed(new("head2", "OST_Floors", "Landing", Faces: house.StairBox(st, 12.5 - 1.5 / 12, 15.5, -1.5, 1.5, 10 - 1.0 / 12, 10)))],
+        });
+        var read = Read(house);
+        Assert.Null(Flight(read, "s1")!["nosings"]);
+        Assert.Contains("Floors \"Landing\") reaches back over the last tread", Note(read, "s1", "nosings"));
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_tread_depth not measured"));
     }
 
     [Fact]
