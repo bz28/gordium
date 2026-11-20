@@ -55,9 +55,9 @@ def described(name: str) -> dict:
 
 def flight(st: dict) -> dict:
     """A drawn flight as the Revit reader sends it: the floor at its foot; each tread's nosing from the run (equal
-    risers and treads, along its path), then the floor's edge at the head, only when that floor stands at the run's
-    top (the cross-check: house 3's, 1 1/2 in above it, sends none); each side a wall's face, or open; what is
-    overhead; no handrails (railings: step 5)."""
+    risers and treads, along its path), then the floor's edge at the head, as drawn (house 3's 1 1/2 in above the
+    run's top: its last riser 9 in); each side a wall's face, or open; what is overhead; no handrails (railings:
+    step 5)."""
     (x0, y0), (x1, y1) = st["path"]
     length = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
     ux, uy = (x1 - x0) / length, (y1 - y0) / length
@@ -77,9 +77,8 @@ def flight(st: dict) -> dict:
     out = {"id": f"host-{st['id']}", "name": st["name"], "bottom_elevation": st["foot"]["top"],
            "sides": {w["side"]: w["face"] for w in st["walls"]} | {s: "open" for s in st["open_sides"]},
            "overhead": overhead}
-    if st["head_above_run"] == 0:
-        out["nosings"] = [across(k, st["base"] + st["riser"] * (k + 1)) for k in range(st["risers"] - 1)] \
-            + [across(st["risers"] - 1, st["head_top"])]
+    out["nosings"] = [across(k, st["base"] + st["riser"] * (k + 1)) for k in range(st["risers"] - 1)] \
+        + [across(st["risers"] - 1, st["head_top"])]
     if st["handrails"]:                       # each drawn handrail's inner edge (step 5)
         out["handrails"] = [{"side": h["side"], "inner_edge": h["inner"]} for h in st["handrails"]]
     return out
@@ -118,7 +117,7 @@ def test_the_steps_scope_is_the_design_notes():
     assert r.scope("1_ranch_compliant") == r.scope("6_door_stated_clear") == rooms | {"egress_door": doors, "stair": set(),
                                                                                        "guard": set()}
     assert r.scope("2_two_story_small_window") == rooms | {"stair": stairs | handrails, "egress_door": doors, "guard": set()}
-    assert r.scope("3_tall_riser") == rooms | {"stair": set()}                   # read, nothing measured (step 4)
+    assert r.scope("3_tall_riser") == rooms | {"stair": stairs}                  # its last riser as drawn (step 4)
     assert r.scope("4_loft") == rooms | {"stair": stairs | handrails, "guard": {"guard_height", "guard_opening_sphere"},
                                          "egress_door": set()}
     # a sliding door: no clear width worked by hand, so no maker's clear opening made up: its height not in scope
@@ -199,7 +198,7 @@ def test_house_4s_loft_guard_and_stair_drawn_and_read_measure_as_worked_by_hand(
     assert any("guard not read" in p for p in r.recording_problems(rec))
 
 
-def test_house_3s_tall_riser_is_drawn_at_the_head_and_comes_back_not_measured():
+def test_house_3s_tall_riser_is_drawn_at_the_head_and_measured_as_drawn():
     d = r.drawing("3_tall_riser")
     s = d["stairs"][0]
     assert (s["risers"], s["riser"], s["base"], s["head_top"]) == (13, 0.625, -8.25, 0.0)
@@ -207,11 +206,21 @@ def test_house_3s_tall_riser_is_drawn_at_the_head_and_comes_back_not_measured():
     assert s["open_sides"] == ["right"] and [w["side"] for w in s["walls"]] == ["left"]   # the guard: step 5
     assert "1.5 in above the run's top" in d["notes"][0]
     rec = described("3_tall_riser")
-    assert "nosings" not in rec["interior"]["stairs"][0]
+    # the last riser measured to the floor at the head (R318.7.5.1, Q1): -0.75 ft to 0, 9 in; the hand-worked
+    # answers (riser 9, variation 9 - 7.5 = 1.5, total 99, 13 risers) hold with the tall riser at the head
+    top = rec["interior"]["stairs"][0]["nosings"]
+    assert (top[-2][0][2], top[-1][0][2]) == (pytest.approx(-0.75), 0.0)
     assert r.recording_problems(rec) == []
-    s = rec["interior"]["stairs"][0]                                   # a reader that sent the drawn risers anyway
-    s["nosings"] = flight({**d["stairs"][0], "head_above_run": 0})["nosings"]
-    assert any("s stair_riser_height = 9.0: not in step 4" in p for p in r.recording_problems(rec))
+    got = r.measure(rec["interior"])["parts"]["stair"][0]
+    assert (got["measures"]["stair_riser_height"], got["more"]["stair_riser_variation"]) == (9.0, 1.5)
+    s = rec["interior"]["stairs"][0]                                   # a reader sending the run's own top instead
+    s["nosings"] = flight({**d["stairs"][0], "head_top": d["stairs"][0]["head_top"] - 0.125})["nosings"]
+    problems = r.recording_problems(rec)
+    assert any("s stair_riser_height = 7.5, expected 9.0" in p for p in problems)
+    assert any("s stair_riser_variation = 0.0, expected 1.5" in p for p in problems)
+    rec = described("3_tall_riser")                                    # and one sending none: not measured fails too
+    del rec["interior"]["stairs"][0]["nosings"]
+    assert any("s stair_riser_height not measured" in p for p in r.recording_problems(rec))
 
 
 def test_a_stair_in_a_house_not_yet_in_the_stairs_step_isnt_drawn():
