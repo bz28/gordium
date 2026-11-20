@@ -31,6 +31,7 @@ from design_checker import conformance as c
 from design_checker import conformance_rhino as cr
 from design_checker import rhino_logic as logic
 from design_checker import site_json
+from model_measurement import read_3dm
 
 
 def _facts(path: str) -> dict:
@@ -64,6 +65,8 @@ def export(model_path: str, facts_path: str) -> dict:
     names = [layer.FullPath for layer in model.Layers]
     lots, lines = [], []
     for o in model.Objects:
+        if o.Attributes.IsInstanceDefinitionObject:
+            continue                      # a block's definition: the reader reads only what is placed (review round 3)
         g, layer = o.Geometry, names[o.Attributes.LayerIndex]
         if not isinstance(g, r.Curve):
             if not logic.on_layer(layer, c.BUILDING_LAYER):   # the building is drawn from Rhino's faces, below
@@ -71,9 +74,14 @@ def export(model_path: str, facts_path: str) -> dict:
             continue
         pts = _points(g)
         if logic.on_layer(layer, c.SITE_LAYER) and g.IsClosed:   # the Site layer and its sublayers, as the reader
-            lots.append({"id": str(o.Attributes.Id), "points": [p[:2] for p in pts[:-1]]})
+            lots.append({"id": read_3dm._id(o), "points": [p[:2] for p in pts[:-1]]})   # the reader's own id
         else:
             lines.append(pts)
+    ids = [lot["id"] for lot in lots]
+    if facts.get("lot_id") and facts["lot_id"] not in ids:
+        raise SystemExit(f"the facts' lot_id {facts['lot_id']} isn't one of the lots drawn ({ids})")
+    if rhino.get("lot") and rhino["lot"]["id"] not in ids:
+        raise SystemExit(f"the Rhino reader's lot {rhino['lot']['id']} isn't one of the lots drawn ({ids})")
     return {
         "lots": lots,
         "picked": facts.get("lot_id"),

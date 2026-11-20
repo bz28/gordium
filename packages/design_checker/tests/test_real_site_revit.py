@@ -107,6 +107,38 @@ def test_a_closed_outline_on_a_site_sublayer_is_a_lot_as_the_reader_reads_it(tmp
     assert len(rs.export(path, facts)["lots"]) == 2
 
 
+def test_a_block_definitions_parts_are_not_drawn(tmp_path):
+    # review round 3: an unplaced block's Site outline became a second lot; the reader reads only what is placed
+    import rhino3dm as r
+    rs = _real_site()
+
+    def add(m, i):
+        m.Objects.AddCurve(_square(), _attrs(i["Site"]))
+        m.InstanceDefinitions.Add("blk", "", "", "", r.Point3d(0, 0, 0), (_square(),), (_attrs(i["Site"]),))
+    path, facts = _tiny(tmp_path, ["Site"], add)
+    export = rs.export(path, facts)
+    assert len(export["lots"]) == 1 and export["lines"] == []
+
+
+def test_a_lot_is_named_as_the_reader_names_it(tmp_path):
+    # review round 3: a lot carrying gordium:id was drawn under its raw object id, so the picked lot never matched
+    rs = _real_site()
+    lot = _attrs(0)
+    lot.SetUserString("gordium:id", "orig-lot")
+    path, facts = _tiny(tmp_path, ["Site"], lambda m, i: m.Objects.AddCurve(_square(), lot))
+    Path(facts).write_text("lot_facts:\n  zone: R-1b\n  lot_id: orig-lot\n", encoding="utf-8")
+    export = rs.export(path, facts)
+    assert [lot["id"] for lot in export["lots"]] == ["orig-lot"] and export["picked"] == "orig-lot"
+
+
+def test_a_picked_lot_not_drawn_is_refused(tmp_path):
+    rs = _real_site()
+    path, facts = _tiny(tmp_path, ["Site"], lambda m, i: m.Objects.AddCurve(_square(), _attrs(i["Site"])))
+    Path(facts).write_text("lot_facts:\n  zone: R-1b\n  lot_id: not-there\n", encoding="utf-8")
+    with pytest.raises(SystemExit, match="isn't one of the lots drawn"):
+        rs.export(path, facts)
+
+
 def test_a_marked_floor_block_is_refused(tmp_path):
     # review round 2: a floor mark was dropped, so Revit would send floor null where Rhino sends the height
     import rhino3dm as r
