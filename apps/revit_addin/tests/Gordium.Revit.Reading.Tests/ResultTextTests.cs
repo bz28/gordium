@@ -60,6 +60,26 @@ public sealed class ResultTextTests(RealWorker worker) : IClassFixture<RealWorke
 
     private static int CountOf(string s, string part) => (s.Length - s.Replace(part, "", StringComparison.Ordinal).Length) / part.Length;
 
+    /// <summary>The Revit trial (Pacific sample): "Lot area per main building" gave one reason part per building,
+    /// the same two twelve times. Said once each with the count; distinct parts all kept, in order.</summary>
+    [Fact]
+    public void A_reason_repeated_per_building_is_said_once_with_its_count()
+    {
+        var parts = Enumerable.Repeat("a building has a curved edge (not measured yet); a building has a curved surface (not measured yet)", 12);
+        var reason = string.Join("; ", parts) + "; enter the stories";
+        var view = new JsonObject
+        {
+            ["items"] = new JsonArray(Row("r0", "needs_review", reason: reason)),
+            ["summary"] = "1 needs review", ["state"] = "needs_review",
+            ["groups"] = new JsonArray(new JsonObject { ["key"] = "review", ["title"] = "Needs review", ["items"] = new JsonArray("r0") }),
+        };
+        Assert.Contains("- [needs review] Row r0: a building has a curved edge (not measured yet) (x12); a building has a curved " +
+                        "surface (not measured yet) (x12); enter the stories [uid-r0]",
+                        Lines(ResultText.Format(Answer(view), null, [], null)).Select(l => l.Trim()));
+        Assert.Equal("a (x2); b", ResultText.Once("a; b; a"));
+        Assert.Equal("no repeats; here", ResultText.Once("no repeats; here"));
+    }
+
     [Fact]
     public void A_row_not_measured_says_what_is_allowed_and_why_never_a_dash_measured()
     {

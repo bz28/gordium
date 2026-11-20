@@ -76,7 +76,8 @@ public sealed class CheckProjectCommand : IExternalCommand
         var prepared = ProjectCheck.PrepareAsync(outside, inside, new WorkerLeftOut(worker)).GetAwaiter().GetResult();
         log["read_s"] = sw.Elapsed.TotalSeconds;
         log["missing"] = prepared.Missing;
-        log["lot_edges"] = outside.LotLines.Where(l => l.IsPropertyLine).Select(l => new Dictionary<string, object?>
+        // in Revit's internal coordinates, as the Street edge mark keeps them (the request's site is in shared ones)
+        log["lot_edges_internal"] = outside.LotLines.Where(l => l.IsPropertyLine).Select(l => new Dictionary<string, object?>
         {
             ["property_line"] = l.UniqueId,
             ["edges"] = l.Curves.Select(c => StreetEdges.Format([(c.Start, c.End)])).ToList(),
@@ -96,9 +97,10 @@ public sealed class CheckProjectCommand : IExternalCommand
         log["check_s"] = sw.Elapsed.TotalSeconds;
         log["answer"] = result.Raw.GetRawText();
         var words = ResultText.Format(result, PhaseName(doc, prepared.PhaseChecked), prepared.OptionsChecked, prepared.Inside,
-                                      uid => Label(doc, uid));
+                                      uid => Label(doc, uid), street: prepared.Street);
         var full = ResultText.Format(result, PhaseName(doc, prepared.PhaseChecked), prepared.OptionsChecked, prepared.Inside,
-                                     uid => Label(doc, uid), maxOtherRows: int.MaxValue).ToString();
+                                     uid => Label(doc, uid), maxOtherRows: int.MaxValue, street: prepared.Street).ToString();
+        log["street"] = prepared.Street;
         log["state"] = result.State.ToString();
         log["summary"] = result.Summary;
         log["shown"] = words.ToString();
@@ -139,6 +141,7 @@ public sealed class CheckProjectCommand : IExternalCommand
         var lines = RevitRead.LotLines(doc).Where(l => l.IsPropertyLine).ToDictionary(l => l.UniqueId);
         if (lines.Count == 0)
             return false;                                            // no property line: the dialog says what is missing
+        var toShared = RevitRead.InternalToShared(doc);
         var kept = new List<(Xyz A, Xyz B)>();
         var said = new List<string>();
         while (true)
@@ -160,8 +163,23 @@ public sealed class CheckProjectCommand : IExternalCommand
             var (edge, why) = StreetEdges.Nearest(line, RevitInterior.P(picked.GlobalPoint));
             if (edge is { } got)
             {
-                if (!kept.Contains(got))
-                    kept.Add(got);
+                // said back before it is kept: Revit highlights the whole property line, never the edge it took
+                var words = StreetEdges.Describe(got, toShared);
+                var ask = new TaskDialog(Title)
+                {
+                    MainInstruction = $"Use {words} as the street line?",
+                    MainContent = "Shared coordinates, feet. No: the click is forgotten; click the edge again.",
+                    CommonButtons = TaskDialogCommonButtons.Yes | TaskDialogCommonButtons.No,
+                    DefaultButton = TaskDialogResult.No,
+                };
+                if (ask.Show() == TaskDialogResult.Yes)
+                {
+                    if (!kept.Contains(got))
+                        kept.Add(got);
+                    said.Add("kept " + words);
+                }
+                else
+                    said.Add("not kept " + words);
             }
             else
             {
@@ -223,10 +241,10 @@ public sealed class CheckProjectCommand : IExternalCommand
                             ?? throw new InvalidOperationException($"{name} is not one of Gordium's marks");
                     var p = doc.ProjectInformation.get_Parameter(m.Guid)
                             ?? throw new InvalidOperationException($"{name} isn't on Project Information");
-                    if (value is JsonValue v && v.TryGetValue<bool>(out var yes))
-                        p.Set(yes ? 1 : 0);
-                    else
-                        p.Set(value!.GetValue<string>());
+                    // by the mark's own kind: a value of another kind, or a Set Revit refuses, and nothing is checked
+                    var (yesNo, text) = ProjectFacts.RequestValue(m, value);
+                    if (!(yesNo is { } i ? p.Set(i) : p.Set(text!)))
+                        throw new InvalidOperationException($"Revit didn't set {name} to {value?.ToJsonString()}: nothing was checked");
                 }
                 t.Commit();
             }

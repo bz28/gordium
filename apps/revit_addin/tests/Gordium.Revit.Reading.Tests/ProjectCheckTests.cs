@@ -79,6 +79,11 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         Assert.Equal("[[[0,0],[60,0]]]", facts["street_line"]!.ToJsonString());
         Assert.Equal("gordium.interior/1", prepared.Request.Interior["format"]!.GetValue<string>());
         Assert.Equal(FakeHouse.LastPhase, prepared.PhaseChecked);
+        // the street the check was sent with, named in every result (review round 1)
+        Assert.Equal("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)", prepared.Street);
+        Assert.Contains("; street line: the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0).",
+                        ResultText.Format(result, "phase 2", prepared.OptionsChecked, prepared.Inside, street: prepared.Street).Checked,
+                        StringComparison.Ordinal);
 
         var got = result.Items.ToDictionary(i => i.Id, i => i.StatusWord);
         foreach (var (id, word) in Outside(Scene))
@@ -207,7 +212,31 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         Assert.Equal(0, edge.Value.A.Y + edge.Value.B.Y);
         Assert.Equal(60, Math.Abs(edge.Value.A.X - edge.Value.B.X));
         Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(0, 0, 0)).Why, StringComparison.Ordinal);
+        // review round 1: a click just past the corner, nearer the side edge, or on the street edge within 2 ft of the
+        // corner, could keep either edge: refused (the old 0.01 ft band kept the side edge and the street edge)
+        Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(0.05, 0.3, 0)).Why, StringComparison.Ordinal);
+        Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(1.5, 0, 0)).Why, StringComparison.Ordinal);
+        Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(58.7, 0.1, 0)).Why, StringComparison.Ordinal);
+        Assert.Equal(edge, StreetEdges.Nearest(line, new Xyz(3, 0, 0)).Edge);                    // past the corner band
+        // said back to the architect before it is kept
+        Assert.Equal("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)", StreetEdges.Describe(edge.Value, Transform3.Identity));
         Assert.Contains("wasn't on an edge", StreetEdges.Nearest(line, new Xyz(30, 60, 0)).Why, StringComparison.Ordinal);
+    }
+
+    /// <summary>Review round 1: a request file's mark is set by the mark's own kind; another kind is refused naming
+    /// the mark (it was set as text, or Revit's Set refused it unseen, and the check ran on a mark not meant).</summary>
+    [Fact]
+    public void A_request_files_mark_of_the_wrong_kind_is_refused_naming_the_mark()
+    {
+        Assert.Equal((1, null), ProjectFacts.RequestValue(Marks.LotSurveyed, JsonValue.Create(true)));
+        Assert.Equal((0, null), ProjectFacts.RequestValue(Marks.CornerLot, JsonNode.Parse("false")));
+        Assert.Equal((null, "R-1b"), ProjectFacts.RequestValue(Marks.Zone, JsonNode.Parse("\"R-1b\"")));
+        foreach (var (m, v) in new (MarkDefinition, string)[] { (Marks.LotSurveyed, "\"yes\""), (Marks.LotSurveyed, "1"), (Marks.Zone, "true"),
+                                                                 (Marks.Use, "null"), (Marks.ClearWidth, "3.0") })
+        {
+            var e = Assert.Throws<InvalidOperationException>(() => ProjectFacts.RequestValue(m, JsonNode.Parse(v)));
+            Assert.StartsWith(m.Name + " is a ", e.Message, StringComparison.Ordinal);
+        }
     }
 
     [Theory]

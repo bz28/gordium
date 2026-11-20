@@ -14,8 +14,10 @@ public sealed record ProjectRequest(JsonObject Site, JsonObject Facts, JsonObjec
 /// <param name="PhaseChecked">The phase checked (the last one), the same for the outside and the inside.</param>
 /// <param name="OptionsChecked">Each design option set's option checked, the same for both.</param>
 /// <param name="Inside">The interior read (its not-read lists for the dialog), or null when nothing was read.</param>
+/// <param name="Street">The street line sent, in words ("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)"), so
+/// every result names the street it was checked against; null when nothing was sent.</param>
 public sealed record ProjectPrepared(ProjectRequest? Request, IReadOnlyList<string> Missing, string? PhaseChecked,
-                                     IReadOnlyList<string> OptionsChecked, InteriorReadResult? Inside);
+                                     IReadOnlyList<string> OptionsChecked, InteriorReadResult? Inside, string? Street = null);
 
 /// <summary>
 /// "Check my project" without Revit (reading design note, section 9): the architect's own open project read outside
@@ -51,8 +53,10 @@ public static class ProjectCheck
             return new ProjectPrepared(null, [why!], site.PhaseChecked, site.OptionsChecked, null);
         var facts = read.Facts.DeepClone().AsObject();
         facts["street_line"] = street;
+        var words = string.Join(" and ", street.Select(e => StreetEdges.Describe(
+            (e![0]![0]!.GetValue<double>(), e[0]![1]!.GetValue<double>()), (e[1]![0]!.GetValue<double>(), e[1]![1]!.GetValue<double>()))));
         return new ProjectPrepared(new ProjectRequest(site.Site, facts, interior.Interior), [], site.PhaseChecked,
-                                   site.OptionsChecked, interior);
+                                   site.OptionsChecked, interior, words);
     }
 
     /// <summary>The one check_site: the site, the facts and the interior, together.</summary>
@@ -135,6 +139,26 @@ public static class ProjectFacts
                         "click the lot edge along the street when Check my project asks.");
         return new ProjectFactsRead(facts, edges, missing);
     }
+
+    /// <summary>A mark's value in a request file (check_project_request.json's "marks"), as Revit's Parameter.Set
+    /// takes it: a Yes/No mark needs true or false (1 or 0), a text mark text. Anything else is refused naming the
+    /// mark, never set as something near it: a check made on a mark the request didn't mean.</summary>
+    public static (int? YesNo, string? Text) RequestValue(MarkDefinition mark, JsonNode? value)
+    {
+        ArgumentNullException.ThrowIfNull(mark);
+        var v = value as JsonValue;
+        switch (mark.Kind)
+        {
+            case MarkValueKind.YesNo when v is not null && v.TryGetValue<bool>(out var yes):
+                return (yes ? 1 : 0, null);
+            case MarkValueKind.Text when v is not null && v.TryGetValue<string>(out var text):
+                return (null, text);
+            default:
+                throw new InvalidOperationException(
+                    $"{mark.Name} is a {(mark.Kind == MarkValueKind.YesNo ? "Yes/No mark: give true or false" : mark.Kind == MarkValueKind.Text ? "text mark: give text" : "length mark, which a request can't set")}, " +
+                    $"not {value?.ToJsonString() ?? "null"}: nothing was checked");
+        }
+    }
 }
 
 /// <summary>The street edges: picked by the architect on the property line (<see cref="Nearest"/>), kept in the
@@ -174,8 +198,15 @@ public static class StreetEdges
         return edges.Count > 0 ? edges : null;
     }
 
+    /// <summary>How near a corner a click is refused (ft): a click this near an end the edge shares with another can
+    /// land on either edge (Revit highlights the whole property line, not the edge hit). A quarter of a shorter edge's
+    /// length, so every edge keeps a middle that can be clicked.</summary>
+    public const double CornerReach = 2.0;
+
     /// <summary>The edge of the property line nearest the point picked on it (plan distance, internal coordinates):
-    /// its two ends, or why none (the pick off every edge, or as near two edges: a corner).</summary>
+    /// its two ends, or why none: the pick off every edge; or at a corner (the two nearest edges within half
+    /// <see cref="PickReach"/> of each other, or the click within <see cref="CornerReach"/> of an end the edge shares
+    /// with another), where a click meant for one edge can keep the other.</summary>
     public static ((Xyz A, Xyz B)? Edge, string? Why) Nearest(LotLineElement line, Xyz picked)
     {
         ArgumentNullException.ThrowIfNull(line);
@@ -183,10 +214,32 @@ public static class StreetEdges
                               .OrderBy(x => x.D).ToList();
         if (near.Count == 0 || near[0].D > PickReach)
             return (null, "the click wasn't on an edge of the property line: click on the edge along the street");
-        if (near.Count > 1 && near[1].D - near[0].D < Tolerance)
-            return (null, "the click was at a corner, as near two edges: click nearer the middle of the edge along the street");
+        const string corner = "the click was too near a corner, where it could be on either edge: click nearer the middle of the edge along the street";
+        if (near.Count > 1 && near[1].D - near[0].D < PickReach / 2)
+            return (null, corner);
         var c0 = near[0].Curve;
+        var reach = Math.Min(CornerReach, Plan(c0.Start, c0.End) / 4);
+        foreach (var end in new[] { c0.Start, c0.End })
+            if (Plan(end, picked) < reach && line.Curves.Any(c => !ReferenceEquals(c, c0)
+                    && (Plan(c.Start, end) <= Tolerance || Plan(c.End, end) <= Tolerance)))
+                return (null, corner);
         return ((new Xyz(c0.Start.X, c0.Start.Y, 0), new Xyz(c0.End.X, c0.End.Y, 0)), null);
+    }
+
+    private static double Plan(Xyz a, Xyz b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
+
+    /// <summary>An edge as the architect confirms it: "the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)" (the
+    /// straight distance between its ends; the coordinates as given: shared for what is sent and shown).</summary>
+    public static string Describe((double X, double Y) a, (double X, double Y) b) =>
+        string.Create(CultureInfo.InvariantCulture,
+            $"the {Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y)):0.0} ft lot edge from ({a.X:0.0}, {a.Y:0.0}) to ({b.X:0.0}, {b.Y:0.0})");
+
+    /// <summary>A kept edge (internal coordinates) described in the shared coordinates the check uses.</summary>
+    public static string Describe((Xyz A, Xyz B) edge, Transform3 toShared)
+    {
+        ArgumentNullException.ThrowIfNull(toShared);
+        Xyz a = toShared.Apply(edge.A), b = toShared.Apply(edge.B);
+        return Describe((a.X, a.Y), (b.X, b.Y));
     }
 
     /// <summary>The kept edges as the facts' <c>street_line</c>: each the lot's own edge whose ends they are (turned

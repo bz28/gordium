@@ -57,14 +57,17 @@ public static class ResultText
     /// <param name="inside">The interior read, for its not-read lists; null when none.</param>
     /// <param name="element">A Revit UniqueId as the architect finds it (Revit's element id); null keeps the UniqueId.</param>
     /// <param name="maxOtherRows">How many rows that comply or don't apply are shown in all before the rest are cut.</param>
+    /// <param name="street">The street line the check was sent with, in words (ProjectPrepared.Street): named in
+    /// <see cref="ResultWords.Checked"/>, so a wrong edge picked is seen.</param>
     public static ResultWords Format(CheckResult result, string? phase, IReadOnlyList<string> options, InteriorReadResult? inside,
-                                     Func<string, string?>? element = null, int maxOtherRows = 30)
+                                     Func<string, string?>? element = null, int maxOtherRows = 30, string? street = null)
     {
         ArgumentNullException.ThrowIfNull(result);
         ArgumentNullException.ThrowIfNull(options);
         var headline = $"{StateWords(result.State)}: {result.Summary}";
         var checkedWords = "Checked: " + (phase is null ? "the model (it has no phases)" : $"the last phase, {phase}") + "; design options: " +
-                           (options.Count == 0 ? "the main model (no design options)" : "the main model and " + string.Join(", ", options)) + ".";
+                           (options.Count == 0 ? "the main model (no design options)" : "the main model and " + string.Join(", ", options)) +
+                           (street is null ? "" : $"; street line: {street}") + ".";
         var rows = result.Items.ToDictionary(i => i.Id, StringComparer.Ordinal);
         var budget = maxOtherRows;
         var main = new StringBuilder();
@@ -117,7 +120,7 @@ public static class ResultText
         var proposed = Text(row.Raw, "proposed");
         var required = Text(row.Raw, "required");
         // an egress row's reason starts with its part, which its name already says: said once
-        var reason = row.Reason;
+        var reason = Once(row.Reason);
         var part = row.Name.Split(" · ")[0];
         if (reason is not null && row.Name.Contains(" · ", StringComparison.Ordinal) && reason.StartsWith(part + ": ", StringComparison.Ordinal))
             reason = reason[(part.Length + 2)..];
@@ -140,6 +143,20 @@ public static class ResultText
             s.Append(" [").Append(string.Join(", ", shown)).Append(ids.Count > 6 ? $", {ids.Count - 6} more" : "").Append(']');
         }
         return s.ToString();
+    }
+
+    /// <summary>A reason whose "; "-separated parts repeat (one per building: "a building has a curved edge (not
+    /// measured yet)" twelve times) said once each, in the order first said, with how many times ("(x12)"). Nothing
+    /// is dropped: every distinct part stays, and the count says how many there were.</summary>
+    public static string? Once(string? reason)
+    {
+        if (reason is null)
+            return null;
+        var parts = reason.Split("; ");
+        if (parts.Length == parts.Distinct(StringComparer.Ordinal).Count())
+            return reason;
+        var counts = parts.GroupBy(p => p, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+        return string.Join("; ", parts.Distinct(StringComparer.Ordinal).Select(p => counts[p] > 1 ? $"{p} (x{counts[p]})" : p));
     }
 
     /// <summary>The Revit elements a row is about: a zoning row's <c>objects</c> (the lot and the buildings), an
