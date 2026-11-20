@@ -197,6 +197,8 @@ not in the list, or a window's word on a door, is not stated, never a near guess
 - **Reading them** (`MarkReading`): by GUID only (a firm's own "Gordium: Sleeping room" is never read as
   Gordium's), and only the rooms, windows and doors in the design checked (the outside reader's phase and option
   rule, `SiteReader.InDesignChecked`; a room belongs to one phase, so only the last phase's rooms are read).
+  While any Room is unplaced, not enclosed or redundant, `MarkReading.Rooms` gives null: rooms not read (the
+  description leaves `rooms` out), never the placed rooms without it (design note, section 2).
   **A mark never set is not stated** (null), never No: Revit's `Parameter.HasValue` false reads as null whatever
   `AsInteger()` says; a blank length is null, never 0. A door's operation must be a door's word ("Casement" on a
   door is not stated, for the opening as for the door): one rule (`Operations.ForOpening(word, isDoor)`) for the

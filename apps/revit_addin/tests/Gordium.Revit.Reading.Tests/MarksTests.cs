@@ -169,7 +169,7 @@ public sealed class MarksTests
         {
             Instance = new Dictionary<Guid, MarkValue> { [firms.Guid!.Value] = new(true, Integer: 1) },
         });
-        Assert.Null(MarkReading.Rooms(model).Single().Sleeping);
+        Assert.Null(MarkReading.Rooms(model)!.Single().Sleeping);
     }
 
     [Fact]
@@ -222,7 +222,7 @@ public sealed class MarksTests
         var model = Model(Room("bed", "Bedroom 2", true), Room("living", "Living", false), Room("study", "Study", null),
                           Window("w1", true, "Casement"), Window("w2", null, "Double-hung"),
                           Door("d1", false, true, "Side-hinged door"), Door("d2", false, null, "Casement"));
-        Assert.Equal([true, false, null], MarkReading.Rooms(model).Select(r => r.Sleeping));
+        Assert.Equal([true, false, null], MarkReading.Rooms(model)!.Select(r => r.Sleeping));
         var openings = MarkReading.Openings(model);
         Assert.Equal([true, null, false, false], openings.Select(o => o.Escape));
         Assert.Equal(["casement", null, "side_hinged_door", null], openings.Select(o => o.Operation));
@@ -235,7 +235,7 @@ public sealed class MarksTests
     public void A_bedroom_by_name_alone_is_never_read_as_a_sleeping_room()
     {
         var model = Model(Room("bed", "Bedroom 2", null));
-        Assert.Null(MarkReading.Rooms(model).Single().Sleeping);
+        Assert.Null(MarkReading.Rooms(model)!.Single().Sleeping);
         var cell = MarkingList.Build(model).Rows.Single().Cells.Single();
         Assert.Equal(MarkState.Unset, cell.State);
         Assert.StartsWith("suggested: Yes", cell.Suggestion);
@@ -267,7 +267,7 @@ public sealed class MarksTests
         {
             Phases = ["existing", "new"],
         };
-        Assert.Equal(["now"], MarkReading.Rooms(model).Select(r => r.Id));
+        Assert.Equal(["now"], MarkReading.Rooms(model)!.Select(r => r.Id));
         Assert.Equal(["kept"], MarkReading.Openings(model).Select(o => o.Id));
         Assert.Equal(["now", "kept"], MarkingList.Build(model).Rows.Select(r => r.Id));
     }
@@ -281,20 +281,36 @@ public sealed class MarksTests
                           Room("open", "Den", false) with { Placement = RoomPlacement.NotEnclosed },
                           Room("twice", "Study", false) with { Placement = RoomPlacement.Redundant },
                           Room("unknown", "Hall", false) with { Placement = null });
-        Assert.Equal(["placed"], MarkReading.Rooms(model).Select(r => r.Id));
+        Assert.Null(MarkReading.Rooms(model));            // round 2: rooms not read while any blocker exists
+        Assert.Equal(["placed"], MarkReading.Rooms(model with { Marked = [model.Marked[0]] })!.Select(r => r.Id));
         Assert.Equal(4, MarkReading.RoomBlockers(model).Count);
         var list = MarkingList.Build(model);
         Assert.Equal(["placed"], list.Rows.Select(r => r.Id));
         Assert.Equal(
         [
-            "Bedroom 3: not placed: place it in a closed area or delete it",
-            "Den: not enclosed: close its walls or room separation lines, or delete it",
-            "Hall: its placement couldn't be read",
-            "Study: redundant (another room is in the same area): delete one",
+            "Room \"Bedroom 3\": not placed: place it in a closed area or delete it",
+            "Room \"Den\": not enclosed: close its walls or room separation lines, or delete it",
+            "Room \"Hall\": its placement couldn't be read",
+            "Room \"Study\": redundant (another room is in the same area): delete one",
         ], list.RoomBlockers);
         Assert.StartsWith("4 Rooms are unplaced", list.Summary[0]);
-        Assert.StartsWith("Room Bedroom 3: not placed", MarkingList.Text(list));
+        Assert.StartsWith("Room \"Bedroom 3\": not placed", MarkingList.Text(list));
         Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
+    }
+
+    // review round 2, findings 1 and 2: a model whose only Room is a blocker says so once, in the singular, and
+    // names Revit's default "Room 100" once
+    [Fact]
+    public void Only_a_blocker_room_one_line_singular_and_the_name_once()
+    {
+        var list = MarkingList.Build(Model(Room("r", "Room", null, "100") with { Placement = RoomPlacement.NotEnclosed }));
+        Assert.StartsWith("1 Room is unplaced, not enclosed or redundant", list.Summary[0]);
+        Assert.DoesNotContain(list.Summary, l => l.StartsWith(MarkingListResult.NoRooms, StringComparison.Ordinal));
+        Assert.Equal(["Room \"Room 100\": not enclosed: close its walls or room separation lines, or delete it"], list.RoomBlockers);
+        Assert.DoesNotContain("Room Room", MarkingList.Text(list));
+        Assert.Equal("A room with no name or number: not placed: place it in a closed area or delete it",
+                     MarkingList.Build(Model(Room("x", null, null) with { Placement = RoomPlacement.Unplaced })).RoomBlockers.Single());
+        Assert.Null(MarkReading.Rooms(Model(Room("r", "Room", null, "100") with { Placement = RoomPlacement.NotEnclosed })));
     }
 
     // review round 1, finding 3: "every room, window and door is marked" only when there are rooms and all are marked
