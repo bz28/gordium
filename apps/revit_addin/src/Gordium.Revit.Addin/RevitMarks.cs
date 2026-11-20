@@ -42,6 +42,7 @@ internal static class RevitMarks
     private static MarkedElement Element(Document doc, Element e)
     {
         var type = doc.GetElement(e.GetTypeId());
+        var size = e is FamilyInstance ? RevitInterior.TypeSize(type) : default((double? Width, double? Height));
         return new MarkedElement
         {
             UniqueId = e.UniqueId,
@@ -56,7 +57,41 @@ internal static class RevitMarks
             DesignOption = Id(e.DesignOption?.Id),
             Instance = Values(e),
             Type = type is null ? new Dictionary<Guid, MarkValue>() : Values(type),
+            TypeManufacturer = type?.get_Parameter(BuiltInParameter.ALL_MODEL_MANUFACTURER)?.AsString(),
+            TypeModel = type?.get_Parameter(BuiltInParameter.ALL_MODEL_MODEL)?.AsString(),
+            TypeWidth = size.Width,
+            TypeHeight = size.Height,
         };
+    }
+
+    /// <summary>Writes each window type's draft clear opening (<see cref="ClearPrefills"/>: only types whose three
+    /// marks are empty, in one transaction; never <c>Gordium: Clear confirmed</c>). A mark Revit won't set throws, and
+    /// the transaction rolls back: nothing is filled half way. Returns the plans written.</summary>
+    internal static List<ClearPrefill> Prefill(Document doc, RevitModel model)
+    {
+        var todo = ClearPrefills.Plan(model).Where(p => p.State == PrefillState.Fill).ToList();
+        if (todo.Count == 0)
+            return todo;
+        using var t = new Transaction(doc, "Gordium: fill the makers' clear openings (drafts to confirm)");
+        t.Start();
+        foreach (var p in todo)
+        {
+            var type = doc.GetElement(p.TypeId) ?? throw new InvalidOperationException($"no type {p.TypeId}");
+            void Set(MarkDefinition m, Func<Parameter, bool> set)
+            {
+                var param = type.get_Parameter(m.Guid);
+                // re-checked here: a mark set since the plan was read is never written over
+                var taken = param is not null && (param.StorageType == StorageType.String
+                    ? !string.IsNullOrWhiteSpace(param.AsString()) : param.HasValue);
+                if (param is null || param.IsReadOnly || taken || !set(param))
+                    throw new InvalidOperationException($"{m.Name} on {p.Label} couldn't be filled");
+            }
+            Set(Marks.ClearWidth, q => q.Set(p.ClearWidth!.Value));
+            Set(Marks.ClearHeight, q => q.Set(p.ClearHeight!.Value));
+            Set(Marks.ClearSource, q => q.Set(p.Source!));
+        }
+        t.Commit();
+        return todo;
     }
 
     /// <summary>Revit's own three states of a room that isn't on the plan: no <c>Location</c> (unplaced); placed
@@ -195,7 +230,14 @@ public sealed class MarkForEgressCommand : IExternalCommand
             // the model with its inside read (as Read inside and a check read it), so the list's has-none ticks, their
             // conflicts and proposals are the reader's own
             var model = RevitInterior.Model(doc);
+            // each window type a maker's formula covers, its three Clear marks empty: filled as a draft (never the
+            // Clear confirmed stamp), then the model read again so the list shows what is now in it
+            var filled = RevitMarks.Prefill(doc, model);
+            log["clear_filled"] = filled.Select(p => $"{p.TypeId} {p.Label}: {p.Source}").ToList();
+            if (filled.Count > 0)
+                model = RevitInterior.Model(doc);
             var list = MarkingList.Build(model, plan);
+            log["clear_lines"] = list.ClearLines;
             // every element the list counts by type, by id
             log["stair_candidates"] = (model.Interior?.StairCandidates ?? [])
                 .Select(c => $"{c.UniqueId} {c.BuiltInCategory.Replace("OST_", "")} \"{c.Name}\": {c.Kind}" +
@@ -222,7 +264,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
                 }),
             }).ToList();
             Trial.Log("mark_for_egress", log);
-            var head = added.Count == 0 ? "" : $"Added {added.Count} Gordium marks to this project.\n\n";
+            var head = (added.Count == 0 ? "" : $"Added {added.Count} Gordium marks to this project.\n\n") + ClearPrefills.Head(filled.Count);
             var dialog = new TaskDialog("Gordium: mark for egress")
             {
                 MainInstruction = list.Headline,

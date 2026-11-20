@@ -41,6 +41,10 @@ public sealed class CheckProjectCommand : IExternalCommand
         {
             var added = RevitMarks.AddMarks(doc, ui.Application, MarkSetup.Plan(RevitMarks.Bindings(doc)));
             log["marks_added"] = added.Select(s => $"{s.Action}: {s.Mark.Name}").ToList();
+            // each window type a maker's formula covers, its three Clear marks empty: filled as a draft the architect
+            // confirms (never the stamp, so this check sends no clear opening for it)
+            var filled = RevitMarks.Prefill(doc, RevitMarks.Model(doc));
+            log["clear_filled"] = filled.Select(p => $"{p.TypeId} {p.Label}: {p.Source}").ToList();
             if (ProjectFacts.Read(RevitMarks.Model(doc)).StreetEdges is null)
                 PickStreet(ui.ActiveUIDocument!, log);
             var run = Run(doc, ui.Application, log);
@@ -48,7 +52,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             // message says, and checked once more (the typed reason, never its words)
             if (StreetEdges.NeedsNewPick(run.Prepared) && PickStreet(ui.ActiveUIDocument!, log))
                 run = Run(doc, ui.Application, log);
-            Show(run, added.Count);
+            Show(run, added.Count, filled.Count);
             return Result.Succeeded;
         }
         catch (Exception e)
@@ -109,9 +113,9 @@ public sealed class CheckProjectCommand : IExternalCommand
         return new Ran(prepared, result, words, full);
     }
 
-    private static void Show(Ran run, int marksAdded)
+    private static void Show(Ran run, int marksAdded, int clearFilled)
     {
-        var added = marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.\n\n";
+        var added = (marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.\n\n") + ClearPrefills.Head(clearFilled);
         if (run.Words is not { } w)
         {
             new TaskDialog(Title)
