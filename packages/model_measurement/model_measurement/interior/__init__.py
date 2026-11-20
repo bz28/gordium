@@ -72,6 +72,14 @@ def _part(item: dict, measured, within=None) -> dict:
     return part
 
 
+def _door(item: dict, measured) -> dict:
+    """An exit door's part, with `from`: for each clear size it has, whether it came from the drawing, the maker's
+    stated size, or both (the less favourable), with each value and the maker's source."""
+    part = _part(item, measured)
+    part["from"] = {name: came for name, came in measured[3].items() if name in part["measures"]}
+    return part
+
+
 def measure(description) -> dict:
     out = {"format": MEASURED_FORMAT, "units": {"length": "in", "area": "sf"},
            "parts": {k: None for k in KINDS}, "problems": [], "not_checked": [], "has_none": {}}
@@ -147,7 +155,7 @@ def measure(description) -> dict:
 
     doors = _given(description, "egress_door", problems)
     if doors is not None:
-        parts["egress_door"] = [_part(d, measure_door(d, reader)) for d in doors if d["exit"]]
+        parts["egress_door"] = [_door(d, measure_door(d, reader)) for d in doors if d["exit"]]
 
     guards = _given(description, "guard", problems)
     if guards is not None:

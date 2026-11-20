@@ -302,7 +302,7 @@ python -m model_measurement.interior <description.yaml>     # prints each part's
 - The input format: [docs/interior/interior_description_format.md](../../docs/interior/interior_description_format.md).
 - Each measure's definition, the 2025 RCNYS section it serves, and every reason one has no value (`interior/stops.py`):
   [docs/interior/interior_measurements.md](../../docs/interior/interior_measurements.md).
-- How we know it's right: five made-up houses with every measure worked out by hand first
+- How we know it's right: six made-up houses with every measure worked out by hand first
   ([test_data/interior_houses/](../../test_data/interior_houses/README.md), `tests/test_interior_houses.py`); small
   hand-worked cases and a case for each reason (`tests/test_interior_measures.py`).
 

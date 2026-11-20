@@ -1,5 +1,11 @@
 """The exit door (R318.2): its clear width and clear height, and whether it is side-hinged.
 
+Each clear size is the drawn one, or the maker's stated one (`stated_clear`), or, given both, the less favourable
+(the smaller) of the two: never more than either (decision 2, docs/revit/revit_interior_reading_design.md section
+8). Each says which it came from, and why, in the part's `from`. A door drawn but not measurable from its drawing
+gets no value even with a maker's size (that size alone could be more than the door as drawn), and a maker's size
+given but malformed gives neither measure a value (it is never dropped, which could leave the larger drawn one).
+
 R318.2: the clear width is "measured between the face of the door and the stop, with the door open 90 degrees";
 the clear height "from the top of the threshold to the bottom of the stop". Drawn in the door's own plan and
 elevation: u along the wall, n across it (toward the side the door swings into), z up. The leaf, drawn closed,
@@ -21,10 +27,21 @@ STOP_LAP = 0.75
 STOP_LAP_WORDS = "3/4"
 
 
-def clear_width(d: dict, reader) -> float:
+# what draws each clear size: given any of these, the size is measured from the drawing (and must be measurable)
+DRAWN = {"width": ("stops", "hinge_pin", "leaf_closed"), "height": ("threshold_top", "head_stop_bottom")}
+STATED_KEYS = ("width", "height", "source")
+
+
+def _hinged_only(d: dict) -> None:
+    """R318.2's clear width is measured with a side-hinged door open 90 degrees: no other door has one, drawn or
+    stated."""
     operation = choice(d.get("operation"), OPERATIONS, "the door's operation")
     if operation != "side_hinged":
         raise Stop("not_side_hinged", operation=operation.replace("_", " "))
+
+
+def clear_width(d: dict, reader) -> float:
+    _hinged_only(d)
     side = choice(d.get("hinge_side"), ("left", "right"), "the door's hinge side")
     stops = d.get("stops")
     if not isinstance(stops, dict):
@@ -89,15 +106,70 @@ def side_hinged(d: dict) -> bool:
     return SIDE_HINGED[operation]
 
 
-def measure_door(d: dict, reader) -> tuple[dict, dict, dict]:
-    measures, stopped = {}, {}
+def stated_clear(d: dict, reader):
+    """The maker's stated clear opening, {width, height, source} (inches), or None when not given. Given but
+    malformed (not a mapping, a key it doesn't know, no source, a size missing, not a length, or not more than
+    zero): Stop, never a default."""
+    s = d.get("stated_clear")
+    if s is None:
+        return None
+    if not isinstance(s, dict):
+        raise Stop("door_stated_shape")
+    unknown = sorted(str(k) for k in s if k not in STATED_KEYS)
+    if unknown:
+        raise Stop("door_stated_keys", keys=", ".join(unknown))
+    source = s.get("source")
+    if not isinstance(source, str) or not source.strip():
+        raise Stop("door_stated_no_source")
+    got = {"source": source.strip()}
+    for key in ("width", "height"):
+        what = f"the maker's stated clear {key}"
+        got[key] = reader.size(s.get(key), what)
+        if got[key] <= 0:
+            raise Stop("not_positive", what=what, value=tidy(got[key]))
+    return got
+
+
+def _clear(key: str, fn, d: dict, reader, maker) -> tuple[float, dict]:
+    """(the clear width or height, where it came from): drawn, stated, or the less favourable of both."""
+    if isinstance(maker, Stop):
+        raise maker
+    if key == "width":
+        _hinged_only(d)
+    if maker is None:
+        return tidy(fn(d, reader)), {"used": "drawn", "why": "drawn; no maker's clear opening given"}
+    stated = tidy(maker[key])
+    told = {"stated": stated, "source": maker["source"]}
+    if all(d.get(k) is None for k in DRAWN[key]):
+        return stated, dict(used="stated", **told, why=f"the maker's stated clear {key}; none drawn")
+    try:
+        drawn = tidy(fn(d, reader))
+    except Stop as s:
+        raise Stop("door_drawn_unread", what=key, reason=s.reason) from None
+    told["drawn"] = drawn
+    if stated < drawn:
+        return stated, dict(used="stated", **told, why=f"the maker's stated clear {key} is smaller than the drawn "
+                                                         "one: the less favourable counts")
+    if drawn < stated:
+        return drawn, dict(used="drawn", **told, why=f"the drawn clear {key} is smaller than the maker's stated "
+                                                      "one: the less favourable counts")
+    return drawn, dict(used="both", **told, why=f"the drawn and the maker's stated clear {key} are the same")
+
+
+def measure_door(d: dict, reader) -> tuple[dict, dict, dict, dict]:
+    """(measures, more, not_measured, from): `from` says, for each clear size measured, which it came from."""
+    measures, stopped, came = {}, {}, {}
     try:
         measures["door_side_hinged"] = side_hinged(d)
     except Stop as s:
         stopped["door_side_hinged"] = s.reason
-    for name, fn in (("door_clear_width", clear_width), ("door_clear_height", clear_height)):
+    try:
+        maker = stated_clear(d, reader)
+    except Stop as s:
+        maker = s
+    for name, key, fn in (("door_clear_width", "width", clear_width), ("door_clear_height", "height", clear_height)):
         try:
-            measures[name] = tidy(fn(d, reader))
+            measures[name], came[name] = _clear(key, fn, d, reader, maker)
         except Stop as s:
             stopped[name] = s.reason
-    return measures, {}, stopped
+    return measures, {}, stopped, came

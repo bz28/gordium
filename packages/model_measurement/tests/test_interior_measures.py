@@ -1553,6 +1553,149 @@ def test_door_data_problems(path, value, words, measure):
     assert words in stopped[measure], stopped
 
 
+# the maker's stated clear opening (decision 2): the base door is drawn 32.25 wide (latch 34 - leaf face 1.75)
+# and 80 high (80 - 0)
+SRC = "maker's catalogue, p. 4"
+
+
+def stated_door(width=32.25, height=80, **change):
+    d = base()
+    d["doors"][0]["stated_clear"] = {"width": width, "height": height, "source": SRC}
+    d["doors"][0].update(change)
+    return d
+
+
+def door_from(d):
+    p = one(d, "egress_door")
+    return p["measures"], p["not_measured"], p["from"]
+
+
+def test_drawn_alone_says_so():
+    m, _, came = door_from(base())
+    assert (m["door_clear_width"], m["door_clear_height"]) == (32.25, 80.0)
+    assert {k: v["used"] for k, v in came.items()} == {"door_clear_width": "drawn", "door_clear_height": "drawn"}
+    assert "no maker's clear opening" in came["door_clear_width"]["why"]
+
+
+def test_the_makers_smaller_width_counts():
+    m, _, came = door_from(stated_door(width=31.5, height=81))     # width 31.5 < 32.25; height 80 < 81
+    assert (m["door_clear_width"], m["door_clear_height"]) == (31.5, 80.0)
+    assert came["door_clear_width"] == {"used": "stated", "stated": 31.5, "drawn": 32.25, "source": SRC,
+                                        "why": "the maker's stated clear width is smaller than the drawn one: the "
+                                               "less favourable counts"}
+    assert came["door_clear_height"]["used"] == "drawn" and came["door_clear_height"]["stated"] == 81.0
+
+
+def test_the_drawn_smaller_height_counts_and_the_makers_smaller_height_too():
+    m, _, came = door_from(stated_door(width=33, height=79))       # width 32.25 < 33; height 79 < 80
+    assert (m["door_clear_width"], m["door_clear_height"]) == (32.25, 79.0)
+    assert came["door_clear_width"]["used"] == "drawn" and came["door_clear_height"]["used"] == "stated"
+
+
+def test_drawn_and_stated_the_same():
+    m, _, came = door_from(stated_door())
+    assert (m["door_clear_width"], m["door_clear_height"]) == (32.25, 80.0)
+    assert {v["used"] for v in came.values()} == {"both"}
+
+
+def test_the_makers_opening_alone():
+    d = stated_door(width=34, height=81)
+    for k in ("stops", "hinge_pin", "leaf_closed", "threshold_top", "head_stop_bottom"):
+        del d["doors"][0][k]
+    m, stopped, came = door_from(d)
+    assert (m["door_clear_width"], m["door_clear_height"]) == (34.0, 81.0)
+    assert came["door_clear_width"] == {"used": "stated", "stated": 34.0, "source": SRC,
+                                        "why": "the maker's stated clear width; none drawn"}
+    assert "door_clear_width" not in stopped
+
+
+def test_the_makers_size_alone_on_one_measure_only():
+    d = stated_door(width=34, height=81)
+    del d["doors"][0]["threshold_top"], d["doors"][0]["head_stop_bottom"]     # the height not drawn: stated
+    m, _, came = door_from(d)
+    assert (m["door_clear_width"], m["door_clear_height"]) == (32.25, 81.0)
+    assert came["door_clear_width"]["used"] == "drawn" and came["door_clear_height"]["used"] == "stated"
+
+
+@pytest.mark.parametrize("key, measure", [("stops", "door_clear_width"), ("hinge_pin", "door_clear_width"),
+                                          ("leaf_closed", "door_clear_width"), ("threshold_top", "door_clear_height"),
+                                          ("head_stop_bottom", "door_clear_height")])
+def test_a_door_drawn_in_part_never_falls_back_to_the_makers_size(key, measure):
+    """Drawn but not measurable (one part of the drawing missing): the maker's size alone could be more than the
+    door as drawn, so no value, never the stated one."""
+    d = stated_door(width=40, height=90)
+    del d["doors"][0][key]
+    m, stopped, came = door_from(d)
+    assert measure not in m and measure not in came
+    assert "is drawn but can't be measured from the drawing" in stopped[measure]
+
+
+def test_a_drawn_door_that_doesnt_measure_never_takes_the_makers_size():
+    d = stated_door(width=40, height=90, stops={"hinge": 34, "latch": 0})       # stops the wrong way round
+    m, stopped, _ = door_from(d)
+    assert "door_clear_width" not in m and "far side" in stopped["door_clear_width"]
+    assert m["door_clear_height"] == 80.0
+
+
+def test_a_sliding_door_has_no_clear_width_even_stated():
+    d = stated_door(width=34, height=81, operation="sliding")
+    for k in ("stops", "hinge_pin", "leaf_closed"):
+        del d["doors"][0][k]
+    m, stopped, came = door_from(d)
+    assert "door_clear_width" not in m and "this door is sliding" in stopped["door_clear_width"]
+    assert m["door_clear_height"] == 80.0 and came["door_clear_height"]["used"] == "drawn"
+
+
+@pytest.mark.parametrize("stated, words", [
+    ("34 x 80", "isn't a mapping"),
+    ({"width": 34, "height": 80}, "doesn't say where it comes from"),
+    ({"width": 34, "height": 80, "source": "  "}, "doesn't say where it comes from"),
+    ({"width": 34, "height": 80, "source": 4}, "doesn't say where it comes from"),
+    ({"width": 34, "height": 80, "source": SRC, "bottom": 0}, "keys it doesn't know (bottom;"),
+    ({"widht": 34, "height": 80, "source": SRC}, "keys it doesn't know (widht;"),
+    ({"height": 80, "source": SRC}, "the maker's stated clear width isn't given"),
+    ({"width": 34, "source": SRC}, "the maker's stated clear height isn't given"),
+    ({"width": "wide", "height": 80, "source": SRC}, "the maker's stated clear width isn't a length"),
+    ({"width": True, "height": 80, "source": SRC}, "the maker's stated clear width isn't a length"),
+    ({"width": -34, "height": 80, "source": SRC}, "a size can't be less than zero"),
+    ({"width": 34, "height": 0, "source": SRC}, "the maker's stated clear height is 0.0 in: not more than zero"),
+])
+def test_a_malformed_makers_size_gives_neither_measure(stated, words):
+    """Refused, never defaulted and never dropped: dropping it would leave the drawn size, which may be larger."""
+    d = base()
+    d["doors"][0]["stated_clear"] = stated
+    m, stopped, came = door_from(d)
+    assert "door_clear_width" not in m and "door_clear_height" not in m and came == {}
+    assert words in stopped["door_clear_width"] and words in stopped["door_clear_height"], stopped
+    assert m["door_side_hinged"] is True
+
+
+def test_the_makers_size_in_the_descriptions_units():
+    d = stated_door()
+    d["units"] = "mm"
+    for door_ in d["doors"]:
+        door_["stops"] = {k: v * 25.4 for k, v in door_["stops"].items()}
+        door_["hinge_pin"] = [v * 25.4 for v in door_["hinge_pin"]]
+        door_["leaf_closed"] = [[v * 25.4 for v in c] for c in door_["leaf_closed"]]
+        door_["threshold_top"], door_["head_stop_bottom"] = 0, 80 * 25.4
+        door_["stated_clear"].update(width=800, height=2000)          # 31.496 in, 78.740 in
+    m, _, came = door_from(d)
+    assert m["door_clear_width"] == pytest.approx(800 / 25.4) and came["door_clear_width"]["used"] == "stated"
+    assert m["door_clear_height"] == pytest.approx(2000 / 25.4) and came["door_clear_height"]["used"] == "stated"
+
+
+@pytest.mark.parametrize("seed", range(5))
+def test_random_doors_are_never_more_than_drawn_or_stated(seed):
+    import random
+    rng = random.Random(seed)
+    for _ in range(100):
+        sw, sh = rng.uniform(28, 36), rng.uniform(76, 84)
+        m, _, came = door_from(stated_door(width=sw, height=sh))
+        assert m["door_clear_width"] <= min(32.25, sw) + 1e-6 and m["door_clear_height"] <= min(80, sh) + 1e-6
+        assert m["door_clear_width"] == pytest.approx(min(32.25, sw), abs=1e-6)
+        assert m["door_clear_height"] == pytest.approx(min(80, sh), abs=1e-6)
+
+
 # --- the description ------------------------------------------------------------------------------------------------
 
 @pytest.mark.parametrize("units, scale", [("in", 1), ("ft", 1 / 12), ("mm", 25.4), ("m", 0.0254)])
@@ -1759,6 +1902,11 @@ STOP_CASES = {
     "not_side_hinged": _set(("doors", 0, "operation"), "sliding"),
     "stops_wrong_way": _set(("doors", 0, "stops"), {"hinge": 34, "latch": 0}),
     "not_positive": _set(("doors", 0, "head_stop_bottom"), 0),
+    "door_stated_shape": _set(("doors", 0, "stated_clear"), "34 x 80"),
+    "door_stated_keys": _set(("doors", 0, "stated_clear"), {"width": 34, "height": 80, "source": "A", "bottom": 0}),
+    "door_stated_no_source": _set(("doors", 0, "stated_clear"), {"width": 34, "height": 80}),
+    "door_drawn_unread": _with(base, lambda d: d["doors"][0].update(
+        stated_clear={"width": 34, "height": 80, "source": "A"}, head_stop_bottom=None)),
 }
 
 
