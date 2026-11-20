@@ -117,7 +117,7 @@ public static class StairReader
         // one line per category and kind (a real model has hundreds alike: Pacific Continental's 272 grilles), each
         // element still listed by id in the Revit layer's log
         foreach (var g in records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption)
-                                                             && !InsideWindowOrDoor(c))
+                                                             && !InsideWindowOrDoor(c) && !ClearedByArchitect(c))
                      .GroupBy(c => (c.BuiltInCategory, c.Kind)))
         {
             var cat = g.Key.BuiltInCategory.Replace("OST_", "");
@@ -147,6 +147,48 @@ public static class StairReader
         }
         if (records.CoordinationModels > 0)
             why.Add($"{records.CoordinationModels} coordination model(s) linked: what is in one isn't read, and a stair could be in it");
+        return why;
+    }
+
+    // ---- the architect's "Not a stair" (Ben, 2026-11-20, Q2) ---------------------------------------------------
+
+    /// <summary>The kinds the architect's <c>Gordium: Not a stair</c> can never clear: a stair Revit itself knows as one.</summary>
+    private static readonly HashSet<string> StairKinds = new(StringComparer.Ordinal) { "a multistory stair", "a stair not made of components" };
+
+    private static bool MarkedNotAStair(IReadOnlyDictionary<Guid, MarkValue>? marks) =>
+        marks is not null && Marks.YesNo(marks.TryGetValue(Marks.NotAStair.Guid, out var v) ? v : null) is true;
+
+    /// <summary>A candidate the architect marked <c>Gordium: Not a stair</c> Yes (unset or No: not stated, so it still
+    /// stops the stairs being read): any element in Generic Models, Stairs or Railings that isn't a Revit stair (a
+    /// multistory stair, a stair not made of components: a conflict instead, <see cref="NotAStairConflicts"/>).</summary>
+    public static bool ClearedByArchitect(StairCandidate c) => MarkedNotAStair(c.InstanceMarks) && !StairKinds.Contains(c.Kind);
+
+    /// <summary>Every element in the design checked cleared by the architect's <c>Gordium: Not a stair</c>, one line
+    /// per category and type ("Not a stair (architect): GenericModel "Wall niche" x 7, ids in the log"), listed in the
+    /// marking list and the Read inside log so each exemption is traceable. Empty when none is.</summary>
+    public static List<string> NotAStairLines(RevitModel model) =>
+        model.Interior is not { } records ? []
+        : records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption) && ClearedByArchitect(c))
+            .GroupBy(c => (Cat: c.BuiltInCategory.Replace("OST_", ""), Name: c.Name ?? "(no name)"))
+            .OrderBy(g => g.Key.Cat, StringComparer.Ordinal).ThenBy(g => g.Key.Name, StringComparer.Ordinal)
+            .Select(g => $"Not a stair (architect): {g.Key.Cat} \"{g.Key.Name}\" x {g.Count()}, ids in the log").ToList();
+
+    /// <summary>Every Revit stair or railing in the design checked marked <c>Gordium: Not a stair</c> Yes: the mark
+    /// can't clear one (it is read as what it is: a stair checked, never a stair skipped), so each is a conflict,
+    /// listed first in the marking list.</summary>
+    public static List<string> NotAStairConflicts(RevitModel model)
+    {
+        if (model.Interior is not { } records)
+            return [];
+        var why = new List<string>();
+        const string Read = "the mark can't clear a Revit stair or railing: it is read as one (clear the mark, or delete the element if it isn't one)";
+        foreach (var s in (records.Stairs ?? []).Where(s => SiteReader.InDesignChecked(model, s.PhaseDemolished, s.DesignOption) && MarkedNotAStair(s.InstanceMarks)))
+            why.Add($"Stair \"{s.Name ?? s.UniqueId}\" is marked {Marks.NotAStair.Name} Yes, but {Read}");
+        foreach (var r in (records.Railings ?? []).Where(r => SiteReader.InDesignChecked(model, r.PhaseDemolished, r.DesignOption) && MarkedNotAStair(r.InstanceMarks)))
+            why.Add($"Railing \"{r.Name ?? r.UniqueId}\" is marked {Marks.NotAStair.Name} Yes, but {Read}");
+        foreach (var c in records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption)
+                                                             && MarkedNotAStair(c.InstanceMarks) && StairKinds.Contains(c.Kind)))
+            why.Add($"{c.BuiltInCategory.Replace("OST_", "")} \"{c.Name ?? c.UniqueId}\" ({c.Kind}) is marked {Marks.NotAStair.Name} Yes, but {Read}");
         return why;
     }
 

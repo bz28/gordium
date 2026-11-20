@@ -83,6 +83,101 @@ public sealed class RealModelTests
         Assert.False(StairReader.InsideWindowOrDoor(Muntin(Box(10.5, 0.1, 4, 12.5, 0.4, 7), window)));
     }
 
+    // ---- the architect's "Not a stair" (Q2: the sample's 19 standalone Generic Models) -----------------------------
+
+    private static Dictionary<Guid, MarkValue> NotAStair(MarkValue v) => new() { [Marks.NotAStair.Guid] = v };
+
+    /// <summary>House 2 with the sample's kind of standalone Generic Models beside it (not nested in anything): two
+    /// corbels and a wall niche, each marked <paramref name="mark"/> (null: the mark not on the element at all).</summary>
+    private static FakeHouse WithGenericModels(MarkValue? mark)
+    {
+        var house = FakeHouse.Draw("2_two_story_small_window");
+        foreach (var (id, name) in new[] { ("gm1", "Corbel"), ("gm2", "Corbel"), ("gm3", "Wall niche") })
+            house.StairCandidates.Add(new(id, "OST_GenericModel", name, "a loadable family", Box: Box(50, 50, 0, 51, 51, 1),
+                                          InstanceMarks: mark is { } m ? NotAStair(m) : null));
+        return house;
+    }
+
+    public static TheoryData<string, bool> NotAStairMarks() => new()
+    {
+        { "Yes", true }, { "No", false }, { "never set", false }, { "not on the element", false },
+    };
+
+    [Theory]
+    [MemberData(nameof(NotAStairMarks))]
+    public void A_generic_model_marked_not_a_stair_is_cleared_and_listed_unset_or_no_still_blocks(string how, bool cleared)
+    {
+        var house = WithGenericModels(how switch
+        {
+            "Yes" => Yes, "No" => new MarkValue(true, 0), "never set" => new MarkValue(false, 0), _ => null,
+        });
+        var read = InteriorReader.Read(house.Model());
+        var list = MarkingList.Build(house.Model());
+        if (cleared)
+        {
+            Assert.NotNull(read.Interior["stairs"]);
+            Assert.Empty(read.StairsNotRead);
+            Assert.Empty(StairReader.Blockers(house.Model()));
+            Assert.DoesNotContain(GuardReader.Blockers(house.Model(), null), w => w.Contains("GenericModel"));   // nor a guard's
+            // every exemption traceable: one line per type, in the Read inside log and in the marking list
+            string[] lines = ["Not a stair (architect): GenericModel \"Corbel\" x 2, ids in the log",
+                              "Not a stair (architect): GenericModel \"Wall niche\" x 1, ids in the log"];
+            Assert.Equal(lines, read.NotAStair);
+            Assert.Equal(lines, list.NotAStair);
+            Assert.Contains(lines[0], MarkingList.Text(list));
+            Assert.Equal([], InteriorTests.Problems(house, read));                                   // measured as worked by hand
+        }
+        else
+        {
+            Assert.Null(read.Interior["stairs"]);
+            Assert.Contains(read.StairsNotRead, w => w.Contains("3 GenericModel elements are each a loadable family"));
+            Assert.Empty(read.NotAStair);
+            Assert.Empty(list.NotAStair);
+        }
+        Assert.Empty(read.NotAStairConflicts);
+    }
+
+    [Fact]
+    public void One_generic_model_left_unmarked_still_stops_the_stairs()
+    {
+        var house = WithGenericModels(Yes);
+        house.StairCandidates[2] = house.StairCandidates[2] with { InstanceMarks = null };     // the niche not marked
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(read.Interior["stairs"]);
+        Assert.Contains(read.StairsNotRead, w => w.Contains("GenericModel \"Wall niche\" is a loadable family"));
+        Assert.Equal(["Not a stair (architect): GenericModel \"Corbel\" x 2, ids in the log"], read.NotAStair);
+    }
+
+    [Fact]
+    public void Not_a_stair_never_clears_a_revit_stair_or_railing_it_is_a_conflict_listed_first()
+    {
+        var house = FakeHouse.Draw("2_two_story_small_window");
+        house.Stairs[0] = house.Stairs[0] with { InstanceMarks = NotAStair(Yes) };
+        var r = house.Railings!.Count - 1;
+        house.Railings[r] = house.Railings[r] with { InstanceMarks = NotAStair(Yes) };
+        var read = InteriorReader.Read(house.Model());
+        Assert.Equal(2, read.NotAStairConflicts.Count);
+        Assert.Contains("is marked Gordium: Not a stair Yes, but the mark can't clear a Revit stair or railing", read.NotAStairConflicts[0]);
+        Assert.StartsWith("Stair ", read.NotAStairConflicts[0]);
+        Assert.StartsWith("Railing ", read.NotAStairConflicts[1]);
+        Assert.Empty(read.NotAStair);
+        Assert.NotNull(read.Interior["stairs"]);                                                   // read as what it is
+        Assert.Equal([], InteriorTests.Problems(house, read));
+        var list = MarkingList.Build(house.Model());
+        Assert.Equal(read.NotAStairConflicts, list.NotAStairConflicts);
+        Assert.StartsWith("Conflict: Stair ", MarkingList.Text(list));                             // listed first
+        Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
+
+        // a multistory stair marked so: still a stair the reader doesn't walk, and a conflict
+        house = FakeHouse.Draw("2_two_story_small_window");
+        house.StairCandidates.Add(new("ms", "OST_MultistoryStairs", "Tower stair", "a multistory stair", InstanceMarks: NotAStair(Yes)));
+        read = InteriorReader.Read(house.Model());
+        Assert.Null(read.Interior["stairs"]);
+        Assert.Contains(read.StairsNotRead, w => w.Contains("\"Tower stair\" is a multistory stair"));
+        Assert.Contains("(a multistory stair) is marked Gordium: Not a stair Yes", read.NotAStairConflicts.Single());
+        Assert.Empty(read.NotAStair);
+    }
+
     // ---- an enclosed area with no Room ----------------------------------------------------------------------------
 
     /// <summary>The ranch with its rooms and areas on level 0 given that level's id, plus the level itself.</summary>
