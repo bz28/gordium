@@ -283,6 +283,20 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         match = StreetEdges.Match([chordKept], lot, Transform3.Identity);
         Assert.Equal("[[[40,0],[0,0]]]", Rounded(match.StreetLine!));
         Assert.Equal("the 40.0 ft lot edge from (40.0, 0.0) to (0.0, 0.0)", match.Words);
+        // each test on its own: the kind, for an arc so flat its middle is within 0.25 ft of the chord's; the middle,
+        // for two arcs on the same ends bulging either way
+        JsonObject Curved(Func<double, Xyz> at) => new()
+        {
+            ["curved"] = true,
+            ["points"] = new JsonArray(Enumerable.Range(0, 201).Select(k => at(k / 200.0)).Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray()),
+        };
+        var flat = new JsonObject { ["edges"] = new JsonArray(Curved(t => new Xyz(40 * t, -0.4 * t * (1 - t), 0)),
+            new JsonObject { ["points"] = new JsonArray(new JsonArray(40.0, 0.0), new JsonArray(0.0, 0.0)) }) };
+        Assert.Equal("[[[40,0],[0,0]]]", Rounded(StreetEdges.Match([chordKept], flat, Transform3.Identity).StreetLine!));
+        var twoArcs = new JsonObject { ["edges"] = new JsonArray(Curved(At), Curved(t => At(t) with { Y = -At(t).Y })) };
+        match = StreetEdges.Match([arcKept], twoArcs, Transform3.Identity);
+        Assert.Equal(StreetRefusal.None, match.Reason);
+        Assert.Equal(-1, Math.Sign(arcKept.Mid!.Value.Y));                                   // the arc kept bulges south
         // an older mark, its ends alone: which was meant can't be told, so nothing is sent, and its typed reason is
         // one the button asks a new pick for (never read from the words)
         var (both, why2) = StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity);
