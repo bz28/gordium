@@ -140,7 +140,9 @@ internal static class HouseDraw
         foreach (var room in house["rooms"]!.AsArray().Select(n => n!.AsObject()))
         {
             var shape = DirectShape.CreateElement(doc, ceilings);
-            shape.Name = "Ceiling of " + room["name"]!.GetValue<string>();
+            // Revit refuses \ : { } [ ] | ; < > ? ` ~ in an element's name (the Orangetown main floor's "Main floor: ...")
+            shape.Name = new string(("Ceiling of " + room["name"]!.GetValue<string>())
+                .Select(c => @"\:{}[]|;<>?`~".Contains(c) ? '-' : c).ToArray());
             var solids = new List<GeometryObject>();
             foreach (var piece in room["ceilings"]!.AsArray())
             {
