@@ -184,6 +184,22 @@ public sealed class RealModelTests
     }
 
     [Fact]
+    public void With_no_room_drawn_at_all_the_list_never_says_the_rooms_drawn_are_read()
+    {
+        // review round 2: walls only (a first run): no rooms sent, yet the area's line said "the rooms drawn are read"
+        var house = Ranch();
+        house.Marked.RemoveAll(e => e.BuiltInCategory == Marks.Rooms);
+        house.Rooms.Clear();
+        house.Areas.Add(Unroomed());
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(read.Interior["rooms"]);
+        Assert.Null(read.Interior["unknown_spaces"]);
+        var summary = MarkingList.Build(house.Model()).Summary;
+        Assert.DoesNotContain(summary, s => s.Contains("the rooms drawn are read"));
+        Assert.Contains(summary, s => s.StartsWith("1 enclosed area has no Room (listed above): once the rooms are read", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void With_no_area_unroomed_nothing_is_added_and_no_level_is_listed()
     {
         var house = Ranch();

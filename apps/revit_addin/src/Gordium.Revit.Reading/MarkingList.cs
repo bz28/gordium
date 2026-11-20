@@ -180,7 +180,11 @@ public static class MarkingList
         blockers.AddRange(others);
         // each enclosed area with no Room (not on a level marked as having none): sent as a space whose use isn't known
         var unknown = InteriorReader.AreaBlockers(model);
-        var summary = Summary(rows, placement, others.Count, InteriorReader.UnknownAreas(model).Count);
+        // what the reader sends, read once (with the model's inside read): the list says the rooms are read only when
+        // the reader sends them (review round 2: with no Room drawn at all it said so beside "No rooms are drawn")
+        var read = model.Interior is null ? null : InteriorReader.Read(model);
+        var summary = Summary(rows, placement, others.Count, InteriorReader.UnknownAreas(model).Count,
+                              roomsSent: read?.Interior["rooms"] is not null);
         // step 4: the project-wide tick, always shown; and, with the model's inside read, what could hide a stair
         var stairBlockers = StairReader.Blockers(model);
         summary.Add(MarkReading.AllStairs(model) switch
@@ -201,7 +205,6 @@ public static class MarkingList
         // step 6: what the house has none of, read exactly as the reader reads it (the guards' tick needs the stairs read)
         // (the add-in builds the list from the model with its inside read, RevitInterior.Model; without it, a tick can't
         // be checked against the model, and the list says so instead of calling it held back)
-        var read = model.Interior is null ? null : InteriorReader.Read(model);
         var ticks = read?.Ticks ?? HasNone.ReadAll(model);
         return new(problems, blockers, summary, rows)
         {
@@ -331,7 +334,7 @@ public static class MarkingList
         return new(m, MarkState.NotUnderstood, word, null, words);
     }
 
-    private static List<string> Summary(List<MarkingRow> rows, int placement, int others, int unknown)
+    private static List<string> Summary(List<MarkingRow> rows, int placement, int others, int unknown, bool roomsSent)
     {
         var lines = new List<string>();
         var blockers = placement + others;
@@ -343,10 +346,10 @@ public static class MarkingList
                       "areas that couldn't be read) could hide a room, " +
                       "so no room is read for egress until each is resolved.");
         if (unknown > 0)
-            // "the rooms drawn are read" only when nothing else stops them (review round 1: beside an unplaced Room the
-            // two lines contradicted each other)
+            // "the rooms drawn are read" only when the reader sends them (review rounds 1 and 2: beside an unplaced
+            // Room, or with no Room drawn at all, the lines contradicted each other); unknown is 0 with the inside unread
             lines.Add((unknown == 1 ? "1 enclosed area has" : $"{unknown} enclosed areas have") + " no Room (listed above): " +
-                      (blockers == 0 ? "the rooms drawn are read, but each such area may be a bedroom, so every sleeping-room rule needs review"
+                      (roomsSent ? "the rooms drawn are read, but each such area may be a bedroom, so every sleeping-room rule needs review"
                                      : "once the rooms are read, each such area may be a bedroom, so it keeps every sleeping-room rule needing review") +
                       $" until a Room is placed in each, or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
         void Flag(MarkedKind[] kinds, MarkDefinition m, string plural, string consequence)
