@@ -8,45 +8,45 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "m1": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000417d",
-    "m2": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000417f",
-    "m3": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004181",
-    "m4": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004183",
-    "b2a": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004185",
-    "b2b": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004187",
-    "b3a": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004189",
-    "b3b": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418b",
-    "b4a": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418d",
-    "b4b": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418f",
-    "x1": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004191",
-    "x2": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004193",
-    "bsw1": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004195",
-    "bsw2": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004197",
-    "front": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004199",
-    "master": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419b",
-    "bed2": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419d",
-    "bed3": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419e",
-    "bed4": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419f",
-    "bonus": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a0",
-    "master_bath": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a1",
-    "hall_bath": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a2",
-    "bed2_alcove": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a3",
-    "bed2_closet": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a4",
-    "wic_master_1": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a5",
-    "wic_master_2": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a6",
-    "linen": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a7",
-    "wic4": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a8",
-    "hall": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a9",
-    "main_floor": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041aa",
-    "garage": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041ac",
-    "basement": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041ad"
+    "m1": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b0",
+    "m2": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b2",
+    "m3": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b4",
+    "m4": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b6",
+    "b2a": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b8",
+    "b2b": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ba",
+    "b3a": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041bc",
+    "b3b": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041be",
+    "b4a": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c0",
+    "b4b": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c2",
+    "x1": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c4",
+    "x2": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c6",
+    "bsw1": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c8",
+    "bsw2": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ca",
+    "front": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041cc",
+    "master": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ce",
+    "bed2": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d0",
+    "bed3": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d1",
+    "bed4": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d2",
+    "bonus": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d3",
+    "master_bath": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d4",
+    "hall_bath": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d5",
+    "bed2_alcove": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d6",
+    "bed2_closet": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d7",
+    "wic_master_1": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d8",
+    "wic_master_2": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d9",
+    "linen": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041da",
+    "wic4": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041db",
+    "hall": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041dc",
+    "main_floor": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041dd",
+    "garage": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041df",
+    "basement": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041e0"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419b",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ce",
         "name": "Master bedroom (1)",
         "sleeping": true,
         "floor": [
@@ -94,7 +94,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419d",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d0",
         "name": "Bedroom 2 (2)",
         "sleeping": true,
         "floor": [
@@ -142,7 +142,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419e",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d1",
         "name": "Bedroom 3 (3)",
         "sleeping": true,
         "floor": [
@@ -190,7 +190,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419f",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d2",
         "name": "Bedroom 4 (4)",
         "sleeping": true,
         "floor": [
@@ -238,7 +238,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a0",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d3",
         "name": "Bonus room (5)",
         "sleeping": false,
         "floor": [
@@ -286,7 +286,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a1",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d4",
         "name": "Master bath (6)",
         "sleeping": false,
         "floor": [
@@ -334,7 +334,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a2",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d5",
         "name": "Hall bath (7)",
         "sleeping": false,
         "floor": [
@@ -382,7 +382,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a3",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d6",
         "name": "Bedroom 2\u0027s entry alcove (not dimensioned) (8)",
         "sleeping": false,
         "floor": [
@@ -430,7 +430,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a4",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d7",
         "name": "Bedroom 2 closet (9)",
         "sleeping": false,
         "floor": [
@@ -478,7 +478,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a5",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d8",
         "name": "Walk-in closet 1 (10)",
         "sleeping": false,
         "floor": [
@@ -526,7 +526,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a6",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d9",
         "name": "Walk-in closet 2 (11)",
         "sleeping": false,
         "floor": [
@@ -574,7 +574,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a7",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041da",
         "name": "Linen and bedroom 3 closet (12)",
         "sleeping": false,
         "floor": [
@@ -622,7 +622,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a8",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041db",
         "name": "Bedroom 4 walk-in closet (13)",
         "sleeping": false,
         "floor": [
@@ -670,7 +670,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a9",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041dc",
         "name": "Hallway, stair, bridge and open to below (14)",
         "sleeping": false,
         "floor": [
@@ -834,7 +834,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041aa",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041dd",
         "name": "Main floor: kitchen, dinette, family, dining, living, hall, entry, powder, laundry (partitions not drawn) (15)",
         "sleeping": false,
         "floor": [
@@ -1965,344 +1965,344 @@
             [
               41.5,
               22.5,
-              -1
+              -0.875
             ],
             [
               41.5,
               41.47222222222223,
-              -1
+              -0.875
             ],
             [
               32.85176034589253,
               26.578031706814905,
-              -1
+              -0.875
             ]
           ],
           [
             [
               41.5,
               41.47222222222222,
-              -1
+              -0.875
             ],
             [
               41.5,
               41.67971887550201,
-              -1
+              -0.875
             ],
             [
               30.71744816762576,
               27.584455335591105,
-              -1
+              -0.875
             ],
             [
               32.85176034589253,
               26.578031706814905,
-              -1
+              -0.875
             ]
           ],
           [
             [
               41.5,
               41.67971887550201,
-              -1
+              -0.875
             ],
             [
               41.5,
               41.833333333333336,
-              -1
+              -0.875
             ],
             [
               0.5,
               41.833333333333336,
-              -1
+              -0.875
             ],
             [
               30.71744816762576,
               27.5844553355911,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.5,
               41.833333333333336,
-              -1
+              -0.875
             ],
             [
               0.5,
               41.071705426356594,
-              -1
+              -0.875
             ],
             [
               2.338596491228074,
               36.43245614035088,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.5,
               41.07170542635659,
-              -1
+              -0.875
             ],
             [
               0.5,
               40.93217054263566,
-              -1
+              -0.875
             ],
             [
               7.166666666666671,
               22.249999999999993,
-              -1
+              -0.875
             ],
             [
               2.338596491228074,
               36.43245614035087,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.5,
               40.93217054263565,
-              -1
+              -0.875
             ],
             [
               0.5,
               2.6666666666666643,
-              -1
+              -0.875
             ],
             [
               13.833333333333336,
               2.6666666666666643,
-              -1
+              -0.875
             ],
             [
               7.166666666666686,
               22.249999999999943,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.5,
               41.833333333333336,
-              -1
+              -0.875
             ],
             [
               2.338596491228067,
               36.43245614035088,
-              -1
+              -0.875
             ],
             [
               7.166666666666664,
               24.250000000000014,
-              -1
+              -0.875
             ]
           ],
           [
             [
               2.338596491228074,
               36.43245614035087,
-              -1
+              -0.875
             ],
             [
               7.166666666666664,
               22.250000000000004,
-              -1
+              -0.875
             ],
             [
               13.833333333333336,
               3.567829457364347,
-              -1
+              -0.875
             ],
             [
               13.833333333333336,
               6.666666666666664,
-              -1
+              -0.875
             ],
             [
               7.166666666666671,
               24.249999999999986,
-              -1
+              -0.875
             ]
           ],
           [
             [
               7.166666666666686,
               22.249999999999943,
-              -1
+              -0.875
             ],
             [
               13.833333333333336,
               2.6666666666666643,
-              -1
+              -0.875
             ],
             [
               13.833333333333336,
               3.56782945736434,
-              -1
+              -0.875
             ]
           ],
           [
             [
               14.715821812596008,
               6.666666666666664,
-              -1
+              -0.875
             ],
             [
               21,
               6.666666666666664,
-              -1
+              -0.875
             ],
             [
               18.282256104476886,
               11.328812698824201,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.5,
               41.833333333333336,
-              -1
+              -0.875
             ],
             [
               7.166666666666664,
               24.250000000000014,
-              -1
+              -0.875
             ],
             [
               14.135176651305684,
               6.666666666666664,
-              -1
+              -0.875
             ],
             [
               14.715821812596008,
               6.666666666666664,
-              -1
+              -0.875
             ],
             [
               18.282256104476886,
               11.328812698824201,
-              -1
+              -0.875
             ]
           ],
           [
             [
               7.166666666666671,
               24.249999999999986,
-              -1
+              -0.875
             ],
             [
               13.833333333333336,
               6.666666666666664,
-              -1
+              -0.875
             ],
             [
               14.135176651305684,
               6.666666666666664,
-              -1
+              -0.875
             ]
           ],
           [
             [
               18.28225610447689,
               11.328812698824198,
-              -1
+              -0.875
             ],
             [
               21,
               6.666666666666664,
-              -1
+              -0.875
             ],
             [
               21,
               14.881526104417667,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.5,
               41.833333333333336,
-              -1
+              -0.875
             ],
             [
               18.282256104476886,
               11.328812698824201,
-              -1
+              -0.875
             ],
             [
               21,
               14.881526104417667,
-              -1
+              -0.875
             ],
             [
               21,
               22.5,
-              -1
+              -0.875
             ]
           ],
           [
             [
               30.483870967741936,
               22.5,
-              -1
+              -0.875
             ],
             [
               41.5,
               22.5,
-              -1
+              -0.875
             ],
             [
               32.85176034589253,
               26.578031706814905,
-              -1
+              -0.875
             ]
           ],
           [
             [
               26.827956989247312,
               22.5,
-              -1
+              -0.875
             ],
             [
               30.483870967741936,
               22.5,
-              -1
+              -0.875
             ],
             [
               32.85176034589253,
               26.578031706814905,
-              -1
+              -0.875
             ],
             [
               30.71744816762576,
               27.584455335591105,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.5,
               41.833333333333336,
-              -1
+              -0.875
             ],
             [
               21,
               22.5,
-              -1
+              -0.875
             ],
             [
               26.827956989247312,
               22.5,
-              -1
+              -0.875
             ],
             [
               30.71744816762576,
               27.584455335591105,
-              -1
+              -0.875
             ]
           ],
           [
@@ -3376,7 +3376,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041ac",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041df",
         "name": "Garage (16)",
         "sleeping": false,
         "floor": [
@@ -3579,127 +3579,127 @@
             [
               41.5,
               3,
-              -1
+              -0.875
             ],
             [
               41.5,
               3.0753968253968256,
-              -1
+              -0.875
             ],
             [
               26.06134671414697,
               5.403447717707998,
-              -1
+              -0.875
             ],
             [
               23.825581395348838,
               3,
-              -1
+              -0.875
             ]
           ],
           [
             [
               41.5,
               3.075396825396825,
-              -1
+              -0.875
             ],
             [
               41.5,
               22,
-              -1
+              -0.875
             ],
             [
               26.061346714146975,
               5.403447717707998,
-              -1
+              -0.875
             ]
           ],
           [
             [
               21.5,
               6.091269841269844,
-              -1
+              -0.875
             ],
             [
               21.5,
               3,
-              -1
+              -0.875
             ],
             [
               23.825581395348838,
               3,
-              -1
+              -0.875
             ],
             [
               26.061346714146975,
               5.403447717707996,
-              -1
+              -0.875
             ]
           ],
           [
             [
               41.5,
               22,
-              -1
+              -0.875
             ],
             [
               30.193548387096776,
               22,
-              -1
+              -0.875
             ],
             [
               21.5,
               7.027777777777777,
-              -1
+              -0.875
             ],
             [
               21.5,
               6.091269841269842,
-              -1
+              -0.875
             ],
             [
               26.06134671414697,
               5.403447717707996,
-              -1
+              -0.875
             ]
           ],
           [
             [
               30.193548387096776,
               22,
-              -1
+              -0.875
             ],
             [
               26.445468509984643,
               22,
-              -1
+              -0.875
             ],
             [
               21.5,
               15.53514056224899,
-              -1
+              -0.875
             ],
             [
               21.5,
               7.027777777777777,
-              -1
+              -0.875
             ]
           ],
           [
             [
               26.445468509984643,
               22,
-              -1
+              -0.875
             ],
             [
               21.5,
               22,
-              -1
+              -0.875
             ],
             [
               21.5,
               15.535140562248994,
-              -1
+              -0.875
             ]
           ],
           [
@@ -3898,7 +3898,7 @@
         ]
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041ad",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041e0",
         "name": "Unfinished basement (17)",
         "sleeping": false,
         "floor": [
@@ -5051,344 +5051,344 @@
             [
               41.333333333333336,
               22.5,
-              -1
+              -0.875
             ],
             [
               41.333333333333336,
               41.18518518518519,
-              -1
+              -0.875
             ],
             [
               32.81503010172307,
               26.51477406407861,
-              -1
+              -0.875
             ]
           ],
           [
             [
               41.333333333333336,
               41.18518518518519,
-              -1
+              -0.875
             ],
             [
               41.333333333333336,
               41.46184738955824,
-              -1
+              -0.875
             ],
             [
               30.671867625419917,
               27.524871132828043,
-              -1
+              -0.875
             ],
             [
               32.81503010172306,
               26.514774064078612,
-              -1
+              -0.875
             ]
           ],
           [
             [
               41.333333333333336,
               41.46184738955824,
-              -1
+              -0.875
             ],
             [
               41.333333333333336,
               41.666666666666664,
-              -1
+              -0.875
             ],
             [
               0.6666666666666714,
               41.666666666666664,
-              -1
+              -0.875
             ],
             [
               30.671867625419917,
               27.524871132828046,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.6666666666666714,
               41.666666666666664,
-              -1
+              -0.875
             ],
             [
               0.6666666666666714,
               40.65116279069767,
-              -1
+              -0.875
             ],
             [
               2.855612682090843,
               35.127892030848294,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.6666666666666714,
               40.65116279069767,
-              -1
+              -0.875
             ],
             [
               0.6666666666666714,
               40.465116279069754,
-              -1
+              -0.875
             ],
             [
               7.166666666666671,
               22.249999999999982,
-              -1
+              -0.875
             ],
             [
               2.855612682090843,
               35.1278920308483,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.6666666666666714,
               40.46511627906976,
-              -1
+              -0.875
             ],
             [
               0.6666666666666714,
               2.8333333333333357,
-              -1
+              -0.875
             ],
             [
               13.666666666666664,
               2.8333333333333357,
-              -1
+              -0.875
             ],
             [
               7.166666666666657,
               22.250000000000036,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.6666666666666714,
               41.666666666666664,
-              -1
+              -0.875
             ],
             [
               2.855612682090843,
               35.1278920308483,
-              -1
+              -0.875
             ],
             [
               6.250273224043724,
               26.562295081967193,
-              -1
+              -0.875
             ]
           ],
           [
             [
               2.855612682090843,
               35.1278920308483,
-              -1
+              -0.875
             ],
             [
               7.166666666666664,
               22.250000000000004,
-              -1
+              -0.875
             ],
             [
               13.666666666666664,
               4.034883720930239,
-              -1
+              -0.875
             ],
             [
               13.666666666666664,
               6.5,
-              -1
+              -0.875
             ],
             [
               6.250273224043717,
               26.56229508196721,
-              -1
+              -0.875
             ]
           ],
           [
             [
               7.166666666666657,
               22.250000000000032,
-              -1
+              -0.875
             ],
             [
               13.666666666666664,
               2.8333333333333357,
-              -1
+              -0.875
             ],
             [
               13.666666666666664,
               4.034883720930246,
-              -1
+              -0.875
             ]
           ],
           [
             [
               14.588325652841785,
               6.5,
-              -1
+              -0.875
             ],
             [
               21,
               6.5,
-              -1
+              -0.875
             ],
             [
               18.239956639566397,
               11.27351761517615,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.6666666666666714,
               41.666666666666664,
-              -1
+              -0.875
             ],
             [
               6.250273224043724,
               26.562295081967193,
-              -1
+              -0.875
             ],
             [
               14.201228878648234,
               6.5,
-              -1
+              -0.875
             ],
             [
               14.588325652841785,
               6.5,
-              -1
+              -0.875
             ],
             [
               18.239956639566397,
               11.27351761517615,
-              -1
+              -0.875
             ]
           ],
           [
             [
               6.250273224043717,
               26.562295081967214,
-              -1
+              -0.875
             ],
             [
               13.666666666666664,
               6.5,
-              -1
+              -0.875
             ],
             [
               14.201228878648234,
               6.5,
-              -1
+              -0.875
             ]
           ],
           [
             [
               18.239956639566397,
               11.27351761517615,
-              -1
+              -0.875
             ],
             [
               21,
               6.5,
-              -1
+              -0.875
             ],
             [
               21,
               14.881526104417667,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.6666666666666714,
               41.666666666666664,
-              -1
+              -0.875
             ],
             [
               18.239956639566397,
               11.27351761517615,
-              -1
+              -0.875
             ],
             [
               21,
               14.881526104417667,
-              -1
+              -0.875
             ],
             [
               21,
               22.5,
-              -1
+              -0.875
             ]
           ],
           [
             [
               30.483870967741936,
               22.5,
-              -1
+              -0.875
             ],
             [
               41.333333333333336,
               22.5,
-              -1
+              -0.875
             ],
             [
               32.81503010172307,
               26.514774064078612,
-              -1
+              -0.875
             ]
           ],
           [
             [
               26.827956989247312,
               22.5,
-              -1
+              -0.875
             ],
             [
               30.483870967741936,
               22.5,
-              -1
+              -0.875
             ],
             [
               32.81503010172307,
               26.514774064078612,
-              -1
+              -0.875
             ],
             [
               30.671867625419917,
               27.524871132828046,
-              -1
+              -0.875
             ]
           ],
           [
             [
               0.6666666666666714,
               41.666666666666664,
-              -1
+              -0.875
             ],
             [
               21,
               22.5,
-              -1
+              -0.875
             ],
             [
               26.827956989247312,
               22.5,
-              -1
+              -0.875
             ],
             [
               30.67186762541992,
               27.524871132828046,
-              -1
+              -0.875
             ]
           ],
           [
@@ -7643,114 +7643,114 @@
     ],
     "openings": [
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000417d",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b0",
         "name": "Gordium test window m1 (36 x 54 in): Family1 (Master bedroom double-hung 1 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419b",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ce",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000417f",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b2",
         "name": "Gordium test window m2 (36 x 54 in): Family2 (Master bedroom double-hung 2 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419b",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ce",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004181",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b4",
         "name": "Gordium test window m3 (24 x 54 in): Family3 (Master bedroom casement C15, 1 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419b",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ce",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004183",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b6",
         "name": "Gordium test window m4 (24 x 54 in): Family4 (Master bedroom casement C15, 2 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419b",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ce",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004185",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b8",
         "name": "Gordium test window b2a (36 x 54 in): Family5 (Bedroom 2 double-hung 1 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419d",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d0",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004187",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ba",
         "name": "Gordium test window b2b (36 x 54 in): Family6 (Bedroom 2 double-hung 2 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419d",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d0",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004189",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041bc",
         "name": "Gordium test window b3a (36 x 54 in): Family7 (Bedroom 3 double-hung 1 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419e",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d1",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418b",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041be",
         "name": "Gordium test window b3b (36 x 54 in): Family8 (Bedroom 3 double-hung 2 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419e",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d1",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418d",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c0",
         "name": "Gordium test window b4a (36 x 62 in): Family9 (Bedroom 4 double-hung 1 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419f",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d2",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418f",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c2",
         "name": "Gordium test window b4b (36 x 62 in): Family10 (Bedroom 4 double-hung 2 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000419f",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d2",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004191",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c4",
         "name": "Gordium test window x1 (36 x 62 in): Family11 (Bonus room double-hung 1 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a0",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d3",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004193",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c6",
         "name": "Gordium test window x2 (36 x 62 in): Family12 (Bonus room double-hung 2 of 2)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041a0",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041d3",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004195",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c8",
         "name": "Gordium test window bsw1 (24 x 48 in): Family13 (Basement window CW14 in areaway (north wall))",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041ad",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041e0",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004197",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ca",
         "name": "Gordium test window bsw2 (24 x 48 in): Family14 (Basement window CW14 in areaway (west wall))",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041ad",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041e0",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004199",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041cc",
         "name": "Gordium test door front (36 x 96 in): Family15 (Front entry door)",
-        "room": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-000041aa",
+        "room": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041dd",
         "escape": false,
         "operation": "side_hinged_door"
       }
     ],
     "doors": [
       {
-        "id": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004199",
+        "id": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041cc",
         "name": "Gordium test door front (36 x 96 in): Family15 (Front entry door)",
         "exit": true,
         "operation": "side_hinged"
@@ -7768,6 +7768,8 @@
   ],
   "drawing_notes": [
     "Floor-to-floor heights (main floor 118.5 in, basement 108 in below the main floor): none: no stair is drawn, and no measure in scope compares levels",
+    "Each floor slab drawn as thick as the gap the layout leaves under it: the second floor\u0027s 10.5 in (2x10 joists, subfloor and board), the main floor\u0027s 12 in (2x12 joists and subfloor, A-5); the basement\u0027s 4 in concrete (A-2): none: every ceiling is drawn where A-4 puts it, and no slab reaches below one",
+    "Each window pair drawn 2 in apart (\u0060pair_gap\u0060), centred on the pair\u0027s dimensioned centre: none: no window has a clear opening to measure",
     "Bedroom 4\u0027s 10\u0027-0\u0022 x 1\u0027-4\u0022 window recess left out; its windows drawn in the straight south wall at d 466-472: none: the area stays house.yaml\u0027s (understated, never overstated); the windows have no clear opening to measure",
     "Bedroom 2\u0027s entry alcove (x 366-410, d 146-174) drawn as a room of its own, a room separation line between it and the bedroom: none: bedroom 2\u0027s area stays house.yaml\u0027s 128.3 sq ft (understated, never overstated)",
     "Bedroom 2\u0027s closet against the east wall: none: it bounds the alcove only",
@@ -7779,91 +7781,94 @@
     "The basement as one room in its foundation walls; the unexcavated areas outside it; the basement stair\u0027s walls and the mechanical area not drawn: none"
   ],
   "drawn": [
-    "door front: placed in wall 16646, host 16646, box 15.917,6.083,-9.875 to 19.417,8.035,-1.625, type size (3, 8)"
+    "floor at 0 ft: type Gordium test floor 10.5 in, thickness 10.5 in (drawing 10.5), box z -0.875 to 0 ft",
+    "floor at -9.875 ft: type Gordium test floor 12 in, thickness 12 in (drawing 12), box z -10.875 to -9.875 ft",
+    "floor at -18.875 ft: type Gordium test floor 4 in, thickness 4 in (drawing 4), box z -19.2083 to -18.875 ft",
+    "door front: placed in wall 16690, host 16690, box 15.917,6.083,-9.875 to 19.417,8.035,-1.625, type size (3, 8)"
   ],
   "notes": [
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000417d",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b0",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000417f",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b2",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004181",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b4",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004183",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b6",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004185",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041b8",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004187",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ba",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004189",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041bc",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418b",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041be",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418d",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c0",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-0000418f",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c2",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004191",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c4",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004193",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c6",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004195",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041c8",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004197",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041ca",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004199",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041cc",
       "field": "stated_clear",
       "why": "a door\u0027s maker\u0027s clear opening is sent with the door (doors); as an escape opening its bottom isn\u0027t stated by a door\u0027s marks yet"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004199",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041cc",
       "field": "doors.threshold_top",
       "why": "a door\u0027s drawn stops, hinge, leaf, threshold and head stop aren\u0027t read from its family (door families don\u0027t model them consistently): its maker\u0027s clear opening is read instead"
     },
     {
-      "part": "2a5bb6ec-c409-42ce-90b3-b6fcb8706515-00004199",
+      "part": "4d056e44-d2a8-40ce-9c4b-6460f8cb36fb-000041cc",
       "field": "doors.stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     }

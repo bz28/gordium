@@ -953,8 +953,10 @@ internal static class HouseDraw
         if (new FilteredElementCollector(doc).OfClass(typeof(FloorType)).Cast<FloorType>().FirstOrDefault(x => x.Name == name) is { } found)
             return found;
         var made = (FloorType)basic.Duplicate(name);
-        made.SetCompoundStructure(CompoundStructure.CreateSingleLayerCompoundStructure(MaterialFunctionAssignment.Structure,
-                                                                                       thickness, ElementId.InvalidElementId));
+        var structure = CompoundStructure.CreateSingleLayerCompoundStructure(MaterialFunctionAssignment.Structure,
+                                                                             thickness, ElementId.InvalidElementId);
+        structure.EndCap = EndCapCondition.NoEndCap;   // a floor's structure has no end cap (Revit refuses one)
+        made.SetCompoundStructure(structure);
         return made;
     }
 
