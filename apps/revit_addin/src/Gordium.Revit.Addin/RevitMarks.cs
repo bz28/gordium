@@ -34,6 +34,7 @@ internal static class RevitMarks
         Marked = Marked.SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType())
             .Select(e => Element(doc, e)).ToList(),
         Bindings = Bindings(doc),
+        ProjectMarks = doc.ProjectInformation is { } info ? Values(info) : new Dictionary<Guid, MarkValue>(),
     };
 
     private static MarkedElement Element(Document doc, Element e)

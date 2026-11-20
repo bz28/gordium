@@ -95,11 +95,11 @@ the protocol they speak, `"protocol": "1.2"` (a different major version is refus
   beside the site description, never inside it. The place's inherited laws (egress, for Ithaca) are checked on it;
   without one they wait ("no rooms drawn yet"), never pass. One that can't be read is measured as far as it can and
   the rest needs review, as on the command line (`--interior`); the result's `egress.interior_sha256` fingerprints
-  exactly the interior it was worked out from. With a `report`, only that fingerprint is kept (written in the
-  report): the interior itself isn't kept beside the report as the site description is, yet, so a report's egress
-  rows can be traced to their interior but not worked out again from the files beside it. Keeping it is the Revit
-  interior reader's step ([revit_interior_reading_design.md](../revit/revit_interior_reading_design.md), section 5),
-  before any host sends a real interior. A tool sends it only to a worker whose `hello` says 1.2 or later:
+  exactly the interior it was worked out from. With a `report`, the interior is kept beside it as the site
+  description is (`<report name>.interior.json`, below), and the report names its fingerprint too, so a report's
+  egress rows can be traced to their interior and worked out again from the files beside it
+  ([revit_interior_reading_design.md](../revit/revit_interior_reading_design.md), section 5). A tool sends it only
+  to a worker whose `hello` says 1.2 or later:
   an older worker ignores a field it doesn't know, and its egress would wait as if no rooms were drawn.
 - `start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}`: the largest legal starting building
   on the description's lot (its buildings are left out), the same answer `start` gives.
@@ -136,12 +136,14 @@ use is the one every Rhino check already takes, and both give the same answers (
 **A report keeps its site.** When `check` or `check_site` writes a zoning report, the exact description it was
 worked out from is written beside it as `<report name>.site.json` (Ben, 2026-11-06), so any report can be traced
 to exactly the site it was worked out from, and worked out again with the same lot facts (the file holds the site
-description only, not the lot facts). A report with egress rows (a `check_site` sent an `interior`) also needs the
-same interior to be worked out again, and that isn't kept beside it yet: the report names it by its fingerprint,
-`interior_sha256`, only (see `check_site` above). If the description can't be written, no new report is written either (the answer says
-why). The earlier report's site file is replaced only once the new report is in place, so a report that can't be
-saved (open in Excel, say) leaves the earlier report beside its own site. Never a report beside another check's
-site; at worst, a check stopped between the two leaves a report with no site file.
+description only, not the lot facts). A report with egress rows (a `check_site` sent an `interior`) also keeps that
+interior beside it, as `<report name>.interior.json`, and names it by its fingerprint, `interior_sha256`, so it can
+be worked out again the same way. If either description can't be written, no new report is written either (the
+answer says why). The earlier report's site and interior files are replaced only once the new report is in place,
+so a report that can't be saved (open in Excel, say) leaves the earlier report beside its own site and interior.
+Never a report beside another check's site or interior: a check with no interior drops the earlier report's
+interior file once the new report is in; at worst, a check stopped between the two leaves a report with no site
+file (or no interior file).
 
 The older commands (`check`, `start`, `facts`, `options`, `sample_site`) answer exactly as before (the golden
 answers and the recorded session prove it, to the last character).

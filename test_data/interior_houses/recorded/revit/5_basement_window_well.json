@@ -1,0 +1,140 @@
+{
+  "host": "revit",
+  "house": "5_basement_window_well",
+  "step": 3,
+  "recorded": {
+    "by": "Gordium add-in, Record interior houses (Windows trial)",
+    "date": "2026-11-20",
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
+  },
+  "ids": {
+    "we1": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-00001259",
+    "we2": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-0000125b",
+    "bbed": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-0000125d"
+  },
+  "interior": {
+    "format": "gordium.interior/1",
+    "units": "ft",
+    "rooms": [
+      {
+        "id": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-0000125d",
+        "name": "Basement bedroom (1)",
+        "sleeping": true,
+        "floor": [
+          [
+            0,
+            0
+          ],
+          [
+            11,
+            0
+          ],
+          [
+            11,
+            10
+          ],
+          [
+            0,
+            10
+          ]
+        ],
+        "floor_elevation": -8,
+        "ceilings": [
+          [
+            [
+              0,
+              0,
+              -0.5
+            ],
+            [
+              11,
+              0,
+              -0.5
+            ],
+            [
+              11,
+              10,
+              -0.5
+            ],
+            [
+              0,
+              10,
+              -0.5
+            ]
+          ]
+        ]
+      }
+    ],
+    "openings": [
+      {
+        "id": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-00001259",
+        "name": "Gordium test window we1 (30 x 36 in): Family7 (Window 1)",
+        "room": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-0000125d",
+        "escape": true,
+        "operation": "casement",
+        "stated_clear": {
+          "width": 2.375,
+          "height": 3,
+          "bottom": -5,
+          "source": "the maker\u0027s net clear opening (made up: worked out from house.yaml\u0027s frame and sash)"
+        }
+      },
+      {
+        "id": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-0000125b",
+        "name": "Gordium test window we2 (24 x 20 in): Family8 (Window 2)",
+        "room": "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-0000125d",
+        "escape": true,
+        "operation": "awning",
+        "stated_clear": {
+          "width": 2,
+          "height": 1.6666666666666667,
+          "bottom": -4.166666666666667,
+          "source": "maker\u0027s data sheet (made up)"
+        }
+      }
+    ]
+  },
+  "rooms_not_read": [],
+  "openings_not_read": [],
+  "stairs_not_read": [
+    "Gordium: These are all the stairs is not set on Project Information: until it says Yes, a stair not drawn as one would go unchecked"
+  ],
+  "drawing_notes": [],
+  "drawn": [],
+  "notes": [],
+  "evidence": {
+    "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-00001259": {
+      "sill_line": -5,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z -5..-2, wall box z -8..-0.4167 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 4674, wall 4674 4734be25-82ea-4b5e-8c8e-9ea0829e55fd-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4697 (this window), OST_Windows 4699"
+      ],
+      "wall_opening_bottom": -5,
+      "placed": {
+        "bottom": -5,
+        "top": -1.9999999999999982,
+        "width": 2.4999999999999996
+      }
+    },
+    "4734be25-82ea-4b5e-8c8e-9ea0829e55fd-0000125b": {
+      "sill_line": -4.166666666666667,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z -4.1667..-2.5, wall box z -8..-0.4167 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 4674, wall 4674 4734be25-82ea-4b5e-8c8e-9ea0829e55fd-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4697, OST_Windows 4699 (this window)"
+      ],
+      "wall_opening_bottom": -4.166666666666667,
+      "placed": {
+        "bottom": -4.166666666666667,
+        "top": -2.499999999999999,
+        "width": 2
+      }
+    }
+  },
+  "revit_layer": [
+    "stairs: 0 component stairs (0 runs), 0 other elements that could be one",
+    "enclosed areas on Level 1: 0 (0 with no Room)",
+    "enclosed areas on Level 2: 1 (0 with no Room)"
+  ]
+}

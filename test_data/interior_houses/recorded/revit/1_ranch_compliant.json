@@ -1,0 +1,251 @@
+{
+  "host": "revit",
+  "house": "1_ranch_compliant",
+  "step": 3,
+  "recorded": {
+    "by": "Gordium add-in, Record interior houses (Windows trial)",
+    "date": "2026-11-20",
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
+  },
+  "ids": {
+    "w1": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9",
+    "w2": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb",
+    "w3": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
+    "bed1": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
+    "bed2": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
+    "living": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602"
+  },
+  "interior": {
+    "format": "gordium.interior/1",
+    "units": "ft",
+    "rooms": [
+      {
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
+        "name": "Bedroom 1 (1)",
+        "sleeping": true,
+        "floor": [
+          [
+            0,
+            0
+          ],
+          [
+            12,
+            0
+          ],
+          [
+            12,
+            11
+          ],
+          [
+            0,
+            11
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              0,
+              0,
+              8
+            ],
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              12,
+              11,
+              8
+            ],
+            [
+              0,
+              11,
+              8
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
+        "name": "Bedroom 2 (2)",
+        "sleeping": true,
+        "floor": [
+          [
+            12,
+            0
+          ],
+          [
+            23,
+            0
+          ],
+          [
+            23,
+            10
+          ],
+          [
+            12,
+            10
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              12,
+              0,
+              8
+            ],
+            [
+              23,
+              0,
+              8
+            ],
+            [
+              23,
+              10,
+              8
+            ],
+            [
+              12,
+              10,
+              8
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602",
+        "name": "Living room (3)",
+        "sleeping": false,
+        "floor": [
+          [
+            23,
+            11
+          ],
+          [
+            23,
+            25
+          ],
+          [
+            0,
+            25
+          ],
+          [
+            0,
+            11
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              23,
+              11,
+              8
+            ],
+            [
+              23,
+              25,
+              8
+            ],
+            [
+              0,
+              25,
+              8
+            ],
+            [
+              0,
+              11,
+              8
+            ]
+          ]
+        ]
+      }
+    ],
+    "openings": [
+      {
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9",
+        "name": "Gordium test window w1 (26 x 36 in): Family1 (Window 1)",
+        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
+        "escape": true,
+        "operation": "casement",
+        "stated_clear": {
+          "width": 2.0416666666666665,
+          "height": 3,
+          "bottom": 2.5,
+          "source": "the maker\u0027s net clear opening (made up: worked out from house.yaml\u0027s frame and sash)"
+        }
+      },
+      {
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb",
+        "name": "Gordium test window w2 (30 x 60 in): Family2 (Window 2)",
+        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
+        "escape": true,
+        "operation": "double_hung",
+        "stated_clear": {
+          "width": 2.5,
+          "height": 2.1666666666666665,
+          "bottom": 2,
+          "source": "the maker\u0027s net clear opening (made up: worked out from house.yaml\u0027s frame and sash)"
+        }
+      },
+      {
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
+        "name": "Gordium test window w3 (60 x 60 in): Family3 (Window 3)",
+        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602",
+        "escape": false,
+        "operation": "fixed"
+      }
+    ]
+  },
+  "rooms_not_read": [],
+  "openings_not_read": [],
+  "stairs_not_read": [
+    "Gordium: These are all the stairs is not set on Project Information: until it says Yes, a stair not drawn as one would go unchecked"
+  ],
+  "drawing_notes": [],
+  "drawn": [],
+  "notes": [
+    {
+      "part": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
+      "field": "stated_clear",
+      "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
+    }
+  ],
+  "evidence": {
+    "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9": {
+      "sill_line": 2.5,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z 2.5..5.5, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 5584, wall 5584 62815a77-36ea-469e-a7ed-72afbe9694aa-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625 (this window), OST_Windows 5627"
+      ],
+      "wall_opening_bottom": 2.5,
+      "placed": {
+        "bottom": 2.5,
+        "top": 5.500000000000002,
+        "width": 2.166666666666666
+      }
+    },
+    "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb": {
+      "sill_line": 2,
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z 2..7, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 5584, wall 5584 62815a77-36ea-469e-a7ed-72afbe9694aa-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625, OST_Windows 5627 (this window)"
+      ],
+      "wall_opening_bottom": 2,
+      "placed": {
+        "bottom": 2,
+        "top": 7.000000000000002,
+        "width": 2.5
+      }
+    }
+  },
+  "revit_layer": [
+    "stairs: 0 component stairs (0 runs), 0 other elements that could be one",
+    "enclosed areas on Level 1: 3 (0 with no Room)"
+  ]
+}

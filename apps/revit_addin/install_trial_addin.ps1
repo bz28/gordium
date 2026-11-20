@@ -5,7 +5,9 @@
 # again after every rebuild of an unsigned add-in, in a new folder or the same one (seen on the trial laptop,
 # 2026-11-19), so each build is signed with this machine's own certificate (trust_trial_addin.ps1, run once): Revit
 # trusts the publisher, and doesn't ask.
-param([string]$Revit = "2027")
+# -Python names the Python to run for a clone with no venv of its own (a git worktree): written beside the build
+# (gordium_python.txt); the add-in then points it at this clone's packages (PYTHONPATH), so the code run is this clone's.
+param([string]$Revit = "2027", [string]$Python = "")
 $ErrorActionPreference = "Stop"
 $tfm = @{ "2027" = "net10.0-windows"; "2026" = "net8.0-windows" }[$Revit]
 if (-not $tfm) { throw "Revit $Revit is not one the add-in is built for (2026, 2027)" }
@@ -19,6 +21,10 @@ if (Test-Path $target) { Remove-Item (Join-Path $target "*") -Recurse -Force }
 New-Item -ItemType Directory -Force $target | Out-Null
 Copy-Item (Join-Path $project "bin\Release\$tfm\*") $target -Recurse
 [IO.File]::WriteAllText((Join-Path $target "gordium_clone.txt"), $clone, (New-Object Text.UTF8Encoding $false))
+if ($Python) {
+    if (-not (Test-Path $Python)) { throw "no Python at $Python" }
+    [IO.File]::WriteAllText((Join-Path $target "gordium_python.txt"), (Resolve-Path $Python).Path, (New-Object Text.UTF8Encoding $false))
+}
 # signed with this machine's trial certificate (trust_trial_addin.ps1), so Revit doesn't ask "Always Load" after every
 # build; without the certificate the build is installed unsigned, and Revit asks
 $cert = Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |

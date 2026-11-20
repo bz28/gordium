@@ -7,7 +7,13 @@
 **Status: agreed by Ben, 2026-11-19** (his four decisions are in section 8). Each step of section 7 is its own
 PR; step 1 (protocol 1.2: the worker and the C# client take an interior) is built; step 2 (the marks and the marking
 list, [the add-in's README](../../apps/revit_addin/README.md#the-architects-marks-interior-step-2)) is built and
-tried in Revit 2027.4 on Snowdon Towers (section 9); the rest are not yet.
+tried in Revit 2027.4 on Snowdon Towers (section 9); step 3 (rooms and marked escape windows,
+[README](../../apps/revit_addin/README.md#rooms-and-escape-windows-interior-step-3)) is built and tested on fake
+records and recorded in Revit 2027.4 (houses 1, 2 and 5, trial run 6, 2026-11-20: every measure of the step equal
+to the hand-worked one); step 4 (stairs, [README](../../apps/revit_addin/README.md#stairs-interior-step-4)) is built
+and tested on fake records and recorded in Revit 2027.4 (houses 1, 2, 3 and 5, 0 problems each: house 2's stair
+16 risers of 7.5 in, 10 in treads, 85.5 in headroom, 36 in wide; house 3's tall riser at the head held for review); the
+rest are not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -68,9 +74,11 @@ exactly:
   `rooms`. So the reader also looks for enclosed areas with no Room on each level, and for Rooms that are unplaced,
   not enclosed or redundant, and for any closed workset or unloaded link (a room could be in it); while any exists,
   it is listed first in the marking list and `rooms` is left out (not read), until the architect places a Room or
-  says the area isn't a room. (**To check:** how exactly to find
-  enclosed areas with no Room; until that is settled, the reader can't claim to have seen every room, and `rooms` is
-  left out.)
+  says the area isn't a room. **Built in step 3:** the enclosed areas are Revit's own plan circuits, every level's
+  for the last phase (`Document.get_PlanTopology(level, phase).Circuits`, each `PlanCircuit.IsRoomLocated`), the
+  ones Revit's own "place rooms" uses; an area that isn't a room is said by placing a Room in it marked Sleeping
+  room No (no other way of saying it is built yet). To confirm in the trial: that a circuit with no Room shows as one
+  on real models.
 - **The reader may propose, never decide.** A room named "Bedroom 2" can be shown as a suggestion in the add-in's
   marking list, marked "suggested"; it is sent as `sleeping: true` only once the architect has accepted it
   themselves, a fact about their own design. A suggestion alone is never sent.
@@ -94,6 +102,7 @@ exactly:
 | `Gordium: Operation` | Windows, Doors (type) | One architect-facing list (casement, double hung, side-hinged door, sliding door, …) | `openings[].operation` and `doors[].operation`, each through a fixed table to that list's own word (`side_hinged_door` for an opening, `side_hinged` for a door): the two lists use different words |
 | `Gordium: Clear width`, `Clear height`, `Clear offset`, `Clear source`, `Clear confirmed` | Windows (type) | The maker's net clear opening; the height of its bottom above the window's sill line (the line Revit's Sill Height places), required (blank: no clear opening sent, never read as 0); the maker's publication it came from; and **the confirmation stamp**: written by the add-in only when the architect ticks the values on a section of that window type (facts about their own design), it records exactly what was confirmed, who and when: **the type itself** (its `UniqueId`), its width and height, its `Gordium: Operation`, the clear width, height and offset, the `Clear source`, and, where the clear opening was copied from a maker's family parameter, that parameter's name and value. The reader sends a clear opening only when every one of these, read now, equals the stamp: so a duplicated or copied type (Duplicate, Transfer Project Standards and copying between projects carry the stamp with them, but not the original's `UniqueId`), a resized type, any edited value (an offset typed or bulk-filled as 0 in a schedule, a changed source or operation), or a maker's value that has since changed (a hardware option switched) all leave the window unconfirmed until the architect ticks it again. Confirmed per type: the add-in offers the value of another type of the same family as a suggestion, never as a confirmation | `openings[].stated_clear` |
 | `Gordium: Top rail is handrail` | Railings (type) | Yes / No / unset | whether a stair railing's top rail is also its handrail (unset on a stair railing with a top rail: that flight's `handrails` left out, not read) |
+| `Gordium: These are all the stairs` | Project Information | Yes / No / unset | `stairs` sent only on Yes (section 2's "all the stairs"; No or unset: not read). **Decided (2026-11-20, step 4):** the project-wide ticks ("these are all the stairs", later "all the guards", "this house has none of ...") are Gordium shared parameters on Project Information (Yes/No; unset is not stated), added by Mark for egress like the other marks and listed in the marking list; each step adds its own |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick
 Escape opening"); they are visible, print on sheets and survive export and upgrades. Considered: Revit's hidden
@@ -135,9 +144,9 @@ disagree.
 |---|---|---|
 | `id`, `name` | `Room.UniqueId`; the room's Name and Number | |
 | `sleeping` | The `Gordium: Sleeping room` mark (unset: not given) | |
-| `floor` | `Room.GetBoundarySegments` with `SpatialElementBoundaryLocation.Finish` (the finished wall faces, which the format asks for), whatever the project's own room setting is. Checked against what stands inside it: a wall, column or other building element (not furniture, casework or fixtures, as for ceilings) crossing the room's plan inside the outline that doesn't bound the room (its "Room Bounding" off, or a wall shorter than the room's computation height) means no `floor` (the room may be two rooms, or smaller than its outline). A room with more than one boundary loop (a column or a chase standing inside it) has no `floor` sent (needs review): the format's floor is one outline with no holes, and a hole is a format change of its own | That Finish gives the wall finish face for every wall type; a curved boundary segment: the room's floor not sent (needs review), never its chord |
+| `floor` | `Room.GetBoundarySegments` with `SpatialElementBoundaryLocation.Finish` (the finished wall faces, which the format asks for), whatever the project's own room setting is. Checked against what stands inside it: a wall, column or other building element (not furniture, casework or fixtures, as for ceilings; nor a window or door hosted in a wall bounding the room, which is part of that boundary, though its trim may reach in: only windows and doors, anything else such a wall hosts, a bulkhead or a shelf, counts like any other element) crossing the room's plan inside the outline that doesn't bound the room (its "Room Bounding" off, or a wall shorter than the room's computation height) means no `floor` (the room may be two rooms, or smaller than its outline). A room with more than one boundary loop (a column or a chase standing inside it) has no `floor` sent (needs review): the format's floor is one outline with no holes, and a hole is a format change of its own | That Finish gives the wall finish face for every wall type; a curved boundary segment: the room's floor not sent (needs review), never its chord |
 | `floor_elevation` | The room's level elevation plus its base offset, sent only when the top face of the floor slab under the whole room agrees with it within 1/16 in. No slab top found under the whole room, more than one at different heights, or a disagreement: not given (a window's sill height is worked from this floor, so an unchecked floor could make a high sill read low) | Finding the slab top under a room |
-| `ceilings` | The lowest undersides over the room's plan, between its floor and the floor above, of everything there that is building or services (a ceiling, a beam, a bulkhead, a soffit, a duct, a pipe, the floor or roof above): furniture, casework, furniture systems, plumbing fixtures, specialty equipment and lighting fixtures are not ceilings and are left aside, and anything in a category the reader can't place in either list leaves `ceilings` out, so what is unknown stays on the safe side: their downward planar faces, as flat pieces of absolute 3D points covering the whole floor. Anything there it can't read exactly (a curved face, a link: above): no `ceilings`. Always `ceilings`, never `ceiling_height` (a height above the floor would be worked from a floor elevation the reader may have held back): the measuring code works the height from `floor_elevation`, and gives none when it is missing | How to collect "what is above the room" exactly (each element's lowest faces clipped to the room's plan); a curved ceiling face: not given |
+| `ceilings` | The lowest undersides over the room's plan, between its floor and the floor above, of everything there that is building or services (a ceiling, a beam, a bulkhead, a soffit, a duct, a pipe, the floor or roof above): furniture, casework, furniture systems, plumbing fixtures, specialty equipment and lighting fixtures are not ceilings and are left aside, as is a window or door hosted in a wall bounding the room (never anything else that wall hosts: a wall-hosted bulkhead is a ceiling), and anything in a category the reader can't place in either list leaves `ceilings` out, so what is unknown stays on the safe side: their downward planar faces, as flat pieces of absolute 3D points covering the whole floor. Anything there it can't read exactly (a curved face, a link: above): no `ceilings`. Always `ceilings`, never `ceiling_height` (a height above the floor would be worked from a floor elevation the reader may have held back): the measuring code works the height from `floor_elevation`, and gives none when it is missing | How to collect "what is above the room" exactly (each element's lowest faces clipped to the room's plan); a curved ceiling face: not given |
 
 The room's own "Unbounded Height" or "Limit Offset" is never used as the ceiling: it is a calculation volume, not
 a drawn ceiling.
@@ -149,7 +158,7 @@ a drawn ceiling.
 | `room` | The window's or door's `FromRoom` / `ToRoom` for the last phase: the room inside | Which of the two is inside for a door between two rooms |
 | `escape` | The `Gordium: Escape opening` mark | |
 | `operation` | The `Gordium: Operation` type parameter (Revit families don't say how they open in any standard way) | |
-| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when every check holds: everything the type's `Clear confirmed` stamp records (section 3: the type's `UniqueId`, size and operation, the clear width, height, offset and source, and a mapped maker parameter's current value) equals its value read now (a duplicated or resized type, or any value edited or changed since the architect ticked it, then sends none; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as placed, in absolute heights (the clear bottom no lower than the placed geometry's lowest point, the clear top no higher than its highest, Clear width no more than its width, 1/16 in to spare). `bottom` = the instance's level elevation + its Sill Height + `Clear offset` (the maker's height of the clear opening's bottom above that sill line). `Clear offset` blank (never read as 0): no `stated_clear`. **The sill line is checked against something drawn that doesn't come from the Sill Height parameter**: the bottom of the opening the window cuts in its host wall (or the family's Bottom reference); disagreeing by more than 1/16 in, or not found: no `stated_clear`. Not the family's lowest drawn point: exterior sills and trim hang below the unit on most real windows. **Until the trial shows this check can be made** (section 9), the first reader sends no `stated_clear` at all, so every escape opening's size and sill need review: a sill read from a typed number alone is never enough for R319.2.3 (44 in at most) | Reading the bottom of the wall opening a window cuts, or its Bottom reference (`FamilyInstance.GetReferences`), on real families; the placed geometry's extents |
+| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when every check holds: everything the type's `Clear confirmed` stamp records (section 3: the type's `UniqueId`, size and operation, the clear width, height, offset and source, and a mapped maker parameter's current value) equals its value read now (a duplicated or resized type, or any value edited or changed since the architect ticked it, then sends none; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as placed, in absolute heights (the clear bottom no lower than the placed geometry's lowest point, the clear top no higher than its highest, Clear width no more than its width, 1/16 in to spare). `bottom` = the instance's level elevation + its Sill Height + `Clear offset` (the maker's height of the clear opening's bottom above that sill line). `Clear offset` blank (never read as 0): no `stated_clear`. **The sill line is checked against something drawn that doesn't come from the Sill Height parameter**: the bottom of the opening the window cuts in its host wall (or the family's Bottom reference); disagreeing by more than 1/16 in, or not found: no `stated_clear`. Not the family's lowest drawn point: exterior sills and trim hang below the unit on most real windows. **Shown possible in the trial** (section 9; step 3): the wall opening is the host wall's faces whose `Element.GetGeneratingElementIds` name the window, and on houses 1, 2 and 5 its bottom equals the sill line exactly. A window that cuts nothing found sends no `stated_clear`, so its size and sill need review: a sill read from a typed number alone is never enough for R319.2.3 (44 in at most). `HostObject.FindInserts` is not used: it listed no inserts even on walls the windows had cut | The Bottom reference (`FamilyInstance.GetReferences`), and real makers' families (whose rough openings may be larger than the unit): to try |
 | `frame`, `sashes`, `hinged` | **Not sent by the first reader.** A family's sash geometry is modelled differently by every maker and firm (or not at all), so reading it would be guessing. The measuring code uses the maker's opening alone when no frame is given (`model_measurement/interior/openings.py`); a window with neither gets no value (needs review) | Later, perhaps: families that carry Gordium's own frame and sash parameters |
 | `ground_outside` | The ground at the opening's outside face, only from a ground the architect gave: the Toposolid picked as the ground (as the outside reader's `terrain`), probed 1 ft outside each end of the opening, or finished spot grades there; else **not given**. Never the lot facts' flat ground: that is often Gordium's own assumption (`ground_assumed: "flat"`), and an assumed ground could make a window a grade-floor opening, which needs only 5 sq ft (R319.2.1 exception) | Probing a Toposolid (as the outside reader's to-check) |
 | `area_well` | Not in Revit's vocabulary. First reader: not given. An opening whose clear bottom is below the ground outside is sent with no `ground_outside` (its grade-floor reading needs review), and the marking list asks the architect to draw its well; R319.4's well rules, which need the well, need review | How firms draw wells (a generic model, an in-place family) |
@@ -165,6 +174,56 @@ a drawn ceiling.
 | `sides` | The reader searches the whole band on each side of the flight, from well inside the tread ends to past them, from the treads up to the headroom height, for anything at all. A wall face found there is the side line; else a railing's inside face above handrail height. `open` only when that search finds nothing (a wall or railing missed would make the stair look wider than it is: R318.7.1). Anything found that it can't read exactly (a generic model, a curved face): `sides` left out, the width needs review | Searching that band exactly |
 | `handrails` | The stair's railings (`Stairs.GetAssociatedRailings()`): their handrails (`Railing.GetHandRails`), inner edge in plan, with their side. A top rail (`TopRail`) counts as a handrail only where the railing's type is marked `Gordium: Top rail is handrail` (a guard's top rail is usually 36 in or more up, above the handrail's 34 to 38 in) | |
 | `overhead` | The downward planar faces of everything above the flight (floors, ceilings, roofs, beams), clipped to the flight's plan. Nothing found, or a curved face: `overhead` left out (the format refuses an empty list), so the headroom has no value and needs review; the flight is still sent | Collecting it exactly, as for ceilings |
+
+**As built in step 4** (`Gordium.Revit.Reading/StairReader.cs`; the Revit layer `RevitInterior.StairsOf`), where the
+table above needed settling:
+
+- *Treads*: the run's own upward flat faces, grouped by height (a face lying wholly under another of the run's own, a
+  riser board's top under its tread, is inside the run and set aside); one group per tread the run says it has, each a
+  rectangle square to the run's path (`StairsRun.GetStairsPath`), its front edge the nosing. A curved face anywhere
+  in the run (a rounded nosing) sends no nosings. A run ending with a riser carries that riser up to its top, so its
+  geometry has one top face more than its treads (Revit 2027.4, trial step 4 runs 1 and 2: 16 for 15, house 3 13 for
+  12; house 2's a sliver 1/2 in deep along the path just past the last tread, at the run's top less the 3 in tread):
+  only when exactly one too many, the top one, past the last tread, no deeper than 2 in along the run and not above
+  the run's top, is it taken as that riser board's top, the head's edge, never a tread. The **top nosing** is its front edge (the last riser's line), else the top tread's back edge, at the height
+  of the floor or landing found there, only if that floor stops at the last riser's line: a floor at the head reaching
+  back over the last tread (a landing nosing, a slab edge past the line) makes the last tread shallower than the line
+  says, so no nosings are sent (review round 1); a floor's opening (the stairwell, its edge on the riser line) is
+  taken out of it first, and anything there that can't be read (a mesh, a geometry Revit refused, a face with no
+  outline) refuses the nosings too (review round 2). The drawing draws house 2's upper floor the way a real model has
+  it: one floor at the head with the stairwell as an opening, its underside the house's 9 ft piece over the foot.
+  Beside a flight, an element with only flat straight-edged faces is judged face by face (an upper floor's box spans
+  its opening, so its box alone would stand it in the width). Every top group's height and extent is kept in the evidence.
+- *For Ben (noted, no mark added now)*: under section 2's rule any Generic Model anywhere in a project stops stairs
+  being read, with no way yet to say "this one isn't a stair".
+- *Foot and head*: the floor or landing top is looked for in a 1 in strip in front of the first nosing and past the
+  last riser, across the stair's width: one flat top within a foot covering the whole strip, else not found.
+- *The cross-check*: every drawn riser (from the floor at the foot to the floor at the head) against
+  `Stairs.ActualRiserHeight`, every tread (nosing to nosing, the last to the head's edge) against `ActualTreadDepth`,
+  the counts against `StairsRun.ActualRisersNumber` / `ActualTreadsNumber`; a run that doesn't begin and end with a
+  riser isn't read yet. Any of these failing, or the foot not confirmed (the first riser can't be checked), sends no
+  `nosings`. A winder, spiral or sketched run sends neither `nosings` nor `bottom_elevation` (only straight flights
+  are measured; its foot is read with the first straight tread, which a turning run hasn't).
+- *Sides*: the band on each side, from the flight's middle to 6 in past the tread ends, from 1 in under the line of
+  nosings to 80 in over it (from the first nosing to the top one). The innermost wall face there facing the flight is
+  the side line, if it covers the whole band; nothing there is `open`; anything else (furniture and fixtures too, a
+  column, a pipe in front of the wall, a railing, the stair's own support over its treads or rising 34 in over them)
+  leaves `sides` out (review round 1: a cabinet or a light is in a stair's way, unlike a room's ceiling, so stairs
+  never set furniture and fixtures aside, beside or overhead). Extents are read from flat faces' corners (exact), else from Revit's box (only ever bigger).
+- *Handrails and guards*: railings are read in step 5 with the guards (the same reading of a Railing's geometry), so
+  step 4 sends no `handrails` (the width at the handrail and the handrail sides need review) and a railing beside or
+  over a flight leaves its `sides` or `overhead` out.
+- *Overhead*: a face's opening (a floor's stairwell opening) is taken out of it exactly
+  (`PlanGeometry.Subtract`); an element with some of its flat pieces over the flight under the line of nosings and
+  some over it crosses the flight and leaves `overhead` out; one wholly under it (a slab under the stair) is set aside.
+- *The stair element itself*: its geometry may be all its components together. With one run and no landing or
+  support it is the run; else, if it has faces, a flight's sides and overhead are left out until the trial shows how
+  Revit gives it (to check).
+- *Nothing that could be a stair unread* (section 2): no stair not made of components (`Stairs.IsByComponent`), no
+  multistory stair (`MultistoryStairsId`, or any `MultistoryStairs`), nothing else in Stairs, Railings or Generic
+  Models (an in-place or loadable family, a DirectShape), no closed workset, no unloaded link, no link holding links,
+  stairs, railings or generic models, no coordination model (`CoordinationModelLinkUtils`); each is listed first in
+  the marking list. With no stair found, `stairs` is left out (never `[]`: that is the has-none tick, step 6).
 
 ### Doors (`doors`)
 
@@ -204,10 +263,12 @@ A small, additive change (protocol **1.2**, a minor version: a 1.1 worker refuse
   and hands it to `check.check_site`, which already runs egress on it and fingerprints it in the report (`interior_sha256`), so every result can be
   traced to exactly the interior it was worked out from (principle 5).
 - `WorkerClient.CheckSiteAsync` gains `interior`; the add-in keeps each check's interior beside its site
-  description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Not yet: keeping
-  the interior beside a saved report. Until then a report's egress rows trace to their interior by its fingerprint
-  alone (`interior_sha256`, written in the report), so they can't be worked out again from what is kept beside it;
-  section 7's step 3, the first to send a real interior, keeps it. Today no host sends one.
+  description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Built in step 3:
+  a saved report keeps its interior beside it (`<report name>.interior.json`, `check.check_description`), written
+  first, moved in with the site, the earlier report's set aside and put back if the new report can't be moved in,
+  and never an earlier check's interior left beside a new report (a check with no interior drops it); the report
+  also names it by its fingerprint (`interior_sha256`), so its egress rows can be worked out again from what is kept
+  beside it.
 - **Only to a worker that says it understands it.** A 1.1 worker ignores a field it doesn't know, so it would answer
   "Egress waiting: no rooms drawn yet" for a house with rooms. The add-in sends `interior` only when the worker's
   `hello` says protocol 1.2 or later; with an older worker it shows that egress can't be checked with this checker
@@ -290,7 +351,10 @@ Each step is its own PR, through the review loop, with its tests:
    egress failures. A room's floor area and ceiling height are measured and recorded too, but no rule reads them
    yet (R312 and R313, room size and ceiling height, aren't brought in). The step builds the sill line's check
    against the wall opening (section 4) and shows on the five houses that it can be made; only then are the escape
-   openings' clear measures in its scope. If it can't be made, they stay not measured, and the step says so. It includes finding enclosed areas with no Room (section 2), without which no
+   openings' clear measures in its scope. If it can't be made, they stay not measured, and the step says so.
+   **Shown (Revit 2027.4, trial run 6, 2026-11-20):** on houses 1, 2 and 5 every escape window's wall opening (the
+   wall faces the window generates) has its bottom on the sill line exactly, so the clear measures are in scope, and
+   the three recordings give every in-scope measure as worked by hand. It includes finding enclosed areas with no Room (section 2), without which no
    `rooms` can be sent. Recorded houses 1, 2 and 5. The step's PR lists every `parts.yaml` measure of each kind as in
    or out of scope, and the `more` values compared: in scope `sleeping_room_floor_area` (and `floor_area_drawn`,
    `least_ceiling_height`), `opening_net_clear_width`, `_height`, `_area`, `opening_sill_height`, `opening_is_door`
@@ -302,6 +366,18 @@ Each step is its own PR, through the review loop, with its tests:
    report's set aside and put back if the new report can't be moved in, and never an earlier check's interior left
    beside a new report), so egress rows can be worked out again (section 5).
 4. **Stairs** (straight component runs, the cross-check), houses 2 and 3: risers, treads, widths, headroom.
+   **Built** (section 4, "As built in step 4"). Scope (`recordings.py`, `STEPS[4]`): house 2's flight in scope for
+   `stair_riser_height`, `stair_riser_variation`, `stair_total_rise`, `stair_risers`, `stair_tread_depth`,
+   `stair_tread_variation`, `stair_headroom` and `stair_clear_width`; out of scope, expected not measured,
+   `stair_clear_width_at_handrail` and `stair_handrail_sides` (railings: step 5). **House 3's tall riser** can't be
+   drawn inside a component run (Revit makes a run's risers equal: `ActualRiserHeight` = height / risers), so it is
+   drawn where a tall riser arises in Revit: 13 risers of 7 1/2 in, the floor at the head 1 1/2 in above the run's
+   top (the 9 in riser moved from the 7th to the 13th, which changes none of house 3's hand-worked stair measures).
+   The cross-check then sends no nosings, so every stair measure of house 3 must come back not measured (its stair
+   read, its rooms and window as step 3): never 7.6 in, never a pass. The drawing puts each stair 10 ft clear of the
+   house with its own side walls and floors (a stair's measures don't depend on where it stands), since houses 2 and
+   3 draw their stairs inside bedrooms' plans, which a real model can't. Each house is recorded at the latest step
+   that draws it (houses 1 and 5 stay step 3). The tick "these are all the stairs" is on Project Information (section 3).
 5. **Doors** (after the PR adding doors' stated clear width to the format, decision 2), then **guards**, house 4.
 6. **`has_none` ticks.**
 
@@ -329,6 +405,28 @@ on a room placed afterwards (58 of 58), so an unmarked room never reads as No; a
 nothing. Still to check: that a type's marks read through `Element.GetTypeId()` (Operation set on a window type), and that a Room's placement reads as Revit names it (no `Location`: unplaced;
 `Area` 0 with no boundary loop: not enclosed; `Area` 0 with one: redundant) and its phase from `ROOM_PHASE`. Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
 test only: it is not a house, and gives no verdict).
+
+For rooms and escape windows (step 3), **answered on houses 1, 2 and 5 drawn by the add-in (Revit 2027.4, trial runs
+1 to 6, 2026-11-20; `test_data/interior_houses/recorded/revit/`)**: the bottom of the opening a window cuts is read
+from the host wall's faces whose `Element.GetGeneratingElementIds` name the window, and equals its sill line (level +
+Sill Height) exactly on all six escape windows; `HostObject.FindInserts` listed no inserts even on those cut walls, so
+nothing relies on it; `SpatialElementBoundaryLocation.Finish` gave each room's outline at the walls' faces and the
+room separation lines; the slab top under each room agreed with its level; the enclosed areas (`PlanTopology`) are
+worked out by Revit only in a document it can change, so they are read inside a transaction that is rolled back;
+`FromRoom`/`ToRoom` for the last phase gave each window's room. Two lessons for drawing: Revit cuts a hosted window's wall only once the document is regenerated right after
+the window is placed and its Sill Height set (`Document.Regenerate()` there; without it, in runs 2 to 5 and again on
+830fbedc, every window was hosted but cut nothing; the walls are also committed first), and walls reaching past the level above enclose an area on it too (house 5's basement walls, first drawn a
+foot past its ceiling). Still to try on real models: real makers' window families (their rough openings may be
+larger than the unit), the Bottom reference, sloped and curved ceilings, links and worksets.
+
+For stairs (step 4), to check on houses 2 and 3 drawn by the add-in, then on real stairs: that a `StairsRun`'s
+geometry gives each tread top as its own flat face (monolithic and assembled run types; a riser board's top under its
+tread); that `Stairs.BaseElevation` plus `StairsRun.BaseElevation` / `TopElevation` is the run's foot and top in
+internal coordinates; that a straight run created from a path (N-1) treads long gets N risers; whether the `Stairs`
+element's own geometry repeats its runs' (step 4 leaves a multi-run stair's sides and overhead out while it does);
+`GetStairsPath`'s direction; a run type's nosing length (a nosing on the run but none drawn on the floor at the head
+makes the last tread read deeper than typed, so no nosings are sent: to settle with real stairs); real stair types'
+supports beside the treads.
 
 ## Sources
 

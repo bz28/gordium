@@ -229,6 +229,123 @@ not set, and a room placed afterwards too (58 of 58); a second run added nothing
 marks read through `doc.GetElement(e.GetTypeId())` (Operation set on a window type), and the room placement
 states (unplaced, not enclosed, redundant) on real rooms.
 
+## Rooms and escape windows (interior step 3)
+
+The **interior reader** (`Gordium.Revit.Reading/InteriorReader.cs`) turns the rooms and the windows and doors into
+the [interior description](../../docs/interior/interior_description_format.md) (`gordium.interior/1`, feet, shared
+coordinates), by the [design note](../../docs/revit/revit_interior_reading_design.md)'s rules (sections 2 to 4). Its
+records (`InteriorRecords.cs`) are filled by the Revit layer (`Gordium.Revit.Addin/RevitInterior.cs`), which decides
+nothing. What it sends, and what it leaves out:
+
+- **`rooms`**, only when every room counts: no Room unplaced, not enclosed or redundant; **no enclosed area without a
+  Room** on any level (Revit's own plan circuits, `PlanTopology.Circuits` and `PlanCircuit.IsRoomLocated`, for the
+  last phase); no closed workset; no linked model not loaded, holding Rooms or holding links of its own. Each is
+  listed first in the marking list. The way to clear an enclosed area that isn't a room (a chase, a closet) is to
+  place a Room in it, marked Sleeping room No. With no Room at all, `rooms` is left out, never `[]`.
+- Each room's **`floor`**: its boundary at the finished faces (`SpatialElementBoundaryLocation.Finish`), sent only as
+  one loop of straight segments, with nothing standing inside it that doesn't bound it (a wall set not to bound rooms,
+  a column; furniture, casework and fixtures don't count, nor a window or door in a wall bounding it: only those, never anything else the wall hosts), from just above
+  the floor to the level's room computation height. **`floor_elevation`**: the level and base offset, sent only when
+  one slab top (a floor or a foundation slab) within a foot of it agrees within 1/16 in and covers the whole room.
+  **`ceilings`**: the downward flat faces of everything building or services over the room, clipped to its floor
+  (exact polygon clipping, `PlanGeometry.cs`), the lowest counting in the measuring code; anything over it that can't
+  be read exactly (a curved face, a mesh, a category in neither list) leaves `ceilings` out. A loaded linked model
+  reaching over a room leaves all three out.
+- **`openings`**: every window and door in the design checked, with its marks (step 2); `room` from `FromRoom` /
+  `ToRoom` for the last phase (left out when it is between two rooms or in none). A window's maker's clear opening,
+  **`stated_clear`**, is sent only when (1) its type's `Gordium: Clear confirmed` stamp (`ClearStamp.cs`) equals
+  every value read now (the type's `UniqueId`, its own Width and Height, Operation, Clear width, height, offset and
+  source, and a maker's parameter it names); (2) its **sill line** (level + Sill Height) agrees within 1/16 in with
+  the bottom of the opening it cuts in its wall (the wall's faces whose `GetGeneratingElementIds` name it); and (3)
+  the clear opening fits inside the window's own geometry as placed. `bottom` is the sill line plus `Clear offset`.
+  Never a frame or sash, a ground outside (no Toposolid is read yet) or an area well. Doors get no clear opening (the
+  doors step). With no window or door found, `openings` is left out, never `[]`; a window or door in a linked model
+  leaves it out too.
+- **`stairs`, `doors`, `guards`, `has_none`**: left out (not read): later steps.
+
+Every value left out has its reason in `InteriorReadResult.Notes`; for each escape window, `Evidence` records the
+sill line, the wall opening's bottom and the window's placed extents the check used.
+
+**Read inside** (the Egress panel) reads the open project this way and logs the description and every note.
+
+**How we know (without Revit):** `InteriorTests.cs` draws houses 1, 2 and 5 as fake Revit records from the houses'
+own data (`InteriorDrawing.cs`, through `python -m model_measurement.interior.recordings draw`) and checks the
+reading with the same interior conformance CI applies to a Revit recording
+(`model_measurement/interior/recordings.py`: every measure in the step's scope equal to the hand-worked one, every
+other not measured, stairs, doors and guards not read), also under shared coordinates turned 30 degrees and moved
+875,000 ft. Then each trap one at a time: an enclosed area with no Room, an unplaced Room, a closed workset, links,
+nothing drawn, an unmarked room, two boundary loops, a curved segment, a wall inside not bounding, furniture, slabs
+missing, an inch high, at two heights or under part of the room, a soffit, a category not known, a curved face over
+the room, and fifteen ways a window's clear opening can't be trusted (no stamp, Clear offset blank or set to 0 after
+confirming, source or operation edited, a duplicated or resized type, a changed maker's value, the wall opening an
+inch below the sill line or not found, a clear opening wider than the window, no geometry...). Eight guards were
+undone once to check their tests then fail (the sill line check, the enclosed areas, never `[]`, the slab covering
+the whole room, the stamp's type, the clear opening fitting the window, what stands inside a room).
+
+**How we will know in Revit (the recordings):** **Record houses** (the Egress panel, or the request file below)
+draws houses 1, 2 and 5 in new projects (`HouseDraw.cs`: the houses' numbers from the same Python, exterior walls
+with their inside faces on the rooms' outline, a slab under each level, room separation lines, Rooms named and
+marked, ceilings as thin DirectShapes whose undersides are the house's ceilings, one `Window.rft` family per window
+with a frame solid of its size, its maker's clear opening confirmed with the stamp), reads each through the Revit
+layer, writes `test_data/interior_houses/recorded/revit/<house>.json` (the description, the notes and the
+evidence), and checks it as CI will (`python -m model_measurement.interior.recordings check <file>`). The earlier
+recording is deleted first, so a failed run leaves none. Asked for with no click by writing
+`%LOCALAPPDATA%\Gordium\trial\interior_request.json` (`{}` for all three, or `{"houses": ["1_ranch_compliant"]}`)
+while Revit is idle: taken once, results in `results.jsonl` (`record_house` lines). CI checks every recording
+committed, and a host with any recording must have all three (`test_interior_recordings.py`).
+
+**Recorded in Revit 2027.4 (trial run 6, 2026-11-20):** all three houses pass with no problem: rooms read, and every
+escape window's wall opening (the wall faces whose `GetGeneratingElementIds` name it) with its bottom on its sill line
+exactly, so the clear measures are in the step's scope. `FindInserts` listed no inserts even on the cut walls, so
+nothing relies on it. Lessons from runs 1 to 5, in the drawer: Window.rft's head plane is "Top"; Revit cuts a window's wall only
+after a `Document.Regenerate()` right after the window is placed and its Sill Height set (without it, runs 2 to 5 and
+a re-recording of 830fbedc: hosted, nothing cut; the walls are also committed first); the walls stop at the ceilings' top (higher, house 5's basement walls closed an area on the level
+above); the enclosed areas are read inside a rolled-back transaction (Revit works them out only in a document it can
+change).
+
+For a clone with no venv of its own (a git worktree), install with the main clone's Python:
+`install_trial_addin.ps1 -Python C:\...\gordium\.venv\Scripts\python.exe`; the add-in then runs Python with this
+clone's packages first (`PYTHONPATH`), so the code run is always this clone's.
+
+## Stairs (interior step 4)
+
+The **stair reader** (`Gordium.Revit.Reading/StairReader.cs`, called by `InteriorReader`) sends each run of a
+component stair as one flight of `stairs`, by the [design note](../../docs/revit/revit_interior_reading_design.md)'s
+section 4 ("As built in step 4"):
+
+- **Only on the architect's tick and with nothing hidden.** `stairs` is sent only when `Gordium: These are all the
+  stairs` on Project Information says Yes (a mark added by Mark for egress; unset or No: not read) and nothing could
+  be a stair the reader doesn't walk: a stair not made of components, a multistory stair, anything else in Stairs,
+  Railings or Generic Models (an in-place or loadable family, a DirectShape), a closed workset, an unloaded link, a
+  link holding stairs, a coordination model. Each is listed first in the marking list (`MarkingListResult.StairBlockers`),
+  with a summary line for the tick. With no stair found, `stairs` is left out, never `[]`.
+- **Each flight from what is drawn.** `bottom_elevation`: the floor or landing in front of the first riser, sent only
+  within 1/16 in of the run's base. `nosings`: each tread's front edge from the run's own flat faces, then the floor's
+  edge at the head, sent only when the floor at the head agrees with the run's top and every drawn riser and tread with
+  the stair's typed `ActualRiserHeight` / `ActualTreadDepth` (and the counts with the run's). `sides`: the innermost
+  wall face beside the flight running from its treads to 80 in over them, `open` when nothing is there; anything
+  else beside it (a column, a railing) leaves `sides` out. `overhead`: the undersides over the flight clipped to its
+  plan, a stairwell opening taken out exactly. No `handrails` (railings come with the guards, step 5).
+- A flight found is never dropped: whatever can't be read is left out with its reason (`InteriorReadResult.Notes`;
+  the flight's numbers and what was compared in `Evidence["stairs"]`).
+
+**How we know (without Revit):** `StairTests.cs` draws houses 2 and 3's stairs as fake records (`InteriorDrawing.cs`)
+and checks them with the interior conformance CI applies: house 2's risers, treads, headroom (85.5 in) and clear width
+(36 in) as worked by hand; house 3's tall riser, drawn at the head, not measured; both under turned shared coordinates.
+Then each trap: no tick, No, never set; nothing found; each blocker; a typed riser or tread disagreeing; the run's
+counts and ends; a winder, a curved face, a run whose geometry fails; a riser board's top under its tread; the floor at
+the foot missing, an inch high or under half the width; a link reaching the flight; a wall inside the tread ends
+(34 in); a railing, a column, a chair or a wall cabinet beside it (furniture and fixtures count for a stair), a pipe behind the wall; a light in the headroom; a floor at the head reaching over the last tread; a wall not running the whole flight; the
+stair's own stringer low and outside, or over the treads; a beam over it (84 in); a mass, a failed duct, a beam
+through the flight, a handrail over it; a floor with a stairwell opening.
+
+**In Revit:** Record houses draws houses 2 and 3 with their stairs (`HouseDraw.DrawStairs`: a duplicated stair type
+with no supports and a run type with no nosing, the side walls, the floor at the foot and head and the overhead as
+DirectShapes, the walls and floors committed and regenerated before the `StairsEditScope`, the document regenerated
+after; any railing Revit adds is deleted: step 5), ticks "these are all the stairs", and records each house at its
+step (houses 1 and 5 at step 3, 2 and 3 at step 4). The recording keeps `stairs_not_read`, the drawing's notes and
+what Revit gave back for each stair (`drawn`), and each run's faces, numbers and surroundings in its evidence.
+
 ## Running it
 
 Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and
