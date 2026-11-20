@@ -3,12 +3,12 @@
   "scene": "19_house_only_inside_a_block",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "0dbed423-6eb3-422e-9211-e4e67e4c4d5b-00000adf": "lot",
-    "0dbed423-6eb3-422e-9211-e4e67e4c4d5b-00000ae9": "house_link"
+    "baadd10c-0f09-4a84-8ea5-bd4bccb86e7d-00000adf": "lot",
+    "baadd10c-0f09-4a84-8ea5-bd4bccb86e7d-00000ae9": "house_link"
   },
   "steps": {
     "as drawn": {
@@ -21,7 +21,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "0dbed423-6eb3-422e-9211-e4e67e4c4d5b-00000adf",
+        "id": "baadd10c-0f09-4a84-8ea5-bd4bccb86e7d-00000adf",
         "edges": [
           {
             "points": [
@@ -94,7 +94,7 @@
       ],
       "left_out": [
         {
-          "id": "0dbed423-6eb3-422e-9211-e4e67e4c4d5b-00000ae9",
+          "id": "baadd10c-0f09-4a84-8ea5-bd4bccb86e7d-00000ae9",
           "layer": "RVT Links",
           "could_be_building": true,
           "touching": false,

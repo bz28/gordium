@@ -3,14 +3,14 @@
   "scene": "09_two_lot_outlines",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "dd0fbc6e-2dbb-4fe1-85d9-461e6d5795cd-00000adf": "lot",
-    "dd0fbc6e-2dbb-4fe1-85d9-461e6d5795cd-00000ae6": "lot_2",
-    "dd0fbc6e-2dbb-4fe1-85d9-461e6d5795cd-00000aeb": "house_floor1",
-    "dd0fbc6e-2dbb-4fe1-85d9-461e6d5795cd-00000aec": "house_floor2"
+    "3acda029-2f4a-416a-b410-cf3adcf3c600-00000adf": "lot",
+    "3acda029-2f4a-416a-b410-cf3adcf3c600-00000ae6": "lot_2",
+    "3acda029-2f4a-416a-b410-cf3adcf3c600-00000aeb": "house_floor1",
+    "3acda029-2f4a-416a-b410-cf3adcf3c600-00000aec": "house_floor2"
   },
   "steps": {
     "as drawn": {
@@ -25,7 +25,7 @@
       "lot": null,
       "buildings": [
         {
-          "id": "dd0fbc6e-2dbb-4fe1-85d9-461e6d5795cd-00000aeb",
+          "id": "3acda029-2f4a-416a-b410-cf3adcf3c600-00000aeb",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -179,7 +179,7 @@
           "name": ""
         },
         {
-          "id": "dd0fbc6e-2dbb-4fe1-85d9-461e6d5795cd-00000aec",
+          "id": "3acda029-2f4a-416a-b410-cf3adcf3c600-00000aec",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
