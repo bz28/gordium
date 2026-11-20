@@ -8,18 +8,18 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "wa": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f3",
-    "main": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f5",
-    "loft": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f7",
-    "ls": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-00001304",
-    "lg": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-00001357"
+    "wa": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f3",
+    "main": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f5",
+    "loft": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f7",
+    "ls": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001304",
+    "lg": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001357"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f5",
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f5",
         "name": "Bedroom (1)",
         "sleeping": true,
         "floor": [
@@ -67,7 +67,7 @@
         ]
       },
       {
-        "id": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f7",
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f7",
         "name": "Sleeping loft (2)",
         "sleeping": true,
         "floor": [
@@ -117,16 +117,16 @@
     ],
     "openings": [
       {
-        "id": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f3",
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f3",
         "name": "Gordium test window wa (36 x 24 in): Family11 (Window A)",
-        "room": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f5",
+        "room": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f5",
         "escape": true,
         "operation": "awning"
       }
     ],
     "stairs": [
       {
-        "id": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-00001304",
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001304",
         "name": "Gordium test stair ls",
         "bottom_elevation": 0,
         "nosings": [
@@ -340,7 +340,7 @@
     ],
     "guards": [
       {
-        "id": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-00001357",
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001357",
         "name": "Gordium test guard lg",
         "top": 12,
         "walking_surface": 9,
@@ -448,14 +448,14 @@
   ],
   "notes": [
     {
-      "part": "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-000012f3",
+      "part": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f3",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     }
   ],
   "evidence": {
     "stairs": {
-      "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-00001304": {
+      "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001304": {
         "revit_layer": [
           "run 4868 Straight: base 0, top 9 (relative), risers 12, treads 11, begins/ends with riser True/True, width 24 in; path (145,1,0) (151.4167,1,0)",
           "its geometry: 138 faces (23 facing up, 0 curved), failed False; box 145,0,0 to 151.458,2,9",
@@ -716,13 +716,13 @@
           6.999999999999773
         ],
         "handrails_beside_walls": [
-          "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-00001316 (right)"
+          "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001316 (right)"
         ],
         "railings_refused": []
       }
     },
     "guards": {
-      "e47df436-e7a1-4a03-b9e1-d3f25dd35dba-00001357": {
+      "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001357": {
         "revit_layer": [
           "railing 4951 \u0022Gordium test guard lg\u0022: host  , base level Level 2 9, base offset 0; path (164.4167,0,9)-(168.4167,0,9); around it 5: Floors Floor at the guard lg, Walls Gordium test wall 4 in, Walls Gordium test wall 4 in, SketchLines Model Lines, RailingRailPathExtensionLines Model Lines",
           "Railing 4951 OST_StairsRailing: 10 solids (6,6,6,6,6,6,6,6,6,6 faces, 0 curved), failed False; x 164.4167..168.4167, y -0.0625..0.0625, z 9.1667..11.875",
