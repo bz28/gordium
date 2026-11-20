@@ -145,7 +145,7 @@ internal static class RevitInterior
             Stairs => "a stair not made of components",
             _ => $"another element ({e.GetType().Name})",
         },
-        Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id), BoxOf(e), NestedIn(e));
+        Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id), BoxOf(e), NestedIn(e), RevitMarks.Values(e));
 
     /// <summary>The family instances <paramref name="e"/> is nested in, innermost first (<c>FamilyInstance.SuperComponent</c>
     /// to the top), each with its category and box; empty when it isn't nested.</summary>
@@ -171,6 +171,7 @@ internal static class RevitInterior
             Name = name.Length > 0 ? name : null,
             IsByComponent = byComponent,
             MultistoryStairsId = Id(s.MultistoryStairsId),
+            InstanceMarks = RevitMarks.Values(s),
             PhaseCreated = Id(s.CreatedPhaseId),
             PhaseDemolished = Id(s.DemolishedPhaseId),
             DesignOption = Id(s.DesignOption?.Id),
@@ -342,6 +343,7 @@ internal static class RevitInterior
             BaseLevelElevation = level?.ProjectElevation,
             BaseOffset = offset,
             TypeMarks = type is null ? new Dictionary<Guid, MarkValue>() : RevitMarks.Values(type),
+            InstanceMarks = RevitMarks.Values(r),
             Parts = parts,
             Near = near,
             Diagnostics = words,

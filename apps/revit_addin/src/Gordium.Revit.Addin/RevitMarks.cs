@@ -199,7 +199,8 @@ public sealed class MarkForEgressCommand : IExternalCommand
             // every element the list counts by type, by id
             log["stair_candidates"] = (model.Interior?.StairCandidates ?? [])
                 .Select(c => $"{c.UniqueId} {c.BuiltInCategory.Replace("OST_", "")} \"{c.Name}\": {c.Kind}" +
-                             (StairReader.InsideWindowOrDoor(c) ? " (inside its window or door: not a stair)" : "")).ToList();
+                             (StairReader.InsideWindowOrDoor(c) ? " (inside its window or door: not a stair)" : "") +
+                             (StairReader.ClearedByArchitect(c) ? $" (marked {Marks.NotAStair.Name} Yes: cleared by the architect)" : "")).ToList();
             log["unknown_area_each"] = InteriorReader.UnknownAreaWords(model);
             log["headline"] = list.Headline;
             log["has_none_conflicts"] = list.HasNoneConflicts;
@@ -209,6 +210,8 @@ public sealed class MarkForEgressCommand : IExternalCommand
             log["unknown_areas"] = list.UnknownAreas;
             log["level_conflicts"] = list.LevelConflicts;
             log["stair_blockers"] = list.StairBlockers;
+            log["not_a_stair_conflicts"] = list.NotAStairConflicts;
+            log["not_a_stair"] = list.NotAStair;
             log["summary"] = list.Summary;
             log["rows"] = list.Rows.Select(r => new Dictionary<string, object?>
             {

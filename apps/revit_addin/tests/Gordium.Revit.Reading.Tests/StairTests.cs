@@ -41,19 +41,70 @@ public sealed class StairTests
     }
 
     [Fact]
-    public void House_3s_tall_riser_drawn_at_the_head_sends_no_nosings()
+    public void House_3s_tall_riser_drawn_at_the_head_is_measured_as_drawn()
     {
+        // the floor at the head 1 1/2 in above the run's top: the last riser, from the top tread (-0.75 ft) to that
+        // floor (0), is 9 in, measured as drawn (R318.7.5.1: between the leading edges of the adjacent treads; Q1)
         var house = FakeHouse.Draw(Three);
         var read = Read(house);
         var s = Flight(read, "s")!;
-        Assert.Null(s["nosings"]);
-        Assert.Contains("the floor at its head is 1.5 in from the run's top", Note(read, "s", "nosings"));
-        Assert.Equal(-8.25, s["bottom_elevation"]!.GetValue<double>(), 9);                  // the foot agrees
+        var nosings = s["nosings"]!.AsArray();
+        Assert.Equal(13, nosings.Count);
+        Assert.Equal(0.0, nosings[12]![0]![2]!.GetValue<double>(), 9);                     // the floor at the head
+        Assert.Equal(-0.75, nosings[11]![0]![2]!.GetValue<double>(), 9);
+        Assert.Null(Note(read, "s", "nosings"));
+        Assert.Equal(-8.25, s["bottom_elevation"]!.GetValue<double>(), 9);
         Assert.Equal("open", s["sides"]!["right"]!.GetValue<string>());                     // the guard: step 5
         var ev = read.Evidence["stairs"]!["run-s"]!;
         Assert.Equal(0.0, ev["head"]!.GetValue<double>(), 9);
         Assert.Equal(-0.125, ev["run_top"]!.GetValue<double>(), 9);
-        Assert.Equal([], InteriorTests.Problems(house, read));                              // every stair measure not measured
+        Assert.Equal(9.0, ev["drawn_risers_in"]![12]!.GetValue<double>(), 9);
+        Assert.Equal(7.5, ev["run_risers_in"]![12]!.GetValue<double>(), 9);                 // the run's own, as typed
+        Assert.Equal([], InteriorTests.Problems(house, read));                              // riser 9 in, variation 1.5
+    }
+
+    [Fact]
+    public void A_last_riser_shorter_than_the_runs_is_measured_as_drawn()
+    {
+        // house 2's floor at the head 1 in under the run's top (still above its last riser board, 3 in under the top):
+        // the last riser 6.5 in, the variation 1 in, the total rise 119 in
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        house.SetRun("s1", r => r with
+        {
+            Near = [.. r.Near!.Where(e => e.UniqueId != "head-s1"),
+                    FakeHouse.Boxed(new("head2", "OST_Floors", "Landing", Faces: house.StairBox(st, 12.5, 15.5, -1.5, 1.5, 9, 10 - 1.0 / 12)))],
+        });
+        var read = Read(house);
+        Assert.Equal(10 - 1.0 / 12, Flight(read, "s1")!["nosings"]![15]![0]![2]!.GetValue<double>(), 9);
+        var problems = InteriorTests.Problems(house, read);
+        Assert.Contains(problems, p => p.Contains("s1 stair_riser_variation = 1.0, expected 0.0"));
+        Assert.Contains(problems, p => p.Contains("s1 stair_total_rise = 119.0, expected 120.0"));
+    }
+
+    [Fact]
+    public void A_floor_at_the_head_under_the_runs_own_top_or_under_its_top_tread_sends_no_nosings()
+    {
+        // 4 in under the run's top: its last riser board (3 in under) stands proud of the floor, a lip not read
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        house.SetRun("s1", r => r with
+        {
+            Near = [.. r.Near!.Where(e => e.UniqueId != "head-s1"),
+                    FakeHouse.Boxed(new("head2", "OST_Floors", "Landing", Faces: house.StairBox(st, 12.5, 15.5, -1.5, 1.5, 9, 10 - 4.0 / 12)))],
+        });
+        var read = Read(house);
+        Assert.Null(Flight(read, "s1")!["nosings"]);
+        Assert.Contains("the run itself reaches 1 in above the floor at its head", Note(read, "s1", "nosings"));
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_riser_height not measured"));
+        // at or under the top tread: no riser there
+        house = FakeHouse.Draw(Two);
+        house.SetRun("s1", r => r with
+        {
+            Near = [.. r.Near!.Where(e => e.UniqueId != "head-s1"),
+                    FakeHouse.Boxed(new("head2", "OST_Floors", "Landing", Faces: house.StairBox(st, 12.5, 15.5, -1.5, 1.5, 9, 9.375)))],
+        });
+        Assert.Contains("from its top tread: no riser there", Note(Read(house), "s1", "nosings"));
     }
 
     [Fact]
@@ -225,6 +276,53 @@ public sealed class StairTests
     }
 
     [Fact]
+    public void Spiral_is_sent_from_the_runs_style_only_where_the_drawing_agrees()
+    {
+        // Revit's StairsRunStyle (Straight, Winder, Spiral, Sketched): a Straight run drawn straight is no spiral (R202)
+        var house = FakeHouse.Draw(Two);
+        Assert.False(Flight(Read(house), "s1")!["spiral"]!.GetValue<bool>());
+        Assert.Null(Note(Read(house), "s1", "spiral"));
+
+        // Revit's Spiral style is any arc run (a curved stair too), never shown to be R202's spiral: not sent (review
+        // round 1: true would set the ordinary R318.7 rules aside)
+        house.SetRun("s1", r => r with { Style = "Spiral" });
+        var read = Read(house);
+        Assert.Null(Flight(read, "s1")!["spiral"]);
+        Assert.Null(Flight(read, "s1")!["nosings"]);
+        Assert.Contains("whether it is a spiral stairway as R202 defines one", Note(read, "s1", "spiral"));
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_spiral not measured"));
+
+        house = FakeHouse.Draw(Two);                                         // its nosings left out: no spiral either
+        house.SetRun("s1", r => r with { Near = r.Near!.Where(e => e.UniqueId != "foot-s1").ToList() });
+        read = Read(house);
+        Assert.Null(Flight(read, "s1")!["nosings"]);
+        Assert.Null(Flight(read, "s1")!["spiral"]);
+        Assert.Equal(Note(read, "s1", "nosings"), Note(read, "s1", "spiral"));
+
+        foreach (var style in new[] { "Winder", "Sketched" })              // neither: not stated
+        {
+            house = FakeHouse.Draw(Two);
+            house.SetRun("s1", r => r with { Style = style });
+            read = Read(house);
+            Assert.Null(Flight(read, "s1")!["spiral"]);
+            Assert.Contains($"a {style.ToLowerInvariant()} run", Note(read, "s1", "spiral"));
+            Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_spiral not measured"));
+        }
+
+        house = FakeHouse.Draw(Two);                                         // Straight, but a curved face drawn
+        house.SetRun("s1", r => r with { Faces = [.. r.Faces!, new SurfaceRecord(false, new(0, 0, 0), [], [new(0, 0, 0)])] });
+        read = Read(house);
+        Assert.Null(Flight(read, "s1")!["spiral"]);
+        Assert.Contains("curved face", Note(read, "s1", "spiral"));
+
+        house = FakeHouse.Draw(Two);                                         // Straight, but its path bends
+        house.SetRun("s1", r => r with { Path = [r.Path[0], r.Path[0] + 0.5 * (r.Path[1] - r.Path[0]) + new Xyz(0.5, 0.5, 0), r.Path[1]] });
+        read = Read(house);
+        Assert.Null(Flight(read, "s1")!["spiral"]);
+        Assert.Contains("a bent run", Note(read, "s1", "spiral"));
+    }
+
+    [Fact]
     public void A_riser_top_hidden_under_its_tread_is_inside_the_run_not_a_tread()
     {
         // an assembled stair's riser board reaching up under the tread: its top face touches the tread's underside
@@ -237,29 +335,49 @@ public sealed class StairTests
     }
 
     [Fact]
-    public void The_floor_at_the_foot_must_agree_with_the_runs_base()
+    public void The_floor_at_the_foot_is_read_as_drawn()
     {
         var house = FakeHouse.Draw(Two);
         house.SetRun("s1", r => r with { Near = r.Near!.Where(e => e.UniqueId != "foot-s1").ToList() });
         var read = Read(house);
         Assert.Null(Flight(read, "s1")!["bottom_elevation"]);
         Assert.Contains("no floor or landing top was found", Note(read, "s1", "bottom_elevation"));
-        Assert.Null(Flight(read, "s1")!["nosings"]);                                        // the first riser can't be checked
+        Assert.Null(Flight(read, "s1")!["nosings"]);                                        // the first riser can't be measured
 
-        house = FakeHouse.Draw(Two);                         // the floor an inch high: a short first riser
-        var st = house.StairDrawing("s1");
+        // the floor an inch above the run's base: a first riser of 6.5 in, measured as drawn (R318.7.5.1, Q1), never
+        // the run's 7.5 in; and an inch below it, 8.5 in
+        foreach (var (top, words) in new[] { (1.0 / 12, "stair_riser_variation = 1.0, expected 0.0"), (-1.0 / 12, "stair_riser_height = 8.5, expected 7.5") })
+        {
+            house = FakeHouse.Draw(Two);
+            var sd = house.StairDrawing("s1");
+            house.SetRun("s1", r => r with
+            {
+                Near = [.. r.Near!.Where(e => e.UniqueId != "foot-s1"),
+                        FakeHouse.Boxed(new("foot2", "OST_Floors", "Floor", Faces: house.StairBox(sd, -3, 0, -1.5, 1.5, -1, top)))],
+            });
+            read = Read(house);
+            Assert.Equal(top, Flight(read, "s1")!["bottom_elevation"]!.GetValue<double>(), 9);
+            Assert.NotNull(Flight(read, "s1")!["nosings"]);
+            Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 " + words));
+        }
+
+        house = FakeHouse.Draw(Two);                         // a floor at the first tread's height: no riser there
+        var st2 = house.StairDrawing("s1");
         house.SetRun("s1", r => r with
         {
             Near = [.. r.Near!.Where(e => e.UniqueId != "foot-s1"),
-                    FakeHouse.Boxed(new("foot2", "OST_Floors", "Floor", Faces: house.StairBox(st, -3, 0, -1.5, 1.5, -1, 1.0 / 12)))],
+                    FakeHouse.Boxed(new("foot2", "OST_Floors", "Floor", Faces: house.StairBox(st2, -3, 0, -1.5, 1.5, -1, 7.5 / 12)))],
         });
-        Assert.Contains("1 in from the run's base", Note(Read(house), "s1", "bottom_elevation"));
+        read = Read(house);
+        Assert.Null(Flight(read, "s1")!["bottom_elevation"]);
+        Assert.Contains("from its first tread: no riser there", Note(read, "s1", "bottom_elevation"));
+        Assert.Null(Flight(read, "s1")!["nosings"]);
 
         house = FakeHouse.Draw(Two);                         // a floor under half the stair's width only
         house.SetRun("s1", r => r with
         {
             Near = [.. r.Near!.Where(e => e.UniqueId != "foot-s1"),
-                    FakeHouse.Boxed(new("foot2", "OST_Floors", "Floor", Faces: house.StairBox(st, -3, 0, 0, 1.5, -1, 0)))],
+                    FakeHouse.Boxed(new("foot2", "OST_Floors", "Floor", Faces: house.StairBox(st2, -3, 0, 0, 1.5, -1, 0)))],
         });
         Assert.Contains("no one floor top covers the stair's whole width", Note(Read(house), "s1", "bottom_elevation"));
     }

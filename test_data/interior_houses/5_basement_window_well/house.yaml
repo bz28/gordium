@@ -31,6 +31,7 @@ stairs:
   - id: bs
     name: Basement stair
     bottom_elevation: -96
+    spiral: false                # a straight flight (R202: a spiral's treads radiate from a column)
     nosings:
       - [[0, 0, -88], [0, 36, -88]]
       - [[10, 0, -80], [10, 36, -80]]
