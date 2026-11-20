@@ -27,6 +27,23 @@ public sealed class PanelSupportTests
         Assert.Equal(0, queue.Count);
     }
 
+    /// <summary>Review round 2 (P3): an edit while Check again waited redrew the panel greyed, re-enabled the button
+    /// and erased "Checking...". The waiting survives every redraw until the check ends.</summary>
+    [Fact]
+    public void A_redraw_while_a_check_waits_keeps_check_again_greyed_and_checking_said()
+    {
+        var state = new CheckAgainState();
+        Assert.True(state.Enabled);
+        Assert.Equal("", state.Status(""));
+        state.Start();
+        Assert.False(state.Enabled);                       // the redraw (MarkStale's Show) reads this
+        Assert.Equal("Checking...", state.Status(""));
+        Assert.Equal("Checking...", state.Status("Added 3 Gordium marks to this project."));
+        state.Stop();
+        Assert.True(state.Enabled);
+        Assert.Equal("Added 3 Gordium marks to this project.", state.Status("Added 3 Gordium marks to this project."));
+    }
+
     [Fact]
     public void Taken_actions_run_in_order_and_one_that_throws_doesnt_stop_the_rest()
     {

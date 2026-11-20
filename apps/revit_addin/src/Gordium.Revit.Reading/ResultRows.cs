@@ -176,12 +176,15 @@ public static class ResultRows
     public const string StreetTransaction = "Gordium: the street edge";
     public const string AreasTransaction = "Gordium: read the enclosed areas (rolled back)";
 
-    /// <summary>Whether a change to the checked project (Revit's DocumentChanged: its transactions' names) makes the
-    /// shown results stale: any change but the check's own; a change with no name (an undo, a redo) too.</summary>
-    public static bool ChangesTheCheck(IReadOnlyCollection<string> transactions)
+    /// <summary>Whether a change to the checked project (Revit's DocumentChanged) makes the shown results stale.
+    /// <paramref name="committed"/>: whether it is a transaction committed (<c>e.Operation</c> is
+    /// <c>TransactionCommitted</c>); an undo or redo (<c>TransactionUndone</c>, <c>TransactionRedone</c>) is stale
+    /// whatever its names, which are the undone or redone transactions' own (undoing the check's street edge takes a
+    /// fact away). A committed change is stale unless every transaction in it is the check's own (or it has none).</summary>
+    public static bool ChangesTheCheck(IReadOnlyCollection<string> transactions, bool committed)
     {
         ArgumentNullException.ThrowIfNull(transactions);
-        return transactions.Count == 0 || transactions.Any(t => !OwnTransactions.Contains(t));
+        return !committed || transactions.Count == 0 || transactions.Any(t => !OwnTransactions.Contains(t));
     }
 
     /// <summary>The results as shown once the model changed after the check (made at <paramref name="checkedAt"/>):

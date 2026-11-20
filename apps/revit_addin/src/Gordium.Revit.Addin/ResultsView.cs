@@ -84,9 +84,9 @@ internal sealed class ResultsView : C.UserControl
         _content = content;
         _selected = null;
         _again.Visibility = W.Visibility.Visible;
-        _again.IsEnabled = true;
+        _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
-        Say(content.MarksAdded == 0 ? "" : $"Added {content.MarksAdded} Gordium marks to this project.");
+        Say(_checkAgainState.Status(content.MarksAdded == 0 ? "" : $"Added {content.MarksAdded} Gordium marks to this project."));
         _body.Children.Clear();
         if (content.Model is not { } model)
         {
@@ -175,12 +175,19 @@ internal sealed class ResultsView : C.UserControl
         _status.Visibility = words.Length == 0 ? W.Visibility.Collapsed : W.Visibility.Visible;
     }
 
-    private const string Checking = "Checking...";
+    private const string Checking = CheckAgainState.Checking;
+
+    /// <summary>Whether a Check again waits or runs: kept across every redraw (a greyed redraw after an edit).</summary>
+    private readonly CheckAgainState _checkAgainState = new();
 
     /// <summary>While a check runs: Check again greyed, and why.</summary>
     internal void Busy(bool busy)
     {
-        _again.IsEnabled = !busy;
+        if (busy)
+            _checkAgainState.Start();
+        else
+            _checkAgainState.Stop();
+        _again.IsEnabled = _checkAgainState.Enabled;
         if (busy)
             Say(Checking);
         else if (_status.Text == Checking)

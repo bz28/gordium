@@ -247,17 +247,22 @@ public sealed class ResultRowsTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal(PanelPart.Stale, ResultRows.Layout(stale)[0]);
     }
 
-    /// <summary>Only the check's own transactions (adding the marks, keeping the street edge) leave the results
-    /// standing; any other change, or one with no name (an undo), makes them stale.</summary>
+    /// <summary>Only the check's own committed transactions (adding the marks, keeping the street edge) leave the
+    /// results standing; any other change makes them stale, and so does any undo or redo, whatever its names
+    /// (review round 2: Revit names an undo by the transaction undone, so undoing the street edge kept a green pass).</summary>
     [Fact]
     public void Any_change_but_the_checks_own_makes_the_results_stale()
     {
-        Assert.False(ResultRows.ChangesTheCheck([ResultRows.MarksTransaction]));
-        Assert.False(ResultRows.ChangesTheCheck([ResultRows.StreetTransaction, ResultRows.MarksTransaction]));
-        Assert.True(ResultRows.ChangesTheCheck(["Move"]));
-        Assert.True(ResultRows.ChangesTheCheck([ResultRows.StreetTransaction, "Modify element attributes"]));
-        Assert.True(ResultRows.ChangesTheCheck([]));
-        Assert.True(ResultRows.ChangesTheCheck(["Gordium: the request's marks"]));     // a fact changed: stale
+        Assert.False(ResultRows.ChangesTheCheck([ResultRows.MarksTransaction], committed: true));
+        Assert.False(ResultRows.ChangesTheCheck([ResultRows.StreetTransaction, ResultRows.MarksTransaction], committed: true));
+        Assert.True(ResultRows.ChangesTheCheck(["Move"], committed: true));
+        Assert.True(ResultRows.ChangesTheCheck([ResultRows.StreetTransaction, "Modify element attributes"], committed: true));
+        Assert.True(ResultRows.ChangesTheCheck([], committed: true));
+        Assert.True(ResultRows.ChangesTheCheck(["Gordium: the request's marks"], committed: true));     // a fact changed: stale
+        // undone or redone: stale, the check's own included
+        Assert.True(ResultRows.ChangesTheCheck([ResultRows.StreetTransaction], committed: false));
+        Assert.True(ResultRows.ChangesTheCheck([ResultRows.MarksTransaction], committed: false));
+        Assert.True(ResultRows.ChangesTheCheck(["Move"], committed: false));
     }
 
     /// <summary>Review (Revit trial, P2): at the docked size the header filled the pane and no row showed. The
