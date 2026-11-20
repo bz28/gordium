@@ -1,0 +1,249 @@
+using System.Diagnostics;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Text.Json.Nodes;
+using Autodesk.Revit.Attributes;
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using Autodesk.Revit.UI.Selection;
+using Gordium.Revit.Reading;
+using Gordium.Worker;
+using TaskDialog = Autodesk.Revit.UI.TaskDialog;
+using RevitApplication = Autodesk.Revit.ApplicationServices.Application;
+
+namespace Gordium.Revit.Addin;
+
+/// <summary>
+/// "Check my project" (docs/revit/revit_reading_design.md, section 9): the open project read outside
+/// (<see cref="RevitRead"/>, then SiteReader) and inside (<see cref="RevitInterior"/>, then InteriorReader), with the
+/// lot facts from Gordium's marks on Project Information, sent as one check_site, and shown: the worker's state and
+/// summary, the phase and design options checked, the groups in the worker's order with every failure (ResultText).
+/// Its first run adds the marks (as Mark for egress does); a street edge not set is asked for by a pick; any other
+/// fact missing and nothing is sent: the dialog lists what to fill in. The request and the answer go to the log.
+/// </summary>
+[Transaction(TransactionMode.Manual)]
+public sealed class CheckProjectCommand : IExternalCommand
+{
+    private const string Title = "Gordium: check my project";
+
+    public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
+    {
+        var ui = commandData.Application;
+        var doc = ui.ActiveUIDocument?.Document;
+        if (doc is null || doc.IsFamilyDocument)
+        {
+            TaskDialog.Show(Title, "Open a project (not a family) to check it.");
+            return Result.Cancelled;
+        }
+        var log = new Dictionary<string, object?> { ["document"] = doc.Title };
+        try
+        {
+            var added = RevitMarks.AddMarks(doc, ui.Application, MarkSetup.Plan(RevitMarks.Bindings(doc)));
+            log["marks_added"] = added.Select(s => $"{s.Action}: {s.Mark.Name}").ToList();
+            if (ProjectFacts.Read(RevitMarks.Model(doc)).StreetEdges is null)
+                PickStreet(ui.ActiveUIDocument!, log);
+            var run = Run(doc, ui.Application, log);
+            // the edge kept is no longer one of the lot's (the property line redrawn): asked for again, checked once more
+            if (run.Prepared.Missing is [var only] && only.StartsWith(Marks.StreetEdge.Name, StringComparison.Ordinal)
+                && only.Contains("no longer an edge", StringComparison.Ordinal) && PickStreet(ui.ActiveUIDocument!, log))
+                run = Run(doc, ui.Application, log);
+            Show(run, added.Count);
+            return Result.Succeeded;
+        }
+        catch (Exception e)
+        {
+            log["error"] = $"{e.GetType().Name}: {e.Message}";
+            log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
+            Trial.Log("check_project", log);
+            TaskDialog.Show(Title, $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
+            message = e.Message;
+            return Result.Failed;
+        }
+    }
+
+    internal sealed record Ran(ProjectPrepared Prepared, CheckResult? Result, ResultWords? Words, string? FullText);
+
+    /// <summary>Reads, sends and logs one check of the document (everything in the log, whatever happens).</summary>
+    internal static Ran Run(Document doc, RevitApplication app, Dictionary<string, object?> log)
+    {
+        var sw = Stopwatch.StartNew();
+        // both reads on Revit's thread, one after the other, of the same document: the same phases and options
+        var outside = RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance);
+        var inside = RevitInterior.Model(doc);
+        var worker = Trial.Worker();
+        // the lot's lines are read on this thread before anything is awaited (a lot line's points call into Revit)
+        var prepared = ProjectCheck.PrepareAsync(outside, inside, new WorkerLeftOut(worker)).GetAwaiter().GetResult();
+        log["read_s"] = sw.Elapsed.TotalSeconds;
+        log["missing"] = prepared.Missing;
+        log["lot_edges"] = outside.LotLines.Where(l => l.IsPropertyLine).Select(l => new Dictionary<string, object?>
+        {
+            ["property_line"] = l.UniqueId,
+            ["edges"] = l.Curves.Select(c => StreetEdges.Format([(c.Start, c.End)])).ToList(),
+        }).ToList();
+        if (prepared.Request is not { } request)
+        {
+            Trial.Log("check_project", log);
+            return new Ran(prepared, null, null, null);
+        }
+        log["request"] = new JsonObject
+        {
+            ["site"] = request.Site.DeepClone(), ["facts"] = request.Facts.DeepClone(), ["interior"] = request.Interior.DeepClone(),
+        }.ToJsonString();
+        sw.Restart();
+        // the worker client is async: off Revit's thread, waited for (as the box house's check)
+        var result = Task.Run(() => ProjectCheck.SendAsync(worker, request)).GetAwaiter().GetResult();
+        log["check_s"] = sw.Elapsed.TotalSeconds;
+        log["answer"] = result.Raw.GetRawText();
+        var words = ResultText.Format(result, PhaseName(doc, prepared.PhaseChecked), prepared.OptionsChecked, prepared.Inside,
+                                      uid => Label(doc, uid));
+        var full = ResultText.Format(result, PhaseName(doc, prepared.PhaseChecked), prepared.OptionsChecked, prepared.Inside,
+                                     uid => Label(doc, uid), maxOtherRows: int.MaxValue).ToString();
+        log["state"] = result.State.ToString();
+        log["summary"] = result.Summary;
+        log["shown"] = words.ToString();
+        log["notes"] = prepared.Inside?.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
+        Trial.Log("check_project", log);
+        return new Ran(prepared, result, words, full);
+    }
+
+    private static void Show(Ran run, int marksAdded)
+    {
+        var added = marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.\n\n";
+        if (run.Words is not { } w)
+        {
+            new TaskDialog(Title)
+            {
+                MainInstruction = "Nothing was checked: fill these in first",
+                MainContent = added + string.Join("\n", run.Prepared.Missing.Select(m => "- " + m)),
+                FooterText = $"Logged to {Trial.LogPath()}",
+            }.Show();
+            return;
+        }
+        var file = Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "check_project_result.txt");
+        File.WriteAllText(file, run.FullText + "\n", new UTF8Encoding(false));
+        new TaskDialog(Title)
+        {
+            MainInstruction = w.Headline,
+            MainContent = added + w.Checked + "\n\n" + w.Outline,
+            ExpandedContent = w.Main + (w.Inside.Length > 0 ? "\n\n" + w.Inside : ""),
+            FooterText = $"Every row: {file}. The request and the answer: {Trial.LogPath()}",
+        }.Show();
+    }
+
+    /// <summary>Asks the architect to click the lot edges along the street, and keeps them in the Street edge mark.
+    /// True when an edge was kept.</summary>
+    internal static bool PickStreet(UIDocument ui, Dictionary<string, object?> log)
+    {
+        var doc = ui.Document;
+        var lines = RevitRead.LotLines(doc).Where(l => l.IsPropertyLine).ToDictionary(l => l.UniqueId);
+        if (lines.Count == 0)
+            return false;                                            // no property line: the dialog says what is missing
+        var kept = new List<(Xyz A, Xyz B)>();
+        var said = new List<string>();
+        while (true)
+        {
+            Reference picked;
+            try
+            {
+                picked = ui.Selection.PickObject(ObjectType.Element, new PropertyLines(),
+                    kept.Count == 0 ? "Gordium: click the lot edge along the street (on the property line; Esc to stop)"
+                                    : "Gordium: click another lot edge along the street, or press Esc when done");
+            }
+            catch (Autodesk.Revit.Exceptions.OperationCanceledException)
+            {
+                break;
+            }
+            var e = doc.GetElement(picked);
+            if (e is null || !lines.TryGetValue(e.UniqueId, out var line))
+                continue;
+            var (edge, why) = StreetEdges.Nearest(line, RevitInterior.P(picked.GlobalPoint));
+            if (edge is { } got)
+            {
+                if (!kept.Contains(got))
+                    kept.Add(got);
+            }
+            else
+            {
+                said.Add(why!);
+                TaskDialog.Show(Title, why);
+            }
+        }
+        log["street_picks"] = said;
+        if (kept.Count == 0)
+            return false;
+        using var t = new Transaction(doc, "Gordium: the street edge");
+        t.Start();
+        var p = doc.ProjectInformation.get_Parameter(Marks.StreetEdge.Guid)
+                ?? throw new InvalidOperationException($"{Marks.StreetEdge.Name} isn't on Project Information");
+        p.Set(StreetEdges.Format(kept));
+        t.Commit();
+        log["street_edge"] = StreetEdges.Format(kept);
+        return true;
+    }
+
+    private sealed class PropertyLines : ISelectionFilter
+    {
+        public bool AllowElement(Element elem) => elem is PropertyLine;
+
+        public bool AllowReference(Reference reference, XYZ position) => true;
+    }
+
+    private static string? PhaseName(Document doc, string? id) =>
+        id is null ? null : long.TryParse(id, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n)
+            ? doc.GetElement(new ElementId(n))?.Name ?? id : id;
+
+    /// <summary>A UniqueId as the architect finds the element: its category and Revit's element id (Select by ID).</summary>
+    private static string? Label(Document doc, string uid) =>
+        doc.GetElement(uid) is { } e ? $"{e.Category?.Name ?? "element"} id {e.Id.Value.ToString(CultureInfo.InvariantCulture)}" : null;
+
+    /// <summary>A check asked for by file while Revit is idle, no clicks (check_project_request.json:
+    /// <c>{"model": "&lt;path&gt;.rvt", "marks": {"Gordium: Zone": "R-1b", "Gordium: Lot surveyed": true, ...}}</c>,
+    /// "marks" optional): the model opened, the marks given set (Gordium's marks added first), checked as the button
+    /// checks it but with no street pick, logged (the result's words too) and closed unsaved.</summary>
+    internal static string RequestPath => Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "check_project_request.json");
+
+    internal static void RunRequest(RevitApplication app, string requestFile)
+    {
+        var request = JsonNode.Parse(File.ReadAllText(requestFile, Encoding.UTF8))!;
+        var path = request["model"]!.GetValue<string>();
+        var log = new Dictionary<string, object?> { ["file"] = path };
+        var doc = app.OpenDocumentFile(path);
+        try
+        {
+            log["document"] = doc.Title;
+            if (request["marks"] is JsonObject marks)
+            {
+                RevitMarks.AddMarks(doc, app, MarkSetup.Plan(RevitMarks.Bindings(doc)));
+                using var t = new Transaction(doc, "Gordium: the request's marks");
+                t.Start();
+                foreach (var (name, value) in marks)
+                {
+                    var m = Marks.All.FirstOrDefault(x => x.Name == name)
+                            ?? throw new InvalidOperationException($"{name} is not one of Gordium's marks");
+                    var p = doc.ProjectInformation.get_Parameter(m.Guid)
+                            ?? throw new InvalidOperationException($"{name} isn't on Project Information");
+                    if (value is JsonValue v && v.TryGetValue<bool>(out var yes))
+                        p.Set(yes ? 1 : 0);
+                    else
+                        p.Set(value!.GetValue<string>());
+                }
+                t.Commit();
+            }
+            var run = Run(doc, app, log);
+            if (run.FullText is { } text)
+                File.WriteAllText(Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "check_project_result.txt"), text + "\n",
+                                  new UTF8Encoding(false));
+        }
+        catch (Exception e)
+        {
+            log["error"] = $"{e.GetType().Name}: {e.Message}";
+            log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
+            Trial.Log("check_project", log);
+        }
+        finally
+        {
+            doc.Close(false);
+        }
+    }
+}

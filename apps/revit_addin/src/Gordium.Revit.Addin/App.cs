@@ -41,6 +41,13 @@ public sealed class App : IExternalApplication
             ToolTip = "Draws each conformance scene in a new Revit model, reads it as a check would, records it to " +
                       "test_data/host_conformance/recorded/revit/ and checks it by the suite's own rules",
         });
+        var check = application.CreateRibbonPanel(Tab, "Check");
+        check.AddItem(new PushButtonData("gordium_check_project", "Check my\nproject", dll, typeof(CheckProjectCommand).FullName)
+        {
+            ToolTip = "Checks this project against the City of Ithaca's zoning (the outside) and New York's egress rules " +
+                      "(the inside) in one check, with the lot facts on Project Information (Gordium's marks, added on " +
+                      "first use); a fact not set and nothing is sent: it lists what to fill in",
+        });
         var egress = application.CreateRibbonPanel(Tab, "Egress");
         egress.AddItem(new PushButtonData("gordium_mark_for_egress", "Mark for\negress", dll,
                                           typeof(MarkForEgressCommand).FullName)
@@ -64,7 +71,8 @@ public sealed class App : IExternalApplication
     }
 
     /// <summary>A run asked for by file, so the trial can be driven with no click: the in-place source
-    /// (InPlaceSource.RequestPath), the interior houses (RecordHousesCommand.RequestPath) or the scenes
+    /// (InPlaceSource.RequestPath), the interior houses (RecordHousesCommand.RequestPath), a project checked
+    /// (CheckProjectCommand.RequestPath) or the scenes
     /// (RecordScenesCommand.RunRequestPath). Each is taken (renamed) first, so it runs once even if it fails; every result
     /// goes to the log, and nothing ever escapes Revit's Idling event.</summary>
     private static void OnIdling(object? sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
@@ -124,6 +132,20 @@ public sealed class App : IExternalApplication
             catch (Exception x)       // never out of Revit's Idling event
             {
                 Trial.Log("read_interior", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
+        if (File.Exists(CheckProjectCommand.RequestPath))
+        {
+            try
+            {
+                var takenCheck = CheckProjectCommand.RequestPath + ".taken";
+                File.Move(CheckProjectCommand.RequestPath, takenCheck, overwrite: true);
+                CheckProjectCommand.RunRequest(ui.Application, takenCheck);
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("check_project", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
             }
             return;
         }
