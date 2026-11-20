@@ -142,6 +142,12 @@ public sealed record RevitElement
     /// <summary><c>Family.IsInPlace</c>: only names it; an in-place family is sorted by its category like any other.</summary>
     public bool IsInPlace { get; init; }
 
+    /// <summary>For a shared family nested in another (a sub-component), the <c>UniqueId</c> of the family instance it
+    /// sits in (<c>FamilyInstance.SuperComponent</c>); null otherwise. Revit lists a shared nested family as its own
+    /// element and leaves it out of its host's geometry (trial, 2026-11-19); the reader reads it as part of its host
+    /// (SiteReader.Fold), as Rhino reads a nested block as part of its block.</summary>
+    public string? SuperComponent { get; init; }
+
     public GordiumMark Mark { get; init; } = GordiumMark.None;
 
     /// <summary>A floor block's mark, "&lt;story&gt;;&lt;height drawn, ft&gt;" (as Rhino's <c>gordium:floor</c>).</summary>

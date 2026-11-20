@@ -16,7 +16,7 @@ Why a second reader is allowed at all, and the alternatives: [docs/decisions/202
 | `common_verdicts.yaml` | The rows every scene gives the same status (they depend only on facts every scene states alike). A scene's check must give exactly these rows plus its own. | By hand |
 | `expected/<scene>.site.json` | The description a host must send for the scene (`.after` for the step after its edit), worked out from the scene's numbers alone, never by reading a model. | `python -m design_checker.conformance --write` |
 | `models/<scene>.3dm` | The scene drawn in Rhino's file format, every object and layer with a fixed id (a block's definition and the object inside it excepted: rhino3dm makes their ids, and no reader uses them; so a rewrite reads the same; the files' bytes still differ on each write, as Rhino stamps them). | the same |
-| `recorded/<host>/<scene>.json` | A host's descriptions of each scene, recorded once on its own machine. `recorded/rhino3dm/` is the Rhino reference adapter's; `recorded/revit/` is empty until the Revit add-in records its own. | the host |
+| `recorded/<host>/<scene>.json` | A host's descriptions of each scene, recorded once on its own machine. `recorded/rhino3dm/` is the Rhino reference adapter's; `recorded/revit/` is the Revit add-in's (Revit 2027.4, recorded on the Windows trial laptop by its "Record scenes": [the runbook](../../docs/revit/windows_trial_runbook.md), section 4). | the host |
 
 The 26 scenes: a box house; a curved wall; an open solid; a block on the Building layer; a garage left out
 (scenario 06); no grade; spot grades on a slope, then the house moves (scenario 07); a model in millimetres; two lot

@@ -1,21 +1,35 @@
 # Installs the trial build of the Gordium Revit add-in for the current Windows user (docs/revit/windows_trial_runbook.md,
-# days 3 and 4). Builds it, copies the build to its own folder (Revit locks the files it loads, so the clone's build
-# folder stays free to rebuild), writes the clone's path beside it, and writes Revit's manifest (.addin) pointing at it.
-# Then start Revit (on the trial laptop, a running Revit 2027.4 picked the add-in up without a restart and never asked
-# "Always Load"; another Revit may need a restart, or ask once whether to load it: answer "Always Load").
+# days 3 and 4). Builds it, copies the build to one fixed folder (%LOCALAPPDATA%\Gordium\addin\<version>\current),
+# writes the clone's path beside it, and writes Revit's manifest (.addin) pointing at it.
+# Revit locks the files it loads, so this refuses while Revit is running: close Revit first. Revit asked "Always Load"
+# again after every rebuild of an unsigned add-in, in a new folder or the same one (seen on the trial laptop,
+# 2026-11-19), so each build is signed with this machine's own certificate (trust_trial_addin.ps1, run once): Revit
+# trusts the publisher, and doesn't ask.
 param([string]$Revit = "2027")
 $ErrorActionPreference = "Stop"
 $tfm = @{ "2027" = "net10.0-windows"; "2026" = "net8.0-windows" }[$Revit]
 if (-not $tfm) { throw "Revit $Revit is not one the add-in is built for (2026, 2027)" }
+if (Get-Process Revit -ErrorAction SilentlyContinue) { throw "Revit is running: close it first (it locks the add-in's files)" }
 $project = Join-Path $PSScriptRoot "src\Gordium.Revit.Addin"
 $clone = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
 dotnet build $project -c Release -f $tfm -v q
 if ($LASTEXITCODE -ne 0) { throw "build failed" }
-$stamp = Get-Date -Format "yyyy-MM-dd_HHmmss"
-$target = Join-Path $env:LOCALAPPDATA "Gordium\addin\$Revit\$stamp"
+$target = Join-Path $env:LOCALAPPDATA "Gordium\addin\$Revit\current"
+if (Test-Path $target) { Remove-Item (Join-Path $target "*") -Recurse -Force }
 New-Item -ItemType Directory -Force $target | Out-Null
 Copy-Item (Join-Path $project "bin\Release\$tfm\*") $target -Recurse
 [IO.File]::WriteAllText((Join-Path $target "gordium_clone.txt"), $clone, (New-Object Text.UTF8Encoding $false))
+# signed with this machine's trial certificate (trust_trial_addin.ps1), so Revit doesn't ask "Always Load" after every
+# build; without the certificate the build is installed unsigned, and Revit asks
+$cert = Get-ChildItem Cert:\CurrentUser\My -CodeSigningCert |
+    Where-Object { $_.Subject -eq "CN=Gordium trial add-in (this machine)" -and $_.NotAfter -gt (Get-Date) } |
+    Sort-Object NotAfter -Descending | Select-Object -First 1
+if ($cert) {
+    foreach ($dll in Get-ChildItem $target -Filter "Gordium*.dll") {
+        $signed = Set-AuthenticodeSignature -FilePath $dll.FullName -Certificate $cert -HashAlgorithm SHA256
+        if ($signed.Status -ne "Valid") { throw "signing $($dll.Name) gave $($signed.Status): $($signed.StatusMessage)" }
+    }
+} else { "No trial certificate (run trust_trial_addin.ps1 once): installed unsigned, so Revit will ask whether to load it" }
 $manifestDir = Join-Path $env:APPDATA "Autodesk\Revit\Addins\$Revit"
 New-Item -ItemType Directory -Force $manifestDir | Out-Null
 $manifest = @"
@@ -32,4 +46,4 @@ $manifest = @"
 </RevitAddIns>
 "@
 [IO.File]::WriteAllText((Join-Path $manifestDir "Gordium.addin"), $manifest, (New-Object Text.UTF8Encoding $false))
-"Installed $tfm build for Revit $Revit at $target (clone: $clone). Start Revit, or check its Gordium tab if it is running; if the tab is missing, restart Revit."
+"Installed $tfm build for Revit $Revit at $target (clone: $clone), signed: $([bool]$cert). Start Revit."
