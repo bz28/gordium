@@ -99,6 +99,8 @@ STOPS = {
                            "flight ({reason}): its shape isn't known",
     "spiral_but_straight": "the flight is said to be a spiral stairway, but its nosings make a straight flight with "
                            "rectangular treads: which is right is unclear",
+    "spiral_not_shown": "the flight is said to be a spiral stairway, but nothing measured shows R202's closed circular "
+                        "form around a supporting column (a curved stair isn't one): its shape isn't known",
     "nosings_out_of_range": "the stair's nosings have coordinates too large to measure",
     "too_few_nosings": "the flight needs at least {n} nosings (each tread's leading edge, and the top one) for this",
     "nosing_not_level": "nosing {n} isn't level (its ends are {off} in apart in height)",

@@ -265,6 +265,25 @@ def test_house_3_as_drawn_fails_r318_7_5_1_once_nothing_else_is_open():
         assert status == "needs_review" and "serves sleeping loft not measured" in reason
 
 
+def test_a_curved_flight_said_spiral_keeps_the_ordinary_stair_rules_to_review():
+    """Review round 1: Revit's Spiral run style is any arc run, a curved stair too, never shown to be R202's spiral
+    stairway. A flight said `spiral: true` with no nosings (as a Revit arc run would be sent) must leave the R318.7
+    rules that set spiral stairs aside needing review, never not applicable (the open-riser flag has no spiral rule
+    of its own: it would vanish)."""
+    from design_checker.check import check_site
+    sys.path.insert(0, str(r.REPO / "packages/permit_sheets"))
+    from permit_sheets import goldens
+    interior = described("2_two_story_small_window")["interior"]
+    s1 = interior["stairs"][0]
+    s1["spiral"] = True
+    del s1["nosings"]
+    got = check_site(goldens.site(), dict(goldens.FACTS), name="2", today=goldens.DATE, interior=interior)
+    status = {i["rule"]: i["status"] for i in got["view"]["items"] if (i.get("part") or {}).get("id") == "host-s1"}
+    for rule in ("general.r318_7_5_1_stair_open_riser_sphere", "general.r318_7_1_stair_clear_width_above_handrail",
+                 "general.r318_7_1_stair_clear_width_at_handrail", "general.r318_7_5_1_stair_riser_height_max"):
+        assert status[rule] == "needs_review", rule
+
+
 def test_a_stair_in_a_house_not_yet_in_the_stairs_step_isnt_drawn():
     d = r.drawing("5_basement_window_well")
     assert d["stairs"] == [] and "stairs" in d["not_drawn"]

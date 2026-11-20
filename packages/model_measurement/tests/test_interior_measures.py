@@ -470,8 +470,9 @@ def test_spiral_is_taken_only_where_the_nosings_agree():
     d["stairs"][0]["spiral"] = True                                                      # said spiral, drawn straight
     m, stopped, _ = stair(d)
     assert "stair_spiral" not in m and "which is right is unclear" in stopped["stair_spiral"]
-    del d["stairs"][0]["nosings"]                                                        # a spiral run: no nosings sent
-    assert stair(d)[0]["stair_spiral"] is True
+    del d["stairs"][0]["nosings"]                       # said spiral, nothing measured: never true (review round 1)
+    m, stopped, _ = stair(d)
+    assert "stair_spiral" not in m and "closed circular form" in stopped["stair_spiral"]
     d["stairs"][0]["spiral"] = False                                                     # said straight, shape unread
     m, stopped, _ = stair(d)
     assert "stair_spiral" not in m and "isn't measured as a straight flight" in stopped["stair_spiral"]
@@ -1926,6 +1927,7 @@ STOP_CASES = {
     "spiral_not_said": base,
     "spiral_not_straight": _stair(spiral=False, nosings=[[[0, 0, 7], [0, 36, 7]], [[10, 0, 14], [12, 36, 14]]]),
     "spiral_but_straight": _stair(spiral=True),
+    "spiral_not_shown": _stair(spiral=True, nosings=[[[0, 0, 7], [0, 36, 7]]]),
     "too_few_nosings": _stair(nosings=[[[0, 0, 7], [0, 36, 7]]]),
     "nosing_not_level": _stair(nosings=[[[0, 0, 7], [0, 36, 8]]]),
     "not_bottom_to_top": _stair(nosings=[[[0, 0, -7], [0, 36, -7]]]),

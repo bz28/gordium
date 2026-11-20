@@ -349,15 +349,14 @@ public static class StairReader
         {
             evidence[run.UniqueId] = _ev;
             _ev["revit_layer"] = new JsonArray(run.Diagnostics.Select(d => (JsonNode?)d).ToArray());
-            // whether it is a spiral (R202: treads radiating from a column), from Revit's own record of the run's shape
-            // (StairsRunStyle: Straight, Winder, Spiral, Sketched in the Revit 2027 API): true for a Spiral run; false only
-            // for a Straight run whose drawn treads read straight below (one direction, flat rectangular treads square
-            // to the run); a winder, a sketched run, or a Straight run drawn otherwise: left out (needs review)
+            // whether it is a spiral stairway (R202: "a plan view of closed circular form ... radiating from a
+            // minimum-diameter supporting column"), from Revit's own record of the run's shape (StairsRunStyle: Straight,
+            // Winder, Spiral, Sketched in the Revit 2027 API) and its drawing: false only for a Straight run whose
+            // nosings are sent (its drawn treads read straight and rectangular, square to the run). Never true: Revit's
+            // Spiral style is every arc run, any sweep and radius (a curved stair too), and true would make the
+            // ordinary R318.7 rules not applicable (review round 1); every other run: left out (needs review)
             _ev["style"] = run.Style;
-            if (run.Style == "Spiral")
-                _flight["spiral"] = true;
-            string[] all = run.Style == "Spiral" ? ["bottom_elevation", "nosings", "sides", "handrails", "overhead"]
-                : ["spiral", "bottom_elevation", "nosings", "sides", "handrails", "overhead"];
+            string[] all = ["spiral", "bottom_elevation", "nosings", "sides", "handrails", "overhead"];
             if (run.Faces is null || run.GeometryFailed)
             {
                 OutAll("the run's geometry couldn't be read exactly (a mesh, or Revit refused)", all);
@@ -381,7 +380,10 @@ public static class StairReader
             _v = new P2(-_u.Y, _u.X);
             if (run.Style != "Straight" || path.Any(p => Math.Abs(A(p)) > Sixteenth))
             {
-                OutAll($"a {(run.Style == "Straight" ? "bent" : run.Style.ToLowerInvariant())} run (its treads turn) isn't measured: only straight flights are", all);
+                var kind = run.Style == "Straight" ? "bent" : run.Style.ToLowerInvariant();
+                Out("spiral", $"a {kind} run: whether it is a spiral stairway as R202 defines one (closed circular form " +
+                              "around a supporting column) isn't known (Revit's Spiral style is any arc run)");
+                OutAll($"a {kind} run (its treads turn) isn't measured: only straight flights are", all[1..]);
                 return _flight;
             }
             var at = run.Path[0];
@@ -392,8 +394,7 @@ public static class StairReader
                 OutAll(bad, all);
                 return _flight;
             }
-            _flight["spiral"] = false;                      // a Straight run, its treads read straight and rectangular
-            _headZ = topZ;                                   // until the floor at the head is read: the line's top
+            _headZ = topZ;                                  // until the floor at the head is read: the line's top
             _ev["run_base"] = baseZ;
             _ev["run_top"] = topZ;
             _ev["typed_riser"] = stair.ActualRiserHeight;
@@ -454,9 +455,10 @@ public static class StairReader
             if (headZ is { } h)
                 _headZ = h;
             if (NosingsProblem(bottom, headZ, headWhy, footWhy, baseZ, topZ) is { } nosingsWhy)
-                Out("nosings", nosingsWhy);
+                OutAll(nosingsWhy, "nosings", "spiral");     // with no nosings the shape isn't measured: no spiral either
             else
             {
+                _flight["spiral"] = false;                  // a Straight run, its treads read straight and rectangular
                 var nosings = new JsonArray();
                 foreach (var x in _treads)
                     nosings.Add(new JsonArray(Point3(x.S, x.Right, x.Z), Point3(x.S, x.Left, x.Z)));

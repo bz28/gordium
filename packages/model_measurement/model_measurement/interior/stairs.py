@@ -310,15 +310,17 @@ def _spiral(st: dict, not_straight: str | None, measures: dict, stopped: dict) -
     style), taken only where the nosings agree with it. A spiral stairway (R202) is "a stairway with a plan view of
     closed circular form and uniform section-shaped treads, attached to and radiating from a minimum-diameter
     supporting column": a flight measured as straight with rectangular treads (`not_straight` None) is not one. So
-    `false` is taken only for a flight measured straight, `true` only for one that isn't; otherwise, or not given,
-    it is not measured (its rules need review)."""
+    `false` is taken only for a flight measured straight. `true` is never taken yet: nothing measured shows that
+    closed circular form (a flight that isn't measured straight may be any curved stair), and true would make the
+    ordinary R318.7 rules not applicable (review round 1: a false-pass path for a curved stair). Otherwise, or not
+    given, it is not measured (its rules need review)."""
     said = st.get("spiral")
     if not isinstance(said, bool):
         stopped["stair_spiral"] = Stop("spiral_not_said").reason
     elif said is False and not_straight is not None:
         stopped["stair_spiral"] = Stop("spiral_not_straight", reason=not_straight).reason
-    elif said is True and not_straight is None:
-        stopped["stair_spiral"] = Stop("spiral_but_straight").reason
+    elif said is True:
+        stopped["stair_spiral"] = Stop("spiral_but_straight" if not_straight is None else "spiral_not_shown").reason
     else:
         measures["stair_spiral"] = said
 

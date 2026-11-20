@@ -283,11 +283,21 @@ public sealed class StairTests
         Assert.False(Flight(Read(house), "s1")!["spiral"]!.GetValue<bool>());
         Assert.Null(Note(Read(house), "s1", "spiral"));
 
-        house.SetRun("s1", r => r with { Style = "Spiral" });               // Revit says spiral: sent, never measured straight
+        // Revit's Spiral style is any arc run (a curved stair too), never shown to be R202's spiral: not sent (review
+        // round 1: true would set the ordinary R318.7 rules aside)
+        house.SetRun("s1", r => r with { Style = "Spiral" });
         var read = Read(house);
-        Assert.True(Flight(read, "s1")!["spiral"]!.GetValue<bool>());
+        Assert.Null(Flight(read, "s1")!["spiral"]);
         Assert.Null(Flight(read, "s1")!["nosings"]);
-        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_spiral = True, expected False"));
+        Assert.Contains("whether it is a spiral stairway as R202 defines one", Note(read, "s1", "spiral"));
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_spiral not measured"));
+
+        house = FakeHouse.Draw(Two);                                         // its nosings left out: no spiral either
+        house.SetRun("s1", r => r with { Near = r.Near!.Where(e => e.UniqueId != "foot-s1").ToList() });
+        read = Read(house);
+        Assert.Null(Flight(read, "s1")!["nosings"]);
+        Assert.Null(Flight(read, "s1")!["spiral"]);
+        Assert.Equal(Note(read, "s1", "nosings"), Note(read, "s1", "spiral"));
 
         foreach (var style in new[] { "Winder", "Sketched" })              // neither: not stated
         {
