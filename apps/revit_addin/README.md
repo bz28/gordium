@@ -404,19 +404,38 @@ the jurisdiction is the City of Ithaca). Why each choice:
   design options); the outside described (`SiteReader`), the street edge kept in the mark matched to the lot's own
   edge (`StreetEdges`: an edge the lot no longer has is asked for again, never sent); the inside read
   (`InteriorReader`); one request.
-- **`ResultText`** (`ResultText.cs`): the answer as the dialog's words. The headline is the worker's state and
-  summary; groups in the worker's order with its counts; each row with its own verdict (a status word not known is
-  shown as needs review), measured against allowed or the checker's reason, and its element; failures, rows that
-  need review and rows not checked are never cut, other rows past 30 with "N more (in the log)".
+- **`ResultRows`** (`ResultRows.cs`): the answer as rows, the one model the results panel and the text file both
+  read. Per row: its verdict (a status word not known is needs review, amber), name, figures (a zoning row's
+  measured against allowed; an egress row's as its reason states them), how far off **in the worker's own words
+  only** (its `delta`, or `margin` from a worker with no delta; never worked out by the add-in), its reason said
+  once, the law's section and exact quotes (from the answer's `detail.quotes`), and its elements. The counts are the
+  worker's own summary words per law (`view.sections`), never recounted; red and green only for exactly "N do not
+  comply" and "N comply".
+- **`ResultText`** (`ResultText.cs`): the same rows as text (`check_project_result.txt`, the log). The headline is
+  the worker's state and summary; groups in the worker's order with its counts; failures, rows that need review and
+  rows not checked are never cut, other rows past 30 with "N more (in the log)" (the result file has every row).
 - **The button** (`CheckProject.cs`): adds the marks on first use, asks the architect to click the street edge
-  when it isn't set, reads both on Revit's thread, sends off it, shows a TaskDialog (every failure first, every row
-  under *Show details*) and writes every row to `check_project_result.txt` and the request and answer to the log.
-  `check_project_request.json` (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks.
+  when it isn't set, reads both on Revit's thread, sends off it, opens the **results panel** and writes every row to
+  `check_project_result.txt` and the request and answer to the log. `check_project_request.json`
+  (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks and never uses the panel.
+- **The results panel** (`ResultsPane.cs`, `ResultsView.cs`, `PanelActions.cs`): a dockable pane, *Gordium: Check
+  my project*, tabbed behind Properties the first time. Header with *Check again*; the worker's state and count
+  chips; its groups in its order (does not comply first, complies folded), every row in a scrolling list; each row
+  with its figures, how far off, reason, section and a *Law* expander with the law's words. Click a row (or *Show
+  in model*) to select and zoom to its elements. Nothing sent for a missing Project Information fact: the panel
+  lists each, with *Open Project Information*. Element marks are still set in Properties (the click selects the
+  element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread. Why each choice:
+  the reading design note, section 9.
 
 How we know: `ProjectCheckTests` (scene 01 as fake Revit records with interior houses 1 and 5, checked by the real
 worker: the scene's hand-worked zoning verdicts, the houses' egress verdicts, a project with no lot never complies,
-each missing fact sends nothing) and `ResultTextTests` (200 rows with every status, including a word the add-in
-doesn't know and a "not applicable" with no reason: nothing shown as a pass that the worker didn't say passes).
+each missing fact sends nothing), `ResultTextTests` (200 rows with every status, including a word the add-in
+doesn't know and a "not applicable" with no reason: nothing shown as a pass that the worker didn't say passes) and
+`ResultRowsTests` (the panel's rows: 200 rows all shown once in the worker's groups with its counts, never
+recounted; the worker's delta and never a margin it didn't give; egress figures from the reason with no margin
+worked out; sections and quotes; count chips coloured only by their words; every text-file row word for word the
+panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote). The WPF panel itself
+is checked in Revit (it needs Revit to run).
 
 ## Running it
 
