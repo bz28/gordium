@@ -40,9 +40,9 @@ def law_rows(result, rule_id):
     return [i for i in result["view"]["items"] if i["group"] == present.LAW_GROUP and i["rule"] == rule_id]
 
 
-def test_the_worker_speaks_1_2():
-    assert protocol.PROTOCOL == "1.2"
-    assert answer({"id": 1, "cmd": "hello", "protocol": "1.2"})["result"]["protocol"] == "1.2"
+def test_the_worker_speaks_1_3_and_answers_a_1_2_request():
+    assert protocol.PROTOCOL == "1.3"            # 1.3: a left-out object's slab (test_site_slabs.py)
+    assert answer({"id": 1, "cmd": "hello", "protocol": "1.2"})["result"]["protocol"] == "1.3"
 
 
 def test_the_examples_name_the_protocol_the_worker_speaks():

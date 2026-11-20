@@ -41,7 +41,7 @@ ignored and a design could pass that shouldn't (Gordium's rule: never a false pa
 | `lot` | `{id, edges: [{points: [[x, y], …], curved}]}`, or `null` when no lot outline was found; `problems` should then say why (Rhino's reader always does: `no_lot_layer`, `no_lot_outline`, `several_lot_outlines`…). It isn't refused when it doesn't: every measure that needs the lot then needs review, saying "no lot outline". A straight lot line is its two ends; a curved one is points closely along it, with `curved: true`. |
 | `buildings` | Each solid on the building layer: `{id, role: "building", layer, name?, floor?, faces: [{points: [[x, y, z], …], holes?: [[…]]}], problems: [problem…]}`. `floor` is a floor block's height as drawn (ft); left out or `null` for any other solid. A face that can't be read exactly is never approximated: it is left out and the building gets a problem (`curved_surface`, `curved_edge`, `open_solid`…). |
 | `unsent` | Objects that may be building but couldn't be sent at all (a block, a surface): `{id, layer, kind, problem}`. A tool that can't name each such object may instead send one building per kind with no faces and the problem (`read_model` does: a building with id `"a block"` and a `not_a_solid` problem, as `read_site` reads a file); either way every building's measuring needs review. |
-| `left_out` | Objects on the lot that weren't sent: `{id, layer, could_be_building, touching, ground_like, context}`. Each one makes the check need review. `touching: null` means not known, which counts as touching. |
+| `left_out` | Objects on the lot that weren't sent: `{id, layer, could_be_building, touching, ground_like, context, slab?, name?}`. Each one makes the check need review. `touching: null` means not known, which counts as touching. `slab` (protocol 1.3; left out for anything that isn't one): a slab on the ground outside the building, whose kind the tool can't tell from its shape (Revit: a Floor under none of the house's walls or roofs), by what the architect marked it: `"unmarked"`, `"patio"` (a patio, terrace or walk) or `"parking"` (a parking area, parking space or driveway). A porch, deck, landing or ramp is sent as a building, never as a slab. `name`: the object's name in the tool, for the architect's reading only. |
 | `grade` | `{source, points: [[x, y, z], …]}`, source one of `spot`, `finished_spots`, `terrain` or `none`. Always present: no ground read is `{"source": "none", "points": []}`, and the measuring then uses the lot facts' flat ground (`ground_is_flat`, `grade_elevation`) if they give one, else says the ground is missing. |
 | `inventory_complete` | `true` only when the tool looked at everything on the lot, so `left_out` is the whole list. `false` makes every building's measuring need review. |
 | `problems` | Problems with the site as a whole (the file, the lot outline). |
@@ -82,7 +82,7 @@ length), flat ground not yet given, and nothing else on the lot.
 ## How the worker uses it
 
 The worker (`python -m design_checker serve`) answers JSON requests one per line. The new-style commands name
-the protocol they speak, `"protocol": "1.2"` (a different major version is refused):
+the protocol they speak, `"protocol": "1.3"` (a different major version is refused):
 
 - `hello`: the protocol, the site description version, and fingerprints of the worker's code and of each place's
   rules (`protocol.about()`). Every new-style answer carries the same under `"about"`.
@@ -117,6 +117,18 @@ use is the one every Rhino check already takes, and both give the same answers (
 - Each `left_out` object makes the check need review (an "Objects on the lot not included" row; lot coverage and
   the accessory building rules need review); one that touches a building, or isn't known to (`touching: null`),
   makes the yards, height and stories need review too.
+- **A left-out slab** (`slab`, protocol 1.3), by Chapter 325's BUILDING AREA (§325-3B: "All porches, attached or
+  freestanding decks, … ramps, and/or landings" count; it "shall not include parking areas and parking spaces";
+  "Pergolas and terraces and patios shall be exempt from total lot coverage requirements. However, neither pergolas
+  or terraces and patios above grade shall be located in a required yard") and §325-18A. It is never measured, so it
+  never makes a row fail. `"unmarked"`: it may be a porch or deck, so it is a left-out object as above, and lot
+  coverage and every required yard (to the walls and to the eaves) need review whether it touches or not (a
+  freestanding deck counts too), the rows naming it. `"patio"`: not in lot coverage and not an object that may be a
+  building (STRUCTURE "shall not include patios or terraces"), but every required yard needs review, naming it, since
+  one above grade may not be in a required yard and its height above the ground isn't measured yet. A walk is read
+  as a patio (§325-3B has no walk; TERRACE OR PATIO is "a level plane or surfaced patio … less than 18 inches above
+  grade", and GREEN SPACE names "pedestrian amenities such as sidewalks or patios" together). `"parking"`: changes
+  nothing. Extras that also name slabs (`site_slabs`) are refused: one source.
 - The grade points come only from the description. Facts that also give `grade_points`, a `grade_from` other than
   the description's grade source, or extras that also list left-out objects are refused: one source for each
   thing. A flat ground stated in the facts (`ground_is_flat` with `grade_elevation`) is still used when the

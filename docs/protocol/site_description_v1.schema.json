@@ -289,6 +289,18 @@
     },
     "context": {
      "type": "boolean"
+    },
+    "slab": {
+     "enum": [
+      "unmarked",
+      "patio",
+      "parking"
+     ],
+     "description": "Protocol 1.3: a slab on the ground outside the building (Revit: a Floor under none of the house's walls or roofs), by what the architect marked it. unmarked: it may be a porch, deck, landing or ramp, so lot coverage and the yards need review; patio (a patio, terrace or walk): not in lot coverage, but the yards need review (one above grade may not be in a required yard); parking (a parking area or driveway): not in lot coverage. Left out: not a slab."
+    },
+    "name": {
+     "type": "string",
+     "description": "The object's name in the tool (a Revit floor type, \"Concrete 10\\\"\"), for the architect's reading only."
     }
    },
    "required": [

@@ -341,10 +341,10 @@ def test_hello_says_the_protocol_the_schema_and_the_fingerprints():
     reply = answer({"id": 1, "cmd": "hello", "protocol": "1.0"})
     assert reply["ok"] and reply["result"] == reply["about"] == protocol.about()
     about = reply["result"]
-    assert about["protocol"] == "1.2" and about["site_schema"] == "gordium.site/1"
+    assert about["protocol"] == "1.3" and about["site_schema"] == "gordium.site/1"
     assert re.fullmatch(r"[0-9a-f]{64}", about["worker_fingerprint"])
     assert set(about["rulebook"]) >= {PLACE.key} and all(re.fullmatch(r"[0-9a-f]{64}", v) for v in about["rulebook"].values())
-    assert answer({"id": 2, "cmd": "hello", "protocol": "1.3"})["ok"]        # a newer minor version: understood
+    assert answer({"id": 2, "cmd": "hello", "protocol": "1.4"})["ok"]        # a newer minor version: understood
 
 
 def test_the_fingerprints_cover_what_a_check_reads_and_follow_a_rule_edited_while_the_worker_runs(tmp_path, monkeypatch):

@@ -3,11 +3,12 @@ namespace Gordium.Worker;
 /// <summary>What this client speaks, from docs/protocol/worker_protocol_v1.md and site_description_v1.md.</summary>
 public static class Protocol
 {
-    /// <summary>The protocol version every request names (<c>"protocol": "1.2"</c>). A 1.0 or 1.1 worker answers it
+    /// <summary>The protocol version every request names (<c>"protocol": "1.3"</c>). A 1.0 or 1.1 worker answers it
     /// too, all but what it doesn't have: <c>objects.left_out</c> (1.1, an unknown command to a 1.0 worker: refused)
     /// and <c>check_site</c>'s <c>interior</c> (1.2), which the client sends only to a worker that says 1.2 or later
-    /// (an older one would ignore it: <see cref="WorkerClient.CheckSiteAsync"/>).</summary>
-    public const string Version = "1.2";
+    /// (an older one would ignore it: <see cref="WorkerClient.CheckSiteAsync"/>). A site slab (a left-out object's
+    /// <c>slab</c>, 1.3) needs no such gate: an older worker refuses a site field it doesn't know, never drops it.</summary>
+    public const string Version = "1.3";
 
     /// <summary>The minor version from which <c>check_site</c> reads an <c>interior</c>.</summary>
     public const int InteriorMinor = 2;
