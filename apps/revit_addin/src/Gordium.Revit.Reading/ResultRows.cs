@@ -92,8 +92,37 @@ public sealed record CountLine(string? Title, IReadOnlyList<CountChip> Chips);
 /// <param name="Counts">The worker's counts, never recounted.</param>
 /// <param name="Groups">The worker's groups, in its order, every row in one.</param>
 /// <param name="Inside">What the inside reader left out.</param>
+/// <param name="Stale">Why these results no longer stand for the model (it changed since the check), or null while
+/// they do: everything is then grey (<see cref="ResultRows.Stale"/>), never green.</param>
 public sealed record ResultModel(Verdict State, string Headline, string Checked, IReadOnlyList<CountLine> Counts,
-                                 IReadOnlyList<ResultGroup> Groups, string Inside);
+                                 IReadOnlyList<ResultGroup> Groups, string Inside, string? Stale = null)
+{
+    /// <summary>The state's colour: green only for a check that complies and still stands; red for one that
+    /// doesn't; amber otherwise; grey once the model changed.</summary>
+    public Tone StateTone => Stale is not null ? Tone.Neutral : State switch
+    {
+        Verdict.DoesNotComply => Tone.Fails,
+        Verdict.Complies => Tone.Complies,
+        _ => Tone.Review,
+    };
+}
+
+/// <summary>The parts of the results panel, top to bottom (<see cref="ResultRows.Layout"/>).</summary>
+public enum PanelPart
+{
+    /// <summary>"The model changed since this check (14:32): click Check again".</summary>
+    Stale,
+    /// <summary>The worker's state, one line.</summary>
+    State,
+    /// <summary>The worker's counts, one compact line of chips per law.</summary>
+    Counts,
+    /// <summary>The groups and their rows.</summary>
+    Groups,
+    /// <summary>What was not read from the model (folded).</summary>
+    Inside,
+    /// <summary>The phase, design options and street line checked, and where the files are (folded).</summary>
+    Details,
+}
 
 /// <summary>
 /// A check_site answer as rows (reading design note, section 9): the one model the text file
@@ -116,6 +145,63 @@ public static class ResultRows
                                                l.Items.Select(id => rows[id]).ToList())).ToList())).ToList();
         return new ResultModel(result.State, ResultText.Headline(result), ResultText.CheckedWords(phase, options, street),
                                Counts(result), groups, ResultText.InsideWords(inside));
+    }
+
+    /// <summary>The panel's parts in the order it shows them, all in one scrolling list: the stale notice (when
+    /// stale), the state, the counts, then straight away the groups, so the first failing row is on screen at the
+    /// pane's docked height (Revit 2027 trial: ~420 px); what was not read and the details (phase, options, street
+    /// line, files) after the rows, folded.</summary>
+    public static IReadOnlyList<PanelPart> Layout(ResultModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var parts = new List<PanelPart>();
+        if (model.Stale is not null)
+            parts.Add(PanelPart.Stale);
+        parts.AddRange([PanelPart.State, PanelPart.Counts, PanelPart.Groups]);
+        if (model.Inside.Length > 0)
+            parts.Add(PanelPart.Inside);
+        parts.Add(PanelPart.Details);
+        return parts;
+    }
+
+    /// <summary>The transactions "Check my project" itself makes before it shows a result (adding Gordium's marks,
+    /// keeping the street edge picked): never a change that makes the result stale.</summary>
+    public static readonly IReadOnlySet<string> OwnTransactions = new HashSet<string>(StringComparer.Ordinal)
+    {
+        MarksTransaction, StreetTransaction, AreasTransaction,
+    };
+
+    /// <summary>The names of those transactions (the add-in names its transactions with these).</summary>
+    public const string MarksTransaction = "Gordium: add the egress marks";
+    public const string StreetTransaction = "Gordium: the street edge";
+    public const string AreasTransaction = "Gordium: read the enclosed areas (rolled back)";
+
+    /// <summary>Whether a change to the checked project (Revit's DocumentChanged: its transactions' names) makes the
+    /// shown results stale: any change but the check's own; a change with no name (an undo, a redo) too.</summary>
+    public static bool ChangesTheCheck(IReadOnlyCollection<string> transactions)
+    {
+        ArgumentNullException.ThrowIfNull(transactions);
+        return transactions.Count == 0 || transactions.Any(t => !OwnTransactions.Contains(t));
+    }
+
+    /// <summary>The results as shown once the model changed after the check (made at <paramref name="checkedAt"/>):
+    /// every colour grey (the state, the counts, the groups, the lines, the rows: never a green "complies" for a
+    /// model that may no longer comply), the words kept, and why said ("The model changed since this check (14:32):
+    /// click Check again").</summary>
+    public static ResultModel Stale(ResultModel model, DateTime checkedAt)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        static ResultRow Grey(ResultRow r) => r with { Tone = Tone.Neutral };
+        return model with
+        {
+            Stale = $"The model changed since this check ({checkedAt:HH:mm}): click Check again",
+            Counts = model.Counts.Select(c => c with { Chips = c.Chips.Select(x => x with { Tone = Tone.Neutral }).ToList() }).ToList(),
+            Groups = model.Groups.Select(g => g with
+            {
+                Tone = Tone.Neutral, Rows = g.Rows.Select(Grey).ToList(),
+                Lines = g.Lines.Select(l => l with { Tone = Tone.Neutral, Rows = l.Rows.Select(Grey).ToList() }).ToList(),
+            }).ToList(),
+        };
     }
 
     /// <summary>The colour of a verdict: a word the add-in doesn't know is amber, never green.</summary>

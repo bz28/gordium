@@ -223,6 +223,55 @@ public sealed class ResultRowsTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal(Tone.Fails, whole.Chips.Single(c => c.Words == "Zoning: 1 does not comply").Tone);
     }
 
+    /// <summary>Review round 1 (P1): after a check that complies, an edit to the model left the panel's green
+    /// "Complies" up. Stale: no green anywhere (state, chips, groups, lines, rows), the words kept, why said.</summary>
+    [Fact]
+    public void Results_after_the_model_changed_are_greyed_with_no_green_anywhere_and_say_why()
+    {
+        var items = new JsonArray(Zoning("y", "complies", "+1'-0\"", margin: "+1'-0\""), Egress("e", "complies", "net clear height 30 in, needs ≥ 24 in"));
+        var law = Group("law:complies", "Egress · Complies", "e");
+        law["lines"] = new JsonArray(new JsonObject { ["key"] = "w2", ["title"] = "Window 2: 1 complies", ["status"] = "complies", ["items"] = new JsonArray("e") });
+        var model = ResultRows.Build(Answer(View(items, new JsonArray(Group("complies", "Complies", "y"), law), "complies", "2 comply")), null, [], null);
+        static IEnumerable<Tone> Tones(ResultModel m) =>
+            new[] { m.StateTone }.Concat(m.Counts.SelectMany(c => c.Chips).Select(c => c.Tone))
+                .Concat(m.Groups.Select(g => g.Tone)).Concat(m.Groups.SelectMany(g => g.Lines).Select(l => l.Tone))
+                .Concat(m.Groups.SelectMany(g => g.AllRows).Select(r => r.Tone));
+        Assert.All(Tones(model), t => Assert.Equal(Tone.Complies, t));          // as checked: green throughout
+        Assert.Null(model.Stale);
+
+        var stale = ResultRows.Stale(model, new DateTime(2026, 11, 20, 14, 32, 0));
+        Assert.DoesNotContain(Tone.Complies, Tones(stale));
+        Assert.Equal("The model changed since this check (14:32): click Check again", stale.Stale);
+        Assert.Equal(model.Headline, stale.Headline);                           // the words kept
+        Assert.Equal(model.Groups.SelectMany(g => g.AllRows).Select(r => r.Line()), stale.Groups.SelectMany(g => g.AllRows).Select(r => r.Line()));
+        Assert.Equal(PanelPart.Stale, ResultRows.Layout(stale)[0]);
+    }
+
+    /// <summary>Only the check's own transactions (adding the marks, keeping the street edge) leave the results
+    /// standing; any other change, or one with no name (an undo), makes them stale.</summary>
+    [Fact]
+    public void Any_change_but_the_checks_own_makes_the_results_stale()
+    {
+        Assert.False(ResultRows.ChangesTheCheck([ResultRows.MarksTransaction]));
+        Assert.False(ResultRows.ChangesTheCheck([ResultRows.StreetTransaction, ResultRows.MarksTransaction]));
+        Assert.True(ResultRows.ChangesTheCheck(["Move"]));
+        Assert.True(ResultRows.ChangesTheCheck([ResultRows.StreetTransaction, "Modify element attributes"]));
+        Assert.True(ResultRows.ChangesTheCheck([]));
+        Assert.True(ResultRows.ChangesTheCheck(["Gordium: the request's marks"]));     // a fact changed: stale
+    }
+
+    /// <summary>Review (Revit trial, P2): at the docked size the header filled the pane and no row showed. The
+    /// groups come straight after the state and counts; the details (phase, options, street line) after the rows.</summary>
+    [Fact]
+    public void The_rows_come_straight_after_the_state_and_counts_and_the_details_after_them()
+    {
+        var model = ResultRows.Build(Answer(View(new JsonArray(Zoning("y", "does_not_comply", "1'-0\" short")), new JsonArray(Group("fails", "F", "y")),
+                                                 "does_not_comply", "1 does not comply")), "Phase 2", ["Porch: Deep"], null, "the 60.0 ft lot edge");
+        Assert.Equal([PanelPart.State, PanelPart.Counts, PanelPart.Groups, PanelPart.Details], ResultRows.Layout(model));
+        Assert.Equal([PanelPart.State, PanelPart.Counts, PanelPart.Groups, PanelPart.Inside, PanelPart.Details],
+                     ResultRows.Layout(model with { Inside = "Stairs not read from the model:" }));
+    }
+
     [Fact]
     public void A_reason_repeated_per_building_is_said_once_with_its_count_in_the_panel_too()
     {

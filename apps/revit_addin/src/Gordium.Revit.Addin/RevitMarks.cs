@@ -136,7 +136,7 @@ internal static class RevitMarks
             var definitions = app.OpenSharedParameterFile()
                 ?? throw new InvalidOperationException("Revit couldn't open Gordium's shared-parameter file " + file);
             var group = definitions.Groups.get_Item(Marks.Group) ?? definitions.Groups.Create(Marks.Group);
-            using var t = new Transaction(doc, "Gordium: add the egress marks");
+            using var t = new Transaction(doc, ResultRows.MarksTransaction);
             t.Start();
             foreach (var s in todo)
             {

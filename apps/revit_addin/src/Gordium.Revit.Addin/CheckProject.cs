@@ -51,14 +51,24 @@ public sealed class CheckProjectCommand : IExternalCommand
         {
             var added = RevitMarks.AddMarks(doc, ui.Application, MarkSetup.Plan(RevitMarks.Bindings(doc)));
             log["marks_added"] = added.Select(s => $"{s.Action}: {s.Mark.Name}").ToList();
-            if (ProjectFacts.Read(RevitMarks.Model(doc)).StreetEdges is null)
+            // the street edge asked for only when it is the one fact left and the view shows a property line to click
+            var read = ProjectFacts.Read(RevitMarks.Model(doc));
+            var view = ShowsPropertyLine(ui.ActiveUIDocument!);
+            var ask = StreetEdges.Ask(read, read.StreetEdges is null, view);
+            log["street_ask"] = ask.ToString();
+            if (ask == StreetAsk.Pick)
                 PickStreet(ui.ActiveUIDocument!, log);
             var run = Run(doc, ui.Application, log);
             // the edge kept can't be sent (no longer a lot edge, or matching two): asked for again at once, as its
-            // message says, and checked once more (the typed reason, never its words)
-            if (StreetEdges.NeedsNewPick(run.Prepared) && PickStreet(ui.ActiveUIDocument!, log))
-                run = Run(doc, ui.Application, log);
-            Show(ui, doc, run, added.Count);
+            // message says, and checked once more (the typed reason, never its words); in a view that can show it
+            if (StreetEdges.NeedsNewPick(run.Prepared))
+            {
+                ask = StreetEdges.Ask(ProjectFacts.Read(RevitMarks.Model(doc)), needed: true, view);
+                log["street_ask_again"] = ask.ToString();
+                if (ask == StreetAsk.Pick && PickStreet(ui.ActiveUIDocument!, log))
+                    run = Run(doc, ui.Application, log);
+            }
+            Show(ui, doc, run, added.Count, ask);
             return (Result.Succeeded, null);
         }
         catch (Exception e)
@@ -124,7 +134,7 @@ public sealed class CheckProjectCommand : IExternalCommand
 
     /// <summary>The run in the results panel (what to fill in first when nothing was sent), every row in the text
     /// file; each element's label read here, on Revit's thread, for the panel.</summary>
-    private static void Show(UIApplication ui, Document doc, Ran run, int marksAdded)
+    private static void Show(UIApplication ui, Document doc, Ran run, int marksAdded, StreetAsk ask)
     {
         var labels = new Dictionary<string, string>(StringComparer.Ordinal);
         string files;
@@ -139,8 +149,15 @@ public sealed class CheckProjectCommand : IExternalCommand
         }
         else
             files = $"Logged to {Trial.LogPath()}";
-        ResultsPane.Show(ui, doc, new PanelContent(doc.Title, DateTime.Now, run.Model, run.Prepared.Missing, marksAdded, labels, files));
+        ResultsPane.Show(ui, doc, new PanelContent(doc.Title, DateTime.Now, run.Model,
+                                                   StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files));
     }
+
+    /// <summary>Whether the active view is a plan (a site plan or floor plan) with a property line visible in it:
+    /// the only view a street-edge click can land in.</summary>
+    private static bool ShowsPropertyLine(UIDocument ui) =>
+        ui.ActiveView is ViewPlan { IsTemplate: false } plan
+        && new FilteredElementCollector(ui.Document, plan.Id).OfClass(typeof(PropertyLine)).Any();
 
     /// <summary>Asks the architect to click the lot edges along the street, and keeps them in the Street edge mark.
     /// True when an edge was kept.</summary>
@@ -159,7 +176,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             try
             {
                 picked = ui.Selection.PickObject(ObjectType.Element, new PropertyLines(),
-                    kept.Count == 0 ? "Gordium: click the lot edge along the street (on the property line; Esc to stop)"
+                    kept.Count == 0 ? "Gordium: " + StreetEdges.PickPrompt
                                     : "Gordium: click another lot edge along the street, or press Esc when done");
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -199,7 +216,7 @@ public sealed class CheckProjectCommand : IExternalCommand
         log["street_picks"] = said;
         if (kept.Count == 0)
             return false;
-        using var t = new Transaction(doc, "Gordium: the street edge");
+        using var t = new Transaction(doc, ResultRows.StreetTransaction);
         t.Start();
         var p = doc.ProjectInformation.get_Parameter(Marks.StreetEdge.Guid)
                 ?? throw new InvalidOperationException($"{Marks.StreetEdge.Name} isn't on Project Information");

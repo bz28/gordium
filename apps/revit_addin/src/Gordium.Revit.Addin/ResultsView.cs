@@ -35,9 +35,7 @@ internal sealed class ResultsView : C.UserControl
     private readonly C.TextBlock _sub = Small("");
     private readonly C.Button _again;
     private readonly C.TextBlock _status = Small("");
-    private readonly C.StackPanel _top = new();
     private readonly C.StackPanel _body = new() { Margin = new W.Thickness(10, 4, 10, 10) };
-    private readonly C.TextBlock _footer = Small("");
     private PanelContent? _content;
     private C.Border? _selected;
 
@@ -50,35 +48,32 @@ internal sealed class ResultsView : C.UserControl
         SetResourceReference(ForegroundProperty, W.SystemColors.WindowTextBrushKey);
         FontSize = 12;
 
-        _again = new C.Button { Content = "Check again", Padding = new W.Thickness(10, 2, 10, 2), Margin = new W.Thickness(8, 0, 0, 0),
+        _again = new C.Button { Content = "Check again", Padding = new W.Thickness(8, 1, 8, 1), Margin = new W.Thickness(8, 0, 0, 0),
                                 Visibility = W.Visibility.Collapsed, VerticalAlignment = W.VerticalAlignment.Center };
         _again.Click += (_, _) => _checkAgain();
-        var head = new C.StackPanel { Margin = new W.Thickness(10, 10, 10, 4) };
-        head.Children.Add(new C.TextBlock { Text = "Gordium: Check my project", FontSize = 14, FontWeight = W.FontWeights.SemiBold });
-        var subLine = new C.DockPanel { Margin = new W.Thickness(0, 2, 0, 4) };
+        // compact header: the title and Check again on one line, when and which project under it
+        var head = new C.StackPanel { Margin = new W.Thickness(10, 8, 10, 2) };
+        var titleLine = new C.DockPanel();
         C.DockPanel.SetDock(_again, C.Dock.Right);
-        subLine.Children.Add(_again);
-        subLine.Children.Add(_sub);
-        head.Children.Add(subLine);
+        titleLine.Children.Add(_again);
+        titleLine.Children.Add(new C.TextBlock { Text = "Gordium: Check my project", FontSize = 13, FontWeight = W.FontWeights.SemiBold,
+                                                 VerticalAlignment = W.VerticalAlignment.Center, TextTrimming = W.TextTrimming.CharacterEllipsis });
+        head.Children.Add(titleLine);
+        head.Children.Add(_sub);
         _status.Visibility = W.Visibility.Collapsed;
         _status.FontStyle = W.FontStyles.Italic;
         head.Children.Add(_status);
-        head.Children.Add(_top);
 
-        var scroll = new C.ScrollViewer
+        // one scrolling list for everything, the header included: rows are never out of reach at any pane size
+        var all = new C.StackPanel();
+        all.Children.Add(head);
+        all.Children.Add(_body);
+        Content = new C.ScrollViewer
         {
             VerticalScrollBarVisibility = C.ScrollBarVisibility.Auto,
             HorizontalScrollBarVisibility = C.ScrollBarVisibility.Disabled,
-            Content = _body,
+            Content = all,
         };
-        _footer.Margin = new W.Thickness(10, 4, 10, 8);
-        var root = new C.DockPanel();
-        C.DockPanel.SetDock(head, C.Dock.Top);
-        C.DockPanel.SetDock(_footer, C.Dock.Bottom);
-        root.Children.Add(head);
-        root.Children.Add(_footer);
-        root.Children.Add(scroll);
-        Content = root;
         _sub.Text = "Click Check my project on the Gordium tab to check this project.";
     }
 
@@ -92,34 +87,75 @@ internal sealed class ResultsView : C.UserControl
         _again.IsEnabled = true;
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
         Say(content.MarksAdded == 0 ? "" : $"Added {content.MarksAdded} Gordium marks to this project.");
-        _top.Children.Clear();
         _body.Children.Clear();
-        _footer.Text = content.Files;
         if (content.Model is not { } model)
         {
             ShowMissing(content.Missing);
+            _body.Children.Add(Small(content.Files, top: 8));
             return;
         }
-        _top.Children.Add(new C.TextBlock
-        {
-            Text = ResultText.StateWords(model.State), FontSize = 13, FontWeight = W.FontWeights.SemiBold,
-            Foreground = Ink(StateTone(model.State)), Margin = new W.Thickness(0, 2, 0, 2),
-        });
-        foreach (var line in model.Counts)
-        {
-            if (line.Title is not null)
-                _top.Children.Add(Small(line.Title, top: 4));
-            var chips = new C.WrapPanel();
-            foreach (var chip in line.Chips)
-                chips.Children.Add(Chip(chip));
-            _top.Children.Add(chips);
-        }
-        _top.Children.Add(Small(model.Checked, top: 4));
+        foreach (var part in ResultRows.Layout(model))
+            switch (part)
+            {
+                case PanelPart.Stale:
+                    _body.Children.Add(new C.TextBlock
+                    {
+                        Text = model.Stale, FontWeight = W.FontWeights.SemiBold, Foreground = Ink(Tone.Review),
+                        TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 0, 0, 2),
+                    });
+                    break;
+                case PanelPart.State:
+                    _body.Children.Add(new C.TextBlock
+                    {
+                        Text = ResultText.StateWords(model.State) + (model.Stale is null ? "" : " (before the model changed)"),
+                        FontSize = 13, FontWeight = W.FontWeights.SemiBold, Foreground = Ink(model.StateTone),
+                        TextWrapping = W.TextWrapping.Wrap,
+                    });
+                    break;
+                case PanelPart.Counts:
+                    // one wrap line per law, its short name first: as few lines as the width allows
+                    foreach (var line in model.Counts)
+                    {
+                        var chips = new C.WrapPanel { Margin = new W.Thickness(0, 2, 0, 0) };
+                        if (line.Title is not null)
+                            chips.Children.Add(new C.TextBlock
+                            {
+                                Text = Short(line.Title), FontSize = 10.5, FontWeight = W.FontWeights.SemiBold, Opacity = 0.8,
+                                Margin = new W.Thickness(0, 3, 6, 0), VerticalAlignment = W.VerticalAlignment.Center, ToolTip = line.Title,
+                            });
+                        foreach (var chip in line.Chips)
+                            chips.Children.Add(Chip(chip));
+                        _body.Children.Add(chips);
+                    }
+                    break;
+                case PanelPart.Groups:
+                    foreach (var g in model.Groups)
+                        _body.Children.Add(GroupBlock(g));
+                    break;
+                case PanelPart.Inside:
+                    _body.Children.Add(Fold("What wasn't read from the model", true, () => Small(model.Inside), top: 10));
+                    break;
+                case PanelPart.Details:
+                    _body.Children.Add(Fold("Details", true, () =>
+                    {
+                        var d = new C.StackPanel();
+                        d.Children.Add(Small(model.Checked, top: 2));
+                        d.Children.Add(Small(content.Files, top: 4));
+                        return d;
+                    }, top: 6));
+                    break;
+            }
+    }
 
-        foreach (var g in model.Groups)
-            _body.Children.Add(GroupBlock(g));
-        if (model.Inside.Length > 0)
-            _body.Children.Add(Fold("What wasn't read from the model", false, () => Small(model.Inside)));
+    /// <summary>A law's short name for its count line: "Zoning" from "Zoning (City of Ithaca)" (the whole on hover).</summary>
+    private static string Short(string title) => title.IndexOf(" (", StringComparison.Ordinal) is var i and > 0 ? title[..i] : title;
+
+    /// <summary>The model changed since the check: everything shown greyed (ResultRows.Stale), with why, once.</summary>
+    internal void MarkStale()
+    {
+        if (_content is not { Model: { Stale: null } model } content)
+            return;
+        Show(content with { Model = ResultRows.Stale(model, content.When), MarksAdded = 0 });
     }
 
     /// <summary>A check that failed: every row of the last check taken down, and why.</summary>
@@ -127,10 +163,8 @@ internal sealed class ResultsView : C.UserControl
     {
         _content = null;
         _selected = null;
-        _top.Children.Clear();
         _body.Children.Clear();
         _sub.Text = "Not checked";
-        _footer.Text = "";
         Say(words);
     }
 
@@ -155,8 +189,9 @@ internal sealed class ResultsView : C.UserControl
 
     private void ShowMissing(IReadOnlyList<string> missing)
     {
-        _top.Children.Add(new C.TextBlock
+        _body.Children.Add(new C.TextBlock
         {
+            Margin = new W.Thickness(0, 0, 0, 6),
             Text = "Nothing was checked: fill these in first", FontSize = 13, FontWeight = W.FontWeights.SemiBold,
             Foreground = Ink(Tone.Review), TextWrapping = W.TextWrapping.Wrap,
         });
@@ -296,19 +331,11 @@ internal sealed class ResultsView : C.UserControl
         return Frozen(M.Color.FromArgb(alpha, c.R, c.G, c.B));
     }
 
-    /// <summary>The state's colour: green only for complies; not checked or needs review amber.</summary>
-    private static Tone StateTone(Verdict v) => v switch
-    {
-        Verdict.DoesNotComply => Tone.Fails,
-        Verdict.Complies => Tone.Complies,
-        _ => Tone.Review,
-    };
-
     private static C.Border Chip(CountChip chip) => new()
     {
-        Child = new C.TextBlock { Text = chip.Words, FontSize = 11.5 },
+        Child = new C.TextBlock { Text = chip.Words, FontSize = 10.5 },
         Background = Ink(chip.Tone, 0x26), BorderBrush = Ink(chip.Tone), BorderThickness = new W.Thickness(1),
-        CornerRadius = new W.CornerRadius(10), Padding = new W.Thickness(8, 2, 8, 2), Margin = new W.Thickness(0, 3, 6, 0),
+        CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(6, 0, 6, 1), Margin = new W.Thickness(0, 2, 4, 0),
     };
 
     private static C.TextBlock Small(string text, double top = 0, double right = 0, double bottom = 0)

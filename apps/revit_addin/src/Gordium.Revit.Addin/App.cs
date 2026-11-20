@@ -69,6 +69,9 @@ public sealed class App : IExternalApplication
         // the results panel (Check my project's), and the one ExternalEvent its clicks run through on Revit's thread
         ResultsPane.Register(application);
         PanelActions.Start();
+        // the results greyed when the checked project changes, taken down when it closes: never a stale pass
+        application.ControlledApplication.DocumentChanged += ResultsPane.OnDocumentChanged;
+        application.ControlledApplication.DocumentClosing += ResultsPane.OnDocumentClosing;
         application.Idling += OnIdling;
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
@@ -183,6 +186,8 @@ public sealed class App : IExternalApplication
 
     public Result OnShutdown(UIControlledApplication application)
     {
+        application.ControlledApplication.DocumentChanged -= ResultsPane.OnDocumentChanged;
+        application.ControlledApplication.DocumentClosing -= ResultsPane.OnDocumentClosing;
         var worker = Worker;
         Worker = null;
         if (worker is not null)

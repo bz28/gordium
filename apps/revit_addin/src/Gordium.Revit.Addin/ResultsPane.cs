@@ -48,15 +48,17 @@ internal sealed class ResultsPane : IDockablePaneProvider
     /// <summary>A line in the panel (a click's result, a problem), when the panel exists.</summary>
     internal static void Say(string words) => _view?.Say(words);
 
-    private static void Post(string what, Action<UIApplication> act)
+    /// <summary>Queues a Revit action; on a refusal (or no queue) <paramref name="refused"/> runs and the panel says so.</summary>
+    private static void Post(string what, Action<UIApplication> act, Action? refused = null)
     {
         if (PanelActions.Current is not { } actions)
         {
+            refused?.Invoke();
             Say("The Gordium add-in didn't start its panel actions: restart Revit.");
             return;
         }
-        if (!actions.Post(what, act, out var refused))
-            Say($"Revit didn't take \"{what}\" ({refused}): finish what Revit is doing, then click again.");
+        if (actions.Post(what, act, refused) is { } said)
+            Say($"Revit didn't take \"{what}\" ({said}): finish what Revit is doing, then click again.");
     }
 
     private static void CheckAgain()
@@ -72,7 +74,40 @@ internal sealed class ResultsPane : IDockablePaneProvider
             {
                 View().Busy(false);
             }
-        });
+        }, refused: () => View().Busy(false));            // refused: Check again usable again, as the words say
+    }
+
+    /// <summary>Revit's DocumentChanged: a change to the project checked, other than the check's own, greys the
+    /// results and says the model changed since the check (ResultRows.Stale).</summary>
+    internal static void OnDocumentChanged(object? sender, Autodesk.Revit.DB.Events.DocumentChangedEventArgs e)
+    {
+        try
+        {
+            if (_checked is null || _view is null || !e.GetDocument().Equals(_checked))
+                return;
+            if (ResultRows.ChangesTheCheck(e.GetTransactionNames().ToList()))
+                _view.MarkStale();
+        }
+        catch (Exception x)       // never out of Revit's event
+        {
+            Trial.Log("results_panel", new Dictionary<string, object?> { ["document_changed"] = $"{x.GetType().Name}: {x.Message}" });
+        }
+    }
+
+    /// <summary>Revit's DocumentClosing: the project checked closing takes its rows down.</summary>
+    internal static void OnDocumentClosing(object? sender, Autodesk.Revit.DB.Events.DocumentClosingEventArgs e)
+    {
+        try
+        {
+            if (_checked is null || !e.Document.Equals(_checked))
+                return;
+            _checked = null;
+            Failed("The project checked was closed: open it and click Check my project.");
+        }
+        catch (Exception x)       // never out of Revit's event
+        {
+            Trial.Log("results_panel", new Dictionary<string, object?> { ["document_closing"] = $"{x.GetType().Name}: {x.Message}" });
+        }
     }
 
     private static void OpenProjectInformation() => Post("Open Project Information", ui =>
