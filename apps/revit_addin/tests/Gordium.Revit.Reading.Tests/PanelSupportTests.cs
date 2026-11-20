@@ -40,11 +40,16 @@ public sealed class PanelSupportTests
         Assert.Equal("Checking...", state.Status(""));
         Assert.Equal("Checking...", state.Status("Added 3 Gordium marks to this project."));
         Assert.Equal("Checking...", state.Status(""));           // a later greyed redraw: nothing to say
-        Assert.Equal("Added 3 Gordium marks to this project.", state.Stop());   // review round 3: said once it ends
+        // review round 3: said once it ends, while the panel still says Checking...
+        Assert.Equal("Added 3 Gordium marks to this project.", state.Stop("Checking..."));
         Assert.True(state.Enabled);
         Assert.Equal("Added 3 Gordium marks to this project.", state.Status("Added 3 Gordium marks to this project."));
         state.Start();
-        Assert.Equal("", state.Stop());                          // nothing held from before
+        Assert.Equal("", state.Stop("Checking..."));             // nothing held from before
+        state.Start();
+        state.Status("Added 3 Gordium marks to this project.");
+        // a failure said meanwhile (Failed, a refusal) is kept as it is
+        Assert.Equal("Nothing was checked: IOException: x", state.Stop("Nothing was checked: IOException: x"));
     }
 
     [Fact]

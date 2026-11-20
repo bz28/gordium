@@ -25,14 +25,16 @@ public sealed class CheckAgainState
         _held = "";
     }
 
-    /// <summary>Ends the wait; gives the line a redraw wanted meanwhile (review round 3: a Check again that added
-    /// marks never said so), "" when none.</summary>
-    public string Stop()
+    /// <summary>Ends the wait and gives the line to show next: while the panel still says "Checking...", the line a
+    /// redraw wanted meanwhile (review round 3: a Check again that added marks never said so), "" when none; any
+    /// other line (a failure's words) unchanged.</summary>
+    public string Stop(string currentStatus)
     {
+        ArgumentNullException.ThrowIfNull(currentStatus);
         Busy = false;
         var held = _held;
         _held = "";
-        return held;
+        return currentStatus == Checking ? held : currentStatus;
     }
 
     /// <summary>The line to show after a redraw that would show <paramref name="shown"/>: "Checking..." while busy,
