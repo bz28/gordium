@@ -116,6 +116,11 @@ internal static class HouseDraw
             shape.SetShape(solids);
         }
         doc.Regenerate();
+        // the walls, slabs and ceilings committed and regenerated before any window is placed in them (trial run 5,
+        // 2026-11-20: windows placed in the walls' own transaction were hosted but never inserts, the walls uncut)
+        t.Commit();
+        using var t2 = new Transaction(doc, "Gordium: place the windows and Rooms");
+        t2.Start();
 
         foreach (var w in windows)
         {
@@ -131,6 +136,9 @@ internal static class HouseDraw
             var at = new XYZ(cx + ox * wallThickness / 2, cy + oy * wallThickness / 2, z);
             var fi = doc.Create.NewFamilyInstance(at, symbol, wall, levels[z], StructuralType.NonStructural);
             Set(fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM), D(w["sill"]), "Sill Height");
+            doc.Regenerate();
+            words.Add($"window {id} just placed and regenerated: its wall's inserts {wall.FindInserts(true, true, true, true).Count}, " +
+                      $"this window among them {wall.FindInserts(true, true, true, true).Contains(fi.Id)}");
             Set(fi.get_Parameter(Marks.EscapeOpening.Guid), w["escape"]!.GetValue<bool>() ? 1 : 0, Marks.EscapeOpening.Name);
             fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.Set(w["name"]!.GetValue<string>());
             var word = Operations.Words.First(x => Operations.ForOpening(x) == w["operation"]!.GetValue<string>());
@@ -168,7 +176,7 @@ internal static class HouseDraw
             Set(r.get_Parameter(Marks.SleepingRoom.Guid), room["sleeping"]!.GetValue<bool>() ? 1 : 0, Marks.SleepingRoom.Name);
             ids[room["id"]!.GetValue<string>()] = r.UniqueId;
         }
-        t.Commit();
+        t2.Commit();
         // after the commit, regenerated again: each window's placement and whether its wall knows it as an insert
         using (var again = new Transaction(doc, "Gordium: regenerate (rolled back)"))
         {
@@ -315,7 +323,7 @@ internal static class HouseDraw
                 // 2026-11-20: the drawn walls showed no cut and no insert)
                 var openings = new FilteredElementCollector(fdoc).OfClass(typeof(Opening)).GetElementCount();
                 var host = new FilteredElementCollector(fdoc).OfClass(typeof(Wall)).FirstElement() as Wall;
-                words.Add($"{name}: Window.rft has {openings} opening(s) and {(host is null ? "no" : "a")} host wall; planes left {left}, right {right}, sill {sill}, top {head}, wall centre y {y}");
+                words.Add($"{name}: Window.rft has {openings} opening(s) and {(host is null ? "no" : "a")} host wall; planes left {left}, right {right}, sill {sill}, top {head}, wall centre y {y}; the template wall's box {(host?.get_BoundingBox(null) is { } hb ? $"{hb.Min} .. {hb.Max}" : "none")}");
                 if (openings == 0)
                 {
                     if (host is null)
