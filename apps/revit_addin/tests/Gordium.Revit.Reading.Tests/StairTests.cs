@@ -263,6 +263,17 @@ public sealed class StairTests
     }
 
     [Fact]
+    public void Something_unreadable_with_no_box_near_the_foot_leaves_the_bottom_out_review_round_3()
+    {
+        var house = FakeHouse.Draw(Two);
+        house.SetRun("s1", r => r with { Near = [.. r.Near!, new NearbyElement("mesh", "OST_Floors", "Mesh floor", GeometryFailed: true)] });
+        var read = Read(house);
+        Assert.Null(Flight(read, "s1")!["bottom_elevation"]);
+        Assert.Contains("Floors \"Mesh floor\" near it couldn't be read, and where it stands isn't known", Note(read, "s1", "bottom_elevation"));
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_riser_height not measured"));
+    }
+
+    [Fact]
     public void A_loaded_link_reaching_the_flight_leaves_what_is_around_it_out()
     {
         var house = FakeHouse.Draw(Two);

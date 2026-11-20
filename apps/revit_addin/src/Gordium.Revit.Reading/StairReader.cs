@@ -489,6 +489,11 @@ public static class StairReader
                         why = $"the geometry of {Named(e)} there couldn't be read";
                         return null;
                     }
+                    if (e.Box is null && e.GeometryFailed)        // the cautious side (review round 3), as ReachesBack
+                    {
+                        why = $"the geometry of {Named(e)} near it couldn't be read, and where it stands isn't known";
+                        return null;
+                    }
                     continue;
                 }
                 foreach (var f in e.Faces)
