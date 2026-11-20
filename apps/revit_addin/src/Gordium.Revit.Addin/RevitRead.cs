@@ -85,12 +85,20 @@ internal static class RevitRead
     private static RevitElement Element(Document doc, Element e, Options options, string version, double tolerance, int depth)
     {
         var category = e.Category;
-        IReadOnlyList<GeometryItem>? geometry = null;
+        IReadOnlyList<GeometryItem>? geometry = null, coarser = null;
         var failed = false;
         try
         {
             var g = e.get_Geometry(options);
             geometry = g is null ? null : Items(g);
+            if (e is FamilyInstance)
+            {
+                var more = new List<GeometryItem>();
+                foreach (var level in new[] { ViewDetailLevel.Medium, ViewDetailLevel.Coarse })
+                    if (e.get_Geometry(new Options { DetailLevel = level, IncludeNonVisibleObjects = false }) is { } other)
+                        more.AddRange(Items(other));
+                coarser = more.Count > 0 ? more : null;
+            }
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or InvalidOperationException
                                        or Autodesk.Revit.Exceptions.InvalidOperationException)
@@ -133,6 +141,7 @@ internal static class RevitRead
                 ? w.IntegerValue.ToString(System.Globalization.CultureInfo.InvariantCulture) : null,
             BoundingBox = box is null ? null : new RevitBox(P(box.Min), P(box.Max), box.Transform is { } bt ? T(bt) : null),
             Geometry = failed ? null : geometry,
+            CoarserGeometry = failed ? null : coarser,
             GeometryFailed = failed,
             Location = e.Location is LocationPoint lp ? P(lp.Point) : MarkerPoint(e, mark),
             Link = link,

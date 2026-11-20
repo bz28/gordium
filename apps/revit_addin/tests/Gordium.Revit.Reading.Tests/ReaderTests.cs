@@ -374,6 +374,28 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     }
 
     [Fact]
+    public async Task A_part_drawn_only_at_a_coarser_detail_level_is_never_missed()
+    {
+        // design note section 8, "Detail level": a shed whose Fine solid stands 10 ft off the house but whose Coarse
+        // drawing reaches it touches the house; read at Fine alone it touched nothing
+        var shed = FakeRevit.Family("shed", [Block(48, 90, 56, 98, 0, 8)]) with { CoarserGeometry = [Block(45, 79, 56, 98, 0, 8)] };
+        Assert.True(LeftOut(await Site(House(shed)), "shed")["touching"]!.GetValue<bool>());
+        Assert.False(LeftOut(await Site(House(shed with { CoarserGeometry = null })), "shed")["touching"]!.GetValue<bool>());
+
+        // a family with nothing at Fine keeps no box: its coarser drawing alone never gives it a place
+        var empty = FakeRevit.Family("empty", [new SolidItem([], [])]) with { CoarserGeometry = [Block(48, 90, 56, 98, 0, 8)] };
+        Assert.Null(LeftOut(await Site(House(empty)), "empty")["touching"]);
+
+        // a building drawn bigger at Medium or Coarse: its faces are Fine's, and it says it may be bigger
+        var door = FakeRevit.Family("door", [Block(20, 29, 23, 30, 0, 7)], "OST_Doors", "Doors");
+        JsonObject Door(JsonObject site) => site["buildings"]!.AsArray().Single(x => x!["id"]!.GetValue<string>() == "door")!.AsObject();
+        Assert.Empty(Codes(Door(await Site(House(door with { CoarserGeometry = [Block(20, 29, 23, 30, 0, 7)] })))));
+        var bigger = Door(await Site(House(door with { CoarserGeometry = [Block(20, 27, 23, 30, 0, 7)] })));
+        Assert.Equal(["tool_words"], Codes(bigger));
+        Assert.Equal(6, bigger["faces"]!.AsArray().Count);
+    }
+
+    [Fact]
     public async Task A_building_part_nested_in_a_family_is_still_a_building()
     {
         // review round 1: folded into a Generic Model kit, a shared nested window vanished into a left-out family,

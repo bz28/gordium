@@ -117,6 +117,10 @@ internal sealed class Read(RevitModel model)
         if (g.MissingPart)               // a nested family that gave nothing: the building may be bigger than its faces
             g.Problem(SiteReader.Problem("tool_words",
                 ("words", "part of this element (a nested family) has no geometry to read, so it may be bigger than measured")));
+        var coarser = CoarserBox(e, g);
+        if (coarser is { Bigger: true })  // drawn bigger at Medium or Coarse detail: its faces are Fine's alone
+            g.Problem(SiteReader.Problem("tool_words",
+                ("words", "part of this element is drawn only at Medium or Coarse detail, so it may be bigger than measured")));
         var b = new JsonObject
         {
             ["id"] = e.UniqueId, ["role"] = "building", ["layer"] = e.Category,
@@ -127,8 +131,24 @@ internal sealed class Read(RevitModel model)
         if (e.Name is { } name)
             b["name"] = name;
         Buildings.Add(b);
-        if (Union(g.Box.Box, RevitBox(e, ToShared)) is { } box)
+        if (Union(Union(g.Box.Box, RevitBox(e, ToShared)), coarser?.Box) is { } box)
             BuildingBoxes.Add(box);
+    }
+
+    /// <summary>A building part's geometry at Medium and Coarse detail, against its Fine faces: its box, and whether it
+    /// reaches past them (more than the model's vertex tolerance) or holds anything the reader can't place (a piece of
+    /// a kind it doesn't know, a nested family that gives nothing), either of which may make the building bigger
+    /// than measured. Null when there is none.</summary>
+    private (Box3? Box, bool Bigger)? CoarserBox(RevitElement e, Gathered fine)
+    {
+        if (e.CoarserGeometry is not { Count: > 0 } more)
+            return null;
+        var c = Walk(more, ToShared, e);
+        var tol = model.VertexTolerance;
+        var past = c.Box.Box is { } cb && (fine.Box.Box is not { } fb
+            || cb.Min.X < fb.Min.X - tol || cb.Min.Y < fb.Min.Y - tol || cb.Min.Z < fb.Min.Z - tol
+            || cb.Max.X > fb.Max.X + tol || cb.Max.Y > fb.Max.Y + tol || cb.Max.Z > fb.Max.Z + tol);
+        return (c.Box.Box, past || c.Other || c.MissingPart);
     }
 
     /// <summary>A floor block's height as drawn, from its mark "&lt;story&gt;;&lt;height&gt;", or null when it can't be read
