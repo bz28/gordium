@@ -230,15 +230,15 @@ def test_the_drawing_is_the_houses_own_data():
 
 def test_the_command_line_prints_each_house_and_a_recordings_problems(tmp_path):
     out = subprocess.run([sys.executable, "-m", "model_measurement.interior.recordings", "draw"], capture_output=True,
-                         text=True, check=True).stdout.splitlines()
+                         text=True, encoding="utf-8", check=True).stdout.splitlines()
     assert [json.loads(line)["house"] for line in out] == list(r.STEP_HOUSES)
     good = tmp_path / "1_ranch_compliant.json"
     good.write_text(json.dumps(described("1_ranch_compliant")), encoding="utf-8")
     out = subprocess.run([sys.executable, "-m", "model_measurement.interior.recordings", "check", str(good)],
-                         capture_output=True, text=True, check=True).stdout
+                         capture_output=True, text=True, encoding="utf-8", check=True).stdout
     assert json.loads(out) == []
     bad = tmp_path / "bad.json"
     bad.write_text("{", encoding="utf-8")
     out = subprocess.run([sys.executable, "-m", "model_measurement.interior.recordings", "check", str(bad)],
-                         capture_output=True, text=True, check=True).stdout
+                         capture_output=True, text=True, encoding="utf-8", check=True).stdout
     assert json.loads(out)[0].startswith("not JSON")
