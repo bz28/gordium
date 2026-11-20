@@ -40,7 +40,8 @@ public sealed class InteriorTests
     // ---- the houses of the step, end to end ---------------------------------------------------------------------
 
     public static TheoryData<string> Houses() => ["1_ranch_compliant", "2_two_story_small_window", "3_tall_riser", "4_loft",
-                                                  "5_basement_window_well", "6_door_stated_clear"];
+                                                  "5_basement_window_well", "6_door_stated_clear",
+                                                  "orangetown_ny_80_south_william"];   // the real house, placed by its layout.yaml
 
     [Theory]
     [MemberData(nameof(Houses))]

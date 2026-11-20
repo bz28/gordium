@@ -264,13 +264,15 @@ internal sealed class FakeHouse
                 UniqueId = uid, ToRoom = Uid(d["room"]!.GetValue<string>()), Host = DoorWall(d), HostIsWall = true,
                 LevelElevation = Fake.Place(0, 0, z).Z, SillHeight = 0, Location = Fake.Place(cx, cy, z),
                 Along = Fake.Place(-oy, ox, 0) - Fake.Place(0, 0, 0), TypeWidth = width, TypeHeight = height,
-                Placed = Prism(OpeningPlan(cx, cy, ox, oy, width / 2, t, 0.25, 0.75), z, z + height).SelectMany(f => f.Points).ToList(),
+                Placed = Prism(OpeningPlan(cx, cy, ox, oy, width / 2, Thick(d, t), 0.25, 0.75), z, z + height).SelectMany(f => f.Points).ToList(),
             });
         }
     }
 
     private static string DoorWall(JsonObject d)
     {
+        if (d["wall"] is JsonNode index)
+            return $"wall-{D(d["level"])}-{index.GetValue<int>()}";
         var (ox, oy) = P(d["outward"]!);
         return $"wall-{D(d["level"])}-" + (oy < 0 ? "ymin" : ox < 0 ? "xmin" : oy > 0 ? "ymax" : "xmax");
     }
@@ -432,10 +434,39 @@ internal sealed class FakeHouse
         foreach (var level in Drawing["levels"]!.AsArray().Select(n => n!.AsObject()))
         {
             var z = D(level["elevation"]);
-            var (x0, y0) = P(level["box"]![0]!);
-            var (x1, y1) = P(level["box"]![1]!);
             var h = D(level["wall_height"]);
             var list = new List<NearbyElement>();
+            // the opening each window cuts in its wall: its head (an underside, inside the wall's thickness) and its sill
+            List<SurfaceRecord> Cut(string id, List<SurfaceRecord> faces)
+            {
+                foreach (var w in windowsOn.GetValueOrDefault(id, []))
+                {
+                    var (cx, cy) = P(w["center"]!);
+                    var (ox, oy) = P(w["outward"]!);
+                    var half = D(w["width"]) / 2;
+                    var top = z + D(w["sill"]) + D(w["height"]);
+                    var cut = OpeningPlan(cx, cy, ox, oy, half, Thick(w, t));
+                    faces.Add(Face(new(0, 0, -1), cut.Select(p => (p.X, p.Y, top))));
+                    faces.Add(Face(new(0, 0, 1), cut.Select(p => (p.X, p.Y, z + D(w["sill"])))));
+                }
+                return faces;
+            }
+            if (level["walls"] is JsonArray placed)
+            {
+                // a house placed by its layout: each of its walls as drawn, no box; the floor under its outline
+                foreach (var (k, f) in placed.Select((f, k) => (k, f!)))
+                {
+                    var (fx0, fy0) = P(f[0]!);
+                    var (fx1, fy1) = P(f[1]!);
+                    var id = $"wall-{z}-{k}";
+                    list.Add(new NearbyElement(id, "OST_Walls", "Generic wall", Faces: Cut(id, Prism(Rect(fx0, fy0, fx1, fy1), z, z + h))));
+                }
+                walls[z] = list;
+                slabs[z] = new NearbyElement($"slab-{z}", "OST_Floors", "Generic floor", Faces: Prism(Ccw(level["outline"]!), z - 1, z));
+                continue;
+            }
+            var (x0, y0) = P(level["box"]![0]!);
+            var (x1, y1) = P(level["box"]![1]!);
             foreach (var (side, plan) in new[]
                      {
                          ("ymin", Rect(x0 - t, y0 - t, x1 + t, y0)), ("xmin", Rect(x0 - t, y0, x0, y1)),
@@ -443,19 +474,7 @@ internal sealed class FakeHouse
                      })
             {
                 var id = $"wall-{z}-{side}";
-                var faces = Prism(plan, z, z + h);
-                foreach (var w in windowsOn.GetValueOrDefault(id, []))
-                {
-                    // the opening the window cuts: its head (an underside, inside the wall's thickness) and its sill
-                    var (cx, cy) = P(w["center"]!);
-                    var (ox, oy) = P(w["outward"]!);
-                    var half = D(w["width"]) / 2;
-                    var top = z + D(w["sill"]) + D(w["height"]);
-                    var cut = OpeningPlan(cx, cy, ox, oy, half, t);
-                    faces.Add(Face(new(0, 0, -1), cut.Select(p => (p.X, p.Y, top))));
-                    faces.Add(Face(new(0, 0, 1), cut.Select(p => (p.X, p.Y, z + D(w["sill"])))));
-                }
-                list.Add(new NearbyElement(id, "OST_Walls", "Generic exterior", Faces: faces));
+                list.Add(new NearbyElement(id, "OST_Walls", "Generic exterior", Faces: Cut(id, Prism(plan, z, z + h))));
             }
             foreach (var (k, f) in level["fillers"]!.AsArray().Select((f, k) => (k, f!)))
             {
@@ -485,11 +504,22 @@ internal sealed class FakeHouse
             Ids[id] = uid;
             var z = D(room["floor_elevation"]);
             var level = Drawing["levels"]!.AsArray().First(l => D(l!["elevation"]) == z)!;
-            var (bx0, by0) = P(level["box"]![0]!);
-            var (bx1, by1) = P(level["box"]![1]!);
             var floor = room["floor"]!.AsArray().Select(p => P(p!)).ToList();
             var segments = new List<BoundarySegmentRecord>();
-            for (var i = 0; i < floor.Count; i++)
+            if (room["boundary"] is JsonArray boundary)
+            {
+                // a placed house: each edge piece with the wall the drawing says bounds it, else a separation line
+                foreach (var (seg, i) in boundary.Select((x, i) => (x!.AsArray(), i)))
+                {
+                    var (ax, ay) = P(seg[0]!);
+                    var (bx, by) = P(seg[1]!);
+                    var element = seg[2] is JsonNode k ? $"wall-{z}-{k.GetValue<int>()}" : $"separation-{z}-{i}";
+                    segments.Add(new(Fake.Place(ax, ay, z), Fake.Place(bx, by, z), true, element));
+                }
+            }
+            var (bx0, by0) = level["box"] is JsonArray box ? P(box[0]!) : (double.NaN, double.NaN);
+            var (bx1, by1) = level["box"] is JsonArray box1 ? P(box1[1]!) : (double.NaN, double.NaN);
+            for (var i = 0; i < floor.Count && room["boundary"] is null; i++)
             {
                 var a = floor[i];
                 var b = floor[(i + 1) % floor.Count];
@@ -511,7 +541,7 @@ internal sealed class FakeHouse
             over.AddRange(slabs.Where(s => s.Key > z).Select(s => s.Value));
             over.AddRange(Drawing["windows"]!.AsArray().Where(w => D(w!["level"]) == z)
                 .Select(w => new NearbyElement(Uid(w!["id"]!.GetValue<string>()), "OST_Windows", "Gordium test window",
-                                               Host: WallOf(w.AsObject()), Faces: WindowFaces(w.AsObject(), t))));
+                                               Host: WallOf(w.AsObject()), Faces: WindowFaces(w.AsObject(), Thick(w.AsObject(), t)))));
             Rooms.Add(new RoomRecord
             {
                 UniqueId = uid, Level = $"Level {z}", LevelElevation = Fake.Place(0, 0, z).Z, BaseOffset = 0,
@@ -548,13 +578,13 @@ internal sealed class FakeHouse
                 Instance = new Dictionary<Guid, MarkValue> { [Marks.EscapeOpening.Guid] = new(true, w["escape"]!.GetValue<bool>() ? 1 : 0) },
                 Type = type,
             });
-            var cut = OpeningPlan(cx, cy, ox, oy, width / 2, t);
+            var cut = OpeningPlan(cx, cy, ox, oy, width / 2, Thick(w, t));
             Openings.Add(new OpeningRecord
             {
                 UniqueId = uid, ToRoom = Uid(w["room"]!.GetValue<string>()), Host = WallOf(w), HostIsWall = true,
                 LevelElevation = Fake.Place(0, 0, z).Z, SillHeight = sill, Location = Fake.Place(cx, cy, z),
                 Along = Fake.Place(-oy, ox, 0) - Fake.Place(0, 0, 0), TypeWidth = width, TypeHeight = height,
-                Placed = WindowFaces(w, t).SelectMany(f => f.Points).ToList(),
+                Placed = WindowFaces(w, Thick(w, t)).SelectMany(f => f.Points).ToList(),
                 WallOpening = cut.SelectMany(p => new[] { Fake.Place(p.X, p.Y, z + sill), Fake.Place(p.X, p.Y, z + sill + height) }).ToList(),
             });
         }
@@ -577,11 +607,17 @@ internal sealed class FakeHouse
 
     private static string WallOf(JsonObject w)
     {
+        if (w["wall"] is JsonNode index)                  // a placed house: its wall by index in its level's walls
+            return $"wall-{D(w["level"])}-{index.GetValue<int>()}";
         var (ox, oy) = P(w["outward"]!);
         return $"wall-{D(w["level"])}-" + (oy < 0 ? "ymin" : ox < 0 ? "xmin" : oy > 0 ? "ymax" : "xmax");
     }
 
     private static List<(double X, double Y)> Rect(double x0, double y0, double x1, double y1) => [(x0, y0), (x1, y0), (x1, y1), (x0, y1)];
+
+    /// <summary>The thickness of the wall an opening is in: its own (a placed house's walls differ), else the exterior
+    /// wall's.</summary>
+    private static double Thick(JsonObject o, double t) => o["wall_thickness"] is JsonNode w ? w.GetValue<double>() : t;
 
     /// <summary>Where a window cuts its wall, in plan: its width along the wall, the wall's thickness across it.</summary>
     private static List<(double X, double Y)> OpeningPlan(double cx, double cy, double ox, double oy, double half, double t,

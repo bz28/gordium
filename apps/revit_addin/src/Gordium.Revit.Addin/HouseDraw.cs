@@ -25,7 +25,10 @@ namespace Gordium.Revit.Addin;
 /// door as the house says, its type's maker's clear opening confirmed with a door's stamp; each stair's handrail is a
 /// railing on the stair whose top rail (a square rail profile of the drawing's) is the handrail, marked so; each level
 /// guard a railing (its rails and balusters the drawing's) along the edge of a floor between a wall and a post; and the
-/// tick "these are all the guards and handrails" set. What it can't draw is an error, never a house drawn differently.
+/// tick "these are all the guards and handrails" set. A real house placed by its layout (a level with <c>walls</c>, no
+/// box: test_data/real_houses/) has each of its walls drawn as given, the floor under its outline, each opening in the
+/// wall the drawing names and each Room at the drawing's point inside it. What it can't draw is an error, never a house
+/// drawn differently.
 /// </summary>
 internal static class HouseDraw
 {
@@ -76,27 +79,47 @@ internal static class HouseDraw
             lv.get_Parameter(BuiltInParameter.LEVEL_ROOM_COMPUTATION_HEIGHT)?.Set(2.0);
             levels[z] = lv;
             var view = ViewPlan.Create(doc, floorPlan.Id, lv.Id);
-            var (x0, y0) = P(level["box"]![0]!);
-            var (x1, y1) = P(level["box"]![1]!);
             var height = D(level["wall_height"]);
-            var h = wallThickness / 2;
-            var exterior = WallTypeOf(doc, wallThickness);
-            var corners = new[] { new XYZ(x0 - h, y0 - h, z), new XYZ(x1 + h, y0 - h, z), new XYZ(x1 + h, y1 + h, z), new XYZ(x0 - h, y1 + h, z) };
-            var sides = new[] { "ymin", "xmax", "ymax", "xmin" };
-            for (var i = 0; i < 4; i++)
-                walls[$"{z.ToString(CultureInfo.InvariantCulture)}-{sides[i]}"] =
-                    Wall.Create(doc, Line.CreateBound(corners[i], corners[(i + 1) % 4]), exterior.Id, lv.Id, height, 0, false, false);
-            Floor.Create(doc, [Rectangle(x0 - wallThickness, y0 - wallThickness, x1 + wallThickness, y1 + wallThickness, z)], floorType.Id, lv.Id);
-            foreach (var f in level["fillers"]!.AsArray())
+            var key = z.ToString(CultureInfo.InvariantCulture);
+            // a wall per rectangle, along its longer side, as thick as its shorter: a gap between rooms (a hand-worked
+            // house's fillers), or every wall of a house placed by its layout (a real house: `walls`, indexed by the
+            // openings hosted in them)
+            Wall RectWall(JsonNode f)
             {
-                var (fx0, fy0) = P(f![0]!);
+                var (fx0, fy0) = P(f[0]!);
                 var (fx1, fy1) = P(f[1]!);
                 var alongX = fx1 - fx0 >= fy1 - fy0;
                 var thick = alongX ? fy1 - fy0 : fx1 - fx0;
                 var line = alongX
                     ? Line.CreateBound(new XYZ(fx0, (fy0 + fy1) / 2, z), new XYZ(fx1, (fy0 + fy1) / 2, z))
                     : Line.CreateBound(new XYZ((fx0 + fx1) / 2, fy0, z), new XYZ((fx0 + fx1) / 2, fy1, z));
-                Wall.Create(doc, line, WallTypeOf(doc, thick).Id, lv.Id, height, 0, false, false);
+                return Wall.Create(doc, line, WallTypeOf(doc, thick).Id, lv.Id, height, 0, false, false);
+            }
+            if (level["walls"] is JsonArray placed)
+            {
+                // a house placed by its layout: its own walls and no box; the floor under its outline
+                foreach (var (f, k) in placed.Select((f, k) => (f!, k)))
+                    walls[$"{key}-wall-{k}"] = RectWall(f);
+                var outline = level["outline"]!.AsArray().Select(p => P(p!)).ToList();
+                var loop = new CurveLoop();
+                for (var i = 0; i < outline.Count; i++)
+                    loop.Append(Line.CreateBound(new XYZ(outline[i].X, outline[i].Y, z), new XYZ(outline[(i + 1) % outline.Count].X, outline[(i + 1) % outline.Count].Y, z)));
+                Floor.Create(doc, [loop], floorType.Id, lv.Id);
+            }
+            else
+            {
+                var (x0, y0) = P(level["box"]![0]!);
+                var (x1, y1) = P(level["box"]![1]!);
+                var h = wallThickness / 2;
+                var exterior = WallTypeOf(doc, wallThickness);
+                var corners = new[] { new XYZ(x0 - h, y0 - h, z), new XYZ(x1 + h, y0 - h, z), new XYZ(x1 + h, y1 + h, z), new XYZ(x0 - h, y1 + h, z) };
+                var sides = new[] { "ymin", "xmax", "ymax", "xmin" };
+                for (var i = 0; i < 4; i++)
+                    walls[$"{key}-{sides[i]}"] =
+                        Wall.Create(doc, Line.CreateBound(corners[i], corners[(i + 1) % 4]), exterior.Id, lv.Id, height, 0, false, false);
+                Floor.Create(doc, [Rectangle(x0 - wallThickness, y0 - wallThickness, x1 + wallThickness, y1 + wallThickness, z)], floorType.Id, lv.Id);
+                foreach (var f in level["fillers"]!.AsArray())
+                    RectWall(f!);
             }
             var separations = level["separations"]!.AsArray();
             if (separations.Count > 0)
@@ -142,14 +165,10 @@ internal static class HouseDraw
         {
             var id = w["id"]!.GetValue<string>();
             var z = D(w["level"]);
-            var (cx, cy) = P(w["center"]!);
-            var (ox, oy) = P(w["outward"]!);
-            var side = oy < 0 ? "ymin" : ox < 0 ? "xmin" : oy > 0 ? "ymax" : "xmax";
-            var wall = walls[$"{z.ToString(CultureInfo.InvariantCulture)}-{side}"];
+            var (wall, at) = Host(walls, w, z, wallThickness);
             var symbol = families[id];
             if (!symbol.IsActive)
                 symbol.Activate();
-            var at = new XYZ(cx + ox * wallThickness / 2, cy + oy * wallThickness / 2, z);
             var fi = doc.Create.NewFamilyInstance(at, symbol, wall, levels[z], StructuralType.NonStructural);
             Set(fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM), D(w["sill"]), "Sill Height");
             // load-bearing: regenerated right after each window is placed and its Sill Height set, Revit cuts the wall;
@@ -180,14 +199,10 @@ internal static class HouseDraw
         {
             var id = d["id"]!.GetValue<string>();
             var z = D(d["level"]);
-            var (cx, cy) = P(d["center"]!);
-            var (ox, oy) = P(d["outward"]!);
-            var side = oy < 0 ? "ymin" : ox < 0 ? "xmin" : oy > 0 ? "ymax" : "xmax";
-            var wall = walls[$"{z.ToString(CultureInfo.InvariantCulture)}-{side}"];
+            var (wall, at) = Host(walls, d, z, wallThickness);
             var symbol = doorFamilies[id];
             if (!symbol.IsActive)
                 symbol.Activate();
-            var at = new XYZ(cx + ox * wallThickness / 2, cy + oy * wallThickness / 2, z);
             var fi = doc.Create.NewFamilyInstance(at, symbol, wall, levels[z], StructuralType.NonStructural);
             if (fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM) is { IsReadOnly: false } sill)
                 sill.Set(0.0);
@@ -227,7 +242,10 @@ internal static class HouseDraw
         foreach (var room in house["rooms"]!.AsArray().Select(n => n!.AsObject()))
         {
             var floor = room["floor"]!.AsArray().Select(p => P(p!)).ToList();
-            var inside = new UV(floor.Average(p => p.X), floor.Average(p => p.Y));
+            // a placed house's rooms aren't all rectangles: the drawing's point inside each (its outline's average
+            // could fall outside an L-shaped room)
+            var inside = room["point"] is JsonArray point ? new UV(D(point[0]), D(point[1]))
+                : new UV(floor.Average(p => p.X), floor.Average(p => p.Y));
             var r = doc.Create.NewRoom(levels[D(room["floor_elevation"])], inside)
                     ?? throw new InvalidOperationException($"Revit placed no Room in {room["id"]}");
             r.Name = room["name"]!.GetValue<string>();
@@ -249,6 +267,23 @@ internal static class HouseDraw
             tick.Commit();
         }
         return ids;
+    }
+
+    /// <summary>The wall an opening (a window or door) is hosted by and the point it is placed at: in a placed house,
+    /// its wall by index in its level's <c>walls</c> and its point <c>at</c> on that wall's centre line; else the box's
+    /// side it faces out of, half the exterior wall's thickness out from its centre on the inside face.</summary>
+    private static (Wall Wall, XYZ At) Host(Dictionary<string, Wall> walls, JsonObject o, double z, double wallThickness)
+    {
+        var key = z.ToString(CultureInfo.InvariantCulture);
+        if (o["wall"] is JsonNode index)
+        {
+            var (ax, ay) = P(o["at"]!);
+            return (walls[$"{key}-wall-{index.GetValue<int>()}"], new XYZ(ax, ay, z));
+        }
+        var (cx, cy) = P(o["center"]!);
+        var (ox, oy) = P(o["outward"]!);
+        var side = oy < 0 ? "ymin" : ox < 0 ? "xmin" : oy > 0 ? "ymax" : "xmax";
+        return (walls[$"{key}-{side}"], new XYZ(cx + ox * wallThickness / 2, cy + oy * wallThickness / 2, z));
     }
 
     // ---- doors, railings and guards (step 5) -------------------------------------------------------------------
