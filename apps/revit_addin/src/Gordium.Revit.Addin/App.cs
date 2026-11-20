@@ -35,6 +35,13 @@ public sealed class App : IExternalApplication
             ToolTip = "Starts Gordium's checker and checks conformance scene 01 (the box house), comparing every " +
                       "row with the hand-worked verdicts",
         });
+        var egress = application.CreateRibbonPanel(Tab, "Egress");
+        egress.AddItem(new PushButtonData("gordium_mark_for_egress", "Mark for\negress", dll,
+                                          typeof(MarkForEgressCommand).FullName)
+        {
+            ToolTip = "Adds Gordium's egress marks to this project if they aren't there, then lists every room, window " +
+                      "and door with its marks, anything not set first",
+        });
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
     }
