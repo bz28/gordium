@@ -327,7 +327,8 @@ internal static class RevitInterior
     }
 
     /// <summary>Each solid of the element's geometry (a family's instance geometry included) as its faces, solids with
-    /// no face (Revit's empty ones) left out; and whether anything couldn't be read as faces (a mesh, or a throw).</summary>
+    /// no face (Revit's empty ones) left out; and whether anything couldn't be read as faces (a mesh, a throw, or a face Revit gives no edges or
+    /// triangles for).</summary>
     private static (List<IReadOnlyList<SurfaceRecord>>? Solids, bool Failed) Solids(Element e, Options options)
     {
         var solids = new List<IReadOnlyList<SurfaceRecord>>();
@@ -339,7 +340,11 @@ internal static class RevitInterior
                 switch (o)
                 {
                     case Solid s when s.Faces.Size > 0:
-                        solids.Add(s.Faces.Cast<Face>().Select(Surface).ToList());
+                        var read = s.Faces.Cast<Face>().Select(Surface).ToList();
+                        if (read.Any(f => f is null))
+                            failed = true;               // a face Revit can't give: the element's geometry failed
+                        else
+                            solids.Add(read.Select(f => f!).ToList());
                         break;
                     case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
                         Walk(inner);
@@ -553,11 +558,13 @@ internal static class RevitInterior
         e.get_BoundingBox(null) is { } b ? new RevitBox(P(b.Min), P(b.Max), b.Transform is { IsIdentity: false } bt ? T(bt) : null) : null;
 
     /// <summary>Every face of the element's solids (a family's instance geometry included), and whether anything in its
-    /// geometry couldn't be read as faces (a mesh, or <c>get_Geometry</c> throwing).</summary>
+    /// geometry couldn't be read as faces (a mesh, <c>get_Geometry</c> throwing, or a face Revit gives no edges or
+    /// triangles for: then no faces at all).</summary>
     private static (List<SurfaceRecord>? Faces, bool Failed) Faces(Element e, Options options)
     {
         var faces = new List<SurfaceRecord>();
         var failed = false;
+        var unreadable = false;
         void Walk(GeometryElement g)
         {
             foreach (var o in g)
@@ -566,7 +573,15 @@ internal static class RevitInterior
                 {
                     case Solid s:
                         foreach (Face f in s.Faces)
-                            faces.Add(Surface(f));
+                        {
+                            // a face Revit gives no edges or triangles for (seen on real families: the Pacific
+                            // Continental sample, 2026-11-20) can't be read: the element's geometry counts as failed,
+                            // the cautious side, never a crash and never skipped
+                            if (Surface(f) is { } face)
+                                faces.Add(face);
+                            else
+                                unreadable = true;
+                        }
                         break;
                     case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
                         Walk(inner);
@@ -586,16 +601,30 @@ internal static class RevitInterior
         {
             return (null, true);
         }
-        return (faces, failed);
+        // a face Revit couldn't give: none of the element's faces is passed on (its others alone could put a wall's
+        // far face where its near one is, review round 1), only that its geometry failed
+        return unreadable ? (null, true) : (faces, failed);
     }
 
-    private static SurfaceRecord Surface(Face f)
+    /// <summary>A face as the reader's record, or null when Revit can't give its edges or its triangles.</summary>
+    private static SurfaceRecord? Surface(Face f)
     {
-        var loops = f.GetEdgesAsCurveLoops()
-            .Select(l => (IReadOnlyList<LoopCurve>)l.Select(c => new LoopCurve(P(c.GetEndPoint(0)), c is Line)).ToList()).ToList();
-        if (f is PlanarFace pf)
-            return new SurfaceRecord(true, P(pf.FaceNormal), loops, loops.SelectMany(l => l.Select(c => c.Start)).ToList());
-        return new SurfaceRecord(false, new Xyz(0, 0, 0), loops, f.Triangulate().Vertices.Select(P).ToList());
+        try
+        {
+            if (f.GetEdgesAsCurveLoops() is not { } edges)
+                return null;
+            var loops = edges
+                .Select(l => (IReadOnlyList<LoopCurve>)l.Select(c => new LoopCurve(P(c.GetEndPoint(0)), c is Line)).ToList()).ToList();
+            if (f is PlanarFace pf)
+                return new SurfaceRecord(true, P(pf.FaceNormal), loops, loops.SelectMany(l => l.Select(c => c.Start)).ToList());
+            if (f.Triangulate() is not { Vertices: { Count: > 0 } vertices })
+                return null;
+            return new SurfaceRecord(false, new Xyz(0, 0, 0), loops, vertices.Select(P).ToList());
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     // ---- a window or door ---------------------------------------------------------------------------------------
