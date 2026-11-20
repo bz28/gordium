@@ -21,9 +21,10 @@ internal static class RealSite
     internal static void Run(Autodesk.Revit.ApplicationServices.Application app, string requestFile)
     {
         var request = JsonNode.Parse(File.ReadAllText(requestFile, Encoding.UTF8))!;
+        // first, before anything that can fail: a failed run leaves no earlier result to compare (review rounds 1, 2)
+        File.Delete(request["out"]!.GetValue<string>());
         var export = JsonNode.Parse(File.ReadAllText(request["model"]!.GetValue<string>(), Encoding.UTF8))!.AsObject();
         var log = new Dictionary<string, object?> { ["model"] = request["model"]!.GetValue<string>() };
-        File.Delete(request["out"]!.GetValue<string>());   // a failed run leaves no earlier result to compare (review round 1)
         var doc = app.NewProjectDocument(UnitSystem.Imperial);
         try
         {

@@ -29,6 +29,7 @@ import yaml
 
 from design_checker import conformance as c
 from design_checker import conformance_rhino as cr
+from design_checker import rhino_logic as logic
 from design_checker import site_json
 
 
@@ -58,16 +59,18 @@ def export(model_path: str, facts_path: str) -> dict:
     for b in rhino["buildings"]:
         if any(f.get("holes") for f in b["faces"]):
             raise SystemExit(f"building {b['id']} has a face with holes: not drawn yet")
+        if b.get("floor") is not None:
+            raise SystemExit(f"building {b['id']} is a marked floor block: not drawn yet")
     names = [layer.FullPath for layer in model.Layers]
     lots, lines = [], []
     for o in model.Objects:
         g, layer = o.Geometry, names[o.Attributes.LayerIndex]
         if not isinstance(g, r.Curve):
-            if layer != "Building":       # the building is drawn from Rhino's faces, below
+            if not logic.on_layer(layer, c.BUILDING_LAYER):   # the building is drawn from Rhino's faces, below
                 raise SystemExit(f"{o.Attributes.Id} on {layer} is a {type(g).__name__}: not drawn yet")
             continue
         pts = _points(g)
-        if layer == "Site" and g.IsClosed:
+        if logic.on_layer(layer, c.SITE_LAYER) and g.IsClosed:   # the Site layer and its sublayers, as the reader
             lots.append({"id": str(o.Attributes.Id), "points": [p[:2] for p in pts[:-1]]})
         else:
             lines.append(pts)
