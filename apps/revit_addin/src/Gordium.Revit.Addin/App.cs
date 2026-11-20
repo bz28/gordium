@@ -36,6 +36,11 @@ public sealed class App : IExternalApplication
             ToolTip = "Starts Gordium's checker and checks conformance scene 01 (the box house), comparing every " +
                       "row with the hand-worked verdicts",
         });
+        panel.AddItem(new PushButtonData("gordium_record_scenes", "Record\nscenes", dll, typeof(RecordScenesCommand).FullName)
+        {
+            ToolTip = "Draws each conformance scene in a new Revit model, reads it as a check would, records it to " +
+                      "test_data/host_conformance/recorded/revit/ and checks it by the suite's own rules",
+        });
         var egress = application.CreateRibbonPanel(Tab, "Egress");
         egress.AddItem(new PushButtonData("gordium_mark_for_egress", "Mark for\negress", dll,
                                           typeof(MarkForEgressCommand).FullName)
@@ -58,25 +63,54 @@ public sealed class App : IExternalApplication
         return Result.Succeeded;
     }
 
-    /// <summary>A run asked for by file while Revit is idle, so the trial needs no click: the interior houses
-    /// (<see cref="RecordHousesCommand.RequestPath"/>). The file is taken (renamed) before it runs, so it runs once even
-    /// if it fails; every result goes to the log, and nothing ever escapes Revit's Idling event.</summary>
+    /// <summary>A run asked for by file, so the trial can be driven with no click: the in-place source
+    /// (InPlaceSource.RequestPath), the interior houses (RecordHousesCommand.RequestPath) or the scenes
+    /// (RecordScenesCommand.RunRequestPath). Each is taken (renamed) first, so it runs once even if it fails; every result
+    /// goes to the log, and nothing ever escapes Revit's Idling event.</summary>
     private static void OnIdling(object? sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
     {
         if (sender is not UIApplication ui)
             return;
-        var request = RecordHousesCommand.RequestPath;
+        if (File.Exists(InPlaceSource.RequestPath))
+        {
+            try
+            {
+                var takenStep = InPlaceSource.RequestPath + ".taken";
+                File.Move(InPlaceSource.RequestPath, takenStep, overwrite: true);
+                InPlaceSource.Run(ui, takenStep);
+            }
+            catch (Exception x)       // never out of Revit's Idling event (review round 1)
+            {
+                Trial.Log("in_place_source", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
+        if (File.Exists(RecordHousesCommand.RequestPath))
+        {
+            try
+            {
+                var takenHouses = RecordHousesCommand.RequestPath + ".taken";
+                File.Move(RecordHousesCommand.RequestPath, takenHouses, overwrite: true);
+                RecordHousesCommand.Run(ui.Application, RecordHousesCommand.Requested(takenHouses));
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("record_houses", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
+        var request = RecordScenesCommand.RunRequestPath;
         if (!File.Exists(request))
             return;
+        var taken = request + ".taken";
         try
         {
-            var taken = request + ".taken";
             File.Move(request, taken, overwrite: true);
-            RecordHousesCommand.Run(ui.Application, RecordHousesCommand.Requested(taken));
+            RecordScenesCommand.Run(ui.Application, RecordScenesCommand.Requested(taken));
         }
         catch (Exception x)
         {
-            Trial.Log("record_houses", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            Trial.Log("record_scenes", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
         }
     }
 

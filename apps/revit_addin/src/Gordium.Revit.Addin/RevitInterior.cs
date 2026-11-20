@@ -21,28 +21,13 @@ internal static class RevitInterior
     /// <summary>The model with its marks (RevitMarks.Model) and its inside, ready for <see cref="InteriorReader.Read"/>.</summary>
     internal static RevitModel Model(Document doc) => RevitMarks.Model(doc) with
     {
-        InternalToShared = InternalToShared(doc),
+        InternalToShared = RevitRead.InternalToShared(doc),        // the one place the turn is settled (the outside reader's)
         UserWorksets = doc.IsWorkshared
             ? new FilteredWorksetCollector(doc).OfKind(WorksetKind.UserWorkset)
                 .Select(w => new WorksetRecord(w.Id.IntegerValue.ToString(CultureInfo.InvariantCulture), w.Name, w.IsOpen)).ToList()
             : [],
         Interior = Read(doc),
     };
-
-    /// <summary>Revit's internal coordinates to the shared ones: <c>ActiveProjectLocation.GetTotalTransform()</c>, the
-    /// way round on which the survey point and the project base point land on their shared positions (as the outside
-    /// reader settles it); refused when neither does, never guessed.</summary>
-    internal static Reading.Transform3 InternalToShared(Document doc)
-    {
-        var total = doc.ActiveProjectLocation.GetTotalTransform();
-        var points = new[] { BasePoint.GetSurveyPoint(doc), BasePoint.GetProjectBasePoint(doc) };
-        foreach (var t in new[] { total, total.Inverse })
-            if (points.All(p => t.OfPoint(p.Position).DistanceTo(p.SharedPosition) < 1e-6))
-                return T(t);
-        throw new InvalidOperationException(
-            "Revit's shared coordinates couldn't be told apart from its internal ones (the survey point and the project " +
-            "base point agree with neither way of the project location's transform): the inside isn't read");
-    }
 
     internal static InteriorRecords Read(Document doc)
     {

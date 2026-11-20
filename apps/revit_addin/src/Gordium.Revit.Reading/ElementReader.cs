@@ -339,7 +339,7 @@ internal sealed class Read(RevitModel model)
         inside.ClosedWorkset |= doc.UserWorksets.Any(w => !w.IsOpen);
         inside.HoldsLot |= doc.LotLines.Any(l => l.IsPropertyLine);
         var parts = new JsonArray();
-        foreach (var el in doc.Elements.Where(SiteReader.Looked))
+        foreach (var el in SiteReader.Fold(doc.Elements).Where(SiteReader.Looked))
         {
             if (el.Kind == ElementKind.LinkInstance)
             {

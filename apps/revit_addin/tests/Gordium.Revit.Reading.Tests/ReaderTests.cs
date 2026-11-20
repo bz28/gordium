@@ -347,6 +347,60 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     }
 
     [Fact]
+    public async Task A_shared_nested_family_is_read_as_part_of_its_host()
+    {
+        // Revit lists a shared nested family (a sub-component) as its own element, outside its host's geometry (trial,
+        // 2026-11-19, scene 26): read alone, the shed touched nothing and its empty part was a third object
+        var shed = FakeRevit.Family("shed", [Block(48, 90, 56, 98, 0, 8)]);
+        var empty = FakeRevit.Family("part", [new SolidItem([], [])]) with { SuperComponent = "shed" };
+        var site = await Site(House(shed, empty));
+        Assert.DoesNotContain("part", Ids(site, "left_out"));
+        Assert.Null(LeftOut(site, "shed")["touching"]);           // the part gives nothing: the shed's place can't be told
+
+        // a part that reaches the house makes its host touch it
+        var porch = FakeRevit.Family("porch", [Block(45, 79, 48, 90, 0, 8)]) with { SuperComponent = "shed" };
+        site = await Site(House(shed, porch));
+        Assert.DoesNotContain("porch", Ids(site, "left_out"));
+        Assert.True(LeftOut(site, "shed")["touching"]!.GetValue<bool>());
+
+        // a part whose geometry can't be read makes its host's unreadable
+        var failed = FakeRevit.Family("bad", []) with { SuperComponent = "shed", GeometryFailed = true };
+        site = await Site(House(shed, failed));
+        Assert.Contains("shed", Ids(site, "unsent"));
+
+        // a sub-component whose host isn't there is read on its own
+        site = await Site(House(empty with { SuperComponent = "gone" }));
+        Assert.Null(LeftOut(site, "part")["touching"]);
+    }
+
+    [Fact]
+    public async Task A_building_part_nested_in_a_family_is_still_a_building()
+    {
+        // review round 1: folded into a Generic Model kit, a shared nested window vanished into a left-out family,
+        // and a linked model holding only such a window no longer counted as holding a building (a false pass)
+        var kit = FakeRevit.Family("kit", [Block(48, 90, 52, 94)]);
+        var window = FakeRevit.Family("win", [Block(48, 90, 50, 91)], "OST_Windows", "Windows") with { SuperComponent = "kit" };
+        var site = await Site(House(kit, window));
+        Assert.Contains("win", Ids(site, "buildings"));
+        Assert.Contains("kit", Ids(site, "left_out"));
+
+        var doc = new RevitModel { Document = "kit.rvt", Elements = [kit, window] };
+        site = await Site(House(FakeRevit.LinkOf("link", doc)));
+        Assert.Contains(SiteReader.LinkedModelKind, Ids(site, "unsent"));
+    }
+
+    [Fact]
+    public async Task Sub_components_in_a_loop_are_each_read_on_their_own()
+    {
+        // review round 1: two elements each naming the other as its host were both dropped
+        var a = FakeRevit.Family("a", [Block(48, 90, 56, 98, 0, 8)]) with { SuperComponent = "b" };
+        var b = FakeRevit.Family("b", [Block(48, 100, 56, 108, 0, 8)]) with { SuperComponent = "a" };
+        var site = await Site(House(a, b));
+        Assert.Contains("a", Ids(site, "left_out"));
+        Assert.Contains("b", Ids(site, "left_out"));
+    }
+
+    [Fact]
     public async Task A_nested_family_that_gives_an_empty_list_counts_as_missing_too()
     {
         // review round 2: GetInstanceGeometry() may give an empty list rather than null; both mean "nothing to read"

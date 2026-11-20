@@ -150,7 +150,12 @@ public sealed record SceneDrawing(string Name, JsonObject Data)
                 elements.Add(FakeRevit.Directshape(id, [f.Grid(lo, hi, z0, mesh["cells"]!.GetValue<int>())]));
             }
             else if (o["nested_empty"]?.GetValue<bool>() == true)
-                elements.Add(FakeRevit.Family(id, [f.Prism(outline, z0, z1), new InstanceItem([])]));
+            {
+                // as Revit gives a shared nested family (trial, 2026-11-19): its own element, a sub-component of the
+                // shed, holding only an empty solid; the shed's own geometry without it
+                elements.Add(FakeRevit.Family(id, [f.Prism(outline, z0, z1)]));
+                elements.Add(FakeRevit.Family(id + "_part", [new SolidItem([], [])]) with { SuperComponent = id });
+            }
             else if (o["block"]?.GetValue<bool>() == true)
                 elements.Add(FakeRevit.Family(id, [f.Prism(outline, z0, z1)]));
             else

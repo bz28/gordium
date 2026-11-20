@@ -73,7 +73,7 @@ public static class SiteReader
         var read = new Read(model);
         var problems = new List<JsonObject>();
         var lot = LotReader.Read(model, facts["lot_id"]?.GetValue<string>(), read.ToShared, problems);
-        foreach (var e in model.Elements)
+        foreach (var e in Fold(model.Elements))
             if (Looked(e) && OnLotNow(model, e))
                 read.Element(e);
 
@@ -139,6 +139,82 @@ public static class SiteReader
     internal static bool Looked(RevitElement e) =>
         (e.CategoryType == CategoryType.Model || e.Kind is ElementKind.LinkInstance or ElementKind.CadImport or ElementKind.CoordinationModel)
         && !e.ViewSpecific && !NotLookedAt.Contains(e.BuiltInCategory) && e.Kind != ElementKind.Group;
+
+    /// <summary>Shared nested families (sub-components) read as part of the family they sit in (design note, section
+    /// 1, "Nested families"): Revit lists each as its own element, outside its host's geometry, where Rhino reads a
+    /// nested block as part of its block. So each sub-component, at any depth, is added to its host's geometry as one
+    /// nested instance and not read on its own: what it gives, placed as Revit places it (its geometry is already in
+    /// the model's coordinates); nothing that could be a building (no face: an empty family, lines only) as a nested
+    /// family that gives nothing, so its host's place can't be told (touching: null), as a family on its own with
+    /// nothing in it; and one whose geometry can't be read makes its host's unreadable. Never folded, so read on
+    /// their own as before (more is only more cautious): a sub-component in a building category or marked as a floor
+    /// block (a window in a kit family is a building wherever it sits, and a linked model holding one still holds a
+    /// building: review round 1); one whose host isn't in the list; and one whose chain of hosts never reaches an
+    /// element that isn't a sub-component (a loop: Revit can't make one, but nothing is ever dropped for it).</summary>
+    internal static IReadOnlyList<RevitElement> Fold(IReadOnlyList<RevitElement> elements)
+    {
+        var byId = new Dictionary<string, RevitElement>();
+        foreach (var e in elements)
+            byId.TryAdd(e.UniqueId, e);
+        var folded = elements.Where(e => e.SuperComponent is { } h && byId.ContainsKey(h) && FoldsInto(e, byId)).ToList();
+        if (folded.Count == 0)
+            return elements;
+        var subs = folded.GroupBy(e => e.SuperComponent!).ToDictionary(g => g.Key, g => g.ToList());
+        RevitElement With(RevitElement e)
+        {
+            if (!subs.TryGetValue(e.UniqueId, out var held))
+                return e;
+            var geometry = new List<GeometryItem>(e.Geometry ?? []);
+            var failed = e.GeometryFailed;
+            foreach (var sub in held.Select(With))
+            {
+                failed |= sub.GeometryFailed;
+                geometry.Add(new InstanceItem(sub.Geometry is { } g && AnyFace(g) || sub.Geometry is { } o && AnyOther(o) ? sub.Geometry : null));
+            }
+            return e with { Geometry = geometry, GeometryFailed = failed };
+        }
+        var gone = folded.Select(e => e.UniqueId).ToHashSet();
+        return elements.Where(e => !gone.Contains(e.UniqueId)).Select(With).ToList();
+    }
+
+    /// <summary>Whether a sub-component is folded into its host: it isn't a building part (a building category or a
+    /// floor block), its host is in the list, and its chain of hosts has no loop. The chain ends at the first element
+    /// that is read on its own (one with no host in the list, or a building part), which every folded part above
+    /// it reaches.</summary>
+    private static bool FoldsInto(RevitElement e, Dictionary<string, RevitElement> byId)
+    {
+        if (IsBuildingPart(e) || e.SuperComponent is not { } first || first == e.UniqueId || !byId.ContainsKey(first))
+            return false;
+        var seen = new HashSet<string> { e.UniqueId };
+        var at = e;
+        while (at.SuperComponent is { } h && h != at.UniqueId && byId.TryGetValue(h, out var host))
+        {
+            if (!seen.Add(h))
+                return false;            // a loop (Revit can't make one): every element in it read on its own
+            if (IsBuildingPart(host))
+                return true;             // never folded itself: the chain ends here
+            at = host;
+        }
+        return true;
+    }
+
+    private static bool IsBuildingPart(RevitElement e) =>
+        e.Mark == GordiumMark.FloorBlock || BuildingCategories.Contains(e.BuiltInCategory);
+
+    private static bool AnyFace(IEnumerable<GeometryItem> items) => items.Any(i => i switch
+    {
+        SolidItem s => s.Faces.Count > 0,
+        MeshItem m => m.Triangles.Count > 0,
+        InstanceItem { Items: { } inner } => AnyFace(inner),
+        _ => false,
+    });
+
+    private static bool AnyOther(IEnumerable<GeometryItem> items) => items.Any(i => i switch
+    {
+        OtherItem => true,
+        InstanceItem { Items: { } inner } => AnyOther(inner),
+        _ => false,
+    });
 
     /// <summary>Whether the element is on the lot in the design checked (proposed, design note, section 1):
     /// <list type="bullet">
