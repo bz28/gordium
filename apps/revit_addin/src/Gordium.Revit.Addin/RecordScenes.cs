@@ -97,8 +97,9 @@ public sealed class RecordScenesCommand : IExternalCommand
     internal static HashSet<string>? Requested(string path)
     {
         Debug = File.Exists(path) && JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))?["debug"]?.GetValue<bool>() == true;
-        return File.Exists(path)
-            ? JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))!["scenes"]!.AsArray().Select(s => s!.GetValue<string>()).ToHashSet()
+        // no file, or a file naming no scenes ({}): every drawn scene
+        return File.Exists(path) && JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))?["scenes"] is JsonArray scenes
+            ? scenes.Select(s => s!.GetValue<string>()).ToHashSet()
             : null;
     }
 
@@ -165,6 +166,7 @@ public sealed class RecordScenesCommand : IExternalCommand
         catch (Exception e)
         {
             log["error"] = $"{e.GetType().Name}: {e.Message}";
+            log["where"] = e.StackTrace?.Split('\n').Take(4).Select(l => l.Trim()).ToList();
             Trial.Log("record_scene", log);
             return $"{name}: failed ({e.GetType().Name}: {e.Message})";
         }

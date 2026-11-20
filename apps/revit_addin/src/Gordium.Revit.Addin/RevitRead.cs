@@ -123,6 +123,7 @@ internal static class RevitRead
             Name = e.Name,
             Kind = Kind(doc, e),
             IsInPlace = e is FamilyInstance fi && fi.Symbol?.Family?.IsInPlace == true,
+            SuperComponent = e is FamilyInstance sub && sub.SuperComponent is { } host ? host.UniqueId : null,
             Mark = mark,
             FloorMark = floorMark,
             PhaseCreated = Id(e.CreatedPhaseId),

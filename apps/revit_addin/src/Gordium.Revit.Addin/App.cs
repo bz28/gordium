@@ -50,8 +50,17 @@ public sealed class App : IExternalApplication
     /// click: taken (renamed) first, so it runs once even if it fails; every result goes to the log.</summary>
     private static void OnIdling(object? sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
     {
+        if (sender is not UIApplication ui)
+            return;
+        if (File.Exists(InPlaceSource.RequestPath))
+        {
+            var takenStep = InPlaceSource.RequestPath + ".taken";
+            File.Move(InPlaceSource.RequestPath, takenStep, overwrite: true);
+            InPlaceSource.Run(ui, takenStep);
+            return;
+        }
         var request = RecordScenesCommand.RunRequestPath;
-        if (sender is not UIApplication ui || !File.Exists(request))
+        if (!File.Exists(request))
             return;
         var taken = request + ".taken";
         try

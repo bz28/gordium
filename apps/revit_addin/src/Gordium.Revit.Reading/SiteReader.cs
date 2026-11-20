@@ -73,7 +73,7 @@ public static class SiteReader
         var read = new Read(model);
         var problems = new List<JsonObject>();
         var lot = LotReader.Read(model, facts["lot_id"]?.GetValue<string>(), read.ToShared, problems);
-        foreach (var e in model.Elements)
+        foreach (var e in Fold(model.Elements))
             if (Looked(e) && OnLotNow(model, e))
                 read.Element(e);
 
@@ -139,6 +139,54 @@ public static class SiteReader
     internal static bool Looked(RevitElement e) =>
         (e.CategoryType == CategoryType.Model || e.Kind is ElementKind.LinkInstance or ElementKind.CadImport or ElementKind.CoordinationModel)
         && !e.ViewSpecific && !NotLookedAt.Contains(e.BuiltInCategory) && e.Kind != ElementKind.Group;
+
+    /// <summary>Shared nested families (sub-components) read as part of the family they sit in (design note, section
+    /// 1, "Nested families"): Revit lists each as its own element, outside its host's geometry, where Rhino reads a
+    /// nested block as part of its block. So each sub-component, at any depth, is added to its host's geometry as one
+    /// nested instance and not read on its own: what it gives, placed as Revit places it (its geometry is already in
+    /// the model's coordinates); nothing that could be a building (no face: an empty family, lines only) as a nested
+    /// family that gives nothing, so its host's place can't be told (touching: null), as a family on its own with
+    /// nothing in it; and one whose geometry can't be read makes its host's unreadable. A sub-component whose host
+    /// isn't in the list is read on its own (more is only more cautious).</summary>
+    internal static IReadOnlyList<RevitElement> Fold(IReadOnlyList<RevitElement> elements)
+    {
+        var present = elements.Select(e => e.UniqueId).ToHashSet();
+        var subs = elements.Where(e => e.SuperComponent is { } h && h != e.UniqueId && present.Contains(h))
+                           .GroupBy(e => e.SuperComponent!).ToDictionary(g => g.Key, g => g.ToList());
+        if (subs.Count == 0)
+            return elements;
+        RevitElement With(RevitElement e, HashSet<string> seen)
+        {
+            if (!subs.TryGetValue(e.UniqueId, out var held) || !seen.Add(e.UniqueId))
+                return e;                // no sub-components (or a loop Revit can't make: read as it is)
+            var geometry = new List<GeometryItem>(e.Geometry ?? []);
+            var failed = e.GeometryFailed;
+            foreach (var sub in held.Select(s => With(s, seen)))
+            {
+                failed |= sub.GeometryFailed;
+                geometry.Add(new InstanceItem(sub.Geometry is { } g && AnyFace(g) || sub.Geometry is { } o && AnyOther(o) ? sub.Geometry : null));
+            }
+            seen.Remove(e.UniqueId);
+            return e with { Geometry = geometry, GeometryFailed = failed };
+        }
+        return elements.Where(e => e.SuperComponent is not { } h || h == e.UniqueId || !present.Contains(h))
+                       .Select(e => With(e, [])).ToList();
+    }
+
+    private static bool AnyFace(IEnumerable<GeometryItem> items) => items.Any(i => i switch
+    {
+        SolidItem s => s.Faces.Count > 0,
+        MeshItem m => m.Triangles.Count > 0,
+        InstanceItem { Items: { } inner } => AnyFace(inner),
+        _ => false,
+    });
+
+    private static bool AnyOther(IEnumerable<GeometryItem> items) => items.Any(i => i switch
+    {
+        OtherItem => true,
+        InstanceItem { Items: { } inner } => AnyOther(inner),
+        _ => false,
+    });
 
     /// <summary>Whether the element is on the lot in the design checked (proposed, design note, section 1):
     /// <list type="bullet">

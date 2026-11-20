@@ -37,6 +37,7 @@ are for the architect's reading only (proposed).
 | Gordium's own floor blocks (drawn by `start_site`; proposed: DirectShapes carrying a Gordium mark with `"<story>;<height>"`, as Rhino's `gordium:floor` user text) | `buildings`, with `floor` = the height drawn | Floor blocks on `Gordium::Massing` | Every drawn scene: each expected building is a floor block with `floor: 10`, so every scene's house (02's curved one and 03's open one too) is drawn as marked floor blocks, built from real solids (`GeometryCreationUtilities` or `BRepBuilder`, never a faceting builder that would turn 02's curve into flat faces: **to check**) |
 | Curtain wall (the host wall itself) | Proposed: its panels and mullions are their own elements (row 1); the wall sends its own faces only if it has any (**to check**: whether a curtain wall's own geometry is empty, so no face is sent twice) | | **new scene A** |
 | In-place family | Proposed: by its category, like the building-category row; off the building categories, as the family instance row below (left out whatever its geometry, never dropped for having none at Fine detail). `Family.IsInPlace` only names it in the panel | | **new scene A**; empty: **new scene H** |
+| A shared nested family (a sub-component: `FamilyInstance.SuperComponent` names the instance it sits in) | **Decided (2026-11-19, section 8):** read as part of the family it sits in, at any depth, never as its own element: its geometry is added to its host's as one nested family (`SiteReader.Fold`), so it makes its host's box bigger, one with no face (empty, lines only) leaves its host with no box (`touching: null`), and one that can't be read makes its host unreadable. Revit lists it as its own element, outside its host's geometry (the trial); a nested family that isn't shared is already inside its host's geometry. A sub-component whose host isn't in the model is read on its own | A nested block: part of its block | 26 (the shed's empty part) |
 | Model group | Proposed: never itself: each member element is read on its own (a group has no geometry of its own) | | **new scene E** (ids after editing a group) |
 | Any other element with a Revit `Solid` or mesh with faces (closed or not) (generic models, masses, site, planting, specialty equipment, furniture) on the lot | `left_out`, `could_be_building: true` | A solid on the Default layer | 05 (garage), 15 (porch); the recorder draws these as Generic Models |
 | A family instance off the building categories, loadable or in-place, whatever its geometry (even none at Fine detail) | `left_out`, `could_be_building: true`; with no box, `touching: null` | A block on another layer: Rhino counts every block, whatever it holds | 15 (`shed_block`); empty: **new scene H** |
@@ -241,6 +242,24 @@ whether `DocumentChanged` reports joined neighbours; whether `ElementOnPhaseStat
 how often real models need review only because of curved family details (Q3); how a component stair's and a
 railing's parts (runs, landings, supports, top rails, handrails) are read, so a stair is part of the building and
 neither left out nor unsent (Snowdon Towers has stairs).
+
+**Answered in the trial (Revit 2027.4, 2026-11-19; every drawn scene recorded from Revit and passing).**
+
+- *Nested families.* A nested family that isn't shared comes back inside its host's geometry (a nested
+  `GeometryInstance`); a shared one is its own element, a sub-component, left out of its host's geometry. Decided:
+  read as part of its host (section 1's row), the same reading Rhino gives a nested block, so a shed's empty part
+  leaves the shed with no box instead of being a second object and the shed touching nothing (scene 26).
+- *Detail level.* Decided: read at Fine, as now, and also at Coarse; where Coarse reaches beyond Fine the element's
+  box (for touching and the lot) is the larger, and a building whose Coarse geometry reaches beyond its Fine faces
+  gets a problem saying so (it may be bigger than measured), so a part drawn only at Coarse is never missed. Faces
+  are still sent from Fine alone (the real shape). Not built yet: its own PR, with a scene of a family whose solid
+  shows at Coarse only.
+- *In-place families.* Revit's API can't create one, and inside the in-place editor no add-in code runs (no
+  Idling event; every add-in button is greyed). Scene 18's built-in was made once by hand in a source model and
+  is copied into each scene model (`InPlaceSource`, `SceneDraw.CopyBuiltIn`); it reads by its category (Walls)
+  like any building part.
+- *Closed meshes.* A `TessellatedShapeBuilder` mesh comes back as a `Mesh` that says it is closed (scene 18's
+  roof: 12 triangles, closed), so no `open_mesh` is sent for it.
 
 **Words.** The problem codes stay the same for every host (the conformance suite compares them), but some of their
 sentences are Rhino's: `lot_not_found` says "the Site layer", `no_lot_outline` and `several_lot_outlines` say "on

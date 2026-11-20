@@ -13,6 +13,10 @@ namespace Gordium.Revit.Addin;
 /// picked lot the scene doesn't draw (23) is drawn, its UniqueId taken, then deleted;</item>
 /// <item>each floor block: a Gordium-marked DirectShape solid carrying "&lt;story&gt;;&lt;height&gt;" (a curved face where the
 /// scene has one, an open shell with no floor or roof where it draws it open);</item>
+/// <item>a house of parts (18): each part a DirectShape in its building category (a curtain wall's panel and mullions
+/// in Curtain Panels and Curtain Wall Mullions; the roof slab a closed mesh), and the built-in an in-place family in
+/// Walls, which Revit's API can't create: copied from a source model made once by hand (InPlaceSource), as Copy and
+/// Paste does;</item>
 /// <item>each other solid: a Generic Model DirectShape (context-marked on Gordium::Context); a terrain mesh: an open
 /// mesh DirectShape; each spot grade: a spot-marked DirectShape holding one point;</item>
 /// <item>a survey offset: the drawing near Revit's internal origin, the shared coordinates moved by the offset;
@@ -30,13 +34,9 @@ internal static class SceneDraw
         foreach (var (_, data) in scene["steps"]!.AsObject())
             foreach (var s in data!["solids"]!.AsArray())
             {
-                var name = s!["id"]!.GetValue<string>();
-                if (name == "built_in")
-                    why.Add("built_in: an in-place family (Revit's API can't create one: drawn by hand)");
-                if (name == "curtain_panel" || name.StartsWith("mullion_", StringComparison.Ordinal))
-                    why.Add($"{name}: a curtain wall's panel or mullion (a curtain wall, not drawn yet)");
-                if (s["mesh"]!.GetValue<bool>())
-                    why.Add($"{name}: a building drawn as a closed mesh (not drawn yet)");
+                if (s!["id"]!.GetValue<string>() == "built_in" && !System.IO.File.Exists(InPlaceSource.SourcePath))
+                    why.Add($"built_in: an in-place family, which Revit's API can't create: copied from {InPlaceSource.SourcePath}, " +
+                            "made once by hand (InPlaceSource), which isn't there");
             }
         return why.Distinct().ToList();
     }
@@ -52,6 +52,25 @@ internal static class SceneDraw
         var buildings = new Dictionary<string, ElementId>();
         var facts = scene["facts"]!.DeepClone().AsObject();
         var offset = Offset(scene);
+        // the built-in (18): an in-place family, copied from its source model, opened before this drawing's transaction
+        var builtIn = scene["steps"]!["as drawn"]!["solids"]!.AsArray().Any(s => s!["id"]!.GetValue<string>() == "built_in");
+        if (builtIn && offset.GetLength() > 0)
+            throw new InvalidOperationException("the in-place built-in is copied as drawn: a scene with an offset can't have one");
+        var source = builtIn ? app.OpenDocumentFile(InPlaceSource.SourcePath) : null;
+        try
+        {
+            return Draw(app, doc, scene, ids, buildings, facts, offset, source);
+        }
+        finally
+        {
+            source?.Close(false);
+        }
+    }
+
+    private static Drawn Draw(Autodesk.Revit.ApplicationServices.Application app, Document doc, JsonObject scene,
+                              Dictionary<string, string> ids, Dictionary<string, ElementId> buildings, JsonObject facts,
+                              XYZ offset, Document? source)
+    {
         using var t = new Transaction(doc, "Gordium: draw conformance scene");
         Warnings.Accept(t);
         t.Start();
@@ -110,10 +129,10 @@ internal static class SceneDraw
                 (inLinks.TryGetValue(link.GetValue<string>(), out var held) ? held : inLinks[link.GetValue<string>()] = []).Add(s);
                 continue;
             }
-            var ds = Building(doc, s, offset);
             var name = s["id"]!.GetValue<string>();
-            ids[ds.UniqueId] = name;
-            buildings[name] = ds.Id;
+            var part = name == "built_in" ? CopyBuiltIn(source!, doc) : Building(doc, s, offset);
+            ids[part.UniqueId] = name;
+            buildings[name] = part.Id;
         }
         if (scene["group"]!.GetValue<bool>())     // every part in one model group (20): moved together at the edit
             buildings[GroupKey] = doc.Create.NewGroup(buildings.Values.ToList()).Id;
@@ -201,13 +220,20 @@ internal static class SceneDraw
         if (s["block"]!.GetValue<bool>())
             return Shape(doc, [Line.CreateBound(Xyz(outline[0], z0), Xyz(outline[2], z1))], null, BuiltInCategory.OST_Walls);
         if (s["floor"] is not JsonValue floor)
-            return Shape(doc, [Solid(outline, z0, z1, null, null)], null, name switch
+        {
+            var category = name switch
             {
                 "floor_slab" => BuiltInCategory.OST_Floors,
                 "roof_slab" => BuiltInCategory.OST_Roofs,
                 "window" => BuiltInCategory.OST_Windows,
+                "curtain_panel" => BuiltInCategory.OST_CurtainWallPanels,
+                _ when name.StartsWith("mullion_", StringComparison.Ordinal) => BuiltInCategory.OST_CurtainWallMullions,
                 _ => BuiltInCategory.OST_Walls,
-            });
+            };
+            return s["mesh"]!.GetValue<bool>()
+                ? Shape(doc, ClosedMesh(outline, z0, z1), null, category)
+                : Shape(doc, [Solid(outline, z0, z1, null, null)], null, category);
+        }
         var mark = $"{RevitRead.FloorPrefix}{name.Split("floor")[^1]};{Num(floor.GetValue<double>())}";
         var curved = s["curved"] as JsonObject;
         return s["open"]!.GetValue<bool>()
@@ -368,6 +394,55 @@ internal static class SceneDraw
         return Shape(doc, [b.GetResult()], mark);
     }
 
+    /// <summary>The in-place built-in (18), copied from its source model where it was made by hand, in place (the
+    /// source draws it at the scene's own coordinates); checked to be the one in-place family there, in Walls.</summary>
+    private static Element CopyBuiltIn(Document source, Document doc)
+    {
+        var made = new FilteredElementCollector(source).OfClass(typeof(FamilyInstance)).Cast<FamilyInstance>()
+            .Where(f => f.Symbol.Family.IsInPlace).ToList();
+        if (made.Count != 1 || made[0].Category?.BuiltInCategory != BuiltInCategory.OST_Walls)
+            throw new InvalidOperationException($"{InPlaceSource.SourcePath} should hold one in-place family, in Walls");
+        // both models come from the same template, so their types share names: Revit asks about each in a dialog
+        // ("the following types already exist") unless told to keep the scene model's own (trial, 2026-11-19)
+        var options = new CopyPasteOptions();
+        options.SetDuplicateTypeNamesHandler(new KeepDestinationTypes());
+        var copied = ElementTransformUtils.CopyElements(source, [made[0].Id], doc, Transform.Identity, options);
+        return copied.Select(doc.GetElement).Single(e => e is FamilyInstance);
+    }
+
+    /// <summary>A vertical prism as a closed mesh of triangles (a roof slab "meshed", 18): two triangles a face, every
+    /// edge shared by two triangles, wound outward.</summary>
+    private static IList<GeometryObject> ClosedMesh(List<(double X, double Y)> outline, double z0, double z1)
+    {
+        if (outline.Count != 4)
+            throw new InvalidOperationException("a closed mesh is drawn for a four-cornered outline only");
+        // Fallback Abort threw InternalException from Build (trial, 2026-11-19), as for the terrain mesh: Salvage, and
+        // the outcome checked below, so nothing but a mesh is drawn
+        var b = new TessellatedShapeBuilder { Target = TessellatedShapeBuilderTarget.Mesh, Fallback = TessellatedShapeBuilderFallback.Salvage };
+        b.OpenConnectedFaceSet(true);
+        void Quad(XYZ a, XYZ c, XYZ d, XYZ e)
+        {
+            b.AddFace(new TessellatedFace(new List<XYZ> { a, c, d }, ElementId.InvalidElementId));
+            b.AddFace(new TessellatedFace(new List<XYZ> { a, d, e }, ElementId.InvalidElementId));
+        }
+        // counter-clockwise in plan (as the scenes draw): the roof seen from above, the floor from below
+        var lo = outline.Select(p => Xyz(p, z0)).ToList();
+        var hi = outline.Select(p => Xyz(p, z1)).ToList();
+        Quad(hi[0], hi[1], hi[2], hi[3]);
+        Quad(lo[0], lo[3], lo[2], lo[1]);
+        for (var i = 0; i < 4; i++)
+        {
+            var j = (i + 1) % 4;
+            Quad(lo[i], lo[j], hi[j], hi[i]);
+        }
+        b.CloseConnectedFaceSet();
+        b.Build();
+        var built = b.GetBuildResult();
+        if (built.Outcome != TessellatedShapeBuilderOutcome.Mesh)
+            throw new InvalidOperationException($"the closed mesh came back as {built.Outcome}");
+        return built.GetGeometricalObjects();
+    }
+
     /// <summary>A flat open mesh over the outline's plan box at height z, cells × cells squares (two triangles each),
     /// as FakeRevit.Grid: the terrain the architect hasn't picked (scene 16).</summary>
     private static DirectShape Grid(Document doc, List<(double X, double Y)> outline, double z, int cells)
@@ -415,6 +490,12 @@ internal static class SceneDraw
     private static List<(double X, double Y)> Outline(JsonNode o) => o.AsArray().Select(p => P(p!)).ToList();
 
     private static string Num(double v) => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+}
+
+/// <summary>Copying between models: a type the scene model already has by name is kept, never asked about.</summary>
+internal sealed class KeepDestinationTypes : IDuplicateTypeNamesHandler
+{
+    public DuplicateTypeAction OnDuplicateTypeNamesFound(DuplicateTypeNamesHandlerArgs args) => DuplicateTypeAction.UseDestinationTypes;
 }
 
 /// <summary>A scene is drawn as the suite asks, including what Revit only warns about (an open property line, scene
