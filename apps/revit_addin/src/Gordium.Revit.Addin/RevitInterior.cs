@@ -38,15 +38,173 @@ internal static class RevitInterior
             .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
             .Select(fi => OpeningOf(doc, fi, phase)).ToList();
         var diagnostics = new List<string>();
+        var (stairs, candidates) = StairsOf(doc, diagnostics);
+        int coordination;
+        try
+        {
+            coordination = Autodesk.Revit.DB.ExternalData.CoordinationModelLinkUtils.GetAllCoordinationModelInstanceIds(doc).Count;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            diagnostics.Add($"coordination models couldn't be listed ({x.GetType().Name}: {x.Message}): counted as one");
+            coordination = 1;                                         // what can't be listed could hold a stair
+        }
         return new InteriorRecords
         {
             Rooms = rooms,
             Openings = openings,
             EnclosedAreas = phase is null ? null : Areas(doc, phase, diagnostics),
             Links = Links(doc),
+            Stairs = stairs,
+            StairCandidates = candidates,
+            CoordinationModels = coordination,
             Diagnostics = diagnostics,
         };
     }
+
+    // ---- stairs (step 4) ---------------------------------------------------------------------------------------
+
+    private static readonly Options Fine = new() { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
+
+    /// <summary>Every component stair with its runs, and everything else in Stairs, Railings and Generic Models (and
+    /// every multistory stair) as something that could be a stair the reader doesn't walk. View-specific elements (a
+    /// stair path, a tag) aren't model elements and aren't listed.</summary>
+    private static (List<StairRecord>? Stairs, List<StairCandidate> Candidates) StairsOf(Document doc, List<string> diagnostics)
+    {
+        var stairs = new List<StairRecord>();
+        var candidates = new List<StairCandidate>();
+        try
+        {
+            foreach (var e in Models(doc, BuiltInCategory.OST_Stairs))
+            {
+                if (e is Stairs s)
+                    stairs.Add(StairOf(doc, s, diagnostics));
+                else
+                    candidates.Add(Candidate(e));
+            }
+            foreach (var e in Models(doc, BuiltInCategory.OST_StairsRailing).Where(e => e is not Railing))
+                candidates.Add(Candidate(e));
+            foreach (var e in Models(doc, BuiltInCategory.OST_GenericModel))
+                candidates.Add(Candidate(e));
+            foreach (var m in new FilteredElementCollector(doc).OfClass(typeof(MultistoryStairs)))
+                candidates.Add(new StairCandidate(m.UniqueId, m.Category?.BuiltInCategory.ToString() ?? "OST_MultistoryStairs", m.Name,
+                                                  "a multistory stair", Id(m.DemolishedPhaseId), Id(m.DesignOption?.Id)));
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"the stairs couldn't be read ({x.GetType().Name}: {x.Message})");
+            return (null, candidates);
+        }
+        diagnostics.Add($"stairs: {stairs.Count} component stairs ({stairs.Sum(s => s.Runs.Count)} runs), {candidates.Count} other elements that could be one");
+        return (stairs, candidates);
+    }
+
+    private static IEnumerable<Element> Models(Document doc, BuiltInCategory c) =>
+        new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().Where(e => !e.ViewSpecific);
+
+    private static StairCandidate Candidate(Element e) => new(
+        e.UniqueId, e.Category?.BuiltInCategory.ToString() ?? "", e.Name,
+        e switch
+        {
+            FamilyInstance { Symbol.Family.IsInPlace: true } => "an in-place family",
+            FamilyInstance => "a loadable family",
+            DirectShape => "a DirectShape",
+            Stairs => "a stair not made of components",
+            _ => $"another element ({e.GetType().Name})",
+        },
+        Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
+
+    private static StairRecord StairOf(Document doc, Stairs s, List<string> diagnostics)
+    {
+        var type = doc.GetElement(s.GetTypeId());
+        var mark = s.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+        var name = string.Join(" ", new[] { type?.Name, mark }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        var byComponent = Stairs.IsByComponent(doc, s.Id);
+        var record = new StairRecord
+        {
+            UniqueId = s.UniqueId,
+            Name = name.Length > 0 ? name : null,
+            IsByComponent = byComponent,
+            MultistoryStairsId = Id(s.MultistoryStairsId),
+            PhaseCreated = Id(s.CreatedPhaseId),
+            PhaseDemolished = Id(s.DemolishedPhaseId),
+            DesignOption = Id(s.DesignOption?.Id),
+        };
+        if (!byComponent)
+            return record;
+        string[] Uids(IEnumerable<ElementId> ids) => ids.Select(id => doc.GetElement(id)?.UniqueId).OfType<string>().ToArray();
+        var (ownFaces, _) = Faces(s, Fine);
+        diagnostics.Add($"stair {s.Id.Value} \"{name}\": base {s.BaseElevation:0.######}, top {s.TopElevation:0.######}, " +
+                        $"riser {s.ActualRiserHeight * 12:0.######} in, tread {s.ActualTreadDepth * 12:0.######} in, " +
+                        $"risers {s.ActualRisersNumber}, the stair element's own geometry {ownFaces?.Count ?? -1} faces");
+        return record with
+        {
+            BaseElevation = s.BaseElevation,
+            ActualRiserHeight = s.ActualRiserHeight,
+            ActualTreadDepth = s.ActualTreadDepth,
+            Runs = s.GetStairsRuns().Select(id => doc.GetElement(id)).OfType<StairsRun>().Select(r => RunOf(doc, s, r)).ToList(),
+            Landings = Uids(s.GetStairsLandings()),
+            Supports = Uids(s.GetStairsSupports()),
+            Railings = Uids(s.GetAssociatedRailings()),
+        };
+    }
+
+    /// <summary>A run: its own faces, path and numbers, and everything around it (its box widened 2 ft in plan, from 2
+    /// ft under it up), each with its faces, box, phase and option, logged enough that a failing run explains itself.</summary>
+    private static RunRecord RunOf(Document doc, Stairs stairs, StairsRun run)
+    {
+        var words = new List<string>();
+        var path = new List<Xyz>();
+        try
+        {
+            var curves = run.GetStairsPath().ToList();
+            if (curves.Count > 0)
+            {
+                path.Add(P(curves[0].GetEndPoint(0)));
+                path.AddRange(curves.Select(c => P(c.GetEndPoint(1))));
+            }
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException x)
+        {
+            words.Add($"no path: {x.Message}");
+        }
+        var (faces, failed) = Faces(run, Fine);
+        var box = run.get_BoundingBox(null);
+        List<NearbyElement>? near = null;
+        if (box is not null)
+            near = Near(doc, run.Id, new Outline(new XYZ(box.Min.X - 2, box.Min.Y - 2, box.Min.Z - 2),
+                                                  new XYZ(box.Max.X + 2, box.Max.Y + 2, box.Max.Z + 1000)), null);
+        var up = faces?.Count(f => f.Planar && f.Normal.Z > 1 - 1e-6) ?? -1;
+        words.Add($"run {run.Id.Value} {run.StairsRunStyle}: base {run.BaseElevation:0.######}, top {run.TopElevation:0.######} (relative), " +
+                  $"risers {run.ActualRisersNumber}, treads {run.ActualTreadsNumber}, begins/ends with riser {run.BeginsWithRiser}/{run.EndsWithRiser}, " +
+                  $"width {run.ActualRunWidth * 12:0.######} in; path {string.Join(" ", path.Select(p => $"({p.X:0.####},{p.Y:0.####},{p.Z:0.####})"))}");
+        words.Add($"its geometry: {faces?.Count ?? -1} faces ({up} facing up, {faces?.Count(f => !f.Planar) ?? -1} curved), failed {failed}; " +
+                  $"box {box?.Min.X:0.###},{box?.Min.Y:0.###},{box?.Min.Z:0.###} to {box?.Max.X:0.###},{box?.Max.Y:0.###},{box?.Max.Z:0.###}");
+        words.Add("tread tops (z, internal): " + string.Join(" ", (faces ?? []).Where(f => f.Planar && f.Normal.Z > 1 - 1e-6)
+            .Select(f => f.Points.Count == 0 ? "?" : $"{f.Points.Average(p => p.Z):0.######}").Distinct()));
+        words.Add($"around it: {near?.Count.ToString(CultureInfo.InvariantCulture) ?? "not looked for"} elements: " +
+                  string.Join(", ", (near ?? []).Select(e => $"{e.BuiltInCategory.Replace("OST_", "")} {e.Name} ({e.Faces?.Count ?? -1} faces)")));
+        return new RunRecord
+        {
+            UniqueId = run.UniqueId,
+            Style = run.StairsRunStyle.ToString(),
+            BaseElevation = run.BaseElevation,
+            TopElevation = run.TopElevation,
+            RisersNumber = run.ActualRisersNumber,
+            TreadsNumber = run.ActualTreadsNumber,
+            BeginsWithRiser = run.BeginsWithRiser,
+            EndsWithRiser = run.EndsWithRiser,
+            Path = path,
+            Faces = failed ? null : faces,
+            GeometryFailed = failed || faces is null,
+            Near = near,
+            Diagnostics = words,
+        };
+    }
+
+    private static string? Id(ElementId? id) =>
+        id is null || id == ElementId.InvalidElementId ? null : id.Value.ToString(CultureInfo.InvariantCulture);
 
     // ---- enclosed areas and links -------------------------------------------------------------------------------
 
@@ -119,7 +277,8 @@ internal static class RevitInterior
             links.Add(new InteriorLink(li.UniqueId, li.Name, loaded,
                                        box is null ? null : new RevitBox(P(box.Min), P(box.Max), box.Transform is { } bt ? T(bt) : null),
                                        Count(BuiltInCategory.OST_Rooms), Count(BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors),
-                                       linked is not null && new FilteredElementCollector(linked).OfClass(typeof(RevitLinkInstance)).GetElementCount() > 0));
+                                       linked is not null && new FilteredElementCollector(linked).OfClass(typeof(RevitLinkInstance)).GetElementCount() > 0,
+                                       Count(BuiltInCategory.OST_Stairs, BuiltInCategory.OST_StairsRailing, BuiltInCategory.OST_GenericModel)));
         }
         return links;
     }
@@ -166,9 +325,9 @@ internal static class RevitInterior
         return record with
         {
             Inside = Inside(doc, room, loops, floor, level!),
-            Under = Near(doc, room, new Outline(new XYZ(x0, y0, floor - InteriorReader.SlabBand), new XYZ(x1, y1, floor + InteriorReader.SlabBand)),
+            Under = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor - InteriorReader.SlabBand), new XYZ(x1, y1, floor + InteriorReader.SlabBand)),
                          [BuiltInCategory.OST_Floors, BuiltInCategory.OST_StructuralFoundation]),
-            Over = Near(doc, room, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null),
+            Over = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null),
         };
     }
 
@@ -206,7 +365,7 @@ internal static class RevitInterior
 
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
     /// (any for null), with their faces.</summary>
-    private static List<NearbyElement>? Near(Document doc, Room room, Outline box, BuiltInCategory[]? categories)
+    private static List<NearbyElement>? Near(Document doc, ElementId skip, Outline box, BuiltInCategory[]? categories)
     {
         try
         {
@@ -215,13 +374,13 @@ internal static class RevitInterior
             var list = new List<NearbyElement>();
             foreach (var e in found)
             {
-                if (e.Id == room.Id || e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } cat)
+                if (e.Id == skip || e.ViewSpecific || e.Category is not { CategoryType: Autodesk.Revit.DB.CategoryType.Model } cat)
                     continue;
                 if (categories is not null && !categories.Contains(cat.BuiltInCategory))
                     continue;
                 var (faces, failed) = Faces(e, options);
                 list.Add(new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
-                                           faces, failed));
+                                           faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id)));
             }
             return list;
         }
@@ -232,6 +391,9 @@ internal static class RevitInterior
     }
 
     private static string Category(Element e) => e.Category is { } c ? c.BuiltInCategory.ToString() : "";
+
+    private static RevitBox? BoxOf(Element e) =>
+        e.get_BoundingBox(null) is { } b ? new RevitBox(P(b.Min), P(b.Max), b.Transform is { IsIdentity: false } bt ? T(bt) : null) : null;
 
     /// <summary>Every face of the element's solids (a family's instance geometry included), and whether anything in its
     /// geometry couldn't be read as faces (a mesh, or <c>get_Geometry</c> throwing).</summary>
