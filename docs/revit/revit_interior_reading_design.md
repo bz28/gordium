@@ -538,7 +538,7 @@ Each step is its own PR, through the review loop, with its tests:
    window as step 3. House 4's loft is drawn clear of its bedroom (its floor over the bedroom would be the bedroom's
    ceiling, which the hand-worked house doesn't give), and the bedroom's walls stop at the loft's level (walls
    through a level enclose an area on it). House 3 isn't drawn again (its guard is along a stair: not read in this
-   step; its stair measures are all not measured already): it stays step 4. Each door is drawn in an outside wall with
+   step; its stair is measured in step 4 already): it stays step 4. Each door is drawn in an outside wall with
    no window (where it stands doesn't change its measures).
 6. **`has_none` ticks.** **Built, tested on fake records; to record in Revit** (section 4, "What the house has none
    of", as built in step 6). Scope (`recordings.py`, `STEPS[6]`): each list a hand-worked house gives empty is ticked in
