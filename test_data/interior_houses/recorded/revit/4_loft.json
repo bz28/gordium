@@ -1,0 +1,766 @@
+{
+  "host": "revit",
+  "house": "4_loft",
+  "step": 5,
+  "recorded": {
+    "by": "Gordium add-in, Record interior houses (Windows trial)",
+    "date": "2026-11-20",
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
+  },
+  "ids": {
+    "wa": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f3",
+    "main": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f5",
+    "loft": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f7",
+    "ls": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001304",
+    "lg": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001357"
+  },
+  "interior": {
+    "format": "gordium.interior/1",
+    "units": "ft",
+    "rooms": [
+      {
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f5",
+        "name": "Bedroom (1)",
+        "sleeping": true,
+        "floor": [
+          [
+            0,
+            0
+          ],
+          [
+            14,
+            0
+          ],
+          [
+            14,
+            12
+          ],
+          [
+            0,
+            12
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              0,
+              0,
+              16.000000000000004
+            ],
+            [
+              14,
+              0,
+              16.000000000000004
+            ],
+            [
+              14,
+              12,
+              16.000000000000004
+            ],
+            [
+              0,
+              12,
+              16.000000000000004
+            ]
+          ]
+        ]
+      },
+      {
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f7",
+        "name": "Sleeping loft (2)",
+        "sleeping": true,
+        "floor": [
+          [
+            24.5,
+            0
+          ],
+          [
+            34.5,
+            0
+          ],
+          [
+            34.5,
+            8.000000000000002
+          ],
+          [
+            24.5,
+            8.000000000000002
+          ]
+        ],
+        "floor_elevation": 9,
+        "ceilings": [
+          [
+            [
+              24.5,
+              0,
+              16
+            ],
+            [
+              34.5,
+              0,
+              16
+            ],
+            [
+              34.5,
+              8.000000000000002,
+              16
+            ],
+            [
+              24.5,
+              8.000000000000002,
+              16
+            ]
+          ]
+        ]
+      }
+    ],
+    "openings": [
+      {
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f3",
+        "name": "Gordium test window wa (36 x 24 in): Family11 (Window A)",
+        "room": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f5",
+        "escape": true,
+        "operation": "awning"
+      }
+    ],
+    "stairs": [
+      {
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001304",
+        "name": "Gordium test stair ls",
+        "bottom_elevation": 0,
+        "nosings": [
+          [
+            [
+              145,
+              0,
+              0.75
+            ],
+            [
+              145,
+              2.0000000000000004,
+              0.75
+            ]
+          ],
+          [
+            [
+              145.58333333333334,
+              0,
+              1.5
+            ],
+            [
+              145.58333333333334,
+              2.0000000000000004,
+              1.5
+            ]
+          ],
+          [
+            [
+              146.16666666666669,
+              0,
+              2.25
+            ],
+            [
+              146.16666666666669,
+              2.0000000000000004,
+              2.25
+            ]
+          ],
+          [
+            [
+              146.75000000000003,
+              0,
+              3
+            ],
+            [
+              146.75000000000003,
+              2.0000000000000004,
+              3
+            ]
+          ],
+          [
+            [
+              147.33333333333334,
+              0,
+              3.75
+            ],
+            [
+              147.33333333333334,
+              2.0000000000000004,
+              3.75
+            ]
+          ],
+          [
+            [
+              147.91666666666669,
+              0,
+              4.5
+            ],
+            [
+              147.91666666666669,
+              2.0000000000000004,
+              4.5
+            ]
+          ],
+          [
+            [
+              148.50000000000003,
+              0,
+              5.25
+            ],
+            [
+              148.50000000000003,
+              2.0000000000000004,
+              5.25
+            ]
+          ],
+          [
+            [
+              149.08333333333334,
+              0,
+              6
+            ],
+            [
+              149.08333333333334,
+              2.0000000000000004,
+              6
+            ]
+          ],
+          [
+            [
+              149.66666666666669,
+              0,
+              6.75
+            ],
+            [
+              149.66666666666669,
+              2.0000000000000004,
+              6.75
+            ]
+          ],
+          [
+            [
+              150.25000000000003,
+              0,
+              7.5
+            ],
+            [
+              150.25000000000003,
+              2.0000000000000004,
+              7.5
+            ]
+          ],
+          [
+            [
+              150.83333333333334,
+              0,
+              8.25
+            ],
+            [
+              150.83333333333334,
+              2.0000000000000004,
+              8.25
+            ]
+          ],
+          [
+            [
+              151.41666666666666,
+              0,
+              9
+            ],
+            [
+              151.41666666666666,
+              2.0000000000000004,
+              9
+            ]
+          ]
+        ],
+        "sides": {
+          "left": [
+            [
+              144.67191601049868,
+              2.0000000000000004
+            ],
+            [
+              151.88976377952756,
+              2.0000000000000004
+            ]
+          ],
+          "right": [
+            [
+              144.67191601049868,
+              0
+            ],
+            [
+              151.88976377952756,
+              0
+            ]
+          ]
+        },
+        "handrails": [
+          {
+            "side": "right",
+            "inner_edge": [
+              [
+                145,
+                0.25
+              ],
+              [
+                151.41666666666666,
+                0.25
+              ]
+            ]
+          }
+        ],
+        "overhead": [
+          [
+            [
+              145,
+              0,
+              14.000000000000005
+            ],
+            [
+              151.41666666666666,
+              0,
+              17.20833333333335
+            ],
+            [
+              151.41666666666666,
+              2.0000000000000004,
+              17.20833333333335
+            ],
+            [
+              145,
+              2.0000000000000004,
+              14.000000000000005
+            ]
+          ]
+        ]
+      }
+    ],
+    "guards": [
+      {
+        "id": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001357",
+        "name": "Gordium test guard lg",
+        "top": 12,
+        "walking_surface": 9,
+        "extent": {
+          "left": 2.842170943040401E-14,
+          "right": 4
+        },
+        "members": [
+          {
+            "left": 2.842170943040401E-14,
+            "right": 4,
+            "bottom": 9.166666666666666,
+            "top": 9.291666666666666
+          },
+          {
+            "left": 0.2916666666666572,
+            "right": 0.4166666666666572,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 0.7083333333333428,
+            "right": 0.8333333333333428,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 1.125,
+            "right": 1.25,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 1.5416666666666572,
+            "right": 1.6666666666666572,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 1.9583333333333428,
+            "right": 2.083333333333343,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 2.375,
+            "right": 2.5,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 2.791666666666657,
+            "right": 2.916666666666657,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 3.208333333333343,
+            "right": 3.333333333333343,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 3.625,
+            "right": 3.75,
+            "bottom": 9.291666666666666,
+            "top": 11.875
+          },
+          {
+            "left": 2.842170943040401E-14,
+            "right": 4,
+            "bottom": 11.875,
+            "top": 12
+          }
+        ]
+      }
+    ]
+  },
+  "rooms_not_read": [],
+  "openings_not_read": [],
+  "stairs_not_read": [],
+  "doors_not_read": [
+    "No doors are drawn: no exit door is read (never read as a house with none)"
+  ],
+  "guards_not_read": [],
+  "drawing_notes": [
+    "room loft: within the height of main (a loft), so drawn 24.5 ft clear of it: drawn over it, its floor would be the other room\u0027s ceiling there"
+  ],
+  "drawn": [
+    "rail profile Gordium test rail 1.5 in square: family 3756, type 4095 \u0022Family12\u0022, category OST_ProfileFamilies",
+    "baluster Gordium test baluster 1.5 in x 31 in: family 4097, type 4790, category OST_StairsRailingBaluster",
+    "stair type Gordium test stair ls from \u0022Stairs 1\u0022: run type monolithic False, risers True, treads True, tread 3 in thick, nosing 0 in",
+    "stair ls: 2 railings Revit added deleted (the drawing\u0027s own are drawn next)",
+    "railing type Gordium test handrail ls: from \u0022Railing 1\u0022, its own handrails -1 / -1 (positions None / None)",
+    "railing type Gordium test handrail ls: top rail 4885 at 36 in, 0 other rails, balusters none",
+    "stair ls: Revit\u0027s railing 4886 on its right: path (145,0,0)-(151.4167,0,0)",
+    "stair ls: handrail right: drawn inner face -9 in across the run\u0027s path, the house\u0027s -9 in; moves: inner -10.25 in across, wanted -9 | inner -10.25 in across, wanted -9 | inner -10.25 in across, wanted -9; placement offset 2.25 in",
+    "stair ls: Revit\u0027s railing 4890 on its left: path (145,2,0)-(151.4167,2,0)",
+    "stair ls: railing 4886 host 4867, top rail 4896 box 145,0.125,3.5464 to 151.4167,0.25,12, handrails 0",
+    "stair ls: risers 12 (drawing 12), riser 9 in (drawing 9), tread 7 in, base 0, top 9; run risers 12, treads 11, width 24 in, supports 0, railings 1; warnings dismissed: none",
+    "railing type Gordium test guard lg: from \u0022Railing 1\u0022, its own handrails -1 / -1 (positions None / None)",
+    "railing type Gordium test guard lg: top rail 4940 at 36 in, 1 other rails, balusters Family13 from 3.5 in, first at 4.25 in, pattern 5 in",
+    "guard lg: railing 4951 on level Level 2 (9 ft), box 164.4167,-0.0625,9.1667 to 168.4167,0.1667,12; top rail 4957 box 11.875 to 12 (drawing 11.875 to 12), rail 1.5 in",
+    "guard lg: drawn: u 0..48 in, z 2..3.5 in; u 3.5..5 in, z 3.5..34.5 in; u 8.5..10 in, z 3.5..34.5 in; u 13.5..15 in, z 3.5..34.5 in; u 18.5..20 in, z 3.5..34.5 in; u 23.5..25 in, z 3.5..34.5 in; u 28.5..30 in, z 3.5..34.5 in; u 33.5..35 in, z 3.5..34.5 in; u 38.5..40 in, z 3.5..34.5 in; u 43.5..45 in, z 3.5..34.5 in; u 0..48 in, z 34.5..36 in || the house\u0027s: top rail u 0..48, z 34.5..36; rail u 0..48, z 2..3.5; baluster u 3.5..5, z 3.5..34.5; baluster u 8.5..10, z 3.5..34.5; baluster u 13.5..15, z 3.5..34.5; baluster u 18.5..20, z 3.5..34.5; baluster u 23.5..25, z 3.5..34.5; baluster u 28.5..30, z 3.5..34.5; baluster u 33.5..35, z 3.5..34.5; baluster u 38.5..40, z 3.5..34.5; baluster u 43.5..45, z 3.5..34.5"
+  ],
+  "notes": [
+    {
+      "part": "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-000012f3",
+      "field": "stated_clear",
+      "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
+    }
+  ],
+  "evidence": {
+    "stairs": {
+      "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001304": {
+        "revit_layer": [
+          "run 4868 Straight: base 0, top 9 (relative), risers 12, treads 11, begins/ends with riser True/True, width 24 in; path (145,1,0) (151.4167,1,0)",
+          "its geometry: 138 faces (23 facing up, 0 curved), failed False; box 145,0,0 to 151.458,2,9",
+          "tread tops (z, internal): 0.5 0.75 1.25 1.5 2 2.25 2.75 3 3.5 3.75 4.25 4.5 5 5.25 5.75 6 6.5 6.75 7.25 7.5 8 8.75 8.25",
+          "around it: 10 elements: Floors Floor at the foot of ls (6 faces), Floors Floor at the head of ls (6 faces), Ceilings Overhead 1 of ls (6 faces), Walls Gordium test wall 6 in (6 faces), Walls Gordium test wall 6 in (6 faces), Stairs Stair (138 faces), StairsRailing Gordium test handrail ls (0 faces), RailingTopRail Gordium test handrail ls top rail (6 faces), RailingRailPathExtensionLines Model Lines (0 faces), SketchLines Model Lines (0 faces)"
+        ],
+        "tread_faces": 12,
+        "tread_groups": [
+          {
+            "z": 0.75,
+            "s": [
+              0,
+              0.5833333333333428
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 1.5,
+            "s": [
+              0.5833333333333428,
+              1.1666666666666572
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 2.25,
+            "s": [
+              1.1666666666666856,
+              1.75
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 3,
+            "s": [
+              1.7500000000000284,
+              2.333333333333343
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 3.75,
+            "s": [
+              2.333333333333343,
+              2.916666666666657
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 4.5,
+            "s": [
+              2.9166666666666856,
+              3.5
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 5.25,
+            "s": [
+              3.5000000000000284,
+              4.083333333333343
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 6,
+            "s": [
+              4.083333333333343,
+              4.666666666666657
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 6.75,
+            "s": [
+              4.666666666666686,
+              5.25
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 7.5,
+            "s": [
+              5.250000000000028,
+              5.833333333333343
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 8.25,
+            "s": [
+              5.833333333333343,
+              6.416666666666657
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          },
+          {
+            "z": 8.75,
+            "s": [
+              6.416666666666657,
+              6.458333333333314
+            ],
+            "a": [
+              -1.0000000000000002,
+              1.0000000000000002
+            ],
+            "faces": 1
+          }
+        ],
+        "head_riser_top": {
+          "z": 8.75,
+          "front": 6.416666666666657
+        },
+        "run_base": 0,
+        "run_top": 9,
+        "typed_riser": 0.75,
+        "typed_tread": 0.5833333333333334,
+        "treads": [
+          [
+            0,
+            -1.0000000000000002,
+            1.0000000000000002,
+            0.75
+          ],
+          [
+            0.5833333333333428,
+            -1.0000000000000002,
+            1.0000000000000002,
+            1.5
+          ],
+          [
+            1.1666666666666856,
+            -1.0000000000000002,
+            1.0000000000000002,
+            2.25
+          ],
+          [
+            1.7500000000000284,
+            -1.0000000000000002,
+            1.0000000000000002,
+            3
+          ],
+          [
+            2.333333333333343,
+            -1.0000000000000002,
+            1.0000000000000002,
+            3.75
+          ],
+          [
+            2.9166666666666856,
+            -1.0000000000000002,
+            1.0000000000000002,
+            4.5
+          ],
+          [
+            3.5000000000000284,
+            -1.0000000000000002,
+            1.0000000000000002,
+            5.25
+          ],
+          [
+            4.083333333333343,
+            -1.0000000000000002,
+            1.0000000000000002,
+            6
+          ],
+          [
+            4.666666666666686,
+            -1.0000000000000002,
+            1.0000000000000002,
+            6.75
+          ],
+          [
+            5.250000000000028,
+            -1.0000000000000002,
+            1.0000000000000002,
+            7.5
+          ],
+          [
+            5.833333333333343,
+            -1.0000000000000002,
+            1.0000000000000002,
+            8.25
+          ]
+        ],
+        "back": 6.416666666666657,
+        "foot": 0,
+        "head": 9,
+        "drawn_risers_in": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
+        "drawn_treads_in": [
+          7.000000000000114,
+          7.000000000000114,
+          7.000000000000114,
+          6.999999999999773,
+          7.000000000000114,
+          7.000000000000114,
+          6.999999999999773,
+          7.000000000000114,
+          7.000000000000114,
+          6.999999999999773,
+          6.999999999999773
+        ],
+        "handrails_beside_walls": [
+          "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001316 (right)"
+        ],
+        "railings_refused": []
+      }
+    },
+    "guards": {
+      "b1e5a4d3-2411-45ca-870c-0a7c77c977d8-00001357": {
+        "revit_layer": [
+          "railing 4951 \u0022Gordium test guard lg\u0022: host  , base level Level 2 9, base offset 0; path (164.4167,0,9)-(168.4167,0,9); around it 5: Floors Floor at the guard lg, Walls Gordium test wall 4 in, Walls Gordium test wall 4 in, SketchLines Model Lines, RailingRailPathExtensionLines Model Lines",
+          "Railing 4951 OST_StairsRailing: 10 solids (6,6,6,6,6,6,6,6,6,6 faces, 0 curved), failed False; x 164.4167..168.4167, y -0.0625..0.0625, z 9.1667..11.875",
+          "  solid: x 164.41667..168.41667, y -0.0625..0.0625, z 9.16667..9.29167, 6 faces",
+          "  solid: x 164.70833..164.83333, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 165.125..165.25, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 165.54167..165.66667, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 165.95833..166.08333, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 166.375..166.5, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 166.79167..166.91667, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 167.20833..167.33333, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 167.625..167.75, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "  solid: x 168.04167..168.16667, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
+          "TopRail 4957 OST_RailingTopRail: 1 solids (6 faces, 0 curved), failed False; x 164.4167..168.4167, y -0.0625..0.0625, z 11.875..12",
+          "  solid: x 164.41667..168.41667, y -0.0625..0.0625, z 11.875..12, 6 faces"
+        ],
+        "length": 4,
+        "members": 11,
+        "depth": [
+          -0.0625,
+          0.0625
+        ],
+        "base": 9,
+        "floor_tops": [
+          "9 Floors \u0022Floor at the guard lg\u0022"
+        ],
+        "ends": [
+          "Walls \u0022Gordium test wall 4 in\u0022",
+          "Walls \u0022Gordium test wall 4 in\u0022"
+        ]
+      }
+    }
+  },
+  "revit_layer": [
+    "stair 4867 \u0022Gordium test stair ls\u0022: base 0, top 9, riser 9 in, tread 7 in, risers 12, the stair element\u0027s own geometry 138 faces",
+    "stairs: 1 component stairs (1 runs), 0 other elements that could be one",
+    "railings: 2",
+    "enclosed areas on Level 1: 1 (0 with no Room)",
+    "enclosed areas on Level 2: 1 (0 with no Room)"
+  ]
+}

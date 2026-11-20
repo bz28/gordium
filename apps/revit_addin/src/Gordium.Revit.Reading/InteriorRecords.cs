@@ -33,6 +33,11 @@ public sealed record InteriorRecords
     /// family, a DirectShape), and every <c>MultistoryStairs</c>. While any is in the design checked, no stair is read.</summary>
     public IReadOnlyList<StairCandidate> StairCandidates { get; init; } = [];
 
+    /// <summary>Every <c>Railing</c> (step 5: <c>OfCategory(OST_StairsRailing)</c>, the <c>Railing</c> class), with its
+    /// parts and what is around it: a stair's handrails and the guards are read from them. Null when the Revit layer
+    /// didn't read them: then no guard and no handrail is read.</summary>
+    public IReadOnlyList<RailingRecord>? Railings { get; init; }
+
     /// <summary>How many coordination models are linked (<c>CoordinationModelLinkUtils.GetAllCoordinationModelInstanceIds</c>):
     /// what is in one isn't read, and a stair could be in it.</summary>
     public int CoordinationModels { get; init; }
@@ -214,6 +219,58 @@ public sealed record RunRecord
     /// <summary>What the Revit layer looked at (the faces found, the run's numbers), for the trial's log only.</summary>
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
 }
+
+/// <summary>A railing (<c>Railing</c>, step 5): its path, its base, what hosts it, and each of its parts (the railing's
+/// own geometry: balusters, posts and the rails that aren't continuous; its top rail; its handrails).</summary>
+public sealed record RailingRecord
+{
+    /// <summary><c>Element.UniqueId</c>.</summary>
+    public required string UniqueId { get; init; }
+
+    /// <summary>Its type's name and Mark, for the words.</summary>
+    public string? Name { get; init; }
+
+    /// <summary>Its host (<c>Railing.HostId</c> when <c>HasHost</c>), by <c>UniqueId</c>, or null.</summary>
+    public string? Host { get; init; }
+
+    public string? PhaseDemolished { get; init; }
+    public string? DesignOption { get; init; }
+
+    /// <summary>Its path (<c>Railing.GetPath()</c>), each curve's ends and whether it is a <c>Line</c>, internal.</summary>
+    public IReadOnlyList<PathCurve> Path { get; init; } = [];
+
+    /// <summary>Its base level's elevation (<c>STAIRS_RAILING_BASE_LEVEL_PARAM</c>'s <c>Level.ProjectElevation</c>) and its
+    /// base offset (<c>STAIRS_RAILING_HEIGHT_OFFSET</c>), or null.</summary>
+    public double? BaseLevelElevation { get; init; }
+
+    /// <inheritdoc cref="BaseLevelElevation"/>
+    public double? BaseOffset { get; init; }
+
+    /// <summary>Gordium's marks on its type (<c>Gordium: Top rail is handrail</c>), by GUID.</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> TypeMarks { get; init; } = new Dictionary<Guid, MarkValue>();
+
+    /// <summary>Its parts: the railing itself, its top rail (<c>Railing.TopRail</c>) and its handrails
+    /// (<c>GetHandRails</c>).</summary>
+    public IReadOnlyList<RailingPart> Parts { get; init; } = [];
+
+    /// <summary>Every model element whose box meets the railing's box widened 2 ft (with its faces, box, phase and
+    /// option): the floor it stands on and what it ends against. Null when it couldn't be looked for.</summary>
+    public IReadOnlyList<NearbyElement>? Near { get; init; }
+
+    /// <summary>What the Revit layer looked at, for the trial's log only.</summary>
+    public IReadOnlyList<string> Diagnostics { get; init; } = [];
+}
+
+/// <summary>A curve of a railing's path.</summary>
+public sealed record PathCurve(Xyz Start, Xyz End, bool IsLine);
+
+/// <summary>What a part of a railing is.</summary>
+public enum RailingPartKind { Railing, TopRail, Handrail }
+
+/// <summary>One part of a railing, by <c>UniqueId</c>, with each of its solids' faces (a baluster, a rail: one solid
+/// each), or null with <paramref name="GeometryFailed"/> when they couldn't be read (a mesh, Revit refused).</summary>
+public sealed record RailingPart(string UniqueId, RailingPartKind Kind, IReadOnlyList<IReadOnlyList<SurfaceRecord>>? Solids,
+                                 bool GeometryFailed = false);
 
 /// <summary>A face of a solid (<c>Face</c>), or a mesh read as one.</summary>
 /// <param name="Planar">A <c>PlanarFace</c> (anything else, a curved face or a mesh, is not read exactly).</param>

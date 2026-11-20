@@ -20,12 +20,20 @@ namespace Gordium.Revit.Reading;
 /// with the run's own. A run that isn't straight sends neither.</item>
 /// <item><c>sides</c>: on each side, the band from the middle of the flight to 6 in past its tread ends, from 1 in
 /// under the line of nosings to 80 in over it, searched for anything: the innermost wall face there running the whole
-/// band is the side line; nothing at all is <c>open</c>; anything else (a railing, a column, the stair's own support
-/// rising into it) leaves <c>sides</c> out. Railings are read with the guards (step 5), so this step sends no
-/// <c>handrails</c>.</item>
+/// band is the side line; nothing at all is <c>open</c>; anything else (a column, the stair's own support rising into
+/// it, a railing not read as below) leaves <c>sides</c> out. A vertical face is judged exactly up the run (a roof's
+/// side rising more slowly than the stair is in the band only where it is).</item>
+/// <item><c>handrails</c> (step 5): a railing on this stair beside a wall, read exactly (flat faces, straight edges),
+/// every point between the wall face and the flight's middle and none more than 38 in over the nosings, is a handrail,
+/// not a side: its handrails (and its top rail where its type is marked <c>Gordium: Top rail is handrail</c> Yes; unset
+/// with a top rail: none sent) each give their edge nearest the middle, as far as they run. Sent only on the tick
+/// <c>Gordium: These are all the guards and handrails</c> and with both sides read; none found is then an empty list.
+/// Any other railing beside the flight (on an open side: a guard along a stair; not the stair's; round; higher) leaves
+/// <c>sides</c> and <c>handrails</c> out, and the guards with them.</item>
 /// <item><c>overhead</c>: the downward flat faces of everything over the flight, clipped to its plan (a floor's
 /// stairwell opening taken out exactly), each above the line of nosings; anything there it can't read exactly, a
-/// railing reaching over it, or something crossing the flight leaves <c>overhead</c> out.</item>
+/// railing reaching over it that isn't the stair's own no higher than 38 in over the nosings, or something crossing
+/// the flight leaves <c>overhead</c> out.</item>
 /// <item>A loaded link reaching the flight's plan leaves its bottom, nosings, sides and overhead out.</item>
 /// </list>
 /// </summary>
@@ -50,7 +58,20 @@ public static class StairReader
     /// <summary>The lowest a handrail may be (34 in): a stair's own support under it can't narrow the width above it.</summary>
     public const double HandrailLow = 34.0 / 12;
 
-    /// <summary>A railing and its parts (read with the guards, step 5).</summary>
+    /// <summary>The highest a handrail may be (38 in, R318.7.8.1): a railing of the stair's beside a wall wholly at or
+    /// under it is a handrail, inside the width at the handrail, never narrowing the width above it (step 5).</summary>
+    public const double HandrailHigh = 38.0 / 12;
+
+    /// <summary>What the flights made of the railings beside them (step 5): those read as a handrail beside a wall on
+    /// every flight they stand by, and those refused (on an open side, not the stair's, not read exactly). The guards
+    /// are read only when every railing on a stair is one of the first (<see cref="GuardReader"/>).</summary>
+    public sealed class RailingUse
+    {
+        public HashSet<string> BesideWall { get; } = new(StringComparer.Ordinal);
+        public HashSet<string> Refused { get; } = new(StringComparer.Ordinal);
+    }
+
+    /// <summary>A railing and its parts.</summary>
     public static readonly IReadOnlySet<string> Railings = new HashSet<string>(StringComparer.Ordinal)
     {
         "OST_StairsRailing", "OST_RailingTopRail", "OST_RailingHandRail", "OST_RailingSupport", "OST_RailingTermination",
@@ -111,9 +132,10 @@ public static class StairReader
     }
 
     /// <summary>Every flight of every stair in the design checked (the list is the caller's to send or not).</summary>
-    public static JsonArray Flights(RevitModel model, List<InteriorNote> notes, JsonObject evidence)
+    public static JsonArray Flights(RevitModel model, List<InteriorNote> notes, JsonObject evidence, RailingUse? use = null)
     {
         var flights = new JsonArray();
+        use ??= new RailingUse();
         foreach (var stair in model.Interior?.Stairs ?? [])
         {
             if (!SiteReader.InDesignChecked(model, stair.PhaseDemolished, stair.DesignOption))
@@ -121,20 +143,62 @@ public static class StairReader
             for (var k = 0; k < stair.Runs.Count; k++)
             {
                 var name = stair.Runs.Count == 1 ? stair.Name ?? "Stair" : $"{stair.Name ?? "Stair"} (run {k + 1} of {stair.Runs.Count})";
-                flights.Add(new Flight(model, stair, stair.Runs[k], name, notes, evidence).Read());
+                flights.Add(new Flight(model, stair, stair.Runs[k], name, notes, evidence, use).Read());
             }
         }
+        use.BesideWall.ExceptWith(use.Refused);                     // beside a wall on one flight, refused on another
         return flights;
+    }
+
+    /// <summary>The railing a part belongs to (the railing's own id, or its top rail's or a handrail's), by id.</summary>
+    internal static Dictionary<string, RailingRecord> RailingsByPart(RevitModel model)
+    {
+        var by = new Dictionary<string, RailingRecord>(StringComparer.Ordinal);
+        foreach (var r in model.Interior?.Railings ?? [])
+        {
+            by.TryAdd(r.UniqueId, r);
+            foreach (var p in r.Parts)
+                by.TryAdd(p.UniqueId, r);
+        }
+        return by;
+    }
+
+    /// <summary>Whether a railing stands on this stair (it lists it, or hosts it).</summary>
+    internal static bool OnStair(StairRecord stair, RailingRecord r) => stair.Railings.Contains(r.UniqueId) || r.Host == stair.UniqueId;
+
+    /// <summary>Every point of every part of the railing, internal; null when a part can't be read exactly (its
+    /// geometry refused or a mesh, a curved face, a curved edge: a round handrail's extremes aren't its corners).</summary>
+    internal static List<Xyz>? ExactPoints(RailingRecord r)
+    {
+        var pts = new List<Xyz>();
+        foreach (var p in r.Parts)
+        {
+            if (p.GeometryFailed || p.Solids is null)
+                return null;
+            foreach (var f in p.Solids.SelectMany(s => s))
+            {
+                if (!f.Planar || f.Loops.Any(l => l.Any(c => !c.IsLine)))
+                    return null;
+                pts.AddRange(f.Points);
+            }
+        }
+        return pts;
     }
 
     // ---- one flight --------------------------------------------------------------------------------------------
 
     private sealed class Flight(RevitModel model, StairRecord stair, RunRecord run, string name, List<InteriorNote> notes,
-                                JsonObject evidence)
+                                JsonObject evidence, RailingUse use)
     {
         private readonly Transform3 _t = model.InternalToShared;
         private readonly JsonObject _flight = new() { ["id"] = run.UniqueId, ["name"] = name };
         private readonly JsonObject _ev = new();
+        private readonly Dictionary<string, RailingRecord> _railingOf = RailingsByPart(model);
+
+        // the railings of this stair read as a handrail beside a wall on one side of this flight (railing id → side),
+        // and those that aren't (each beside it, refused)
+        private readonly Dictionary<string, string> _accepted = new(StringComparer.Ordinal);
+        private readonly HashSet<string> _refused = new(StringComparer.Ordinal);
 
         // the flight's frame, in shared coordinates: s up the run, a across it to the left looking up
         private P2 _o;
@@ -202,7 +266,7 @@ public static class StairReader
         {
             evidence[run.UniqueId] = _ev;
             _ev["revit_layer"] = new JsonArray(run.Diagnostics.Select(d => (JsonNode?)d).ToArray());
-            string[] all = ["bottom_elevation", "nosings", "sides", "overhead"];
+            string[] all = ["bottom_elevation", "nosings", "sides", "handrails", "overhead"];
             if (run.Faces is null || run.GeometryFailed)
             {
                 OutAll("the run's geometry couldn't be read exactly (a mesh, or Revit refused)", all);
@@ -300,16 +364,136 @@ public static class StairReader
                 _flight["nosings"] = nosings;
             }
 
-            if (Sides(out var sidesWhy) is { } sides)
+            var sides = Sides(out var sidesWhy);
+            if (sides is not null)
+            {
                 _flight["sides"] = sides;
+                use.BesideWall.UnionWith(_accepted.Keys);
+            }
             else
                 Out("sides", sidesWhy!);
-            Out("handrails", "railings (and their handrails) are read with the guards, a later step");
+            use.Refused.UnionWith(_refused);
+            if (sides is null)
+                use.Refused.UnionWith(_accepted.Keys);              // not read beside a wall after all: never a handrail only
+            if (Handrails(sides is not null, out var railsWhy) is { } rails)
+                _flight["handrails"] = rails;
+            else
+                Out("handrails", railsWhy!);
             if (Overhead(out var overWhy) is { } over)
                 _flight["overhead"] = over;
             else
                 Out("overhead", overWhy!);
+            _ev["handrails_beside_walls"] = new JsonArray(_accepted.Select(p => (JsonNode)$"{p.Key} ({p.Value})").ToArray());
+            _ev["railings_refused"] = new JsonArray(_refused.Select(x => (JsonNode)x).ToArray());
             return _flight;
+        }
+
+        // ---- the railings beside it (step 5) ------------------------------------------------------------------
+
+        /// <summary>Whether a railing element in a side's band is this stair's handrail beside the wall there: a railing
+        /// on this stair, every part read exactly, every point between the wall face (1/16 in to spare) and the flight's
+        /// middle, and none higher over the line of nosings than a handrail may be (38 in). Then it is inside the width
+        /// at the handrail and never narrows the width above it. Remembered per railing; a railing not so is refused.</summary>
+        private bool HandrailBeside(NearbyElement e, string side, int sign, double wallA, double mid)
+        {
+            if (!_railingOf.TryGetValue(e.UniqueId, out var r))
+                return false;
+            if (_accepted.TryGetValue(r.UniqueId, out var was))
+                return was == side;
+            if (_refused.Contains(r.UniqueId))
+                return false;
+            var ok = OnStair(stair, r) && ExactPoints(r) is { } pts && pts.Count > 0 && pts.Select(_t.Apply).All(p =>
+            {
+                var q = Local(new P2(p.X, p.Y));
+                return sign * (q.Y - wallA) <= Sixteenth && sign * (q.Y - mid) >= 0
+                       && p.Z <= Line(Math.Clamp(q.X, _treads[0].S, _back)) + HandrailHigh + Sixteenth;
+            });
+            // and nothing of it that isn't sent as a handrail (a top rail marked No or unset, a newel post, a baluster)
+            // stands farther toward the middle than the innermost handrail edge sent: the width at the handrail is
+            // read from those edges alone (review round 1: a top rail marked No read the width at the handrail 36 in,
+            // drawn 32.5). With nothing sent as a handrail, the railing narrows a width nothing says: refused
+            if (ok)
+            {
+                var top = Marks.YesNo(r.TypeMarks.TryGetValue(Marks.TopRailIsHandrail.Guid, out var v) ? v : null);
+                bool Sent(RailingPart p) => p.Kind == RailingPartKind.Handrail || (p.Kind == RailingPartKind.TopRail && top is true);
+                List<double> As(IEnumerable<RailingPart> parts) => parts.SelectMany(p => p.Solids!.SelectMany(s => s)).SelectMany(f => f.Points)
+                    .Select(_t.Apply).Select(p => Local(new P2(p.X, p.Y)).Y).ToList();
+                var sent = As(r.Parts.Where(Sent));
+                var rest = As(r.Parts.Where(p => !Sent(p)));
+                if (sent.Count == 0)
+                    ok = false;
+                else
+                {
+                    var inner = sign > 0 ? sent.Min() : sent.Max();
+                    ok = rest.All(a => sign * (a - inner) >= -1e-9);
+                }
+            }
+            if (ok)
+                _accepted[r.UniqueId] = side;
+            else
+                _refused.Add(r.UniqueId);
+            return ok;
+        }
+
+        /// <summary>A railing on this stair read exactly whose every point is at or under handrail height (38 in) over the
+        /// line of nosings: whatever side it stands on, it is no part of the headroom.</summary>
+        private bool LowRailing(RailingRecord r) =>
+            OnStair(stair, r) && ExactPoints(r) is { Count: > 0 } pts && pts.Select(_t.Apply).All(p =>
+                p.Z <= Line(Math.Clamp(Local(new P2(p.X, p.Y)).X, _treads[0].S, _back)) + HandrailHigh + Sixteenth);
+
+        private void RefuseRailing(NearbyElement e)
+        {
+            if (_railingOf.TryGetValue(e.UniqueId, out var r))
+                _refused.Add(r.UniqueId);
+        }
+
+        /// <summary>The flight's handrails: the handrails (and, where the railing's type is marked so, the top rail) of
+        /// each railing read as a handrail beside a wall, each as the plan line of its edge nearest the flight's middle,
+        /// from its first point along the run to its last. Sent only on the architect's tick that every guard and
+        /// handrail is drawn as a railing, and with the flight's sides read; with none, an empty list. Null with why.</summary>
+        private JsonArray? Handrails(bool sidesRead, out string? why)
+        {
+            why = null;
+            if (MarkReading.AllGuards(model) is not true)
+            {
+                why = $"{Marks.AllGuards.Name} is {(MarkReading.AllGuards(model) is false ? "No" : "not set")} on Project " +
+                      "Information: until it says Yes, a handrail drawn as something else (a wall sweep) would be missed";
+                return null;
+            }
+            if (model.Interior!.Railings is null)
+            {
+                why = "the railings couldn't be read";
+                return null;
+            }
+            if (!sidesRead)
+            {
+                why = "its sides weren't read, so the railings beside it aren't read as its handrails";
+                return null;
+            }
+            var rails = new JsonArray();
+            foreach (var (uid, side) in _accepted.OrderBy(p => p.Key, StringComparer.Ordinal))
+            {
+                var r = _railingOf[uid];
+                var top = Marks.YesNo(r.TypeMarks.TryGetValue(Marks.TopRailIsHandrail.Guid, out var v) ? v : null);
+                if (top is null && r.Parts.Any(p => p.Kind == RailingPartKind.TopRail && p.Solids is { Count: > 0 }))
+                {
+                    why = $"{Marks.TopRailIsHandrail.Name} isn't set on the type of railing \"{r.Name ?? r.UniqueId}\": whether its top rail is a handrail isn't stated";
+                    return null;
+                }
+                foreach (var p in r.Parts.Where(p => p.Kind == RailingPartKind.Handrail || (p.Kind == RailingPartKind.TopRail && top is true)))
+                {
+                    var pts = p.Solids!.SelectMany(s => s).SelectMany(f => f.Points).Select(_t.Apply).Select(q => Local(new P2(q.X, q.Y))).ToList();
+                    if (pts.Count == 0)
+                        continue;
+                    var inner = side == "left" ? pts.Min(q => q.Y) : pts.Max(q => q.Y);
+                    rails.Add(new JsonObject
+                    {
+                        ["side"] = side,
+                        ["inner_edge"] = new JsonArray(XY(pts.Min(q => q.X), inner), XY(pts.Max(q => q.X), inner)),
+                    });
+                }
+            }
+            return rails;
         }
 
         private JsonArray Point3(double s, double a, double z)
@@ -608,6 +792,18 @@ public static class StairReader
                     var over = PlanGeometry.Overlap(tread, loops[0]);
                     foreach (var hole in loops.Skip(1))
                         over = over is null ? null : PlanGeometry.Subtract(over, hole);
+                    // a sloped face (a handrail rising up the stair) is at the head's height over the tread only where
+                    // its plane is: judged at the corners of its part over the tread, where its height is least and most
+                    if (over is not null && over.Sum(PlanGeometry.Area) > area * 1e-9)
+                    {
+                        var n = TurnedNormal(f.Normal);
+                        var p0 = pts[0];
+                        var n2 = Local(new P2(_o.X + n.X, _o.Y + n.Y));
+                        var q0 = Local(new P2(p0.X, p0.Y));
+                        var zs = over.SelectMany(piece => piece).Select(q => p0.Z - (n2.X * (q.X - q0.X) + n2.Y * (q.Y - q0.Y)) / n.Z).ToList();
+                        if (zs.All(z => z > headZ + Sixteenth) || zs.All(z => z < headZ - Sixteenth))
+                            continue;
+                    }
                     if (over is null || over.Sum(PlanGeometry.Area) > area * 1e-9)
                         return $"the floor at its head ({Named(e)}) reaches back over the last tread, short of the last riser's line, " +
                                "so the last tread is shallower than drawn by the riser: its nosing there isn't read yet";
@@ -690,8 +886,10 @@ public static class StairReader
                         why = $"the {side} wall face beside it ({Named(w.E)}) {gap}";
                         return null;
                     }
+                    // this stair's railing beside the wall, at or under handrail height: its handrail, not its side
                     var others = inBand.Where(x => x.E.UniqueId != w.E.UniqueId
                                                    && !(side == "left" ? x.H.A0 >= w.A - Sixteenth : x.H.A1 <= w.A + Sixteenth)
+                                                   && !(Railings.Contains(x.E.BuiltInCategory) && HandrailBeside(x.E, side, sign, w.A, mid))
                                                    && InTheWay(x.E, sign, mid, w.A, s0, s1)).ToList();
                     if (others.Count > 0)
                     {
@@ -702,7 +900,11 @@ public static class StairReader
                 }
                 else if (inBand.FirstOrDefault(x => InTheWay(x.E, sign, mid, aOut, s0, s1)) is { E: not null } first)
                 {
-                    why = BesideWords(first.E, side);
+                    foreach (var x in inBand.Where(x => Railings.Contains(x.E.BuiltInCategory)))
+                        RefuseRailing(x.E);                         // on a side with no wall: a guard along a stair
+                    why = Railings.Contains(first.E.BuiltInCategory)
+                        ? $"a railing ({Named(first.E)}) stands on its {side} side, where there is no wall: a guard along a stair isn't read yet"
+                        : BesideWords(first.E, side);
                     return null;
                 }
                 else
@@ -745,7 +947,9 @@ public static class StairReader
                     var plan = pts.Select(p => Local(new P2(p.X, p.Y))).ToList();
                     var p0 = plan.MinBy(p => p.X * 1e6 + p.Y)!;
                     var far = plan.MaxBy(p => (p.X - p0.X) * (p.X - p0.X) + (p.Y - p0.Y) * (p.Y - p0.Y))!;
-                    if (Clip(p0, far, s0, s1, a0, a1) is { } seg && ZIn(pts.Min(p => p.Z), pts.Max(p => p.Z), seg.Sa, seg.Sb))
+                    if (Clip(p0, far, s0, s1, a0, a1) is not { } seg)
+                        continue;
+                    if (SideFaceInBand(f, seg.Sa, seg.Sb, breaks))
                         return true;
                     continue;
                 }
@@ -777,6 +981,33 @@ public static class StairReader
             return false;
         }
 
+        /// <summary>Whether a vertical flat face, over the part of it in a side's band between <paramref name="sa"/> and
+        /// <paramref name="sb"/> along the run, reaches between 1 in under the line of nosings and 80 in over it: exact,
+        /// the face drawn up the run (s, z) against the band drawn the same way (a sloped roof's side rising more slowly
+        /// than the stair is over the band at its foot only where it really is). A face square across the run is
+        /// judged at its one place along it.</summary>
+        private bool SideFaceInBand(SurfaceRecord f, double sa, double sb, List<double> breaks)
+        {
+            List<P2> Up(IEnumerable<Xyz> pts) => pts.Select(_t.Apply).Select(p => new P2(S(new P2(p.X, p.Y)), p.Z)).ToList();
+            var sz = f.Loops.Count == 0 ? Up(f.Points)
+                : f.Loops.Select(l => Up(l.Select(c => c.Start))).OrderByDescending(PlanGeometry.Area).First();
+            if (sz.Count == 0)
+                return false;
+            if (sz.Max(p => p.X) - sz.Min(p => p.X) < 1e-9)
+            {
+                var s = sz[0].X;
+                return sz.Max(p => p.Y) >= Line(s) - Inch && sz.Min(p => p.Y) <= Line(s) + SideHeight;
+            }
+            if (sb - sa < 1e-9)
+                return false;
+            var cuts = breaks.Where(s => s > sa && s < sb).Prepend(sa).Append(sb).ToList();
+            var band = cuts.Select(s => new P2(s, Line(s) - Inch)).Concat(Enumerable.Reverse(cuts).Select(s => new P2(s, Line(s) + SideHeight))).ToList();
+            // the face's outline up the run, or (not a simple outline) its box there: only ever bigger
+            var face = PlanGeometry.Clean(sz) is { } clean && PlanGeometry.IsSimple(clean) ? clean
+                : [new(sz.Min(p => p.X), sz.Min(p => p.Y)), new(sz.Max(p => p.X), sz.Min(p => p.Y)), new(sz.Max(p => p.X), sz.Max(p => p.Y)), new(sz.Min(p => p.X), sz.Max(p => p.Y))];
+            return PlanGeometry.OverlapArea(band, face) is not { } a || a > 1e-12;
+        }
+
         /// <summary>A plan segment clipped to the box s0..s1, a0..a1 (Liang–Barsky): the s range of what is inside, or
         /// null when nothing is.</summary>
         private static (double Sa, double Sb)? Clip(P2 p, P2 q, double s0, double s1, double a0, double a1)
@@ -801,16 +1032,27 @@ public static class StairReader
             return (p.X + t0 * dx, p.X + t1 * dx);
         }
 
-        private static string BesideWords(NearbyElement e, string side) =>
-            Railings.Contains(e.BuiltInCategory)
-                ? $"a railing ({Named(e)}) stands on its {side} side: railings are read with the guards, a later step"
-                : $"{Named(e)} stands on its {side} side, within the clear width or above it, and isn't read as a side";
+        private string BesideWords(NearbyElement e, string side)
+        {
+            if (!Railings.Contains(e.BuiltInCategory))
+                return $"{Named(e)} stands on its {side} side, within the clear width or above it, and isn't read as a side";
+            RefuseRailing(e);
+            return $"a railing ({Named(e)}) stands on its {side} side and isn't read as its handrail beside the wall (it isn't on " +
+                   "this stair, rises more than 38 in over the nosings, reaches past the middle or the wall face, can't be read exactly, " +
+                   $"or has a part not sent as a handrail, such as a top rail not marked {Marks.TopRailIsHandrail.Name} Yes, a post " +
+                   "or a baluster, standing farther in than its handrail)";
+        }
 
         /// <summary>An element's extent in the frame: from its flat faces' corners when every face is flat (exact: a
         /// box axis-aligned in Revit's own coordinates swells when the flight is turned from them), else from its box
         /// (only ever bigger than what it holds); null when nothing is drawn.</summary>
         private (double S0, double S1, double A0, double A1, double Z0, double Z1)? Extent(NearbyElement e)
         {
+            // only lines and points (a railing's path extension lines, a model line), its geometry read: nothing physical,
+            // never a side, an obstruction or overhead, whatever its box (Revit 2027.4, trial step 5 run 2). Geometry that
+            // failed is still read by its box: the cautious side
+            if (e is { GeometryFailed: false, Faces.Count: 0 })
+                return null;
             var exact = !e.GeometryFailed && e.Faces is { Count: > 0 } fs && fs.All(f => f.Planar && f.Loops.All(l => l.All(c => c.IsLine)));
             if (!exact && e.Box is { } box)
                 return Hull(box);
@@ -885,7 +1127,11 @@ public static class StairReader
                     continue;                                       // nowhere over the flight's plan, or wholly under it
                 if (Railings.Contains(e.BuiltInCategory))
                 {
-                    why = $"a railing ({Named(e)}) reaches over it: railings are read with the guards, a later step";
+                    // this stair's railing read as its handrail beside a wall (no higher than 38 in over the nosings):
+                    // inside the stairway's width at the handrail, never its headroom
+                    if (_railingOf.TryGetValue(e.UniqueId, out var r) && (_accepted.ContainsKey(r.UniqueId) || LowRailing(r)))
+                        continue;
+                    why = $"a railing ({Named(e)}) reaches over it and isn't read as its handrail beside a wall";
                     return null;
                 }
                 if (!known)

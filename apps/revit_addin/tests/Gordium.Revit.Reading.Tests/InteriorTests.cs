@@ -39,7 +39,8 @@ public sealed class InteriorTests
 
     // ---- the houses of the step, end to end ---------------------------------------------------------------------
 
-    public static TheoryData<string> Houses() => ["1_ranch_compliant", "2_two_story_small_window", "3_tall_riser", "5_basement_window_well"];
+    public static TheoryData<string> Houses() => ["1_ranch_compliant", "2_two_story_small_window", "3_tall_riser", "4_loft",
+                                                  "5_basement_window_well", "6_door_stated_clear"];
 
     [Theory]
     [MemberData(nameof(Houses))]
@@ -54,8 +55,9 @@ public sealed class InteriorTests
             Assert.Null(read.Interior["stairs"]);             // none drawn: not read, never "none"
         else
             Assert.Empty(read.StairsNotRead);
-        Assert.Null(read.Interior["doors"]);
-        Assert.Null(read.Interior["guards"]);
+        // step 5's doors and guards where the drawing has them; none found is never "none"
+        Assert.Equal(house.Drawing["doors"]!.AsArray().Count > 0, read.Interior["doors"] is not null);
+        Assert.Equal(house.Drawing["guards"]!.AsArray().Count > 0, read.Interior["guards"] is not null);
         Assert.Null(read.Interior["has_none"]);
         Assert.Equal([], Problems(house, read));
     }
@@ -486,8 +488,12 @@ public sealed class InteriorTests
         var door = read.Interior["openings"]!.AsArray().Single(o => o!["id"]!.GetValue<string>() == "door-1")!;
         Assert.Equal("side_hinged_door", door["operation"]!.GetValue<string>());
         Assert.False(door["escape"]!.GetValue<bool>());
-        Assert.Null(door["stated_clear"]);
-        Assert.Null(read.Interior["doors"]);                   // the doors step: not read
-        Assert.Equal([], Problems(house, read));
+        Assert.Null(door["stated_clear"]);                     // as an escape opening: its bottom isn't stated
+        // as a door (step 5): its marks, and no clear opening its type doesn't confirm
+        var asDoor = read.Interior["doors"]!.AsArray().Single(o => o!["id"]!.GetValue<string>() == "door-1")!;
+        Assert.True(asDoor["exit"]!.GetValue<bool>());
+        Assert.Equal("side_hinged", asDoor["operation"]!.GetValue<string>());
+        Assert.Null(asDoor["stated_clear"]);
+        Assert.Contains(read.Notes, n => n.Part == "door-1" && n.Field == "doors.stated_clear" && n.Why.Contains("isn't confirmed"));
     }
 }

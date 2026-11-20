@@ -1,26 +1,28 @@
 {
   "host": "revit",
   "house": "1_ranch_compliant",
-  "step": 3,
+  "step": 5,
   "recorded": {
     "by": "Gordium add-in, Record interior houses (Windows trial)",
     "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "w1": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9",
-    "w2": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb",
-    "w3": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
-    "bed1": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
-    "bed2": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
-    "living": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602"
+    "w1": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da1",
+    "w2": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da3",
+    "w3": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da5",
+    "d1": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da7",
+    "d2": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da9",
+    "bed1": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dab",
+    "bed2": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dad",
+    "living": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dae"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dab",
         "name": "Bedroom 1 (1)",
         "sleeping": true,
         "floor": [
@@ -68,7 +70,7 @@
         ]
       },
       {
-        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dad",
         "name": "Bedroom 2 (2)",
         "sleeping": true,
         "floor": [
@@ -116,7 +118,7 @@
         ]
       },
       {
-        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602",
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dae",
         "name": "Living room (3)",
         "sleeping": false,
         "floor": [
@@ -166,9 +168,9 @@
     ],
     "openings": [
       {
-        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9",
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da1",
         "name": "Gordium test window w1 (26 x 36 in): Family1 (Window 1)",
-        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
+        "room": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dab",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -179,9 +181,9 @@
         }
       },
       {
-        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb",
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da3",
         "name": "Gordium test window w2 (30 x 60 in): Family2 (Window 2)",
-        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
+        "room": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dad",
         "escape": true,
         "operation": "double_hung",
         "stated_clear": {
@@ -192,11 +194,44 @@
         }
       },
       {
-        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da5",
         "name": "Gordium test window w3 (60 x 60 in): Family3 (Window 3)",
-        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602",
+        "room": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dae",
         "escape": false,
         "operation": "fixed"
+      },
+      {
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da7",
+        "name": "Gordium test door d1 (34.25 x 80 in): Family4 (Front door)",
+        "room": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dae",
+        "escape": false,
+        "operation": "side_hinged_door"
+      },
+      {
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da9",
+        "name": "Gordium test door d2 (36 x 80 in): Family5 (Back door)",
+        "room": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001dae",
+        "escape": false,
+        "operation": "side_hinged_door"
+      }
+    ],
+    "doors": [
+      {
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da7",
+        "name": "Gordium test door d1 (34.25 x 80 in): Family4 (Front door)",
+        "exit": true,
+        "operation": "side_hinged",
+        "stated_clear": {
+          "width": 2.6875,
+          "height": 6.666666666666667,
+          "source": "the maker\u0027s clear opening (made up: the less favourable of house.yaml\u0027s drawn and stated clear opening, as the measuring code works it out)"
+        }
+      },
+      {
+        "id": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da9",
+        "name": "Gordium test door d2 (36 x 80 in): Family5 (Back door)",
+        "exit": false,
+        "operation": "side_hinged"
       }
     ]
   },
@@ -205,22 +240,54 @@
   "stairs_not_read": [
     "Gordium: These are all the stairs is not set on Project Information: until it says Yes, a stair not drawn as one would go unchecked"
   ],
+  "doors_not_read": [],
+  "guards_not_read": [
+    "No guards are drawn as railings off a stair: no guard is read for egress (never read as a house with none)"
+  ],
   "drawing_notes": [],
-  "drawn": [],
+  "drawn": [
+    "door d1: placed in wall 7546, host 7546, box 5.99,23.632,-0 to 9.344,25.583,6.917, type size (2.8541666666666665, 6.666666666666667)",
+    "door d2: placed in wall 7546, host 7546, box 13.583,23.632,-0 to 17.083,25.583,6.917, type size (3, 6.666666666666667)"
+  ],
   "notes": [
     {
-      "part": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
+      "part": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da5",
       "field": "stated_clear",
+      "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
+    },
+    {
+      "part": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da7",
+      "field": "stated_clear",
+      "why": "a door\u0027s maker\u0027s clear opening is sent with the door (doors); as an escape opening its bottom isn\u0027t stated by a door\u0027s marks yet"
+    },
+    {
+      "part": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da9",
+      "field": "stated_clear",
+      "why": "a door\u0027s maker\u0027s clear opening is sent with the door (doors); as an escape opening its bottom isn\u0027t stated by a door\u0027s marks yet"
+    },
+    {
+      "part": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da7",
+      "field": "doors.threshold_top",
+      "why": "a door\u0027s drawn stops, hinge, leaf, threshold and head stop aren\u0027t read from its family (door families don\u0027t model them consistently): its maker\u0027s clear opening is read instead"
+    },
+    {
+      "part": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da9",
+      "field": "doors.threshold_top",
+      "why": "a door\u0027s drawn stops, hinge, leaf, threshold and head stop aren\u0027t read from its family (door families don\u0027t model them consistently): its maker\u0027s clear opening is read instead"
+    },
+    {
+      "part": "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da9",
+      "field": "doors.stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     }
   ],
   "evidence": {
-    "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9": {
+    "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da1": {
       "sill_line": 2.5,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 2.5..5.5, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 5584, wall 5584 62815a77-36ea-469e-a7ed-72afbe9694aa-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625 (this window), OST_Windows 5627"
+        "host (FamilyInstance.Host) 7544, wall 7544 37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001d78: 14 faces; ids generating them: OST_Walls 7544, OST_Walls 7545, OST_Walls 7547, OST_Windows 7585 (this window), OST_Windows 7587"
       ],
       "wall_opening_bottom": 2.5,
       "placed": {
@@ -229,12 +296,12 @@
         "width": 2.166666666666666
       }
     },
-    "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb": {
+    "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da3": {
       "sill_line": 2,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 2..7, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 5584, wall 5584 62815a77-36ea-469e-a7ed-72afbe9694aa-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625, OST_Windows 5627 (this window)"
+        "host (FamilyInstance.Host) 7544, wall 7544 37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001d78: 14 faces; ids generating them: OST_Walls 7544, OST_Walls 7545, OST_Walls 7547, OST_Windows 7585, OST_Windows 7587 (this window)"
       ],
       "wall_opening_bottom": 2,
       "placed": {
@@ -242,10 +309,22 @@
         "top": 7.000000000000002,
         "width": 2.5
       }
+    },
+    "37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001da7": {
+      "placed": {
+        "width": 3.354166666666666,
+        "height": 6.91666666666667
+      },
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z -0..6.9167, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 7546, wall 7546 37fc0cb1-6724-4f2a-a78e-9ebea3293e9b-00001d7a: 12 faces; ids generating them: OST_Walls 7546, OST_Walls 7547, OST_Walls 7545, OST_Doors 7591 (this window), OST_Doors 7593"
+      ]
     }
   },
   "revit_layer": [
     "stairs: 0 component stairs (0 runs), 0 other elements that could be one",
+    "railings: 0",
     "enclosed areas on Level 1: 3 (0 with no Room)"
   ]
 }

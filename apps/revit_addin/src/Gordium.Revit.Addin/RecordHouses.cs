@@ -109,6 +109,8 @@ public sealed class RecordHousesCommand : IExternalCommand
                 ["rooms_not_read"] = new JsonArray(read.RoomsNotRead.Select(w => (JsonNode?)w).ToArray()),
                 ["openings_not_read"] = new JsonArray(read.OpeningsNotRead.Select(w => (JsonNode?)w).ToArray()),
                 ["stairs_not_read"] = new JsonArray(read.StairsNotRead.Select(w => (JsonNode?)w).ToArray()),
+                ["doors_not_read"] = new JsonArray(read.DoorsNotRead.Select(w => (JsonNode?)w).ToArray()),
+                ["guards_not_read"] = new JsonArray(read.GuardsNotRead.Select(w => (JsonNode?)w).ToArray()),
                 ["drawing_notes"] = house["notes"]?.DeepClone(),
                 ["drawn"] = new JsonArray(drawn.Select(w => (JsonNode?)w).ToArray()),
                 ["notes"] = new JsonArray(read.Notes.Select(n => (JsonNode)new JsonObject
@@ -130,8 +132,11 @@ public sealed class RecordHousesCommand : IExternalCommand
             log["rooms_not_read"] = read.RoomsNotRead;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["stairs_not_read"] = read.StairsNotRead;
+            log["doors_not_read"] = read.DoorsNotRead;
+            log["guards_not_read"] = read.GuardsNotRead;
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
+            log["railings"] = (model.Interior!.Railings ?? []).SelectMany(r => r.Diagnostics).ToList();
             Trial.Log("record_house", log);
             return problems.Count == 0 ? $"{name}: OK" : $"{name}: {problems.Count} problem(s): {problems[0]}";
         }
@@ -173,6 +178,8 @@ public sealed class ReadInteriorCommand : IExternalCommand
             log["rooms_not_read"] = read.RoomsNotRead;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["stairs_not_read"] = read.StairsNotRead;
+            log["doors_not_read"] = read.DoorsNotRead;
+            log["guards_not_read"] = read.GuardsNotRead;
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
@@ -181,8 +188,10 @@ public sealed class ReadInteriorCommand : IExternalCommand
             var rooms = read.Interior["rooms"] is JsonArray r ? $"{r.Count} rooms read" : "Rooms not read: " + string.Join("; ", read.RoomsNotRead.Take(5));
             var openings = read.Interior["openings"] is JsonArray o ? $"{o.Count} windows and doors read" : "Openings not read: " + string.Join("; ", read.OpeningsNotRead.Take(5));
             var stairs = read.Interior["stairs"] is JsonArray s ? $"{s.Count} stair flights read" : "Stairs not read: " + string.Join("; ", read.StairsNotRead.Take(5));
+            var doors = read.Interior["doors"] is JsonArray d ? $"{d.Count} doors read" : "Doors not read: " + string.Join("; ", read.DoorsNotRead.Take(5));
+            var guards = read.Interior["guards"] is JsonArray g ? $"{g.Count} guards read" : "Guards not read: " + string.Join("; ", read.GuardsNotRead.Take(5));
             var notes = string.Join("\n", read.Notes.Take(20).Select(n => $"- {n.Field}: {n.Why}"));
-            TaskDialog.Show("Gordium: read inside", $"{rooms}\n{openings}\n{stairs}\n\n{read.Notes.Count} values left out" +
+            TaskDialog.Show("Gordium: read inside", $"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n\n{read.Notes.Count} values left out" +
                             (notes.Length > 0 ? ":\n" + notes : "") + $"\n\nLogged to {Trial.LogPath()}");
             return Result.Succeeded;
         }

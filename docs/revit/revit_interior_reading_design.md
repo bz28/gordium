@@ -12,8 +12,9 @@ tried in Revit 2027.4 on Snowdon Towers (section 9); step 3 (rooms and marked es
 records and recorded in Revit 2027.4 (houses 1, 2 and 5, trial run 6, 2026-11-20: every measure of the step equal
 to the hand-worked one); step 4 (stairs, [README](../../apps/revit_addin/README.md#stairs-interior-step-4)) is built
 and tested on fake records and recorded in Revit 2027.4 (houses 1, 2, 3 and 5, 0 problems each: house 2's stair
-16 risers of 7.5 in, 10 in treads, 85.5 in headroom, 36 in wide; house 3's tall riser at the head held for review); the
-rest are not yet.
+16 risers of 7.5 in, 10 in treads, 85.5 in headroom, 36 in wide; house 3's tall riser at the head held for review);
+step 5 (doors, handrails and level guards) is built and tested on fake records, to record in Revit (houses 1, 2, 4,
+5 and 6); step 6 is not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -103,6 +104,8 @@ exactly:
 | `Gordium: Clear width`, `Clear height`, `Clear offset`, `Clear source`, `Clear confirmed` | Windows (type) | The maker's net clear opening; the height of its bottom above the window's sill line (the line Revit's Sill Height places), required (blank: no clear opening sent, never read as 0); the maker's publication it came from; and **the confirmation stamp**: written by the add-in only when the architect ticks the values on a section of that window type (facts about their own design), it records exactly what was confirmed, who and when: **the type itself** (its `UniqueId`), its width and height, its `Gordium: Operation`, the clear width, height and offset, the `Clear source`, and, where the clear opening was copied from a maker's family parameter, that parameter's name and value. The reader sends a clear opening only when every one of these, read now, equals the stamp: so a duplicated or copied type (Duplicate, Transfer Project Standards and copying between projects carry the stamp with them, but not the original's `UniqueId`), a resized type, any edited value (an offset typed or bulk-filled as 0 in a schedule, a changed source or operation), or a maker's value that has since changed (a hardware option switched) all leave the window unconfirmed until the architect ticks it again. Confirmed per type: the add-in offers the value of another type of the same family as a suggestion, never as a confirmation | `openings[].stated_clear` |
 | `Gordium: Top rail is handrail` | Railings (type) | Yes / No / unset | whether a stair railing's top rail is also its handrail (unset on a stair railing with a top rail: that flight's `handrails` left out, not read) |
 | `Gordium: These are all the stairs` | Project Information | Yes / No / unset | `stairs` sent only on Yes (section 2's "all the stairs"; No or unset: not read). **Decided (2026-11-20, step 4):** the project-wide ticks ("these are all the stairs", later "all the guards", "this house has none of ...") are Gordium shared parameters on Project Information (Yes/No; unset is not stated), added by Mark for egress like the other marks and listed in the marking list; each step adds its own |
+| `Gordium: These are all the guards and handrails` | Project Information | Yes / No / unset | `guards` and every flight's `handrails` sent only on Yes (step 5, section 2's "all the guards"). **Decided (Ben, 2026-11-20, step 5):** one tick for both, since both are railings: a guard drawn as a low wall would go unchecked, and a handrail drawn as a wall sweep would leave the width at the handrail read too wide; with the tick, a flight with no railing found sends `handrails: []` |
+| `Gordium: Clear width`, `Clear height`, `Clear source`, `Clear confirmed` on doors | Doors (type) | As windows' | `doors[].stated_clear` (step 5): the same marks bound to Doors too, confirmed and re-checked exactly as windows' (the stamp, made for a door, records the type's `UniqueId`, size and operation, the clear width and height, the source and a mapped maker's parameter; a window's stamp never confirms a door, nor a door's a window); no `Clear offset` (a door's clear opening has no bottom in the format). The width and height are the maker's figure measured as R318.2 measures it (between the face of the door open 90 degrees and the stop; threshold top to stop bottom), never the door's size or rough opening: the marks' own tooltip says so |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick
 Escape opening"); they are visible, print on sheets and survive export and upgrades. Considered: Revit's hidden
@@ -212,7 +215,25 @@ table above needed settling:
   never set furniture and fixtures aside, beside or overhead). Extents are read from flat faces' corners (exact), else from Revit's box (only ever bigger).
 - *Handrails and guards*: railings are read in step 5 with the guards (the same reading of a Railing's geometry), so
   step 4 sends no `handrails` (the width at the handrail and the handrail sides need review) and a railing beside or
-  over a flight leaves its `sides` or `overhead` out.
+  over a flight leaves its `sides` or `overhead` out. **As built in step 5** (`StairReader.cs`): a railing on the
+  stair (it lists it, or hosts it) standing in a side's band where a wall face is found, every part read exactly
+  (flat faces, straight edges: a polyhedron's extremes are its corners), every point between the wall face and the
+  flight's middle and none more than 38 in (the highest a handrail may be) over the line of nosings, and nothing of
+  it that isn't sent as a handrail (a top rail marked No or unset, a post, a baluster) farther toward the middle than
+  the innermost handrail edge sent (review round 1: a top rail marked No read the width at the handrail 36 in, drawn
+  32.5; with no handrail sent, it is refused), is that side's
+  handrail: it never narrows the width above the handrail nor the headroom, so the wall stays the side and the
+  railing is set aside overhead. Its `handrails` entries are its handrails (`GetHandRails`) and its top rail where
+  the type says `Gordium: Top rail is handrail` Yes (unset with a top rail: `handrails` left out), each the plan line
+  of its edge nearest the middle from its first point along the run to its last. `handrails` is sent only on the
+  tick "these are all the guards and handrails" and with both sides read; with none found, `[]`. Anything else
+  beside the flight (a railing on an open side, which is a guard along a stair; a railing not the stair's; a round
+  handrail, whose curved faces aren't read exactly; one rising past 38 in or reaching past the middle) leaves `sides`
+  and `handrails` out, and, being a railing on a stair not read as a handrail, the `guards` too. A stair railing at
+  or under 38 in over the nosings is never the headroom. Two exactness fixes came with it: a sloped face at the head
+  (a handrail rising past it) is judged by its plane over the last tread, not its whole height range; a vertical face
+  in a side's band (a sloped roof's side) is judged up the run against the band, not by its height range alone (house
+  4's roof, 98.5 in over the top nosing, was read in the band).
 - *Overhead*: a face's opening (a floor's stairwell opening) is taken out of it exactly
   (`PlanGeometry.Subtract`); an element with some of its flat pieces over the flight under the line of nosings and
   some over it crosses the flight and leaves `overhead` out; one wholly under it (a slab under the stair) is set aside.
@@ -239,6 +260,17 @@ not measurable or a malformed stated size giving no value, and `from` saying whi
 step 5's. Until the reader does, it sends
 each door's `exit` mark and `operation` only: the width and height have no value (needs review), which is safe.
 
+**As built in step 5** (`InteriorReader.cs`, `ReadDoor`): every door in the design checked is a `doors` entry with
+its `Gordium: Exit door` mark (unset: not given, so no door is read), its type's `Gordium: Operation` through the
+door's word (a window's word on a door is not stated), and `stated_clear` `{width, height, source}` only when the
+type's `Clear confirmed` stamp, made for a door, confirms every value now (section 3) and the clear opening fits
+inside the door as placed (its geometry's width along the wall, its height), 1/16 in to spare. Nothing drawn is
+sent (`stops`, `hinge_pin`, `leaf_closed`, `threshold_top`, `head_stop_bottom`): door families don't model them
+consistently, and a family's leaf read as the door's could make it read wider. So the measured size is the maker's
+alone, `from` saying "stated". A door is an opening too (`openings`, its escape mark), sent there with no
+`stated_clear` (its clear bottom isn't stated by a door's marks). No door found: `doors` left out (never `[]`); a
+link holding windows or doors leaves it out, as it does `openings`.
+
 ### Guards (`guards`)
 
 Railings not on a stair (a `Railing` that no stair lists among its `GetAssociatedRailings()`; its `HostId` the floor whose edge it guards): `walking_surface` from the host
@@ -246,6 +278,38 @@ floor's top, `top` from the railing's top rail, `members` from the railing's rai
 elevation. A guard drawn as something other than a Railing (a low wall, a generic family) is not found, which is
 why `guards` is sent, empty or not, only on the architect's tick (section 2). **To check:** reading balusters from a railing's geometry exactly (their spacing decides the 4 in
 sphere rule). Guards along a stair: the stair's railing, `top_line` along its top rail.
+
+**As built in step 5** (`GuardReader.cs`): `guards` is sent only on the tick "these are all the guards and handrails",
+with none of the stairs' blockers (section 4, stairs), and with every railing on a stair read as a handrail beside a
+wall: **a guard along a stair isn't read yet** (its `top_line` and the stair's side as the guard's inside face are
+to build), so any other railing on a stair leaves `guards` out, as does a railing on no stair standing beside a
+flight (it can't be told from a guard along it), or any railing while stairs are drawn but not read (where it stands
+isn't known). "Beside a flight" is judged by where things are drawn, never by how far a flight's reading got
+(review round 2: a winder, an unread run, a side refused first): a railing on no stair whose box comes within 1 ft
+in plan of a run's own drawn extent, its height between 1 ft under the run's base and 4 ft over its top, is held back; a run
+whose extent can't be read holds back every railing on no stair. Each other railing on no stair is a level guard, never
+dropped, each value sent only when read exactly:
+
+- its path must be one straight line (else every value out);
+- `members`: every solid of the railing, its top rail and its handrails must be a box square to the guard (six flat
+  faces, each facing along it, across it or up or down), each its rectangle in the guard's elevation; one that isn't
+  (a round or turned baluster, a sloped rail, an L-shaped post) leaves `members` out, since a rectangle around it is
+  bigger than it and the openings would read smaller; `top` the highest member's top;
+- `walking_surface`: the one flat top within a foot of the railing's base covering a 1 in strip along its whole path
+  on one side or the other, every top there at one height, agreeing with the base (level + base offset) within 1/16 in;
+- `extent`: at each end a wall or column face square to the guard within 1/16 in of the path's end, covering it from
+  the walking surface to the top across the members' depth, its place along the guard the extent (the format reads
+  past each end as solid, so a guard ending in the air sends none); a member's end within a millionth of a foot of
+  it is put on it (Revit's number noise, never a drawn gap);
+- a loaded link reaching it leaves every value out.
+
+- the openings are read in one plane only when every infill member (each under the guard's top) has its face toward
+  the walking side in one plane within 1/16 in (with the floor on both sides, both faces): members at different
+  depths projected together could block a sphere that weaves between them (two staggered rows, each with 4.5 in
+  gaps, offset by half, overlap to 1.5 in in elevation), so otherwise `members` is left out, the note naming the
+  members' depths (Ben, 2026-11-20).
+
+No level guard found: `guards` left out (never `[]`).
 
 ### What the house has none of (`has_none`)
 
@@ -379,6 +443,19 @@ Each step is its own PR, through the review loop, with its tests:
    3 draw their stairs inside bedrooms' plans, which a real model can't. Each house is recorded at the latest step
    that draws it (houses 1 and 5 stay step 3). The tick "these are all the stairs" is on Project Information (section 3).
 5. **Doors** (after the PR adding doors' stated clear width to the format, decision 2), then **guards**, house 4.
+   **Built, tested on fake records; to record in Revit** (section 4, the doors', handrails' and guards' "As built in
+   step 5"). Scope (`recordings.py`, `STEPS[5]`): houses 1, 2 and 6 `door_clear_width`, `door_clear_height`,
+   `door_side_hinged` (from the maker's clear opening the drawing confirms on each door's type: the less favourable of
+   house.yaml's drawn and stated, as the measuring code works it out); house 5 `door_side_hinged` only (its sliding
+   door has no clear width worked by hand, so no maker's clear opening is made up: its height expected not
+   measured); houses 2 and 4 the stair measures with `stair_clear_width_at_handrail` and `stair_handrail_sides` (each
+   handrail a railing on the stair whose top rail is the handrail); house 4 `guard_height` and `guard_opening_sphere`
+   (its loft guard a railing between a wall and a post, its rails and balusters house.yaml's), and its rooms and
+   window as step 3. House 4's loft is drawn clear of its bedroom (its floor over the bedroom would be the bedroom's
+   ceiling, which the hand-worked house doesn't give), and the bedroom's walls stop at the loft's level (walls
+   through a level enclose an area on it). House 3 isn't drawn again (its guard is along a stair: not read in this
+   step; its stair measures are all not measured already): it stays step 4. Each door is drawn in an outside wall with
+   no window (where it stands doesn't change its measures).
 6. **`has_none` ticks.**
 
 ## 8. Decisions (Ben, 2026-11-19: "go w ur recs")
@@ -427,6 +504,17 @@ element's own geometry repeats its runs' (step 4 leaves a multi-run stair's side
 `GetStairsPath`'s direction; a run type's nosing length (a nosing on the run but none drawn on the floor at the head
 makes the last tread read deeper than typed, so no nosings are sent: to settle with real stairs); real stair types'
 supports beside the treads.
+
+For doors, handrails and guards (step 5), to check on houses 1, 2, 4, 5 and 6 drawn by the add-in: that a door made
+from Door.rft gives its placed width along `HandOrientation` and its height as its type's; that `Railing.Create` on a
+stair's treads then `SetPath` gives a railing the stair lists (`GetAssociatedRailings`) with its top rail along the
+new path; that a profile drawn in Profile-Rail.rft with its top on its origin puts a rail's top at its height (the
+top rail's and the other rails'); that a baluster family from Baluster.rft, placed from the host at its base offset,
+is the height it was drawn (not stretched to the top rail); that the baluster pattern (one baluster, its distance
+from the pattern's start, the end space, justified at the beginning) places the drawing's balusters; that the top
+rail, other rails and balusters come back as solids of six flat faces; `STAIRS_RAILING_BASE_LEVEL_PARAM` and
+`STAIRS_RAILING_HEIGHT_OFFSET` as a railing's base. Then real railings: round handrails (Revit's default profiles are
+circular: their curved faces leave a stair's sides and handrails out, to settle), real balusters and posts.
 
 ## Sources
 

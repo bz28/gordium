@@ -71,7 +71,7 @@ internal static class RevitMarks
     }
 
     /// <summary>Every Gordium mark the element has, by GUID (never by name), as Revit gives it.</summary>
-    private static Dictionary<Guid, MarkValue> Values(Element e)
+    internal static Dictionary<Guid, MarkValue> Values(Element e)
     {
         var values = new Dictionary<Guid, MarkValue>();
         foreach (var m in Marks.All)

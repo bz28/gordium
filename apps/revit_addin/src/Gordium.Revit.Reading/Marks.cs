@@ -59,13 +59,15 @@ public static class Marks
 
     public static readonly MarkDefinition ClearWidth = new(
         "Gordium: Clear width", new("8cb5d70c-116d-4621-9876-fd15c4c55f5c"), MarkValueKind.Length, MarkBinding.Type,
-        [Windows], "openings[].stated_clear.width",
-        "The maker's net clear opening width, as the maker publishes it for egress.");
+        [Windows, Doors], "openings[].stated_clear.width, doors[].stated_clear.width",
+        "The maker's net clear opening width, as the maker publishes it for egress. For a door, measured as R318.2 " +
+        "measures it: between the face of the door open 90 degrees and the stop (never the door's size or its rough opening).");
 
     public static readonly MarkDefinition ClearHeight = new(
         "Gordium: Clear height", new("8a8a2307-84a5-4a36-9121-c21453707702"), MarkValueKind.Length, MarkBinding.Type,
-        [Windows], "openings[].stated_clear.height",
-        "The maker's net clear opening height, as the maker publishes it for egress.");
+        [Windows, Doors], "openings[].stated_clear.height, doors[].stated_clear.height",
+        "The maker's net clear opening height, as the maker publishes it for egress. For a door, measured as R318.2 " +
+        "measures it: from the top of the threshold to the bottom of the stop.");
 
     public static readonly MarkDefinition ClearOffset = new(
         "Gordium: Clear offset", new("07f4d517-54a6-4e39-ba85-90c299137a28"), MarkValueKind.Length, MarkBinding.Type,
@@ -74,12 +76,12 @@ public static class Marks
 
     public static readonly MarkDefinition ClearSource = new(
         "Gordium: Clear source", new("2bc7eaef-1770-4077-870b-450ed224adde"), MarkValueKind.Text, MarkBinding.Type,
-        [Windows], "openings[].stated_clear.source",
+        [Windows, Doors], "openings[].stated_clear.source, doors[].stated_clear.source",
         "The maker's publication the clear opening came from (catalogue, product line, hardware option).");
 
     public static readonly MarkDefinition ClearConfirmed = new(
         "Gordium: Clear confirmed", new("66ced3f6-2dd7-4aa7-a0ce-89d086652103"), MarkValueKind.Text, MarkBinding.Type,
-        [Windows], "openings[].stated_clear (the confirmation stamp)",
+        [Windows, Doors], "openings[].stated_clear, doors[].stated_clear (the confirmation stamp)",
         "Written by Gordium when the architect confirms this type's clear opening. Don't type in it: any change leaves the type unconfirmed.");
 
     public static readonly MarkDefinition TopRailIsHandrail = new(
@@ -95,11 +97,19 @@ public static class Marks
         MarkBinding.Instance, [ProjectInformation], "stairs (sent only when Yes)",
         "Yes once every stair of the house is drawn as a Revit stair (not a generic model or an in-place family). Blank or No: no stair is read for egress.");
 
+    /// <summary>The project-wide tick that the railings found are all the house's guards and handrails (design note,
+    /// sections 2 and 3; step 5): without Yes no guard is read (a guard drawn as a low wall would go unchecked) and no
+    /// stair's handrails are (a handrail drawn as a wall sweep would leave the width at the handrail read too wide).</summary>
+    public static readonly MarkDefinition AllGuards = new(
+        "Gordium: These are all the guards and handrails", new("80055f84-3feb-492a-b581-331ff692a2a9"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "guards and stairs[].handrails (sent only when Yes)",
+        "Yes once every guard and handrail of the house is drawn as a Revit railing (not a wall, a wall sweep or a generic model). Blank or No: no guard or handrail is read for egress.");
+
     /// <summary>Every mark, in the design note's order.</summary>
     public static readonly IReadOnlyList<MarkDefinition> All =
     [
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
-        ClearConfirmed, TopRailIsHandrail, AllStairs,
+        ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

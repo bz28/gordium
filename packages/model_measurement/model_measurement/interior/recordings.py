@@ -51,11 +51,30 @@ STAIRS = {"stair_riser_height", "stair_riser_variation", "stair_total_rise", "st
 # so it is drawn where a tall riser arises in Revit: the floor at the head 1 1/2 in above the run's top. The reader's
 # cross-check (the floor at the head against the run's top, design note section 4) then sends no nosings, so every one
 # of its stair measures must come back not measured (its stair still read): never 7.6 in, never a pass.
+# Step 5 (doors, then guards; house 4): the exit door's clear width and height (from the maker's stated clear opening
+# the architect confirmed on its type: door families aren't measured from their drawing) and whether it is
+# side-hinged; a stair's handrails (the width at the handrail, the sides with one); a level guard's height and the
+# largest sphere through it.
+DOORS = {"door_clear_width", "door_clear_height", "door_side_hinged"}
+HANDRAILS = {"stair_clear_width_at_handrail", "stair_handrail_sides"}
+GUARDS = {"guard_height", "guard_opening_sphere"}
+# House 4's loft is drawn clear of its bedroom (its floor over the bedroom would be the bedroom's ceiling, which the
+# hand-worked house doesn't give: one 16 ft ceiling), so its rooms' measures are step 3's. Its bedroom's awning window
+# has no maker's clear opening: every clear measure comes back not measured, as worked by hand. House 5's sliding exit
+# door has no clear width worked by hand (R318.2 measures a side-hinged door), so no maker's clear opening, which needs
+# both sizes, is made up for it: only whether it is side-hinged is in scope, its height expected not measured.
+# House 3 isn't drawn again: its guard is along a stair, which this step doesn't read (a railing along a stair that
+# isn't a handrail against a wall leaves `guards` out), and its stair measures are all not measured already.
 STEPS = {
     3: {"1_ranch_compliant": ROOMS_AND_WINDOWS, "2_two_story_small_window": ROOMS_AND_WINDOWS,
         "5_basement_window_well": ROOMS_AND_WINDOWS},
     4: {"2_two_story_small_window": {**ROOMS_AND_WINDOWS, "stair": STAIRS},
         "3_tall_riser": {**ROOMS_AND_WINDOWS, "stair": set()}},
+    5: {"1_ranch_compliant": {**ROOMS_AND_WINDOWS, "egress_door": DOORS},
+        "2_two_story_small_window": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "egress_door": DOORS},
+        "4_loft": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "guard": GUARDS},
+        "5_basement_window_well": {**ROOMS_AND_WINDOWS, "egress_door": {"door_side_hinged"}},
+        "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS}},
 }
 STEP = max(STEPS)
 # each house at the latest step that draws it: its recording must be of that step
@@ -239,7 +258,8 @@ def drawing(name: str) -> dict:
     exterior walls around them (their inside faces on the rooms' outline), a wall filling any gap between rooms, a
     room separation line wherever two rooms meet, each room's ceiling as thin solids whose undersides are its
     ceiling, and each window in an outside wall of its room. Rooms whose plan isn't a rectangle on the axes aren't
-    drawn yet (refused)."""
+    drawn yet (refused). From step 5: each door (_doors), each stair's handrails (_stair) and each level guard (_guard);
+    a room within another's height (a loft) drawn clear of it."""
     house = _house(name)
     ft = _ft(house["units"])
     measured = {p["id"]: p for p in measure(house)["parts"]["emergency_escape_opening"] or []}
@@ -257,8 +277,25 @@ def drawing(name: str) -> dict:
         room = {"id": r["id"], "name": r["name"], "sleeping": r["sleeping"], "floor": floor, "floor_elevation": fe,
                 "ceilings": ceilings}
         rooms.append(room)
-        levels.setdefault(fe, []).append(room)
+    notes = []
+    # a room drawn within another's height (a loft: its floor over the other's, above its floor and under its
+    # ceiling) is drawn clear of it, moved in plan (x only): drawn over it, its floor slab would be the other room's
+    # ceiling there, which the hand-worked house doesn't give (house 4: the bedroom's one 16 ft ceiling). A room's
+    # measures don't depend on where it stands
+    for room in rooms:
+        under = [o for o in rooms if o is not room and o["floor_elevation"] < room["floor_elevation"]
+                 < max(z for piece in o["ceilings"] for _, _, z in piece)
+                 and Polygon(o["floor"]).intersection(Polygon(room["floor"])).area > 0]
+        if under:
+            dx = max(x for o in rooms for x, _ in o["floor"]) + EXTERIOR_WALL + ROOM_GAP - min(x for x, _ in room["floor"])
+            room["floor"] = [[x + dx, y] for x, y in room["floor"]]
+            room["ceilings"] = [[[x + dx, y, z] for x, y, z in piece] for piece in room["ceilings"]]
+            notes.append(f"room {room['id']}: within the height of {', '.join(o['id'] for o in under)} (a loft), so drawn "
+                         f"{dx:g} ft clear of it: drawn over it, its floor would be the other room's ceiling there")
+    for room in rooms:
+        levels.setdefault(room["floor_elevation"], []).append(room)
     out_levels = []
+    elevations = sorted(levels)
     for fe, here in sorted(levels.items()):
         polys = [Polygon(r["floor"]) for r in here]
         x0, y0 = min(p.bounds[0] for p in polys), min(p.bounds[1] for p in polys)
@@ -282,6 +319,11 @@ def drawing(name: str) -> dict:
         # would enclose an area on that level too (trial run 3, 2026-11-20: house 5's walls, up a foot past its
         # ceiling, closed an area on Level 1, where the hand-worked house has none)
         top = max(z for r in here for piece in r["ceilings"] for _, _, z in piece) + CEILING_THICKNESS
+        # nor past the next level up (house 4's bedroom, 16 ft high, under its loft's level at 9 ft): walls through a
+        # level enclose an area on it, with no Room (trial run 3, as above)
+        above = [z for z in elevations if z > fe]
+        if above and top > above[0]:
+            top = above[0]
         out_levels.append({"elevation": fe, "box": [[x0, y0], [x1, y1]], "fillers": fillers,
                            "separations": separations, "wall_height": top - fe})
     windows = []
@@ -327,22 +369,136 @@ def drawing(name: str) -> dict:
                             "sill": bottom - fe, "level": fe,
                             "center": [sx0 + t * (sx1 - sx0), sy0 + t * (sy1 - sy0)], "outward": list(outward),
                             "clear": clear})
-    stairs, notes = [], []
+    stairs = []
+    x_clear = max(lv["box"][1][0] for lv in out_levels) + EXTERIOR_WALL + STAIR_GAP
+    handrails = HANDRAILS <= scope(name).get("stair", set())
     if "stair" in scope(name):
-        x_clear = max(lv["box"][1][0] for lv in out_levels) + EXTERIOR_WALL + STAIR_GAP
         for st in house.get("stairs") or []:
-            drawn, note = _stair(name, st, ft, house, x_clear)
+            drawn, note = _stair(name, st, ft, house, x_clear, handrails)
             stairs.append(drawn)
             notes += note
             x_clear = drawn["extent"][1] + STAIR_GAP
-    not_drawn = {k for k in ("doors", "guards") if house.get(k)}
+    doors = _doors(name, house, ft, rooms, out_levels, windows) if "egress_door" in scope(name) else []
+    guards = []
+    if "guard" in scope(name):
+        for g in house.get("guards") or []:
+            if g.get("stair") is not None:
+                raise ValueError(f"{name}: guard {g['id']} is along a stair, which isn't drawn yet")
+            drawn = _guard(name, g, ft, x_clear)
+            guards.append(drawn)
+            x_clear = drawn["extent"][1] + STAIR_GAP
+    not_drawn = set()
+    if house.get("doors") and not doors:
+        not_drawn.add("doors")
+    if house.get("guards") and not guards:
+        not_drawn.add("guards")
     if not stairs and house.get("stairs"):
         not_drawn.add("stairs")
-    if stairs and any(st.get("handrails") for st in house["stairs"]):
+    if stairs and not handrails and any(st.get("handrails") for st in house["stairs"]):
         not_drawn.add("handrails")
     return {"house": name, "step": HOUSE_STEP[name], "units": "ft", "exterior_wall": EXTERIOR_WALL,
             "ceiling_thickness": CEILING_THICKNESS, "levels": out_levels, "rooms": rooms, "windows": windows,
-            "stairs": stairs, "notes": notes, "not_drawn": sorted(not_drawn)}
+            "stairs": stairs, "doors": doors, "guards": guards, "rail": RAIL, "handrail_top": HANDRAIL_TOP,
+            "notes": notes, "not_drawn": sorted(not_drawn)}
+
+
+ROOM_GAP = 10.0                 # ft: a room drawn clear of the room it is within the height of (a loft)
+RAIL = 1.5 / 12                 # ft: a drawn rail's width (and height): a handrail, a guard's rails and balusters' depth
+HANDRAIL_TOP = 3.0              # ft: a drawn handrail's top over the line of nosings (R318.7.8: 34 to 38 in)
+DOOR_WIDTH = 3.0                # ft: a door drawn with no stops (a sliding door): the family's width
+DOOR_HEIGHT = 80 / 12           # ft: and its height with no threshold or head stop drawn
+
+
+def _doors(name: str, house: dict, ft, rooms: list, levels: list, windows: list) -> list:
+    """Each door in an outside wall with no window in it (a room that isn't a sleeping room's first), spread along it:
+    its family's size from its drawing (stop to stop, threshold to head stop), else a 3 ft x 6 ft 8 in door; and, where
+    the measuring code works out both its clear width and height, those as the maker's clear opening the architect
+    confirmed on its type (what a maker would publish, never more than the less favourable of drawn and stated). Where
+    a door stands doesn't change its measures (the reader sends no drawn stops, pin or leaf: door families don't model
+    them consistently)."""
+    given = house.get("doors") or []
+    if not given:
+        return []
+    measured = {p["id"]: p for p in measure(house)["parts"]["egress_door"] or []}
+    taken = {(w["level"], tuple(w["outward"]), w["room"]) for w in windows}
+    choice = None
+    for room in sorted(rooms, key=lambda r: r["sleeping"]):
+        level = next(lv for lv in levels if lv["elevation"] == room["floor_elevation"])
+        (bx0, by0), (bx1, by1) = level["box"]
+        (rx0, ry0, rx1, ry1) = Polygon(room["floor"]).bounds
+        for (a, b), outward, outside in (((rx0, ry0), (rx1, ry0)), (0, -1), ry0 == by0), \
+                (((rx0, ry0), (rx0, ry1)), (-1, 0), rx0 == bx0), (((rx0, ry1), (rx1, ry1)), (0, 1), ry1 == by1), \
+                (((rx1, ry0), (rx1, ry1)), (1, 0), rx1 == bx1):
+            if outside and not any(t[0] == room["floor_elevation"] and t[1] == outward for t in taken):
+                choice = (room, a, b, outward)
+                break
+        if choice:
+            break
+    if choice is None:
+        raise ValueError(f"{name}: no outside wall without a window for its doors")
+    room, (ax, ay), (bx, by), outward = choice
+    out = []
+    for k, d in enumerate(given, 1):
+        t = k / (len(given) + 1)
+        stops = d.get("stops")
+        width = ft(abs(stops["latch"] - stops["hinge"])) if stops else DOOR_WIDTH
+        height = ft(d["head_stop_bottom"] - d["threshold_top"]) \
+            if d.get("head_stop_bottom") is not None and d.get("threshold_top") is not None else DOOR_HEIGHT
+        part = measured.get(d["id"])
+        clear = None
+        if part is not None and {"door_clear_width", "door_clear_height"} <= set(part["measures"]):
+            m = part["measures"]
+            clear = {"width": m["door_clear_width"] / 12, "height": m["door_clear_height"] / 12,
+                     "source": "the maker's clear opening (made up: the less favourable of house.yaml's drawn and "
+                               "stated clear opening, as the measuring code works it out)"}
+        out.append({"id": d["id"], "name": d.get("name") or d["id"], "exit": d["exit"], "operation": d["operation"],
+                    "width": width, "height": height, "level": room["floor_elevation"], "room": room["id"],
+                    "center": [ax + t * (bx - ax), ay + t * (by - ay)], "outward": list(outward), "clear": clear})
+    span = math.hypot(bx - ax, by - ay)
+    if any(d["width"] > span / (len(given) + 1) for d in out):
+        raise ValueError(f"{name}: its doors don't fit along the wall chosen for them")
+    return out
+
+
+def _guard(name: str, g: dict, ft, x_clear: float) -> dict:
+    """A guard at a level walking surface as a Revit railing draws it, in feet, clear of the house (where it stands
+    doesn't change its measures): its path along +x from the face of a wall at its left end to the face of a post (a
+    short wall) at its right, along the edge of a floor on the walking side (y below the path); its rails (the members
+    running its whole extent, the top one its top rail) and its balusters (every other member: equal, equally spaced),
+    each height above the walking surface, the balusters' first left edge along it. Anything else is refused."""
+    walk, top = ft(g["walking_surface"]), ft(g["top"])
+    left, right = ft(g["extent"]["left"]), ft(g["extent"]["right"])
+    members = [{k: ft(m[k]) for k in ("left", "right", "bottom", "top")} for m in g["members"]]
+    rails = [m for m in members if abs(m["left"] - left) < 1e-9 and abs(m["right"] - right) < 1e-9]
+    balusters = sorted((m for m in members if m not in rails), key=lambda m: m["left"])
+    tops = [m for m in rails if abs(m["top"] - top) < 1e-9]
+    if len(tops) != 1:
+        raise ValueError(f"{name}: guard {g['id']} hasn't one top rail reaching its top")
+    widths = {round(m["right"] - m["left"], 9) for m in balusters}
+    heights = {(round(m["bottom"], 9), round(m["top"], 9)) for m in balusters}
+    steps = {round(b["left"] - a["left"], 9) for a, b in zip(balusters, balusters[1:])}
+    if not balusters or len(widths) != 1 or len(heights) != 1 or len(steps) > 1:
+        raise ValueError(f"{name}: guard {g['id']}'s balusters aren't equal and equally spaced")
+    length = right - left
+    y = 0.0
+    x0 = x_clear
+    post = 4 / 12
+    reach = 1.0
+    bal = balusters[0]
+    return {"id": g["id"], "name": g.get("name") or g["id"], "level": walk, "start": [x0, y], "end": [x0 + length, y],
+            "length": length, "top": top - walk,
+            "top_rail": {"bottom": tops[0]["bottom"] - walk, "top": tops[0]["top"] - walk},
+            "rails": [{"bottom": m["bottom"] - walk, "top": m["top"] - walk} for m in rails if m is not tops[0]],
+            "balusters": {"first": bal["left"] - left, "width": bal["right"] - bal["left"],
+                          "spacing": balusters[1]["left"] - bal["left"] if len(balusters) > 1 else 0.0,
+                          "count": len(balusters),
+                          "bottom": bal["bottom"] - walk, "top": bal["top"] - walk},
+            "floor": [[x0 - post, y - 3.0], [x0 + length + post, y - 3.0], [x0 + length + post, y], [x0 - post, y]],
+            "slab": SLAB,
+            "end_walls": [{"line": [[x0 - post / 2, y - reach], [x0 - post / 2, y + reach]], "thickness": post},
+                          {"line": [[x0 + length + post / 2, y - reach], [x0 + length + post / 2, y + reach]],
+                           "thickness": post}],
+            "wall_top": top - walk + 1.0, "extent": [x0 - post, x0 + length + post]}
 
 
 STAIR_GAP = 10.0                # ft: each stair drawn this far clear of the house and of the stair before it
@@ -352,7 +508,7 @@ SLAB = 1.0                      # ft: their thickness
 HEADROOM_WALL = 7.0             # ft: the side walls rise this far above the top nosing (the reader looks up 80 in)
 
 
-def _stair(name: str, st: dict, ft, house: dict, x_clear: float) -> tuple[dict, list[str]]:
+def _stair(name: str, st: dict, ft, house: dict, x_clear: float, handrails: bool = False) -> tuple[dict, list[str]]:
     """One flight as a Revit component stair draws it, in feet, moved in plan (x only) to stand clear of the house:
     its risers (equal: a component run's are), tread depth and width, the centre line from its first riser to its last
     (the run's location path), the floor at its foot and head as thin slabs, each side that is a wall as the line of
@@ -435,6 +591,17 @@ def _stair(name: str, st: dict, ft, house: dict, x_clear: float) -> tuple[dict, 
     xs = [p[0] for p in foot + head] + [p[0] for w in walls for p in w["face"]] + [p[0] for pc in overhead for p in pc]
     if upper:
         xs += [p[0] for p in upper["outer"]]
+    # each handrail (step 5) as a railing on the stair whose top rail is its handrail (RAIL square, its top HANDRAIL_TOP
+    # over the nosings): its plan path RAIL / 2 outward of the house's inner edge, from the first riser to the last
+    rails = []
+    if handrails:
+        for h in st.get("handrails") or []:
+            edge = [[ft(x), ft(y)] for x, y in h["inner_edge"]]
+            a = edge[0][across]
+            if any(abs(p[across] - a) > 1e-9 for p in edge):
+                raise ValueError(f"{name}: stair {st['id']}'s {h['side']} handrail isn't straight along the run")
+            out_a = a + (RAIL / 2 if a > mid else -RAIL / 2)
+            rails.append({"side": h["side"], "inner": [at(first, a), at(top, a)], "path": [at(first, out_a), at(top, out_a)]})
     notes = []
     if extra > 1e-9:
         notes.append(f"stair {st['id']}: a component run's risers are equal, so the {extra * 12:g} in more of its "
@@ -444,7 +611,7 @@ def _stair(name: str, st: dict, ft, house: dict, x_clear: float) -> tuple[dict, 
             "path": [at(first, mid), at(first + sign * tread * (len(risers) - 1), mid)],
             "head_above_run": extra, "head_top": zs[-1], "foot": {"plan": foot, "top": base},
             "head": None if upper else {"plan": head, "top": zs[-1]}, "upper_floor": upper, "slab": SLAB, "walls": walls, "wall_thickness": STAIR_WALL,
-            "wall_top": zs[-1] + HEADROOM_WALL, "open_sides": sorted(open_sides), "overhead": overhead,
+            "wall_top": zs[-1] + HEADROOM_WALL, "open_sides": sorted(open_sides), "overhead": overhead, "handrails": rails,
             "extent": [min(xs), max(xs)]}, notes
 
 

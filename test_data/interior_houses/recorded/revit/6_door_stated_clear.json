@@ -1,0 +1,133 @@
+{
+  "host": "revit",
+  "house": "6_door_stated_clear",
+  "step": 5,
+  "recorded": {
+    "by": "Gordium add-in, Record interior houses (Windows trial)",
+    "date": "2026-11-20",
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
+  },
+  "ids": {
+    "d1": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0c",
+    "liv": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0e"
+  },
+  "interior": {
+    "format": "gordium.interior/1",
+    "units": "ft",
+    "rooms": [
+      {
+        "id": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0e",
+        "name": "Living room (1)",
+        "sleeping": false,
+        "floor": [
+          [
+            0,
+            0
+          ],
+          [
+            15,
+            0
+          ],
+          [
+            15,
+            12
+          ],
+          [
+            0,
+            12
+          ]
+        ],
+        "floor_elevation": 0,
+        "ceilings": [
+          [
+            [
+              0,
+              0,
+              8
+            ],
+            [
+              15,
+              0,
+              8
+            ],
+            [
+              15,
+              12,
+              8
+            ],
+            [
+              0,
+              12,
+              8
+            ]
+          ]
+        ]
+      }
+    ],
+    "openings": [
+      {
+        "id": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0c",
+        "name": "Gordium test door d1 (35.75 x 79.25 in): Family17 (Front door)",
+        "room": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0e",
+        "escape": false,
+        "operation": "side_hinged_door"
+      }
+    ],
+    "doors": [
+      {
+        "id": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0c",
+        "name": "Gordium test door d1 (35.75 x 79.25 in): Family17 (Front door)",
+        "exit": true,
+        "operation": "side_hinged",
+        "stated_clear": {
+          "width": 2.7916666666666665,
+          "height": 6.604166666666667,
+          "source": "the maker\u0027s clear opening (made up: the less favourable of house.yaml\u0027s drawn and stated clear opening, as the measuring code works it out)"
+        }
+      }
+    ]
+  },
+  "rooms_not_read": [],
+  "openings_not_read": [],
+  "stairs_not_read": [
+    "Gordium: These are all the stairs is not set on Project Information: until it says Yes, a stair not drawn as one would go unchecked"
+  ],
+  "doors_not_read": [],
+  "guards_not_read": [
+    "No guards are drawn as railings off a stair: no guard is read for egress (never read as a house with none)"
+  ],
+  "drawing_notes": [],
+  "drawn": [
+    "door d1: placed in wall 3829, host 3829, box 5.76,-0.583,-0 to 9.24,1.368,6.854, type size (2.9791666666666665, 6.604166666666667)"
+  ],
+  "notes": [
+    {
+      "part": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0c",
+      "field": "stated_clear",
+      "why": "a door\u0027s maker\u0027s clear opening is sent with the door (doors); as an escape opening its bottom isn\u0027t stated by a door\u0027s marks yet"
+    },
+    {
+      "part": "ee63f356-9439-408b-a965-5a402961a4b2-00000f0c",
+      "field": "doors.threshold_top",
+      "why": "a door\u0027s drawn stops, hinge, leaf, threshold and head stop aren\u0027t read from its family (door families don\u0027t model them consistently): its maker\u0027s clear opening is read instead"
+    }
+  ],
+  "evidence": {
+    "ee63f356-9439-408b-a965-5a402961a4b2-00000f0c": {
+      "placed": {
+        "width": 3.479166666666666,
+        "height": 6.85416666666667
+      },
+      "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
+      "revit_layer": [
+        "window box z -0..6.8542, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
+        "host (FamilyInstance.Host) 3829, wall 3829 ee63f356-9439-408b-a965-5a402961a4b2-00000ef5: 9 faces; ids generating them: OST_Walls 3829, OST_Walls 3830, OST_Walls 3832, OST_Doors 3852 (this window)"
+      ]
+    }
+  },
+  "revit_layer": [
+    "stairs: 0 component stairs (0 runs), 0 other elements that could be one",
+    "railings: 0",
+    "enclosed areas on Level 1: 1 (0 with no Room)"
+  ]
+}

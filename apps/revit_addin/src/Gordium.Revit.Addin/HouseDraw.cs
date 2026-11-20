@@ -20,8 +20,12 @@ namespace Gordium.Revit.Addin;
 /// in an outside wall of its room at its sill height, marked Escape opening Yes or No, its type's Operation set, and,
 /// on an escape window, the maker's clear opening (what the measuring code works out from the house's frame and sash)
 /// with its Clear offset above the sill line, confirmed with Gordium's stamp as the architect's tick would be. In a house
-/// of the stairs step (4), each flight is a component stair (DrawStairs). Doors, guards and handrails are later steps:
-/// not drawn. What it can't draw is an error, never a house drawn differently.
+/// of the stairs step (4), each flight is a component stair (DrawStairs). In a house of step 5, each door is a door
+/// family of its own (Door.rft: a leaf of its size) in an outside wall with no window, marked Escape opening No and Exit
+/// door as the house says, its type's maker's clear opening confirmed with a door's stamp; each stair's handrail is a
+/// railing on the stair whose top rail (a square rail profile of the drawing's) is the handrail, marked so; each level
+/// guard a railing (its rails and balusters the drawing's) along the edge of a floor between a wall and a post; and the
+/// tick "these are all the guards and handrails" set. What it can't draw is an error, never a house drawn differently.
 /// </summary>
 internal static class HouseDraw
 {
@@ -42,6 +46,15 @@ internal static class HouseDraw
 
         var windows = house["windows"]!.AsArray().Select(n => n!.AsObject()).ToList();
         var families = windows.ToDictionary(w => w["id"]!.GetValue<string>(), w => WindowFamily(app, doc, w));
+        // step 5: a door family of its own per door, and the rail profile and baluster families the railings use, each
+        // made and loaded before anything is drawn (a family loads only outside the project's transactions)
+        var doors = (house["doors"] as JsonArray ?? []).Select(n => n!.AsObject()).ToList();
+        var doorFamilies = doors.ToDictionary(d => d["id"]!.GetValue<string>(), d => DoorFamily(app, doc, d));
+        var guards = (house["guards"] as JsonArray ?? []).Select(n => n!.AsObject()).ToList();
+        var handrails = (house["stairs"] as JsonArray ?? []).Any(s => s!["handrails"] is JsonArray { Count: > 0 });
+        var rail = house["rail"] is JsonNode railSize ? D(railSize) : 1.5 / 12;
+        var profile = handrails || guards.Count > 0 ? RailProfile(app, doc, rail, log) : null;
+        var balusters = guards.ToDictionary(g => g["id"]!.GetValue<string>(), g => BalusterFamily(app, doc, g["balusters"]!.AsObject(), log));
 
         var ids = new Dictionary<string, string>();
         var wallThickness = D(house["exterior_wall"]);
@@ -157,15 +170,55 @@ internal static class HouseDraw
             }
             ids[id] = fi.UniqueId;
         }
-        doc.Regenerate();
-        // the stamp, from the type's values as Revit now gives them (read the way the reader reads them)
-        foreach (var w in windows.Where(w => w["clear"] is JsonObject))
+        // step 5: each door in an outside wall with no window (house.yaml gives a door no room or place, and where it
+        // stands changes none of its measures: the reader sends its marks and the maker's clear opening, nothing drawn;
+        // so house 2's front door is upstairs, in the only level the house draws: Ben, 2026-11-20, fine), in its room's
+        // outside wall at the level, placed as the windows are (the walls committed
+        // first, regenerated right after it is placed), marked Escape opening No and Exit door as the house says, its
+        // type's Operation and maker's clear opening set
+        foreach (var d in doors)
         {
-            var symbol = families[w["id"]!.GetValue<string>()];
+            var id = d["id"]!.GetValue<string>();
+            var z = D(d["level"]);
+            var (cx, cy) = P(d["center"]!);
+            var (ox, oy) = P(d["outward"]!);
+            var side = oy < 0 ? "ymin" : ox < 0 ? "xmin" : oy > 0 ? "ymax" : "xmax";
+            var wall = walls[$"{z.ToString(CultureInfo.InvariantCulture)}-{side}"];
+            var symbol = doorFamilies[id];
+            if (!symbol.IsActive)
+                symbol.Activate();
+            var at = new XYZ(cx + ox * wallThickness / 2, cy + oy * wallThickness / 2, z);
+            var fi = doc.Create.NewFamilyInstance(at, symbol, wall, levels[z], StructuralType.NonStructural);
+            if (fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM) is { IsReadOnly: false } sill)
+                sill.Set(0.0);
+            doc.Regenerate();
+            Set(fi.get_Parameter(Marks.EscapeOpening.Guid), 0, Marks.EscapeOpening.Name);
+            Set(fi.get_Parameter(Marks.ExitDoor.Guid), d["exit"]!.GetValue<bool>() ? 1 : 0, Marks.ExitDoor.Name);
+            fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.Set(d["name"]!.GetValue<string>());
+            var word = Operations.Words.First(x => Operations.ForDoor(x) == d["operation"]!.GetValue<string>());
+            Set(symbol.get_Parameter(Marks.Operation.Guid), word, Marks.Operation.Name);
+            if (d["clear"] is JsonObject c)
+            {
+                Set(symbol.get_Parameter(Marks.ClearWidth.Guid), D(c["width"]), Marks.ClearWidth.Name);
+                Set(symbol.get_Parameter(Marks.ClearHeight.Guid), D(c["height"]), Marks.ClearHeight.Name);
+                Set(symbol.get_Parameter(Marks.ClearSource.Guid), c["source"]!.GetValue<string>(), Marks.ClearSource.Name);
+            }
+            var box = fi.get_BoundingBox(null);
+            log.Add($"door {id}: placed in wall {wall.Id.Value}, host {fi.Host?.Id.Value}, box {box?.Min.X:0.###},{box?.Min.Y:0.###},{box?.Min.Z:0.###} to " +
+                    $"{box?.Max.X:0.###},{box?.Max.Y:0.###},{box?.Max.Z:0.###}, type size {RevitInterior.TypeSize(symbol)}");
+            ids[id] = fi.UniqueId;
+        }
+        doc.Regenerate();
+        // the stamp, from the type's values as Revit now gives them (read the way the reader reads them): a window's,
+        // and a door's (its width and height, no offset)
+        foreach (var (symbol, door) in windows.Where(w => w["clear"] is JsonObject).Select(w => (families[w["id"]!.GetValue<string>()], false))
+                     .Concat(doors.Where(d => d["clear"] is JsonObject).Select(d => (doorFamilies[d["id"]!.GetValue<string>()], true))))
+        {
             var (width, height) = RevitInterior.TypeSize(symbol);
             var values = new ClearValues(symbol.UniqueId, width, height, symbol.get_Parameter(Marks.Operation.Guid)?.AsString()?.Trim(),
-                                         Length(symbol, Marks.ClearWidth), Length(symbol, Marks.ClearHeight), Length(symbol, Marks.ClearOffset),
-                                         symbol.get_Parameter(Marks.ClearSource.Guid)?.AsString()?.Trim());
+                                         Length(symbol, Marks.ClearWidth), Length(symbol, Marks.ClearHeight),
+                                         door ? null : Length(symbol, Marks.ClearOffset),
+                                         symbol.get_Parameter(Marks.ClearSource.Guid)?.AsString()?.Trim(), Door: door);
             Set(symbol.get_Parameter(Marks.ClearConfirmed.Guid),
                 ClearStamp.Make(values, StampedBy, DateTime.Now.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)),
                 Marks.ClearConfirmed.Name);
@@ -183,8 +236,433 @@ internal static class HouseDraw
         }
         t2.Commit();
         if (house["stairs"] is JsonArray stairs && stairs.Count > 0)
-            DrawStairs(doc, stairs.Select(n => n!.AsObject()).ToList(), levels, ids, log);
+            DrawStairs(doc, stairs.Select(n => n!.AsObject()).ToList(), levels, ids, log, profile, house);
+        if (guards.Count > 0)
+            DrawGuards(doc, guards, levels, ids, log, profile!, balusters, rail);
+        // the architect's tick once every guard and handrail of the house is drawn as a railing (step 5)
+        var notDrawn = (house["not_drawn"] as JsonArray ?? []).Select(n => n!.GetValue<string>()).ToList();
+        if (!notDrawn.Contains("guards") && !notDrawn.Contains("handrails") && house["step"]!.GetValue<int>() >= 5)
+        {
+            using var tick = new Transaction(doc, "Gordium: these are all the guards and handrails");
+            tick.Start();
+            Set(doc.ProjectInformation.get_Parameter(Marks.AllGuards.Guid), 1, Marks.AllGuards.Name);
+            tick.Commit();
+        }
         return ids;
+    }
+
+    // ---- doors, railings and guards (step 5) -------------------------------------------------------------------
+
+    /// <summary>A door family of this door's size, made from Revit's Door.rft: its leaf a solid filling the opening
+    /// (from the level up its height, the width of the family, 1 3/4 in thick, centred in the wall), so the door as
+    /// placed is the size its type says. One family per door. Loaded into the project.</summary>
+    private static FamilySymbol DoorFamily(RevitApplication app, Document project, JsonObject d)
+    {
+        var id = d["id"]!.GetValue<string>();
+        double width = D(d["width"]), height = D(d["height"]);
+        var name = $"Gordium test door {id} ({width * 12:0.###} x {height * 12:0.###} in)";
+        var fdoc = app.NewFamilyDocument(Template(app, "Door.rft"));
+        try
+        {
+            using (var t = new Transaction(fdoc, "Gordium: a test door"))
+            {
+                t.Start();
+                var fm = fdoc.FamilyManager;
+                if (fm.CurrentType is null)
+                    fm.NewType(name);
+                fm.Set(FamilyParameterOf(fm, BuiltInParameter.DOOR_WIDTH, BuiltInParameter.FAMILY_WIDTH_PARAM, "Width"), width);
+                fm.Set(FamilyParameterOf(fm, BuiltInParameter.DOOR_HEIGHT, BuiltInParameter.FAMILY_HEIGHT_PARAM, "Height"), height);
+                fdoc.Regenerate();
+                var planes = new FilteredElementCollector(fdoc).OfClass(typeof(ReferencePlane)).Cast<ReferencePlane>()
+                    .Where(p => !string.IsNullOrEmpty(p.Name)).GroupBy(p => p.Name).ToDictionary(g => g.Key, g => g.First().GetPlane().Origin);
+                // Door.rft's Left and Right planes flex with its Width; without them the leaf is centred on the family's origin
+                double left = planes.TryGetValue("Left", out var l) ? l.X : -width / 2, right = planes.TryGetValue("Right", out var rr) ? rr.X : width / 2;
+                double y = planes.TryGetValue("Center (Front/Back)", out var c) ? c.Y : 0;
+                if (Math.Abs(right - left - width) > 1e-6)
+                    throw new InvalidOperationException($"Door.rft's Left and Right planes didn't flex to {width} ft (they are {right - left} apart; " +
+                                                        "its planes: " + string.Join(", ", planes.Keys.Order()) + ")");
+                var profile = new CurveArray();
+                var corners = new[] { new XYZ(left, y, 0), new XYZ(right, y, 0), new XYZ(right, y, height), new XYZ(left, y, height) };
+                for (var i = 0; i < 4; i++)
+                    profile.Append(Line.CreateBound(corners[i], corners[(i + 1) % 4]));
+                var loops = new CurveArrArray();
+                loops.Append(profile);
+                var sketch = SketchPlane.Create(fdoc, Plane.CreateByNormalAndOrigin(XYZ.BasisY, new XYZ(0, y, 0)));
+                const double depth = 1.75 / 12;
+                var leaf = fdoc.FamilyCreate.NewExtrusion(true, loops, sketch, depth);
+                leaf.StartOffset = -depth / 2;
+                leaf.EndOffset = depth / 2;
+                t.Commit();
+            }
+            var family = fdoc.LoadFamily(project) ?? throw new InvalidOperationException($"{name} didn't load into the project");
+            using (var rename = new Transaction(project, "Gordium: name a test door"))
+            {
+                rename.Start();
+                family.Name = name;
+                rename.Commit();
+            }
+            var symbols = family.GetFamilySymbolIds().Select(project.GetElement).OfType<FamilySymbol>().ToList();
+            return symbols.FirstOrDefault(s => RevitInterior.TypeSize(s) is var (sw, sh) && sw is { } a && sh is { } b
+                                               && Math.Abs(a - width) < 1e-9 && Math.Abs(b - height) < 1e-9)
+                   ?? throw new InvalidOperationException($"{name} has no type {width} x {height} ft once loaded (sizes: " +
+                                                          string.Join(", ", symbols.Select(s => RevitInterior.TypeSize(s).ToString())) + ")");
+        }
+        finally
+        {
+            fdoc.Close(false);
+        }
+    }
+
+    /// <summary>A rail profile <paramref name="size"/> square (Profile-Rail.rft), centred across the rail with its top
+    /// on the profile's origin: a rail placed at a height has its top there. Loaded into the project.</summary>
+    private static FamilySymbol RailProfile(RevitApplication app, Document project, double size, List<string> log)
+    {
+        var name = $"Gordium test rail {size * 12:0.###} in square";
+        var fdoc = app.NewFamilyDocument(Template(app, "Profile-Rail.rft"));
+        try
+        {
+            using (var t = new Transaction(fdoc, "Gordium: a rail profile"))
+            {
+                t.Start();
+                var view = new FilteredElementCollector(fdoc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>().FirstOrDefault(v => !v.IsTemplate)
+                           ?? throw new InvalidOperationException("Profile-Rail.rft has no plan view to draw the profile in");
+                var corners = new[] { new XYZ(-size / 2, -size, 0), new XYZ(size / 2, -size, 0), new XYZ(size / 2, 0, 0), new XYZ(-size / 2, 0, 0) };
+                for (var i = 0; i < 4; i++)
+                    fdoc.FamilyCreate.NewDetailCurve(view, Line.CreateBound(corners[i], corners[(i + 1) % 4]));
+                t.Commit();
+            }
+            var family = fdoc.LoadFamily(project) ?? throw new InvalidOperationException($"{name} didn't load into the project");
+            using (var rename = new Transaction(project, "Gordium: name the rail profile"))
+            {
+                rename.Start();
+                family.Name = name;
+                rename.Commit();
+            }
+            var symbol = family.GetFamilySymbolIds().Select(project.GetElement).OfType<FamilySymbol>().FirstOrDefault()
+                         ?? throw new InvalidOperationException($"{name} has no type once loaded");
+            log.Add($"rail profile {name}: family {family.Id.Value}, type {symbol.Id.Value} \"{symbol.Name}\", category {family.FamilyCategory?.BuiltInCategory}");
+            return symbol;
+        }
+        finally
+        {
+            fdoc.Close(false);
+        }
+    }
+
+    /// <summary>A baluster family (Baluster.rft): a box the guard's balusters' width square, from its origin up their
+    /// height (fixed: placed at its base, it is that tall whatever its top reference). Loaded into the project.</summary>
+    private static FamilySymbol BalusterFamily(RevitApplication app, Document project, JsonObject b, List<string> log)
+    {
+        double width = D(b["width"]), height = D(b["top"]) - D(b["bottom"]);
+        var name = $"Gordium test baluster {width * 12:0.###} in x {height * 12:0.###} in";
+        var fdoc = app.NewFamilyDocument(Template(app, "Baluster.rft"));
+        try
+        {
+            using (var t = new Transaction(fdoc, "Gordium: a baluster"))
+            {
+                t.Start();
+                var profile = new CurveArray();
+                var corners = new[] { new XYZ(-width / 2, -width / 2, 0), new XYZ(width / 2, -width / 2, 0), new XYZ(width / 2, width / 2, 0), new XYZ(-width / 2, width / 2, 0) };
+                for (var i = 0; i < 4; i++)
+                    profile.Append(Line.CreateBound(corners[i], corners[(i + 1) % 4]));
+                var loops = new CurveArrArray();
+                loops.Append(profile);
+                var sketch = SketchPlane.Create(fdoc, Plane.CreateByNormalAndOrigin(XYZ.BasisZ, XYZ.Zero));
+                fdoc.FamilyCreate.NewExtrusion(true, loops, sketch, height);
+                t.Commit();
+            }
+            var family = fdoc.LoadFamily(project) ?? throw new InvalidOperationException($"{name} didn't load into the project");
+            using (var rename = new Transaction(project, "Gordium: name the baluster"))
+            {
+                rename.Start();
+                family.Name = name;
+                rename.Commit();
+            }
+            var symbol = family.GetFamilySymbolIds().Select(project.GetElement).OfType<FamilySymbol>().FirstOrDefault()
+                         ?? throw new InvalidOperationException($"{name} has no type once loaded");
+            log.Add($"baluster {name}: family {family.Id.Value}, type {symbol.Id.Value}, category {family.FamilyCategory?.BuiltInCategory}");
+            return symbol;
+        }
+        finally
+        {
+            fdoc.Close(false);
+        }
+    }
+
+    /// <summary>A railing type of the project's first, duplicated: its top rail the profile, its top at
+    /// <paramref name="topHeight"/>; no handrails; no posts; the rails that aren't continuous <paramref name="rails"/>
+    /// (each its top's height); and the balusters <paramref name="baluster"/> describes (one per pattern, from the base
+    /// at its offset, the pattern its spacing long, the first its centre in from the start), or none. Every setting
+    /// Revit refuses is an error, never a railing drawn differently; each is logged.</summary>
+    private static RailingType RailingTypeOf(Document doc, string name, FamilySymbol profile, double topHeight, IEnumerable<double> rails,
+                                             FamilySymbol? balusterFamily, JsonObject? baluster, List<string> log)
+    {
+        var basic = new FilteredElementCollector(doc).OfClass(typeof(RailingType)).Cast<RailingType>().FirstOrDefault()
+                    ?? throw new InvalidOperationException("no railing type in a new project");
+        var type = (RailingType)basic.Duplicate(name);
+        var anyTop = doc.GetElement(type.TopRailType) as ElementType
+                     ?? new FilteredElementCollector(doc).OfClass(typeof(TopRailType)).Cast<ElementType>().FirstOrDefault()
+                     ?? throw new InvalidOperationException("no top rail type in a new project");
+        var topType = (ContinuousRailType)anyTop.Duplicate(name + " top rail");
+        topType.ProfileId = profile.Id;
+        topType.StartOrBottomExtensionStyle = RailExtensionStyle.None;
+        topType.EndOrTopExtensionStyle = RailExtensionStyle.None;
+        topType.StartOrBottomTermination = ElementId.InvalidElementId;
+        topType.EndOrTopTermination = ElementId.InvalidElementId;
+        type.TopRailType = topType.Id;
+        type.TopRailHeight = topHeight;
+        // no handrails of the type's own: a handrail's position can be set only where the type has one (Revit 2027.4,
+        // trial step 5 run 1: "The rail has no primary hand rail" on a type with none); where it has none, there is none
+        if (type.PrimaryHandrailType != ElementId.InvalidElementId)
+            type.PrimaryHandRailPosition = HandRailPosition.None;
+        if (type.SecondaryHandrailType != ElementId.InvalidElementId)
+            type.SecondaryHandRailPosition = HandRailPosition.None;
+        log.Add($"railing type {name}: from \"{basic.Name}\", its own handrails {type.PrimaryHandrailType.Value} / {type.SecondaryHandrailType.Value} " +
+                $"(positions {type.PrimaryHandRailPosition} / {type.SecondaryHandRailPosition})");
+        var structure = type.RailStructure;
+        for (var i = structure.GetNonContinuousRailCount() - 1; i >= 0; i--)
+            structure.RemoveNonContinuousRail(i);
+        var k = 0;
+        foreach (var height in rails)
+        {
+            structure.AddNonContinuousRail($"Gordium rail {++k}", height, 0);
+            structure.GetNonContinuousRail(structure.GetNonContinuousRailCount() - 1).ProfileId = profile.Id;
+        }
+        var placement = type.BalusterPlacement;
+        placement.UseBalusterPerTreadOnStairs = false;
+        var pattern = placement.BalusterPattern;
+        if (pattern.GetBalusterCount() == 0)
+            throw new InvalidOperationException($"railing type {basic.Name}'s baluster pattern has no baluster to set");
+        while (pattern.GetBalusterCount() > 1)
+            pattern.RemoveBaluster(pattern.GetBalusterCount() - 1);
+        var info = pattern.GetBaluster(0);
+        if (balusterFamily is null || baluster is null)
+            info.BalusterFamilyId = ElementId.InvalidElementId;
+        else
+        {
+            double first = D(baluster["first"]) + D(baluster["width"]) / 2, spacing = D(baluster["spacing"]);
+            info.BalusterFamilyId = balusterFamily.Id;
+            info.BaseReferenceName = BalusterInfo.GetReferenceNameForHost();
+            info.BaseOffset = D(baluster["bottom"]);
+            info.TopReferenceName = BalusterInfo.GetReferenceNameForTopRail();
+            info.TopOffset = 0;
+            info.Offset = 0;
+            info.DistanceFromPreviousOrSpace = first;
+            pattern.EndSpace = Math.Max(spacing - first, 0);
+            pattern.DistributionJustification = PatternJustification.Beginning;
+            pattern.ExcessLengthFillBalusterId = ElementId.InvalidElementId;
+        }
+        foreach (var post in new[] { placement.PostPattern.StartPost, placement.PostPattern.EndPost, placement.PostPattern.CornerPost })
+            post.BalusterFamilyId = ElementId.InvalidElementId;
+        log.Add($"railing type {name}: top rail {topType.Id.Value} at {topHeight * 12:0.###} in, {structure.GetNonContinuousRailCount()} other rails, " +
+                $"balusters {(balusterFamily is null ? "none" : $"{balusterFamily.Name} from {D(baluster!["bottom"]) * 12:0.###} in, first at {pattern.GetBaluster(0).DistanceFromPreviousOrSpace * 12:0.###} in, pattern {pattern.Length * 12:0.###} in")}");
+        return type;
+    }
+
+    /// <summary>Each handrail of a stair as a railing on it (Revit's own, made on its treads), its path moved to the
+    /// drawing's (the handrail's inner edge RAIL / 2 inward), the railing on the other side deleted; its type's top rail
+    /// the handrail (marked so), with no balusters. What Revit gives back is logged.</summary>
+    private static void DrawHandrails(Document doc, ElementId stairsId, JsonObject st, FamilySymbol profile, double top, List<string> log)
+    {
+        var id = st["id"]!.GetValue<string>();
+        using var t = new Transaction(doc, "Gordium: the stair's handrails");
+        t.Start();
+        var type = RailingTypeOf(doc, $"Gordium test handrail {id}", profile, top, [], null, null, log);
+        Set(type.get_Parameter(Marks.TopRailIsHandrail.Guid), 1, Marks.TopRailIsHandrail.Name);
+        var made = Railing.Create(doc, stairsId, type.Id, RailingPlacementPosition.Treads).ToList();
+        doc.Regenerate();
+        var (px0, py0) = P(st["path"]![0]!);
+        var (px1, py1) = P(st["path"]![1]!);
+        var len = Math.Sqrt((px1 - px0) * (px1 - px0) + (py1 - py0) * (py1 - py0));
+        double lx = -(py1 - py0) / len, ly = (px1 - px0) / len;              // to the left, looking up the run
+        double A(XYZ p) => (p.X - px0) * lx + (p.Y - py0) * ly;
+        var wanted = st["handrails"]!.AsArray().Select(h => h!.AsObject()).ToDictionary(h => h["side"]!.GetValue<string>());
+        var kept = new HashSet<string>();
+        foreach (var rid in made)
+        {
+            var railing = (Railing)doc.GetElement(rid);
+            var path = railing.GetPath().ToList();
+            var mid = (path[0].GetEndPoint(0) + path[^1].GetEndPoint(1)) / 2;
+            var side = A(mid) > 0 ? "left" : "right";
+            log.Add($"stair {id}: Revit's railing {rid.Value} on its {side}: path " +
+                    string.Join(" ", path.Select(c => $"({c.GetEndPoint(0).X:0.####},{c.GetEndPoint(0).Y:0.####},{c.GetEndPoint(0).Z:0.####})-({c.GetEndPoint(1).X:0.####},{c.GetEndPoint(1).Y:0.####},{c.GetEndPoint(1).Z:0.####})")));
+            if (!wanted.TryGetValue(side, out var h) || !kept.Add(side))
+            {
+                doc.Delete(rid);
+                continue;
+            }
+            var z = path[0].GetEndPoint(0).Z;
+            var (ax, ay) = P(h["path"]![0]!);
+            var (bx, by) = P(h["path"]![1]!);
+            var loop = new CurveLoop();
+            loop.Append(Line.CreateBound(new XYZ(ax, ay, z), new XYZ(bx, by, z)));
+            railing.SetPath(loop);
+            doc.Regenerate();
+            // where the top rail's inner face (its edge nearest the middle) lands, against the house's: Revit placed a
+            // stair railing's rail by its own offset whatever the path (trial step 5 run 3: 0.25 to 1.75 in off the wall,
+            // the house's 3.5 and 3 in), so it is measured from the drawn rail and moved until it is the house's: first
+            // by the path, then by the railing's placement offset either way, each move measured
+            var want = A(new XYZ(D(h["inner"]![0]![0]), D(h["inner"]![0]![1]), 0));
+            double? Inner()
+            {
+                var pts = RailPoints(doc.GetElement(railing.TopRail));
+                return pts.Count == 0 ? null : side == "left" ? pts.Min(A) : pts.Max(A);
+            }
+            var tries = new List<string>();
+            void Shift(double by)
+            {
+                var shifted = new CurveLoop();
+                foreach (var c in railing.GetPath())
+                    shifted.Append(c.CreateTransformed(Transform.CreateTranslation(new XYZ(lx * by, ly * by, 0))));
+                railing.SetPath(shifted);
+            }
+            var param = railing.get_Parameter(BuiltInParameter.STAIRS_RAILING_PLACEMENT_OFFSET);
+            for (var k = 0; k < 6 && Inner() is { } got && Math.Abs(got - want) > 1e-6; k++)
+            {
+                var delta = want - got;
+                tries.Add($"inner {got * 12:0.####} in across, wanted {want * 12:0.####}");
+                if (k < 2)
+                    Shift(delta);
+                else if (param is { IsReadOnly: false })
+                    param.Set(param.AsDouble() + (k % 2 == 0 ? delta : -delta) * (k < 4 ? 1 : -1));
+                doc.Regenerate();
+            }
+            var landed = Inner();
+            log.Add($"stair {id}: handrail {side}: drawn inner face {(landed is { } li ? (li * 12).ToString("0.######", CultureInfo.InvariantCulture) : "none")} in across " +
+                    $"the run's path, the house's {want * 12:0.######} in; moves: {(tries.Count == 0 ? "none" : string.Join(" | ", tries))}; " +
+                    $"placement offset {param?.AsDouble() * 12:0.####} in");
+            if (landed is not { } l2 || Math.Abs(l2 - want) > 1e-6)
+                throw new InvalidOperationException($"stair {id}: its {side} handrail's inner face couldn't be put where the house has it: {log[^1]}");
+        }
+        if (kept.Count != wanted.Count)
+            throw new InvalidOperationException($"stair {id}: Revit made no railing on its {string.Join(", ", wanted.Keys.Except(kept))} side");
+        doc.Regenerate();
+        t.Commit();
+        var stair = (Stairs)doc.GetElement(stairsId);
+        foreach (var rid in stair.GetAssociatedRailings())
+        {
+            var railing = (Railing)doc.GetElement(rid);
+            var topRail = doc.GetElement(railing.TopRail);
+            var box = topRail?.get_BoundingBox(null);
+            log.Add($"stair {id}: railing {rid.Value} host {railing.HostId.Value}, top rail {railing.TopRail.Value} box " +
+                    $"{box?.Min.X:0.####},{box?.Min.Y:0.####},{box?.Min.Z:0.####} to {box?.Max.X:0.####},{box?.Max.Y:0.####},{box?.Max.Z:0.####}, " +
+                    $"handrails {railing.GetHandRails().Count}");
+        }
+    }
+
+    /// <summary>Every vertex of an element's solids (a family's instance geometry included), for where a drawn rail is.</summary>
+    private static List<XYZ> RailPoints(Element? e)
+    {
+        var pts = new List<XYZ>();
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                if (o is Solid s)
+                    foreach (Edge edge in s.Edges)
+                        pts.AddRange(edge.Tessellate());
+                else if (o is GeometryInstance gi && gi.GetInstanceGeometry() is { } inner)
+                    Walk(inner);
+            }
+        }
+        if (e?.get_Geometry(new Options { DetailLevel = ViewDetailLevel.Fine }) is { } geometry)
+            Walk(geometry);
+        return pts;
+    }
+
+    /// <summary>Each solid of an element as its extents along a guard (u from its start along its unit direction),
+    /// across it and up, for the log beside the drawing's members.</summary>
+    private static List<string> SolidsAlong(Element? e, XYZ start, XYZ along, double walk)
+    {
+        var out_ = new List<string>();
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                if (o is Solid { Faces.Size: > 0 } s)
+                {
+                    var pts = s.Edges.Cast<Edge>().SelectMany(x => x.Tessellate()).ToList();
+                    var u = pts.Select(p => (p - start).DotProduct(along)).ToList();
+                    out_.Add($"u {u.Min() * 12:0.###}..{u.Max() * 12:0.###} in, z {(pts.Min(p => p.Z) - walk) * 12:0.###}..{(pts.Max(p => p.Z) - walk) * 12:0.###} in");
+                }
+                else if (o is GeometryInstance gi && gi.GetInstanceGeometry() is { } inner)
+                    Walk(inner);
+            }
+        }
+        if (e?.get_Geometry(new Options { DetailLevel = ViewDetailLevel.Fine }) is { } geometry)
+            Walk(geometry);
+        return out_;
+    }
+
+    /// <summary>Each level guard: the floor along its walking side (a DirectShape in Floors, its top the walking
+    /// surface), a wall at its start and a post (a short wall) at its end, committed and regenerated first; then the
+    /// railing along the floor's edge from the wall's face to the post's, its type's rails and balusters the drawing's.</summary>
+    private static void DrawGuards(Document doc, List<JsonObject> guards, Dictionary<double, Level> levels, Dictionary<string, string> ids,
+                                   List<string> log, FamilySymbol profile, Dictionary<string, FamilySymbol> balusters, double rail)
+    {
+        var floors = Category(doc, BuiltInCategory.OST_Floors);
+        using (var t = new Transaction(doc, "Gordium: what the guards stand on and end against"))
+        {
+            t.Start();
+            foreach (var g in guards)
+            {
+                var z = D(g["level"]);
+                if (!levels.TryGetValue(z, out var level))
+                    levels[z] = level = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+                        .FirstOrDefault(l => Math.Abs(l.ProjectElevation - z) < 1e-9) ?? Level.Create(doc, z);
+                var shape = DirectShape.CreateElement(doc, floors);
+                shape.Name = $"Floor at the guard {g["id"]}";
+                shape.SetShape([Prism(g["floor"]!.AsArray().Select(p => P(p!)).ToList(), z - D(g["slab"]), D(g["slab"]))]);
+                foreach (var w in g["end_walls"]!.AsArray().Select(n => n!.AsObject()))
+                {
+                    var (ax, ay) = P(w["line"]![0]!);
+                    var (bx, by) = P(w["line"]![1]!);
+                    Wall.Create(doc, Line.CreateBound(new XYZ(ax, ay, z), new XYZ(bx, by, z)), WallTypeOf(doc, D(w["thickness"])).Id, level.Id,
+                                D(g["wall_top"]), 0, false, false);
+                }
+            }
+            doc.Regenerate();
+            t.Commit();
+        }
+        foreach (var g in guards)
+        {
+            var id = g["id"]!.GetValue<string>();
+            var z = D(g["level"]);
+            using var t = new Transaction(doc, "Gordium: a guard");
+            t.Start();
+            var type = RailingTypeOf(doc, $"Gordium test guard {id}", profile, D(g["top_rail"]!["top"]),
+                                     g["rails"]!.AsArray().Select(r => D(r!["top"])), balusters[id], g["balusters"]!.AsObject(), log);
+            Set(type.get_Parameter(Marks.TopRailIsHandrail.Guid), 0, Marks.TopRailIsHandrail.Name);
+            var (ax, ay) = P(g["start"]!);
+            var (bx, by) = P(g["end"]!);
+            var loop = new CurveLoop();
+            loop.Append(Line.CreateBound(new XYZ(ax, ay, z), new XYZ(bx, by, z)));
+            var railing = Railing.Create(doc, loop, type.Id, levels[z].Id);
+            if (railing.get_Parameter(BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET) is { IsReadOnly: false } offset)
+                offset.Set(0.0);
+            doc.Regenerate();
+            t.Commit();
+            var topRail = doc.GetElement(railing.TopRail);
+            var box = railing.get_BoundingBox(null);
+            var topBox = topRail?.get_BoundingBox(null);
+            log.Add($"guard {id}: railing {railing.Id.Value} on level {levels[z].Name} ({z:0.###} ft), box {box?.Min.X:0.####},{box?.Min.Y:0.####},{box?.Min.Z:0.####} to " +
+                    $"{box?.Max.X:0.####},{box?.Max.Y:0.####},{box?.Max.Z:0.####}; top rail {railing.TopRail.Value} box {topBox?.Min.Z:0.####} to {topBox?.Max.Z:0.####} " +
+                    $"(drawing {z + D(g["top_rail"]!["bottom"]):0.####} to {z + D(g["top"]):0.####}), rail {rail * 12:0.###} in");
+            // what was drawn, member by member (u along it, z over the walking surface), beside the house's
+            var startPt = new XYZ(ax, ay, z);
+            var dir = (new XYZ(bx, by, z) - startPt).Normalize();
+            var b = g["balusters"]!;
+            var data = new List<string> { $"top rail u 0..{D(g["length"]) * 12:0.###}, z {D(g["top_rail"]!["bottom"]) * 12:0.###}..{D(g["top_rail"]!["top"]) * 12:0.###}" };
+            data.AddRange(g["rails"]!.AsArray().Select(rr => $"rail u 0..{D(g["length"]) * 12:0.###}, z {D(rr!["bottom"]) * 12:0.###}..{D(rr["top"]) * 12:0.###}"));
+            for (var k = 0; k < b["count"]!.GetValue<int>(); k++)
+            {
+                var left = D(b["first"]) + k * D(b["spacing"]);
+                data.Add($"baluster u {left * 12:0.###}..{(left + D(b["width"])) * 12:0.###}, z {D(b["bottom"]) * 12:0.###}..{D(b["top"]) * 12:0.###}");
+            }
+            log.Add($"guard {id}: drawn: " + string.Join("; ", SolidsAlong(railing, startPt, dir, z).Concat(SolidsAlong(topRail, startPt, dir, z))) +
+                    " || the house's: " + string.Join("; ", data));
+            ids[id] = railing.UniqueId;
+        }
     }
 
     // ---- stairs (step 4) ----------------------------------------------------------------------------------------
@@ -197,7 +675,7 @@ internal static class HouseDraw
     /// is regenerated once it is, before anything is read. The architect's tick ("these are all the stairs") is set, as
     /// the architect would once every stair is drawn. Every number Revit gives back is logged.</summary>
     private static void DrawStairs(Document doc, List<JsonObject> stairs, Dictionary<double, Level> levels,
-                                   Dictionary<string, string> ids, List<string> log)
+                                   Dictionary<string, string> ids, List<string> log, FamilySymbol? profile, JsonObject house)
     {
         var floors = Category(doc, BuiltInCategory.OST_Floors);
         var ceilings = Category(doc, BuiltInCategory.OST_Ceilings);
@@ -310,15 +788,17 @@ internal static class HouseDraw
             using (var t = new Transaction(doc, "Gordium: regenerate after the stair"))
             {
                 t.Start();
-                // railings are step 5 (with the guards): one Revit added on its own isn't the drawing's
+                // a railing Revit added on its own isn't the drawing's: the drawing's handrails are drawn next (step 5)
                 if (((Stairs)doc.GetElement(stairsId)).GetAssociatedRailings() is { Count: > 0 } railings)
                 {
-                    log.Add($"stair {id}: {railings.Count} railings Revit added deleted (railings: step 5)");
+                    log.Add($"stair {id}: {railings.Count} railings Revit added deleted (the drawing's own are drawn next)");
                     doc.Delete(railings);
                 }
                 doc.Regenerate();
                 t.Commit();
             }
+            if (st["handrails"] is JsonArray { Count: > 0 })
+                DrawHandrails(doc, stairsId, st, profile!, D(house["handrail_top"]), log);
             var stair = (Stairs)doc.GetElement(stairsId);
             run = (StairsRun)doc.GetElement(run.Id);
             log.Add($"stair {id}: risers {stair.ActualRisersNumber} (drawing {st["risers"]}), riser {stair.ActualRiserHeight * 12:0.######} in " +
@@ -435,7 +915,11 @@ internal static class HouseDraw
 
     /// <summary>Revit's own window template (<c>Window.rft</c>), in the application's family template folder or the
     /// English-Imperial one beside it.</summary>
-    private static string WindowTemplate(RevitApplication app)
+    private static string WindowTemplate(RevitApplication app) => Template(app, "Window.rft");
+
+    /// <summary>One of Revit's own family templates by file name (<c>Door.rft</c>, <c>Baluster.rft</c>,
+    /// <c>Profile-Rail.rft</c>), where <see cref="WindowTemplate"/> looks.</summary>
+    private static string Template(RevitApplication app, string file)
     {
         var tried = new List<string>();
         foreach (var dir in new[]
@@ -446,12 +930,12 @@ internal static class HouseDraw
                                   $"RVT {app.VersionNumber}", "Family Templates", "English-Imperial"),
                  })
         {
-            var path = Path.Combine(dir, "Window.rft");
+            var path = Path.Combine(dir, file);
             tried.Add(path);
             if (File.Exists(path))
                 return path;
         }
-        throw new InvalidOperationException("Revit's Window.rft wasn't found (looked in " + string.Join("; ", tried) + ")");
+        throw new InvalidOperationException($"Revit's {file} wasn't found (looked in " + string.Join("; ", tried) + ")");
     }
 
     /// <summary>A window family of this window's size, made from Window.rft (whose opening cuts the wall from the
