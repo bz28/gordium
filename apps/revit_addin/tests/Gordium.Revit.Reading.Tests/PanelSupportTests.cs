@@ -39,9 +39,12 @@ public sealed class PanelSupportTests
         Assert.False(state.Enabled);                       // the redraw (MarkStale's Show) reads this
         Assert.Equal("Checking...", state.Status(""));
         Assert.Equal("Checking...", state.Status("Added 3 Gordium marks to this project."));
-        state.Stop();
+        Assert.Equal("Checking...", state.Status(""));           // a later greyed redraw: nothing to say
+        Assert.Equal("Added 3 Gordium marks to this project.", state.Stop());   // review round 3: said once it ends
         Assert.True(state.Enabled);
         Assert.Equal("Added 3 Gordium marks to this project.", state.Status("Added 3 Gordium marks to this project."));
+        state.Start();
+        Assert.Equal("", state.Stop());                          // nothing held from before
     }
 
     [Fact]

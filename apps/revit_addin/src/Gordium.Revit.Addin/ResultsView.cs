@@ -183,15 +183,16 @@ internal sealed class ResultsView : C.UserControl
     /// <summary>While a check runs: Check again greyed, and why.</summary>
     internal void Busy(bool busy)
     {
+        var held = "";
         if (busy)
             _checkAgainState.Start();
         else
-            _checkAgainState.Stop();
+            held = _checkAgainState.Stop();
         _again.IsEnabled = _checkAgainState.Enabled;
         if (busy)
             Say(Checking);
         else if (_status.Text == Checking)
-            Say("");                                         // the check stopped without a result (no project open)
+            Say(held);                                       // what the check's redraw had to say, or nothing
     }
 
     private void ShowMissing(IReadOnlyList<string> missing)

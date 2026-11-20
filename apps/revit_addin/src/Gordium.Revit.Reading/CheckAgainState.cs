@@ -16,10 +16,33 @@ public sealed class CheckAgainState
     /// <summary>Whether Check again can be clicked.</summary>
     public bool Enabled => !Busy;
 
-    public void Start() => Busy = true;
+    /// <summary>A line a redraw wanted while busy ("Added 3 Gordium marks to this project."), shown once it ends.</summary>
+    private string _held = "";
 
-    public void Stop() => Busy = false;
+    public void Start()
+    {
+        Busy = true;
+        _held = "";
+    }
 
-    /// <summary>The line to show after a redraw that would show <paramref name="shown"/>: "Checking..." while busy.</summary>
-    public string Status(string shown) => Busy ? Checking : shown;
+    /// <summary>Ends the wait; gives the line a redraw wanted meanwhile (review round 3: a Check again that added
+    /// marks never said so), "" when none.</summary>
+    public string Stop()
+    {
+        Busy = false;
+        var held = _held;
+        _held = "";
+        return held;
+    }
+
+    /// <summary>The line to show after a redraw that would show <paramref name="shown"/>: "Checking..." while busy,
+    /// the line kept for <see cref="Stop"/> (a later redraw with nothing to say, a greyed one, never erases it).</summary>
+    public string Status(string shown)
+    {
+        if (!Busy)
+            return shown;
+        if (shown.Length > 0)
+            _held = shown;
+        return Checking;
+    }
 }
