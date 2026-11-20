@@ -716,6 +716,8 @@ def layout_problems(name: str) -> list[str]:
     problems = []
     if lay.get("format") != LAYOUT or lay.get("units") != house.get("units"):
         return [f"{name}: layout.yaml isn't {LAYOUT} in house.yaml's units"]
+    if lay["units"] != "in":       # every length, area and message here is in inches (review round 3)
+        return [f"{name}: layout.yaml's lengths are in {lay['units']}; a layout is in inches"]
     given = {r["id"]: r for r in house["rooms"]}
     placed, openings, doors = {}, {}, {}
     for lv in lay["levels"]:
@@ -801,7 +803,7 @@ def layout_problems(name: str) -> list[str]:
         gap = lv["elevation"] - (below["elevation"] + below["ceiling"])
         # every level's own slab is a positive number, never 0, below 0 or words (review round 2)
         if "slab" in lv and not thickness(lv["slab"]):
-            problems.append(f"{lv['id']}: its slab {lv['slab']!r} isn't a thickness in inches")
+            problems.append(f"{lv['id']}: its slab {lv['slab']!r} isn't a thickness (inches)")
         elif gap <= 0 or ("slab" in lv and lv["slab"] > gap):
             problems.append(f"{lv['id']}: its slab doesn't fit the {gap:g} between {below['id']}'s ceiling and its floor")
     sizes = lay["sizes"]

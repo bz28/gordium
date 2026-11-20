@@ -317,6 +317,15 @@ def test_a_wall_with_no_thickness_and_a_slanted_room_edge_are_refused(layout):
     assert "main_floor: room garage has an edge that isn't along x or d" in problems
 
 
+def test_a_layout_not_in_inches_is_refused(layout, monkeypatch):
+    # review round 3: the refusals word lengths and areas in inches; a layout in other units (even matching its
+    # house.yaml's) would be misreported, so it is refused outright
+    layout["units"] = "mm"
+    house = r._house(NAME)
+    monkeypatch.setattr(r, "_house", lambda name: {**house, "units": "mm"})
+    assert r.layout_problems(NAME) == [f"{NAME}: layout.yaml's lengths are in mm; a layout is in inches"]
+
+
 def test_a_layout_not_in_the_format_or_house_yamls_units_is_refused(layout):
     layout["units"] = "ft"
     assert r.layout_problems(NAME) == [f"{NAME}: layout.yaml isn't gordium.layout/1 in house.yaml's units"]
