@@ -166,12 +166,19 @@ public static class SiteReader
                 return e;
             var geometry = new List<GeometryItem>(e.Geometry ?? []);
             var failed = e.GeometryFailed;
-            foreach (var sub in held.Select(s => Coarser(With(s))))
+            var building = IsBuildingPart(e);
+            var coarser = new List<GeometryItem>();
+            // in a building, a part's coarser drawing is weighed against the building's Fine faces, never sent as
+            // faces (review round 1); elsewhere it is read as part of the part
+            foreach (var sub in held.Select(s => building ? With(s) : Coarser(With(s))))
             {
+                if (building && sub.CoarserGeometry is { Count: > 0 } subCoarser)
+                    coarser.Add(new InstanceItem(subCoarser));
                 failed |= sub.GeometryFailed;
                 geometry.Add(new InstanceItem(sub.Geometry is { } g && AnyFace(g) || sub.Geometry is { } o && AnyOther(o) ? sub.Geometry : null));
             }
-            return e with { Geometry = geometry, GeometryFailed = failed };
+            return coarser.Count == 0 ? e with { Geometry = geometry, GeometryFailed = failed }
+                : e with { Geometry = geometry, GeometryFailed = failed, CoarserGeometry = [.. e.CoarserGeometry ?? [], .. coarser] };
         }
         var gone = folded.Select(e => e.UniqueId).ToHashSet();
         return elements.Where(e => !gone.Contains(e.UniqueId)).Select(e => Coarser(With(e))).ToList();
@@ -185,9 +192,28 @@ public static class SiteReader
     /// box, touching unknown), never given a place by its coarser drawing alone.</summary>
     public static RevitElement Coarser(RevitElement e)
     {
-        if (IsBuildingPart(e) || e.CoarserGeometry is not { Count: > 0 } more || e.Geometry is not { } fine || !AnyFace(fine))
+        if (IsBuildingPart(e) || Drawn(e.CoarserGeometry) is not { Count: > 0 } more || e.Geometry is not { } fine || !AnyFace(fine))
             return e;
         return e with { Geometry = [.. fine, new InstanceItem(more)], CoarserGeometry = null };
+    }
+
+    /// <summary>What a coarser detail level actually draws: its items with every nested family that gives nothing
+    /// there (at any depth) left out, since a part shown at Fine only is already read from Fine and draws nothing to
+    /// add (review round 1); a piece of a kind the reader doesn't know is kept. Null for none.</summary>
+    public static IReadOnlyList<GeometryItem>? Drawn(IReadOnlyList<GeometryItem>? items)
+    {
+        if (items is null)
+            return null;
+        var kept = new List<GeometryItem>();
+        foreach (var i in items)
+            if (i is InstanceItem inst)
+            {
+                if (Drawn(inst.Items) is { Count: > 0 } inner)
+                    kept.Add(new InstanceItem(inner));
+            }
+            else
+                kept.Add(i);
+        return kept.Count > 0 ? kept : null;
     }
 
     /// <summary>Whether a sub-component is folded into its host: it isn't a building part (a building category or a

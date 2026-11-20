@@ -396,6 +396,44 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     }
 
     [Fact]
+    public async Task A_coarser_part_inside_the_buildings_box_but_off_its_solids_is_flagged()
+    {
+        // review round 1 (P0): an L-shaped door whose notch is filled at Coarse only; the notch is inside Fine's box,
+        // so comparing boxes missed it
+        var door = FakeRevit.Family("door", [Block(20, 29, 23, 30, 0, 7), Block(20, 30, 21, 33, 0, 7)], "OST_Doors", "Doors")
+            with { CoarserGeometry = [Block(21, 30, 23, 33, 0, 7)] };
+        var b = (await Site(House(door)))["buildings"]!.AsArray().Single(x => x!["id"]!.GetValue<string>() == "door")!.AsObject();
+        Assert.Equal(["tool_words"], Codes(b));
+    }
+
+    [Fact]
+    public async Task A_part_nested_in_a_building_never_adds_its_coarser_drawing_as_faces()
+    {
+        // review round 1: a trim nested in a window was sent three times (Fine, Medium, Coarse) as the window's faces
+        var win = FakeRevit.Family("win", [Block(20, 29, 23, 30, 3, 7)], "OST_Windows", "Windows")
+            with { CoarserGeometry = [Block(20, 29, 23, 30, 3, 7)] };
+        var trim = FakeRevit.Family("trim", [Block(20, 28, 23, 29, 3, 4)])
+            with { SuperComponent = "win", CoarserGeometry = [Block(20, 28, 23, 29, 3, 4)] };
+        var b = (await Site(House(win, trim)))["buildings"]!.AsArray().Single(x => x!["id"]!.GetValue<string>() == "win")!.AsObject();
+        Assert.Equal(12, b["faces"]!.AsArray().Count);
+        Assert.Empty(Codes(b));
+    }
+
+    [Fact]
+    public async Task A_nested_part_shown_at_fine_only_draws_nothing_to_add()
+    {
+        // review round 1: a nested family giving nothing at Medium or Coarse made a door "bigger" and a shed's place
+        // unknown, though Fine had read both
+        var door = FakeRevit.Family("door", [Block(20, 29, 23, 30, 0, 7)], "OST_Doors", "Doors")
+            with { CoarserGeometry = [Block(20, 29, 23, 30, 0, 7), new InstanceItem([])] };
+        var b = (await Site(House(door)))["buildings"]!.AsArray().Single(x => x!["id"]!.GetValue<string>() == "door")!.AsObject();
+        Assert.Empty(Codes(b));
+        var shed = FakeRevit.Family("shed", [Block(48, 90, 56, 98, 0, 8)])
+            with { CoarserGeometry = [Block(48, 90, 56, 98, 0, 8), new InstanceItem(null)] };
+        Assert.False(LeftOut(await Site(House(shed)), "shed")["touching"]!.GetValue<bool>());
+    }
+
+    [Fact]
     public async Task A_building_part_nested_in_a_family_is_still_a_building()
     {
         // review round 1: folded into a Generic Model kit, a shared nested window vanished into a left-out family,

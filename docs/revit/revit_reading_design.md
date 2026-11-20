@@ -255,8 +255,11 @@ neither left out nor unsent (Snowdon Towers has stairs).
   of it (`SiteReader.Coarser`): its box, footprint and definition can only grow, so a part drawn only at Coarse is
   never missed; it never gives a place to a family with no face at Fine, which keeps no box (touching unknown). A
   building's faces are still sent from Fine alone (the real shape); its box takes the coarser geometry too, and a
-  building whose coarser geometry reaches past its Fine faces gets a problem saying it may be bigger than measured
-  (`tool_words`). Tried in Revit 2027.4 (`DetailCheck`, 2026-11-19): a Generic Model family holding a 4 ft box shown
+  building whose coarser drawing doesn't repeat its Fine one (a point or a face Fine doesn't have: a part beyond
+  Fine's box, or inside it but off its solids) gets a problem saying it may be bigger than measured (`tool_words`;
+  a simpler coarser drawing is flagged too, which only asks for review). A part nested in a building adds its
+  coarser drawing to that test, never to the building's faces. A nested family that draws nothing at a coarser
+  level adds nothing (it is read from Fine). Tried in Revit 2027.4 (`DetailCheck`, 2026-11-19): a Generic Model family holding a 4 ft box shown
   at every level and a 2 ft box shown at Coarse only reads one solid at Fine and both at Coarse; read at Fine alone
   its footprint ran x 0 to 4 ft, read as built x 0 to 12 ft. Reader pins: `A_part_drawn_only_at_a_coarser_detail_level_is_never_missed`.
 - *Scene 18 drawn from DirectShapes.* Its walls, slabs, window, curtain panel and mullions are DirectShapes in those

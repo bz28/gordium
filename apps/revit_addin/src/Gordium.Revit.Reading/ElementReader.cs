@@ -13,6 +13,7 @@ internal sealed class Gathered
     public readonly List<JsonObject> Problems = [];
     public readonly BoxBuilder Box = new();
     public readonly List<(double X, double Y)> Plan = [];
+    public readonly List<Xyz> Points = [];
     public bool HasFaces, Other, MissingPart, AnySolid, AnyMesh, AllClosed = true;
 
     public void Point(Xyz p)
@@ -21,6 +22,7 @@ internal sealed class Gathered
             throw new ArgumentException("a point of the model isn't a number");
         Box.Add(p);
         Plan.Add((p.X, p.Y));
+        Points.Add(p);
     }
 
     public void Problem(JsonObject p)
@@ -135,20 +137,32 @@ internal sealed class Read(RevitModel model)
             BuildingBoxes.Add(box);
     }
 
-    /// <summary>A building part's geometry at Medium and Coarse detail, against its Fine faces: its box, and whether it
-    /// reaches past them (more than the model's vertex tolerance) or holds anything the reader can't place (a piece of
-    /// a kind it doesn't know, a nested family that gives nothing), either of which may make the building bigger
-    /// than measured. Null when there is none.</summary>
+    /// <summary>A building part's geometry at Medium and Coarse detail, against its Fine drawing: its box, and whether
+    /// it draws anything Fine doesn't. The cautious test (review round 1): the coarser drawing passes only if it
+    /// repeats Fine, every point it has within the model's vertex tolerance of a Fine point and every face it sends
+    /// one Fine sends too; anything else (a part inside Fine's box but off its solids, a curved piece, a piece of a
+    /// kind the reader doesn't know) may make the building bigger than measured. A coarser drawing that is smaller
+    /// or simpler than Fine is flagged too: that only asks for review. Null when there is none.</summary>
     private (Box3? Box, bool Bigger)? CoarserBox(RevitElement e, Gathered fine)
     {
-        if (e.CoarserGeometry is not { Count: > 0 } more)
+        if (SiteReader.Drawn(e.CoarserGeometry) is not { Count: > 0 } more)
             return null;
         var c = Walk(more, ToShared, e);
         var tol = model.VertexTolerance;
-        var past = c.Box.Box is { } cb && (fine.Box.Box is not { } fb
-            || cb.Min.X < fb.Min.X - tol || cb.Min.Y < fb.Min.Y - tol || cb.Min.Z < fb.Min.Z - tol
-            || cb.Max.X > fb.Max.X + tol || cb.Max.Y > fb.Max.Y + tol || cb.Max.Z > fb.Max.Z + tol);
-        return (c.Box.Box, past || c.Other || c.MissingPart);
+        var newPoint = c.Points.Any(p => !fine.Points.Any(q => p.DistanceTo(q) <= tol));
+        var fineFaces = fine.Faces.Select(FaceKey).ToHashSet();
+        var newFace = c.Faces.Any(f => !fineFaces.Contains(FaceKey(f)));
+        return (c.Box.Box, newPoint || newFace || c.Other || c.MissingPart || c.Problems.Count > fine.Problems.Count);
+    }
+
+    /// <summary>A face as its corners, rounded to a ten-thousandth of a foot and sorted: the same face from any start
+    /// and either way round.</summary>
+    private static string FaceKey(JsonObject face)
+    {
+        IEnumerable<string> Corners(JsonNode? ring) => (ring?.AsArray() ?? []).Select(p => string.Join(",",
+            p!.AsArray().Select(v => Math.Round(v!.GetValue<double>(), 4).ToString("R", System.Globalization.CultureInfo.InvariantCulture))));
+        var holes = (face["holes"]?.AsArray() ?? []).Select(h => string.Join(";", Corners(h).Order()));
+        return string.Join(";", Corners(face["points"]).Order()) + "|" + string.Join("|", holes.Order());
     }
 
     /// <summary>A floor block's height as drawn, from its mark "&lt;story&gt;;&lt;height&gt;", or null when it can't be read
