@@ -581,8 +581,8 @@
 <line x1="1008" y1="375.1" x2="1202.4" y2="375.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <text x="1016" y="383.1" font-size="5.5" text-anchor="start" fill="#5a5a5a" xml:space="preserve">INTERIOR DRAWING CHECKED</text>
 <text x="1016" y="392.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">fingerprint</text>
-<text x="1016" y="400.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">e4b39a9836e911b204ea8ba4bb1aee512fd57741d170856fba14fd16c1ec</text>
-<text x="1016" y="408.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">c00c (sha256 of the description as sorted-key JSON, the check's own)</text>
+<text x="1016" y="400.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">cd8f828b682529f702e795d5b99d46b51ae28aa09715cde370842cfaeb2a</text>
+<text x="1016" y="408.1" font-size="5.5" text-anchor="start" fill="#1a1a1a" xml:space="preserve">8bdd (sha256 of the description as sorted-key JSON, the check's own)</text>
 <line x1="1008" y1="418.1" x2="1202.4" y2="418.1" stroke="#8c8c8c" stroke-width="0.3"/>
 <polygon points="1016,426.1 1194.4,426.1 1194.4,523.3 1016,523.3" fill="none" stroke="#8c8c8c" stroke-width="0.5" stroke-dasharray="2 2"/>
 <text x="1105.2" y="476.7" font-size="5.5" text-anchor="middle" fill="#5a5a5a" xml:space="preserve">ARCHITECT'S STAMP AND SIGNATURE</text>
