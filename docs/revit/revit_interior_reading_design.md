@@ -7,7 +7,9 @@
 **Status: agreed by Ben, 2026-11-19** (his four decisions are in section 8). Each step of section 7 is its own
 PR; step 1 (protocol 1.2: the worker and the C# client take an interior) is built; step 2 (the marks and the marking
 list, [the add-in's README](../../apps/revit_addin/README.md#the-architects-marks-interior-step-2)) is built and
-tried in Revit 2027.4 on Snowdon Towers (section 9); the rest are not yet.
+tried in Revit 2027.4 on Snowdon Towers (section 9); step 3 (rooms and marked escape windows,
+[README](../../apps/revit_addin/README.md#rooms-and-escape-windows-interior-step-3)) is built and tested on fake
+records, its Revit recordings of houses 1, 2 and 5 still to make in the trial; the rest are not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -68,9 +70,11 @@ exactly:
   `rooms`. So the reader also looks for enclosed areas with no Room on each level, and for Rooms that are unplaced,
   not enclosed or redundant, and for any closed workset or unloaded link (a room could be in it); while any exists,
   it is listed first in the marking list and `rooms` is left out (not read), until the architect places a Room or
-  says the area isn't a room. (**To check:** how exactly to find
-  enclosed areas with no Room; until that is settled, the reader can't claim to have seen every room, and `rooms` is
-  left out.)
+  says the area isn't a room. **Built in step 3:** the enclosed areas are Revit's own plan circuits, every level's
+  for the last phase (`Document.get_PlanTopology(level, phase).Circuits`, each `PlanCircuit.IsRoomLocated`), the
+  ones Revit's own "place rooms" uses; an area that isn't a room is said by placing a Room in it marked Sleeping
+  room No (no other way of saying it is built yet). To confirm in the trial: that a circuit with no Room shows as one
+  on real models.
 - **The reader may propose, never decide.** A room named "Bedroom 2" can be shown as a suggestion in the add-in's
   marking list, marked "suggested"; it is sent as `sleeping: true` only once the architect has accepted it
   themselves, a fact about their own design. A suggestion alone is never sent.

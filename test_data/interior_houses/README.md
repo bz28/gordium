@@ -7,6 +7,8 @@ Five synthetic houses (none is a real house) written in the host-neutral [interi
 
 `packages/model_measurement/tests/test_interior_houses.py` checks the code's numbers against `expected.yaml` exactly (to a millionth), then runs the measured parts through the checker's per-part rows with SYNTHETIC rules (made-up rules, never the code's text).
 
+**Drawn in a host.** A host that reads a house's inside itself (the Revit add-in) draws houses from their own data (`python -m model_measurement.interior.recordings draw`), reads them with its reader and records what it sent in `recorded/<host>/<house>.json`. `packages/model_measurement/tests/test_interior_recordings.py` measures every recording on every push and compares it with `expected.yaml` (`model_measurement/interior/recordings.py`): each building step of the [Revit interior plan](../../docs/revit/revit_interior_reading_design.md) (section 7) names its houses and the measures in its scope, which must equal the hand-worked ones; every other measure must come back not measured, never a value. `expected.yaml` is never edited to fit a host. Step 3 (rooms and escape windows): houses 1, 2 and 5; their Revit recordings are made in the Windows trial (`apps/revit_addin/README.md`).
+
 | House | Units | What it tests |
 |---|---|---|
 | `1_ranch_compliant` | in | One story, two bedrooms, each with an escape window that complies: a casement and a double-hung (grade-floor: within 44 in of the ground); a side-hinged exit door; a fixed window not marked as an escape opening; no stairs |
