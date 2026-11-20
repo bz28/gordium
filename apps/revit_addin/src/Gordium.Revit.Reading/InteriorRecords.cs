@@ -1,0 +1,156 @@
+namespace Gordium.Revit.Reading;
+
+// What the Revit layer reads from a model for the house's inside (docs/revit/revit_interior_reading_design.md,
+// sections 2 and 4; section 7, step 3: rooms and marked escape windows), as plain records: nothing here is a Revit
+// type, so the interior reader's decisions (InteriorReader) are built and tested without Revit. The Revit layer
+// (Gordium.Revit.Addin/RevitInterior.cs) fills each record from the API named beside it and decides nothing. Every
+// point is in Revit's internal coordinates and feet, as the API gives it; the reader alone turns it into shared
+// coordinates (RevitModel.InternalToShared). The marks themselves are RevitModel.Marked's (step 2).
+
+/// <summary>Everything the interior reader needs beyond the marks.</summary>
+public sealed record InteriorRecords
+{
+    /// <summary>One record per Room the marks list (<see cref="RevitModel.Marked"/>), by <c>UniqueId</c>.</summary>
+    public IReadOnlyList<RoomRecord> Rooms { get; init; } = [];
+
+    /// <summary>One record per window and door the marks list, by <c>UniqueId</c>.</summary>
+    public IReadOnlyList<OpeningRecord> Openings { get; init; } = [];
+
+    /// <summary>Every enclosed area on every level, for the last phase (<c>Document.get_PlanTopology(level, phase)
+    /// .Circuits</c>): an area with no Room in it may be a bedroom nobody placed a Room in (design note, section 2).
+    /// Null when the Revit layer couldn't read them: then no room can be read.</summary>
+    public IReadOnlyList<EnclosedArea>? EnclosedAreas { get; init; }
+
+    /// <summary>Every linked Revit model (<c>RevitLinkInstance</c>).</summary>
+    public IReadOnlyList<InteriorLink> Links { get; init; } = [];
+}
+
+/// <summary>An enclosed area on a level (a <c>PlanCircuit</c>).</summary>
+/// <param name="Level">The level's name (<c>Level.Name</c>), for the words.</param>
+/// <param name="Area">Its area (<c>PlanCircuit.Area</c>, sq ft).</param>
+/// <param name="HasRoom"><c>PlanCircuit.IsRoomLocated</c>.</param>
+/// <param name="PointInside"><c>PlanCircuit.GetPointInside()</c> at the level's elevation (internal), for the words.</param>
+public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz PointInside);
+
+/// <summary>A linked Revit model, for the interior: whether its contents are known, where it reaches, and whether it
+/// holds rooms, windows or doors (design note, section 4: a link's rooms or windows leave that kind not read; a loaded
+/// link reaching a room's plan leaves that room's floor and ceilings out).</summary>
+/// <param name="UniqueId">The link instance's <c>UniqueId</c>.</param>
+/// <param name="Name">Its name, for the words.</param>
+/// <param name="Loaded"><c>RevitLinkType.GetLinkedFileStatus()</c> is Loaded and <c>GetLinkDocument()</c> isn't null.</param>
+/// <param name="Box">The link instance's box (<c>get_BoundingBox(null)</c>), or null when Revit gives none.</param>
+/// <param name="Rooms">Rooms in the linked document (0 when not loaded: not known, see <paramref name="Loaded"/>).</param>
+/// <param name="WindowsAndDoors">Windows and doors in it.</param>
+/// <param name="HasLinks">The linked document holds links of its own (their contents aren't read).</param>
+public sealed record InteriorLink(string UniqueId, string Name, bool Loaded, RevitBox? Box, int Rooms, int WindowsAndDoors,
+                                  bool HasLinks);
+
+/// <summary>A Room's own geometry and what stands in, under and over it.</summary>
+public sealed record RoomRecord
+{
+    /// <summary><c>Room.UniqueId</c>.</summary>
+    public required string UniqueId { get; init; }
+
+    /// <summary>Its level's name (<c>Room.Level.Name</c>), for the words.</summary>
+    public string? Level { get; init; }
+
+    /// <summary>Its level's elevation in internal coordinates (<c>Room.Level.ProjectElevation</c>, to check), or null.</summary>
+    public double? LevelElevation { get; init; }
+
+    /// <summary><c>Room.BaseOffset</c>.</summary>
+    public double? BaseOffset { get; init; }
+
+    /// <summary>The room's boundary at the finished wall faces (<c>Room.GetBoundarySegments</c> with
+    /// <c>SpatialElementBoundaryLocation.Finish</c>), each loop's segments in order; null when Revit gave none.</summary>
+    public IReadOnlyList<IReadOnlyList<BoundarySegmentRecord>>? Boundary { get; init; }
+
+    /// <summary>Every element whose solid crosses the room's plan from just above its floor to just below its level's
+    /// computation height (<c>ElementIntersectsSolidFilter</c> with the boundary extruded): a wall, a column standing
+    /// inside the room that doesn't bound it. Null when it couldn't be looked for.</summary>
+    public IReadOnlyList<NearbyElement>? Inside { get; init; }
+
+    /// <summary>The floors (<c>OST_Floors</c>, <c>OST_StructuralFoundation</c>) whose box reaches the room's plan within
+    /// a foot of its floor, with their faces. Null when it couldn't be looked for.</summary>
+    public IReadOnlyList<NearbyElement>? Under { get; init; }
+
+    /// <summary>Every element whose box reaches over the room's plan above its floor, with its faces: what the ceilings
+    /// are read from. Null when it couldn't be looked for.</summary>
+    public IReadOnlyList<NearbyElement>? Over { get; init; }
+}
+
+/// <summary>One segment of a room's boundary (<c>BoundarySegment</c>): its ends, whether its curve is a <c>Line</c>,
+/// and the element bounding it there (<c>BoundarySegment.ElementId</c>: a wall, a room separation line), by
+/// <c>UniqueId</c> (null when none, or in a linked model).</summary>
+public sealed record BoundarySegmentRecord(Xyz Start, Xyz End, bool IsLine, string? Element);
+
+/// <summary>An element near a room: its category, what hosts it, and its faces (where asked).</summary>
+/// <param name="UniqueId"><c>Element.UniqueId</c>.</param>
+/// <param name="BuiltInCategory">Its category's built-in name (<c>OST_Walls</c>), empty for none.</param>
+/// <param name="Name">For the words.</param>
+/// <param name="Host">A family instance's host (<c>FamilyInstance.Host</c>), by <c>UniqueId</c>, or null.</param>
+/// <param name="Faces">Its solids' faces (<c>get_Geometry</c>, Fine, a family's instance geometry included), or null
+/// when not asked (<see cref="RoomRecord.Inside"/>).</param>
+/// <param name="GeometryFailed"><c>get_Geometry</c> threw, or gave something other than solids, meshes or curves.</param>
+public sealed record NearbyElement(string UniqueId, string BuiltInCategory, string? Name = null, string? Host = null,
+                                   IReadOnlyList<SurfaceRecord>? Faces = null, bool GeometryFailed = false);
+
+/// <summary>A face of a solid (<c>Face</c>), or a mesh read as one.</summary>
+/// <param name="Planar">A <c>PlanarFace</c> (anything else, a curved face or a mesh, is not read exactly).</param>
+/// <param name="Normal"><c>PlanarFace.FaceNormal</c> (internal); zero for any other face.</param>
+/// <param name="Loops"><c>GetEdgesAsCurveLoops()</c>: each loop's curves in order.</param>
+/// <param name="Points">Points on it, for where it stands: a planar face's loop points; any other face's
+/// <c>Triangulate()</c> vertices.</param>
+public sealed record SurfaceRecord(bool Planar, Xyz Normal, IReadOnlyList<IReadOnlyList<LoopCurve>> Loops, IReadOnlyList<Xyz> Points);
+
+/// <summary>A window's or door's placement: what the escape opening's room, sill and clear opening are read from and
+/// checked against.</summary>
+public sealed record OpeningRecord
+{
+    /// <summary><c>Element.UniqueId</c>.</summary>
+    public required string UniqueId { get; init; }
+
+    /// <summary><c>FamilyInstance.get_FromRoom(last phase)</c>'s <c>UniqueId</c>, or null.</summary>
+    public string? FromRoom { get; init; }
+
+    /// <summary><c>FamilyInstance.get_ToRoom(last phase)</c>'s <c>UniqueId</c>, or null.</summary>
+    public string? ToRoom { get; init; }
+
+    /// <summary>The host (<c>FamilyInstance.Host</c>): a wall's <c>UniqueId</c>, or null.</summary>
+    public string? Host { get; init; }
+
+    /// <summary>Whether the host is a wall (<c>Wall</c>).</summary>
+    public bool HostIsWall { get; init; }
+
+    /// <summary>The instance's level's elevation (<c>Level.ProjectElevation</c> of its <c>LevelId</c>), internal, or null.</summary>
+    public double? LevelElevation { get; init; }
+
+    /// <summary>Its Sill Height (<c>INSTANCE_SILL_HEIGHT_PARAM</c>), or null when it has none.</summary>
+    public double? SillHeight { get; init; }
+
+    /// <summary>The instance's point (<c>LocationPoint.Point</c>), internal, or null.</summary>
+    public Xyz? Location { get; init; }
+
+    /// <summary><c>FamilyInstance.HandOrientation</c>: along the wall.</summary>
+    public Xyz? Along { get; init; }
+
+    /// <summary>The type's own Width and Height (<c>WINDOW_WIDTH</c> / <c>WINDOW_HEIGHT</c> on the type, else
+    /// <c>FAMILY_WIDTH_PARAM</c> / <c>FAMILY_HEIGHT_PARAM</c>), or null when the type has none (a family sized per
+    /// window, or size parameters of other names).</summary>
+    public double? TypeWidth { get; init; }
+
+    /// <inheritdoc cref="TypeWidth"/>
+    public double? TypeHeight { get; init; }
+
+    /// <summary>Every length parameter on the type, by name (<c>Parameter.Definition.Name</c>, <c>AsDouble()</c>): a
+    /// maker's clear-opening parameter the stamp names is checked against its value now.</summary>
+    public IReadOnlyDictionary<string, double> TypeLengths { get; init; } = new Dictionary<string, double>();
+
+    /// <summary>Every point of the window's own drawn geometry as placed (<c>get_Geometry</c>, Fine: its solids' edge
+    /// points), internal; null when it gives none.</summary>
+    public IReadOnlyList<Xyz>? Placed { get; init; }
+
+    /// <summary>Every point of the faces of the host wall that this window cut (<c>Element.GetGeneratingElementIds</c>
+    /// of the wall's faces naming this window), internal; null when the host isn't a wall or no such face was found:
+    /// the bottom of the wall opening, which the sill line is checked against (design note, section 4).</summary>
+    public IReadOnlyList<Xyz>? WallOpening { get; init; }
+}

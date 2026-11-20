@@ -138,7 +138,12 @@ public static class MarkingList
         var problems = (setup ?? []).Where(s => s.Action == MarkSetupAction.Conflict)
             .Select(s => $"{s.Mark.Name}: {s.Words}").ToList();
         var blockers = MarkReading.RoomBlockers(model).Select(Blocker).OrderBy(b => b, StringComparer.OrdinalIgnoreCase).ToList();
-        var summary = Summary(rows, blockers.Count);
+        var placement = blockers.Count;
+        // with the model's inside read (step 3): every enclosed area with no Room, closed workset and link that could
+        // hold one stops every room being read too, so it is listed first (design note, section 2)
+        var others = InteriorReader.OtherRoomBlockers(model);
+        blockers.AddRange(others);
+        var summary = Summary(rows, placement, others.Count);
         return new(problems, blockers, summary, rows);
     }
 
@@ -177,7 +182,7 @@ public static class MarkingList
         }
     }
 
-    private static string Label(MarkedElement e)
+    internal static string Label(MarkedElement e)
     {
         var what = string.Join(": ", new[] { e.Family, e.Name }.Where(s => !string.IsNullOrWhiteSpace(s)));
         if (what.Length == 0)
@@ -212,12 +217,17 @@ public static class MarkingList
         return new(m, MarkState.NotUnderstood, word, null, words);
     }
 
-    private static List<string> Summary(List<MarkingRow> rows, int blockers)
+    private static List<string> Summary(List<MarkingRow> rows, int placement, int others)
     {
         var lines = new List<string>();
-        if (blockers > 0)
-            lines.Add((blockers == 1 ? "1 Room is" : $"{blockers} Rooms are") + " unplaced, not enclosed or redundant, " +
+        var blockers = placement + others;
+        if (placement > 0)
+            lines.Add((placement == 1 ? "1 Room is" : $"{placement} Rooms are") + " unplaced, not enclosed or redundant, " +
                       "so no room is read for egress until each is placed or deleted.");
+        if (others > 0)
+            lines.Add((others == 1 ? "1 enclosed area, workset or link" : $"{others} enclosed areas, worksets or links") +
+                      " listed above could hide a room, " +
+                      "so no room is read for egress until each is resolved.");
         void Flag(MarkedKind[] kinds, MarkDefinition m, string plural, string consequence)
         {
             var cells = rows.Where(r => kinds.Contains(r.Kind)).Select(r => r.Cells.First(c => c.Mark == m)).ToList();
