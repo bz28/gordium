@@ -160,17 +160,20 @@ public static class SiteReader
         if (folded.Count == 0)
             return elements.Select(Coarser).ToList();
         var subs = folded.GroupBy(e => e.SuperComponent!).ToDictionary(g => g.Key, g => g.ToList());
-        RevitElement With(RevitElement e)
+        // inBuilding: e is a building part, or sits in one at any depth (review round 2: only the direct host was
+        // looked at, so a part two levels down still sent its coarser drawing as the building's faces)
+        RevitElement With(RevitElement e, bool inBuilding)
         {
             if (!subs.TryGetValue(e.UniqueId, out var held))
                 return e;
             var geometry = new List<GeometryItem>(e.Geometry ?? []);
             var failed = e.GeometryFailed;
-            var building = IsBuildingPart(e);
+            var building = inBuilding || IsBuildingPart(e);
             var coarser = new List<GeometryItem>();
-            // in a building, a part's coarser drawing is weighed against the building's Fine faces, never sent as
-            // faces (review round 1); elsewhere it is read as part of the part
-            foreach (var sub in held.Select(s => building ? With(s) : Coarser(With(s))))
+            // in a building, a part's coarser drawing (and its own parts', at any depth) is carried up to be weighed
+            // against the building's Fine faces, never sent as faces (review rounds 1, 2); elsewhere it is read as
+            // part of the part
+            foreach (var sub in held.Select(s => building ? With(s, true) : Coarser(With(s, false))))
             {
                 if (building && sub.CoarserGeometry is { Count: > 0 } subCoarser)
                     coarser.Add(new InstanceItem(subCoarser));
@@ -181,7 +184,7 @@ public static class SiteReader
                 : e with { Geometry = geometry, GeometryFailed = failed, CoarserGeometry = [.. e.CoarserGeometry ?? [], .. coarser] };
         }
         var gone = folded.Select(e => e.UniqueId).ToHashSet();
-        return elements.Where(e => !gone.Contains(e.UniqueId)).Select(e => Coarser(With(e))).ToList();
+        return elements.Where(e => !gone.Contains(e.UniqueId)).Select(e => Coarser(With(e, false))).ToList();
     }
 
     /// <summary>A family's geometry at the coarser detail levels (Medium and Coarse), read as part of it (reading

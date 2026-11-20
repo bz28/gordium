@@ -420,6 +420,49 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
     }
 
     [Fact]
+    public async Task A_part_nested_two_levels_down_in_a_building_never_adds_its_coarser_drawing_as_faces()
+    {
+        // review round 2: only the direct host was checked, so a bead in a trim in a window sent its coarser drawing
+        // as the window's faces, never weighed
+        var win = FakeRevit.Family("win", [Block(20, 29, 23, 30, 3, 7)], "OST_Windows", "Windows")
+            with { CoarserGeometry = [Block(20, 29, 23, 30, 3, 7)] };
+        var trim = FakeRevit.Family("trim", [Block(20, 28, 23, 29, 3, 4)]) with { SuperComponent = "win" };
+        var bead = FakeRevit.Family("bead", [Block(20, 27.5, 23, 28, 3, 3.5)])
+            with { SuperComponent = "trim", CoarserGeometry = [Block(20, 27.5, 23, 28, 3, 3.5)] };
+        JsonObject Win(JsonObject site) => site["buildings"]!.AsArray().Single(x => x!["id"]!.GetValue<string>() == "win")!.AsObject();
+        var b = Win(await Site(House(win, trim, bead)));
+        Assert.Equal(18, b["faces"]!.AsArray().Count);
+        Assert.Empty(Codes(b));
+        b = Win(await Site(House(win, trim, bead with { CoarserGeometry = [Block(20, 26, 23, 28, 3, 3.5)] })));
+        Assert.Equal(18, b["faces"]!.AsArray().Count);
+        Assert.Equal(["tool_words"], Codes(b));
+    }
+
+    [Fact]
+    public async Task A_detailed_family_drawn_the_same_at_every_level_is_read_quickly()
+    {
+        // review round 2: every coarser point was compared with every Fine point, on Revit's own thread
+        const int n = 300;
+        var v = new List<Xyz>();
+        for (var j = 0; j <= n; j++)
+            for (var i = 0; i <= n; i++)
+                v.Add(new Xyz(20 + 3.0 * i / n, 29 + 1.0 * j / n, 3));
+        var t = new List<(int, int, int)>();
+        for (var j = 0; j < n; j++)
+            for (var i = 0; i < n; i++)
+            {
+                var a = j * (n + 1) + i;
+                t.Add((a, a + 1, a + n + 2));
+                t.Add((a, a + n + 2, a + n + 1));
+            }
+        var mesh = new MeshItem(v, t, false);
+        var panel = FakeRevit.Family("panel", [mesh], "OST_Windows", "Windows") with { CoarserGeometry = [mesh] };
+        var clock = System.Diagnostics.Stopwatch.StartNew();
+        await Site(House(panel));
+        Assert.True(clock.Elapsed.TotalSeconds < 20, $"took {clock.Elapsed.TotalSeconds:0.0} s");
+    }
+
+    [Fact]
     public async Task A_nested_part_shown_at_fine_only_draws_nothing_to_add()
     {
         // review round 1: a nested family giving nothing at Medium or Coarse made a door "bigger" and a shed's place

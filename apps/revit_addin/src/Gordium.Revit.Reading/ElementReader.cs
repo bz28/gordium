@@ -149,10 +149,46 @@ internal sealed class Read(RevitModel model)
             return null;
         var c = Walk(more, ToShared, e);
         var tol = model.VertexTolerance;
-        var newPoint = c.Points.Any(p => !fine.Points.Any(q => p.DistanceTo(q) <= tol));
+        var near = new PointGrid(fine.Points, tol);       // near-linear, not every point against every point (round 2)
+        var newPoint = c.Points.Any(p => !near.Has(p));
         var fineFaces = fine.Faces.Select(FaceKey).ToHashSet();
         var newFace = c.Faces.Any(f => !fineFaces.Contains(FaceKey(f)));
         return (c.Box.Box, newPoint || newFace || c.Other || c.MissingPart || c.Problems.Count > fine.Problems.Count);
+    }
+
+    /// <summary>Points in cells a tolerance wide, so whether a point is within the tolerance of any of them is a look
+    /// at its own cell and the 26 around it.</summary>
+    private sealed class PointGrid
+    {
+        private readonly Dictionary<(long, long, long), List<Xyz>> cells = [];
+        private readonly double size;
+
+        public PointGrid(IEnumerable<Xyz> points, double tolerance)
+        {
+            size = tolerance > 0 ? tolerance : 1e-9;
+            foreach (var p in points)
+            {
+                var k = Key(p);
+                if (!cells.TryGetValue(k, out var list))
+                    cells[k] = list = [];
+                if (!list.Any(q => q.DistanceTo(p) <= size / 1000))
+                    list.Add(p);
+            }
+        }
+
+        private (long, long, long) Key(Xyz p) =>
+            ((long)Math.Floor(p.X / size), (long)Math.Floor(p.Y / size), (long)Math.Floor(p.Z / size));
+
+        public bool Has(Xyz p)
+        {
+            var (x, y, z) = Key(p);
+            for (var i = -1; i <= 1; i++)
+                for (var j = -1; j <= 1; j++)
+                    for (var k = -1; k <= 1; k++)
+                        if (cells.TryGetValue((x + i, y + j, z + k), out var list) && list.Any(q => q.DistanceTo(p) <= size))
+                            return true;
+            return false;
+        }
     }
 
     /// <summary>A face as its corners, rounded to a ten-thousandth of a foot and sorted: the same face from any start
