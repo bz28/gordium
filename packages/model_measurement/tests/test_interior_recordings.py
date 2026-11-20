@@ -53,12 +53,19 @@ def flight(st: dict) -> dict:
         cx, cy = x0 + ux * st["tread"] * k, y0 + uy * st["tread"] * k
         return [[cx + uy * half, cy - ux * half, z], [cx - uy * half, cy + ux * half, z]]
 
+    overhead = list(st["overhead"])
+    if st["upper_floor"]:                     # the upper floor's underside short of its opening: its piece over the foot
+        u = st["upper_floor"]
+        z = u["top"] - st["slab"]
+        (a0, a1), (h0, h1) = (u["outer"][0], u["outer"][3]), (u["hole"][0], u["hole"][3])
+        overhead.append([[*a0, z], [*h0[:1], a0[1], z] if ux else [a0[0], h0[1], z],
+                         [*h0[:1], a1[1], z] if ux else [a1[0], h0[1], z], [*a1, z]])
     out = {"id": f"host-{st['id']}", "name": st["name"], "bottom_elevation": st["foot"]["top"],
            "sides": {w["side"]: w["face"] for w in st["walls"]} | {s: "open" for s in st["open_sides"]},
-           "overhead": st["overhead"]}
+           "overhead": overhead}
     if st["head_above_run"] == 0:
         out["nosings"] = [across(k, st["base"] + st["riser"] * (k + 1)) for k in range(st["risers"] - 1)] \
-            + [across(st["risers"] - 1, st["head"]["top"])]
+            + [across(st["risers"] - 1, st["head_top"])]
     return out
 
 

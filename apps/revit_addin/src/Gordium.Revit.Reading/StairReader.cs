@@ -563,28 +563,47 @@ public static class StairReader
                 return null;
             var tread = Rect(last.S, _back - Sixteenth, last.Right, last.Left);
             var area = PlanGeometry.Area(tread);
+            bool Over(List<P2> plan) =>
+                plan.Count > 0 && PlanGeometry.OverlapArea(tread, Rect(plan.Min(p => p.X), plan.Max(p => p.X), plan.Min(p => p.Y), plan.Max(p => p.Y))) is not (null or <= 0);
             foreach (var e in run.Near!)
             {
-                if (!InDesign(e) || Own(e) || NotPhysical(e) || (OwnStair(e) && StairIsThisRun) || e.Faces is null)
+                if (!InDesign(e) || Own(e) || NotPhysical(e) || (OwnStair(e) && StairIsThisRun))
                     continue;
+                // what can't be read (a mesh, a geometry Revit refused) at the head's height over the last tread refuses
+                // the nosings, as TopAt does: by its box, or, with none, whatever its extent (review round 2)
+                if (e.GeometryFailed || e.Faces is null)
+                {
+                    if (e.Box is { } box)
+                    {
+                        var h = Hull(box);
+                        if (h.Z1 >= headZ - Sixteenth && h.Z0 <= headZ + Sixteenth && Over([new(h.S0, h.A0), new(h.S1, h.A1)]))
+                            return $"the geometry of {Named(e)} at its head, over the last tread, couldn't be read";
+                    }
+                    else if (e.GeometryFailed)
+                        return $"the geometry of {Named(e)} near its head couldn't be read, and where it stands isn't known";
+                    if (e.Faces is null)
+                        continue;
+                }
                 foreach (var f in e.Faces)
                 {
                     var pts = f.Points.Select(_t.Apply).ToList();
-                    if (pts.Count == 0 || pts.Max(p => p.Z) < headZ - Sixteenth || pts.Min(p => p.Z) > headZ + Sixteenth || f.Loops.Count == 0)
+                    if (pts.Count == 0 || pts.Max(p => p.Z) < headZ - Sixteenth || pts.Min(p => p.Z) > headZ + Sixteenth)
                         continue;
-                    var loop = f.Loops[0].Select(c => Local(Plan(c.Start))).ToList();
+                    var plan = pts.Select(p => Local(new P2(p.X, p.Y))).ToList();
                     if (f.Planar && Math.Abs(TurnedNormal(f.Normal).Z) <= 1e-9)
                         continue;                                   // a side: nothing over the tread seen from above
-                    if (!f.Planar)
+                    if (!f.Planar || f.Loops.Count == 0)            // judged by its points: never skipped (review round 2)
                     {
-                        if (PlanGeometry.OverlapArea(tread, Rect(loop.Concat(pts.Select(p => Local(new P2(p.X, p.Y)))).Min(p => p.X),
-                                                                 loop.Concat(pts.Select(p => Local(new P2(p.X, p.Y)))).Max(p => p.X),
-                                                                 pts.Select(p => Local(new P2(p.X, p.Y))).Min(p => p.Y),
-                                                                 pts.Select(p => Local(new P2(p.X, p.Y))).Max(p => p.Y))) is not (null or <= 0))
-                            return $"a curved face of {Named(e)} at its head's height reaches over the last tread, which isn't read exactly";
+                        if (Over(plan.Concat(f.Loops.SelectMany(l => l).Select(c => Local(Plan(c.Start)))).ToList()))
+                            return $"a face of {Named(e)} at its head's height that isn't read exactly reaches over the last tread";
                         continue;
                     }
-                    if (PlanGeometry.OverlapArea(tread, loop) is not { } o || o > area * 1e-9)
+                    // the outer loop less its holes (an upper floor's stairwell opening, its edge at the riser line)
+                    var loops = f.Loops.Select(l => l.Select(c => Local(Plan(c.Start))).ToList()).OrderByDescending(PlanGeometry.Area).ToList();
+                    var over = PlanGeometry.Overlap(tread, loops[0]);
+                    foreach (var hole in loops.Skip(1))
+                        over = over is null ? null : PlanGeometry.Subtract(over, hole);
+                    if (over is null || over.Sum(PlanGeometry.Area) > area * 1e-9)
                         return $"the floor at its head ({Named(e)}) reaches back over the last tread, short of the last riser's line, " +
                                "so the last tread is shallower than drawn by the riser: its nosing there isn't read yet";
                 }
@@ -667,7 +686,8 @@ public static class StairReader
                         return null;
                     }
                     var others = inBand.Where(x => x.E.UniqueId != w.E.UniqueId
-                                                   && !(side == "left" ? x.H.A0 >= w.A - Sixteenth : x.H.A1 <= w.A + Sixteenth)).ToList();
+                                                   && !(side == "left" ? x.H.A0 >= w.A - Sixteenth : x.H.A1 <= w.A + Sixteenth)
+                                                   && InTheWay(x.E, sign, mid, w.A, s0, s1)).ToList();
                     if (others.Count > 0)
                     {
                         why = BesideWords(others[0].E, side);
@@ -675,15 +695,105 @@ public static class StairReader
                     }
                     sides[side] = new JsonArray(XY(w.S0, w.A), XY(w.S1, w.A));
                 }
-                else if (inBand.Count > 0)
+                else if (inBand.FirstOrDefault(x => InTheWay(x.E, sign, mid, aOut, s0, s1)) is { E: not null } first)
                 {
-                    why = BesideWords(inBand[0].E, side);
+                    why = BesideWords(first.E, side);
                     return null;
                 }
                 else
                     sides[side] = "open";
             }
             return sides;
+        }
+
+        /// <summary>Whether any part of the element stands in a side's band between the flight's middle and
+        /// <paramref name="limit"/> (the wall face, 1/16 in kept off it; or the band's outer edge), from 1 in under the
+        /// line of nosings to 80 in over it. Read face by face where every face is flat with straight edges (an upper
+        /// floor around a stairwell opening is in the way only where it really is: its box spans the opening); else by
+        /// its box, only ever bigger than what it holds.</summary>
+        private bool InTheWay(NearbyElement e, int sign, double mid, double limit, double s0, double s1)
+        {
+            double a0 = sign > 0 ? mid : limit + Sixteenth, a1 = sign > 0 ? limit - Sixteenth : mid;
+            if (a1 <= a0 || s1 <= s0)
+                return false;
+            bool ZIn(double zLo, double zHi, double sa, double sb) =>
+                zHi >= Line(Math.Min(sa, sb)) - Inch && zLo <= Line(Math.Max(sa, sb)) + SideHeight;
+            var exact = !e.GeometryFailed && e.Faces is { Count: > 0 } fs && fs.All(f => f.Planar && f.Loops.All(l => l.All(c => c.IsLine)));
+            if (!exact)
+            {
+                if (Extent(e) is not { } h)
+                    return false;
+                double cs0 = Math.Max(h.S0, s0), cs1 = Math.Min(h.S1, s1);
+                return cs0 < cs1 && h.A0 < a1 && h.A1 > a0 && ZIn(h.Z0, h.Z1, cs0, cs1);
+            }
+            var rect = Rect(s0, s1, a0, a1);
+            var breaks = _treads.Select(x => x.S).Append(_back).ToList();
+            foreach (var f in e.Faces!)
+            {
+                var pts = f.Points.Select(_t.Apply).ToList();
+                if (pts.Count == 0)
+                    continue;
+                var n = TurnedNormal(f.Normal);
+                if (Math.Abs(n.Z) <= 1e-9)
+                {
+                    // a side face: its plan is a straight piece; clipped to the band's plan, its heights against the band's
+                    var plan = pts.Select(p => Local(new P2(p.X, p.Y))).ToList();
+                    var p0 = plan.MinBy(p => p.X * 1e6 + p.Y)!;
+                    var far = plan.MaxBy(p => (p.X - p0.X) * (p.X - p0.X) + (p.Y - p0.Y) * (p.Y - p0.Y))!;
+                    if (Clip(p0, far, s0, s1, a0, a1) is { } seg && ZIn(pts.Min(p => p.Z), pts.Max(p => p.Z), seg.Sa, seg.Sb))
+                        return true;
+                    continue;
+                }
+                var loops = f.Loops.Select(l => l.Select(c => Local(Plan(c.Start))).ToList()).OrderByDescending(PlanGeometry.Area).ToList();
+                if (loops.Count == 0)
+                    continue;
+                var over = PlanGeometry.Overlap(rect, loops[0]);
+                foreach (var hole in loops.Skip(1))
+                    over = over is null ? null : PlanGeometry.Subtract(over, hole);
+                if (over is null)
+                    return true;                                    // not a simple outline: the cautious side
+                var q0 = Local(new P2(pts[0].X, pts[0].Y));
+                var n2 = Local(new P2(_o.X + n.X, _o.Y + n.Y));
+                double Z(P2 q) => pts[0].Z - (n2.X * (q.X - q0.X) + n2.Y * (q.Y - q0.Y)) / n.Z;
+                foreach (var piece in over)
+                {
+                    var check = new List<P2>(piece);
+                    for (var i = 0; i < piece.Count; i++)
+                    {
+                        P2 a = piece[i], b = piece[(i + 1) % piece.Count];
+                        foreach (var s in breaks.Where(s => (s - a.X) * (s - b.X) < 0))
+                            check.Add(new P2(s, a.Y + (s - a.X) / (b.X - a.X) * (b.Y - a.Y)));
+                    }
+                    var gaps = check.Select(q => Z(q) - Line(q.X)).ToList();
+                    if (!gaps.All(g => g < -Inch) && !gaps.All(g => g > SideHeight))
+                        return true;
+                }
+            }
+            return false;
+        }
+
+        /// <summary>A plan segment clipped to the box s0..s1, a0..a1 (Liang–Barsky): the s range of what is inside, or
+        /// null when nothing is.</summary>
+        private static (double Sa, double Sb)? Clip(P2 p, P2 q, double s0, double s1, double a0, double a1)
+        {
+            double t0 = 0, t1 = 1, dx = q.X - p.X, dy = q.Y - p.Y;
+            foreach (var (den, num) in new[] { (-dx, p.X - s0), (dx, s1 - p.X), (-dy, p.Y - a0), (dy, a1 - p.Y) })
+            {
+                if (Math.Abs(den) < 1e-12)
+                {
+                    if (num < 0)
+                        return null;
+                    continue;
+                }
+                var t = num / den;
+                if (den < 0)
+                    t0 = Math.Max(t0, t);
+                else
+                    t1 = Math.Min(t1, t);
+                if (t0 > t1)
+                    return null;
+            }
+            return (p.X + t0 * dx, p.X + t1 * dx);
         }
 
         private static string BesideWords(NearbyElement e, string side) =>

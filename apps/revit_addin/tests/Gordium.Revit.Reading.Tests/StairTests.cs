@@ -345,6 +345,51 @@ public sealed class StairTests
     }
 
     [Fact]
+    public void The_upper_floor_around_the_stairwell_opening_is_read_as_a_real_model_has_it_review_round_2()
+    {
+        // house 2 is drawn with one upper floor at the head, the stairwell an opening in it, its edge on the riser line
+        var house = FakeHouse.Draw(Two);
+        var floor = house.Stairs[0].Runs[0].Near!.Single(e => e.UniqueId == "head-s1");
+        Assert.Contains(floor.Faces!, f => f.Loops.Count == 2);                             // an outline and its opening
+        var read = Read(house);
+        Assert.Equal(16, Flight(read, "s1")!["nosings"]!.AsArray().Count);
+        Assert.NotNull(Flight(read, "s1")!["sides"]);                                       // its box spans the opening
+        Assert.Equal([], InteriorTests.Problems(house, read));
+        // the opening stopping 1 1/2 in short of the riser line: the floor reaches over the last tread
+        var st = house.StairDrawing("s1");
+        List<(double X, double Y)> outer = [.. new[] { (-1.67, -2.0), (15.5, -2.0), (15.5, 2.0), (-1.67, 2.0) }.Select(p => FakeHouse.StairAt(st, p.Item1, p.Item2))];
+        List<(double X, double Y)> hole = [.. new[] { (1.67, -1.5), (12.5 - 1.5 / 12, -1.5), (12.5 - 1.5 / 12, 1.5), (1.67, 1.5) }.Select(p => FakeHouse.StairAt(st, p.Item1, p.Item2))];
+        house.SetRun("s1", r => r with
+        {
+            Near = [.. r.Near!.Where(e => e.UniqueId != "head-s1"), FakeHouse.Boxed(new("short", "OST_Floors", "Upper floor", Faces: house.PrismWithHole(outer, hole, 9, 10)))],
+        });
+        Assert.Contains("reaches back over the last tread", Note(Read(house), "s1", "nosings"));
+    }
+
+    public static TheoryData<string> Unreadable() => ["mesh with a box", "failed with no box", "a face with points and no loops"];
+
+    [Theory]
+    [MemberData(nameof(Unreadable))]
+    public void Anything_unreadable_at_the_heads_height_over_the_last_tread_sends_no_nosings_review_round_2(string what)
+    {
+        // a mesh landing nosing (its box ends at the riser line, so the floor's strip past it says nothing)
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        var nose = house.StairBox(st, 12.5 - 1.5 / 12, 12.5, -1.5, 1.5, 10 - 1.0 / 12, 10);
+        var e = FakeHouse.Boxed(new NearbyElement("nose", "OST_Floors", "Nosing", Faces: nose));
+        e = what switch
+        {
+            "mesh with a box" => e with { Faces = null, GeometryFailed = true },
+            "failed with no box" => e with { Faces = null, GeometryFailed = true, Box = null },
+            _ => e with { Faces = [new SurfaceRecord(true, house.Fake.Place(0, 0, 1) - house.Fake.Place(0, 0, 0), [], nose[0].Points)] },
+        };
+        house.SetRun("s1", r => r with { Near = [.. r.Near!, e] });
+        var read = Read(house);
+        Assert.Null(Flight(read, "s1")!["nosings"]);
+        Assert.Contains("Floors \"Nosing\"", Note(read, "s1", "nosings"));
+    }
+
+    [Fact]
     public void A_wall_that_doesnt_run_the_whole_flight_leaves_the_sides_out()
     {
         var house = FakeHouse.Draw(Two);
@@ -403,7 +448,7 @@ public sealed class StairTests
             Assert.Contains(words, Note(read, "s1", "overhead"));
         }
         var empty = FakeHouse.Draw(Two);
-        empty.SetRun("s1", r => r with { Near = r.Near!.Where(e => !e.UniqueId.StartsWith("over-", StringComparison.Ordinal)).ToList() });
+        empty.SetRun("s1", r => r with { Near = r.Near!.Where(e => !e.UniqueId.StartsWith("over-", StringComparison.Ordinal) && e.UniqueId != "head-s1").ToList() });
         Assert.Equal("nothing was found over it", Note(Read(empty), "s1", "overhead"));
     }
 
@@ -413,7 +458,7 @@ public sealed class StairTests
         // the floor over house 2's stair with an opening over all but its first 2 ft: only that strip is overhead
         var house = FakeHouse.Draw(Two);
         var st = house.StairDrawing("s1");
-        house.SetRun("s1", r => r with { Near = r.Near!.Where(e => !e.UniqueId.StartsWith("over-", StringComparison.Ordinal)).ToList() });
+        house.SetRun("s1", r => r with { Near = r.Near!.Where(e => !e.UniqueId.StartsWith("over-", StringComparison.Ordinal) && e.UniqueId != "head-s1").ToList() });
         var outer = new[] { (-2.0, -2.0), (14.0, -2.0), (14.0, 2.0), (-2.0, 2.0) }.Select(p => FakeHouse.StairAt(st, p.Item1, p.Item2)).ToList();
         var hole = new[] { (2.0, -1.5), (13.0, -1.5), (13.0, 1.5), (2.0, 1.5) }.Select(p => FakeHouse.StairAt(st, p.Item1, p.Item2)).ToList();
         var under = new SurfaceRecord(true, house.Fake.Place(0, 0, -1) - house.Fake.Place(0, 0, 0),

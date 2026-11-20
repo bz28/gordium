@@ -188,7 +188,12 @@ table above needed settling:
   the run's top, is it taken as that riser board's top, the head's edge, never a tread. The **top nosing** is its front edge (the last riser's line), else the top tread's back edge, at the height
   of the floor or landing found there, only if that floor stops at the last riser's line: a floor at the head reaching
   back over the last tread (a landing nosing, a slab edge past the line) makes the last tread shallower than the line
-  says, so no nosings are sent (review round 1). Every top group's height and extent is kept in the evidence.
+  says, so no nosings are sent (review round 1); a floor's opening (the stairwell, its edge on the riser line) is
+  taken out of it first, and anything there that can't be read (a mesh, a geometry Revit refused, a face with no
+  outline) refuses the nosings too (review round 2). The drawing draws house 2's upper floor the way a real model has
+  it: one floor at the head with the stairwell as an opening, its underside the house's 9 ft piece over the foot.
+  Beside a flight, an element with only flat straight-edged faces is judged face by face (an upper floor's box spans
+  its opening, so its box alone would stand it in the width). Every top group's height and extent is kept in the evidence.
 - *For Ben (noted, no mark added now)*: under section 2's rule any Generic Model anywhere in a project stops stairs
   being read, with no way yet to say "this one isn't a stair".
 - *Foot and head*: the floor or landing top is looked for in a 1 in strip in front of the first nosing and past the

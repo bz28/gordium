@@ -220,8 +220,32 @@ internal static class HouseDraw
                 double b = D(st["base"]), slab = D(st["slab"]);
                 var baseLevel = LevelAt(b);
                 var topLevel = LevelAt(D(st["head_top"]));
+                if (st["upper_floor"] is JsonObject upper)
+                {
+                    // the floor the flight arrives at, one floor with the stairwell as an opening in it (its edge on the
+                    // last riser's line), as a real model has it: the outline anticlockwise, the opening clockwise
+                    var top = D(upper["top"]);
+                    CurveLoop Loop(JsonNode ring, bool anticlockwise)
+                    {
+                        var pts = ring.AsArray().Select(p => P(p!)).ToList();
+                        var area = 0.0;
+                        for (var i = 0; i < pts.Count; i++)
+                            area += pts[i].X * pts[(i + 1) % pts.Count].Y - pts[(i + 1) % pts.Count].X * pts[i].Y;
+                        if ((area > 0) != anticlockwise)
+                            pts.Reverse();
+                        var loop = new CurveLoop();
+                        for (var i = 0; i < pts.Count; i++)
+                            loop.Append(Line.CreateBound(new XYZ(pts[i].X, pts[i].Y, top - slab), new XYZ(pts[(i + 1) % pts.Count].X, pts[(i + 1) % pts.Count].Y, top - slab)));
+                        return loop;
+                    }
+                    var shape = DirectShape.CreateElement(doc, floors);
+                    shape.Name = $"Upper floor at the head of {id}, with its stairwell opening";
+                    shape.SetShape([GeometryCreationUtilities.CreateExtrusionGeometry([Loop(upper["outer"]!, true), Loop(upper["hole"]!, false)], XYZ.BasisZ, slab)]);
+                }
                 foreach (var key in new[] { "foot", "head" })
                 {
+                    if (st[key] is null)
+                        continue;
                     var plan = st[key]!["plan"]!.AsArray().Select(p => P(p!)).ToList();
                     var top = D(st[key]!["top"]);
                     var shape = DirectShape.CreateElement(doc, floors);

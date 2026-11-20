@@ -114,8 +114,17 @@ internal sealed class FakeHouse
             faces.AddRange(StairBox(st, (n - 1) * t, (n - 1) * t + 0.5 / 12, -w / 2, w / 2, b + (n - 1) * r, b + n * r - 3.0 / 12));
             var near = new List<NearbyElement> { new("run-" + id, "OST_StairsRuns", "Run", Faces: faces) };
             var slab = D(st["slab"]);
+            if (st["upper_floor"] is JsonObject upper)
+            {
+                // one floor around the stairwell opening (its edge on the last riser's line), as a real model has it
+                var top = D(upper["top"]);
+                near.Add(new("head-" + id, "OST_Floors", "Upper floor",
+                             Faces: PrismWithHole(Ccw(upper["outer"]!), Ccw(upper["hole"]!), top - slab, top)));
+            }
             foreach (var (key, what) in new[] { ("foot", "Floor at the foot"), ("head", "Floor at the head") })
             {
+                if (st[key] is null)
+                    continue;
                 var plan = st[key]!["plan"]!.AsArray().Select(p => P(p!)).ToList();
                 if (PlanGeometry.SignedArea(plan.Select(p => new P2(p.X, p.Y)).ToList()) < 0)
                     plan.Reverse();
@@ -374,6 +383,37 @@ internal sealed class FakeHouse
         var pts = points.Select(p => Fake.Place(p.X, p.Y, p.Z)).ToList();
         var n = Fake.Place(normal.X, normal.Y, normal.Z) - Fake.Place(0, 0, 0);
         return new SurfaceRecord(true, n, [pts.Select(p => new LoopCurve(p, true)).ToList()], pts);
+    }
+
+    private static List<(double X, double Y)> Ccw(JsonNode n)
+    {
+        var plan = n.AsArray().Select(p => P(p!)).ToList();
+        if (PlanGeometry.SignedArea(plan.Select(p => new P2(p.X, p.Y)).ToList()) < 0)
+            plan.Reverse();
+        return plan;
+    }
+
+    /// <summary>A slab over an outline with an opening (both anticlockwise): its top and bottom faces each two loops
+    /// (the outline, then the opening), a side per outline edge facing out, a side per opening edge facing in.</summary>
+    public List<SurfaceRecord> PrismWithHole(List<(double X, double Y)> outer, List<(double X, double Y)> hole, double z0, double z1)
+    {
+        SurfaceRecord Flat(double z, double nz)
+        {
+            var o = outer.Select(p => Fake.Place(p.X, p.Y, z)).ToList();
+            var h = hole.Select(p => Fake.Place(p.X, p.Y, z)).ToList();
+            var n = Fake.Place(0, 0, nz) - Fake.Place(0, 0, 0);
+            return new SurfaceRecord(true, n, [o.Select(p => new LoopCurve(p, true)).ToList(), h.Select(p => new LoopCurve(p, true)).ToList()], o.Concat(h).ToList());
+        }
+        var faces = new List<SurfaceRecord> { Flat(z1, 1), Flat(z0, -1) };
+        foreach (var (ring, outward) in new[] { (outer, 1.0), (hole, -1.0) })
+            for (var i = 0; i < ring.Count; i++)
+            {
+                var a = ring[i];
+                var b = ring[(i + 1) % ring.Count];
+                var len = Math.Sqrt((b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y));
+                faces.Add(Face(new(outward * (b.Y - a.Y) / len, -outward * (b.X - a.X) / len, 0), [(a.X, a.Y, z0), (b.X, b.Y, z0), (b.X, b.Y, z1), (a.X, a.Y, z1)]));
+            }
+        return faces;
     }
 
     /// <summary>A prism over a plan outline (anticlockwise): top, bottom and a side per edge.</summary>

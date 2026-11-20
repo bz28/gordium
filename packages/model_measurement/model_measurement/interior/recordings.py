@@ -416,7 +416,25 @@ def _stair(name: str, st: dict, ft, house: dict, x_clear: float) -> tuple[dict, 
         span = sorted(p[axis] for p in pts)
         walls.append({"side": side, "face": [at(span[0], a), at(span[-1], a)], "outward": out})
     overhead = [[[x + dx, y, z] for x, y, z in ([ft(v) for v in p] for p in piece)] for piece in st.get("overhead") or []]
+    # the floor the flight arrives at, drawn the way a real model has it when the house allows: one floor, its
+    # underside an overhead piece of the house (a slab SLAB thick under the head's floor), reaching from that piece
+    # past the head, with the stairwell as an opening in it (its edge on the last riser's line) between the piece and
+    # the head. House 2: the upper floor over the foot of its stair (9 ft), its top at the head (10 ft).
+    upper = None
+    under = [pc for pc in overhead if all(abs(p[2] - (zs[-1] - SLAB)) < 1e-9 for p in pc)]
+    if len(under) == 1:
+        piece = under[0]
+        vals = [p[axis] - (dx if axis == 0 else 0) for p in piece]           # along the run, in the house's own frame
+        near_s, far = (min(vals), max(vals)) if sign > 0 else (max(vals), min(vals))
+        if sign * far < sign * top and sign * near_s <= sign * first:       # over the foot, short of the head
+            wide = width / 2 + STAIR_WALL
+            upper = {"outer": [at(near_s, mid - wide), at(top + sign * STRIP, mid - wide), at(top + sign * STRIP, mid + wide),
+                               at(near_s, mid + wide)],
+                     "hole": [at(far, lo), at(top, lo), at(top, hi), at(far, hi)], "top": zs[-1]}
+            overhead.remove(piece)
     xs = [p[0] for p in foot + head] + [p[0] for w in walls for p in w["face"]] + [p[0] for pc in overhead for p in pc]
+    if upper:
+        xs += [p[0] for p in upper["outer"]]
     notes = []
     if extra > 1e-9:
         notes.append(f"stair {st['id']}: a component run's risers are equal, so the {extra * 12:g} in more of its "
@@ -425,7 +443,7 @@ def _stair(name: str, st: dict, ft, house: dict, x_clear: float) -> tuple[dict, 
             "tread": tread, "width": width,
             "path": [at(first, mid), at(first + sign * tread * (len(risers) - 1), mid)],
             "head_above_run": extra, "head_top": zs[-1], "foot": {"plan": foot, "top": base},
-            "head": {"plan": head, "top": zs[-1]}, "slab": SLAB, "walls": walls, "wall_thickness": STAIR_WALL,
+            "head": None if upper else {"plan": head, "top": zs[-1]}, "upper_floor": upper, "slab": SLAB, "walls": walls, "wall_thickness": STAIR_WALL,
             "wall_top": zs[-1] + HEADROOM_WALL, "open_sides": sorted(open_sides), "overhead": overhead,
             "extent": [min(xs), max(xs)]}, notes
 
