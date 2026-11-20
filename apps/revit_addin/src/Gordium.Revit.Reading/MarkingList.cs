@@ -196,8 +196,9 @@ public static class MarkingList
             var unset = rows.Count(r => r.Kind == MarkedKind.SiteSlab && r.NeedsMarking);
             summary.Add(unset == 0
                 ? $"{Marks.SiteSlab.Name}: all {slabs.Count} floors outside the house marked."
-                : $"{Marks.SiteSlab.Name}: {unset} of {slabs.Count} floors outside the house say nothing about what they " +
-                  "are: one on the lot keeps lot coverage and the yards needing review until it says (" +
+                // review round 3: an unknown word ("Garage") does say something, just not one of Gordium's words
+                : $"{Marks.SiteSlab.Name}: {unset} of {slabs.Count} floors outside the house aren't marked with one of " +
+                  "Gordium's words: one on the lot keeps lot coverage and the yards needing review until it says (" +
                   string.Join(", ", SlabKinds.Words) + "); one off the lot changes nothing.");
         }
         var inHouse = SiteSlabs.MarkedInHouse(model);

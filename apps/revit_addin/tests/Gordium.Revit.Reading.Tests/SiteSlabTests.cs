@@ -204,7 +204,8 @@ public sealed class SiteSlabTests(RealWorker worker) : IClassFixture<RealWorker>
         Assert.Equal(MarkState.NotUnderstood, rows["odd"].Cells.Single().State);
         Assert.Equal(MarkState.Given, rows["walk"].Cells.Single().State);
         Assert.Contains(Concrete, rows["pad"].Label);
-        Assert.Contains("Gordium: Site slab is: 2 of 3 floors outside the house say nothing about what they are: one on " +
+        Assert.DoesNotContain(list.Summary, s => s.Contains("say nothing"));       // review round 3: "Garage" says something
+        Assert.Contains("Gordium: Site slab is: 2 of 3 floors outside the house aren't marked with one of Gordium's words: one on " +
                         "the lot keeps lot coverage and the yards needing review until it says (Porch, Deck, Landing, Ramp, " +
                         "Patio, Terrace, Walk, Parking, Driveway); one off the lot changes nothing.", list.Summary);
         Assert.Contains(list.Summary, s => s.Contains("under the house's walls or roof") && s.Contains("in_house"));
@@ -222,7 +223,7 @@ public sealed class SiteSlabTests(RealWorker worker) : IClassFixture<RealWorker>
         m = m with { LotLines = [.. m.LotLines, F.PropertyLine("pl-neighbour", [(60, 0), (120, 0), (120, 120), (60, 120)])] };
         var list = MarkingList.Build(m);
         Assert.Equal(["next_door", "pad"], list.Rows.Where(r => r.Kind == MarkedKind.SiteSlab).Select(r => r.Id).Order());
-        Assert.Contains(list.Summary, s => s.Contains("2 of 2 floors outside the house say nothing") && s.Contains("one off the lot changes nothing"));
+        Assert.Contains(list.Summary, s => s.Contains("2 of 2 floors outside the house aren't marked with one of Gordium's words") && s.Contains("one off the lot changes nothing"));
         Assert.DoesNotContain(list.Summary, s => s.Contains("no lot found") || s.Contains("off the lot: not read"));
         Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
 
