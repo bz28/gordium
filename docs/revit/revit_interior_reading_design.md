@@ -105,6 +105,7 @@ exactly:
 | `Gordium: Top rail is handrail` | Railings (type) | Yes / No / unset | whether a stair railing's top rail is also its handrail (unset on a stair railing with a top rail: that flight's `handrails` left out, not read) |
 | `Gordium: These are all the stairs` | Project Information | Yes / No / unset | `stairs` sent only on Yes (section 2's "all the stairs"; No or unset: not read). **Decided (2026-11-20, step 4):** the project-wide ticks ("these are all the stairs", later "all the guards", "this house has none of ...") are Gordium shared parameters on Project Information (Yes/No; unset is not stated), added by Mark for egress like the other marks and listed in the marking list; each step adds its own |
 | `Gordium: These are all the guards and handrails` | Project Information | Yes / No / unset | `guards` and every flight's `handrails` sent only on Yes (step 5, section 2's "all the guards"). **Decided (Ben, 2026-11-20, step 5):** one tick for both, since both are railings: a guard drawn as a low wall would go unchecked, and a handrail drawn as a wall sweep would leave the width at the handrail read too wide; with the tick, a flight with no railing found sends `handrails: []` |
+| `Gordium: This house has no stairs`, `This house has no doors`, `This house has no guards`, `This house has no basements`, `This house has no habitable attics`, `This house has no sleeping lofts`, `This house has no ramps`, `This house has no alternating tread devices`, `This house has no ship ladders`, `This house has no patio covers`, `This house has no deck or porch or cantilever over an escape opening` | Project Information | Yes / No / unset | step 6: `stairs: []`, `doors: []`, `guards: []`, and each `has_none` claim, sent only on Yes with nothing of the kind drawn and nothing that could hide one (section 4, "What the house has none of"). "Ship ladders": a parameter's name has no apostrophe |
 | `Gordium: Clear width`, `Clear height`, `Clear source`, `Clear confirmed` on doors | Doors (type) | As windows' | `doors[].stated_clear` (step 5): the same marks bound to Doors too, confirmed and re-checked exactly as windows' (the stamp, made for a door, records the type's `UniqueId`, size and operation, the clear width and height, the source and a mapped maker's parameter; a window's stamp never confirms a door, nor a door's a window); no `Clear offset` (a door's clear opening has no bottom in the format). The width and height are the maker's figure measured as R318.2 measures it (between the face of the door open 90 degrees and the stop; threshold top to stop bottom), never the door's size or rough opening: the marks' own tooltip says so |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick
@@ -318,6 +319,32 @@ ticks, and only then is the claim sent, its `source` naming both ("no Ramp eleme
 model; ticked by the architect"). The add-in already reads the checker's `not_applicable` status (PR #115), which
 these claims produce. Sleeping lofts are the architect's tick alone: the reader has no loft mark to propose from.
 
+**As built in step 6** (`HasNone.cs`). One Yes/No tick on Project Information per kind (section 3): the three lists
+the format has itself (`This house has no stairs`, `... no doors`, `... no guards`: sent as `stairs: []`, `doors: []`,
+`guards: []`) and each of the format's `has_none` kinds (`... no basements`, `no habitable attics`, `no sleeping lofts`,
+`no ramps`, `no alternating tread devices`, `no ship ladders`, `no patio covers`, `no deck or porch or cantilever over an
+escape opening`: sent as a claim whose `source` names the tick and what the reader found, "ticked by the architect
+(Gordium: This house has no ramps: Yes, on Project Information); no Ramp elements in the model"). Rooms and openings
+get no tick (`rooms: []` is a house not drawn; a missed escape opening or door can only fail). A tick is sent only when:
+
+- it says **Yes** (No or unset: not stated; with no tick, nothing found is still never "none");
+- **nothing drawn contradicts it** (a conflict, listed first of all in the marking list, and that kind not read: the
+  two disagree): a stair for "no stairs" (or `These are all the stairs` No, which says a stair isn't drawn as one); a
+  door for "no doors"; a railing on no stair for "no guards" (or `These are all the guards and handrails` No); an
+  element in Ramps for "no ramps". The other kinds have nothing the reader can find (a basement, a patio cover): the
+  checker's own refusals still apply (a room within another's height refuses "no sleeping lofts");
+- **nothing could hide one**, each kind's list's own blockers: for stairs, ramps, ship ladders and alternating tread
+  devices the stairs' (a generic or in-place family, a sketched or multistory stair, a closed workset, an unloaded or
+  nested link, a link holding stairs, railings or generic models, a coordination model), with a link holding ramps
+  and Ramps not read for ramps; for guards the guards' (every railing on a stair read as a handrail beside a wall,
+  which needs the stairs read); for doors a link holding windows or doors; for basements, habitable attics and sleeping
+  lofts the rooms' (every room read, so the checker can hold the claim against them); for every kind a closed workset,
+  an unloaded or nested link and a coordination model.
+
+The marking list shows a line per tick: sent; not sent and why; or not set, with what the reader found as a proposal
+("Gordium found no Ramp elements in the model: tick Yes if the house has none"), never sent without the tick. Every
+tick's reading is kept in the evidence (`evidence.has_none`).
+
 ## 5. Sending it: the worker takes an `interior`
 
 A small, additive change (protocol **1.2**, a minor version: a 1.1 worker refuses nothing it knew before):
@@ -456,7 +483,12 @@ Each step is its own PR, through the review loop, with its tests:
    through a level enclose an area on it). House 3 isn't drawn again (its guard is along a stair: not read in this
    step; its stair measures are all not measured already): it stays step 4. Each door is drawn in an outside wall with
    no window (where it stands doesn't change its measures).
-6. **`has_none` ticks.**
+6. **`has_none` ticks.** **Built, tested on fake records; to record in Revit** (section 4, "What the house has none
+   of", as built in step 6). Scope (`recordings.py`, `STEPS[6]`): each list a hand-worked house gives empty is ticked in
+   the drawing and must come back as that empty list (houses 1 and 6 `stairs: []`; houses 1, 2, 5 and 6 `guards: []`;
+   house 4 `doors: []`), every step-5 measure as before. No hand-worked house has a `has_none` claim, so none is ticked
+   and the recording's claims must be none (`recording_problems` compares the claims sent and taken with the house's
+   own). House 3 has no empty list: it stays step 4.
 
 ## 8. Decisions (Ben, 2026-11-19: "go w ur recs")
 
