@@ -218,7 +218,10 @@ table above needed settling:
   over a flight leaves its `sides` or `overhead` out. **As built in step 5** (`StairReader.cs`): a railing on the
   stair (it lists it, or hosts it) standing in a side's band where a wall face is found, every part read exactly
   (flat faces, straight edges: a polyhedron's extremes are its corners), every point between the wall face and the
-  flight's middle and none more than 38 in (the highest a handrail may be) over the line of nosings, is that side's
+  flight's middle and none more than 38 in (the highest a handrail may be) over the line of nosings, and nothing of
+  it that isn't sent as a handrail (a top rail marked No or unset, a post, a baluster) farther toward the middle than
+  the innermost handrail edge sent (review round 1: a top rail marked No read the width at the handrail 36 in, drawn
+  32.5; with no handrail sent, it is refused), is that side's
   handrail: it never narrows the width above the handrail nor the headroom, so the wall stays the side and the
   railing is set aside overhead. Its `handrails` entries are its handrails (`GetHandRails`) and its top rail where
   the type says `Gordium: Top rail is handrail` Yes (unset with a top rail: `handrails` left out), each the plan line
@@ -279,7 +282,9 @@ sphere rule). Guards along a stair: the stair's railing, `top_line` along its to
 **As built in step 5** (`GuardReader.cs`): `guards` is sent only on the tick "these are all the guards and handrails",
 with none of the stairs' blockers (section 4, stairs), and with every railing on a stair read as a handrail beside a
 wall: **a guard along a stair isn't read yet** (its `top_line` and the stair's side as the guard's inside face are
-to build), so any other railing on a stair leaves `guards` out. Each railing on no stair is a level guard, never
+to build), so any other railing on a stair leaves `guards` out, as does a railing on no stair standing beside a
+flight (it can't be told from a guard along it), or any railing while stairs are drawn but not read (where it stands
+isn't known). Each other railing on no stair is a level guard, never
 dropped, each value sent only when read exactly:
 
 - its path must be one straight line (else every value out);

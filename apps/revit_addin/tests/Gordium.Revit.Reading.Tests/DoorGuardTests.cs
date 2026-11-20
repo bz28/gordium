@@ -319,16 +319,21 @@ public sealed class DoorGuardTests
     [Fact]
     public void The_top_rail_is_a_handrail_only_where_its_type_says_so()
     {
-        var house = FakeHouse.Draw(Two);
-        house.SetRailing("railing-s1-right", r => r with { TypeMarks = new Dictionary<Guid, MarkValue>() });
-        var read = Read(house);
-        Assert.Null(Flight(read, "s1")["handrails"]);
-        Assert.Contains("Gordium: Top rail is handrail isn't set", Note(read, "run-s1", "handrails"));
-        Assert.NotNull(Flight(read, "s1")["sides"]);
-        house.SetRailing("railing-s1-right", r => r with { TypeMarks = new Dictionary<Guid, MarkValue> { [Marks.TopRailIsHandrail.Guid] = new(true, 0) } });
-        read = Read(house);
-        Assert.Empty(Flight(read, "s1")["handrails"]!.AsArray());                            // the architect's No: none on it
-        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_handrail_sides = 0, expected 1"));
+        // unset or No, the top rail is no handrail sent, yet it narrows the width at the handrail: the railing is
+        // refused, and the width at the handrail is not measured, never the full 36 in (review round 1: a false pass)
+        foreach (var marks in new[] { new Dictionary<Guid, MarkValue>(), new() { [Marks.TopRailIsHandrail.Guid] = new(true, 0) } })
+        {
+            var house = FakeHouse.Draw(Two);
+            house.SetRailing("railing-s1-right", r => r with { TypeMarks = marks });
+            var read = Read(house);
+            Assert.Null(Flight(read, "s1")["handrails"]);
+            Assert.Null(Flight(read, "s1")["sides"]);
+            Assert.Contains("a top rail not marked Gordium: Top rail is handrail Yes", Note(read, "run-s1", "sides"));
+            var problems = InteriorTests.Problems(house, read);
+            Assert.Contains(problems, p => p.Contains("s1 stair_clear_width_at_handrail not measured"));
+            Assert.DoesNotContain(problems, p => p.Contains("stair_clear_width_at_handrail = 36"));
+            Assert.Contains(read.GuardsNotRead, w => w.Contains("isn't read as a handrail beside a wall"));
+        }
     }
 
     [Fact]
@@ -378,10 +383,27 @@ public sealed class DoorGuardTests
             Assert.Contains(read.GuardsNotRead, w => w.Contains("isn't read as a handrail beside a wall: a guard along a stair isn't read yet"));
         else
         {
-            // a railing on no stair is a level guard: sent, its sloped rail no box square to it, so nothing measured
-            var g = Guard(read);
-            Assert.Equal("railing-s1-right", g["id"]!.GetValue<string>());
-            Assert.Null(g["members"]);
+            // a railing on no stair beside a flight can't be told from a guard along it: guards left out (review round 1)
+            Assert.Null(read.Interior["guards"]);
+            Assert.Contains(read.GuardsNotRead, w => w.Contains("stands beside a flight and isn't the stair's"));
         }
+    }
+
+    [Fact]
+    public void A_newel_post_farther_in_than_the_handrail_leaves_the_width_at_the_handrail_not_measured()
+    {
+        // review round 1: the width at the handrail is read from the handrail edges sent; a post standing farther in
+        // (here 6 in off the wall, the handrail's inner edge 3.5 in) would narrow it unseen
+        var house = FakeHouse.Draw(Two);
+        var st = house.StairDrawing("s1");
+        house.SetRailing("railing-s1-right", r => r with
+        {
+            Parts = [r.Parts[0] with { Solids = [house.StairBox(st, 0, 0.25, -1.5 + 2.0 / 12, -1.0, 0.625, 3.5)] }, r.Parts[1]],
+        });
+        var read = Read(house);
+        Assert.Null(Flight(read, "s1")["sides"]);
+        Assert.Null(Flight(read, "s1")["handrails"]);
+        Assert.Contains("standing farther in than its handrail", Note(read, "run-s1", "sides"));
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_clear_width_at_handrail not measured"));
     }
 }

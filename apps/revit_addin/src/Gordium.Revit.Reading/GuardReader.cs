@@ -57,7 +57,15 @@ public static class GuardReader
             if (!SiteReader.InDesignChecked(model, r.PhaseDemolished, r.DesignOption))
                 continue;
             if ((records.Stairs ?? []).FirstOrDefault(s => StairReader.OnStair(s, r)) is not { } stair)
+            {
+                // a railing on no stair standing beside a flight can't be told apart from a guard along that stair, which
+                // isn't read yet (review round 1); with stairs drawn but not read, where it stands isn't known
+                if (stairs is not null && stairs.Refused.Contains(r.UniqueId))
+                    why.Add($"Railing \"{r.Name ?? r.UniqueId}\" stands beside a flight and isn't the stair's: it may be a guard along the stair, which isn't read yet");
+                else if (stairs is null && (records.Stairs ?? []).Any(s => SiteReader.InDesignChecked(model, s.PhaseDemolished, s.DesignOption)))
+                    why.Add($"Railing \"{r.Name ?? r.UniqueId}\": the stairs aren't read, so whether it stands beside one (a guard along a stair, not read yet) isn't known");
                 continue;
+            }
             var name = $"Railing \"{r.Name ?? r.UniqueId}\" on stair \"{stair.Name ?? stair.UniqueId}\"";
             if (stairs is null)
                 why.Add($"{name}: the stairs aren't read, so whether it is a handrail beside a wall or a guard along the stair isn't known");

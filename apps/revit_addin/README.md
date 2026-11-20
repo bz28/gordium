@@ -358,13 +358,14 @@ By the [design note](../../docs/revit/revit_interior_reading_design.md)'s sectio
   bound to Doors too (Mark for egress extends an existing project's binding); a door has no `Clear offset`. Nothing
   drawn is sent (stops, hinge pin, leaf, threshold): door families don't model them consistently.
 - **Handrails** (`StairReader`): a railing on the stair beside a wall, read exactly, between the wall face and the
-  flight's middle and no higher than 38 in over the nosings, is that side's handrail (not its side, never its
+  flight's middle and no higher than 38 in over the nosings, with nothing of it but its handrails standing farther in
+  than the innermost handrail edge sent, is that side's handrail (not its side, never its
   headroom): its handrails, and its top rail where the railing type says `Gordium: Top rail is handrail` Yes, each as
   the edge nearest the middle. Any other railing beside a flight leaves its `sides` and `handrails` out.
 - **Guards** (`GuardReader.cs`): each railing on no stair is a guard at a level walking surface: its members (every
   solid of the railing, its top rail and handrails, each a box square to it), its top, the floor along it (checked
   against its base), and its ends (a wall or post face at each). Guards along a stair aren't read yet, so a railing
-  on a stair that isn't a handrail beside a wall leaves `guards` out.
+  on a stair that isn't a handrail beside a wall, or a railing on no stair standing beside a flight, leaves `guards` out.
 - **The tick:** `guards` and every flight's `handrails` are sent only when `Gordium: These are all the guards and
   handrails` on Project Information says Yes (unset or No: not read; with it, a flight with no railing found sends
   `handrails: []`). Nothing found is never "none": no door or guard found leaves that list out.

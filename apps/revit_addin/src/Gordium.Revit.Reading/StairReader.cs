@@ -408,6 +408,26 @@ public static class StairReader
                 return sign * (q.Y - wallA) <= Sixteenth && sign * (q.Y - mid) >= 0
                        && p.Z <= Line(Math.Clamp(q.X, _treads[0].S, _back)) + HandrailHigh + Sixteenth;
             });
+            // and nothing of it that isn't sent as a handrail (a top rail marked No or unset, a newel post, a baluster)
+            // stands farther toward the middle than the innermost handrail edge sent: the width at the handrail is
+            // read from those edges alone (review round 1: a top rail marked No read the width at the handrail 36 in,
+            // drawn 32.5). With nothing sent as a handrail, the railing narrows a width nothing says: refused
+            if (ok)
+            {
+                var top = Marks.YesNo(r.TypeMarks.TryGetValue(Marks.TopRailIsHandrail.Guid, out var v) ? v : null);
+                bool Sent(RailingPart p) => p.Kind == RailingPartKind.Handrail || (p.Kind == RailingPartKind.TopRail && top is true);
+                List<double> As(IEnumerable<RailingPart> parts) => parts.SelectMany(p => p.Solids!.SelectMany(s => s)).SelectMany(f => f.Points)
+                    .Select(_t.Apply).Select(p => Local(new P2(p.X, p.Y)).Y).ToList();
+                var sent = As(r.Parts.Where(Sent));
+                var rest = As(r.Parts.Where(p => !Sent(p)));
+                if (sent.Count == 0)
+                    ok = false;
+                else
+                {
+                    var inner = sign > 0 ? sent.Min() : sent.Max();
+                    ok = rest.All(a => sign * (a - inner) >= -1e-9);
+                }
+            }
             if (ok)
                 _accepted[r.UniqueId] = side;
             else
@@ -1018,7 +1038,9 @@ public static class StairReader
                 return $"{Named(e)} stands on its {side} side, within the clear width or above it, and isn't read as a side";
             RefuseRailing(e);
             return $"a railing ({Named(e)}) stands on its {side} side and isn't read as its handrail beside the wall (it isn't on " +
-                   "this stair, rises more than 38 in over the nosings, reaches past the middle or the wall face, or can't be read exactly)";
+                   "this stair, rises more than 38 in over the nosings, reaches past the middle or the wall face, can't be read exactly, " +
+                   $"or has a part not sent as a handrail, such as a top rail not marked {Marks.TopRailIsHandrail.Name} Yes, a post " +
+                   "or a baluster, standing farther in than its handrail)";
         }
 
         /// <summary>An element's extent in the frame: from its flat faces' corners when every face is flat (exact: a
