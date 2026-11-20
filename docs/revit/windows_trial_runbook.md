@@ -234,7 +234,7 @@ Fill these in as you go; this page is where the results live. "Mac" below is the
 How they were drawn and recorded: the add-in's "Record scenes" draws each scene in a new model from the suite's own
 numbers (`SceneDraw`), reads it exactly as a check does (`RevitRead`, then `SiteReader`), writes
 `recorded/revit/<scene>.json`, and checks it by the suite's rules (`check_recording.py`). A run is asked for by
-file (`%LOCALAPPDATA%\Gordium	rialun_request.json`, read while Revit is idle), so no click is needed.
+file (`%LOCALAPPDATA%\Gordium\trial\run_request.json`, read while Revit is idle), so no click is needed.
 
 ## 6. Stop and switch criteria
 
