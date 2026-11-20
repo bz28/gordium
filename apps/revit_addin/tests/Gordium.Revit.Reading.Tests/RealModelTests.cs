@@ -169,6 +169,21 @@ public sealed class RealModelTests
     }
 
     [Fact]
+    public void Beside_an_unplaced_room_the_list_never_says_the_rooms_drawn_are_read()
+    {
+        // review round 1: the area's line said "the rooms drawn are read" while an unplaced Room stopped every room
+        var house = Ranch();
+        house.Areas.Add(Unroomed());
+        var i = house.MarkedIndex("living");
+        house.Marked[i] = house.Marked[i] with { Placement = RoomPlacement.Unplaced };
+        Assert.Null(InteriorReader.Read(house.Model()).Interior["rooms"]);
+        var summary = MarkingList.Build(house.Model()).Summary;
+        Assert.Contains(summary, s => s.Contains("so no room is read for egress until each is placed or deleted"));
+        Assert.DoesNotContain(summary, s => s.Contains("the rooms drawn are read"));
+        Assert.Contains(summary, s => s.StartsWith("1 enclosed area has no Room (listed above): once the rooms are read", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void With_no_area_unroomed_nothing_is_added_and_no_level_is_listed()
     {
         var house = Ranch();

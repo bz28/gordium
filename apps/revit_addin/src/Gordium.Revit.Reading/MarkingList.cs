@@ -173,8 +173,9 @@ public static class MarkingList
             .Select(s => $"{s.Mark.Name}: {s.Words}").ToList();
         var blockers = MarkReading.RoomBlockers(model).Select(Blocker).OrderBy(b => b, StringComparer.OrdinalIgnoreCase).ToList();
         var placement = blockers.Count;
-        // with the model's inside read (step 3): every enclosed area with no Room, closed workset and link that could
-        // hold one stops every room being read too, so it is listed first (design note, section 2)
+        // with the model's inside read (step 3): enclosed areas that couldn't be read, each closed workset and each link
+        // that could hold a room stop every room being read too, so they are listed first (design note, section 2); an
+        // enclosed area with no Room doesn't (it is sent as a space whose use isn't known: UnknownAreas below)
         var others = InteriorReader.OtherRoomBlockers(model);
         blockers.AddRange(others);
         // each enclosed area with no Room (not on a level marked as having none): sent as a space whose use isn't known
@@ -342,9 +343,12 @@ public static class MarkingList
                       "areas that couldn't be read) could hide a room, " +
                       "so no room is read for egress until each is resolved.");
         if (unknown > 0)
-            lines.Add((unknown == 1 ? "1 enclosed area has" : $"{unknown} enclosed areas have") + " no Room (listed above): the " +
-                      "rooms drawn are read, but each such area may be a bedroom, so every sleeping-room rule needs review " +
-                      $"until a Room is placed in each, or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
+            // "the rooms drawn are read" only when nothing else stops them (review round 1: beside an unplaced Room the
+            // two lines contradicted each other)
+            lines.Add((unknown == 1 ? "1 enclosed area has" : $"{unknown} enclosed areas have") + " no Room (listed above): " +
+                      (blockers == 0 ? "the rooms drawn are read, but each such area may be a bedroom, so every sleeping-room rule needs review"
+                                     : "once the rooms are read, each such area may be a bedroom, so it keeps every sleeping-room rule needing review") +
+                      $" until a Room is placed in each, or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
         void Flag(MarkedKind[] kinds, MarkDefinition m, string plural, string consequence)
         {
             var cells = rows.Where(r => kinds.Contains(r.Kind)).Select(r => r.Cells.First(c => c.Mark == m)).ToList();
