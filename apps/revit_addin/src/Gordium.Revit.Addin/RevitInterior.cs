@@ -307,7 +307,8 @@ internal static class RevitInterior
     }
 
     /// <summary>Each solid of the element's geometry (a family's instance geometry included) as its faces, solids with
-    /// no face (Revit's empty ones) left out; and whether anything couldn't be read as faces (a mesh, or a throw).</summary>
+    /// no face (Revit's empty ones) left out; and whether anything couldn't be read as faces (a mesh, a throw, or a face Revit gives no edges or
+    /// triangles for).</summary>
     private static (List<IReadOnlyList<SurfaceRecord>>? Solids, bool Failed) Solids(Element e, Options options)
     {
         var solids = new List<IReadOnlyList<SurfaceRecord>>();
@@ -536,11 +537,13 @@ internal static class RevitInterior
         e.get_BoundingBox(null) is { } b ? new RevitBox(P(b.Min), P(b.Max), b.Transform is { IsIdentity: false } bt ? T(bt) : null) : null;
 
     /// <summary>Every face of the element's solids (a family's instance geometry included), and whether anything in its
-    /// geometry couldn't be read as faces (a mesh, or <c>get_Geometry</c> throwing).</summary>
+    /// geometry couldn't be read as faces (a mesh, <c>get_Geometry</c> throwing, or a face Revit gives no edges or
+    /// triangles for: then no faces at all).</summary>
     private static (List<SurfaceRecord>? Faces, bool Failed) Faces(Element e, Options options)
     {
         var faces = new List<SurfaceRecord>();
         var failed = false;
+        var unreadable = false;
         void Walk(GeometryElement g)
         {
             foreach (var o in g)
@@ -556,7 +559,7 @@ internal static class RevitInterior
                             if (Surface(f) is { } face)
                                 faces.Add(face);
                             else
-                                failed = true;
+                                unreadable = true;
                         }
                         break;
                     case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
@@ -577,7 +580,9 @@ internal static class RevitInterior
         {
             return (null, true);
         }
-        return (faces, failed);
+        // a face Revit couldn't give: none of the element's faces is passed on (its others alone could put a wall's
+        // far face where its near one is, review round 1), only that its geometry failed
+        return unreadable ? (null, true) : (faces, failed);
     }
 
     /// <summary>A face as the reader's record, or null when Revit can't give its edges or its triangles.</summary>
