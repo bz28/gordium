@@ -4,7 +4,7 @@
 **For:** engineers writing a reader that produces it (Rhino tags, the Revit add-in, an IFC reader) and anyone writing a test house by hand.\
 **Kept current by:** the engineer who changes `packages/model_measurement/model_measurement/interior/` in that PR.
 
-The measuring code is `model_measurement.interior` (`measure(description)`); what each measure means and which code section it serves is in [interior_measurements.md](interior_measurements.md). Five worked houses written in this format are in [test_data/interior_houses/](../../test_data/interior_houses/README.md).
+The measuring code is `model_measurement.interior` (`measure(description)`); what each measure means and which code section it serves is in [interior_measurements.md](interior_measurements.md). Six worked houses written in this format are in [test_data/interior_houses/](../../test_data/interior_houses/README.md).
 
 ## Why a format of its own
 
@@ -83,6 +83,9 @@ One entry per **flight** (a run of treads between landings; R318 calls it a flig
 | `hinge_pin` | `[u, n]`: the hinge pin's centre in the door's plan: at the leaf's hinge-side corner on the face it swings toward, or beyond it (a pin more than 1/16 in behind that face, or back toward the hinge jamb, doesn't hang the leaf: no clear width) |
 | `leaf_closed` | `[[u, n], [u, n]]`: two opposite corners of the leaf, closed, in the door's plan: thicker than nothing, spanning the opening: reaching the latch-side stop, and no more than 3/4 in (a stop's lap) behind the hinge-side stop |
 | `threshold_top`, `head_stop_bottom` | the top of the threshold and the bottom of the head stop, elevations |
+| `stated_clear` | optional: the maker's clear opening, `{width, height, source}`, both sizes required and more than zero, measured as R318.2 measures them (the width between the face of the door and the stop with the door open 90 degrees, the height from the top of the threshold to the bottom of the stop; a maker's "door size" or rough opening is not it), and `source` the maker's publication it comes from (required, not empty). No other key. Given with the drawn values, the less favourable (the smaller) of the two counts for each size; given alone (none of that size's drawn keys), it counts; given but malformed, neither size counts (never dropped, never defaulted). The measured door says in `from` which each size came from ([interior_measurements.md](interior_measurements.md#the-exit-door-egress_door)) |
+
+A door's `stated_clear` was added within `gordium.interior/1` (2026-11-20): an optional key, so a description without it measures exactly as before. How the Revit add-in will fill it: [revit_interior_reading_design.md](../revit/revit_interior_reading_design.md), section 4 (Doors).
 
 ### guards
 
@@ -131,7 +134,7 @@ parts:
   sleeping_room: [{id, name, measures: {...}, not_measured: {measure: reason}, more: {...}}]
   emergency_escape_opening: [{id, name, within: <room id>, measures, not_measured, more}]
   stair: [...]
-  egress_door: [...]
+  egress_door: [{id, name, measures, not_measured, more, from: {measure: {used, drawn, stated, source, why}}}]
   guard: [...]            # not a part kind in rule_format/parts.yaml yet
 problems: [...]           # why a kind wasn't read (a has_none claim not taken among them)
 not_checked: [...]        # escape openings in rooms that aren't sleeping rooms

@@ -134,6 +134,14 @@ STOPS = {
     "pin_off_leaf": "the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it "
                     "swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't "
                     "hung on that pin",
+    "door_stated_shape": "the door's maker's clear opening (`stated_clear`) isn't a mapping of width, height and "
+                         "source: neither clear size counts",
+    "door_stated_keys": "the door's maker's clear opening (`stated_clear`) has keys it doesn't know ({keys}; it has "
+                        "`width`, `height` and `source`): neither clear size counts",
+    "door_stated_no_source": "the door's maker's clear opening (`stated_clear`) doesn't say where it comes from "
+                             "(`source`, such as the maker's catalogue): neither clear size counts",
+    "door_drawn_unread": "the door's clear {what} is drawn but can't be measured from the drawing ({reason}): the "
+                         "maker's stated one alone could be more than the door as drawn, so neither counts",
     "not_positive": "{what} is {value} in: not more than zero",
 }
 

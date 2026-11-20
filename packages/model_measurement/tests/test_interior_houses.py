@@ -1,4 +1,4 @@
-"""The five made-up houses (test_data/interior_houses/): every measure the code gives equals the one worked out by
+"""The six made-up houses (test_data/interior_houses/): every measure the code gives equals the one worked out by
 hand in the house's expected.yaml (written, with its working, before the code ran on it), every measure it can't
 give is the one expected.yaml says, and nothing else. Then the measured parts go through the checker's per-part
 rows (design_checker.each_part) with SYNTHETIC rules, end to end.
@@ -31,9 +31,9 @@ HEADROOM = dict(RISER, id="R-1b.synthetic_headroom", title="SYNTHETIC stair head
 NOT_YET = {STOPS["not_measured_yet"], STOPS["in_more_not_rules"]}
 
 
-def test_there_are_five_houses():
+def test_there_are_six_houses():
     assert NAMES == ["1_ranch_compliant", "2_two_story_small_window", "3_tall_riser", "4_loft",
-                     "5_basement_window_well"]
+                     "5_basement_window_well", "6_door_stated_clear"]
 
 
 @pytest.mark.parametrize("name", NAMES)
@@ -59,6 +59,8 @@ def test_each_measure_is_the_hand_worked_one(name):
             assert {m for m, why in p["not_measured"].items() if why not in NOT_YET} == set(w.get("not_measured", [])), pid
             for m, v in (w.get("more") or {}).items():
                 assert p["more"][m] == pytest.approx(v, abs=1e-6), (pid, m)
+            for m, used in (w.get("from") or {}).items():       # which the clear size came from: drawn or stated
+                assert p["from"][m]["used"] == used, (pid, m)
     assert got["not_checked"] == []
 
 
@@ -112,6 +114,18 @@ def test_end_to_end_the_low_headroom_fails():
     assert by["bbed/we2"] == "fail"                                  # 3.33 sq ft and 20 in high
     assert by["/bs"] == "fail"                                       # 76 in under the main floor's edge
     assert results[HEADROOM["id"]] == "fail" and results[AREA["id"]] == "fail"
+
+
+DOOR = dict(RISER, id="R-1b.synthetic_door_width", title="SYNTHETIC exit door clear width", for_each="egress_door",
+            check="door_clear_width >= 33.75",
+            examples=[{"given": {"door_clear_width": 34}, "expect": "pass"},
+                      {"given": {"door_clear_width": 33.5}, "expect": "fail"}])
+
+
+def test_end_to_end_the_makers_smaller_door_width_fails():
+    results, by = rows("6_door_stated_clear", [DOOR])
+    # drawn 34.0 alone would pass (>= 33.75); the maker's 33.5 is the less favourable, so it counts and fails
+    assert by["/d1"] == "fail" and results == {DOOR["id"]: "fail"}
 
 
 def test_the_command_prints_the_measures(capsys):
