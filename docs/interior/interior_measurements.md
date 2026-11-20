@@ -91,13 +91,23 @@ Not measured yet: a stair guard's openings (R321.1.3 Exceptions 1 and 2: the 6 i
 
 | Measure | How | Serves |
 |---|---|---|
-| `door_clear_width` (in) | A side-hinged door only: the leaf, drawn closed, turned 90 degrees about its hinge pin (which must hang it: at the leaf's hinge-side corner on the face it swings toward, within 1/16 in, or beyond it; else no value). The leaf must be thicker than nothing and, closed, span its opening: reach the latch-side stop (within 1/16 in), and stand no farther behind the hinge-side stop than a stop laps a leaf (3/4 in), else no value; from its face toward the latch side (or the hinge-side stop, if that stands further in) to the latch-side stop | R318.2 "measured between the face of the door and the stop, with the door open 90 degrees" (p.76) |
-| `door_clear_height` (in) | The bottom of the head stop less the top of the threshold | R318.2 "measured from the top of the threshold to the bottom of the stop" (p.76) |
+| `door_clear_width` (in) | A side-hinged door only: the leaf, drawn closed, turned 90 degrees about its hinge pin (which must hang it: at the leaf's hinge-side corner on the face it swings toward, within 1/16 in, or beyond it; else no value). The leaf must be thicker than nothing and, closed, span its opening: reach the latch-side stop (within 1/16 in), and stand no farther behind the hinge-side stop than a stop laps a leaf (3/4 in), else no value; from its face toward the latch side (or the hinge-side stop, if that stands further in) to the latch-side stop (with a maker's stated clear opening, see below the table) | R318.2 "measured between the face of the door and the stop, with the door open 90 degrees" (p.76) |
+| `door_clear_height` (in) | The bottom of the head stop less the top of the threshold (with a maker's stated clear opening, see below the table) | R318.2 "measured from the top of the threshold to the bottom of the stop" (p.76) |
 | `door_side_hinged` (yes/no) | From the door's `operation` alone: yes for `side_hinged`; no for `sliding`, `folding`, `pocket`; no value for `other` | R318.2 "The egress door shall be side-hinged" (p.76) |
 
 Not measured yet: `opening_operable`. It follows from `operation` just as plainly (fixed glass doesn't open; every other operation does), but R319.6's rule checks it on every sleeping room's openings, since a rule for each opening can't read whether its room is new in an addition: measured, R319.6 would say "complies" on every new house, where it doesn't apply ([decision](../decisions/2026-11-16_interior_absent_parts.md), item 5).
 
-A sliding, folding or pocket door gets no clear width: R318.2's measure is defined for a side-hinged door (and requires one).
+A sliding, folding or pocket door gets no clear width: R318.2's measure is defined for a side-hinged door (and requires one), so a maker's stated width doesn't give it one either.
+
+**The maker's stated clear opening** (`stated_clear`, [decision 2](../revit/revit_interior_reading_design.md#8-decisions-ben-2026-11-19-go-w-ur-recs): door families don't model the stops, pin and leaf consistently; a maker's number with its source can be trusted). Each clear size (width, height) is worked out on its own:
+
+- **Drawn only:** as above.
+- **Stated only** (none of that size's drawing given: `stops`, `hinge_pin`, `leaf_closed` for the width; `threshold_top`, `head_stop_bottom` for the height): the maker's size.
+- **Both:** the less favourable, the smaller. Unlike an escape opening's (which must agree within 1/16 in), no agreement is asked: the smaller can be no more than either, so the larger one can't make the door pass.
+- **Drawn but not measurable** (part of the drawing missing, or wrong): no value, even with a maker's size (`door_drawn_unread`): the maker's alone could be more than the door as drawn.
+- **A maker's size given but malformed** (not a mapping, a key it doesn't know, no `source`, a size missing, not a length, or not more than zero): neither clear size gets a value. It is never dropped: dropping it would leave the drawn size, which may be the larger.
+
+The door's part says, in `from`, for each clear size it has: `used` (`drawn`, `stated`, or `both` when they are the same), the `drawn` and `stated` values given, the maker's `source`, and `why` in words.
 
 ## Every reason a measure can have no value
 
@@ -191,4 +201,8 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `leaf_not_closing` | the closed leaf stops {short} in short of the latch-side stop (within 1/16 in is drawing noise): the leaf drawn doesn't close this opening |
 | `leaf_behind_hinge_stop` | the closed leaf's hinge edge stands {back} in behind the hinge-side stop, more than a stop laps a leaf ({most} in): the leaf drawn doesn't close this opening (a swing-clear hinge isn't measured yet) |
 | `pin_off_leaf` | the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't hung on that pin |
+| `door_stated_shape` | the door's maker's clear opening (`stated_clear`) isn't a mapping of width, height and source: neither clear size counts |
+| `door_stated_keys` | the door's maker's clear opening (`stated_clear`) has keys it doesn't know ({keys}; it has `width`, `height` and `source`): neither clear size counts |
+| `door_stated_no_source` | the door's maker's clear opening (`stated_clear`) doesn't say where it comes from (`source`, such as the maker's catalogue): neither clear size counts |
+| `door_drawn_unread` | the door's clear {what} is drawn but can't be measured from the drawing ({reason}): the maker's stated one alone could be more than the door as drawn, so neither counts |
 | `not_positive` | {what} is {value} in: not more than zero |

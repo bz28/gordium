@@ -172,7 +172,12 @@ The exit door's clear width is measured from drawn geometry (`model_measurement/
 the hinge pin, the closed leaf), which door families don't model consistently. **Agreed (Ben, 2026-11-19, section 8):** add a maker's
 stated clear width and height to the format for doors, as windows have (`stated_clear`), with its source, the less
 favourable of drawn and stated counting when both are given. That is a change to the format and the measuring code
-(engineers, its own PR, with a hand-worked house), before the Revit reader sends doors. Until then the reader sends
+(engineers, its own PR, with a hand-worked house), before the Revit reader sends doors. **Built (2026-11-20):** doors'
+`stated_clear` `{width, height, source}` in the format, each size the smaller of drawn and stated, a door drawn but
+not measurable or a malformed stated size giving no value, and `from` saying which counted
+([interior_measurements.md](../interior/interior_measurements.md#the-exit-door-egress_door); house 6 in
+`test_data/interior_houses/`); how the reader fills it (a confirmed type parameter, as windows' `Clear …` marks) is
+step 5's. Until the reader does, it sends
 each door's `exit` mark and `operation` only: the width and height have no value (needs review), which is safe.
 
 ### Guards (`guards`)
