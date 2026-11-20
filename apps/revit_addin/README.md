@@ -297,9 +297,9 @@ committed, and a host with any recording must have all three (`test_interior_rec
 **Recorded in Revit 2027.4 (trial run 6, 2026-11-20):** all three houses pass with no problem: rooms read, and every
 escape window's wall opening (the wall faces whose `GetGeneratingElementIds` name it) with its bottom on its sill line
 exactly, so the clear measures are in the step's scope. `FindInserts` listed no inserts even on the cut walls, so
-nothing relies on it. Lessons from runs 1 to 5, in the drawer: Window.rft's head plane is "Top"; the walls are
-committed and regenerated before the windows are placed (placed in the walls' own transaction, windows were hosted
-but cut nothing); the walls stop at the ceilings' top (higher, house 5's basement walls closed an area on the level
+nothing relies on it. Lessons from runs 1 to 5, in the drawer: Window.rft's head plane is "Top"; Revit cuts a window's wall only
+after a `Document.Regenerate()` right after the window is placed and its Sill Height set (without it, runs 2 to 5 and
+a re-recording of 830fbedc: hosted, nothing cut; the walls are also committed first); the walls stop at the ceilings' top (higher, house 5's basement walls closed an area on the level
 above); the enclosed areas are read inside a rolled-back transaction (Revit works them out only in a document it can
 change).
 

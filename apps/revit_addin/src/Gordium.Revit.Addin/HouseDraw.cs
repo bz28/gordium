@@ -116,7 +116,8 @@ internal static class HouseDraw
             shape.SetShape(solids);
         }
         doc.Regenerate();
-        // the walls, slabs and ceilings committed and regenerated before any window is placed in them: windows placed in
+        // the walls, slabs and ceilings committed and regenerated before any window is placed in them (with the regenerate
+        // after each window below, what run 6 changed): windows placed in
         // the walls' own transaction were hosted but cut nothing (trial runs 2 to 5, Revit 2027.4); placed after this
         // commit, each cuts its wall (run 6)
         t.Commit();
@@ -137,6 +138,11 @@ internal static class HouseDraw
             var at = new XYZ(cx + ox * wallThickness / 2, cy + oy * wallThickness / 2, z);
             var fi = doc.Create.NewFamilyInstance(at, symbol, wall, levels[z], StructuralType.NonStructural);
             Set(fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM), D(w["sill"]), "Sill Height");
+            // load-bearing: regenerated right after each window is placed and its Sill Height set, Revit cuts the wall;
+            // without this (trial runs 2 to 5, and again once removed in 830fbedc) every window was hosted but cut
+            // nothing, and the reader found no wall opening (run 6, a34f4f9d, cut with it; the re-recording of 830fbedc,
+            // with it removed and the walls still committed first, cut nothing again)
+            doc.Regenerate();
             Set(fi.get_Parameter(Marks.EscapeOpening.Guid), w["escape"]!.GetValue<bool>() ? 1 : 0, Marks.EscapeOpening.Name);
             fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.Set(w["name"]!.GetValue<string>());
             var word = Operations.Words.First(x => Operations.ForOpening(x) == w["operation"]!.GetValue<string>());

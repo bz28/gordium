@@ -342,9 +342,9 @@ Sill Height) exactly on all six escape windows; `HostObject.FindInserts` listed 
 nothing relies on it; `SpatialElementBoundaryLocation.Finish` gave each room's outline at the walls' faces and the
 room separation lines; the slab top under each room agreed with its level; the enclosed areas (`PlanTopology`) are
 worked out by Revit only in a document it can change, so they are read inside a transaction that is rolled back;
-`FromRoom`/`ToRoom` for the last phase gave each window's room. Two lessons for drawing: walls must be committed and
-regenerated before windows are placed in them (placed in the walls' own transaction, a window was hosted but cut
-nothing), and walls reaching past the level above enclose an area on it too (house 5's basement walls, first drawn a
+`FromRoom`/`ToRoom` for the last phase gave each window's room. Two lessons for drawing: Revit cuts a hosted window's wall only once the document is regenerated right after
+the window is placed and its Sill Height set (`Document.Regenerate()` there; without it, in runs 2 to 5 and again on
+830fbedc, every window was hosted but cut nothing; the walls are also committed first), and walls reaching past the level above enclose an area on it too (house 5's basement walls, first drawn a
 foot past its ceiling). Still to try on real models: real makers' window families (their rough openings may be
 larger than the unit), the Bottom reference, sloped and curved ceilings, links and worksets.
 
