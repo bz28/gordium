@@ -235,6 +235,10 @@ public sealed record RevitElement
     /// <summary>A floor block's mark, "&lt;story&gt;;&lt;height drawn, ft&gt;" (as Rhino's <c>gordium:floor</c>).</summary>
     public string? FloorMark { get; init; }
 
+    /// <summary>The architect's marks on the element itself, by the mark's GUID (<c>Element.get_Parameter(Guid)</c>; a
+    /// mark it doesn't have is absent): read for Floors only, for <see cref="Marks.SiteSlab"/>.</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> InstanceMarks { get; init; } = new Dictionary<Guid, MarkValue>();
+
     /// <summary><c>Element.CreatedPhaseId</c>, or null when the element has no phase.</summary>
     public string? PhaseCreated { get; init; }
 

@@ -55,6 +55,8 @@ public sealed class MarksTests
             ("Gordium: No rooms on this level", "c8cc09e8-00ce-4e4b-a27a-4c2d23410a02", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Levels"]),
             // the same model's wall niches, corbels and trim drawn as Generic Models (Q2): cleared one by one
             ("Gordium: Not a stair", "6f527562-6b18-467b-9e86-5a2c5489dbc2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_GenericModel", "OST_Stairs", "OST_StairsRailing"]),
+            // what a floor outside the house is (reading design note, section 1, "Site slabs")
+            ("Gordium: Site slab is", "56113427-6ae6-430d-95dd-2472fbefff71", MarkValueKind.Text, MarkBinding.Instance, ["OST_Floors"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

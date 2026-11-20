@@ -24,7 +24,8 @@ public sealed class ReadRefusedException(string message) : Exception(message);
 /// </summary>
 public static class SiteReader
 {
-    /// <summary>The building categories (design note, section 1, row 1), by built-in name: one building each.</summary>
+    /// <summary>The building categories (design note, section 1, row 1), by built-in name: one building each, but a
+    /// floor outside the house not marked a porch, deck, landing or ramp (a site slab: <see cref="SiteSlabs"/>).</summary>
     public static readonly IReadOnlySet<string> BuildingCategories = new HashSet<string>
     {
         "OST_Walls", "OST_Floors", "OST_Roofs", "OST_Columns", "OST_StructuralColumns", "OST_Stairs",
@@ -101,13 +102,20 @@ public static class SiteReader
                     throw new InvalidOperationException($"objects.left_out's answer {i + 1} is for {d.Id}, not {c.Id}");
                 if (!d.LeftOut)
                     continue;
-                leftOut.Add(new JsonObject
+                var entry = new JsonObject
                 {
                     ["id"] = c.Id, ["layer"] = c.Layer, ["could_be_building"] = true, ["touching"] = d.Touching,
                     ["ground_like"] = d.Touching is not null && lot is not null && c.Box is { } b
                                       && LooksLikeGround(c.GroundKind, c.Closed, b, lot.Ring),
                     ["context"] = c.Context,
-                });
+                };
+                if (c.Slab is not null)          // a site slab (SiteSlabs): what it is marked, and its name to say so
+                {
+                    entry["slab"] = c.Slab;
+                    if (c.Name is { Length: > 0 } name)
+                        entry["name"] = name;
+                }
+                leftOut.Add(entry);
             }
         }
 

@@ -13,16 +13,16 @@ without it no saved address lookup counts as recent, so the overlays row stays: 
 "model": "<.3dm with the lot>", "facts": {...}, "larger_side": null} (the largest legal starting building, as stacked floors;
 "larger_side": "left" or "right" puts a zone's larger side yard there), {"id": 5, "cmd": "sample_site"} (the
 106 Ithaca Rd lot and facts GordiumStart offers). New-style commands name the protocol they speak (protocol.py,
-docs/protocol/): {"id": 6, "cmd": "hello", "protocol": "1.2"} (the protocol, the site description version and the
-fingerprints of the worker's code and rules), {"id": 7, "cmd": "read_model", "protocol": "1.2", "model": "<.3dm>",
+docs/protocol/): {"id": 6, "cmd": "hello", "protocol": "1.3"} (the protocol, the site description version and the
+fingerprints of the worker's code and rules), {"id": 7, "cmd": "read_model", "protocol": "1.3", "model": "<.3dm>",
 "facts": {...}} (the model as a site description, gordium.site/1: site_json.read_model), {"id": 8, "cmd":
-"check_site", "protocol": "1.2", "site": {...}, "facts": {...}, "report": null, "extras": {...}, "interior":
+"check_site", "protocol": "1.3", "site": {...}, "facts": {...}, "report": null, "extras": {...}, "interior":
 {...}} (check() for a site description: check.check_description; "interior", from protocol 1.2: the house's inside,
-gordium.interior/1, which the egress laws are checked on; without it they wait) and {"id": 9, "cmd": "start_site", "protocol": "1.2", "site": {...}, "facts":
+gordium.interior/1, which the egress laws are checked on; without it they wait) and {"id": 9, "cmd": "start_site", "protocol": "1.3", "site": {...}, "facts":
 {...}, "floor_to_floor": null, "design_buffer": 0, "larger_side": null} (start() for one); their answers carry
 "about" (the same fingerprints) beside "result". The session commands (protocol.COMMANDS: facts.*, box.view,
 box.pick, lookup.*, streets.*, session.*, report.message, panel.rows, objects.left_out) are host_core's functions served by a fixed
-table, e.g. {"id": 10, "cmd": "box.view", "protocol": "1.2", "state": {...}}: every field in
+table, e.g. {"id": 10, "cmd": "box.view", "protocol": "1.3", "state": {...}}: every field in
 docs/protocol/worker_protocol_v1.md. Answers:
 {"id": 1, "ok": true, "result": {...}} or {"id": 1, "ok": false, "error": "..."}. A request with "progress": true
 also gets {"id": 1, "step": "Measuring the building…"} lines before its answer, one as each stage starts (the
