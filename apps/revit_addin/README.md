@@ -346,6 +346,47 @@ after; any railing Revit adds is deleted: step 5), ticks "these are all the stai
 step (houses 1 and 5 at step 3, 2 and 3 at step 4). The recording keeps `stairs_not_read`, the drawing's notes and
 what Revit gave back for each stair (`drawn`), and each run's faces, numbers and surroundings in its evidence.
 
+## Doors, handrails and guards (interior step 5)
+
+By the [design note](../../docs/revit/revit_interior_reading_design.md)'s section 4 ("As built in step 5"):
+
+- **Doors** (`InteriorReader.ReadDoor`): every door is a `doors` entry with its `Gordium: Exit door` mark, its
+  type's operation (the door's word) and `stated_clear` `{width, height, source}`, the maker's clear opening, sent
+  only when the type's `Gordium: Clear confirmed` stamp, made for a door, confirms every value now (the type itself,
+  its size and operation, the clear width and height, the source, a mapped maker's parameter: exactly as windows'),
+  and it fits inside the door as placed. `Clear width`, `Clear height`, `Clear source` and `Clear confirmed` are now
+  bound to Doors too (Mark for egress extends an existing project's binding); a door has no `Clear offset`. Nothing
+  drawn is sent (stops, hinge pin, leaf, threshold): door families don't model them consistently.
+- **Handrails** (`StairReader`): a railing on the stair beside a wall, read exactly, between the wall face and the
+  flight's middle and no higher than 38 in over the nosings, is that side's handrail (not its side, never its
+  headroom): its handrails, and its top rail where the railing type says `Gordium: Top rail is handrail` Yes, each as
+  the edge nearest the middle. Any other railing beside a flight leaves its `sides` and `handrails` out.
+- **Guards** (`GuardReader.cs`): each railing on no stair is a guard at a level walking surface: its members (every
+  solid of the railing, its top rail and handrails, each a box square to it), its top, the floor along it (checked
+  against its base), and its ends (a wall or post face at each). Guards along a stair aren't read yet, so a railing
+  on a stair that isn't a handrail beside a wall leaves `guards` out.
+- **The tick:** `guards` and every flight's `handrails` are sent only when `Gordium: These are all the guards and
+  handrails` on Project Information says Yes (unset or No: not read; with it, a flight with no railing found sends
+  `handrails: []`). Nothing found is never "none": no door or guard found leaves that list out.
+
+**How we know (without Revit):** `DoorGuardTests.cs` draws houses 1, 2, 4, 5 and 6 as fake records and checks them
+with the interior conformance CI applies (house 6's door 33.5 x 79.25 in, house 4's loft guard 36 in high with 3 1/2 in
+openings, house 2's and house 4's handrails), also under turned shared coordinates. Then each trap: a door type
+duplicated, resized, its clear width, source or operation edited, a window's stamp on it, its clear opening wider
+than the door; an unmarked door; no door; a round baluster, an L-shaped post, an unreadable baluster, an end wall
+missing, short or an inch back, the floor off the railing's base or at two heights or missing, a curved or bent path,
+a link; the top rail's mark unset or No; a round, too high, off-stair or past-the-middle railing beside a flight; no
+tick, No, never set; no railings read.
+
+**In Revit:** Record houses draws, in houses of step 5 (`HouseDraw`): each door as a family of its own from Door.rft
+(a leaf of its size) in an outside wall with no window, placed and regenerated as the windows are, marked and its
+type's clear opening confirmed with a door's stamp; each stair handrail as a railing Revit makes on the stair's treads,
+its path moved to the drawing's, the other side's deleted, its type's top rail (a square profile from Profile-Rail.rft)
+the handrail; house 4's loft guard as a railing from a wall's face to a post's along a floor's edge, its type's top
+rail, bottom rail and balusters (a box family from Baluster.rft, one per 5 in pattern) house.yaml's; and ticks "these
+are all the guards and handrails". The recording keeps `doors_not_read` and `guards_not_read`; the log every railing's
+parts, solid by solid.
+
 ## Running it
 
 Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and
