@@ -16,7 +16,8 @@ The export draws what the Rhino reader reads, in Revit's terms: each closed outl
 (the lot is picked by the facts' lot_id, as in Rhino), each solid on the Building layer one element in a building
 category, made from the faces Rhino's reader sends; every other curve (the Map layer's neighbours, the setback lines) a
 model line, which neither reader takes for a building or a lot. It draws only that: a model with anything else the
-Rhino reader reads (a curved lot outline, a face with holes, an object left out or unsent, spot grades) is refused,
+Rhino reader reads (a curved lot outline, a building it can't read whole, a face with holes, a marked floor block, an
+object left out or unsent, spot grades) is refused,
 naming it, never drawn differently (review round 1).
 """
 
@@ -58,6 +59,9 @@ def export(model_path: str, facts_path: str) -> dict:
     if rhino["grade"]["source"] != "none":
         raise SystemExit("the Rhino reader reads spot grades: not drawn yet")
     for b in rhino["buildings"]:
+        if b.get("problems") or not b["faces"]:   # a block, a curved or open solid, a mesh: not read whole (round 4)
+            raise SystemExit(f"building {b['id']} isn't read whole by Rhino "
+                             f"({[p.get('code') for p in b.get('problems') or []]}): not drawn yet")
         if any(f.get("holes") for f in b["faces"]):
             raise SystemExit(f"building {b['id']} has a face with holes: not drawn yet")
         if b.get("floor") is not None:

@@ -139,6 +139,24 @@ def test_a_picked_lot_not_drawn_is_refused(tmp_path):
         rs.export(path, facts)
 
 
+def test_a_block_on_the_building_layer_is_refused(tmp_path):
+    # review round 4: the reader sends a placed block on Building as "a block" with no faces and not_a_solid; the
+    # export passed it on, and Revit failed later with an unrelated-looking error
+    import rhino3dm as r
+    rs = _real_site()
+
+    def add(m, i):
+        m.Objects.AddCurve(_square(), _attrs(i["Site"]))
+        outline = r.Polyline([r.Point3d(*q, 0) for q in ((15, 30), (45, 30), (45, 80), (15, 80), (15, 30))]).ToPolylineCurve()
+        box = r.Extrusion.Create(outline, 10, True).ToBrep(True)
+        index = m.InstanceDefinitions.Add("house", "", "", "", r.Point3d(0, 0, 0), (box,), (_attrs(i["Building"]),))
+        m.Objects.Add(r.InstanceReference(m.InstanceDefinitions.FindIndex(index).Id, r.Transform.Identity()),
+                      _attrs(i["Building"]))
+    path, facts = _tiny(tmp_path, ["Site", "Building"], add)
+    with pytest.raises(SystemExit, match="read whole"):
+        rs.export(path, facts)
+
+
 def test_a_marked_floor_block_is_refused(tmp_path):
     # review round 2: a floor mark was dropped, so Revit would send floor null where Rhino sends the height
     import rhino3dm as r
@@ -157,6 +175,8 @@ def test_a_marked_floor_block_is_refused(tmp_path):
     (lambda d: d.update(unsent=[{"id": "x"}]), "unsent"),
     (lambda d: d.update(grade={"source": "spot", "points": [[0, 0, 0]]}), "spot grades"),
     (lambda d: d["buildings"][0]["faces"][0].update(holes=[[[1, 1, 0], [2, 1, 0], [2, 2, 0]]]), "holes"),
+    (lambda d: d["buildings"][0].update(problems=[{"code": "open_solid", "args": {}}]), "read whole"),
+    (lambda d: d["buildings"][0].update(faces=[]), "read whole"),
 ])
 def test_every_refusal_holds(monkeypatch, change, words):
     # review round 2: only the curved-lot refusal was pinned; each of these could be undone with every test passing
