@@ -7,7 +7,6 @@ import json
 import sys
 
 import pytest
-import yaml
 
 from design_checker import conformance, egress, present
 from design_checker.__main__ import answer
