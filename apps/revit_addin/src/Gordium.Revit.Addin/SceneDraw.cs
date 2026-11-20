@@ -56,6 +56,7 @@ internal static class SceneDraw
         var facts = scene["facts"]!.DeepClone().AsObject();
         var offset = Offset(scene);
         using var t = new Transaction(doc, "Gordium: draw conformance scene");
+        Warnings.Accept(t);
         t.Start();
         if (offset.GetLength() > 0)       // shared coordinates: internal (0, 0, 0) is the scene's offset
             doc.ActiveProjectLocation.SetProjectPosition(XYZ.Zero, new ProjectPosition(offset.X, offset.Y, offset.Z, 0));
@@ -148,6 +149,7 @@ internal static class SceneDraw
     {
         var before = scene["steps"]!["as drawn"]!["solids"]!.AsArray().ToDictionary(s => s!["id"]!.GetValue<string>());
         using var t = new Transaction(doc, "Gordium: the scene's edit");
+        Warnings.Accept(t);
         t.Start();
         foreach (var s in scene["steps"]![step]!["solids"]!.AsArray())
         {
@@ -219,7 +221,7 @@ internal static class SceneDraw
     {
         double x0 = outline.Min(p => p.X), x1 = outline.Max(p => p.X), y0 = outline.Min(p => p.Y), y1 = outline.Max(p => p.Y);
         XYZ V(int i, int j) => new(x0 + (x1 - x0) * i / cells, y0 + (y1 - y0) * j / cells, z);
-        var b = new TessellatedShapeBuilder { Target = TessellatedShapeBuilderTarget.Mesh, Fallback = TessellatedShapeBuilderFallback.Abort };
+        var b = new TessellatedShapeBuilder { Target = TessellatedShapeBuilderTarget.Mesh, Fallback = TessellatedShapeBuilderFallback.Salvage };
         b.OpenConnectedFaceSet(false);
         for (var j = 0; j < cells; j++)
             for (var i = 0; i < cells; i++)
@@ -260,4 +262,25 @@ internal static class SceneDraw
     private static List<(double X, double Y)> Outline(JsonNode o) => o.AsArray().Select(p => P(p!)).ToList();
 
     private static string Num(double v) => v.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+}
+
+/// <summary>A scene is drawn as the suite asks, including what Revit only warns about (an open property line, scene
+/// 24: "Property lines do not form a closed loop"): its warnings are accepted without a dialog. An error still stops
+/// the transaction, so nothing Revit refuses is drawn.</summary>
+internal sealed class Warnings : IFailuresPreprocessor
+{
+    internal static void Accept(Transaction t)
+    {
+        var options = t.GetFailureHandlingOptions();
+        options.SetFailuresPreprocessor(new Warnings());
+        t.SetFailureHandlingOptions(options);
+    }
+
+    public FailureProcessingResult PreprocessFailures(FailuresAccessor failures)
+    {
+        foreach (var f in failures.GetFailureMessages())
+            if (f.GetSeverity() == FailureSeverity.Warning)
+                failures.DeleteWarning(f);
+        return FailureProcessingResult.Continue;
+    }
 }
