@@ -150,11 +150,15 @@ public static class SiteReader
     /// it is in that set, else the set's primary. An option the reader can't place (no set holds it, or its set has
     /// no primary) is kept: an extra object can only make the check more cautious.</item>
     /// </list></summary>
-    internal static bool OnLotNow(RevitModel model, RevitElement e)
+    internal static bool OnLotNow(RevitModel model, RevitElement e) => InDesignChecked(model, e.PhaseDemolished, e.DesignOption);
+
+    /// <summary><see cref="OnLotNow(RevitModel, RevitElement)"/>'s rule for any element: by when it is demolished and
+    /// its design option (the interior's rooms, windows and doors use the same one place: interior note, section 4).</summary>
+    internal static bool InDesignChecked(RevitModel model, string? phaseDemolished, string? designOption)
     {
-        if (e.PhaseDemolished is { } gone && model.Phases.Contains(gone))
+        if (phaseDemolished is { } gone && model.Phases.Contains(gone))
             return false;
-        return e.DesignOption is not { } option || Chosen(model, option) is not { } chosen || chosen.Id == option;
+        return designOption is not { } option || Chosen(model, option) is not { } chosen || chosen.Id == option;
     }
 
     /// <summary>The option checked from the set that holds <paramref name="option"/>, or null when no set holds
