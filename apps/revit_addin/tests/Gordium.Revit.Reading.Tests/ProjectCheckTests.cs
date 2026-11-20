@@ -1,0 +1,233 @@
+using System.Text.Json.Nodes;
+using Gordium.Worker;
+using Xunit;
+
+namespace Gordium.Revit.Reading.Tests;
+
+/// <summary>"Check my project" without Revit (reading design note, section 9): conformance scene 01 (the box house)
+/// as the outside and a hand-worked interior house as the inside, both fake Revit records, with the lot facts as
+/// Gordium's marks on Project Information, made into one check_site request and checked by the real worker. The
+/// outside's rows must be the scene's hand-worked verdicts, the inside's the house's; a fact missing sends nothing; a
+/// project with no lot never complies.</summary>
+public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWorker>
+{
+    private static readonly SceneDrawing Scene = SceneDrawing.Named("01_box_house");
+
+    /// <summary>Scene 01 as the project's outside, with Gordium spot-grade markers at the middle of each wall at 0 (the
+    /// scene states its ground flat at 0 instead, which no mark sends: the spots give the same ground), in the
+    /// inside's phases (one document: both reads see the same phases).</summary>
+    private static RevitModel Outside(RevitModel inside)
+    {
+        var model = Scene.Model(Scene.Steps[0]);
+        var f = new FakeRevit(model.InternalToShared);
+        var spots = new[] { (30.0, 30.0), (45.0, 55.0), (30.0, 80.0), (15.0, 55.0) }.Select((p, k) => new RevitElement
+        {
+            UniqueId = $"uid-spot-{k}", BuiltInCategory = "OST_GenericModel", Category = "Generic Models",
+            Mark = GordiumMark.SpotGrade, Location = f.Place(p.Item1, p.Item2, 0),
+        });
+        return model with { Elements = [.. model.Elements, .. spots], Phases = inside.Phases };
+    }
+
+    /// <summary>The south lot edge (the scene's street) as Gordium writes it when the architect clicks it.</summary>
+    private static string SouthEdge(RevitModel outside)
+    {
+        var c = outside.LotLines[0].Curves.Single(c => Math.Abs(c.Start.Y - c.End.Y) < 1e-9 && Math.Min(c.Start.Y, c.End.Y) < 1);
+        return StreetEdges.Format([(c.Start, c.End)]);
+    }
+
+    /// <summary>The scene's hand-worked zoning verdicts (its <c>egress.waiting</c> row is the one a check with no
+    /// inside gives: here the inside is sent).</summary>
+    private static IEnumerable<KeyValuePair<string, string>> Outside(SceneDrawing scene) =>
+        scene.Verdicts(scene.Steps[0]).Where(p => !p.Key.StartsWith("egress.", StringComparison.Ordinal));
+
+    private static void Mark(FakeHouse house, MarkDefinition m, MarkValue v) => house.ProjectMarks[m.Guid] = v;
+
+    /// <summary>The scene's facts as marks: R-1b, one family detached, surveyed, not a corner, ground from the spots,
+    /// the south edge picked.</summary>
+    private static (FakeHouse House, RevitModel Outside) Project(string house)
+    {
+        var h = FakeHouse.Draw(house);
+        var outside = Outside(h.Model());
+        Mark(h, Marks.Zone, new(true, Text: "R-1b"));
+        Mark(h, Marks.Use, new(true, Text: "one_family_detached"));
+        Mark(h, Marks.LotSurveyed, new(true, 1));
+        Mark(h, Marks.CornerLot, new(true, 0));
+        Mark(h, Marks.GroundFrom, new(true, Text: "Spot grades"));
+        Mark(h, Marks.StreetEdge, new(true, Text: SouthEdge(outside)));
+        return (h, outside);
+    }
+
+    private async Task<(ProjectPrepared Prepared, CheckResult Result)> Check(FakeHouse house, RevitModel outside)
+    {
+        var client = await worker.RunningAsync();
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client));
+        Assert.Empty(prepared.Missing);
+        return (prepared, await ProjectCheck.SendAsync(client, prepared.Request!));
+    }
+
+    [Fact]
+    public async Task The_box_house_with_a_compliant_ranch_inside_gives_the_scenes_verdicts_and_egress_rows()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        var (prepared, result) = await Check(house, outside);
+
+        // one request: the site, the facts as the marks state them (the street the lot's own south edge), the inside
+        var facts = prepared.Request!.Facts;
+        Assert.Equal(ProjectFacts.Jurisdiction, facts["jurisdiction"]!.GetValue<string>());
+        Assert.Equal("R-1b", facts["zone"]!.GetValue<string>());
+        Assert.Equal("spot", facts["grade_from"]!.GetValue<string>());
+        Assert.Equal("[[[0,0],[60,0]]]", facts["street_line"]!.ToJsonString());
+        Assert.Equal("gordium.interior/1", prepared.Request.Interior["format"]!.GetValue<string>());
+        Assert.Equal(FakeHouse.LastPhase, prepared.PhaseChecked);
+
+        var got = result.Items.ToDictionary(i => i.Id, i => i.StatusWord);
+        foreach (var (id, word) in Outside(Scene))
+            Assert.True(got.TryGetValue(id, out var mine) && mine == word, $"{id}: the scene says {word}, the check {(mine ?? "no row")}");
+        Assert.DoesNotContain("egress.waiting", got.Keys);          // the inside went with it: egress isn't waiting
+        // the inside was checked too: the ranch's escape windows' clear width complies (26 and 30 in wide, 20 needed)
+        var widths = result.Items.Where(i => i.Id.StartsWith("general.r319_2_2_escape_opening_min_net_clear_width@", StringComparison.Ordinal)).ToList();
+        Assert.Equal(2, widths.Count);
+        Assert.All(widths, i => Assert.Equal(Verdict.Complies, i.Status));
+        Assert.DoesNotContain(result.Items, i => i.Status == Verdict.DoesNotComply);
+        Assert.NotEqual(Verdict.Complies, result.State);        // the use details and the egress still to review
+    }
+
+    [Fact]
+    public async Task A_basement_window_too_small_fails_in_the_same_check()
+    {
+        var (house, outside) = Project("5_basement_window_well");
+        var (_, result) = await Check(house, outside);
+        Assert.Equal(Verdict.DoesNotComply, result.State);
+        var area = result.Items.Where(i => i.Id.StartsWith("general.r319_2_1_escape_opening_min_net_clear_area@", StringComparison.Ordinal)).ToList();
+        Assert.Contains(area, i => i.Status == Verdict.DoesNotComply);
+        // and the outside's rows are still the scene's
+        var got = result.Items.ToDictionary(i => i.Id, i => i.StatusWord);
+        foreach (var (id, word) in Outside(Scene))
+            Assert.Equal(word, got[id]);
+    }
+
+    [Fact]
+    public async Task With_no_lot_nothing_complies()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        var client = await worker.RunningAsync();
+        var prepared = await ProjectCheck.PrepareAsync(outside with { LotLines = [] }, house.Model(), new WorkerLeftOut(client));
+        Assert.Empty(prepared.Missing);                         // sent: the check says why there is no lot
+        Assert.Null(prepared.Request!.Site["lot"]);
+        var result = await ProjectCheck.SendAsync(client, prepared.Request);
+        Assert.NotEqual(Verdict.Complies, result.State);
+        // only what needs no lot may comply: the use, and the building's own height and stories (from the ground)
+        Assert.Equal(["R-1b.height", "R-1b.stories", "R-1b.use"],
+                     result.Items.Where(i => i.Group is "site" or "building" && i.Status == Verdict.Complies).Select(i => i.Id).Order(StringComparer.Ordinal));
+        foreach (var id in new[] { "R-1b.lot_area_one_family_detached", "R-1b.front_yard", "R-1b.rear_yard", "R-1b.lot_coverage" })
+            Assert.Contains(result.Items, i => i.Id == id && i.Status == Verdict.NeedsReview);
+    }
+
+    /// <summary>An asker that fails the test if asked: nothing may be read or sent.</summary>
+    private sealed class NeverAsked : ILeftOutAsker
+    {
+        public Task<IReadOnlyList<LeftOutDecision>> AskAsync(JsonObject? lot, JsonArray objects, JsonArray buildings,
+                                                             JsonObject definitions, CancellationToken cancel = default) =>
+            throw new InvalidOperationException("the worker was asked although a fact is missing");
+    }
+
+    [Theory]
+    [InlineData("zone", "Gordium: Zone")]
+    [InlineData("use", "Gordium: Use")]
+    [InlineData("lot_surveyed", "Gordium: Lot surveyed")]
+    [InlineData("street_line", "Gordium: Street edge")]
+    public async Task A_required_fact_missing_sends_nothing_and_says_what_to_fill_in(string fact, string mark)
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        var m = Marks.All.Single(x => x.Name == mark);
+        Assert.Contains(fact, m.Feeds);
+        house.ProjectMarks[m.Guid] = m.Kind == MarkValueKind.YesNo ? new MarkValue(false, 0) : new MarkValue(true, Text: "  ");   // never set; blank
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new NeverAsked());
+        Assert.Null(prepared.Request);
+        Assert.StartsWith(mark + ":", Assert.Single(prepared.Missing), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task Marks_never_added_list_every_required_fact()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        foreach (var m in new[] { Marks.Zone, Marks.Use, Marks.LotSurveyed, Marks.CornerLot, Marks.StreetEdge, Marks.GroundFrom })
+            house.ProjectMarks.Remove(m.Guid);
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new NeverAsked());
+        Assert.Null(prepared.Request);
+        Assert.Equal(["Gordium: Zone", "Gordium: Use", "Gordium: Lot surveyed", "Gordium: Street edge"],
+                     prepared.Missing.Select(w => w[..w.IndexOf(':', "Gordium: ".Length)]));
+    }
+
+    [Fact]
+    public async Task A_ground_word_not_known_is_asked_never_read_as_no_ground()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        Mark(house, Marks.GroundFrom, new(true, Text: "Toposolid"));
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new NeverAsked());
+        Assert.Null(prepared.Request);
+        Assert.Contains("\"Toposolid\"", Assert.Single(prepared.Missing), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task A_street_edge_the_lot_no_longer_has_is_asked_again_never_sent()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        Mark(house, Marks.StreetEdge, new(true, Text: StreetEdges.Format([(new Xyz(0, 0, 0), new Xyz(30, 0, 0))])));   // half the edge
+        var client = await worker.RunningAsync();
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client));
+        Assert.Null(prepared.Request);
+        Assert.StartsWith("Gordium: Street edge: the street edge picked is no longer an edge of the lot", Assert.Single(prepared.Missing), StringComparison.Ordinal);
+        // and text Gordium didn't write is asked for again too
+        Mark(house, Marks.StreetEdge, new(true, Text: "the front"));
+        prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new NeverAsked());
+        Assert.Contains("isn't an edge Gordium wrote", Assert.Single(prepared.Missing), StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public async Task The_outside_and_inside_read_in_different_designs_are_refused()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        await Assert.ThrowsAsync<ReadRefusedException>(() => ProjectCheck.PrepareAsync(outside with { Phases = ["phase-1"] }, house.Model(), new NeverAsked()));
+        await Assert.ThrowsAsync<ReadRefusedException>(() => ProjectCheck.PrepareAsync(outside with { ActiveOption = "opt-2" }, house.Model(), new NeverAsked()));
+        var sets = new[] { new OptionSet("set-1", "Porch", [new DesignOptionRecord("opt-1", "Deep", true), new DesignOptionRecord("opt-2", "Shallow", false)]) };
+        await Assert.ThrowsAsync<ReadRefusedException>(() => ProjectCheck.PrepareAsync(outside with { OptionSets = sets }, house.Model(), new NeverAsked()));
+    }
+
+    // ---- the street edge picked --------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_click_on_an_edge_keeps_that_edge_and_a_click_at_a_corner_or_off_the_line_keeps_none()
+    {
+        var line = Scene.Model(Scene.Steps[0]).LotLines[0];
+        var (edge, why) = StreetEdges.Nearest(line, new Xyz(20, 0.2, 0));
+        Assert.Null(why);
+        var kept = StreetEdges.Parse(StreetEdges.Format([edge!.Value]))!;
+        Assert.Equal(edge.Value, Assert.Single(kept));
+        Assert.Equal(0, edge.Value.A.Y + edge.Value.B.Y);
+        Assert.Equal(60, Math.Abs(edge.Value.A.X - edge.Value.B.X));
+        Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(0, 0, 0)).Why, StringComparison.Ordinal);
+        Assert.Contains("wasn't on an edge", StreetEdges.Nearest(line, new Xyz(30, 60, 0)).Why, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("1 2 3")]
+    [InlineData("1 2 3 x")]
+    [InlineData("1 2 1 2")]
+    [InlineData("1 2 3 NaN")]
+    [InlineData("1 2 3 4;")]
+    public void Text_gordium_didnt_write_is_no_street_edge(string text) => Assert.Null(StreetEdges.Parse(text));
+
+    [Fact]
+    public void A_kept_edge_is_sent_as_the_lots_own_points_in_shared_coordinates()
+    {
+        var lot = JsonNode.Parse("""{"edges": [{"points": [[100, 200], [160, 200]]}, {"points": [[160, 200], [160, 320]]}]}""")!.AsObject();
+        var toShared = Transform3.Translation(new Xyz(100, 200, 0));
+        // kept reversed, a hair off: sent as the lot's own edge, its own way round
+        var (line, why) = StreetEdges.Match([(new Xyz(60.004, 0, 0), new Xyz(0, 0.003, 0))], lot, toShared);
+        Assert.Null(why);
+        Assert.Equal("[[[100,200],[160,200]]]", line!.ToJsonString());
+        Assert.NotNull(StreetEdges.Match([(new Xyz(60.02, 0, 0), new Xyz(0, 0, 0))], lot, toShared).Why);
+    }
+}
