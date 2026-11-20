@@ -143,6 +143,12 @@ public static class Operations
     /// <summary>The opening's operation (<c>openings[].operation</c>) for the architect's word, or null.</summary>
     public static string? ForOpening(string? word) => Find(word) is var i and >= 0 ? Table[i].Opening : null;
 
+    /// <summary>The opening's operation for a window (any word in the list) or a door (a door's word only: a window's
+    /// word on a door, "Casement", is not stated, never a window's operation, which would read the door as not a
+    /// door). The one rule the reader and the marking list both use.</summary>
+    public static string? ForOpening(string? word, bool isDoor) =>
+        isDoor && ForDoor(word) is null ? null : ForOpening(word);
+
     /// <summary>The door's operation (<c>doors[].operation</c>), or null (a window's word on a door is not a door's
     /// operation: not stated).</summary>
     public static string? ForDoor(string? word) => Find(word) is var i and >= 0 ? Table[i].Door : null;

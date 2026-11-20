@@ -321,7 +321,8 @@ Toposolid outside a window. For the marks (step 2), **answered on Snowdon Towers
 Revit accepts the colon in the marks' names (all 10 added in one step); a Yes/No mark reads not set
 (`Parameter.HasValue` false) on every element that had it added (57 of 57 rooms, 297 of 297 windows and doors) and
 on a room placed afterwards (58 of 58), so an unmarked room never reads as No; a second Mark for egress adds
-nothing. Still to check: that a type's marks read through `Element.GetTypeId()` (Operation set on a window type). Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
+nothing. Still to check: that a type's marks read through `Element.GetTypeId()` (Operation set on a window type), and that a Room's placement reads as Revit names it (no `Location`: unplaced;
+`Area` 0 with no boundary loop: not enclosed; `Area` 0 with one: redundant) and its phase from `ROOM_PHASE`. Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
 test only: it is not a house, and gives no verdict).
 
 ## Sources

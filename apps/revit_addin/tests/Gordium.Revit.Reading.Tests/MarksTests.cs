@@ -193,7 +193,7 @@ public sealed class MarksTests
 
     private static MarkedElement Room(string id, string? name, bool? sleeping, string? number = null) => new()
     {
-        UniqueId = id, BuiltInCategory = Marks.Rooms, Name = name, Number = number,
+        UniqueId = id, BuiltInCategory = Marks.Rooms, Name = name, Number = number, Placement = RoomPlacement.Placed,
         Instance = new Dictionary<Guid, MarkValue> { [Marks.SleepingRoom.Guid] = YesNo(sleeping) },
     };
 
@@ -225,7 +225,7 @@ public sealed class MarksTests
         Assert.Equal([true, false, null], MarkReading.Rooms(model).Select(r => r.Sleeping));
         var openings = MarkReading.Openings(model);
         Assert.Equal([true, null, false, false], openings.Select(o => o.Escape));
-        Assert.Equal(["casement", null, "side_hinged_door", "casement"], openings.Select(o => o.Operation));
+        Assert.Equal(["casement", null, "side_hinged_door", null], openings.Select(o => o.Operation));
         var doors = MarkReading.Doors(model);
         Assert.Equal([true, null], doors.Select(d => d.Exit));
         Assert.Equal(["side_hinged", null], doors.Select(d => d.Operation));
@@ -255,6 +255,57 @@ public sealed class MarksTests
         };
         Assert.Equal(["now", "narrow"], MarkReading.Openings(model).Select(o => o.Id));
         Assert.Equal(["narrow", "now"], MarkingList.Build(model).Rows.Select(r => r.Id).Order());
+    }
+
+    // review round 1, finding 2: a room belongs to one phase; an earlier phase's room isn't the design checked
+    [Fact]
+    public void Only_the_last_phases_rooms_are_read()
+    {
+        var model = Model(Room("old", "Bedroom", true) with { PhaseCreated = "existing" },
+                          Room("now", "Bedroom", true) with { PhaseCreated = "new" },
+                          Window("kept", false, "Casement") with { PhaseCreated = "existing" }) with
+        {
+            Phases = ["existing", "new"],
+        };
+        Assert.Equal(["now"], MarkReading.Rooms(model).Select(r => r.Id));
+        Assert.Equal(["kept"], MarkReading.Openings(model).Select(o => o.Id));
+        Assert.Equal(["now", "kept"], MarkingList.Build(model).Rows.Select(r => r.Id));
+    }
+
+    // review round 1, finding 2: a Room not on the plan blocks every room, listed first, never a row to mark
+    [Fact]
+    public void An_unplaced_not_enclosed_or_redundant_room_is_a_blocker_not_a_row()
+    {
+        var model = Model(Room("placed", "Living", false),
+                          Room("unplaced", "Bedroom 3", null) with { Placement = RoomPlacement.Unplaced },
+                          Room("open", "Den", false) with { Placement = RoomPlacement.NotEnclosed },
+                          Room("twice", "Study", false) with { Placement = RoomPlacement.Redundant },
+                          Room("unknown", "Hall", false) with { Placement = null });
+        Assert.Equal(["placed"], MarkReading.Rooms(model).Select(r => r.Id));
+        Assert.Equal(4, MarkReading.RoomBlockers(model).Count);
+        var list = MarkingList.Build(model);
+        Assert.Equal(["placed"], list.Rows.Select(r => r.Id));
+        Assert.Equal(
+        [
+            "Bedroom 3: not placed: place it in a closed area or delete it",
+            "Den: not enclosed: close its walls or room separation lines, or delete it",
+            "Hall: its placement couldn't be read",
+            "Study: redundant (another room is in the same area): delete one",
+        ], list.RoomBlockers);
+        Assert.StartsWith("4 Rooms are unplaced", list.Summary[0]);
+        Assert.StartsWith("Room Bedroom 3: not placed", MarkingList.Text(list));
+        Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
+    }
+
+    // review round 1, finding 3: "every room, window and door is marked" only when there are rooms and all are marked
+    [Fact]
+    public void The_headline_says_all_marked_only_when_rooms_are_drawn_and_marked()
+    {
+        Assert.Equal(MarkingListResult.NothingDrawn, MarkingList.Build(Model()).Headline);
+        Assert.Equal(MarkingListResult.NoRooms, MarkingList.Build(Model(Window("w", true, "Casement"))).Headline);
+        Assert.Equal(MarkingListResult.NotAllMarked, MarkingList.Build(Model(Room("r", "Bed", null))).Headline);
+        Assert.Equal(MarkingListResult.AllMarked,
+                     MarkingList.Build(Model(Room("r", "Bed", true), Window("w", true, "Casement"))).Headline);
     }
 
     // ---- the marking list -------------------------------------------------------------------------------------

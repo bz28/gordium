@@ -90,11 +90,20 @@ public sealed record MarkedElement
     /// <summary>The type's <c>UniqueId</c> (<c>Element.GetTypeId()</c>), null for a room.</summary>
     public string? TypeUniqueId { get; init; }
 
+    /// <summary>A window's or door's <c>Element.CreatedPhaseId</c>; a room's own phase (<c>ROOM_PHASE</c>: a room
+    /// belongs to one phase); null when none.</summary>
+    public string? PhaseCreated { get; init; }
+
     /// <summary><c>Element.DemolishedPhaseId</c>, or null.</summary>
     public string? PhaseDemolished { get; init; }
 
     /// <summary><c>Element.DesignOption</c>'s id, or null for the main model.</summary>
     public string? DesignOption { get; init; }
+
+    /// <summary>A room's placement (null for a window or door): <c>Room.Location</c> null is unplaced; a placed room
+    /// with <c>Area</c> 0 is not enclosed when <c>GetBoundarySegments</c> gives no loop, else redundant (to check in
+    /// Revit).</summary>
+    public RoomPlacement? Placement { get; init; }
 
     /// <summary>The instance marks, by the mark's GUID.</summary>
     public IReadOnlyDictionary<Guid, MarkValue> Instance { get; init; } = new Dictionary<Guid, MarkValue>();
@@ -102,6 +111,9 @@ public sealed record MarkedElement
     /// <summary>The type marks (read from the element's type), by the mark's GUID.</summary>
     public IReadOnlyDictionary<Guid, MarkValue> Type { get; init; } = new Dictionary<Guid, MarkValue>();
 }
+
+/// <summary>Whether a Room is a room on the plan (Revit's own words for the others).</summary>
+public enum RoomPlacement { Placed, Unplaced, NotEnclosed, Redundant }
 
 /// <summary>One parameter bound in the project (an entry of <c>Document.ParameterBindings</c>).</summary>
 /// <param name="Name"><c>Definition.Name</c>.</param>

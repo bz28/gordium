@@ -47,11 +47,26 @@ internal static class RevitMarks
             Number = e is Room r ? r.Number : e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString(),
             Family = (e as FamilyInstance)?.Symbol?.FamilyName,
             TypeUniqueId = type?.UniqueId,
+            PhaseCreated = Id(e is Room ? e.get_Parameter(BuiltInParameter.ROOM_PHASE)?.AsElementId() : e.CreatedPhaseId),
             PhaseDemolished = Id(e.DemolishedPhaseId),
+            Placement = e is Room room ? Placement(room) : null,
             DesignOption = Id(e.DesignOption?.Id),
             Instance = Values(e),
             Type = type is null ? new Dictionary<Guid, MarkValue>() : Values(type),
         };
+    }
+
+    /// <summary>Revit's own three states of a room that isn't on the plan: no <c>Location</c> (unplaced); placed
+    /// with no area and no boundary loop (not enclosed); placed with a boundary but no area (redundant: another room
+    /// holds the area). To check on real models.</summary>
+    private static RoomPlacement Placement(Room room)
+    {
+        if (room.Location is null)
+            return RoomPlacement.Unplaced;
+        if (room.Area > 0)
+            return RoomPlacement.Placed;
+        var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions());
+        return loops is null || loops.Count == 0 ? RoomPlacement.NotEnclosed : RoomPlacement.Redundant;
     }
 
     /// <summary>Every Gordium mark the element has, by GUID (never by name), as Revit gives it.</summary>
@@ -175,7 +190,9 @@ public sealed class MarkForEgressCommand : IExternalCommand
             var added = RevitMarks.AddMarks(doc, commandData.Application.Application, plan);
             log["added"] = added.Select(s => $"{s.Action}: {s.Mark.Name} ({string.Join(", ", s.Categories)})").ToList();
             var list = MarkingList.Build(RevitMarks.Model(doc), plan);
+            log["headline"] = list.Headline;
             log["setup_problems"] = list.SetupProblems;
+            log["room_blockers"] = list.RoomBlockers;
             log["summary"] = list.Summary;
             log["rows"] = list.Rows.Select(r => new Dictionary<string, object?>
             {
@@ -189,8 +206,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
             var head = added.Count == 0 ? "" : $"Added {added.Count} Gordium marks to this project.\n\n";
             var dialog = new TaskDialog("Gordium: mark for egress")
             {
-                MainInstruction = list.Rows.Any(r => r.NeedsMarking) || list.SetupProblems.Count > 0
-                    ? "Some marks are not set" : "Every room, window and door is marked",
+                MainInstruction = list.Headline,
                 MainContent = head + MarkingList.Text(list, maxRows: 25) + $"\n\nLogged to {Trial.LogPath()}",
             };
             dialog.Show();
