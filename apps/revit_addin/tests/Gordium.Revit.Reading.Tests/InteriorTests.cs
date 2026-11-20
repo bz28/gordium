@@ -51,14 +51,20 @@ public sealed class InteriorTests
         Assert.Empty(read.RoomsNotRead);
         Assert.Empty(read.OpeningsNotRead);
         Assert.Equal(Ft, read.Interior["units"]!.GetValue<string>());
-        if (house.Drawing["stairs"]!.AsArray().Count == 0)
-            Assert.Null(read.Interior["stairs"]);             // none drawn: not read, never "none"
-        else
+        // none drawn is never "none": a list is left out (not read) unless the architect ticked "this house has no ..."
+        // (step 6), then it is the empty list
+        var ticked = house.Drawing["has_none"]!.AsArray().Select(n => n!.GetValue<string>()).ToList();
+        foreach (var key in new[] { "stairs", "doors", "guards" })
+        {
+            if (ticked.Contains(key))
+                Assert.Empty(read.Interior[key]!.AsArray());
+            else
+                Assert.Equal(house.Drawing[key]!.AsArray().Count > 0, read.Interior[key] is not null);
+        }
+        if (house.Drawing["stairs"]!.AsArray().Count > 0 || ticked.Contains("stairs"))
             Assert.Empty(read.StairsNotRead);
-        // step 5's doors and guards where the drawing has them; none found is never "none"
-        Assert.Equal(house.Drawing["doors"]!.AsArray().Count > 0, read.Interior["doors"] is not null);
-        Assert.Equal(house.Drawing["guards"]!.AsArray().Count > 0, read.Interior["guards"] is not null);
         Assert.Null(read.Interior["has_none"]);
+        Assert.All(read.Ticks.Where(t => ticked.Contains(t.Kind.Kind)), t => Assert.True(t.Sent, string.Join("; ", t.WhyNot)));
         Assert.Equal([], Problems(house, read));
     }
 

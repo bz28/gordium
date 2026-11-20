@@ -248,6 +248,22 @@ internal static class HouseDraw
             Set(doc.ProjectInformation.get_Parameter(Marks.AllGuards.Guid), 1, Marks.AllGuards.Name);
             tick.Commit();
         }
+        // step 6: the architect's "this house has no ..." ticks, each kind the house's own data says it has none of
+        // (an empty list, or a has_none claim), as the drawing names them
+        var none = (house["has_none"] as JsonArray ?? []).Select(n => n!.GetValue<string>()).ToList();
+        if (none.Count > 0)
+        {
+            using var tick = new Transaction(doc, "Gordium: this house has none of");
+            tick.Start();
+            foreach (var kind in none)
+            {
+                var mark = (HasNone.All.FirstOrDefault(k => k.Kind == kind)
+                            ?? throw new InvalidOperationException($"no tick for \"{kind}\": not a kind the house can have none of")).Mark;
+                Set(doc.ProjectInformation.get_Parameter(mark.Guid), 1, mark.Name);
+                log.Add($"ticked {mark.Name}: Yes");
+            }
+            tick.Commit();
+        }
         return ids;
     }
 

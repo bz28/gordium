@@ -38,6 +38,10 @@ public sealed record InteriorRecords
     /// didn't read them: then no guard and no handrail is read.</summary>
     public IReadOnlyList<RailingRecord>? Railings { get; init; }
 
+    /// <summary>Every element in Ramps (<c>OfCategory(OST_Ramps)</c>, step 6): a ramp drawn contradicts the architect's
+    /// "this house has no ramps". Null when the Revit layer didn't read them: then that tick isn't sent.</summary>
+    public IReadOnlyList<RampRecord>? Ramps { get; init; }
+
     /// <summary>How many coordination models are linked (<c>CoordinationModelLinkUtils.GetAllCoordinationModelInstanceIds</c>):
     /// what is in one isn't read, and a stair could be in it.</summary>
     public int CoordinationModels { get; init; }
@@ -65,8 +69,12 @@ public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz P
 /// <param name="WindowsAndDoors">Windows and doors in it.</param>
 /// <param name="HasLinks">The linked document holds links of its own (their contents aren't read).</param>
 /// <param name="Stairs">Elements in the linked document's Stairs, Railings and Generic Models categories.</param>
+/// <param name="Ramps">Elements in the linked document's Ramps category (step 6).</param>
 public sealed record InteriorLink(string UniqueId, string Name, bool Loaded, RevitBox? Box, int Rooms, int WindowsAndDoors,
-                                  bool HasLinks, int Stairs = 0);
+                                  bool HasLinks, int Stairs = 0, int Ramps = 0);
+
+/// <summary>An element in Ramps (step 6), for the words and the design checked.</summary>
+public sealed record RampRecord(string UniqueId, string? Name, string? PhaseDemolished = null, string? DesignOption = null);
 
 /// <summary>A Room's own geometry and what stands in, under and over it.</summary>
 public sealed record RoomRecord
