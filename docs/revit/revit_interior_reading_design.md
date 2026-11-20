@@ -12,7 +12,8 @@ tried in Revit 2027.4 on Snowdon Towers (section 9); step 3 (rooms and marked es
 records and recorded in Revit 2027.4 (houses 1, 2 and 5, trial run 6, 2026-11-20: every measure of the step equal
 to the hand-worked one); step 4 (stairs, [README](../../apps/revit_addin/README.md#stairs-interior-step-4)) is built
 and tested on fake records and recorded in Revit 2027.4 (houses 1, 2, 3 and 5, 0 problems each: house 2's stair
-16 risers of 7.5 in, 10 in treads, 85.5 in headroom, 36 in wide; house 3's tall riser at the head held for review);
+16 risers of 7.5 in, 10 in treads, 85.5 in headroom, 36 in wide; house 3's tall riser at the head held for review,
+now measured as drawn, 9 in, and recorded so with houses 1 to 6 on the stair decisions, 0 problems each);
 step 5 (doors, handrails and level guards) is built and tested on fake records, to record in Revit (houses 1, 2, 4,
 5 and 6); step 6 is not yet.
 
@@ -57,7 +58,8 @@ exactly:
 - **"All of them" is said too, for the kinds where a missing one hides a failure.** A stairs list with one stair
   found and another missed would let the missed one go unchecked (its rules run once per part found). So rooms,
   stairs and guards are sent only when (a) the reader finds nothing that could be one of them outside what it reads:
-  no in-place or generic family in the Stairs, Railings or Generic Models categories, no sketched stair, no
+  no in-place or generic family in the Stairs, Railings or Generic Models categories (unless the architect marks it
+  `Gordium: Not a stair` Yes: section 3), no sketched stair, no
   multistory stair (`MultistoryStairs`, or a `Stairs` with a `MultistoryStairsId`: its copies on other levels are
   not runs of any stair the reader walks, so reading them is designed and tested first), no closed workset, no
   unloaded link, no coordination model (for rooms: the completeness rule below); and (b) for stairs and
@@ -132,6 +134,7 @@ exactly:
 | `Gordium: These are all the guards and handrails` | Project Information | Yes / No / unset | `guards` and every flight's `handrails` sent only on Yes (step 5, section 2's "all the guards"). **Decided (Ben, 2026-11-20, step 5):** one tick for both, since both are railings: a guard drawn as a low wall would go unchecked, and a handrail drawn as a wall sweep would leave the width at the handrail read too wide; with the tick, a flight with no railing found sends `handrails: []` |
 | `Gordium: This house has no stairs`, `This house has no doors`, `This house has no guards`, `This house has no basements`, `This house has no habitable attics`, `This house has no sleeping lofts`, `This house has no ramps`, `This house has no alternating tread devices`, `This house has no ship ladders`, `This house has no patio covers`, `This house has no deck or porch or cantilever over an escape opening` | Project Information | Yes / No / unset | step 6: `stairs: []`, `doors: []`, `guards: []`, and each `has_none` claim, sent only on Yes with nothing of the kind drawn and nothing that could hide one (section 4, "What the house has none of"). "Ship ladders": a parameter's name has no apostrophe |
 | `Gordium: No rooms on this level` | Levels (instance) | Yes / No / unset | Yes: the level's enclosed areas with no Room aren't sent as `unknown_spaces` (a roof, a turret's top: section 2); a Room drawn on a level marked Yes is a conflict, listed first, and the mark doesn't count. Unset or No: each such area is sent, and every sleeping-room rule needs review (2026-11-20, the Pacific Continental sample) |
+| `Gordium: Not a stair` | Generic Models, Stairs, Railings (instance) | Yes / No / unset | Yes: that element (a wall niche, a corbel, trim, a panel drawn as a Generic Model or another family in those categories) no longer stops the stairs and guards being read (section 2's "no in-place or generic family"), and each one cleared is listed in the marking list and the Read inside log ("Not a stair (architect): GenericModel "Corbel" x 6, ids in the log"), every id in the log. It never clears a Revit `Stairs`, `Railing` or multistory stair: Yes on one is a conflict, listed first, and it is read as what it is (a stair checked, never one skipped). Unset or No: not stated, it still stops the stairs being read (Ben, 2026-11-20, Q2: the Pacific Continental sample's 19 standalone Generic Models) |
 | `Gordium: Clear width`, `Clear height`, `Clear source`, `Clear confirmed` on doors | Doors (type) | As windows' | `doors[].stated_clear` (step 5): the same marks bound to Doors too, confirmed and re-checked exactly as windows' (the stamp, made for a door, records the type's `UniqueId`, size and operation, the clear width and height, the source and a mapped maker's parameter; a window's stamp never confirms a door, nor a door's a window); no `Clear offset` (a door's clear opening has no bottom in the format). The width and height are the maker's figure measured as R318.2 measures it (between the face of the door open 90 degrees and the stop; threshold top to stop bottom), never the door's size or rough opening: the marks' own tooltip says so |
 | `Gordium: Zone`, `Use`, `Lot surveyed`, `Corner lot`, `Street edge`, `Ground from` | Project Information | Text, Yes/No; the street edge written by Gordium's pick | the lot facts *Check my project* sends with the interior in one check (zoning's, not egress's): [reading design note, section 9](revit_reading_design.md#9-check-my-project-the-architects-own-model-one-check) |
 
@@ -203,10 +206,11 @@ a drawn ceiling.
 
 | Field | From Revit | To check |
 |---|---|---|
-| a flight | Each `StairsRun` of a component `Stairs`, every one sent (the list only as section 2's "all the stairs" allows). A winder or spiral run (the format measures only straight flights) is sent with its `bottom_elevation` and no `nosings`, so its measures have no value and its rules need review | A sketched (non-component) stair: the whole `stairs` list left out (not read) |
-| `bottom_elevation` | The top face of the floor or landing drawn under the first riser, in the same shared coordinates as the nosings; cross-checked against the run's own base (made absolute). More than 1/16 in apart, or no floor or landing face found under the first riser: not sent (the flight's measures need review). The top nosing is checked the same way against the floor or landing at the head; none found there, or a disagreement: no `nosings` | Finding the floor face under the first riser |
+| a flight | Each `StairsRun` of a component `Stairs`, every one sent (the list only as section 2's "all the stairs" allows). A winder or spiral run (the format measures only straight flights) is sent with no `nosings` and no `spiral`, so its measures have no value and its rules need review | A sketched (non-component) stair: the whole `stairs` list left out (not read) |
+| `spiral` | Whether the flight is a spiral stairway (R202: "a plan view of closed circular form and uniform section-shaped treads, attached to and radiating from a minimum-diameter supporting column"). `false` only for a run whose `StairsRun.StairsRunStyle` is `Straight` (the Revit 2027 API's members: Straight, Winder, Spiral, Sketched) and whose nosings are sent (its drawn treads read straight and rectangular, square to the run); the measuring code takes it only for a flight it measures straight. **Never `true`** (review round 1, 2026-11-20): Revit's `Spiral` style is every arc run, any sweep and radius, a curved stair too, and `stair_spiral` true sets every R318.7 rule with `applies_when: not stair_spiral` aside (width, headroom, risers, treads, the open-riser sphere): a false-pass path. Every other run, or a straight run whose nosings are left out: not sent, with its reason (the spiral rules and those turning on it need review) | Telling R202's spiral (a column, closed circular form) from the run's geometry, before `true` is ever sent |
+| `bottom_elevation` | The top face of the floor or landing drawn in front of the first riser, in the same shared coordinates as the nosings, **as drawn** (Ben, 2026-11-20, Q1: R318.7.5.1 measures a riser "vertically between leading edges of the adjacent treads", so a floor standing off the run's own base makes the first riser taller or shorter, and that is what is checked). No floor or landing face found whole there, or one at or above the first tread: not sent (the flight's measures need review). The top nosing is the edge of the floor or landing at the head, as drawn, the same way: none found whole there, one at or under the top tread, one over the last tread short of the riser line, or **any of the run's own geometry above it** (a riser board standing proud of a lower floor, a lip that would be the real top nosing): no `nosings` | Finding the floor face under the first riser |
 | `nosings` | From the run's drawn geometry: the front edge of each tread's top face, bottom to top, then the landing or floor edge at the top | That tread top faces are separate planar faces in the run's solid; nosing profiles (a rounded nosing) |
-| cross-check | The stair's typed `Stairs.ActualRiserHeight` and `Stairs.ActualTreadDepth`, and the run's `StairsRun.ActualRisersNumber`, against the run's drawn nosings: more than 1/16 in apart, the flight is sent without `nosings` (its rules need review) | |
+| cross-check | The stair's typed `Stairs.ActualRiserHeight` and `Stairs.ActualTreadDepth`, and the run's `StairsRun.ActualRisersNumber`, against the run's own drawn risers (its base to its top through its treads: equal by construction) and treads: more than 1/16 in apart, the flight is sent without `nosings` (its rules need review). The risers sent are the drawn ones, the first and last to the floors (above) | |
 | `sides` | The reader searches the whole band on each side of the flight, from well inside the tread ends to past them, from the treads up to the headroom height, for anything at all. A wall face found there is the side line; else a railing's inside face above handrail height. `open` only when that search finds nothing (a wall or railing missed would make the stair look wider than it is: R318.7.1). Anything found that it can't read exactly (a generic model, a curved face): `sides` left out, the width needs review | Searching that band exactly |
 | `handrails` | The stair's railings (`Stairs.GetAssociatedRailings()`): their handrails (`Railing.GetHandRails`), inner edge in plan, with their side. A top rail (`TopRail`) counts as a handrail only where the railing's type is marked `Gordium: Top rail is handrail` (a guard's top rail is usually 36 in or more up, above the handrail's 34 to 38 in) | |
 | `overhead` | The downward planar faces of everything above the flight (floors, ceilings, roofs, beams), clipped to the flight's plan. Nothing found, or a curved face: `overhead` left out (the format refuses an empty list), so the headroom has no value and needs review; the flight is still sent | Collecting it exactly, as for ceilings |
@@ -239,15 +243,17 @@ table above needed settling:
   it: one floor at the head with the stairwell as an opening, its underside the house's 9 ft piece over the foot.
   Beside a flight, an element with only flat straight-edged faces is judged face by face (an upper floor's box spans
   its opening, so its box alone would stand it in the width). Every top group's height and extent is kept in the evidence.
-- *For Ben (noted, no mark added now)*: under section 2's rule any Generic Model anywhere in a project stops stairs
-  being read, with no way yet to say "this one isn't a stair".
+- *Generic Models*: under section 2's rule any Generic Model anywhere in a project stops stairs being read, unless it
+  is nested inside a window or door, or the architect marks it `Gordium: Not a stair` (section 3); each one cleared
+  is listed with its id.
 - *Foot and head*: the floor or landing top is looked for in a 1 in strip in front of the first nosing and past the
   last riser, across the stair's width: one flat top within a foot covering the whole strip, else not found.
-- *The cross-check*: every drawn riser (from the floor at the foot to the floor at the head) against
+- *The cross-check*: the run's own risers (its base to its top through its treads: equal by construction) against
   `Stairs.ActualRiserHeight`, every tread (nosing to nosing, the last to the head's edge) against `ActualTreadDepth`,
   the counts against `StairsRun.ActualRisersNumber` / `ActualTreadsNumber`; a run that doesn't begin and end with a
-  riser isn't read yet. Any of these failing, or the foot not confirmed (the first riser can't be checked), sends no
-  `nosings`. A winder, spiral or sketched run sends neither `nosings` nor `bottom_elevation` (only straight flights
+  riser isn't read yet. Any of these failing, or the foot not confirmed (the first riser can't be measured), sends no
+  `nosings`. The first and last risers sent are as drawn, to the floor in front and the floor at the head (a house
+  whose levels don't divide evenly sends its taller or shorter end riser, and R318.7.5.1 judges it). A winder, spiral or sketched run sends neither `nosings` nor `bottom_elevation` (only straight flights
   are measured; its foot is read with the first straight tread, which a turning run hasn't).
 - *Sides*: the band on each side, from the flight's middle to 6 in past the tread ends, from 1 in under the line of
   nosings to 80 in over it (from the first nosing to the top one). The innermost wall face there facing the flight is
@@ -506,13 +512,19 @@ Each step is its own PR, through the review loop, with its tests:
 4. **Stairs** (straight component runs, the cross-check), houses 2 and 3: risers, treads, widths, headroom.
    **Built** (section 4, "As built in step 4"). Scope (`recordings.py`, `STEPS[4]`): house 2's flight in scope for
    `stair_riser_height`, `stair_riser_variation`, `stair_total_rise`, `stair_risers`, `stair_tread_depth`,
-   `stair_tread_variation`, `stair_headroom` and `stair_clear_width`; out of scope, expected not measured,
+   `stair_tread_variation`, `stair_headroom`, `stair_clear_width` and `stair_spiral` (false: a Straight run whose
+   treads read straight; house 3's flight the same); out of scope, expected not measured,
    `stair_clear_width_at_handrail` and `stair_handrail_sides` (railings: step 5). **House 3's tall riser** can't be
    drawn inside a component run (Revit makes a run's risers equal: `ActualRiserHeight` = height / risers), so it is
    drawn where a tall riser arises in Revit: 13 risers of 7 1/2 in, the floor at the head 1 1/2 in above the run's
    top (the 9 in riser moved from the 7th to the 13th, which changes none of house 3's hand-worked stair measures).
-   The cross-check then sends no nosings, so every stair measure of house 3 must come back not measured (its stair
-   read, its rooms and window as step 3): never 7.6 in, never a pass. The drawing puts each stair 10 ft clear of the
+   **Changed (Ben, 2026-11-20, Q1):** the first and last risers are measured as drawn, to the floor in front and the
+   floor at the head (R318.7.5.1: "The riser shall be measured vertically between leading edges of the adjacent
+   treads"; the floor at the head is the top tread's neighbour), so house 3's flight is in scope for the same measures
+   as house 2's and comes back as worked by hand: risers 12 x 7 1/2 in and one of 9 in (-0.75 ft to 0), riser height
+   9, variation 9 - 7.5 = 1.5, total rise 99 in, 13 risers; never 7.5 in, never a pass. (Before, the cross-check
+   held the whole flight for review.) The run's own risers, base to top, are still the cross-check against the typed
+   riser height. The drawing puts each stair 10 ft clear of the
    house with its own side walls and floors (a stair's measures don't depend on where it stands), since houses 2 and
    3 draw their stairs inside bedrooms' plans, which a real model can't. Each house is recorded at the latest step
    that draws it (houses 1 and 5 stay step 3). The tick "these are all the stairs" is on Project Information (section 3).
@@ -528,7 +540,7 @@ Each step is its own PR, through the review loop, with its tests:
    window as step 3. House 4's loft is drawn clear of its bedroom (its floor over the bedroom would be the bedroom's
    ceiling, which the hand-worked house doesn't give), and the bedroom's walls stop at the loft's level (walls
    through a level enclose an area on it). House 3 isn't drawn again (its guard is along a stair: not read in this
-   step; its stair measures are all not measured already): it stays step 4. Each door is drawn in an outside wall with
+   step; its stair is measured in step 4 already): it stays step 4. Each door is drawn in an outside wall with
    no window (where it stands doesn't change its measures).
 6. **`has_none` ticks.** **Built, tested on fake records; to record in Revit** (section 4, "What the house has none
    of", as built in step 6). Scope (`recordings.py`, `STEPS[6]`): each list a hand-worked house gives empty is ticked in

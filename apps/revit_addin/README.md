@@ -321,10 +321,14 @@ section 4 ("As built in step 4"):
   be a stair the reader doesn't walk: a stair not made of components, a multistory stair, anything else in Stairs,
   Railings or Generic Models (an in-place or loadable family, a DirectShape), a closed workset, an unloaded link, a
   link holding stairs, a coordination model. Each is listed first in the marking list (`MarkingListResult.StairBlockers`),
-  with a summary line for the tick. With no stair found, `stairs` is left out, never `[]`.
-- **Each flight from what is drawn.** `bottom_elevation`: the floor or landing in front of the first riser, sent only
-  within 1/16 in of the run's base. `nosings`: each tread's front edge from the run's own flat faces, then the floor's
-  edge at the head, sent only when the floor at the head agrees with the run's top and every drawn riser and tread with
+  with a summary line for the tick. With no stair found, `stairs` is left out, never `[]`. An element the architect
+  marks `Gordium: Not a stair` Yes (Generic Models, Stairs, Railings; added by Mark for egress) is cleared, and listed
+  as cleared ("Not a stair (architect): ... x N, ids in the log": `MarkingListResult.NotAStair`,
+  `InteriorReadResult.NotAStair`); on a Revit Stair or Railing the mark is a conflict, listed first, and doesn't count.
+- **Each flight from what is drawn.** `bottom_elevation`: the floor or landing in front of the first riser, as drawn
+  (below the first tread). `nosings`: each tread's front edge from the run's own flat faces, then the floor's edge at
+  the head as drawn (above the top tread, nothing of the run above it), so a first or last riser taller or shorter than
+  the run's is measured as drawn (R318.7.5.1); sent only when the run's own risers (base to top) and treads agree with
   the stair's typed `ActualRiserHeight` / `ActualTreadDepth` (and the counts with the run's). `sides`: the innermost
   wall face beside the flight running from its treads to 80 in over them, `open` when nothing is there; anything
   else beside it (a column, a railing) leaves `sides` out. `overhead`: the undersides over the flight clipped to its
@@ -334,7 +338,8 @@ section 4 ("As built in step 4"):
 
 **How we know (without Revit):** `StairTests.cs` draws houses 2 and 3's stairs as fake records (`InteriorDrawing.cs`)
 and checks them with the interior conformance CI applies: house 2's risers, treads, headroom (85.5 in) and clear width
-(36 in) as worked by hand; house 3's tall riser, drawn at the head, not measured; both under turned shared coordinates.
+(36 in) as worked by hand; house 3's tall riser, drawn at the head, measured as drawn (9 in, variation 1.5 in); both
+under turned shared coordinates.
 Then each trap: no tick, No, never set; nothing found; each blocker; a typed riser or tread disagreeing; the run's
 counts and ends; a winder, a curved face, a run whose geometry fails; a riser board's top under its tread; the floor at
 the foot missing, an inch high or under half the width; a link reaching the flight; a wall inside the tread ends

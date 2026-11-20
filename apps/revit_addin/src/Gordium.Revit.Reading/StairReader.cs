@@ -13,11 +13,13 @@ namespace Gordium.Revit.Reading;
 /// Stairs, Railings or Generic Models that isn't a Stairs or a Railing, a closed workset, an unloaded link, a link
 /// holding stairs, a coordination model). Nothing found is never "none": with no stair found the list is left out.</item>
 /// <item>A flight found is never dropped: a value that can't be read exactly is left out, with its reason.</item>
-/// <item><c>bottom_elevation</c>: the top of the floor or landing in front of the first riser, sent only when it agrees
-/// with the run's own base within 1/16 in. <c>nosings</c>: each tread's front edge from the run's own geometry, then
-/// the edge of the floor or landing at the head, sent only when that floor agrees with the run's top, every drawn
-/// riser and tread agrees with the stair's typed <c>ActualRiserHeight</c> and <c>ActualTreadDepth</c>, and the counts
-/// with the run's own. A run that isn't straight sends neither.</item>
+/// <item><c>bottom_elevation</c>: the top of the floor or landing in front of the first riser, as drawn (below the
+/// first tread), even where it stands off the run's own base. <c>nosings</c>: each tread's front edge from the run's own
+/// geometry, then the edge of the floor or landing at the head, as drawn (above the last tread, nothing of the run
+/// above it): so a first or last riser taller or shorter than the run's is sent as it is drawn, and the checker
+/// measures it. Sent only when the run's own risers (base to top) and treads agree with the stair's typed
+/// <c>ActualRiserHeight</c> and <c>ActualTreadDepth</c>, and the counts with the run's own. A run that isn't straight
+/// sends neither.</item>
 /// <item><c>sides</c>: on each side, the band from the middle of the flight to 6 in past its tread ends, from 1 in
 /// under the line of nosings to 80 in over it, searched for anything: the innermost wall face there running the whole
 /// band is the side line; nothing at all is <c>open</c>; anything else (a column, the stair's own support rising into
@@ -115,7 +117,7 @@ public static class StairReader
         // one line per category and kind (a real model has hundreds alike: Pacific Continental's 272 grilles), each
         // element still listed by id in the Revit layer's log
         foreach (var g in records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption)
-                                                             && !InsideWindowOrDoor(c))
+                                                             && !InsideWindowOrDoor(c) && !ClearedByArchitect(c))
                      .GroupBy(c => (c.BuiltInCategory, c.Kind)))
         {
             var cat = g.Key.BuiltInCategory.Replace("OST_", "");
@@ -145,6 +147,48 @@ public static class StairReader
         }
         if (records.CoordinationModels > 0)
             why.Add($"{records.CoordinationModels} coordination model(s) linked: what is in one isn't read, and a stair could be in it");
+        return why;
+    }
+
+    // ---- the architect's "Not a stair" (Ben, 2026-11-20, Q2) ---------------------------------------------------
+
+    /// <summary>The kinds the architect's <c>Gordium: Not a stair</c> can never clear: a stair Revit itself knows as one.</summary>
+    private static readonly HashSet<string> StairKinds = new(StringComparer.Ordinal) { "a multistory stair", "a stair not made of components" };
+
+    private static bool MarkedNotAStair(IReadOnlyDictionary<Guid, MarkValue>? marks) =>
+        marks is not null && Marks.YesNo(marks.TryGetValue(Marks.NotAStair.Guid, out var v) ? v : null) is true;
+
+    /// <summary>A candidate the architect marked <c>Gordium: Not a stair</c> Yes (unset or No: not stated, so it still
+    /// stops the stairs being read): any element in Generic Models, Stairs or Railings that isn't a Revit stair (a
+    /// multistory stair, a stair not made of components: a conflict instead, <see cref="NotAStairConflicts"/>).</summary>
+    public static bool ClearedByArchitect(StairCandidate c) => MarkedNotAStair(c.InstanceMarks) && !StairKinds.Contains(c.Kind);
+
+    /// <summary>Every element in the design checked cleared by the architect's <c>Gordium: Not a stair</c>, one line
+    /// per category and type ("Not a stair (architect): GenericModel "Wall niche" x 7, ids in the log"), listed in the
+    /// marking list and the Read inside log so each exemption is traceable. Empty when none is.</summary>
+    public static List<string> NotAStairLines(RevitModel model) =>
+        model.Interior is not { } records ? []
+        : records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption) && ClearedByArchitect(c))
+            .GroupBy(c => (Cat: c.BuiltInCategory.Replace("OST_", ""), Name: c.Name ?? "(no name)"))
+            .OrderBy(g => g.Key.Cat, StringComparer.Ordinal).ThenBy(g => g.Key.Name, StringComparer.Ordinal)
+            .Select(g => $"Not a stair (architect): {g.Key.Cat} \"{g.Key.Name}\" x {g.Count()}, ids in the log").ToList();
+
+    /// <summary>Every Revit stair or railing in the design checked marked <c>Gordium: Not a stair</c> Yes: the mark
+    /// can't clear one (it is read as what it is: a stair checked, never a stair skipped), so each is a conflict,
+    /// listed first in the marking list.</summary>
+    public static List<string> NotAStairConflicts(RevitModel model)
+    {
+        if (model.Interior is not { } records)
+            return [];
+        var why = new List<string>();
+        const string Read = "the mark can't clear a Revit stair or railing: it is read as one (clear the mark, or delete the element if it isn't one)";
+        foreach (var s in (records.Stairs ?? []).Where(s => SiteReader.InDesignChecked(model, s.PhaseDemolished, s.DesignOption) && MarkedNotAStair(s.InstanceMarks)))
+            why.Add($"Stair \"{s.Name ?? s.UniqueId}\" is marked {Marks.NotAStair.Name} Yes, but {Read}");
+        foreach (var r in (records.Railings ?? []).Where(r => SiteReader.InDesignChecked(model, r.PhaseDemolished, r.DesignOption) && MarkedNotAStair(r.InstanceMarks)))
+            why.Add($"Railing \"{r.Name ?? r.UniqueId}\" is marked {Marks.NotAStair.Name} Yes, but {Read}");
+        foreach (var c in records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption)
+                                                             && MarkedNotAStair(c.InstanceMarks) && StairKinds.Contains(c.Kind)))
+            why.Add($"{c.BuiltInCategory.Replace("OST_", "")} \"{c.Name ?? c.UniqueId}\" ({c.Kind}) is marked {Marks.NotAStair.Name} Yes, but {Read}");
         return why;
     }
 
@@ -305,7 +349,14 @@ public static class StairReader
         {
             evidence[run.UniqueId] = _ev;
             _ev["revit_layer"] = new JsonArray(run.Diagnostics.Select(d => (JsonNode?)d).ToArray());
-            string[] all = ["bottom_elevation", "nosings", "sides", "handrails", "overhead"];
+            // whether it is a spiral stairway (R202: "a plan view of closed circular form ... radiating from a
+            // minimum-diameter supporting column"), from Revit's own record of the run's shape (StairsRunStyle: Straight,
+            // Winder, Spiral, Sketched in the Revit 2027 API) and its drawing: false only for a Straight run whose
+            // nosings are sent (its drawn treads read straight and rectangular, square to the run). Never true: Revit's
+            // Spiral style is every arc run, any sweep and radius (a curved stair too), and true would make the
+            // ordinary R318.7 rules not applicable (review round 1); every other run: left out (needs review)
+            _ev["style"] = run.Style;
+            string[] all = ["spiral", "bottom_elevation", "nosings", "sides", "handrails", "overhead"];
             if (run.Faces is null || run.GeometryFailed)
             {
                 OutAll("the run's geometry couldn't be read exactly (a mesh, or Revit refused)", all);
@@ -329,7 +380,10 @@ public static class StairReader
             _v = new P2(-_u.Y, _u.X);
             if (run.Style != "Straight" || path.Any(p => Math.Abs(A(p)) > Sixteenth))
             {
-                OutAll($"a {(run.Style == "Straight" ? "bent" : run.Style.ToLowerInvariant())} run (its treads turn) isn't measured: only straight flights are", all);
+                var kind = run.Style == "Straight" ? "bent" : run.Style.ToLowerInvariant();
+                Out("spiral", $"a {kind} run: whether it is a spiral stairway as R202 defines one (closed circular form " +
+                              "around a supporting column) isn't known (Revit's Spiral style is any arc run)");
+                OutAll($"a {kind} run (its treads turn) isn't measured: only straight flights are", all[1..]);
                 return _flight;
             }
             var at = run.Path[0];
@@ -340,7 +394,7 @@ public static class StairReader
                 OutAll(bad, all);
                 return _flight;
             }
-            _headZ = topZ;                                   // until the floor at the head is read: the line's top
+            _headZ = topZ;                                  // until the floor at the head is read: the line's top
             _ev["run_base"] = baseZ;
             _ev["run_top"] = topZ;
             _ev["typed_riser"] = stair.ActualRiserHeight;
@@ -366,12 +420,18 @@ public static class StairReader
             var last = _treads[^1];
             var foot = Rect(first.S - Strip, first.S, first.Right, first.Left);
             var head = Rect(_back, _back + Strip, last.Right, last.Left);
+            // the first riser and the last are measured as drawn, to the floor in front and the floor at the head (R318.7.5.1:
+            // "measured vertically between leading edges of the adjacent treads"), not to the run's own base and top: a
+            // floor standing off the run (level heights that don't divide evenly, a finish) makes that riser taller or
+            // shorter than the run's, and the checker sees it (Ben, 2026-11-20, Q1). Each is read only where it is exact:
+            // a floor found whole there, below the first tread or above the last, and at the head nothing of the run's
+            // own standing above it (a riser board proud of the floor would be the real top nosing, unread)
             double? bottom = null, headZ = null;
             if (TopAt(foot, baseZ, out var footWhy) is { } fz)
             {
                 _ev["foot"] = fz;
-                if (Math.Abs(fz - baseZ) > Sixteenth)
-                    Out("bottom_elevation", $"the floor in front of its first riser is {In(fz - baseZ)} from the run's base: they must agree within 1/16 in");
+                if (fz >= first.Z - Sixteenth)
+                    Out("bottom_elevation", footWhy = $"the floor in front of its first riser is {In(fz - first.Z)} from its first tread: no riser there to measure");
                 else
                     bottom = fz;
             }
@@ -383,8 +443,10 @@ public static class StairReader
             if (TopAt(head, topZ, out var headWhy) is { } hz)
             {
                 _ev["head"] = hz;
-                if (Math.Abs(hz - topZ) > Sixteenth)
-                    headWhy = $"the floor at its head is {In(hz - topZ)} from the run's top (a riser there taller or shorter than the run's): they must agree within 1/16 in";
+                if (hz <= last.Z + Sixteenth)
+                    headWhy = $"the floor at its head is {In(hz - last.Z)} from its top tread: no riser there to measure";
+                else if (RunAbove(hz) is { } above)
+                    headWhy = above;
                 else if (ReachesBack(hz) is { } reachesBack)
                     headWhy = reachesBack;
                 else
@@ -392,10 +454,11 @@ public static class StairReader
             }
             if (headZ is { } h)
                 _headZ = h;
-            if (NosingsProblem(bottom, headZ, headWhy, footWhy) is { } nosingsWhy)
-                Out("nosings", nosingsWhy);
+            if (NosingsProblem(bottom, headZ, headWhy, footWhy, baseZ, topZ) is { } nosingsWhy)
+                OutAll(nosingsWhy, "nosings", "spiral");     // with no nosings the shape isn't measured: no spiral either
             else
             {
+                _flight["spiral"] = false;                  // a Straight run, its treads read straight and rectangular
                 var nosings = new JsonArray();
                 foreach (var x in _treads)
                     nosings.Add(new JsonArray(Point3(x.S, x.Right, x.Z), Point3(x.S, x.Left, x.Z)));
@@ -657,13 +720,15 @@ public static class StairReader
             return null;
         }
 
-        /// <summary>Why the nosings can't be sent (null when they can): the foot and head must agree with the run, the
-        /// run must begin and end with a riser, its counts must be its own, and every drawn riser and tread must agree
-        /// with the stair's typed riser height and tread depth within 1/16 in.</summary>
-        private string? NosingsProblem(double? bottom, double? head, string? headWhy, string? footWhy)
+        /// <summary>Why the nosings can't be sent (null when they can): the floor at the foot and at the head must be read,
+        /// the run must begin and end with a riser, its counts must be its own, and the run's own risers (its base to its
+        /// top through its treads) and every tread must agree with the stair's typed riser height and tread depth within
+        /// 1/16 in: the cross-check that its geometry is read right. The risers sent are as drawn, the first from the
+        /// floor in front of it and the last to the floor at the head, whatever the run's own base and top.</summary>
+        private string? NosingsProblem(double? bottom, double? head, string? headWhy, string? footWhy, double baseZ, double topZ)
         {
             if (bottom is not { } b)
-                return "the first riser can't be checked: " + (footWhy ?? "the floor in front of it doesn't agree with the run's base");
+                return "the first riser can't be measured: " + (footWhy ?? "the floor in front of it wasn't read");
             if (head is not { } h)
                 return headWhy is null ? "the floor at its head wasn't found"
                     : headWhy.StartsWith("the floor at its head", StringComparison.Ordinal) ? headWhy : "the floor at its head: " + headWhy;
@@ -673,17 +738,23 @@ public static class StairReader
                 return $"its geometry has {_treads.Count + 1} risers, but the run says {run.RisersNumber?.ToString(CultureInfo.InvariantCulture) ?? "nothing"}";
             if (stair.ActualRiserHeight is not { } riser || stair.ActualTreadDepth is not { } tread)
                 return "the stair's typed riser height or tread depth couldn't be read, so its drawn ones can't be checked";
-            var zs = new List<double> { b };
-            zs.AddRange(_treads.Select(x => x.Z));
-            zs.Add(h);
-            var risers = zs.Zip(zs.Skip(1), (lo, hi) => hi - lo).ToList();
+            List<double> Rises(double lo, double hi)
+            {
+                var zs = new List<double> { lo };
+                zs.AddRange(_treads.Select(x => x.Z));
+                zs.Add(hi);
+                return zs.Zip(zs.Skip(1), (a, c) => c - a).ToList();
+            }
+            var own = Rises(baseZ, topZ);                   // the run's own: equal by construction, typed
+            var risers = Rises(b, h);                       // as drawn: what is sent
             var ss = _treads.Select(x => x.S).Append(_back).ToList();
             var treads = ss.Zip(ss.Skip(1), (lo, hi) => hi - lo).ToList();
+            _ev["run_risers_in"] = new JsonArray(own.Select(r => (JsonNode)(r * 12)).ToArray());
             _ev["drawn_risers_in"] = new JsonArray(risers.Select(r => (JsonNode)(r * 12)).ToArray());
             _ev["drawn_treads_in"] = new JsonArray(treads.Select(r => (JsonNode)(r * 12)).ToArray());
-            for (var i = 0; i < risers.Count; i++)
-                if (Math.Abs(risers[i] - riser) > Sixteenth)
-                    return $"riser {i + 1} is drawn {In(risers[i])}, but the stair's Actual Riser Height is {In(riser)}: they must agree within 1/16 in";
+            for (var i = 0; i < own.Count; i++)
+                if (Math.Abs(own[i] - riser) > Sixteenth)
+                    return $"the run's riser {i + 1} is drawn {In(own[i])}, but the stair's Actual Riser Height is {In(riser)}: they must agree within 1/16 in";
             for (var i = 0; i < treads.Count; i++)
                 if (Math.Abs(treads[i] - tread) > Sixteenth)
                     return $"tread {i + 1} is drawn {In(treads[i])} deep (nosing to nosing), but the stair's Actual Tread Depth is {In(tread)}: they must agree within 1/16 in";
@@ -777,6 +848,19 @@ public static class StairReader
                 return null;
             }
             return tops[0].Z;
+        }
+
+        /// <summary>The last riser rises to the floor at the head only if nothing of the run's own stands above that floor
+        /// (1/16 in to spare): a floor lower than the run's last riser board leaves the board's top proud of it, a lip
+        /// that would be the real top nosing, which isn't read. Null when the floor is at or above all of the run; else
+        /// why.</summary>
+        private string? RunAbove(double headZ)
+        {
+            var top = run.Faces!.SelectMany(f => f.Points).Select(p => _t.Apply(p).Z).DefaultIfEmpty(double.NegativeInfinity).Max();
+            _ev["run_highest"] = top;
+            return top > headZ + Sixteenth
+                ? $"the run itself reaches {In(top - headZ)} above the floor at its head (its last riser board standing proud of the floor): its last riser isn't read exactly"
+                : null;
         }
 
         /// <summary>The top nosing is the floor's edge at the head only if that floor stops at the last riser's line:

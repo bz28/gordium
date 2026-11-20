@@ -132,6 +132,8 @@ public sealed class RecordHousesCommand : IExternalCommand
             log["rooms_not_read"] = read.RoomsNotRead;
             log["unknown_spaces"] = read.UnknownSpaces;
             log["level_conflicts"] = read.LevelConflicts;
+            log["not_a_stair_conflicts"] = read.NotAStairConflicts;
+            log["not_a_stair"] = read.NotAStair;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["stairs_not_read"] = read.StairsNotRead;
             log["doors_not_read"] = read.DoorsNotRead;
@@ -225,6 +227,8 @@ public sealed class ReadInteriorCommand : IExternalCommand
             log["rooms_not_read"] = read.RoomsNotRead;
             log["unknown_spaces"] = read.UnknownSpaces;
             log["level_conflicts"] = read.LevelConflicts;
+            log["not_a_stair_conflicts"] = read.NotAStairConflicts;
+            log["not_a_stair"] = read.NotAStair;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["stairs_not_read"] = read.StairsNotRead;
             log["doors_not_read"] = read.DoorsNotRead;
@@ -237,7 +241,8 @@ public sealed class ReadInteriorCommand : IExternalCommand
             log["stair_candidates"] = model.Interior.StairCandidates.Select(c =>
                 $"{c.UniqueId} {c.BuiltInCategory.Replace("OST_", "")} \"{c.Name}\": {c.Kind}" +
                 (c.NestedIn is { Count: > 0 } up ? " nested in " + string.Join(" in ", up.Select(h => $"{h.BuiltInCategory.Replace("OST_", "")} {h.UniqueId}")) : "") +
-                (StairReader.InsideWindowOrDoor(c) ? " (inside its window or door: not a stair)" : "")).ToList();
+                (StairReader.InsideWindowOrDoor(c) ? " (inside its window or door: not a stair)" : "") +
+                (StairReader.ClearedByArchitect(c) ? $" (marked {Marks.NotAStair.Name} Yes: cleared by the architect)" : "")).ToList();
             log["interior"] = read.Interior.ToJsonString();
             Trial.Log("read_interior", log);
             var rooms = (read.Interior["rooms"] is JsonArray r ? $"{r.Count} rooms read" : "Rooms not read: " + string.Join("; ", read.RoomsNotRead.Take(5))) +
@@ -245,7 +250,8 @@ public sealed class ReadInteriorCommand : IExternalCommand
                                                         "(every sleeping-room rule needs review)" : "") +
                         (read.LevelConflicts.Count > 0 ? "\nConflict: " + string.Join("\nConflict: ", read.LevelConflicts) : "");
             var openings = read.Interior["openings"] is JsonArray o ? $"{o.Count} windows and doors read" : "Openings not read: " + string.Join("; ", read.OpeningsNotRead.Take(5));
-            var stairs = read.Interior["stairs"] is JsonArray s ? $"{s.Count} stair flights read" : "Stairs not read: " + string.Join("; ", read.StairsNotRead.Take(5));
+            var stairs = (read.Interior["stairs"] is JsonArray s ? $"{s.Count} stair flights read" : "Stairs not read: " + string.Join("; ", read.StairsNotRead.Take(5))) +
+                         string.Concat(read.NotAStairConflicts.Select(c => "\nConflict: " + c)) + string.Concat(read.NotAStair.Select(c => "\n" + c));
             var doors = read.Interior["doors"] is JsonArray d ? $"{d.Count} doors read" : "Doors not read: " + string.Join("; ", read.DoorsNotRead.Take(5));
             var guards = read.Interior["guards"] is JsonArray g ? $"{g.Count} guards read" : "Guards not read: " + string.Join("; ", read.GuardsNotRead.Take(5));
             var none = read.Ticks.Where(t => t.Sent).Select(t => t.Kind.Words).ToList() is { Count: > 0 } sent

@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 import pytest
+from pathlib import Path
 
 from model_measurement.interior import recordings as r
 
@@ -57,9 +58,9 @@ def described(name: str) -> dict:
 
 def flight(st: dict) -> dict:
     """A drawn flight as the Revit reader sends it: the floor at its foot; each tread's nosing from the run (equal
-    risers and treads, along its path), then the floor's edge at the head, only when that floor stands at the run's
-    top (the cross-check: house 3's, 1 1/2 in above it, sends none); each side a wall's face, or open; what is
-    overhead; no handrails (railings: step 5)."""
+    risers and treads, along its path), then the floor's edge at the head, as drawn (house 3's 1 1/2 in above the
+    run's top: its last riser 9 in); each side a wall's face, or open; what is overhead; no handrails (railings:
+    step 5)."""
     (x0, y0), (x1, y1) = st["path"]
     length = ((x1 - x0) ** 2 + (y1 - y0) ** 2) ** 0.5
     ux, uy = (x1 - x0) / length, (y1 - y0) / length
@@ -76,12 +77,11 @@ def flight(st: dict) -> dict:
         (a0, a1), (h0, h1) = (u["outer"][0], u["outer"][3]), (u["hole"][0], u["hole"][3])
         overhead.append([[*a0, z], [*h0[:1], a0[1], z] if ux else [a0[0], h0[1], z],
                          [*h0[:1], a1[1], z] if ux else [a1[0], h0[1], z], [*a1, z]])
-    out = {"id": f"host-{st['id']}", "name": st["name"], "bottom_elevation": st["foot"]["top"],
+    out = {"id": f"host-{st['id']}", "name": st["name"], "bottom_elevation": st["foot"]["top"], "spiral": False,
            "sides": {w["side"]: w["face"] for w in st["walls"]} | {s: "open" for s in st["open_sides"]},
            "overhead": overhead}
-    if st["head_above_run"] == 0:
-        out["nosings"] = [across(k, st["base"] + st["riser"] * (k + 1)) for k in range(st["risers"] - 1)] \
-            + [across(st["risers"] - 1, st["head_top"])]
+    out["nosings"] = [across(k, st["base"] + st["riser"] * (k + 1)) for k in range(st["risers"] - 1)] \
+        + [across(st["risers"] - 1, st["head_top"])]
     if st["handrails"]:                       # each drawn handrail's inner edge (step 5)
         out["handrails"] = [{"side": h["side"], "inner_edge": h["inner"]} for h in st["handrails"]]
     return out
@@ -110,7 +110,8 @@ def test_the_steps_scope_is_the_design_notes():
              "emergency_escape_opening": {"opening_net_clear_width", "opening_net_clear_height", "opening_net_clear_area",
                                           "opening_sill_height", "opening_is_door", "opening_door_hinged_or_sliding"}}
     stairs = {"stair_riser_height", "stair_riser_variation", "stair_total_rise", "stair_risers", "stair_tread_depth",
-              "stair_tread_variation", "stair_headroom", "stair_clear_width"}      # never the width at the handrail
+              "stair_tread_variation", "stair_headroom", "stair_clear_width",
+              "stair_spiral"}                                                   # never the width at the handrail
     doors = {"door_clear_width", "door_clear_height", "door_side_hinged"}
     handrails = {"stair_clear_width_at_handrail", "stair_handrail_sides"}
     assert r.STEP == 6
@@ -132,7 +133,7 @@ def test_the_steps_scope_is_the_design_notes():
         "egress_door": doors, "sleeping_loft": set(), "loft_room": set(), "habitable_attic": set(), "ramp": set(),
         "alternating_tread_device": set(), "ships_ladder": set()}
     assert sorted(r.drawing(ORANGETOWN)["has_none"]) == claims       # its own claims ticked; no list is empty
-    assert r.scope("3_tall_riser") == rooms | {"stair": set()}                   # read, nothing measured (step 4)
+    assert r.scope("3_tall_riser") == rooms | {"stair": stairs}                  # its last riser as drawn (step 4)
     assert r.scope("4_loft") == rooms | {"stair": stairs | handrails, "guard": {"guard_height", "guard_opening_sphere"},
                                          "egress_door": set()}
     # a sliding door: no clear width worked by hand, so no maker's clear opening made up: its height not in scope
@@ -148,6 +149,16 @@ def test_the_steps_scope_is_the_design_notes():
     assert r.drawing("1_ranch_compliant")["has_none"] == ["stairs", "guards"]
     assert r.drawing("4_loft")["has_none"] == ["doors"]
     assert r.drawing("3_tall_riser")["has_none"] == []
+
+
+def test_the_design_notes_step_4_scope_names_every_stair_measure_in_scope():
+    # review round 4 (stair decisions): the note's step-4 scope list fell behind STEPS[4] (stair_spiral added to the
+    # code, not the list); every stair measure in scope must be named in that paragraph
+    note = (Path(r.__file__).resolve().parents[4] / "docs" / "revit" / "revit_interior_reading_design.md").read_text(
+        encoding="utf-8")
+    step4 = note[note.index("4. **Stairs**"):note.index("5. **")]
+    missing = sorted(m for m in r.STEPS[4]["2_two_story_small_window"]["stair"] if f"`{m}`" not in step4)
+    assert missing == []
 
 
 def test_house_2s_stair_drawn_and_read_measures_as_worked_by_hand():
@@ -215,7 +226,7 @@ def test_house_4s_loft_guard_and_stair_drawn_and_read_measure_as_worked_by_hand(
     assert any("guard not read" in p for p in r.recording_problems(rec))
 
 
-def test_house_3s_tall_riser_is_drawn_at_the_head_and_comes_back_not_measured():
+def test_house_3s_tall_riser_is_drawn_at_the_head_and_measured_as_drawn():
     d = r.drawing("3_tall_riser")
     s = d["stairs"][0]
     assert (s["risers"], s["riser"], s["base"], s["head_top"]) == (13, 0.625, -8.25, 0.0)
@@ -223,11 +234,65 @@ def test_house_3s_tall_riser_is_drawn_at_the_head_and_comes_back_not_measured():
     assert s["open_sides"] == ["right"] and [w["side"] for w in s["walls"]] == ["left"]   # the guard: step 5
     assert "1.5 in above the run's top" in d["notes"][0]
     rec = described("3_tall_riser")
-    assert "nosings" not in rec["interior"]["stairs"][0]
+    # the last riser measured to the floor at the head (R318.7.5.1, Q1): -0.75 ft to 0, 9 in; the hand-worked
+    # answers (riser 9, variation 9 - 7.5 = 1.5, total 99, 13 risers) hold with the tall riser at the head
+    top = rec["interior"]["stairs"][0]["nosings"]
+    assert (top[-2][0][2], top[-1][0][2]) == (pytest.approx(-0.75), 0.0)
     assert r.recording_problems(rec) == []
-    s = rec["interior"]["stairs"][0]                                   # a reader that sent the drawn risers anyway
-    s["nosings"] = flight({**d["stairs"][0], "head_above_run": 0})["nosings"]
-    assert any("s stair_riser_height = 9.0: not in step 4" in p for p in r.recording_problems(rec))
+    got = r.measure(rec["interior"])["parts"]["stair"][0]
+    assert (got["measures"]["stair_riser_height"], got["measures"]["stair_riser_variation"]) == (9.0, 1.5)
+    s = rec["interior"]["stairs"][0]                                   # a reader sending the run's own top instead
+    s["nosings"] = flight({**d["stairs"][0], "head_top": d["stairs"][0]["head_top"] - 0.125})["nosings"]
+    problems = r.recording_problems(rec)
+    assert any("s stair_riser_height = 7.5, expected 9.0" in p for p in problems)
+    assert any("s stair_riser_variation = 0.0, expected 1.5" in p for p in problems)
+    rec = described("3_tall_riser")                                    # and one sending none: not measured fails too
+    del rec["interior"]["stairs"][0]["nosings"]
+    assert any("s stair_riser_height not measured" in p for p in r.recording_problems(rec))
+
+
+def test_house_3_as_drawn_fails_r318_7_5_1_once_nothing_else_is_open():
+    """The eval: house 3 as the Revit reader sends it (its 9 in riser at the head, `spiral: false`) through the real
+    checker. R318.7.5.1: "The riser height shall be not more than 8 1/4 inches" (9 > 8.25) and "The greatest riser
+    height within any flight of stairs shall not exceed the smallest by more than 3/8 inch" (9 - 7.5 = 1.5 > 0.375):
+    both fail. Each rule's one remaining open input is R315.5's sleeping-loft stair (review_when), which the house
+    doesn't state: with the architect's "no sleeping lofts" tick both are does_not_comply, without it both need
+    review (never a pass either way)."""
+    from design_checker.check import check_site
+    sys.path.insert(0, str(r.REPO / "packages/permit_sheets"))
+    from permit_sheets import goldens
+
+    def statuses(ticked):
+        interior = described("3_tall_riser")["interior"]
+        if ticked:
+            interior["has_none"] = [{"kind": "sleeping_loft", "source": "ticked by the architect (test)"}]
+        got = check_site(goldens.site(), dict(goldens.FACTS), name="3", today=goldens.DATE, interior=interior)
+        return {i["rule"]: (i["status"], i["reason"]) for i in got["view"]["items"]
+                if i["rule"] in ("general.r318_7_5_1_stair_riser_height_max", "general.r318_7_5_1_stair_riser_variation_max")}
+
+    ticked = statuses(True)
+    assert [s for s, _ in ticked.values()] == ["does_not_comply", "does_not_comply"]
+    for status, reason in statuses(False).values():
+        assert status == "needs_review" and "serves sleeping loft not measured" in reason
+
+
+def test_a_curved_flight_said_spiral_keeps_the_ordinary_stair_rules_to_review():
+    """Review round 1: Revit's Spiral run style is any arc run, a curved stair too, never shown to be R202's spiral
+    stairway. A flight said `spiral: true` with no nosings (as a Revit arc run would be sent) must leave the R318.7
+    rules that set spiral stairs aside needing review, never not applicable (the open-riser flag has no spiral rule
+    of its own: it would vanish)."""
+    from design_checker.check import check_site
+    sys.path.insert(0, str(r.REPO / "packages/permit_sheets"))
+    from permit_sheets import goldens
+    interior = described("2_two_story_small_window")["interior"]
+    s1 = interior["stairs"][0]
+    s1["spiral"] = True
+    del s1["nosings"]
+    got = check_site(goldens.site(), dict(goldens.FACTS), name="2", today=goldens.DATE, interior=interior)
+    status = {i["rule"]: i["status"] for i in got["view"]["items"] if (i.get("part") or {}).get("id") == "host-s1"}
+    for rule in ("general.r318_7_5_1_stair_open_riser_sphere", "general.r318_7_1_stair_clear_width_above_handrail",
+                 "general.r318_7_1_stair_clear_width_at_handrail", "general.r318_7_5_1_stair_riser_height_max"):
+        assert status[rule] == "needs_review", rule
 
 
 def test_a_stair_in_a_house_not_yet_in_the_stairs_step_isnt_drawn():

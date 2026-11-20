@@ -8,18 +8,18 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "wa": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130b",
-    "main": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130d",
-    "loft": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130f",
-    "ls": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000131c",
-    "lg": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000136f"
+    "wa": "be75780b-f764-453e-96ba-133e8916a46d-0000130f",
+    "main": "be75780b-f764-453e-96ba-133e8916a46d-00001311",
+    "loft": "be75780b-f764-453e-96ba-133e8916a46d-00001313",
+    "ls": "be75780b-f764-453e-96ba-133e8916a46d-00001320",
+    "lg": "be75780b-f764-453e-96ba-133e8916a46d-00001373"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130d",
+        "id": "be75780b-f764-453e-96ba-133e8916a46d-00001311",
         "name": "Bedroom (1)",
         "sleeping": true,
         "floor": [
@@ -67,7 +67,7 @@
         ]
       },
       {
-        "id": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130f",
+        "id": "be75780b-f764-453e-96ba-133e8916a46d-00001313",
         "name": "Sleeping loft (2)",
         "sleeping": true,
         "floor": [
@@ -117,17 +117,18 @@
     ],
     "openings": [
       {
-        "id": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130b",
+        "id": "be75780b-f764-453e-96ba-133e8916a46d-0000130f",
         "name": "Gordium test window wa (36 x 24 in): Family11 (Window A)",
-        "room": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130d",
+        "room": "be75780b-f764-453e-96ba-133e8916a46d-00001311",
         "escape": true,
         "operation": "awning"
       }
     ],
     "stairs": [
       {
-        "id": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000131c",
+        "id": "be75780b-f764-453e-96ba-133e8916a46d-00001320",
         "name": "Gordium test stair ls",
+        "spiral": false,
         "bottom_elevation": 0,
         "nosings": [
           [
@@ -341,7 +342,7 @@
     "doors": [],
     "guards": [
       {
-        "id": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000136f",
+        "id": "be75780b-f764-453e-96ba-133e8916a46d-00001373",
         "name": "Gordium test guard lg",
         "top": 12,
         "walking_surface": 9,
@@ -429,39 +430,40 @@
     "room loft: within the height of main (a loft), so drawn 24.5 ft clear of it: drawn over it, its floor would be the other room\u0027s ceiling there"
   ],
   "drawn": [
-    "rail profile Gordium test rail 1.5 in square: family 3780, type 4119 \u0022Family12\u0022, category OST_ProfileFamilies",
-    "baluster Gordium test baluster 1.5 in x 31 in: family 4121, type 4814, category OST_StairsRailingBaluster",
+    "rail profile Gordium test rail 1.5 in square: family 3784, type 4123 \u0022Family12\u0022, category OST_ProfileFamilies",
+    "baluster Gordium test baluster 1.5 in x 31 in: family 4125, type 4818, category OST_StairsRailingBaluster",
     "stair type Gordium test stair ls from \u0022Stairs 1\u0022: run type monolithic False, risers True, treads True, tread 3 in thick, nosing 0 in",
     "stair ls: 2 railings Revit added deleted (the drawing\u0027s own are drawn next)",
     "railing type Gordium test handrail ls: from \u0022Railing 1\u0022, its own handrails -1 / -1 (positions None / None)",
-    "railing type Gordium test handrail ls: top rail 4909 at 36 in, 0 other rails, balusters none",
-    "stair ls: Revit\u0027s railing 4910 on its right: path (145,0,0)-(151.4167,0,0)",
+    "railing type Gordium test handrail ls: top rail 4913 at 36 in, 0 other rails, balusters none",
+    "stair ls: Revit\u0027s railing 4914 on its right: path (145,0,0)-(151.4167,0,0)",
     "stair ls: handrail right: drawn inner face -9 in across the run\u0027s path, the house\u0027s -9 in; moves: inner -10.25 in across, wanted -9 | inner -10.25 in across, wanted -9 | inner -10.25 in across, wanted -9; placement offset 2.25 in",
-    "stair ls: Revit\u0027s railing 4914 on its left: path (145,2,0)-(151.4167,2,0)",
-    "stair ls: railing 4910 host 4891, top rail 4920 box 145,0.125,3.5464 to 151.4167,0.25,12, handrails 0",
+    "stair ls: Revit\u0027s railing 4918 on its left: path (145,2,0)-(151.4167,2,0)",
+    "stair ls: railing 4914 host 4895, top rail 4924 box 145,0.125,3.5464 to 151.4167,0.25,12, handrails 0",
     "stair ls: risers 12 (drawing 12), riser 9 in (drawing 9), tread 7 in, base 0, top 9; run risers 12, treads 11, width 24 in, supports 0, railings 1; warnings dismissed: none",
     "railing type Gordium test guard lg: from \u0022Railing 1\u0022, its own handrails -1 / -1 (positions None / None)",
-    "railing type Gordium test guard lg: top rail 4964 at 36 in, 1 other rails, balusters Family13 from 3.5 in, first at 4.25 in, pattern 5 in",
-    "guard lg: railing 4975 on level Level 2 (9 ft), box 164.4167,-0.0625,9.1667 to 168.4167,0.1667,12; top rail 4981 box 11.875 to 12 (drawing 11.875 to 12), rail 1.5 in",
+    "railing type Gordium test guard lg: top rail 4968 at 36 in, 1 other rails, balusters Family13 from 3.5 in, first at 4.25 in, pattern 5 in",
+    "guard lg: railing 4979 on level Level 2 (9 ft), box 164.4167,-0.0625,9.1667 to 168.4167,0.1667,12; top rail 4985 box 11.875 to 12 (drawing 11.875 to 12), rail 1.5 in",
     "guard lg: drawn: u 0..48 in, z 2..3.5 in; u 3.5..5 in, z 3.5..34.5 in; u 8.5..10 in, z 3.5..34.5 in; u 13.5..15 in, z 3.5..34.5 in; u 18.5..20 in, z 3.5..34.5 in; u 23.5..25 in, z 3.5..34.5 in; u 28.5..30 in, z 3.5..34.5 in; u 33.5..35 in, z 3.5..34.5 in; u 38.5..40 in, z 3.5..34.5 in; u 43.5..45 in, z 3.5..34.5 in; u 0..48 in, z 34.5..36 in || the house\u0027s: top rail u 0..48, z 34.5..36; rail u 0..48, z 2..3.5; baluster u 3.5..5, z 3.5..34.5; baluster u 8.5..10, z 3.5..34.5; baluster u 13.5..15, z 3.5..34.5; baluster u 18.5..20, z 3.5..34.5; baluster u 23.5..25, z 3.5..34.5; baluster u 28.5..30, z 3.5..34.5; baluster u 33.5..35, z 3.5..34.5; baluster u 38.5..40, z 3.5..34.5; baluster u 43.5..45, z 3.5..34.5",
     "ticked Gordium: This house has no doors: Yes"
   ],
   "notes": [
     {
-      "part": "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000130b",
+      "part": "be75780b-f764-453e-96ba-133e8916a46d-0000130f",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     }
   ],
   "evidence": {
     "stairs": {
-      "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000131c": {
+      "be75780b-f764-453e-96ba-133e8916a46d-00001320": {
         "revit_layer": [
-          "run 4892 Straight: base 0, top 9 (relative), risers 12, treads 11, begins/ends with riser True/True, width 24 in; path (145,1,0) (151.4167,1,0)",
+          "run 4896 Straight: base 0, top 9 (relative), risers 12, treads 11, begins/ends with riser True/True, width 24 in; path (145,1,0) (151.4167,1,0)",
           "its geometry: 138 faces (23 facing up, 0 curved), failed False; box 145,0,0 to 151.458,2,9",
           "tread tops (z, internal): 0.5 0.75 1.25 1.5 2 2.25 2.75 3 3.5 3.75 4.25 4.5 5 5.25 5.75 6 6.5 6.75 7.25 7.5 8 8.75 8.25",
           "around it: 10 elements: Floors Floor at the foot of ls (6 faces), Floors Floor at the head of ls (6 faces), Ceilings Overhead 1 of ls (6 faces), Walls Gordium test wall 6 in (6 faces), Walls Gordium test wall 6 in (6 faces), Stairs Stair (138 faces), StairsRailing Gordium test handrail ls (0 faces), RailingTopRail Gordium test handrail ls top rail (6 faces), RailingRailPathExtensionLines Model Lines (0 faces), SketchLines Model Lines (0 faces)"
         ],
+        "style": "Straight",
         "tread_faces": 12,
         "tread_groups": [
           {
@@ -688,6 +690,21 @@
         "back": 6.416666666666657,
         "foot": 0,
         "head": 9,
+        "run_highest": 8.75,
+        "run_risers_in": [
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9,
+          9
+        ],
         "drawn_risers_in": [
           9,
           9,
@@ -716,16 +733,16 @@
           6.999999999999773
         ],
         "handrails_beside_walls": [
-          "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000132e (right)"
+          "be75780b-f764-453e-96ba-133e8916a46d-00001332 (right)"
         ],
         "railings_refused": []
       }
     },
     "guards": {
-      "9cdf7832-bc4f-4422-8d28-9eff79aef32f-0000136f": {
+      "be75780b-f764-453e-96ba-133e8916a46d-00001373": {
         "revit_layer": [
-          "railing 4975 \u0022Gordium test guard lg\u0022: host  , base level Level 2 9, base offset 0; path (164.4167,0,9)-(168.4167,0,9); around it 5: Floors Floor at the guard lg, Walls Gordium test wall 4 in, Walls Gordium test wall 4 in, SketchLines Model Lines, RailingRailPathExtensionLines Model Lines",
-          "Railing 4975 OST_StairsRailing: 10 solids (6,6,6,6,6,6,6,6,6,6 faces, 0 curved), failed False; x 164.4167..168.4167, y -0.0625..0.0625, z 9.1667..11.875",
+          "railing 4979 \u0022Gordium test guard lg\u0022: host  , base level Level 2 9, base offset 0; path (164.4167,0,9)-(168.4167,0,9); around it 5: Floors Floor at the guard lg, Walls Gordium test wall 4 in, Walls Gordium test wall 4 in, SketchLines Model Lines, RailingRailPathExtensionLines Model Lines",
+          "Railing 4979 OST_StairsRailing: 10 solids (6,6,6,6,6,6,6,6,6,6 faces, 0 curved), failed False; x 164.4167..168.4167, y -0.0625..0.0625, z 9.1667..11.875",
           "  solid: x 164.41667..168.41667, y -0.0625..0.0625, z 9.16667..9.29167, 6 faces",
           "  solid: x 164.70833..164.83333, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
           "  solid: x 165.125..165.25, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
@@ -736,7 +753,7 @@
           "  solid: x 167.20833..167.33333, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
           "  solid: x 167.625..167.75, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
           "  solid: x 168.04167..168.16667, y -0.0625..0.0625, z 9.29167..11.875, 6 faces",
-          "TopRail 4981 OST_RailingTopRail: 1 solids (6 faces, 0 curved), failed False; x 164.4167..168.4167, y -0.0625..0.0625, z 11.875..12",
+          "TopRail 4985 OST_RailingTopRail: 1 solids (6 faces, 0 curved), failed False; x 164.4167..168.4167, y -0.0625..0.0625, z 11.875..12",
           "  solid: x 164.41667..168.41667, y -0.0625..0.0625, z 11.875..12, 6 faces"
         ],
         "length": 4,
@@ -841,7 +858,7 @@
   },
   "revit_layer": [
     "design options: ",
-    "stair 4891 \u0022Gordium test stair ls\u0022: base 0, top 9, riser 9 in, tread 7 in, risers 12, the stair element\u0027s own geometry 138 faces",
+    "stair 4895 \u0022Gordium test stair ls\u0022: base 0, top 9, riser 9 in, tread 7 in, risers 12, the stair element\u0027s own geometry 138 faces",
     "stairs: 1 component stairs (1 runs), 0 other elements that could be one (0 of them generic models nested inside a window or door, not a stair); nested and not inside their window or door: ",
     "railings: 2",
     "enclosed areas on Level 1: 1 (0 with no Room: )",

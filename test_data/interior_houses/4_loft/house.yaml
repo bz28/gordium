@@ -28,6 +28,7 @@ stairs:
   - id: ls
     name: Loft stair
     bottom_elevation: 0
+    spiral: false                # a straight flight (R202: a spiral's treads radiate from a column)
     nosings:
       - [[0.0, 0, 228.6], [0.0, 609.6, 228.6]]
       - [[177.8, 0, 457.2], [177.8, 609.6, 457.2]]
