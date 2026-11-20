@@ -196,12 +196,19 @@ not in the list, or a window's word on a door, is not stated, never a near guess
   its own for this and puts the architect's own back afterwards.
 - **Reading them** (`MarkReading`): by GUID only (a firm's own "Gordium: Sleeping room" is never read as
   Gordium's), and only the rooms, windows and doors in the design checked (the outside reader's phase and option
-  rule, `SiteReader.InDesignChecked`). **A mark never set is not stated** (null), never No: Revit's
-  `Parameter.HasValue` false reads as null whatever `AsInteger()` says; a blank length is null, never 0.
+  rule, `SiteReader.InDesignChecked`; a room belongs to one phase, so only the last phase's rooms are read).
+  **A mark never set is not stated** (null), never No: Revit's `Parameter.HasValue` false reads as null whatever
+  `AsInteger()` says; a blank length is null, never 0. A door's operation must be a door's word ("Casement" on a
+  door is not stated, for the opening as for the door): one rule (`Operations.ForOpening(word, isDoor)`) for the
+  reader and the list.
 - **The marking list** (`MarkingList.Build`): every room, window and door with its marks, anything not set (or set
   to a word Gordium doesn't read) first; a line per mark saying what an unset one leaves not read ("1 of 2 rooms not
   marked, so no room is read for egress"). A room named "Bedroom…" or "Sleeping…" with its mark unset shows
-  "suggested: Yes" (Ben's decision 3); a suggestion is never read as the mark, and No is never suggested.
+  "suggested: Yes" (Ben's decision 3); a suggestion is never read as the mark, and No is never suggested. A
+  Room that is unplaced, not enclosed or redundant (or whose placement couldn't be read) is listed first, as what
+  stops every room being read (design note, section 2), never as a row to mark. The headline
+  (`MarkingListResult.Headline`) says every room, window and door is marked only when rooms are drawn and nothing
+  is unset or in the way.
 
 In Revit, **Mark for egress** (the Gordium tab's Egress panel) adds the marks on first use, in one undoable
 transaction, then shows the list in a dialog and logs every row to `results.jsonl`. That dialog is the minimal
@@ -214,10 +221,11 @@ reading of an unset mark, the operation words against the measuring code's own l
 suggestions. Two guards were undone once to check their tests then fail: an unset Yes/No read as No, and a
 parameter of a mark's name taken for it.
 
-To check in Revit (not yet run): that a Yes/No added to existing elements and on elements placed afterwards reads
-`HasValue` false until set (if Revit fills a default No, an unmarked bedroom would read as not a bedroom, and the
-marks must change type); that Revit accepts the colon in the names; that a type mark reads from
-`doc.GetElement(e.GetTypeId())`; and that a second run changes nothing.
+Tried in Revit 2027.4 on Snowdon Towers (2026-11-19; [design note, section 9](../../docs/revit/revit_interior_reading_design.md#9-to-check-in-the-trial-the-revit-api-on-real-models)):
+all 10 marks added, the names with a colon accepted; 57 of 57 existing rooms and 297 of 297 windows and doors read
+not set, and a room placed afterwards too (58 of 58); a second run added nothing. Still to check: that a type's
+marks read through `doc.GetElement(e.GetTypeId())` (Operation set on a window type), and the room placement
+states (unplaced, not enclosed, redundant) on real rooms.
 
 ## Running it
 
