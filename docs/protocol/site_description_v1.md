@@ -136,7 +136,9 @@ use is the one every Rhino check already takes, and both give the same answers (
 **A report keeps its site.** When `check` or `check_site` writes a zoning report, the exact description it was
 worked out from is written beside it as `<report name>.site.json` (Ben, 2026-11-06), so any report can be traced
 to exactly the site it was worked out from, and worked out again with the same lot facts (the file holds the site
-description only, not the lot facts). If the description can't be written, no new report is written either (the answer says
+description only, not the lot facts). A report with egress rows (a `check_site` sent an `interior`) also needs the
+same interior to be worked out again, and that isn't kept beside it yet: the report names it by its fingerprint,
+`interior_sha256`, only (see `check_site` above). If the description can't be written, no new report is written either (the answer says
 why). The earlier report's site file is replaced only once the new report is in place, so a report that can't be
 saved (open in Excel, say) leaves the earlier report beside its own site. Never a report beside another check's
 site; at worst, a check stopped between the two leaves a report with no site file.

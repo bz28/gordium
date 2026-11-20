@@ -68,8 +68,13 @@ def test_a_report_with_an_interior_keeps_its_fingerprint_and_says_the_interior_i
     assert not list(tmp_path.glob("*interior*")), "if the interior is now kept beside the report, update the docs and this test"
     page = (REPO / "docs/protocol/site_description_v1.md").read_text(encoding="utf-8")
     assert "the interior itself isn't kept beside the report" in page
+    keeps = page[page.index("**A report keeps its site.**"):]
+    assert "interior_sha256" in keeps[:keeps.index("\n\n")], "the site file's paragraph says the interior isn't kept"
     note = (REPO / "docs/revit/revit_interior_reading_design.md").read_text(encoding="utf-8")
     assert "don't pass it yet" not in note and "Not yet: keeping\n  the interior beside a saved report" in note
+    step3 = note[note.index("3. **Rooms and marked escape windows**"):note.index("4. **Stairs**")]
+    assert "beside its saved report" in step3, "the build order names the step that keeps the interior"
+    assert "the reader's PR (step 4)" not in note
 
 
 def test_an_interior_sent_to_the_worker_is_checked_exactly_as_a_direct_check():

@@ -24,7 +24,7 @@ How a Revit model would get an egress verdict, start to finish. Steps 1 to 3 and
 | 2 | Egress sections drafted into rules by AI, checked by code and against an independent answer key | AI drafts, code checks | Yes, 47 sections ([2026-11-13](../decisions/2026-11-13_house_egress_rules.md), [2026-11-14](../decisions/2026-11-14_house_egress_remaining.md)) |
 | 3 | The interior description: rooms, escape openings, stairs, doors, guards as plain geometry, the same whatever the host | Engineers | Yes ([format](../interior/interior_description_format.md)) |
 | 4 | **The Revit reader writes that description from the model** | Engineers, this note | **No** |
-| 5 | **The add-in sends it with each check** (the worker's `check_site` takes an `interior`) | Engineers, this note | **Partly** (protocol 1.2, section 7 step 1): the worker's `check_site` and the C# client take and send one; the add-in has nothing to send until step 4's reader exists, and keeping each check's interior beside its report comes with that step (section 5) |
+| 5 | **The add-in sends it with each check** (the worker's `check_site` takes an `interior`) | Engineers, this note | **Partly** (protocol 1.2, section 7 step 1): the worker's `check_site` and the C# client take and send one; the add-in has nothing to send until the reader exists (row 4), and keeping each check's interior beside its saved report comes with section 7's step 3, the first that sends one (section 5) |
 | 6 | The interior measured (clear opening, riser height, guard height…) | Engineer code, no AI | Yes ([measurements](../interior/interior_measurements.md); five hand-worked houses pass) |
 | 7 | The rules run on the measures; rows shown, each citing its section | Code | Yes (Ithaca's check runs New York's house rules since 2026-11-14) |
 
@@ -200,7 +200,7 @@ A small, additive change (protocol **1.2**, a minor version: a 1.1 worker refuse
   description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Not yet: keeping
   the interior beside a saved report. Until then a report's egress rows trace to their interior by its fingerprint
   alone (`interior_sha256`, written in the report), so they can't be worked out again from what is kept beside it;
-  the reader's PR (step 4) keeps it, before the add-in sends a real interior. Today no host sends one.
+  section 7's step 3, the first to send a real interior, keeps it. Today no host sends one.
 - **Only to a worker that says it understands it.** A 1.1 worker ignores a field it doesn't know, so it would answer
   "Egress waiting: no rooms drawn yet" for a house with rooms. The add-in sends `interior` only when the worker's
   `hello` says protocol 1.2 or later; with an older worker it shows that egress can't be checked with this checker
@@ -290,7 +290,10 @@ Each step is its own PR, through the review loop, with its tests:
    and `opening_door_hinged_or_sliding`; `opening_at_grade` only in a house drawn with a Toposolid, else expected not
    measured; out of scope, expected not measured: the area well, patio cover and projection measures,
    `sleeping_room_in_addition`, `opening_operable`, `opening_opens_to_yard`, `opening_fully_openable` and
-   `opening_below_grade` (the measuring code doesn't work these out yet).
+   `opening_below_grade` (the measuring code doesn't work these out yet). Before it sends a real interior, it keeps
+   each check's interior beside its saved report, as the site description is kept (written first, the earlier
+   report's set aside and put back if the new report can't be moved in, and never an earlier check's interior left
+   beside a new report), so egress rows can be worked out again (section 5).
 4. **Stairs** (straight component runs, the cross-check), houses 2 and 3: risers, treads, widths, headroom.
 5. **Doors** (after the PR adding doors' stated clear width to the format, decision 2), then **guards**, house 4.
 6. **`has_none` ticks.**
