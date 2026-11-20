@@ -8,15 +8,15 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "d1": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f22",
-    "liv": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f24"
+    "d1": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f24",
+    "liv": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f26"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f24",
+        "id": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f26",
         "name": "Living room (1)",
         "sleeping": false,
         "floor": [
@@ -66,9 +66,9 @@
     ],
     "openings": [
       {
-        "id": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f22",
+        "id": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f24",
         "name": "Gordium test door d1 (35.75 x 79.25 in): Family17 (Front door)",
-        "room": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f24",
+        "room": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f26",
         "escape": false,
         "operation": "side_hinged_door"
       }
@@ -76,7 +76,7 @@
     "stairs": [],
     "doors": [
       {
-        "id": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f22",
+        "id": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f24",
         "name": "Gordium test door d1 (35.75 x 79.25 in): Family17 (Front door)",
         "exit": true,
         "operation": "side_hinged",
@@ -96,24 +96,24 @@
   "guards_not_read": [],
   "drawing_notes": [],
   "drawn": [
-    "door d1: placed in wall 3851, host 3851, box 5.76,-0.583,-0 to 9.24,1.368,6.854, type size (2.9791666666666665, 6.604166666666667)",
+    "door d1: placed in wall 3853, host 3853, box 5.76,-0.583,-0 to 9.24,1.368,6.854, type size (2.9791666666666665, 6.604166666666667)",
     "ticked Gordium: This house has no stairs: Yes",
     "ticked Gordium: This house has no guards: Yes"
   ],
   "notes": [
     {
-      "part": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f22",
+      "part": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f24",
       "field": "stated_clear",
       "why": "a door\u0027s maker\u0027s clear opening is sent with the door (doors); as an escape opening its bottom isn\u0027t stated by a door\u0027s marks yet"
     },
     {
-      "part": "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f22",
+      "part": "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f24",
       "field": "doors.threshold_top",
       "why": "a door\u0027s drawn stops, hinge, leaf, threshold and head stop aren\u0027t read from its family (door families don\u0027t model them consistently): its maker\u0027s clear opening is read instead"
     }
   ],
   "evidence": {
-    "30cf67df-ea18-4d3a-86e3-091707d7da43-00000f22": {
+    "c4e04a51-9707-4144-96a8-0e7cc594e868-00000f24": {
       "placed": {
         "width": 3.479166666666666,
         "height": 6.85416666666667
@@ -121,7 +121,7 @@
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z -0..6.8542, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 3851, wall 3851 30cf67df-ea18-4d3a-86e3-091707d7da43-00000f0b: 9 faces; ids generating them: OST_Walls 3851, OST_Walls 3852, OST_Walls 3854, OST_Doors 3874 (this window)"
+        "host (FamilyInstance.Host) 3853, wall 3853 c4e04a51-9707-4144-96a8-0e7cc594e868-00000f0d: 9 faces; ids generating them: OST_Walls 3853, OST_Walls 3854, OST_Walls 3856, OST_Doors 3876 (this window)"
       ]
     },
     "has_none": {
@@ -207,9 +207,10 @@
     }
   },
   "revit_layer": [
-    "stairs: 0 component stairs (0 runs), 0 other elements that could be one",
+    "design options: ",
+    "stairs: 0 component stairs (0 runs), 0 other elements that could be one (0 of them generic models nested inside a window or door, not a stair); nested and not inside their window or door: ",
     "railings: 0",
-    "enclosed areas on Level 1: 1 (0 with no Room)",
+    "enclosed areas on Level 1: 1 (0 with no Room: )",
     "ramps: 0 elements in Ramps"
   ]
 }
