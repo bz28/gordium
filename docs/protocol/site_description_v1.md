@@ -95,7 +95,11 @@ the protocol they speak, `"protocol": "1.2"` (a different major version is refus
   beside the site description, never inside it. The place's inherited laws (egress, for Ithaca) are checked on it;
   without one they wait ("no rooms drawn yet"), never pass. One that can't be read is measured as far as it can and
   the rest needs review, as on the command line (`--interior`); the result's `egress.interior_sha256` fingerprints
-  exactly the interior it was worked out from. A tool sends it only to a worker whose `hello` says 1.2 or later:
+  exactly the interior it was worked out from. With a `report`, only that fingerprint is kept (written in the
+  report): the interior itself isn't kept beside the report as the site description is, yet, so a report's egress
+  rows can be traced to their interior but not worked out again from the files beside it. Keeping it is the Revit
+  interior reader's step ([revit_interior_reading_design.md](../revit/revit_interior_reading_design.md), section 5),
+  before any host sends a real interior. A tool sends it only to a worker whose `hello` says 1.2 or later:
   an older worker ignores a field it doesn't know, and its egress would wait as if no rooms were drawn.
 - `start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}`: the largest legal starting building
   on the description's lot (its buildings are left out), the same answer `start` gives.

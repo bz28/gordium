@@ -54,6 +54,24 @@ def test_the_examples_name_the_protocol_the_worker_speaks():
     assert shown and set(shown) == {protocol.PROTOCOL}, shown
 
 
+def test_a_report_with_an_interior_keeps_its_fingerprint_and_says_the_interior_itself_isnt_kept(tmp_path):
+    """Principle 5: a saved report's egress rows trace to their interior. Today by its fingerprint, written in the
+    report; the interior itself isn't kept beside the report yet (the reader's step keeps it), and the docs say so,
+    so no one takes the report for reproducible from what is beside it."""
+    from openpyxl import load_workbook
+    report = tmp_path / "check.xlsx"
+    result = worker_check(ranch(), report=str(report))
+    assert result["report_error"] is None and report.exists()
+    sha = egress.fingerprint(ranch())
+    cells = [str(c.value) for ws in load_workbook(report).worksheets for row in ws.iter_rows() for c in row if c.value]
+    assert any(sha in c for c in cells), "the report names the interior it was worked out from"
+    assert not list(tmp_path.glob("*interior*")), "if the interior is now kept beside the report, update the docs and this test"
+    page = (REPO / "docs/protocol/site_description_v1.md").read_text(encoding="utf-8")
+    assert "the interior itself isn't kept beside the report" in page
+    note = (REPO / "docs/revit/revit_interior_reading_design.md").read_text(encoding="utf-8")
+    assert "don't pass it yet" not in note and "Not yet: keeping\n  the interior beside a saved report" in note
+
+
 def test_an_interior_sent_to_the_worker_is_checked_exactly_as_a_direct_check():
     direct = check_description(SITE, dict(FACTS), interior=ranch())
     sent = worker_check(ranch())

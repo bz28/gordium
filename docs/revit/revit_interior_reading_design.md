@@ -4,8 +4,8 @@
 **For:** Ben; whoever writes the Revit interior reader; reviewers checking that nothing it sends could turn a "needs review" into a "complies".\
 **Kept current by:** the PR that builds each step below, as it settles a "to check"; any PR that changes the interior description, the worker's `check_site`, or one of the decisions here.
 
-**Status: agreed by Ben, 2026-11-19** (his four decisions are in section 8). Nothing here is built yet; each step
-of section 7 is its own PR.
+**Status: agreed by Ben, 2026-11-19** (his four decisions are in section 8). Each step of section 7 is its own
+PR; step 1 (protocol 1.2: the worker and the C# client take an interior) is built, the rest are not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -24,7 +24,7 @@ How a Revit model would get an egress verdict, start to finish. Steps 1 to 3 and
 | 2 | Egress sections drafted into rules by AI, checked by code and against an independent answer key | AI drafts, code checks | Yes, 47 sections ([2026-11-13](../decisions/2026-11-13_house_egress_rules.md), [2026-11-14](../decisions/2026-11-14_house_egress_remaining.md)) |
 | 3 | The interior description: rooms, escape openings, stairs, doors, guards as plain geometry, the same whatever the host | Engineers | Yes ([format](../interior/interior_description_format.md)) |
 | 4 | **The Revit reader writes that description from the model** | Engineers, this note | **No** |
-| 5 | **The add-in sends it with each check** (the worker's `check_site` takes an `interior`) | Engineers, this note | **No**: the Python check takes one (`check.check_site(..., interior=)`), but the worker command and the C# client don't pass it yet |
+| 5 | **The add-in sends it with each check** (the worker's `check_site` takes an `interior`) | Engineers, this note | **Partly** (protocol 1.2, section 7 step 1): the worker's `check_site` and the C# client take and send one; the add-in has nothing to send until step 4's reader exists, and keeping each check's interior beside its report comes with that step (section 5) |
 | 6 | The interior measured (clear opening, riser height, guard height…) | Engineer code, no AI | Yes ([measurements](../interior/interior_measurements.md); five hand-worked houses pass) |
 | 7 | The rules run on the measures; rows shown, each citing its section | Code | Yes (Ithaca's check runs New York's house rules since 2026-11-14) |
 
@@ -197,7 +197,10 @@ A small, additive change (protocol **1.2**, a minor version: a 1.1 worker refuse
   and hands it to `check.check_site`, which already runs egress on it and fingerprints it in the report (`interior_sha256`), so every result can be
   traced to exactly the interior it was worked out from (principle 5).
 - `WorkerClient.CheckSiteAsync` gains `interior`; the add-in keeps each check's interior beside its site
-  description, as decided for the site (2026-11-06).
+  description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Not yet: keeping
+  the interior beside a saved report. Until then a report's egress rows trace to their interior by its fingerprint
+  alone (`interior_sha256`, written in the report), so they can't be worked out again from what is kept beside it;
+  the reader's PR (step 4) keeps it, before the add-in sends a real interior. Today no host sends one.
 - **Only to a worker that says it understands it.** A 1.1 worker ignores a field it doesn't know, so it would answer
   "Egress waiting: no rooms drawn yet" for a house with rooms. The add-in sends `interior` only when the worker's
   `hello` says protocol 1.2 or later; with an older worker it shows that egress can't be checked with this checker
