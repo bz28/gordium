@@ -85,7 +85,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         {
             if (_checked is null || _view is null || !e.GetDocument().Equals(_checked))
                 return;
-            if (ResultRows.ChangesTheCheck(e.GetTransactionNames().ToList(), committed: e.Operation == UndoOperation.TransactionCommitted))
+            if (ResultRows.ChangesTheCheck(e.GetTransactionNames().ToList(), committed: e.Operation == Autodesk.Revit.DB.Events.UndoOperation.TransactionCommitted))
                 _view.MarkStale();
         }
         catch (Exception x)       // never out of Revit's event
