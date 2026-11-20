@@ -497,6 +497,42 @@ internal static class HouseDraw
             var loop = new CurveLoop();
             loop.Append(Line.CreateBound(new XYZ(ax, ay, z), new XYZ(bx, by, z)));
             railing.SetPath(loop);
+            doc.Regenerate();
+            // where the top rail's inner face (its edge nearest the middle) lands, against the house's: Revit placed a
+            // stair railing's rail by its own offset whatever the path (trial step 5 run 3: 0.25 to 1.75 in off the wall,
+            // the house's 3.5 and 3 in), so it is measured from the drawn rail and moved until it is the house's: first
+            // by the path, then by the railing's placement offset either way, each move measured
+            var want = A(new XYZ(D(h["inner"]![0]![0]), D(h["inner"]![0]![1]), 0));
+            double? Inner()
+            {
+                var pts = RailPoints(doc.GetElement(railing.TopRail));
+                return pts.Count == 0 ? null : side == "left" ? pts.Min(A) : pts.Max(A);
+            }
+            var tries = new List<string>();
+            void Shift(double by)
+            {
+                var shifted = new CurveLoop();
+                foreach (var c in railing.GetPath())
+                    shifted.Append(c.CreateTransformed(Transform.CreateTranslation(new XYZ(lx * by, ly * by, 0))));
+                railing.SetPath(shifted);
+            }
+            var param = railing.get_Parameter(BuiltInParameter.STAIRS_RAILING_PLACEMENT_OFFSET);
+            for (var k = 0; k < 6 && Inner() is { } got && Math.Abs(got - want) > 1e-6; k++)
+            {
+                var delta = want - got;
+                tries.Add($"inner {got * 12:0.####} in across, wanted {want * 12:0.####}");
+                if (k < 2)
+                    Shift(delta);
+                else if (param is { IsReadOnly: false })
+                    param.Set(param.AsDouble() + (k % 2 == 0 ? delta : -delta) * (k < 4 ? 1 : -1));
+                doc.Regenerate();
+            }
+            var landed = Inner();
+            log.Add($"stair {id}: handrail {side}: drawn inner face {(landed is { } li ? (li * 12).ToString("0.######", CultureInfo.InvariantCulture) : "none")} in across " +
+                    $"the run's path, the house's {want * 12:0.######} in; moves: {(tries.Count == 0 ? "none" : string.Join(" | ", tries))}; " +
+                    $"placement offset {param?.AsDouble() * 12:0.####} in");
+            if (landed is not { } l2 || Math.Abs(l2 - want) > 1e-6)
+                throw new InvalidOperationException($"stair {id}: its {side} handrail's inner face couldn't be put where the house has it: {log[^1]}");
         }
         if (kept.Count != wanted.Count)
             throw new InvalidOperationException($"stair {id}: Revit made no railing on its {string.Join(", ", wanted.Keys.Except(kept))} side");
@@ -512,6 +548,50 @@ internal static class HouseDraw
                     $"{box?.Min.X:0.####},{box?.Min.Y:0.####},{box?.Min.Z:0.####} to {box?.Max.X:0.####},{box?.Max.Y:0.####},{box?.Max.Z:0.####}, " +
                     $"handrails {railing.GetHandRails().Count}");
         }
+    }
+
+    /// <summary>Every vertex of an element's solids (a family's instance geometry included), for where a drawn rail is.</summary>
+    private static List<XYZ> RailPoints(Element? e)
+    {
+        var pts = new List<XYZ>();
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                if (o is Solid s)
+                    foreach (Edge edge in s.Edges)
+                        pts.AddRange(edge.Tessellate());
+                else if (o is GeometryInstance gi && gi.GetInstanceGeometry() is { } inner)
+                    Walk(inner);
+            }
+        }
+        if (e?.get_Geometry(new Options { DetailLevel = ViewDetailLevel.Fine }) is { } geometry)
+            Walk(geometry);
+        return pts;
+    }
+
+    /// <summary>Each solid of an element as its extents along a guard (u from its start along its unit direction),
+    /// across it and up, for the log beside the drawing's members.</summary>
+    private static List<string> SolidsAlong(Element? e, XYZ start, XYZ along, double walk)
+    {
+        var out_ = new List<string>();
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                if (o is Solid { Faces.Size: > 0 } s)
+                {
+                    var pts = s.Edges.Cast<Edge>().SelectMany(x => x.Tessellate()).ToList();
+                    var u = pts.Select(p => (p - start).DotProduct(along)).ToList();
+                    out_.Add($"u {u.Min() * 12:0.###}..{u.Max() * 12:0.###} in, z {(pts.Min(p => p.Z) - walk) * 12:0.###}..{(pts.Max(p => p.Z) - walk) * 12:0.###} in");
+                }
+                else if (o is GeometryInstance gi && gi.GetInstanceGeometry() is { } inner)
+                    Walk(inner);
+            }
+        }
+        if (e?.get_Geometry(new Options { DetailLevel = ViewDetailLevel.Fine }) is { } geometry)
+            Walk(geometry);
+        return out_;
     }
 
     /// <summary>Each level guard: the floor along its walking side (a DirectShape in Floors, its top the walking
@@ -568,6 +648,19 @@ internal static class HouseDraw
             log.Add($"guard {id}: railing {railing.Id.Value} on level {levels[z].Name} ({z:0.###} ft), box {box?.Min.X:0.####},{box?.Min.Y:0.####},{box?.Min.Z:0.####} to " +
                     $"{box?.Max.X:0.####},{box?.Max.Y:0.####},{box?.Max.Z:0.####}; top rail {railing.TopRail.Value} box {topBox?.Min.Z:0.####} to {topBox?.Max.Z:0.####} " +
                     $"(drawing {z + D(g["top_rail"]!["bottom"]):0.####} to {z + D(g["top"]):0.####}), rail {rail * 12:0.###} in");
+            // what was drawn, member by member (u along it, z over the walking surface), beside the house's
+            var startPt = new XYZ(ax, ay, z);
+            var dir = (new XYZ(bx, by, z) - startPt).Normalize();
+            var b = g["balusters"]!;
+            var data = new List<string> { $"top rail u 0..{D(g["length"]) * 12:0.###}, z {D(g["top_rail"]!["bottom"]) * 12:0.###}..{D(g["top_rail"]!["top"]) * 12:0.###}" };
+            data.AddRange(g["rails"]!.AsArray().Select(rr => $"rail u 0..{D(g["length"]) * 12:0.###}, z {D(rr!["bottom"]) * 12:0.###}..{D(rr["top"]) * 12:0.###}"));
+            for (var k = 0; k < b["count"]!.GetValue<int>(); k++)
+            {
+                var left = D(b["first"]) + k * D(b["spacing"]);
+                data.Add($"baluster u {left * 12:0.###}..{(left + D(b["width"])) * 12:0.###}, z {D(b["bottom"]) * 12:0.###}..{D(b["top"]) * 12:0.###}");
+            }
+            log.Add($"guard {id}: drawn: " + string.Join("; ", SolidsAlong(railing, startPt, dir, z).Concat(SolidsAlong(topRail, startPt, dir, z))) +
+                    " || the house's: " + string.Join("; ", data));
             ids[id] = railing.UniqueId;
         }
     }
