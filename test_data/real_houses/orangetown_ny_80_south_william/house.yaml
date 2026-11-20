@@ -281,6 +281,7 @@ doors:
       leaf_closed: "the leaf is '3'-0\"x8'-0\"' (A-2); its thickness isn't given ('THERMA-TRU OR EQUAL', A-1)"
       threshold_top: "not on the datum (main floor elevation relative to the second floor not dimensioned); the threshold isn't detailed"
       head_stop_bottom: "not given"
+      stated_clear: "no clear opening given: 'THERMA-TRU OR EQUAL' (A-1), a door size '3'-0\"x8'-0\"' only (A-2)"
 
 guards:
   # The railings drawn around the open stairwell and the 'OPEN TO BELOW' areas on the second floor (A-3). Each is
