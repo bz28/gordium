@@ -197,6 +197,17 @@ def _ids(parts) -> dict:
     return count
 
 
+def _maybe(part) -> str | None:
+    """Why a part may not be of its kind at all (`maybe`: an enclosed space whose use isn't known may or may not be
+    a sleeping room), or None. Every row about such a part, or about a part sitting in it, needs review with this
+    reason, unless the rule doesn't apply to it whatever it is (not applicable): never a pass, never a fail, and its
+    kind's rules are never "none" while it may be one. A `maybe` that isn't text still counts (said, never dropped)."""
+    if not isinstance(part, dict) or "maybe" not in part:
+        return None
+    why = part["maybe"]
+    return why.strip() if isinstance(why, str) and why.strip() else "it may not be a part of this kind"
+
+
 def _ref(part: dict, kind: str) -> dict:
     return {"kind": kind, "id": part["id"], "name": _name(part)}
 
@@ -248,7 +259,8 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     """The rule's rows: one per part (with `within`: per part, grouped under the part it sits in; a part it sits in
     with none of them gets one row, the rule's when_none), never none at all.
 
-    parts: {kind: [{"id", "name"?, "within"?: <id of the part it sits in>, "measures"?: {measure: value}}]}. A kind
+    parts: {kind: [{"id", "name"?, "within"?: <id of the part it sits in>, "measures"?: {measure: value},
+    "maybe"?: <why it may not be of this kind at all: its rows, and those of the parts in it, need review>}]}. A kind
     the rule needs that isn't a list wasn't read: one needs-review row. values: the building's measures. Only the
     part kind's own measures are taken from a part (a part can't change a building value)."""
     if rule_problems(rule):
@@ -275,14 +287,17 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     out = [_row(rule, "needs_review", reason=p) for p in dict.fromkeys(parent_problems + problems)]
     values = building_values(values)
 
-    def checked(part, within=None):
+    def checked(part, within=None, maybe=None):
         mine = {m: v for m, v in (part.get("measures") or {}).items() if m in own}
         known = {**values, **mine}
         result, unknown = part_outcome(rule, known, allowed), None
         if result == "needs_review" and (unknown := fails_whatever(rule, known, allowed)):
             result = "fail"                      # fails whatever the measures not given are (2026-10-21)
-        return _row(rule, result, part, within, values={m: mine.get(m) for m in sorted(formula_names(rule) & own)},
-                    unknown=unknown)
+        shown = {m: mine.get(m) for m in sorted(formula_names(rule) & own)}
+        why = _maybe(part) or maybe
+        if why and result != "not_applicable":   # it, or the part it sits in, may not be of its kind at all
+            return _row(rule, "needs_review", part, within, reason=why, values=shown)
+        return _row(rule, result, part, within, values=shown, unknown=unknown)
 
     if not parent:
         out += [checked(p) for p in children]
@@ -307,12 +322,14 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     for p in parents:
         within = _ref(p, parent)
         mine = by_parent[p["id"]]
-        out += [checked(c, within) for c in mine]
+        out += [checked(c, within, _maybe(p)) for c in mine]
+        none = _none_outcome(rule, values, allowed) if not mine else None
         if not mine and (p["id"] in doubtful or ANYWHERE in doubtful):          # it has one we can't read: not "none"
             out.append(_row(rule, "needs_review", within=within, reason=f"an {_words(kind)} that may be in it can't be read"))
+        elif not mine and _maybe(p) and none != "not_applicable":   # what "none" means hangs on what it is
+            out.append(_row(rule, "needs_review", within=within, reason=_maybe(p)))
         elif not mine:
-            out.append(_row(rule, _none_outcome(rule, values, allowed), within=within,
-                            reason=f"no {_words(kind)}", none=True))
+            out.append(_row(rule, none, within=within, reason=f"no {_words(kind)}", none=True))
     if not parents and not parent_problems:
         out.append(_row(rule, "not_applicable", reason=f"no {_plural(parent)}"))
     return out

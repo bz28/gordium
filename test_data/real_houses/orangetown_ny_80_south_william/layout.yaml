@@ -1,0 +1,251 @@
+# Where everything in house.yaml stands: the house laid out from the plan dimensions of its permit drawings (A-2, A-3,
+# the public PDF named in README.md, SHA-256 c6879996...a34d), so a host such as Revit can draw it and read it back
+# (packages/model_measurement/model_measurement/interior/recordings.py, `placed_drawing`). house.yaml gives each room
+# from its own corner (only its area is measured); this file places them. It changes no measure: a room's area, its
+# ceiling and a window's clear opening don't depend on where they stand.
+#
+# Plan coordinates, inches, read off the plans (north up on A-2 and A-3): x east from the house's west outer face, d
+# south from its north outer face. Every wall is a rectangle [x0, d0, x1, d1]. Each number is a dimension string on
+# the sheet named, or the sum of a chain of them (the chains close: each is checked against the sheet's overall
+# dimension below); nothing is scaled (every sheet: "DO NOT SCALE PLANS !"). Where the drawings don't dimension
+# something it is listed under `assumptions`, with what it could change: none of them changes any measure.
+#
+# The chains (A-3, 2nd floor plan; 6" exterior walls, 4" partitions as the sheet marks them):
+#   east-west, along the north wall: 6 | 13'-6" master | 4 | 6'-6" tub + 3'-4" shower (glass between, no wall) | 4 |
+#     5'-8" hall bath | 4 | 11'-0" bedroom 2 | 6  = 504 = 42'-0" (the overall)
+#   east-west, through the walk-in closets: 6 | 6'-7" | 4 | 6'-7" | 4 | 3'-4" open | 3'-4" stair  -> x 252
+#   east-west, through bedroom 3: (x 252) 3'-10" passage | 4 | 2'-0" closet | 4 | 14'-0" bedroom 3 | 6  = 504
+#   east-west, through bedroom 4: 6 | 13'-4" bonus | 6 | 3'-4" | 3'-4" | 6 | 3'-4" closet | 4 | 16'-4" bedroom 4 | 6 = 504
+#   north-south, west side: 6 | 17'-0" master | 4 | 8'-0" closets | 4 | 13'-6" bonus | 6  = 482 = 40'-2" (the overall)
+#   north-south, east side: 6 | 11'-8" bedroom 2 | 4 | 2'-0" closet | 4 | 11'-4" bedroom 3 | 4 | 12'-4" bedroom 4 | 6
+#     = 472 = 39'-4" (the overall; bedroom 4's window recess, 1'-4" more, is left out: see assumptions)
+#   north-south, the middle: 6 | 5'-0" shower | 4 | 5'-0" | 4 | 5'-0" hallway | 9'-8" stair | 4'-0" bridge | 4 |
+#     8'-8" closet off bedroom 4  -> d 466 = bedroom 4's south face (472 - 6): the chains meet
+#   the open area over the entry: A-2's porch is 4'-0" deep from the entry's front wall to the house front (d 482),
+#     so that wall's outer face is at d 434 (inner 428). Check: A-3 "MINUS OPEN AREA = -101 S.F." = the stair
+#     (40 x 116) + the open area beside it (40 x 116) + this one (80 x 66) = 14,560 sq in = 101.1 sq ft
+# A-2 main floor: north-south, east side: 6 | 13'-4" family | 4 | 5'-8" laundry | 6 | 21'-6" garage | 6 = 508 = 42'-4"
+#   (the overall); garage 20'-0" wide between 6" walls, west wall x 252-258 (south chain 14'-4" | 6'-8" | 21'-0").
+# A-2 basement: 8" concrete walls; south chain 13'-8" | 8 | 6'-8" | 8 | 20'-4" = 504; west side inside faces d 8 and
+#   474 (chain 13'-4" | 11'-10" | 9'-10" | 3'-10" between them, 466 = 482 - 16); east part: 13'-4" + 5'-10" from the
+#   inside north face to the unexcavated area's wall (d 238).
+format: gordium.layout/1
+units: in
+house: house.yaml
+plan: "x east from the house's west outer face, d south from its north outer face (A-2 and A-3 plans, north up)"
+
+levels:
+  - id: second_floor
+    elevation: 0
+    ceiling: 96
+    cite:
+      elevation: "house.yaml's datum: the second floor's finished floor (A-4 'SEC. FLR')"
+      ceiling: "A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\""
+    walls:
+      north: [0, 0, 504, 6]                 # exterior, 6": A-3 '6"' at each end of the north chain
+      west: [0, 6, 6, 482]                  # exterior: A-3 left overall 40'-2"
+      east: [498, 6, 504, 466]              # exterior: A-3 right overall 39'-4" (to d 472, with the south wall)
+      south_bonus: [6, 476, 166, 482]       # exterior: the bonus room's south wall
+      bonus_east: [166, 314, 172, 482]      # 6": A-3 '6"' east of the bonus room's 13'-4"; exterior south of d 428
+      south_open: [172, 428, 252, 434]      # exterior over the entry: A-3 'F.G. SEE ELEVATION'; d from A-2's 4'-0" porch
+      wic4_west: [252, 362, 258, 472]       # 6": A-3 '6"' west of the closet's 3'-4"; exterior south of d 434
+      south: [258, 466, 504, 472]           # exterior: bedroom 4's south wall (its recess left out)
+      master_east: [168, 6, 172, 210]       # 4": A-3 '4"' after the master's 13'-6"
+      master_south: [6, 210, 172, 214]      # 4": A-3 '4"' after the master's 17'-0"
+      wic_divider: [85, 214, 89, 310]       # 4": A-3 6'-7" | 4" | 6'-7"
+      wic_east: [168, 214, 172, 310]        # 4": A-3 '4"' after the second 6'-7"
+      bonus_north: [6, 310, 172, 314]       # 4": A-3 '4"' after the closets' 8'-0"
+      bath_south: [172, 130, 362, 134]      # 4": A-3 5'-0" | 4" | 5'-0" | 4" (the baths' south wall)
+      bath_divider: [290, 6, 294, 130]      # 4": A-3 '4"' after the shower's 3'-4"
+      hall_bath_east: [362, 6, 366, 174]    # 4": A-3 '4"' after the hall bath's 5'-8"; on down past bedroom 2's alcove
+      bed2_south: [410, 146, 498, 150]      # 4": A-3 '4"' after bedroom 2's 11'-8" (the closet's north wall)
+      closet2_west: [410, 150, 414, 174]    # 4": the closet's 7'-0" from the east wall (A-3 '7'-0"')
+      bed3_north: [298, 174, 498, 178]      # 4": A-3 '4"' after the closet's 2'-0"
+      linen_west: [298, 178, 302, 314]      # 4": A-3 3'-10" | 4"
+      bed3_west: [326, 178, 330, 314]       # 4": A-3 2'-0" | 4" | 14'-0"
+      bed3_south: [298, 314, 498, 318]      # 4": A-3 'LOAD BEARING WALL', '4"' after bedroom 3's 11'-4"
+      bed4_west: [298, 318, 302, 466]       # 4": A-3 3'-4" | 4" | 16'-4"
+      wic4_north: [252, 358, 298, 362]      # 4": A-3 bridge 4'-0" | 4" | 8'-8"
+    rooms:
+      - id: master
+        floor: [[6, 6], [168, 6], [168, 210], [6, 210]]           # 13'-6" x 17'-0": house.yaml's 162 x 204
+      - id: bed2
+        floor: [[366, 6], [498, 6], [498, 146], [366, 146]]       # 11'-0" x 11'-8": house.yaml's 132 x 140
+      - id: bed3
+        floor: [[330, 178], [498, 178], [498, 314], [330, 314]]   # 14'-0" x 11'-4": house.yaml's 168 x 136
+      - id: bed4
+        floor: [[302, 318], [498, 318], [498, 466], [302, 466]]   # 16'-4" x 12'-4": house.yaml's 196 x 148
+      - id: bonus
+        floor: [[6, 314], [166, 314], [166, 476], [6, 476]]       # 13'-4" x 13'-6": house.yaml's 160 x 162
+      - id: master_bath
+        name: Master bath
+        sleeping: false
+        floor: [[172, 6], [290, 6], [290, 130], [172, 130]]       # 6'-6" + 3'-4" by 5'-0" + 4" + 5'-0"
+      - id: hall_bath
+        name: Hall bath
+        sleeping: false
+        floor: [[294, 6], [362, 6], [362, 130], [294, 130]]       # 5'-8" by 5'-0" + 4" + 5'-0"
+      - id: bed2_alcove
+        name: Bedroom 2's entry alcove (not dimensioned)
+        sleeping: false
+        floor: [[366, 146], [410, 146], [410, 174], [366, 174]]
+      - id: bed2_closet
+        name: Bedroom 2 closet
+        sleeping: false
+        floor: [[414, 150], [498, 150], [498, 174], [414, 174]]   # 7'-0" x 2'-0"
+      - id: wic_master_1
+        name: Walk-in closet 1
+        sleeping: false
+        floor: [[6, 214], [85, 214], [85, 310], [6, 310]]         # 6'-7" x 8'-0"
+      - id: wic_master_2
+        name: Walk-in closet 2
+        sleeping: false
+        floor: [[89, 214], [168, 214], [168, 310], [89, 310]]     # 6'-7" x 8'-0"
+      - id: linen
+        name: Linen and bedroom 3 closet
+        sleeping: false
+        floor: [[302, 178], [326, 178], [326, 314], [302, 314]]   # 2'-0" wide
+      - id: wic4
+        name: Bedroom 4 walk-in closet
+        sleeping: false
+        floor: [[258, 362], [298, 362], [298, 466], [258, 466]]   # 3'-4" x 8'-8"
+      - id: hall
+        name: Hallway, stair, bridge and open to below
+        sleeping: false
+        floor: [[172, 134], [362, 134], [362, 174], [298, 174], [298, 358], [252, 358], [252, 428], [172, 428]]
+    separations:
+      - [[366, 146], [410, 146]]            # bedroom 2's alcove kept out of the bedroom, as house.yaml keeps it
+    windows:
+      - {id: m1, wall: north, along: 68, size: "3046", cite: "A-3 '(2) 3046 DH', the pair's centre 7'-3\" from the west face (A-3 top chain)"}
+      - {id: m2, wall: north, along: 106, size: "3046", cite: "as m1"}
+      - {id: m3, wall: west, along: 30, size: C15, cite: "A-3 'C15', its centre 2'-6\" from the north face (A-3 left chain)"}
+      - {id: m4, wall: west, along: 186, size: C15, cite: "A-3 'C15', its centre 2'-6\" + 13'-0\" from the north face"}
+      - {id: b2a, wall: north, along: 413, size: "3046", cite: "A-3 '(2) 3046 DH', the pair's centre 7'-3\" + 10'-4\" + 8'-4\" + 10'-1\" = 36'-0\" from the west face"}
+      - {id: b2b, wall: north, along: 451, size: "3046", cite: "as b2a"}
+      - {id: b3a, wall: east, along: 227, size: "3046", cite: "A-3 '(2) 3046 DH' on the east wall, the pair's centre 18'-10\" north of the south face (A-3 right chain): d 472 - 226 = 246, the middle of bedroom 3"}
+      - {id: b3b, wall: east, along: 265, size: "3046", cite: "as b3a"}
+      - {id: b4a, wall: south, along: 359, size: "3052", cite: "A-3 '(2) 3052 DH', centred in the 10'-0\" recess (A-3 south chain 5'-6\" | 10'-0\" | 5'-6\": x 318 to 438, centre 378)"}
+      - {id: b4b, wall: south, along: 397, size: "3052", cite: "as b4a"}
+      - {id: x1, wall: south_bonus, along: 67, size: "3052", cite: "A-3 '(2) 3052 DH' in the bonus room's south wall, drawn centred over the bay below (A-2 chain 3'-2\" | 2'-0\" | 4'-0\" | 2'-0\" | 3'-2\": centre 7'-2\" = 86)"}
+      - {id: x2, wall: south_bonus, along: 105, size: "3052", cite: "as x1"}
+
+  - id: main_floor
+    elevation: -118.5
+    ceiling: 108
+    cite:
+      elevation: "not dimensioned: answer_key.yaml's reading from the framing (stair_riser): the main floor's 9'-0\" ceiling (108, A-4) + 1/2 in gypsum board + the second floor's 2x10 joists (9 1/4) + 3/4 in subfloor = 118.5 in below the second floor"
+      ceiling: "A-4 elevations, 'MAIN FLR' to 'CLG.' 9'-0\""
+    walls:
+      north: [0, 0, 504, 6]                 # exterior: A-2 42'-0"
+      west: [0, 6, 6, 482]                  # exterior: A-2 left overall 40'-2"
+      east: [498, 6, 504, 508]              # exterior: A-2 right overall 42'-4"
+      south_living: [6, 476, 166, 482]      # exterior: the living room's front (its bay left out: see assumptions)
+      porch_west: [166, 428, 172, 482]      # exterior: A-2 '6"' west of the porch's 6'-8"
+      entry_front: [172, 428, 252, 434]     # exterior: the entry's front wall, A-2 porch 4'-0" deep to the house front
+      garage_west: [252, 238, 258, 508]     # A-2 garage 20'-0" between 6" walls (south chain 14'-4" | 6'-8" | 21'-0")
+      garage_north: [258, 238, 498, 244]    # A-2 laundry 5'-8" | 6" | garage 21'-6"
+      garage_south: [258, 502, 498, 508]    # exterior: the garage front
+    rooms:
+      - id: main_floor
+        name: "Main floor: kitchen, dinette, family, dining, living, hall, entry, powder, laundry (partitions not drawn)"
+        sleeping: false
+        floor: [[6, 6], [498, 6], [498, 238], [252, 238], [252, 428], [166, 428], [166, 476], [6, 476]]
+      - id: garage
+        name: Garage
+        sleeping: false
+        floor: [[258, 244], [498, 244], [498, 502], [258, 502]]   # 20'-0" x 21'-6"
+    doors:
+      - {id: front, wall: entry_front, along: 212, width: 36, height: 96, cite: "A-2 entry door '3'-0\"x8'-0\"' between two '12\" TFG' sidelites, centred in the porch's 6'-8\" (x 172 to 252)"}
+
+  - id: basement
+    elevation: -226.5
+    ceiling: 96
+    slab: 4                                 # the lowest level's slab; every other level's is the gap under it (below)
+    cite:
+      slab: "A-2 basement plan '4\" CONC. SLAB (3500 PSI) ON 6 MIL VAPOR BARRIER'"
+      elevation: "not dimensioned: answer_key.yaml's reading (stair_riser): 'SLAB' to 'CLG.' 8'-0\" (96, A-4) + the A-5 section's 2x12 joists (11 1/4) + 3/4 in subfloor = 108 in below the main floor (the A-2 basement plan's 2x10 would make it 106: the drawings disagree, README #12)"
+      ceiling: "A-4 'SLAB' to 'CLG.' 8'-0\""
+    walls:
+      north: [0, 0, 504, 8]                 # 8" poured concrete (A-2 wall legend, basement plan)
+      west: [0, 8, 8, 482]
+      east: [496, 8, 504, 246]
+      south: [8, 474, 164, 482]
+      unexcavated_north: [252, 238, 496, 246]   # A-2 13'-4" + 5'-10" from the inside north face
+      unexcavated_west: [252, 246, 260, 482]    # A-2 south chain 13'-8" | 8" | 6'-8" | 8"
+      small_unexcavated_north: [172, 430, 252, 438]   # A-2 'UNEXCAVATED' 6'-8" x 3'-0" (to the inside south face, d 474)
+      small_unexcavated_west: [164, 430, 172, 482]    # A-2 south chain 13'-8" | 8"
+    rooms:
+      - id: basement
+        floor: [[8, 8], [496, 8], [496, 238], [252, 238], [252, 430], [164, 430], [164, 474], [8, 474]]
+    windows:
+      - {id: bsw1, wall: north, along: 93, size: CW14, cite: "A-2 basement plan 'CW14' in its areaway, its centre 7'-9\" from the west face (A-2 top chain)"}
+      - {id: bsw2, wall: west, along: 238, size: CW14, cite: "A-2 basement plan 'CW14' in its areaway, its centre 19'-10\" from the north face (A-2 left chain)"}
+
+# Window sizes the drawer needs (each window family cuts its wall). Every escape window here has no clear opening in
+# house.yaml (no frame, no maker's figure), so none of these sizes is measured: the reader sends no clear opening and
+# every clear-opening measure comes back not measured, as expected.yaml has it.
+sizes:
+  "3046": {width: 36, height: 54, cite: "the size code read by common naming, 3'-0\" x 4'-6\" (README; house.yaml 'the unit's size code')"}
+  "3052": {width: 36, height: 62, cite: "3'-0\" x 5'-2\" by the same naming"}
+  C15: {width: 24, height: 54, assumed: true, cite: "not on the drawings: 'C15' has no dimensions (house.yaml m3); drawn 2'-0\" wide and as tall as the 3046s beside it"}
+  CW14: {width: 24, height: 48, assumed: true, cite: "not on the drawings: 'CW14' has no dimensions (house.yaml bsw1); drawn 2'-0\" x 4'-0\""}
+head: 81                                    # every window's top 6'-9" over its floor: A-1 'ALL HEADER HEIGHTS TO BE 6'-9" ABOVE THE FINISHED FLOOR, UNLESS NOTED OTHERWISE'
+pair_gap: 2                                 # a mulled pair drawn 2 in apart (each unit its own family, never overlapping)
+
+# Placed, not drawn: what a host draws from these would be read and measured, and the drawings don't give it (house.yaml
+# `stairs: not given`; its guards have no members), so drawing them would invent risers, treads and baluster spacing
+# that decide verdicts (answer_key.yaml: the basement stair's risers, both stairs' headroom).
+not_drawn:
+  stairs:
+    - id: main_stair
+      level: main_floor
+      plan: [212, 170, 252, 310]            # A-2 'UP 16R' at d 170 (the kitchen wall's line), 3'-4" wide (x 212-252); A-3 the stairwell 9'-8" (d 194-310) to the bridge
+      cite: "A-2 'UP 16R', A-3 'DN 15R', 3'-4\" wide: no floor-to-floor, riser height or tread depth given"
+    - id: basement_stair
+      level: basement
+      plan: [216, 230, 252, 350]            # under the main stair, 3'-0" wide (A-2 basement plan), its run 10'-0" (answer_key.yaml)
+      cite: "A-2 'DN 13R' / 'UP 14R', 3'-0\" wide, run '10'-0\"': place approximate (its north end not dimensioned)"
+  guards:
+    - {id: g_hall, level: second_floor, line: [[172, 194], [252, 194]], cite: "A-3 '36\" HIGH RAILING' across the stairwell's north end (house.yaml extent 80)"}
+    - {id: g_bridge_n, level: second_floor, line: [[172, 310], [212, 310]], cite: "A-3, north side of the bridge (extent 40)"}
+    - {id: g_bridge_s, level: second_floor, line: [[172, 358], [252, 358]], cite: "A-3, south side of the bridge (extent 80)"}
+    - {id: g_east, level: second_floor, line: [[252, 194], [252, 310]], cite: "A-3 '36\" HIGH RAILING AS PER CODE' along the stairwell's 9'-8\" (extent 116)"}
+    - {id: g_stair_w, level: second_floor, line: [[212, 194], [212, 310]], cite: "A-3, the stair's west side over the open area"}
+
+assumptions:
+  - what: "Floor-to-floor heights (main floor 118.5 in, basement 108 in below the main floor)"
+    why: "not dimensioned (A-4 gives floor-to-ceiling heights only); answer_key.yaml's framing reading"
+    effect: "none: no stair is drawn, and no measure in scope compares levels"
+  - what: "Each floor slab drawn as thick as the gap the layout leaves under it: the second floor's 10.5 in (2x10 joists, subfloor and board), the main floor's 12 in (2x12 joists and subfloor, A-5); the basement's 4 in concrete (A-2)"
+    why: "a slab thicker than the gap would cut into the cited ceiling below it (A-4's 9'-0\" main floor)"
+    effect: "none: every ceiling is drawn where A-4 puts it, and no slab reaches below one"
+  - what: "Each window pair drawn 2 in apart (`pair_gap`), centred on the pair's dimensioned centre"
+    why: "the plans show mulled pairs with one centre dimension; each unit is its own family, so they are kept from overlapping"
+    effect: "none: no window has a clear opening to measure"
+  - what: "Bedroom 4's 10'-0\" x 1'-4\" window recess left out; its windows drawn in the straight south wall at d 466-472"
+    why: "house.yaml leaves the recess out (no inside dimension: its 10'-0\" and 1'-4\" are outside dimensions), and its windows must open from bedroom 4"
+    effect: "none: the area stays house.yaml's (understated, never overstated); the windows have no clear opening to measure"
+  - what: "Bedroom 2's entry alcove (x 366-410, d 146-174) drawn as a room of its own, a room separation line between it and the bedroom"
+    why: "house.yaml leaves it out (not dimensioned); its size here is what the dimensioned walls around it leave"
+    effect: "none: bedroom 2's area stays house.yaml's 128.3 sq ft (understated, never overstated)"
+  - what: "Bedroom 2's closet against the east wall"
+    why: "drawn there on A-3; only its 7'-0\" width is dimensioned"
+    effect: "none: it bounds the alcove only"
+  - what: "C15 and CW14 sizes, and every window's top at 6'-9\""
+    why: "the codes have no dimensions on the drawings; A-1's general header note"
+    effect: "none: no window has a clear opening, so no window size is measured"
+  - what: "The bonus room's windows centred in its south wall"
+    why: "A-3 gives the pair no centre dimension; drawn centred over the bay below"
+    effect: "none"
+  - what: "Second floor: the bridge (7 1/2 in lower), the stairwell and the open areas are drawn on the floor's level, one room with the hallway; the floor slab is drawn whole"
+    why: "a level per walking surface would split the hall; nothing on them is measured (stairs and guards aren't drawn)"
+    effect: "none"
+  - what: "Main floor: its interior partitions, the living room's bay and the family room's fireplace bump-out aren't drawn; the garage is drawn on the main floor's level"
+    why: "no main-floor room is in house.yaml and nothing on the main floor but the front door is measured; every extra enclosed area is a chance of one without a Room, which stops every room being read. The garage slab's height disagrees between sheets (README question 10)"
+    effect: "none on any measure; the front door is in its own wall, as drawn"
+  - what: "Interior doors, the rear sliders, the garage doors and every window not in house.yaml aren't drawn"
+    why: "house.yaml describes only the front door and the marked escape windows; a drawn door is read as a door of the house"
+    effect: "none: expected.yaml has only the front door"
+  - what: "The basement as one room in its foundation walls; the unexcavated areas outside it; the basement stair's walls and the mechanical area not drawn"
+    why: "the basement isn't a sleeping room; its escape windows aren't checked (expected.yaml not_checked)"
+    effect: "none"

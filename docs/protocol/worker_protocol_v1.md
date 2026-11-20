@@ -319,6 +319,9 @@ The same rule as the site description ([site_description_v1.md](site_description
 
 - **Minor** (`1.1`): new commands, new answer fields, new optional request fields whose absence means exactly the
   old behaviour.
+  A new optional site field is minor too, even when it can change a verdict, provided every older worker refuses
+  it as unknown (site_json's strict field check) and never drops it, and its absence means exactly the old
+  behaviour (1.3's `left_out[].slab`).
 - **Major** (`2.0`): anything else: a rename, a removal, a change of meaning or units, a new required field.
 - Each side refuses a different major version.
 

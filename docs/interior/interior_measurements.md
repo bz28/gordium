@@ -122,6 +122,8 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `not_a_list` | `{key}` in the description isn't a list |
 | `not_a_mapping` | {what} #{n} isn't a mapping |
 | `flag_missing` | {what} {name}: say whether it is {question} (`{key}`: true or false) |
+| `unknown_spaces_entry` | `unknown_spaces` #{n} isn't a space with an id (a mapping with a text `id`): the rooms aren't read |
+| `unknown_space` | an enclosed space with no room drawn in it: its use isn't known, so it may be a sleeping room (draw a room in it and say whether it is a sleeping room) |
 | `has_none_not_a_list` | `has_none` in the description isn't a list (each entry a `kind` and its `source`): what the house has none of isn't read |
 | `has_none_entry` | `has_none` entry #{n} isn't a `kind` (with its `source`): it isn't read |
 | `has_none_listed` | `has_none` names {kind!r}, which the description lists itself: say there are none with an empty list (`{key}: []`), not in `has_none` |
@@ -133,6 +135,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `has_none_keys` | the description says the house has no {words}, with keys it doesn't know ({keys}; an entry has `kind`, `source` and, optionally, `reading`): it isn't taken, so their rules need review |
 | `has_none_below_ground` | the description says the house has no basements, yet {what}: which is right is unclear, so their rules need review |
 | `has_none_room_within` | the description says the house has no sleeping lofts, yet {what}: which is right is unclear, so their rules need review |
+| `has_none_unknown_space` | the description says the house has no {words}, yet it gives {count} enclosed space(s) whose use isn't known (`unknown_spaces`), any of which could be one: it isn't taken, so their rules need review |
 | `has_none_contradicted` | the description says the house has no {words}, yet it also gives `{key}`, which isn't an empty list: which is right is unclear, so their rules need review |
 | `missing` | {what} isn't given |
 | `not_a_length` | {what} isn't a length (a number) |

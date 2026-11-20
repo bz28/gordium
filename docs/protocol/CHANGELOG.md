@@ -16,10 +16,10 @@ by `packages/design_checker/tests/test_protocol.py` ([worker_protocol_v1.md](wor
   `parking`) and give its `name`, both optional
   ([site_description_v1.md](site_description_v1.md#how-the-worker-uses-it)): an unmarked one makes lot coverage and
   every required yard need review, naming it; a patio, terrace or walk is not in lot coverage but makes the yards
-  need review; a parking area or driveway changes nothing (§325-3B BUILDING AREA, §325-18A). Treated as a minor
-  version though the field can change a verdict ([versions](site_description_v1.md#versions)): absent, every
-  answer is exactly as before, and a 1.2 worker refuses a description that has it (an unknown field), never drops
-  it, so no tool can get a pass from a worker that didn't read it. `check_site` refuses extras naming
+  need review; a parking area or driveway changes nothing (§325-3B BUILDING AREA, §325-18A). A minor version
+  under the amended rule ([versions](site_description_v1.md#versions)): absent, every answer is exactly as
+  before, and a 1.2 worker refuses a description that has it (an unknown field), never drops it, so no tool can
+  get a pass from a worker that didn't read it. `check_site` refuses extras naming
   `site_slabs` (the description's own, handed to the view)
   (command table sha256 `7f569908834b515e8022b28f54ec5ffca3314a67afe67fd5afaf286a535537b9`).
 - **2026-11-19 · protocol 1.2 · site description `gordium.site/1`** (unchanged): `check_site` takes an optional

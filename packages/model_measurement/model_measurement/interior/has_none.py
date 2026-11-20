@@ -14,6 +14,7 @@ import math
 
 from shapely.errors import GEOSException
 from shapely.geometry import Polygon
+from shapely.ops import unary_union
 
 from model_measurement.interior.stops import Stop
 
@@ -43,6 +44,8 @@ KINDS = {
 # the kinds the description already lists: an empty list says there are none
 LISTED = {"sleeping_room": "rooms", "emergency_escape_opening": "openings", "stair": "stairs",
           "egress_door": "doors", "guard": "guards"}
+# the kinds that are spaces: an enclosed space whose use isn't known (`unknown_spaces`) could be one of them
+SPACES = ("basement", "habitable_attic", "sleeping_loft")
 SAID = "the description says the house has no {words}"
 ENTRY_KEYS = {"kind", "source", "reading"}
 
@@ -118,15 +121,42 @@ def _top(room: dict, floor: float):
     pieces = room.get("ceilings")
     if not isinstance(pieces, list) or not pieces:
         return None
-    zs = []
+    read = []
     for piece in pieces:
         if not isinstance(piece, list) or not piece:
             return None
+        pts = []
         for p in piece:
             if not isinstance(p, (list, tuple)) or len(p) != 3 or None in (xyz := [_value(v) for v in p]):
                 return None
-            zs.append(xyz[2])
-    return max(zs)
+            pts.append(xyz)
+        read.append(pts)
+    # the room's ceiling is the lowest piece over each place: a piece wholly over lower ones isn't its ceiling anywhere
+    # (a host's reader sends every underside over the room, the floor above's rooms' ceilings over its own: Orangetown
+    # read from Revit, whose main floor's own ceiling is under the second floor's). Only such a piece is left out; a
+    # piece that can't be drawn in plan always counts (the highest point of what is left counts, as before)
+    shapes = []
+    for pts in read:
+        try:
+            plan = Polygon([(x, y) for x, y, _ in pts]) if len(pts) >= 3 else None
+            plan = plan if plan is not None and plan.is_valid and plan.area > 0 else None
+        except (GEOSException, ValueError):
+            plan = None
+        shapes.append((plan, min(z for *_, z in pts), max(z for *_, z in pts)))
+    tops = []
+    for i, (plan, low, high) in enumerate(shapes):
+        # strictly lower only: a piece at the same height hides nothing (and many coincident pieces unioned together
+        # lost coverage in GEOS, Orangetown's Revit recording: a hidden piece read as uncovered)
+        under = [q for j, (q, _, qh) in enumerate(shapes) if j != i and q is not None and qh < low]
+        hidden = False
+        if plan is not None and under:
+            try:
+                hidden = plan.difference(unary_union(under)).area <= plan.area * 1e-9
+            except GEOSException:
+                hidden = False
+        if not hidden:
+            tops.append(high)
+    return max(tops)
 
 
 def _plan(room: dict):
@@ -222,6 +252,12 @@ def read(description: dict) -> tuple[dict, list[str]]:
         listed = KINDS[kind]["list"]
         if listed is not None and listed in description and description[listed] != []:
             problems.append(Stop("has_none_contradicted", words=KINDS[kind]["words"], key=listed).reason)
+            continue
+        spaces = description.get("unknown_spaces")
+        if kind in SPACES and spaces is not None and spaces != []:
+            # a space whose use isn't known may be the basement, attic or loft said to be none
+            problems.append(Stop("has_none_unknown_space", words=KINDS[kind]["words"],
+                                 count=len(spaces) if isinstance(spaces, list) else "some").reason)
             continue
         if kind == "basement" and (below := below_ground(description)):
             problems.append(Stop("has_none_below_ground", what=below).reason)

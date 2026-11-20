@@ -13,6 +13,8 @@ import pytest
 
 from model_measurement.interior import recordings as r
 
+ORANGETOWN = "orangetown_ny_80_south_william"
+
 
 def described(name: str) -> dict:
     """The house as a host's reader would send it from the drawing: rooms (floor, elevation, ceiling pieces) and every
@@ -43,6 +45,11 @@ def described(name: str) -> dict:
                              for x in d["doors"]]
     if d["guards"]:
         interior["guards"] = [guard(g) for g in d["guards"]]
+    for key in d["has_none"]:                 # the architect's "this house has none of" ticks (step 6)
+        if key in r.NONE_LISTS:
+            interior[key] = []
+        else:
+            interior.setdefault("has_none", []).append({"kind": key, "source": "ticked by the architect (test)"})
     return {"host": "test", "house": name, "step": d["step"], "ids": ids,
             "recorded": {"by": "test_interior_recordings", "date": "2026-11-20", "tool": "python"},
             "interior": interior}
@@ -106,15 +113,41 @@ def test_the_steps_scope_is_the_design_notes():
               "stair_tread_variation", "stair_headroom", "stair_clear_width"}      # never the width at the handrail
     doors = {"door_clear_width", "door_clear_height", "door_side_hinged"}
     handrails = {"stair_clear_width_at_handrail", "stair_handrail_sides"}
-    assert r.STEP == 5
-    assert r.HOUSE_STEP == {"1_ranch_compliant": 5, "2_two_story_small_window": 5, "3_tall_riser": 4, "4_loft": 5,
-                            "5_basement_window_well": 5, "6_door_stated_clear": 5}
-    assert r.scope("1_ranch_compliant") == r.scope("6_door_stated_clear") == rooms | {"egress_door": doors}
-    assert r.scope("2_two_story_small_window") == rooms | {"stair": stairs | handrails, "egress_door": doors}
+    assert r.STEP == 6
+    assert r.HOUSE_STEP == {"1_ranch_compliant": 6, "2_two_story_small_window": 6, "3_tall_riser": 4, "4_loft": 6,
+                            "5_basement_window_well": 6, "6_door_stated_clear": 6, ORANGETOWN: 6}
+    # step 6: each list the house gives empty is in scope, read as that empty list (no measures)
+    assert r.scope("1_ranch_compliant") == r.scope("6_door_stated_clear") == rooms | {"egress_door": doors, "stair": set(),
+                                                                                       "guard": set()}
+    assert r.scope("2_two_story_small_window") == rooms | {"stair": stairs | handrails, "egress_door": doors, "guard": set()}
+    # the real house: its rooms, marked escape windows and front door; its stairs and guards not drawn, so not read;
+    # and what its seven has_none claims bring: each claimed part kind an empty list, two measures on every opening
+    claims = ["alternating_tread_device", "deck_porch_or_cantilever_over_escape_opening", "habitable_attic",
+              "patio_cover", "ramp", "ships_ladder", "sleeping_loft"]
+    assert sorted(c["kind"] for c in r._house(ORANGETOWN)["has_none"]) == claims
+    assert r.scope(ORANGETOWN) == {
+        "sleeping_room": rooms["sleeping_room"],
+        "emergency_escape_opening": rooms["emergency_escape_opening"] | {"opening_into_patio_cover",
+                                                                         "opening_under_projection"},
+        "egress_door": doors, "sleeping_loft": set(), "loft_room": set(), "habitable_attic": set(), "ramp": set(),
+        "alternating_tread_device": set(), "ships_ladder": set()}
+    assert sorted(r.drawing(ORANGETOWN)["has_none"]) == claims       # its own claims ticked; no list is empty
     assert r.scope("3_tall_riser") == rooms | {"stair": set()}                   # read, nothing measured (step 4)
-    assert r.scope("4_loft") == rooms | {"stair": stairs | handrails, "guard": {"guard_height", "guard_opening_sphere"}}
+    assert r.scope("4_loft") == rooms | {"stair": stairs | handrails, "guard": {"guard_height", "guard_opening_sphere"},
+                                         "egress_door": set()}
     # a sliding door: no clear width worked by hand, so no maker's clear opening made up: its height not in scope
-    assert r.scope("5_basement_window_well") == rooms | {"egress_door": {"door_side_hinged"}}
+    assert r.scope("5_basement_window_well") == rooms | {"egress_door": {"door_side_hinged"}, "guard": set()}
+    # every empty list in scope is ticked, and nothing else (no hand-worked house has a has_none claim)
+    for name in r.STEP_HOUSES:
+        if name == ORANGETOWN:
+            continue
+        house = r._house(name)
+        assert r.drawing(name)["has_none"] == [k for k, kind in r.NONE_LISTS.items()
+                                               if house.get(k) == [] and kind in r.scope(name)]
+        assert not house.get("has_none")
+    assert r.drawing("1_ranch_compliant")["has_none"] == ["stairs", "guards"]
+    assert r.drawing("4_loft")["has_none"] == ["doors"]
+    assert r.drawing("3_tall_riser")["has_none"] == []
 
 
 def test_house_2s_stair_drawn_and_read_measures_as_worked_by_hand():
@@ -158,7 +191,7 @@ def test_doors_drawn_and_read_measure_as_worked_by_hand():
     rec = described("5_basement_window_well")
     assert r.recording_problems(rec) == []
     rec["interior"]["doors"][0]["stated_clear"] = {"width": 3.0, "height": 80 / 12, "source": "made up"}
-    assert any("de door_clear_height = 80.0: not in step 5" in p for p in r.recording_problems(rec))
+    assert any("de door_clear_height = 80.0: not in step 6" in p for p in r.recording_problems(rec))
 
 
 def test_house_4s_loft_guard_and_stair_drawn_and_read_measure_as_worked_by_hand():
@@ -226,7 +259,7 @@ def test_a_measure_out_of_scope_given_a_value_fails():
     rec = described("1_ranch_compliant")
     for o in rec["interior"]["openings"]:
         o["ground_outside"] = -8 / 12                                # a ground nobody drew: grade-floor is in no step yet
-    assert any("w1 opening_at_grade = True: not in step 5" in p for p in r.recording_problems(rec))
+    assert any("w1 opening_at_grade = True: not in step 6" in p for p in r.recording_problems(rec))
     rec = described("5_basement_window_well")
     we1 = next(o for o in rec["interior"]["openings"] if o["id"] == "host-we1")
     we1.update(ground_outside=0, area_well={"floor_elevation": -66 / 12, "width": 40 / 12, "projection": 3})
@@ -234,15 +267,37 @@ def test_a_measure_out_of_scope_given_a_value_fails():
 
 
 def test_a_kind_of_a_later_step_must_not_be_read():
-    rec = described("1_ranch_compliant")
+    rec = described("5_basement_window_well")
     rec["interior"]["stairs"] = []                                   # "none" said by a reader that can't know it
-    assert any("stair read (0 parts): not in step 5" in p for p in r.recording_problems(rec))
-    rec = described("2_two_story_small_window")
-    rec["interior"]["guards"] = []                                   # no guard found is never "none" either
-    assert any("guard read (0 parts): not in step 5" in p for p in r.recording_problems(rec))
+    assert any("stair read (0 parts): not in step 6" in p for p in r.recording_problems(rec))
     rec = described("3_tall_riser")
     rec["interior"]["doors"] = []
     assert any("egress_door read (0 parts): not in step 4" in p for p in r.recording_problems(rec))
+
+
+def test_an_empty_list_the_house_gives_must_come_back_empty():
+    # step 6: the tick "this house has no ..." read back as the empty list, never left out, never a part
+    for name, key, kind in (("1_ranch_compliant", "stairs", "stair"), ("2_two_story_small_window", "guards", "guard"),
+                            ("4_loft", "doors", "egress_door"), ("5_basement_window_well", "guards", "guard")):
+        rec = described(name)
+        assert rec["interior"][key] == [] and r.recording_problems(rec) == []
+        del rec["interior"][key]                                    # the tick not read
+        assert any(f"{kind} not read" in p for p in r.recording_problems(rec)), name
+
+
+def test_what_the_house_has_none_of_must_be_the_houses_own():
+    rec = described("1_ranch_compliant")                             # a claim no hand-worked house makes
+    rec["interior"]["has_none"] = [{"kind": "deck_porch_or_cantilever_over_escape_opening", "source": "ticked (test)"}]
+    problems = r.recording_problems(rec)
+    assert any("has none of ['deck_porch_or_cantilever_over_escape_opening']" in p and "expected []" in p for p in problems)
+    rec = described("1_ranch_compliant")                             # a claim of a part kind out of scope, too
+    rec["interior"]["has_none"] = [{"kind": "ramp", "source": "ticked (test)"}]
+    problems = r.recording_problems(rec)
+    assert any("ramp read (0 parts): not in step 6" in p for p in problems)
+    assert any("has none of ['ramp']" in p for p in problems)
+    rec = described("1_ranch_compliant")                             # sent but not taken (no source) is not the house's either
+    rec["interior"]["has_none"] = [{"kind": "ramp"}]
+    assert any("has none of ['ramp'] (taken: [])" in p for p in r.recording_problems(rec))
 
 
 def test_a_kind_in_scope_not_read_fails_and_says_why():
@@ -268,9 +323,9 @@ def test_a_part_missing_extra_or_in_the_wrong_room_fails():
 def test_the_recording_must_say_what_it_is():
     rec = described("1_ranch_compliant")
     assert r.recording_problems({**rec, "house": "7_nowhere"})[0].startswith("test/7_nowhere: not a house of any step")
-    assert any("recorded for step 3, not step 5" in p for p in r.recording_problems({**rec, "step": 3}))
-    two = described("2_two_story_small_window")                     # a step-4 recording of a house now in step 5
-    assert any("recorded for step 4, not step 5" in p for p in r.recording_problems({**two, "step": 4}))
+    assert any("recorded for step 3, not step 6" in p for p in r.recording_problems({**rec, "step": 3}))
+    two = described("2_two_story_small_window")                     # a step-5 recording of a house now in step 6
+    assert any("recorded for step 5, not step 6" in p for p in r.recording_problems({**two, "step": 5}))
     assert any("says how it was recorded" in p for p in r.recording_problems({**rec, "recorded": {"by": "x"}}))
     assert any("no id map" in p for p in r.recording_problems({**rec, "ids": None}))
     twice = copy.deepcopy(rec)
@@ -281,8 +336,11 @@ def test_the_recording_must_say_what_it_is():
 def test_a_host_with_any_recording_has_every_house_of_the_step():
     assert r.coverage_problems({"revit": {"1_ranch_compliant": {}}}) == [
         "revit: no recording for 2_two_story_small_window, 3_tall_riser, 4_loft, 5_basement_window_well, "
-        "6_door_stated_clear"]
+        "6_door_stated_clear, orangetown_ny_80_south_william"]
     assert r.coverage_problems({"revit": {h: {} for h in r.STEP_HOUSES}}) == []
+    # the real house too: its recording is required, not just checked when present
+    assert r.coverage_problems({"revit": {h: {} for h in r.STEP_HOUSES if h != ORANGETOWN}}) == [
+        f"revit: no recording for {ORANGETOWN}"]
 
 
 def test_every_committed_recording_passes():
@@ -303,7 +361,7 @@ def test_the_drawing_is_the_houses_own_data():
     w1 = next(w for w in d["windows"] if w["id"] == "w1")
     assert (w1["width"], w1["height"], w1["sill"]) == (26 / 12, 3.0, 2.5)                    # its frame, from house.yaml
     assert w1["clear"]["width"] * 12 == pytest.approx(24.5) and w1["clear"]["offset"] == 0   # the measuring code's
-    assert d["not_drawn"] == [] and d["step"] == 5 and d["stairs"] == [] and d["guards"] == []
+    assert d["not_drawn"] == [] and d["step"] == 6 and d["stairs"] == [] and d["guards"] == []
     assert [x["id"] for x in d["doors"]] == ["d1", "d2"] and {x["room"] for x in d["doors"]} == {"living"}
     assert d["doors"][1]["clear"] is None                            # the back door: not drawn, so nothing worked out
     assert level["wall_height"] == pytest.approx(8 + 1 / 12)                                # up to the ceilings' top
@@ -327,3 +385,23 @@ def test_the_command_line_prints_each_house_and_a_recordings_problems(tmp_path):
     out = subprocess.run([sys.executable, "-m", "model_measurement.interior.recordings", "check", str(bad)],
                          capture_output=True, text=True, encoding="utf-8", check=True).stdout
     assert json.loads(out)[0].startswith("not JSON")
+
+
+def test_the_real_houses_claims_must_come_back_and_bring_only_their_own_measures():
+    rec = described(ORANGETOWN)
+    assert len(rec["interior"]["has_none"]) == 7 and r.recording_problems(rec) == []
+    # a claim the reader didn't send (blocked): its kind isn't taken, so its part kinds aren't read and the openings
+    # lose the measure it brings
+    rec["interior"]["has_none"] = [c for c in rec["interior"]["has_none"] if c["kind"] != "patio_cover"]
+    problems = r.recording_problems(rec)
+    assert any("has none of" in p and "patio_cover" in p for p in problems)
+    assert any("m1 opening_into_patio_cover not measured" in p for p in problems)
+    # a claim the house doesn't make (the drawings show a basement): refused
+    rec = described(ORANGETOWN)
+    rec["interior"]["has_none"].append({"kind": "basement", "source": "ticked (test)"})
+    assert any("has none of" in p and "basement" in p for p in r.recording_problems(rec))
+    # step 5's scope (no claims) would refuse the empty lists the claims bring: the claims are what put them in scope
+    assert r.claimed({"emergency_escape_opening": set()}, ["ramp"]) == {"emergency_escape_opening": set(), "ramp": set()}
+    assert r.claimed({"emergency_escape_opening": set(), "stair": set()}, ["sleeping_loft"]) == {
+        "emergency_escape_opening": set(), "stair": {"stair_serves_sleeping_loft"}, "sleeping_loft": set(),
+        "loft_room": set()}

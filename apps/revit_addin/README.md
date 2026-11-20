@@ -46,7 +46,7 @@ foreach (var group in result.Groups)                      // the panel's heading
 2. **Sends one request per line,** UTF-8 without a byte-order mark (the worker refuses one) and in fact plain
    ASCII (any other character is written as a JSON `\u` escape, so no code page can change it), each with the next id,
    `"protocol": "1.3"` (a 1.0, 1.1 or 1.2 worker answers it too, all but what it doesn't have: `objects.left_out` is
-   1.1's; `check_site`'s `interior`, the house's inside, is 1.2's, and the client sends one only to a worker whose
+   1.1's; a site description with a slab (`left_out[].slab`, 1.3's) a 1.2 or older worker refuses, never checks; `check_site`'s `interior`, the house's inside, is 1.2's, and the client sends one only to a worker whose
    `hello` said 1.2 or later, refusing with `WorkerVersionException` before sending anything otherwise: an older
    worker would ignore it and say egress waits, as if no rooms were drawn), and only the fields the caller gave (an
    optional field left null is not sent).
@@ -261,7 +261,10 @@ nothing. What it sends, and what it leaves out:
   Never a frame or sash, a ground outside (no Toposolid is read yet) or an area well. Doors get no clear opening (the
   doors step). With no window or door found, `openings` is left out, never `[]`; a window or door in a linked model
   leaves it out too.
-- **`stairs`, `doors`, `guards`, `has_none`**: left out (not read): later steps.
+- **`stairs`, `doors`, `guards`, `has_none`**: left out (not read): later steps. Step 6 (`HasNone.cs`): an empty
+  `stairs`, `doors` or `guards` and each `has_none` claim only on the architect's "This house has no ..." tick on
+  Project Information, with nothing of the kind drawn and nothing that could hide one; a tick against what is drawn is
+  never sent and is listed first in the marking list.
 
 Every value left out has its reason in `InteriorReadResult.Notes`; for each escape window, `Evidence` records the
 sill line, the wall opening's bottom and the window's placed extents the check used.

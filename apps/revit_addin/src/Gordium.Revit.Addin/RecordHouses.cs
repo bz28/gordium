@@ -130,10 +130,13 @@ public sealed class RecordHousesCommand : IExternalCommand
             log["problems"] = problems.Select(p => p!.GetValue<string>()).ToList();
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["rooms_not_read"] = read.RoomsNotRead;
+            log["unknown_spaces"] = read.UnknownSpaces;
+            log["level_conflicts"] = read.LevelConflicts;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["stairs_not_read"] = read.StairsNotRead;
             log["doors_not_read"] = read.DoorsNotRead;
             log["guards_not_read"] = read.GuardsNotRead;
+            log["has_none"] = read.Ticks.Where(t => t.Ticked is not null).Select(t => t.Sent ? $"{t.Kind.Kind}: sent" : $"{t.Kind.Kind}: " + string.Join("; ", t.WhyNot)).ToList();
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
             log["railings"] = (model.Interior!.Railings ?? []).SelectMany(r => r.Diagnostics).ToList();
@@ -220,22 +223,35 @@ public sealed class ReadInteriorCommand : IExternalCommand
             var read = InteriorReader.Read(model);
             log["read_s"] = sw.Elapsed.TotalSeconds;
             log["rooms_not_read"] = read.RoomsNotRead;
+            log["unknown_spaces"] = read.UnknownSpaces;
+            log["level_conflicts"] = read.LevelConflicts;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["stairs_not_read"] = read.StairsNotRead;
             log["doors_not_read"] = read.DoorsNotRead;
             log["guards_not_read"] = read.GuardsNotRead;
+            log["has_none"] = read.Ticks.Select(t => t.Sent ? $"{t.Kind.Kind}: sent" : $"{t.Kind.Kind}: " + string.Join("; ", t.WhyNot)).ToList();
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
+            // every element that could be a stair, by id (the dialog and the marking list count them by type)
+            log["stair_candidates"] = model.Interior.StairCandidates.Select(c =>
+                $"{c.UniqueId} {c.BuiltInCategory.Replace("OST_", "")} \"{c.Name}\": {c.Kind}" +
+                (c.NestedIn is { Count: > 0 } up ? " nested in " + string.Join(" in ", up.Select(h => $"{h.BuiltInCategory.Replace("OST_", "")} {h.UniqueId}")) : "") +
+                (StairReader.InsideWindowOrDoor(c) ? " (inside its window or door: not a stair)" : "")).ToList();
             log["interior"] = read.Interior.ToJsonString();
             Trial.Log("read_interior", log);
-            var rooms = read.Interior["rooms"] is JsonArray r ? $"{r.Count} rooms read" : "Rooms not read: " + string.Join("; ", read.RoomsNotRead.Take(5));
+            var rooms = (read.Interior["rooms"] is JsonArray r ? $"{r.Count} rooms read" : "Rooms not read: " + string.Join("; ", read.RoomsNotRead.Take(5))) +
+                        (read.UnknownSpaces.Count > 0 ? $"; {read.UnknownSpaces.Count} enclosed areas with no Room sent as spaces whose use isn't known " +
+                                                        "(every sleeping-room rule needs review)" : "") +
+                        (read.LevelConflicts.Count > 0 ? "\nConflict: " + string.Join("\nConflict: ", read.LevelConflicts) : "");
             var openings = read.Interior["openings"] is JsonArray o ? $"{o.Count} windows and doors read" : "Openings not read: " + string.Join("; ", read.OpeningsNotRead.Take(5));
             var stairs = read.Interior["stairs"] is JsonArray s ? $"{s.Count} stair flights read" : "Stairs not read: " + string.Join("; ", read.StairsNotRead.Take(5));
             var doors = read.Interior["doors"] is JsonArray d ? $"{d.Count} doors read" : "Doors not read: " + string.Join("; ", read.DoorsNotRead.Take(5));
             var guards = read.Interior["guards"] is JsonArray g ? $"{g.Count} guards read" : "Guards not read: " + string.Join("; ", read.GuardsNotRead.Take(5));
+            var none = read.Ticks.Where(t => t.Sent).Select(t => t.Kind.Words).ToList() is { Count: > 0 } sent
+                ? "Read as none (ticked): " + string.Join(", ", sent) : "Nothing read as none";
             var notes = string.Join("\n", read.Notes.Take(20).Select(n => $"- {n.Field}: {n.Why}"));
-            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n\n{read.Notes.Count} values left out" +
+            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n{none}\n\n{read.Notes.Count} values left out" +
                     (notes.Length > 0 ? ":\n" + notes : ""), read);
         }
         catch (Exception e)

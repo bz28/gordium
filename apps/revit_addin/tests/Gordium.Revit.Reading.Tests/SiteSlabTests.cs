@@ -208,4 +208,33 @@ public sealed class SiteSlabTests(RealWorker worker) : IClassFixture<RealWorker>
         Assert.Contains(list.Summary, s => s.Contains("under the house's walls or roof") && s.Contains("in_house"));
         Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
     }
+
+    /// <summary>Review round 1: a floor the check drops (wholly off the lot, or only touching its line from outside, as
+    /// objects.left_out decides: ON_LOT_REACH) is never asked for, only named off the lot; one a hair over the line
+    /// (more than 0.1 ft in) is.</summary>
+    [Fact]
+    public async Task The_marking_list_asks_only_for_slabs_the_check_reads()
+    {
+        var m = House(Floor("neighbour", 70, 90, 80, 100), Floor("touching", 60, 90, 66, 100),
+                      Floor("over", 59.7, 90, 66, 100));
+        var list = MarkingList.Build(m);
+        Assert.Equal(["over"], list.Rows.Where(r => r.Kind == MarkedKind.SiteSlab).Select(r => r.Id));
+        Assert.Contains(list.Summary, s => s.StartsWith("2 floors outside the house are off the lot: not read", StringComparison.Ordinal)
+                                           && s.Contains("(neighbour)") && s.Contains("(touching)"));
+        // the check agrees: the two it doesn't ask for aren't read, the one it does is
+        Assert.Equal(["over"], Ids(await Site(m), "left_out").Where(i => i is "neighbour" or "touching" or "over"));
+
+        // only the off-lot ones: nothing to mark
+        var off = MarkingList.Build(House(Floor("neighbour", 70, 90, 80, 100)));
+        Assert.DoesNotContain(off.Rows, r => r.Kind == MarkedKind.SiteSlab);
+        Assert.DoesNotContain(off.Summary, s => s.Contains("not marked"));
+    }
+
+    [Fact]
+    public void With_no_lot_no_slab_is_asked_for()
+    {
+        var list = MarkingList.Build(House(Floor("pad", 50, 90, 58, 100)) with { LotLines = [] });
+        Assert.DoesNotContain(list.Rows, r => r.Kind == MarkedKind.SiteSlab);
+        Assert.Contains(list.Summary, s => s.Contains("not read: no lot found"));
+    }
 }

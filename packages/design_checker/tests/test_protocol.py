@@ -429,6 +429,24 @@ def test_the_pin_sees_a_new_field_a_default_and_a_renamed_answer(monkeypatch):
     assert _pin() != before
 
 
+def test_the_versions_rule_names_when_a_new_site_field_that_can_change_a_verdict_is_minor():
+    """Protocol 1.3 added left_out[].slab, which changes verdicts, as a minor version (review round 1: the rule then
+    said any such field was major). The rule names the condition that makes it safe, in both pages, and the strict
+    field check it rests on still refuses a field it doesn't know."""
+    from design_checker import site_json
+    for page in ("site_description_v1.md", "worker_protocol_v1.md"):
+        text = (DOCS / page).read_text(encoding="utf-8")
+        rule = " ".join(text.split("## Versions", 1)[1].split("\n## ", 1)[0].split())
+        assert "minor" in rule and "even when it can change a verdict" in rule, page
+        assert "refuses it as unknown" in rule and "never drops it" in rule, page
+        assert "absence means exactly the old behaviour" in rule, page
+    assert "though the field can change a verdict" not in (DOCS / "CHANGELOG.md").read_text(encoding="utf-8")
+    doc = json.loads((REPO / "test_data/host_conformance/expected/01_box_house.site.json").read_text(encoding="utf-8"))
+    doc["left_out"] = [{"id": "x", "layer": None, "could_be_building": True, "touching": None, "ground_like": False,
+                        "context": False, "a_newer_field": "patio"}]
+    assert any("unknown field 'a_newer_field'" in r for r in site_json.problems_of(doc))
+
+
 def test_the_doc_lists_every_command_as_the_table_has_it():
     text = (DOCS / "worker_protocol_v1.md").read_text(encoding="utf-8")
     block = text.split(protocol.REFERENCE[0], 1)[1].split(protocol.REFERENCE[1], 1)[0]

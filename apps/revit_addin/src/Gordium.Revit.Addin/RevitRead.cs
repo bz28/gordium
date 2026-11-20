@@ -273,7 +273,7 @@ internal static class RevitRead
 
     /// <summary>Every property line (its boundary, <c>PropertyLine.GetBoundary()</c>, Revit 2027) and every model
     /// line the architect could pick (<c>CurveElement</c>).</summary>
-    private static List<LotLineElement> LotLines(Document doc)
+    internal static List<LotLineElement> LotLines(Document doc)
     {
         var lines = new List<LotLineElement>();
         foreach (var pl in new FilteredElementCollector(doc).OfClass(typeof(PropertyLine)).Cast<PropertyLine>())
