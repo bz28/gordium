@@ -142,7 +142,7 @@ public sealed class CheckProjectCommand : IExternalCommand
         if (lines.Count == 0)
             return false;                                            // no property line: the dialog says what is missing
         var toShared = RevitRead.InternalToShared(doc);
-        var kept = new List<(Xyz A, Xyz B)>();
+        var kept = new List<PickedEdge>();
         var said = new List<string>();
         while (true)
         {
@@ -194,9 +194,9 @@ public sealed class CheckProjectCommand : IExternalCommand
         t.Start();
         var p = doc.ProjectInformation.get_Parameter(Marks.StreetEdge.Guid)
                 ?? throw new InvalidOperationException($"{Marks.StreetEdge.Name} isn't on Project Information");
-        p.Set(StreetEdges.Format(kept));
+        // Set's false throws naming the mark (the transaction then rolls back) and nothing is logged as kept
+        StreetEdges.Keep(kept, p.Set, log);
         t.Commit();
-        log["street_edge"] = StreetEdges.Format(kept);
         return true;
     }
 
@@ -243,8 +243,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                             ?? throw new InvalidOperationException($"{name} isn't on Project Information");
                     // by the mark's own kind: a value of another kind, or a Set Revit refuses, and nothing is checked
                     var (yesNo, words) = ProjectFacts.RequestValue(m, value);
-                    if (!(yesNo is { } i ? p.Set(i) : p.Set(words!)))
-                        throw new InvalidOperationException($"Revit didn't set {name} to {value?.ToJsonString()}: nothing was checked");
+                    ProjectFacts.Write(m, value?.ToJsonString() ?? "null", () => yesNo is { } i ? p.Set(i) : p.Set(words!));
                 }
                 t.Commit();
             }

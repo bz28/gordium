@@ -53,8 +53,7 @@ public static class ProjectCheck
             return new ProjectPrepared(null, [why!], site.PhaseChecked, site.OptionsChecked, null);
         var facts = read.Facts.DeepClone().AsObject();
         facts["street_line"] = street;
-        var words = string.Join(" and ", street.Select(e => StreetEdges.Describe(
-            (e![0]![0]!.GetValue<double>(), e[0]![1]!.GetValue<double>()), (e[1]![0]!.GetValue<double>(), e[1]![1]!.GetValue<double>()))));
+        var words = StreetEdges.DescribeSent(street, site.Site["lot"] as JsonObject);
         return new ProjectPrepared(new ProjectRequest(site.Site, facts, interior.Interior), [], site.PhaseChecked,
                                    site.OptionsChecked, interior, words);
     }
@@ -140,6 +139,17 @@ public static class ProjectFacts
         return new ProjectFactsRead(facts, edges, missing);
     }
 
+    /// <summary>Every write of a Gordium mark (the street pick's and a request file's) goes through here:
+    /// <paramref name="set"/> is Revit's Parameter.Set, which says false when it didn't set the value; then it throws
+    /// naming the mark, so nothing is checked or logged as set on a mark the project doesn't hold.</summary>
+    public static void Write(MarkDefinition mark, string value, Func<bool> set)
+    {
+        ArgumentNullException.ThrowIfNull(mark);
+        ArgumentNullException.ThrowIfNull(set);
+        if (!set())
+            throw new InvalidOperationException($"Revit didn't set {mark.Name} to {value}: nothing was checked");
+    }
+
     /// <summary>A mark's value in a request file (check_project_request.json's "marks"), as Revit's Parameter.Set
     /// takes it: a Yes/No mark needs true or false (1 or 0), a text mark text. Anything else is refused naming the
     /// mark, never set as something near it: a check made on a mark the request didn't mean.</summary>
@@ -160,6 +170,10 @@ public static class ProjectFacts
         }
     }
 }
+
+/// <summary>A lot edge picked as the street: its ends (internal coordinates), whether it is straight, and its length
+/// (along the curve for a curved one).</summary>
+public sealed record PickedEdge(Xyz A, Xyz B, bool IsLine, double Length);
 
 /// <summary>The street edges: picked by the architect on the property line (<see cref="Nearest"/>), kept in the
 /// <see cref="Marks.StreetEdge"/> mark as their ends in Revit's internal coordinates (they don't move when the shared
@@ -207,7 +221,7 @@ public static class StreetEdges
     /// its two ends, or why none: the pick off every edge; or at a corner (the two nearest edges within half
     /// <see cref="PickReach"/> of each other, or the click within <see cref="CornerReach"/> of an end the edge shares
     /// with another), where a click meant for one edge can keep the other.</summary>
-    public static ((Xyz A, Xyz B)? Edge, string? Why) Nearest(LotLineElement line, Xyz picked)
+    public static (PickedEdge? Edge, string? Why) Nearest(LotLineElement line, Xyz picked)
     {
         ArgumentNullException.ThrowIfNull(line);
         var near = line.Curves.Select(c => (Curve: c, D: PlanDistance(LotReader.Points(c), picked)))
@@ -218,28 +232,65 @@ public static class StreetEdges
         if (near.Count > 1 && near[1].D - near[0].D < PickReach / 2)
             return (null, corner);
         var c0 = near[0].Curve;
-        var reach = Math.Min(CornerReach, Plan(c0.Start, c0.End) / 4);
+        var reach = Math.Min(CornerReach, (c0.IsLine ? Plan(c0.Start, c0.End) : c0.Length) / 4);
         foreach (var end in new[] { c0.Start, c0.End })
             if (Plan(end, picked) < reach && line.Curves.Any(c => !ReferenceEquals(c, c0)
                     && (Plan(c.Start, end) <= Tolerance || Plan(c.End, end) <= Tolerance)))
                 return (null, corner);
-        return ((new Xyz(c0.Start.X, c0.Start.Y, 0), new Xyz(c0.End.X, c0.End.Y, 0)), null);
+        return (new PickedEdge(new Xyz(c0.Start.X, c0.Start.Y, 0), new Xyz(c0.End.X, c0.End.Y, 0), c0.IsLine,
+                               c0.IsLine ? Plan(c0.Start, c0.End) : c0.Length), null);
     }
 
     private static double Plan(Xyz a, Xyz b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
 
-    /// <summary>An edge as the architect confirms it: "the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)" (the
-    /// straight distance between its ends; the coordinates as given: shared for what is sent and shown).</summary>
-    public static string Describe((double X, double Y) a, (double X, double Y) b) =>
+    /// <summary>An edge as the architect confirms it: "the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)"; a curved
+    /// one by its length along the curve, never its chord: "the curved 47.1 ft lot edge from ...". The coordinates
+    /// as given (shared, for what is sent and shown); <paramref name="curvedLength"/> null for a straight edge.</summary>
+    public static string Describe((double X, double Y) a, (double X, double Y) b, double? curvedLength = null) =>
         string.Create(CultureInfo.InvariantCulture,
-            $"the {Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y)):0.0} ft lot edge from ({a.X:0.0}, {a.Y:0.0}) to ({b.X:0.0}, {b.Y:0.0})");
+            $"the {(curvedLength is null ? "" : "curved ")}{curvedLength ?? Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y)):0.0} ft lot edge from ({N(a.X)}, {N(a.Y)}) to ({N(b.X)}, {N(b.Y)})");
 
-    /// <summary>A kept edge (internal coordinates) described in the shared coordinates the check uses.</summary>
-    public static string Describe((Xyz A, Xyz B) edge, Transform3 toShared)
+    /// <summary>A coordinate to a tenth, never "-0.0" (a point a hair below 0).</summary>
+    private static string N(double v) => (Math.Round(v, 1) + 0.0).ToString("0.0", CultureInfo.InvariantCulture);
+
+    /// <summary>A picked edge (internal coordinates) described in the shared coordinates the check uses.</summary>
+    public static string Describe(PickedEdge edge, Transform3 toShared)
     {
+        ArgumentNullException.ThrowIfNull(edge);
         ArgumentNullException.ThrowIfNull(toShared);
         Xyz a = toShared.Apply(edge.A), b = toShared.Apply(edge.B);
-        return Describe((a.X, a.Y), (b.X, b.Y));
+        return Describe((a.X, a.Y), (b.X, b.Y), edge.IsLine ? null : edge.Length);
+    }
+
+    /// <summary>The street line sent, in words: each edge as the lot has it (its points: a curved edge by its length
+    /// along them).</summary>
+    public static string DescribeSent(JsonArray street, JsonObject? lot)
+    {
+        ArgumentNullException.ThrowIfNull(street);
+        static (double X, double Y) P(JsonNode? p) => (p![0]!.GetValue<double>(), p[1]!.GetValue<double>());
+        return string.Join(" and ", street.Select(e =>
+        {
+            var (a, b) = (P(e![0]), P(e[1]));
+            var own = lot?["edges"]?.AsArray().FirstOrDefault(x => x!["curved"]?.GetValue<bool>() == true
+                && x["points"]!.AsArray() is var ps && P(ps[0]) == a && P(ps[^1]) == b);
+            if (own is null)
+                return Describe(a, b);
+            var pts = own["points"]!.AsArray().Select(P).ToList();
+            var along = pts.Zip(pts.Skip(1), (p, q) => Math.Sqrt((p.X - q.X) * (p.X - q.X) + (p.Y - q.Y) * (p.Y - q.Y))).Sum();
+            return Describe(a, b, along);
+        }));
+    }
+
+    /// <summary>Keeps the picked edges in the <see cref="Marks.StreetEdge"/> mark through <paramref name="set"/> (Revit's
+    /// Parameter.Set, which says false when it didn't), and logs them only once set: never a street edge logged that
+    /// the project doesn't hold.</summary>
+    public static void Keep(IEnumerable<PickedEdge> edges, Func<string, bool> set, IDictionary<string, object?> log)
+    {
+        ArgumentNullException.ThrowIfNull(edges);
+        ArgumentNullException.ThrowIfNull(log);
+        var text = Format(edges.Select(e => (e.A, e.B)));
+        ProjectFacts.Write(Marks.StreetEdge, text, () => set(text));
+        log["street_edge"] = text;
     }
 
     /// <summary>The kept edges as the facts' <c>street_line</c>: each the lot's own edge whose ends they are (turned

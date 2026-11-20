@@ -306,8 +306,15 @@ read by GUID like every mark; unset is not stated:
 which mark to fill in and how.
 
 **The street edge is picked, not typed.** The button asks "click the lot edge along the street" on the property
-line (Esc when done; several edges for a frontage drawn in pieces); the edge nearest the click is kept (a click at a
-corner, as near two edges, keeps none and says so). It is kept as the edge's two ends in Revit's **internal**
+line (Esc when done; several edges for a frontage drawn in pieces). Revit highlights the whole property line, never
+the edge a click lands on, so a click near a corner is **refused** and says so: when the two nearest edges are within
+0.5 ft of each other (half the 1 ft pick reach), or the click is within 2 ft (a quarter of a shorter edge) of an end
+the edge shares with another. Otherwise the nearest edge is **said back for a Yes** before it is kept: "Use the 60.0 ft
+lot edge from (x, y) to (x, y) as the street line?" (shared coordinates; a curved edge by its length along the
+curve, "the curved 47.1 ft lot edge ...", never its chord); No forgets the click. Every result's *Checked* line names
+the street line it was checked against, in the same words. The mark is written through one helper for every Gordium
+mark write (the pick's and a request file's): when Revit's `Parameter.Set` says it didn't set the value, it stops
+naming the mark, nothing is checked, and nothing is logged as kept. The edge is kept as its two ends in Revit's **internal**
 coordinates, which don't move when the shared coordinates are set again (an edge index was rejected: redrawing the
 property line renumbers its edges silently). At each check the kept ends are turned into shared coordinates and
 matched to an edge of the lot read (within 0.01 ft); `street_line` is then that edge's own first and last points,
@@ -325,8 +332,11 @@ the log)". Then the inside's not-read lists. Every row is written to `check_proj
 request and answer to the trial log.
 
 **No clicks.** `check_project_request.json` (`{"model": "<path>.rvt", "marks": {"Gordium: Zone": "R-1b", ...}}`,
-`marks` optional) in the trial folder: the model opened, the marks given set, checked as the button does (no pick:
-the log lists each property line's edges in the Street edge mark's own words, to copy one), logged, closed unsaved.
+`marks` optional) in the trial folder: the model opened, the marks given set (each by its own kind: a Yes/No mark
+needs true or false, a text mark text; anything else stops the run naming the mark), checked as the button does (no
+pick: the log's `lot_edges_internal` lists each property line's edges in the Street edge mark's own words, internal
+coordinates, to copy one), logged, closed unsaved. A reason the worker repeats per building is shown once with its
+count ("(x12)").
 
 ## Where the decisions are written
 

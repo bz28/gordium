@@ -207,10 +207,10 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         var line = Scene.Model(Scene.Steps[0]).LotLines[0];
         var (edge, why) = StreetEdges.Nearest(line, new Xyz(20, 0.2, 0));
         Assert.Null(why);
-        var kept = StreetEdges.Parse(StreetEdges.Format([edge!.Value]))!;
-        Assert.Equal(edge.Value, Assert.Single(kept));
-        Assert.Equal(0, edge.Value.A.Y + edge.Value.B.Y);
-        Assert.Equal(60, Math.Abs(edge.Value.A.X - edge.Value.B.X));
+        var kept = StreetEdges.Parse(StreetEdges.Format([(edge!.A, edge.B)]))!;
+        Assert.Equal((edge.A, edge.B), Assert.Single(kept));
+        Assert.Equal(0, edge.A.Y + edge.B.Y);
+        Assert.Equal(60, Math.Abs(edge.A.X - edge.B.X));
         Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(0, 0, 0)).Why, StringComparison.Ordinal);
         // review round 1: a click just past the corner, nearer the side edge, or on the street edge within 2 ft of the
         // corner, could keep either edge: refused (the old 0.01 ft band kept the side edge and the street edge)
@@ -219,8 +219,68 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(58.7, 0.1, 0)).Why, StringComparison.Ordinal);
         Assert.Equal(edge, StreetEdges.Nearest(line, new Xyz(3, 0, 0)).Edge);                    // past the corner band
         // said back to the architect before it is kept
-        Assert.Equal("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)", StreetEdges.Describe(edge.Value, Transform3.Identity));
+        Assert.Equal("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)", StreetEdges.Describe(edge, Transform3.Identity));
         Assert.Contains("wasn't on an edge", StreetEdges.Nearest(line, new Xyz(30, 60, 0)).Why, StringComparison.Ordinal);
+    }
+
+    /// <summary>Review round 2: a curved street edge is said by its length along the curve (47.1 ft), never its
+    /// chord (40 ft), when it is confirmed and when the result names it.</summary>
+    [Fact]
+    public void A_curved_street_edge_is_said_by_its_length_along_the_curve()
+    {
+        // an arc from (0, 0) to (40, 0), 47.1 ft along, bulging south; the lot closed by three straight lines
+        const double len = 47.1;
+        double lo = 20.01, hi = 1000;                                      // the radius whose 47.1 ft arc spans a 40 ft chord
+        for (var k = 0; k < 200; k++)
+        {
+            var mid = (lo + hi) / 2;
+            if (2 * mid * Math.Sin(len / (2 * mid)) < 40) lo = mid; else hi = mid;
+        }
+        var r = (lo + hi) / 2;
+        double half = len / (2 * r), h = r * Math.Cos(half);              // the centre (20, h), north of the chord
+        Xyz At(double t)
+        {
+            var ang = -Math.PI / 2 - half + 2 * half * t;
+            return new Xyz(20 + r * Math.Cos(ang), h + r * Math.Sin(ang), 0);
+        }
+        Assert.Equal(0, At(0).DistanceTo(new Xyz(0, 0, 0)), 9);
+        Assert.Equal(0, At(1).DistanceTo(new Xyz(40, 0, 0)), 9);
+        var arc = new LotCurve(new Xyz(0, 0, 0), new Xyz(40, 0, 0), false, len, At);
+        var line = new LotLineElement("pl-arc", true,
+            [arc, new LotCurve(new Xyz(40, 0, 0), new Xyz(40, 100, 0), true), new LotCurve(new Xyz(40, 100, 0), new Xyz(0, 100, 0), true),
+             new LotCurve(new Xyz(0, 100, 0), new Xyz(0, 0, 0), true)]);
+        var (edge, why) = StreetEdges.Nearest(line, At(0.5));
+        Assert.Null(why);
+        Assert.False(edge!.IsLine);
+        Assert.Equal("the curved 47.1 ft lot edge from (0.0, 0.0) to (40.0, 0.0)", StreetEdges.Describe(edge, Transform3.Identity));
+        // the result's words, from the lot's own points along the arc
+        var lot = new JsonObject
+        {
+            ["edges"] = new JsonArray(new JsonObject
+            {
+                ["curved"] = true,
+                ["points"] = new JsonArray(Enumerable.Range(0, 201).Select(k => At(k / 200.0)).Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray()),
+            }),
+        };
+        var (sent, _) = StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity);
+        Assert.Equal("the curved 47.1 ft lot edge from (0.0, 0.0) to (40.0, 0.0)", StreetEdges.DescribeSent(sent!, lot));
+    }
+
+    /// <summary>Review round 2: every mark write goes through one helper; a Set Revit refuses throws naming the mark,
+    /// and the street edge is never logged as kept.</summary>
+    [Fact]
+    public void A_street_edge_revit_wont_set_throws_naming_the_mark_and_logs_nothing()
+    {
+        var edge = new PickedEdge(new Xyz(0, 0, 0), new Xyz(60, 0, 0), true, 60);
+        var log = new Dictionary<string, object?>();
+        string? given = null;
+        var e = Assert.Throws<InvalidOperationException>(() => StreetEdges.Keep([edge], t => { given = t; return false; }, log));
+        Assert.StartsWith("Revit didn't set Gordium: Street edge to ", e.Message, StringComparison.Ordinal);
+        Assert.Equal("0 0 60 0", given);
+        Assert.False(log.ContainsKey("street_edge"));
+        StreetEdges.Keep([edge], _ => true, log);
+        Assert.Equal("0 0 60 0", log["street_edge"]);
+        Assert.Throws<InvalidOperationException>(() => ProjectFacts.Write(Marks.Zone, "\"R-1b\"", () => false));
     }
 
     /// <summary>Review round 1: a request file's mark is set by the mark's own kind; another kind is refused naming
