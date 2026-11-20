@@ -242,15 +242,17 @@ table above needed settling:
   it: one floor at the head with the stairwell as an opening, its underside the house's 9 ft piece over the foot.
   Beside a flight, an element with only flat straight-edged faces is judged face by face (an upper floor's box spans
   its opening, so its box alone would stand it in the width). Every top group's height and extent is kept in the evidence.
-- *For Ben (noted, no mark added now)*: under section 2's rule any Generic Model anywhere in a project stops stairs
-  being read, with no way yet to say "this one isn't a stair".
+- *Generic Models*: under section 2's rule any Generic Model anywhere in a project stops stairs being read, unless it
+  is nested inside a window or door, or the architect marks it `Gordium: Not a stair` (section 3); each one cleared
+  is listed with its id.
 - *Foot and head*: the floor or landing top is looked for in a 1 in strip in front of the first nosing and past the
   last riser, across the stair's width: one flat top within a foot covering the whole strip, else not found.
-- *The cross-check*: every drawn riser (from the floor at the foot to the floor at the head) against
+- *The cross-check*: the run's own risers (its base to its top through its treads: equal by construction) against
   `Stairs.ActualRiserHeight`, every tread (nosing to nosing, the last to the head's edge) against `ActualTreadDepth`,
   the counts against `StairsRun.ActualRisersNumber` / `ActualTreadsNumber`; a run that doesn't begin and end with a
-  riser isn't read yet. Any of these failing, or the foot not confirmed (the first riser can't be checked), sends no
-  `nosings`. A winder, spiral or sketched run sends neither `nosings` nor `bottom_elevation` (only straight flights
+  riser isn't read yet. Any of these failing, or the foot not confirmed (the first riser can't be measured), sends no
+  `nosings`. The first and last risers sent are as drawn, to the floor in front and the floor at the head (a house
+  whose levels don't divide evenly sends its taller or shorter end riser, and R318.7.5.1 judges it). A winder, spiral or sketched run sends neither `nosings` nor `bottom_elevation` (only straight flights
   are measured; its foot is read with the first straight tread, which a turning run hasn't).
 - *Sides*: the band on each side, from the flight's middle to 6 in past the tread ends, from 1 in under the line of
   nosings to 80 in over it (from the first nosing to the top one). The innermost wall face there facing the flight is
