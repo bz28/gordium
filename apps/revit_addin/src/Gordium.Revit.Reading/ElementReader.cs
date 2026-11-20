@@ -13,6 +13,7 @@ internal sealed class Gathered
     public readonly List<JsonObject> Problems = [];
     public readonly BoxBuilder Box = new();
     public readonly List<(double X, double Y)> Plan = [];
+    public readonly List<Xyz> Points = [];
     public bool HasFaces, Other, MissingPart, AnySolid, AnyMesh, AllClosed = true;
 
     public void Point(Xyz p)
@@ -21,6 +22,7 @@ internal sealed class Gathered
             throw new ArgumentException("a point of the model isn't a number");
         Box.Add(p);
         Plan.Add((p.X, p.Y));
+        Points.Add(p);
     }
 
     public void Problem(JsonObject p)
@@ -117,6 +119,10 @@ internal sealed class Read(RevitModel model)
         if (g.MissingPart)               // a nested family that gave nothing: the building may be bigger than its faces
             g.Problem(SiteReader.Problem("tool_words",
                 ("words", "part of this element (a nested family) has no geometry to read, so it may be bigger than measured")));
+        var coarser = CoarserBox(e, g);
+        if (coarser is { Bigger: true })  // drawn bigger at Medium or Coarse detail: its faces are Fine's alone
+            g.Problem(SiteReader.Problem("tool_words",
+                ("words", "part of this element is drawn only at Medium or Coarse detail, so it may be bigger than measured")));
         var b = new JsonObject
         {
             ["id"] = e.UniqueId, ["role"] = "building", ["layer"] = e.Category,
@@ -127,8 +133,72 @@ internal sealed class Read(RevitModel model)
         if (e.Name is { } name)
             b["name"] = name;
         Buildings.Add(b);
-        if (Union(g.Box.Box, RevitBox(e, ToShared)) is { } box)
+        if (Union(Union(g.Box.Box, RevitBox(e, ToShared)), coarser?.Box) is { } box)
             BuildingBoxes.Add(box);
+    }
+
+    /// <summary>A building part's geometry at Medium and Coarse detail, against its Fine drawing: its box, and whether
+    /// it draws anything Fine doesn't. The cautious test (review round 1): the coarser drawing passes only if it
+    /// repeats Fine, every point it has within the model's vertex tolerance of a Fine point and every face it sends
+    /// one Fine sends too; anything else (a part inside Fine's box but off its solids, a curved piece, a piece of a
+    /// kind the reader doesn't know) may make the building bigger than measured. A coarser drawing that is smaller
+    /// or simpler than Fine is flagged too: that only asks for review. Null when there is none.</summary>
+    private (Box3? Box, bool Bigger)? CoarserBox(RevitElement e, Gathered fine)
+    {
+        if (SiteReader.Drawn(e.CoarserGeometry) is not { Count: > 0 } more)
+            return null;
+        var c = Walk(more, ToShared, e);
+        var tol = model.VertexTolerance;
+        var near = new PointGrid(fine.Points, tol);       // near-linear, not every point against every point (round 2)
+        var newPoint = c.Points.Any(p => !near.Has(p));
+        var fineFaces = fine.Faces.Select(FaceKey).ToHashSet();
+        var newFace = c.Faces.Any(f => !fineFaces.Contains(FaceKey(f)));
+        return (c.Box.Box, newPoint || newFace || c.Other || c.MissingPart || c.Problems.Count > fine.Problems.Count);
+    }
+
+    /// <summary>Points in cells a tolerance wide, so whether a point is within the tolerance of any of them is a look
+    /// at its own cell and the 26 around it.</summary>
+    private sealed class PointGrid
+    {
+        private readonly Dictionary<(long, long, long), List<Xyz>> cells = [];
+        private readonly double size;
+
+        public PointGrid(IEnumerable<Xyz> points, double tolerance)
+        {
+            size = tolerance > 0 ? tolerance : 1e-9;
+            foreach (var p in points)
+            {
+                var k = Key(p);
+                if (!cells.TryGetValue(k, out var list))
+                    cells[k] = list = [];
+                if (!list.Any(q => q.DistanceTo(p) <= size / 1000))
+                    list.Add(p);
+            }
+        }
+
+        private (long, long, long) Key(Xyz p) =>
+            ((long)Math.Floor(p.X / size), (long)Math.Floor(p.Y / size), (long)Math.Floor(p.Z / size));
+
+        public bool Has(Xyz p)
+        {
+            var (x, y, z) = Key(p);
+            for (var i = -1; i <= 1; i++)
+                for (var j = -1; j <= 1; j++)
+                    for (var k = -1; k <= 1; k++)
+                        if (cells.TryGetValue((x + i, y + j, z + k), out var list) && list.Any(q => q.DistanceTo(p) <= size))
+                            return true;
+            return false;
+        }
+    }
+
+    /// <summary>A face as its corners, rounded to a ten-thousandth of a foot and sorted: the same face from any start
+    /// and either way round.</summary>
+    private static string FaceKey(JsonObject face)
+    {
+        IEnumerable<string> Corners(JsonNode? ring) => (ring?.AsArray() ?? []).Select(p => string.Join(",",
+            p!.AsArray().Select(v => Math.Round(v!.GetValue<double>(), 4).ToString("R", System.Globalization.CultureInfo.InvariantCulture))));
+        var holes = (face["holes"]?.AsArray() ?? []).Select(h => string.Join(";", Corners(h).Order()));
+        return string.Join(";", Corners(face["points"]).Order()) + "|" + string.Join("|", holes.Order());
     }
 
     /// <summary>A floor block's height as drawn, from its mark "&lt;story&gt;;&lt;height&gt;", or null when it can't be read

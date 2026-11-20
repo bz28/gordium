@@ -3,14 +3,14 @@
   "scene": "07_spot_grades_on_a_slope",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000adf": "lot",
-    "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae4": "house_floor1",
-    "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae5": "house_floor2",
-    "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae6": "house_floor3"
+    "bc28890c-092b-46f2-beff-d0cf089ceaba-00000adf": "lot",
+    "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae4": "house_floor1",
+    "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae5": "house_floor2",
+    "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae6": "house_floor3"
   },
   "steps": {
     "as drawn": {
@@ -23,7 +23,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000adf",
+        "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000adf",
         "edges": [
           {
             "points": [
@@ -81,7 +81,7 @@
       },
       "buildings": [
         {
-          "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae4",
+          "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -235,7 +235,7 @@
           "name": ""
         },
         {
-          "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae5",
+          "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -389,7 +389,7 @@
           "name": ""
         },
         {
-          "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae6",
+          "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae6",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -583,7 +583,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000adf",
+        "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000adf",
         "edges": [
           {
             "points": [
@@ -641,7 +641,7 @@
       },
       "buildings": [
         {
-          "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae4",
+          "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -795,7 +795,7 @@
           "name": ""
         },
         {
-          "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae5",
+          "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -949,7 +949,7 @@
           "name": ""
         },
         {
-          "id": "3db7cdb9-ae9d-48df-830b-fe0631f4fd76-00000ae6",
+          "id": "bc28890c-092b-46f2-beff-d0cf089ceaba-00000ae6",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,

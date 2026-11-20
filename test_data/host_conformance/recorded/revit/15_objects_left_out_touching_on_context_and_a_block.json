@@ -3,16 +3,16 @@
   "scene": "15_objects_left_out_touching_on_context_and_a_block",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "df6d3b3b-bf39-408b-8028-6db1b9510821-00000adf": "lot",
-    "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae4": "house_floor1",
-    "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae5": "house_floor2",
-    "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae6": "porch",
-    "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae7": "neighbour_solid",
-    "df6d3b3b-bf39-408b-8028-6db1b9510821-00000e34": "shed_block"
+    "bf66e217-36ef-417c-a44f-70bab3da0efc-00000adf": "lot",
+    "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae4": "house_floor1",
+    "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae5": "house_floor2",
+    "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae6": "porch",
+    "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae7": "neighbour_solid",
+    "bf66e217-36ef-417c-a44f-70bab3da0efc-00000e34": "shed_block"
   },
   "steps": {
     "as drawn": {
@@ -25,7 +25,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "df6d3b3b-bf39-408b-8028-6db1b9510821-00000adf",
+        "id": "bf66e217-36ef-417c-a44f-70bab3da0efc-00000adf",
         "edges": [
           {
             "points": [
@@ -83,7 +83,7 @@
       },
       "buildings": [
         {
-          "id": "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae4",
+          "id": "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -237,7 +237,7 @@
           "name": ""
         },
         {
-          "id": "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae5",
+          "id": "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -394,7 +394,7 @@
       "unsent": [],
       "left_out": [
         {
-          "id": "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae6",
+          "id": "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae6",
           "layer": "Generic Models",
           "could_be_building": true,
           "touching": true,
@@ -402,7 +402,7 @@
           "context": false
         },
         {
-          "id": "df6d3b3b-bf39-408b-8028-6db1b9510821-00000ae7",
+          "id": "bf66e217-36ef-417c-a44f-70bab3da0efc-00000ae7",
           "layer": "Generic Models",
           "could_be_building": true,
           "touching": false,
@@ -410,7 +410,7 @@
           "context": true
         },
         {
-          "id": "df6d3b3b-bf39-408b-8028-6db1b9510821-00000e34",
+          "id": "bf66e217-36ef-417c-a44f-70bab3da0efc-00000e34",
           "layer": "Generic Models",
           "could_be_building": true,
           "touching": false,

@@ -3,14 +3,14 @@
   "scene": "16_terrain_mesh_left_out",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000adf": "lot",
-    "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000ae4": "house_floor1",
-    "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000ae5": "house_floor2",
-    "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000ae6": "terrain"
+    "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000adf": "lot",
+    "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000ae4": "house_floor1",
+    "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000ae5": "house_floor2",
+    "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000ae6": "terrain"
   },
   "steps": {
     "as drawn": {
@@ -19,11 +19,11 @@
       "host": {
         "name": "revit",
         "version": "2027",
-        "document": "Project1",
+        "document": "Project14",
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000adf",
+        "id": "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000adf",
         "edges": [
           {
             "points": [
@@ -81,7 +81,7 @@
       },
       "buildings": [
         {
-          "id": "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000ae4",
+          "id": "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -235,7 +235,7 @@
           "name": ""
         },
         {
-          "id": "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000ae5",
+          "id": "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -392,7 +392,7 @@
       "unsent": [],
       "left_out": [
         {
-          "id": "2b1ece63-9a38-4453-bc1d-104008ddeebc-00000ae6",
+          "id": "d0e05176-69b7-4a71-ac15-9f92cd0d3395-00000ae6",
           "layer": "Generic Models",
           "could_be_building": true,
           "touching": true,
