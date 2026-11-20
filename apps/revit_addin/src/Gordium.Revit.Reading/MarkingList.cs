@@ -135,6 +135,14 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// <summary>Every level marked "no rooms on this level" with a Room drawn on it: listed first, with the ticks'.</summary>
     public IReadOnlyList<string> LevelConflicts { get; init; } = [];
 
+    /// <summary>Every Revit stair or railing marked <c>Gordium: Not a stair</c> Yes (the mark can't clear one): listed
+    /// first, with the other conflicts.</summary>
+    public IReadOnlyList<string> NotAStairConflicts { get; init; } = [];
+
+    /// <summary>Every element the architect cleared with <c>Gordium: Not a stair</c>, a line per category and type:
+    /// listed with what could hide a stair, so each exemption is seen.</summary>
+    public IReadOnlyList<string> NotAStair { get; init; } = [];
+
     /// <summary>Every enclosed area with no Room (sent as a space whose use isn't known, so every sleeping-room rule
     /// needs review), listed after what stops the rooms being read.</summary>
     public IReadOnlyList<string> UnknownAreas { get; init; } = [];
@@ -147,7 +155,7 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// unset, and nothing stops a mark or a room being read.</summary>
     public string Headline =>
         Rows.Count == 0 && RoomBlockers.Count == 0 ? NothingDrawn
-        : HasNoneConflicts.Count > 0 || LevelConflicts.Count > 0 || SetupProblems.Count > 0 || RoomBlockers.Count > 0
+        : HasNoneConflicts.Count > 0 || LevelConflicts.Count > 0 || NotAStairConflicts.Count > 0 || SetupProblems.Count > 0 || RoomBlockers.Count > 0
           || UnknownAreas.Count > 0 || Rows.Any(r => r.NeedsMarking) ? NotAllMarked
         : !Rows.Any(r => r.Kind == MarkedKind.Room) ? NoRooms
         : AllMarked;
@@ -231,6 +239,8 @@ public static class MarkingList
         {
             StairBlockers = stairBlockers,
             LevelConflicts = InteriorReader.LevelConflicts(model),
+            NotAStairConflicts = StairReader.NotAStairConflicts(model),
+            NotAStair = StairReader.NotAStairLines(model),
             UnknownAreas = unknown,
             HasNoneConflicts = ticks.Where(t => t.Ticked is true && t.Conflicts.Count > 0)
                 .SelectMany(t => t.WhyNot.Take(t.Conflicts.Count)).ToList(),
@@ -414,11 +424,11 @@ public static class MarkingList
     public static string Text(MarkingListResult list, int maxRows = 40)
     {
         var sb = new StringBuilder();
-        foreach (var c in list.HasNoneConflicts.Concat(list.LevelConflicts))
+        foreach (var c in list.HasNoneConflicts.Concat(list.LevelConflicts).Concat(list.NotAStairConflicts))
             sb.Append("Conflict: ").Append(c).Append('\n');
         foreach (var p in list.SetupProblems)
             sb.Append("Can't add ").Append(p).Append('\n');
-        foreach (var b in list.RoomBlockers.Concat(list.UnknownAreas).Concat(list.StairBlockers))
+        foreach (var b in list.RoomBlockers.Concat(list.UnknownAreas).Concat(list.StairBlockers).Concat(list.NotAStair))
             sb.Append(b).Append('\n');
         foreach (var s in list.Summary.Concat(list.HasNoneLines))
             sb.Append(s).Append('\n');

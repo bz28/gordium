@@ -260,11 +260,12 @@ def test_the_rhino_panel_draws_the_lines_and_never_selects_one():
 
 
 def test_a_rule_reading_a_worked_out_value_stays_with_the_architect_even_when_it_passes(checked):
-    """The main stair's riser variation (0 in, worked out, not given to the rules yet) is something Gordium read:
-    its rule is the architect's to look at, never folded with what Gordium can't read."""
+    """The main stair's tread variation (0 in, worked out, not given to the rules yet) is something Gordium read:
+    its rule is the architect's to look at, never folded with what Gordium can't read. (The riser variation was
+    this example until it was given to the rules, 2026-11-20.)"""
     [item] = [i for i in law_items(checked["2_two_story_small_window"])
-              if i["id"] == "general.r318_7_5_1_stair_riser_variation_max@-/s1"]
-    assert not item["open"].get("concern") and "riser variation 0 in" in item["open"]["worked"]
+              if i["id"] == "general.r318_7_5_2_stair_tread_variation_max@-/s1"]
+    assert not item["open"].get("concern") and "tread variation 0 in" in item["open"]["worked"]
     assert grouping.tier(item) == grouping.REVIEW_T
 
 

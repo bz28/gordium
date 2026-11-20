@@ -38,6 +38,13 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
 
     /// <summary>Each level marked "no rooms on this level" with a Room drawn on it (the mark doesn't count).</summary>
     public IReadOnlyList<string> LevelConflicts { get; init; } = [];
+
+    /// <summary>Each element the architect cleared with <c>Gordium: Not a stair</c>, a line per category and type
+    /// (<see cref="StairReader.NotAStairLines"/>).</summary>
+    public IReadOnlyList<string> NotAStair { get; init; } = [];
+
+    /// <summary>Each Revit stair or railing marked <c>Gordium: Not a stair</c> Yes (the mark doesn't count).</summary>
+    public IReadOnlyList<string> NotAStairConflicts { get; init; } = [];
 }
 
 /// <summary>
@@ -221,6 +228,7 @@ public static class InteriorReader
         {
             StairsNotRead = stairsNotRead, DoorsNotRead = doorsNotRead, GuardsNotRead = guardsNotRead, Ticks = ticks,
             UnknownSpaces = unknown.Count > 0 ? UnknownAreaWords(model) : [], LevelConflicts = LevelConflicts(model),
+            NotAStair = StairReader.NotAStairLines(model), NotAStairConflicts = StairReader.NotAStairConflicts(model),
         };
     }
 

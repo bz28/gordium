@@ -48,13 +48,17 @@ ROOMS_AND_WINDOWS = {
 # Step 4 (stairs: straight component runs, the cross-check): a flight's risers, treads, headroom and clear width above
 # the handrail. Not in this step: the width at the handrail and the handrail sides (handrails are railings, read with
 # the guards in step 5: no `handrails` is sent, so both are not measured).
+# Whether the flight is a spiral (`stair_spiral`) is in scope too: the reader sends `spiral: false` for a Straight run
+# whose drawn treads read straight (Revit's StairsRunStyle and the geometry agreeing), as each hand-worked flight is.
 STAIRS = {"stair_riser_height", "stair_riser_variation", "stair_total_rise", "stair_risers", "stair_tread_depth",
-          "stair_tread_variation", "stair_headroom", "stair_clear_width"}
+          "stair_tread_variation", "stair_headroom", "stair_clear_width", "stair_spiral"}
 # Each step's houses and, per house, the measures of each kind in scope (a kind present is read; a kind absent must be
 # left out). House 3's tall riser can't be drawn inside a Revit component run (its risers are equal by construction),
-# so it is drawn where a tall riser arises in Revit: the floor at the head 1 1/2 in above the run's top. The reader's
-# cross-check (the floor at the head against the run's top, design note section 4) then sends no nosings, so every one
-# of its stair measures must come back not measured (its stair still read): never 7.6 in, never a pass.
+# so it is drawn where a tall riser arises in Revit: the floor at the head 1 1/2 in above the run's top. The reader
+# measures the last riser as drawn, to that floor (R318.7.5.1: "measured vertically between leading edges of the
+# adjacent treads"; Ben, 2026-11-20, Q1), so its stair measures are the hand-worked ones: 12 risers of 7 1/2 in and
+# one of 9 in (at the head, not the 7th: the same tallest, smallest and total), riser height 9, variation 1.5, total
+# rise 99 in, 13 risers; never 7.5 in, never a pass.
 # Step 5 (doors, then guards; house 4): the exit door's clear width and height (from the maker's stated clear opening
 # the architect confirmed on its type: door families aren't measured from their drawing) and whether it is
 # side-hinged; a stair's handrails (the width at the handrail, the sides with one); a level guard's height and the
@@ -68,12 +72,12 @@ GUARDS = {"guard_height", "guard_opening_sphere"}
 # door has no clear width worked by hand (R318.2 measures a side-hinged door), so no maker's clear opening, which needs
 # both sizes, is made up for it: only whether it is side-hinged is in scope, its height expected not measured.
 # House 3 isn't drawn again: its guard is along a stair, which this step doesn't read (a railing along a stair that
-# isn't a handrail against a wall leaves `guards` out), and its stair measures are all not measured already.
+# isn't a handrail against a wall leaves `guards` out), and its stair is measured in step 4 already.
 STEPS = {
     3: {"1_ranch_compliant": ROOMS_AND_WINDOWS, "2_two_story_small_window": ROOMS_AND_WINDOWS,
         "5_basement_window_well": ROOMS_AND_WINDOWS},
     4: {"2_two_story_small_window": {**ROOMS_AND_WINDOWS, "stair": STAIRS},
-        "3_tall_riser": {**ROOMS_AND_WINDOWS, "stair": set()}},
+        "3_tall_riser": {**ROOMS_AND_WINDOWS, "stair": STAIRS}},
     5: {"1_ranch_compliant": {**ROOMS_AND_WINDOWS, "egress_door": DOORS},
         "2_two_story_small_window": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "egress_door": DOORS},
         "4_loft": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "guard": GUARDS},

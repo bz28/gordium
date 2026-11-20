@@ -24,6 +24,7 @@ stairs:
   - id: s
     name: Basement stair
     bottom_elevation: -8.25
+    spiral: false                # a straight flight (R202: a spiral's treads radiate from a column)
     nosings:                     # runs up along +y; the 7th riser (to -3.75) is 0.75 ft, the rest 0.625 ft
       - [[0, 0, -7.625], [3, 0, -7.625]]
       - [[0, 0.8125, -7.0], [3, 0.8125, -7.0]]

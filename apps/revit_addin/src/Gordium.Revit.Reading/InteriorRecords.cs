@@ -149,9 +149,11 @@ public sealed record NearbyElement(string UniqueId, string BuiltInCategory, stri
 /// <param name="NestedIn">For a family instance nested in another (a window's grille, a shared component), the
 /// family instances it is nested in, innermost first (<c>FamilyInstance.SuperComponent</c>, to the top), each with
 /// its category and box; empty when it isn't nested.</param>
+/// <param name="InstanceMarks">Gordium's marks on the element itself (<c>Gordium: Not a stair</c>), by GUID.</param>
 public sealed record StairCandidate(string UniqueId, string BuiltInCategory, string? Name, string Kind,
                                     string? PhaseDemolished = null, string? DesignOption = null, RevitBox? Box = null,
-                                    IReadOnlyList<NestHost>? NestedIn = null);
+                                    IReadOnlyList<NestHost>? NestedIn = null,
+                                    IReadOnlyDictionary<Guid, MarkValue>? InstanceMarks = null);
 
 /// <summary>A family instance another is nested in (<c>FamilyInstance.SuperComponent</c>).</summary>
 /// <param name="UniqueId"><c>Element.UniqueId</c>.</param>
@@ -173,6 +175,9 @@ public sealed record StairRecord
 
     /// <summary><c>Stairs.MultistoryStairsId</c>'s id, or null: one of a multistory stair (then no stair is read).</summary>
     public string? MultistoryStairsId { get; init; }
+
+    /// <summary>Gordium's marks on the stair itself, by GUID: <c>Gordium: Not a stair</c> Yes on one is a conflict.</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> InstanceMarks { get; init; } = new Dictionary<Guid, MarkValue>();
 
     public string? PhaseCreated { get; init; }
     public string? PhaseDemolished { get; init; }
@@ -275,6 +280,9 @@ public sealed record RailingRecord
 
     /// <summary>Gordium's marks on its type (<c>Gordium: Top rail is handrail</c>), by GUID.</summary>
     public IReadOnlyDictionary<Guid, MarkValue> TypeMarks { get; init; } = new Dictionary<Guid, MarkValue>();
+
+    /// <summary>Gordium's marks on the railing itself, by GUID: <c>Gordium: Not a stair</c> Yes on one is a conflict.</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> InstanceMarks { get; init; } = new Dictionary<Guid, MarkValue>();
 
     /// <summary>Its parts: the railing itself, its top rail (<c>Railing.TopRail</c>) and its handrails
     /// (<c>GetHandRails</c>).</summary>

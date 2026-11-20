@@ -8,16 +8,16 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "w": "6998ba11-0440-41c7-bc79-7164388827e0-00000ee7",
-    "bed": "6998ba11-0440-41c7-bc79-7164388827e0-00000ee9",
-    "s": "6998ba11-0440-41c7-bc79-7164388827e0-00000ef6"
+    "w": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000eeb",
+    "bed": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000eed",
+    "s": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000efa"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "6998ba11-0440-41c7-bc79-7164388827e0-00000ee9",
+        "id": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000eed",
         "name": "Bedroom (1)",
         "sleeping": true,
         "floor": [
@@ -67,9 +67,9 @@
     ],
     "openings": [
       {
-        "id": "6998ba11-0440-41c7-bc79-7164388827e0-00000ee7",
+        "id": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000eeb",
         "name": "Gordium test window w (48 x 36 in): Family10 (Window)",
-        "room": "6998ba11-0440-41c7-bc79-7164388827e0-00000ee9",
+        "room": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000eed",
         "escape": true,
         "operation": "horizontal_slider",
         "stated_clear": {
@@ -82,9 +82,168 @@
     ],
     "stairs": [
       {
-        "id": "6998ba11-0440-41c7-bc79-7164388827e0-00000ef6",
+        "id": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000efa",
         "name": "Gordium test stair s",
+        "spiral": false,
         "bottom_elevation": -8.25,
+        "nosings": [
+          [
+            [
+              24,
+              0,
+              -7.625
+            ],
+            [
+              21,
+              0,
+              -7.625
+            ]
+          ],
+          [
+            [
+              24,
+              0.8125,
+              -7
+            ],
+            [
+              21,
+              0.8125,
+              -7
+            ]
+          ],
+          [
+            [
+              24,
+              1.625,
+              -6.375
+            ],
+            [
+              21,
+              1.625,
+              -6.375
+            ]
+          ],
+          [
+            [
+              24,
+              2.4375,
+              -5.75
+            ],
+            [
+              21,
+              2.4375,
+              -5.75
+            ]
+          ],
+          [
+            [
+              24,
+              3.25,
+              -5.125
+            ],
+            [
+              21,
+              3.25,
+              -5.125
+            ]
+          ],
+          [
+            [
+              24,
+              4.0625,
+              -4.5
+            ],
+            [
+              21,
+              4.0625,
+              -4.5
+            ]
+          ],
+          [
+            [
+              24,
+              4.875,
+              -3.875
+            ],
+            [
+              21,
+              4.875,
+              -3.875
+            ]
+          ],
+          [
+            [
+              24,
+              5.6875,
+              -3.25
+            ],
+            [
+              21,
+              5.6875,
+              -3.25
+            ]
+          ],
+          [
+            [
+              24,
+              6.5,
+              -2.625
+            ],
+            [
+              21,
+              6.5,
+              -2.625
+            ]
+          ],
+          [
+            [
+              24,
+              7.3125,
+              -2
+            ],
+            [
+              21,
+              7.3125,
+              -2
+            ]
+          ],
+          [
+            [
+              24,
+              8.125,
+              -1.375
+            ],
+            [
+              21,
+              8.125,
+              -1.375
+            ]
+          ],
+          [
+            [
+              24,
+              8.9375,
+              -0.75
+            ],
+            [
+              21,
+              8.9375,
+              -0.75
+            ]
+          ],
+          [
+            [
+              24,
+              9.75,
+              0
+            ],
+            [
+              21,
+              9.75,
+              0
+            ]
+          ]
+        ],
         "sides": {
           "left": [
             [
@@ -144,23 +303,18 @@
   ],
   "notes": [
     {
-      "part": "6998ba11-0440-41c7-bc79-7164388827e0-00000ef6",
-      "field": "nosings",
-      "why": "the floor at its head is 1.5 in from the run\u0027s top (a riser there taller or shorter than the run\u0027s): they must agree within 1/16 in"
-    },
-    {
-      "part": "6998ba11-0440-41c7-bc79-7164388827e0-00000ef6",
+      "part": "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000efa",
       "field": "handrails",
       "why": "Gordium: These are all the guards and handrails is not set on Project Information: until it says Yes, a handrail drawn as something else (a wall sweep) would be missed"
     }
   ],
   "evidence": {
-    "6998ba11-0440-41c7-bc79-7164388827e0-00000ee7": {
+    "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000eeb": {
       "sill_line": 2,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 2..5, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 3792, wall 3792 6998ba11-0440-41c7-bc79-7164388827e0-00000ed0: 10 faces; ids generating them: OST_Walls 3792, OST_Walls 3793, OST_Walls 3795, OST_Windows 3815 (this window)"
+        "host (FamilyInstance.Host) 3796, wall 3796 853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000ed4: 10 faces; ids generating them: OST_Walls 3796, OST_Walls 3797, OST_Walls 3799, OST_Windows 3819 (this window)"
       ],
       "wall_opening_bottom": 2,
       "placed": {
@@ -170,13 +324,14 @@
       }
     },
     "stairs": {
-      "6998ba11-0440-41c7-bc79-7164388827e0-00000ef6": {
+      "853fc7f5-e5e9-4744-8bc1-3d2ffe569ddf-00000efa": {
         "revit_layer": [
-          "run 3830 Straight: base 0, top 8.125 (relative), risers 13, treads 12, begins/ends with riser True/True, width 36 in; path (22.5,0,-8.25) (22.5,9.75,-8.25)",
+          "run 3834 Straight: base 0, top 8.125 (relative), risers 13, treads 12, begins/ends with riser True/True, width 36 in; path (22.5,0,-8.25) (22.5,9.75,-8.25)",
           "its geometry: 150 faces (25 facing up, 0 curved), failed False; box 21,0,-8.25 to 24,9.792,-0.125",
           "tread tops (z, internal): -7.875 -7.625 -7.25 -7 -6.625 -6.375 -6 -5.75 -5.375 -5.125 -4.75 -4.5 -4.125 -3.875 -3.5 -3.25 -2.875 -2.625 -2.25 -2 -1.625 -1.375 -1 -0.375 -0.75",
           "around it: 5 elements: Floors Floor at the foot of s (6 faces), Floors Floor at the head of s (6 faces), Ceilings Overhead 1 of s (6 faces), Walls Gordium test wall 6 in (6 faces), Stairs Stair (150 faces)"
         ],
+        "style": "Straight",
         "tread_faces": 13,
         "tread_groups": [
           {
@@ -421,6 +576,51 @@
         "back": 9.75,
         "foot": -8.25,
         "head": 0,
+        "run_highest": -0.375,
+        "run_risers_in": [
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5
+        ],
+        "drawn_risers_in": [
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          9
+        ],
+        "drawn_treads_in": [
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75,
+          9.75
+        ],
         "handrails_beside_walls": [],
         "railings_refused": []
       }
@@ -509,7 +709,7 @@
   },
   "revit_layer": [
     "design options: ",
-    "stair 3829 \u0022Gordium test stair s\u0022: base -8.25, top -0.125, riser 7.5 in, tread 9.75 in, risers 13, the stair element\u0027s own geometry 150 faces",
+    "stair 3833 \u0022Gordium test stair s\u0022: base -8.25, top -0.125, riser 7.5 in, tread 9.75 in, risers 13, the stair element\u0027s own geometry 150 faces",
     "stairs: 1 component stairs (1 runs), 0 other elements that could be one (0 of them generic models nested inside a window or door, not a stair); nested and not inside their window or door: ",
     "railings: 0",
     "enclosed areas on Level 1: 1 (0 with no Room: )",

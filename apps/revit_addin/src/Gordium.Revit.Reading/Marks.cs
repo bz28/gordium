@@ -160,13 +160,29 @@ public static class Marks
         "a patio, terrace or walk (less than 18 in above grade, no roof) and parking or a driveway don't count in lot " +
         "coverage. Blank: lot coverage and the yards need review.");
 
+    public const string GenericModels = "OST_GenericModel";
+    public const string StairsCategory = "OST_Stairs";
+
+    /// <summary>An element the architect says is not a stair, a stair's part or a guard (Ben, 2026-11-20, Q2: a real
+    /// model's wall niches, corbels and trim drawn as Generic Models; Pacific Continental has 19). Yes: that element no
+    /// longer stops the stairs (and guards) being read, and each one cleared is listed in the marking list and the Read
+    /// inside log. Bound to every category whose other elements could be a stair (Generic Models, Stairs, Railings),
+    /// but it never clears a Revit Stair, Railing or multistory stair: Yes on one is a conflict, listed first, and the
+    /// element is read as what it is. Blank or No: not stated, so it still stops the stairs being read.</summary>
+    public static readonly MarkDefinition NotAStair = new(
+        "Gordium: Not a stair", new("6f527562-6b18-467b-9e86-5a2c5489dbc2"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [GenericModels, StairsCategory, Railings], "stairs and guards (a cleared element doesn't stop them being read)",
+        "Yes for a generic model or family that is not a stair, a stair's part or a guard (a wall niche, a corbel, trim): " +
+        "it then doesn't stop the stairs being read, and is listed as cleared by you. Never clears a Revit Stair or Railing. " +
+        "Blank or No: it could be a stair drawn another way, so no stair is read for egress.");
+
     /// <summary>Every mark, in the design note's order.</summary>
     public static readonly IReadOnlyList<MarkDefinition> All =
     [
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
-        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, SiteSlab,
+        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

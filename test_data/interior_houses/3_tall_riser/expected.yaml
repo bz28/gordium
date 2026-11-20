@@ -19,11 +19,12 @@ parts:
     s:
       measures:
         stair_riser_height: 9.0             # 0.75 ft
+        stair_spiral: false                 # straight, rectangular treads: not R202's spiral (treads radiating from a column)
+        stair_riser_variation: 1.5          # 9 - 7.5: over R318.7.5.1's 3/8 in
         stair_tread_depth: 9.75             # 0.8125 ft
         stair_headroom: 84.0                # ceiling at 7 ft over the top nosing at 0
         stair_clear_width: 36.0             # 3 ft between the wall and the guard's inside
       more:
-        stair_riser_variation: 1.5          # 9 - 7.5
         stair_tread_variation: 0.0
         stair_clear_width_at_handrail: 30.0 # 2.75 - 0.25 = 2.5 ft
         stair_handrail_sides: 2

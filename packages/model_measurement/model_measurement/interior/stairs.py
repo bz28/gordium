@@ -305,6 +305,26 @@ class InFrame:
         self.z = lambda s, a: surface.z(*flight.xy(s, a))
 
 
+def _spiral(st: dict, not_straight: str | None, measures: dict, stopped: dict) -> None:
+    """`stair_spiral` from the description's `spiral` (the host's own record of the flight's shape: Revit's run
+    style), taken only where the nosings agree with it. A spiral stairway (R202) is "a stairway with a plan view of
+    closed circular form and uniform section-shaped treads, attached to and radiating from a minimum-diameter
+    supporting column": a flight measured as straight with rectangular treads (`not_straight` None) is not one. So
+    `false` is taken only for a flight measured straight. `true` is never taken yet: nothing measured shows that
+    closed circular form (a flight that isn't measured straight may be any curved stair), and true would make the
+    ordinary R318.7 rules not applicable (review round 1: a false-pass path for a curved stair). Otherwise, or not
+    given, it is not measured (its rules need review)."""
+    said = st.get("spiral")
+    if not isinstance(said, bool):
+        stopped["stair_spiral"] = Stop("spiral_not_said").reason
+    elif said is False and not_straight is not None:
+        stopped["stair_spiral"] = Stop("spiral_not_straight", reason=not_straight).reason
+    elif said is True:
+        stopped["stair_spiral"] = Stop("spiral_but_straight" if not_straight is None else "spiral_not_shown").reason
+    else:
+        measures["stair_spiral"] = said
+
+
 def measure_stair(st: dict, reader) -> tuple[dict, dict, dict, Flight | None]:
     """(measures, more, not_measured, the flight placed in plan or None) for one flight."""
     measures, more, stopped = {}, {}, {}
@@ -321,15 +341,21 @@ def measure_stair(st: dict, reader) -> tuple[dict, dict, dict, Flight | None]:
         flight = Flight(st, reader)
     except Stop as s:
         stop(names, s.reason)
+        _spiral(st, s.reason, measures, stopped)
         return measures, more, stopped, None
     measures["stair_riser_height"] = tidy(max(flight.risers))
-    more.update(stair_riser_variation=tidy(max(flight.risers) - min(flight.risers_least)),
-                stair_total_rise=tidy(flight.z[-1] - flight.bottom), stair_risers=len(flight.risers))
+    # the variation is R318.7.5.1's own measure ("The greatest riser height within any flight of stairs shall not
+    # exceed the smallest by more than 3/8 inch"), each riser read at its tallest and shortest: given to the rules
+    # (Ben, 2026-11-20: a riser drawn taller than the rest fails the flight, never only needs review)
+    measures["stair_riser_variation"] = tidy(max(flight.risers) - min(flight.risers_least))
+    more.update(stair_total_rise=tidy(flight.z[-1] - flight.bottom), stair_risers=len(flight.risers))
     try:
         flight.plan()
     except Stop as s:
         stop(names, s.reason)
+        _spiral(st, s.reason, measures, stopped)
         return measures, more, stopped, None
+    _spiral(st, None, measures, stopped)
     measures["stair_tread_depth"] = tidy(min(flight.treads))
     more["stair_tread_variation"] = tidy(max(flight.treads_most) - min(flight.treads))
     try:
