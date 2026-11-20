@@ -242,8 +242,8 @@ public sealed class CheckProjectCommand : IExternalCommand
                     var p = doc.ProjectInformation.get_Parameter(m.Guid)
                             ?? throw new InvalidOperationException($"{name} isn't on Project Information");
                     // by the mark's own kind: a value of another kind, or a Set Revit refuses, and nothing is checked
-                    var (yesNo, text) = ProjectFacts.RequestValue(m, value);
-                    if (!(yesNo is { } i ? p.Set(i) : p.Set(text!)))
+                    var (yesNo, words) = ProjectFacts.RequestValue(m, value);
+                    if (!(yesNo is { } i ? p.Set(i) : p.Set(words!)))
                         throw new InvalidOperationException($"Revit didn't set {name} to {value?.ToJsonString()}: nothing was checked");
                 }
                 t.Commit();
