@@ -84,9 +84,7 @@ public sealed class RecordHousesCommand : IExternalCommand
                 File.Delete(path);                            // never an earlier run's recording left as this one's
             var sw = Stopwatch.StartNew();
             doc = app.NewProjectDocument(UnitSystem.Imperial);
-            var drawing = new List<string>();
-            log["drawing"] = drawing;
-            var ids = HouseDraw.Draw(app, doc, house, drawing);
+            var ids = HouseDraw.Draw(app, doc, house);
             log["draw_s"] = sw.Elapsed.TotalSeconds;
             sw.Restart();
             var model = RevitInterior.Model(doc);

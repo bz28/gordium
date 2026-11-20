@@ -292,9 +292,16 @@ evidence), and checks it as CI will (`python -m model_measurement.interior.recor
 recording is deleted first, so a failed run leaves none. Asked for with no click by writing
 `%LOCALAPPDATA%\Gordium\trial\interior_request.json` (`{}` for all three, or `{"houses": ["1_ranch_compliant"]}`)
 while Revit is idle: taken once, results in `results.jsonl` (`record_house` lines). CI checks every recording
-committed, and a host with any recording must have all three (`test_interior_recordings.py`). If the trial shows
-the sill line can't be checked against the wall opening on these families, the windows' clear opening and sill
-stay not measured, and this step's scope says so (design note, section 7).
+committed, and a host with any recording must have all three (`test_interior_recordings.py`).
+
+**Recorded in Revit 2027.4 (trial run 6, 2026-11-20):** all three houses pass with no problem: rooms read, and every
+escape window's wall opening (the wall faces whose `GetGeneratingElementIds` name it) with its bottom on its sill line
+exactly, so the clear measures are in the step's scope. `FindInserts` listed no inserts even on the cut walls, so
+nothing relies on it. Lessons from runs 1 to 5, in the drawer: Window.rft's head plane is "Top"; the walls are
+committed and regenerated before the windows are placed (placed in the walls' own transaction, windows were hosted
+but cut nothing); the walls stop at the ceilings' top (higher, house 5's basement walls closed an area on the level
+above); the enclosed areas are read inside a rolled-back transaction (Revit works them out only in a document it can
+change).
 
 For a clone with no venv of its own (a git worktree), install with the main clone's Python:
 `install_trial_addin.ps1 -Python C:\...\gordium\.venv\Scripts\python.exe`; the add-in then runs Python with this

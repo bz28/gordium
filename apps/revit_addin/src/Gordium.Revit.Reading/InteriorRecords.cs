@@ -158,9 +158,9 @@ public sealed record OpeningRecord
     /// the bottom of the wall opening, which the sill line is checked against (design note, section 4).</summary>
     public IReadOnlyList<Xyz>? WallOpening { get; init; }
 
-    /// <summary>How the wall opening's faces were found, for the evidence: by <c>GetGeneratingElementIds</c> naming the
-    /// window, or (the window one of the wall's inserts, <c>HostObject.FindInserts</c>) as the wall's faces lying wholly
-    /// within the window's width and between the wall's bottom and top. Null when none was found.</summary>
+    /// <summary>How the wall opening's faces were found, for the evidence: the wall's faces whose
+    /// <c>GetGeneratingElementIds</c> name the window (<c>HostObject.FindInserts</c> isn't used: it listed no inserts
+    /// even on walls the windows cut, trial run 6). Null when none was found.</summary>
     public string? WallOpeningBy { get; init; }
 
     /// <summary>What the Revit layer looked at for this window (the wall's faces, the ids that generated them), for the

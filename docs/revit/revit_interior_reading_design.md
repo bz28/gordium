@@ -9,7 +9,8 @@ PR; step 1 (protocol 1.2: the worker and the C# client take an interior) is buil
 list, [the add-in's README](../../apps/revit_addin/README.md#the-architects-marks-interior-step-2)) is built and
 tried in Revit 2027.4 on Snowdon Towers (section 9); step 3 (rooms and marked escape windows,
 [README](../../apps/revit_addin/README.md#rooms-and-escape-windows-interior-step-3)) is built and tested on fake
-records, its Revit recordings of houses 1, 2 and 5 still to make in the trial; the rest are not yet.
+records and recorded in Revit 2027.4 (houses 1, 2 and 5, trial run 6, 2026-11-20: every measure of the step equal
+to the hand-worked one); the rest are not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -153,7 +154,7 @@ a drawn ceiling.
 | `room` | The window's or door's `FromRoom` / `ToRoom` for the last phase: the room inside | Which of the two is inside for a door between two rooms |
 | `escape` | The `Gordium: Escape opening` mark | |
 | `operation` | The `Gordium: Operation` type parameter (Revit families don't say how they open in any standard way) | |
-| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when every check holds: everything the type's `Clear confirmed` stamp records (section 3: the type's `UniqueId`, size and operation, the clear width, height, offset and source, and a mapped maker parameter's current value) equals its value read now (a duplicated or resized type, or any value edited or changed since the architect ticked it, then sends none; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as placed, in absolute heights (the clear bottom no lower than the placed geometry's lowest point, the clear top no higher than its highest, Clear width no more than its width, 1/16 in to spare). `bottom` = the instance's level elevation + its Sill Height + `Clear offset` (the maker's height of the clear opening's bottom above that sill line). `Clear offset` blank (never read as 0): no `stated_clear`. **The sill line is checked against something drawn that doesn't come from the Sill Height parameter**: the bottom of the opening the window cuts in its host wall (or the family's Bottom reference); disagreeing by more than 1/16 in, or not found: no `stated_clear`. Not the family's lowest drawn point: exterior sills and trim hang below the unit on most real windows. **Until the trial shows this check can be made** (section 9), the first reader sends no `stated_clear` at all, so every escape opening's size and sill need review: a sill read from a typed number alone is never enough for R319.2.3 (44 in at most) | Reading the bottom of the wall opening a window cuts, or its Bottom reference (`FamilyInstance.GetReferences`), on real families; the placed geometry's extents |
+| `stated_clear` | Width and height from the `Gordium: Clear …` parameters (makers publish the net clear opening), with `Clear source`, sent only when every check holds: everything the type's `Clear confirmed` stamp records (section 3: the type's `UniqueId`, size and operation, the clear width, height, offset and source, and a mapped maker parameter's current value) equals its value read now (a duplicated or resized type, or any value edited or changed since the architect ticked it, then sends none; a family sized per window, or with size parameters of other names, has no type Width and Height to match, so none is sent either), and the clear opening fits inside the window as placed, in absolute heights (the clear bottom no lower than the placed geometry's lowest point, the clear top no higher than its highest, Clear width no more than its width, 1/16 in to spare). `bottom` = the instance's level elevation + its Sill Height + `Clear offset` (the maker's height of the clear opening's bottom above that sill line). `Clear offset` blank (never read as 0): no `stated_clear`. **The sill line is checked against something drawn that doesn't come from the Sill Height parameter**: the bottom of the opening the window cuts in its host wall (or the family's Bottom reference); disagreeing by more than 1/16 in, or not found: no `stated_clear`. Not the family's lowest drawn point: exterior sills and trim hang below the unit on most real windows. **Shown possible in the trial** (section 9; step 3): the wall opening is the host wall's faces whose `Element.GetGeneratingElementIds` name the window, and on houses 1, 2 and 5 its bottom equals the sill line exactly. A window that cuts nothing found sends no `stated_clear`, so its size and sill need review: a sill read from a typed number alone is never enough for R319.2.3 (44 in at most). `HostObject.FindInserts` is not used: it listed no inserts even on walls the windows had cut | The Bottom reference (`FamilyInstance.GetReferences`), and real makers' families (whose rough openings may be larger than the unit): to try |
 | `frame`, `sashes`, `hinged` | **Not sent by the first reader.** A family's sash geometry is modelled differently by every maker and firm (or not at all), so reading it would be guessing. The measuring code uses the maker's opening alone when no frame is given (`model_measurement/interior/openings.py`); a window with neither gets no value (needs review) | Later, perhaps: families that carry Gordium's own frame and sash parameters |
 | `ground_outside` | The ground at the opening's outside face, only from a ground the architect gave: the Toposolid picked as the ground (as the outside reader's `terrain`), probed 1 ft outside each end of the opening, or finished spot grades there; else **not given**. Never the lot facts' flat ground: that is often Gordium's own assumption (`ground_assumed: "flat"`), and an assumed ground could make a window a grade-floor opening, which needs only 5 sq ft (R319.2.1 exception) | Probing a Toposolid (as the outside reader's to-check) |
 | `area_well` | Not in Revit's vocabulary. First reader: not given. An opening whose clear bottom is below the ground outside is sent with no `ground_outside` (its grade-floor reading needs review), and the marking list asks the architect to draw its well; R319.4's well rules, which need the well, need review | How firms draw wells (a generic model, an in-place family) |
@@ -291,7 +292,10 @@ Each step is its own PR, through the review loop, with its tests:
    egress failures. A room's floor area and ceiling height are measured and recorded too, but no rule reads them
    yet (R312 and R313, room size and ceiling height, aren't brought in). The step builds the sill line's check
    against the wall opening (section 4) and shows on the five houses that it can be made; only then are the escape
-   openings' clear measures in its scope. If it can't be made, they stay not measured, and the step says so. It includes finding enclosed areas with no Room (section 2), without which no
+   openings' clear measures in its scope. If it can't be made, they stay not measured, and the step says so.
+   **Shown (Revit 2027.4, trial run 6, 2026-11-20):** on houses 1, 2 and 5 every escape window's wall opening (the
+   wall faces the window generates) has its bottom on the sill line exactly, so the clear measures are in scope, and
+   the three recordings give every in-scope measure as worked by hand. It includes finding enclosed areas with no Room (section 2), without which no
    `rooms` can be sent. Recorded houses 1, 2 and 5. The step's PR lists every `parts.yaml` measure of each kind as in
    or out of scope, and the `more` values compared: in scope `sleeping_room_floor_area` (and `floor_area_drawn`,
    `least_ceiling_height`), `opening_net_clear_width`, `_height`, `_area`, `opening_sill_height`, `opening_is_door`
@@ -330,6 +334,19 @@ on a room placed afterwards (58 of 58), so an unmarked room never reads as No; a
 nothing. Still to check: that a type's marks read through `Element.GetTypeId()` (Operation set on a window type), and that a Room's placement reads as Revit names it (no `Location`: unplaced;
 `Area` 0 with no boundary loop: not enclosed; `Area` 0 with one: redundant) and its phase from `ROOM_PHASE`. Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
 test only: it is not a house, and gives no verdict).
+
+For rooms and escape windows (step 3), **answered on houses 1, 2 and 5 drawn by the add-in (Revit 2027.4, trial runs
+1 to 6, 2026-11-20; `test_data/interior_houses/recorded/revit/`)**: the bottom of the opening a window cuts is read
+from the host wall's faces whose `Element.GetGeneratingElementIds` name the window, and equals its sill line (level +
+Sill Height) exactly on all six escape windows; `HostObject.FindInserts` listed no inserts even on those cut walls, so
+nothing relies on it; `SpatialElementBoundaryLocation.Finish` gave each room's outline at the walls' faces and the
+room separation lines; the slab top under each room agreed with its level; the enclosed areas (`PlanTopology`) are
+worked out by Revit only in a document it can change, so they are read inside a transaction that is rolled back;
+`FromRoom`/`ToRoom` for the last phase gave each window's room. Two lessons for drawing: walls must be committed and
+regenerated before windows are placed in them (placed in the walls' own transaction, a window was hosted but cut
+nothing), and walls reaching past the level above enclose an area on it too (house 5's basement walls, first drawn a
+foot past its ceiling). Still to try on real models: real makers' window families (their rough openings may be
+larger than the unit), the Bottom reference, sloped and curved ceilings, links and worksets.
 
 ## Sources
 

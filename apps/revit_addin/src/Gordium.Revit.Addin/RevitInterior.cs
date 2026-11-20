@@ -303,7 +303,7 @@ internal static class RevitInterior
         var (width, height) = TypeSize(type);
         var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
         var (faces, failed) = Faces(fi, options);
-        var cut = fi.Host is Wall wall ? Cut(wall, fi, width, options) : (null, null, ["its host isn't a wall"]);
+        var cut = fi.Host is Wall wall ? Cut(wall, fi, options) : (null, null, ["its host isn't a wall"]);
         return new OpeningRecord
         {
             UniqueId = fi.UniqueId,
@@ -349,14 +349,11 @@ internal static class RevitInterior
         return lengths;
     }
 
-    /// <summary>The points of the faces of the host wall that this window or door cut, how they were found, and what
-    /// was looked at. First the faces <c>Element.GetGeneratingElementIds</c> says this window generated; if none (trial
-    /// run 2, 2026-11-20: no wall face named the window), then, only when the window is one of the wall's inserts
-    /// (<c>HostObject.FindInserts</c>), the wall's faces lying wholly within the window's width along the wall
-    /// (<c>HandOrientation</c>, from its point, half its type's width each side, 1/16 in to spare) and wholly between the
-    /// wall's own bottom and top: the opening's sill, head and jambs, which the cut makes and no other face of a straight
-    /// wall is. Never the window's own geometry or its Sill Height.</summary>
-    private static (List<Xyz>? Points, string? By, List<string> Words) Cut(Wall wall, FamilyInstance fi, double? width, Options options)
+    /// <summary>The points of the faces of the host wall that this window or door cut (the faces whose
+    /// <c>Element.GetGeneratingElementIds</c> name it: shown to work on houses 1, 2 and 5 in Revit 2027.4, trial run 6),
+    /// how they were found, and what was looked at (the boxes and the ids generating the wall's faces, for a future
+    /// failure's log). Never the window's own geometry or its Sill Height; nothing found is none.</summary>
+    private static (List<Xyz>? Points, string? By, List<string> Words) Cut(Wall wall, FamilyInstance fi, Options options)
     {
         var words = new List<string>();
         var faces = new List<(Face Face, List<Xyz> Points, ICollection<ElementId> By)>();
@@ -394,25 +391,10 @@ internal static class RevitInterior
         var named = faces.Where(f => f.By.Contains(fi.Id)).SelectMany(f => f.Points).ToList();
         if (named.Count > 0)
             return (named, "the wall's faces Revit says this window generated (GetGeneratingElementIds)", words);
-        var inserts = wall.FindInserts(true, true, true, true);
-        words.Add($"the wall's inserts (FindInserts): {inserts.Count}, this window among them: {inserts.Contains(fi.Id)}");
-        if (!inserts.Contains(fi.Id) || width is not { } w || fi.Location is not LocationPoint lp)
-            return (null, null, words);
-        var along = fi.HandOrientation;
-        var lengthAlong = Math.Sqrt(along.X * along.X + along.Y * along.Y);
-        var box = wall.get_BoundingBox(null);
-        if (lengthAlong < 1e-9 || box is null)
-            return (null, null, words);
-        double U(Xyz p) => ((p.X - lp.Point.X) * along.X + (p.Y - lp.Point.Y) * along.Y) / lengthAlong;
-        var within = faces.Where(f => f.Points.Count > 0 && f.Points.All(p => Math.Abs(U(p)) <= w / 2 + Sixteenth)
-                                      && f.Points.All(p => p.Z > box.Min.Z + Sixteenth && p.Z < box.Max.Z - Sixteenth)).ToList();
-        words.Add($"faces wholly within the window's width and the wall's height: {within.Count}" +
-                  (within.Count > 0 ? $", lowest at {within.Min(f => f.Points.Min(p => p.Z)):0.######} ft, highest at " +
-                                      $"{within.Max(f => f.Points.Max(p => p.Z)):0.######} ft (internal)" : ""));
-        return within.Count == 0
-            ? (null, null, words)
-            : (within.SelectMany(f => f.Points).ToList(),
-               "the wall's faces wholly within this window's width (an insert of the wall: FindInserts)", words);
+        // nothing else stands in for it: HostObject.FindInserts listed no inserts at all even on walls the windows did
+        // cut (trial run 6, Revit 2027.4), so it is no evidence either way and isn't used
+        words.Add("no face of the wall names this window as generating it: the window cut nothing found");
+        return (null, null, words);
     }
 
     internal static Xyz P(XYZ p) => new(p.X, p.Y, p.Z);

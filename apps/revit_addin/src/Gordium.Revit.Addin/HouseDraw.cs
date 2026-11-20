@@ -32,7 +32,7 @@ internal static class HouseDraw
     private static (double X, double Y) P(JsonNode n) => (D(n[0]), D(n[1]));
 
     /// <summary>Draws the house; gives the house's ids to the Revit elements' <c>UniqueId</c>s.</summary>
-    internal static Dictionary<string, string> Draw(RevitApplication app, Document doc, JsonObject house, List<string> words)
+    internal static Dictionary<string, string> Draw(RevitApplication app, Document doc, JsonObject house)
     {
         var plan = MarkSetup.Plan(RevitMarks.Bindings(doc));
         if (plan.FirstOrDefault(s => s.Action == MarkSetupAction.Conflict) is { } conflict)
@@ -40,7 +40,7 @@ internal static class HouseDraw
         RevitMarks.AddMarks(doc, app, plan);
 
         var windows = house["windows"]!.AsArray().Select(n => n!.AsObject()).ToList();
-        var families = windows.ToDictionary(w => w["id"]!.GetValue<string>(), w => WindowFamily(app, doc, w, words));
+        var families = windows.ToDictionary(w => w["id"]!.GetValue<string>(), w => WindowFamily(app, doc, w));
 
         var ids = new Dictionary<string, string>();
         var wallThickness = D(house["exterior_wall"]);
@@ -116,8 +116,9 @@ internal static class HouseDraw
             shape.SetShape(solids);
         }
         doc.Regenerate();
-        // the walls, slabs and ceilings committed and regenerated before any window is placed in them (trial run 5,
-        // 2026-11-20: windows placed in the walls' own transaction were hosted but never inserts, the walls uncut)
+        // the walls, slabs and ceilings committed and regenerated before any window is placed in them: windows placed in
+        // the walls' own transaction were hosted but cut nothing (trial runs 2 to 5, Revit 2027.4); placed after this
+        // commit, each cuts its wall (run 6)
         t.Commit();
         using var t2 = new Transaction(doc, "Gordium: place the windows and Rooms");
         t2.Start();
@@ -136,9 +137,6 @@ internal static class HouseDraw
             var at = new XYZ(cx + ox * wallThickness / 2, cy + oy * wallThickness / 2, z);
             var fi = doc.Create.NewFamilyInstance(at, symbol, wall, levels[z], StructuralType.NonStructural);
             Set(fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM), D(w["sill"]), "Sill Height");
-            doc.Regenerate();
-            words.Add($"window {id} just placed and regenerated: its wall's inserts {wall.FindInserts(true, true, true, true).Count}, " +
-                      $"this window among them {wall.FindInserts(true, true, true, true).Contains(fi.Id)}");
             Set(fi.get_Parameter(Marks.EscapeOpening.Guid), w["escape"]!.GetValue<bool>() ? 1 : 0, Marks.EscapeOpening.Name);
             fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.Set(w["name"]!.GetValue<string>());
             var word = Operations.Words.First(x => Operations.ForOpening(x) == w["operation"]!.GetValue<string>());
@@ -177,33 +175,7 @@ internal static class HouseDraw
             ids[room["id"]!.GetValue<string>()] = r.UniqueId;
         }
         t2.Commit();
-        // after the commit, regenerated again: each window's placement and whether its wall knows it as an insert
-        using (var again = new Transaction(doc, "Gordium: regenerate (rolled back)"))
-        {
-            again.Start();
-            doc.Regenerate();
-            foreach (var w in windows)
-                words.Add(Placement(doc, w["id"]!.GetValue<string>(), (FamilyInstance)doc.GetElement(ids[w["id"]!.GetValue<string>()])));
-            again.RollBack();
-        }
         return ids;
-    }
-
-    /// <summary>A window as placed, in words for the log (ft, internal): its family's placement type, its level and
-    /// Sill Height, its box, its host wall's box, base and height, and whether the wall lists it as an insert.</summary>
-    private static string Placement(Document doc, string id, FamilyInstance fi)
-    {
-        static string Z(BoundingBoxXYZ? b) => b is null ? "none" : $"{b.Min.Z:0.####}..{b.Max.Z:0.####} (x {b.Min.X:0.##}..{b.Max.X:0.##}, y {b.Min.Y:0.##}..{b.Max.Y:0.##})";
-        var level = doc.GetElement(fi.LevelId) as Level;
-        var wall = fi.Host as Wall;
-        var inserts = wall?.FindInserts(true, true, true, true);
-        var baseLevel = wall is null ? null : doc.GetElement(wall.get_Parameter(BuiltInParameter.WALL_BASE_CONSTRAINT)?.AsElementId() ?? ElementId.InvalidElementId) as Level;
-        return $"window {id}: family {fi.Symbol.Family.Name}, placement {fi.Symbol.Family.FamilyPlacementType}, " +
-               $"level {level?.Name} at {level?.ProjectElevation:0.####}, Sill Height {fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM)?.AsDouble():0.####}, " +
-               $"box z {Z(fi.get_BoundingBox(null))}, point {(fi.Location as LocationPoint)?.Point}; host {wall?.Id.Value} " +
-               $"box z {Z(wall?.get_BoundingBox(null))}, base {baseLevel?.Name} offset {wall?.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET)?.AsDouble():0.####} " +
-               $"height {wall?.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM)?.AsDouble():0.####}; its inserts after regenerating " +
-               $"{inserts?.Count}, this window among them {inserts?.Contains(fi.Id)}";
     }
 
     private static double? Length(Element e, MarkDefinition m) =>
@@ -275,7 +247,7 @@ internal static class HouseDraw
     /// <summary>A window family of this window's size, made from Window.rft (whose opening cuts the wall from the
     /// Sill reference plane to the Top one): a frame solid filling the opening, half the template wall's thickness
     /// deep, centred in it. One family per window, so each window has a type of its own. Loaded into the project.</summary>
-    private static FamilySymbol WindowFamily(RevitApplication app, Document project, JsonObject w, List<string> words)
+    private static FamilySymbol WindowFamily(RevitApplication app, Document project, JsonObject w)
     {
         var id = w["id"]!.GetValue<string>();
         double width = D(w["width"]), height = D(w["height"]);
@@ -319,21 +291,10 @@ internal static class HouseDraw
                 var frame = fdoc.FamilyCreate.NewExtrusion(true, loops, sketch, depth);
                 frame.StartOffset = -depth / 2;
                 frame.EndOffset = depth / 2;
-                // the opening it cuts in its wall: the template's own, else one made here on the template's wall (trial run 3,
-                // 2026-11-20: the drawn walls showed no cut and no insert)
-                var openings = new FilteredElementCollector(fdoc).OfClass(typeof(Opening)).GetElementCount();
-                var host = new FilteredElementCollector(fdoc).OfClass(typeof(Wall)).FirstElement() as Wall;
-                words.Add($"{name}: Window.rft has {openings} opening(s) and {(host is null ? "no" : "a")} host wall; planes left {left}, right {right}, sill {sill}, top {head}, wall centre y {y}; the template wall's box {(host?.get_BoundingBox(null) is { } hb ? $"{hb.Min} .. {hb.Max}" : "none")}");
-                if (openings == 0)
-                {
-                    if (host is null)
-                        throw new InvalidOperationException("Window.rft has no opening and no wall to cut one in");
-                    var cut = new CurveArray();
-                    for (var i = 0; i < 4; i++)
-                        cut.Append(Line.CreateBound(corners[i], corners[(i + 1) % 4]));
-                    fdoc.FamilyCreate.NewOpening(host, cut);
-                    words.Add($"{name}: made an opening {width} x {height} ft in the template's wall");
-                }
+                // the opening it cuts in its wall is the template's own (Revit 2027.4's Window.rft has one): without it
+                // nothing would be cut, and the reader would find no wall opening (and send no clear opening)
+                if (new FilteredElementCollector(fdoc).OfClass(typeof(Opening)).GetElementCount() == 0)
+                    throw new InvalidOperationException("Window.rft has no opening to cut the wall");
                 t.Commit();
             }
             var family = fdoc.LoadFamily(project) ?? throw new InvalidOperationException($"{name} didn't load into the project");
