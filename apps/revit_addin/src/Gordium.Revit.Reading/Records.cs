@@ -118,6 +118,19 @@ public sealed record MarkedElement
 
     /// <summary>The type marks (read from the element's type), by the mark's GUID.</summary>
     public IReadOnlyDictionary<Guid, MarkValue> Type { get; init; } = new Dictionary<Guid, MarkValue>();
+
+    /// <summary>A window's or door's type's Manufacturer (<c>ALL_MODEL_MANUFACTURER</c>), as typed; null when not set.</summary>
+    public string? TypeManufacturer { get; init; }
+
+    /// <summary>Its type's Model (<c>ALL_MODEL_MODEL</c>), as typed; null when not set.</summary>
+    public string? TypeModel { get; init; }
+
+    /// <summary>Its type's own Width and Height, feet, read as <see cref="OpeningRecord.TypeWidth"/> is; null when the
+    /// type has none.</summary>
+    public double? TypeWidth { get; init; }
+
+    /// <inheritdoc cref="TypeWidth"/>
+    public double? TypeHeight { get; init; }
 }
 
 /// <summary>Whether a Room is a room on the plan (Revit's own words for the others).</summary>

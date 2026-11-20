@@ -1,0 +1,110 @@
+{
+  "format": "gordium.maker_clear_openings/1",
+  "version": "2026-11-20",
+  "about": "Window makers' published formulas for a window's net clear opening (sash fully open), curated by hand from the maker's own PDF, each entry checked by a test against rows of the maker's own table (Gordium.Revit.Reading.Tests/MakerClearOpeningsTests.cs). Used only to pre-fill a window type's Gordium: Clear width, Clear height and Clear source as a draft the architect confirms (docs/revit/revit_interior_reading_design.md, section 3): never a confirmation, never a pass. All lengths are inches. An entry is added only when its formula was reproduced against a published row of the PDF actually opened (Andersen A-Series hung, 2026-11-20: its size guide prints the formulas and a symbol for sizes that meet egress, but no clear-opening row to reproduce, so it is not here).",
+  "entries": [
+    {
+      "id": "marvin_ultimate_casement",
+      "maker": "Marvin",
+      "product_line": "Ultimate Casement (UCA), full frame",
+      "operation": "Casement",
+      "match": {
+        "manufacturer": ["Marvin", "Marvin Windows and Doors", "Marvin Windows & Doors"],
+        "model": ["Ultimate Casement", "Marvin Ultimate Casement", "UCA"]
+      },
+      "inputs": {
+        "width": "the type's Width is the frame outside measurement (Marvin's \"Frame OSM\" in the formula, the \"Frame Size\" column of Standard Unit Measurements: Casement): accepted only when it equals one of that column's widths",
+        "height": "the type's Height is the frame outside measurement (\"Frame Size\" height column): accepted only when it equals one of that column's heights",
+        "why_standard_sizes_only": "a family's Width may be the frame or the rough opening, and Gordium can't tell which from the number alone. Marvin's standard frame, rough-opening and masonry-opening sizes never coincide (rough = frame + 1 in wide, + 1/2 in high), so a Width and Height that are both a listed frame size can only be the frame. A rough opening, a masonry opening or a custom size gets no pre-fill."
+      },
+      "standard_sizes": {
+        "source": "marvin_adm",
+        "width": [
+          {"cn": "16", "masonry": 16.5, "rough": 17, "frame": 16},
+          {"cn": "18", "masonry": 18.5, "rough": 19, "frame": 18},
+          {"cn": "20", "masonry": 20.5, "rough": 21, "frame": 20},
+          {"cn": "24", "masonry": 24.5, "rough": 25, "frame": 24},
+          {"cn": "26", "masonry": 26.5, "rough": 27, "frame": 26},
+          {"cn": "28", "masonry": 28.5, "rough": 29, "frame": 28},
+          {"cn": "30", "masonry": 30.5, "rough": 31, "frame": 30},
+          {"cn": "32", "masonry": 32.5, "rough": 33, "frame": 32},
+          {"cn": "36", "masonry": 36.5, "rough": 37, "frame": 36},
+          {"cn": "40", "masonry": 40.5, "rough": 41, "frame": 40}
+        ],
+        "height": [
+          {"cn": "14", "masonry": 13.375, "rough": 13.625, "frame": 13.125},
+          {"cn": "16", "masonry": 15.375, "rough": 15.625, "frame": 15.125},
+          {"cn": "18", "masonry": 17.375, "rough": 17.625, "frame": 17.125},
+          {"cn": "20", "masonry": 19.375, "rough": 19.625, "frame": 19.125},
+          {"cn": "24", "masonry": 23.375, "rough": 23.625, "frame": 23.125},
+          {"cn": "28", "masonry": 27.375, "rough": 27.625, "frame": 27.125},
+          {"cn": "32", "masonry": 31.375, "rough": 31.625, "frame": 31.125},
+          {"cn": "36", "masonry": 35.375, "rough": 35.625, "frame": 35.125},
+          {"cn": "40", "masonry": 39.375, "rough": 39.625, "frame": 39.125},
+          {"cn": "44", "masonry": 43.375, "rough": 43.625, "frame": 43.125},
+          {"cn": "48", "masonry": 47.375, "rough": 47.625, "frame": 47.125},
+          {"cn": "54", "masonry": 53.375, "rough": 53.625, "frame": 53.125},
+          {"cn": "56", "masonry": 55.375, "rough": 55.625, "frame": 55.125},
+          {"cn": "60", "masonry": 59.375, "rough": 59.625, "frame": 59.125},
+          {"cn": "64", "masonry": 63.375, "rough": 63.625, "frame": 63.125},
+          {"cn": "72", "masonry": 71.375, "rough": 71.625, "frame": 71.125},
+          {"cn": "78", "masonry": 77.375, "rough": 77.625, "frame": 77.125},
+          {"cn": "84", "masonry": 83.375, "rough": 83.625, "frame": 83.125},
+          {"cn": "92", "masonry": 91.375, "rough": 91.625, "frame": 91.125},
+          {"cn": "96", "masonry": 95.375, "rough": 95.625, "frame": 95.125}
+        ]
+      },
+      "formula": {
+        "clear_width": {"frame_width_minus": 7.125},
+        "clear_height": {"frame_height_minus": 5.125},
+        "source": "marvin_adm"
+      },
+      "valid": {
+        "frame_width_min": 20,
+        "frame_width_max": 36,
+        "frame_height_max": 71.125,
+        "why": "The width formula is Marvin's for a frame 20 in and wider (a narrower frame has another formula and a different hinge). Above 36 x 102, 40 x 92 or 44 x 71 1/8 in Marvin fits custodial sash limiters that limit travel, so the formula's full opening no longer holds: Gordium pre-fills only frames inside all three (at most 36 in wide and 71 1/8 in high), whichever way that sentence is read."
+      },
+      "caveats": "the formulas are Marvin's \"with Standard Screen\"; a Window Opening Control Device limits the sash to under 4 in until released; custodial sash limiters on large frames limit travel; frames 20 to under 24 in wide take an 18 in wash/egress hinge and wider frames a 22 in one; the Tall Bottom Rail option isn't named in the formulas",
+      "checked_rows": [
+        {"cn": "2864", "frame_width": 28, "frame_height": 63.125, "published": {"clear_width": "1-8 57/64", "clear_height": "4-10 1/64", "area_ft2": 8.42, "e": true}, "page": "UCA UCANF-6 (PDF page 8)"},
+        {"cn": "3660", "frame_width": 36, "frame_height": 59.125, "published": {"clear_width": "2-4 57/64", "clear_height": "4-6 1/64", "area_ft2": 10.84, "e": true}, "page": "UCA UCANF-8 (PDF page 10)"},
+        {"cn": "2448", "frame_width": 24, "frame_height": 47.125, "published": {"clear_width": "1-4 57/64", "clear_height": "3-6 1/64", "area_ft2": 4.93, "e": false}, "page": "UCA UCANF-5 (PDF page 7)"},
+        {"cn": "2060", "frame_width": 20, "frame_height": 59.125, "published": {"clear_width": "1-0 57/64", "clear_height": "4-6 1/64", "area_ft2": 4.83, "e": false}, "page": "UCA UCANF-5 (PDF page 7)"}
+      ],
+      "checked_rows_note": "Marvin's table prints each clear width and height 1/64 in more than its own formula gives from the frame size (28 - 7 1/8 = 20 7/8 in, the table 20 57/64 in): the formula is the smaller, so the pre-fill is never larger than Marvin's table. The tests hold the formula to within 1/64 in of every row, and never above it, and the printed area (to 0.01 sq ft) between the formula's area and the printed width times height (CN 2060: 4.828 and 4.835, printed 4.83; CN 2864: 8.408 and 8.417, printed 8.42).",
+      "sources": {
+        "marvin_adm": {
+          "title": "Marvin Architectural Detail Manual: Ultimate Casement, Awning and Picture (UCA UCANF, 14131101)",
+          "url": "https://marvin.com/f/1019562/x/eaabd5bb0d/adm-ultimate-casement-awning-picture.pdf",
+          "accessed": "2026-11-20",
+          "sha256": "19e504b6528f38dd3ce5ffd488885b2c7d9a0e1cd9ee8f509b5864508115b411",
+          "formula_page": "UCA UCANF-25 (PDF page 27), Ver 2019.3 2019-06-24",
+          "formula_quote": "Egress Formulas with Standard Screen / Clear Opening Width: / Frame OSM 20\" (508) and greater / Clear Opening Width = Frame OSM Width - 7 1/8\" (181) / Frame OSM Width less than 20\" (508) / Clear Opening Width = Frame OSM Width - 9 9/16\" (243) / Clear Opening Height = Frame OSM Height - 5 1/8\" (130) / Clear Opening Area (ft. ^2) = (Clear Opening Width x Clear Opening Height) / 144",
+          "sizes_page": "UCA UCANF-29 (PDF page 31), Standard Unit Measurements: Casement, Ver 2019.3 2019-06-24",
+          "sizes_quote": "28 2-4 1/2 (724) 2-5 (737) 2-4 (711) ... 64 5-3 3/8 (1610) 5-3 5/8 (1616) 5-3 1/8 (1603)",
+          "table_page": "UCA UCANF-6 (PDF page 8), Egress and Vent Openings: Casement - Full and Narrow Frame",
+          "table_quote": "2864 1-8 57/64 (531) 4-10 1/64 (1473) 8.42 (0.78) E 1-11 1/64 (585) 4-10 1/64 (1473) 9.27 (0.86)",
+          "caveat_pages": "UCA UCANF-1 (PDF page 3): \"Frame OM width of 20\" (508) to under 24\" (610) use an 18\" (457) wash/egress hinge\", \"Frame OM widths greater than 24\" (610) use a 22\" (559) wash/egress hinge\", \"The standard operation of the WOCD limits the operation of the sash to an opening of less than 4\" (102)\"; UCA UCANF-2 (PDF page 4): \"If Casement frame OM is larger than 36\" (914) x 102\" (2591), 40\" (1016) x 92\" (2337), or 44\" (1118) x 71.125\" (1807) custodial limiters will be applied, limiting travel\""
+        }
+      }
+    }
+  ],
+  "known_makers": [
+    {
+      "maker": "Marvin",
+      "manufacturer": ["Marvin", "Marvin Windows and Doors", "Marvin Windows & Doors"],
+      "clear_opening_pdfs": [{"title": "Ultimate Casement, Awning and Picture ADM", "url": "https://marvin.com/f/1019562/x/eaabd5bb0d/adm-ultimate-casement-awning-picture.pdf"}]
+    },
+    {
+      "maker": "Andersen",
+      "manufacturer": ["Andersen", "Andersen Windows", "Andersen Windows & Doors", "Andersen Corporation"],
+      "clear_opening_pdfs": [{"title": "A-Series hung windows size guide", "url": "https://www.andersenwindows.com/-/media/aw/files/technical-docs/sizing/sizing-windows--a-series-hung.pdf"}]
+    },
+    {
+      "maker": "Pella",
+      "manufacturer": ["Pella", "Pella Corporation", "Pella Windows and Doors"],
+      "clear_opening_pdfs": [{"title": "Pella Reserve casement ADM", "url": "https://media.pella.com/professional/adm/Clad-Wood/Pella-Reserve_Casement.pdf"}]
+    }
+  ]
+}
