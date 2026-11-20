@@ -36,3 +36,14 @@ The model has several errors (building off the lot, rear setback too small, over
 
 `spreadsheet_design_report.xlsx` is Gordium's own report for this design, in the architects' format
 (`python -m project_report spreadsheet_design.yaml`; generated, never hand-edited; CI checks it is current).
+
+## Read in Revit
+
+`revit_reading.json` is this model drawn in Revit 2027.4 and read back by the Revit add-in (recorded on the Windows
+trial laptop, 2026-11-19): each closed Site outline a property line (the lot picked by `lot_id`, as in Rhino), the
+house one element in a building category made of exactly the faces Rhino's reader sends, every other curve a model
+line. `packages/design_checker/tests/test_real_site_revit.py` holds it to what the Rhino reader reads from the same
+model: the same description (every point within a millionth of a foot) and the same verdicts (5 complies, 18 needs
+review, 9 not checked: the house reaches past the lot, so its yards and coverage can't be measured, in either host).
+Re-record with `apps/revit_addin/tests/Gordium.Revit.Reading.Tests/real_site.py export`, the add-in's
+`real_site_request.json`, then `real_site.py compare`.
