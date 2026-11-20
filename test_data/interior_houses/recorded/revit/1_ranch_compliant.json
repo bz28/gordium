@@ -8,19 +8,19 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "w1": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015f9",
-    "w2": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015fb",
-    "w3": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015fd",
-    "bed1": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015ff",
-    "bed2": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-00001601",
-    "living": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-00001602"
+    "w1": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9",
+    "w2": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb",
+    "w3": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
+    "bed1": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
+    "bed2": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
+    "living": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015ff",
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
         "name": "Bedroom 1 (1)",
         "sleeping": true,
         "floor": [
@@ -50,45 +50,6 @@
               8
             ],
             [
-              0,
-              0,
-              8
-            ],
-            [
-              12,
-              0,
-              8
-            ],
-            [
-              6,
-              5.5,
-              8
-            ]
-          ],
-          [
-            [
-              0,
-              11,
-              8
-            ],
-            [
-              0,
-              0,
-              8
-            ],
-            [
-              0,
-              0,
-              8
-            ],
-            [
-              6,
-              5.5,
-              8
-            ]
-          ],
-          [
-            [
               12,
               0,
               8
@@ -99,42 +60,15 @@
               8
             ],
             [
-              12,
-              11,
-              8
-            ],
-            [
-              6,
-              5.5,
-              8
-            ]
-          ],
-          [
-            [
-              12,
-              11,
-              8
-            ],
-            [
-              12,
-              11,
-              8
-            ],
-            [
               0,
               11,
-              8
-            ],
-            [
-              6,
-              5.5,
               8
             ]
           ]
         ]
       },
       {
-        "id": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-00001601",
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
         "name": "Bedroom 2 (2)",
         "sleeping": true,
         "floor": [
@@ -164,45 +98,6 @@
               8
             ],
             [
-              12,
-              0,
-              8
-            ],
-            [
-              23,
-              0,
-              8
-            ],
-            [
-              17.5,
-              5,
-              8
-            ]
-          ],
-          [
-            [
-              12,
-              10,
-              8
-            ],
-            [
-              12,
-              0,
-              8
-            ],
-            [
-              12,
-              0,
-              8
-            ],
-            [
-              17.5,
-              5,
-              8
-            ]
-          ],
-          [
-            [
               23,
               0,
               8
@@ -213,42 +108,15 @@
               8
             ],
             [
-              23,
-              10,
-              8
-            ],
-            [
-              17.5,
-              5,
-              8
-            ]
-          ],
-          [
-            [
-              23,
-              10,
-              8
-            ],
-            [
-              23,
-              10,
-              8
-            ],
-            [
               12,
               10,
-              8
-            ],
-            [
-              17.5,
-              5,
               8
             ]
           ]
         ]
       },
       {
-        "id": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-00001602",
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602",
         "name": "Living room (3)",
         "sleeping": false,
         "floor": [
@@ -273,22 +141,10 @@
         "ceilings": [
           [
             [
-              0,
-              11,
-              8
-            ],
-            [
               23,
               11,
               8
             ],
-            [
-              23,
-              25,
-              8
-            ]
-          ],
-          [
             [
               23,
               25,
@@ -310,9 +166,9 @@
     ],
     "openings": [
       {
-        "id": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015f9",
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9",
         "name": "Gordium test window w1 (26 x 36 in): Family1 (Window 1)",
-        "room": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015ff",
+        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015ff",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -323,9 +179,9 @@
         }
       },
       {
-        "id": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015fb",
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb",
         "name": "Gordium test window w2 (30 x 60 in): Family2 (Window 2)",
-        "room": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-00001601",
+        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001601",
         "escape": true,
         "operation": "double_hung",
         "stated_clear": {
@@ -336,9 +192,9 @@
         }
       },
       {
-        "id": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015fd",
+        "id": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
         "name": "Gordium test window w3 (60 x 60 in): Family3 (Window 3)",
-        "room": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-00001602",
+        "room": "62815a77-36ea-469e-a7ed-72afbe9694aa-00001602",
         "escape": false,
         "operation": "fixed"
       }
@@ -353,18 +209,18 @@
   "drawn": [],
   "notes": [
     {
-      "part": "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015fd",
+      "part": "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fd",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     }
   ],
   "evidence": {
-    "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015f9": {
+    "62815a77-36ea-469e-a7ed-72afbe9694aa-000015f9": {
       "sill_line": 2.5,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 2.5..5.5, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 5584, wall 5584 a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625 (this window), OST_Windows 5627"
+        "host (FamilyInstance.Host) 5584, wall 5584 62815a77-36ea-469e-a7ed-72afbe9694aa-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625 (this window), OST_Windows 5627"
       ],
       "wall_opening_bottom": 2.5,
       "placed": {
@@ -373,12 +229,12 @@
         "width": 2.166666666666666
       }
     },
-    "a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015fb": {
+    "62815a77-36ea-469e-a7ed-72afbe9694aa-000015fb": {
       "sill_line": 2,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 2..7, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 5584, wall 5584 a6931147-65e0-47f3-ba62-ba71b14ff4bd-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625, OST_Windows 5627 (this window)"
+        "host (FamilyInstance.Host) 5584, wall 5584 62815a77-36ea-469e-a7ed-72afbe9694aa-000015d0: 14 faces; ids generating them: OST_Walls 5584, OST_Walls 5585, OST_Walls 5587, OST_Windows 5625, OST_Windows 5627 (this window)"
       ],
       "wall_opening_bottom": 2,
       "placed": {

@@ -8,18 +8,18 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "w5": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125c",
-    "w6": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125e",
-    "bed3": "f147614e-931d-44fa-b63b-d6adb45f953a-00001260",
-    "bed4": "f147614e-931d-44fa-b63b-d6adb45f953a-00001262",
-    "s1": "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f"
+    "w5": "8bd401f7-e204-45aa-ab02-a74089bbe481-0000125c",
+    "w6": "8bd401f7-e204-45aa-ab02-a74089bbe481-0000125e",
+    "bed3": "8bd401f7-e204-45aa-ab02-a74089bbe481-00001260",
+    "bed4": "8bd401f7-e204-45aa-ab02-a74089bbe481-00001262",
+    "s1": "8bd401f7-e204-45aa-ab02-a74089bbe481-0000126e"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-00001260",
+        "id": "8bd401f7-e204-45aa-ab02-a74089bbe481-00001260",
         "name": "Bedroom 3 (1)",
         "sleeping": true,
         "floor": [
@@ -49,45 +49,6 @@
               18
             ],
             [
-              0,
-              0,
-              18
-            ],
-            [
-              10,
-              0,
-              18
-            ],
-            [
-              5,
-              5,
-              18
-            ]
-          ],
-          [
-            [
-              0,
-              10,
-              18
-            ],
-            [
-              0,
-              0,
-              18
-            ],
-            [
-              0,
-              0,
-              18
-            ],
-            [
-              5,
-              5,
-              18
-            ]
-          ],
-          [
-            [
               10,
               0,
               18
@@ -98,42 +59,15 @@
               18
             ],
             [
-              10,
-              10,
-              18
-            ],
-            [
-              5,
-              5,
-              18
-            ]
-          ],
-          [
-            [
-              10,
-              10,
-              18
-            ],
-            [
-              10,
-              10,
-              18
-            ],
-            [
               0,
               10,
-              18
-            ],
-            [
-              5,
-              5,
               18
             ]
           ]
         ]
       },
       {
-        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-00001262",
+        "id": "8bd401f7-e204-45aa-ab02-a74089bbe481-00001262",
         "name": "Bedroom 4 (2)",
         "sleeping": true,
         "floor": [
@@ -163,84 +97,18 @@
               18
             ],
             [
-              10,
-              0,
-              18
-            ],
-            [
               18,
               0,
               18
             ],
             [
               18,
-              3.333333333333333,
-              18
-            ],
-            [
-              14.8,
-              6,
-              18
-            ]
-          ],
-          [
-            [
-              10,
-              10,
-              18
-            ],
-            [
-              10,
-              0,
-              18
-            ],
-            [
-              10,
-              0,
-              18
-            ],
-            [
-              14.8,
-              6,
-              18
-            ]
-          ],
-          [
-            [
-              18,
-              10,
-              18
-            ],
-            [
-              18,
-              10,
-              18
-            ],
-            [
-              14.8,
-              6,
-              18
-            ],
-            [
-              18,
-              3.333333333333334,
-              18
-            ]
-          ],
-          [
-            [
-              18,
               10,
               18
             ],
             [
               10,
               10,
-              18
-            ],
-            [
-              14.8,
-              6,
               18
             ]
           ],
@@ -256,62 +124,6 @@
               14
             ],
             [
-              19,
-              2.5,
-              17
-            ]
-          ],
-          [
-            [
-              18,
-              0,
-              18
-            ],
-            [
-              18,
-              0,
-              18
-            ],
-            [
-              19,
-              2.5,
-              17
-            ],
-            [
-              18,
-              3.333333333333333,
-              18
-            ]
-          ],
-          [
-            [
-              22,
-              0,
-              14
-            ],
-            [
-              22,
-              10,
-              14
-            ],
-            [
-              22,
-              10,
-              14
-            ],
-            [
-              19,
-              2.5,
-              17
-            ]
-          ],
-          [
-            [
-              22,
-              10,
-              14
-            ],
-            [
               22,
               10,
               14
@@ -320,16 +132,6 @@
               18,
               10,
               18
-            ],
-            [
-              18,
-              3.333333333333334,
-              18
-            ],
-            [
-              19,
-              2.5,
-              17
             ]
           ]
         ]
@@ -337,9 +139,9 @@
     ],
     "openings": [
       {
-        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125c",
+        "id": "8bd401f7-e204-45aa-ab02-a74089bbe481-0000125c",
         "name": "Gordium test window w5 (22 x 36 in): Family4 (Window 5)",
-        "room": "f147614e-931d-44fa-b63b-d6adb45f953a-00001260",
+        "room": "8bd401f7-e204-45aa-ab02-a74089bbe481-00001260",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -350,9 +152,9 @@
         }
       },
       {
-        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125e",
+        "id": "8bd401f7-e204-45aa-ab02-a74089bbe481-0000125e",
         "name": "Gordium test window w6 (28 x 36 in): Family5 (Window 6)",
-        "room": "f147614e-931d-44fa-b63b-d6adb45f953a-00001262",
+        "room": "8bd401f7-e204-45aa-ab02-a74089bbe481-00001262",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -365,7 +167,7 @@
     ],
     "stairs": [
       {
-        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f",
+        "id": "8bd401f7-e204-45aa-ab02-a74089bbe481-0000126e",
         "name": "Gordium test stair s1",
         "bottom_elevation": 0,
         "nosings": [
@@ -588,11 +390,6 @@
           [
             [
               52.5,
-              1.5,
-              9
-            ],
-            [
-              52.5,
               0,
               9
             ],
@@ -603,57 +400,6 @@
             ],
             [
               54.166666666666664,
-              2.6000000000000005,
-              9
-            ],
-            [
-              53.57913669064748,
-              2.7410071942446046,
-              9
-            ]
-          ],
-          [
-            [
-              52.5,
-              3,
-              9
-            ],
-            [
-              52.5,
-              1.5000000000000004,
-              9
-            ],
-            [
-              53.57913669064748,
-              2.7410071942446046,
-              9
-            ]
-          ],
-          [
-            [
-              54.166666666666664,
-              3,
-              9
-            ],
-            [
-              53.80434782608695,
-              3,
-              9
-            ],
-            [
-              53.57913669064748,
-              2.7410071942446046,
-              9
-            ],
-            [
-              54.166666666666664,
-              2.6000000000000005,
-              9
-            ]
-          ],
-          [
-            [
-              53.80434782608695,
               3,
               9
             ],
@@ -661,28 +407,6 @@
               52.5,
               3,
               9
-            ],
-            [
-              53.57913669064748,
-              2.7410071942446046,
-              9
-            ]
-          ],
-          [
-            [
-              55.52536231884058,
-              0,
-              18
-            ],
-            [
-              65,
-              0,
-              18
-            ],
-            [
-              59.6849593495935,
-              1.2756097560975608,
-              18
             ]
           ],
           [
@@ -692,42 +416,8 @@
               18
             ],
             [
-              55.52536231884058,
-              0,
-              18
-            ],
-            [
-              59.6849593495935,
-              1.275609756097561,
-              18
-            ],
-            [
-              54.166666666666664,
-              2.6000000000000005,
-              18
-            ]
-          ],
-          [
-            [
               65,
               0,
-              18
-            ],
-            [
-              65,
-              2.905555555555554,
-              18
-            ],
-            [
-              59.6849593495935,
-              1.2756097560975608,
-              18
-            ]
-          ],
-          [
-            [
-              65,
-              2.905555555555554,
               18
             ],
             [
@@ -738,16 +428,6 @@
             [
               54.166666666666664,
               3,
-              18
-            ],
-            [
-              54.166666666666664,
-              2.6000000000000005,
-              18
-            ],
-            [
-              59.6849593495935,
-              1.2756097560975608,
               18
             ]
           ]
@@ -766,18 +446,18 @@
   ],
   "notes": [
     {
-      "part": "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f",
+      "part": "8bd401f7-e204-45aa-ab02-a74089bbe481-0000126e",
       "field": "handrails",
       "why": "railings (and their handrails) are read with the guards, a later step"
     }
   ],
   "evidence": {
-    "f147614e-931d-44fa-b63b-d6adb45f953a-0000125c": {
+    "8bd401f7-e204-45aa-ab02-a74089bbe481-0000125c": {
       "sill_line": 12,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 12..15, wall box z 10..18.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 4674, wall 4674 f147614e-931d-44fa-b63b-d6adb45f953a-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700 (this window), OST_Windows 4702"
+        "host (FamilyInstance.Host) 4674, wall 4674 8bd401f7-e204-45aa-ab02-a74089bbe481-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700 (this window), OST_Windows 4702"
       ],
       "wall_opening_bottom": 12,
       "placed": {
@@ -786,12 +466,12 @@
         "width": 1.833333333333334
       }
     },
-    "f147614e-931d-44fa-b63b-d6adb45f953a-0000125e": {
+    "8bd401f7-e204-45aa-ab02-a74089bbe481-0000125e": {
       "sill_line": 11,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 11..14, wall box z 10..18.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 4674, wall 4674 f147614e-931d-44fa-b63b-d6adb45f953a-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700, OST_Windows 4702 (this window)"
+        "host (FamilyInstance.Host) 4674, wall 4674 8bd401f7-e204-45aa-ab02-a74089bbe481-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700, OST_Windows 4702 (this window)"
       ],
       "wall_opening_bottom": 11,
       "placed": {
@@ -801,12 +481,12 @@
       }
     },
     "stairs": {
-      "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f": {
+      "8bd401f7-e204-45aa-ab02-a74089bbe481-0000126e": {
         "revit_layer": [
-          "run 4719 Straight: base 0, top 10 (relative), risers 16, treads 15, begins/ends with riser True/True, width 36 in; path (52.5,1.5,0) (65,1.5,0)",
+          "run 4718 Straight: base 0, top 10 (relative), risers 16, treads 15, begins/ends with riser True/True, width 36 in; path (52.5,1.5,0) (65,1.5,0)",
           "its geometry: 186 faces (31 facing up, 0 curved), failed False; box 52.5,0,0 to 65.042,3,10",
           "tread tops (z, internal): 0.375 0.625 1 1.25 1.625 1.875 2.25 2.5 2.875 3.125 3.5 3.75 4.125 4.375 4.75 5 5.375 5.625 6 6.25 6.625 6.875 7.25 7.5 7.875 8.125 8.5 8.75 9.125 9.75 9.375",
-          "around it: 7 elements: Floors Floor at the foot of s1 (6 faces), Floors Floor at the head of s1 (6 faces), Ceilings Overhead 1 of s1 (6 faces), Ceilings Overhead 2 of s1 (6 faces), Walls Gordium test wall 6 in (6 faces), Walls Gordium test wall 6 in (6 faces), Stairs Stair (186 faces)"
+          "around it: 6 elements: Floors Upper floor at the head of s1, with its stairwell opening (10 faces), Floors Floor at the foot of s1 (6 faces), Ceilings Overhead 1 of s1 (6 faces), Walls Gordium test wall 6 in (6 faces), Walls Gordium test wall 6 in (6 faces), Stairs Stair (186 faces)"
         ],
         "tread_faces": 16,
         "tread_groups": [
@@ -1145,7 +825,7 @@
     }
   },
   "revit_layer": [
-    "stair 4718 \u0022Gordium test stair s1\u0022: base 0, top 10, riser 7.5 in, tread 10 in, risers 16, the stair element\u0027s own geometry 186 faces",
+    "stair 4717 \u0022Gordium test stair s1\u0022: base 0, top 10, riser 7.5 in, tread 10 in, risers 16, the stair element\u0027s own geometry 186 faces",
     "stairs: 1 component stairs (1 runs), 0 other elements that could be one",
     "enclosed areas on Level 1: 0 (0 with no Room)",
     "enclosed areas on Level 2: 2 (0 with no Room)"
