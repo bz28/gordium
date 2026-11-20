@@ -19,6 +19,7 @@
 | `answer_key.yaml` | For each egress rule: what the drawings give, the arithmetic, and the outcome (complies / fails / needs review) |
 | `hand_check.yaml` | All 115 rules of New York State's egress rulebook worked by hand before the checker ran: what the code says about the house (`truth`) and what the checker should say given the description (`predicted`) |
 | `evaluation.md` | **The full egress check on this house**: every rule's answer from the checker beside the hand-check, and why they differ. Start here |
+| `layout.yaml` | Where everything stands, so a host (Revit) can draw it: every room, wall, marked window and the front door placed on each level from the plans' dimension strings (each chain closes on the sheet's overall), the stairs and railings placed but not drawn (the drawings give no risers, treads or balusters to draw), and every assumption with its effect (none changes a measure). `packages/model_measurement/tests/test_real_house_layout.py` checks it is self-consistent and house.yaml's |
 
 `packages/model_measurement/tests/test_real_houses.py` checks the first three; `packages/design_checker/tests/test_real_house_egress.py` checks the full check against `hand_check.yaml` and `evaluation.md`.
 
