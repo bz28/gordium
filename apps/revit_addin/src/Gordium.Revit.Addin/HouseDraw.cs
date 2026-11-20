@@ -411,8 +411,14 @@ internal static class HouseDraw
         topType.EndOrTopTermination = ElementId.InvalidElementId;
         type.TopRailType = topType.Id;
         type.TopRailHeight = topHeight;
-        type.PrimaryHandRailPosition = HandRailPosition.None;
-        type.SecondaryHandRailPosition = HandRailPosition.None;
+        // no handrails of the type's own: a handrail's position can be set only where the type has one (Revit 2027.4,
+        // trial step 5 run 1: "The rail has no primary hand rail" on a type with none); where it has none, there is none
+        if (type.PrimaryHandrailType != ElementId.InvalidElementId)
+            type.PrimaryHandRailPosition = HandRailPosition.None;
+        if (type.SecondaryHandrailType != ElementId.InvalidElementId)
+            type.SecondaryHandRailPosition = HandRailPosition.None;
+        log.Add($"railing type {name}: from \"{basic.Name}\", its own handrails {type.PrimaryHandrailType.Value} / {type.SecondaryHandrailType.Value} " +
+                $"(positions {type.PrimaryHandRailPosition} / {type.SecondaryHandRailPosition})");
         var structure = type.RailStructure;
         for (var i = structure.GetNonContinuousRailCount() - 1; i >= 0; i--)
             structure.RemoveNonContinuousRail(i);
