@@ -542,7 +542,13 @@ Each step is its own PR, through the review loop, with its tests:
    the drawing and must come back as that empty list (houses 1 and 6 `stairs: []`; houses 1, 2, 5 and 6 `guards: []`;
    house 4 `doors: []`), every step-5 measure as before. No hand-worked house has a `has_none` claim, so none is ticked
    and the recording's claims must be none (`recording_problems` compares the claims sent and taken with the house's
-   own). House 3 has no empty list: it stays step 4.
+   own). House 3 has no empty list: it stays step 4. The real house (`test_data/real_houses/orangetown_ny_80_south_william/`,
+   placed by its `layout.yaml`) is the first with claims: its seven are ticked and, nothing of those kinds being drawn,
+   must each come back, bringing into scope what `has_none.KINDS` says each brings (`recordings.claimed`): its part
+   kinds as empty lists, and on every escape opening `opening_into_patio_cover` and `opening_under_projection` (false).
+   A claim that doesn't come back fails the recording. A host sends every underside over a room, the floor above's
+   rooms' ceilings over its own, so "no sleeping lofts" takes a room's ceiling as the pieces not wholly over lower
+   ones (`has_none._top`): before, every two-storey reading refused it.
 
 ## 8. Decisions (Ben, 2026-11-19: "go w ur recs")
 

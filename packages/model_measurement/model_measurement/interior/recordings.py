@@ -22,13 +22,17 @@ import sys
 from pathlib import Path
 
 import yaml
-from shapely.geometry import Point, Polygon
+from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry.polygon import orient
+from shapely.ops import split, unary_union
 
 from model_measurement.interior import measure
+from model_measurement.interior.has_none import KINDS as NONE_KINDS
 from model_measurement.interior.read import INCHES
 
 REPO = Path(__file__).resolve().parents[4]
 HOUSES = REPO / "test_data" / "interior_houses"
+REAL = REPO / "test_data" / "real_houses"       # real houses transcribed from their drawings, each placed by a layout.yaml
 RECORDED = HOUSES / "recorded"
 
 # Section 7, step 3 (rooms and marked escape windows): the measures read. A sleeping room's floor area, the floor drawn
@@ -89,10 +93,39 @@ STEPS = {
                                      "guard": set()},
         "4_loft": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "guard": GUARDS, "egress_door": set()},
         "5_basement_window_well": {**ROOMS_AND_WINDOWS, "egress_door": {"door_side_hinged"}, "guard": set()},
-        "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS, "stair": set(), "guard": set()}},
+        "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS, "stair": set(), "guard": set()},
+        # the first real house (test_data/real_houses/), placed by its layout.yaml: its rooms and marked escape windows
+        # and its front door, as in step 5. No window or door has a clear opening, so every clear measure must come back
+        # not measured (expected.yaml); its stairs and guards aren't drawn (layout.yaml `not_drawn`: the drawings give
+        # no riser, tread or baluster to draw), so neither may be read. It is the first house with `has_none` claims
+        # (seven): each is ticked in the drawing and, nothing of the kind being drawn, must come back, bringing what
+        # has_none.KINDS says it brings (claimed): its part kinds as empty lists, its escape openings' measures
+        "orangetown_ny_80_south_william": None},
 }
 # the lists the format has itself, each the part kind it gives: an empty one is the house having none (step 6's ticks)
 NONE_LISTS = {"stairs": "stair", "doors": "egress_door", "guards": "guard"}
+
+
+def claimed(base: dict, kinds) -> dict:
+    """A step's scope for a house with `has_none` claims (step 6): `base` and, for each claim, what it brings
+    (has_none.KINDS): each of its part kinds in scope as an empty list (no measures), and the measures it gives every
+    escape opening (no patio cover: none opens into one) and every stair measured (its stairs' only where the stair
+    kind is read). Nothing else: a claim adds no measure the house doesn't give."""
+    out = {k: set(v) for k, v in base.items()}
+    for kind in kinds:
+        spec = NONE_KINDS[kind]
+        for part in spec.get("parts", ()):
+            out.setdefault(part, set())
+        out["emergency_escape_opening"] |= set(spec.get("openings", {}))
+        if "stair" in out:
+            out["stair"] |= set(spec.get("stairs", {}))
+    return out
+
+
+STEPS[6]["orangetown_ny_80_south_william"] = claimed(
+    {**ROOMS_AND_WINDOWS, "egress_door": DOORS},
+    sorted(c["kind"] for c in yaml.safe_load((REAL / "orangetown_ny_80_south_william" / "house.yaml")
+                                             .read_text(encoding="utf-8")).get("has_none") or []))
 STEP = max(STEPS)
 # each house at the latest step that draws it: its recording must be of that step
 HOUSE_STEP = {house: step for step in sorted(STEPS) for house in STEPS[step]}
@@ -105,12 +138,17 @@ def scope(name: str) -> dict:
     return STEPS[HOUSE_STEP[name]][name]
 
 
+def _folder(name: str) -> Path:
+    """A hand-worked house's folder (test_data/interior_houses/), else a real house's (test_data/real_houses/)."""
+    return HOUSES / name if (HOUSES / name).is_dir() else REAL / name
+
+
 def _house(name: str) -> dict:
-    return yaml.safe_load((HOUSES / name / "house.yaml").read_text(encoding="utf-8"))
+    return yaml.safe_load((_folder(name) / "house.yaml").read_text(encoding="utf-8"))
 
 
 def _expected(name: str) -> dict:
-    return yaml.safe_load((HOUSES / name / "expected.yaml").read_text(encoding="utf-8"))
+    return yaml.safe_load((_folder(name) / "expected.yaml").read_text(encoding="utf-8"))
 
 
 # ---- the comparison ---------------------------------------------------------------------------------------------
@@ -243,9 +281,11 @@ def recordings(host: str | None = None) -> dict:
 
 
 def coverage_problems(recorded: dict) -> list[str]:
-    """A host with any recording has one for every house of the step: it can't leave out the hard ones."""
-    return [f"{host}: no recording for {', '.join(sorted(set(STEP_HOUSES) - set(by)))}"
-            for host, by in sorted(recorded.items()) if set(STEP_HOUSES) - set(by)]
+    """A host with any recording has one for every house of the step, the real house included: it can't leave out the
+    hard ones (a re-record that failed deletes the house's earlier recording and writes none)."""
+    houses = set(STEP_HOUSES)
+    return [f"{host}: no recording for {', '.join(sorted(houses - set(by)))}"
+            for host, by in sorted(recorded.items()) if houses - set(by)]
 
 
 # ---- the houses to draw -----------------------------------------------------------------------------------------
@@ -284,7 +324,10 @@ def drawing(name: str) -> dict:
     room separation line wherever two rooms meet, each room's ceiling as thin solids whose undersides are its
     ceiling, and each window in an outside wall of its room. Rooms whose plan isn't a rectangle on the axes aren't
     drawn yet (refused). From step 5: each door (_doors), each stair's handrails (_stair) and each level guard (_guard);
-    a room within another's height (a loft) drawn clear of it."""
+    a room within another's height (a loft) drawn clear of it. A house with a layout.yaml (a real house) is drawn where
+    its layout places it (placed_drawing)."""
+    if (_folder(name) / "layout.yaml").exists():
+        return placed_drawing(name)
     house = _house(name)
     ft = _ft(house["units"])
     measured = {p["id"]: p for p in measure(house)["parts"]["emergency_escape_opening"] or []}
@@ -642,6 +685,333 @@ def _stair(name: str, st: dict, ft, house: dict, x_clear: float, handrails: bool
             "head": None if upper else {"plan": head, "top": zs[-1]}, "upper_floor": upper, "slab": SLAB, "walls": walls, "wall_thickness": STAIR_WALL,
             "wall_top": zs[-1] + HEADROOM_WALL, "open_sides": sorted(open_sides), "overhead": overhead, "handrails": rails,
             "extent": [min(xs), max(xs)]}, notes
+
+
+# ---- a real house, placed by its layout -------------------------------------------------------------------------
+
+LAYOUT = "gordium.layout/1"
+FIT = 1e-9                      # sq in / in: a placed room is house.yaml's to this (the same inside dimensions, so exact)
+
+
+def _layout(name: str) -> dict:
+    return yaml.safe_load((_folder(name) / "layout.yaml").read_text(encoding="utf-8"))
+
+
+def _rect(w) -> Polygon:
+    x0, d0, x1, d1 = w
+    return Polygon([(x0, d0), (x1, d0), (x1, d1), (x0, d1)])
+
+
+def _along_x(w) -> bool:
+    """Whether a wall rectangle runs along x (its longer side)."""
+    return w[2] - w[0] > w[3] - w[1]
+
+
+def _faces(w) -> list:
+    """A wall rectangle's four faces as (axis, at, lo, hi, outward from the wall in (x, d)): axis "d" is a face along x
+    at that d."""
+    x0, d0, x1, d1 = w
+    return [("d", d0, x0, x1, (0, -1)), ("d", d1, x0, x1, (0, 1)), ("x", x0, d0, d1, (-1, 0)), ("x", x1, d0, d1, (1, 0))]
+
+
+def _room_edges(floor) -> list | None:
+    """A room outline's edges as (axis, at, lo, hi, (a, b)), each along x or along d; None if any isn't."""
+    out = []
+    for a, b in zip(floor, floor[1:] + floor[:1]):
+        if a[1] == b[1]:
+            out.append(("d", a[1], min(a[0], b[0]), max(a[0], b[0]), (a, b)))
+        elif a[0] == b[0]:
+            out.append(("x", a[0], min(a[1], b[1]), max(a[1], b[1]), (a, b)))
+        else:
+            return None
+    return out
+
+
+def _gaps(lo, hi, spans) -> list:
+    """The parts of [lo, hi] no span covers."""
+    gaps, at = [], lo
+    for s0, s1 in sorted(spans):
+        if s0 > at:
+            gaps.append((at, min(s0, hi)))
+        at = max(at, s1)
+        if at >= hi:
+            break
+    if at < hi:
+        gaps.append((at, hi))
+    return [(a, b) for a, b in gaps if b - a > FIT]
+
+
+def _host(level: dict, wall: str, along: float, width: float):
+    """Where an opening `width` wide, centred `along` its wall, stands: (the room it opens from, the position of the
+    wall's face on that room's edge, the outward direction in (x, d)), the face and the room's edge both covering the
+    whole opening; None when no room's edge does."""
+    w = level["walls"][wall]
+    for axis, at, lo, hi, out in _faces(w):
+        if (axis == "d") != _along_x(w):
+            continue                                           # an end of the wall, not a face along it
+        if not (lo <= along - width / 2 and along + width / 2 <= hi):
+            continue
+        for r in level["rooms"]:
+            for e in _room_edges(r["floor"]) or []:
+                if e[0] == axis and e[1] == at and e[2] <= along - width / 2 and along + width / 2 <= e[3]:
+                    return r["id"], at, out
+    return None
+
+
+def layout_problems(name: str) -> list[str]:
+    """Why a real house's layout.yaml can't be drawn as it says ([] when it can): on each level the walls don't overlap
+    each other and no room overlaps a wall or another room; every area the walls enclose (cut by the room separation
+    lines) is exactly one room and every room is one such area (so the host finds a Room in each enclosed area, and
+    each room's outline is its own); each room house.yaml gives is placed once, with house.yaml's inside dimensions
+    and area (exactly: the measures are compared to a millionth), floor elevation and ceiling; each opening and door
+    house.yaml gives is placed once, whole within a wall face on its own room's edge (a door: on a room of its level),
+    clear of every other opening in that wall, and under the ceiling."""
+    lay, house = _layout(name), _house(name)
+    problems = []
+    if lay.get("format") != LAYOUT or lay.get("units") != house.get("units"):
+        return [f"{name}: layout.yaml isn't {LAYOUT} in house.yaml's units"]
+    if lay["units"] != "in":       # every length, area and message here is in inches (review round 3)
+        return [f"{name}: layout.yaml's lengths are in {lay['units']}; a layout is in inches"]
+    given = {r["id"]: r for r in house["rooms"]}
+    placed, openings, doors = {}, {}, {}
+    for lv in lay["levels"]:
+        walls = {k: _rect(w) for k, w in lv["walls"].items()}
+        names = list(walls)
+        for i, a in enumerate(names):
+            if walls[a].area <= 0:
+                problems.append(f"{lv['id']}: wall {a} has no thickness")
+            for b in names[i + 1:]:
+                if walls[a].intersection(walls[b]).area > FIT:
+                    problems.append(f"{lv['id']}: walls {a} and {b} overlap")
+        polys = {}
+        for r in lv["rooms"]:
+            rid = r["id"]
+            if rid in placed:
+                problems.append(f"room {rid} placed twice")
+            placed[rid] = lv
+            if _room_edges(r["floor"]) is None:
+                problems.append(f"{lv['id']}: room {rid} has an edge that isn't along x or d")
+                continue
+            polys[rid] = Polygon(r["floor"])
+            if not polys[rid].is_valid:
+                problems.append(f"{lv['id']}: room {rid}'s outline isn't a simple polygon")
+            for k, w in walls.items():
+                if polys[rid].intersection(w).area > FIT:
+                    problems.append(f"{lv['id']}: room {rid} overlaps wall {k}")
+            if rid not in given and not (isinstance(r.get("name"), str) and isinstance(r.get("sleeping"), bool)):
+                problems.append(f"{lv['id']}: room {rid} isn't in house.yaml, so it needs its own name and sleeping")
+        ids = list(polys)
+        for i, a in enumerate(ids):
+            for b in ids[i + 1:]:
+                if polys[a].intersection(polys[b]).area > FIT:
+                    problems.append(f"{lv['id']}: rooms {a} and {b} overlap")
+        # every enclosed area is exactly one room: the holes in the walls' union, cut by the separation lines
+        union = unary_union(list(walls.values()))
+        holes = [Polygon(ring) for g in getattr(union, "geoms", [union]) for ring in g.interiors]
+        for s in lv.get("separations") or []:
+            line = LineString(s)
+            if not any(line.within(p.boundary.buffer(FIT)) for p in polys.values()):
+                problems.append(f"{lv['id']}: separation {s} isn't on a room's edge")
+            holes = [piece for h in holes for piece in split(h, line).geoms]
+        matched = set()
+        for h in holes:
+            same = [rid for rid, p in polys.items() if h.symmetric_difference(p).area < FIT]
+            if len(same) != 1:
+                pt = h.representative_point()
+                problems.append(f"{lv['id']}: an area the walls enclose ({h.area / 144:.2f} sq ft, around x {pt.x:g}, "
+                                f"d {pt.y:g}) is {'no room' if not same else 'several rooms'}")
+            matched.update(same)
+        for rid in sorted(set(polys) - matched):
+            problems.append(f"{lv['id']}: room {rid} isn't an area its walls (and separation lines) enclose")
+        for o in lv.get("windows") or []:
+            openings.setdefault(o["id"], []).append((lv, o))
+        for d in lv.get("doors") or []:
+            doors.setdefault(d["id"], []).append((lv, d))
+    for rid, r in given.items():
+        if rid not in placed:
+            problems.append(f"room {rid} (house.yaml) isn't placed")
+            continue
+        lv = placed[rid]
+        if "floor" in r:
+            want = Polygon(r["floor"])
+            got = Polygon(next(x for x in lv["rooms"] if x["id"] == rid)["floor"])
+            w, h = want.bounds[2] - want.bounds[0], want.bounds[3] - want.bounds[1]
+            gw, gh = got.bounds[2] - got.bounds[0], got.bounds[3] - got.bounds[1]
+            if abs(want.area - want.envelope.area) > FIT or abs(got.area - got.envelope.area) > FIT \
+                    or not ((gw, gh) == (w, h) or (gw, gh) == (h, w)):
+                problems.append(f"room {rid}: placed {gw:g} x {gh:g}, house.yaml's is {w:g} x {h:g}")
+            if abs(got.area - want.area) > FIT:
+                problems.append(f"room {rid}: placed {got.area / 144:g} sq ft, house.yaml's {want.area / 144:g}")
+        for key, mine in (("floor_elevation", lv["elevation"]), ("ceiling_height", lv["ceiling"])):
+            if key in r and r[key] != mine:
+                problems.append(f"room {rid}: its level gives {key} {mine}, house.yaml {r[key]}")
+    # each level's floor slab fits the gap under it: the level below's ceiling up to this level's floor (the lowest
+    # level's slab is the layout's own `slab`)
+    def thickness(x) -> bool:
+        return isinstance(x, (int, float)) and not isinstance(x, bool) and x > 0
+
+    by_height = sorted(lay["levels"], key=lambda lv: lv["elevation"])
+    if not thickness(by_height[0].get("slab")):
+        problems.append(f"{by_height[0]['id']}: the lowest level gives no slab thickness")
+    for below, lv in zip(by_height, by_height[1:]):
+        gap = lv["elevation"] - (below["elevation"] + below["ceiling"])
+        # every level's own slab is a positive number, never 0, below 0 or words (review round 2)
+        if "slab" in lv and not thickness(lv["slab"]):
+            problems.append(f"{lv['id']}: its slab {lv['slab']!r} isn't a thickness (inches)")
+        elif gap <= 0 or ("slab" in lv and lv["slab"] > gap):
+            problems.append(f"{lv['id']}: its slab doesn't fit the {gap:g} between {below['id']}'s ceiling and its floor")
+    sizes = lay["sizes"]
+    for o in house.get("openings") or []:
+        where = openings.pop(o["id"], [])
+        if len(where) != 1:
+            problems.append(f"opening {o['id']} placed {len(where)} times, not once")
+            continue
+        lv, p = where[0]
+        size = sizes.get(p.get("size"))
+        if size is None or p.get("wall") not in lv["walls"]:
+            problems.append(f"opening {o['id']}: no size {p.get('size')!r} or no wall {p.get('wall')!r} on {lv['id']}")
+            continue
+        host = _host(lv, p["wall"], p["along"], size["width"])
+        if host is None or host[0] != o["room"]:
+            problems.append(f"opening {o['id']}: not whole in a face of its room {o['room']} on wall {p['wall']} "
+                            f"({'in ' + host[0] if host else 'in no room'})")
+        if lay["head"] > lv["ceiling"] or size["height"] > lay["head"]:
+            problems.append(f"opening {o['id']}: doesn't fit under its level's ceiling")
+    for extra in sorted(openings):
+        problems.append(f"opening {extra} placed but not in house.yaml")
+    for d in house.get("doors") or []:
+        where = doors.pop(d["id"], [])
+        if len(where) != 1:
+            problems.append(f"door {d['id']} placed {len(where)} times, not once")
+            continue
+        lv, p = where[0]
+        if p.get("wall") not in lv["walls"] or _host(lv, p["wall"], p["along"], p["width"]) is None:
+            problems.append(f"door {d['id']}: not whole in a room's face of wall {p.get('wall')}")
+        if p["height"] > lv["ceiling"]:
+            problems.append(f"door {d['id']}: taller than its level's ceiling")
+    for extra in sorted(doors):
+        problems.append(f"door {extra} placed but not in house.yaml")
+    for lv in lay["levels"]:                               # the openings in one wall clear of each other
+        spans = {}
+        for p in (lv.get("windows") or []) + (lv.get("doors") or []):
+            width = p["width"] if "width" in p else (sizes.get(p.get("size")) or {}).get("width", 0)
+            spans.setdefault(p["wall"], []).append((p["along"] - width / 2, p["along"] + width / 2, p["id"]))
+        for wall, ss in spans.items():
+            ss.sort()
+            for (_, a1, a), (b0, _, b) in zip(ss, ss[1:]):
+                if b0 < a1:
+                    problems.append(f"{lv['id']}: openings {a} and {b} overlap in wall {wall}")
+    return problems
+
+
+def placed_drawing(name: str) -> dict:
+    """A real house as a host draws it, in feet (y north), from its layout.yaml: each level's walls as rectangles (each
+    drawn as a wall along its longer side, as thick as its shorter) and no exterior box, the floor slab under its
+    outline (the walls and rooms together), `slab` thick: the gap the layout leaves between the ceiling below and this
+    floor (the lowest level's: the layout's own), so no slab cuts into a cited ceiling; a room separation line where the layout has one; each room (house.yaml's
+    name and sleeping, else the layout's) with its ceiling a thin solid over its whole outline, each edge of its
+    outline with the wall that bounds it (`boundary`: its index in the level's `walls`, or null for a separation line)
+    and a point inside it for the host's Room; each marked opening in its wall (`wall`: its index; `at`: on the wall's
+    centre line), its sill under the layout's head by the height of its size code, with no maker's clear opening
+    (house.yaml gives none); each door in its wall. Its stairs and guards are placed in the layout but not drawn
+    (`not_drawn`). Refused where layout_problems finds anything, and where an opening has a frame or a maker's clear
+    opening, or a door a clear opening (not drawn from a layout yet)."""
+    if problems := layout_problems(name):
+        raise ValueError(f"{name}: layout.yaml can't be drawn: " + "; ".join(problems))
+    lay, house = _layout(name), _house(name)
+    ft = _ft(lay["units"])
+    south = max(w[3] for lv in lay["levels"] for w in lv["walls"].values())
+
+    def xy(x, d):
+        return [ft(x), ft(south - d)]
+
+    given = {r["id"]: r for r in house["rooms"]}
+    given_open = {o["id"]: o for o in house.get("openings") or []}
+    given_doors = {d["id"]: d for d in house.get("doors") or []}
+    measured_doors = {p["id"]: p for p in measure(house)["parts"]["egress_door"] or []}
+    levels, rooms, windows, doors = [], [], [], []
+    elevations = sorted(ft(lv["elevation"]) for lv in lay["levels"])
+    by_height = sorted(lay["levels"], key=lambda lv: lv["elevation"])
+    for lv in lay["levels"]:
+        fe = ft(lv["elevation"])
+        # its floor slab as thick as the gap under it (never cutting into the ceiling below), the lowest its own
+        below = [b for b in by_height if b["elevation"] < lv["elevation"]]
+        slab = ft(lv["slab"]) if "slab" in lv else ft(lv["elevation"] - below[-1]["elevation"] - below[-1]["ceiling"])
+        names = list(lv["walls"])
+        for r in lv["rooms"]:
+            poly = orient(Polygon([xy(x, d) for x, d in r["floor"]]), 1.0)
+            floor = [[x, y] for x, y in list(poly.exterior.coords)[:-1]]
+            boundary = []                       # the outline's edges in the layout's order (turned anticlockwise below)
+            for axis, at, lo, hi, (a, b) in _room_edges(r["floor"]):
+                pieces = [(max(lo, f_lo), min(hi, f_hi), k) for k, w in enumerate(lv["walls"].values())
+                          for f_axis, f_at, f_lo, f_hi, _ in _faces(w)
+                          if f_axis == axis and f_at == at and min(hi, f_hi) - max(lo, f_lo) > FIT]
+                pieces += [(g0, g1, None) for g0, g1 in _gaps(lo, hi, [(p0, p1) for p0, p1, _ in pieces])]
+                forward = (b[0] - a[0] if axis == "d" else b[1] - a[1]) > 0
+                for p0, p1, k in sorted(pieces, key=lambda p: p[0], reverse=not forward):
+                    s, e = (p0, p1) if forward else (p1, p0)
+                    ends = [xy(s, at), xy(e, at)] if axis == "d" else [xy(at, s), xy(at, e)]
+                    boundary.append([*ends, k])
+            if not Polygon([seg[0] for seg in boundary]).exterior.is_ccw:
+                boundary = [[b, a, k] for a, b, k in reversed(boundary)]
+            g = given.get(r["id"], {})
+            ceiling = fe + ft(lv["ceiling"])
+            pt = poly.representative_point()
+            rooms.append({"id": r["id"], "name": g.get("name") or r["name"],
+                          "sleeping": g["sleeping"] if "sleeping" in g else r["sleeping"],
+                          "floor": floor, "floor_elevation": fe, "ceilings": [[[x, y, ceiling] for x, y in floor]],
+                          "point": [pt.x, pt.y], "boundary": boundary})
+        # the walls stop at the top of the ceilings, never past the next level up (as `drawing`)
+        top = fe + ft(lv["ceiling"]) + CEILING_THICKNESS
+        above = [z for z in elevations if z > fe]
+        if above and top > above[0]:
+            top = above[0]
+        outline = orient(unary_union([_rect(w) for w in lv["walls"].values()]
+                                     + [Polygon(r["floor"]) for r in lv["rooms"]]).simplify(0), -1.0)   # ccw once d flips
+        levels.append({"elevation": fe, "outline": [xy(x, d) for x, d in list(outline.exterior.coords)[:-1]],
+                       "walls": [[xy(w[0], w[3]), xy(w[2], w[1])] for w in lv["walls"].values()],
+                       "separations": [[xy(*a), xy(*b)] for a, b in lv.get("separations") or []],
+                       "wall_height": top - fe, "slab": slab})
+
+        def place(p, width):
+            rid, at, (ox, od) = _host(lv, p["wall"], p["along"], width)
+            w = lv["walls"][p["wall"]]
+            if _along_x(w):
+                center, middle, thick = xy(p["along"], at), xy(p["along"], (w[1] + w[3]) / 2), ft(w[3] - w[1])
+            else:
+                center, middle, thick = xy(at, p["along"]), xy((w[0] + w[2]) / 2, p["along"]), ft(w[2] - w[0])
+            # the face's outward points from the wall into the room: the opening's outward is away from the room
+            # ((x, d) -> (x, y): y = -d), as ints (no -0)
+            return rid, {"center": center, "at": middle, "outward": [-ox, od], "wall": names.index(p["wall"]),
+                         "wall_thickness": thick}
+
+        for p in lv.get("windows") or []:
+            o = given_open[p["id"]]
+            if "frame" in o or "stated_clear" in o:
+                raise ValueError(f"{name}: opening {o['id']} has a frame or a maker's clear opening: not drawn from a "
+                                 f"layout yet")
+            size = lay["sizes"][p["size"]]
+            rid, spot = place(p, size["width"])
+            windows.append({"id": o["id"], "name": o.get("name") or o["id"], "room": rid, "escape": o["escape"],
+                            "operation": o["operation"], "width": ft(size["width"]), "height": ft(size["height"]),
+                            "sill": ft(lay["head"] - size["height"]), "level": fe, **spot, "clear": None})
+        for p in lv.get("doors") or []:
+            d = given_doors[p["id"]]
+            part = measured_doors.get(d["id"])
+            if part is not None and {"door_clear_width", "door_clear_height"} & set(part["measures"]):
+                raise ValueError(f"{name}: door {d['id']} has a clear opening: not drawn from a layout yet")
+            rid, spot = place(p, p["width"])
+            doors.append({"id": d["id"], "name": d.get("name") or d["id"], "exit": d["exit"],
+                          "operation": d["operation"], "width": ft(p["width"]), "height": ft(p["height"]),
+                          "level": fe, "room": rid, **spot, "clear": None})
+    not_drawn = sorted(set(lay.get("not_drawn") or {}) | ({"guards"} if house.get("guards") else set()))
+    return {"house": name, "step": HOUSE_STEP[name], "units": "ft", "placed": True, "exterior_wall": EXTERIOR_WALL,
+            "ceiling_thickness": CEILING_THICKNESS, "levels": levels, "rooms": rooms, "windows": windows,
+            "stairs": [], "doors": doors, "guards": [], "rail": RAIL, "handrail_top": HANDRAIL_TOP,
+            "notes": [f"{a['what']}: {a['effect']}" for a in lay.get("assumptions") or []], "not_drawn": not_drawn,
+            # step 6's ticks, as drawing() sets them: each list in scope the house gives empty, then its own has_none
+            "has_none": [key for key, kind in NONE_LISTS.items() if house.get(key) == [] and kind in scope(name)]
+                        + [c["kind"] for c in house.get("has_none") or []]}
 
 
 def main(argv) -> int:

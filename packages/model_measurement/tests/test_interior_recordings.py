@@ -13,6 +13,8 @@ import pytest
 
 from model_measurement.interior import recordings as r
 
+ORANGETOWN = "orangetown_ny_80_south_william"
+
 
 def described(name: str) -> dict:
     """The house as a host's reader would send it from the drawing: rooms (floor, elevation, ceiling pieces) and every
@@ -113,11 +115,23 @@ def test_the_steps_scope_is_the_design_notes():
     handrails = {"stair_clear_width_at_handrail", "stair_handrail_sides"}
     assert r.STEP == 6
     assert r.HOUSE_STEP == {"1_ranch_compliant": 6, "2_two_story_small_window": 6, "3_tall_riser": 4, "4_loft": 6,
-                            "5_basement_window_well": 6, "6_door_stated_clear": 6}
+                            "5_basement_window_well": 6, "6_door_stated_clear": 6, ORANGETOWN: 6}
     # step 6: each list the house gives empty is in scope, read as that empty list (no measures)
     assert r.scope("1_ranch_compliant") == r.scope("6_door_stated_clear") == rooms | {"egress_door": doors, "stair": set(),
                                                                                        "guard": set()}
     assert r.scope("2_two_story_small_window") == rooms | {"stair": stairs | handrails, "egress_door": doors, "guard": set()}
+    # the real house: its rooms, marked escape windows and front door; its stairs and guards not drawn, so not read;
+    # and what its seven has_none claims bring: each claimed part kind an empty list, two measures on every opening
+    claims = ["alternating_tread_device", "deck_porch_or_cantilever_over_escape_opening", "habitable_attic",
+              "patio_cover", "ramp", "ships_ladder", "sleeping_loft"]
+    assert sorted(c["kind"] for c in r._house(ORANGETOWN)["has_none"]) == claims
+    assert r.scope(ORANGETOWN) == {
+        "sleeping_room": rooms["sleeping_room"],
+        "emergency_escape_opening": rooms["emergency_escape_opening"] | {"opening_into_patio_cover",
+                                                                         "opening_under_projection"},
+        "egress_door": doors, "sleeping_loft": set(), "loft_room": set(), "habitable_attic": set(), "ramp": set(),
+        "alternating_tread_device": set(), "ships_ladder": set()}
+    assert sorted(r.drawing(ORANGETOWN)["has_none"]) == claims       # its own claims ticked; no list is empty
     assert r.scope("3_tall_riser") == rooms | {"stair": stairs}                  # its last riser as drawn (step 4)
     assert r.scope("4_loft") == rooms | {"stair": stairs | handrails, "guard": {"guard_height", "guard_opening_sphere"},
                                          "egress_door": set()}
@@ -125,6 +139,8 @@ def test_the_steps_scope_is_the_design_notes():
     assert r.scope("5_basement_window_well") == rooms | {"egress_door": {"door_side_hinged"}, "guard": set()}
     # every empty list in scope is ticked, and nothing else (no hand-worked house has a has_none claim)
     for name in r.STEP_HOUSES:
+        if name == ORANGETOWN:
+            continue
         house = r._house(name)
         assert r.drawing(name)["has_none"] == [k for k, kind in r.NONE_LISTS.items()
                                                if house.get(k) == [] and kind in r.scope(name)]
@@ -355,8 +371,11 @@ def test_the_recording_must_say_what_it_is():
 def test_a_host_with_any_recording_has_every_house_of_the_step():
     assert r.coverage_problems({"revit": {"1_ranch_compliant": {}}}) == [
         "revit: no recording for 2_two_story_small_window, 3_tall_riser, 4_loft, 5_basement_window_well, "
-        "6_door_stated_clear"]
+        "6_door_stated_clear, orangetown_ny_80_south_william"]
     assert r.coverage_problems({"revit": {h: {} for h in r.STEP_HOUSES}}) == []
+    # the real house too: its recording is required, not just checked when present
+    assert r.coverage_problems({"revit": {h: {} for h in r.STEP_HOUSES if h != ORANGETOWN}}) == [
+        f"revit: no recording for {ORANGETOWN}"]
 
 
 def test_every_committed_recording_passes():
@@ -401,3 +420,23 @@ def test_the_command_line_prints_each_house_and_a_recordings_problems(tmp_path):
     out = subprocess.run([sys.executable, "-m", "model_measurement.interior.recordings", "check", str(bad)],
                          capture_output=True, text=True, encoding="utf-8", check=True).stdout
     assert json.loads(out)[0].startswith("not JSON")
+
+
+def test_the_real_houses_claims_must_come_back_and_bring_only_their_own_measures():
+    rec = described(ORANGETOWN)
+    assert len(rec["interior"]["has_none"]) == 7 and r.recording_problems(rec) == []
+    # a claim the reader didn't send (blocked): its kind isn't taken, so its part kinds aren't read and the openings
+    # lose the measure it brings
+    rec["interior"]["has_none"] = [c for c in rec["interior"]["has_none"] if c["kind"] != "patio_cover"]
+    problems = r.recording_problems(rec)
+    assert any("has none of" in p and "patio_cover" in p for p in problems)
+    assert any("m1 opening_into_patio_cover not measured" in p for p in problems)
+    # a claim the house doesn't make (the drawings show a basement): refused
+    rec = described(ORANGETOWN)
+    rec["interior"]["has_none"].append({"kind": "basement", "source": "ticked (test)"})
+    assert any("has none of" in p and "basement" in p for p in r.recording_problems(rec))
+    # step 5's scope (no claims) would refuse the empty lists the claims bring: the claims are what put them in scope
+    assert r.claimed({"emergency_escape_opening": set()}, ["ramp"]) == {"emergency_escape_opening": set(), "ramp": set()}
+    assert r.claimed({"emergency_escape_opening": set(), "stair": set()}, ["sleeping_loft"]) == {
+        "emergency_escape_opening": set(), "stair": {"stair_serves_sleeping_loft"}, "sleeping_loft": set(),
+        "loft_room": set()}
