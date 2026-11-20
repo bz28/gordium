@@ -3,8 +3,12 @@ using System.Text.Json.Nodes;
 namespace Gordium.Revit.Reading;
 
 /// <summary>A left-out candidate: an element that could be a building and isn't measured, as sent to
-/// <c>objects.left_out</c> (<see cref="Sent"/>), and what the description lists of it if it is left out.</summary>
-internal sealed record Candidate(string Id, string Layer, bool Context, JsonObject Sent, Box3? Box, string GroundKind, bool Closed);
+/// <c>objects.left_out</c> (<see cref="Sent"/>), and what the description lists of it if it is left out. For a site
+/// slab (<see cref="SiteSlabs"/>), <see cref="Slab"/> is the description's <c>left_out[].slab</c> and
+/// <see cref="Name"/> the element's name sent with it (<c>left_out[].name</c>), so the rows can say which; both null
+/// otherwise.</summary>
+internal sealed record Candidate(string Id, string Layer, bool Context, JsonObject Sent, Box3? Box, string GroundKind, bool Closed,
+                                 string? Slab = null, string? Name = null);
 
 /// <summary>What the reader gathered from one element's geometry (design note, section 2).</summary>
 internal sealed class Gathered
@@ -45,6 +49,9 @@ internal sealed class Read(RevitModel model)
     public readonly List<Xyz> SpotGrades = [];
     public readonly List<Xyz> FinishedGrades = [];
 
+    /// <summary>The floors outside the house (<see cref="SiteSlabs"/>), by UniqueId, with what each is marked.</summary>
+    private readonly IReadOnlyDictionary<string, SiteSlab> _slabs = SiteSlabs.Find(model);
+
     /// <summary>False whenever any user workset is closed (whether or not its elements can still be read: to
     /// check), or a linked model, at any depth, isn't loaded: the reader can't have looked at everything.</summary>
     public bool InventoryComplete = model.UserWorksets.All(w => w.IsOpen);
@@ -73,6 +80,9 @@ internal sealed class Read(RevitModel model)
                 break;
             case { Mark: GordiumMark.Context }:
                 Ordinary(e, context: true);
+                break;
+            case var _ when _slabs.TryGetValue(e.UniqueId, out var slab) && slab.Kind != SlabKind.Building:
+                Slab(e, slab);
                 break;
             case { Mark: GordiumMark.FloorBlock }:
             case var _ when SiteReader.BuildingCategories.Contains(e.BuiltInCategory):
@@ -221,6 +231,25 @@ internal sealed class Read(RevitModel model)
         });
         if (box is { } b)
             BuildingBoxes.Add(b);         // anything near it may be part of it
+    }
+
+    // ---- site slabs ------------------------------------------------------------------------------------------------
+
+    /// <summary>A floor outside the house not marked a porch, deck, landing or ramp (<see cref="SiteSlabs"/>): a
+    /// left-out candidate whose <c>slab</c> says what it is marked (unmarked, a patio, parking), never a building and
+    /// never measured, so it can't make a row fail or pass; the checker decides its rows. Not a building's box either.
+    /// One whose geometry can't be read, or that has no face, is read as a building part is (an object that couldn't
+    /// be sent: every building measure needs review), as it was before.</summary>
+    private void Slab(RevitElement e, SiteSlab slab)
+    {
+        var g = e.GeometryFailed || e.Geometry is null ? null : Walk(e.Geometry, ToShared, e);
+        if (g is null || g.Other || !g.HasFaces || g.MissingPart)
+        {
+            Building(e);
+            return;
+        }
+        Candidates.Add(Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), null, false, "Brep", g.AllClosed)
+                       with { Slab = SlabKinds.Described(slab.Kind), Name = e.Name });
     }
 
     // ---- everything else that could be a building ----------------------------------------------------------------

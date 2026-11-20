@@ -134,6 +134,9 @@ internal static class RevitRead
             SuperComponent = e is FamilyInstance sub && sub.SuperComponent is { } host ? host.UniqueId : null,
             Mark = mark,
             FloorMark = floorMark,
+            // a floor's own marks, for Gordium: Site slab is (SiteSlabs); read on floors only, so no other element pays
+            InstanceMarks = category?.BuiltInCategory == BuiltInCategory.OST_Floors
+                ? RevitMarks.Values(e) : new Dictionary<Guid, MarkValue>(),
             PhaseCreated = Id(e.CreatedPhaseId),
             PhaseDemolished = Id(e.DemolishedPhaseId),
             DesignOption = Id(e.DesignOption?.Id),
@@ -160,6 +163,37 @@ internal static class RevitRead
         _ when CoordinationModelLinkUtils.IsCoordinationModelInstance(doc, e) => ElementKind.CoordinationModel,
         _ => ElementKind.Ordinary,
     };
+
+    /// <summary>The floors, walls and roofs of the document without their geometry (Revit's own box only), each as
+    /// <see cref="Element"/> copies it otherwise: what <see cref="SiteSlabs"/> sorts by, for the marking list, which
+    /// must name exactly the site slabs the reader reads.</summary>
+    internal static List<RevitElement> HouseOutline(Document doc)
+    {
+        var list = new List<RevitElement>();
+        foreach (var c in new[] { BuiltInCategory.OST_Floors, BuiltInCategory.OST_Walls, BuiltInCategory.OST_Roofs })
+            foreach (var e in new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType())
+            {
+                var box = e.get_BoundingBox(null);
+                var (mark, floorMark) = Mark(e);
+                list.Add(new RevitElement
+                {
+                    UniqueId = e.UniqueId,
+                    BuiltInCategory = c.ToString(),
+                    Category = e.Category?.Name ?? "",
+                    ViewSpecific = e.ViewSpecific,
+                    Name = e.Name,
+                    Kind = Kind(doc, e),
+                    Mark = mark,
+                    FloorMark = floorMark,
+                    InstanceMarks = c == BuiltInCategory.OST_Floors ? RevitMarks.Values(e) : new Dictionary<Guid, MarkValue>(),
+                    PhaseCreated = Id(e.CreatedPhaseId),
+                    PhaseDemolished = Id(e.DemolishedPhaseId),
+                    DesignOption = Id(e.DesignOption?.Id),
+                    BoundingBox = box is null ? null : new RevitBox(P(box.Min), P(box.Max), box.Transform is { } bt ? T(bt) : null),
+                });
+            }
+        return list;
+    }
 
     private static (GordiumMark, string?) Mark(Element e)
     {

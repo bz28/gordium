@@ -32,6 +32,8 @@ public sealed class MarksTests
             ("Gordium: Top rail is handrail", "8f09dc9e-0975-42ba-8a4b-43e43b393578", MarkValueKind.YesNo, MarkBinding.Type, ["OST_StairsRailing"]),
             ("Gordium: These are all the stairs", "90205a68-1eaf-4ca2-a350-0cb24012986c", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: These are all the guards and handrails", "80055f84-3feb-492a-b581-331ff692a2a9", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // what a floor outside the house is (reading design note, section 1, "Site slabs")
+            ("Gordium: Site slab is", "56113427-6ae6-430d-95dd-2472fbefff71", MarkValueKind.Text, MarkBinding.Instance, ["OST_Floors"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
