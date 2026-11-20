@@ -74,7 +74,7 @@ def flight(st: dict) -> dict:
         (a0, a1), (h0, h1) = (u["outer"][0], u["outer"][3]), (u["hole"][0], u["hole"][3])
         overhead.append([[*a0, z], [*h0[:1], a0[1], z] if ux else [a0[0], h0[1], z],
                          [*h0[:1], a1[1], z] if ux else [a1[0], h0[1], z], [*a1, z]])
-    out = {"id": f"host-{st['id']}", "name": st["name"], "bottom_elevation": st["foot"]["top"],
+    out = {"id": f"host-{st['id']}", "name": st["name"], "bottom_elevation": st["foot"]["top"], "spiral": False,
            "sides": {w["side"]: w["face"] for w in st["walls"]} | {s: "open" for s in st["open_sides"]},
            "overhead": overhead}
     out["nosings"] = [across(k, st["base"] + st["riser"] * (k + 1)) for k in range(st["risers"] - 1)] \
@@ -107,7 +107,8 @@ def test_the_steps_scope_is_the_design_notes():
              "emergency_escape_opening": {"opening_net_clear_width", "opening_net_clear_height", "opening_net_clear_area",
                                           "opening_sill_height", "opening_is_door", "opening_door_hinged_or_sliding"}}
     stairs = {"stair_riser_height", "stair_riser_variation", "stair_total_rise", "stair_risers", "stair_tread_depth",
-              "stair_tread_variation", "stair_headroom", "stair_clear_width"}      # never the width at the handrail
+              "stair_tread_variation", "stair_headroom", "stair_clear_width",
+              "stair_spiral"}                                                   # never the width at the handrail
     doors = {"door_clear_width", "door_clear_height", "door_side_hinged"}
     handrails = {"stair_clear_width_at_handrail", "stair_handrail_sides"}
     assert r.STEP == 6
@@ -212,7 +213,7 @@ def test_house_3s_tall_riser_is_drawn_at_the_head_and_measured_as_drawn():
     assert (top[-2][0][2], top[-1][0][2]) == (pytest.approx(-0.75), 0.0)
     assert r.recording_problems(rec) == []
     got = r.measure(rec["interior"])["parts"]["stair"][0]
-    assert (got["measures"]["stair_riser_height"], got["more"]["stair_riser_variation"]) == (9.0, 1.5)
+    assert (got["measures"]["stair_riser_height"], got["measures"]["stair_riser_variation"]) == (9.0, 1.5)
     s = rec["interior"]["stairs"][0]                                   # a reader sending the run's own top instead
     s["nosings"] = flight({**d["stairs"][0], "head_top": d["stairs"][0]["head_top"] - 0.125})["nosings"]
     problems = r.recording_problems(rec)
@@ -221,6 +222,31 @@ def test_house_3s_tall_riser_is_drawn_at_the_head_and_measured_as_drawn():
     rec = described("3_tall_riser")                                    # and one sending none: not measured fails too
     del rec["interior"]["stairs"][0]["nosings"]
     assert any("s stair_riser_height not measured" in p for p in r.recording_problems(rec))
+
+
+def test_house_3_as_drawn_fails_r318_7_5_1_once_nothing_else_is_open():
+    """The eval: house 3 as the Revit reader sends it (its 9 in riser at the head, `spiral: false`) through the real
+    checker. R318.7.5.1: "The riser height shall be not more than 8 1/4 inches" (9 > 8.25) and "The greatest riser
+    height within any flight of stairs shall not exceed the smallest by more than 3/8 inch" (9 - 7.5 = 1.5 > 0.375):
+    both fail. Each rule's one remaining open input is R315.5's sleeping-loft stair (review_when), which the house
+    doesn't state: with the architect's "no sleeping lofts" tick both are does_not_comply, without it both need
+    review (never a pass either way)."""
+    from design_checker.check import check_site
+    sys.path.insert(0, str(r.REPO / "packages/permit_sheets"))
+    from permit_sheets import goldens
+
+    def statuses(ticked):
+        interior = described("3_tall_riser")["interior"]
+        if ticked:
+            interior["has_none"] = [{"kind": "sleeping_loft", "source": "ticked by the architect (test)"}]
+        got = check_site(goldens.site(), dict(goldens.FACTS), name="3", today=goldens.DATE, interior=interior)
+        return {i["rule"]: (i["status"], i["reason"]) for i in got["view"]["items"]
+                if i["rule"] in ("general.r318_7_5_1_stair_riser_height_max", "general.r318_7_5_1_stair_riser_variation_max")}
+
+    ticked = statuses(True)
+    assert [s for s, _ in ticked.values()] == ["does_not_comply", "does_not_comply"]
+    for status, reason in statuses(False).values():
+        assert status == "needs_review" and "serves sleeping loft not measured" in reason
 
 
 def test_a_stair_in_a_house_not_yet_in_the_stairs_step_isnt_drawn():

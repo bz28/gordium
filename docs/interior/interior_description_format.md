@@ -74,6 +74,7 @@ One entry per **flight** (a run of treads between landings; R318 calls it a flig
 | Key | Meaning |
 |---|---|
 | `bottom_elevation` | the finished floor or landing at the flight's foot |
+| `spiral` | optional, true or false: whether the flight is a spiral stairway (R202), from the host's own record of its shape (a Revit run's style). `false` is taken only for a flight whose nosings make it straight, `true` only for one whose don't; left out, it is not known (the rules that turn on it need review) |
 | `nosings` | the leading edge of each tread, bottom to top, then the leading edge of the floor or landing at the top: each `[[x, y, z], [x, y, z]]`, its two ends across the stair's width |
 | `sides` | `{left, right}`, looking up the stair: the plan line of what bounds the flight above handrail height (a finished wall face, a guard's inside face), from before the first nosing to past the top one, standing at the tread ends (no more than 1 1/2 in, a skirt or stringer, out beyond them; the treads may run past it into the wall); or `open` for a side with neither (then the tread ends bound it) |
 | `handrails` | a list (empty for none) of `{side: left|right, inner_edge}`: the plan line of the handrail's edge nearest the middle of the stair, as far as it runs |

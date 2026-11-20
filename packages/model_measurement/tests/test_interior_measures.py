@@ -70,7 +70,7 @@ def test_the_base_case():
     s = got["parts"]["stair"][0]
     # risers 7 (x4), treads 10 (x3); headroom least at the top nosing: 120 - 28
     assert s["measures"] == {"stair_riser_height": 7.0, "stair_tread_depth": 10.0, "stair_headroom": 92.0,
-                             "stair_clear_width": 36.0}
+                             "stair_clear_width": 36.0, "stair_riser_variation": 0.0}
     assert s["more"]["stair_handrail_sides"] == 0 and s["more"]["stair_clear_width_at_handrail"] == 36.0
     g = got["parts"]["guard"][0]["measures"]
     assert g == {"guard_height": 36.0, "guard_opening_sphere": 10.0}   # one opening 10 wide x 34 high
@@ -456,15 +456,34 @@ def flight(risers, treads, **extra):
 def test_riser_and_tread_extremes():
     m, _, more = stair(flight([7, 7.5, 7, 7.25], [10, 9.5, 10.25]))
     assert m["stair_riser_height"] == 7.5 and m["stair_tread_depth"] == 9.5
-    assert more["stair_riser_variation"] == 0.5 and more["stair_tread_variation"] == 0.75
+    assert m["stair_riser_variation"] == 0.5 and more["stair_tread_variation"] == 0.75
     assert more["stair_total_rise"] == 28.75 and more["stair_risers"] == 4
+
+
+def test_spiral_is_taken_only_where_the_nosings_agree():
+    # R202: a spiral's treads radiate from a column; a straight flight with rectangular treads is not one
+    d = flight([7, 7, 7, 7], [10, 10, 10])
+    m, stopped, _ = stair(d)
+    assert "stair_spiral" not in m and "isn't given" in stopped["stair_spiral"]          # not said: not known
+    d["stairs"][0]["spiral"] = False
+    assert stair(d)[0]["stair_spiral"] is False
+    d["stairs"][0]["spiral"] = True                                                      # said spiral, drawn straight
+    m, stopped, _ = stair(d)
+    assert "stair_spiral" not in m and "which is right is unclear" in stopped["stair_spiral"]
+    del d["stairs"][0]["nosings"]                                                        # a spiral run: no nosings sent
+    assert stair(d)[0]["stair_spiral"] is True
+    d["stairs"][0]["spiral"] = False                                                     # said straight, shape unread
+    m, stopped, _ = stair(d)
+    assert "stair_spiral" not in m and "isn't measured as a straight flight" in stopped["stair_spiral"]
+    d["stairs"][0]["spiral"] = "no"                                                      # not true or false
+    assert "stair_spiral" not in stair(d)[0]
 
 
 def test_the_bottom_riser_is_from_the_floor():
     d = flight([7, 7, 7, 7], [10, 10, 10])
     d["stairs"][0]["bottom_elevation"] = -1.5                          # the floor at the foot is 1.5 lower
     m, _, more = stair(d)
-    assert m["stair_riser_height"] == 8.5 and more["stair_riser_variation"] == 1.5
+    assert m["stair_riser_height"] == 8.5 and m["stair_riser_variation"] == 1.5
 
 
 def test_a_flight_running_any_direction():
@@ -481,7 +500,7 @@ def test_a_flight_running_any_direction():
     st["overhead"] = [[turn(*p[:2]) + [p[2]] for p in o] for o in st["overhead"]]
     m, _, _ = stair(d)
     assert m == pytest.approx({"stair_riser_height": 7.0, "stair_tread_depth": 10.0, "stair_headroom": 92.0,
-                               "stair_clear_width": 36.0})
+                               "stair_clear_width": 36.0, "stair_riser_variation": 0.0})
 
 
 def test_nosings_given_top_down_or_turned_around_still_read_up():
@@ -1005,7 +1024,7 @@ def test_stair_data_problems_give_no_value(change, words, measure):
 
 def test_risers_are_measured_even_when_the_plan_cant_be():
     m, stopped, more = stair(changed(("stairs", 0, "nosings"), [[[0, 0, 7], [0, 36, 7]]]))
-    assert m == {"stair_riser_height": 7.0} and more["stair_risers"] == 1
+    assert m == {"stair_riser_height": 7.0, "stair_riser_variation": 0.0} and more["stair_risers"] == 1
     assert "stair_riser_height" not in stopped and "stair_tread_depth" in stopped
 
 
@@ -1089,7 +1108,7 @@ def test_a_tilted_nosing_is_read_at_its_worst_end():
     n[1] = [[10.03125, 0, 14.03125], [9.96875, 36, 13.96875]]      # nosing 2 tilted 1/32 in each way
     m, _, more = stair(d)
     assert m["stair_riser_height"] == 7.03125                       # 14.03125 - 7
-    assert more["stair_riser_variation"] == 0.0625                  # 7.03125 - 6.96875 (21 - 14.03125)
+    assert m["stair_riser_variation"] == 0.0625                  # 7.03125 - 6.96875 (21 - 14.03125)
     assert m["stair_tread_depth"] == 9.96875 and more["stair_tread_variation"] == 0.0625
     n[1] = [[10, 0, 14], [10, 36, 13.9375]]                         # one end 1/16 in low: the riser above it
     m, _, _ = stair(d)
@@ -1904,6 +1923,9 @@ STOP_CASES = {
         area_well={"floor_elevation": 10, "width": 36, "projection": 36}, ground_outside=80)),
     "nosings_out_of_range": _stair(nosings=[[[10 * j, -9e307, 7 * (j + 1)], [10 * j, 9e307, 7 * (j + 1)]]
                                            for j in range(3)]),
+    "spiral_not_said": base,
+    "spiral_not_straight": _stair(spiral=False, nosings=[[[0, 0, 7], [0, 36, 7]], [[10, 0, 14], [12, 36, 14]]]),
+    "spiral_but_straight": _stair(spiral=True),
     "too_few_nosings": _stair(nosings=[[[0, 0, 7], [0, 36, 7]]]),
     "nosing_not_level": _stair(nosings=[[[0, 0, 7], [0, 36, 8]]]),
     "not_bottom_to_top": _stair(nosings=[[[0, 0, -7], [0, 36, -7]]]),

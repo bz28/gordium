@@ -44,8 +44,10 @@ ROOMS_AND_WINDOWS = {
 # Step 4 (stairs: straight component runs, the cross-check): a flight's risers, treads, headroom and clear width above
 # the handrail. Not in this step: the width at the handrail and the handrail sides (handrails are railings, read with
 # the guards in step 5: no `handrails` is sent, so both are not measured).
+# Whether the flight is a spiral (`stair_spiral`) is in scope too: the reader sends `spiral: false` for a Straight run
+# whose drawn treads read straight (Revit's StairsRunStyle and the geometry agreeing), as each hand-worked flight is.
 STAIRS = {"stair_riser_height", "stair_riser_variation", "stair_total_rise", "stair_risers", "stair_tread_depth",
-          "stair_tread_variation", "stair_headroom", "stair_clear_width"}
+          "stair_tread_variation", "stair_headroom", "stair_clear_width", "stair_spiral"}
 # Each step's houses and, per house, the measures of each kind in scope (a kind present is read; a kind absent must be
 # left out). House 3's tall riser can't be drawn inside a Revit component run (its risers are equal by construction),
 # so it is drawn where a tall riser arises in Revit: the floor at the head 1 1/2 in above the run's top. The reader

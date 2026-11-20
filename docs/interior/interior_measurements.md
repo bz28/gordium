@@ -65,7 +65,7 @@ One part per straight flight. s runs up the flight at a right angle to the first
 | Measure | How | Serves |
 |---|---|---|
 | `stair_riser_height` (in) | The tallest riser. Each riser is the height between the leading edges (nosings) of adjacent treads; the first from the finished floor at the foot, the last to the top floor's or landing's nosing | R318.7.5.1 "measured vertically between leading edges of the adjacent treads" (p.77) |
-| `stair_riser_variation` (in, `more`) | Tallest less shortest riser in the flight | R318.7.5.1 "shall not exceed the smallest by more than 3/8 inch" (p.77) |
+| `stair_riser_variation` (in) | Tallest less shortest riser in the flight (each riser at its tallest and shortest) | R318.7.5.1 "shall not exceed the smallest by more than 3/8 inch" (p.77) |
 | `stair_tread_depth` (in) | The shallowest tread: the distance along s between adjacent nosings | R318.7.5.2 "measured horizontally between the vertical planes of the foremost projection of adjacent treads and at a right angle to the tread’s leading edge" (p.77) |
 | `stair_tread_variation` (in, `more`) | Deepest less shallowest tread | R318.7.5.2 (p.77) |
 | `stair_headroom` (in) | The least height from the line connecting the nosings up to anything overhead, over the flight's whole width from its first nosing to its top one (each tread at its own nosing's width, back to the next riser, and out to both ends of every nosing drawn slightly askew, the top one included). The overhead pieces must cover all of it | R318.7.2 "measured vertically from the sloped line adjoining the tread nosing" (p.77) |
@@ -73,6 +73,7 @@ One part per straight flight. s runs up the flight at a right angle to the first
 | `stair_clear_width_at_handrail` (in, `more`) | The same, at and below handrail height: the inmost of the side, the handrail's inner edge (where it runs) and the tread ends (each tread at its own nosing's width back to the next nosing) | R318.7.1 "The clear width of stairways at and below the handrail height, including treads and landings" (p.77) |
 | `stair_handrail_sides` (count, `more`) | How many sides have a handrail (0, 1 or 2): the width allowed at the handrail turns on it. A side counts only where one handrail runs the whole flight between the stair's sides (the wall faces, or an open side's tread ends); a side whose handrails run only part of it, or lie outside the sides: no value. The description gives no handrail height, so that isn't checked here | R318.7.1 (31 1/2 in with one side, 27 in with both); R320.5 "continuous for the full length of the flight, from a point directly above the nosing of the landing at the top of the flight to a point directly above the lowest nosing of the flight" (p.81) |
 | `stair_total_rise`, `stair_risers` (`more`) | The top nosing less the foot; the number of risers | R318.7.3 "a vertical rise greater than 12 feet 7 inches" (p.77) |
+| `stair_spiral` (yes/no) | The description's `spiral` (the host's own record of the flight's shape: Revit's run style), taken only where the nosings agree: `false` only for a flight measured straight with rectangular treads, `true` only for one that isn't; else, or not given, no value | R202 "Spiral stairway": "a stairway with a plan view of closed circular form and uniform section-shaped treads, attached to and radiating from a minimum-diameter supporting column" |
 
 The tread and riser dimensions are "exclusive of carpets, rugs or runners" (R318.7.5, p.77): the description gives finished walking surfaces without them. Not measured yet: winder treads (at the walkline, R318.7.5.2.1: no value), spiral stairs, nosing projections (R318.7.5.3), landings (their size and headroom, R318.7.6), open risers' 4 in sphere.
 
@@ -177,6 +178,9 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `no_ground` | the finished ground level outside the opening isn't given |
 | `ground_mixed` | the ground outside the opening is within 44 in of its bottom at some points and not at others |
 | `readings_differ` | the readings give different answers; {question} |
+| `spiral_not_said` | whether the flight is a spiral stairway isn't given (`spiral`: true or false) |
+| `spiral_not_straight` | the flight is said not to be a spiral stairway, but it isn't measured as a straight flight ({reason}): its shape isn't known |
+| `spiral_but_straight` | the flight is said to be a spiral stairway, but its nosings make a straight flight with rectangular treads: which is right is unclear |
 | `nosings_out_of_range` | the stair's nosings have coordinates too large to measure |
 | `too_few_nosings` | the flight needs at least {n} nosings (each tread's leading edge, and the top one) for this |
 | `nosing_not_level` | nosing {n} isn't level (its ends are {off} in apart in height) |
