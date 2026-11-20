@@ -99,6 +99,20 @@ public sealed class App : IExternalApplication
             }
             return;
         }
+        if (File.Exists(RealSite.RequestPath))
+        {
+            try
+            {
+                var takenSite = RealSite.RequestPath + ".taken";
+                File.Move(RealSite.RequestPath, takenSite, overwrite: true);
+                RealSite.Run(ui.Application, takenSite);
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("real_site", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
         var request = RecordScenesCommand.RunRequestPath;
         if (!File.Exists(request))
             return;
