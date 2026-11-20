@@ -134,7 +134,7 @@ parts:
   sleeping_room: [{id, name, measures: {...}, not_measured: {measure: reason}, more: {...}}]
   emergency_escape_opening: [{id, name, within: <room id>, measures, not_measured, more}]
   stair: [...]
-  egress_door: [...]
+  egress_door: [{id, name, measures, not_measured, more, from: {measure: {used, drawn, stated, source, why}}}]
   guard: [...]            # not a part kind in rule_format/parts.yaml yet
 problems: [...]           # why a kind wasn't read (a has_none claim not taken among them)
 not_checked: [...]        # escape openings in rooms that aren't sleeping rooms

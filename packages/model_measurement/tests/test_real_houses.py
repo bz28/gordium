@@ -35,7 +35,7 @@ FORMAT_KEYS = {
                  "area_well"},
     "stairs": {"bottom_elevation", "nosings", "sides", "handrails", "overhead"},
     "doors": {"exit", "operation", "hinge_side", "stops", "hinge_pin", "leaf_closed", "threshold_top",
-              "head_stop_bottom"},
+              "head_stop_bottom", "stated_clear"},
     "guards": {"walking_surface", "top", "extent", "members", "stair", "top_line"},
 }
 NOT_VALUES = {"id", "name", "cite", "absent"}
