@@ -82,7 +82,7 @@ length), flat ground not yet given, and nothing else on the lot.
 ## How the worker uses it
 
 The worker (`python -m design_checker serve`) answers JSON requests one per line. The new-style commands name
-the protocol they speak, `"protocol": "1.1"` (a different major version is refused):
+the protocol they speak, `"protocol": "1.2"` (a different major version is refused):
 
 - `hello`: the protocol, the site description version, and fingerprints of the worker's code and of each place's
   rules (`protocol.about()`). Every new-style answer carries the same under `"about"`.

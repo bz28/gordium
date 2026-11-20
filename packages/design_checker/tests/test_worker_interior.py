@@ -46,6 +46,15 @@ def test_the_worker_speaks_1_2():
     assert answer({"id": 1, "cmd": "hello", "protocol": "1.2"})["result"]["protocol"] == "1.2"
 
 
+def test_the_examples_name_the_protocol_the_worker_speaks():
+    """The worker's own help and the site description's page show the version a tool should send: today's."""
+    import re
+    from design_checker import __main__ as worker
+    page = (REPO / "docs/protocol/site_description_v1.md").read_text(encoding="utf-8")
+    shown = re.findall(r'"protocol": "(\d+\.\d+)"', (worker.__doc__ or "") + page)
+    assert shown and set(shown) == {protocol.PROTOCOL}, shown
+
+
 def test_an_interior_sent_to_the_worker_is_checked_exactly_as_a_direct_check():
     direct = check_description(SITE, dict(FACTS), interior=ranch())
     sent = worker_check(ranch())
