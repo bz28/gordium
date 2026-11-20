@@ -69,9 +69,9 @@ exactly:
   says the area isn't a room. (**To check:** how exactly to find
   enclosed areas with no Room; until that is settled, the reader can't claim to have seen every room, and `rooms` is
   left out.)
-- **The reader may propose, never decide.** A room named "Bedroom 2" can be pre-ticked as a suggestion in the
-  add-in's marking list; it is sent as `sleeping: true` only once the architect has ticked it: a fact about their own design. A suggestion
-  never left the add-in unconfirmed.
+- **The reader may propose, never decide.** A room named "Bedroom 2" can be shown as a suggestion in the add-in's
+  marking list, marked "suggested"; it is sent as `sleeping: true` only once the architect has accepted it
+  themselves, a fact about their own design. A suggestion alone is never sent.
 - **Measured from what is drawn; a typed number is a cross-check.** Revit stores some values twice: what the
   architect typed (a stair's "Actual Riser Height") and the shape drawn. The reader sends the drawn shape, and
   where the typed value disagrees with it by more than 1/16 in (the measuring code's drawing-noise allowance), the
@@ -298,7 +298,7 @@ Each step is its own PR, through the review loop, with its tests:
 2. **A stated clear width for doors in the format** (section 4, doors), the less favourable of drawn and stated
    counting when both are given. Agreed: door families can't be measured reliably; the maker's number, with its
    source, can. A format and measuring-code PR of its own, before step 5.
-3. **Suggestions from room names** (a "Bedroom" pre-ticked as a suggestion, sent only once confirmed). Agreed: a
+3. **Suggestions from room names** (a "Bedroom" shown as a suggestion, sent only once the architect accepts it). Agreed: a
    time-saver that can't cause a false pass.
 4. **Order** (section 7): step 1 first, on the Mac side, while the trial's outside reading goes on. Agreed.
 
