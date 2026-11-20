@@ -209,8 +209,8 @@ internal static class SceneDraw
 
     /// <summary>One of the scene's buildings: a marked floor block (a curved face, or an open shell, where the scene
     /// has one); a part of a house of parts in its building category (as SceneDrawing.PartOf: the slabs Floors and
-    /// Roofs, the window Windows, the rest Walls; DirectShapes in those categories, not native walls and slabs: section
-    /// 7 of the runbook notes it); a block on the Building layer (04): a Walls element holding only a line, which the
+    /// Roofs, the window Windows, the rest Walls; DirectShapes in those categories, not native walls, slabs, a window family or
+    /// a curtain wall: the reading design note's section 8 says so, and keeps native elements open); a block on the Building layer (04): a Walls element holding only a line, which the
     /// reader can't send as a solid.</summary>
     private static DirectShape Building(Document doc, JsonNode s, XYZ offset)
     {
@@ -438,9 +438,10 @@ internal static class SceneDraw
         b.CloseConnectedFaceSet();
         b.Build();
         var built = b.GetBuildResult();
-        if (built.Outcome != TessellatedShapeBuilderOutcome.Mesh)
-            throw new InvalidOperationException($"the closed mesh came back as {built.Outcome}");
-        return built.GetGeometricalObjects();
+        var got = built.GetGeometricalObjects();
+        if (built.Outcome != TessellatedShapeBuilderOutcome.Mesh || got.Count != 1 || got[0] is not Mesh m || m.NumTriangles != 12)
+            throw new InvalidOperationException($"the closed mesh came back as {built.Outcome}, not one mesh of 12 triangles");
+        return got;
     }
 
     /// <summary>A flat open mesh over the outline's plan box at height z, cells × cells squares (two triangles each),
@@ -459,7 +460,13 @@ internal static class SceneDraw
             }
         b.CloseConnectedFaceSet();
         b.Build();
-        return Shape(doc, b.GetBuildResult().GetGeometricalObjects(), null);
+        // Salvage may give back less than was asked for: only the whole mesh is drawn (review round 1)
+        var built = b.GetBuildResult();
+        var got = built.GetGeometricalObjects();
+        if (built.Outcome != TessellatedShapeBuilderOutcome.Mesh || got.Count != 1 || got[0] is not Mesh m
+            || m.NumTriangles != 2 * cells * cells)
+            throw new InvalidOperationException($"the terrain mesh came back as {built.Outcome}, not one mesh of {2 * cells * cells} triangles");
+        return Shape(doc, got, null);
     }
 
     private static CurveLoop Loop(List<(double X, double Y)> ring, double z, int? curvedEdge, (double X, double Y)? through = null)

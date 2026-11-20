@@ -216,9 +216,19 @@ powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps
 
 It builds the add-in, copies the build to one fixed folder, `%LOCALAPPDATA%\Gordium\addin\<version>\current\` (it refuses while Revit is running: Revit locks the files it loads), writes the clone's path beside it
 (`gordium_clone.txt`: the worker reads its rulebooks from the clone), and writes Revit's manifest to
-`%APPDATA%\Autodesk\Revit\Addins\<version>\Gordium.addin`. Revit asks once whether to load Gordium (answer "Always Load") and
-remembers the answer for that file location; the folder never changes, so it isn't asked again (the script first installed
-each build into a new folder, and Revit asked after every install, 2026-11-19).
+`%APPDATA%\Autodesk\Revit\Addins\<version>\Gordium.addin`. The fixed folder only keeps one copy; it doesn't stop
+Revit asking. Revit asks "Always Load" again whenever an unsigned add-in's file changes (seen on the trial laptop,
+2026-11-19, in a new folder or the same one), so each build is signed: run once, per Windows user,
+
+```
+powershell -ExecutionPolicy Bypass -File apps\revit_addin\trust_trial_addin.ps1
+```
+
+which makes a code-signing certificate that exists only on this machine ("Gordium trial add-in (this machine)", its
+private key not exportable) and trusts it for this user (Trusted Publishers, and Trusted Root, where Windows asks once
+to confirm). Every install then signs `Gordium*.dll` with it, and Revit loads a build from a trusted publisher without
+asking. Without the certificate the build is installed unsigned and Revit asks. To undo it, remove that certificate
+from `certmgr.msc` (Personal, Trusted Publishers and Trusted Root Certification Authorities).
 
 **How we know it works:** the trial ran it in Revit 2027.4 on 2026-11-19 (runbook section 5, Q2): it loaded on
 .NET 10.0.15, the box house's 32 rows matched the hand-worked verdicts four times out of four, and closing Revit

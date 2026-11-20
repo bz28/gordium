@@ -54,9 +54,16 @@ public sealed class App : IExternalApplication
             return;
         if (File.Exists(InPlaceSource.RequestPath))
         {
-            var takenStep = InPlaceSource.RequestPath + ".taken";
-            File.Move(InPlaceSource.RequestPath, takenStep, overwrite: true);
-            InPlaceSource.Run(ui, takenStep);
+            try
+            {
+                var takenStep = InPlaceSource.RequestPath + ".taken";
+                File.Move(InPlaceSource.RequestPath, takenStep, overwrite: true);
+                InPlaceSource.Run(ui, takenStep);
+            }
+            catch (Exception x)       // never out of Revit's Idling event (review round 1)
+            {
+                Trial.Log("in_place_source", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
             return;
         }
         var request = RecordScenesCommand.RunRequestPath;

@@ -229,7 +229,7 @@ Fill these in as you go; this page is where the results live. "Mac" below is the
 |---|---|
 | Scenes recorded (of 24) | 24 (Revit 2027.4, 2026-11-19), all in one run with no clicks: 146 s, Revit's start included |
 | Scenes passing `python -m design_checker.conformance` | 24 (`OK: every scene conforms`, run on the laptop) |
-| Scenes that failed, with the reason for each | None now. On the way: 26, a shared nested family is its own element in Revit (now read as part of its host, [reading design note](revit_reading_design.md) section 8); 18's in-place built-in, which Revit's API can't create (made once by hand, then copied into each scene model) |
+| Scenes that failed, with the reason for each | None now. On the way: 26, a shared nested family is its own element in Revit (now read as part of its host, [reading design note](revit_reading_design.md) section 8); 18's in-place built-in, which Revit's API can't create (made once by hand, then copied into each scene model). Scene 18's other parts are DirectShapes in their building categories, not native walls, slabs, a window family and a curtain wall, so native elements are still to record ([reading design note](revit_reading_design.md), section 8) |
 
 How they were drawn and recorded: the add-in's "Record scenes" draws each scene in a new model from the suite's own
 numbers (`SceneDraw`), reads it exactly as a check does (`RevitRead`, then `SiteReader`), writes
