@@ -294,7 +294,7 @@ read by GUID like every mark; unset is not stated:
 
 | Mark | Sends | If unset |
 |---|---|---|
-| `Gordium: Zone` (text) | `zone`, as typed: the architect's confirmed district. An address lookup's suggestion is never sent as confirmed (v1 has no lookup) | nothing is sent |
+| `Gordium: Zone` (text) | `zone`, as typed: the district exactly as the architect typed it. An address lookup's suggestion is never sent in its place (v1 has no lookup) | nothing is sent |
 | `Gordium: Use` (text) | `use`, Gordium's word (`one_family_detached`); a word the district doesn't list makes the use row need review | nothing is sent |
 | `Gordium: Lot surveyed` (Yes/No) | `lot_surveyed` | nothing is sent |
 | `Gordium: Street edge` (text, written by Gordium) | `street_line`: the lot's own edges | asked for by a pick; else nothing is sent |
