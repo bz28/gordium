@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using Autodesk.Revit.UI;
 using Gordium.Worker;
@@ -40,8 +41,28 @@ public sealed class App : IExternalApplication
             ToolTip = "Draws each conformance scene in a new Revit model, reads it as a check would, records it to " +
                       "test_data/host_conformance/recorded/revit/ and checks it by the suite's own rules",
         });
+        application.Idling += OnIdling;
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
+    }
+
+    /// <summary>A run asked for by file (RecordScenesCommand.RunRequestPath), so the trial can be driven with no
+    /// click: taken (renamed) first, so it runs once even if it fails; every result goes to the log.</summary>
+    private static void OnIdling(object? sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
+    {
+        var request = RecordScenesCommand.RunRequestPath;
+        if (sender is not UIApplication ui || !File.Exists(request))
+            return;
+        var taken = request + ".taken";
+        try
+        {
+            File.Move(request, taken, overwrite: true);
+            RecordScenesCommand.Run(ui.Application, RecordScenesCommand.Requested(taken));
+        }
+        catch (Exception x)
+        {
+            Trial.Log("record_scenes", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+        }
     }
 
     public Result OnShutdown(UIControlledApplication application)

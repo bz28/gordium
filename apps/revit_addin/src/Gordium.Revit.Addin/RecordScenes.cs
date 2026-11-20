@@ -25,23 +25,9 @@ public sealed class RecordScenesCommand : IExternalCommand
 
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {
-        var app = commandData.Application.Application;
-        var lines = new List<string>();
         try
         {
-            var clone = Trial.Clone();
-            var worker = Trial.Worker();
-            var tests = Path.Combine(clone, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests");
-            var scenes = PythonOnce.Run(Trial.Python(clone), clone, [Path.Combine(tests, "scene_data.py")], TimeSpan.FromMinutes(2))
-                .Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => JsonNode.Parse(l)!.AsObject()).ToList();
-            var wanted = Requested();
-            foreach (var scene in scenes)
-            {
-                var name = scene["name"]!.GetValue<string>();
-                if (wanted is not null && !wanted.Contains(name))
-                    continue;
-                lines.Add(Record(app, clone, tests, worker, scene));
-            }
+            var lines = Run(commandData.Application.Application, Requested(RequestPath));
             TaskDialog.Show("Gordium: record scenes", string.Join("\n", lines) + $"\n\nLogged to {Trial.LogPath()}");
             return Result.Succeeded;
         }
@@ -54,9 +40,35 @@ public sealed class RecordScenesCommand : IExternalCommand
         }
     }
 
-    private static HashSet<string>? Requested()
+    /// <summary>Which scenes the button records (absent: every drawn scene).</summary>
+    internal static string RequestPath => Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "record_request.json");
+
+    /// <summary>A request to record while Revit is idle, with no click (App's Idling handler): taken (renamed) before
+    /// it runs, so it runs once; its <c>scenes</c> as the button's request file.</summary>
+    internal static string RunRequestPath => Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "run_request.json");
+
+    /// <summary>Records the scenes named (all drawn scenes for null); one line each, every result logged.</summary>
+    internal static List<string> Run(Autodesk.Revit.ApplicationServices.Application app, HashSet<string>? wanted)
     {
-        var path = Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "record_request.json");
+        var lines = new List<string>();
+        var clone = Trial.Clone();
+        var worker = Trial.Worker();
+        var tests = Path.Combine(clone, "apps", "revit_addin", "tests", "Gordium.Revit.Reading.Tests");
+        var scenes = PythonOnce.Run(Trial.Python(clone), clone, [Path.Combine(tests, "scene_data.py")], TimeSpan.FromMinutes(2))
+            .Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => JsonNode.Parse(l)!.AsObject()).ToList();
+        foreach (var scene in scenes)
+        {
+            var name = scene["name"]!.GetValue<string>();
+            if (wanted is not null && !wanted.Contains(name))
+                continue;
+            lines.Add(Record(app, clone, tests, worker, scene));
+        }
+        Trial.Log("record_scenes_done", new Dictionary<string, object?> { ["scenes"] = lines.Count });
+        return lines;
+    }
+
+    internal static HashSet<string>? Requested(string path)
+    {
         return File.Exists(path)
             ? JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))!["scenes"]!.AsArray().Select(s => s!.GetValue<string>()).ToHashSet()
             : null;
