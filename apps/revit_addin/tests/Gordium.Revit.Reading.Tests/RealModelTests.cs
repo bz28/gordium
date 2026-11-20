@@ -1,0 +1,384 @@
+using System.Text.Json.Nodes;
+using Xunit;
+
+namespace Gordium.Revit.Reading.Tests;
+
+/// <summary>What stopped a real model being read (Autodesk's "Pacific Continental Residence Sample.rvt", Read inside on
+/// 2026-11-20; docs/revit/revit_interior_reading_design.md, section 2): a window's grille muntins (Generic Models
+/// nested in the window) counted as stairs nobody drew, and one enclosed area with no Room anywhere (a roof level's
+/// parapets, a chase) stopped every room in the house being read. Each pinned on the hand-worked ranch drawn as fake
+/// Revit records, both ways, and through the real measuring code and checker.</summary>
+public sealed class RealModelTests
+{
+    private static readonly MarkValue Yes = new(true, 1);
+    private const string Level0 = "level-0";
+
+    // ---- a window's grille is not a stair -----------------------------------------------------------------------
+
+    private static RevitBox Box(double x0, double y0, double z0, double x1, double y1, double z1) => new(new(x0, y0, z0), new(x1, y1, z1));
+
+    private static readonly RevitBox WindowBox = Box(10, 0, 3, 13, 0.5, 8);
+
+    private static StairCandidate Muntin(RevitBox? box, params NestHost[] chain) =>
+        new("muntin", "OST_GenericModel", "Muntin Pattern_1x2", "a loadable family", Box: box, NestedIn: chain);
+
+    public static TheoryData<string, bool> Grilles() => new()
+    {
+        { "inside its window", false },
+        { "inside its window, two deep", false },
+        { "inside its door", false },
+        { "touching its window's box", false },
+        { "sticking out of its window", true },
+        { "not nested", true },
+        { "nested in a generic model", true },
+        { "no box", true },
+        { "its window has no box", true },
+        { "an in-place family's", true },
+    };
+
+    [Theory]
+    [MemberData(nameof(Grilles))]
+    public void A_generic_model_nested_inside_a_window_or_door_is_no_stair_anything_else_still_is(string how, bool blocks)
+    {
+        var window = new NestHost("w", "OST_Windows", WindowBox);
+        var inside = Box(10.5, 0.1, 4, 12.5, 0.4, 7);
+        var candidate = how switch
+        {
+            "inside its window" => Muntin(inside, window),
+            "inside its window, two deep" => Muntin(inside, new NestHost("sash", "OST_GenericModel", Box(10.2, 0, 3.2, 12.8, 0.5, 7.8)), window),
+            "inside its door" => Muntin(inside, new NestHost("d", "OST_Doors", WindowBox)),
+            "touching its window's box" => Muntin(Box(10, 0, 3, 13, 0.5, 8 + InteriorReader.Sixteenth / 2), window),
+            "sticking out of its window" => Muntin(Box(10.5, 0.1, 4, 12.5, 0.4, 8.5), window),
+            "not nested" => Muntin(inside),
+            "nested in a generic model" => Muntin(inside, new NestHost("gm", "OST_GenericModel", WindowBox)),
+            "no box" => Muntin(null, window),
+            "its window has no box" => Muntin(inside, window with { Box = null }),
+            _ => Muntin(inside, window) with { Kind = "an in-place family", BuiltInCategory = "OST_StairsRailing" },
+        };
+        Assert.Equal(!blocks, StairReader.InsideWindowOrDoor(candidate));
+        var house = FakeHouse.Draw("3_tall_riser");
+        house.StairCandidates.Add(candidate);
+        var read = InteriorReader.Read(house.Model());
+        if (blocks)
+        {
+            Assert.Null(read.Interior["stairs"]);
+            Assert.Contains(read.StairsNotRead, w => w.Contains("can't tell every stair is read"));
+        }
+        else
+        {
+            Assert.NotNull(read.Interior["stairs"]);
+            Assert.Empty(read.StairsNotRead);
+            Assert.Empty(StairReader.Blockers(house.Model()));
+        }
+    }
+
+    [Fact]
+    public void A_grille_inside_a_window_turned_off_the_axes_is_judged_in_the_window_boxs_own_turn()
+    {
+        // a box with its own transform: both turned the same way, the grille still sits inside
+        var turn = Transform3.TurnThenMove(Math.PI / 6, new Xyz(100, 50, 0));
+        var window = new NestHost("w", "OST_Windows", WindowBox with { Transform = turn });
+        Assert.True(StairReader.InsideWindowOrDoor(Muntin(Box(10.5, 0.1, 4, 12.5, 0.4, 7) with { Transform = turn }, window)));
+        // the grille's box unturned, far from the turned window: not inside it
+        Assert.False(StairReader.InsideWindowOrDoor(Muntin(Box(10.5, 0.1, 4, 12.5, 0.4, 7), window)));
+    }
+
+    // ---- an enclosed area with no Room ----------------------------------------------------------------------------
+
+    /// <summary>The ranch with its rooms and areas on level 0 given that level's id, plus the level itself.</summary>
+    private static FakeHouse Ranch(bool? noRooms = null)
+    {
+        var house = FakeHouse.Draw("1_ranch_compliant");
+        for (var i = 0; i < house.Rooms.Count; i++)
+            house.Rooms[i] = house.Rooms[i] with { LevelId = Level0 };
+        for (var i = 0; i < house.Areas.Count; i++)
+            house.Areas[i] = house.Areas[i] with { LevelId = Level0 };
+        house.Marked.Add(new MarkedElement
+        {
+            UniqueId = Level0, BuiltInCategory = Marks.Levels, Name = "Level 0",
+            Instance = noRooms is { } v ? new Dictionary<Guid, MarkValue> { [Marks.NoRoomsOnLevel.Guid] = new(true, v ? 1 : 0) }
+                : new Dictionary<Guid, MarkValue>(),
+        });
+        return house;
+    }
+
+    private static EnclosedArea Unroomed(double area = 331.4, double x = 30, double y = 3, string? level = Level0) =>
+        new("Level 0", area, false, new Xyz(x, y, 0), level);
+
+    private static JsonNode Measured(InteriorReadResult read)
+    {
+        var path = Path.Combine(Path.GetTempPath(), $"gordium_unknown_{Guid.NewGuid():N}.json");
+        File.WriteAllText(path, read.Interior.ToJsonString());
+        try
+        {
+            return JsonNode.Parse(Env.RunCode(
+                "import json, sys; from model_measurement.interior import measure; from rule_format.parts import rows, rule_result; " +
+                "from rule_format.rulebook import load, REPO; " +
+                "m = measure(json.load(open(sys.argv[1]))); " +
+                "rule = next(r for r in load(REPO / 'regulations/jurisdictions/new_york/new_york_state/5_building_code_rules/drafted/general.yaml')['rules'] " +
+                "if r['id'] == 'general.r319_1_sleeping_room_escape_opening_operable'); " +
+                "got = rows(rule, m['parts'], {}, {'use': set()}); " +
+                "print(json.dumps({'rooms': [[p['id'], p.get('maybe')] for p in m['parts']['sleeping_room'] or []], 'problems': m['problems'], " +
+                "'rows': [[(r['within'] or {}).get('id'), r['outcome'], r['reason']] for r in got], 'result': rule_result(got)}))", path))!;
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    [Fact]
+    public void An_enclosed_area_with_no_room_is_sent_as_a_space_whose_use_isnt_known_and_the_rooms_drawn_are_read()
+    {
+        var house = Ranch();
+        house.Areas.Add(Unroomed());
+        var read = InteriorReader.Read(house.Model());
+        Assert.Empty(read.RoomsNotRead);
+        Assert.Equal(3, read.Interior["rooms"]!.AsArray().Count);                // every room drawn is still read
+        var space = Assert.Single(read.Interior["unknown_spaces"]!.AsArray())!;
+        Assert.StartsWith("enclosed-area:level-0:", space["id"]!.GetValue<string>());
+        Assert.StartsWith("An enclosed area on Level 0 has no Room (331.4 sq ft", space["name"]!.GetValue<string>());
+        Assert.StartsWith("An enclosed area on Level 0 has no Room (331.4 sq ft", Assert.Single(read.UnknownSpaces));
+        // the same id at every read of the same model
+        Assert.Equal(space["id"]!.GetValue<string>(), InteriorReader.Read(house.Model()).Interior["unknown_spaces"]![0]!["id"]!.GetValue<string>());
+
+        // through the real measuring code and rule: a sleeping room that may not be one, "every sleeping room has an
+        // escape opening" needs review on it (never "fails": it may be a closet), the drawn bedrooms each their own row
+        var got = Measured(read);
+        Assert.Empty(got["problems"]!.AsArray());
+        var rooms = got["rooms"]!.AsArray().Select(r => (Id: r![0]!.GetValue<string>(), Maybe: r[1]?.GetValue<string>())).ToList();
+        Assert.Equal([FakeHouse.Uid("bed1"), FakeHouse.Uid("bed2"), space["id"]!.GetValue<string>()], rooms.Select(r => r.Id));
+        Assert.Null(rooms[0].Maybe);
+        Assert.Contains("its use isn't known, so it may be a sleeping room", rooms[2].Maybe);
+        var rows = got["rows"]!.AsArray().Select(r => (Within: r![0]?.GetValue<string>(), Outcome: r[1]!.GetValue<string>())).ToList();
+        Assert.Equal("needs_review", rows.Single(r => r.Within == space["id"]!.GetValue<string>()).Outcome);
+        Assert.Contains(rows, r => r.Within == FakeHouse.Uid("bed1"));
+        Assert.NotEqual("pass", got["result"]!.GetValue<string>());
+
+        // the marking list: the area listed (not as stopping the rooms), the headline not all marked, the level's row to mark
+        var list = MarkingList.Build(house.Model());
+        Assert.Empty(list.RoomBlockers);
+        Assert.StartsWith("An enclosed area on Level 0 has no Room (331.4 sq ft", Assert.Single(list.UnknownAreas));
+        Assert.Contains(Marks.NoRoomsOnLevel.Name + " Yes", list.UnknownAreas[0]);
+        Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
+        Assert.Contains(list.Summary, s => s.StartsWith("1 enclosed area has no Room (listed above): the rooms drawn are read", StringComparison.Ordinal));
+        var level = list.Rows.Single(r => r.Kind == MarkedKind.Level);
+        Assert.Equal("Level 0 (1 enclosed area with no Room)", level.Label);
+        Assert.True(level.NeedsMarking);
+        Assert.Contains("An enclosed area on Level 0 has no Room", MarkingList.Text(list));
+    }
+
+    [Fact]
+    public void Beside_an_unplaced_room_the_list_never_says_the_rooms_drawn_are_read()
+    {
+        // review round 1: the area's line said "the rooms drawn are read" while an unplaced Room stopped every room
+        var house = Ranch();
+        house.Areas.Add(Unroomed());
+        var i = house.MarkedIndex("living");
+        house.Marked[i] = house.Marked[i] with { Placement = RoomPlacement.Unplaced };
+        Assert.Null(InteriorReader.Read(house.Model()).Interior["rooms"]);
+        var summary = MarkingList.Build(house.Model()).Summary;
+        Assert.Contains(summary, s => s.Contains("so no room is read for egress until each is placed or deleted"));
+        Assert.DoesNotContain(summary, s => s.Contains("the rooms drawn are read"));
+        Assert.Contains(summary, s => s.StartsWith("1 enclosed area has no Room (listed above): once the rooms are read", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void With_no_room_drawn_at_all_the_list_never_says_the_rooms_drawn_are_read()
+    {
+        // review round 2: walls only (a first run): no rooms sent, yet the area's line said "the rooms drawn are read"
+        var house = Ranch();
+        house.Marked.RemoveAll(e => e.BuiltInCategory == Marks.Rooms);
+        house.Rooms.Clear();
+        house.Areas.Add(Unroomed());
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(read.Interior["rooms"]);
+        Assert.Null(read.Interior["unknown_spaces"]);
+        var summary = MarkingList.Build(house.Model()).Summary;
+        Assert.DoesNotContain(summary, s => s.Contains("the rooms drawn are read"));
+        Assert.Contains(summary, s => s.StartsWith("1 enclosed area has no Room (listed above): once the rooms are read", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void With_no_area_unroomed_nothing_is_added_and_no_level_is_listed()
+    {
+        var house = Ranch();
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(read.Interior["unknown_spaces"]);                            // the houses' recordings are unchanged
+        Assert.DoesNotContain(MarkingList.Build(house.Model()).Rows, r => r.Kind == MarkedKind.Level);
+        Assert.Equal([], InteriorTests.Problems(house, read));
+    }
+
+    [Fact]
+    public void Enclosed_areas_that_couldnt_be_read_still_leave_every_room_out()
+    {
+        var house = Ranch();
+        var model = house.Model() with { Interior = house.Model().Interior! with { EnclosedAreas = null } };
+        var read = InteriorReader.Read(model);
+        Assert.Null(read.Interior["rooms"]);
+        Assert.Null(read.Interior["unknown_spaces"]);
+        Assert.Contains(read.RoomsNotRead, w => w.StartsWith("the enclosed areas on each level couldn't be read"));
+    }
+
+    [Fact]
+    public void An_area_lying_in_a_room_of_the_design_checked_has_its_room_one_in_another_option_doesnt()
+    {
+        // Revit's circuits are the main model's: a Room in the option checked can leave its circuit "no Room"
+        var house = Ranch();
+        var bed1 = house.Rooms[house.RoomIndex("bed1")];
+        var pts = bed1.Boundary![0].Select(s => s.Start).ToList();
+        var middle = new Xyz(pts.Average(p => p.X), pts.Average(p => p.Y), 0);
+        house.Areas.Add(Unroomed(100, middle.X, middle.Y));
+        Assert.Null(InteriorReader.Read(house.Model()).Interior["unknown_spaces"]);
+
+        // on its edge, or on another level, it isn't clearly in the room: sent
+        house.Areas[^1] = Unroomed(100, pts[0].X, pts[0].Y);
+        Assert.NotNull(InteriorReader.Read(house.Model()).Interior["unknown_spaces"]);
+        house.Areas[^1] = Unroomed(100, middle.X, middle.Y, level: "level-1");
+        Assert.NotNull(InteriorReader.Read(house.Model()).Interior["unknown_spaces"]);
+        house.Areas[^1] = Unroomed(100, middle.X, middle.Y, level: null);
+        Assert.NotNull(InteriorReader.Read(house.Model()).Interior["unknown_spaces"]);
+
+        // the room in a design option that isn't the one checked: not the design, so the area has no room in it
+        house.Areas[^1] = Unroomed(100, middle.X, middle.Y);
+        var i = house.MarkedIndex("bed1");
+        house.Marked[i] = house.Marked[i] with { DesignOption = "opt-b" };
+        var options = new OptionSet("set-1", "Entry", [new DesignOptionRecord("opt-a", "El Cabrillo", true), new DesignOptionRecord("opt-b", "Dover", false)]);
+        var read = InteriorReader.Read(house.Model() with { OptionSets = [options] });
+        Assert.NotNull(read.Interior["unknown_spaces"]);
+        Assert.DoesNotContain(read.Interior["rooms"]!.AsArray(), r => r!["id"]!.GetValue<string>() == FakeHouse.Uid("bed1"));
+        // in the primary option: the design checked
+        house.Marked[i] = house.Marked[i] with { DesignOption = "opt-a" };
+        Assert.Null(InteriorReader.Read(house.Model() with { OptionSets = [options] }).Interior["unknown_spaces"]);
+    }
+
+    [Fact]
+    public void A_level_marked_no_rooms_clears_its_areas_unless_a_room_is_drawn_on_it_then_the_conflict_is_listed_first()
+    {
+        // a roof level: its areas are between parapets, none a room
+        var house = Ranch();
+        house.Areas.Add(Unroomed(level: "roof"));
+        house.Marked.Add(new MarkedElement
+        {
+            UniqueId = "roof", BuiltInCategory = Marks.Levels, Name = "Roof",
+            Instance = new Dictionary<Guid, MarkValue> { [Marks.NoRoomsOnLevel.Guid] = Yes },
+        });
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(read.Interior["unknown_spaces"]);
+        Assert.Empty(read.LevelConflicts);
+        var list = MarkingList.Build(house.Model());
+        Assert.Empty(list.UnknownAreas);
+        var roof = list.Rows.Single(r => r.Kind == MarkedKind.Level);
+        Assert.Equal("Roof (1 enclosed area with no Room)", roof.Label);
+        Assert.False(roof.NeedsMarking);
+        Assert.Equal(MarkingListResult.AllMarked, list.Headline);
+
+        // marked No: not stated as having none, the area is sent
+        house.Marked[^1] = house.Marked[^1] with { Instance = new Dictionary<Guid, MarkValue> { [Marks.NoRoomsOnLevel.Guid] = new(true, 0) } };
+        Assert.NotNull(InteriorReader.Read(house.Model()).Interior["unknown_spaces"]);
+
+        // level 0 marked Yes, with the ranch's rooms on it: the mark doesn't count, each Room is read, the conflict is first
+        house = Ranch(noRooms: true);
+        house.Areas.Add(Unroomed());
+        read = InteriorReader.Read(house.Model());
+        Assert.Equal(3, read.Interior["rooms"]!.AsArray().Count);                // never dropped in silence
+        Assert.NotNull(read.Interior["unknown_spaces"]);                          // the mark doesn't count
+        var conflict = Assert.Single(read.LevelConflicts);
+        Assert.StartsWith($"Level \"Level 0\" is marked {Marks.NoRoomsOnLevel.Name} Yes, but Room \"", conflict);
+        list = MarkingList.Build(house.Model());
+        Assert.Equal(read.LevelConflicts, list.LevelConflicts);
+        Assert.StartsWith("Conflict: Level \"Level 0\"", MarkingList.Text(list));
+        Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
+    }
+
+    [Fact]
+    public void An_area_with_no_room_holds_back_no_basements_attics_or_lofts_and_the_checker_refuses_them_too()
+    {
+        var house = Ranch();
+        house.ProjectMarks[Marks.NoSleepingLofts.Guid] = Yes;
+        house.ProjectMarks[Marks.NoRamps.Guid] = Yes;
+        Assert.Contains(InteriorReader.Read(house.Model()).Interior["has_none"]!.AsArray(), e => e!["kind"]!.GetValue<string>() == "sleeping_loft");
+        house.Areas.Add(Unroomed());
+        var read = InteriorReader.Read(house.Model());
+        var kinds = read.Interior["has_none"]!.AsArray().Select(e => e!["kind"]!.GetValue<string>()).ToList();
+        Assert.Equal(["ramp"], kinds);                                            // a ramp isn't a space
+        var tick = read.Ticks.Single(t => t.Kind.Kind == "sleeping_loft");
+        Assert.Contains(tick.Blockers, b => b.StartsWith("An enclosed area on Level 0 has no Room"));
+    }
+
+    // ---- hundreds alike are one line each, for the architect --------------------------------------------------
+
+    [Fact]
+    public void Many_alike_are_counted_on_one_line_per_type_and_per_level()
+    {
+        // Pacific Continental's Mark for egress: one line per grille and per area, ~300 lines nobody can read
+        var house = Ranch();
+        for (var k = 0; k < 136; k++)
+            house.StairCandidates.Add(new($"m12-{k}", "OST_GenericModel", "Muntin Pattern_1x2", "a loadable family"));
+        for (var k = 0; k < 130; k++)
+            house.StairCandidates.Add(new($"m22-{k}", "OST_GenericModel", "Muntin Pattern_2x2", "a loadable family"));
+        for (var k = 0; k < 6; k++)
+            house.StairCandidates.Add(new($"pf-{k}", "OST_GenericModel", "Picture Frame", "a loadable family"));
+        house.StairCandidates.Add(new("ip", "OST_GenericModel", "Ladder", "an in-place family"));
+        for (var k = 0; k < 19; k++)
+            house.Areas.Add(Unroomed(2 + k, 100 + 20 * k, 3, "roof") with { Level = "Roof" });
+        house.Areas.Add(Unroomed());
+
+        var stairs = StairReader.Blockers(house.Model());
+        Assert.Equal(
+            ["272 GenericModel elements are each a loadable family (3 types: Muntin Pattern_1x2 x136, Muntin Pattern_2x2 x130, " +
+             "Picture Frame x6; each listed by id in the log): a stair or its railing drawn this way isn't read, so Gordium " +
+             "can't tell every stair is read",
+             "GenericModel \"Ladder\" is an in-place family: a stair or its railing drawn this way isn't read, so Gordium can't " +
+             "tell every stair is read"], stairs);
+        var areas = InteriorReader.AreaBlockers(house.Model());
+        Assert.Equal(2, areas.Count);
+        Assert.StartsWith("19 enclosed areas on Roof have no Room (2 to 20 sq ft; each listed with its place in the log)", areas[0]);
+        Assert.StartsWith("An enclosed area on Level 0 has no Room (331.4 sq ft", areas[1]);
+
+        var list = MarkingList.Build(house.Model());
+        Assert.Equal(stairs, list.StairBlockers);
+        Assert.Equal(areas, list.UnknownAreas);
+        Assert.True(MarkingList.Text(list).Split('\n').Length < 60);
+        Assert.Contains(list.Summary, s => s.StartsWith("20 enclosed areas have no Room", StringComparison.Ordinal));
+        // each one still in the reading, by id and place: the description's spaces and the log's words
+        var read = InteriorReader.Read(house.Model());
+        Assert.Equal(20, read.Interior["unknown_spaces"]!.AsArray().Count);
+        Assert.Equal(20, read.UnknownSpaces.Count);
+    }
+
+    // ---- what is in, under and over a room: the design checked only -------------------------------------------
+
+    [Fact]
+    public void A_wall_in_a_design_option_not_checked_doesnt_stand_in_a_room()
+    {
+        var house = Ranch();
+        var i = house.RoomIndex("bed1");
+        var wall = new NearbyElement("option-wall", "OST_Walls", "Dover wall", DesignOption: "opt-b");
+        house.Rooms[i] = house.Rooms[i] with { Inside = [wall] };
+        var options = new OptionSet("set-1", "Entry", [new DesignOptionRecord("opt-a", "El Cabrillo", true), new DesignOptionRecord("opt-b", "Dover", false)]);
+        var model = house.Model() with { OptionSets = [options] };
+        var bed1 = InteriorReader.Read(model).Interior["rooms"]!.AsArray().Single(r => r!["id"]!.GetValue<string>() == FakeHouse.Uid("bed1"))!;
+        Assert.NotNull(bed1["floor"]);
+        // the same wall in the option checked stands in it: no floor
+        house.Rooms[i] = house.Rooms[i] with { Inside = [wall with { DesignOption = "opt-a" }] };
+        bed1 = InteriorReader.Read(house.Model() with { OptionSets = [options] }).Interior["rooms"]!.AsArray()
+            .Single(r => r!["id"]!.GetValue<string>() == FakeHouse.Uid("bed1"))!;
+        Assert.Null(bed1["floor"]);
+    }
+
+    // ---- a wall whose faces Revit can't give ------------------------------------------------------------------
+
+    [Fact]
+    public void A_window_whose_walls_faces_couldnt_be_read_says_so_and_sends_no_clear_opening()
+    {
+        var house = FakeHouse.Draw("1_ranch_compliant");
+        var i = house.Openings.FindIndex(o => o.UniqueId == FakeHouse.Uid("w1"));
+        house.Openings[i] = house.Openings[i] with { WallOpening = null, WallOpeningBy = null, WallOpeningUnread = true };
+        var read = InteriorReader.Read(house.Model());
+        var w1 = read.Interior["openings"]!.AsArray().Single(o => o!["id"]!.GetValue<string>() == FakeHouse.Uid("w1"))!;
+        Assert.Null(w1["stated_clear"]);
+        Assert.StartsWith("its wall's geometry couldn't be read",
+                          read.Notes.Single(n => n.Part == FakeHouse.Uid("w1") && n.Field == "stated_clear").Why);
+    }
+}

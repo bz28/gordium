@@ -33,6 +33,7 @@ public static class Marks
     public const string Doors = "OST_Doors";
     public const string Railings = "OST_StairsRailing";
     public const string ProjectInformation = "OST_ProjectInformation";
+    public const string Levels = "OST_Levels";
 
     /// <summary>The group the parameters are written under in the shared-parameter file Gordium makes.</summary>
     public const string Group = "Gordium";
@@ -145,12 +146,55 @@ public static class Marks
 
     /// <summary>The <see cref="GroundFrom"/> words and the <c>grade_from</c> each sends.</summary>
     public static IReadOnlyList<(string Word, string GradeFrom)> GroundWords => [("Spot grades", "spot"), ("Finished spot grades", "finished_spots")];
+    /// <summary>A level the architect says has no rooms at all (a roof, a turret's top: Revit finds enclosed areas
+    /// there between walls and parapets). Yes: its enclosed areas with no Room aren't sent as spaces whose use isn't
+    /// known; a Room drawn on it disagrees, and is listed first as a conflict (the tick then doesn't count). Blank or
+    /// No: its enclosed areas with no Room are each sent so, and every sleeping-room rule needs review.</summary>
+    public static readonly MarkDefinition NoRoomsOnLevel = new(
+        "Gordium: No rooms on this level", new("c8cc09e8-00ce-4e4b-a27a-4c2d23410a02"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Levels], "unknown_spaces (an enclosed area with no Room on a level ticked Yes isn't one)",
+        "Yes for a level with no rooms at all (a roof, the top of a turret). Its enclosed areas with no Room are then not treated as rooms nobody drew; a Room drawn on it is listed as a conflict. Blank or No: each enclosed area with no Room on it keeps every sleeping-room rule needing review.");
+
+    // ---- step 6: what the house has none of (design note, sections 2 and 4; HasNone) ------------------------------
+    // One Yes/No on Project Information per kind: the three kinds the description lists itself (an empty list says
+    // none) and every kind of the format's has_none (model_measurement.interior.has_none.KINDS). Yes is sent only when
+    // nothing of that kind is drawn and nothing could hide one; No or unset: not stated, that kind not read.
+
+    private static MarkDefinition NoneTick(string name, string guid, string feeds, string what) => new(
+        "Gordium: This house has no " + name, new(guid), MarkValueKind.YesNo, MarkBinding.Instance, [ProjectInformation], feeds,
+        $"Yes when the house has no {what} at all (however drawn). Sent only when nothing of the kind is drawn and nothing " +
+        "could hide one. Blank or No: not stated, so its egress rules need review.");
+
+    public static readonly MarkDefinition NoStairs = NoneTick("stairs", "a1f4e4bd-612e-4ac3-8f40-29734e304311", "stairs: []", "stairs");
+    public static readonly MarkDefinition NoDoors = NoneTick("doors", "06f6906a-a8b1-4ca9-81bc-f073346c5bad", "doors: []", "doors");
+    public static readonly MarkDefinition NoGuards = NoneTick("guards", "8ba873c3-cea1-4adc-b301-52e61ba9c1a4", "guards: []",
+                                                               "guards (at a floor's edge or along a stair)");
+    public static readonly MarkDefinition NoBasements = NoneTick("basements", "a96ef278-0a0e-4787-b2ed-0f5e3fd4e693",
+                                                                  "has_none: basement", "basement");
+    public static readonly MarkDefinition NoHabitableAttics = NoneTick("habitable attics", "bccc5c23-d42d-47cf-bd62-0c45311db280",
+                                                                        "has_none: habitable_attic", "habitable attic");
+    public static readonly MarkDefinition NoSleepingLofts = NoneTick("sleeping lofts", "348c128f-c23b-40af-a0ea-2b1acaa45d46",
+                                                                      "has_none: sleeping_loft", "sleeping loft");
+    public static readonly MarkDefinition NoRamps = NoneTick("ramps", "6aad2ebe-4051-49b2-bae3-e531d9d620f4", "has_none: ramp", "ramp");
+    public static readonly MarkDefinition NoAlternatingTreadDevices = NoneTick(
+        "alternating tread devices", "3e807c15-9890-4ed0-9f16-98ee891af0f1", "has_none: alternating_tread_device",
+        "alternating tread device");
+    // no apostrophe in a parameter's name: "ship ladders" (the format's "ship's ladders")
+    public static readonly MarkDefinition NoShipLadders = NoneTick("ship ladders", "0249580f-f83a-431e-9e59-9e9e5a542066",
+                                                                    "has_none: ships_ladder", "ship's ladder");
+    public static readonly MarkDefinition NoPatioCovers = NoneTick("patio covers", "0b28269f-ee8a-4939-b3ed-2ac97d6b44d1",
+                                                                    "has_none: patio_cover", "patio cover");
+    public static readonly MarkDefinition NoProjectionOverEscapeOpening = NoneTick(
+        "deck or porch or cantilever over an escape opening", "820cd2d1-5b6d-416d-afa8-01cb1f0c4515",
+        "has_none: deck_porch_or_cantilever_over_escape_opening", "deck, porch or cantilever over any escape opening");
 
     /// <summary>Every mark, in the design note's order.</summary>
     public static readonly IReadOnlyList<MarkDefinition> All =
     [
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
+        NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
+        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

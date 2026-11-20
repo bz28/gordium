@@ -39,6 +39,20 @@ public sealed class MarksTests
             ("Gordium: Corner lot", "b37e1302-284e-4440-bc43-a44309ea8991", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Street edge", "260b3e70-6b9b-45d2-8137-a5c18db9ccf5", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Ground from", "aa4ea7e3-5a41-48da-b6a8-979f3dfb3e5c", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // step 6: what the house has none of, one tick per kind
+            ("Gordium: This house has no stairs", "a1f4e4bd-612e-4ac3-8f40-29734e304311", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no doors", "06f6906a-a8b1-4ca9-81bc-f073346c5bad", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no guards", "8ba873c3-cea1-4adc-b301-52e61ba9c1a4", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no basements", "a96ef278-0a0e-4787-b2ed-0f5e3fd4e693", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no habitable attics", "bccc5c23-d42d-47cf-bd62-0c45311db280", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no sleeping lofts", "348c128f-c23b-40af-a0ea-2b1acaa45d46", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no ramps", "6aad2ebe-4051-49b2-bae3-e531d9d620f4", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no alternating tread devices", "3e807c15-9890-4ed0-9f16-98ee891af0f1", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no ship ladders", "0249580f-f83a-431e-9e59-9e9e5a542066", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no patio covers", "0b28269f-ee8a-4939-b3ed-2ac97d6b44d1", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: This house has no deck or porch or cantilever over an escape opening", "820cd2d1-5b6d-416d-afa8-01cb1f0c4515", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // a real model (Pacific Continental, 2026-11-20): a roof or turret level whose enclosed areas aren't rooms
+            ("Gordium: No rooms on this level", "c8cc09e8-00ce-4e4b-a27a-4c2d23410a02", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Levels"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

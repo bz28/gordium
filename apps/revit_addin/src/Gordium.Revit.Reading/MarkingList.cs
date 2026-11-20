@@ -8,7 +8,7 @@ namespace Gordium.Revit.Reading;
 // the marking list built from them. The one rule (principle 4): a mark never set is not stated, never "No"; a
 // suggestion is shown, never read as a mark.
 
-public enum MarkedKind { Room, Window, Door }
+public enum MarkedKind { Room, Window, Door, Level }
 
 /// <summary>A room's mark, read: <see cref="Sleeping"/> null when not stated.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping);
@@ -47,8 +47,13 @@ public static class MarkReading
         Marks.Rooms => MarkedKind.Room,
         Marks.Windows => MarkedKind.Window,
         Marks.Doors => MarkedKind.Door,
+        Marks.Levels => MarkedKind.Level,
         _ => null,
     };
+
+    /// <summary>The levels in the model the architect marked "no rooms on this level" Yes (unset or No: not stated).</summary>
+    public static IReadOnlyList<MarkedElement> LevelsMarkedNoRooms(RevitModel model) =>
+        InDesign(model).Where(e => KindOf(e) == MarkedKind.Level && Marks.YesNo(Get(e, Marks.NoRoomsOnLevel)) is true).ToList();
 
     private static MarkValue? Get(MarkedElement e, MarkDefinition m) =>
         (m.Binding == MarkBinding.Instance ? e.Instance : e.Type).TryGetValue(m.Guid, out var v) ? v : null;
@@ -124,11 +129,26 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// <summary>What could hide a stair (step 4), listed after the room blockers: while any is there no stair is read.</summary>
     public IReadOnlyList<string> StairBlockers { get; init; } = [];
 
+    /// <summary>Every "this house has none of" tick that disagrees with what is drawn (step 6): listed first of all.</summary>
+    public IReadOnlyList<string> HasNoneConflicts { get; init; } = [];
+
+    /// <summary>Every level marked "no rooms on this level" with a Room drawn on it: listed first, with the ticks'.</summary>
+    public IReadOnlyList<string> LevelConflicts { get; init; } = [];
+
+    /// <summary>Every enclosed area with no Room (sent as a space whose use isn't known, so every sleeping-room rule
+    /// needs review), listed after what stops the rooms being read.</summary>
+    public IReadOnlyList<string> UnknownAreas { get; init; } = [];
+
+    /// <summary>A line per "this house has none of" tick (step 6): sent, not sent and why, or not set (with what the
+    /// reader found, as a proposal only).</summary>
+    public IReadOnlyList<string> HasNoneLines { get; init; } = [];
+
     /// <summary>The list's headline: every room, window and door marked only when there are rooms, nothing is
     /// unset, and nothing stops a mark or a room being read.</summary>
     public string Headline =>
         Rows.Count == 0 && RoomBlockers.Count == 0 ? NothingDrawn
-        : SetupProblems.Count > 0 || RoomBlockers.Count > 0 || Rows.Any(r => r.NeedsMarking) ? NotAllMarked
+        : HasNoneConflicts.Count > 0 || LevelConflicts.Count > 0 || SetupProblems.Count > 0 || RoomBlockers.Count > 0
+          || UnknownAreas.Count > 0 || Rows.Any(r => r.NeedsMarking) ? NotAllMarked
         : !Rows.Any(r => r.Kind == MarkedKind.Room) ? NoRooms
         : AllMarked;
 }
@@ -142,7 +162,10 @@ public static class MarkingList
 
     public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null)
     {
-        var rows = MarkReading.InDesign(model).Select(Row).OfType<MarkingRow>()
+        // a level is listed when it has an enclosed area with no Room (whatever its mark), or its mark is set
+        var unmarkedAreas = InteriorReader.UnknownAreas(model, levelMarks: false);
+        var rows = MarkReading.InDesign(model)
+            .Select(e => MarkReading.KindOf(e) == MarkedKind.Level ? LevelRow(e, unmarkedAreas) : Row(e)).OfType<MarkingRow>()
             .OrderByDescending(r => r.NeedsMarking).ThenBy(r => r.Kind)
             .ThenBy(r => r.Label, StringComparer.OrdinalIgnoreCase).ThenBy(r => r.Id, StringComparer.Ordinal)
             .ToList();
@@ -150,11 +173,18 @@ public static class MarkingList
             .Select(s => $"{s.Mark.Name}: {s.Words}").ToList();
         var blockers = MarkReading.RoomBlockers(model).Select(Blocker).OrderBy(b => b, StringComparer.OrdinalIgnoreCase).ToList();
         var placement = blockers.Count;
-        // with the model's inside read (step 3): every enclosed area with no Room, closed workset and link that could
-        // hold one stops every room being read too, so it is listed first (design note, section 2)
+        // with the model's inside read (step 3): enclosed areas that couldn't be read, each closed workset and each link
+        // that could hold a room stop every room being read too, so they are listed first (design note, section 2); an
+        // enclosed area with no Room doesn't (it is sent as a space whose use isn't known: UnknownAreas below)
         var others = InteriorReader.OtherRoomBlockers(model);
         blockers.AddRange(others);
-        var summary = Summary(rows, placement, others.Count);
+        // each enclosed area with no Room (not on a level marked as having none): sent as a space whose use isn't known
+        var unknown = InteriorReader.AreaBlockers(model);
+        // what the reader sends, read once (with the model's inside read): the list says the rooms are read only when
+        // the reader sends them (review round 2: with no Room drawn at all it said so beside "No rooms are drawn")
+        var read = model.Interior is null ? null : InteriorReader.Read(model);
+        var summary = Summary(rows, placement, others.Count, InteriorReader.UnknownAreas(model).Count,
+                              roomsSent: read?.Interior["rooms"] is not null);
         // step 4: the project-wide tick, always shown; and, with the model's inside read, what could hide a stair
         var stairBlockers = StairReader.Blockers(model);
         summary.Add(MarkReading.AllStairs(model) switch
@@ -170,10 +200,56 @@ public static class MarkingList
                         "or handrail is read for egress until it says Yes.",
         });
         if (stairBlockers.Count > 0)
-            summary.Add((stairBlockers.Count == 1 ? "1 element, workset or link" : $"{stairBlockers.Count} elements, worksets or links") +
-                        " listed above could hide a stair, so no stair (and no guard) is read for egress until each is resolved.");
-        return new(problems, blockers, summary, rows) { StairBlockers = stairBlockers };
+            summary.Add((stairBlockers.Count == 1 ? "What is listed above" : $"The {stairBlockers.Count} lines listed above") +
+                        " (elements, worksets or links) could hide a stair, so no stair (and no guard) is read for egress until each is resolved.");
+        // step 6: what the house has none of, read exactly as the reader reads it (the guards' tick needs the stairs read)
+        // (the add-in builds the list from the model with its inside read, RevitInterior.Model; without it, a tick can't
+        // be checked against the model, and the list says so instead of calling it held back)
+        var ticks = read?.Ticks ?? HasNone.ReadAll(model);
+        return new(problems, blockers, summary, rows)
+        {
+            StairBlockers = stairBlockers,
+            LevelConflicts = InteriorReader.LevelConflicts(model),
+            UnknownAreas = unknown,
+            HasNoneConflicts = ticks.Where(t => t.Ticked is true && t.Conflicts.Count > 0)
+                .SelectMany(t => t.WhyNot.Take(t.Conflicts.Count)).ToList(),
+            HasNoneLines = ticks.Select(t => TickLine(t, read)).ToList(),
+        };
     }
+
+    /// <summary>One tick's line in the list; <paramref name="read"/> is what the reader sends (null: the model's inside
+    /// wasn't read).</summary>
+    internal static string TickLine(NoneTick t, InteriorReadResult? read)
+    {
+        var name = t.Kind.Mark.Name;
+        if (read is null)
+            return $"{name}: {(t.Ticked is true ? "Yes" : t.Ticked is false ? "No" : "not set")} on Project Information " +
+                   "(not yet checked against the model: run Read inside to see whether it is read as none).";
+        if (t.Sent)
+            return $"{name}: Yes (on Project Information): read as a house with none.";
+        if (t.Ticked is true && t.Conflicts.Count > 0)
+            return $"{name}: Yes, but it disagrees with what is drawn (listed first): not read as none, and no {t.Kind.Words} " +
+                   "read for egress until one or the other is changed.";
+        if (t.Ticked is true)
+            return $"{name}: Yes, but not read as none while {Count(t.Blockers.Count)} could hide one: " + string.Join("; ", t.Blockers) + ".";
+        var proposal = t.Found is not null && t.Conflicts.Count == 0
+            ? $" Gordium found {t.Found}: tick Yes if the house has none (Gordium never ticks it for you)." : "";
+        return t.Ticked is false
+            ? $"{name}: No (on Project Information): not stated as none, so " +
+              (!t.Kind.IsList ? $"the rules for {t.Kind.Words} need review."
+               : read.Interior[t.Kind.Kind] is not null ? $"the {t.Kind.Words} are read as drawn."
+               : $"no {t.Kind.Words} are read for egress (" + string.Join("; ", NotRead(read, t.Kind)) + ").")   // every reason: one left off could be the one still blocking (review round 2)
+            : $"{name}: not set on Project Information: not stated, never read as none." + proposal;
+    }
+
+    private static IReadOnlyList<string> NotRead(InteriorReadResult read, NoneKind kind) => kind.Kind switch
+    {
+        "stairs" => read.StairsNotRead,
+        "doors" => read.DoorsNotRead,
+        _ => read.GuardsNotRead,
+    };
+
+    private static string Count(int n) => n == 1 ? "1 thing" : $"{n} things";
 
     private static string RoomLabel(MarkedElement e) =>
         string.Join(" ", new[] { e.Name, e.Number }.Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } label
@@ -208,6 +284,19 @@ public static class MarkingList
             default:
                 return null;
         }
+    }
+
+    /// <summary>A level's row: shown when it has an enclosed area with no Room (unset is then to mark: place the Rooms,
+    /// or say the level has none), or when its mark is set either way; never a suggestion (a suggested Yes could hide a
+    /// bedroom).</summary>
+    private static MarkingRow? LevelRow(MarkedElement e, List<EnclosedArea> areas)
+    {
+        var cell = YesNo(e, Marks.NoRoomsOnLevel, null);
+        var count = areas.Count(a => a.LevelId == e.UniqueId);
+        if (cell.State == MarkState.Unset && count == 0)
+            return null;
+        var label = (e.Name ?? e.UniqueId) + (count == 0 ? "" : count == 1 ? " (1 enclosed area with no Room)" : $" ({count} enclosed areas with no Room)");
+        return new(e.UniqueId, MarkedKind.Level, label, [cell]);
     }
 
     internal static string Label(MarkedElement e)
@@ -245,7 +334,7 @@ public static class MarkingList
         return new(m, MarkState.NotUnderstood, word, null, words);
     }
 
-    private static List<string> Summary(List<MarkingRow> rows, int placement, int others)
+    private static List<string> Summary(List<MarkingRow> rows, int placement, int others, int unknown, bool roomsSent)
     {
         var lines = new List<string>();
         var blockers = placement + others;
@@ -253,9 +342,16 @@ public static class MarkingList
             lines.Add((placement == 1 ? "1 Room is" : $"{placement} Rooms are") + " unplaced, not enclosed or redundant, " +
                       "so no room is read for egress until each is placed or deleted.");
         if (others > 0)
-            lines.Add((others == 1 ? "1 enclosed area, workset or link" : $"{others} enclosed areas, worksets or links") +
-                      " listed above could hide a room, " +
+            lines.Add((others == 1 ? "1 thing" : $"{others} things") + " listed above (a closed workset, a link, enclosed " +
+                      "areas that couldn't be read) could hide a room, " +
                       "so no room is read for egress until each is resolved.");
+        if (unknown > 0)
+            // "the rooms drawn are read" only when the reader sends them (review rounds 1 and 2: beside an unplaced
+            // Room, or with no Room drawn at all, the lines contradicted each other); unknown is 0 with the inside unread
+            lines.Add((unknown == 1 ? "1 enclosed area has" : $"{unknown} enclosed areas have") + " no Room (listed above): " +
+                      (roomsSent ? "the rooms drawn are read, but each such area may be a bedroom, so every sleeping-room rule needs review"
+                                     : "once the rooms are read, each such area may be a bedroom, so it keeps every sleeping-room rule needing review") +
+                      $" until a Room is placed in each, or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
         void Flag(MarkedKind[] kinds, MarkDefinition m, string plural, string consequence)
         {
             var cells = rows.Where(r => kinds.Contains(r.Kind)).Select(r => r.Cells.First(c => c.Mark == m)).ToList();
@@ -283,11 +379,13 @@ public static class MarkingList
     public static string Text(MarkingListResult list, int maxRows = 40)
     {
         var sb = new StringBuilder();
+        foreach (var c in list.HasNoneConflicts.Concat(list.LevelConflicts))
+            sb.Append("Conflict: ").Append(c).Append('\n');
         foreach (var p in list.SetupProblems)
             sb.Append("Can't add ").Append(p).Append('\n');
-        foreach (var b in list.RoomBlockers.Concat(list.StairBlockers))
+        foreach (var b in list.RoomBlockers.Concat(list.UnknownAreas).Concat(list.StairBlockers))
             sb.Append(b).Append('\n');
-        foreach (var s in list.Summary)
+        foreach (var s in list.Summary.Concat(list.HasNoneLines))
             sb.Append(s).Append('\n');
         var shown = 0;
         foreach (var r in list.Rows)

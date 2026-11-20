@@ -14,6 +14,10 @@ docs/interior/interior_measurements.md.
 What the description says the house has none of (`has_none`, has_none.py) makes that kind's parts an empty list, or
 gives each escape opening a measure that follows from it, and is said in `has_none` ({kind: its source and words}) so
 the checker shows every rule it sets aside. A part kind no list or claim speaks of is left out of `parts` (not read).
+
+An enclosed space with no room drawn in it (`unknown_spaces`) may be a sleeping room nobody drew: it is given as a
+sleeping room marked `maybe` (rule_format.parts: every row about it needs review), so the rooms that are drawn are
+still checked and a rule over every sleeping room never passes while one may be missing.
 """
 
 import math
@@ -58,6 +62,31 @@ def _given(description: dict, kind: str, problems: list):
     return got
 
 
+def _unknown_spaces(description: dict, problems: list):
+    """The enclosed spaces with no room drawn in them (`unknown_spaces`, [] when not given: the rooms are every
+    room); None (with a problem: then no room is read) when the list or an entry can't be read."""
+    got = description.get("unknown_spaces")
+    if got is None:
+        return []
+    if not isinstance(got, list):
+        problems.append(Stop("not_a_list", key="unknown_spaces").reason)
+        return None
+    for n, item in enumerate(got, 1):
+        if not isinstance(item, dict) or not isinstance(item.get("id"), str) or not item["id"].strip():
+            problems.append(Stop("unknown_spaces_entry", n=n).reason)
+            return None
+    return got
+
+
+def _unknown(space: dict) -> dict:
+    """An enclosed space whose use isn't known, as a sleeping room that may not be one (`maybe`, rule_format.parts:
+    every row about it needs review, never a pass or a fail): nothing of it is measured."""
+    from rule_format.parts import measure_kinds
+    why = Stop("unknown_space").reason
+    return {"id": space["id"], "name": name_of(space), "measures": {},
+            "not_measured": {m: why for m in measure_kinds("sleeping_room")}, "more": {}, "maybe": why}
+
+
 def _part(item: dict, measured, within=None) -> dict:
     measures, more, stopped = measured[:3]
     # a last guard for every kind: a value that isn't a finite number is no value (read.FAR keeps this unreachable)
@@ -100,8 +129,10 @@ def measure(description) -> dict:
     problems += refused
 
     rooms = _given(description, "sleeping_room", problems)
-    if rooms is not None:
-        parts["sleeping_room"] = [_part(r, measure_room(r, reader)) for r in rooms if r["sleeping"]]
+    spaces = _unknown_spaces(description, problems) if rooms is not None else None
+    if rooms is not None and spaces is not None:
+        parts["sleeping_room"] = [_part(r, measure_room(r, reader)) for r in rooms if r["sleeping"]] \
+            + [_unknown(s) for s in spaces]
     every_room = description.get("rooms") if isinstance(description.get("rooms"), list) else None
 
     def same_id(room_id):

@@ -31,6 +31,9 @@ internal static class Env
     /// <summary>Runs a module of Gordium's Python packages (<c>python -m</c>) and gives its standard output.</summary>
     public static string RunModule(string module, params string[] args) => Run(["-m", module, .. args], module);
 
+    /// <summary>Runs a line of Python (<c>python -c</c>, its arguments after it) and gives its standard output.</summary>
+    public static string RunCode(string code, params string[] args) => Run(["-c", code, .. args], "python -c");
+
     private static string Run(string[] argv, string script)
     {
         var info = new ProcessStartInfo(Python)

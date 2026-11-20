@@ -38,6 +38,10 @@ public sealed record InteriorRecords
     /// didn't read them: then no guard and no handrail is read.</summary>
     public IReadOnlyList<RailingRecord>? Railings { get; init; }
 
+    /// <summary>Every element in Ramps (<c>OfCategory(OST_Ramps)</c>, step 6): a ramp drawn contradicts the architect's
+    /// "this house has no ramps". Null when the Revit layer didn't read them: then that tick isn't sent.</summary>
+    public IReadOnlyList<RampRecord>? Ramps { get; init; }
+
     /// <summary>How many coordination models are linked (<c>CoordinationModelLinkUtils.GetAllCoordinationModelInstanceIds</c>):
     /// what is in one isn't read, and a stair could be in it.</summary>
     public int CoordinationModels { get; init; }
@@ -51,8 +55,11 @@ public sealed record InteriorRecords
 /// <param name="Level">The level's name (<c>Level.Name</c>), for the words.</param>
 /// <param name="Area">Its area (<c>PlanCircuit.Area</c>, sq ft).</param>
 /// <param name="HasRoom"><c>PlanCircuit.IsRoomLocated</c>.</param>
-/// <param name="PointInside"><c>PlanCircuit.GetPointInside()</c> at the level's elevation (internal), for the words.</param>
-public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz PointInside);
+/// <param name="PointInside"><c>PlanCircuit.GetPointInside()</c> at the level's elevation (internal): for the words,
+/// and to find a Room of the design checked it lies in (a Room in a design option Revit's main-model circuits don't
+/// count, <see cref="InteriorReader.UnknownAreas"/>).</param>
+/// <param name="LevelId">The level's <c>UniqueId</c>: its "no rooms on this level" mark, and the rooms on it.</param>
+public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz PointInside, string? LevelId = null);
 
 /// <summary>A linked Revit model, for the interior: whether its contents are known, where it reaches, and whether it
 /// holds rooms, windows or doors (design note, section 4: a link's rooms or windows leave that kind not read; a loaded
@@ -65,8 +72,12 @@ public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz P
 /// <param name="WindowsAndDoors">Windows and doors in it.</param>
 /// <param name="HasLinks">The linked document holds links of its own (their contents aren't read).</param>
 /// <param name="Stairs">Elements in the linked document's Stairs, Railings and Generic Models categories.</param>
+/// <param name="Ramps">Elements in the linked document's Ramps category (step 6).</param>
 public sealed record InteriorLink(string UniqueId, string Name, bool Loaded, RevitBox? Box, int Rooms, int WindowsAndDoors,
-                                  bool HasLinks, int Stairs = 0);
+                                  bool HasLinks, int Stairs = 0, int Ramps = 0);
+
+/// <summary>An element in Ramps (step 6), for the words and the design checked.</summary>
+public sealed record RampRecord(string UniqueId, string? Name, string? PhaseDemolished = null, string? DesignOption = null);
 
 /// <summary>A Room's own geometry and what stands in, under and over it.</summary>
 public sealed record RoomRecord
@@ -76,6 +87,10 @@ public sealed record RoomRecord
 
     /// <summary>Its level's name (<c>Room.Level.Name</c>), for the words.</summary>
     public string? Level { get; init; }
+
+    /// <summary>Its level's <c>UniqueId</c> (<c>Room.Level</c>), or null: a level marked "no rooms on this level"
+    /// with a Room on it is a conflict, and an enclosed area lying in this room has it.</summary>
+    public string? LevelId { get; init; }
 
     /// <summary>Its level's elevation in internal coordinates (<c>Room.Level.ProjectElevation</c>, to check), or null.</summary>
     public double? LevelElevation { get; init; }
@@ -130,8 +145,19 @@ public sealed record NearbyElement(string UniqueId, string BuiltInCategory, stri
 /// <param name="DesignOption"><c>Element.DesignOption</c>'s id.</param>
 /// <param name="Kind">What Revit says it is, in the architect's words ("an in-place family", "a loadable family", "a
 /// DirectShape", "a multistory stair", "a stair not made of components", "another element").</param>
+/// <param name="Box">Its box (<c>get_BoundingBox(null)</c>), internal, or null when Revit gives none.</param>
+/// <param name="NestedIn">For a family instance nested in another (a window's grille, a shared component), the
+/// family instances it is nested in, innermost first (<c>FamilyInstance.SuperComponent</c>, to the top), each with
+/// its category and box; empty when it isn't nested.</param>
 public sealed record StairCandidate(string UniqueId, string BuiltInCategory, string? Name, string Kind,
-                                    string? PhaseDemolished = null, string? DesignOption = null);
+                                    string? PhaseDemolished = null, string? DesignOption = null, RevitBox? Box = null,
+                                    IReadOnlyList<NestHost>? NestedIn = null);
+
+/// <summary>A family instance another is nested in (<c>FamilyInstance.SuperComponent</c>).</summary>
+/// <param name="UniqueId"><c>Element.UniqueId</c>.</param>
+/// <param name="BuiltInCategory">Its category's built-in name (<c>OST_Windows</c>).</param>
+/// <param name="Box">Its box (<c>get_BoundingBox(null)</c>), internal, or null.</param>
+public sealed record NestHost(string UniqueId, string BuiltInCategory, RevitBox? Box);
 
 /// <summary>A component stair (<c>Stairs</c>), with each of its runs: one flight each (design note, section 4).</summary>
 public sealed record StairRecord
@@ -337,6 +363,11 @@ public sealed record OpeningRecord
     /// <c>GetGeneratingElementIds</c> name the window (<c>HostObject.FindInserts</c> isn't used: it listed no inserts
     /// even on walls the windows cut, trial run 6). Null when none was found.</summary>
     public string? WallOpeningBy { get; init; }
+
+    /// <summary>The host wall's geometry, or one of its faces, couldn't be read (<c>get_Geometry</c> refused, or a face
+    /// Revit gives no edges for): the opening this window cuts is unread, never looked for on the faces that could be
+    /// read alone (its bottom could be on the one that couldn't). <see cref="WallOpening"/> is then null.</summary>
+    public bool WallOpeningUnread { get; init; }
 
     /// <summary>What the Revit layer looked at for this window (the wall's faces, the ids that generated them), for the
     /// trial's log only: never read by a decision.</summary>
