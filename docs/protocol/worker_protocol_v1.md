@@ -1,4 +1,4 @@
-# The worker protocol, version 1 (`1.1`)
+# The worker protocol, version 1 (`1.2`)
 
 **Purpose:** how a design tool (Rhino now, Revit later) talks to Gordium's checker: the message format, every command, and how versions change.\
 **For:** engineers writing a design-tool add-in; reviewers checking that the worker answers exactly what the tool's own copy of the logic would.\
@@ -12,7 +12,7 @@ description, has its own page: [site_description_v1.md](site_description_v1.md).
 
 ## Messages
 
-A request is one JSON object on one line: `{"id": 7, "cmd": "box.view", "protocol": "1.1", ...its fields}`
+A request is one JSON object on one line: `{"id": 7, "cmd": "box.view", "protocol": "1.2", ...its fields}`
 (a tool written for `1.0` may keep sending `"1.0"`: the same major version, answered the same).
 
 - `id`: any value; the answer carries it back.

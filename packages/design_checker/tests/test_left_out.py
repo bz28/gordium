@@ -260,12 +260,14 @@ def test_the_worker_refuses_an_object_field_it_doesnt_read():
 
 
 def test_a_1_0_request_is_still_answered():
-    """Protocol 1.1 adds a command: a host that names 1.0 is still answered (a minor version)."""
+    """Protocol 1.1 added this command: a host that names 1.0 is still answered by any later 1.x worker (a minor
+    version). The worker's exact version is pinned by test_worker_interior.test_the_worker_speaks_1_2."""
     out = io.StringIO()
     serve(io.StringIO(json.dumps({"id": 1, "cmd": "objects.left_out", "protocol": "1.0",
                                   "objects": [_obj("x", None)]}) + "\n"), out)
     assert json.loads(out.getvalue())["result"]["no_box"] == [{"id": "x", "why": "no_box"}]
-    assert protocol.PROTOCOL == "1.1"
+    major, minor = (int(n) for n in protocol.PROTOCOL.split("."))
+    assert major == 1 and minor >= 1                # objects.left_out is 1.1's, still served by every later 1.x
 
 
 # ---- what to tell the architect about a linked file (words only) ------------------------------------------------

@@ -9,6 +9,10 @@ import json
 import sys
 import time
 
+# hello's protocol looking like 1.x to a loose reading only: a line break after it, another script's digit, a minor
+# too big for a number
+VERSIONS = {"hello_version_newline": "1.2\n", "hello_version_other_digit": "1.\u0662",
+            "hello_version_overflow": "1.99999999999"}
 ABOUT = {"protocol": "1.0", "site_schema": "gordium.site/1", "worker_fingerprint": "f" * 64,
          "rulebook": {"new_york/ithaca_city": "a" * 64}}
 ITEM = {"id": "R-1b.height", "name": "Height", "group": "building", "status": "complies", "reason": None}
@@ -203,6 +207,8 @@ def main(argv):
                 about = {**ABOUT, "site_schema": "gordium.site/2"}
             if mode == "hello_bad_version":
                 about = {**ABOUT, "protocol": "one"}
+            if mode in VERSIONS:
+                about = {**ABOUT, "protocol": VERSIONS[mode]}
             if mode == "hello_crash":
                 sys.stderr.write("Traceback: ImportError: no module named shapely\n")
                 sys.stderr.flush()

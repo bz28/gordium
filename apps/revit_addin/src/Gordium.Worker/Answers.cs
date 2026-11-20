@@ -12,14 +12,20 @@ public sealed record WorkerAbout(
     string WorkerFingerprint,
     IReadOnlyDictionary<string, string> Rulebook)
 {
-    private static readonly Regex Version = new(@"^(\d+)\.(\d+)$", RegexOptions.CultureInvariant);
+    // ASCII digits only, and nothing after (\z: $ would let a trailing line break through, \d other scripts' digits)
+    private static readonly Regex Version = new(@"^([0-9]+)\.([0-9]+)\z", RegexOptions.CultureInvariant);
+
+    /// <summary>The minor version the worker said (1.2 gives 2): what it can read beyond 1.0 (check_site's
+    /// <c>interior</c> from 2).</summary>
+    public int Minor { get; private init; }
 
     /// <summary>Reads it strictly and refuses a worker that doesn't speak protocol 1.x and gordium.site/1.</summary>
     internal static WorkerAbout Parse(JsonElement e, string where)
     {
         var protocol = StrictJson.String(e, "protocol", where);
         var m = Version.Match(protocol);
-        if (!m.Success)
+        if (!m.Success || !int.TryParse(m.Groups[2].Value, System.Globalization.NumberStyles.None,
+                                         System.Globalization.CultureInfo.InvariantCulture, out var minor))
             throw new WorkerProtocolException($"{where}.protocol is {JsonSerializer.Serialize(protocol)}, not a version like \"1.0\"");
         if (m.Groups[1].Value != Gordium.Worker.Protocol.Major.ToString(System.Globalization.CultureInfo.InvariantCulture))
             throw new WorkerVersionException(
@@ -38,7 +44,7 @@ public sealed record WorkerAbout(
                 throw new WorkerProtocolException($"{where}.rulebook[\"{p.Name}\"] is {StrictJson.Kind(p.Value)}, not a fingerprint");
             rulebook[p.Name] = p.Value.GetString()!;
         }
-        return new WorkerAbout(protocol, schema, fingerprint, rulebook);
+        return new WorkerAbout(protocol, schema, fingerprint, rulebook) { Minor = minor };
     }
 }
 

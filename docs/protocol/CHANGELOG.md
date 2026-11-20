@@ -11,6 +11,13 @@ change can't land without a version and a word here (the rules for minor and maj
 and the command table together (`protocol.table()`: every command, part, field and default), pinned the same way
 by `packages/design_checker/tests/test_protocol.py` ([worker_protocol_v1.md](worker_protocol_v1.md#versions)).
 
+- **2026-11-19 · protocol 1.2 · site description `gordium.site/1`** (unchanged): `check_site` takes an optional
+  `interior`, the house's inside as an interior description (`gordium.interior/1`), and checks the place's inherited
+  laws (New York's egress, for Ithaca) on it, as the command line's `--interior` does; without it they wait, as
+  before ([site_description_v1.md](site_description_v1.md#how-the-worker-uses-it); the Revit add-in's reading of
+  an interior: [revit_interior_reading_design.md](../revit/revit_interior_reading_design.md)). A minor version: a
+  request without `interior` is answered exactly as before; the session commands are unchanged
+  (command table sha256 `77acae03c601945bd7834d572afaeb40e8b4251ab37862b3570f74175c40ddc5`).
 - **2026-11-12 · protocol 1.1 · site description `gordium.site/1`** (unchanged): the session command
   `objects.left_out` ([worker_protocol_v1.md](worker_protocol_v1.md#session-commands)): which objects a check
   leaves out, which may be touching the house, and which have no box that covers all of them, decided in

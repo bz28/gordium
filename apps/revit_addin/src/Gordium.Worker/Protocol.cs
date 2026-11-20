@@ -3,9 +3,14 @@ namespace Gordium.Worker;
 /// <summary>What this client speaks, from docs/protocol/worker_protocol_v1.md and site_description_v1.md.</summary>
 public static class Protocol
 {
-    /// <summary>The protocol version every request names (<c>"protocol": "1.1"</c>). A 1.0 worker answers it too,
-    /// all but <c>objects.left_out</c>, which it doesn't have (an unknown command, refused).</summary>
-    public const string Version = "1.1";
+    /// <summary>The protocol version every request names (<c>"protocol": "1.2"</c>). A 1.0 or 1.1 worker answers it
+    /// too, all but what it doesn't have: <c>objects.left_out</c> (1.1, an unknown command to a 1.0 worker: refused)
+    /// and <c>check_site</c>'s <c>interior</c> (1.2), which the client sends only to a worker that says 1.2 or later
+    /// (an older one would ignore it: <see cref="WorkerClient.CheckSiteAsync"/>).</summary>
+    public const string Version = "1.2";
+
+    /// <summary>The minor version from which <c>check_site</c> reads an <c>interior</c>.</summary>
+    public const int InteriorMinor = 2;
 
     /// <summary>The major version this client understands; a worker reporting any other is refused.</summary>
     public const int Major = 1;

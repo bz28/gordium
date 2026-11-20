@@ -82,15 +82,25 @@ length), flat ground not yet given, and nothing else on the lot.
 ## How the worker uses it
 
 The worker (`python -m design_checker serve`) answers JSON requests one per line. The new-style commands name
-the protocol they speak, `"protocol": "1.1"` (a different major version is refused):
+the protocol they speak, `"protocol": "1.2"` (a different major version is refused):
 
 - `hello`: the protocol, the site description version, and fingerprints of the worker's code and of each place's
   rules (`protocol.about()`). Every new-style answer carries the same under `"about"`.
 - `read_model {model, facts, inventory_complete?}`: a `.3dm` file read as a site description, for recording test
   fixtures. It reads only the lot and Building layers, so it says `inventory_complete: false` unless the caller
   says it looked at the rest of the lot itself.
-- `check_site {site, facts, report?, extras?, today?}`: the check of a site description, the same answer `check`
-  gives (`today`: the day of the check, YYYY-MM-DD, as `check` takes it).
+- `check_site {site, facts, report?, extras?, today?, interior?}`: the check of a site description, the same answer
+  `check` gives (`today`: the day of the check, YYYY-MM-DD, as `check` takes it). `interior` (protocol 1.2): the
+  house's inside as an [interior description](../interior/interior_description_format.md) (`gordium.interior/1`),
+  beside the site description, never inside it. The place's inherited laws (egress, for Ithaca) are checked on it;
+  without one they wait ("no rooms drawn yet"), never pass. One that can't be read is measured as far as it can and
+  the rest needs review, as on the command line (`--interior`); the result's `egress.interior_sha256` fingerprints
+  exactly the interior it was worked out from. With a `report`, only that fingerprint is kept (written in the
+  report): the interior itself isn't kept beside the report as the site description is, yet, so a report's egress
+  rows can be traced to their interior but not worked out again from the files beside it. Keeping it is the Revit
+  interior reader's step ([revit_interior_reading_design.md](../revit/revit_interior_reading_design.md), section 5),
+  before any host sends a real interior. A tool sends it only to a worker whose `hello` says 1.2 or later:
+  an older worker ignores a field it doesn't know, and its egress would wait as if no rooms were drawn.
 - `start_site {site, facts, floor_to_floor?, design_buffer?, larger_side?}`: the largest legal starting building
   on the description's lot (its buildings are left out), the same answer `start` gives.
 
@@ -126,7 +136,9 @@ use is the one every Rhino check already takes, and both give the same answers (
 **A report keeps its site.** When `check` or `check_site` writes a zoning report, the exact description it was
 worked out from is written beside it as `<report name>.site.json` (Ben, 2026-11-06), so any report can be traced
 to exactly the site it was worked out from, and worked out again with the same lot facts (the file holds the site
-description only, not the lot facts). If the description can't be written, no new report is written either (the answer says
+description only, not the lot facts). A report with egress rows (a `check_site` sent an `interior`) also needs the
+same interior to be worked out again, and that isn't kept beside it yet: the report names it by its fingerprint,
+`interior_sha256`, only (see `check_site` above). If the description can't be written, no new report is written either (the answer says
 why). The earlier report's site file is replaced only once the new report is in place, so a report that can't be
 saved (open in Excel, say) leaves the earlier report beside its own site. Never a report beside another check's
 site; at worst, a check stopped between the two leaves a report with no site file.

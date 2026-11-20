@@ -16,7 +16,7 @@ from rule_format.rulebook import REPO
 
 from .site_json import SCHEMA
 
-PROTOCOL = "1.1"
+PROTOCOL = "1.2"
 LEGACY = ("check", "start", "facts", "options", "sample_site")
 
 
