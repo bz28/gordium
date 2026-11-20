@@ -53,8 +53,12 @@ public static class MarkReading
     private static MarkValue? Get(MarkedElement e, MarkDefinition m) =>
         (m.Binding == MarkBinding.Instance ? e.Instance : e.Type).TryGetValue(m.Guid, out var v) ? v : null;
 
-    public static IReadOnlyList<RoomMarks> Rooms(RevitModel model) =>
-        InDesign(model).Where(e => KindOf(e) == MarkedKind.Room && e.Placement == RoomPlacement.Placed)
+    /// <summary>The rooms in the design checked, each with its mark; <b>null (rooms not read)</b> while any
+    /// <see cref="RoomBlockers"/> exists: a bedroom may be the room not on the plan, so the description leaves
+    /// <c>rooms</c> out until each is placed or deleted (design note, section 2), never a list without it.</summary>
+    public static IReadOnlyList<RoomMarks>? Rooms(RevitModel model) =>
+        RoomBlockers(model).Count > 0 ? null
+        : InDesign(model).Where(e => KindOf(e) == MarkedKind.Room)
             .Select(e => new RoomMarks(e.UniqueId, e.Name, Marks.YesNo(Get(e, Marks.SleepingRoom)))).ToList();
 
     public static IReadOnlyList<OpeningMarks> Openings(RevitModel model) =>
@@ -134,10 +138,7 @@ public static class MarkingList
         var problems = (setup ?? []).Where(s => s.Action == MarkSetupAction.Conflict)
             .Select(s => $"{s.Mark.Name}: {s.Words}").ToList();
         var blockers = MarkReading.RoomBlockers(model).Select(Blocker).OrderBy(b => b, StringComparer.OrdinalIgnoreCase).ToList();
-        var summary = Summary(rows);
-        if (blockers.Count > 0)
-            summary.Insert(0, $"{blockers.Count} Rooms are unplaced, not enclosed or redundant, so no room is read for egress " +
-                              "until each is placed or deleted.");
+        var summary = Summary(rows, blockers.Count);
         return new(problems, blockers, summary, rows);
     }
 
@@ -145,7 +146,11 @@ public static class MarkingList
         string.Join(" ", new[] { e.Name, e.Number }.Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } label
             ? label : "(a room with no name or number)";
 
-    private static string Blocker(MarkedElement e) => RoomLabel(e) + ": " + (e.Placement switch
+    /// <summary>A blocker's line: "Room "Room 100": not enclosed..." (the room's own name quoted, so Revit's default
+    /// name "Room" doesn't read as a doubled word).</summary>
+    private static string Blocker(MarkedElement e) =>
+        (string.Join(" ", new[] { e.Name, e.Number }.Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } label
+            ? $"Room \"{label}\"" : "A room with no name or number") + ": " + (e.Placement switch
     {
         RoomPlacement.Unplaced => "not placed: place it in a closed area or delete it",
         RoomPlacement.NotEnclosed => "not enclosed: close its walls or room separation lines, or delete it",
@@ -207,9 +212,12 @@ public static class MarkingList
         return new(m, MarkState.NotUnderstood, word, null, words);
     }
 
-    private static List<string> Summary(List<MarkingRow> rows)
+    private static List<string> Summary(List<MarkingRow> rows, int blockers)
     {
         var lines = new List<string>();
+        if (blockers > 0)
+            lines.Add((blockers == 1 ? "1 Room is" : $"{blockers} Rooms are") + " unplaced, not enclosed or redundant, " +
+                      "so no room is read for egress until each is placed or deleted.");
         void Flag(MarkedKind[] kinds, MarkDefinition m, string plural, string consequence)
         {
             var cells = rows.Where(r => kinds.Contains(r.Kind)).Select(r => r.Cells.First(c => c.Mark == m)).ToList();
@@ -220,7 +228,7 @@ public static class MarkingList
                 ? $"{m.Name}: all {cells.Count} {plural} marked."
                 : $"{m.Name}: {unset} of {cells.Count} {plural} not marked, so {consequence} until each says Yes or No.");
         }
-        if (!rows.Any(r => r.Kind == MarkedKind.Room))
+        if (blockers == 0 && !rows.Any(r => r.Kind == MarkedKind.Room))
             lines.Add(MarkingListResult.NoRooms + ": egress waits until the house's Rooms are placed.");
         Flag([MarkedKind.Room], Marks.SleepingRoom, "rooms", "no room is read for egress");
         Flag([MarkedKind.Window, MarkedKind.Door], Marks.EscapeOpening, "windows and doors", "no escape opening is read");
@@ -240,7 +248,7 @@ public static class MarkingList
         foreach (var p in list.SetupProblems)
             sb.Append("Can't add ").Append(p).Append('\n');
         foreach (var b in list.RoomBlockers)
-            sb.Append("Room ").Append(b).Append('\n');
+            sb.Append(b).Append('\n');
         foreach (var s in list.Summary)
             sb.Append(s).Append('\n');
         var shown = 0;
