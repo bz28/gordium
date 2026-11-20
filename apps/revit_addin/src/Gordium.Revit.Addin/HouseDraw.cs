@@ -145,13 +145,6 @@ internal static class HouseDraw
             ids[id] = fi.UniqueId;
         }
         doc.Regenerate();
-        foreach (var (id, uid) in ids.ToList())
-        {
-            var placed = (FamilyInstance)doc.GetElement(uid);
-            var inserts = (placed.Host as HostObject)?.FindInserts(true, true, true, true);
-            words.Add($"window {id}: host {placed.Host?.Id.Value} ({placed.Host?.GetType().Name}), its inserts {inserts?.Count}, " +
-                      $"this window among them {inserts?.Contains(placed.Id)}");
-        }
         // the stamp, from the type's values as Revit now gives them (read the way the reader reads them)
         foreach (var w in windows.Where(w => w["clear"] is JsonObject))
         {
@@ -176,7 +169,33 @@ internal static class HouseDraw
             ids[room["id"]!.GetValue<string>()] = r.UniqueId;
         }
         t.Commit();
+        // after the commit, regenerated again: each window's placement and whether its wall knows it as an insert
+        using (var again = new Transaction(doc, "Gordium: regenerate (rolled back)"))
+        {
+            again.Start();
+            doc.Regenerate();
+            foreach (var w in windows)
+                words.Add(Placement(doc, w["id"]!.GetValue<string>(), (FamilyInstance)doc.GetElement(ids[w["id"]!.GetValue<string>()])));
+            again.RollBack();
+        }
         return ids;
+    }
+
+    /// <summary>A window as placed, in words for the log (ft, internal): its family's placement type, its level and
+    /// Sill Height, its box, its host wall's box, base and height, and whether the wall lists it as an insert.</summary>
+    private static string Placement(Document doc, string id, FamilyInstance fi)
+    {
+        static string Z(BoundingBoxXYZ? b) => b is null ? "none" : $"{b.Min.Z:0.####}..{b.Max.Z:0.####} (x {b.Min.X:0.##}..{b.Max.X:0.##}, y {b.Min.Y:0.##}..{b.Max.Y:0.##})";
+        var level = doc.GetElement(fi.LevelId) as Level;
+        var wall = fi.Host as Wall;
+        var inserts = wall?.FindInserts(true, true, true, true);
+        var baseLevel = wall is null ? null : doc.GetElement(wall.get_Parameter(BuiltInParameter.WALL_BASE_CONSTRAINT)?.AsElementId() ?? ElementId.InvalidElementId) as Level;
+        return $"window {id}: family {fi.Symbol.Family.Name}, placement {fi.Symbol.Family.FamilyPlacementType}, " +
+               $"level {level?.Name} at {level?.ProjectElevation:0.####}, Sill Height {fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM)?.AsDouble():0.####}, " +
+               $"box z {Z(fi.get_BoundingBox(null))}, point {(fi.Location as LocationPoint)?.Point}; host {wall?.Id.Value} " +
+               $"box z {Z(wall?.get_BoundingBox(null))}, base {baseLevel?.Name} offset {wall?.get_Parameter(BuiltInParameter.WALL_BASE_OFFSET)?.AsDouble():0.####} " +
+               $"height {wall?.get_Parameter(BuiltInParameter.WALL_USER_HEIGHT_PARAM)?.AsDouble():0.####}; its inserts after regenerating " +
+               $"{inserts?.Count}, this window among them {inserts?.Contains(fi.Id)}";
     }
 
     private static double? Length(Element e, MarkDefinition m) =>

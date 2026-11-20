@@ -384,6 +384,10 @@ internal static class RevitInterior
             words.Add($"the wall's geometry couldn't be read ({x.GetType().Name}: {x.Message})");
             return (null, null, words);
         }
+        var fb = fi.get_BoundingBox(null);
+        var wb = wall.get_BoundingBox(null);
+        words.Add($"window box z {fb?.Min.Z:0.####}..{fb?.Max.Z:0.####}, wall box z {wb?.Min.Z:0.####}..{wb?.Max.Z:0.####} (internal ft), " +
+                  $"family placement {fi.Symbol?.Family?.FamilyPlacementType}");
         words.Add($"host (FamilyInstance.Host) {fi.Host?.Id.Value}, wall {wall.Id.Value} {wall.UniqueId}: {faces.Count} faces; ids generating them: " + string.Join(", ",
             faces.SelectMany(f => f.By).Distinct().Select(id => wall.Document.GetElement(id) is { } e
                 ? $"{e.Category?.BuiltInCategory.ToString() ?? "?"} {id.Value}{(id == fi.Id ? " (this window)" : "")}" : $"{id.Value}")));
