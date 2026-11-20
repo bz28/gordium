@@ -118,20 +118,7 @@ public sealed class InteriorTests
 
     // ---- every room counts ------------------------------------------------------------------------------------
 
-    [Fact]
-    public void An_enclosed_area_with_no_room_leaves_rooms_out_and_is_listed_first()
-    {
-        var house = FakeHouse.Draw("1_ranch_compliant");
-        house.Areas.Add(new EnclosedArea("Level 0", 24.0, false, new Xyz(30, 3, 0)));
-        var read = InteriorReader.Read(house.Model());
-        Assert.Null(read.Interior["rooms"]);
-        Assert.Contains(read.RoomsNotRead, w => w.StartsWith("An enclosed area on Level 0 has no Room (24 sq ft"));
-        Assert.NotNull(read.Interior["openings"]);           // a missed window can only fail: openings still read
-        var list = MarkingList.Build(house.Model());
-        Assert.StartsWith("An enclosed area on Level 0 has no Room", list.RoomBlockers[0]);
-        Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
-        Assert.Contains(list.Summary, s => s.Contains("could hide a room"));
-    }
+    // an enclosed area with no Room: sent as a space whose use isn't known, the rooms drawn still read (RealModelTests)
 
     [Fact]
     public void Enclosed_areas_not_read_leave_rooms_out()

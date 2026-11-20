@@ -17,7 +17,9 @@ namespace Gordium.Revit.Addin;
 /// </summary>
 internal static class RevitMarks
 {
-    private static readonly BuiltInCategory[] Marked = [BuiltInCategory.OST_Rooms, BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors];
+    // levels for their "no rooms on this level" mark (a roof level's enclosed areas aren't rooms nobody drew)
+    private static readonly BuiltInCategory[] Marked =
+        [BuiltInCategory.OST_Rooms, BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors, BuiltInCategory.OST_Levels];
 
     /// <summary>The model's phases, design options and marked elements, with the project's bindings: what the
     /// marking list and (later) the interior reader need.</summary>
@@ -192,12 +194,21 @@ public sealed class MarkForEgressCommand : IExternalCommand
             log["added"] = added.Select(s => $"{s.Action}: {s.Mark.Name} ({string.Join(", ", s.Categories)})").ToList();
             // the model with its inside read (as Read inside and a check read it), so the list's has-none ticks, their
             // conflicts and proposals are the reader's own
-            var list = MarkingList.Build(RevitInterior.Model(doc), plan);
+            var model = RevitInterior.Model(doc);
+            var list = MarkingList.Build(model, plan);
+            // every element the list counts by type, by id
+            log["stair_candidates"] = (model.Interior?.StairCandidates ?? [])
+                .Select(c => $"{c.UniqueId} {c.BuiltInCategory.Replace("OST_", "")} \"{c.Name}\": {c.Kind}" +
+                             (StairReader.InsideWindowOrDoor(c) ? " (inside its window or door: not a stair)" : "")).ToList();
+            log["unknown_area_each"] = InteriorReader.UnknownAreaWords(model);
             log["headline"] = list.Headline;
             log["has_none_conflicts"] = list.HasNoneConflicts;
             log["has_none"] = list.HasNoneLines;
             log["setup_problems"] = list.SetupProblems;
             log["room_blockers"] = list.RoomBlockers;
+            log["unknown_areas"] = list.UnknownAreas;
+            log["level_conflicts"] = list.LevelConflicts;
+            log["stair_blockers"] = list.StairBlockers;
             log["summary"] = list.Summary;
             log["rows"] = list.Rows.Select(r => new Dictionary<string, object?>
             {

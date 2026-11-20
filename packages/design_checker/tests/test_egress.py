@@ -191,6 +191,30 @@ def test_a_measure_its_measuring_doubts_is_never_used():
     assert each_part.check_parts([rule], clean, {}, {"use": set()})["results"] == {SILL: "pass"}
 
 
+EVERY_BEDROOM = "general.r319_1_sleeping_room_escape_opening_operable"     # when_none: fail
+
+
+def test_a_space_whose_use_isnt_known_keeps_every_bedroom_rule_from_passing_and_the_drawn_rooms_are_checked():
+    """An enclosed space with no room drawn in it (a Revit plan circuit with no Room) may be a bedroom: R319.1's
+    "every sleeping room has an escape opening" never passes, and never fails on it, while the rooms drawn are still
+    checked exactly as before (house 1's windows: the sill rule's rows, a bedroom's failing window)."""
+    space = [{"id": "area-1", "name": "Enclosed area on L1 with no Room (331.4 sq ft)"}]
+    house = ranch() | {"unknown_spaces": space}
+    got = check_site(SITE, dict(FACTS), interior=house)
+    [row] = [i for i in rows_of(got, EVERY_BEDROOM) if i["part"]["within"] and i["part"]["within"]["id"] == "area-1"]
+    assert row["status"] == present.REVIEW and "its use isn't known, so it may be a sleeping room" in row["reason"]
+    assert got["egress"]["results"][EVERY_BEDROOM] != "pass"
+    # the drawn bedrooms' windows are checked as before: the sill rule, which a room with no opening doesn't reach
+    assert [i["status"] for i in rows_of(got, SILL)] == [present.COMPLIES, present.COMPLIES]
+    bad = sill_too_high() | {"unknown_spaces": space}
+    assert check_site(SITE, dict(FACTS), interior=bad)["egress"]["results"][SILL] == "fail"
+    # a house with no bedroom drawn: "every bedroom" is not applicable, but not beside a space that may be one
+    six = yaml.safe_load((REPO / "test_data/interior_houses/6_door_stated_clear/house.yaml").read_text(encoding="utf-8"))
+    assert check_site(SITE, dict(FACTS), interior=six)["egress"]["results"][EVERY_BEDROOM] == "not_applicable"
+    six["unknown_spaces"] = space
+    assert check_site(SITE, dict(FACTS), interior=six)["egress"]["results"][EVERY_BEDROOM] == "needs_review"
+
+
 def test_rules_that_fail_the_rule_checks_are_never_used(monkeypatch):
     monkeypatch.setattr(egress, "rulebook_file_problems", lambda path, ctx: ["a quote isn't at its lines"])
     result = check_site(SITE, dict(FACTS), interior=sill_too_high())

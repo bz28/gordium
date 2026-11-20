@@ -112,9 +112,26 @@ public static class StairReader
             if (s.MultistoryStairsId is not null)
                 why.Add($"Stair \"{s.Name ?? s.UniqueId}\" is one of a multistory stair, whose copies on other levels aren't read yet");
         }
-        foreach (var c in records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption)))
-            why.Add($"{c.BuiltInCategory.Replace("OST_", "")} \"{c.Name ?? c.UniqueId}\" is {c.Kind}: a stair or its railing " +
-                    "drawn this way isn't read, so Gordium can't tell every stair is read");
+        // one line per category and kind (a real model has hundreds alike: Pacific Continental's 272 grilles), each
+        // element still listed by id in the Revit layer's log
+        foreach (var g in records.StairCandidates.Where(c => SiteReader.InDesignChecked(model, c.PhaseDemolished, c.DesignOption)
+                                                             && !InsideWindowOrDoor(c))
+                     .GroupBy(c => (c.BuiltInCategory, c.Kind)))
+        {
+            var cat = g.Key.BuiltInCategory.Replace("OST_", "");
+            var list = g.ToList();
+            if (list.Count == 1)
+                why.Add($"{cat} \"{list[0].Name ?? list[0].UniqueId}\" is {list[0].Kind}: a stair or its railing " +
+                        "drawn this way isn't read, so Gordium can't tell every stair is read");
+            else
+            {
+                var names = list.GroupBy(c => c.Name ?? "(no name)").OrderByDescending(n => n.Count()).ThenBy(n => n.Key, StringComparer.Ordinal)
+                    .Select(n => $"{n.Key} x{n.Count()}").ToList();
+                why.Add($"{list.Count} {cat} elements are each {g.Key.Kind} ({names.Count} " + (names.Count == 1 ? "type" : "types") + ": " +
+                        string.Join(", ", names) + "; each listed by id in the log): a stair or its railing drawn this way isn't read, " +
+                        "so Gordium can't tell every stair is read");
+            }
+        }
         foreach (var w in model.UserWorksets.Where(w => !w.IsOpen))
             why.Add($"Workset \"{w.Name}\" is closed: a stair could be in it (open it)");
         foreach (var link in records.Links)
@@ -129,6 +146,28 @@ public static class StairReader
         if (records.CoordinationModels > 0)
             why.Add($"{records.CoordinationModels} coordination model(s) linked: what is in one isn't read, and a stair could be in it");
         return why;
+    }
+
+    /// <summary>A Generic Model family nested in a window or door (a grille's muntins: 272 of them in Autodesk's
+    /// Pacific Continental sample, 2026-11-20), at any depth of nesting, whose box lies within that window's or door's
+    /// box (1/16 in to spare): it is part of the window or door, not a stair or a guard, so it doesn't stop the stairs
+    /// being read. Anything else stays a blocker: not nested, nested in anything else, sticking out of the window's
+    /// box, or with a box Revit doesn't give.</summary>
+    public static bool InsideWindowOrDoor(StairCandidate c)
+    {
+        if (c.BuiltInCategory != "OST_GenericModel" || c.Box is not { } box || c.NestedIn is not { Count: > 0 } hosts)
+            return false;
+        var own = World(box);
+        return hosts.Any(h => h.BuiltInCategory is "OST_Windows" or "OST_Doors" && h.Box is { } hb && Within(own, World(hb)));
+    }
+
+    private static Box3 World(RevitBox b) => Box3.Turned(b.Min, b.Max, b.Transform ?? Transform3.Identity);
+
+    private static bool Within(Box3 inner, Box3 outer)
+    {
+        const double t = InteriorReader.Sixteenth;
+        return inner.Min.X >= outer.Min.X - t && inner.Min.Y >= outer.Min.Y - t && inner.Min.Z >= outer.Min.Z - t
+            && inner.Max.X <= outer.Max.X + t && inner.Max.Y <= outer.Max.Y + t && inner.Max.Z <= outer.Max.Z + t;
     }
 
     /// <summary>Every flight of every stair in the design checked (the list is the caller's to send or not).</summary>

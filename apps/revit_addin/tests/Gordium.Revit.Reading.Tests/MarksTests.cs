@@ -44,6 +44,8 @@ public sealed class MarksTests
             ("Gordium: This house has no ship ladders", "0249580f-f83a-431e-9e59-9e9e5a542066", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: This house has no patio covers", "0b28269f-ee8a-4939-b3ed-2ac97d6b44d1", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: This house has no deck or porch or cantilever over an escape opening", "820cd2d1-5b6d-416d-afa8-01cb1f0c4515", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // a real model (Pacific Continental, 2026-11-20): a roof or turret level whose enclosed areas aren't rooms
+            ("Gordium: No rooms on this level", "c8cc09e8-00ce-4e4b-a27a-4c2d23410a02", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Levels"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

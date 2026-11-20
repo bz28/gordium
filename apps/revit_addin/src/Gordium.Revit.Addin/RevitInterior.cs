@@ -38,6 +38,12 @@ internal static class RevitInterior
             .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
             .Select(fi => OpeningOf(doc, fi, phase)).ToList();
         var diagnostics = new List<string>();
+        // the design options (for the trial's log): what is read is the main model and, of each set, the option being
+        // edited or else its primary; Revit's enclosed areas (plan circuits) are the main model's own
+        var active = DesignOption.GetActiveDesignOptionId(doc);
+        diagnostics.Add("design options: " + string.Join("; ", new FilteredElementCollector(doc).OfClass(typeof(DesignOption)).Cast<DesignOption>()
+            .Select(o => $"{doc.GetElement(o.get_Parameter(BuiltInParameter.OPTION_SET_ID)?.AsElementId() ?? ElementId.InvalidElementId)?.Name}: " +
+                         $"{o.Name}{(o.IsPrimary ? " (primary)" : "")}{(o.Id == active ? " (being edited)" : "")}")));
         var (stairs, candidates) = StairsOf(doc, diagnostics);
         var railings = RailingsOf(doc, diagnostics);
         int coordination;
@@ -99,7 +105,11 @@ internal static class RevitInterior
             diagnostics.Add($"the stairs couldn't be read ({x.GetType().Name}: {x.Message})");
             return (null, candidates);
         }
-        diagnostics.Add($"stairs: {stairs.Count} component stairs ({stairs.Sum(s => s.Runs.Count)} runs), {candidates.Count} other elements that could be one");
+        diagnostics.Add($"stairs: {stairs.Count} component stairs ({stairs.Sum(s => s.Runs.Count)} runs), {candidates.Count} other elements that could be one " +
+                        $"({candidates.Count(StairReader.InsideWindowOrDoor)} of them generic models nested inside a window or door, not a stair); " +
+                        "nested and not inside their window or door: " + string.Join(", ", candidates
+                            .Where(c => c.NestedIn is { Count: > 0 } && !StairReader.InsideWindowOrDoor(c)).Take(10)
+                            .Select(c => $"{c.Name} in {string.Join(" in ", c.NestedIn!.Select(h => h.BuiltInCategory.Replace("OST_", "")))}")));
         return (stairs, candidates);
     }
 
@@ -135,7 +145,19 @@ internal static class RevitInterior
             Stairs => "a stair not made of components",
             _ => $"another element ({e.GetType().Name})",
         },
-        Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
+        Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id), BoxOf(e), NestedIn(e));
+
+    /// <summary>The family instances <paramref name="e"/> is nested in, innermost first (<c>FamilyInstance.SuperComponent</c>
+    /// to the top), each with its category and box; empty when it isn't nested.</summary>
+    private static List<NestHost> NestedIn(Element e)
+    {
+        var chain = new List<NestHost>();
+        var seen = new HashSet<ElementId>();
+        for (var up = (e as FamilyInstance)?.SuperComponent; up is not null && seen.Add(up.Id) && chain.Count < 32;
+             up = (up as FamilyInstance)?.SuperComponent)
+            chain.Add(new NestHost(up.UniqueId, up.Category?.BuiltInCategory.ToString() ?? "", BoxOf(up)));
+        return chain;
+    }
 
     private static StairRecord StairOf(Document doc, Stairs s, List<string> diagnostics)
     {
@@ -407,10 +429,12 @@ internal static class RevitInterior
                 {
                     var inside = c.GetPointInside();
                     areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated,
-                                               new Xyz(inside.U, inside.V, level.ProjectElevation)));
+                                               new Xyz(inside.U, inside.V, level.ProjectElevation), level.UniqueId));
                 }
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
-                                $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room)");
+                                $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
+                                string.Join(", ", areas.Skip(before).Where(a => !a.HasRoom)
+                                    .Select(a => $"{a.Area:0.#} sq ft at ({a.PointInside.X:0.##}, {a.PointInside.Y:0.##}) internal")) + ")");
             }
             return areas;
         }
@@ -474,6 +498,7 @@ internal static class RevitInterior
         {
             UniqueId = room.UniqueId,
             Level = level?.Name,
+            LevelId = level?.UniqueId,
             LevelElevation = elevation,
             BaseOffset = offset,
             Boundary = boundary,
@@ -515,7 +540,8 @@ internal static class RevitInterior
             return new FilteredElementCollector(doc).WhereElementIsNotElementType()
                 .WherePasses(new ElementIntersectsSolidFilter(solid))
                 .Where(e => e.Id != room.Id)
-                .Select(e => new NearbyElement(e.UniqueId, Category(e), e.Name, (e as FamilyInstance)?.Host?.UniqueId))
+                .Select(e => new NearbyElement(e.UniqueId, Category(e), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                                               PhaseDemolished: Id(e.DemolishedPhaseId), DesignOption: Id(e.DesignOption?.Id)))
                 .ToList();
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
@@ -636,7 +662,7 @@ internal static class RevitInterior
         var (width, height) = TypeSize(type);
         var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
         var (faces, failed) = Faces(fi, options);
-        var cut = fi.Host is Wall wall ? Cut(wall, fi, options) : (null, null, ["its host isn't a wall"]);
+        var cut = fi.Host is Wall wall ? Cut(wall, fi, options) : (null, null, ["its host isn't a wall"], false);
         return new OpeningRecord
         {
             UniqueId = fi.UniqueId,
@@ -654,6 +680,7 @@ internal static class RevitInterior
             Placed = failed || faces is null || faces.Count == 0 ? null : faces.SelectMany(f => f.Points).ToList(),
             WallOpening = cut.Points,
             WallOpeningBy = cut.By,
+            WallOpeningUnread = cut.Unread,
             Diagnostics = cut.Words,
         };
     }
@@ -686,10 +713,11 @@ internal static class RevitInterior
     /// <c>Element.GetGeneratingElementIds</c> name it: shown to work on houses 1, 2 and 5 in Revit 2027.4, trial run 6),
     /// how they were found, and what was looked at (the boxes and the ids generating the wall's faces, for a future
     /// failure's log). Never the window's own geometry or its Sill Height; nothing found is none.</summary>
-    private static (List<Xyz>? Points, string? By, List<string> Words) Cut(Wall wall, FamilyInstance fi, Options options)
+    private static (List<Xyz>? Points, string? By, List<string> Words, bool Unread) Cut(Wall wall, FamilyInstance fi, Options options)
     {
         var words = new List<string>();
         var faces = new List<(Face Face, List<Xyz> Points, ICollection<ElementId> By)>();
+        var unreadable = 0;
         void Walk(GeometryElement g)
         {
             foreach (var o in g)
@@ -697,8 +725,23 @@ internal static class RevitInterior
                 if (o is Solid s)
                 {
                     foreach (Face f in s.Faces)
-                        faces.Add((f, f.GetEdgesAsCurveLoops().SelectMany(l => l.Select(c => P(c.GetEndPoint(0)))).ToList(),
-                                   wall.GetGeneratingElementIds(f)));
+                    {
+                        // a face Revit gives no edges for, or that throws (as Surface: the Pacific Continental sample,
+                        // 2026-11-20), can't be read: it may be the one this window cut, so the cut is unread below
+                        try
+                        {
+                            if (f.GetEdgesAsCurveLoops() is { } loops)
+                                faces.Add((f, loops.SelectMany(l => l.Select(c => P(c.GetEndPoint(0)))).ToList(),
+                                           wall.GetGeneratingElementIds(f)));
+                            else
+                                unreadable++;
+                        }
+                        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException
+                                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+                        {
+                            unreadable++;
+                        }
+                    }
                 }
                 else if (o is GeometryInstance gi && gi.GetInstanceGeometry() is { } inner)
                     Walk(inner);
@@ -712,7 +755,14 @@ internal static class RevitInterior
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
         {
             words.Add($"the wall's geometry couldn't be read ({x.GetType().Name}: {x.Message})");
-            return (null, null, words);
+            return (null, null, words, true);
+        }
+        if (unreadable > 0)
+        {
+            // never the faces that could be read alone: the bottom of the cut could be on the one that couldn't
+            words.Add($"{unreadable} of the wall's faces couldn't be read (Revit gave no edges for them, or refused): " +
+                      "the opening this window cuts is unread");
+            return (null, null, words, true);
         }
         var fb = fi.get_BoundingBox(null);
         var wb = wall.get_BoundingBox(null);
@@ -723,11 +773,11 @@ internal static class RevitInterior
                 ? $"{e.Category?.BuiltInCategory.ToString() ?? "?"} {id.Value}{(id == fi.Id ? " (this window)" : "")}" : $"{id.Value}")));
         var named = faces.Where(f => f.By.Contains(fi.Id)).SelectMany(f => f.Points).ToList();
         if (named.Count > 0)
-            return (named, "the wall's faces Revit says this window generated (GetGeneratingElementIds)", words);
+            return (named, "the wall's faces Revit says this window generated (GetGeneratingElementIds)", words, false);
         // nothing else stands in for it: HostObject.FindInserts listed no inserts at all even on walls the windows did
         // cut (trial run 6, Revit 2027.4), so it is no evidence either way and isn't used
         words.Add("no face of the wall names this window as generating it: the window cut nothing found");
-        return (null, null, words);
+        return (null, null, words, false);
     }
 
     internal static Xyz P(XYZ p) => new(p.X, p.Y, p.Z);
