@@ -5,7 +5,9 @@
 **Kept current by:** the PR that builds each step below, as it settles a "to check"; any PR that changes the interior description, the worker's `check_site`, or one of the decisions here.
 
 **Status: agreed by Ben, 2026-11-19** (his four decisions are in section 8). Each step of section 7 is its own
-PR; step 1 (protocol 1.2: the worker and the C# client take an interior) is built, the rest are not yet.
+PR; step 1 (protocol 1.2: the worker and the C# client take an interior) is built; step 2 (the marks and the marking
+list, [the add-in's README](../../apps/revit_addin/README.md#the-architects-marks-interior-step-2)) is built, to
+confirm in Revit (section 9); the rest are not yet.
 
 The outside of the building (the lot, the massing, the yards and height) has its own note:
 [revit_reading_design.md](revit_reading_design.md). This note is the inside: what egress needs. Words used here:
@@ -315,7 +317,10 @@ the undersides above a room or a flight exactly; tread top faces in a `StairsRun
 against each run's drawn risers; finding enclosed areas with no Room; the bottom of the wall opening a window cuts (or its Bottom reference), and its placed
 width and height; the floor face under a stair's first riser; a multistory stair's levels;
 reading a loaded link's elements through its placement; `FromRoom`/`ToRoom` for the last phase; a railing's balusters from its geometry; probing a
-Toposolid outside a window. Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
+Toposolid outside a window. For the marks (step 2): that a Yes/No mark reads `Parameter.HasValue` false on
+elements that had it added and on elements placed afterwards, until the architect sets it (else an unmarked room
+would read as No, and the marks must change type); that Revit accepts the colon in the marks' names; that a type's
+marks read through `Element.GetTypeId()`. Snowdon Towers has rooms, stairs, railings and windows to try each on (as a reading
 test only: it is not a house, and gives no verdict).
 
 ## Sources
