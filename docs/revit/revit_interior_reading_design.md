@@ -511,7 +511,8 @@ Each step is its own PR, through the review loop, with its tests:
 4. **Stairs** (straight component runs, the cross-check), houses 2 and 3: risers, treads, widths, headroom.
    **Built** (section 4, "As built in step 4"). Scope (`recordings.py`, `STEPS[4]`): house 2's flight in scope for
    `stair_riser_height`, `stair_riser_variation`, `stair_total_rise`, `stair_risers`, `stair_tread_depth`,
-   `stair_tread_variation`, `stair_headroom` and `stair_clear_width`; out of scope, expected not measured,
+   `stair_tread_variation`, `stair_headroom`, `stair_clear_width` and `stair_spiral` (false: a Straight run whose
+   treads read straight; house 3's flight the same); out of scope, expected not measured,
    `stair_clear_width_at_handrail` and `stair_handrail_sides` (railings: step 5). **House 3's tall riser** can't be
    drawn inside a component run (Revit makes a run's risers equal: `ActualRiserHeight` = height / risers), so it is
    drawn where a tall riser arises in Revit: 13 risers of 7 1/2 in, the floor at the head 1 1/2 in above the run's

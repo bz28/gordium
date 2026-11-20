@@ -10,6 +10,7 @@ import subprocess
 import sys
 
 import pytest
+from pathlib import Path
 
 from model_measurement.interior import recordings as r
 
@@ -148,6 +149,16 @@ def test_the_steps_scope_is_the_design_notes():
     assert r.drawing("1_ranch_compliant")["has_none"] == ["stairs", "guards"]
     assert r.drawing("4_loft")["has_none"] == ["doors"]
     assert r.drawing("3_tall_riser")["has_none"] == []
+
+
+def test_the_design_notes_step_4_scope_names_every_stair_measure_in_scope():
+    # review round 4 (stair decisions): the note's step-4 scope list fell behind STEPS[4] (stair_spiral added to the
+    # code, not the list); every stair measure in scope must be named in that paragraph
+    note = (Path(r.__file__).resolve().parents[4] / "docs" / "revit" / "revit_interior_reading_design.md").read_text(
+        encoding="utf-8")
+    step4 = note[note.index("4. **Stairs**"):note.index("5. **")]
+    missing = sorted(m for m in r.STEPS[4]["2_two_story_small_window"]["stair"] if f"`{m}`" not in step4)
+    assert missing == []
 
 
 def test_house_2s_stair_drawn_and_read_measures_as_worked_by_hand():
