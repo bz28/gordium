@@ -1,0 +1,121 @@
+using Autodesk.Revit.DB;
+using Autodesk.Revit.UI;
+using Gordium.Revit.Reading;
+
+namespace Gordium.Revit.Addin;
+
+/// <summary>
+/// Check my project's results as a Revit dockable pane (tabbed with Properties on first use), registered at
+/// startup. It holds the one <see cref="ResultsView"/>, the document last checked, and the panel's Revit actions,
+/// each run on Revit's thread through <see cref="PanelActions"/>: Check again, select and zoom a row's elements, open
+/// Project Information. A check asked for by file (CheckProjectCommand.RunRequest) never uses the pane.
+/// </summary>
+internal sealed class ResultsPane : IDockablePaneProvider
+{
+    /// <summary>The pane's id: never changed (Revit keeps where the architect docked it under this id).</summary>
+    internal static readonly DockablePaneId Id = new(new Guid("6f4d2a1e-3b7c-4e58-9a0d-2c1b7e5f8a93"));
+
+    private static ResultsView? _view;
+    private static Document? _checked;
+
+    internal static void Register(UIControlledApplication app) =>
+        app.RegisterDockablePane(Id, "Gordium: Check my project", new ResultsPane());
+
+    public void SetupDockablePane(DockablePaneProviderData data)
+    {
+        data.FrameworkElement = View();
+        data.VisibleByDefault = false;
+        data.InitialState = new DockablePaneState
+        {
+            DockPosition = DockPosition.Tabbed,
+            TabBehind = DockablePanes.BuiltInDockablePanes.PropertiesPalette,
+        };
+    }
+
+    private static ResultsView View() => _view ??= new ResultsView(Zoom, CheckAgain, OpenProjectInformation);
+
+    /// <summary>Shows a check in the pane and brings the pane up (on Revit's thread: a command or a panel action).</summary>
+    internal static void Show(UIApplication ui, Document doc, PanelContent content)
+    {
+        _checked = doc;
+        View().Show(content);
+        ui.GetDockablePane(Id).Show();
+    }
+
+    /// <summary>A check that failed: the last check's rows taken down (never shown as this one's), and why.</summary>
+    internal static void Failed(string words) => _view?.Failed(words);
+
+    /// <summary>A line in the panel (a click's result, a problem), when the panel exists.</summary>
+    internal static void Say(string words) => _view?.Say(words);
+
+    private static void Post(string what, Action<UIApplication> act)
+    {
+        if (PanelActions.Current is not { } actions)
+        {
+            Say("The Gordium add-in didn't start its panel actions: restart Revit.");
+            return;
+        }
+        if (!actions.Post(what, act, out var refused))
+            Say($"Revit didn't take \"{what}\" ({refused}): finish what Revit is doing, then click again.");
+    }
+
+    private static void CheckAgain()
+    {
+        View().Busy(true);
+        Post("Check again", ui =>
+        {
+            try
+            {
+                CheckProjectCommand.Check(ui);
+            }
+            finally
+            {
+                View().Busy(false);
+            }
+        });
+    }
+
+    private static void OpenProjectInformation() => Post("Open Project Information", ui =>
+    {
+        var id = RevitCommandId.LookupPostableCommandId(PostableCommand.ProjectInformation);
+        if (id is null || !ui.CanPostCommand(id))
+            Say("Open Manage > Project Information to fill in Gordium's marks.");
+        else
+            ui.PostCommand(id);
+    });
+
+    private static void Zoom(ResultRow row) => Post("Show in model", ui => ShowElements(ui, row));
+
+    /// <summary>Selects the row's elements and zooms to them, in the project that was checked, by their UniqueIds;
+    /// says plainly when it can't (the project closed or not the active one, an element gone or not in this model).</summary>
+    private static void ShowElements(UIApplication ui, ResultRow row)
+    {
+        var doc = _checked;
+        if (doc is null || !doc.IsValidObject)
+        {
+            Say("The project checked is closed: open it and click Check again.");
+            return;
+        }
+        var uidoc = ui.ActiveUIDocument;
+        if (uidoc is null || !uidoc.Document.Equals(doc))
+        {
+            Say($"Switch to {doc.Title} to show it: the check was of that project.");
+            return;
+        }
+        var found = new List<ElementId>();
+        foreach (var uid in row.Elements)
+            if (doc.GetElement(uid) is { } e)
+                found.Add(e.Id);
+        var gone = row.Elements.Count - found.Count;
+        if (found.Count == 0)
+        {
+            Say("Its elements aren't in this model now (deleted since the check, in a linked model, or an area Gordium " +
+                "read from the walls): click Check again.");
+            return;
+        }
+        uidoc.Selection.SetElementIds(found);
+        uidoc.ShowElements(found);
+        Say($"Selected {found.Count} element{(found.Count == 1 ? "" : "s")} for {row.Name}" +
+            (gone > 0 ? $"; {gone} not in this model now." : "."));
+    }
+}
