@@ -80,7 +80,7 @@ public static class GuardReader
     }
 
     /// <summary>How far around a stair run a railing on no stair is held back (ft): beyond the run's own drawn extent
-    /// (its width with it) in plan, and over its top by a guard's height and more.</summary>
+    /// (its width with it) in plan, and below its base (over its top, <see cref="OverRun"/>).</summary>
     public const double NearRun = 1.0;
 
     /// <summary>The headroom over a run within which a railing counts as near it (ft): more than any guard is tall.</summary>
@@ -88,7 +88,7 @@ public static class GuardReader
 
     /// <summary>Why a railing on no stair counts as near a stair run in the design (null when it is near none): its box
     /// (path and parts, shared coordinates) within <see cref="NearRun"/> of a run's box in plan (the run's own faces and
-    /// path) and its height range meeting the run's, from its base to <see cref="OverRun"/> over its top. A run whose
+    /// path) and its height range meeting the run's, from <see cref="NearRun"/> under its base to <see cref="OverRun"/> over its top. A run whose
     /// extent can't be known (no faces read), or a railing with nothing drawn, counts as near.</summary>
     private static string? NearARun(RevitModel model, InteriorRecords records, RailingRecord r)
     {

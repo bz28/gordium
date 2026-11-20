@@ -286,7 +286,7 @@ to build), so any other railing on a stair leaves `guards` out, as does a railin
 flight (it can't be told from a guard along it), or any railing while stairs are drawn but not read (where it stands
 isn't known). "Beside a flight" is judged by where things are drawn, never by how far a flight's reading got
 (review round 2: a winder, an unread run, a side refused first): a railing on no stair whose box comes within 1 ft
-in plan of a run's own drawn extent, its height between the run's base and 4 ft over its top, is held back; a run
+in plan of a run's own drawn extent, its height between 1 ft under the run's base and 4 ft over its top, is held back; a run
 whose extent can't be read holds back every railing on no stair. Each other railing on no stair is a level guard, never
 dropped, each value sent only when read exactly:
 
