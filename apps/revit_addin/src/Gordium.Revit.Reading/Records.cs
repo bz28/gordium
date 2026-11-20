@@ -51,7 +51,69 @@ public sealed record RevitModel
     /// <summary>Every element that can be a lot line: each property line, and each model line the architect could
     /// pick (<c>CurveElement</c>), with its curves.</summary>
     public IReadOnlyList<LotLineElement> LotLines { get; init; } = [];
+
+    /// <summary>Every room, window and door, with Gordium's marks on it and on its type
+    /// (<c>FilteredElementCollector(doc).OfCategory(...)</c> for <c>OST_Rooms</c>, <c>OST_Windows</c> and
+    /// <c>OST_Doors</c>, <c>WhereElementIsNotElementType()</c>): the marking list's rows
+    /// (docs/revit/revit_interior_reading_design.md, section 3).</summary>
+    public IReadOnlyList<MarkedElement> Marked { get; init; } = [];
+
+    /// <summary>Every parameter bound in the project (<c>Document.ParameterBindings</c>), for adding Gordium's marks
+    /// without clashing (<see cref="MarkSetup"/>).</summary>
+    public IReadOnlyList<BoundParameter> Bindings { get; init; } = [];
 }
+
+/// <summary>One parameter's value on an element, as Revit gives it: <c>Parameter.HasValue</c>, and by its
+/// <c>StorageType</c> <c>AsInteger()</c> (a Yes/No is an integer, 1 or 0), <c>AsString()</c> or <c>AsDouble()</c>
+/// (internal units: feet). The record copies; <see cref="Marks"/> decides what it means.</summary>
+public sealed record MarkValue(bool HasValue, int? Integer = null, string? Text = null, double? Number = null);
+
+/// <summary>A room, window or door, with Gordium's marks read from it and from its type, each by the mark's GUID
+/// (<c>Element.get_Parameter(Guid)</c>; a mark the element doesn't have is absent from the map).</summary>
+public sealed record MarkedElement
+{
+    /// <summary><c>Element.UniqueId</c>.</summary>
+    public required string UniqueId { get; init; }
+
+    /// <summary><c>OST_Rooms</c>, <c>OST_Windows</c> or <c>OST_Doors</c>.</summary>
+    public required string BuiltInCategory { get; init; }
+
+    /// <summary>A room's name (<c>ROOM_NAME</c>), or a window's or door's <c>Element.Name</c> (its type's name).</summary>
+    public string? Name { get; init; }
+
+    /// <summary>A room's <c>Room.Number</c>; a window's or door's Mark (<c>ALL_MODEL_MARK</c>).</summary>
+    public string? Number { get; init; }
+
+    /// <summary>A window's or door's family (<c>FamilyInstance.Symbol.FamilyName</c>); null for a room.</summary>
+    public string? Family { get; init; }
+
+    /// <summary>The type's <c>UniqueId</c> (<c>Element.GetTypeId()</c>), null for a room.</summary>
+    public string? TypeUniqueId { get; init; }
+
+    /// <summary><c>Element.DemolishedPhaseId</c>, or null.</summary>
+    public string? PhaseDemolished { get; init; }
+
+    /// <summary><c>Element.DesignOption</c>'s id, or null for the main model.</summary>
+    public string? DesignOption { get; init; }
+
+    /// <summary>The instance marks, by the mark's GUID.</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> Instance { get; init; } = new Dictionary<Guid, MarkValue>();
+
+    /// <summary>The type marks (read from the element's type), by the mark's GUID.</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> Type { get; init; } = new Dictionary<Guid, MarkValue>();
+}
+
+/// <summary>One parameter bound in the project (an entry of <c>Document.ParameterBindings</c>).</summary>
+/// <param name="Name"><c>Definition.Name</c>.</param>
+/// <param name="Guid">A shared parameter's GUID (<c>SharedParameterElement.GuidValue</c>), null for a project
+/// parameter that isn't shared.</param>
+/// <param name="Kind">The definition's data type when it is one of the marks' (<c>Definition.GetDataType()</c> equal to
+/// <c>SpecTypeId.Boolean.YesNo</c>, <c>String.Text</c> or <c>Length</c>), else null.</param>
+/// <param name="DataType">The data type's <c>TypeId</c>, for the words.</param>
+/// <param name="IsInstance">An <c>InstanceBinding</c> (else a <c>TypeBinding</c>).</param>
+/// <param name="Categories">The binding's categories, by built-in name.</param>
+public sealed record BoundParameter(string Name, Guid? Guid, MarkValueKind? Kind, string DataType, bool IsInstance,
+                                    IReadOnlyList<string> Categories);
 
 public sealed record OptionSet(string Id, string Name, IReadOnlyList<DesignOptionRecord> Options);
 
