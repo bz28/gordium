@@ -67,8 +67,36 @@ public sealed class RecordScenesCommand : IExternalCommand
         return lines;
     }
 
+    /// <summary>A request with <c>"debug": true</c>: each scene's records written beside the log (debug\&lt;scene&gt;.json),
+    /// every element's category, kind, box and geometry tree, to see what Revit gave the reader.</summary>
+    internal static bool Debug { get; set; }
+
+    private static void Dump(RevitModel model, string scene, string step)
+    {
+        static JsonNode Item(GeometryItem g) => g switch
+        {
+            SolidItem s => new JsonObject { ["solid"] = $"{s.Faces.Count} faces, {s.Edges.Count} edges" },
+            MeshItem m => new JsonObject { ["mesh"] = $"{m.Triangles.Count} triangles, closed {m.IsClosed}" },
+            InstanceItem i => new JsonObject { ["instance"] = i.Items is null ? null : new JsonArray(i.Items.Select(Item).ToArray()) },
+            OtherItem o => new JsonObject { ["other"] = o.TypeName },
+            _ => JsonValue.Create("linework")!,
+        };
+        var dir = Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "debug");
+        Directory.CreateDirectory(dir);
+        var elements = new JsonArray(model.Elements.Where(e => e.CategoryType == Reading.CategoryType.Model && !e.ViewSpecific)
+            .Select(e => (JsonNode)new JsonObject
+            {
+                ["id"] = e.UniqueId, ["category"] = e.BuiltInCategory, ["kind"] = e.Kind.ToString(), ["mark"] = e.Mark.ToString(),
+                ["box"] = e.BoundingBox is { } b ? $"{b.Min} .. {b.Max}" : null,
+                ["geometry"] = e.GeometryFailed ? "failed" : e.Geometry is null ? null : new JsonArray(e.Geometry.Select(Item).ToArray()),
+            }).ToArray());
+        File.WriteAllText(Path.Combine(dir, $"{scene} ({step}).json"),
+                          elements.ToJsonString(new JsonSerializerOptions { WriteIndented = true }), new UTF8Encoding(false));
+    }
+
     internal static HashSet<string>? Requested(string path)
     {
+        Debug = File.Exists(path) && JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))?["debug"]?.GetValue<bool>() == true;
         return File.Exists(path)
             ? JsonNode.Parse(File.ReadAllText(path, Encoding.UTF8))!["scenes"]!.AsArray().Select(s => s!.GetValue<string>()).ToHashSet()
             : null;
@@ -90,7 +118,7 @@ public sealed class RecordScenesCommand : IExternalCommand
         var doc = app.NewProjectDocument(UnitSystem.Imperial);
         try
         {
-            var drawn = SceneDraw.Draw(doc, scene);
+            var drawn = SceneDraw.Draw(app, doc, scene);
             log["draw_s"] = sw.Elapsed.TotalSeconds;
             var steps = new JsonObject();
             foreach (var (step, _) in scene["steps"]!.AsObject())
@@ -100,6 +128,8 @@ public sealed class RecordScenesCommand : IExternalCommand
                 sw.Restart();
                 var model = RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance);
                 log[$"read_s ({step})"] = sw.Elapsed.TotalSeconds;
+                if (Debug)
+                    Dump(model, name, step);
                 sw.Restart();
                 // on Revit's thread: the lot is read (calling back into the API) before the reader's first wait, and
                 // every wait inside it lets go of this thread (ConfigureAwait(false)), so blocking here can't deadlock

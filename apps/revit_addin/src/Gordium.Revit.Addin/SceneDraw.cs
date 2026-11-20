@@ -27,20 +27,17 @@ internal static class SceneDraw
     internal static List<string> Unsupported(JsonObject scene)
     {
         var why = new List<string>();
-        if (scene["group"]!.GetValue<bool>())
-            why.Add("a model group");
         foreach (var (_, data) in scene["steps"]!.AsObject())
             foreach (var s in data!["solids"]!.AsArray())
             {
-                if (s!["floor"] is not JsonValue)
-                    why.Add($"{s["id"]}: a building that isn't a floor block (native walls, slabs, families)");
-                if (s["mesh"]!.GetValue<bool>() || s["block"]!.GetValue<bool>() || s["in_block"] is JsonValue)
-                    why.Add($"{s["id"]}: a mesh, a block or a linked model");
+                var name = s!["id"]!.GetValue<string>();
+                if (name == "built_in")
+                    why.Add("built_in: an in-place family (Revit's API can't create one: drawn by hand)");
+                if (name == "curtain_panel" || name.StartsWith("mullion_", StringComparison.Ordinal))
+                    why.Add($"{name}: a curtain wall's panel or mullion (a curtain wall, not drawn yet)");
+                if (s["mesh"]!.GetValue<bool>())
+                    why.Add($"{name}: a building drawn as a closed mesh (not drawn yet)");
             }
-        foreach (var o in scene["others"]!.AsArray())
-            if (o!["block"]?.GetValue<bool>() == true || o["empty"]?.GetValue<bool>() == true
-                || o["nested_empty"]?.GetValue<bool>() == true || o["holds_buildings"]?.GetValue<bool>() == true)
-                why.Add($"{o["id"]}: a family or a linked model");
         return why.Distinct().ToList();
     }
 
@@ -49,7 +46,7 @@ internal static class SceneDraw
     internal sealed record Drawn(Dictionary<string, string> Ids, JsonObject Facts, Dictionary<string, ElementId> Buildings);
 
     /// <summary>Draws the scene's first step in <paramref name="doc"/>.</summary>
-    internal static Drawn Draw(Document doc, JsonObject scene)
+    internal static Drawn Draw(Autodesk.Revit.ApplicationServices.Application app, Document doc, JsonObject scene)
     {
         var ids = new Dictionary<string, string>();
         var buildings = new Dictionary<string, ElementId>();
@@ -105,30 +102,52 @@ internal static class SceneDraw
             }
             facts["lot_id"] = uid;
         }
+        var inLinks = new Dictionary<string, List<JsonNode>>();
         foreach (var s in scene["steps"]!["as drawn"]!["solids"]!.AsArray())
         {
-            var name = s!["id"]!.GetValue<string>();
-            var story = name.Split("floor")[^1];
-            var mark = $"{RevitRead.FloorPrefix}{story};{Num(s["floor"]!.GetValue<double>())}";
-            var outline = Outline(s["outline"]!).Select(p => Shift(p, offset)).ToList();
-            double z0 = s["base"]!.GetValue<double>() - offset.Z, z1 = s["top"]!.GetValue<double>() - offset.Z;
-            var curved = s["curved"] as JsonObject;
-            var ds = s["open"]!.GetValue<bool>()
-                ? OpenPrism(doc, outline, z0, z1, mark)
-                : Prism(doc, outline, z0, z1, mark, curved?["edge"]!.GetValue<int>(),
-                        curved is null ? null : Shift(P(curved["through"]!), offset));
+            if (s!["in_block"] is JsonValue link)
+            {
+                (inLinks.TryGetValue(link.GetValue<string>(), out var held) ? held : inLinks[link.GetValue<string>()] = []).Add(s);
+                continue;
+            }
+            var ds = Building(doc, s, offset);
+            var name = s["id"]!.GetValue<string>();
             ids[ds.UniqueId] = name;
             buildings[name] = ds.Id;
         }
+        if (scene["group"]!.GetValue<bool>())     // every part in one model group (20): moved together at the edit
+            buildings[GroupKey] = doc.Create.NewGroup(buildings.Values.ToList()).Id;
         foreach (var o in scene["others"]!.AsArray())
         {
-            var outline = Outline(o!["outline"]!).Select(p => Shift(p, offset)).ToList();
+            var oid = o!["id"]!.GetValue<string>();
+            if (o["holds_buildings"]?.GetValue<bool>() == true)
+            {
+                ids[Link(app, doc, oid, inLinks[oid], offset).UniqueId] = oid;
+                continue;
+            }
+            if (o["empty"]?.GetValue<bool>() == true)
+            {
+                ids[Place(doc, Family(app, doc, oid, null, null)).UniqueId] = oid;
+                continue;
+            }
+            var outline = Outline(o["outline"]!).Select(p => Shift(p, offset)).ToList();
             double z0 = o["base"]!.GetValue<double>() - offset.Z, z1 = o["top"]!.GetValue<double>() - offset.Z;
+            if (o["block"]?.GetValue<bool>() == true)
+            {
+                // a Generic Models family instance; with nested_empty, a nested family with no geometry beside its solid
+                // drawn about the family's own origin and placed at the outline's middle, as real families are made:
+                // Revit's box of an instance reaches to its origin, so a solid drawn far from it reads bigger
+                var nested = o["nested_empty"]?.GetValue<bool>() == true ? FamilyFile(app, oid + "_part", null, null, shared: true) : null;
+                var (cx, cy) = ((outline.Min(q => q.X) + outline.Max(q => q.X)) / 2, (outline.Min(q => q.Y) + outline.Max(q => q.Y)) / 2);
+                var local = outline.Select(q => (q.X - cx, q.Y - cy)).ToList();
+                ids[Place(doc, Family(app, doc, oid, (local, z0, z1), nested), new XYZ(cx, cy, 0)).UniqueId] = oid;
+                continue;
+            }
             var context = o["layer"]?.GetValue<string>().StartsWith("Gordium::Context", StringComparison.Ordinal) == true;
             var ds = o["mesh"] is JsonObject mesh
                 ? Grid(doc, outline, z0, mesh["cells"]!.GetValue<int>())
                 : Prism(doc, outline, z0, z1, context ? RevitRead.ContextMark : null);
-            ids[ds.UniqueId] = o["id"]!.GetValue<string>();
+            ids[ds.UniqueId] = oid;
         }
         foreach (var p in scene["spots"]!.AsArray())
         {
@@ -156,15 +175,149 @@ internal static class SceneDraw
             var name = s!["id"]!.GetValue<string>();
             var (a, b) = (P(before[name]!["outline"]![0]!), P(s["outline"]![0]!));
             var dz = s["base"]!.GetValue<double>() - before[name]!["base"]!.GetValue<double>();
+            if (drawn.Buildings.TryGetValue(GroupKey, out var group))
+            {
+                ElementTransformUtils.MoveElement(doc, group, new XYZ(b.X - a.X, b.Y - a.Y, dz));   // the group, once
+                break;
+            }
             ElementTransformUtils.MoveElement(doc, drawn.Buildings[name], new XYZ(b.X - a.X, b.Y - a.Y, dz));
         }
         if (t.Commit() != TransactionStatus.Committed)
             throw new InvalidOperationException("Revit didn't commit the scene's edit");
     }
 
-    private static DirectShape Shape(Document doc, IList<GeometryObject> geometry, string? mark)
+    private const string GroupKey = "\u0000group";
+
+    /// <summary>One of the scene's buildings: a marked floor block (a curved face, or an open shell, where the scene
+    /// has one); a part of a house of parts in its building category (as SceneDrawing.PartOf: the slabs Floors and
+    /// Roofs, the window Windows, the rest Walls; DirectShapes in those categories, not native walls and slabs: section
+    /// 7 of the runbook notes it); a block on the Building layer (04): a Walls element holding only a line, which the
+    /// reader can't send as a solid.</summary>
+    private static DirectShape Building(Document doc, JsonNode s, XYZ offset)
     {
-        var ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+        var name = s["id"]!.GetValue<string>();
+        var outline = Outline(s["outline"]!).Select(p => Shift(p, offset)).ToList();
+        double z0 = s["base"]!.GetValue<double>() - offset.Z, z1 = s["top"]!.GetValue<double>() - offset.Z;
+        if (s["block"]!.GetValue<bool>())
+            return Shape(doc, [Line.CreateBound(Xyz(outline[0], z0), Xyz(outline[2], z1))], null, BuiltInCategory.OST_Walls);
+        if (s["floor"] is not JsonValue floor)
+            return Shape(doc, [Solid(outline, z0, z1, null, null)], null, name switch
+            {
+                "floor_slab" => BuiltInCategory.OST_Floors,
+                "roof_slab" => BuiltInCategory.OST_Roofs,
+                "window" => BuiltInCategory.OST_Windows,
+                _ => BuiltInCategory.OST_Walls,
+            });
+        var mark = $"{RevitRead.FloorPrefix}{name.Split("floor")[^1]};{Num(floor.GetValue<double>())}";
+        var curved = s["curved"] as JsonObject;
+        return s["open"]!.GetValue<bool>()
+            ? OpenPrism(doc, outline, z0, z1, mark)
+            : Prism(doc, outline, z0, z1, mark, curved?["edge"]!.GetValue<int>(),
+                    curved is null ? null : Shift(P(curved["through"]!), offset));
+    }
+
+    /// <summary>A family file built from Revit's Generic Model template: one solid (a vertical prism), or none; with a
+    /// nested family (another such file) placed inside it.</summary>
+    private static string FamilyFile(Autodesk.Revit.ApplicationServices.Application app, string name,
+                                     (List<(double X, double Y)> Outline, double Z0, double Z1)? prism, string? nested,
+                                     bool shared = false)
+    {
+        var templates = app.FamilyTemplatePath;
+        var template = new[]
+        {
+            System.IO.Path.Combine(templates, "Generic Model.rft"),
+            System.IO.Path.Combine(templates, "English-Imperial", "Generic Model.rft"),
+            System.IO.Path.Combine(templates, "English", "Metric Generic Model.rft"),
+            System.IO.Path.Combine(templates, "..", "English-Imperial", "Generic Model.rft"),
+            System.IO.Path.Combine(templates, "Metric Generic Model.rft"),
+        }.FirstOrDefault(System.IO.File.Exists) ?? throw new InvalidOperationException($"no Generic Model template under {templates}");
+        var fam = app.NewFamilyDocument(template);
+        try
+        {
+            using (var t = new Transaction(fam, "Gordium: scene family"))
+            {
+                t.Start();
+                // a shared family stays its own instance when nested (Revit hands it back as a nested
+                // GeometryInstance); a family not shared is merged into its host's geometry (seen in the trial,
+                // 2026-11-19: an empty one came back as an empty solid inside the host's)
+                if (shared)
+                    fam.OwnerFamily.get_Parameter(BuiltInParameter.FAMILY_SHARED).Set(1);
+                if (prism is { } p)
+                {
+                    var profile = new CurveArrArray();
+                    var loop = new CurveArray();
+                    for (var i = 0; i < p.Outline.Count; i++)
+                        loop.Append(Line.CreateBound(Xyz(p.Outline[i], p.Z0), Xyz(p.Outline[(i + 1) % p.Outline.Count], p.Z0)));
+                    profile.Append(loop);
+                    var plane = SketchPlane.Create(fam, Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, p.Z0)));
+                    fam.FamilyCreate.NewExtrusion(true, profile, plane, p.Z1 - p.Z0);
+                }
+                if (nested is not null)
+                {
+                    fam.LoadFamily(nested, out var inner);
+                    var symbol = (FamilySymbol)fam.GetElement(inner.GetFamilySymbolIds().First());
+                    symbol.Activate();
+                    fam.FamilyCreate.NewFamilyInstance(XYZ.Zero, symbol, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+                }
+                t.Commit();
+            }
+            var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"gordium_{name}_{Guid.NewGuid():N}.rfa");
+            fam.SaveAs(path);
+            return path;
+        }
+        finally
+        {
+            fam.Close(false);
+        }
+    }
+
+    private static FamilySymbol Family(Autodesk.Revit.ApplicationServices.Application app, Document doc, string name,
+                                       (List<(double X, double Y)> Outline, double Z0, double Z1)? prism, string? nested)
+    {
+        doc.LoadFamily(FamilyFile(app, name, prism, nested), out var family);
+        var symbol = (FamilySymbol)doc.GetElement(family.GetFamilySymbolIds().First());
+        symbol.Activate();
+        return symbol;
+    }
+
+    /// <summary>A family placed at <paramref name="at"/> (the origin when not given).</summary>
+    private static FamilyInstance Place(Document doc, FamilySymbol symbol, XYZ? at = null) =>
+        doc.Create.NewFamilyInstance(at ?? XYZ.Zero, symbol, Autodesk.Revit.DB.Structure.StructuralType.NonStructural);
+
+    /// <summary>A linked Revit model holding the scene's buildings (19): another project, its floor blocks drawn, saved
+    /// to a temporary file and linked, origin to origin.</summary>
+    private static RevitLinkInstance Link(Autodesk.Revit.ApplicationServices.Application app, Document doc, string name,
+                                          List<JsonNode> solids, XYZ offset)
+    {
+        var linked = app.NewProjectDocument(UnitSystem.Imperial);
+        var path = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"gordium_{name}_{Guid.NewGuid():N}.rvt");
+        try
+        {
+            using (var t = new Transaction(linked, "Gordium: the linked model"))
+            {
+                t.Start();
+                foreach (var s in solids)
+                    Building(linked, s, offset);
+                t.Commit();
+            }
+            linked.SaveAs(path);
+        }
+        finally
+        {
+            linked.Close(false);
+        }
+        var type = RevitLinkType.Create(doc, ModelPathUtils.ConvertUserVisiblePathToModelPath(path), new RevitLinkOptions(false));
+        return RevitLinkInstance.Create(doc, type.ElementId);
+    }
+
+    private static Solid Solid(List<(double X, double Y)> outline, double z0, double z1, int? curvedEdge,
+                               (double X, double Y)? through) =>
+        GeometryCreationUtilities.CreateExtrusionGeometry([Loop(outline, z0, curvedEdge, through)], XYZ.BasisZ, z1 - z0);
+
+    private static DirectShape Shape(Document doc, IList<GeometryObject> geometry, string? mark,
+                                     BuiltInCategory category = BuiltInCategory.OST_GenericModel)
+    {
+        var ds = DirectShape.CreateElement(doc, new ElementId(category));
         if (mark is not null)
         {
             ds.ApplicationId = RevitRead.MarkApplication;

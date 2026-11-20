@@ -1,0 +1,113 @@
+{
+  "host": "revit",
+  "scene": "19_house_only_inside_a_block",
+  "recorded": {
+    "by": "Gordium add-in, Record scenes (Windows trial)",
+    "date": "2026-11-19",
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
+  },
+  "ids": {
+    "a5661904-ca26-464f-8d52-48ec63943758-00000adf": "lot",
+    "a5661904-ca26-464f-8d52-48ec63943758-00000ae9": "house_link"
+  },
+  "steps": {
+    "as drawn": {
+      "schema": "gordium.site/1",
+      "units": "ft",
+      "host": {
+        "name": "revit",
+        "version": "2027",
+        "document": "Project3",
+        "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
+      },
+      "lot": {
+        "id": "a5661904-ca26-464f-8d52-48ec63943758-00000adf",
+        "edges": [
+          {
+            "points": [
+              [
+                60,
+                0
+              ],
+              [
+                60,
+                120
+              ]
+            ],
+            "curved": false
+          },
+          {
+            "points": [
+              [
+                60,
+                120
+              ],
+              [
+                0,
+                120
+              ]
+            ],
+            "curved": false
+          },
+          {
+            "points": [
+              [
+                0,
+                120
+              ],
+              [
+                0,
+                0
+              ]
+            ],
+            "curved": false
+          },
+          {
+            "points": [
+              [
+                0,
+                0
+              ],
+              [
+                60,
+                0
+              ]
+            ],
+            "curved": false
+          }
+        ]
+      },
+      "buildings": [],
+      "unsent": [
+        {
+          "id": "a linked model",
+          "layer": "RVT Links",
+          "kind": "a linked model",
+          "problem": {
+            "code": "not_a_solid",
+            "args": {
+              "kind": "a linked model",
+              "layer": "RVT Links"
+            }
+          }
+        }
+      ],
+      "left_out": [
+        {
+          "id": "a5661904-ca26-464f-8d52-48ec63943758-00000ae9",
+          "layer": "RVT Links",
+          "could_be_building": true,
+          "touching": false,
+          "ground_like": false,
+          "context": false
+        }
+      ],
+      "grade": {
+        "source": "none",
+        "points": []
+      },
+      "inventory_complete": true,
+      "problems": []
+    }
+  }
+}

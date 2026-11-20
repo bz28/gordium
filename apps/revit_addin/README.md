@@ -214,11 +214,11 @@ powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps
 powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps1 -Revit 2026
 ```
 
-It builds the add-in, copies the build to `%LOCALAPPDATA%\Gordium\addin\<version>\<time>\` (Revit locks the
-files it loads, so the clone stays free to rebuild), writes the clone's path beside it (`gordium_clone.txt`: the
-worker reads its rulebooks from the clone), and writes Revit's manifest to
-`%APPDATA%\Autodesk\Revit\Addins\<version>\Gordium.addin`. On the trial laptop, Revit 2027.4 picked the add-in up
-without a restart and never asked "Always Load" (2026-11-19).
+It builds the add-in, copies the build to one fixed folder, `%LOCALAPPDATA%\Gordium\addin\<version>\current\` (it refuses while Revit is running: Revit locks the files it loads), writes the clone's path beside it
+(`gordium_clone.txt`: the worker reads its rulebooks from the clone), and writes Revit's manifest to
+`%APPDATA%\Autodesk\Revit\Addins\<version>\Gordium.addin`. Revit asks once whether to load Gordium (answer "Always Load") and
+remembers the answer for that file location; the folder never changes, so it isn't asked again (the script first installed
+each build into a new folder, and Revit asked after every install, 2026-11-19).
 
 **How we know it works:** the trial ran it in Revit 2027.4 on 2026-11-19 (runbook section 5, Q2): it loaded on
 .NET 10.0.15, the box house's 32 rows matched the hand-worked verdicts four times out of four, and closing Revit
