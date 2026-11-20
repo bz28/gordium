@@ -75,7 +75,20 @@ STEPS = {
         "4_loft": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "guard": GUARDS},
         "5_basement_window_well": {**ROOMS_AND_WINDOWS, "egress_door": {"door_side_hinged"}},
         "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS}},
+    # Step 6 (the architect's "this house has none of" ticks): each list the hand-worked house gives empty (houses 1
+    # and 6 `stairs: []`; 1, 2, 5 and 6 `guards: []`; 4 `doors: []`) is ticked in the drawing (NONE_LISTS, `has_none`)
+    # and must come back as that empty list: in scope with no measures. No hand-worked house has a `has_none` claim, so
+    # none is ticked and none may come back (recording_problems compares them). House 5's stair isn't drawn (as in step
+    # 5), but no guard is: "no guards" is the house's own. House 3 has no empty list: it stays step 4.
+    6: {"1_ranch_compliant": {**ROOMS_AND_WINDOWS, "egress_door": DOORS, "stair": set(), "guard": set()},
+        "2_two_story_small_window": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "egress_door": DOORS,
+                                     "guard": set()},
+        "4_loft": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "guard": GUARDS, "egress_door": set()},
+        "5_basement_window_well": {**ROOMS_AND_WINDOWS, "egress_door": {"door_side_hinged"}, "guard": set()},
+        "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS, "stair": set(), "guard": set()}},
 }
+# the lists the format has itself, each the part kind it gives: an empty one is the house having none (step 6's ticks)
+NONE_LISTS = {"stairs": "stair", "doors": "egress_door", "guards": "guard"}
 STEP = max(STEPS)
 # each house at the latest step that draws it: its recording must be of that step
 HOUSE_STEP = {house: step for step in sorted(STEPS) for house in STEPS[step]}
@@ -195,6 +208,14 @@ def recording_problems(rec: dict) -> list[str]:
                         problems.append(f"{where}: {hid} {m} = {values[m]!r}, expected {w['values'][m]!r}")
                 elif m in values:
                     problems.append(f"{where}: {hid} {m} = {values[m]!r}, expected not measured")
+    # what the house has none of (step 6): the claims sent and taken must be exactly the hand-worked house's own
+    house_none = sorted(measure(_house(name))["has_none"])
+    interior = rec.get("interior") if isinstance(rec.get("interior"), dict) else {}
+    sent = interior.get("has_none") or []
+    sent_kinds = sorted(str(e.get("kind")) if isinstance(e, dict) else repr(e) for e in sent) \
+        if isinstance(sent, list) else [repr(sent)]
+    if sent_kinds != house_none or sorted(got["has_none"]) != house_none:
+        problems.append(f"{where}: has none of {sent_kinds} (taken: {sorted(got['has_none'])}), expected {house_none}")
     house_not_checked = sorted(x["id"] for x in measure(_house(name))["not_checked"])
     not_checked = sorted(back.get(x["id"], str(x["id"])) for x in got["not_checked"])
     if not_checked != house_not_checked:
@@ -396,10 +417,14 @@ def drawing(name: str) -> dict:
         not_drawn.add("stairs")
     if stairs and not handrails and any(st.get("handrails") for st in house["stairs"]):
         not_drawn.add("handrails")
+    # step 6: the "this house has none of" ticks to set: each list in scope the house gives empty, then each claim of
+    # its own has_none (the reader sends each back only when nothing of the kind is drawn)
+    has_none = [key for key, kind in NONE_LISTS.items() if house.get(key) == [] and kind in scope(name)] \
+        + [c["kind"] for c in house.get("has_none") or []]
     return {"house": name, "step": HOUSE_STEP[name], "units": "ft", "exterior_wall": EXTERIOR_WALL,
             "ceiling_thickness": CEILING_THICKNESS, "levels": out_levels, "rooms": rooms, "windows": windows,
             "stairs": stairs, "doors": doors, "guards": guards, "rail": RAIL, "handrail_top": HANDRAIL_TOP,
-            "notes": notes, "not_drawn": sorted(not_drawn)}
+            "notes": notes, "not_drawn": sorted(not_drawn), "has_none": has_none}
 
 
 ROOM_GAP = 10.0                 # ft: a room drawn clear of the room it is within the height of (a loft)
