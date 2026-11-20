@@ -1,0 +1,25 @@
+# Hand-derived before the code ran on this house (inches). Working shown per value.
+#
+# The exit door d1, drawn: hinged left, pin at u 0, n 1.75 (the leaf's hinge-side corner on the face it swings
+# toward). Open 90 degrees about the pin, the leaf's face toward the latch side stands at u = 0 + (1.75 - 0) = 1.75
+# (the hinge-side stop, at 0, stands further back, so the face rules). Clear width drawn = 35.75 - 1.75 = 34.0.
+# Clear height drawn = head stop bottom 80 - threshold top 0.75 = 79.25.
+#
+# The maker's stated clear opening: 33.5 wide, 79.5 high.
+# Width: min(drawn 34.0, stated 33.5) = 33.5: the maker's is smaller, so it counts (`from`: stated).
+# Height: min(drawn 79.25, stated 79.5) = 79.25: the drawn one is smaller, so it counts (`from`: drawn).
+# With the drawn width alone the door would read 1/2 in wider than its maker says: never more favourable.
+parts:
+  sleeping_room: {}                     # the living room isn't a sleeping room
+  emergency_escape_opening: {}
+  stair: {}
+  guard: {}
+  egress_door:
+    d1:
+      measures:
+        door_clear_width: 33.5          # min(35.75 - 1.75 = 34.0 drawn, 33.5 stated)
+        door_clear_height: 79.25        # min(80 - 0.75 = 79.25 drawn, 79.5 stated)
+        door_side_hinged: true          # operation: side_hinged
+      from:
+        door_clear_width: stated
+        door_clear_height: drawn
