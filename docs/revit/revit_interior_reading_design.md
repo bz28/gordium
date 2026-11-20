@@ -341,7 +341,13 @@ get no tick (`rooms: []` is a house not drawn; a missed escape opening or door c
   lofts the rooms' (every room read, so the checker can hold the claim against them); for every kind a closed workset,
   an unloaded or nested link and a coordination model.
 
-The marking list shows a line per tick: sent; not sent and why; or not set, with what the reader found as a proposal
+**A later check (review round 1, to do):** a "no basements" tick on a house that draws a level of rooms below the
+ground isn't caught by the reader: it sends no `ground_outside` yet (no Toposolid read), so the checker's own
+below-ground refusal compares nothing. Once the ground outside is read, a room's floor below it should hold the tick
+back as a conflict.
+
+The marking list (built by Mark for egress from the model with its inside read, `RevitInterior.Model`, so its ticks
+are the reader's own) shows a line per tick: sent; not sent and why; or not set, with what the reader found as a proposal
 ("Gordium found no Ramp elements in the model: tick Yes if the house has none"), never sent without the tick. Every
 tick's reading is kept in the evidence (`evidence.has_none`).
 

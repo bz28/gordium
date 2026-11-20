@@ -180,20 +180,27 @@ public static class MarkingList
             summary.Add((stairBlockers.Count == 1 ? "1 element, workset or link" : $"{stairBlockers.Count} elements, worksets or links") +
                         " listed above could hide a stair, so no stair (and no guard) is read for egress until each is resolved.");
         // step 6: what the house has none of, read exactly as the reader reads it (the guards' tick needs the stairs read)
-        var ticks = model.Interior is null ? HasNone.ReadAll(model) : InteriorReader.Read(model).Ticks;
+        // (the add-in builds the list from the model with its inside read, RevitInterior.Model; without it, a tick can't
+        // be checked against the model, and the list says so instead of calling it held back)
+        var read = model.Interior is null ? null : InteriorReader.Read(model);
+        var ticks = read?.Ticks ?? HasNone.ReadAll(model);
         return new(problems, blockers, summary, rows)
         {
             StairBlockers = stairBlockers,
             HasNoneConflicts = ticks.Where(t => t.Ticked is true && t.Conflicts.Count > 0)
                 .SelectMany(t => t.WhyNot.Take(t.Conflicts.Count)).ToList(),
-            HasNoneLines = ticks.Select(TickLine).ToList(),
+            HasNoneLines = ticks.Select(t => TickLine(t, read)).ToList(),
         };
     }
 
-    /// <summary>One tick's line in the list.</summary>
-    internal static string TickLine(NoneTick t)
+    /// <summary>One tick's line in the list; <paramref name="read"/> is what the reader sends (null: the model's inside
+    /// wasn't read).</summary>
+    internal static string TickLine(NoneTick t, InteriorReadResult? read)
     {
         var name = t.Kind.Mark.Name;
+        if (read is null)
+            return $"{name}: {(t.Ticked is true ? "Yes" : t.Ticked is false ? "No" : "not set")} on Project Information " +
+                   "(not yet checked against the model: run Read inside to see whether it is read as none).";
         if (t.Sent)
             return $"{name}: Yes (on Project Information): read as a house with none.";
         if (t.Ticked is true && t.Conflicts.Count > 0)
@@ -205,9 +212,18 @@ public static class MarkingList
             ? $" Gordium found {t.Found}: tick Yes if the house has none (Gordium never ticks it for you)." : "";
         return t.Ticked is false
             ? $"{name}: No (on Project Information): not stated as none, so " +
-              (t.Kind.IsList ? $"the {t.Kind.Words} are read as drawn." : $"the rules for {t.Kind.Words} need review.")
+              (!t.Kind.IsList ? $"the rules for {t.Kind.Words} need review."
+               : read.Interior[t.Kind.Kind] is not null ? $"the {t.Kind.Words} are read as drawn."
+               : $"no {t.Kind.Words} are read for egress (" + string.Join("; ", NotRead(read, t.Kind).Take(3)) + ").")
             : $"{name}: not set on Project Information: not stated, never read as none." + proposal;
     }
+
+    private static IReadOnlyList<string> NotRead(InteriorReadResult read, NoneKind kind) => kind.Kind switch
+    {
+        "stairs" => read.StairsNotRead,
+        "doors" => read.DoorsNotRead,
+        _ => read.GuardsNotRead,
+    };
 
     private static string Count(int n) => n == 1 ? "1 thing" : $"{n} things";
 

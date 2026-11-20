@@ -132,7 +132,8 @@ public sealed class HasNoneTests
         Assert.NotEmpty(tick.Blockers);
         Assert.False(tick.Sent);
         Assert.All(read.StairsNotRead, w => Assert.StartsWith("Gordium: This house has no stairs is Yes, but isn't sent", w));
-        Assert.Contains(MarkingList.Build(model).HasNoneLines, l => l.StartsWith("Gordium: This house has no stairs: Yes, but not read as none while", StringComparison.Ordinal));
+        if (what != "inside not read")                                   // then the list says it isn't checked yet
+            Assert.Contains(MarkingList.Build(model).HasNoneLines, l => l.StartsWith("Gordium: This house has no stairs: Yes, but not read as none while", StringComparison.Ordinal));
     }
 
     [Fact]
@@ -240,5 +241,42 @@ public sealed class HasNoneTests
         Assert.Contains("Gordium: This house has no", MarkingList.Text(list));
         // the proposal is shown, never sent
         Assert.Null(InteriorReader.Read(house.Model()).Interior["has_none"]);
+    }
+
+    [Fact]
+    public void A_list_ticked_no_says_read_as_drawn_only_when_that_kind_is_read()
+    {
+        // review round 1: house 1, "no stairs" No and "these are all the stairs" not set: no stair is read at all
+        var house = FakeHouse.Draw("1_ranch_compliant");
+        house.ProjectMarks[Marks.NoStairs.Guid] = No;
+        house.ProjectMarks.Remove(Marks.AllStairs.Guid);
+        var line = MarkingList.Build(house.Model()).HasNoneLines[0];
+        Assert.DoesNotContain("read as drawn", line);
+        Assert.StartsWith("Gordium: This house has no stairs: No (on Project Information): not stated as none, so no stairs are " +
+                          "read for egress (Gordium: These are all the stairs is not set", line);
+        // house 2 with its stair read: "read as drawn" is true
+        house = FakeHouse.Draw("2_two_story_small_window");
+        house.ProjectMarks[Marks.NoStairs.Guid] = No;
+        Assert.EndsWith("the stairs are read as drawn.", MarkingList.Build(house.Model()).HasNoneLines[0]);
+    }
+
+    [Fact]
+    public void The_add_in_builds_the_marking_list_from_the_model_with_its_inside_read()
+    {
+        // review round 1: built from the marks alone, every Yes tick read "the model's inside wasn't read", no conflict
+        // was listed and no proposal shown. The command builds it from RevitInterior.Model (the reader's own model)
+        var command = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "RevitMarks.cs"));
+        Assert.Contains("MarkingList.Build(RevitInterior.Model(doc), plan)", command);
+        Assert.DoesNotContain("MarkingList.Build(RevitMarks.Model(doc)", command);
+        // and through that model a conflict is listed first (the Reading-layer seam the command calls)
+        var house = FakeHouse.Draw("2_two_story_small_window");
+        house.ProjectMarks[Marks.NoStairs.Guid] = Yes;
+        Assert.StartsWith("Conflict: ", MarkingList.Text(MarkingList.Build(house.Model())));
+        // without the inside read (any other caller), a tick isn't called held back: it says it isn't checked yet
+        var bare = MarkingList.Build(house.Model() with { Interior = null });
+        Assert.Empty(bare.HasNoneConflicts);
+        Assert.Equal("Gordium: This house has no stairs: Yes on Project Information (not yet checked against the model: run Read " +
+                     "inside to see whether it is read as none).", bare.HasNoneLines[0]);
+        Assert.All(bare.HasNoneLines, l => Assert.DoesNotContain("wasn't read", l));
     }
 }

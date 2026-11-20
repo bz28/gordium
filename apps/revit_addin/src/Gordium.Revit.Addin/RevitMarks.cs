@@ -190,8 +190,12 @@ public sealed class MarkForEgressCommand : IExternalCommand
             var plan = MarkSetup.Plan(RevitMarks.Bindings(doc));
             var added = RevitMarks.AddMarks(doc, commandData.Application.Application, plan);
             log["added"] = added.Select(s => $"{s.Action}: {s.Mark.Name} ({string.Join(", ", s.Categories)})").ToList();
-            var list = MarkingList.Build(RevitMarks.Model(doc), plan);
+            // the model with its inside read (as Read inside and a check read it), so the list's has-none ticks, their
+            // conflicts and proposals are the reader's own
+            var list = MarkingList.Build(RevitInterior.Model(doc), plan);
             log["headline"] = list.Headline;
+            log["has_none_conflicts"] = list.HasNoneConflicts;
+            log["has_none"] = list.HasNoneLines;
             log["setup_problems"] = list.SetupProblems;
             log["room_blockers"] = list.RoomBlockers;
             log["summary"] = list.Summary;
