@@ -791,12 +791,18 @@ def layout_problems(name: str) -> list[str]:
                 problems.append(f"room {rid}: its level gives {key} {mine}, house.yaml {r[key]}")
     # each level's floor slab fits the gap under it: the level below's ceiling up to this level's floor (the lowest
     # level's slab is the layout's own `slab`)
+    def thickness(x) -> bool:
+        return isinstance(x, (int, float)) and not isinstance(x, bool) and x > 0
+
     by_height = sorted(lay["levels"], key=lambda lv: lv["elevation"])
-    if not isinstance(by_height[0].get("slab"), (int, float)) or by_height[0]["slab"] <= 0:
+    if not thickness(by_height[0].get("slab")):
         problems.append(f"{by_height[0]['id']}: the lowest level gives no slab thickness")
     for below, lv in zip(by_height, by_height[1:]):
         gap = lv["elevation"] - (below["elevation"] + below["ceiling"])
-        if gap <= 0 or ("slab" in lv and lv["slab"] > gap):
+        # every level's own slab is a positive number, never 0, below 0 or words (review round 2)
+        if "slab" in lv and not thickness(lv["slab"]):
+            problems.append(f"{lv['id']}: its slab {lv['slab']!r} isn't a thickness in inches")
+        elif gap <= 0 or ("slab" in lv and lv["slab"] > gap):
             problems.append(f"{lv['id']}: its slab doesn't fit the {gap:g} between {below['id']}'s ceiling and its floor")
     sizes = lay["sizes"]
     for o in house.get("openings") or []:

@@ -260,6 +260,18 @@ def test_a_slab_thicker_than_its_gap_is_refused(layout):
     assert "basement: the lowest level gives no slab thickness" in r.layout_problems(NAME)
 
 
+def test_a_slab_that_isnt_a_thickness_is_refused_on_every_level(layout):
+    # review round 2: only the lowest level's slab was checked for a positive number; 0 or -3 got through, words crashed
+    for bad in (0, -3, "10.5", True):
+        level(layout, "second_floor")["slab"] = bad
+        assert any(p.startswith("second_floor: its slab") and "isn't a thickness" in p
+                   for p in r.layout_problems(NAME)), bad
+    del level(layout, "second_floor")["slab"]
+    # levels that meet or overlap leave no room for a slab
+    level(layout, "main_floor")["elevation"] = level(layout, "second_floor")["elevation"] - level(layout, "main_floor")["ceiling"]
+    assert any(p.startswith("second_floor: its slab doesn't fit the 0") for p in r.layout_problems(NAME))
+
+
 def test_each_window_pair_is_its_sizes_and_the_pair_gap_apart():
     pairs = [("m1", "m2"), ("b2a", "b2b"), ("b3a", "b3b"), ("b4a", "b4b"), ("x1", "x2")]
     windows = {w["id"]: w for lv in LAYOUT["levels"] for w in lv.get("windows") or []}
