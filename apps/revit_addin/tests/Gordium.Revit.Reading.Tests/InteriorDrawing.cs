@@ -109,6 +109,9 @@ internal sealed class FakeHouse
             var faces = new List<SurfaceRecord>();
             for (var k = 1; k < n; k++)
                 faces.AddRange(StairBox(st, (k - 1) * t, k * t, -w / 2, w / 2, b + k * r - 1.0 / 12, b + k * r));
+            // the last riser, carried up to the run's top as Revit draws it (trial step 4 run 1: a top face more than
+            // the treads), its face on the last riser's line
+            faces.AddRange(StairBox(st, (n - 1) * t, (n - 1) * t + 1.0 / 12, -w / 2, w / 2, b + (n - 1) * r, b + n * r));
             var near = new List<NearbyElement> { new("run-" + id, "OST_StairsRuns", "Run", Faces: faces) };
             var slab = D(st["slab"]);
             foreach (var (key, what) in new[] { ("foot", "Floor at the foot"), ("head", "Floor at the head") })

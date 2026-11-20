@@ -225,14 +225,14 @@ public static class StairReader
                 OutAll($"a {(run.Style == "Straight" ? "bent" : run.Style.ToLowerInvariant())} run (its treads turn) isn't measured: only straight flights are", all);
                 return _flight;
             }
-            if (Treads() is { } bad)
+            var at = run.Path[0];
+            var baseZ = _t.Apply(new Xyz(at.X, at.Y, stair.BaseElevation.Value + run.BaseElevation.Value)).Z;
+            var topZ = _t.Apply(new Xyz(at.X, at.Y, stair.BaseElevation.Value + run.TopElevation.Value)).Z;
+            if (Treads(topZ) is { } bad)
             {
                 OutAll(bad, all);
                 return _flight;
             }
-            var at = run.Path[0];
-            var baseZ = _t.Apply(new Xyz(at.X, at.Y, stair.BaseElevation.Value + run.BaseElevation.Value)).Z;
-            var topZ = _t.Apply(new Xyz(at.X, at.Y, stair.BaseElevation.Value + run.TopElevation.Value)).Z;
             _headZ = topZ;                                   // until the floor at the head is read: the line's top
             _ev["run_base"] = baseZ;
             _ev["run_top"] = topZ;
@@ -339,7 +339,7 @@ public static class StairReader
         /// <summary>Each tread's top, from the run's own upward flat faces (a face sitting under another of the run's
         /// own, a riser's top under its tread, is inside the run and set aside), grouped by height: its front edge is
         /// its nosing. Null when they read as straight rectangular treads, one per tread the run has; else why.</summary>
-        private string? Treads()
+        private string? Treads(double topZ)
         {
             var faces = run.Faces!;
             if (faces.Any(f => !f.Planar))
@@ -375,8 +375,28 @@ public static class StairReader
                     groups.Add([top]);
             }
             _ev["tread_faces"] = tops.Count;
+            _ev["tread_groups"] = new JsonArray(groups.Select(g =>
+            {
+                var p = g.SelectMany(x => x.Loop).ToList();
+                return (JsonNode)new JsonObject
+                {
+                    ["z"] = g[0].Z, ["s"] = new JsonArray(p.Min(q => q.X), p.Max(q => q.X)), ["a"] = new JsonArray(p.Min(q => q.Y), p.Max(q => q.Y)),
+                    ["faces"] = g.Count,
+                };
+            }).ToArray());
             if (groups.Count == 0)
                 return "no tread top was found in the run's geometry";
+            // a run that ends with a riser carries that riser up to its top: the riser's own top face, at the run's
+            // top (the floor at the head's height, never a tread's), is the head's edge, not a tread (Revit 2027.4,
+            // trial step 4 run 1: 16 tops for 15 treads, house 3 13 for 12). Its front edge is the last riser's line:
+            // the top nosing's place along the run. Only the top group, only at the run's top, only one too many.
+            double? headEdge = null;
+            if (run.EndsWithRiser && run.TreadsNumber is { } treadCount && groups.Count == treadCount + 1 && Math.Abs(groups[^1][0].Z - topZ) <= Sixteenth)
+            {
+                headEdge = groups[^1].SelectMany(x => x.Loop).Min(p => p.X);
+                _ev["head_riser_top"] = new JsonObject { ["z"] = groups[^1][0].Z, ["front"] = headEdge };
+                groups.RemoveAt(groups.Count - 1);
+            }
             if (run.TreadsNumber is not { } count || groups.Count != count)
                 return $"its geometry has {groups.Count} tread tops, but the run says it has {run.TreadsNumber?.ToString(CultureInfo.InvariantCulture) ?? "no number of"} treads";
             foreach (var g in groups)
@@ -390,9 +410,13 @@ public static class StairReader
                 _treads.Add((front, right, left, g.Average(x => x.Z)));
                 _back = pts.Max(p => p.X);
             }
+            if (headEdge is { } riserLine)
+                _back = riserLine;                                  // the last riser's line, from the riser's own top
             for (var i = 1; i < _treads.Count; i++)
                 if (_treads[i].S <= _treads[i - 1].S)
                     return "its treads don't move up the run as they rise";
+            if (_back <= _treads[^1].S)
+                return "its head isn't past its top tread";
             if (_treads.Any(x => x.Right >= x.Left))
                 return "a tread has no width across the run";
             return null;

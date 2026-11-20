@@ -170,10 +170,29 @@ public sealed class StairTests
         Assert.Contains("the run says 17", Note(Read(house), "s1", "nosings"));
         house = FakeHouse.Draw(Two);
         house.SetRun("s1", r => r with { TreadsNumber = 14 });
-        Assert.Contains("15 tread tops, but the run says it has 14", Note(Read(house), "s1", "nosings"));
+        Assert.Contains("16 tread tops, but the run says it has 14", Note(Read(house), "s1", "nosings"));
         house = FakeHouse.Draw(Two);
         house.SetRun("s1", r => r with { EndsWithRiser = false });
+        Assert.Contains("16 tread tops, but the run says it has 15", Note(Read(house), "s1", "nosings"));
+        house = FakeHouse.Draw(Two);
+        house.SetRun("s1", r => r with { BeginsWithRiser = false });
         Assert.Contains("begin and end with a riser", Note(Read(house), "s1", "nosings"));
+    }
+
+    [Fact]
+    public void The_last_risers_top_at_the_runs_top_is_the_heads_edge_never_a_tread()
+    {
+        // Revit 2027.4, trial step 4 run 1: a run ending with a riser has one top face more than its treads, at its top
+        var read = Read(FakeHouse.Draw(Two));
+        var ev = read.Evidence["stairs"]!["run-s1"]!;
+        Assert.Equal(16, ev["tread_groups"]!.AsArray().Count);
+        Assert.Equal(10.0, ev["head_riser_top"]!["z"]!.GetValue<double>(), 9);
+        Assert.Equal(12.5, ev["back"]!.GetValue<double>(), 9);                              // the last riser's line
+        Assert.Equal(16, Flight(read, "s1")!["nosings"]!.AsArray().Count);
+        // a top face more than the treads anywhere but at the run's top is still one too many
+        var house = FakeHouse.Draw(Two);
+        house.SetRun("s1", r => r with { TopElevation = r.TopElevation + 1.0 / 12 });
+        Assert.Contains("16 tread tops, but the run says it has 15", Note(Read(house), "s1", "nosings"));
     }
 
     [Fact]

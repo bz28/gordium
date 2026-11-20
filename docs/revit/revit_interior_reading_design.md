@@ -179,8 +179,13 @@ table above needed settling:
 - *Treads*: the run's own upward flat faces, grouped by height (a face lying wholly under another of the run's own, a
   riser board's top under its tread, is inside the run and set aside); one group per tread the run says it has, each a
   rectangle square to the run's path (`StairsRun.GetStairsPath`), its front edge the nosing. A curved face anywhere
-  in the run (a rounded nosing) sends no nosings. The **top nosing** is the run's top tread's back edge (the last
-  riser's line) at the height of the floor or landing found there.
+  in the run (a rounded nosing) sends no nosings. A run ending with a riser carries that riser up to its top, so its
+  geometry has one top face more than its treads (Revit 2027.4, trial step 4 run 1: 16 for 15, house 3 13 for 12):
+  only the top group, only at the run's top and only one too many is taken as that riser's top, the head's edge, never
+  a tread. The **top nosing** is its front edge (the last riser's line), else the top tread's back edge, at the height
+  of the floor or landing found there. Every top group's height and extent is kept in the evidence.
+- *For Ben (noted, no mark added now)*: under section 2's rule any Generic Model anywhere in a project stops stairs
+  being read, with no way yet to say "this one isn't a stair".
 - *Foot and head*: the floor or landing top is looked for in a 1 in strip in front of the first nosing and past the
   last riser, across the stair's width: one flat top within a foot covering the whole strip, else not found.
 - *The cross-check*: every drawn riser (from the floor at the foot to the floor at the head) against
