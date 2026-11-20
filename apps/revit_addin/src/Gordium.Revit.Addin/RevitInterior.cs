@@ -39,6 +39,7 @@ internal static class RevitInterior
             .Select(fi => OpeningOf(doc, fi, phase)).ToList();
         var diagnostics = new List<string>();
         var (stairs, candidates) = StairsOf(doc, diagnostics);
+        var railings = RailingsOf(doc, diagnostics);
         int coordination;
         try
         {
@@ -57,6 +58,7 @@ internal static class RevitInterior
             Links = Links(doc),
             Stairs = stairs,
             StairCandidates = candidates,
+            Railings = railings,
             CoordinationModels = coordination,
             Diagnostics = diagnostics,
         };
@@ -205,6 +207,140 @@ internal static class RevitInterior
 
     private static string? Id(ElementId? id) =>
         id is null || id == ElementId.InvalidElementId ? null : id.Value.ToString(CultureInfo.InvariantCulture);
+
+    // ---- railings (step 5) -------------------------------------------------------------------------------------
+
+    /// <summary>Every <c>Railing</c> (not view-specific), with its path, base, host, type marks, its parts (itself, its
+    /// top rail, its handrails) each as its solids' faces, and what is around it. Null when they couldn't be read.</summary>
+    private static List<RailingRecord>? RailingsOf(Document doc, List<string> diagnostics)
+    {
+        try
+        {
+            var list = Models(doc, BuiltInCategory.OST_StairsRailing).OfType<Railing>().Select(r => RailingOf(doc, r)).ToList();
+            diagnostics.Add($"railings: {list.Count}");
+            return list;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"the railings couldn't be read ({x.GetType().Name}: {x.Message})");
+            return null;
+        }
+    }
+
+    private static RailingRecord RailingOf(Document doc, Railing r)
+    {
+        var words = new List<string>();
+        var type = doc.GetElement(r.GetTypeId());
+        var path = new List<PathCurve>();
+        try
+        {
+            foreach (var c in r.GetPath())
+                path.Add(new PathCurve(P(c.GetEndPoint(0)), P(c.GetEndPoint(1)), c is Line));
+        }
+        catch (Autodesk.Revit.Exceptions.InvalidOperationException x)
+        {
+            words.Add($"no path: {x.Message}");
+        }
+        var levelId = r.get_Parameter(BuiltInParameter.STAIRS_RAILING_BASE_LEVEL_PARAM)?.AsElementId();
+        var level = (levelId is null ? null : doc.GetElement(levelId) as Level) ?? doc.GetElement(r.LevelId) as Level;
+        var offsetParam = r.get_Parameter(BuiltInParameter.STAIRS_RAILING_HEIGHT_OFFSET);
+        double? offset = offsetParam is { HasValue: true, StorageType: StorageType.Double } ? offsetParam.AsDouble() : null;
+        var elements = new List<(Element E, RailingPartKind Kind)> { (r, RailingPartKind.Railing) };
+        if (r.TopRail != ElementId.InvalidElementId && doc.GetElement(r.TopRail) is { } top)
+            elements.Add((top, RailingPartKind.TopRail));
+        foreach (var id in r.GetHandRails())
+            if (doc.GetElement(id) is { } h)
+                elements.Add((h, RailingPartKind.Handrail));
+        var parts = new List<RailingPart>();
+        var boxes = new List<BoundingBoxXYZ>();
+        foreach (var (e, kind) in elements)
+        {
+            var (solids, failed) = Solids(e, Fine);
+            parts.Add(new RailingPart(e.UniqueId, kind, failed ? null : solids, failed || solids is null));
+            var box = e.get_BoundingBox(null);
+            if (box is not null)
+                boxes.Add(box);
+            var pts = (solids ?? []).SelectMany(s => s).SelectMany(f => f.Points).ToList();
+            words.Add($"{kind} {e.Id.Value} {e.Category?.BuiltInCategory}: {solids?.Count ?? -1} solids " +
+                      $"({string.Join(",", (solids ?? []).Select(s => s.Count))} faces, {(solids ?? []).Sum(s => s.Count(f => !f.Planar))} curved), failed {failed}" +
+                      (pts.Count == 0 ? "" : $"; x {pts.Min(p => p.X):0.####}..{pts.Max(p => p.X):0.####}, y {pts.Min(p => p.Y):0.####}..{pts.Max(p => p.Y):0.####}, " +
+                                             $"z {pts.Min(p => p.Z):0.####}..{pts.Max(p => p.Z):0.####}"));
+            foreach (var s in (solids ?? []).Take(40))
+            {
+                var sp = s.SelectMany(f => f.Points).ToList();
+                if (sp.Count > 0)
+                    words.Add($"  solid: x {sp.Min(p => p.X):0.#####}..{sp.Max(p => p.X):0.#####}, y {sp.Min(p => p.Y):0.#####}..{sp.Max(p => p.Y):0.#####}, " +
+                              $"z {sp.Min(p => p.Z):0.#####}..{sp.Max(p => p.Z):0.#####}, {s.Count} faces");
+            }
+        }
+        List<NearbyElement>? near = null;
+        if (boxes.Count > 0)
+        {
+            near = Near(doc, r.Id, new Outline(new XYZ(boxes.Min(b => b.Min.X) - 2, boxes.Min(b => b.Min.Y) - 2, boxes.Min(b => b.Min.Z) - 2),
+                                                new XYZ(boxes.Max(b => b.Max.X) + 2, boxes.Max(b => b.Max.Y) + 2, boxes.Max(b => b.Max.Z) + 2)), null)
+                ?.Where(e => !elements.Any(x => x.E.UniqueId == e.UniqueId)).ToList();
+        }
+        var host = r.HasHost ? doc.GetElement(r.HostId) : null;
+        var mark = r.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString();
+        var name = string.Join(" ", new[] { type?.Name, mark }.Where(x => !string.IsNullOrWhiteSpace(x)));
+        words.Insert(0, $"railing {r.Id.Value} \"{name}\": host {host?.Category?.BuiltInCategory} {host?.Id.Value}, base level {level?.Name} " +
+                        $"{level?.ProjectElevation:0.######}, base offset {offset:0.######}; path " +
+                        string.Join(" ", path.Select(c => $"({c.Start.X:0.####},{c.Start.Y:0.####},{c.Start.Z:0.####})-({c.End.X:0.####},{c.End.Y:0.####},{c.End.Z:0.####}){(c.IsLine ? "" : " curved")}")) +
+                        $"; around it {near?.Count.ToString(CultureInfo.InvariantCulture) ?? "not looked for"}: " +
+                        string.Join(", ", (near ?? []).Select(e => $"{e.BuiltInCategory.Replace("OST_", "")} {e.Name}")));
+        return new RailingRecord
+        {
+            UniqueId = r.UniqueId,
+            Name = name.Length > 0 ? name : null,
+            Host = host?.UniqueId,
+            PhaseDemolished = Id(r.DemolishedPhaseId),
+            DesignOption = Id(r.DesignOption?.Id),
+            Path = path,
+            BaseLevelElevation = level?.ProjectElevation,
+            BaseOffset = offset,
+            TypeMarks = type is null ? new Dictionary<Guid, MarkValue>() : RevitMarks.Values(type),
+            Parts = parts,
+            Near = near,
+            Diagnostics = words,
+        };
+    }
+
+    /// <summary>Each solid of the element's geometry (a family's instance geometry included) as its faces, solids with
+    /// no face (Revit's empty ones) left out; and whether anything couldn't be read as faces (a mesh, or a throw).</summary>
+    private static (List<IReadOnlyList<SurfaceRecord>>? Solids, bool Failed) Solids(Element e, Options options)
+    {
+        var solids = new List<IReadOnlyList<SurfaceRecord>>();
+        var failed = false;
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                switch (o)
+                {
+                    case Solid s when s.Faces.Size > 0:
+                        solids.Add(s.Faces.Cast<Face>().Select(Surface).ToList());
+                        break;
+                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
+                        Walk(inner);
+                        break;
+                    case Mesh:
+                        failed = true;
+                        break;
+                }
+            }
+        }
+        try
+        {
+            if (e.get_Geometry(options) is { } g)
+                Walk(g);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return (null, true);
+        }
+        return (solids, failed);
+    }
 
     // ---- enclosed areas and links -------------------------------------------------------------------------------
 
@@ -482,8 +618,8 @@ internal static class RevitInterior
                     return v.AsDouble();
             return null;
         }
-        return (Get(BuiltInParameter.WINDOW_WIDTH, BuiltInParameter.FAMILY_WIDTH_PARAM),
-                Get(BuiltInParameter.WINDOW_HEIGHT, BuiltInParameter.FAMILY_HEIGHT_PARAM));
+        return (Get(BuiltInParameter.WINDOW_WIDTH, BuiltInParameter.DOOR_WIDTH, BuiltInParameter.FAMILY_WIDTH_PARAM),
+                Get(BuiltInParameter.WINDOW_HEIGHT, BuiltInParameter.DOOR_HEIGHT, BuiltInParameter.FAMILY_HEIGHT_PARAM));
     }
 
     /// <summary>Every length parameter on the type, by name (the first of a name only).</summary>
