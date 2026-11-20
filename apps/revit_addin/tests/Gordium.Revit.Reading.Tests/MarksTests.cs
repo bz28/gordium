@@ -32,6 +32,13 @@ public sealed class MarksTests
             ("Gordium: Top rail is handrail", "8f09dc9e-0975-42ba-8a4b-43e43b393578", MarkValueKind.YesNo, MarkBinding.Type, ["OST_StairsRailing"]),
             ("Gordium: These are all the stairs", "90205a68-1eaf-4ca2-a350-0cb24012986c", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: These are all the guards and handrails", "80055f84-3feb-492a-b581-331ff692a2a9", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // Check my project's lot facts (reading design note, section 9)
+            ("Gordium: Zone", "7c0c478b-5959-44fd-bf53-ca89d9302bf0", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Use", "0a732869-f46a-4fbd-bab9-4d60735d96f3", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Lot surveyed", "133d30e3-832f-4956-88c3-6b48989ac3f7", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Corner lot", "b37e1302-284e-4440-bc43-a44309ea8991", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Street edge", "260b3e70-6b9b-45d2-8137-a5c18db9ccf5", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Ground from", "aa4ea7e3-5a41-48da-b6a8-979f3dfb3e5c", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // step 6: what the house has none of, one tick per kind
             ("Gordium: This house has no stairs", "a1f4e4bd-612e-4ac3-8f40-29734e304311", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: This house has no doors", "06f6906a-a8b1-4ca9-81bc-f073346c5bad", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),

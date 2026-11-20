@@ -396,6 +396,33 @@ rail, bottom rail and balusters (a box family from Baluster.rft, one per 5 in pa
 are all the guards and handrails". The recording keeps `doors_not_read` and `guards_not_read`; the log every railing's
 parts, solid by solid.
 
+## Check my project
+
+The first button for an architect's own model: one click reads the open project outside (zoning) and inside
+(egress) and sends **one** `check_site`, with the lot facts the architect states as Gordium marks on Project
+Information (`Gordium: Zone`, `Use`, `Lot surveyed`, `Street edge`, and optionally `Corner lot` and `Ground from`;
+the jurisdiction is the City of Ithaca). Why each choice:
+[reading design note, section 9](../../docs/revit/revit_reading_design.md#9-check-my-project-the-architects-own-model-one-check).
+
+- **`ProjectCheck`** (`ProjectCheck.cs`): the marks read as facts (`ProjectFacts`: a required one unset and no
+  request is made, only the list of what to fill in); the two reads checked to be of the same design (phases,
+  design options); the outside described (`SiteReader`), the street edge kept in the mark matched to the lot's own
+  edge (`StreetEdges`: an edge the lot no longer has is asked for again, never sent); the inside read
+  (`InteriorReader`); one request.
+- **`ResultText`** (`ResultText.cs`): the answer as the dialog's words. The headline is the worker's state and
+  summary; groups in the worker's order with its counts; each row with its own verdict (a status word not known is
+  shown as needs review), measured against allowed or the checker's reason, and its element; failures, rows that
+  need review and rows not checked are never cut, other rows past 30 with "N more (in the log)".
+- **The button** (`CheckProject.cs`): adds the marks on first use, asks the architect to click the street edge
+  when it isn't set, reads both on Revit's thread, sends off it, shows a TaskDialog (every failure first, every row
+  under *Show details*) and writes every row to `check_project_result.txt` and the request and answer to the log.
+  `check_project_request.json` (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks.
+
+How we know: `ProjectCheckTests` (scene 01 as fake Revit records with interior houses 1 and 5, checked by the real
+worker: the scene's hand-worked zoning verdicts, the houses' egress verdicts, a project with no lot never complies,
+each missing fact sends nothing) and `ResultTextTests` (200 rows with every status, including a word the add-in
+doesn't know and a "not applicable" with no reason: nothing shown as a pass that the worker didn't say passes).
+
 ## Running it
 
 Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and
@@ -418,7 +445,7 @@ CI restores in locked mode.
 `Gordium.Worker.slnx` (which CI and the Mac build and test). It is built once per Revit version installed:
 `net10.0-windows` against Revit 2027, `net8.0-windows` against Revit 2026.
 
-So far it is the trial's (runbook days 3 and 4): a **Gordium** tab with two buttons, and **Mark for egress**
+So far it is the trial's (runbook days 3 and 4): a **Gordium** tab with two buttons, **Check my project** (above) and **Mark for egress**
 (above).
 
 - **About** shows and logs which build Revit loaded and on which .NET runtime.

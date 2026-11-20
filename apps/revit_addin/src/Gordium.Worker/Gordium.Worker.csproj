@@ -10,5 +10,7 @@
   <ItemGroup>
     <!-- the tests check the strict reader directly, case by case -->
     <InternalsVisibleTo Include="Gordium.Worker.Tests" />
+    <!-- and the Revit reader's, which read answers made by hand into the dialog's words (ResultTextTests) -->
+    <InternalsVisibleTo Include="Gordium.Revit.Reading.Tests" />
   </ItemGroup>
 </Project>

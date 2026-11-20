@@ -279,6 +279,70 @@ sentences are Rhino's: `lot_not_found` says "the Site layer", `no_lot_outline` a
 the … layer", `not_a_solid` says "explode it". Host-neutral wording for those is a change to
 `model_measurement/stops.py`, its own PR, before the Revit add-in is used on a real project.
 
+## 9. Check my project: the architect's own model, one check
+
+**What it does.** One button, *Check my project*, checks the open project: the outside (this note: `RevitRead`,
+then `SiteReader`) and the inside (the [interior note](revit_interior_reading_design.md): `RevitInterior`, then
+`InteriorReader`), read one after the other from the same document, sent as **one** `check_site` with the site, the
+lot facts and the `interior`. The two reads must name the same phases and design options (the last phase; each
+set's option being edited, else its primary), or nothing is sent. Code: `ProjectCheck.cs` and `ResultText.cs` in
+`Gordium.Revit.Reading` (tested on fake records against the real worker: scene 01 with interior houses 1 and 5),
+`CheckProject.cs` in the add-in. **Decided (Ben, 2026-11-20, "go with your recommendations").**
+
+**The lot facts are Gordium marks on Project Information**, added by the button's first run (or Mark for egress),
+read by GUID like every mark; unset is not stated:
+
+| Mark | Sends | If unset |
+|---|---|---|
+| `Gordium: Zone` (text) | `zone`, as typed: the district exactly as the architect typed it. An address lookup's suggestion is never sent in its place (v1 has no lookup) | nothing is sent |
+| `Gordium: Use` (text) | `use`, Gordium's word (`one_family_detached`); a word the district doesn't list makes the use row need review | nothing is sent |
+| `Gordium: Lot surveyed` (Yes/No) | `lot_surveyed` | nothing is sent |
+| `Gordium: Street edge` (text, written by Gordium) | `street_line`: the lot's own edges | asked for by a pick; else nothing is sent |
+| `Gordium: Corner lot` (Yes/No) | `corner_lot` | not sent: the yards need review |
+| `Gordium: Ground from` (text: Spot grades / Finished spot grades) | `grade_from`, the ground from Gordium's spot-grade markers (section 5) | not sent: no ground, so height and stories need review. A Toposolid isn't read yet (no terrain code), so a Toposolid ground always needs review |
+
+`jurisdiction` is fixed to the City of Ithaca (`regulations/jurisdictions/new_york/ithaca_city`). A required fact
+(the checker's own list, `host_core.facts.REQUIRED`) missing and **no request is sent**: the dialog lists exactly
+which mark to fill in and how.
+
+**The street edge is picked, not typed.** The button asks "click the lot edge along the street" on the property
+line (Esc when done; several edges for a frontage drawn in pieces). Revit highlights the whole property line, never
+the edge a click lands on, so a click near a corner is **refused** and says so: when the two nearest edges are within
+0.5 ft of each other (half the 1 ft pick reach), or the click is within 2 ft (a quarter of a shorter edge) of an end
+the edge shares with another. Otherwise the nearest edge is **said back for a Yes** before it is kept: "Use the 60.0 ft
+lot edge from (x, y) to (x, y) as the street line?" (shared coordinates; a curved edge by its length along the
+curve, "the curved 47.1 ft lot edge ...", never its chord); No forgets the click. Every result's *Checked* line names
+the street line it was checked against, in the same words. The mark is written through one helper for every Gordium
+mark write (the pick's and a request file's): when Revit's `Parameter.Set` says it didn't set the value, it stops
+naming the mark, nothing is checked, and nothing is logged as kept. The edge is kept as its two ends in Revit's **internal**
+coordinates, which don't move when the shared coordinates are set again (an edge index was rejected: redrawing the
+property line renumbers its edges silently). At each check the kept ends are turned into shared coordinates and
+matched to an edge of the lot read (within 0.01 ft); `street_line` is then that edge's own first and last points,
+exactly as the site description has them. With the ends the mark keeps whether the edge is straight and its point
+halfway along (`x1 y1 x2 y2 line|arc mx my`), and only the lot edge whose ends, kind and middle (within 0.25 ft) all
+agree matches, so an arc and its chord (same ends) never match each other; an older mark with the ends alone that
+matches two lot edges is refused. An edge the lot no longer has (the property line redrawn), or one matching two,
+is never sent: its typed reason (`StreetRefusal`, `StreetEdges.NeedsNewPick`) has the button ask for the edge again
+at once, as its message says (a request file has no pick: the message says to give the mark again). With no lot
+read at all, the kept edge is sent as it is, named without a length, and the check says there is no lot: the lot's
+rows need review, so the check never complies.
+
+**The dialog.** The headline is the worker's own state and summary line (never a count of the add-in's), then
+the phase and design options checked, then each group in the worker's order with its count and every failure in
+full; *Show details* lists every row: each with its own verdict as the add-in reads it (a status word it doesn't
+know is shown as needs review, with the worker's word), its name, measured against allowed (or the checker's reason,
+where an egress row's figures are), and the Revit element (category and element id, for Select by ID). A row that
+fails, needs review or isn't checked is never cut; rows that comply or don't apply may be, past 30, with "N more (in
+the log)". Then the inside's not-read lists. Every row is written to `check_project_result.txt`, and the full
+request and answer to the trial log.
+
+**No clicks.** `check_project_request.json` (`{"model": "<path>.rvt", "marks": {"Gordium: Zone": "R-1b", ...}}`,
+`marks` optional) in the trial folder: the model opened, the marks given set (each by its own kind: a Yes/No mark
+needs true or false, a text mark text; anything else stops the run naming the mark), checked as the button does (no
+pick: the log's `lot_edges_internal` lists each property line's edges in the Street edge mark's own words, internal
+coordinates, to copy one), logged, closed unsaved. A reason the worker repeats per building is shown once with its
+count ("(x12)").
+
 ## Where the decisions are written
 
 Every decision above that a Revit model doesn't have to be open for is code in

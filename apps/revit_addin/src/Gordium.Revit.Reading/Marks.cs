@@ -106,6 +106,46 @@ public static class Marks
         MarkBinding.Instance, [ProjectInformation], "guards and stairs[].handrails (sent only when Yes)",
         "Yes once every guard and handrail of the house is drawn as a Revit railing (not a wall, a wall sweep or a generic model). Blank or No: no guard or handrail is read for egress.");
 
+    // ---- the lot facts "Check my project" sends (reading design note, section 9): on Project Information, typed by
+    // the architect (the street edge picked by Gordium). Unset is not stated: a required one unset and nothing is sent.
+
+    /// <summary>The zoning district, as the architect confirms it (never an address lookup's suggestion).</summary>
+    public static readonly MarkDefinition Zone = new(
+        "Gordium: Zone", new("7c0c478b-5959-44fd-bf53-ca89d9302bf0"), MarkValueKind.Text, MarkBinding.Instance,
+        [ProjectInformation], "facts.zone",
+        "The lot's zoning district exactly as the City of Ithaca's zoning map writes it (R-1b, R-2a, R-3a...). Typed by you, so confirmed: Gordium never fills it from an address lookup.");
+
+    /// <summary>The use, in the checker's own word (one_family_detached...).</summary>
+    public static readonly MarkDefinition Use = new(
+        "Gordium: Use", new("0a732869-f46a-4fbd-bab9-4d60735d96f3"), MarkValueKind.Text, MarkBinding.Instance,
+        [ProjectInformation], "facts.use",
+        "What the building is used for, in Gordium's word for the use (one_family_detached, one_family_semi_detached...). A word the district doesn't list needs review, never a pass.");
+
+    public static readonly MarkDefinition LotSurveyed = new(
+        "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [ProjectInformation], "facts.lot_surveyed",
+        "Yes when the property line is drawn from a survey; No when it is traced from the tax map (its measures then carry the map's 2 ft accuracy). Blank: nothing is checked.");
+
+    public static readonly MarkDefinition CornerLot = new(
+        "Gordium: Corner lot", new("b37e1302-284e-4440-bc43-a44309ea8991"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [ProjectInformation], "facts.corner_lot",
+        "Yes when the lot is on two streets. Blank: the yards need review until you answer.");
+
+    /// <summary>The lot edges along the street, written by Gordium when the architect clicks them (StreetEdges).</summary>
+    public static readonly MarkDefinition StreetEdge = new(
+        "Gordium: Street edge", new("260b3e70-6b9b-45d2-8137-a5c18db9ccf5"), MarkValueKind.Text, MarkBinding.Instance,
+        [ProjectInformation], "facts.street_line",
+        "Written by Gordium when you click the lot edge along the street (Check my project asks). Don't type in it: an edge it can't find on the lot is asked for again.");
+
+    /// <summary>Which of Gordium's spot-grade markers the ground is read from (<c>grade_from</c>).</summary>
+    public static readonly MarkDefinition GroundFrom = new(
+        "Gordium: Ground from", new("aa4ea7e3-5a41-48da-b6a8-979f3dfb3e5c"), MarkValueKind.Text, MarkBinding.Instance,
+        [ProjectInformation], "facts.grade_from",
+        "Which of Gordium's spot-grade markers give the ground: " + string.Join(" or ", GroundWords.Select(w => w.Word)) +
+        ". Blank: no ground is sent, so building height and stories need review (a Toposolid isn't read yet).");
+
+    /// <summary>The <see cref="GroundFrom"/> words and the <c>grade_from</c> each sends.</summary>
+    public static IReadOnlyList<(string Word, string GradeFrom)> GroundWords => [("Spot grades", "spot"), ("Finished spot grades", "finished_spots")];
     /// <summary>A level the architect says has no rooms at all (a roof, a turret's top: Revit finds enclosed areas
     /// there between walls and parapets). Yes: its enclosed areas with no Room aren't sent as spaces whose use isn't
     /// known; a Room drawn on it disagrees, and is listed first as a conflict (the tick then doesn't count). Blank or
@@ -168,7 +208,7 @@ public static class Marks
     public static readonly IReadOnlyList<MarkDefinition> All =
     [
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
-        ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards,
+        ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair,
     ];
