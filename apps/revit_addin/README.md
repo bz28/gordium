@@ -178,6 +178,57 @@ terrain, true north turned, the survey point moved). Not in this reader yet: the
 (`grade_from: terrain` is refused with words, never read as no ground), and checking that the saved facts were
 entered under the same shared coordinates (scene K).
 
+## The architect's marks (interior step 2)
+
+Egress needs facts only the architect can state: which room is a bedroom, which window is its escape window,
+which door is the exit door. They are Gordium **shared parameters** (Ben, 2026-11-19; the
+[interior design note](../../docs/revit/revit_interior_reading_design.md), section 3), written as data in
+`Gordium.Revit.Reading/Marks.cs`: each name, its fixed GUID (never changed: a new GUID is a different parameter, and
+every mark set on the old one would read as not set), Yes/No, text or length, on each element or on its type, and
+the categories it is bound to. The operation list (`Operations`) maps each architect's word ("Side-hinged door")
+to the interior description's own word for an opening (`side_hinged_door`) and for a door (`side_hinged`); a word
+not in the list, or a window's word on a door, is not stated, never a near guess.
+
+- **Adding them** (`MarkSetup.Plan`, done by the add-in's `RevitMarks.AddMarks`): each mark not in the project is
+  added; one bound to fewer categories than it should be is extended, keeping any the architect added; one bound
+  the wrong way (type instead of instance, another data type), or another parameter of the same name, is a
+  conflict: nothing is changed and the marking list says why first. The add-in writes a shared-parameter file of
+  its own for this and puts the architect's own back afterwards.
+- **Reading them** (`MarkReading`): by GUID only (a firm's own "Gordium: Sleeping room" is never read as
+  Gordium's), and only the rooms, windows and doors in the design checked (the outside reader's phase and option
+  rule, `SiteReader.InDesignChecked`; a room belongs to one phase, so only the last phase's rooms are read).
+  While any Room is unplaced, not enclosed or redundant, `MarkReading.Rooms` gives null: rooms not read (the
+  description leaves `rooms` out), never the placed rooms without it (design note, section 2).
+  **A mark never set is not stated** (null), never No: Revit's `Parameter.HasValue` false reads as null whatever
+  `AsInteger()` says; a blank length is null, never 0. A door's operation must be a door's word ("Casement" on a
+  door is not stated, for the opening as for the door): one rule (`Operations.ForOpening(word, isDoor)`) for the
+  reader and the list.
+- **The marking list** (`MarkingList.Build`): every room, window and door with its marks, anything not set (or set
+  to a word Gordium doesn't read) first; a line per mark saying what an unset one leaves not read ("1 of 2 rooms not
+  marked, so no room is read for egress"). A room named "Bedroom…" or "Sleeping…" with its mark unset shows
+  "suggested: Yes" (Ben's decision 3); a suggestion is never read as the mark, and No is never suggested. A
+  Room that is unplaced, not enclosed or redundant (or whose placement couldn't be read) is listed first, as what
+  stops every room being read (design note, section 2), never as a row to mark. The headline
+  (`MarkingListResult.Headline`) says every room, window and door is marked only when rooms are drawn and nothing
+  is unset or in the way.
+
+In Revit, **Mark for egress** (the Gordium tab's Egress panel) adds the marks on first use, in one undoable
+transaction, then shows the list in a dialog and logs every row to `results.jsonl`. That dialog is the minimal
+first view; the dockable list comes with the UI pass. Nothing is sent to the checker yet: the interior reader
+(section 7, step 3) builds the description's flags from `MarkReading` alone.
+
+How we know: `MarksTests.cs` (both .NET 8 and 10) pins the table (names, GUIDs, kinds, bindings, categories), the
+reading of an unset mark, the operation words against the measuring code's own lists (read from
+`model_measurement.interior`, never retyped), every setup case, the design checked, the order of the list and the
+suggestions. Two guards were undone once to check their tests then fail: an unset Yes/No read as No, and a
+parameter of a mark's name taken for it.
+
+Tried in Revit 2027.4 on Snowdon Towers (2026-11-19; [design note, section 9](../../docs/revit/revit_interior_reading_design.md#9-to-check-in-the-trial-the-revit-api-on-real-models)):
+all 10 marks added, the names with a colon accepted; 57 of 57 existing rooms and 297 of 297 windows and doors read
+not set, and a room placed afterwards too (58 of 58); a second run added nothing. Still to check: that a type's
+marks read through `doc.GetElement(e.GetTypeId())` (Operation set on a window type), and the room placement
+states (unplaced, not enclosed, redundant) on real rooms.
+
 ## Running it
 
 Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and
@@ -200,7 +251,8 @@ CI restores in locked mode.
 `Gordium.Worker.slnx` (which CI and the Mac build and test). It is built once per Revit version installed:
 `net10.0-windows` against Revit 2027, `net8.0-windows` against Revit 2026.
 
-So far it is the trial's (runbook days 3 and 4): a **Gordium** tab with two buttons.
+So far it is the trial's (runbook days 3 and 4): a **Gordium** tab with two buttons, and **Mark for egress**
+(above).
 
 - **About** shows and logs which build Revit loaded and on which .NET runtime.
 - **Check box house** starts the worker with the clone's venv Python (or reuses the running one), says `hello`,
