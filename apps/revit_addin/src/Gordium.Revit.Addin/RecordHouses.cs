@@ -239,16 +239,8 @@ public sealed class ReadInteriorCommand : IExternalCommand
             var none = read.Ticks.Where(t => t.Sent).Select(t => t.Kind.Words).ToList() is { Count: > 0 } sent
                 ? "Read as none (ticked): " + string.Join(", ", sent) : "Nothing read as none";
             var notes = string.Join("\n", read.Notes.Take(20).Select(n => $"- {n.Field}: {n.Why}"));
-            return ($"{rooms}
-{openings}
-{stairs}
-{doors}
-{guards}
-{none}
-
-{read.Notes.Count} values left out" +
-                    (notes.Length > 0 ? ":
-" + notes : ""), read);
+            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n{none}\n\n{read.Notes.Count} values left out" +
+                    (notes.Length > 0 ? ":\n" + notes : ""), read);
         }
         catch (Exception e)
         {
