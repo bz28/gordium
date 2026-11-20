@@ -4,12 +4,12 @@
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
     "date": "2026-11-19",
-    "tool": "Revit Autodesk Revit 2027, Gordium add-in (trial)"
+    "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "649a5d58-4c66-417a-8d8b-e97dbf59f102-00000adf": "lot",
-    "649a5d58-4c66-417a-8d8b-e97dbf59f102-00000ae4": "house_floor1",
-    "649a5d58-4c66-417a-8d8b-e97dbf59f102-00000ae5": "house_floor2"
+    "c7d5f87d-3674-4804-907a-fe11ec3b4d2a-00000adf": "lot",
+    "c7d5f87d-3674-4804-907a-fe11ec3b4d2a-00000ae4": "house_floor1",
+    "c7d5f87d-3674-4804-907a-fe11ec3b4d2a-00000ae5": "house_floor2"
   },
   "steps": {
     "as drawn": {
@@ -18,11 +18,11 @@
       "host": {
         "name": "revit",
         "version": "2027",
-        "document": "Project4",
+        "document": "Project22",
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "649a5d58-4c66-417a-8d8b-e97dbf59f102-00000adf",
+        "id": "c7d5f87d-3674-4804-907a-fe11ec3b4d2a-00000adf",
         "edges": [
           {
             "points": [
@@ -80,7 +80,7 @@
       },
       "buildings": [
         {
-          "id": "649a5d58-4c66-417a-8d8b-e97dbf59f102-00000ae4",
+          "id": "c7d5f87d-3674-4804-907a-fe11ec3b4d2a-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -234,7 +234,7 @@
           "name": ""
         },
         {
-          "id": "649a5d58-4c66-417a-8d8b-e97dbf59f102-00000ae5",
+          "id": "c7d5f87d-3674-4804-907a-fe11ec3b4d2a-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,

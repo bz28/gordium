@@ -133,7 +133,7 @@ internal static class RevitRead
             BoundingBox = box is null ? null : new RevitBox(P(box.Min), P(box.Max), box.Transform is { } bt ? T(bt) : null),
             Geometry = failed ? null : geometry,
             GeometryFailed = failed,
-            Location = e.Location is LocationPoint lp ? P(lp.Point) : null,
+            Location = e.Location is LocationPoint lp ? P(lp.Point) : MarkerPoint(e, mark),
             Link = link,
         };
     }
@@ -164,6 +164,16 @@ internal static class RevitRead
             FinishedMark => (GordiumMark.FinishedGrade, null),
             _ => (GordiumMark.None, null),       // a mark this add-in doesn't know: not a mark, read as any element
         };
+    }
+
+    /// <summary>A Gordium grade marker drawn as a DirectShape (no <c>LocationPoint</c>): the one point it holds.
+    /// None or several: no location, so the reader refuses the marker rather than guess.</summary>
+    private static Xyz? MarkerPoint(Element e, GordiumMark mark)
+    {
+        if (mark is not (GordiumMark.SpotGrade or GordiumMark.FinishedGrade) || e.get_Geometry(new Options()) is not { } g)
+            return null;
+        var points = g.OfType<Autodesk.Revit.DB.Point>().ToList();
+        return points.Count == 1 ? P(points[0].Coord) : null;
     }
 
     private static List<GeometryItem> Items(GeometryElement g)

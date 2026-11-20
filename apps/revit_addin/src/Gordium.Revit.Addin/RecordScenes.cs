@@ -21,7 +21,7 @@ namespace Gordium.Revit.Addin;
 [Transaction(TransactionMode.Manual)]
 public sealed class RecordScenesCommand : IExternalCommand
 {
-    private const string Tool = "Revit {0}, Gordium add-in (trial)";
+    private const string Tool = "{0} ({1}), Gordium add-in (trial)";
 
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {
@@ -78,17 +78,24 @@ public sealed class RecordScenesCommand : IExternalCommand
         var doc = app.NewProjectDocument(UnitSystem.Imperial);
         try
         {
-            var ids = SceneDraw.Draw(doc, scene);
+            var drawn = SceneDraw.Draw(doc, scene);
             log["draw_s"] = sw.Elapsed.TotalSeconds;
-            sw.Restart();
-            var model = RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance);
-            log["read_s"] = sw.Elapsed.TotalSeconds;
-            sw.Restart();
-            // on Revit's thread: the lot is read (calling back into the API) before the reader's first wait, and every
-            // wait inside it lets go of this thread (ConfigureAwait(false)), so blocking here can't deadlock
-            var read = SiteReader.DescribeAsync(model, scene["facts"]!.DeepClone().AsObject(), new WorkerLeftOut(worker))
-                                 .GetAwaiter().GetResult();
-            log["describe_s"] = sw.Elapsed.TotalSeconds;
+            var steps = new JsonObject();
+            foreach (var (step, _) in scene["steps"]!.AsObject())
+            {
+                if (step != "as drawn")
+                    SceneDraw.Edit(doc, scene, step, drawn);       // moved in place, every UniqueId kept
+                sw.Restart();
+                var model = RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance);
+                log[$"read_s ({step})"] = sw.Elapsed.TotalSeconds;
+                sw.Restart();
+                // on Revit's thread: the lot is read (calling back into the API) before the reader's first wait, and
+                // every wait inside it lets go of this thread (ConfigureAwait(false)), so blocking here can't deadlock
+                var read = SiteReader.DescribeAsync(model, drawn.Facts.DeepClone().AsObject(), new WorkerLeftOut(worker))
+                                     .GetAwaiter().GetResult();
+                log[$"describe_s ({step})"] = sw.Elapsed.TotalSeconds;
+                steps[step] = read.Site;
+            }
             var recording = new JsonObject
             {
                 ["host"] = "revit",
@@ -97,13 +104,13 @@ public sealed class RecordScenesCommand : IExternalCommand
                 {
                     ["by"] = "Gordium add-in, Record scenes (Windows trial)",
                     ["date"] = DateTime.Now.ToString("yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture),
-                    ["tool"] = string.Format(System.Globalization.CultureInfo.InvariantCulture, Tool, app.VersionName),
+                    ["tool"] = string.Format(System.Globalization.CultureInfo.InvariantCulture, Tool, app.VersionName, app.SubVersionNumber),
                 },
-                ["ids"] = new JsonObject(ids.Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))),
-                ["steps"] = new JsonObject { ["as drawn"] = read.Site },
+                ["ids"] = new JsonObject(drawn.Ids.Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))),
+                ["steps"] = steps,
             };
             var path = Path.Combine(clone, "test_data", "host_conformance", "recorded", "revit", name + ".json");
-            File.WriteAllText(path, recording.ToJsonString(new JsonSerializerOptions { WriteIndented = true }) + "\n",
+            File.WriteAllText(path, recording.ToJsonString(new JsonSerializerOptions { WriteIndented = true, NewLine = "\n" }) + "\n",
                               new UTF8Encoding(false));
             sw.Restart();
             var problems = JsonNode.Parse(PythonOnce.Run(Trial.Python(clone), clone,
