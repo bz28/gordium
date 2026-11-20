@@ -8,18 +8,18 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "w5": "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000125c",
-    "w6": "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000125e",
-    "bed3": "4d0cee2c-03b8-489e-981f-2a51a09a1227-00001260",
-    "bed4": "4d0cee2c-03b8-489e-981f-2a51a09a1227-00001262",
-    "s1": "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000126f"
+    "w5": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125c",
+    "w6": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125e",
+    "bed3": "f147614e-931d-44fa-b63b-d6adb45f953a-00001260",
+    "bed4": "f147614e-931d-44fa-b63b-d6adb45f953a-00001262",
+    "s1": "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "4d0cee2c-03b8-489e-981f-2a51a09a1227-00001260",
+        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-00001260",
         "name": "Bedroom 3 (1)",
         "sleeping": true,
         "floor": [
@@ -133,7 +133,7 @@
         ]
       },
       {
-        "id": "4d0cee2c-03b8-489e-981f-2a51a09a1227-00001262",
+        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-00001262",
         "name": "Bedroom 4 (2)",
         "sleeping": true,
         "floor": [
@@ -337,9 +337,9 @@
     ],
     "openings": [
       {
-        "id": "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000125c",
-        "name": "Gordium test window w5 (22 x 36 in): Family1 (Window 5)",
-        "room": "4d0cee2c-03b8-489e-981f-2a51a09a1227-00001260",
+        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125c",
+        "name": "Gordium test window w5 (22 x 36 in): Family4 (Window 5)",
+        "room": "f147614e-931d-44fa-b63b-d6adb45f953a-00001260",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -350,9 +350,9 @@
         }
       },
       {
-        "id": "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000125e",
-        "name": "Gordium test window w6 (28 x 36 in): Family2 (Window 6)",
-        "room": "4d0cee2c-03b8-489e-981f-2a51a09a1227-00001262",
+        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-0000125e",
+        "name": "Gordium test window w6 (28 x 36 in): Family5 (Window 6)",
+        "room": "f147614e-931d-44fa-b63b-d6adb45f953a-00001262",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -365,7 +365,7 @@
     ],
     "stairs": [
       {
-        "id": "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000126f",
+        "id": "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f",
         "name": "Gordium test stair s1",
         "bottom_elevation": 0,
         "nosings": [
@@ -766,18 +766,18 @@
   ],
   "notes": [
     {
-      "part": "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000126f",
+      "part": "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f",
       "field": "handrails",
       "why": "railings (and their handrails) are read with the guards, a later step"
     }
   ],
   "evidence": {
-    "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000125c": {
+    "f147614e-931d-44fa-b63b-d6adb45f953a-0000125c": {
       "sill_line": 12,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 12..15, wall box z 10..18.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 4674, wall 4674 4d0cee2c-03b8-489e-981f-2a51a09a1227-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700 (this window), OST_Windows 4702"
+        "host (FamilyInstance.Host) 4674, wall 4674 f147614e-931d-44fa-b63b-d6adb45f953a-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700 (this window), OST_Windows 4702"
       ],
       "wall_opening_bottom": 12,
       "placed": {
@@ -786,12 +786,12 @@
         "width": 1.833333333333334
       }
     },
-    "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000125e": {
+    "f147614e-931d-44fa-b63b-d6adb45f953a-0000125e": {
       "sill_line": 11,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 11..14, wall box z 10..18.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 4674, wall 4674 4d0cee2c-03b8-489e-981f-2a51a09a1227-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700, OST_Windows 4702 (this window)"
+        "host (FamilyInstance.Host) 4674, wall 4674 f147614e-931d-44fa-b63b-d6adb45f953a-00001242: 14 faces; ids generating them: OST_Walls 4674, OST_Walls 4675, OST_Walls 4677, OST_Windows 4700, OST_Windows 4702 (this window)"
       ],
       "wall_opening_bottom": 11,
       "placed": {
@@ -801,7 +801,7 @@
       }
     },
     "stairs": {
-      "4d0cee2c-03b8-489e-981f-2a51a09a1227-0000126f": {
+      "f147614e-931d-44fa-b63b-d6adb45f953a-0000126f": {
         "revit_layer": [
           "run 4719 Straight: base 0, top 10 (relative), risers 16, treads 15, begins/ends with riser True/True, width 36 in; path (52.5,1.5,0) (65,1.5,0)",
           "its geometry: 186 faces (31 facing up, 0 curved), failed False; box 52.5,0,0 to 65.042,3,10",

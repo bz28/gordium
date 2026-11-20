@@ -8,16 +8,16 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "w": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ec9",
-    "bed": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ecb",
-    "s": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ed8"
+    "w": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ec9",
+    "bed": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ecb",
+    "s": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ed8"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ecb",
+        "id": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ecb",
         "name": "Bedroom (1)",
         "sleeping": true,
         "floor": [
@@ -133,9 +133,9 @@
     ],
     "openings": [
       {
-        "id": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ec9",
-        "name": "Gordium test window w (48 x 36 in): Family3 (Window)",
-        "room": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ecb",
+        "id": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ec9",
+        "name": "Gordium test window w (48 x 36 in): Family6 (Window)",
+        "room": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ecb",
         "escape": true,
         "operation": "horizontal_slider",
         "stated_clear": {
@@ -148,7 +148,7 @@
     ],
     "stairs": [
       {
-        "id": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ed8",
+        "id": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ed8",
         "name": "Gordium test stair s",
         "bottom_elevation": -8.25,
         "sides": {
@@ -260,23 +260,23 @@
   ],
   "notes": [
     {
-      "part": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ed8",
+      "part": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ed8",
       "field": "nosings",
       "why": "the floor at its head is 1.5 in from the run\u0027s top (a riser there taller or shorter than the run\u0027s): they must agree within 1/16 in"
     },
     {
-      "part": "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ed8",
+      "part": "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ed8",
       "field": "handrails",
       "why": "railings (and their handrails) are read with the guards, a later step"
     }
   ],
   "evidence": {
-    "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ec9": {
+    "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ec9": {
       "sill_line": 2,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 2..5, wall box z 0..8.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 3762, wall 3762 30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000eb2: 10 faces; ids generating them: OST_Walls 3762, OST_Walls 3763, OST_Walls 3765, OST_Windows 3785 (this window)"
+        "host (FamilyInstance.Host) 3762, wall 3762 f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000eb2: 10 faces; ids generating them: OST_Walls 3762, OST_Walls 3763, OST_Walls 3765, OST_Windows 3785 (this window)"
       ],
       "wall_opening_bottom": 2,
       "placed": {
@@ -286,7 +286,7 @@
       }
     },
     "stairs": {
-      "30702bbb-e1b7-4fcf-9af3-fc68d4613df5-00000ed8": {
+      "f0586f4c-ef6b-4a46-8c39-e618fd4660c5-00000ed8": {
         "revit_layer": [
           "run 3800 Straight: base 0, top 8.125 (relative), risers 13, treads 12, begins/ends with riser True/True, width 36 in; path (22.5,0,-8.25) (22.5,9.75,-8.25)",
           "its geometry: 150 faces (25 facing up, 0 curved), failed False; box 21,0,-8.25 to 24,9.792,-0.125",
