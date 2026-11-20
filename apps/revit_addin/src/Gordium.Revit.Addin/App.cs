@@ -41,6 +41,13 @@ public sealed class App : IExternalApplication
             ToolTip = "Draws each conformance scene in a new Revit model, reads it as a check would, records it to " +
                       "test_data/host_conformance/recorded/revit/ and checks it by the suite's own rules",
         });
+        var egress = application.CreateRibbonPanel(Tab, "Egress");
+        egress.AddItem(new PushButtonData("gordium_mark_for_egress", "Mark for\negress", dll,
+                                          typeof(MarkForEgressCommand).FullName)
+        {
+            ToolTip = "Adds Gordium's egress marks to this project if they aren't there, then lists every room, window " +
+                      "and door with its marks, anything not set first",
+        });
         application.Idling += OnIdling;
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
