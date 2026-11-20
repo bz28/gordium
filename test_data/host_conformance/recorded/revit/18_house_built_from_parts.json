@@ -3,26 +3,26 @@
   "scene": "18_house_built_from_parts",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000adf": "lot",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae4": "floor_slab",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae5": "wall_south_west",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae6": "window_sill",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae7": "window",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae8": "window_head",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae9": "wall_south_east",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000aea": "wall_north",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000aeb": "wall_west",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000aec": "wall_east_south",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000aed": "mullion_south",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000aee": "curtain_panel",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000aef": "mullion_north",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000af0": "wall_east_north",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000afc": "built_in",
-    "16abb539-6740-4fc7-b020-f7591f5c971c-00000b02": "roof_slab"
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000adf": "lot",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae4": "floor_slab",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae5": "wall_south_west",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae6": "window_sill",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae7": "window",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae8": "window_head",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae9": "wall_south_east",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aea": "wall_north",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aeb": "wall_west",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aec": "wall_east_south",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aed": "mullion_south",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aee": "curtain_panel",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aef": "mullion_north",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000af0": "wall_east_north",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000afc": "built_in",
+    "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000b02": "roof_slab"
   },
   "steps": {
     "as drawn": {
@@ -31,11 +31,11 @@
       "host": {
         "name": "revit",
         "version": "2027",
-        "document": "Project1",
+        "document": "Project16",
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000adf",
+        "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000adf",
         "edges": [
           {
             "points": [
@@ -93,7 +93,7 @@
       },
       "buildings": [
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae4",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae4",
           "role": "building",
           "layer": "Floors",
           "floor": null,
@@ -247,7 +247,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae5",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae5",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -401,7 +401,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae6",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae6",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -555,7 +555,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae7",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae7",
           "role": "building",
           "layer": "Windows",
           "floor": null,
@@ -709,7 +709,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae8",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae8",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -863,7 +863,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000ae9",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000ae9",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -1017,7 +1017,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000aea",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aea",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -1171,7 +1171,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000aeb",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aeb",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -1325,7 +1325,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000aec",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aec",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -1479,7 +1479,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000aed",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aed",
           "role": "building",
           "layer": "Curtain Wall Mullions",
           "floor": null,
@@ -1633,7 +1633,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000aee",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aee",
           "role": "building",
           "layer": "Curtain Panels",
           "floor": null,
@@ -1787,7 +1787,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000aef",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000aef",
           "role": "building",
           "layer": "Curtain Wall Mullions",
           "floor": null,
@@ -1941,7 +1941,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000af0",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000af0",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -2095,7 +2095,7 @@
           "name": ""
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000afc",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000afc",
           "role": "building",
           "layer": "Walls",
           "floor": null,
@@ -2249,7 +2249,7 @@
           "name": "built_in"
         },
         {
-          "id": "16abb539-6740-4fc7-b020-f7591f5c971c-00000b02",
+          "id": "ca4ba98b-b4e7-462b-954d-62eb96c2533f-00000b02",
           "role": "building",
           "layer": "Roofs",
           "floor": null,

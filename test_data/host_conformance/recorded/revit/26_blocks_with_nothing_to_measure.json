@@ -3,15 +3,15 @@
   "scene": "26_blocks_with_nothing_to_measure",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "f1715aab-d290-463d-80f2-868e86df8b76-00000adf": "lot",
-    "f1715aab-d290-463d-80f2-868e86df8b76-00000ae4": "house_floor1",
-    "f1715aab-d290-463d-80f2-868e86df8b76-00000ae5": "house_floor2",
-    "f1715aab-d290-463d-80f2-868e86df8b76-00000e2b": "empty_block",
-    "f1715aab-d290-463d-80f2-868e86df8b76-00001488": "shed_with_empty_part"
+    "8955d82e-6310-456a-807f-663b539d6754-00000adf": "lot",
+    "8955d82e-6310-456a-807f-663b539d6754-00000ae4": "house_floor1",
+    "8955d82e-6310-456a-807f-663b539d6754-00000ae5": "house_floor2",
+    "8955d82e-6310-456a-807f-663b539d6754-00000e2b": "empty_block",
+    "8955d82e-6310-456a-807f-663b539d6754-00001488": "shed_with_empty_part"
   },
   "steps": {
     "as drawn": {
@@ -24,7 +24,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "f1715aab-d290-463d-80f2-868e86df8b76-00000adf",
+        "id": "8955d82e-6310-456a-807f-663b539d6754-00000adf",
         "edges": [
           {
             "points": [
@@ -82,7 +82,7 @@
       },
       "buildings": [
         {
-          "id": "f1715aab-d290-463d-80f2-868e86df8b76-00000ae4",
+          "id": "8955d82e-6310-456a-807f-663b539d6754-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -236,7 +236,7 @@
           "name": ""
         },
         {
-          "id": "f1715aab-d290-463d-80f2-868e86df8b76-00000ae5",
+          "id": "8955d82e-6310-456a-807f-663b539d6754-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -393,7 +393,7 @@
       "unsent": [],
       "left_out": [
         {
-          "id": "f1715aab-d290-463d-80f2-868e86df8b76-00000e2b",
+          "id": "8955d82e-6310-456a-807f-663b539d6754-00000e2b",
           "layer": "Generic Models",
           "could_be_building": true,
           "touching": null,
@@ -401,7 +401,7 @@
           "context": false
         },
         {
-          "id": "f1715aab-d290-463d-80f2-868e86df8b76-00001488",
+          "id": "8955d82e-6310-456a-807f-663b539d6754-00001488",
           "layer": "Generic Models",
           "could_be_building": true,
           "touching": null,
