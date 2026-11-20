@@ -45,5 +45,12 @@ house one element in a building category made of exactly the faces Rhino's reade
 line. `packages/design_checker/tests/test_real_site_revit.py` holds it to what the Rhino reader reads from the same
 model: the same description (every point within a millionth of a foot) and the same verdicts (5 complies, 18 needs
 review, 9 not checked: the house reaches past the lot, so its yards and coverage can't be measured, in either host).
-Re-record with `apps/revit_addin/tests/Gordium.Revit.Reading.Tests/real_site.py export`, the add-in's
-`real_site_request.json`, then `real_site.py compare`.
+To re-record (on the Windows trial laptop, with `real_site.py` from `apps/revit_addin/tests/Gordium.Revit.Reading.Tests/`):
+
+1. `real_site.py export model.3dm model_facts.yaml > export.json` (it refuses a model it can't draw as Rhino reads
+   it, naming what).
+2. Write `%LOCALAPPDATA%\Gordium\trial\real_site_request.json` as `{"model": "<export.json>", "out": "<revit.json>"}`
+   and start Revit: the add-in draws, reads and writes `revit.json` (and deletes any earlier one first), logging a
+   `real_site` line to `results.jsonl` (an `error` there means no result).
+3. `real_site.py record <revit.json> model.3dm <date> "<Revit version>, Gordium add-in (trial)" revit_reading.json`.
+4. `real_site.py compare model.3dm model_facts.yaml revit_reading.json` prints `[]`, and the test passes.
