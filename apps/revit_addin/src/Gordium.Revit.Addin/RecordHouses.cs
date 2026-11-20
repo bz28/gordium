@@ -15,7 +15,7 @@ using RevitApplication = Autodesk.Revit.ApplicationServices.Application;
 namespace Gordium.Revit.Addin;
 
 /// <summary>
-/// Interior conformance in Revit (docs/revit/revit_interior_reading_design.md, section 6; section 7, step 3): each
+/// Interior conformance in Revit (docs/revit/revit_interior_reading_design.md, section 6; section 7, steps 3 and 4): each
 /// hand-worked house of the step drawn in a new Revit project by <see cref="HouseDraw"/>, read exactly as a check would
 /// read it (<see cref="RevitInterior"/>, then <see cref="InteriorReader"/>), recorded to
 /// test_data/interior_houses/recorded/revit/&lt;house&gt;.json, and judged by the same rules CI applies
@@ -84,7 +84,10 @@ public sealed class RecordHousesCommand : IExternalCommand
                 File.Delete(path);                            // never an earlier run's recording left as this one's
             var sw = Stopwatch.StartNew();
             doc = app.NewProjectDocument(UnitSystem.Imperial);
-            var ids = HouseDraw.Draw(app, doc, house);
+            var drawn = new List<string>();
+            log["drawing_notes"] = house["notes"]?.ToJsonString();
+            log["drawn"] = drawn;
+            var ids = HouseDraw.Draw(app, doc, house, drawn);
             log["draw_s"] = sw.Elapsed.TotalSeconds;
             sw.Restart();
             var model = RevitInterior.Model(doc);
@@ -94,7 +97,7 @@ public sealed class RecordHousesCommand : IExternalCommand
             {
                 ["host"] = "revit",
                 ["house"] = name,
-                ["step"] = 3,
+                ["step"] = house["step"]!.GetValue<int>(),
                 ["recorded"] = new JsonObject
                 {
                     ["by"] = "Gordium add-in, Record interior houses (Windows trial)",
@@ -105,6 +108,9 @@ public sealed class RecordHousesCommand : IExternalCommand
                 ["interior"] = read.Interior.DeepClone(),
                 ["rooms_not_read"] = new JsonArray(read.RoomsNotRead.Select(w => (JsonNode?)w).ToArray()),
                 ["openings_not_read"] = new JsonArray(read.OpeningsNotRead.Select(w => (JsonNode?)w).ToArray()),
+                ["stairs_not_read"] = new JsonArray(read.StairsNotRead.Select(w => (JsonNode?)w).ToArray()),
+                ["drawing_notes"] = house["notes"]?.DeepClone(),
+                ["drawn"] = new JsonArray(drawn.Select(w => (JsonNode?)w).ToArray()),
                 ["notes"] = new JsonArray(read.Notes.Select(n => (JsonNode)new JsonObject
                 {
                     ["part"] = n.Part, ["field"] = n.Field, ["why"] = n.Why,
@@ -123,6 +129,7 @@ public sealed class RecordHousesCommand : IExternalCommand
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["rooms_not_read"] = read.RoomsNotRead;
             log["openings_not_read"] = read.OpeningsNotRead;
+            log["stairs_not_read"] = read.StairsNotRead;
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
             Trial.Log("record_house", log);
@@ -165,6 +172,7 @@ public sealed class ReadInteriorCommand : IExternalCommand
             log["read_s"] = sw.Elapsed.TotalSeconds;
             log["rooms_not_read"] = read.RoomsNotRead;
             log["openings_not_read"] = read.OpeningsNotRead;
+            log["stairs_not_read"] = read.StairsNotRead;
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
@@ -172,8 +180,9 @@ public sealed class ReadInteriorCommand : IExternalCommand
             Trial.Log("read_interior", log);
             var rooms = read.Interior["rooms"] is JsonArray r ? $"{r.Count} rooms read" : "Rooms not read: " + string.Join("; ", read.RoomsNotRead.Take(5));
             var openings = read.Interior["openings"] is JsonArray o ? $"{o.Count} windows and doors read" : "Openings not read: " + string.Join("; ", read.OpeningsNotRead.Take(5));
+            var stairs = read.Interior["stairs"] is JsonArray s ? $"{s.Count} stair flights read" : "Stairs not read: " + string.Join("; ", read.StairsNotRead.Take(5));
             var notes = string.Join("\n", read.Notes.Take(20).Select(n => $"- {n.Field}: {n.Why}"));
-            TaskDialog.Show("Gordium: read inside", $"{rooms}\n{openings}\n\n{read.Notes.Count} values left out" +
+            TaskDialog.Show("Gordium: read inside", $"{rooms}\n{openings}\n{stairs}\n\n{read.Notes.Count} values left out" +
                             (notes.Length > 0 ? ":\n" + notes : "") + $"\n\nLogged to {Trial.LogPath()}");
             return Result.Succeeded;
         }

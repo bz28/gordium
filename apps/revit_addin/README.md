@@ -307,6 +307,45 @@ For a clone with no venv of its own (a git worktree), install with the main clon
 `install_trial_addin.ps1 -Python C:\...\gordium\.venv\Scripts\python.exe`; the add-in then runs Python with this
 clone's packages first (`PYTHONPATH`), so the code run is always this clone's.
 
+## Stairs (interior step 4)
+
+The **stair reader** (`Gordium.Revit.Reading/StairReader.cs`, called by `InteriorReader`) sends each run of a
+component stair as one flight of `stairs`, by the [design note](../../docs/revit/revit_interior_reading_design.md)'s
+section 4 ("As built in step 4"):
+
+- **Only on the architect's tick and with nothing hidden.** `stairs` is sent only when `Gordium: These are all the
+  stairs` on Project Information says Yes (a mark added by Mark for egress; unset or No: not read) and nothing could
+  be a stair the reader doesn't walk: a stair not made of components, a multistory stair, anything else in Stairs,
+  Railings or Generic Models (an in-place or loadable family, a DirectShape), a closed workset, an unloaded link, a
+  link holding stairs, a coordination model. Each is listed first in the marking list (`MarkingListResult.StairBlockers`),
+  with a summary line for the tick. With no stair found, `stairs` is left out, never `[]`.
+- **Each flight from what is drawn.** `bottom_elevation`: the floor or landing in front of the first riser, sent only
+  within 1/16 in of the run's base. `nosings`: each tread's front edge from the run's own flat faces, then the floor's
+  edge at the head, sent only when the floor at the head agrees with the run's top and every drawn riser and tread with
+  the stair's typed `ActualRiserHeight` / `ActualTreadDepth` (and the counts with the run's). `sides`: the innermost
+  wall face beside the flight running from its treads to 80 in over them, `open` when nothing is there; anything
+  else beside it (a column, a railing) leaves `sides` out. `overhead`: the undersides over the flight clipped to its
+  plan, a stairwell opening taken out exactly. No `handrails` (railings come with the guards, step 5).
+- A flight found is never dropped: whatever can't be read is left out with its reason (`InteriorReadResult.Notes`;
+  the flight's numbers and what was compared in `Evidence["stairs"]`).
+
+**How we know (without Revit):** `StairTests.cs` draws houses 2 and 3's stairs as fake records (`InteriorDrawing.cs`)
+and checks them with the interior conformance CI applies: house 2's risers, treads, headroom (85.5 in) and clear width
+(36 in) as worked by hand; house 3's tall riser, drawn at the head, not measured; both under turned shared coordinates.
+Then each trap: no tick, No, never set; nothing found; each blocker; a typed riser or tread disagreeing; the run's
+counts and ends; a winder, a curved face, a run whose geometry fails; a riser board's top under its tread; the floor at
+the foot missing, an inch high or under half the width; a link reaching the flight; a wall inside the tread ends
+(34 in); a railing, a column, a chair or a wall cabinet beside it (furniture and fixtures count for a stair), a pipe behind the wall; a light in the headroom; a floor at the head reaching over the last tread; a wall not running the whole flight; the
+stair's own stringer low and outside, or over the treads; a beam over it (84 in); a mass, a failed duct, a beam
+through the flight, a handrail over it; a floor with a stairwell opening.
+
+**In Revit:** Record houses draws houses 2 and 3 with their stairs (`HouseDraw.DrawStairs`: a duplicated stair type
+with no supports and a run type with no nosing, the side walls, the floor at the foot and head and the overhead as
+DirectShapes, the walls and floors committed and regenerated before the `StairsEditScope`, the document regenerated
+after; any railing Revit adds is deleted: step 5), ticks "these are all the stairs", and records each house at its
+step (houses 1 and 5 at step 3, 2 and 3 at step 4). The recording keeps `stairs_not_read`, the drawing's notes and
+what Revit gave back for each stair (`drawn`), and each run's faces, numbers and surroundings in its evidence.
+
 ## Running it
 
 Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and

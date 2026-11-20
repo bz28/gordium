@@ -187,6 +187,13 @@ public static class PlanGeometry
     /// isn't a simple polygon with an area.</summary>
     public static List<List<P2>>? Overlap(IReadOnlyList<P2> a, IReadOnlyList<P2> b)
     {
+        // two convex outlines (a flight's plan, a flat ceiling or beam) overlap in one convex piece: clipped whole
+        if (Clean(a) is { } ca && Clean(b) is { } cb && IsSimple(ca) && IsSimple(cb) && IsConvex(ca) && IsConvex(cb))
+        {
+            var sc = Math.Max(Scale(ca), Scale(cb));
+            var piece = ClipConvex(ca, cb);
+            return piece.Count >= 3 && SignedArea(piece) > 1e-10 * sc * sc ? [piece] : [];
+        }
         var ta = Triangulate(a);
         var tb = Triangulate(b);
         if (ta is null || tb is null)
@@ -202,6 +209,72 @@ public static class PlanGeometry
                     pieces.Add(piece);
             }
         return pieces;
+    }
+
+    /// <summary>A convex polygon (anticlockwise) cut to the side of the line a→b on its left (the line's own points
+    /// kept), or its right when <paramref name="left"/> is false.</summary>
+    public static List<P2> Half(IReadOnlyList<P2> poly, P2 a, P2 b, bool left)
+    {
+        var output = new List<P2>();
+        double Side(P2 p) => (left ? 1 : -1) * P2.Cross(b - a, p - a);
+        for (var j = 0; j < poly.Count; j++)
+        {
+            var p = poly[j];
+            var q = poly[(j + 1) % poly.Count];
+            double dp = Side(p), dq = Side(q);
+            if (dp >= 0)
+                output.Add(p);
+            if ((dp >= 0) != (dq >= 0))
+            {
+                var t = dp / (dp - dq);
+                output.Add(new P2(p.X + t * (q.X - p.X), p.Y + t * (q.Y - p.Y)));
+            }
+        }
+        return output;
+    }
+
+    /// <summary>Convex pieces (anticlockwise) minus a simple polygon (a hole: a stairwell opening in the floor over a
+    /// flight), as convex pieces with an area: exact (each triangle of the hole taken away in turn, every piece left
+    /// cut by the triangle's edges into the parts outside it). Null when the hole isn't a simple polygon.</summary>
+    public static List<List<P2>>? Subtract(IReadOnlyList<List<P2>> pieces, IReadOnlyList<P2> hole)
+    {
+        // a convex hole is taken out by its own edges (whole pieces, never slivers between its triangles: a run of
+        // slivers with near-equal corners made the measuring code's geometry library lose area in a union)
+        var convex = Clean(hole) is { } c && IsSimple(c) && IsConvex(c) ? c : null;
+        var tris = convex is not null ? new List<P2[]> { convex.ToArray() } : Triangulate(hole);
+        if (tris is null)
+            return null;
+        var s = Math.Max(Scale(hole), pieces.Count == 0 ? 1.0 : pieces.Max(p => Scale(p)));
+        var tiny = 1e-10 * s * s;
+        var left = pieces.Select(p => p.ToList()).ToList();
+        foreach (var tri in tris)
+        {
+            var next = new List<List<P2>>();
+            foreach (var piece in left)
+            {
+                var rest = piece;
+                for (var i = 0; i < tri.Length && rest.Count >= 3; i++)
+                {
+                    // the part of what is left outside this edge is outside the hole's piece; the rest goes on to the next edge
+                    var outside = Half(rest, tri[i], tri[(i + 1) % tri.Length], left: false);
+                    if (outside.Count >= 3 && SignedArea(outside) > tiny)
+                        next.Add(outside);
+                    rest = Half(rest, tri[i], tri[(i + 1) % tri.Length], left: true);
+                }
+            }
+            left = next;
+        }
+        return left;
+    }
+
+    /// <summary>Whether a polygon cleaned anticlockwise (<see cref="Clean"/>) turns left at every corner.</summary>
+    public static bool IsConvex(IReadOnlyList<P2> p)
+    {
+        var s = Scale(p);
+        for (var i = 0; i < p.Count; i++)
+            if (P2.Cross(p[(i + 1) % p.Count] - p[i], p[(i + 2) % p.Count] - p[(i + 1) % p.Count]) < -1e-12 * s * s)
+                return false;
+        return true;
     }
 
     /// <summary>The area two simple polygons share; null when either isn't one.</summary>

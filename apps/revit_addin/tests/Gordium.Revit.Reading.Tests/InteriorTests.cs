@@ -22,7 +22,7 @@ public sealed class InteriorTests
     private static string? Note(InteriorReadResult r, string houseId, string field) =>
         r.Notes.FirstOrDefault(n => n.Part == FakeHouse.Uid(houseId) && n.Field == field)?.Why;
 
-    private static List<string> Problems(FakeHouse house, InteriorReadResult read)
+    internal static List<string> Problems(FakeHouse house, InteriorReadResult read)
     {
         var path = Path.Combine(Path.GetTempPath(), $"gordium_interior_{Guid.NewGuid():N}.json");
         File.WriteAllText(path, house.Recording(read).ToJsonString());
@@ -39,7 +39,7 @@ public sealed class InteriorTests
 
     // ---- the houses of the step, end to end ---------------------------------------------------------------------
 
-    public static TheoryData<string> Houses() => ["1_ranch_compliant", "2_two_story_small_window", "5_basement_window_well"];
+    public static TheoryData<string> Houses() => ["1_ranch_compliant", "2_two_story_small_window", "3_tall_riser", "5_basement_window_well"];
 
     [Theory]
     [MemberData(nameof(Houses))]
@@ -50,7 +50,10 @@ public sealed class InteriorTests
         Assert.Empty(read.RoomsNotRead);
         Assert.Empty(read.OpeningsNotRead);
         Assert.Equal(Ft, read.Interior["units"]!.GetValue<string>());
-        Assert.Null(read.Interior["stairs"]);                 // later steps: not read, never "none"
+        if (house.Drawing["stairs"]!.AsArray().Count == 0)
+            Assert.Null(read.Interior["stairs"]);             // none drawn: not read, never "none"
+        else
+            Assert.Empty(read.StairsNotRead);
         Assert.Null(read.Interior["doors"]);
         Assert.Null(read.Interior["guards"]);
         Assert.Null(read.Interior["has_none"]);
@@ -62,7 +65,7 @@ public sealed class InteriorTests
     {
         // true north turned 30 degrees and the survey point 875,000 ft out and 400 ft up: every point turned once
         var turn = Transform3.TurnThenMove(Math.PI / 6, new Xyz(875_000.25, -12_345.5, 400.0));
-        foreach (var name in new[] { "1_ranch_compliant", "2_two_story_small_window", "5_basement_window_well" })
+        foreach (var name in new[] { "1_ranch_compliant", "2_two_story_small_window", "3_tall_riser", "5_basement_window_well" })
         {
             var house = FakeHouse.Draw(name, turn);
             var read = InteriorReader.Read(house.Model());

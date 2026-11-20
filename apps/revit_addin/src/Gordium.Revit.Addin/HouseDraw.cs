@@ -19,8 +19,9 @@ namespace Gordium.Revit.Addin;
 /// (made from Revit's Window.rft, which cuts the wall: a frame solid of the window's size in the middle of the wall),
 /// in an outside wall of its room at its sill height, marked Escape opening Yes or No, its type's Operation set, and,
 /// on an escape window, the maker's clear opening (what the measuring code works out from the house's frame and sash)
-/// with its Clear offset above the sill line, confirmed with Gordium's stamp as the architect's tick would be. Stairs,
-/// doors and guards are later steps: not drawn. What it can't draw is an error, never a house drawn differently.
+/// with its Clear offset above the sill line, confirmed with Gordium's stamp as the architect's tick would be. In a house
+/// of the stairs step (4), each flight is a component stair (DrawStairs). Doors, guards and handrails are later steps:
+/// not drawn. What it can't draw is an error, never a house drawn differently.
 /// </summary>
 internal static class HouseDraw
 {
@@ -32,7 +33,7 @@ internal static class HouseDraw
     private static (double X, double Y) P(JsonNode n) => (D(n[0]), D(n[1]));
 
     /// <summary>Draws the house; gives the house's ids to the Revit elements' <c>UniqueId</c>s.</summary>
-    internal static Dictionary<string, string> Draw(RevitApplication app, Document doc, JsonObject house)
+    internal static Dictionary<string, string> Draw(RevitApplication app, Document doc, JsonObject house, List<string> log)
     {
         var plan = MarkSetup.Plan(RevitMarks.Bindings(doc));
         if (plan.FirstOrDefault(s => s.Action == MarkSetupAction.Conflict) is { } conflict)
@@ -181,7 +182,210 @@ internal static class HouseDraw
             ids[room["id"]!.GetValue<string>()] = r.UniqueId;
         }
         t2.Commit();
+        if (house["stairs"] is JsonArray stairs && stairs.Count > 0)
+            DrawStairs(doc, stairs.Select(n => n!.AsObject()).ToList(), levels, ids, log);
         return ids;
+    }
+
+    // ---- stairs (step 4) ----------------------------------------------------------------------------------------
+
+    /// <summary>Each flight as a component stair (one straight run of equal risers, its riser count and tread depth the
+    /// drawing's, its type's nosing length 0 and supports none), with its side walls, the floor at its foot and head as
+    /// thin DirectShapes in Floors and what is overhead as thin DirectShapes in Ceilings (no joins: a real floor or
+    /// wall could join and split the faces read). The lessons of step 3 kept: what the stair stands among is committed
+    /// and regenerated before the stair is made (a StairsEditScope needs no transaction open anyway), and the document
+    /// is regenerated once it is, before anything is read. The architect's tick ("these are all the stairs") is set, as
+    /// the architect would once every stair is drawn. Every number Revit gives back is logged.</summary>
+    private static void DrawStairs(Document doc, List<JsonObject> stairs, Dictionary<double, Level> levels,
+                                   Dictionary<string, string> ids, List<string> log)
+    {
+        var floors = Category(doc, BuiltInCategory.OST_Floors);
+        var ceilings = Category(doc, BuiltInCategory.OST_Ceilings);
+        var made = new List<(JsonObject St, Level Base, Level Top, StairsType Type)>();
+        using (var t = new Transaction(doc, "Gordium: what the stairs stand among"))
+        {
+            t.Start();
+            Level LevelAt(double z)
+            {
+                if (levels.TryGetValue(z, out var lv))
+                    return lv;
+                lv = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+                    .FirstOrDefault(l => Math.Abs(l.ProjectElevation - z) < 1e-9) ?? Level.Create(doc, z);
+                levels[z] = lv;
+                return lv;
+            }
+            foreach (var st in stairs)
+            {
+                var id = st["id"]!.GetValue<string>();
+                double b = D(st["base"]), slab = D(st["slab"]);
+                var baseLevel = LevelAt(b);
+                var topLevel = LevelAt(D(st["head_top"]));
+                if (st["upper_floor"] is JsonObject upper)
+                {
+                    // the floor the flight arrives at, one floor with the stairwell as an opening in it (its edge on the
+                    // last riser's line), as a real model has it: the outline anticlockwise, the opening clockwise
+                    var top = D(upper["top"]);
+                    CurveLoop Loop(JsonNode ring, bool anticlockwise)
+                    {
+                        var pts = ring.AsArray().Select(p => P(p!)).ToList();
+                        var area = 0.0;
+                        for (var i = 0; i < pts.Count; i++)
+                            area += pts[i].X * pts[(i + 1) % pts.Count].Y - pts[(i + 1) % pts.Count].X * pts[i].Y;
+                        if ((area > 0) != anticlockwise)
+                            pts.Reverse();
+                        var loop = new CurveLoop();
+                        for (var i = 0; i < pts.Count; i++)
+                            loop.Append(Line.CreateBound(new XYZ(pts[i].X, pts[i].Y, top - slab), new XYZ(pts[(i + 1) % pts.Count].X, pts[(i + 1) % pts.Count].Y, top - slab)));
+                        return loop;
+                    }
+                    var shape = DirectShape.CreateElement(doc, floors);
+                    shape.Name = $"Upper floor at the head of {id}, with its stairwell opening";
+                    shape.SetShape([GeometryCreationUtilities.CreateExtrusionGeometry([Loop(upper["outer"]!, true), Loop(upper["hole"]!, false)], XYZ.BasisZ, slab)]);
+                }
+                foreach (var key in new[] { "foot", "head" })
+                {
+                    if (st[key] is null)
+                        continue;
+                    var plan = st[key]!["plan"]!.AsArray().Select(p => P(p!)).ToList();
+                    var top = D(st[key]!["top"]);
+                    var shape = DirectShape.CreateElement(doc, floors);
+                    shape.Name = $"Floor at the {key} of {id}";
+                    shape.SetShape([Prism(plan, top - slab, slab)]);
+                }
+                foreach (var (piece, k) in st["overhead"]!.AsArray().Select((p, k) => (p!.AsArray(), k)))
+                {
+                    var pts = piece.Select(p => new XYZ(D(p![0]), D(p[1]), D(p[2]))).ToList();
+                    var loop = new CurveLoop();
+                    for (var i = 0; i < pts.Count; i++)
+                        loop.Append(Line.CreateBound(pts[i], pts[(i + 1) % pts.Count]));
+                    var shape = DirectShape.CreateElement(doc, ceilings);
+                    shape.Name = $"Overhead {k + 1} of {id}";
+                    shape.SetShape([GeometryCreationUtilities.CreateExtrusionGeometry([loop], XYZ.BasisZ, CeilingThickness)]);
+                }
+                var thick = D(st["wall_thickness"]);
+                foreach (var w in st["walls"]!.AsArray().Select(n => n!.AsObject()))
+                {
+                    var (fx0, fy0) = P(w["face"]![0]!);
+                    var (fx1, fy1) = P(w["face"]![1]!);
+                    var (ox, oy) = P(w["outward"]!);
+                    var line = Line.CreateBound(new XYZ(fx0 + ox * thick / 2, fy0 + oy * thick / 2, b), new XYZ(fx1 + ox * thick / 2, fy1 + oy * thick / 2, b));
+                    Wall.Create(doc, line, WallTypeOf(doc, thick).Id, baseLevel.Id, D(st["wall_top"]) - b, 0, false, false);
+                }
+                made.Add((st, baseLevel, topLevel, StairTypeOf(doc, st, log)));
+            }
+            var tick = doc.ProjectInformation.get_Parameter(Marks.AllStairs.Guid);
+            Set(tick, 1, Marks.AllStairs.Name);
+            doc.Regenerate();
+            t.Commit();
+        }
+        foreach (var (st, baseLevel, topLevel, type) in made)
+        {
+            var id = st["id"]!.GetValue<string>();
+            var warnings = new List<string>();
+            using var scope = new StairsEditScope(doc, "Gordium: a test stair");
+            var stairsId = scope.Start(baseLevel.Id, topLevel.Id);
+            StairsRun run;
+            using (var t = new Transaction(doc, "Gordium: its run"))
+            {
+                t.Start();
+                var s = (Stairs)doc.GetElement(stairsId);
+                s.ChangeTypeId(type.Id);
+                Set(s.get_Parameter(BuiltInParameter.STAIRS_BASE_OFFSET), 0.0, "the stair's base offset");
+                // the floor at the head this far above the run's top: house 3's tall riser, where Revit makes one
+                Set(s.get_Parameter(BuiltInParameter.STAIRS_TOP_OFFSET), -D(st["head_above_run"]), "the stair's top offset");
+                s.DesiredRisersNumber = st["risers"]!.GetValue<int>();
+                s.ActualTreadDepth = D(st["tread"]);
+                doc.Regenerate();
+                var (x0, y0) = P(st["path"]![0]!);
+                var (x1, y1) = P(st["path"]![1]!);
+                var b = D(st["base"]);
+                run = StairsRun.CreateStraightRun(doc, stairsId, Line.CreateBound(new XYZ(x0, y0, b), new XYZ(x1, y1, b)), StairsRunJustification.Center);
+                run.ActualRunWidth = D(st["width"]);
+                var options = t.GetFailureHandlingOptions();
+                options.SetFailuresPreprocessor(new Warnings(warnings));
+                t.SetFailureHandlingOptions(options);
+                t.Commit();
+            }
+            scope.Commit(new Warnings(warnings));
+            using (var t = new Transaction(doc, "Gordium: regenerate after the stair"))
+            {
+                t.Start();
+                // railings are step 5 (with the guards): one Revit added on its own isn't the drawing's
+                if (((Stairs)doc.GetElement(stairsId)).GetAssociatedRailings() is { Count: > 0 } railings)
+                {
+                    log.Add($"stair {id}: {railings.Count} railings Revit added deleted (railings: step 5)");
+                    doc.Delete(railings);
+                }
+                doc.Regenerate();
+                t.Commit();
+            }
+            var stair = (Stairs)doc.GetElement(stairsId);
+            run = (StairsRun)doc.GetElement(run.Id);
+            log.Add($"stair {id}: risers {stair.ActualRisersNumber} (drawing {st["risers"]}), riser {stair.ActualRiserHeight * 12:0.######} in " +
+                    $"(drawing {D(st["riser"]) * 12:0.######}), tread {stair.ActualTreadDepth * 12:0.######} in, base {stair.BaseElevation:0.######}, " +
+                    $"top {stair.TopElevation:0.######}; run risers {run.ActualRisersNumber}, treads {run.ActualTreadsNumber}, width " +
+                    $"{run.ActualRunWidth * 12:0.######} in, supports {stair.GetStairsSupports().Count}, railings {stair.GetAssociatedRailings().Count}; " +
+                    "warnings dismissed: " + (warnings.Count == 0 ? "none" : string.Join(" | ", warnings)));
+            // what isn't the drawing is an error, never a stair drawn differently
+            if (run.ActualRisersNumber != st["risers"]!.GetValue<int>() || Math.Abs(stair.ActualRiserHeight - D(st["riser"])) > 1e-9
+                || Math.Abs(stair.ActualTreadDepth - D(st["tread"])) > 1e-9)
+                throw new InvalidOperationException($"stair {id} came out unlike the drawing: {log[^1]}");
+            ids[id] = run.UniqueId;
+        }
+    }
+
+    private const double CeilingThickness = 1.0 / 12;
+
+    private static ElementId Category(Document doc, BuiltInCategory c) =>
+        DirectShape.IsValidCategoryId(new ElementId(c), doc) ? new ElementId(c)
+            : throw new InvalidOperationException($"a DirectShape can't be in {c} here");
+
+    private static Solid Prism(List<(double X, double Y)> plan, double z, double height)
+    {
+        var loop = new CurveLoop();
+        for (var i = 0; i < plan.Count; i++)
+            loop.Append(Line.CreateBound(new XYZ(plan[i].X, plan[i].Y, z), new XYZ(plan[(i + 1) % plan.Count].X, plan[(i + 1) % plan.Count].Y, z)));
+        return GeometryCreationUtilities.CreateExtrusionGeometry([loop], XYZ.BasisZ, height);
+    }
+
+    /// <summary>A stair type of the project's first, duplicated for the drawing: its riser and tread limits wide
+    /// enough for the drawing's (so Revit doesn't refuse or warn), its run width the drawing's, no side or middle
+    /// supports (a stringer would stand inside the side walls), and a run type of its own with no nosing (the drawing's
+    /// nosings are the riser lines). Each setting Revit refuses is logged, not hidden.</summary>
+    private static StairsType StairTypeOf(Document doc, JsonObject st, List<string> log)
+    {
+        var name = $"Gordium test stair {st["id"]}";
+        var types = new FilteredElementCollector(doc).OfClass(typeof(StairsType)).Cast<StairsType>().ToList();
+        var basic = types.FirstOrDefault() ?? throw new InvalidOperationException("no stair type in a new project");
+        var type = (StairsType)basic.Duplicate(name);
+        type.MaxRiserHeight = D(st["riser"]) + 1.0 / 12;
+        type.MinTreadDepth = D(st["tread"]);
+        type.MinRunWidth = D(st["width"]);
+        foreach (var p in new[] { BuiltInParameter.STAIRSTYPE_HAS_LEFT_SUPPORT, BuiltInParameter.STAIRSTYPE_HAS_RIGHT_SUPPORT,
+                                  BuiltInParameter.STAIRSTYPE_HAS_INTERMEDIATE_SUPPORT })
+            if (type.get_Parameter(p) is not { IsReadOnly: false } param || !param.Set(0))
+                log.Add($"stair type {name}: {p} couldn't be set to none");
+        var runType = (StairsRunType)((ElementType)doc.GetElement(type.RunType)).Duplicate(name + " run");
+        runType.NosingLength = 0;
+        type.RunType = runType.Id;
+        log.Add($"stair type {name} from \"{basic.Name}\": run type monolithic {runType.IsMonolithic}, risers {runType.HasRisers}, " +
+                $"treads {runType.HasTreads}, tread {runType.TreadThickness * 12:0.###} in thick, nosing {runType.NosingLength * 12:0.###} in");
+        return type;
+    }
+
+    /// <summary>Takes Revit's warnings out of the way (each kept for the log); an error is left to roll back.</summary>
+    private sealed class Warnings(List<string> seen) : IFailuresPreprocessor
+    {
+        public FailureProcessingResult PreprocessFailures(FailuresAccessor failures)
+        {
+            foreach (var f in failures.GetFailureMessages())
+            {
+                seen.Add($"{f.GetSeverity()}: {f.GetDescriptionText()}");
+                if (f.GetSeverity() == FailureSeverity.Warning)
+                    failures.DeleteWarning(f);
+            }
+            return FailureProcessingResult.Continue;
+        }
     }
 
     private static double? Length(Element e, MarkDefinition m) =>

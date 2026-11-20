@@ -33,6 +33,11 @@ internal sealed class FakeHouse
     public List<WorksetRecord> Worksets { get; } = [];
     public Dictionary<string, string> Ids { get; } = [];
 
+    public List<StairRecord> Stairs { get; } = [];
+    public List<StairCandidate> StairCandidates { get; } = [];
+    public Dictionary<Guid, MarkValue> ProjectMarks { get; } = new() { [Marks.AllStairs.Guid] = new(true, 1) };   // ticked
+    public int CoordinationModels { get; set; }
+
     public RevitModel Model() => new()
     {
         Document = Name,
@@ -40,15 +45,135 @@ internal sealed class FakeHouse
         Phases = ["phase-1", LastPhase],
         Marked = Marked,
         UserWorksets = Worksets,
-        Interior = new InteriorRecords { Rooms = Rooms, Openings = Openings, EnclosedAreas = Areas, Links = Links },
+        ProjectMarks = ProjectMarks,
+        Interior = new InteriorRecords
+        {
+            Rooms = Rooms, Openings = Openings, EnclosedAreas = Areas, Links = Links, Stairs = Stairs,
+            StairCandidates = StairCandidates, CoordinationModels = CoordinationModels,
+        },
     };
+
+    /// <summary>The stair <paramref name="houseId"/>'s record and its one run's index there.</summary>
+    public int StairIndex(string houseId) => Stairs.FindIndex(s => s.UniqueId == "stair-" + houseId);
+
+    /// <summary>Changes the one run of stair <paramref name="houseId"/>.</summary>
+    public void SetRun(string houseId, Func<RunRecord, RunRecord> change)
+    {
+        var i = StairIndex(houseId);
+        Stairs[i] = Stairs[i] with { Runs = [change(Stairs[i].Runs[0])] };
+    }
+
+    /// <summary>Adds something around stair <paramref name="houseId"/>'s run (its box worked out from its faces).</summary>
+    public void AddNear(string houseId, NearbyElement e) =>
+        SetRun(houseId, r => r with { Near = [.. r.Near!, Boxed(e)] });
+
+    /// <summary>The element with its box (internal, axis-aligned) around its faces, as Revit gives it.</summary>
+    public static NearbyElement Boxed(NearbyElement e)
+    {
+        var pts = (e.Faces ?? []).SelectMany(f => f.Points).ToList();
+        return pts.Count == 0 ? e : e with
+        {
+            Box = new RevitBox(new(pts.Min(p => p.X), pts.Min(p => p.Y), pts.Min(p => p.Z)), new(pts.Max(p => p.X), pts.Max(p => p.Y), pts.Max(p => p.Z))),
+        };
+    }
+
+    /// <summary>A point of stair <paramref name="st"/>'s frame (s up its path from the first riser, a across it to the
+    /// left looking up), in shared plan coordinates.</summary>
+    public static (double X, double Y) StairAt(JsonObject st, double s, double a)
+    {
+        var (x0, y0) = P(st["path"]![0]!);
+        var (x1, y1) = P(st["path"]![1]!);
+        var len = Math.Sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+        double ux = (x1 - x0) / len, uy = (y1 - y0) / len;
+        return (x0 + s * ux - a * uy, y0 + s * uy + a * ux);
+    }
+
+    /// <summary>A box in a stair's frame, as a prism (its plan anticlockwise in shared coordinates).</summary>
+    public List<SurfaceRecord> StairBox(JsonObject st, double s0, double s1, double a0, double a1, double z0, double z1) =>
+        Prism([StairAt(st, s0, a0), StairAt(st, s1, a0), StairAt(st, s1, a1), StairAt(st, s0, a1)], z0, z1);
+
+    public JsonObject StairDrawing(string houseId) =>
+        Drawing["stairs"]!.AsArray().Select(n => n!.AsObject()).First(s => s["id"]!.GetValue<string>() == houseId);
+
+    /// <summary>Each stair of the drawing as the Revit layer would read the component stair HouseDraw draws: one
+    /// straight run whose treads are slabs 1 in thick (their tops the treads), its path from the first riser to the
+    /// last, the stair's typed riser and tread equal to the drawn ones; around it the side walls, the floor at its foot
+    /// and head, and what is overhead (thin solids whose undersides are the house's pieces).</summary>
+    private void DrawStairs()
+    {
+        foreach (var st in Drawing["stairs"]!.AsArray().Select(n => n!.AsObject()))
+        {
+            var id = st["id"]!.GetValue<string>();
+            double b = D(st["base"]), r = D(st["riser"]), t = D(st["tread"]), w = D(st["width"]);
+            var n = st["risers"]!.GetValue<int>();
+            var faces = new List<SurfaceRecord>();
+            for (var k = 1; k < n; k++)
+                faces.AddRange(StairBox(st, (k - 1) * t, k * t, -w / 2, w / 2, b + k * r - 1.0 / 12, b + k * r));
+            // the last riser board as Revit 2027.4 draws it (trial step 4 run 2, house 2: a top face 1/2 in deep along
+            // the path, 12.5 to 12.5417 ft, 9.75 ft up: the run's top less its 3 in tread), its face on the last riser's line
+            faces.AddRange(StairBox(st, (n - 1) * t, (n - 1) * t + 0.5 / 12, -w / 2, w / 2, b + (n - 1) * r, b + n * r - 3.0 / 12));
+            var near = new List<NearbyElement> { new("run-" + id, "OST_StairsRuns", "Run", Faces: faces) };
+            var slab = D(st["slab"]);
+            if (st["upper_floor"] is JsonObject upper)
+            {
+                // one floor around the stairwell opening (its edge on the last riser's line), as a real model has it
+                var top = D(upper["top"]);
+                near.Add(new("head-" + id, "OST_Floors", "Upper floor",
+                             Faces: PrismWithHole(Ccw(upper["outer"]!), Ccw(upper["hole"]!), top - slab, top)));
+            }
+            foreach (var (key, what) in new[] { ("foot", "Floor at the foot"), ("head", "Floor at the head") })
+            {
+                if (st[key] is null)
+                    continue;
+                var plan = st[key]!["plan"]!.AsArray().Select(p => P(p!)).ToList();
+                if (PlanGeometry.SignedArea(plan.Select(p => new P2(p.X, p.Y)).ToList()) < 0)
+                    plan.Reverse();
+                var top = D(st[key]!["top"]);
+                near.Add(new($"{key}-{id}", "OST_Floors", what, Faces: Prism(plan, top - slab, top)));
+            }
+            var thick = D(st["wall_thickness"]);
+            foreach (var wall in st["walls"]!.AsArray().Select(x => x!.AsObject()))
+            {
+                var (fx0, fy0) = P(wall["face"]![0]!);
+                var (fx1, fy1) = P(wall["face"]![1]!);
+                var (ox, oy) = P(wall["outward"]!);
+                List<(double X, double Y)> plan = [(fx0, fy0), (fx1, fy1), (fx1 + ox * thick, fy1 + oy * thick), (fx0 + ox * thick, fy0 + oy * thick)];
+                if (PlanGeometry.SignedArea(plan.Select(p => new P2(p.X, p.Y)).ToList()) < 0)
+                    plan.Reverse();
+                near.Add(new($"wall-{id}-{wall["side"]}", "OST_Walls", "Stair wall", Faces: Prism(plan, b, D(st["wall_top"]))));
+            }
+            foreach (var (piece, k) in st["overhead"]!.AsArray().Select((p, k) => (p!.AsArray(), k)))
+            {
+                var pts = piece.Select(p => (X: D(p![0]), Y: D(p[1]), Z: D(p[2]))).ToList();
+                var thin = D(Drawing["ceiling_thickness"]);
+                near.Add(new($"over-{id}-{k}", "OST_Ceilings", "Overhead", Faces: [Face(Down(pts), pts), Face(new(0, 0, 1), pts.Select(p => (p.X, p.Y, p.Z + thin)))]));
+            }
+            var (px0, py0) = P(st["path"]![0]!);
+            var (px1, py1) = P(st["path"]![1]!);
+            Stairs.Add(new StairRecord
+            {
+                UniqueId = "stair-" + id, Name = st["name"]!.GetValue<string>(), IsByComponent = true, PhaseCreated = LastPhase,
+                BaseElevation = Fake.Place(px0, py0, b).Z, ActualRiserHeight = r, ActualTreadDepth = t,
+                Runs =
+                [
+                    new RunRecord
+                    {
+                        UniqueId = "run-" + id, Style = "Straight", BaseElevation = 0, TopElevation = n * r, RisersNumber = n,
+                        TreadsNumber = n - 1, BeginsWithRiser = true, EndsWithRiser = true,
+                        Path = [Fake.Place(px0, py0, b), Fake.Place(px1, py1, b)], Faces = faces, Near = near.Select(Boxed).ToList(),
+                    },
+                ],
+            });
+            Ids[id] = "run-" + id;
+        }
+    }
 
     /// <summary>The recording the add-in writes for this reading (RecordHouses.cs), for the interior conformance check.</summary>
     public JsonObject Recording(InteriorReadResult read) => new()
     {
         ["host"] = "revit",
         ["house"] = Name,
-        ["step"] = 3,
+        ["step"] = Drawing["step"]!.GetValue<int>(),
         ["recorded"] = new JsonObject { ["by"] = "InteriorTests (fake Revit records)", ["date"] = Confirmed, ["tool"] = "dotnet test" },
         ["ids"] = new JsonObject(Ids.Select(p => KeyValuePair.Create(p.Key, (JsonNode?)p.Value))),
         ["interior"] = read.Interior.DeepClone(),
@@ -206,6 +331,7 @@ internal sealed class FakeHouse
                 WallOpening = cut.SelectMany(p => new[] { Fake.Place(p.X, p.Y, z + sill), Fake.Place(p.X, p.Y, z + sill + height) }).ToList(),
             });
         }
+        DrawStairs();
     }
 
     public static FakeHouse Draw(string name, Transform3? turn = null) => new(name, turn ?? Transform3.Identity);
@@ -257,6 +383,37 @@ internal sealed class FakeHouse
         var pts = points.Select(p => Fake.Place(p.X, p.Y, p.Z)).ToList();
         var n = Fake.Place(normal.X, normal.Y, normal.Z) - Fake.Place(0, 0, 0);
         return new SurfaceRecord(true, n, [pts.Select(p => new LoopCurve(p, true)).ToList()], pts);
+    }
+
+    private static List<(double X, double Y)> Ccw(JsonNode n)
+    {
+        var plan = n.AsArray().Select(p => P(p!)).ToList();
+        if (PlanGeometry.SignedArea(plan.Select(p => new P2(p.X, p.Y)).ToList()) < 0)
+            plan.Reverse();
+        return plan;
+    }
+
+    /// <summary>A slab over an outline with an opening (both anticlockwise): its top and bottom faces each two loops
+    /// (the outline, then the opening), a side per outline edge facing out, a side per opening edge facing in.</summary>
+    public List<SurfaceRecord> PrismWithHole(List<(double X, double Y)> outer, List<(double X, double Y)> hole, double z0, double z1)
+    {
+        SurfaceRecord Flat(double z, double nz)
+        {
+            var o = outer.Select(p => Fake.Place(p.X, p.Y, z)).ToList();
+            var h = hole.Select(p => Fake.Place(p.X, p.Y, z)).ToList();
+            var n = Fake.Place(0, 0, nz) - Fake.Place(0, 0, 0);
+            return new SurfaceRecord(true, n, [o.Select(p => new LoopCurve(p, true)).ToList(), h.Select(p => new LoopCurve(p, true)).ToList()], o.Concat(h).ToList());
+        }
+        var faces = new List<SurfaceRecord> { Flat(z1, 1), Flat(z0, -1) };
+        foreach (var (ring, outward) in new[] { (outer, 1.0), (hole, -1.0) })
+            for (var i = 0; i < ring.Count; i++)
+            {
+                var a = ring[i];
+                var b = ring[(i + 1) % ring.Count];
+                var len = Math.Sqrt((b.X - a.X) * (b.X - a.X) + (b.Y - a.Y) * (b.Y - a.Y));
+                faces.Add(Face(new(outward * (b.Y - a.Y) / len, -outward * (b.X - a.X) / len, 0), [(a.X, a.Y, z0), (b.X, b.Y, z0), (b.X, b.Y, z1), (a.X, a.Y, z1)]));
+            }
+        return faces;
     }
 
     /// <summary>A prism over a plan outline (anticlockwise): top, bottom and a side per edge.</summary>

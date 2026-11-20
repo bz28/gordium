@@ -24,6 +24,19 @@ public sealed record InteriorRecords
     /// <summary>Every linked Revit model (<c>RevitLinkInstance</c>).</summary>
     public IReadOnlyList<InteriorLink> Links { get; init; } = [];
 
+    /// <summary>Every <c>Stairs</c> element (<c>OfCategory(OST_Stairs)</c>, the <c>Stairs</c> class), with its runs
+    /// (step 4). Null when the Revit layer didn't read them: then no stair is read.</summary>
+    public IReadOnlyList<StairRecord>? Stairs { get; init; }
+
+    /// <summary>Everything else that could be a stair the reader doesn't walk (design note, section 2): any element in
+    /// Stairs, Railings or Generic Models that isn't a <c>Stairs</c> or a <c>Railing</c> (an in-place family, a loadable
+    /// family, a DirectShape), and every <c>MultistoryStairs</c>. While any is in the design checked, no stair is read.</summary>
+    public IReadOnlyList<StairCandidate> StairCandidates { get; init; } = [];
+
+    /// <summary>How many coordination models are linked (<c>CoordinationModelLinkUtils.GetAllCoordinationModelInstanceIds</c>):
+    /// what is in one isn't read, and a stair could be in it.</summary>
+    public int CoordinationModels { get; init; }
+
     /// <summary>What the Revit layer looked at and what Revit said (each level's enclosed areas, an error), for the
     /// trial's log only: never read by a decision.</summary>
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
@@ -46,8 +59,9 @@ public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz P
 /// <param name="Rooms">Rooms in the linked document (0 when not loaded: not known, see <paramref name="Loaded"/>).</param>
 /// <param name="WindowsAndDoors">Windows and doors in it.</param>
 /// <param name="HasLinks">The linked document holds links of its own (their contents aren't read).</param>
+/// <param name="Stairs">Elements in the linked document's Stairs, Railings and Generic Models categories.</param>
 public sealed record InteriorLink(string UniqueId, string Name, bool Loaded, RevitBox? Box, int Rooms, int WindowsAndDoors,
-                                  bool HasLinks);
+                                  bool HasLinks, int Stairs = 0);
 
 /// <summary>A Room's own geometry and what stands in, under and over it.</summary>
 public sealed record RoomRecord
@@ -95,8 +109,111 @@ public sealed record BoundarySegmentRecord(Xyz Start, Xyz End, bool IsLine, stri
 /// <param name="Faces">Its solids' faces (<c>get_Geometry</c>, Fine, a family's instance geometry included), or null
 /// when not asked (<see cref="RoomRecord.Inside"/>).</param>
 /// <param name="GeometryFailed"><c>get_Geometry</c> threw, or gave something other than solids, meshes or curves.</param>
+/// <param name="Box">Its box (<c>get_BoundingBox(null)</c>), internal, where asked (a flight's surroundings).</param>
+/// <param name="PhaseDemolished"><c>Element.DemolishedPhaseId</c>, where asked.</param>
+/// <param name="DesignOption"><c>Element.DesignOption</c>'s id, where asked.</param>
 public sealed record NearbyElement(string UniqueId, string BuiltInCategory, string? Name = null, string? Host = null,
-                                   IReadOnlyList<SurfaceRecord>? Faces = null, bool GeometryFailed = false);
+                                   IReadOnlyList<SurfaceRecord>? Faces = null, bool GeometryFailed = false,
+                                   RevitBox? Box = null, string? PhaseDemolished = null, string? DesignOption = null);
+
+/// <summary>Something in Stairs, Railings or Generic Models the reader doesn't walk as a stair.</summary>
+/// <param name="UniqueId"><c>Element.UniqueId</c>.</param>
+/// <param name="BuiltInCategory">Its category's built-in name.</param>
+/// <param name="Name">For the words.</param>
+/// <param name="PhaseDemolished"><c>Element.DemolishedPhaseId</c>.</param>
+/// <param name="DesignOption"><c>Element.DesignOption</c>'s id.</param>
+/// <param name="Kind">What Revit says it is, in the architect's words ("an in-place family", "a loadable family", "a
+/// DirectShape", "a multistory stair", "a stair not made of components", "another element").</param>
+public sealed record StairCandidate(string UniqueId, string BuiltInCategory, string? Name, string Kind,
+                                    string? PhaseDemolished = null, string? DesignOption = null);
+
+/// <summary>A component stair (<c>Stairs</c>), with each of its runs: one flight each (design note, section 4).</summary>
+public sealed record StairRecord
+{
+    /// <summary><c>Element.UniqueId</c>.</summary>
+    public required string UniqueId { get; init; }
+
+    /// <summary>Its type's name and Mark, for the words.</summary>
+    public string? Name { get; init; }
+
+    /// <summary><c>Stairs.IsByComponent</c>: false for a stair sketched the old way (then no stair is read).</summary>
+    public bool IsByComponent { get; init; }
+
+    /// <summary><c>Stairs.MultistoryStairsId</c>'s id, or null: one of a multistory stair (then no stair is read).</summary>
+    public string? MultistoryStairsId { get; init; }
+
+    public string? PhaseCreated { get; init; }
+    public string? PhaseDemolished { get; init; }
+    public string? DesignOption { get; init; }
+
+    /// <summary><c>Stairs.BaseElevation</c>, internal: what each run's base and top elevations are relative to.</summary>
+    public double? BaseElevation { get; init; }
+
+    /// <summary>The typed values the drawn risers and treads are checked against: <c>Stairs.ActualRiserHeight</c>,
+    /// <c>Stairs.ActualTreadDepth</c>.</summary>
+    public double? ActualRiserHeight { get; init; }
+
+    /// <inheritdoc cref="ActualRiserHeight"/>
+    public double? ActualTreadDepth { get; init; }
+
+    /// <summary>Its runs (<c>GetStairsRuns</c>), in Revit's order.</summary>
+    public IReadOnlyList<RunRecord> Runs { get; init; } = [];
+
+    /// <summary>Its own landings, supports and railings (<c>GetStairsLandings</c>, <c>GetStairsSupports</c>,
+    /// <c>GetAssociatedRailings</c>), by <c>UniqueId</c>.</summary>
+    public IReadOnlyList<string> Landings { get; init; } = [];
+
+    /// <inheritdoc cref="Landings"/>
+    public IReadOnlyList<string> Supports { get; init; } = [];
+
+    /// <inheritdoc cref="Landings"/>
+    public IReadOnlyList<string> Railings { get; init; } = [];
+}
+
+/// <summary>One run of a component stair (<c>StairsRun</c>): what its flight is read from, and what is around it.</summary>
+public sealed record RunRecord
+{
+    /// <summary><c>Element.UniqueId</c>: the flight's id.</summary>
+    public required string UniqueId { get; init; }
+
+    /// <summary><c>StairsRun.StairsRunStyle</c> by name (<c>Straight</c>, <c>Winder</c>, <c>Spiral</c>, <c>Sketched</c>).</summary>
+    public string Style { get; init; } = "";
+
+    /// <summary><c>StairsRun.BaseElevation</c> and <c>TopElevation</c>: relative to the stair's base.</summary>
+    public double? BaseElevation { get; init; }
+
+    /// <inheritdoc cref="BaseElevation"/>
+    public double? TopElevation { get; init; }
+
+    /// <summary><c>StairsRun.ActualRisersNumber</c> and <c>ActualTreadsNumber</c>.</summary>
+    public int? RisersNumber { get; init; }
+
+    /// <inheritdoc cref="RisersNumber"/>
+    public int? TreadsNumber { get; init; }
+
+    /// <summary><c>StairsRun.BeginsWithRiser</c>, <c>EndsWithRiser</c>.</summary>
+    public bool BeginsWithRiser { get; init; }
+
+    /// <inheritdoc cref="BeginsWithRiser"/>
+    public bool EndsWithRiser { get; init; }
+
+    /// <summary>The run's path in plan (<c>GetStairsPath()</c>'s curves' ends, in order), internal: the direction up it.</summary>
+    public IReadOnlyList<Xyz> Path { get; init; } = [];
+
+    /// <summary>The run's own solids' faces (<c>get_Geometry</c>, Fine); null when it couldn't be read.</summary>
+    public IReadOnlyList<SurfaceRecord>? Faces { get; init; }
+
+    /// <summary>Its geometry held a mesh, or threw.</summary>
+    public bool GeometryFailed { get; init; }
+
+    /// <summary>Every model element whose box meets the run's box widened 2 ft in plan, from 2 ft under its base up
+    /// (with its faces, box, phase and option): the floors at its foot and head, its sides, what is overhead. Null
+    /// when it couldn't be looked for.</summary>
+    public IReadOnlyList<NearbyElement>? Near { get; init; }
+
+    /// <summary>What the Revit layer looked at (the faces found, the run's numbers), for the trial's log only.</summary>
+    public IReadOnlyList<string> Diagnostics { get; init; } = [];
+}
 
 /// <summary>A face of a solid (<c>Face</c>), or a mesh read as one.</summary>
 /// <param name="Planar">A <c>PlanarFace</c> (anything else, a curved face or a mesh, is not read exactly).</param>

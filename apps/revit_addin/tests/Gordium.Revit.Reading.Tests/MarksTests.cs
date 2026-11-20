@@ -29,6 +29,7 @@ public sealed class MarksTests
             ("Gordium: Clear source", "2bc7eaef-1770-4077-870b-450ed224adde", MarkValueKind.Text, MarkBinding.Type, ["OST_Windows"]),
             ("Gordium: Clear confirmed", "66ced3f6-2dd7-4aa7-a0ce-89d086652103", MarkValueKind.Text, MarkBinding.Type, ["OST_Windows"]),
             ("Gordium: Top rail is handrail", "8f09dc9e-0975-42ba-8a4b-43e43b393578", MarkValueKind.YesNo, MarkBinding.Type, ["OST_StairsRailing"]),
+            ("Gordium: These are all the stairs", "90205a68-1eaf-4ca2-a350-0cb24012986c", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
@@ -341,7 +342,18 @@ public sealed class MarksTests
             "Gordium: Escape opening: 1 of 4 windows and doors not marked, so no escape opening is read until each says Yes or No.",
             "Gordium: Exit door: all 2 doors marked.",
             "Gordium: Operation: 1 windows and doors have no operation Gordium reads, so their egress measures need review.",
+            "Gordium: These are all the stairs: not set on Project Information, so no stair is read for egress until it says Yes.",
         ], list.Summary);
+        var ticked = model with
+        {
+            ProjectMarks = new Dictionary<Guid, MarkValue> { [Marks.AllStairs.Guid] = new(true, 1) },
+        };
+        Assert.Equal("Gordium: These are all the stairs: Yes (on Project Information).", MarkingList.Build(ticked).Summary[^1]);
+        var unset = model with
+        {
+            ProjectMarks = new Dictionary<Guid, MarkValue> { [Marks.AllStairs.Guid] = new(false, 0) },   // never set reads 0
+        };
+        Assert.Contains("not set on Project Information", MarkingList.Build(unset).Summary[^1]);
         var text = MarkingList.Text(list);
         Assert.StartsWith("Gordium: Sleeping room: 1 of 2", text);
         Assert.Contains("TO MARK  Room: Bedroom 2 102\n    Gordium: Sleeping room: not set - suggested: Yes", text);
