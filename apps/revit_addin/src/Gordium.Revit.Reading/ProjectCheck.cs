@@ -128,7 +128,8 @@ public static class ProjectFacts
         IReadOnlyList<(Xyz, Xyz)>? edges = null;
         var street = Marks.Text(Get(Marks.StreetEdge));
         if (street is null)
-            missing.Add($"{Marks.StreetEdge.Name}: click the lot edge along the street when Check my project asks.");
+            missing.Add($"{Marks.StreetEdge.Name}: click the lot edge along the street when Check my project asks " +
+                        "(in a plan or site view; with no property line drawn, draw it first).");
         else if ((edges = StreetEdges.Parse(street)) is null)
             missing.Add($"{Marks.StreetEdge.Name} holds \"{street}\", which isn't an edge Gordium wrote: clear it, then " +
                         "click the lot edge along the street when Check my project asks.");
