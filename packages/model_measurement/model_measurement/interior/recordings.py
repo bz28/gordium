@@ -27,6 +27,7 @@ from shapely.geometry.polygon import orient
 from shapely.ops import split, unary_union
 
 from model_measurement.interior import measure
+from model_measurement.interior.has_none import KINDS as NONE_KINDS
 from model_measurement.interior.read import INCHES
 
 REPO = Path(__file__).resolve().parents[4]
@@ -77,13 +78,50 @@ STEPS = {
         "2_two_story_small_window": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "egress_door": DOORS},
         "4_loft": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "guard": GUARDS},
         "5_basement_window_well": {**ROOMS_AND_WINDOWS, "egress_door": {"door_side_hinged"}},
-        "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS},
+        "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS}},
+    # Step 6 (the architect's "this house has none of" ticks): each list the hand-worked house gives empty (houses 1
+    # and 6 `stairs: []`; 1, 2, 5 and 6 `guards: []`; 4 `doors: []`) is ticked in the drawing (NONE_LISTS, `has_none`)
+    # and must come back as that empty list: in scope with no measures. No hand-worked house has a `has_none` claim, so
+    # none is ticked and none may come back (recording_problems compares them). House 5's stair isn't drawn (as in step
+    # 5), but no guard is: "no guards" is the house's own. House 3 has no empty list: it stays step 4.
+    6: {"1_ranch_compliant": {**ROOMS_AND_WINDOWS, "egress_door": DOORS, "stair": set(), "guard": set()},
+        "2_two_story_small_window": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "egress_door": DOORS,
+                                     "guard": set()},
+        "4_loft": {**ROOMS_AND_WINDOWS, "stair": STAIRS | HANDRAILS, "guard": GUARDS, "egress_door": set()},
+        "5_basement_window_well": {**ROOMS_AND_WINDOWS, "egress_door": {"door_side_hinged"}, "guard": set()},
+        "6_door_stated_clear": {**ROOMS_AND_WINDOWS, "egress_door": DOORS, "stair": set(), "guard": set()},
         # the first real house (test_data/real_houses/), placed by its layout.yaml: its rooms and marked escape windows
-        # and its front door. No window or door has a clear opening, so every clear measure must come back not measured
-        # (expected.yaml); its stairs and guards aren't drawn (layout.yaml `not_drawn`: the drawings give no riser,
-        # tread or baluster to draw), so neither may be read
-        "orangetown_ny_80_south_william": {**ROOMS_AND_WINDOWS, "egress_door": DOORS}},
+        # and its front door, as in step 5. No window or door has a clear opening, so every clear measure must come back
+        # not measured (expected.yaml); its stairs and guards aren't drawn (layout.yaml `not_drawn`: the drawings give
+        # no riser, tread or baluster to draw), so neither may be read. It is the first house with `has_none` claims
+        # (seven): each is ticked in the drawing and, nothing of the kind being drawn, must come back, bringing what
+        # has_none.KINDS says it brings (claimed): its part kinds as empty lists, its escape openings' measures
+        "orangetown_ny_80_south_william": None},
 }
+# the lists the format has itself, each the part kind it gives: an empty one is the house having none (step 6's ticks)
+NONE_LISTS = {"stairs": "stair", "doors": "egress_door", "guards": "guard"}
+
+
+def claimed(base: dict, kinds) -> dict:
+    """A step's scope for a house with `has_none` claims (step 6): `base` and, for each claim, what it brings
+    (has_none.KINDS): each of its part kinds in scope as an empty list (no measures), and the measures it gives every
+    escape opening (no patio cover: none opens into one) and every stair measured (its stairs' only where the stair
+    kind is read). Nothing else: a claim adds no measure the house doesn't give."""
+    out = {k: set(v) for k, v in base.items()}
+    for kind in kinds:
+        spec = NONE_KINDS[kind]
+        for part in spec.get("parts", ()):
+            out.setdefault(part, set())
+        out["emergency_escape_opening"] |= set(spec.get("openings", {}))
+        if "stair" in out:
+            out["stair"] |= set(spec.get("stairs", {}))
+    return out
+
+
+STEPS[6]["orangetown_ny_80_south_william"] = claimed(
+    {**ROOMS_AND_WINDOWS, "egress_door": DOORS},
+    sorted(c["kind"] for c in yaml.safe_load((REAL / "orangetown_ny_80_south_william" / "house.yaml")
+                                             .read_text(encoding="utf-8")).get("has_none") or []))
 STEP = max(STEPS)
 # each house at the latest step that draws it: its recording must be of that step
 HOUSE_STEP = {house: step for step in sorted(STEPS) for house in STEPS[step]}
@@ -208,6 +246,14 @@ def recording_problems(rec: dict) -> list[str]:
                         problems.append(f"{where}: {hid} {m} = {values[m]!r}, expected {w['values'][m]!r}")
                 elif m in values:
                     problems.append(f"{where}: {hid} {m} = {values[m]!r}, expected not measured")
+    # what the house has none of (step 6): the claims sent and taken must be exactly the hand-worked house's own
+    house_none = sorted(measure(_house(name))["has_none"])
+    interior = rec.get("interior") if isinstance(rec.get("interior"), dict) else {}
+    sent = interior.get("has_none") or []
+    sent_kinds = sorted(str(e.get("kind")) if isinstance(e, dict) else repr(e) for e in sent) \
+        if isinstance(sent, list) else [repr(sent)]
+    if sent_kinds != house_none or sorted(got["has_none"]) != house_none:
+        problems.append(f"{where}: has none of {sent_kinds} (taken: {sorted(got['has_none'])}), expected {house_none}")
     house_not_checked = sorted(x["id"] for x in measure(_house(name))["not_checked"])
     not_checked = sorted(back.get(x["id"], str(x["id"])) for x in got["not_checked"])
     if not_checked != house_not_checked:
@@ -414,10 +460,14 @@ def drawing(name: str) -> dict:
         not_drawn.add("stairs")
     if stairs and not handrails and any(st.get("handrails") for st in house["stairs"]):
         not_drawn.add("handrails")
+    # step 6: the "this house has none of" ticks to set: each list in scope the house gives empty, then each claim of
+    # its own has_none (the reader sends each back only when nothing of the kind is drawn)
+    has_none = [key for key, kind in NONE_LISTS.items() if house.get(key) == [] and kind in scope(name)] \
+        + [c["kind"] for c in house.get("has_none") or []]
     return {"house": name, "step": HOUSE_STEP[name], "units": "ft", "exterior_wall": EXTERIOR_WALL,
             "ceiling_thickness": CEILING_THICKNESS, "levels": out_levels, "rooms": rooms, "windows": windows,
             "stairs": stairs, "doors": doors, "guards": guards, "rail": RAIL, "handrail_top": HANDRAIL_TOP,
-            "notes": notes, "not_drawn": sorted(not_drawn)}
+            "notes": notes, "not_drawn": sorted(not_drawn), "has_none": has_none}
 
 
 ROOM_GAP = 10.0                 # ft: a room drawn clear of the room it is within the height of (a loft)
@@ -954,7 +1004,10 @@ def placed_drawing(name: str) -> dict:
     return {"house": name, "step": HOUSE_STEP[name], "units": "ft", "placed": True, "exterior_wall": EXTERIOR_WALL,
             "ceiling_thickness": CEILING_THICKNESS, "levels": levels, "rooms": rooms, "windows": windows,
             "stairs": [], "doors": doors, "guards": [], "rail": RAIL, "handrail_top": HANDRAIL_TOP,
-            "notes": [f"{a['what']}: {a['effect']}" for a in lay.get("assumptions") or []], "not_drawn": not_drawn}
+            "notes": [f"{a['what']}: {a['effect']}" for a in lay.get("assumptions") or []], "not_drawn": not_drawn,
+            # step 6's ticks, as drawing() sets them: each list in scope the house gives empty, then its own has_none
+            "has_none": [key for key, kind in NONE_LISTS.items() if house.get(key) == [] and kind in scope(name)]
+                        + [c["kind"] for c in house.get("has_none") or []]}
 
 
 def main(argv) -> int:

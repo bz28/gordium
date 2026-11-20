@@ -2,12 +2,13 @@
 layout.yaml), checked against its hand-check (test_data/real_houses/<house>/hand_check.yaml).
 
 A host's reader sends only what it can read from the drawing: the rooms (outline, floor, ceilings), every marked window
-(no clear opening: the drawings give none) and the doors (exit mark, operation; no clear opening). It doesn't send
-house.yaml's `has_none` claims (those are the architect's, not the model's) and the stairs and guards aren't drawn.
-So the full egress check on that reading must:
+(no clear opening: the drawings give none), the doors (exit mark, operation; no clear opening), and each of house.yaml's
+`has_none` claims the architect ticked (step 6: the drawing ticks them; the reader sends each back only while nothing
+of the kind is drawn and nothing could hide one). The stairs and guards aren't drawn. So the full egress check on that
+reading must:
 
-  - give exactly what it gives on house.yaml for every rule but those a `has_none` claim of house.yaml sets aside;
-    those, with no claim, must be needs review (more cautious, never kinder);
+  - give exactly what it gives on house.yaml for every rule, when every claim came back; a claim that didn't come back
+    may only leave the rules it sets aside needing review (more cautious, never kinder);
   - never pass a rule whose hand-worked truth isn't complies (never a false pass).
 
 The same holds for the host's recording itself, once one is committed (test_data/interior_houses/recorded/<host>/).
@@ -45,7 +46,10 @@ def as_read(drawing: dict) -> dict:
             + [{"id": d["id"], "name": d["name"], "room": d["room"], "escape": False,
                 "operation": {"side_hinged": "side_hinged_door", "sliding": "sliding_door"}[d["operation"]]}
                for d in drawing["doors"]],
-            "doors": [{k: d[k] for k in ("id", "name", "exit", "operation")} for d in drawing["doors"]]}
+            "doors": [{k: d[k] for k in ("id", "name", "exit", "operation")} for d in drawing["doors"]],
+            # the ticks the drawing sets that are claims (not empty lists), as the reader sends them back
+            "has_none": [{"kind": k, "source": f"ticked by the architect ({k}: Yes, on Project Information)"}
+                         for k in drawing["has_none"] if k not in recordings.NONE_LISTS]}
 
 
 def readings() -> list:
@@ -77,6 +81,9 @@ def test_the_reading_checks_as_house_yaml_does_but_for_the_architects_claims(fou
     differ = {k for k in want if got[k] != want[k]}
     assert differ <= set_aside, sorted(differ - set_aside)
     assert all(want[k] == "not_applicable" and got[k] == "needs_review" for k in differ)
+    claims = {c["kind"] for c in load("house.yaml")["has_none"]}
+    if {c["kind"] for c in interior.get("has_none") or []} == claims:     # every claim came back: the same answers
+        assert differ == set()
     # the rules the drawing does carry come out as the hand-check predicted: the front door side-hinged (pass), the
     # bedrooms' escape windows and the door's clear opening needs review (no clear opening is given)
     for k, v in got.items():

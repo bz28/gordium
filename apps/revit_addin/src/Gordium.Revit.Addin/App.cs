@@ -113,6 +113,20 @@ public sealed class App : IExternalApplication
             }
             return;
         }
+        if (File.Exists(ReadInteriorCommand.RequestPath))
+        {
+            try
+            {
+                var takenRead = ReadInteriorCommand.RequestPath + ".taken";
+                File.Move(ReadInteriorCommand.RequestPath, takenRead, overwrite: true);
+                ReadInteriorCommand.RunRequest(ui.Application, takenRead);
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("read_interior", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
         if (File.Exists(DetailCheck.RequestPath))
         {
             try

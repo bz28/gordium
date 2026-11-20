@@ -2167,6 +2167,16 @@ def _loft(floor_elevation=100):
     (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"][0].update(
         ceilings=[[[0, 0, 40], [120, 0, 40], [120, 120, 120], [0, 120, 120]]]), d["rooms"].append(_loft(100))),
      "room Loft's floor is over room Bedroom's and below its ceiling"),
+    # read from a host: every underside over the room below, its own ceiling and the floor above's rooms' ceilings
+    # over it (Orangetown's main floor read from Revit): the room upstairs is over its ceiling, so taken
+    (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"][0].update(
+        ceilings=[[[0, 0, 96], [120, 0, 96], [120, 120, 96], [0, 120, 96]],
+                  [[0, 0, 192], [60, 0, 192], [60, 60, 192], [0, 60, 192]]]), d["rooms"].append(_loft(100))), None),
+    # but a higher piece reaching past the lower one is the room's ceiling there: refused
+    (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"][0].update(
+        ceilings=[[[0, 0, 96], [120, 0, 96], [120, 60, 96], [0, 60, 96]],
+                  [[0, 0, 192], [120, 0, 192], [120, 120, 192], [0, 120, 192]]]), d["rooms"].append(_loft(100))),
+     "room Loft's floor is over room Bedroom's and below its ceiling"),
     # the room below's ceiling can't be read: it could be above the loft, so refused
     (lambda d: (d["rooms"][0].pop("ceiling_height"), d["rooms"].append(_loft(100))),
      "room Bedroom's ceiling can't be read"),

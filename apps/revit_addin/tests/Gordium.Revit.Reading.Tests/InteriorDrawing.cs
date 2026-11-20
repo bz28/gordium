@@ -36,6 +36,7 @@ internal sealed class FakeHouse
     public List<StairRecord> Stairs { get; } = [];
     public List<StairCandidate> StairCandidates { get; } = [];
     public List<RailingRecord>? Railings { get; set; } = [];
+    public List<RampRecord>? Ramps { get; set; } = [];
     public Dictionary<Guid, MarkValue> ProjectMarks { get; } = new() { [Marks.AllStairs.Guid] = new(true, 1) };   // ticked
     public int CoordinationModels { get; set; }
 
@@ -50,7 +51,7 @@ internal sealed class FakeHouse
         Interior = new InteriorRecords
         {
             Rooms = Rooms, Openings = Openings, EnclosedAreas = Areas, Links = Links, Stairs = Stairs,
-            StairCandidates = StairCandidates, CoordinationModels = CoordinationModels, Railings = Railings,
+            StairCandidates = StairCandidates, CoordinationModels = CoordinationModels, Railings = Railings, Ramps = Ramps,
         },
     };
 
@@ -601,6 +602,9 @@ internal sealed class FakeHouse
         var notDrawn = Drawing["not_drawn"]!.AsArray().Select(n => n!.GetValue<string>()).ToList();
         if (!notDrawn.Contains("guards") && !notDrawn.Contains("handrails"))
             ProjectMarks[Marks.AllGuards.Guid] = new(true, 1);
+        // step 6: the "this house has none of" ticks the drawing names (as HouseDraw sets them)
+        foreach (var kind in Drawing["has_none"]!.AsArray().Select(n => n!.GetValue<string>()))
+            ProjectMarks[HasNone.All.Single(k => k.Kind == kind).Mark.Guid] = new(true, 1);
     }
 
     public static FakeHouse Draw(string name, Transform3? turn = null) => new(name, turn ?? Transform3.Identity);
