@@ -65,6 +65,11 @@ def compare(found, interior):
     return want["results"], got["results"], set_aside, hand
 
 
+def test_the_revit_recording_is_among_the_readings():
+    # the committed Revit recording is checked here, never quietly dropped when missing
+    assert [source for source, _ in readings()] == ["drawn", "revit"]
+
+
 @pytest.mark.parametrize("source, interior", readings(), ids=lambda x: x if isinstance(x, str) else "")
 def test_the_reading_checks_as_house_yaml_does_but_for_the_architects_claims(found, source, interior):
     want, got, set_aside, hand = compare(found, interior)

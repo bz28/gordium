@@ -97,14 +97,24 @@ internal static class HouseDraw
             }
             if (level["walls"] is JsonArray placed)
             {
-                // a house placed by its layout: its own walls and no box; the floor under its outline
+                // a house placed by its layout: its own walls and no box; the floor under its outline, as thick as the
+                // drawing's slab (the gap the layout leaves under it: the project's own floor type, 12 in, cut 1 1/2 in
+                // into the Orangetown main floor's 9'-0" ceiling, review round 1)
                 foreach (var (f, k) in placed.Select((f, k) => (f!, k)))
                     walls[$"{key}-wall-{k}"] = RectWall(f);
                 var outline = level["outline"]!.AsArray().Select(p => P(p!)).ToList();
                 var loop = new CurveLoop();
                 for (var i = 0; i < outline.Count; i++)
                     loop.Append(Line.CreateBound(new XYZ(outline[i].X, outline[i].Y, z), new XYZ(outline[(i + 1) % outline.Count].X, outline[(i + 1) % outline.Count].Y, z)));
-                Floor.Create(doc, [loop], floorType.Id, lv.Id);
+                var slab = FloorTypeOf(doc, floorType, D(level["slab"]));
+                var made = Floor.Create(doc, [loop], slab.Id, lv.Id);
+                doc.Regenerate();
+                var box = made.get_BoundingBox(null);
+                var drawnThick = made.get_Parameter(BuiltInParameter.FLOOR_ATTR_THICKNESS_PARAM)?.AsDouble();
+                log.Add($"floor at {key} ft: type {slab.Name}, thickness {drawnThick * 12:0.###} in (drawing {D(level["slab"]) * 12:0.###}), " +
+                        $"box z {box?.Min.Z:0.####} to {box?.Max.Z:0.####} ft");
+                if (drawnThick is not { } th || Math.Abs(th - D(level["slab"])) > 1e-9)
+                    throw new InvalidOperationException($"the floor at {key} ft came out {drawnThick} ft thick, not the drawing's {D(level["slab"])}");
             }
             else
             {
@@ -933,6 +943,19 @@ internal static class HouseDraw
         for (var i = 0; i < 4; i++)
             loop.Append(Line.CreateBound(pts[i], pts[(i + 1) % 4]));
         return loop;
+    }
+
+    /// <summary>A floor type one layer <paramref name="thickness"/> thick (its top the level), made once per thickness
+    /// from the project's own.</summary>
+    private static FloorType FloorTypeOf(Document doc, FloorType basic, double thickness)
+    {
+        var name = $"Gordium test floor {thickness * 12:0.###} in";
+        if (new FilteredElementCollector(doc).OfClass(typeof(FloorType)).Cast<FloorType>().FirstOrDefault(x => x.Name == name) is { } found)
+            return found;
+        var made = (FloorType)basic.Duplicate(name);
+        made.SetCompoundStructure(CompoundStructure.CreateSingleLayerCompoundStructure(MaterialFunctionAssignment.Structure,
+                                                                                       thickness, ElementId.InvalidElementId));
+        return made;
     }
 
     /// <summary>A basic wall type one layer thick (the finish face is the wall's face), made once per thickness.</summary>

@@ -160,7 +160,9 @@ levels:
   - id: basement
     elevation: -226.5
     ceiling: 96
+    slab: 4                                 # the lowest level's slab; every other level's is the gap under it (below)
     cite:
+      slab: "A-2 basement plan '4\" CONC. SLAB (3500 PSI) ON 6 MIL VAPOR BARRIER'"
       elevation: "not dimensioned: answer_key.yaml's reading (stair_riser): 'SLAB' to 'CLG.' 8'-0\" (96, A-4) + the A-5 section's 2x12 joists (11 1/4) + 3/4 in subfloor = 108 in below the main floor (the A-2 basement plan's 2x10 would make it 106: the drawings disagree, README #12)"
       ceiling: "A-4 'SLAB' to 'CLG.' 8'-0\""
     walls:
@@ -214,6 +216,12 @@ assumptions:
   - what: "Floor-to-floor heights (main floor 118.5 in, basement 108 in below the main floor)"
     why: "not dimensioned (A-4 gives floor-to-ceiling heights only); answer_key.yaml's framing reading"
     effect: "none: no stair is drawn, and no measure in scope compares levels"
+  - what: "Each floor slab drawn as thick as the gap the layout leaves under it: the second floor's 10.5 in (2x10 joists, subfloor and board), the main floor's 12 in (2x12 joists and subfloor, A-5); the basement's 4 in concrete (A-2)"
+    why: "a slab thicker than the gap would cut into the cited ceiling below it (A-4's 9'-0\" main floor)"
+    effect: "none: every ceiling is drawn where A-4 puts it, and no slab reaches below one"
+  - what: "Each window pair drawn 2 in apart (`pair_gap`), centred on the pair's dimensioned centre"
+    why: "the plans show mulled pairs with one centre dimension; each unit is its own family, so they are kept from overlapping"
+    effect: "none: no window has a clear opening to measure"
   - what: "Bedroom 4's 10'-0\" x 1'-4\" window recess left out; its windows drawn in the straight south wall at d 466-472"
     why: "house.yaml leaves the recess out (no inside dimension: its 10'-0\" and 1'-4\" are outside dimensions), and its windows must open from bedroom 4"
     effect: "none: the area stays house.yaml's (understated, never overstated); the windows have no clear opening to measure"

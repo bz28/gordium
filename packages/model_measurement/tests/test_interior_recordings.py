@@ -285,8 +285,11 @@ def test_the_recording_must_say_what_it_is():
 def test_a_host_with_any_recording_has_every_house_of_the_step():
     assert r.coverage_problems({"revit": {"1_ranch_compliant": {}}}) == [
         "revit: no recording for 2_two_story_small_window, 3_tall_riser, 4_loft, 5_basement_window_well, "
-        "6_door_stated_clear"]
+        "6_door_stated_clear, orangetown_ny_80_south_william"]
     assert r.coverage_problems({"revit": {h: {} for h in r.STEP_HOUSES}}) == []
+    # the real house too: its recording is required, not just checked when present
+    assert r.coverage_problems({"revit": {h: {} for h in r.STEP_HOUSES if h != ORANGETOWN}}) == [
+        f"revit: no recording for {ORANGETOWN}"]
 
 
 def test_every_committed_recording_passes():

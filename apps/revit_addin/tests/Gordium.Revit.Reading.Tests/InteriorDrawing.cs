@@ -462,7 +462,7 @@ internal sealed class FakeHouse
                     list.Add(new NearbyElement(id, "OST_Walls", "Generic wall", Faces: Cut(id, Prism(Rect(fx0, fy0, fx1, fy1), z, z + h))));
                 }
                 walls[z] = list;
-                slabs[z] = new NearbyElement($"slab-{z}", "OST_Floors", "Generic floor", Faces: Prism(Ccw(level["outline"]!), z - 1, z));
+                slabs[z] = new NearbyElement($"slab-{z}", "OST_Floors", "Generic floor", Faces: Prism(Ccw(level["outline"]!), z - D(level["slab"]), z));
                 continue;
             }
             var (x0, y0) = P(level["box"]![0]!);

@@ -231,10 +231,9 @@ def recordings(host: str | None = None) -> dict:
 
 
 def coverage_problems(recorded: dict) -> list[str]:
-    """A host with any recording has one for every hand-worked house of the step: it can't leave out the hard ones. A
-    real house (test_data/real_houses/) isn't required yet: it is recorded on the Windows trial machine after it is
-    added, and its recording, once committed, must pass like any other (test_every_committed_recording_passes)."""
-    houses = {h for h in STEP_HOUSES if (HOUSES / h).is_dir()}
+    """A host with any recording has one for every house of the step, the real house included: it can't leave out the
+    hard ones (a re-record that failed deletes the house's earlier recording and writes none)."""
+    houses = set(STEP_HOUSES)
     return [f"{host}: no recording for {', '.join(sorted(houses - set(by)))}"
             for host, by in sorted(recorded.items()) if houses - set(by)]
 
@@ -790,6 +789,15 @@ def layout_problems(name: str) -> list[str]:
         for key, mine in (("floor_elevation", lv["elevation"]), ("ceiling_height", lv["ceiling"])):
             if key in r and r[key] != mine:
                 problems.append(f"room {rid}: its level gives {key} {mine}, house.yaml {r[key]}")
+    # each level's floor slab fits the gap under it: the level below's ceiling up to this level's floor (the lowest
+    # level's slab is the layout's own `slab`)
+    by_height = sorted(lay["levels"], key=lambda lv: lv["elevation"])
+    if not isinstance(by_height[0].get("slab"), (int, float)) or by_height[0]["slab"] <= 0:
+        problems.append(f"{by_height[0]['id']}: the lowest level gives no slab thickness")
+    for below, lv in zip(by_height, by_height[1:]):
+        gap = lv["elevation"] - (below["elevation"] + below["ceiling"])
+        if gap <= 0 or ("slab" in lv and lv["slab"] > gap):
+            problems.append(f"{lv['id']}: its slab doesn't fit the {gap:g} between {below['id']}'s ceiling and its floor")
     sizes = lay["sizes"]
     for o in house.get("openings") or []:
         where = openings.pop(o["id"], [])
@@ -837,7 +845,8 @@ def layout_problems(name: str) -> list[str]:
 def placed_drawing(name: str) -> dict:
     """A real house as a host draws it, in feet (y north), from its layout.yaml: each level's walls as rectangles (each
     drawn as a wall along its longer side, as thick as its shorter) and no exterior box, the floor slab under its
-    outline (the walls and rooms together), a room separation line where the layout has one; each room (house.yaml's
+    outline (the walls and rooms together), `slab` thick: the gap the layout leaves between the ceiling below and this
+    floor (the lowest level's: the layout's own), so no slab cuts into a cited ceiling; a room separation line where the layout has one; each room (house.yaml's
     name and sleeping, else the layout's) with its ceiling a thin solid over its whole outline, each edge of its
     outline with the wall that bounds it (`boundary`: its index in the level's `walls`, or null for a separation line)
     and a point inside it for the host's Room; each marked opening in its wall (`wall`: its index; `at`: on the wall's
@@ -860,8 +869,12 @@ def placed_drawing(name: str) -> dict:
     measured_doors = {p["id"]: p for p in measure(house)["parts"]["egress_door"] or []}
     levels, rooms, windows, doors = [], [], [], []
     elevations = sorted(ft(lv["elevation"]) for lv in lay["levels"])
+    by_height = sorted(lay["levels"], key=lambda lv: lv["elevation"])
     for lv in lay["levels"]:
         fe = ft(lv["elevation"])
+        # its floor slab as thick as the gap under it (never cutting into the ceiling below), the lowest its own
+        below = [b for b in by_height if b["elevation"] < lv["elevation"]]
+        slab = ft(lv["slab"]) if "slab" in lv else ft(lv["elevation"] - below[-1]["elevation"] - below[-1]["ceiling"])
         names = list(lv["walls"])
         for r in lv["rooms"]:
             poly = orient(Polygon([xy(x, d) for x, d in r["floor"]]), 1.0)
@@ -896,7 +909,7 @@ def placed_drawing(name: str) -> dict:
         levels.append({"elevation": fe, "outline": [xy(x, d) for x, d in list(outline.exterior.coords)[:-1]],
                        "walls": [[xy(w[0], w[3]), xy(w[2], w[1])] for w in lv["walls"].values()],
                        "separations": [[xy(*a), xy(*b)] for a, b in lv.get("separations") or []],
-                       "wall_height": top - fe})
+                       "wall_height": top - fe, "slab": slab})
 
         def place(p, width):
             rid, at, (ox, od) = _host(lv, p["wall"], p["along"], width)

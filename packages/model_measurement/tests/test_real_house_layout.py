@@ -239,3 +239,72 @@ def test_a_room_not_in_house_yaml_needs_its_own_name_and_sleeping(layout):
 def test_a_level_whose_ceiling_isnt_house_yamls_is_refused(layout):
     level(layout, "second_floor")["ceiling"] = 97
     assert any("room master: its level gives ceiling_height 97, house.yaml 96" in p for p in r.layout_problems(NAME))
+
+
+def test_each_slab_fits_the_gap_under_its_level():
+    # review round 1: a 12 in slab under the second floor cut 1 1/2 in into the main floor's cited 9'-0" ceiling
+    d = r.drawing(NAME)
+    levels = sorted(d["levels"], key=lambda lv: lv["elevation"])
+    ceiling = {lv["elevation"] / 12: lv["ceiling"] / 12 for lv in LAYOUT["levels"]}     # the cited ceilings, in ft
+    for below, lv in zip(levels, levels[1:]):
+        # the slab's underside at or over the cited ceiling below: (elevation above - slab) >= elevation + ceiling
+        assert lv["elevation"] - lv["slab"] >= below["elevation"] + ceiling[below["elevation"]] - 1e-9
+    assert [round(lv["slab"] * 12, 6) for lv in levels] == [4, 12, 10.5]     # A-2 4" slab; the gaps the framing leaves
+
+
+def test_a_slab_thicker_than_its_gap_is_refused(layout):
+    level(layout, "second_floor")["slab"] = 12
+    assert any("second_floor: its slab doesn't fit the 10.5" in p for p in r.layout_problems(NAME))
+    del level(layout, "second_floor")["slab"]
+    del level(layout, "basement")["slab"]
+    assert "basement: the lowest level gives no slab thickness" in r.layout_problems(NAME)
+
+
+def test_each_window_pair_is_its_sizes_and_the_pair_gap_apart():
+    pairs = [("m1", "m2"), ("b2a", "b2b"), ("b3a", "b3b"), ("b4a", "b4b"), ("x1", "x2")]
+    windows = {w["id"]: w for lv in LAYOUT["levels"] for w in lv.get("windows") or []}
+    for a, b in pairs:
+        assert windows[a]["wall"] == windows[b]["wall"]
+        width = LAYOUT["sizes"][windows[a]["size"]]["width"]
+        assert abs(windows[b]["along"] - windows[a]["along"]) == width + LAYOUT["pair_gap"], (a, b)
+    assert any("pair_gap" in x["what"] for x in LAYOUT["assumptions"])
+
+
+def test_a_door_outside_its_wall_is_refused(layout):
+    next(x for x in level(layout, "main_floor")["doors"] if x["id"] == "front")["along"] = 300
+    assert "door front: not whole in a room's face of wall entry_front" in r.layout_problems(NAME)
+
+
+def test_a_door_taller_than_its_ceiling_is_refused(layout):
+    next(x for x in level(layout, "main_floor")["doors"] if x["id"] == "front")["height"] = 110
+    assert "door front: taller than its level's ceiling" in r.layout_problems(NAME)
+
+
+def test_a_window_head_over_the_ceiling_is_refused(layout):
+    layout["head"] = 100
+    assert "opening m1: doesn't fit under its level's ceiling" in r.layout_problems(NAME)
+
+
+def test_a_separation_off_every_rooms_edge_is_refused(layout):
+    level(layout, "second_floor")["separations"].append([[20, 20], [40, 20]])
+    assert any("separation [[20, 20], [40, 20]] isn't on a room's edge" in p for p in r.layout_problems(NAME))
+
+
+def test_an_opening_or_door_not_in_house_yaml_is_refused(layout):
+    level(layout, "second_floor")["windows"].append({"id": "zz", "wall": "north", "along": 140, "size": "3046"})
+    level(layout, "main_floor")["doors"].append({"id": "dd", "wall": "garage_south", "along": 300, "width": 36, "height": 80})
+    problems = r.layout_problems(NAME)
+    assert "opening zz placed but not in house.yaml" in problems and "door dd placed but not in house.yaml" in problems
+
+
+def test_a_wall_with_no_thickness_and_a_slanted_room_edge_are_refused(layout):
+    level(layout, "basement")["walls"]["thin"] = [300, 100, 300, 120]
+    room(layout, "garage")["floor"][1] = [497, 244]
+    problems = r.layout_problems(NAME)
+    assert "basement: wall thin has no thickness" in problems
+    assert "main_floor: room garage has an edge that isn't along x or d" in problems
+
+
+def test_a_layout_not_in_the_format_or_house_yamls_units_is_refused(layout):
+    layout["units"] = "ft"
+    assert r.layout_problems(NAME) == [f"{NAME}: layout.yaml isn't gordium.layout/1 in house.yaml's units"]
