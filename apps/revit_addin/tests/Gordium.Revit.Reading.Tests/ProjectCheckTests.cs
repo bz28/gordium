@@ -264,6 +264,17 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         };
         var (sent, _) = StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity);
         Assert.Equal("the curved 47.1 ft lot edge from (0.0, 0.0) to (40.0, 0.0)", StreetEdges.DescribeSent(sent!, lot));
+
+        // review round 3: with no lot read, no length is said (the chord would contradict the 47.1 ft confirmed)
+        var (unmatched, _) = StreetEdges.Match([(edge.A, edge.B)], null, Transform3.Identity);
+        Assert.Equal("the street edge from (0.0, 0.0) to (40.0, 0.0), not matched to a lot (none was read)",
+                     StreetEdges.DescribeSent(unmatched!, null));
+        // ... and a lot bounded by the arc and its chord (two edges with the same ends): which was confirmed can't be
+        // told, so nothing is sent
+        lot["edges"]!.AsArray().Add(new JsonObject { ["points"] = new JsonArray(new JsonArray(40.0, 0.0), new JsonArray(0.0, 0.0)) });
+        var (both, why2) = StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity);
+        Assert.Null(both);
+        Assert.Contains("matches more than one lot edge", why2, StringComparison.Ordinal);
     }
 
     /// <summary>Review round 2: every mark write goes through one helper; a Set Revit refuses throws naming the mark,

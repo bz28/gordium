@@ -271,6 +271,9 @@ public static class StreetEdges
         return string.Join(" and ", street.Select(e =>
         {
             var (a, b) = (P(e![0]), P(e[1]));
+            if (lot is null)        // sent as kept, matched to no lot edge: no length said (never the chord of an arc)
+                return string.Create(CultureInfo.InvariantCulture,
+                    $"the street edge from ({N(a.X)}, {N(a.Y)}) to ({N(b.X)}, {N(b.Y)}), not matched to a lot (none was read)");
             var own = lot?["edges"]?.AsArray().FirstOrDefault(x => x!["curved"]?.GetValue<bool>() == true
                 && x["points"]!.AsArray() is var ps && P(ps[0]) == a && P(ps[^1]) == b);
             if (own is null)
@@ -312,6 +315,7 @@ public static class StreetEdges
                 continue;
             }
             JsonArray? found = null;
+            var matches = 0;
             foreach (var e in lot["edges"]!.AsArray())
             {
                 var pts = e!["points"]!.AsArray();
@@ -321,10 +325,15 @@ public static class StreetEdges
                 bool Near(Xyz p, double x, double y) => Math.Abs(p.X - x) <= Tolerance && Math.Abs(p.Y - y) <= Tolerance;
                 if (Near(sa, fx, fy) && Near(sb, lx, ly) || Near(sa, lx, ly) && Near(sb, fx, fy))
                 {
-                    found = new JsonArray(Pt(fx, fy), Pt(lx, ly));
-                    break;
+                    found ??= new JsonArray(Pt(fx, fy), Pt(lx, ly));
+                    matches++;
                 }
             }
+            // two lot edges with the same ends (an arc and its chord): which one was confirmed can't be told from the
+            // ends kept, so nothing is sent (review round 3)
+            if (matches > 1)
+                return (null, $"{Marks.StreetEdge.Name}: the street edge matches more than one lot edge (two edges share its " +
+                              "ends): pick it again when Check my project asks, or redraw the property line so they don't.");
             if (found is null)
                 return (null, $"{Marks.StreetEdge.Name}: the street edge picked is no longer an edge of the lot (the " +
                               "property line was changed): click the lot edge along the street again when Check my project asks.");
