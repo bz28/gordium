@@ -19,9 +19,11 @@ public static class PlanGeometry
     /// <summary>The polygon's area, positive when its points run anticlockwise.</summary>
     public static double SignedArea(IReadOnlyList<P2> p)
     {
-        double a = 0;
-        for (var i = 0; i < p.Count; i++)
-            a += P2.Cross(p[i], p[(i + 1) % p.Count]);
+        if (p.Count < 3)
+            return 0;
+        double a = 0;                                // about its first point: survey-scale coordinates keep their precision
+        for (var i = 1; i < p.Count - 1; i++)
+            a += P2.Cross(p[i] - p[0], p[i + 1] - p[0]);
         return a / 2;
     }
 
@@ -30,8 +32,11 @@ public static class PlanGeometry
     /// <summary>The points moved so that <paramref name="origin"/> is at 0, 0.</summary>
     public static List<P2> Local(IEnumerable<P2> p, P2 origin) => p.Select(q => q - origin).ToList();
 
+    /// <summary>The polygon's own size (its extent), never how far it is from the origin: a tolerance scaled by the
+    /// coordinates themselves would grow with the survey point's distance (875,000 ft out: 0.77 sq ft, dropping a
+    /// 6 in jog from a room's outline; review round 1).</summary>
     private static double Scale(IReadOnlyList<P2> p) =>
-        Math.Max(1.0, p.Max(q => Math.Max(Math.Abs(q.X), Math.Abs(q.Y))));
+        Math.Max(1.0, Math.Max(p.Max(q => q.X) - p.Min(q => q.X), p.Max(q => q.Y) - p.Min(q => q.Y)));
 
     /// <summary>The polygon anticlockwise, with points repeated or standing on a straight run between their
     /// neighbours taken out; null when fewer than 3 are left (no area).</summary>
@@ -91,7 +96,7 @@ public static class PlanGeometry
 
     private static bool SegmentsMeet(P2 a, P2 b, P2 c, P2 d)
     {
-        var s = Math.Max(1.0, new[] { a, b, c, d }.Max(q => Math.Max(Math.Abs(q.X), Math.Abs(q.Y))));
+        var s = Scale([a, b, c, d]);
         var tol = 1e-12 * s * s;
         int d1 = Side(c, d, a, tol), d2 = Side(c, d, b, tol), d3 = Side(a, b, c, tol), d4 = Side(a, b, d, tol);
         if (d1 * d2 < 0 && d3 * d4 < 0)

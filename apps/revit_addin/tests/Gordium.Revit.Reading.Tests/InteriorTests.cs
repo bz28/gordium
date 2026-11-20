@@ -73,6 +73,28 @@ public sealed class InteriorTests
     }
 
     [Fact]
+    public void A_short_jog_in_a_room_far_out_in_survey_coordinates_is_kept()
+    {
+        // review round 1: the outline was cleaned with a tolerance grown by the coordinates themselves (0.77 sq ft at
+        // 875,000 ft), so a 6 in x 1 ft notch vanished and a 99.5 sq ft room was sent as 100
+        var turn = Transform3.TurnThenMove(Math.PI / 6, new Xyz(875_000.25, -12_345.5, 400.0));
+        var house = FakeHouse.Draw("1_ranch_compliant", turn);
+        var i = house.RoomIndex("bed1");
+        (double X, double Y)[] notched = [(0, 0), (4.5, 0), (4.5, 0.5), (5.5, 0.5), (5.5, 0), (10, 0), (10, 10), (0, 10)];
+        const double X0 = 875_000.25, Y0 = -12_345.5;                 // the room drawn there in shared coordinates
+        var loop = notched.Select((p, k) => new BoundarySegmentRecord(house.Fake.Place(X0 + p.X, Y0 + p.Y, 0),
+            house.Fake.Place(X0 + notched[(k + 1) % notched.Length].X, Y0 + notched[(k + 1) % notched.Length].Y, 0), true, "wall-0-ymin")).ToList();
+        house.Rooms[i] = house.Rooms[i] with { Boundary = [loop] };
+        var floor = Room(InteriorReader.Read(house.Model()), "bed1")!["floor"]!.AsArray()
+            .Select(p => new P2(p![0]!.GetValue<double>(), p[1]!.GetValue<double>())).ToList();
+        Assert.Equal(8, floor.Count);
+        double area = 0;
+        for (var k = 1; k < floor.Count - 1; k++)
+            area += P2.Cross(floor[k] - floor[0], floor[k + 1] - floor[0]) / 2;
+        Assert.Equal(99.5, Math.Abs(area), 6);
+    }
+
+    [Fact]
     public void The_sill_line_check_is_recorded_as_evidence()
     {
         var read = InteriorReader.Read(FakeHouse.Draw("1_ranch_compliant").Model());
@@ -270,6 +292,25 @@ public sealed class InteriorTests
         var problems = Problems(house, read);
         Assert.Contains(problems, p => p.Contains("bed1 least_ceiling_height = 78.0, expected 96.0"));   // the soffit, 6.5 ft up
         Assert.DoesNotContain(problems, p => p.Contains("72.0"));                                        // never the wardrobe
+    }
+
+    [Fact]
+    public void Only_a_window_or_door_in_a_bounding_wall_is_set_aside_never_anything_else_the_wall_hosts()
+    {
+        // review round 1: everything a bounding wall hosted was set aside, so a wall-hosted bulkhead 6.5 ft up was
+        // never a ceiling (8 ft read) and never something standing in the room
+        var house = FakeHouse.Draw("1_ranch_compliant");
+        var i = house.RoomIndex("bed1");
+        var bulkhead = new NearbyElement("bulkhead", "OST_GenericModel", "Bulkhead", Host: "wall-0-ymin",
+                                         Faces: house.Prism([(0, 0), (12, 0), (12, 1), (0, 1)], 6.5, 8));
+        house.Rooms[i] = house.Rooms[i] with { Over = [.. house.Rooms[i].Over!, bulkhead] };
+        Assert.Contains(Problems(house, InteriorReader.Read(house.Model())),
+                        p => p.Contains("bed1 least_ceiling_height = 78.0, expected 96.0"));
+        house = FakeHouse.Draw("1_ranch_compliant");
+        house.Rooms[i] = house.Rooms[i] with { Inside = [bulkhead with { Faces = null }] };
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(Room(read, "bed1")!["floor"]);
+        Assert.Contains("GenericModel \"Bulkhead\"", Note(read, "bed1", "floor"));
     }
 
     [Fact]

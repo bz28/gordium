@@ -244,7 +244,7 @@ nothing. What it sends, and what it leaves out:
   place a Room in it, marked Sleeping room No. With no Room at all, `rooms` is left out, never `[]`.
 - Each room's **`floor`**: its boundary at the finished faces (`SpatialElementBoundaryLocation.Finish`), sent only as
   one loop of straight segments, with nothing standing inside it that doesn't bound it (a wall set not to bound rooms,
-  a column; furniture, casework and fixtures don't count, nor a window or door in a wall bounding it), from just above
+  a column; furniture, casework and fixtures don't count, nor a window or door in a wall bounding it: only those, never anything else the wall hosts), from just above
   the floor to the level's room computation height. **`floor_elevation`**: the level and base offset, sent only when
   one slab top (a floor or a foundation slab) within a foot of it agrees within 1/16 in and covers the whole room.
   **`ceilings`**: the downward flat faces of everything building or services over the room, clipped to its floor

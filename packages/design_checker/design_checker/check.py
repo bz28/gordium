@@ -890,7 +890,12 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
             if content is None or site_error is not None:
                 continue
             try:
-                part.write_text(json.dumps(content, indent=1, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+                text = json.dumps(content, indent=1, sort_keys=True, allow_nan=False) + "\n"
+            except ValueError as e:          # not strict JSON (a NaN): not kept, so no report (review round 1)
+                site_error = (_NotWritten(OSError(None, f"it isn't strict JSON ({e})")), kept)
+                continue
+            try:
+                part.write_text(text, encoding="utf-8")
             except OSError as e:
                 site_error = (_NotWritten(e), kept)
     try:                                     # a site that can't be kept: no report written (the earlier one stays)
@@ -931,7 +936,8 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
 
 
 class _NotWritten(OSError):
-    """The site file couldn't be written before the check: the report wasn't written either."""
+    """The site or interior file couldn't be written before the check (or isn't strict JSON): the report wasn't written
+    either."""
 
     def __init__(self, error: OSError):
         super().__init__(error.errno, error.strerror)

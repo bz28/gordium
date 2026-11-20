@@ -218,7 +218,7 @@ public static class InteriorReader
                 plan = null;
             }
             else if (inside.Where(e => !bounding.Contains(e.UniqueId) && !NotBuilding.Contains(e.BuiltInCategory)
-                                       && !(e.Host is { } h && bounding.Contains(h)))
+                                       && !InBoundingWall(e, bounding))
                            .Select(e => Named(e)).Distinct().ToList() is { Count: > 0 } standing)
             {
                 Out("floor", "something stands inside its outline without bounding it (" + string.Join(", ", standing) +
@@ -263,6 +263,13 @@ public static class InteriorReader
         else
             Out("ceilings", why!);
     }
+
+    /// <summary>A window or door in one of the walls bounding the room: part of that boundary, so neither something
+    /// standing inside the room nor a ceiling over it (its trim may reach into the room). Only windows and doors:
+    /// anything else a bounding wall hosts (a wall-hosted bulkhead, a shelf, a soffit) is read like any other element
+    /// (review round 1: a wall-hosted Generic Model 6.5 ft up was never a ceiling).</summary>
+    private static bool InBoundingWall(NearbyElement e, HashSet<string> bounding) =>
+        e.BuiltInCategory is "OST_Windows" or "OST_Doors" && e.Host is { } h && bounding.Contains(h);
 
     private static string Named(NearbyElement e) =>
         string.IsNullOrWhiteSpace(e.Name) ? e.BuiltInCategory.Replace("OST_", "") : $"{e.BuiltInCategory.Replace("OST_", "")} \"{e.Name}\"";
@@ -371,7 +378,7 @@ public static class InteriorReader
         var pieces = new JsonArray();
         foreach (var e in over)
         {
-            if (e.UniqueId == rec.UniqueId || NotBuilding.Contains(e.BuiltInCategory) || (e.Host is { } h && bounding.Contains(h)))
+            if (e.UniqueId == rec.UniqueId || NotBuilding.Contains(e.BuiltInCategory) || InBoundingWall(e, bounding))
                 continue;                                    // a window or door in a wall bounding it isn't over it
             if (!Building.Contains(e.BuiltInCategory) && e is { GeometryFailed: false, Faces.Count: 0 })
                 continue;                                    // nothing drawn (a base point, a line): nothing over it

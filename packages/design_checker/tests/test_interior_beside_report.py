@@ -57,6 +57,18 @@ def test_an_interior_that_cant_be_written_means_no_report_and_the_earlier_files_
     assert files(tmp_path) == before                                              # the earlier report, untouched
 
 
+def test_an_interior_that_isnt_strict_json_means_no_report_and_leaves_no_part_file(tmp_path):
+    """Review round 1: a NaN in the interior raised out of the check and left the site's half-written copy behind."""
+    report = tmp_path / "house.xlsx"
+    checked(report, ranch())
+    before = files(tmp_path)
+    bad = ranch()
+    bad["rooms"][0]["floor_elevation"] = float("nan")
+    result = checked(report, bad)
+    assert result["report_error"].startswith("the interior description beside the report: it isn't strict JSON")
+    assert files(tmp_path) == before                                              # no part file, the earlier files kept
+
+
 def test_a_report_that_cant_be_moved_in_leaves_the_earlier_report_beside_its_own_site_and_interior(tmp_path, monkeypatch):
     report = tmp_path / "house.xlsx"
     checked(report, ranch())
