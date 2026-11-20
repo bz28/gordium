@@ -16,8 +16,10 @@ public sealed record ProjectRequest(JsonObject Site, JsonObject Facts, JsonObjec
 /// <param name="Inside">The interior read (its not-read lists for the dialog), or null when nothing was read.</param>
 /// <param name="Street">The street line sent, in words ("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)"), so
 /// every result names the street it was checked against; null when nothing was sent.</param>
+/// <param name="StreetRefused">Why the street edge kept wasn't sent, typed (<see cref="StreetEdges.NeedsNewPick"/>).</param>
 public sealed record ProjectPrepared(ProjectRequest? Request, IReadOnlyList<string> Missing, string? PhaseChecked,
-                                     IReadOnlyList<string> OptionsChecked, InteriorReadResult? Inside, string? Street = null);
+                                     IReadOnlyList<string> OptionsChecked, InteriorReadResult? Inside, string? Street = null,
+                                     StreetRefusal StreetRefused = StreetRefusal.None);
 
 /// <summary>
 /// "Check my project" without Revit (reading design note, section 9): the architect's own open project read outside
@@ -48,12 +50,12 @@ public static class ProjectCheck
         // points call back into the API; SiteReader reads the lot before it asks the worker anything)
         var interior = InteriorReader.Read(inside);
         var site = await SiteReader.DescribeAsync(outside, read.Facts, asker, cancel).ConfigureAwait(false);
-        var (street, why) = StreetEdges.Match(read.StreetEdges!, site.Site["lot"] as JsonObject, outside.InternalToShared);
-        if (street is null)
-            return new ProjectPrepared(null, [why!], site.PhaseChecked, site.OptionsChecked, null);
+        var match = StreetEdges.Match(read.StreetEdges!, site.Site["lot"] as JsonObject, outside.InternalToShared);
+        if (match.StreetLine is not { } street)
+            return new ProjectPrepared(null, [match.Why!], site.PhaseChecked, site.OptionsChecked, null, StreetRefused: match.Reason);
         var facts = read.Facts.DeepClone().AsObject();
         facts["street_line"] = street;
-        var words = StreetEdges.DescribeSent(street, site.Site["lot"] as JsonObject);
+        var words = match.Words;
         return new ProjectPrepared(new ProjectRequest(site.Site, facts, interior.Interior), [], site.PhaseChecked,
                                    site.OptionsChecked, interior, words);
     }
@@ -82,10 +84,10 @@ public static class ProjectCheck
 
 /// <summary>The lot facts as Gordium's marks on Project Information give them.</summary>
 /// <param name="Facts">The facts to send (jurisdiction, zone, use, lot_surveyed, and corner_lot and grade_from when
-/// set); street_line is added once the lot is read (<see cref="StreetEdges.Match"/>).</param>
+/// set); street_line is added once the lot is read (<c>StreetEdges.Match</c>).</param>
 /// <param name="StreetEdges">The street edges picked (Revit's internal coordinates), or null when not set.</param>
 /// <param name="Missing">What to fill in; empty when every required fact is stated.</param>
-public sealed record ProjectFactsRead(JsonObject Facts, IReadOnlyList<(Xyz A, Xyz B)>? StreetEdges, IReadOnlyList<string> Missing);
+public sealed record ProjectFactsRead(JsonObject Facts, IReadOnlyList<KeptEdge>? StreetEdges, IReadOnlyList<string> Missing);
 
 /// <summary>The lot facts from the marks. Gordium checks the City of Ithaca only (CLAUDE.md: first city), so the
 /// jurisdiction is fixed. Every required fact (the checker's own list, host_core.facts.REQUIRED: zone, use,
@@ -128,7 +130,7 @@ public static class ProjectFacts
             else
                 facts["grade_from"] = word.GradeFrom;
         }
-        IReadOnlyList<(Xyz, Xyz)>? edges = null;
+        IReadOnlyList<KeptEdge>? edges = null;
         var street = Marks.Text(Get(Marks.StreetEdge));
         if (street is null)
             missing.Add($"{Marks.StreetEdge.Name}: click the lot edge along the street when Check my project asks " +
@@ -172,12 +174,39 @@ public static class ProjectFacts
 }
 
 /// <summary>A lot edge picked as the street: its ends (internal coordinates), whether it is straight, and its length
-/// (along the curve for a curved one).</summary>
-public sealed record PickedEdge(Xyz A, Xyz B, bool IsLine, double Length);
+/// (along the curve for a curved one); Mid, a point on it, halfway along (internal coordinates): with IsLine, what tells an arc
+/// from its chord, or two arcs on the same ends, apart (review round 4).</summary>
+public sealed record PickedEdge(Xyz A, Xyz B, bool IsLine, double Length, Xyz? Mid = null);
+
+/// <summary>A street edge as the mark keeps it: its ends and, when Gordium wrote them (from round 4), whether it is
+/// straight and its point halfway along. An older mark has the ends alone (<see cref="IsLine"/> null).</summary>
+public sealed record KeptEdge(Xyz A, Xyz B, bool? IsLine = null, Xyz? Mid = null);
+
+/// <summary>Why a kept street edge wasn't sent as a lot edge.</summary>
+public enum StreetRefusal
+{
+    None,
+    /// <summary>No lot edge has its ends (and kind and middle): the property line was changed.</summary>
+    NoLongerAnEdge,
+    /// <summary>More than one lot edge matches what was kept (an older mark with its ends alone, on a lot with an arc
+    /// and its chord): which was meant can't be told.</summary>
+    Ambiguous,
+}
+
+/// <summary>What <see cref="StreetEdges.Match(IReadOnlyList{KeptEdge}, JsonObject?, Transform3)"/> gives: the street
+/// line to send, or why not (in words, and typed).</summary>
+public sealed record StreetMatch(JsonArray? StreetLine, string? Why, StreetRefusal Reason)
+{
+    /// <summary>The street line sent, in words: each the lot edge matched, by its own points (a curved one by its
+    /// length along them); a kept edge sent with no lot read, without a length.</summary>
+    public string? Words { get; init; }
+
+    public void Deconstruct(out JsonArray? streetLine, out string? why) => (streetLine, why) = (StreetLine, Why);
+}
 
 /// <summary>The street edges: picked by the architect on the property line (<see cref="Nearest"/>), kept in the
 /// <see cref="Marks.StreetEdge"/> mark as their ends in Revit's internal coordinates (they don't move when the shared
-/// coordinates are set again), and sent as the lot's own edges (<see cref="Match"/>): an edge the lot no longer has
+/// coordinates are set again), and sent as the lot's own edges (<c>Match</c>): an edge the lot no longer has
 /// (the property line redrawn) is asked for again, never sent as a street line no lot edge is.</summary>
 public static class StreetEdges
 {
@@ -187,29 +216,50 @@ public static class StreetEdges
     /// <summary>How near a kept edge's ends must be to a lot edge's (ft).</summary>
     public const double Tolerance = 0.01;
 
-    /// <summary>The kept edges as the mark's text: "x1 y1 x2 y2" per edge (feet, internal), "; " between.</summary>
-    public static string Format(IEnumerable<(Xyz A, Xyz B)> edges) =>
-        string.Join("; ", edges.Select(e => string.Join(" ", new[] { e.A.X, e.A.Y, e.B.X, e.B.Y }
-            .Select(v => v.ToString("R", CultureInfo.InvariantCulture)))));
+    /// <summary>How near a kept edge's middle must be to a lot edge's (ft): a curved lot edge is sent as points
+    /// <see cref="LotReader.ArcStep"/> apart, so its middle is found to within that.</summary>
+    public const double MidTolerance = LotReader.ArcStep;
 
-    /// <summary>The mark's text as edges, or null when it isn't text <see cref="Format"/> wrote.</summary>
-    public static IReadOnlyList<(Xyz A, Xyz B)>? Parse(string text)
+    private static string R(double v) => v.ToString("R", CultureInfo.InvariantCulture);
+
+    /// <summary>The kept edges as the mark's text, "; " between (feet, internal): "x1 y1 x2 y2 line mx my" or
+    /// "x1 y1 x2 y2 arc mx my" (its kind and its point halfway along); an edge with no middle known, the ends alone.</summary>
+    public static string Format(IEnumerable<KeptEdge> edges) =>
+        string.Join("; ", edges.Select(e => string.Join(" ", new[] { e.A.X, e.A.Y, e.B.X, e.B.Y }.Select(R))
+            + (e.IsLine is { } line && e.Mid is { } m ? $" {(line ? "line" : "arc")} {R(m.X)} {R(m.Y)}" : "")));
+
+    /// <summary>Ends alone (a lot line's own ends, as the log lists them; an older mark).</summary>
+    public static string Format(IEnumerable<(Xyz A, Xyz B)> edges) => Format(edges.Select(e => new KeptEdge(e.A, e.B)));
+
+    /// <summary>The mark's text as edges (an older mark's ends alone still read), or null when it isn't text
+    /// <see cref="Format(IEnumerable{KeptEdge})"/> wrote.</summary>
+    public static IReadOnlyList<KeptEdge>? Parse(string text)
     {
-        var edges = new List<(Xyz, Xyz)>();
+        var edges = new List<KeptEdge>();
         foreach (var part in text.Split(';'))
         {
             var v = part.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            if (v.Length != 4)
+            if (v.Length != 4 && !(v.Length == 7 && v[4] is "line" or "arc"))
                 return null;
-            var n = new double[4];
-            for (var i = 0; i < 4; i++)
+            var idx = v.Length == 4 ? new[] { 0, 1, 2, 3 } : new[] { 0, 1, 2, 3, 5, 6 };
+            var n = new double[7];
+            foreach (var i in idx)
                 if (!double.TryParse(v[i], NumberStyles.Float, CultureInfo.InvariantCulture, out n[i]) || !double.IsFinite(n[i]))
                     return null;
             if (n[0] == n[2] && n[1] == n[3])
                 return null;
-            edges.Add((new Xyz(n[0], n[1], 0), new Xyz(n[2], n[3], 0)));
+            edges.Add(v.Length == 4
+                ? new KeptEdge(new Xyz(n[0], n[1], 0), new Xyz(n[2], n[3], 0))
+                : new KeptEdge(new Xyz(n[0], n[1], 0), new Xyz(n[2], n[3], 0), v[4] == "line", new Xyz(n[5], n[6], 0)));
         }
         return edges.Count > 0 ? edges : null;
+    }
+
+    /// <summary>Whether the refusal's fix is a new pick (the button then asks for the edge again).</summary>
+    public static bool NeedsNewPick(ProjectPrepared prepared)
+    {
+        ArgumentNullException.ThrowIfNull(prepared);
+        return prepared.Request is null && prepared.StreetRefused is StreetRefusal.NoLongerAnEdge or StreetRefusal.Ambiguous;
     }
 
     /// <summary>How near a corner a click is refused (ft): a click this near an end the edge shares with another can
@@ -237,8 +287,10 @@ public static class StreetEdges
             if (Plan(end, picked) < reach && line.Curves.Any(c => !ReferenceEquals(c, c0)
                     && (Plan(c.Start, end) <= Tolerance || Plan(c.End, end) <= Tolerance)))
                 return (null, corner);
+        // its point halfway along: a line's midpoint; a curve's at half its normalised parameter (Curve.Evaluate)
+        var mid = c0.IsLine || c0.PointAt is null ? 0.5 * (c0.Start + c0.End) : c0.PointAt(0.5);
         return (new PickedEdge(new Xyz(c0.Start.X, c0.Start.Y, 0), new Xyz(c0.End.X, c0.End.Y, 0), c0.IsLine,
-                               c0.IsLine ? Plan(c0.Start, c0.End) : c0.Length), null);
+                               c0.IsLine ? Plan(c0.Start, c0.End) : c0.Length, new Xyz(mid.X, mid.Y, 0)), null);
     }
 
     private static double Plan(Xyz a, Xyz b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
@@ -262,27 +314,14 @@ public static class StreetEdges
         return Describe((a.X, a.Y), (b.X, b.Y), edge.IsLine ? null : edge.Length);
     }
 
-    /// <summary>The street line sent, in words: each edge as the lot has it (its points: a curved edge by its length
-    /// along them).</summary>
-    public static string DescribeSent(JsonArray street, JsonObject? lot)
-    {
-        ArgumentNullException.ThrowIfNull(street);
-        static (double X, double Y) P(JsonNode? p) => (p![0]!.GetValue<double>(), p[1]!.GetValue<double>());
-        return string.Join(" and ", street.Select(e =>
-        {
-            var (a, b) = (P(e![0]), P(e[1]));
-            if (lot is null)        // sent as kept, matched to no lot edge: no length said (never the chord of an arc)
-                return string.Create(CultureInfo.InvariantCulture,
-                    $"the street edge from ({N(a.X)}, {N(a.Y)}) to ({N(b.X)}, {N(b.Y)}), not matched to a lot (none was read)");
-            var own = lot?["edges"]?.AsArray().FirstOrDefault(x => x!["curved"]?.GetValue<bool>() == true
-                && x["points"]!.AsArray() is var ps && P(ps[0]) == a && P(ps[^1]) == b);
-            if (own is null)
-                return Describe(a, b);
-            var pts = own["points"]!.AsArray().Select(P).ToList();
-            var along = pts.Zip(pts.Skip(1), (p, q) => Math.Sqrt((p.X - q.X) * (p.X - q.X) + (p.Y - q.Y) * (p.Y - q.Y))).Sum();
-            return Describe(a, b, along);
-        }));
-    }
+    /// <summary>The lot edge matched, in words: by its own points (a curved edge by its length along them).</summary>
+    private static string Words(List<(double X, double Y)> pts, bool curved) =>
+        curved ? Describe(pts[0], pts[^1], pts.Zip(pts.Skip(1), (p, q) => Math.Sqrt((p.X - q.X) * (p.X - q.X) + (p.Y - q.Y) * (p.Y - q.Y))).Sum())
+               : Describe(pts[0], pts[^1]);
+
+    /// <summary>A street edge sent as kept, matched to no lot edge: no length said (never the chord of an arc).</summary>
+    private static string Unmatched((double X, double Y) a, (double X, double Y) b) => string.Create(CultureInfo.InvariantCulture,
+        $"the street edge from ({N(a.X)}, {N(a.Y)}) to ({N(b.X)}, {N(b.Y)}), not matched to a lot (none was read)");
 
     /// <summary>Keeps the picked edges in the <see cref="Marks.StreetEdge"/> mark through <paramref name="set"/> (Revit's
     /// Parameter.Set, which says false when it didn't), and logs them only once set: never a street edge logged that
@@ -291,7 +330,7 @@ public static class StreetEdges
     {
         ArgumentNullException.ThrowIfNull(edges);
         ArgumentNullException.ThrowIfNull(log);
-        var text = Format(edges.Select(e => (e.A, e.B)));
+        var text = Format(edges.Select(e => new KeptEdge(e.A, e.B, e.Mid is null ? null : e.IsLine, e.Mid)));
         ProjectFacts.Write(Marks.StreetEdge, text, () => set(text));
         log["street_edge"] = text;
     }
@@ -299,22 +338,33 @@ public static class StreetEdges
     /// <summary>The kept edges as the facts' <c>street_line</c>: each the lot's own edge whose ends they are (turned
     /// into the shared coordinates), sent with the lot edge's exact first and last points; or why not (an edge the
     /// lot doesn't have). With no lot read, the kept edges are sent turned as they are: the check then says there is
-    /// no lot, so nothing complies.</summary>
-    public static (JsonArray? StreetLine, string? Why) Match(IReadOnlyList<(Xyz A, Xyz B)> edges, JsonObject? lot, Transform3 toShared)
+    /// no lot, so nothing complies. A kept edge with its kind and middle (from round 4) matches only the lot edge
+    /// whose ends, kind and middle all agree, so an arc and its chord never match each other; an older mark's ends
+    /// alone matching more than one lot edge is refused (<see cref="StreetRefusal.Ambiguous"/>).</summary>
+    public static StreetMatch Match(IReadOnlyList<(Xyz A, Xyz B)> edges, JsonObject? lot, Transform3 toShared) =>
+        Match(edges.Select(e => new KeptEdge(e.A, e.B)).ToList(), lot, toShared);
+
+    public static StreetMatch Match(IReadOnlyList<KeptEdge> edges, JsonObject? lot, Transform3 toShared)
     {
         ArgumentNullException.ThrowIfNull(edges);
         ArgumentNullException.ThrowIfNull(toShared);
         static JsonArray Pt(double x, double y) => new(x, y);
+        static (double X, double Y) P(JsonNode? p) => (p![0]!.GetValue<double>(), p[1]!.GetValue<double>());
         var line = new JsonArray();
-        foreach (var (a, b) in edges)
+        var words = new List<string>();
+        foreach (var kept in edges)
         {
-            Xyz sa = toShared.Apply(a), sb = toShared.Apply(b);
+            Xyz sa = toShared.Apply(kept.A), sb = toShared.Apply(kept.B);
+            Xyz? sm = kept.Mid is { } m ? toShared.Apply(m) : null;
             if (lot is null)
             {
                 line.Add(new JsonArray(Pt(sa.X, sa.Y), Pt(sb.X, sb.Y)));
+                words.Add(Unmatched((sa.X, sa.Y), (sb.X, sb.Y)));
                 continue;
             }
             JsonArray? found = null;
+            List<(double X, double Y)>? foundPts = null;
+            var foundCurved = false;
             var matches = 0;
             foreach (var e in lot["edges"]!.AsArray())
             {
@@ -323,23 +373,54 @@ public static class StreetEdges
                 double fx = f[0]!.GetValue<double>(), fy = f[1]!.GetValue<double>();
                 double lx = l[0]!.GetValue<double>(), ly = l[1]!.GetValue<double>();
                 bool Near(Xyz p, double x, double y) => Math.Abs(p.X - x) <= Tolerance && Math.Abs(p.Y - y) <= Tolerance;
-                if (Near(sa, fx, fy) && Near(sb, lx, ly) || Near(sa, lx, ly) && Near(sb, fx, fy))
+                if (!(Near(sa, fx, fy) && Near(sb, lx, ly) || Near(sa, lx, ly) && Near(sb, fx, fy)))
+                    continue;
+                if (kept.IsLine is { } isLine && sm is { } want)
                 {
-                    found ??= new JsonArray(Pt(fx, fy), Pt(lx, ly));
-                    matches++;
+                    if (isLine != (e["curved"]?.GetValue<bool>() != true))
+                        continue;                                    // an arc kept never matches a straight edge, nor a line an arc
+                    var (mx, my) = Middle(pts.Select(P).ToList());
+                    if (Math.Abs(want.X - mx) > MidTolerance || Math.Abs(want.Y - my) > MidTolerance)
+                        continue;                                    // another curve on the same ends
                 }
+                if (found is null)
+                {
+                    found = new JsonArray(Pt(fx, fy), Pt(lx, ly));
+                    foundPts = pts.Select(P).ToList();
+                    foundCurved = e["curved"]?.GetValue<bool>() == true;
+                }
+                matches++;
             }
-            // two lot edges with the same ends (an arc and its chord): which one was confirmed can't be told from the
-            // ends kept, so nothing is sent (review round 3)
+            // what will happen is said: the button asks for the edge again at once; a request file has no pick
+            const string again = " Check my project asks you to click the lot edge along the street again (from a request " +
+                                 "file: give the Gordium: Street edge mark again); nothing is checked until then.";
             if (matches > 1)
-                return (null, $"{Marks.StreetEdge.Name}: the street edge matches more than one lot edge (two edges share its " +
-                              "ends): pick it again when Check my project asks, or redraw the property line so they don't.");
+                return new(null, $"{Marks.StreetEdge.Name}: the street edge kept matches more than one lot edge (two share its " +
+                                 "ends, an arc and its chord: it was kept before Gordium noted which)." + again, StreetRefusal.Ambiguous);
             if (found is null)
-                return (null, $"{Marks.StreetEdge.Name}: the street edge picked is no longer an edge of the lot (the " +
-                              "property line was changed): click the lot edge along the street again when Check my project asks.");
+                return new(null, $"{Marks.StreetEdge.Name}: the street edge picked is no longer an edge of the lot (the " +
+                                 "property line was changed)." + again, StreetRefusal.NoLongerAnEdge);
             line.Add(found);
+            words.Add(Words(foundPts!, foundCurved));
         }
-        return (line, null);
+        return new(line, null, StreetRefusal.None) { Words = string.Join(" and ", words) };
+    }
+
+    /// <summary>The point halfway along a run of points (by length).</summary>
+    private static (double X, double Y) Middle(List<(double X, double Y)> pts)
+    {
+        var lengths = pts.Zip(pts.Skip(1), (p, q) => Math.Sqrt((p.X - q.X) * (p.X - q.X) + (p.Y - q.Y) * (p.Y - q.Y))).ToList();
+        var half = lengths.Sum() / 2;
+        for (var i = 0; i < lengths.Count; i++)
+        {
+            if (half <= lengths[i] && lengths[i] > 0)
+            {
+                var t = half / lengths[i];
+                return (pts[i].X + t * (pts[i + 1].X - pts[i].X), pts[i].Y + t * (pts[i + 1].Y - pts[i].Y));
+            }
+            half -= lengths[i];
+        }
+        return pts[^1];
     }
 
     private static double PlanDistance(List<Xyz> pts, Xyz p)

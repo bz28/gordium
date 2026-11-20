@@ -44,9 +44,9 @@ public sealed class CheckProjectCommand : IExternalCommand
             if (ProjectFacts.Read(RevitMarks.Model(doc)).StreetEdges is null)
                 PickStreet(ui.ActiveUIDocument!, log);
             var run = Run(doc, ui.Application, log);
-            // the edge kept is no longer one of the lot's (the property line redrawn): asked for again, checked once more
-            if (run.Prepared.Missing is [var only] && only.StartsWith(Marks.StreetEdge.Name, StringComparison.Ordinal)
-                && only.Contains("no longer an edge", StringComparison.Ordinal) && PickStreet(ui.ActiveUIDocument!, log))
+            // the edge kept can't be sent (no longer a lot edge, or matching two): asked for again at once, as its
+            // message says, and checked once more (the typed reason, never its words)
+            if (StreetEdges.NeedsNewPick(run.Prepared) && PickStreet(ui.ActiveUIDocument!, log))
                 run = Run(doc, ui.Application, log);
             Show(run, added.Count);
             return Result.Succeeded;

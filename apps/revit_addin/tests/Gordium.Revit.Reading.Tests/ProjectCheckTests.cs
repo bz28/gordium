@@ -207,8 +207,9 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         var line = Scene.Model(Scene.Steps[0]).LotLines[0];
         var (edge, why) = StreetEdges.Nearest(line, new Xyz(20, 0.2, 0));
         Assert.Null(why);
-        var kept = StreetEdges.Parse(StreetEdges.Format([(edge!.A, edge.B)]))!;
-        Assert.Equal((edge.A, edge.B), Assert.Single(kept));
+        var kept = StreetEdges.Parse(StreetEdges.Format([new KeptEdge(edge!.A, edge.B, edge.IsLine, edge.Mid)]))!;
+        Assert.Equal(new KeptEdge(edge.A, edge.B, true, new Xyz(30, 0, 0)), Assert.Single(kept));      // its kind and middle kept
+        Assert.Equal(new KeptEdge(edge.A, edge.B), Assert.Single(StreetEdges.Parse(StreetEdges.Format([(edge.A, edge.B)]))!));   // an older mark still reads
         Assert.Equal(0, edge.A.Y + edge.B.Y);
         Assert.Equal(60, Math.Abs(edge.A.X - edge.B.X));
         Assert.Contains("corner", StreetEdges.Nearest(line, new Xyz(0, 0, 0)).Why, StringComparison.Ordinal);
@@ -262,20 +263,43 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
                 ["points"] = new JsonArray(Enumerable.Range(0, 201).Select(k => At(k / 200.0)).Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray()),
             }),
         };
-        var (sent, _) = StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity);
-        Assert.Equal("the curved 47.1 ft lot edge from (0.0, 0.0) to (40.0, 0.0)", StreetEdges.DescribeSent(sent!, lot));
+        // the arc as the mark keeps it: its ends, its kind and its middle (review round 4)
+        var arcKept = Assert.Single(StreetEdges.Parse(StreetEdges.Format([new KeptEdge(edge.A, edge.B, edge.IsLine, edge.Mid)]))!);
+        Assert.Equal(false, arcKept.IsLine);
+        var match = StreetEdges.Match([arcKept], lot, Transform3.Identity);
+        Assert.Equal("the curved 47.1 ft lot edge from (0.0, 0.0) to (40.0, 0.0)", match.Words);
 
         // review round 3: with no lot read, no length is said (the chord would contradict the 47.1 ft confirmed)
-        var (unmatched, _) = StreetEdges.Match([(edge.A, edge.B)], null, Transform3.Identity);
         Assert.Equal("the street edge from (0.0, 0.0) to (40.0, 0.0), not matched to a lot (none was read)",
-                     StreetEdges.DescribeSent(unmatched!, null));
-        // ... and a lot bounded by the arc and its chord (two edges with the same ends): which was confirmed can't be
-        // told, so nothing is sent
+                     StreetEdges.Match([arcKept], null, Transform3.Identity).Words);
+
+        // review round 4: a lot bounded by the arc and its chord (two edges with the same ends, the chord run back from
+        // (40, 0) to (0, 0)). The arc kept sends the arc, its own way round; the chord kept, the chord; never each other
         lot["edges"]!.AsArray().Add(new JsonObject { ["points"] = new JsonArray(new JsonArray(40.0, 0.0), new JsonArray(0.0, 0.0)) });
+        match = StreetEdges.Match([arcKept], lot, Transform3.Identity);
+        Assert.Equal("[[[0,0],[40,0]]]", Rounded(match.StreetLine!));
+        Assert.Equal("the curved 47.1 ft lot edge from (0.0, 0.0) to (40.0, 0.0)", match.Words);
+        var chordKept = new KeptEdge(new Xyz(0, 0, 0), new Xyz(40, 0, 0), true, new Xyz(20, 0, 0));
+        match = StreetEdges.Match([chordKept], lot, Transform3.Identity);
+        Assert.Equal("[[[40,0],[0,0]]]", Rounded(match.StreetLine!));
+        Assert.Equal("the 40.0 ft lot edge from (40.0, 0.0) to (0.0, 0.0)", match.Words);
+        // an older mark, its ends alone: which was meant can't be told, so nothing is sent, and its typed reason is
+        // one the button asks a new pick for (never read from the words)
         var (both, why2) = StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity);
         Assert.Null(both);
-        Assert.Contains("matches more than one lot edge", why2, StringComparison.Ordinal);
+        Assert.Contains("Check my project asks you to click the lot edge along the street again", why2, StringComparison.Ordinal);
+        Assert.Equal(StreetRefusal.Ambiguous, StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity).Reason);
+        var prepared = new ProjectPrepared(null, [why2!], null, [], null, StreetRefused: StreetRefusal.Ambiguous);
+        Assert.True(StreetEdges.NeedsNewPick(prepared));
+        Assert.True(StreetEdges.NeedsNewPick(prepared with { StreetRefused = StreetRefusal.NoLongerAnEdge }));
+        Assert.False(StreetEdges.NeedsNewPick(prepared with { StreetRefused = StreetRefusal.None }));
     }
+
+    /// <summary>A street line with each coordinate to a millionth of a foot (an arc's end a hair off 0 reads 0).</summary>
+    private static string Rounded(JsonArray line) =>
+        "[" + string.Join(",", line.Select(e => "[" + string.Join(",", e!.AsArray().Select(p =>
+            "[" + string.Join(",", p!.AsArray().Select(v => (Math.Round(v!.GetValue<double>(), 6) + 0.0)
+                .ToString(System.Globalization.CultureInfo.InvariantCulture))) + "]")) + "]")) + "]";
 
     /// <summary>Review round 2: every mark write goes through one helper; a Set Revit refuses throws naming the mark,
     /// and the street edge is never logged as kept.</summary>

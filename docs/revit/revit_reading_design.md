@@ -318,9 +318,14 @@ naming the mark, nothing is checked, and nothing is logged as kept. The edge is 
 coordinates, which don't move when the shared coordinates are set again (an edge index was rejected: redrawing the
 property line renumbers its edges silently). At each check the kept ends are turned into shared coordinates and
 matched to an edge of the lot read (within 0.01 ft); `street_line` is then that edge's own first and last points,
-exactly as the site description has them. An edge the lot no longer has (the property line redrawn) is asked for
-again, never sent. With no lot read at all, the kept edge is sent as it is and the check says there is no lot: the
-lot's rows need review, so the check never complies.
+exactly as the site description has them. With the ends the mark keeps whether the edge is straight and its point
+halfway along (`x1 y1 x2 y2 line|arc mx my`), and only the lot edge whose ends, kind and middle (within 0.25 ft) all
+agree matches, so an arc and its chord (same ends) never match each other; an older mark with the ends alone that
+matches two lot edges is refused. An edge the lot no longer has (the property line redrawn), or one matching two,
+is never sent: its typed reason (`StreetRefusal`, `StreetEdges.NeedsNewPick`) has the button ask for the edge again
+at once, as its message says (a request file has no pick: the message says to give the mark again). With no lot
+read at all, the kept edge is sent as it is, named without a length, and the check says there is no lot: the lot's
+rows need review, so the check never complies.
 
 **The dialog.** The headline is the worker's own state and summary line (never a count of the add-in's), then
 the phase and design options checked, then each group in the worker's order with its count and every failure in
