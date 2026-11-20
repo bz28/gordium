@@ -514,7 +514,11 @@ public static class InteriorReader
         }
         var t = model.InternalToShared;
         var sillLine = level + sill;
-        var record = new JsonObject { ["sill_line"] = t.Apply(new Xyz(at.X, at.Y, sillLine)).Z };
+        var record = new JsonObject
+        {
+            ["sill_line"] = t.Apply(new Xyz(at.X, at.Y, sillLine)).Z, ["wall_opening_by"] = rec.WallOpeningBy,
+            ["revit_layer"] = new JsonArray(rec.Diagnostics.Select(d => (JsonNode?)d).ToArray()),
+        };
         evidence[e.UniqueId] = record;
         if (!rec.HostIsWall || rec.WallOpening is not { Count: > 0 } cut)
         {

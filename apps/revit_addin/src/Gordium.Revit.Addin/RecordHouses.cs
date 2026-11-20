@@ -110,6 +110,7 @@ public sealed class RecordHousesCommand : IExternalCommand
                     ["part"] = n.Part, ["field"] = n.Field, ["why"] = n.Why,
                 }).ToArray()),
                 ["evidence"] = read.Evidence.DeepClone(),
+                ["revit_layer"] = new JsonArray(model.Interior!.Diagnostics.Select(d => (JsonNode?)d).ToArray()),
             };
             Directory.CreateDirectory(Path.GetDirectoryName(path)!);
             File.WriteAllText(path, recording.ToJsonString(new JsonSerializerOptions { WriteIndented = true, NewLine = "\n" }) + "\n",
@@ -123,6 +124,7 @@ public sealed class RecordHousesCommand : IExternalCommand
             log["rooms_not_read"] = read.RoomsNotRead;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["evidence"] = read.Evidence.ToJsonString();
+            log["revit_layer"] = model.Interior!.Diagnostics;
             Trial.Log("record_house", log);
             return problems.Count == 0 ? $"{name}: OK" : $"{name}: {problems.Count} problem(s): {problems[0]}";
         }
@@ -141,8 +143,9 @@ public sealed class RecordHousesCommand : IExternalCommand
 }
 
 /// <summary>"Read inside": what the interior reader would send for the open project, and why anything is left out,
-/// shown and logged (the description itself in the log). A reading only: nothing is sent to the checker yet.</summary>
-[Transaction(TransactionMode.ReadOnly)]
+/// shown and logged (the description itself in the log). A reading only: nothing is sent to the checker yet, and the
+/// one transaction it opens (Revit works out enclosed areas only in a document it can change) is rolled back.</summary>
+[Transaction(TransactionMode.Manual)]
 public sealed class ReadInteriorCommand : IExternalCommand
 {
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
@@ -157,12 +160,14 @@ public sealed class ReadInteriorCommand : IExternalCommand
         try
         {
             var sw = Stopwatch.StartNew();
-            var read = InteriorReader.Read(RevitInterior.Model(doc));
+            var model = RevitInterior.Model(doc);
+            var read = InteriorReader.Read(model);
             log["read_s"] = sw.Elapsed.TotalSeconds;
             log["rooms_not_read"] = read.RoomsNotRead;
             log["openings_not_read"] = read.OpeningsNotRead;
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["evidence"] = read.Evidence.ToJsonString();
+            log["revit_layer"] = model.Interior!.Diagnostics;
             log["interior"] = read.Interior.ToJsonString();
             Trial.Log("read_interior", log);
             var rooms = read.Interior["rooms"] is JsonArray r ? $"{r.Count} rooms read" : "Rooms not read: " + string.Join("; ", read.RoomsNotRead.Take(5));

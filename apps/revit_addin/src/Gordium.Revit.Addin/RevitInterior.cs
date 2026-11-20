@@ -52,43 +52,72 @@ internal static class RevitInterior
         var openings = new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors }
             .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
             .Select(fi => OpeningOf(doc, fi, phase)).ToList();
+        var diagnostics = new List<string>();
         return new InteriorRecords
         {
             Rooms = rooms,
             Openings = openings,
-            EnclosedAreas = phase is null ? null : Areas(doc, phase),
+            EnclosedAreas = phase is null ? null : Areas(doc, phase, diagnostics),
             Links = Links(doc),
+            Diagnostics = diagnostics,
         };
     }
 
     // ---- enclosed areas and links -------------------------------------------------------------------------------
 
     /// <summary>Every enclosed area (<c>PlanCircuit</c>) on every level for the last phase; null when Revit couldn't
-    /// give one level's (then no room can be read).</summary>
-    private static List<EnclosedArea>? Areas(Document doc, Phase phase)
+    /// give one level's (then no room can be read). Revit works out a level's plan topology only in a document it can
+    /// change ("Accessing plan topology requires that document is modifiable", the API's own remark): a level never
+    /// worked out yet (one with nothing on it: trial run 2, 2026-11-20) threw in a read-only moment. So it is read
+    /// inside a transaction that is rolled back, changing nothing in the model.</summary>
+    private static List<EnclosedArea>? Areas(Document doc, Phase phase, List<string> diagnostics)
     {
-        var areas = new List<EnclosedArea>();
-        foreach (var level in new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>())
+        Transaction? t = null;
+        if (!doc.IsModifiable && !doc.IsReadOnly)
         {
-            PlanTopology topology;
-            try
+            t = new Transaction(doc, "Gordium: read the enclosed areas (rolled back)");
+            t.Start();
+        }
+        try
+        {
+            var areas = new List<EnclosedArea>();
+            foreach (var level in new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>())
             {
-                topology = doc.get_PlanTopology(level, phase);
+                PlanTopology topology;
+                try
+                {
+                    topology = doc.get_PlanTopology(level, phase);
+                }
+                catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
+                {
+                    diagnostics.Add($"enclosed areas on {level.Name}: Revit refused ({x.GetType().Name}: {x.Message}), modifiable {doc.IsModifiable}");
+                    return null;
+                }
+                if (topology?.Circuits is not { } circuits)
+                {
+                    diagnostics.Add($"enclosed areas on {level.Name}: Revit gave no {(topology is null ? "plan topology" : "circuits")}");
+                    return null;
+                }
+                var before = areas.Count;
+                foreach (PlanCircuit c in circuits)
+                {
+                    var inside = c.GetPointInside();
+                    areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated,
+                                               new Xyz(inside.U, inside.V, level.ProjectElevation)));
+                }
+                diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
+                                $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room)");
             }
-            catch (Autodesk.Revit.Exceptions.ApplicationException)
+            return areas;
+        }
+        finally
+        {
+            if (t is not null)
             {
-                return null;
-            }
-            if (topology?.Circuits is not { } circuits)
-                return null;
-            foreach (PlanCircuit c in circuits)
-            {
-                var inside = c.GetPointInside();
-                areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated,
-                                           new Xyz(inside.U, inside.V, level.ProjectElevation)));
+                t.RollBack();
+                t.Dispose();
             }
         }
-        return areas;
     }
 
     private static List<InteriorLink> Links(Document doc)
@@ -274,6 +303,7 @@ internal static class RevitInterior
         var (width, height) = TypeSize(type);
         var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
         var (faces, failed) = Faces(fi, options);
+        var cut = fi.Host is Wall wall ? Cut(wall, fi, width, options) : (null, null, ["its host isn't a wall"]);
         return new OpeningRecord
         {
             UniqueId = fi.UniqueId,
@@ -289,7 +319,9 @@ internal static class RevitInterior
             TypeHeight = height,
             TypeLengths = type is null ? new Dictionary<string, double>() : Lengths(type),
             Placed = failed || faces is null || faces.Count == 0 ? null : faces.SelectMany(f => f.Points).ToList(),
-            WallOpening = fi.Host is Wall wall ? Cut(wall, fi, options) : null,
+            WallOpening = cut.Points,
+            WallOpeningBy = cut.By,
+            Diagnostics = cut.Words,
         };
     }
 
@@ -317,11 +349,17 @@ internal static class RevitInterior
         return lengths;
     }
 
-    /// <summary>The points of the host wall's faces this window or door cut (<c>Element.GetGeneratingElementIds</c>);
-    /// null when none was found.</summary>
-    private static List<Xyz>? Cut(Wall wall, FamilyInstance fi, Options options)
+    /// <summary>The points of the faces of the host wall that this window or door cut, how they were found, and what
+    /// was looked at. First the faces <c>Element.GetGeneratingElementIds</c> says this window generated; if none (trial
+    /// run 2, 2026-11-20: no wall face named the window), then, only when the window is one of the wall's inserts
+    /// (<c>HostObject.FindInserts</c>), the wall's faces lying wholly within the window's width along the wall
+    /// (<c>HandOrientation</c>, from its point, half its type's width each side, 1/16 in to spare) and wholly between the
+    /// wall's own bottom and top: the opening's sill, head and jambs, which the cut makes and no other face of a straight
+    /// wall is. Never the window's own geometry or its Sill Height.</summary>
+    private static (List<Xyz>? Points, string? By, List<string> Words) Cut(Wall wall, FamilyInstance fi, double? width, Options options)
     {
-        var points = new List<Xyz>();
+        var words = new List<string>();
+        var faces = new List<(Face Face, List<Xyz> Points, ICollection<ElementId> By)>();
         void Walk(GeometryElement g)
         {
             foreach (var o in g)
@@ -329,8 +367,8 @@ internal static class RevitInterior
                 if (o is Solid s)
                 {
                     foreach (Face f in s.Faces)
-                        if (wall.GetGeneratingElementIds(f).Contains(fi.Id))
-                            points.AddRange(f.GetEdgesAsCurveLoops().SelectMany(l => l.Select(c => P(c.GetEndPoint(0)))));
+                        faces.Add((f, f.GetEdgesAsCurveLoops().SelectMany(l => l.Select(c => P(c.GetEndPoint(0)))).ToList(),
+                                   wall.GetGeneratingElementIds(f)));
                 }
                 else if (o is GeometryInstance gi && gi.GetInstanceGeometry() is { } inner)
                     Walk(inner);
@@ -343,9 +381,34 @@ internal static class RevitInterior
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
         {
-            return null;
+            words.Add($"the wall's geometry couldn't be read ({x.GetType().Name}: {x.Message})");
+            return (null, null, words);
         }
-        return points.Count == 0 ? null : points;
+        words.Add($"wall {wall.UniqueId}: {faces.Count} faces; ids generating them: " + string.Join(", ",
+            faces.SelectMany(f => f.By).Distinct().Select(id => wall.Document.GetElement(id) is { } e
+                ? $"{e.Category?.BuiltInCategory.ToString() ?? "?"} {id.Value}{(id == fi.Id ? " (this window)" : "")}" : $"{id.Value}")));
+        var named = faces.Where(f => f.By.Contains(fi.Id)).SelectMany(f => f.Points).ToList();
+        if (named.Count > 0)
+            return (named, "the wall's faces Revit says this window generated (GetGeneratingElementIds)", words);
+        var inserts = wall.FindInserts(true, false, false, false);
+        words.Add($"the wall's inserts (FindInserts): {inserts.Count}, this window among them: {inserts.Contains(fi.Id)}");
+        if (!inserts.Contains(fi.Id) || width is not { } w || fi.Location is not LocationPoint lp)
+            return (null, null, words);
+        var along = fi.HandOrientation;
+        var lengthAlong = Math.Sqrt(along.X * along.X + along.Y * along.Y);
+        var box = wall.get_BoundingBox(null);
+        if (lengthAlong < 1e-9 || box is null)
+            return (null, null, words);
+        double U(Xyz p) => ((p.X - lp.Point.X) * along.X + (p.Y - lp.Point.Y) * along.Y) / lengthAlong;
+        var within = faces.Where(f => f.Points.Count > 0 && f.Points.All(p => Math.Abs(U(p)) <= w / 2 + Sixteenth)
+                                      && f.Points.All(p => p.Z > box.Min.Z + Sixteenth && p.Z < box.Max.Z - Sixteenth)).ToList();
+        words.Add($"faces wholly within the window's width and the wall's height: {within.Count}" +
+                  (within.Count > 0 ? $", lowest at {within.Min(f => f.Points.Min(p => p.Z)):0.######} ft, highest at " +
+                                      $"{within.Max(f => f.Points.Max(p => p.Z)):0.######} ft (internal)" : ""));
+        return within.Count == 0
+            ? (null, null, words)
+            : (within.SelectMany(f => f.Points).ToList(),
+               "the wall's faces wholly within this window's width (an insert of the wall: FindInserts)", words);
     }
 
     internal static Xyz P(XYZ p) => new(p.X, p.Y, p.Z);
