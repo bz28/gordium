@@ -669,7 +669,7 @@ def _failing_distances(rule: dict, measured: dict, values: dict) -> list[dict]:
     return found
 
 
-def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = None,
+def _report(t: dict, view: dict, report_path: Path, site_file: "Path | list[Path] | None" = None,
             interior_sha256: str | None = None, interior_waiting: bool = True) -> None:
     """The architects'-format workbook (PR 10), saying what the panel says (spec I1, I2): each rule's Error and
     Comparison are its items' most cautious status (a rule the panel shows as needing review is never PASS here),
@@ -747,26 +747,44 @@ def _report(t: dict, view: dict, report_path: Path, site_file: Path | None = Non
     # written beside it, then moved into place: a write that fails half way never leaves a broken report there
     report_path = Path(report_path)
     part = report_path.with_name("." + report_path.name + ".part")
+    files = [] if site_file is None else [Path(site_file)] if isinstance(site_file, (str, Path)) else list(site_file)
     try:
         wb.save(part)
-        # the earlier report's site file (check_description's) is set aside, not deleted, until the new report is in
-        # place: a report that can't be moved in (open in Excel on Windows) leaves the earlier one beside its own site
-        aside = None
-        if site_file is not None and site_file.exists():
-            aside = _aside(site_file)
+        # the earlier report's site file (and its interior file: check_description's) is set aside, not deleted,
+        # until the new report is in place: a report that can't be moved in (open in Excel on Windows) leaves the
+        # earlier one beside its own site and interior
+        aside = []
+        for kept in files:
+            if not kept.exists():
+                continue
             try:
-                os.replace(site_file, aside)
-            except OSError as e:             # said as the site file's trouble, not the report's
-                raise _SiteInTheWay(e, site_file, report_path) from e
+                os.replace(kept, _aside(kept))
+            except OSError as e:             # said as that file's trouble, not the report's
+                _put_back(aside)
+                raise _SiteInTheWay(e, kept, report_path) from e
+            aside.append(kept)
         try:
             os.replace(part, report_path)
-        except BaseException:                # not moved in (or stopped right here): the earlier site goes back,
-            if aside is not None and part.exists():      # unless the move did happen (its part is gone)
-                os.replace(aside, site_file)
+        except BaseException:                # not moved in (or stopped right here): the earlier files go back,
+            if part.exists():                # unless the move did happen (its part is gone)
+                _put_back(aside)
             raise
     finally:
         if part.exists():
             part.unlink()
+
+
+def _put_back(aside: list) -> None:
+    """The earlier report's files set aside, each put back; the first that can't be is raised after the rest are tried
+    (one that can't go back stays set aside: it is the earlier report's only copy)."""
+    failed = None
+    for kept in aside:
+        try:
+            os.replace(_aside(kept), kept)
+        except OSError as e:
+            failed = failed or e
+    if failed is not None:
+        raise failed
 
 
 # What a check or a start is doing, in the architect's words, as each stage begins (the plugin's progress line)
@@ -819,14 +837,20 @@ def _host(model_path: Path) -> dict:
 
 
 SITE_SUFFIX = ".site.json"      # beside a zoning report: the exact site description it was worked out from
+INTERIOR_SUFFIX = ".interior.json"   # beside it too: the exact interior description its egress rows were worked out from
+
+
+def _described(kept: Path) -> str:
+    """Which description a file beside a report holds, in the report_error's words."""
+    return "the interior description" if kept.name.endswith(INTERIOR_SUFFIX) else "the site description"
 
 
 class _SiteInTheWay(OSError):
-    """The earlier report's site file couldn't be set aside (locked, say): the new report wasn't moved in."""
+    """The earlier report's site or interior file couldn't be set aside (locked, say): the new report wasn't moved in."""
 
     def __init__(self, error: OSError, site_file: Path, report_path: Path):
         super().__init__(error.errno, error.strerror)
-        self.words = (f"the site description beside the report: {error.strerror or error} ({site_file}), so the new "
+        self.words = (f"{_described(site_file)} beside the report: {error.strerror or error} ({site_file}), so the new "
                       f"report wasn't saved ({report_path})")
 
 
@@ -847,42 +871,62 @@ def check_description(doc: dict, facts: dict, report_path: Path | None = None, e
     report keeps its site (report_error says why); at worst, a check stopped between the two leaves a report with no
     site file beside it, never a wrong one. `today`: the host's day, as check() takes it; `interior`: the interior
     description, as check_site takes it (beside the site description, never inside it: gordium.site/1 is
-    unchanged)."""
+    unchanged).
+
+    The interior is kept the same way, beside the site (<report name>.interior.json), so the report's egress rows can
+    be worked out again too (the Revit interior design note, section 5): written first, moved in with the site, and
+    never an earlier check's interior left beside a new report: a check with no interior sets the earlier one aside
+    with the earlier site and drops it once the new report is in (put back with it if the report can't be)."""
     today = present.checked_today(today)     # a day that isn't one: refused before any file is touched
     site, facts, extras = site_json.for_measuring(site_json.to_site(doc), facts, extras)
     _refuse_bad_facts(facts)                 # a refused request leaves the earlier report and its site alone
-    kept = part = site_error = None
+    beside, site_error = [], None            # beside: (kept file, its part file, its description or None)
     if report_path is not None:
         report_path = Path(report_path)
-        kept = report_path.with_name(report_path.stem + SITE_SUFFIX)
-        part = kept.with_name("." + kept.name + ".part")       # as the report's own half-written copy is named
-        try:
-            part.write_text(json.dumps(doc, indent=1, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
-        except OSError as e:
-            site_error = _NotWritten(e)
+        for suffix, content in ((SITE_SUFFIX, doc), (INTERIOR_SUFFIX, interior)):
+            kept = report_path.with_name(report_path.stem + suffix)
+            part = kept.with_name("." + kept.name + ".part")    # as the report's own half-written copy is named
+            beside.append((kept, part, content))
+            if content is None or site_error is not None:
+                continue
+            try:
+                part.write_text(json.dumps(content, indent=1, sort_keys=True, allow_nan=False) + "\n", encoding="utf-8")
+            except OSError as e:
+                site_error = (_NotWritten(e), kept)
     try:                                     # a site that can't be kept: no report written (the earlier one stays)
         out = check_site(site, facts, name or doc["host"]["document"] or "model",
                          None if site_error else report_path, extras, step=step,
-                         site_file=None if site_error else kept, today=today, interior=interior)
-    except BaseException:                    # stopped or failed: no half-written site file left behind; an earlier
-        if part is not None:                 # site still set aside is the replaced report's (_report puts it back
-            _unlink(part)                    # when its report isn't moved in), so it goes
+                         site_file=None if site_error or not beside else [kept for kept, _, _ in beside],
+                         today=today, interior=interior)
+    except BaseException:                    # stopped or failed: no half-written file left behind; an earlier one
+        for kept, part, _ in beside:         # still set aside is the replaced report's (_report puts it back when
+            _unlink(part)                    # its report isn't moved in), so it goes
             _unlink(_aside(kept))
         raise
-    if part is not None:
+    if beside:
+        moved = []
         if out["report_error"] is None and site_error is None:
-            try:
-                os.replace(part, kept)
-            except OSError as e:
-                site_error = e
+            for kept, part, content in beside:
+                if content is None:
+                    continue
+                try:
+                    os.replace(part, kept)
+                except OSError as e:
+                    site_error = (e, kept)
+                    break
+                moved.append(kept)
         if site_error is not None and out["report_error"] is None:     # never a report beside the wrong site
-            if not isinstance(site_error, _NotWritten):
+            error, kept = site_error
+            if not isinstance(error, _NotWritten):
                 _unlink(report_path)
-            out["report_error"] = (f"the site description beside the report: {site_error.strerror or site_error} "
+                for done in moved:           # beside no report now: gone with it
+                    _unlink(done)
+            out["report_error"] = (f"{_described(kept)} beside the report: {error.strerror or error} "
                                    f"({kept}), so the new report wasn't saved ({report_path})")
-        _unlink(part)
-        if out["report_error"] is None or site_error is not None:    # the report it was beside was replaced; else
-            _unlink(_aside(kept))            # it was put back, or, if that failed, is the earlier report's only copy
+        for kept, part, _ in beside:
+            _unlink(part)
+            if out["report_error"] is None or site_error is not None:  # the report it was beside was replaced; else
+                _unlink(_aside(kept))        # it was put back, or, if that failed, is the earlier report's only copy
     return out
 
 

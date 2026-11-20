@@ -199,10 +199,12 @@ A small, additive change (protocol **1.2**, a minor version: a 1.1 worker refuse
   and hands it to `check.check_site`, which already runs egress on it and fingerprints it in the report (`interior_sha256`), so every result can be
   traced to exactly the interior it was worked out from (principle 5).
 - `WorkerClient.CheckSiteAsync` gains `interior`; the add-in keeps each check's interior beside its site
-  description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Not yet: keeping
-  the interior beside a saved report. Until then a report's egress rows trace to their interior by its fingerprint
-  alone (`interior_sha256`, written in the report), so they can't be worked out again from what is kept beside it;
-  section 7's step 3, the first to send a real interior, keeps it. Today no host sends one.
+  description, as decided for the site (2026-11-06). Built in step 1: the worker and the client. Built in step 3:
+  a saved report keeps its interior beside it (`<report name>.interior.json`, `check.check_description`), written
+  first, moved in with the site, the earlier report's set aside and put back if the new report can't be moved in,
+  and never an earlier check's interior left beside a new report (a check with no interior drops it); the report
+  also names it by its fingerprint (`interior_sha256`), so its egress rows can be worked out again from what is kept
+  beside it.
 - **Only to a worker that says it understands it.** A 1.1 worker ignores a field it doesn't know, so it would answer
   "Egress waiting: no rooms drawn yet" for a house with rooms. The add-in sends `interior` only when the worker's
   `hello` says protocol 1.2 or later; with an older worker it shows that egress can't be checked with this checker
