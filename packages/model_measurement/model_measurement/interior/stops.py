@@ -14,6 +14,11 @@ STOPS = {
     "not_a_list": "`{key}` in the description isn't a list",
     "not_a_mapping": "{what} #{n} isn't a mapping",
     "flag_missing": "{what} {name}: say whether it is {question} (`{key}`: true or false)",
+    # an enclosed space the host found with no room drawn in it (`unknown_spaces`): its use isn't known
+    "unknown_spaces_entry": "`unknown_spaces` #{n} isn't a space with an id (a mapping with a text `id`): the rooms "
+                            "aren't read",
+    "unknown_space": "an enclosed space with no room drawn in it: its use isn't known, so it may be a sleeping room "
+                     "(draw a room in it and say whether it is a sleeping room)",
     # what the description says the house has none of (has_none.py): a claim not taken leaves its kind not read
     "has_none_not_a_list": "`has_none` in the description isn't a list (each entry a `kind` and its `source`): what the house has none of "
                            "isn't read",
@@ -35,7 +40,10 @@ STOPS = {
                              "unclear, so their rules need review",
     "has_none_room_within": "the description says the house has no sleeping lofts, yet {what}: which is right is "
                             "unclear, so their rules need review",
-    "has_none_contradicted": "the description says the house has no {words}, yet it also gives `{key}`, which isn't "
+    "has_none_unknown_space": "the description says the house has no {words}, yet it gives {count} enclosed "
+                              "space(s) whose use isn't known (`unknown_spaces`), any of which could be one: it isn't "
+                              "taken, so their rules need review",
+    "has_none_contradicted":"the description says the house has no {words}, yet it also gives `{key}`, which isn't "
                              "an empty list: which is right is unclear, so their rules need review",
     # values
     "missing": "{what} isn't given",
