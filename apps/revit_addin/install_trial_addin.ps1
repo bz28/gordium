@@ -3,7 +3,9 @@
 # folder stays free to rebuild), writes the clone's path beside it, and writes Revit's manifest (.addin) pointing at it.
 # Then start Revit (on the trial laptop, a running Revit 2027.4 picked the add-in up without a restart and never asked
 # "Always Load"; another Revit may need a restart, or ask once whether to load it: answer "Always Load").
-param([string]$Revit = "2027")
+# -Python names the Python to run for a clone with no venv of its own (a git worktree): written beside the build
+# (gordium_python.txt); the add-in then points it at this clone's packages (PYTHONPATH), so the code run is this clone's.
+param([string]$Revit = "2027", [string]$Python = "")
 $ErrorActionPreference = "Stop"
 $tfm = @{ "2027" = "net10.0-windows"; "2026" = "net8.0-windows" }[$Revit]
 if (-not $tfm) { throw "Revit $Revit is not one the add-in is built for (2026, 2027)" }
@@ -16,6 +18,10 @@ $target = Join-Path $env:LOCALAPPDATA "Gordium\addin\$Revit\$stamp"
 New-Item -ItemType Directory -Force $target | Out-Null
 Copy-Item (Join-Path $project "bin\Release\$tfm\*") $target -Recurse
 [IO.File]::WriteAllText((Join-Path $target "gordium_clone.txt"), $clone, (New-Object Text.UTF8Encoding $false))
+if ($Python) {
+    if (-not (Test-Path $Python)) { throw "no Python at $Python" }
+    [IO.File]::WriteAllText((Join-Path $target "gordium_python.txt"), (Resolve-Path $Python).Path, (New-Object Text.UTF8Encoding $false))
+}
 $manifestDir = Join-Path $env:APPDATA "Autodesk\Revit\Addins\$Revit"
 New-Item -ItemType Directory -Force $manifestDir | Out-Null
 $manifest = @"

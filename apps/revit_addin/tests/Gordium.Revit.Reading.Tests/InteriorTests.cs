@@ -277,7 +277,8 @@ public sealed class InteriorTests
     {
         foreach (var (element, words) in new[]
                  {
-                     (new NearbyElement("m", "OST_Mass", "Mass", Faces: []), "a category Gordium doesn't read"),
+                     (new NearbyElement("m", "OST_Mass", "Mass", Faces: [new SurfaceRecord(true, new(0, 0, -1), [], [new(2, 2, 7)])]),
+                      "a category Gordium doesn't read"),
                      (new NearbyElement("d", "OST_DuctCurves", "Duct", GeometryFailed: true), "couldn't be read"),
                      (new NearbyElement("c", "OST_Ceilings", "Vault", Faces: [new SurfaceRecord(false, new(0, 0, 0), [], [new(2, 2, 9), new(4, 4, 9)])]),
                       "a curved face"),
@@ -294,6 +295,10 @@ public sealed class InteriorTests
         var k = empty.RoomIndex("bed1");
         empty.Rooms[k] = empty.Rooms[k] with { Over = [] };
         Assert.Equal("nothing was found over it", Note(InteriorReader.Read(empty.Model()), "bed1", "ceilings"));
+        // something with nothing drawn (the project base point, a model line) is nothing over it, whatever its category
+        var point = FakeHouse.Draw("1_ranch_compliant");
+        point.Rooms[k] = point.Rooms[k] with { Over = [.. point.Rooms[k].Over!, new NearbyElement("pbp", "OST_ProjectBasePoint", Faces: [])] };
+        Assert.Equal([], Problems(point, InteriorReader.Read(point.Model())));
     }
 
     // ---- an escape window's clear opening -----------------------------------------------------------------------

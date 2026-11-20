@@ -33,16 +33,30 @@ internal static class Trial
             "Gordium's clone wasn't found above the add-in's folder (no pyproject.toml): load the add-in from the clone");
     }
 
-    /// <summary>The clone's venv Python, as the runbook sets it up (<c>py -3.12 -m venv .venv</c>).</summary>
+    /// <summary>The clone's venv Python, as the runbook sets it up (<c>py -3.12 -m venv .venv</c>); or, for a clone
+    /// with no venv of its own (a git worktree beside the main clone), the Python named in <c>gordium_python.txt</c>
+    /// beside the add-in (written by the install script's <c>-Python</c>).</summary>
     internal static string Python(string clone)
     {
-        var python = Path.Combine(clone, ".venv", "Scripts", "python.exe");
+        var note = Path.Combine(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!, "gordium_python.txt");
+        var python = File.Exists(note) ? File.ReadAllText(note).Trim() : Path.Combine(clone, ".venv", "Scripts", "python.exe");
         if (!File.Exists(python))
             throw new InvalidOperationException($"No venv Python at {python}: run the setup list (runbook section 2)");
         return python;
     }
 
-    internal static WorkerOptions Options(string clone) => new() { PythonPath = Python(clone), WorkingDirectory = clone };
+    /// <summary>Python pointed at the clone's own packages (<c>PYTHONPATH</c>, every <c>packages/&lt;package&gt;</c>
+    /// folder): the code run is always the clone's, even through another clone's venv.</summary>
+    internal static Dictionary<string, string> PythonEnvironment(string clone)
+    {
+        var packages = Path.Combine(clone, "packages");
+        return Directory.Exists(packages)
+            ? new() { ["PYTHONPATH"] = string.Join(Path.PathSeparator, Directory.GetDirectories(packages).Order(StringComparer.Ordinal)) }
+            : [];
+    }
+
+    internal static WorkerOptions Options(string clone) =>
+        new() { PythonPath = Python(clone), WorkingDirectory = clone, Environment = PythonEnvironment(clone) };
 
     /// <summary>The target framework this build was made for (<c>.NETCoreApp,Version=v10.0</c>).</summary>
     internal static string Build() =>
@@ -71,5 +85,5 @@ internal static class Trial
     /// <summary>Runs the clone's Python once and gives its output (for the conformance scene's facts and verdicts,
     /// which only Python works out). A failure, or a run past 2 minutes (stopped), is an error, never an empty answer.</summary>
     internal static string RunPython(string clone, string code) =>
-        PythonOnce.Run(Python(clone), clone, ["-c", code], TimeSpan.FromMinutes(2));
+        PythonOnce.Run(Python(clone), clone, ["-c", code], TimeSpan.FromMinutes(2), PythonEnvironment(clone));
 }

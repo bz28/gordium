@@ -373,6 +373,8 @@ public static class InteriorReader
         {
             if (e.UniqueId == rec.UniqueId || NotBuilding.Contains(e.BuiltInCategory) || (e.Host is { } h && bounding.Contains(h)))
                 continue;                                    // a window or door in a wall bounding it isn't over it
+            if (!Building.Contains(e.BuiltInCategory) && e is { GeometryFailed: false, Faces.Count: 0 })
+                continue;                                    // nothing drawn (a base point, a line): nothing over it
             if (!Building.Contains(e.BuiltInCategory))
             {
                 why = $"{Named(e)} is over it, in a category Gordium doesn't read as a ceiling or as furniture";

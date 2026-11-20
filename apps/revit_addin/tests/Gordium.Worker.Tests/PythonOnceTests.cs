@@ -17,6 +17,15 @@ public sealed class PythonOnceTests
     }
 
     [Fact]
+    public void The_environment_given_is_added_to_its_own()
+    {
+        // the add-in points Python at its clone's packages this way (Trial.PythonEnvironment)
+        var got = PythonOnce.Run(Env.Python, Env.Repo, ["-c", "import os; print(os.environ['GORDIUM_TEST_VALUE'], 'PATH' in os.environ)"],
+                                 TimeSpan.FromSeconds(60), new Dictionary<string, string> { ["GORDIUM_TEST_VALUE"] = "given" });
+        Assert.Equal("given True\n", got.Replace("\r\n", "\n"));
+    }
+
+    [Fact]
     public void A_failure_is_an_error_with_its_words()
     {
         var e = Assert.Throws<InvalidOperationException>(() => Run("import sys; sys.exit('no scene')", TimeSpan.FromSeconds(60)));

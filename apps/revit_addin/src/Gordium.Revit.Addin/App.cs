@@ -1,3 +1,4 @@
+using System.IO;
 using System.Reflection;
 using Autodesk.Revit.UI;
 using Gordium.Worker;
@@ -42,8 +43,41 @@ public sealed class App : IExternalApplication
             ToolTip = "Adds Gordium's egress marks to this project if they aren't there, then lists every room, window " +
                       "and door with its marks, anything not set first",
         });
+        egress.AddItem(new PushButtonData("gordium_read_interior", "Read\ninside", dll, typeof(ReadInteriorCommand).FullName)
+        {
+            ToolTip = "Reads this project's rooms and escape windows as Gordium's egress check would, and says what is " +
+                      "left out and why (logged; nothing is sent to the checker yet)",
+        });
+        egress.AddItem(new PushButtonData("gordium_record_houses", "Record\nhouses", dll, typeof(RecordHousesCommand).FullName)
+        {
+            ToolTip = "Draws each hand-worked house of the interior step in a new Revit project, reads it, records it to " +
+                      "test_data/interior_houses/recorded/revit/ and checks it against the hand-worked measures",
+        });
+        application.Idling += OnIdling;
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
+    }
+
+    /// <summary>A run asked for by file while Revit is idle, so the trial needs no click: the interior houses
+    /// (<see cref="RecordHousesCommand.RequestPath"/>). The file is taken (renamed) before it runs, so it runs once even
+    /// if it fails; every result goes to the log, and nothing ever escapes Revit's Idling event.</summary>
+    private static void OnIdling(object? sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
+    {
+        if (sender is not UIApplication ui)
+            return;
+        var request = RecordHousesCommand.RequestPath;
+        if (!File.Exists(request))
+            return;
+        try
+        {
+            var taken = request + ".taken";
+            File.Move(request, taken, overwrite: true);
+            RecordHousesCommand.Run(ui.Application, RecordHousesCommand.Requested(taken));
+        }
+        catch (Exception x)
+        {
+            Trial.Log("record_houses", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+        }
     }
 
     public Result OnShutdown(UIControlledApplication application)

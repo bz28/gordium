@@ -14,7 +14,13 @@ public static class PythonOnce
     /// <exception cref="TimeoutException">It ran longer than <paramref name="timeout"/> (it is stopped).</exception>
     /// <exception cref="InvalidOperationException">It didn't start, or it exited with an error (its stderr is in
     /// the message).</exception>
-    public static string Run(string python, string workingDirectory, IReadOnlyList<string> arguments, TimeSpan timeout)
+    public static string Run(string python, string workingDirectory, IReadOnlyList<string> arguments, TimeSpan timeout) =>
+        Run(python, workingDirectory, arguments, timeout, new Dictionary<string, string>());
+
+    /// <summary>As <see cref="Run(string, string, IReadOnlyList{string}, TimeSpan)"/>, with
+    /// <paramref name="environment"/> added to this process's own environment.</summary>
+    public static string Run(string python, string workingDirectory, IReadOnlyList<string> arguments, TimeSpan timeout,
+                             IReadOnlyDictionary<string, string> environment)
     {
         var start = new ProcessStartInfo(python)
         {
@@ -29,6 +35,8 @@ public static class PythonOnce
         };
         foreach (var a in arguments)
             start.ArgumentList.Add(a);
+        foreach (var (k, v) in environment)
+            start.Environment[k] = v;
         start.Environment["PYTHONIOENCODING"] = "utf-8";
         var clock = Stopwatch.StartNew();   // one limit for the whole run: Python itself, then its output
         using var p = Process.Start(start) ?? throw new InvalidOperationException($"Python didn't start ({python})");
