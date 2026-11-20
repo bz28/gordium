@@ -37,6 +37,10 @@ public static class StairReader
     /// <summary>The strip in front of the first riser, and past the last, where the floor is looked for (ft).</summary>
     public const double Strip = 1.0 / 12;
 
+    /// <summary>The deepest a riser board's top may be along the run (ft): 2 in, a fifth of the shallowest tread
+    /// the code allows (10 in), and four times Revit's default riser (1/2 in).</summary>
+    public const double RiserBoard = 2.0 / 12;
+
     /// <summary>How far past the tread ends a side is looked for (ft): beyond the 1 1/2 in a stringer may take.</summary>
     public const double SideReach = 0.5;
 
@@ -386,12 +390,18 @@ public static class StairReader
             }).ToArray());
             if (groups.Count == 0)
                 return "no tread top was found in the run's geometry";
-            // a run that ends with a riser carries that riser up to its top: the riser's own top face, at the run's
-            // top (the floor at the head's height, never a tread's), is the head's edge, not a tread (Revit 2027.4,
-            // trial step 4 run 1: 16 tops for 15 treads, house 3 13 for 12). Its front edge is the last riser's line:
-            // the top nosing's place along the run. Only the top group, only at the run's top, only one too many.
+            // a run that ends with a riser has that riser board's own top face too (Revit 2027.4, trial step 4 runs 1
+            // and 2: 16 tops for 15 treads, house 3 13 for 12; house 2's a sliver 1/2 in deep along the path at 12.5 to
+            // 12.5417 ft, just past the last tread, 9.75 ft up: the run's top less the 3 in tread). It is the head's
+            // edge, never a tread: its front edge is the last riser's line, the top nosing's place along the run.
+            // Only when exactly one top too many, the top one, past the last tread, no deeper than a riser board
+            // (RiserBoard), above the last tread and not above the run's top.
             double? headEdge = null;
-            if (run.EndsWithRiser && run.TreadsNumber is { } treadCount && groups.Count == treadCount + 1 && Math.Abs(groups[^1][0].Z - topZ) <= Sixteenth)
+            if (run.EndsWithRiser && run.TreadsNumber is { } treadCount && groups.Count == treadCount + 1 && groups.Count >= 2
+                && groups[^1].SelectMany(x => x.Loop).ToList() is var riserTop
+                && riserTop.Max(p => p.X) - riserTop.Min(p => p.X) <= RiserBoard
+                && riserTop.Min(p => p.X) >= groups[^2].SelectMany(x => x.Loop).Max(p => p.X) - Sixteenth
+                && groups[^1][0].Z > groups[^2][0].Z && groups[^1][0].Z <= topZ + Sixteenth)
             {
                 headEdge = groups[^1].SelectMany(x => x.Loop).Min(p => p.X);
                 _ev["head_riser_top"] = new JsonObject { ["z"] = groups[^1][0].Z, ["front"] = headEdge };

@@ -186,12 +186,20 @@ public sealed class StairTests
         var read = Read(FakeHouse.Draw(Two));
         var ev = read.Evidence["stairs"]!["run-s1"]!;
         Assert.Equal(16, ev["tread_groups"]!.AsArray().Count);
-        Assert.Equal(10.0, ev["head_riser_top"]!["z"]!.GetValue<double>(), 9);
+        Assert.Equal(9.75, ev["head_riser_top"]!["z"]!.GetValue<double>(), 9);             // run 2's numbers
         Assert.Equal(12.5, ev["back"]!.GetValue<double>(), 9);                              // the last riser's line
-        Assert.Equal(16, Flight(read, "s1")!["nosings"]!.AsArray().Count);
-        // a top face more than the treads anywhere but at the run's top is still one too many
+        var nosings = Flight(read, "s1")!["nosings"]!.AsArray();
+        Assert.Equal(16, nosings.Count);
+        Assert.Equal(10.0, nosings[15]![0]![2]!.GetValue<double>(), 9);                     // the floor at the head
+        // a face more than the treads that isn't a riser board's top is still one too many: as deep as a tread,
+        // or above the run's top
         var house = FakeHouse.Draw(Two);
-        house.SetRun("s1", r => r with { TopElevation = r.TopElevation + 1.0 / 12 });
+        var st = house.StairDrawing("s1");
+        // a top 6 in deep there (a step, not a riser board)
+        house.SetRun("s1", r => r with { Faces = [.. r.Faces!, .. house.StairBox(st, 12.5, 13.0, -1.5, 1.5, 9.5, 9.75)] });
+        Assert.Contains("16 tread tops, but the run says it has 15", Note(Read(house), "s1", "nosings"));
+        house = FakeHouse.Draw(Two);                         // above the run's top
+        house.SetRun("s1", r => r with { TopElevation = 9.5 });
         Assert.Contains("16 tread tops, but the run says it has 15", Note(Read(house), "s1", "nosings"));
     }
 
