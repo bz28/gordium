@@ -77,7 +77,7 @@ objects wholly inside the building is **new scene F**, for Ben to decide.
 
 | Step | How | Rhino equivalent | Scene |
 |---|---|---|---|
-| Geometry | Proposed: `Element.get_Geometry(new Options { DetailLevel = Fine })`, no view set (so it doesn't depend on what a view shows), `IncludeNonVisibleObjects` false. A family's `GeometryInstance` is opened with `GetInstanceGeometry()` (already placed in the model). Fine, never Coarse: a coarser level can leave real parts out (**to check** on real families) | rhino3dm's Breps | 01 |
+| Geometry | Proposed: `Element.get_Geometry(new Options { DetailLevel = Fine })`, no view set (so it doesn't depend on what a view shows), `IncludeNonVisibleObjects` false. A family's `GeometryInstance` is opened with `GetInstanceGeometry()` (already placed in the model). A family instance is also read at Medium and Coarse, so a part shown only there is never missed (section 8, "Detail level") | rhino3dm's Breps | 01 |
 | A face | A `PlanarFace` whose every edge is a `Line` is sent: its loops from `GetEdgesAsCurveLoops()`, each curve's start point, the outer loop as `points`, the others as `holes` (which loop is outer: **to check**; proposed the largest in the face's plane) | `_brep_faces` | 01, 10 |
 | A curved face | Any other face type (`CylindricalFace`, `ConicalFace`, `RuledFace`, `RevolvedFace`, `HermiteFace`) is left out and the element gets `curved_surface`. `Face.Triangulate` is never called | `curved_surface` | 02 |
 | A flat face with a curved edge | Left out; the element gets `curved_edge` | `curved_edge` | 02 |
@@ -249,11 +249,19 @@ neither left out nor unsent (Snowdon Towers has stairs).
   `GeometryInstance`); a shared one is its own element, a sub-component, left out of its host's geometry. Decided:
   read as part of its host (section 1's row), the same reading Rhino gives a nested block, so a shed's empty part
   leaves the shed with no box instead of being a second object and the shed touching nothing (scene 26).
-- *Detail level.* Decided: read at Fine, as now, and also at Coarse; where Coarse reaches beyond Fine the element's
-  box (for touching and the lot) is the larger, and a building whose Coarse geometry reaches beyond its Fine faces
-  gets a problem saying so (it may be bigger than measured), so a part drawn only at Coarse is never missed. Faces
-  are still sent from Fine alone (the real shape). Not built yet: its own PR, with a scene of a family whose solid
-  shows at Coarse only.
+- *Detail level.* Decided and built: a family instance is read at Fine, as before, and also at Medium and Coarse
+  (`RevitElement.CoarserGeometry`; families are where a part can be set to show at some levels only, so other
+  elements are read at Fine alone). For a family off the building categories, the coarser geometry is read as part
+  of it (`SiteReader.Coarser`): its box, footprint and definition can only grow, so a part drawn only at Coarse is
+  never missed; it never gives a place to a family with no face at Fine, which keeps no box (touching unknown). A
+  building's faces are still sent from Fine alone (the real shape); its box takes the coarser geometry too, and a
+  building whose coarser drawing doesn't repeat its Fine one (a point or a face Fine doesn't have: a part beyond
+  Fine's box, or inside it but off its solids) gets a problem saying it may be bigger than measured (`tool_words`;
+  a simpler coarser drawing is flagged too, which only asks for review). A part nested in a building adds its
+  coarser drawing to that test, never to the building's faces. A nested family that draws nothing at a coarser
+  level adds nothing (it is read from Fine). Tried in Revit 2027.4 (`DetailCheck`, 2026-11-19): a Generic Model family holding a 4 ft box shown
+  at every level and a 2 ft box shown at Coarse only reads one solid at Fine and both at Coarse; read at Fine alone
+  its footprint ran x 0 to 4 ft, read as built x 0 to 12 ft. Reader pins: `A_part_drawn_only_at_a_coarser_detail_level_is_never_missed`.
 - *Scene 18 drawn from DirectShapes.* Its walls, slabs, window, curtain panel and mullions are DirectShapes in those
   categories (the roof a closed mesh), not native walls, floors, a roof, a window family or a curtain wall: they
   test the reader's sorting by category and its reading of a closed mesh, not what Revit gives for native elements

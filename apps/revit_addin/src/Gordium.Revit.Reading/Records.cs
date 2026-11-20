@@ -247,7 +247,13 @@ public sealed record RevitElement
     /// when it returned null. Ignored when <see cref="GeometryFailed"/>.</summary>
     public IReadOnlyList<GeometryItem>? Geometry { get; init; }
 
-    /// <summary><c>get_Geometry</c> threw.</summary>
+    /// <summary>For a family instance only (families are where a part can be set to show at some detail levels and
+    /// not others): <c>get_Geometry</c> at Medium and at Coarse detail, both lists' items together; null for any other
+    /// element, or when both returned null. A part shown only at a coarser level is never missed: it makes the
+    /// element's box bigger, and a building's gets a problem (reading design note, section 8, "Detail level").</summary>
+    public IReadOnlyList<GeometryItem>? CoarserGeometry { get; init; }
+
+    /// <summary><c>get_Geometry</c> threw (at any detail level read).</summary>
     public bool GeometryFailed { get; init; }
 
     /// <summary>A grade marker's point (<c>LocationPoint.Point</c>).</summary>

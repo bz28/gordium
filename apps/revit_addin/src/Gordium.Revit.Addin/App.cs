@@ -87,6 +87,19 @@ public sealed class App : IExternalApplication
             }
             return;
         }
+        if (File.Exists(DetailCheck.RequestPath))
+        {
+            try
+            {
+                File.Delete(DetailCheck.RequestPath);
+                DetailCheck.Run(ui.Application);
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("detail_check", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
         var request = RecordScenesCommand.RunRequestPath;
         if (!File.Exists(request))
             return;

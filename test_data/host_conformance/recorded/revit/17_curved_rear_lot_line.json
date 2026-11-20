@@ -3,13 +3,13 @@
   "scene": "17_curved_rear_lot_line",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "5b31bdca-e3f4-4b22-a727-65b588c52079-00000adf": "lot",
-    "5b31bdca-e3f4-4b22-a727-65b588c52079-00000ae4": "house_floor1",
-    "5b31bdca-e3f4-4b22-a727-65b588c52079-00000ae5": "house_floor2"
+    "3ee26629-c512-4ca0-aba5-3e6022c3ff14-00000adf": "lot",
+    "3ee26629-c512-4ca0-aba5-3e6022c3ff14-00000ae4": "house_floor1",
+    "3ee26629-c512-4ca0-aba5-3e6022c3ff14-00000ae5": "house_floor2"
   },
   "steps": {
     "as drawn": {
@@ -22,7 +22,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "5b31bdca-e3f4-4b22-a727-65b588c52079-00000adf",
+        "id": "3ee26629-c512-4ca0-aba5-3e6022c3ff14-00000adf",
         "edges": [
           {
             "points": [
@@ -1048,7 +1048,7 @@
       },
       "buildings": [
         {
-          "id": "5b31bdca-e3f4-4b22-a727-65b588c52079-00000ae4",
+          "id": "3ee26629-c512-4ca0-aba5-3e6022c3ff14-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -1202,7 +1202,7 @@
           "name": ""
         },
         {
-          "id": "5b31bdca-e3f4-4b22-a727-65b588c52079-00000ae5",
+          "id": "3ee26629-c512-4ca0-aba5-3e6022c3ff14-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,

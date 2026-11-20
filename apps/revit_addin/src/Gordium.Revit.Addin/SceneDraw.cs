@@ -248,16 +248,7 @@ internal static class SceneDraw
                                      (List<(double X, double Y)> Outline, double Z0, double Z1)? prism, string? nested,
                                      bool shared = false)
     {
-        var templates = app.FamilyTemplatePath;
-        var template = new[]
-        {
-            System.IO.Path.Combine(templates, "Generic Model.rft"),
-            System.IO.Path.Combine(templates, "English-Imperial", "Generic Model.rft"),
-            System.IO.Path.Combine(templates, "English", "Metric Generic Model.rft"),
-            System.IO.Path.Combine(templates, "..", "English-Imperial", "Generic Model.rft"),
-            System.IO.Path.Combine(templates, "Metric Generic Model.rft"),
-        }.FirstOrDefault(System.IO.File.Exists) ?? throw new InvalidOperationException($"no Generic Model template under {templates}");
-        var fam = app.NewFamilyDocument(template);
+        var fam = app.NewFamilyDocument(GenericModelTemplate(app));
         try
         {
             using (var t = new Transaction(fam, "Gordium: scene family"))
@@ -295,6 +286,20 @@ internal static class SceneDraw
         {
             fam.Close(false);
         }
+    }
+
+    /// <summary>Revit's Generic Model family template, wherever this install keeps it.</summary>
+    internal static string GenericModelTemplate(Autodesk.Revit.ApplicationServices.Application app)
+    {
+        var templates = app.FamilyTemplatePath;
+        return new[]
+        {
+            System.IO.Path.Combine(templates, "Generic Model.rft"),
+            System.IO.Path.Combine(templates, "English-Imperial", "Generic Model.rft"),
+            System.IO.Path.Combine(templates, "English", "Metric Generic Model.rft"),
+            System.IO.Path.Combine(templates, "..", "English-Imperial", "Generic Model.rft"),
+            System.IO.Path.Combine(templates, "Metric Generic Model.rft"),
+        }.FirstOrDefault(System.IO.File.Exists) ?? throw new InvalidOperationException($"no Generic Model template under {templates}");
     }
 
     private static FamilySymbol Family(Autodesk.Revit.ApplicationServices.Application app, Document doc, string name,

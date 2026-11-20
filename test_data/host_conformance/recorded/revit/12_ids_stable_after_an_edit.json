@@ -3,13 +3,13 @@
   "scene": "12_ids_stable_after_an_edit",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000adf": "lot",
-    "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000ae4": "house_floor1",
-    "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000ae5": "house_floor2"
+    "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000adf": "lot",
+    "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000ae4": "house_floor1",
+    "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000ae5": "house_floor2"
   },
   "steps": {
     "as drawn": {
@@ -22,7 +22,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000adf",
+        "id": "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000adf",
         "edges": [
           {
             "points": [
@@ -80,7 +80,7 @@
       },
       "buildings": [
         {
-          "id": "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000ae4",
+          "id": "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -234,7 +234,7 @@
           "name": ""
         },
         {
-          "id": "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000ae5",
+          "id": "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -407,7 +407,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000adf",
+        "id": "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000adf",
         "edges": [
           {
             "points": [
@@ -465,7 +465,7 @@
       },
       "buildings": [
         {
-          "id": "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000ae4",
+          "id": "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -619,7 +619,7 @@
           "name": ""
         },
         {
-          "id": "9a8958c4-f7c2-4bb2-adcc-605e45785377-00000ae5",
+          "id": "fe945fb6-4ae2-465f-8fa6-e965497a4fdb-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,

@@ -3,14 +3,14 @@
   "scene": "05_garage_left_out",
   "recorded": {
     "by": "Gordium add-in, Record scenes (Windows trial)",
-    "date": "2026-11-19",
+    "date": "2026-11-20",
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000adf": "lot",
-    "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000ae4": "house_floor1",
-    "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000ae5": "house_floor2",
-    "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000ae6": "garage"
+    "11919fc9-dc5c-447f-8832-5817067aaec2-00000adf": "lot",
+    "11919fc9-dc5c-447f-8832-5817067aaec2-00000ae4": "house_floor1",
+    "11919fc9-dc5c-447f-8832-5817067aaec2-00000ae5": "house_floor2",
+    "11919fc9-dc5c-447f-8832-5817067aaec2-00000ae6": "garage"
   },
   "steps": {
     "as drawn": {
@@ -23,7 +23,7 @@
         "model_units": "autodesk.unit.unit:feetFractionalInches-1.0.0"
       },
       "lot": {
-        "id": "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000adf",
+        "id": "11919fc9-dc5c-447f-8832-5817067aaec2-00000adf",
         "edges": [
           {
             "points": [
@@ -81,7 +81,7 @@
       },
       "buildings": [
         {
-          "id": "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000ae4",
+          "id": "11919fc9-dc5c-447f-8832-5817067aaec2-00000ae4",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -235,7 +235,7 @@
           "name": ""
         },
         {
-          "id": "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000ae5",
+          "id": "11919fc9-dc5c-447f-8832-5817067aaec2-00000ae5",
           "role": "building",
           "layer": "Generic Models",
           "floor": 10,
@@ -392,7 +392,7 @@
       "unsent": [],
       "left_out": [
         {
-          "id": "2f87031e-6ce5-46e8-a9af-eb0deabe26cd-00000ae6",
+          "id": "11919fc9-dc5c-447f-8832-5817067aaec2-00000ae6",
           "layer": "Generic Models",
           "could_be_building": true,
           "touching": false,
