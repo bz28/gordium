@@ -124,11 +124,18 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// <summary>What could hide a stair (step 4), listed after the room blockers: while any is there no stair is read.</summary>
     public IReadOnlyList<string> StairBlockers { get; init; } = [];
 
+    /// <summary>Every "this house has none of" tick that disagrees with what is drawn (step 6): listed first of all.</summary>
+    public IReadOnlyList<string> HasNoneConflicts { get; init; } = [];
+
+    /// <summary>A line per "this house has none of" tick (step 6): sent, not sent and why, or not set (with what the
+    /// reader found, as a proposal only).</summary>
+    public IReadOnlyList<string> HasNoneLines { get; init; } = [];
+
     /// <summary>The list's headline: every room, window and door marked only when there are rooms, nothing is
     /// unset, and nothing stops a mark or a room being read.</summary>
     public string Headline =>
         Rows.Count == 0 && RoomBlockers.Count == 0 ? NothingDrawn
-        : SetupProblems.Count > 0 || RoomBlockers.Count > 0 || Rows.Any(r => r.NeedsMarking) ? NotAllMarked
+        : HasNoneConflicts.Count > 0 || SetupProblems.Count > 0 || RoomBlockers.Count > 0 || Rows.Any(r => r.NeedsMarking) ? NotAllMarked
         : !Rows.Any(r => r.Kind == MarkedKind.Room) ? NoRooms
         : AllMarked;
 }
@@ -172,8 +179,53 @@ public static class MarkingList
         if (stairBlockers.Count > 0)
             summary.Add((stairBlockers.Count == 1 ? "1 element, workset or link" : $"{stairBlockers.Count} elements, worksets or links") +
                         " listed above could hide a stair, so no stair (and no guard) is read for egress until each is resolved.");
-        return new(problems, blockers, summary, rows) { StairBlockers = stairBlockers };
+        // step 6: what the house has none of, read exactly as the reader reads it (the guards' tick needs the stairs read)
+        // (the add-in builds the list from the model with its inside read, RevitInterior.Model; without it, a tick can't
+        // be checked against the model, and the list says so instead of calling it held back)
+        var read = model.Interior is null ? null : InteriorReader.Read(model);
+        var ticks = read?.Ticks ?? HasNone.ReadAll(model);
+        return new(problems, blockers, summary, rows)
+        {
+            StairBlockers = stairBlockers,
+            HasNoneConflicts = ticks.Where(t => t.Ticked is true && t.Conflicts.Count > 0)
+                .SelectMany(t => t.WhyNot.Take(t.Conflicts.Count)).ToList(),
+            HasNoneLines = ticks.Select(t => TickLine(t, read)).ToList(),
+        };
     }
+
+    /// <summary>One tick's line in the list; <paramref name="read"/> is what the reader sends (null: the model's inside
+    /// wasn't read).</summary>
+    internal static string TickLine(NoneTick t, InteriorReadResult? read)
+    {
+        var name = t.Kind.Mark.Name;
+        if (read is null)
+            return $"{name}: {(t.Ticked is true ? "Yes" : t.Ticked is false ? "No" : "not set")} on Project Information " +
+                   "(not yet checked against the model: run Read inside to see whether it is read as none).";
+        if (t.Sent)
+            return $"{name}: Yes (on Project Information): read as a house with none.";
+        if (t.Ticked is true && t.Conflicts.Count > 0)
+            return $"{name}: Yes, but it disagrees with what is drawn (listed first): not read as none, and no {t.Kind.Words} " +
+                   "read for egress until one or the other is changed.";
+        if (t.Ticked is true)
+            return $"{name}: Yes, but not read as none while {Count(t.Blockers.Count)} could hide one: " + string.Join("; ", t.Blockers) + ".";
+        var proposal = t.Found is not null && t.Conflicts.Count == 0
+            ? $" Gordium found {t.Found}: tick Yes if the house has none (Gordium never ticks it for you)." : "";
+        return t.Ticked is false
+            ? $"{name}: No (on Project Information): not stated as none, so " +
+              (!t.Kind.IsList ? $"the rules for {t.Kind.Words} need review."
+               : read.Interior[t.Kind.Kind] is not null ? $"the {t.Kind.Words} are read as drawn."
+               : $"no {t.Kind.Words} are read for egress (" + string.Join("; ", NotRead(read, t.Kind)) + ").")   // every reason: one left off could be the one still blocking (review round 2)
+            : $"{name}: not set on Project Information: not stated, never read as none." + proposal;
+    }
+
+    private static IReadOnlyList<string> NotRead(InteriorReadResult read, NoneKind kind) => kind.Kind switch
+    {
+        "stairs" => read.StairsNotRead,
+        "doors" => read.DoorsNotRead,
+        _ => read.GuardsNotRead,
+    };
+
+    private static string Count(int n) => n == 1 ? "1 thing" : $"{n} things";
 
     private static string RoomLabel(MarkedElement e) =>
         string.Join(" ", new[] { e.Name, e.Number }.Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } label
@@ -283,11 +335,13 @@ public static class MarkingList
     public static string Text(MarkingListResult list, int maxRows = 40)
     {
         var sb = new StringBuilder();
+        foreach (var c in list.HasNoneConflicts)
+            sb.Append("Conflict: ").Append(c).Append('\n');
         foreach (var p in list.SetupProblems)
             sb.Append("Can't add ").Append(p).Append('\n');
         foreach (var b in list.RoomBlockers.Concat(list.StairBlockers))
             sb.Append(b).Append('\n');
-        foreach (var s in list.Summary)
+        foreach (var s in list.Summary.Concat(list.HasNoneLines))
             sb.Append(s).Append('\n');
         var shown = 0;
         foreach (var r in list.Rows)

@@ -134,6 +134,7 @@ public sealed class RecordHousesCommand : IExternalCommand
             log["stairs_not_read"] = read.StairsNotRead;
             log["doors_not_read"] = read.DoorsNotRead;
             log["guards_not_read"] = read.GuardsNotRead;
+            log["has_none"] = read.Ticks.Where(t => t.Ticked is not null).Select(t => t.Sent ? $"{t.Kind.Kind}: sent" : $"{t.Kind.Kind}: " + string.Join("; ", t.WhyNot)).ToList();
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
             log["railings"] = (model.Interior!.Railings ?? []).SelectMany(r => r.Diagnostics).ToList();
@@ -224,6 +225,7 @@ public sealed class ReadInteriorCommand : IExternalCommand
             log["stairs_not_read"] = read.StairsNotRead;
             log["doors_not_read"] = read.DoorsNotRead;
             log["guards_not_read"] = read.GuardsNotRead;
+            log["has_none"] = read.Ticks.Select(t => t.Sent ? $"{t.Kind.Kind}: sent" : $"{t.Kind.Kind}: " + string.Join("; ", t.WhyNot)).ToList();
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["evidence"] = read.Evidence.ToJsonString();
             log["revit_layer"] = model.Interior!.Diagnostics;
@@ -234,8 +236,10 @@ public sealed class ReadInteriorCommand : IExternalCommand
             var stairs = read.Interior["stairs"] is JsonArray s ? $"{s.Count} stair flights read" : "Stairs not read: " + string.Join("; ", read.StairsNotRead.Take(5));
             var doors = read.Interior["doors"] is JsonArray d ? $"{d.Count} doors read" : "Doors not read: " + string.Join("; ", read.DoorsNotRead.Take(5));
             var guards = read.Interior["guards"] is JsonArray g ? $"{g.Count} guards read" : "Guards not read: " + string.Join("; ", read.GuardsNotRead.Take(5));
+            var none = read.Ticks.Where(t => t.Sent).Select(t => t.Kind.Words).ToList() is { Count: > 0 } sent
+                ? "Read as none (ticked): " + string.Join(", ", sent) : "Nothing read as none";
             var notes = string.Join("\n", read.Notes.Take(20).Select(n => $"- {n.Field}: {n.Why}"));
-            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n\n{read.Notes.Count} values left out" +
+            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n{none}\n\n{read.Notes.Count} values left out" +
                     (notes.Length > 0 ? ":\n" + notes : ""), read);
         }
         catch (Exception e)

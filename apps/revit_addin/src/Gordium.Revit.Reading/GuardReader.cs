@@ -43,12 +43,24 @@ public static class GuardReader
     /// railings beside them, or null when the stairs weren't read.</summary>
     public static List<string> NotRead(RevitModel model, StairReader.RailingUse? stairs)
     {
-        if (model.Interior is not { } records)
+        if (model.Interior is null)
             return ["the model's inside wasn't read"];
         var why = new List<string>();
         if (MarkReading.AllGuards(model) is not true)
             why.Add($"{Marks.AllGuards.Name} is {(MarkReading.AllGuards(model) is false ? "No" : "not set")} on Project " +
                     "Information: until it says Yes, a guard not drawn as a railing would go unchecked");
+        why.AddRange(Blockers(model, stairs));
+        return why;
+    }
+
+    /// <summary>What in the model could be a guard the reader doesn't read, besides the architect's tick: the railings
+    /// unread, everything that could hide a stair or a railing (<see cref="StairReader.Blockers"/>), and every railing
+    /// that may be a guard along a stair (step 6: "this house has no guards" is sent only when this is empty too).</summary>
+    public static List<string> Blockers(RevitModel model, StairReader.RailingUse? stairs)
+    {
+        if (model.Interior is not { } records)
+            return ["the model's inside wasn't read"];
+        var why = new List<string>();
         if (records.Railings is null)
             why.Add("the railings couldn't be read");
         why.AddRange(StairReader.Blockers(model));

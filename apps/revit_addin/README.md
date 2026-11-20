@@ -261,7 +261,10 @@ nothing. What it sends, and what it leaves out:
   Never a frame or sash, a ground outside (no Toposolid is read yet) or an area well. Doors get no clear opening (the
   doors step). With no window or door found, `openings` is left out, never `[]`; a window or door in a linked model
   leaves it out too.
-- **`stairs`, `doors`, `guards`, `has_none`**: left out (not read): later steps.
+- **`stairs`, `doors`, `guards`, `has_none`**: left out (not read): later steps. Step 6 (`HasNone.cs`): an empty
+  `stairs`, `doors` or `guards` and each `has_none` claim only on the architect's "This house has no ..." tick on
+  Project Information, with nothing of the kind drawn and nothing that could hide one; a tick against what is drawn is
+  never sent and is listed first in the marking list.
 
 Every value left out has its reason in `InteriorReadResult.Notes`; for each escape window, `Evidence` records the
 sill line, the wall opening's bottom and the window's placed extents the check used.

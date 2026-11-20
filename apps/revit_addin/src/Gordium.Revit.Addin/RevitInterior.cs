@@ -59,6 +59,7 @@ internal static class RevitInterior
             Stairs = stairs,
             StairCandidates = candidates,
             Railings = railings,
+            Ramps = RampsOf(doc, diagnostics),
             CoordinationModels = coordination,
             Diagnostics = diagnostics,
         };
@@ -100,6 +101,25 @@ internal static class RevitInterior
         }
         diagnostics.Add($"stairs: {stairs.Count} component stairs ({stairs.Sum(s => s.Runs.Count)} runs), {candidates.Count} other elements that could be one");
         return (stairs, candidates);
+    }
+
+    /// <summary>Every model element in Ramps (step 6: a ramp drawn contradicts "this house has no ramps"); null when
+    /// they couldn't be listed.</summary>
+    private static List<RampRecord>? RampsOf(Document doc, List<string> diagnostics)
+    {
+        try
+        {
+            var ramps = Models(doc, BuiltInCategory.OST_Ramps)
+                .Select(e => new RampRecord(e.UniqueId, e.Name, Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id))).ToList();
+            diagnostics.Add($"ramps: {ramps.Count} elements in Ramps");
+            return ramps;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"the ramps couldn't be read ({x.GetType().Name}: {x.Message})");
+            return null;
+        }
     }
 
     private static IEnumerable<Element> Models(Document doc, BuiltInCategory c) =>
@@ -419,7 +439,8 @@ internal static class RevitInterior
                                        box is null ? null : new RevitBox(P(box.Min), P(box.Max), box.Transform is { } bt ? T(bt) : null),
                                        Count(BuiltInCategory.OST_Rooms), Count(BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors),
                                        linked is not null && new FilteredElementCollector(linked).OfClass(typeof(RevitLinkInstance)).GetElementCount() > 0,
-                                       Count(BuiltInCategory.OST_Stairs, BuiltInCategory.OST_StairsRailing, BuiltInCategory.OST_GenericModel)));
+                                       Count(BuiltInCategory.OST_Stairs, BuiltInCategory.OST_StairsRailing, BuiltInCategory.OST_GenericModel),
+                                       Count(BuiltInCategory.OST_Ramps)));
         }
         return links;
     }

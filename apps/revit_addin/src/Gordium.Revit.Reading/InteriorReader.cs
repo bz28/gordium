@@ -29,6 +29,9 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
 
     /// <summary>Why <c>guards</c> was left out (empty when it was sent; step 5).</summary>
     public IReadOnlyList<string> GuardsNotRead { get; init; } = [];
+
+    /// <summary>Every "this house has none of" tick, read (step 6): the lists' and the claims', sent or not and why.</summary>
+    public IReadOnlyList<NoneTick> Ticks { get; init; } = [];
 }
 
 /// <summary>
@@ -41,8 +44,8 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
 /// with it (a room's floor elevation against the slab under it, a window's sill line against the opening it cuts).
 /// The stairs (step 4) are <see cref="StairReader"/>'s. The doors (step 5) are read here: each door's exit mark,
 /// operation and the maker's clear opening its type's stamp confirms (nothing drawn: door families don't model their
-/// stops and leaf consistently); the guards (step 5) are <see cref="GuardReader"/>'s. What the house has none of is a
-/// later step: left out (not read).
+/// stops and leaf consistently); the guards (step 5) are <see cref="GuardReader"/>'s. What the house has none of (step
+/// 6) is the architect's ticks, read by <see cref="HasNone"/>: an empty list or a <c>has_none</c> claim only on a tick.
 /// </summary>
 public static class InteriorReader
 {
@@ -125,11 +128,22 @@ public static class InteriorReader
             interior["openings"] = openings;
 
         // step 4: the stairs, one flight per run, only on the architect's tick and with nothing that could be a stair
-        // the reader doesn't walk; nothing found is never "none" (that is the has-none tick's, a later step)
+        // the reader doesn't walk; nothing found is never "none": that is the tick "this house has no stairs" (step 6),
+        // sent as an empty list only with no stair drawn and nothing that could hide one; ticked Yes and not sent (a
+        // stair drawn: the two disagree), no stair is read
+        var noStairs = HasNone.Read(model, HasNone.Stairs);
         var stairsNotRead = StairReader.NotRead(model);
         var stairEvidence = new JsonObject();
         StairReader.RailingUse? use = null;
-        if (stairsNotRead.Count == 0)
+        if (noStairs.Sent)
+        {
+            interior["stairs"] = new JsonArray();
+            stairsNotRead = [];
+            use = new StairReader.RailingUse();
+        }
+        else if (noStairs.Ticked is true)
+            stairsNotRead = [.. noStairs.WhyNot];
+        else if (stairsNotRead.Count == 0)
         {
             use = new StairReader.RailingUse();
             var flights = StairReader.Flights(model, notes, stairEvidence, use);
@@ -143,9 +157,17 @@ public static class InteriorReader
 
         // step 5: the doors (each one's exit mark, operation and maker's confirmed clear opening), and the guards, only
         // on the architect's tick and with every railing on a stair read as a handrail beside a wall; nothing found is
-        // never "none" (that is the has-none tick's, a later step)
+        // never "none": that is the ticks "this house has no doors" and "... no guards" (step 6), each as the stairs'
+        var noDoors = HasNone.Read(model, HasNone.Doors);
         var doorsNotRead = OpeningsNotRead(model);
-        if (doorsNotRead.Count == 0 && records is not null)
+        if (noDoors.Sent)
+        {
+            interior["doors"] = new JsonArray();
+            doorsNotRead = [];
+        }
+        else if (noDoors.Ticked is true)
+            doorsNotRead = [.. noDoors.WhyNot];
+        else if (doorsNotRead.Count == 0 && records is not null)
         {
             var marked = MarkReading.InDesign(model).ToDictionary(e => e.UniqueId, StringComparer.Ordinal);
             var doors = new JsonArray();
@@ -156,9 +178,17 @@ public static class InteriorReader
             else
                 interior["doors"] = doors;
         }
+        var noGuards = HasNone.Read(model, HasNone.Guards, use);
         var guardsNotRead = GuardReader.NotRead(model, use);
         var guardEvidence = new JsonObject();
-        if (guardsNotRead.Count == 0)
+        if (noGuards.Sent)
+        {
+            interior["guards"] = new JsonArray();
+            guardsNotRead = [];
+        }
+        else if (noGuards.Ticked is true)
+            guardsNotRead = [.. noGuards.WhyNot];
+        else if (guardsNotRead.Count == 0)
         {
             var guards = GuardReader.Guards(model, notes, guardEvidence);
             if (guards.Count == 0)
@@ -168,9 +198,16 @@ public static class InteriorReader
         }
         if (guardEvidence.Count > 0)
             evidence["guards"] = guardEvidence;
+
+        // step 6: the format's has_none claims, each only on its tick, with nothing drawn against it and nothing that
+        // could hide one; every tick's reading kept as evidence
+        List<NoneTick> ticks = [noStairs, noDoors, noGuards, .. HasNone.Claims.Select(k => HasNone.Read(model, k, use))];
+        if (HasNone.Entries(ticks) is { } claims)
+            interior["has_none"] = claims;
+        evidence["has_none"] = new JsonObject(ticks.Select(t => KeyValuePair.Create(t.Kind.Kind, (JsonNode?)HasNone.Evidence(t))));
         return new(interior, roomsNotRead, openingsNotRead, notes, evidence)
         {
-            StairsNotRead = stairsNotRead, DoorsNotRead = doorsNotRead, GuardsNotRead = guardsNotRead,
+            StairsNotRead = stairsNotRead, DoorsNotRead = doorsNotRead, GuardsNotRead = guardsNotRead, Ticks = ticks,
         };
     }
 
