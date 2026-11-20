@@ -404,6 +404,50 @@ def test_an_opening_within_a_mistyped_room_keeps_every_room_from_none():
     assert not any(r["outcome"] == "fail" for r in got) and rule_result(got) == "needs_review"
 
 
+MAYBE = "an enclosed space with no room drawn in it: its use isn't known"
+
+
+def test_a_space_that_may_be_a_bedroom_needs_review_and_the_drawn_bedrooms_are_still_checked():
+    # every drawn bedroom passes, but a space that may be a bedroom with no escape opening is never "passes"
+    given = house(opening("w1", "br1"), opening("w2", "br2"))
+    given["sleeping_room"].append({"id": "a1", "name": "Area on L1", "maybe": MAYBE})
+    got = rows(AREA, given, {}, ALLOWED)
+    assert by_name(got) == {("Bedroom 1", "w1"): "pass", ("Bedroom 2", "w2"): "pass",
+                            ("Area on L1", None): "needs_review"}
+    maybe = next(r for r in got if r["within"]["id"] == "a1")
+    assert maybe["reason"] == MAYBE and not maybe["none"]
+    assert rule_result(got) == "needs_review"
+    # a drawn bedroom that fails still fails: the space doesn't hide it
+    given["emergency_escape_opening"][1]["measures"]["opening_net_clear_area"] = 5.1
+    assert rule_result(rows(AREA, given, {}, ALLOWED)) == "fail"
+    # without the maybe the same space would read as a bedroom with no escape opening: a fail, never said of a space
+    # whose use isn't known
+    plain = copy.deepcopy(given)
+    del plain["sleeping_room"][2]["maybe"]
+    assert {r["outcome"] for r in rows(AREA, plain, {}, ALLOWED) if r["within"]["id"] == "a1"} == {"fail"}
+
+
+def test_every_row_about_a_space_that_may_be_a_part_needs_review_unless_the_rule_doesnt_apply():
+    floor = {"id": "R-1b.synthetic_floor", "kind": "rule", "topic": "egress", "title": "SYNTHETIC floor area",
+             "for_each": "sleeping_room", "when_none": "not_applicable", "check": "sleeping_room_floor_area >= 70",
+             "sources": [src(1)], "drafted_by": "claude", "status": "draft"}
+    maybe = {"id": "a1", "name": "Area", "maybe": MAYBE}
+    # measured or not, small or big: a space that may not be a bedroom is never passed or failed as one
+    for measures in ({}, {"sleeping_room_floor_area": 1.1}, {"sleeping_room_floor_area": 300}):
+        got = rows(floor, {"sleeping_room": [maybe | {"measures": measures}]}, {}, ALLOWED)
+        assert [(r["outcome"], r["reason"]) for r in got] == [("needs_review", MAYBE)]
+    # a rule that doesn't apply to this building applies to no bedroom at all: not applicable either way
+    got = rows(floor | {"applies_when": "use == 'church'"}, {"sleeping_room": [maybe]}, {"use": "one_family_detached"},
+               ALLOWED)
+    assert [r["outcome"] for r in got] == ["not_applicable"]
+    # an opening within such a space: needs review whatever it measures
+    given = {"sleeping_room": [maybe], "emergency_escape_opening": [opening("w1", "a1", area=9)]}
+    assert [(r["outcome"], r["reason"]) for r in rows(AREA, given, {}, ALLOWED)] == [("needs_review", MAYBE)]
+    # a maybe that isn't text is still a maybe (said, never dropped)
+    got = rows(AREA, {"sleeping_room": [{"id": "a1", "maybe": None}], "emergency_escape_opening": []}, {}, ALLOWED)
+    assert [r["outcome"] for r in got] == ["needs_review"]
+
+
 def test_a_proposed_measure_cant_borrow_a_part_measure_name():
     ctx = copy.deepcopy(CTX)
     ctx.proposed = {"stair_riser_height": {"unit": "in", "meaning": "m"}}

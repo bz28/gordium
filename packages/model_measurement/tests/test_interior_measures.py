@@ -1765,6 +1765,41 @@ def test_rooms_not_read_still_measures_the_openings_but_not_their_sills():
     assert "opening_net_clear_area" in p["measures"] and "rooms weren't read" in p["not_measured"]["opening_sill_height"]
 
 
+def test_an_unknown_space_is_a_sleeping_room_that_may_not_be_one_and_the_drawn_rooms_are_still_measured():
+    d = base()
+    d["unknown_spaces"] = [{"id": "a1", "name": "Enclosed area on L1 (331.4 sq ft)"}]
+    got = measure(d)
+    bedroom, space = got["parts"]["sleeping_room"]
+    assert bedroom["id"] == "b" and bedroom["measures"]["sleeping_room_floor_area"] == 100.0 and "maybe" not in bedroom
+    assert space["id"] == "a1" and space["name"] == "Enclosed area on L1 (331.4 sq ft)"
+    assert space["maybe"] == STOPS["unknown_space"] and space["measures"] == {}
+    assert set(space["not_measured"].values()) == {STOPS["unknown_space"]} and space["not_measured"]
+    assert got["problems"] == []
+    # none given is none: the rooms are every room, as before
+    assert [p["id"] for p in measure(base())["parts"]["sleeping_room"]] == ["b"]
+
+
+@pytest.mark.parametrize("spaces", ["a1", [1], [{"id": ""}], [{"id": 3}]])
+def test_unknown_spaces_that_cant_be_read_leave_every_room_not_read(spaces):
+    d = base()
+    d["unknown_spaces"] = spaces
+    got = measure(d)
+    assert got["parts"]["sleeping_room"] is None and got["problems"]
+
+
+@pytest.mark.parametrize("kind", ["basement", "habitable_attic", "sleeping_loft"])
+def test_a_space_whose_use_isnt_known_refuses_no_basements_attics_or_lofts(kind):
+    d = base()
+    d["has_none"] = [{"kind": kind, "source": "A-1"}]
+    assert kind in measure(d)["has_none"]
+    d["unknown_spaces"] = [{"id": "a1"}]
+    got = measure(d)
+    assert kind not in got["has_none"] and any("whose use isn't known" in p for p in got["problems"])
+    # a claim that isn't about a space still stands
+    d["has_none"] = [{"kind": "ramp", "source": "A-1"}]
+    assert "ramp" in measure(d)["has_none"]
+
+
 def test_a_part_with_no_id_is_passed_on_for_the_checker_to_name():
     d = base()
     del d["stairs"][0]["id"]
@@ -1806,6 +1841,10 @@ STOP_CASES = {
     "not_a_list": _set(("doors",), "front"),
     "not_a_mapping": _set(("doors",), [1]),
     "flag_missing": _set(("doors", 0, "exit"), _DELETE),
+    "unknown_spaces_entry": _set(("unknown_spaces",), [{"name": "no id"}]),
+    "unknown_space": _set(("unknown_spaces",), [{"id": "a1", "name": "Area on L1"}]),
+    "has_none_unknown_space": _with(base, lambda d: d.update(has_none=[{"kind": "habitable_attic", "source": "A-1"}],
+                                                             unknown_spaces=[{"id": "a1"}])),
     "missing": _set(("doors", 0, "threshold_top"), _DELETE),
     "not_a_length": _set(("doors", 0, "threshold_top"), "low"),
     "too_far": _set(("doors", 0, "threshold_top"), 1e10),

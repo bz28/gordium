@@ -80,6 +80,31 @@ exactly:
   ones Revit's own "place rooms" uses; an area that isn't a room is said by placing a Room in it marked Sleeping
   room No (no other way of saying it is built yet). To confirm in the trial: that a circuit with no Room shows as one
   on real models.
+  **Changed after the first real model (Autodesk's Pacific Continental sample, 2026-11-20).** Its Read inside found 25
+  enclosed areas with no Room (a 1.1 sq ft gap and 4 on L1, one of 331.4 sq ft; 19 between the roof's parapets; 1 on
+  "Turret - Tall"), and under the rule above any one of them stopped every room in the house being read. That is
+  safe but useless on any real model. Decided, as the most accurate rule under principle 4: an unplaced Room, a
+  closed workset, an unloaded link or enclosed areas that can't be read still leave `rooms` out (what is hidden
+  could be any room, drawn or not); **an enclosed area with no Room no longer does**. Every Room is read as before,
+  and each such area is sent as its own entry in the format's `unknown_spaces` (added for this,
+  docs/interior/interior_description_format.md), which the measuring code gives the checker as a sleeping room
+  that *may not be one* (`maybe`, rule_format/parts.py): every rule row about it, or about an opening in it, needs
+  review, never a pass and never a fail (it may be a closet), unless the rule doesn't apply to the house at all. So
+  a drawn bedroom that fails still fails, and "every sleeping room has an escape opening" (R319.1, `when_none:
+  fail`) can't pass while an area may be a bedroom with none: the space's own row needs review, and the rule's one
+  answer with it. A "no basements", "no habitable attics" or "no sleeping lofts" tick isn't sent beside one (the
+  checker refuses the claim too). Rejected: keeping the house-wide block (no real model is ever read); dropping
+  small areas (an area under 70 sq ft that is a bedroom is a failing one, R304.1: dropping it would hide a fail);
+  sending the area as `sleeping: true` (says what isn't known, and fails a closet). Two ways the architect clears
+  them besides placing a Room (marked No if no one sleeps there): **an area that lies in a placed Room of the design
+  checked** has that Room (its point inside within the Room's own outline, 1/16 in clear of its edges, same level:
+  Revit's circuits are the main model's, so a Room in the design option checked can leave its circuit "no Room";
+  a Room in an option not checked doesn't count); and **the level mark `Gordium: No rooms on this level`** (Yes/No
+  on Levels, added by Mark for egress; a level with an area with no Room, or with the mark set, is a row in the
+  marking list): on a level marked Yes its areas aren't sent, but a Room drawn on such a level disagrees with it, so
+  the mark doesn't count there and the conflict is listed first (never a Room dropped in silence). To see on the
+  sample next: whether the L1 areas are its design options' (the log now lists each area with its point and the
+  options, and the rooms' surroundings are now read for the design checked only, section 4).
 - **The reader may propose, never decide.** A room named "Bedroom 2" can be shown as a suggestion in the add-in's
   marking list, marked "suggested"; it is sent as `sleeping: true` only once the architect has accepted it
   themselves, a fact about their own design. A suggestion alone is never sent.
@@ -106,6 +131,7 @@ exactly:
 | `Gordium: These are all the stairs` | Project Information | Yes / No / unset | `stairs` sent only on Yes (section 2's "all the stairs"; No or unset: not read). **Decided (2026-11-20, step 4):** the project-wide ticks ("these are all the stairs", later "all the guards", "this house has none of ...") are Gordium shared parameters on Project Information (Yes/No; unset is not stated), added by Mark for egress like the other marks and listed in the marking list; each step adds its own |
 | `Gordium: These are all the guards and handrails` | Project Information | Yes / No / unset | `guards` and every flight's `handrails` sent only on Yes (step 5, section 2's "all the guards"). **Decided (Ben, 2026-11-20, step 5):** one tick for both, since both are railings: a guard drawn as a low wall would go unchecked, and a handrail drawn as a wall sweep would leave the width at the handrail read too wide; with the tick, a flight with no railing found sends `handrails: []` |
 | `Gordium: This house has no stairs`, `This house has no doors`, `This house has no guards`, `This house has no basements`, `This house has no habitable attics`, `This house has no sleeping lofts`, `This house has no ramps`, `This house has no alternating tread devices`, `This house has no ship ladders`, `This house has no patio covers`, `This house has no deck or porch or cantilever over an escape opening` | Project Information | Yes / No / unset | step 6: `stairs: []`, `doors: []`, `guards: []`, and each `has_none` claim, sent only on Yes with nothing of the kind drawn and nothing that could hide one (section 4, "What the house has none of"). "Ship ladders": a parameter's name has no apostrophe |
+| `Gordium: No rooms on this level` | Levels (instance) | Yes / No / unset | Yes: the level's enclosed areas with no Room aren't sent as `unknown_spaces` (a roof, a turret's top: section 2); a Room drawn on a level marked Yes is a conflict, listed first, and the mark doesn't count. Unset or No: each such area is sent, and every sleeping-room rule needs review (2026-11-20, the Pacific Continental sample) |
 | `Gordium: Clear width`, `Clear height`, `Clear source`, `Clear confirmed` on doors | Doors (type) | As windows' | `doors[].stated_clear` (step 5): the same marks bound to Doors too, confirmed and re-checked exactly as windows' (the stamp, made for a door, records the type's `UniqueId`, size and operation, the clear width and height, the source and a mapped maker's parameter; a window's stamp never confirms a door, nor a door's a window); no `Clear offset` (a door's clear opening has no bottom in the format). The width and height are the maker's figure measured as R318.2 measures it (between the face of the door open 90 degrees and the stop; threshold top to stop bottom), never the door's size or rough opening: the marks' own tooltip says so |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick
@@ -124,7 +150,12 @@ one place, so the interior and the site line up.
 
 **Which elements.** The outside reader's rules apply to every interior element, from the same one place: the last
 phase only (nothing demolished or temporary by then), and the main model plus the option being edited or each set's
-primary ([revit_reading_design.md](revit_reading_design.md), section 1). Rooms, windows, doors, stairs or railings
+primary ([revit_reading_design.md](revit_reading_design.md), section 1). That holds for what is around a part too:
+Revit's collectors give every design option's elements, so a secondary option's wall, floor or roof found in, under
+or over a room is set aside (as the stairs' and guards' surroundings already were; before 2026-11-20 a room's were
+not, which could only refuse a value, never pass one). Revit's own room outlines and plan circuits are the main
+model's (main model and primary options); while a secondary option is being edited, the rooms' outlines are still
+those (to confirm on a real model with options). Rooms, windows, doors, stairs or railings
 found inside a linked model leave that kind not read (its list left out) until reading a linked interior is
 designed: a house drawn in a link can't pass egress unread.
 
@@ -181,6 +212,15 @@ a drawn ceiling.
 
 **As built in step 4** (`Gordium.Revit.Reading/StairReader.cs`; the Revit layer `RevitInterior.StairsOf`), where the
 table above needed settling:
+
+- *A window's grille is not a stair* (2026-11-20, the Pacific Continental sample: 272 "Muntin Pattern_1x2" Generic
+  Models nested in its windows, each a loadable family that stopped the stairs being read). A Generic Model family
+  instance nested, at any depth (`FamilyInstance.SuperComponent` to the top, recorded per candidate), in a window
+  or door, whose box lies within that window's or door's box (1/16 in to spare), is part of it and doesn't count:
+  nothing that fits inside a window's box can be a flight of stairs or a guard along a floor's edge. Anything else
+  still does: not nested, nested in anything but a window or door, sticking out of its box, or a box Revit doesn't
+  give. A guard built into a door family (a Juliet rail) inside the door's box would be set aside too: that is the
+  architect's "all the guards" tick to answer (a guard not drawn as a railing), as for any guard drawn otherwise.
 
 - *Treads*: the run's own upward flat faces, grouped by height (a face lying wholly under another of the run's own, a
   riser board's top under its tread, is inside the run and set aside); one group per tread the run says it has, each a
@@ -533,6 +573,13 @@ the window is placed and its Sill Height set (`Document.Regenerate()` there; wit
 830fbedc, every window was hosted but cut nothing; the walls are also committed first), and walls reaching past the level above enclose an area on it too (house 5's basement walls, first drawn a
 foot past its ceiling). Still to try on real models: real makers' window families (their rough openings may be
 larger than the unit), the Bottom reference, sloped and curved ceilings, links and worksets.
+
+For a real model (Autodesk's Pacific Continental sample, Read inside 2026-11-20), to check at the next run: that each
+grille's `SuperComponent` chain reaches its window and its box lies within the window's (the log counts the generic
+models set aside and names up to 10 nested ones that weren't); which of the enclosed areas with no Room lie in a
+Room of the design checked, and whether the L1 ones are the design options' (the log lists each area's size and
+point, and the options with the one checked); that the roof and turret levels take the new level mark; and that no
+window's cut is left unread by a wall face Revit gives no edges for (`RevitInterior.Cut` now says so, never a crash).
 
 For stairs (step 4), to check on houses 2 and 3 drawn by the add-in, then on real stairs: that a `StairsRun`'s
 geometry gives each tread top as its own flat face (monolithic and assembled run types; a riser board's top under its

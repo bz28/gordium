@@ -32,14 +32,21 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
 
     /// <summary>Every "this house has none of" tick, read (step 6): the lists' and the claims', sent or not and why.</summary>
     public IReadOnlyList<NoneTick> Ticks { get; init; } = [];
+
+    /// <summary>Each enclosed area with no Room sent as a space whose use isn't known (<c>unknown_spaces</c>), in words.</summary>
+    public IReadOnlyList<string> UnknownSpaces { get; init; } = [];
+
+    /// <summary>Each level marked "no rooms on this level" with a Room drawn on it (the mark doesn't count).</summary>
+    public IReadOnlyList<string> LevelConflicts { get; init; } = [];
 }
 
 /// <summary>
 /// The interior reader, section 7 step 3 of docs/revit/revit_interior_reading_design.md: the rooms and the windows and
 /// doors that can be escape openings, as the interior description (<c>gordium.interior/1</c>). Its rules are the
 /// note's section 2: a mark never set is not given; nothing found is never "none" (a kind with nothing found is left
-/// out, never an empty list); every room counts (an enclosed area with no Room, an unplaced Room, a closed workset or
-/// an unloaded link leaves <c>rooms</c> out); a part found is never dropped (a value that can't be read exactly is left
+/// out, never an empty list); every room counts (an unplaced Room, a closed workset or an unloaded link leaves
+/// <c>rooms</c> out; an enclosed area with no Room is sent as a space whose use isn't known, <c>unknown_spaces</c>, so
+/// every sleeping-room rule needs review while the rooms drawn are still checked); a part found is never dropped (a value that can't be read exactly is left
 /// out, with its reason in <see cref="InteriorReadResult.Notes"/>); a value is sent only when what is drawn agrees
 /// with it (a room's floor elevation against the slab under it, a window's sill line against the opening it cuts).
 /// The stairs (step 4) are <see cref="StairReader"/>'s. The doors (step 5) are read here: each door's exit mark,
@@ -112,8 +119,13 @@ public static class InteriorReader
         }
         if (roomsNotRead.Count == 0 && rooms.Count == 0)
             roomsNotRead = [MarkingListResult.NoRooms + ": no room is read for egress (never read as a house with none)"];
+        var unknown = roomsNotRead.Count == 0 ? UnknownAreas(model) : [];
         if (roomsNotRead.Count == 0)
             interior["rooms"] = rooms;
+        // an enclosed area with no Room doesn't stop the rooms drawn being read: each is sent as a space whose use
+        // isn't known, a sleeping room that may not be one (every rule about it needs review, never a pass)
+        if (unknown.Count > 0)
+            interior["unknown_spaces"] = UnknownSpaces(model, unknown);
 
         var openings = new JsonArray();
         if (openingsNotRead.Count == 0 && records is not null)
@@ -208,13 +220,16 @@ public static class InteriorReader
         return new(interior, roomsNotRead, openingsNotRead, notes, evidence)
         {
             StairsNotRead = stairsNotRead, DoorsNotRead = doorsNotRead, GuardsNotRead = guardsNotRead, Ticks = ticks,
+            UnknownSpaces = unknown.Count > 0 ? UnknownAreaWords(model) : [], LevelConflicts = LevelConflicts(model),
         };
     }
 
     // ---- what stops a kind being read ---------------------------------------------------------------------------
 
-    /// <summary>Why no room can be read: every Room not on the plan, every enclosed area with no Room, every closed
-    /// workset and every link that could hold one (design note, section 2). The marking list shows these first.</summary>
+    /// <summary>Why no room can be read: every Room not on the plan, enclosed areas that couldn't be read, every
+    /// closed workset and every link that could hold one (design note, section 2). The marking list shows these first.
+    /// An enclosed area with no Room doesn't stop the rooms being read: it is sent as a space whose use isn't known
+    /// (<see cref="UnknownAreas"/>), whose every sleeping-room rule needs review.</summary>
     public static List<string> RoomsNotRead(RevitModel model)
     {
         var why = new List<string>();
@@ -231,25 +246,140 @@ public static class InteriorReader
     }
 
     /// <summary>What stops every room being read besides a Room not on the plan (the marking list lists those itself):
-    /// each enclosed area with no Room, each closed workset, each link that could hold a room. Empty when the model's
-    /// inside wasn't read (the marking list alone).</summary>
+    /// enclosed areas that couldn't be read, each closed workset, each link that could hold a room. Empty when the
+    /// model's inside wasn't read (the marking list alone).</summary>
     public static List<string> OtherRoomBlockers(RevitModel model) =>
-        model.Interior is null ? [] : [.. AreaBlockers(model), .. WorksetAndLinkBlockers(model, rooms: true)];
+        model.Interior is null ? [] : [.. AreasNotRead(model), .. WorksetAndLinkBlockers(model, rooms: true)];
 
-    /// <summary>The enclosed areas with no Room, each in words (a bedroom may be one); one line when they couldn't be read.</summary>
-    public static List<string> AreaBlockers(RevitModel model)
+    private static List<string> AreasNotRead(RevitModel model) =>
+        model.Interior is { EnclosedAreas: null }
+            ? ["the enclosed areas on each level couldn't be read, so Gordium can't tell every room has a Room"] : [];
+
+    /// <summary>Each enclosed area with no Room that is sent as a space whose use isn't known (<see cref="UnknownAreas"/>),
+    /// in words, with what the architect can do about it: a bedroom may be one, so every sleeping-room rule needs
+    /// review while any is there (and no "no basements, attics or lofts" claim is sent). One line per level (a roof can
+    /// hold 19): one area in full, several counted with their sizes, each area by its place in
+    /// <see cref="InteriorReadResult.UnknownSpaces"/> and the description's <c>unknown_spaces</c>.</summary>
+    public static List<string> AreaBlockers(RevitModel model) =>
+        UnknownAreas(model).GroupBy(a => (a.LevelId, a.Level)).Select(g =>
+        {
+            var list = g.ToList();
+            return list.Count == 1
+                ? AreaWords(model, list[0]) + ": it may be a bedroom nobody placed a Room in, so every sleeping-room rule " +
+                  "needs review: place a Room in it (marked No if no one sleeps there), or open it up; on a level with no " +
+                  "rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes"
+                : string.Format(CultureInfo.InvariantCulture,
+                      "{0} enclosed areas on {1} have no Room ({2:0.#} to {3:0.#} sq ft; each listed with its place in the log): " +
+                      "each may be a bedroom nobody placed a Room in, so every sleeping-room rule needs review: place a Room " +
+                      "in each (marked No if no one sleeps there), or open it up; if the level has no rooms at all (a roof), " +
+                      "mark it {4} Yes", list.Count, g.Key.Level, list.Min(a => a.Area), list.Max(a => a.Area), Marks.NoRoomsOnLevel.Name);
+        }).ToList();
+
+    /// <summary>Each enclosed area sent as a space whose use isn't known, one line each, for the log.</summary>
+    public static List<string> UnknownAreaWords(RevitModel model) => UnknownAreas(model).Select(a => AreaWords(model, a)).ToList();
+
+    private static string AreaWords(RevitModel model, EnclosedArea a)
     {
-        if (model.Interior is not { } records)
+        var p = model.InternalToShared.Apply(a.PointInside);
+        return string.Format(CultureInfo.InvariantCulture, "An enclosed area on {0} has no Room ({1:0.#} sq ft, around x {2:0.##}, y {3:0.##})",
+                             a.Level, a.Area, p.X, p.Y);
+    }
+
+    /// <summary>The enclosed areas the reader sends as spaces whose use isn't known (<c>unknown_spaces</c>): every
+    /// area Revit finds with no Room in it (<c>PlanCircuit.IsRoomLocated</c> false), except one that lies in a placed
+    /// Room of the design checked on its level (its point inside within the Room's own outline, 1/16 in clear of
+    /// it: Revit's circuits are the main model's, and a Room in the design option checked doesn't count in them),
+    /// and, with <paramref name="levelMarks"/>, one on a level marked "no rooms on this level" whose mark stands
+    /// (no Room is drawn on it: <see cref="LevelConflicts"/>). Empty when the areas couldn't be read (then no room is).</summary>
+    public static List<EnclosedArea> UnknownAreas(RevitModel model, bool levelMarks = true)
+    {
+        if (model.Interior is not { EnclosedAreas: { } areas } records)
             return [];
-        if (records.EnclosedAreas is not { } areas)
-            return ["the enclosed areas on each level couldn't be read, so Gordium can't tell every room has a Room"];
-        return areas.Where(a => !a.HasRoom).Select(a =>
+        var cleared = levelMarks ? ClearedLevels(model) : [];
+        var rooms = PlacedRooms(model).ToList();
+        return areas.Where(a => !a.HasRoom && !(a.LevelId is { } l && cleared.Contains(l)) && !rooms.Any(r => Lies(a, r))).ToList();
+    }
+
+    /// <summary>The records of the placed Rooms of the design checked.</summary>
+    private static IEnumerable<RoomRecord> PlacedRooms(RevitModel model)
+    {
+        var placed = MarkReading.InDesign(model).Where(e => MarkReading.KindOf(e) == MarkedKind.Room && e.Placement == RoomPlacement.Placed)
+            .Select(e => e.UniqueId).ToHashSet(StringComparer.Ordinal);
+        return (model.Interior?.Rooms ?? []).Where(r => placed.Contains(r.UniqueId));
+    }
+
+    /// <summary>The area's point inside lies within the room's own outline (inside an odd number of its loops, so not
+    /// in a hole), more than 1/16 in from every edge, on the same level; a room with a curved edge, or a level not
+    /// given, never holds it (read as a chord, the point could be outside the room).</summary>
+    private static bool Lies(EnclosedArea a, RoomRecord r)
+    {
+        if (a.LevelId is null || r.LevelId != a.LevelId || r.Boundary is not { Count: > 0 } loops || loops.Any(l => l.Count < 3 || l.Any(s => !s.IsLine)))
+            return false;
+        var (x, y) = (a.PointInside.X, a.PointInside.Y);
+        var inside = false;
+        foreach (var loop in loops)
+            foreach (var s in loop)
+            {
+                double x1 = s.Start.X, y1 = s.Start.Y, x2 = s.End.X, y2 = s.End.Y;
+                double dx = x2 - x1, dy = y2 - y1, len2 = dx * dx + dy * dy;
+                var t = len2 > 0 ? Math.Clamp(((x - x1) * dx + (y - y1) * dy) / len2, 0, 1) : 0;
+                if (Math.Sqrt(Math.Pow(x - x1 - t * dx, 2) + Math.Pow(y - y1 - t * dy, 2)) <= Sixteenth)
+                    return false;                                   // on its edge: not clearly in it
+                if ((y1 > y) != (y2 > y) && x < x1 + (y - y1) * dx / dy)
+                    inside = !inside;
+            }
+        return inside;
+    }
+
+    /// <summary>The levels marked "no rooms on this level" Yes with no Room of the design checked drawn on them.</summary>
+    private static HashSet<string> ClearedLevels(RevitModel model)
+    {
+        var withRooms = RoomLevels(model);
+        return MarkReading.LevelsMarkedNoRooms(model).Select(l => l.UniqueId).Where(id => !withRooms.ContainsKey(id))
+            .ToHashSet(StringComparer.Ordinal);
+    }
+
+    /// <summary>Each level's Rooms of the design checked (placed or not), by the level's <c>UniqueId</c>.</summary>
+    private static Dictionary<string, List<MarkedElement>> RoomLevels(RevitModel model)
+    {
+        var rooms = MarkReading.InDesign(model).Where(e => MarkReading.KindOf(e) == MarkedKind.Room)
+            .ToDictionary(e => e.UniqueId, StringComparer.Ordinal);
+        return (model.Interior?.Rooms ?? []).Where(r => r.LevelId is not null && rooms.ContainsKey(r.UniqueId))
+            .GroupBy(r => r.LevelId!, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.Select(r => rooms[r.UniqueId]).ToList(), StringComparer.Ordinal);
+    }
+
+    /// <summary>Each level marked "no rooms on this level" Yes with a Room drawn on it: the two disagree, so the mark
+    /// doesn't count (its enclosed areas with no Room are sent as spaces whose use isn't known) and the Room is read as
+    /// any other; listed first in the marking list, never dropped in silence.</summary>
+    public static List<string> LevelConflicts(RevitModel model)
+    {
+        if (model.Interior is null)
+            return [];
+        var withRooms = RoomLevels(model);
+        return MarkReading.LevelsMarkedNoRooms(model).Where(l => withRooms.ContainsKey(l.UniqueId))
+            .Select(l => $"Level \"{l.Name ?? l.UniqueId}\" is marked {Marks.NoRoomsOnLevel.Name} Yes, but " +
+                         string.Join(", ", withRooms[l.UniqueId].Select(r => $"Room \"{RoomName(r)}\"")) +
+                         (withRooms[l.UniqueId].Count == 1 ? " is" : " are") + " drawn on it: delete the Room or mark the level No " +
+                         "(until then the mark doesn't count, and its enclosed areas with no Room each keep the sleeping-room rules needing review)")
+            .ToList();
+    }
+
+    /// <summary>The enclosed areas sent as spaces whose use isn't known, as the description's <c>unknown_spaces</c>
+    /// (each <c>{id, name}</c>: an id from its level and place, the same at every read of the same model).</summary>
+    private static JsonArray UnknownSpaces(RevitModel model, List<EnclosedArea> areas)
+    {
+        var spaces = new JsonArray();
+        var ids = new HashSet<string>(StringComparer.Ordinal);
+        foreach (var a in areas)
         {
             var p = model.InternalToShared.Apply(a.PointInside);
-            return string.Format(CultureInfo.InvariantCulture,
-                "An enclosed area on {0} has no Room ({1:0.#} sq ft, around x {2:0.##}, y {3:0.##}): place a Room in it " +
-                "(marked No if no one sleeps there), or open it up", a.Level, a.Area, p.X, p.Y);
-        }).ToList();
+            var id = string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:{1:0.###},{2:0.###}", a.LevelId ?? a.Level, p.X, p.Y);
+            for (var n = 2; !ids.Add(id); n++)
+                id = $"{id}#{n}";
+            spaces.Add(new JsonObject { ["id"] = id, ["name"] = AreaWords(model, a) });
+        }
+        return spaces;
     }
 
     private static IEnumerable<string> WorksetAndLinkBlockers(RevitModel model, bool rooms)
@@ -319,7 +449,7 @@ public static class InteriorReader
                 Out("floor", "what stands inside it couldn't be looked for");
                 plan = null;
             }
-            else if (inside.Where(e => !bounding.Contains(e.UniqueId) && !NotBuilding.Contains(e.BuiltInCategory)
+            else if (inside.Where(e => InDesign(model, e) && !bounding.Contains(e.UniqueId) && !NotBuilding.Contains(e.BuiltInCategory)
                                        && !InBoundingWall(e, bounding))
                            .Select(e => Named(e)).Distinct().ToList() is { Count: > 0 } standing)
             {
@@ -373,6 +503,11 @@ public static class InteriorReader
     private static bool InBoundingWall(NearbyElement e, HashSet<string> bounding) =>
         e.BuiltInCategory is "OST_Windows" or "OST_Doors" && e.Host is { } h && bounding.Contains(h);
 
+    /// <summary>In the design checked (the outside reader's one rule, as the stairs' and guards' surroundings): an
+    /// element demolished by the last phase, or in a design option that isn't the one checked of its set (a secondary
+    /// option's wall, roof or floor: Revit's collectors give every option's), isn't in, under or over the room.</summary>
+    private static bool InDesign(RevitModel model, NearbyElement e) => SiteReader.InDesignChecked(model, e.PhaseDemolished, e.DesignOption);
+
     private static string Named(NearbyElement e) =>
         string.IsNullOrWhiteSpace(e.Name) ? e.BuiltInCategory.Replace("OST_", "") : $"{e.BuiltInCategory.Replace("OST_", "")} \"{e.Name}\"";
 
@@ -418,7 +553,7 @@ public static class InteriorReader
         var room = PlanGeometry.Local(plan, origin);
         var roomArea = PlanGeometry.Area(room);
         var tops = new List<(double Z, List<List<P2>> Loops, string By)>();
-        foreach (var e in under)
+        foreach (var e in under.Where(e => InDesign(model, e)))
         {
             if (e.GeometryFailed || e.Faces is null)
                 return $"the geometry of {Named(e)} under it couldn't be read";
@@ -478,7 +613,7 @@ public static class InteriorReader
         var room = PlanGeometry.Local(plan, origin);
         var roomArea = PlanGeometry.Area(room);
         var pieces = new JsonArray();
-        foreach (var e in over)
+        foreach (var e in over.Where(e => InDesign(model, e)))
         {
             if (e.UniqueId == rec.UniqueId || NotBuilding.Contains(e.BuiltInCategory) || InBoundingWall(e, bounding))
                 continue;                                    // a window or door in a wall bounding it isn't over it
@@ -705,7 +840,10 @@ public static class InteriorReader
         if (!rec.HostIsWall || rec.WallOpening is not { Count: > 0 } cut)
         {
             record["wall_opening_bottom"] = null;
-            why = "no opening it cuts in a wall was found, so its sill line (Sill Height) can't be checked against anything drawn";
+            why = rec.HostIsWall && rec.WallOpeningUnread
+                ? "its wall's geometry couldn't be read (Revit gave no edges for one of its faces, or refused), so the opening " +
+                  "it cuts, and so its sill line (Sill Height), can't be checked against anything drawn"
+                : "no opening it cuts in a wall was found, so its sill line (Sill Height) can't be checked against anything drawn";
             return null;
         }
         var bottomCut = cut.Min(p => p.Z);

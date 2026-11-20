@@ -25,6 +25,7 @@ The zoning measurements read massing solids from a Rhino file. Egress needs the 
 format: gordium.interior/1
 units: in
 rooms: [...]
+unknown_spaces: [...]     # optional: enclosed spaces with no room drawn in them
 openings: [...]
 stairs: [...]
 doors: [...]
@@ -43,6 +44,12 @@ Every part has an `id` (unique across the whole house) and may have a `name` (wh
 | `floor_elevation` | the finished floor's elevation |
 | `ceiling_height` | a flat ceiling's height above the finished floor; **or** |
 | `ceilings` | the finished ceiling's underside as flat pieces, each a list of 3D points, together covering the whole floor (give one or the other, never both) |
+
+### unknown_spaces
+
+`rooms` lists every room. A host that finds an enclosed space with no room drawn in it (walls all round, no Room: in Revit, a plan circuit with no Room) can't say what it is, and it may be a bedroom nobody drew a room in. Each such space is one entry here, `{id, name}` (the name says where it is: "Enclosed area on L1, 331.4 sq ft, around x 12, y 40"). Left out, or `[]`: there are none.
+
+Each is measured as a sleeping room that may not be one: nothing of it is measured, and every rule row about it (its floor area, its escape openings, "a sleeping room with no escape opening fails") needs review, never a pass and never a fail, with the reason "an enclosed space with no room drawn in it: its use isn't known…". The rooms drawn are still checked as usual, so a drawn bedroom that fails still fails, and a rule over every sleeping room can't pass while a space may be one. A "no basements", "no habitable attics" or "no sleeping lofts" claim (`has_none`) isn't taken beside any unknown space. An unknown space is only given with `rooms`; an entry that isn't a mapping with a text `id` leaves every room not read.
 
 ### openings
 

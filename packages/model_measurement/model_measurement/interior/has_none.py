@@ -43,6 +43,8 @@ KINDS = {
 # the kinds the description already lists: an empty list says there are none
 LISTED = {"sleeping_room": "rooms", "emergency_escape_opening": "openings", "stair": "stairs",
           "egress_door": "doors", "guard": "guards"}
+# the kinds that are spaces: an enclosed space whose use isn't known (`unknown_spaces`) could be one of them
+SPACES = ("basement", "habitable_attic", "sleeping_loft")
 SAID = "the description says the house has no {words}"
 ENTRY_KEYS = {"kind", "source", "reading"}
 
@@ -222,6 +224,12 @@ def read(description: dict) -> tuple[dict, list[str]]:
         listed = KINDS[kind]["list"]
         if listed is not None and listed in description and description[listed] != []:
             problems.append(Stop("has_none_contradicted", words=KINDS[kind]["words"], key=listed).reason)
+            continue
+        spaces = description.get("unknown_spaces")
+        if kind in SPACES and spaces is not None and spaces != []:
+            # a space whose use isn't known may be the basement, attic or loft said to be none
+            problems.append(Stop("has_none_unknown_space", words=KINDS[kind]["words"],
+                                 count=len(spaces) if isinstance(spaces, list) else "some").reason)
             continue
         if kind == "basement" and (below := below_ground(description)):
             problems.append(Stop("has_none_below_ground", what=below).reason)

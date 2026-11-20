@@ -131,6 +131,8 @@ public static class HasNone
                 // a space: every room must be read, so the checker can hold the claim against them (a room within
                 // another's height refuses "no sleeping lofts"; a floor below the ground, "no basements")
                 blockers.AddRange(InteriorReader.RoomsNotRead(model));      // its closed worksets and links too
+                // an enclosed area with no Room may be the basement, attic or loft (the checker refuses the claim too)
+                blockers.AddRange(InteriorReader.AreaBlockers(model));
                 blockers.AddRange(Hidden(model, worksetsAndLinks: false));
                 break;
             default:                                        // a patio cover; a deck, porch or cantilever over an opening

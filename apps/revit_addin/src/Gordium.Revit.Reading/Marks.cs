@@ -33,6 +33,7 @@ public static class Marks
     public const string Doors = "OST_Doors";
     public const string Railings = "OST_StairsRailing";
     public const string ProjectInformation = "OST_ProjectInformation";
+    public const string Levels = "OST_Levels";
 
     /// <summary>The group the parameters are written under in the shared-parameter file Gordium makes.</summary>
     public const string Group = "Gordium";
@@ -105,6 +106,15 @@ public static class Marks
         MarkBinding.Instance, [ProjectInformation], "guards and stairs[].handrails (sent only when Yes)",
         "Yes once every guard and handrail of the house is drawn as a Revit railing (not a wall, a wall sweep or a generic model). Blank or No: no guard or handrail is read for egress.");
 
+    /// <summary>A level the architect says has no rooms at all (a roof, a turret's top: Revit finds enclosed areas
+    /// there between walls and parapets). Yes: its enclosed areas with no Room aren't sent as spaces whose use isn't
+    /// known; a Room drawn on it disagrees, and is listed first as a conflict (the tick then doesn't count). Blank or
+    /// No: its enclosed areas with no Room are each sent so, and every sleeping-room rule needs review.</summary>
+    public static readonly MarkDefinition NoRoomsOnLevel = new(
+        "Gordium: No rooms on this level", new("c8cc09e8-00ce-4e4b-a27a-4c2d23410a02"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Levels], "unknown_spaces (an enclosed area with no Room on a level ticked Yes isn't one)",
+        "Yes for a level with no rooms at all (a roof, the top of a turret). Its enclosed areas with no Room are then not treated as rooms nobody drew; a Room drawn on it is listed as a conflict. Blank or No: each enclosed area with no Room on it keeps every sleeping-room rule needing review.");
+
     // ---- step 6: what the house has none of (design note, sections 2 and 4; HasNone) ------------------------------
     // One Yes/No on Project Information per kind: the three kinds the description lists itself (an empty list says
     // none) and every kind of the format's has_none (model_measurement.interior.has_none.KINDS). Yes is sent only when
@@ -144,7 +154,7 @@ public static class Marks
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
-        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening,
+        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
