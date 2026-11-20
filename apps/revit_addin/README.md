@@ -424,8 +424,11 @@ the jurisdiction is the City of Ithaca). Why each choice:
   with its figures, how far off, reason, section and a *Law* expander with the law's words. Click a row (or *Show
   in model*) to select and zoom to its elements. Nothing sent for a missing Project Information fact: the panel
   lists each, with *Open Project Information*. Element marks are still set in Properties (the click selects the
-  element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread. Why each choice:
-  the reading design note, section 9.
+  element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread (`ActionQueue`: a
+  refused request is dropped). One scrolling list, rows straight after the counts, *Details* folded after them. An
+  edit to the checked project greys everything (no green) and says to check again; closing it takes the rows
+  down. The street edge is asked for only when it is the last fact and the view is a plan showing a property line.
+  Why each choice: the reading design note, section 9.
 
 How we know: `ProjectCheckTests` (scene 01 as fake Revit records with interior houses 1 and 5, checked by the real
 worker: the scene's hand-worked zoning verdicts, the houses' egress verdicts, a project with no lot never complies,

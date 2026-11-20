@@ -334,6 +334,14 @@ agreed). A Revit dockable pane, *Gordium: Check my project*, tabbed behind Prope
 makes every row's words, and both the panel and `check_project_result.txt` (`ResultText`) read it, so the two
 never say a row differently.
 
+- **One scrolling list**, header included, so rows are never out of reach (Revit trial: at the docked size, about
+  420 by 340 px, a fixed header hid every row). Top to bottom (`ResultRows.Layout`): the stale notice when there is
+  one, the state, the count chips (one compact line per law), then straight away the groups; what wasn't read and
+  a folded *Details* (phase, options, street line, files) after the rows.
+- **Never a stale pass.** Revit's `DocumentChanged` on the project checked, for any change but the check's own
+  transactions (adding the marks, keeping the street edge: `ResultRows.ChangesTheCheck`), greys everything
+  (`ResultRows.Stale`: no green in the state, chips, groups, lines or rows) and says "The model changed since this
+  check (14:32): click Check again". `DocumentClosing` of it takes the rows down.
 - **Header and counts.** "Gordium: Check my project", when it was checked and which project, and *Check again*.
   Then the worker's own state, and its counts as **chips in its own words, never recounted**: one line per law
   (`view.sections[]`: "Zoning (City of Ithaca)", "Egress (NY State Residential Code 2025)"), each summary split at
@@ -364,8 +372,15 @@ never say a row differently.
   is built.
 - **Revit's thread.** Every Revit call the panel makes (Check again, select and zoom, open Project Information)
   goes through **one ExternalEvent** made at startup (`PanelActions.cs`) and runs in Revit's API context; the WPF
-  view never calls the Revit API, and each element's label is read when the check runs. A re-check that fails
-  takes the last check's rows down (never left showing as this one's) and says why.
+  view never calls the Revit API, and each element's label is read when the check runs. A request Revit refuses
+  is taken back off the queue (`ActionQueue`: never run later, unasked, with the next one) and Check again is
+  usable again. A re-check that fails takes the last check's rows down (never left showing as this one's) and
+  says why.
+- **The street edge is asked for last, where it can be clicked** (Revit trial: from a sheet view with nothing set,
+  the pick waited with no prompt). Only when it is the one fact left and the active view is a plan showing a
+  property line (`StreetEdges.Ask`), with the status bar saying "Click the lot edge along the street (Esc to
+  skip)"; otherwise the panel lists "open a site plan (or a floor plan) that shows the property line, then click
+  Check again".
 
 Every row is also written to `check_project_result.txt` (in full, the same words), and the full request and answer
 to the trial log.
