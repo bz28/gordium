@@ -64,10 +64,8 @@ public static class ResultText
     {
         ArgumentNullException.ThrowIfNull(result);
         ArgumentNullException.ThrowIfNull(options);
-        var headline = $"{StateWords(result.State)}: {result.Summary}";
-        var checkedWords = "Checked: " + (phase is null ? "the model (it has no phases)" : $"the last phase, {phase}") + "; design options: " +
-                           (options.Count == 0 ? "the main model (no design options)" : "the main model and " + string.Join(", ", options)) +
-                           (street is null ? "" : $"; street line: {street}") + ".";
+        var headline = Headline(result);
+        var checkedWords = CheckedWords(phase, options, street);
         var rows = result.Items.ToDictionary(i => i.Id, StringComparer.Ordinal);
         var budget = maxOtherRows;
         var main = new StringBuilder();
@@ -92,6 +90,22 @@ public static class ResultText
         return new ResultWords(headline, checkedWords, main.ToString().TrimEnd('\n'), InsideWords(inside), outline.ToString().TrimEnd('\n'));
     }
 
+    /// <summary>The worker's state and its summary line: "Does not comply: 4 do not comply · ...".</summary>
+    public static string Headline(CheckResult result)
+    {
+        ArgumentNullException.ThrowIfNull(result);
+        return $"{StateWords(result.State)}: {result.Summary}";
+    }
+
+    /// <summary>What was checked: the phase, the design options and the street line.</summary>
+    public static string CheckedWords(string? phase, IReadOnlyList<string> options, string? street)
+    {
+        ArgumentNullException.ThrowIfNull(options);
+        return "Checked: " + (phase is null ? "the model (it has no phases)" : $"the last phase, {phase}") + "; design options: " +
+               (options.Count == 0 ? "the main model (no design options)" : "the main model and " + string.Join(", ", options)) +
+               (street is null ? "" : $"; street line: {street}") + ".";
+    }
+
     private static void List(StringBuilder s, IEnumerable<CheckItem> items, string indent, ref int budget, Func<string, string?>? element)
     {
         var cut = 0;
@@ -112,38 +126,9 @@ public static class ResultText
             s.Append(indent).Append($"{cut} more (in the log)\n");
     }
 
-    /// <summary>One row: its verdict, its name, measured against allowed (or the checker's reason), and the Revit
-    /// elements it is about.</summary>
-    public static string Row(CheckItem row, Func<string, string?>? element = null)
-    {
-        var s = new StringBuilder($"[{RowWords(row)}] {row.Name}");
-        var proposed = Text(row.Raw, "proposed");
-        var required = Text(row.Raw, "required");
-        // an egress row's reason starts with its part, which its name already says: said once
-        var reason = Once(row.Reason);
-        var part = row.Name.Split(" · ")[0];
-        if (reason is not null && row.Name.Contains(" · ", StringComparison.Ordinal) && reason.StartsWith(part + ": ", StringComparison.Ordinal))
-            reason = reason[(part.Length + 2)..];
-        var said = new List<string>();
-        if (proposed is not null && required is not null)
-        {
-            var sign = Text(row.Raw, "sign") is { } g && !required.StartsWith(g, StringComparison.Ordinal) ? g + " " : "";
-            said.Add($"{proposed} measured, {sign}{required} allowed" + (Text(row.Raw, "margin") is { } margin ? $" ({margin})" : ""));
-        }
-        else if (required is not null)
-            said.Add($"allowed {required}");
-        if (reason is { Length: > 0 })
-            said.Add(reason);
-        if (said.Count > 0)
-            s.Append(": ").Append(string.Join(". ", said));
-        var ids = Elements(row.Raw);
-        if (ids.Count > 0)
-        {
-            var shown = ids.Take(6).Select(id => element?.Invoke(id) ?? id).ToList();
-            s.Append(" [").Append(string.Join(", ", shown)).Append(ids.Count > 6 ? $", {ids.Count - 6} more" : "").Append(']');
-        }
-        return s.ToString();
-    }
+    /// <summary>One row: its verdict, its name, measured against allowed and how far off (or the checker's reason),
+    /// and the Revit elements it is about; the words the results panel shows too (<see cref="ResultRows.Row"/>).</summary>
+    public static string Row(CheckItem row, Func<string, string?>? element = null) => ResultRows.Row(row).Line(element);
 
     /// <summary>A reason whose "; "-separated parts repeat (one per building: "a building has a curved edge (not
     /// measured yet)" twelve times) said once each, in the order first said, with how many times ("(x12)"). Nothing
@@ -171,10 +156,6 @@ public static class ResultText
             ids.Add(id.GetString()!);
         return ids;
     }
-
-    /// <summary>A text field of the row, or null when absent, empty or the worker's "—" (nothing measured).</summary>
-    private static string? Text(JsonElement raw, string name) =>
-        raw.TryGetProperty(name, out var v) && v.ValueKind == JsonValueKind.String && v.GetString() is { Length: > 0 } t && t != "—" ? t : null;
 
     /// <summary>The inside's not-read lists, each reason in full, and how many values were left out.</summary>
     public static string InsideWords(InteriorReadResult? inside)
