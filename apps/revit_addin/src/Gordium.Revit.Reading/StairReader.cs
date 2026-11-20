@@ -349,7 +349,15 @@ public static class StairReader
         {
             evidence[run.UniqueId] = _ev;
             _ev["revit_layer"] = new JsonArray(run.Diagnostics.Select(d => (JsonNode?)d).ToArray());
-            string[] all = ["bottom_elevation", "nosings", "sides", "handrails", "overhead"];
+            // whether it is a spiral (R202: treads radiating from a column), from Revit's own record of the run's shape
+            // (StairsRunStyle: Straight, Winder, Spiral, Sketched in the Revit 2027 API): true for a Spiral run; false only
+            // for a Straight run whose drawn treads read straight below (one direction, flat rectangular treads square
+            // to the run); a winder, a sketched run, or a Straight run drawn otherwise: left out (needs review)
+            _ev["style"] = run.Style;
+            if (run.Style == "Spiral")
+                _flight["spiral"] = true;
+            string[] all = run.Style == "Spiral" ? ["bottom_elevation", "nosings", "sides", "handrails", "overhead"]
+                : ["spiral", "bottom_elevation", "nosings", "sides", "handrails", "overhead"];
             if (run.Faces is null || run.GeometryFailed)
             {
                 OutAll("the run's geometry couldn't be read exactly (a mesh, or Revit refused)", all);
@@ -384,6 +392,7 @@ public static class StairReader
                 OutAll(bad, all);
                 return _flight;
             }
+            _flight["spiral"] = false;                      // a Straight run, its treads read straight and rectangular
             _headZ = topZ;                                   // until the floor at the head is read: the line's top
             _ev["run_base"] = baseZ;
             _ev["run_top"] = topZ;

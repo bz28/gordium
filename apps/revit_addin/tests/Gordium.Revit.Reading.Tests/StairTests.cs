@@ -276,6 +276,43 @@ public sealed class StairTests
     }
 
     [Fact]
+    public void Spiral_is_sent_from_the_runs_style_only_where_the_drawing_agrees()
+    {
+        // Revit's StairsRunStyle (Straight, Winder, Spiral, Sketched): a Straight run drawn straight is no spiral (R202)
+        var house = FakeHouse.Draw(Two);
+        Assert.False(Flight(Read(house), "s1")!["spiral"]!.GetValue<bool>());
+        Assert.Null(Note(Read(house), "s1", "spiral"));
+
+        house.SetRun("s1", r => r with { Style = "Spiral" });               // Revit says spiral: sent, never measured straight
+        var read = Read(house);
+        Assert.True(Flight(read, "s1")!["spiral"]!.GetValue<bool>());
+        Assert.Null(Flight(read, "s1")!["nosings"]);
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_spiral = True, expected False"));
+
+        foreach (var style in new[] { "Winder", "Sketched" })              // neither: not stated
+        {
+            house = FakeHouse.Draw(Two);
+            house.SetRun("s1", r => r with { Style = style });
+            read = Read(house);
+            Assert.Null(Flight(read, "s1")!["spiral"]);
+            Assert.Contains($"a {style.ToLowerInvariant()} run", Note(read, "s1", "spiral"));
+            Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("s1 stair_spiral not measured"));
+        }
+
+        house = FakeHouse.Draw(Two);                                         // Straight, but a curved face drawn
+        house.SetRun("s1", r => r with { Faces = [.. r.Faces!, new SurfaceRecord(false, new(0, 0, 0), [], [new(0, 0, 0)])] });
+        read = Read(house);
+        Assert.Null(Flight(read, "s1")!["spiral"]);
+        Assert.Contains("curved face", Note(read, "s1", "spiral"));
+
+        house = FakeHouse.Draw(Two);                                         // Straight, but its path bends
+        house.SetRun("s1", r => r with { Path = [r.Path[0], r.Path[0] + 0.5 * (r.Path[1] - r.Path[0]) + new Xyz(0.5, 0.5, 0), r.Path[1]] });
+        read = Read(house);
+        Assert.Null(Flight(read, "s1")!["spiral"]);
+        Assert.Contains("a bent run", Note(read, "s1", "spiral"));
+    }
+
+    [Fact]
     public void A_riser_top_hidden_under_its_tread_is_inside_the_run_not_a_tread()
     {
         // an assembled stair's riser board reaching up under the tread: its top face touches the tread's underside
