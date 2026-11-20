@@ -13,6 +13,8 @@ import pytest
 
 from model_measurement.interior import recordings as r
 
+ORANGETOWN = "orangetown_ny_80_south_william"
+
 
 def described(name: str) -> dict:
     """The house as a host's reader would send it from the drawing: rooms (floor, elevation, ceiling pieces) and every
@@ -108,7 +110,9 @@ def test_the_steps_scope_is_the_design_notes():
     handrails = {"stair_clear_width_at_handrail", "stair_handrail_sides"}
     assert r.STEP == 5
     assert r.HOUSE_STEP == {"1_ranch_compliant": 5, "2_two_story_small_window": 5, "3_tall_riser": 4, "4_loft": 5,
-                            "5_basement_window_well": 5, "6_door_stated_clear": 5}
+                            "5_basement_window_well": 5, "6_door_stated_clear": 5, ORANGETOWN: 5}
+    # the real house: its rooms, marked escape windows and front door; its stairs and guards not drawn, so not read
+    assert r.scope(ORANGETOWN) == rooms | {"egress_door": doors}
     assert r.scope("1_ranch_compliant") == r.scope("6_door_stated_clear") == rooms | {"egress_door": doors}
     assert r.scope("2_two_story_small_window") == rooms | {"stair": stairs | handrails, "egress_door": doors}
     assert r.scope("3_tall_riser") == rooms | {"stair": set()}                   # read, nothing measured (step 4)
