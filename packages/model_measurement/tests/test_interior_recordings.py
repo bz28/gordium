@@ -30,10 +30,19 @@ def described(name: str) -> dict:
             o["stated_clear"] = {"width": c["width"], "height": c["height"],
                                  "bottom": w["level"] + w["sill"] + c["offset"], "source": c["source"]}
         openings.append(o)
-    ids = {x["id"]: f"host-{x['id']}" for x in d["rooms"] + d["windows"] + d["stairs"]}
+    for dr in d["doors"]:                     # a door is an opening too (marked no escape opening), and a door
+        openings.append({"id": f"host-{dr['id']}", "name": dr["name"], "room": f"host-{dr['room']}", "escape": False,
+                         "operation": {"side_hinged": "side_hinged_door", "sliding": "sliding_door"}[dr["operation"]]})
+    ids = {x["id"]: f"host-{x['id']}" for x in d["rooms"] + d["windows"] + d["stairs"] + d["doors"] + d["guards"]}
     interior = {"format": "gordium.interior/1", "units": "ft", "rooms": rooms, "openings": openings}
     if d["stairs"]:
         interior["stairs"] = [flight(st) for st in d["stairs"]]
+    if d["doors"]:                            # its exit mark, operation and maker's confirmed clear opening; nothing drawn
+        interior["doors"] = [{"id": f"host-{x['id']}", "name": x["name"], "exit": x["exit"], "operation": x["operation"]}
+                             | ({"stated_clear": {k: x["clear"][k] for k in ("width", "height", "source")}} if x["clear"] else {})
+                             for x in d["doors"]]
+    if d["guards"]:
+        interior["guards"] = [guard(g) for g in d["guards"]]
     return {"host": "test", "house": name, "step": d["step"], "ids": ids,
             "recorded": {"by": "test_interior_recordings", "date": "2026-11-20", "tool": "python"},
             "interior": interior}
@@ -66,7 +75,22 @@ def flight(st: dict) -> dict:
     if st["head_above_run"] == 0:
         out["nosings"] = [across(k, st["base"] + st["riser"] * (k + 1)) for k in range(st["risers"] - 1)] \
             + [across(st["risers"] - 1, st["head_top"])]
+    if st["handrails"]:                       # each drawn handrail's inner edge (step 5)
+        out["handrails"] = [{"side": h["side"], "inner_edge": h["inner"]} for h in st["handrails"]]
     return out
+
+
+def guard(g: dict) -> dict:
+    """A drawn level guard as the Revit reader sends it: the floor's top, its top rail's top, its ends at the wall and
+    the post, each rail and baluster as a rectangle in its own elevation (u from the path's start)."""
+    w = g["level"]
+    rails = [g["top_rail"], *g["rails"]]
+    b = g["balusters"]
+    members = [{"left": 0.0, "right": g["length"], "bottom": w + r["bottom"], "top": w + r["top"]} for r in rails]
+    members += [{"left": b["first"] + k * b["spacing"], "right": b["first"] + k * b["spacing"] + b["width"],
+                 "bottom": w + b["bottom"], "top": w + b["top"]} for k in range(b["count"])]
+    return {"id": f"host-{g['id']}", "name": g["name"], "walking_surface": w, "top": w + g["top"],
+            "extent": {"left": 0.0, "right": g["length"]}, "members": members}
 
 
 @pytest.mark.parametrize("name", r.STEP_HOUSES)
@@ -80,12 +104,17 @@ def test_the_steps_scope_is_the_design_notes():
                                           "opening_sill_height", "opening_is_door", "opening_door_hinged_or_sliding"}}
     stairs = {"stair_riser_height", "stair_riser_variation", "stair_total_rise", "stair_risers", "stair_tread_depth",
               "stair_tread_variation", "stair_headroom", "stair_clear_width"}      # never the width at the handrail
-    assert r.STEP == 4
-    assert r.HOUSE_STEP == {"1_ranch_compliant": 3, "2_two_story_small_window": 4, "3_tall_riser": 4,
-                            "5_basement_window_well": 3}
-    assert r.scope("1_ranch_compliant") == r.scope("5_basement_window_well") == rooms
-    assert r.scope("2_two_story_small_window") == rooms | {"stair": stairs}
-    assert r.scope("3_tall_riser") == rooms | {"stair": set()}                   # read, nothing measured
+    doors = {"door_clear_width", "door_clear_height", "door_side_hinged"}
+    handrails = {"stair_clear_width_at_handrail", "stair_handrail_sides"}
+    assert r.STEP == 5
+    assert r.HOUSE_STEP == {"1_ranch_compliant": 5, "2_two_story_small_window": 5, "3_tall_riser": 4, "4_loft": 5,
+                            "5_basement_window_well": 5, "6_door_stated_clear": 5}
+    assert r.scope("1_ranch_compliant") == r.scope("6_door_stated_clear") == rooms | {"egress_door": doors}
+    assert r.scope("2_two_story_small_window") == rooms | {"stair": stairs | handrails, "egress_door": doors}
+    assert r.scope("3_tall_riser") == rooms | {"stair": set()}                   # read, nothing measured (step 4)
+    assert r.scope("4_loft") == rooms | {"stair": stairs | handrails, "guard": {"guard_height", "guard_opening_sphere"}}
+    # a sliding door: no clear width worked by hand, so no maker's clear opening made up: its height not in scope
+    assert r.scope("5_basement_window_well") == rooms | {"egress_door": {"door_side_hinged"}}
 
 
 def test_house_2s_stair_drawn_and_read_measures_as_worked_by_hand():
@@ -99,8 +128,58 @@ def test_house_2s_stair_drawn_and_read_measures_as_worked_by_hand():
     del rec["interior"]["stairs"][0]["overhead"]
     assert any("s1 stair_headroom not measured" in p for p in r.recording_problems(rec))
     rec = described("2_two_story_small_window")
-    rec["interior"]["stairs"][0]["handrails"] = []                     # "no handrails" said: not in step 4
-    assert any("s1 stair_handrail_sides = 0: not in step 4" in p for p in r.recording_problems(rec))
+    rec["interior"]["stairs"][0]["handrails"] = []                     # its handrail missed: "none" read
+    assert any("s1 stair_handrail_sides = 0, expected 1" in p for p in r.recording_problems(rec))
+    rec = described("2_two_story_small_window")
+    del rec["interior"]["stairs"][0]["handrails"]
+    assert any("s1 stair_clear_width_at_handrail not measured" in p for p in r.recording_problems(rec))
+    rec = described("2_two_story_small_window")
+    h = rec["interior"]["stairs"][0]["handrails"][0]["inner_edge"]
+    h[0][1] = h[1][1] = h[0][1] + 1 / 12                                # read an inch farther in
+    assert any("s1 stair_clear_width_at_handrail = 31.5, expected 32.5" in p for p in r.recording_problems(rec))
+
+
+def test_doors_drawn_and_read_measure_as_worked_by_hand():
+    d = r.drawing("6_door_stated_clear")
+    (door,) = d["doors"]
+    assert door["clear"]["width"] * 12 == pytest.approx(33.5)          # the maker's, the smaller
+    assert door["clear"]["height"] * 12 == pytest.approx(79.25)        # the drawn, the smaller
+    assert door["width"] * 12 == pytest.approx(35.75) and door["outward"] == [0, -1]
+    rec = described("6_door_stated_clear")
+    assert r.recording_problems(rec) == []
+    rec["interior"]["doors"][0]["stated_clear"]["width"] += 0.5 / 12   # a maker's figure larger than the less favourable
+    assert any("d1 door_clear_width = 34.0, expected 33.5" in p for p in r.recording_problems(rec))
+    rec = described("1_ranch_compliant")
+    del next(x for x in rec["interior"]["doors"] if x["id"] == "host-d1")["stated_clear"]
+    assert any("d1 door_clear_width not measured" in p for p in r.recording_problems(rec))
+    # house 5's sliding door: no maker's clear opening is drawn, so its height comes back not measured
+    five = r.drawing("5_basement_window_well")
+    assert [x["clear"] for x in five["doors"]] == [None]
+    rec = described("5_basement_window_well")
+    assert r.recording_problems(rec) == []
+    rec["interior"]["doors"][0]["stated_clear"] = {"width": 3.0, "height": 80 / 12, "source": "made up"}
+    assert any("de door_clear_height = 80.0: not in step 5" in p for p in r.recording_problems(rec))
+
+
+def test_house_4s_loft_guard_and_stair_drawn_and_read_measure_as_worked_by_hand():
+    d = r.drawing("4_loft")
+    loft = next(x for x in d["rooms"] if x["id"] == "loft")
+    assert min(x for x, _ in loft["floor"]) == pytest.approx(24.5)    # drawn clear of the bedroom it is over
+    assert "within the height of main" in d["notes"][0]
+    assert d["levels"][0]["wall_height"] == pytest.approx(9.0)        # the bedroom's walls stop at the loft's level
+    (g,) = d["guards"]
+    assert (g["level"], g["top"], g["length"]) == (9.0, pytest.approx(3.0), pytest.approx(4.0))
+    assert g["balusters"]["count"] == 9 and g["balusters"]["width"] * 12 == pytest.approx(1.5)
+    assert g["balusters"]["spacing"] * 12 == pytest.approx(5.0) and g["balusters"]["first"] * 12 == pytest.approx(3.5)
+    rec = described("4_loft")
+    assert r.recording_problems(rec) == []
+    lg = rec["interior"]["guards"][0]
+    lg["members"].pop()                                               # a baluster missed: a wider gap
+    assert any("lg guard_opening_sphere = 3.5, expected" not in p and "lg guard_opening_sphere" in p
+               for p in r.recording_problems(rec))
+    rec = described("4_loft")
+    del rec["interior"]["guards"]
+    assert any("guard not read" in p for p in r.recording_problems(rec))
 
 
 def test_house_3s_tall_riser_is_drawn_at_the_head_and_comes_back_not_measured():
@@ -146,8 +225,8 @@ def test_an_in_scope_measure_not_measured_fails():
 def test_a_measure_out_of_scope_given_a_value_fails():
     rec = described("1_ranch_compliant")
     for o in rec["interior"]["openings"]:
-        o["ground_outside"] = -8 / 12                                # a ground nobody drew: grade-floor is not in step 3
-    assert any("w1 opening_at_grade = True: not in step 3" in p for p in r.recording_problems(rec))
+        o["ground_outside"] = -8 / 12                                # a ground nobody drew: grade-floor is in no step yet
+    assert any("w1 opening_at_grade = True: not in step 5" in p for p in r.recording_problems(rec))
     rec = described("5_basement_window_well")
     we1 = next(o for o in rec["interior"]["openings"] if o["id"] == "host-we1")
     we1.update(ground_outside=0, area_well={"floor_elevation": -66 / 12, "width": 40 / 12, "projection": 3})
@@ -157,10 +236,13 @@ def test_a_measure_out_of_scope_given_a_value_fails():
 def test_a_kind_of_a_later_step_must_not_be_read():
     rec = described("1_ranch_compliant")
     rec["interior"]["stairs"] = []                                   # "none" said by a reader that can't know it
-    assert any("stair read (0 parts): not in step 3" in p for p in r.recording_problems(rec))
+    assert any("stair read (0 parts): not in step 5" in p for p in r.recording_problems(rec))
     rec = described("2_two_story_small_window")
-    rec["interior"]["guards"] = []
-    assert any("guard read (0 parts): not in step 4" in p for p in r.recording_problems(rec))
+    rec["interior"]["guards"] = []                                   # no guard found is never "none" either
+    assert any("guard read (0 parts): not in step 5" in p for p in r.recording_problems(rec))
+    rec = described("3_tall_riser")
+    rec["interior"]["doors"] = []
+    assert any("egress_door read (0 parts): not in step 4" in p for p in r.recording_problems(rec))
 
 
 def test_a_kind_in_scope_not_read_fails_and_says_why():
@@ -185,10 +267,10 @@ def test_a_part_missing_extra_or_in_the_wrong_room_fails():
 
 def test_the_recording_must_say_what_it_is():
     rec = described("1_ranch_compliant")
-    assert r.recording_problems({**rec, "house": "4_loft"})[0].startswith("test/4_loft: not a house of any step")
-    assert any("recorded for step 4, not step 3" in p for p in r.recording_problems({**rec, "step": 4}))
-    two = described("2_two_story_small_window")                     # a step-3 recording of a house now in step 4
-    assert any("recorded for step 3, not step 4" in p for p in r.recording_problems({**two, "step": 3}))
+    assert r.recording_problems({**rec, "house": "7_nowhere"})[0].startswith("test/7_nowhere: not a house of any step")
+    assert any("recorded for step 3, not step 5" in p for p in r.recording_problems({**rec, "step": 3}))
+    two = described("2_two_story_small_window")                     # a step-4 recording of a house now in step 5
+    assert any("recorded for step 4, not step 5" in p for p in r.recording_problems({**two, "step": 4}))
     assert any("says how it was recorded" in p for p in r.recording_problems({**rec, "recorded": {"by": "x"}}))
     assert any("no id map" in p for p in r.recording_problems({**rec, "ids": None}))
     twice = copy.deepcopy(rec)
@@ -198,7 +280,8 @@ def test_the_recording_must_say_what_it_is():
 
 def test_a_host_with_any_recording_has_every_house_of_the_step():
     assert r.coverage_problems({"revit": {"1_ranch_compliant": {}}}) == [
-        "revit: no recording for 2_two_story_small_window, 3_tall_riser, 5_basement_window_well"]
+        "revit: no recording for 2_two_story_small_window, 3_tall_riser, 4_loft, 5_basement_window_well, "
+        "6_door_stated_clear"]
     assert r.coverage_problems({"revit": {h: {} for h in r.STEP_HOUSES}}) == []
 
 
@@ -220,7 +303,9 @@ def test_the_drawing_is_the_houses_own_data():
     w1 = next(w for w in d["windows"] if w["id"] == "w1")
     assert (w1["width"], w1["height"], w1["sill"]) == (26 / 12, 3.0, 2.5)                    # its frame, from house.yaml
     assert w1["clear"]["width"] * 12 == pytest.approx(24.5) and w1["clear"]["offset"] == 0   # the measuring code's
-    assert d["not_drawn"] == ["doors"] and d["step"] == 3 and d["stairs"] == []
+    assert d["not_drawn"] == [] and d["step"] == 5 and d["stairs"] == [] and d["guards"] == []
+    assert [x["id"] for x in d["doors"]] == ["d1", "d2"] and {x["room"] for x in d["doors"]} == {"living"}
+    assert d["doors"][1]["clear"] is None                            # the back door: not drawn, so nothing worked out
     assert level["wall_height"] == pytest.approx(8 + 1 / 12)                                # up to the ceilings' top
     basement = r.drawing("5_basement_window_well")["levels"][0]
     assert basement["elevation"] + basement["wall_height"] < 0                              # never up past the level over it
