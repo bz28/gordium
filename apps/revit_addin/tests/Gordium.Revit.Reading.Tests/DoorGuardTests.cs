@@ -284,6 +284,36 @@ public sealed class DoorGuardTests
         Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("lg guard_height not measured"));
     }
 
+    [Fact]
+    public void Two_staggered_rows_of_balusters_at_different_depths_leave_the_openings_not_measured()
+    {
+        // each row 4.5 in clear between its balusters, the second row 3 in deeper and offset by half: seen in one
+        // plane they overlap to 1.5 in gaps, yet a 4 in sphere can weave between them
+        var house = FakeHouse.Draw(Loft);
+        var g = house.Drawing["guards"]![0]!;
+        double z = g["level"]!.GetValue<double>(), x0 = g["start"]![0]!.GetValue<double>(), y0 = g["start"]![1]!.GetValue<double>();
+        const double inch = 1.0 / 12;
+        List<SurfaceRecord> Box(double u0, double u1, double n0, double n1, double z0, double z1)
+        {
+            var c = new List<(double X, double Y, double Z)>();
+            foreach (var zz in new[] { z0, z1 })
+                foreach (var (u, n) in new[] { (u0, n0), (u1, n0), (u1, n1), (u0, n1) })
+                    c.Add((x0 + u, y0 + n, zz));
+            return house.Hexahedron(c);
+        }
+        var solids = new List<IReadOnlyList<SurfaceRecord>> { Box(0, 4, -0.75 * inch, 0.75 * inch, z + 2 * inch, z + 3.5 * inch) };
+        for (var u = 0.0; u + 1.5 * inch <= 4; u += 6 * inch)
+            solids.Add(Box(u, u + 1.5 * inch, -0.75 * inch, 0.75 * inch, z + 3.5 * inch, z + 34.5 * inch));
+        for (var u = 3 * inch; u + 1.5 * inch <= 4; u += 6 * inch)
+            solids.Add(Box(u, u + 1.5 * inch, 2.25 * inch, 3.75 * inch, z + 3.5 * inch, z + 34.5 * inch));
+        house.SetRailing("railing-lg", r => r with { Parts = [r.Parts[0] with { Solids = solids }, r.Parts[1]] });
+        var read = Read(house);
+        Assert.Null(Guard(read)["members"]);
+        Assert.Contains("aren't in one plane", Note(read, "railing-lg", "members"));
+        Assert.Contains("at 2.25 in across the guard", Note(read, "railing-lg", "members"));
+        Assert.Contains(InteriorTests.Problems(house, read), p => p.Contains("lg guard_opening_sphere not measured"));
+    }
+
     // ---- a stair's handrails, and railings on a stair --------------------------------------------------------
 
     [Fact]

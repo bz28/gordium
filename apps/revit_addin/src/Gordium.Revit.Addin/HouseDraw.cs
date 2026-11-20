@@ -170,7 +170,10 @@ internal static class HouseDraw
             }
             ids[id] = fi.UniqueId;
         }
-        // step 5: each door in its room's outside wall at the level, placed as the windows are (the walls committed
+        // step 5: each door in an outside wall with no window (house.yaml gives a door no room or place, and where it
+        // stands changes none of its measures: the reader sends its marks and the maker's clear opening, nothing drawn;
+        // so house 2's front door is upstairs, in the only level the house draws: Ben, 2026-11-20, fine), in its room's
+        // outside wall at the level, placed as the windows are (the walls committed
         // first, regenerated right after it is placed), marked Escape opening No and Exit door as the house says, its
         // type's Operation and maker's clear opening set
         foreach (var d in doors)

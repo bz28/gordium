@@ -184,12 +184,48 @@ public static class GuardReader
                     members = members.Select(m => m with { U0 = Snap(m.U0), U1 = Snap(m.U1) }).ToList();
                 }
             }
+            // the openings are measured in one plane (the guard's elevation): only when every infill member (each under
+            // the guard's top: the balusters, posts, panels and lower rails) has its face toward the walking side in one
+            // plane within 1/16 in. Members at different depths projected together could block a sphere that weaves
+            // between them (two staggered rows, each with 4.5 in gaps, overlap to about 2 in in elevation)
+            if (members is not null && walk is not null && top is { } t && Depths(members, t) is { } depthWhy)
+            {
+                Out("members", depthWhy);
+                members = null;
+            }
             if (members is not null)
                 guard["members"] = new JsonArray(members.Select(m => (JsonNode)new JsonObject
                 {
                     ["left"] = m.U0, ["right"] = m.U1, ["bottom"] = m.Z0, ["top"] = m.Z1,
                 }).ToArray());
             return guard;
+        }
+
+        // which side of the path the walking surface was found on: +1 (n above 0), -1, or 0 for both
+        private int _walkSide;
+
+        /// <summary>Why the infill members' faces toward the walking side aren't in one plane within 1/16 in (null when
+        /// they are), naming the members and their depths. With the floor on both sides, both faces must be.</summary>
+        private string? Depths(List<(double U0, double U1, double N0, double N1, double Z0, double Z1)> members, double top)
+        {
+            var infill = members.Where(m => m.Z1 < top - Sixteenth).ToList();
+            if (infill.Count < 2)
+                return null;
+            foreach (var (side, face) in new (int, Func<(double U0, double U1, double N0, double N1, double Z0, double Z1), double>)[]
+                     { (1, m => m.N1), (-1, m => m.N0) })
+            {
+                if (_walkSide != 0 && _walkSide != side)
+                    continue;
+                var faces = infill.Select(face).ToList();
+                if (faces.Max() - faces.Min() <= Sixteenth)
+                    continue;
+                return "its infill members' faces toward the walking side aren't in one plane (" + string.Join("; ", infill
+                           .GroupBy(m => Math.Round(face(m) * 12 * 16) / 16).OrderBy(g => g.Key)
+                           .Select(g => $"{g.Count()} at {g.Key.ToString("0.###", CultureInfo.InvariantCulture)} in across the guard, " +
+                                        $"from {ClearStamp.Inches(g.Min(m => m.U0))} along it")) +
+                       "): a sphere could pass between members at different depths, so its openings aren't read in one plane";
+            }
+            return null;
         }
 
         /// <summary>A millionth of a foot: the most a member's end is put on the face it ends against.</summary>
@@ -355,8 +391,11 @@ public static class GuardReader
                       string.Join(", ", tops.Select(x => ClearStamp.Inches(x.Z - claimed) + " from its base, " + x.By).Distinct()) + ")";
                 return null;
             }
-            var covered = tops.Any(x => strips.Any(s => PlanGeometry.OverlapArea(s, x.Loops[0]) is { } a && a >= area * (1 - 1e-9)
-                                                        && x.Loops.Skip(1).All(h => PlanGeometry.OverlapArea(s, h) is { } ha && ha <= area * 1e-9)));
+            bool Covers(List<P2> s) => tops.Any(x => PlanGeometry.OverlapArea(s, x.Loops[0]) is { } a && a >= area * (1 - 1e-9)
+                                                     && x.Loops.Skip(1).All(h => PlanGeometry.OverlapArea(s, h) is { } ha && ha <= area * 1e-9));
+            bool above = Covers(strips[0]), below = Covers(strips[1]);
+            var covered = above || below;
+            _walkSide = above && below ? 0 : above ? 1 : -1;
             if (!covered)
             {
                 why = "no one floor top runs its whole length beside it";
