@@ -309,8 +309,9 @@ change).
 **Makers' clear openings, filled as drafts** (`MakerClearOpenings.cs`, data in
 [`data/maker_clear_openings.json`](data/maker_clear_openings.json), embedded in the library; design note, section
 5a). Mark for egress and Check my project fill an empty window type's `Clear width`, `Clear height` and `Clear
-source` from its maker's published formula when its Manufacturer and Model match an entry and its Width and Height
-are surely the maker's frame size; never `Clear confirmed`, so nothing is sent until that type is confirmed. The
+source` from its maker's published formula when its Manufacturer and its shared Window Type (or a call-number Model)
+match an entry, its Width and Height are surely the maker's frame size, and the family's own Vent Area, when it has
+one, agrees; never `Clear confirmed`, so nothing is sent until that type is confirmed. The
 data is not a rule and not measuring code: a hand-curated list of makers' figures, each entry pinned by
 `MakerClearOpeningsTests` to rows of the maker's own table (first entry: Marvin Ultimate Casement, CN 2864 and three
 more rows).

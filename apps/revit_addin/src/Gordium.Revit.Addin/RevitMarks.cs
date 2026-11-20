@@ -61,7 +61,21 @@ internal static class RevitMarks
             TypeModel = type?.get_Parameter(BuiltInParameter.ALL_MODEL_MODEL)?.AsString(),
             TypeWidth = size.Width,
             TypeHeight = size.Height,
+            TypeShared = type is null ? new Dictionary<Guid, MarkValue>() : Shared(type),
         };
+    }
+
+    /// <summary>The makers' shared type parameters the clear-opening data names, by GUID only (a firm's parameter of the
+    /// same name is never read as the maker's), as Revit gives them (an Area in sq ft).</summary>
+    private static Dictionary<Guid, MarkValue> Shared(Element type)
+    {
+        var values = new Dictionary<Guid, MarkValue>();
+        foreach (var g in MakerClearOpenings.SharedParameters)
+            if (type.get_Parameter(g) is { } p)
+                values[g] = new MarkValue(p.HasValue, null,
+                                          p.StorageType == StorageType.String ? p.AsString() : null,
+                                          p.StorageType == StorageType.Double ? p.AsDouble() : null);
+        return values;
     }
 
     /// <summary>Writes each window type's draft clear opening (<see cref="ClearPrefills"/>: only types whose three

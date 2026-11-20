@@ -9,8 +9,17 @@
       "product_line": "Ultimate Casement (UCA), full frame",
       "operation": "Casement",
       "match": {
-        "manufacturer": ["Marvin", "Marvin Windows and Doors", "Marvin Windows & Doors"],
-        "model": ["Ultimate Casement", "Marvin Ultimate Casement", "UCA"]
+        "manufacturer": ["Marvin Windows and Doors", "Marvin", "Marvin Windows & Doors"],
+        "window_type": ["Ultimate Casement"],
+        "window_type_parameter": "eafa4376-701d-423a-906c-e9e76dd752ca",
+        "model_call_number": "^UCA(\\d{2})(\\d{2})$",
+        "how": "the type's Manufacturer equals one of manufacturer AND (its shared Window Type parameter, read by GUID, equals one of window_type, OR its Model is a call number UCAwwhh). Whenever the Model is such a call number, its width (ww) and height (hh) call numbers must be the standard table's for the type's frame Width and Height, else no pre-fill: Marvin's mulled families (Window-Casement-Marvin-Ultimate-4W_1H, MultiW_1H, 1W_2H...) carry the same Window Type and a single unit's Model, so a Width that isn't that unit's frame is never filled. Window Type matches exactly (\"Ultimate Casement - Tripane\" doesn't).",
+        "source": "marvin_revit"
+      },
+      "cross_check": {
+        "vent_area_parameter": "0d21ad7d-0db0-489a-a1fa-10d502d650b7",
+        "tolerance_ft2": 0.02,
+        "how": "when the type has Marvin's shared Vent Area (an Area, read by GUID), the formula's clear width x height must agree with it within 0.02 sq ft, else no pre-fill (UCA3648: formula 28 7/8 x 42 in = 8.42 sq ft, Vent Area 8.43 SF). The family's Egress Window Yes/No is never read: a maker's flag is never a pass."
       },
       "inputs": {
         "width": "the type's Width is the frame outside measurement (Marvin's \"Frame OSM\" in the formula, the \"Frame Size\" column of Standard Unit Measurements: Casement): accepted only when it equals one of that column's widths",
@@ -74,6 +83,17 @@
       ],
       "checked_rows_note": "Marvin's table prints each clear width and height 1/64 in more than its own formula gives from the frame size (28 - 7 1/8 = 20 7/8 in, the table 20 57/64 in): the formula is the smaller, so the pre-fill is never larger than Marvin's table. The tests hold the formula to within 1/64 in of every row, and never above it, and the printed area (to 0.01 sq ft) between the formula's area and the printed width times height (CN 2060: 4.828 and 4.835, printed 4.83; CN 2864: 8.408 and 8.417, printed 8.42).",
       "sources": {
+        "marvin_revit": {
+          "title": "Marvin Ultimate Casement Revit families (marvin-ultimate-casement-revit.zip; never committed here)",
+          "url": "https://www.marvin.com/f/1019562/x/b07c991491/marvin-ultimate-casement-revit.zip",
+          "page": "https://www.marvin.com/support/technical-specifications/ultimate-casement-window",
+          "accessed": "2026-11-20",
+          "catalog_file": "Casement/Window-Casement-Marvin-Ultimate.txt (the type catalog of Window-Casement-Marvin-Ultimate.rfa)",
+          "catalog_header_quote": ",Manufacturer##other##,Window Type##other##,Nominal Width##length##inches,Nominal Height##length##inches,Egress Window##other##,Design Pressure##other##,Description##other##,Model##other##",
+          "catalog_quote": "UCA3648,Marvin Windows and Doors,Ultimate Casement,36,48,Yes,DP50,3648 CSMT,UCA3648",
+          "family_quote": "Window Type\" type=\"shared\" id=\"eafa4376-701d-423a-906c-e9e76dd752ca\" typeOfParameter=\"Text\"; Vent Area\" type=\"shared\" id=\"0d21ad7d-0db0-489a-a1fa-10d502d650b7\" typeOfParameter=\"Area\" units=\"SF\">8.43",
+          "sizes": "UCA3648: Width 3'-0\", Height 3'-11 1/8\" (the frame), Rough_Width 3'-1\", Rough_Height 3'-11 5/8\", Nominal_Width 3'-0\", Nominal_Height 4'-0\""
+        },
         "marvin_adm": {
           "title": "Marvin Architectural Detail Manual: Ultimate Casement, Awning and Picture (UCA UCANF, 14131101)",
           "url": "https://marvin.com/f/1019562/x/eaabd5bb0d/adm-ultimate-casement-awning-picture.pdf",

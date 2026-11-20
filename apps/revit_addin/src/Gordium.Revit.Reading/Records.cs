@@ -131,6 +131,11 @@ public sealed record MarkedElement
 
     /// <inheritdoc cref="TypeWidth"/>
     public double? TypeHeight { get; init; }
+
+    /// <summary>The makers' shared type parameters the clear-opening data names (<see cref="MakerClearOpenings.SharedParameters"/>:
+    /// Marvin's Window Type and Vent Area), by GUID (<c>Element.get_Parameter(Guid)</c> on the type, never by name);
+    /// an Area as Revit gives it (internal: sq ft).</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> TypeShared { get; init; } = new Dictionary<Guid, MarkValue>();
 }
 
 /// <summary>Whether a Room is a room on the plan (Revit's own words for the others).</summary>

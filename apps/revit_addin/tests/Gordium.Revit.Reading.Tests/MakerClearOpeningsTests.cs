@@ -137,11 +137,17 @@ public sealed class MakerClearOpeningsTests
     [Fact]
     public void A_type_matches_on_its_manufacturer_and_model_exactly_ignoring_case()
     {
-        Assert.Same(Marvin, MakerClearOpenings.Match(" marvin ", "ULTIMATE CASEMENT"));
-        Assert.Null(MakerClearOpenings.Match("Marvin", "Ultimate Casement Narrow Frame"));
-        Assert.Null(MakerClearOpenings.Match("Marvin Inc", "Ultimate Casement"));
-        Assert.Null(MakerClearOpenings.Match(null, "Ultimate Casement"));
-        Assert.Null(MakerClearOpenings.Match("Marvin", null));
+        // Marvin's own family: Manufacturer "Marvin Windows and Doors", shared Window Type "Ultimate Casement", Model the
+        // call number ("UCA3648"); either the Window Type or a call-number Model matches, with the Manufacturer
+        Assert.Same(Marvin, MakerClearOpenings.Match("Marvin Windows and Doors", "Ultimate Casement", "UCA3648"));
+        Assert.Same(Marvin, MakerClearOpenings.Match(" marvin windows and doors ", "ULTIMATE CASEMENT", null));
+        Assert.Same(Marvin, MakerClearOpenings.Match("Marvin Windows and Doors", null, "UCA3648"));
+        Assert.Null(MakerClearOpenings.Match("Marvin Windows and Doors", "Ultimate Casement - Tripane", "3648 CSMT"));
+        Assert.Null(MakerClearOpenings.Match("Marvin Windows and Doors", "Ultimate Casement Push Out", "UCAPO3648"));
+        Assert.Null(MakerClearOpenings.Match("Marvin Windows and Doors", null, "Ultimate Casement"));   // a Model naming the line: no longer
+        Assert.Null(MakerClearOpenings.Match("Marvin Inc", "Ultimate Casement", "UCA3648"));
+        Assert.Null(MakerClearOpenings.Match(null, "Ultimate Casement", "UCA3648"));
+        Assert.Null(MakerClearOpenings.Match("Marvin Windows and Doors", null, null));
     }
 
     public static TheoryData<double?, double?, string> NoFill() => new()
@@ -166,15 +172,65 @@ public sealed class MakerClearOpeningsTests
 
     // ---- the pre-fill: a draft, never over the architect's values, never confirmed ----------------------------
 
-    private static MarkedElement Window(string id, string? maker = "Marvin", string? model = "Ultimate Casement",
-                                        double w = 28, double h = 63.125, Dictionary<Guid, MarkValue>? type = null) => new()
+    // Marvin's family's own shared parameters (Window-Casement-Marvin-Ultimate.rfa's PartAtom, 2026-11-20)
+    private static readonly Guid WindowType = new("eafa4376-701d-423a-906c-e9e76dd752ca");
+    private static readonly Guid VentArea = new("0d21ad7d-0db0-489a-a1fa-10d502d650b7");
+
+    /// <summary>A window type as Marvin's family gives it (default: CN 2864, frame 28 x 63 1/8 in, no Vent Area).</summary>
+    private static MarkedElement Window(string id, string? maker = "Marvin Windows and Doors", string? model = "UCA2864",
+                                        double w = 28, double h = 63.125, Dictionary<Guid, MarkValue>? type = null,
+                                        string? windowType = "Ultimate Casement", double? vent = null) => new()
     {
         UniqueId = id, BuiltInCategory = Marks.Windows, Name = "CN 2864", Family = "Marvin Ultimate Casement",
         TypeUniqueId = "t-" + id, TypeManufacturer = maker, TypeModel = model, TypeWidth = w / 12, TypeHeight = h / 12,
         Type = type ?? new Dictionary<Guid, MarkValue>(),
+        TypeShared = new Dictionary<Guid, MarkValue>
+        {
+            [WindowType] = new(windowType is not null, Text: windowType),
+            [VentArea] = new(vent is not null, Number: vent),
+        },
     };
 
     private static RevitModel Model(params MarkedElement[] e) => new() { Document = "house.rvt", Marked = e };
+
+    [Fact]
+    public void Marvins_uca3648_as_its_family_gives_it_is_filled_and_its_vent_area_agrees()
+    {
+        // the catalog row "UCA3648,Marvin Windows and Doors,Ultimate Casement,36,48,Yes,DP50,3648 CSMT,UCA3648"; Width
+        // 3'-0", Height 3'-11 1/8" (the frame); Vent Area 8.43 SF. Its "Egress Window" Yes is never read.
+        Assert.Equal(["eafa4376-701d-423a-906c-e9e76dd752ca", "0d21ad7d-0db0-489a-a1fa-10d502d650b7"],
+                     MakerClearOpenings.SharedParameters.Select(g => g.ToString()));
+        var e = Window("a", model: "UCA3648", w: 36, h: 47.125, vent: 8.43) with { Name = "UCA3648" };
+        var p = Assert.Single(ClearPrefills.Plan(Model(e)));
+        Assert.Equal(PrefillState.Fill, p.State);
+        Assert.Equal(28.875, p.ClearWidth!.Value * 12, 9);
+        Assert.Equal(42.0, p.ClearHeight!.Value * 12, 9);
+        Assert.Equal(8.42, Math.Round(p.ClearWidth.Value * p.ClearHeight.Value, 2));
+        // by its Model alone (no Window Type), too
+        Assert.Equal(PrefillState.Fill, Assert.Single(ClearPrefills.Plan(Model(e with
+        {
+            TypeShared = new Dictionary<Guid, MarkValue> { [VentArea] = new(true, Number: 8.43) },
+        }))).State);
+    }
+
+    [Fact]
+    public void A_vent_area_that_disagrees_with_the_formula_stops_the_fill_and_says_why()
+    {
+        var p = Assert.Single(ClearPrefills.Plan(Model(Window("a", model: "UCA3648", w: 36, h: 47.125, vent: 8.46))));
+        Assert.Equal(PrefillState.NotFilled, p.State);
+        Assert.Contains("disagrees with the family's own Vent Area (8.46 sq ft)", p.Line);
+        Assert.Equal(PrefillState.Fill, Assert.Single(ClearPrefills.Plan(Model(Window("a", model: "UCA3648", w: 36, h: 47.125, vent: 8.44)))).State);
+    }
+
+    [Fact]
+    public void A_call_number_model_that_isnt_the_types_frame_is_never_filled()
+    {
+        // Marvin's mulled families carry the same Window Type and one unit's Model: a 2-wide of CN 16 units, 32 in wide
+        var p = Assert.Single(ClearPrefills.Plan(Model(Window("a", model: "UCA1664", w: 32, h: 63.125))));
+        Assert.Equal(PrefillState.NotFilled, p.State);
+        Assert.Contains("is a call number whose frame isn't its Width and Height", p.Line);
+        Assert.Equal(PrefillState.NotFilled, Assert.Single(ClearPrefills.Plan(Model(Window("a", model: "UCA9964")))).State);
+    }
 
     [Fact]
     public void An_empty_matching_type_is_filled_as_a_draft_naming_the_maker_page_and_formula()
@@ -262,7 +318,8 @@ public sealed class MakerClearOpeningsTests
             house.SetType("we2", mark, null);
         house.Marked[m] = house.Marked[m] with
         {
-            TypeManufacturer = "Marvin", TypeModel = "Ultimate Casement", TypeWidth = 28.0 / 12, TypeHeight = 63.125 / 12,
+            TypeManufacturer = "Marvin Windows and Doors", TypeModel = "UCA2864", TypeWidth = 28.0 / 12, TypeHeight = 63.125 / 12,
+            TypeShared = new Dictionary<Guid, MarkValue> { [WindowType] = new(true, Text: "Ultimate Casement") },
         };
         house.Openings[o] = house.Openings[o] with { TypeWidth = 28.0 / 12, TypeHeight = 63.125 / 12 };
         var p = ClearPrefills.Plan(house.Model()).Single(x => x.TypeId == house.Marked[m].TypeUniqueId);

@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Reflection;
 using System.Text.Json.Nodes;
+using System.Text.RegularExpressions;
 
 namespace Gordium.Revit.Reading;
 
@@ -12,11 +13,18 @@ namespace Gordium.Revit.Reading;
 /// <summary>One maker's product line: which types it matches, its formula and where it holds.</summary>
 public sealed record MakerFormula(
     string Id, string Maker, string ProductLine, string Operation, IReadOnlyList<string> Manufacturers,
-    IReadOnlyList<string> Models, IReadOnlyList<double> FrameWidths, IReadOnlyList<double> FrameHeights,
+    IReadOnlyList<string> WindowTypes, Guid WindowTypeParameter, string ModelCallNumber, Guid VentAreaParameter,
+    double VentAreaTolerance, IReadOnlyList<string> WidthCns, IReadOnlyList<string> HeightCns,
+    IReadOnlyList<double> FrameWidths, IReadOnlyList<double> FrameHeights,
     IReadOnlyList<double> RoughWidths, IReadOnlyList<double> RoughHeights, IReadOnlyList<double> MasonryWidths,
     IReadOnlyList<double> MasonryHeights, double WidthMinus, double HeightMinus, double FrameWidthMin,
     double FrameWidthMax, double FrameHeightMax, string Caveats, string Url, string FormulaPage, string FormulaQuote)
 {
+    /// <summary>The Model's width and height call numbers ("UCA3648": 36, 48), or null when it isn't a call number.</summary>
+    public (string Width, string Height)? CallNumber(string? model) =>
+        model is not null && Regex.Match(model.Trim(), ModelCallNumber, RegexOptions.CultureInvariant) is { Success: true } m
+            ? (m.Groups[1].Value, m.Groups[2].Value) : null;
+
     /// <summary>The clear width and height, in inches, from a frame size in inches (the maker's formula only).</summary>
     public (double Width, double Height) Clear(double frameWidth, double frameHeight) =>
         (frameWidth - WidthMinus, frameHeight - HeightMinus);
@@ -66,9 +74,14 @@ public static class MakerClearOpenings
             var valid = Obj(e, "valid");
             var source = Obj(Obj(e, "sources"), Str(formula, "source"));
             List<double> Col(string axis, string what) => Arr(sizes, axis).Select(x => Num((JsonObject)x!, what)).ToList();
+            List<string> Cns(string axis) => Arr(sizes, axis).Select(x => Str((JsonObject)x!, "cn")).ToList();
+            var check = Obj(e, "cross_check");
+            _ = Regex.Match("", Str(match, "model_call_number"));                // a pattern that doesn't parse is refused here
             entries.Add(new(
                 Str(e, "id"), Str(e, "maker"), Str(e, "product_line"), Str(e, "operation"), Strs(match, "manufacturer"),
-                Strs(match, "model"), Col("width", "frame"), Col("height", "frame"), Col("width", "rough"),
+                Strs(match, "window_type"), Guid.Parse(Str(match, "window_type_parameter")), Str(match, "model_call_number"),
+                Guid.Parse(Str(check, "vent_area_parameter")), Num(check, "tolerance_ft2"), Cns("width"), Cns("height"),
+                Col("width", "frame"), Col("height", "frame"), Col("width", "rough"),
                 Col("height", "rough"), Col("width", "masonry"), Col("height", "masonry"),
                 Num(Obj(formula, "clear_width"), "frame_width_minus"), Num(Obj(formula, "clear_height"), "frame_height_minus"),
                 Num(valid, "frame_width_min"), Num(valid, "frame_width_max"), Num(valid, "frame_height_max"),
@@ -97,9 +110,14 @@ public static class MakerClearOpenings
     private static bool Same(string? a, IEnumerable<string> any) =>
         a is not null && any.Any(x => string.Equals(x.Trim(), a.Trim(), StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>The entry whose Manufacturer and Model both equal the type's (trimmed, case-insensitive), or null.</summary>
-    public static MakerFormula? Match(string? manufacturer, string? model) =>
-        Entries.FirstOrDefault(e => Same(manufacturer, e.Manufacturers) && Same(model, e.Models));
+    /// <summary>The entry whose Manufacturer equals the type's (trimmed, case-insensitive) and whose Window Type equals
+    /// the type's shared Window Type, or whose call-number pattern the type's Model is; null otherwise.</summary>
+    public static MakerFormula? Match(string? manufacturer, string? windowType, string? model) =>
+        Entries.FirstOrDefault(e => Same(manufacturer, e.Manufacturers) && (Same(windowType, e.WindowTypes) || e.CallNumber(model) is not null));
+
+    /// <summary>Every maker's shared type parameter the Revit layer reads by GUID (a Window Type, a Vent Area).</summary>
+    public static IReadOnlyList<Guid> SharedParameters =>
+        Entries.SelectMany(e => new[] { e.WindowTypeParameter, e.VentAreaParameter }).Distinct().ToList();
 
     /// <summary>The known maker whose Manufacturer equals the type's, or null.</summary>
     public static KnownMaker? MakerOf(string? manufacturer) => Makers.FirstOrDefault(m => Same(manufacturer, m.Manufacturers));
@@ -163,20 +181,23 @@ public static class ClearPrefills
         if (Marks.Text(MarkReading.Value(e, Marks.ClearConfirmed)) is not null)
             return null;                                     // confirmed by the architect: Gordium proposes nothing
         var label = Label(e);
-        var entry = MakerClearOpenings.Match(e.TypeManufacturer, e.TypeModel);
+        var windowType = Shared(e, MakerClearOpenings.Entries.Select(x => x.WindowTypeParameter)) is { } wt ? Marks.Text(wt) : null;
+        var entry = MakerClearOpenings.Match(e.TypeManufacturer, windowType, e.TypeModel);
         if (entry is null)
         {
             if (MakerClearOpenings.MakerOf(e.TypeManufacturer) is not { } maker)
                 return null;
             return new(e.TypeUniqueId!, label, PrefillState.KnownMakerOnly,
-                $"{label}: made by {maker.Maker}, but its Model ({Quote(e.TypeModel)}) isn't a product line Gordium has a " +
+                $"{label}: made by {maker.Maker}, but its Window Type ({Quote(windowType)}) and Model ({Quote(e.TypeModel)}) " +
+                "aren't a product line Gordium has a " +
                 $"formula for, so its clear opening isn't filled: take it from {maker.Maker}'s clear-opening tables (" +
                 string.Join("; ", maker.Pdfs.Select(p => $"{p.Title}: {p.Url}")) + ") into " + Marks.ClearWidth.Name + ", " +
                 Marks.ClearHeight.Name + " and " + Marks.ClearSource.Name + ".");
         }
         double? width = Marks.Length(MarkReading.Value(e, Marks.ClearWidth)), height = Marks.Length(MarkReading.Value(e, Marks.ClearHeight));
         var source = Marks.Text(MarkReading.Value(e, Marks.ClearSource));
-        var (fill, why) = Compute(entry, e.TypeWidth, e.TypeHeight);
+        var vent = Shared(e, [entry.VentAreaParameter]) is { HasValue: true, Number: { } a } && double.IsFinite(a) ? a : (double?)null;
+        var (fill, why) = Compute(entry, e.TypeWidth, e.TypeHeight, e.TypeModel, vent);
         if (width is null && height is null && source is null)
         {
             if (fill is not { } f)
@@ -206,9 +227,16 @@ public static class ClearPrefills
         $"{entry.Caveats}). It is a draft until you confirm it: no clear opening is sent before. {Marks.ClearOffset.Name} is " +
         "yours to set (the maker's formula doesn't give it).";
 
+    /// <summary>The type's maker's shared parameter (the first of these GUIDs it has), or null.</summary>
+    private static MarkValue? Shared(MarkedElement e, IEnumerable<Guid> guids) =>
+        guids.Select(g => e.TypeShared.TryGetValue(g, out var v) ? v : null).FirstOrDefault(v => v is not null);
+
     /// <summary>The draft for a type size (feet), or why there is none. The size is accepted only when it is the
-    /// maker's standard frame size on both axes (a rough or masonry opening, or a custom size, is ambiguous: none).</summary>
-    public static ((double Width, double Height, string Source)? Fill, string? Why) Compute(MakerFormula entry, double? widthFeet, double? heightFeet)
+    /// maker's standard frame size on both axes (a rough or masonry opening, or a custom size, is ambiguous: none);
+    /// a Model that is a call number must be that frame's; a maker's Vent Area (sq ft) must agree with the formula's
+    /// area.</summary>
+    public static ((double Width, double Height, string Source)? Fill, string? Why) Compute(
+        MakerFormula entry, double? widthFeet, double? heightFeet, string? model = null, double? ventArea = null)
     {
         if (widthFeet is not { } wf || heightFeet is not { } hf)
             return (null, "its type has no Width and Height of its own (a family sized per window)");
@@ -229,7 +257,20 @@ public static class ClearPrefills
             return (null, $"its frame ({MakerClearOpenings.In(w)} by {MakerClearOpenings.In(h)}) is outside where Gordium uses the " +
                           $"formula ({MakerClearOpenings.In(entry.FrameWidthMin)} to {MakerClearOpenings.In(entry.FrameWidthMax)} " +
                           $"wide, up to {MakerClearOpenings.In(entry.FrameHeightMax)} high)");
+        if (entry.CallNumber(model) is { } cn)
+        {
+            var wi = entry.WidthCns.ToList().IndexOf(cn.Width);
+            var hi = entry.HeightCns.ToList().IndexOf(cn.Height);
+            if (wi < 0 || hi < 0 || Math.Abs(entry.FrameWidths[wi] - w) > MakerClearOpenings.SameInches
+                || Math.Abs(entry.FrameHeights[hi] - h) > MakerClearOpenings.SameInches)
+                return (null, $"its Model ({model!.Trim()}) is a call number whose frame isn't its Width and Height " +
+                              $"({MakerClearOpenings.In(w)} by {MakerClearOpenings.In(h)}): a mulled unit, or a resized type");
+        }
         var (cw, ch) = entry.Clear(w, h);
+        if (ventArea is { } vent && Math.Abs(cw * ch / 144 - vent) > entry.VentAreaTolerance + 1e-9)
+            return (null, $"the formula's clear area ({(cw * ch / 144).ToString("0.00", CultureInfo.InvariantCulture)} sq ft) " +
+                          $"disagrees with the family's own Vent Area ({vent.ToString("0.00", CultureInfo.InvariantCulture)} sq ft) " +
+                          $"by more than {entry.VentAreaTolerance.ToString("0.00", CultureInfo.InvariantCulture)} sq ft");
         var source = $"{SourcePrefix}{entry.Maker} {entry.ProductLine}, {entry.FormulaPage} ({entry.Url}): " +
                      $"clear width = frame width - {MakerClearOpenings.In(entry.WidthMinus)}, clear height = frame height - " +
                      $"{MakerClearOpenings.In(entry.HeightMinus)}; frame {MakerClearOpenings.In(w)} by {MakerClearOpenings.In(h)} (the type's Width " +

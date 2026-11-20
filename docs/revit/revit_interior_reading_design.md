@@ -440,8 +440,10 @@ type's section the add-in shows.
 **Makers' formulas, filled as a draft** (2026-11-20). Most real families carry only frame or rough sizes, so the
 add-in also keeps a short, hand-curated file of makers' own clear-opening formulas
 (`apps/revit_addin/data/maker_clear_openings.json`, embedded in `Gordium.Revit.Reading`; `MakerClearOpenings.cs`).
-Each entry names the maker and product line, the Revit type values it matches (the type's Manufacturer and Model,
-exactly, ignoring case), the formula from the frame size, where it holds, the PDF (URL, fingerprint, page, exact
+Each entry names the maker and product line, the Revit type values it matches (for Marvin, read from Marvin's own
+Revit family, 2026-11-20: the type's Manufacturer "Marvin Windows and Doors", and either its shared Window Type
+parameter "Ultimate Casement", read by GUID, or a Model that is a call number such as "UCA3648"; exactly, ignoring
+case), the formula from the frame size, where it holds, the PDF (URL, fingerprint, page, exact
 quote, date opened) and the hardware caveats, and is pinned by a test that reproduces rows of the maker's own table.
 First entry: **Marvin Ultimate Casement** (full frame), from Marvin's Architectural Detail Manual: "Clear Opening
 Width = Frame OSM Width - 7 1/8"" for frames 20 in and wider, "Clear Opening Height = Frame OSM Height - 5 1/8""
@@ -455,7 +457,14 @@ it works, in **Mark for egress** and **Check my project**:
   rough and masonry sizes never coincide (a test checks it), so a type's Width and Height that are both a standard
   frame size can only be the frame; a rough or masonry opening, or a custom size, is not filled, and the list says why.
   Marvin's frames are filled only 20 to 36 in wide and up to 71 1/8 in high (larger frames may get custodial sash
-  limiters).
+  limiters). Marvin's family carries the frame as Width and Height (UCA3648: 3'-0" by 3'-11 1/8", with Rough_Width
+  3'-1" beside it).
+- **Two cross-checks from the family.** A Model that is a call number must be the frame's (UCA3648 is 36 by
+  47 1/8 in), else nothing is filled: Marvin's mulled families (4W_1H, MultiW_1H, 1W_2H...) carry the same Window
+  Type and one unit's Model, so a mulled Width is never read as one sash's frame. And when the type has Marvin's
+  shared Vent Area (by GUID), the formula's area must agree within 0.02 sq ft, else nothing is filled and the list
+  says why (UCA3648: 28 7/8 by 42 in = 8.42 sq ft by the formula, Vent Area 8.43). The family's "Egress Window"
+  Yes/No is never read.
 - **A draft, never a confirmation.** Only a window type whose `Clear width`, `Clear height` and `Clear source` are
   all empty is filled (never over a value typed by hand, never half of one; never a type with a `Clear
   confirmed` stamp), and `Clear confirmed` is never written: the reader sends no clear opening until the type's own
@@ -642,11 +651,11 @@ makes the last tread read deeper than typed, so no nosings are sent: to settle w
 supports beside the treads.
 
 For the makers' formulas (section 5a), to check on a real Marvin Ultimate Casement family (Marvin's own Revit
-download) at the next run: what its type's Manufacturer and Model say (the entry matches "Marvin" with "Ultimate
-Casement", "Marvin Ultimate Casement" or "UCA": a family that says otherwise is not filled, never guessed), and
-whether its Width and Height are the frame (a CN 2864 type 28 by 63 1/8 in: filled 20 7/8 by 58 in) or the rough
-opening (29 by 63 5/8 in: not filled, its line says so); that the three marks are written once and a second Mark for
-egress writes nothing; that `Clear confirmed` stays empty.
+download, Window-Casement-Marvin-Ultimate.rfa, loaded into a project) at the next run: that the type's
+Manufacturer, Model and shared Window Type and Vent Area read through the Revit API as its PartAtom and type catalog
+give them (UCA3648: "Marvin Windows and Doors", "UCA3648", "Ultimate Casement", 8.43 sq ft); that UCA3648 is filled
+28 7/8 by 42 in and UCA2864 20 7/8 by 58 in, and a mulled family's type (4W_1H) is not; that the three marks are
+written once and a second Mark for egress writes nothing; that `Clear confirmed` stays empty.
 
 For doors, handrails and guards (step 5), to check on houses 1, 2, 4, 5 and 6 drawn by the add-in: that a door made
 from Door.rft gives its placed width along `HandOrientation` and its height as its type's; that `Railing.Create` on a
@@ -668,7 +677,12 @@ members named here (`Room.GetBoundarySegments`, `SpatialElementBoundaryOptions`,
 belongs to was checked in this note's first review round (the stair's typed riser and tread are on `Stairs`, not
 `StairsRun`); how each behaves on real models is checked in the trial before code relies on it (section 9).
 
-Makers' clear openings (section 5a), each PDF downloaded and read 2026-11-20: Marvin, Architectural Detail Manual,
+Makers' clear openings (section 5a), each downloaded and read 2026-11-20: Marvin's Ultimate Casement Revit families,
+https://www.marvin.com/f/1019562/x/b07c991491/marvin-ultimate-casement-revit.zip (from
+https://www.marvin.com/support/technical-specifications/ultimate-casement-window; never committed here):
+Window-Casement-Marvin-Ultimate.txt's row "UCA3648,Marvin Windows and Doors,Ultimate Casement,36,48,Yes,DP50,3648
+CSMT,UCA3648", and the .rfa's PartAtom (Window Type, shared, eafa4376-701d-423a-906c-e9e76dd752ca; Vent Area, shared,
+0d21ad7d-0db0-489a-a1fa-10d502d650b7, 8.43 SF; Width 3' - 0", Height 3' - 11 1/8", Rough Width 3' - 1"). Marvin, Architectural Detail Manual,
 Ultimate Casement, Awning and Picture (UCA UCANF, 14131101),
 https://marvin.com/f/1019562/x/eaabd5bb0d/adm-ultimate-casement-awning-picture.pdf (SHA-256 19e504b6...b411), pages
 UCA UCANF-1, -2, -6, -25 and -29; Andersen, A-Series double-hung size guide (2023-24 A-Series Product Guide),
