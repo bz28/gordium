@@ -32,6 +32,7 @@ public static class Marks
     public const string Windows = "OST_Windows";
     public const string Doors = "OST_Doors";
     public const string Railings = "OST_StairsRailing";
+    public const string ProjectInformation = "OST_ProjectInformation";
 
     /// <summary>The group the parameters are written under in the shared-parameter file Gordium makes.</summary>
     public const string Group = "Gordium";
@@ -86,11 +87,19 @@ public static class Marks
         [Railings], "stairs[].handrails",
         "Yes when this railing type's top rail is also the stair's handrail (34 to 38 in up).");
 
+    /// <summary>The project-wide tick that the stairs found are all the house's stairs (design note, sections 2 and 3:
+    /// a Yes/No on Project Information; unset is not stated). Without Yes, no stair is read: a stair missed would go
+    /// unchecked.</summary>
+    public static readonly MarkDefinition AllStairs = new(
+        "Gordium: These are all the stairs", new("90205a68-1eaf-4ca2-a350-0cb24012986c"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "stairs (sent only when Yes)",
+        "Yes once every stair of the house is drawn as a Revit stair (not a generic model or an in-place family). Blank or No: no stair is read for egress.");
+
     /// <summary>Every mark, in the design note's order.</summary>
     public static readonly IReadOnlyList<MarkDefinition> All =
     [
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
-        ClearConfirmed, TopRailIsHandrail,
+        ClearConfirmed, TopRailIsHandrail, AllStairs,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

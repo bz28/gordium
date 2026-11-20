@@ -73,6 +73,10 @@ public static class MarkReading
                                        Operations.ForDoor(Marks.Text(Get(e, Marks.Operation))))).ToList();
 
     internal static MarkValue? Value(MarkedElement e, MarkDefinition m) => Get(e, m);
+
+    /// <summary>The architect's "these are all the stairs" tick on Project Information: null when not set.</summary>
+    public static bool? AllStairs(RevitModel model) =>
+        Marks.YesNo(model.ProjectMarks.TryGetValue(Marks.AllStairs.Guid, out var v) ? v : null);
 }
 
 /// <summary>How one mark stands on one element in the marking list.</summary>
@@ -113,6 +117,9 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     public const string NotAllMarked = "Some marks are not set or can't be read";
     public const string AllMarked = "Every room, window and door is marked";
 
+    /// <summary>What could hide a stair (step 4), listed after the room blockers: while any is there no stair is read.</summary>
+    public IReadOnlyList<string> StairBlockers { get; init; } = [];
+
     /// <summary>The list's headline: every room, window and door marked only when there are rooms, nothing is
     /// unset, and nothing stops a mark or a room being read.</summary>
     public string Headline =>
@@ -144,7 +151,18 @@ public static class MarkingList
         var others = InteriorReader.OtherRoomBlockers(model);
         blockers.AddRange(others);
         var summary = Summary(rows, placement, others.Count);
-        return new(problems, blockers, summary, rows);
+        // step 4: the project-wide tick, always shown; and, with the model's inside read, what could hide a stair
+        var stairBlockers = StairReader.Blockers(model);
+        summary.Add(MarkReading.AllStairs(model) switch
+        {
+            true => $"{Marks.AllStairs.Name}: Yes (on Project Information).",
+            var tick => $"{Marks.AllStairs.Name}: {(tick is false ? "No" : "not set")} on Project Information, so no stair is " +
+                        "read for egress until it says Yes.",
+        });
+        if (stairBlockers.Count > 0)
+            summary.Add((stairBlockers.Count == 1 ? "1 element, workset or link" : $"{stairBlockers.Count} elements, worksets or links") +
+                        " listed above could hide a stair, so no stair is read for egress until each is resolved.");
+        return new(problems, blockers, summary, rows) { StairBlockers = stairBlockers };
     }
 
     private static string RoomLabel(MarkedElement e) =>
@@ -257,7 +275,7 @@ public static class MarkingList
         var sb = new StringBuilder();
         foreach (var p in list.SetupProblems)
             sb.Append("Can't add ").Append(p).Append('\n');
-        foreach (var b in list.RoomBlockers)
+        foreach (var b in list.RoomBlockers.Concat(list.StairBlockers))
             sb.Append(b).Append('\n');
         foreach (var s in list.Summary)
             sb.Append(s).Append('\n');

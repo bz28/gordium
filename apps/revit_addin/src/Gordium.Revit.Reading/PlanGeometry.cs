@@ -204,6 +204,59 @@ public static class PlanGeometry
         return pieces;
     }
 
+    /// <summary>A convex polygon (anticlockwise) cut to the side of the line a→b on its left (the line's own points
+    /// kept), or its right when <paramref name="left"/> is false.</summary>
+    public static List<P2> Half(IReadOnlyList<P2> poly, P2 a, P2 b, bool left)
+    {
+        var output = new List<P2>();
+        double Side(P2 p) => (left ? 1 : -1) * P2.Cross(b - a, p - a);
+        for (var j = 0; j < poly.Count; j++)
+        {
+            var p = poly[j];
+            var q = poly[(j + 1) % poly.Count];
+            double dp = Side(p), dq = Side(q);
+            if (dp >= 0)
+                output.Add(p);
+            if ((dp >= 0) != (dq >= 0))
+            {
+                var t = dp / (dp - dq);
+                output.Add(new P2(p.X + t * (q.X - p.X), p.Y + t * (q.Y - p.Y)));
+            }
+        }
+        return output;
+    }
+
+    /// <summary>Convex pieces (anticlockwise) minus a simple polygon (a hole: a stairwell opening in the floor over a
+    /// flight), as convex pieces with an area: exact (each triangle of the hole taken away in turn, every piece left
+    /// cut by the triangle's edges into the parts outside it). Null when the hole isn't a simple polygon.</summary>
+    public static List<List<P2>>? Subtract(IReadOnlyList<List<P2>> pieces, IReadOnlyList<P2> hole)
+    {
+        var tris = Triangulate(hole);
+        if (tris is null)
+            return null;
+        var s = Math.Max(Scale(hole), pieces.Count == 0 ? 1.0 : pieces.Max(p => Scale(p)));
+        var tiny = 1e-10 * s * s;
+        var left = pieces.Select(p => p.ToList()).ToList();
+        foreach (var tri in tris)
+        {
+            var next = new List<List<P2>>();
+            foreach (var piece in left)
+            {
+                var rest = piece;
+                for (var i = 0; i < 3 && rest.Count >= 3; i++)
+                {
+                    // the part of what is left outside this edge is outside the triangle; the rest goes on to the next edge
+                    var outside = Half(rest, tri[i], tri[(i + 1) % 3], left: false);
+                    if (outside.Count >= 3 && SignedArea(outside) > tiny)
+                        next.Add(outside);
+                    rest = Half(rest, tri[i], tri[(i + 1) % 3], left: true);
+                }
+            }
+            left = next;
+        }
+        return left;
+    }
+
     /// <summary>The area two simple polygons share; null when either isn't one.</summary>
     public static double? OverlapArea(IReadOnlyList<P2> a, IReadOnlyList<P2> b) =>
         Overlap(a, b) is { } pieces ? pieces.Sum(Area) : null;

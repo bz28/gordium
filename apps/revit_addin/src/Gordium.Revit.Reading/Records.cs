@@ -62,6 +62,10 @@ public sealed record RevitModel
     /// without clashing (<see cref="MarkSetup"/>).</summary>
     public IReadOnlyList<BoundParameter> Bindings { get; init; } = [];
 
+    /// <summary>Gordium's marks on Project Information (<c>Document.ProjectInformation</c>), by GUID: the project-wide
+    /// ticks ("these are all the stairs").</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> ProjectMarks { get; init; } = new Dictionary<Guid, MarkValue>();
+
     /// <summary>The house's inside beyond the marks (rooms' geometry, windows' placement, enclosed areas, links), for the
     /// interior reader (<see cref="InteriorReader"/>); null when the Revit layer didn't read it (the marking list alone).</summary>
     public InteriorRecords? Interior { get; init; }

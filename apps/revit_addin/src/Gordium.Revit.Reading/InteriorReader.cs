@@ -19,7 +19,11 @@ public sealed record InteriorNote(string Part, string Field, string Why);
 /// the clear opening was checked against (shared coordinates, feet): the trial's record that the check can be made.</param>
 public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<string> RoomsNotRead,
                                         IReadOnlyList<string> OpeningsNotRead, IReadOnlyList<InteriorNote> Notes,
-                                        JsonObject Evidence);
+                                        JsonObject Evidence)
+{
+    /// <summary>Why <c>stairs</c> was left out (empty when it was sent; step 4).</summary>
+    public IReadOnlyList<string> StairsNotRead { get; init; } = [];
+}
 
 /// <summary>
 /// The interior reader, section 7 step 3 of docs/revit/revit_interior_reading_design.md: the rooms and the windows and
@@ -29,7 +33,8 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
 /// an unloaded link leaves <c>rooms</c> out); a part found is never dropped (a value that can't be read exactly is left
 /// out, with its reason in <see cref="InteriorReadResult.Notes"/>); a value is sent only when what is drawn agrees
 /// with it (a room's floor elevation against the slab under it, a window's sill line against the opening it cuts).
-/// Stairs, doors, guards and what the house has none of are later steps: left out (not read).
+/// The stairs (step 4) are <see cref="StairReader"/>'s. Doors, guards and what the house has none of are later steps:
+/// left out (not read).
 /// </summary>
 public static class InteriorReader
 {
@@ -59,6 +64,10 @@ public static class InteriorReader
         "OST_FlexDuctCurves", "OST_DuctTerminal", "OST_PipeCurves", "OST_PipeFitting", "OST_PipeAccessory",
         "OST_FlexPipeCurves", "OST_CableTray", "OST_CableTrayFitting", "OST_Conduit", "OST_ConduitFitting",
         "OST_MechanicalEquipment", "OST_ElectricalEquipment",
+        // a stair's own parts (step 4: another run or a landing over a flight is its overhead) and a railing's
+        "OST_StairsRuns", "OST_StairsLandings", "OST_StairsSupports", "OST_StairsStringerCarriage", "OST_RailingTopRail",
+        "OST_RailingHandRail", "OST_RailingSupport", "OST_RailingTermination", "OST_StairsRailingBaluster",
+        "OST_StairsRailingRail",
     };
 
     public static InteriorReadResult Read(RevitModel model)
@@ -106,7 +115,22 @@ public static class InteriorReader
             openingsNotRead = ["No windows or doors are drawn: no escape opening is read (never read as a house with none)"];
         if (openingsNotRead.Count == 0)
             interior["openings"] = openings;
-        return new(interior, roomsNotRead, openingsNotRead, notes, evidence);
+
+        // step 4: the stairs, one flight per run, only on the architect's tick and with nothing that could be a stair
+        // the reader doesn't walk; nothing found is never "none" (that is the has-none tick's, a later step)
+        var stairsNotRead = StairReader.NotRead(model);
+        var stairEvidence = new JsonObject();
+        if (stairsNotRead.Count == 0)
+        {
+            var flights = StairReader.Flights(model, notes, stairEvidence);
+            if (flights.Count == 0)
+                stairsNotRead = ["No stairs are drawn: no stair is read for egress (never read as a house with none)"];
+            else
+                interior["stairs"] = flights;
+        }
+        if (stairEvidence.Count > 0)
+            evidence["stairs"] = stairEvidence;
+        return new(interior, roomsNotRead, openingsNotRead, notes, evidence) { StairsNotRead = stairsNotRead };
     }
 
     // ---- what stops a kind being read ---------------------------------------------------------------------------
