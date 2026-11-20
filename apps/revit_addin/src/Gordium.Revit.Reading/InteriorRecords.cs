@@ -113,7 +113,8 @@ public sealed record BoundarySegmentRecord(Xyz Start, Xyz End, bool IsLine, stri
 /// <param name="Host">A family instance's host (<c>FamilyInstance.Host</c>), by <c>UniqueId</c>, or null.</param>
 /// <param name="Faces">Its solids' faces (<c>get_Geometry</c>, Fine, a family's instance geometry included), or null
 /// when not asked (<see cref="RoomRecord.Inside"/>).</param>
-/// <param name="GeometryFailed"><c>get_Geometry</c> threw, or gave something other than solids, meshes or curves.</param>
+/// <param name="GeometryFailed"><c>get_Geometry</c> threw, gave something other than solids, meshes or curves, or held
+/// a face Revit gives no edges or triangles for.</param>
 /// <param name="Box">Its box (<c>get_BoundingBox(null)</c>), internal, where asked (a flight's surroundings).</param>
 /// <param name="PhaseDemolished"><c>Element.DemolishedPhaseId</c>, where asked.</param>
 /// <param name="DesignOption"><c>Element.DesignOption</c>'s id, where asked.</param>
@@ -208,7 +209,7 @@ public sealed record RunRecord
     /// <summary>The run's own solids' faces (<c>get_Geometry</c>, Fine); null when it couldn't be read.</summary>
     public IReadOnlyList<SurfaceRecord>? Faces { get; init; }
 
-    /// <summary>Its geometry held a mesh, or threw.</summary>
+    /// <summary>Its geometry held a mesh or a face Revit gives no edges or triangles for, or threw.</summary>
     public bool GeometryFailed { get; init; }
 
     /// <summary>Every model element whose box meets the run's box widened 2 ft in plan, from 2 ft under its base up

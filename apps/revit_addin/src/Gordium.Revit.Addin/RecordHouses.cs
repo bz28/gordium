@@ -171,6 +171,50 @@ public sealed class ReadInteriorCommand : IExternalCommand
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
         try
         {
+            var (shown, _) = Read(doc, log);
+            TaskDialog.Show("Gordium: read inside", shown + $"\n\nLogged to {Trial.LogPath()}");
+            return Result.Succeeded;
+        }
+        catch (Exception e)
+        {
+            TaskDialog.Show("Gordium: read inside", $"Failed: {e.GetType().Name}\n{e.Message}");
+            message = e.Message;
+            return Result.Failed;
+        }
+    }
+
+    /// <summary>A real model read by request file while Revit is idle, no clicks (read_inside_request.json:
+    /// <c>{"model": "&lt;path&gt;.rvt"}</c>): opened, read as Read inside reads it, logged, closed unsaved.</summary>
+    internal static string RequestPath => Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "read_inside_request.json");
+
+    internal static void RunRequest(Autodesk.Revit.ApplicationServices.Application app, string requestFile)
+    {
+        var path = System.Text.Json.Nodes.JsonNode.Parse(File.ReadAllText(requestFile, System.Text.Encoding.UTF8))!["model"]!.GetValue<string>();
+        var doc = app.OpenDocumentFile(path);
+        try
+        {
+            var log = new Dictionary<string, object?> { ["document"] = doc.Title, ["file"] = path };
+            try
+            {
+                Read(doc, log);
+            }
+            catch (Exception)
+            {
+                // logged by Read
+            }
+        }
+        finally
+        {
+            doc.Close(false);
+        }
+    }
+
+    /// <summary>Reads the open project's inside, logs everything (an error with where it happened), and gives the
+    /// dialog's words.</summary>
+    private static (string Shown, InteriorReadResult Read) Read(Document doc, Dictionary<string, object?> log)
+    {
+        try
+        {
             var sw = Stopwatch.StartNew();
             var model = RevitInterior.Model(doc);
             var read = InteriorReader.Read(model);
@@ -191,17 +235,15 @@ public sealed class ReadInteriorCommand : IExternalCommand
             var doors = read.Interior["doors"] is JsonArray d ? $"{d.Count} doors read" : "Doors not read: " + string.Join("; ", read.DoorsNotRead.Take(5));
             var guards = read.Interior["guards"] is JsonArray g ? $"{g.Count} guards read" : "Guards not read: " + string.Join("; ", read.GuardsNotRead.Take(5));
             var notes = string.Join("\n", read.Notes.Take(20).Select(n => $"- {n.Field}: {n.Why}"));
-            TaskDialog.Show("Gordium: read inside", $"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n\n{read.Notes.Count} values left out" +
-                            (notes.Length > 0 ? ":\n" + notes : "") + $"\n\nLogged to {Trial.LogPath()}");
-            return Result.Succeeded;
+            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n\n{read.Notes.Count} values left out" +
+                    (notes.Length > 0 ? ":\n" + notes : ""), read);
         }
         catch (Exception e)
         {
             log["error"] = $"{e.GetType().Name}: {e.Message}";
+            log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
             Trial.Log("read_interior", log);
-            TaskDialog.Show("Gordium: read inside", $"Failed: {e.GetType().Name}\n{e.Message}");
-            message = e.Message;
-            return Result.Failed;
+            throw;
         }
     }
 }
