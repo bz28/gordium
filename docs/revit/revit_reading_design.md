@@ -339,7 +339,8 @@ never say a row differently.
   one, the state, the count chips (one compact line per law), then straight away the groups; what wasn't read and
   a folded *Details* (phase, options, street line, files) after the rows.
 - **Never a stale pass.** Revit's `DocumentChanged` on the project checked, for any change but the check's own
-  transactions (adding the marks, keeping the street edge: `ResultRows.ChangesTheCheck`), greys everything
+  committed transactions (adding the marks, keeping the street edge), and for every undo or redo whatever its
+  names (the event's `Operation`: `ResultRows.ChangesTheCheck`), greys everything
   (`ResultRows.Stale`: no green in the state, chips, groups, lines or rows) and says "The model changed since this
   check (14:32): click Check again". `DocumentClosing` of it takes the rows down.
 - **Header and counts.** "Gordium: Check my project", when it was checked and which project, and *Check again*.
