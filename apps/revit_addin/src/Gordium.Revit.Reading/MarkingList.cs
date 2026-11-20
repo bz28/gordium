@@ -77,6 +77,10 @@ public static class MarkReading
     /// <summary>The architect's "these are all the stairs" tick on Project Information: null when not set.</summary>
     public static bool? AllStairs(RevitModel model) =>
         Marks.YesNo(model.ProjectMarks.TryGetValue(Marks.AllStairs.Guid, out var v) ? v : null);
+
+    /// <summary>The architect's "these are all the guards and handrails" tick on Project Information: null when not set.</summary>
+    public static bool? AllGuards(RevitModel model) =>
+        Marks.YesNo(model.ProjectMarks.TryGetValue(Marks.AllGuards.Guid, out var v) ? v : null);
 }
 
 /// <summary>How one mark stands on one element in the marking list.</summary>
@@ -159,9 +163,15 @@ public static class MarkingList
             var tick => $"{Marks.AllStairs.Name}: {(tick is false ? "No" : "not set")} on Project Information, so no stair is " +
                         "read for egress until it says Yes.",
         });
+        summary.Add(MarkReading.AllGuards(model) switch
+        {
+            true => $"{Marks.AllGuards.Name}: Yes (on Project Information).",
+            var tick => $"{Marks.AllGuards.Name}: {(tick is false ? "No" : "not set")} on Project Information, so no guard " +
+                        "or handrail is read for egress until it says Yes.",
+        });
         if (stairBlockers.Count > 0)
             summary.Add((stairBlockers.Count == 1 ? "1 element, workset or link" : $"{stairBlockers.Count} elements, worksets or links") +
-                        " listed above could hide a stair, so no stair is read for egress until each is resolved.");
+                        " listed above could hide a stair, so no stair (and no guard) is read for egress until each is resolved.");
         return new(problems, blockers, summary, rows) { StairBlockers = stairBlockers };
     }
 

@@ -35,6 +35,7 @@ internal sealed class FakeHouse
 
     public List<StairRecord> Stairs { get; } = [];
     public List<StairCandidate> StairCandidates { get; } = [];
+    public List<RailingRecord>? Railings { get; set; } = [];
     public Dictionary<Guid, MarkValue> ProjectMarks { get; } = new() { [Marks.AllStairs.Guid] = new(true, 1) };   // ticked
     public int CoordinationModels { get; set; }
 
@@ -49,9 +50,230 @@ internal sealed class FakeHouse
         Interior = new InteriorRecords
         {
             Rooms = Rooms, Openings = Openings, EnclosedAreas = Areas, Links = Links, Stairs = Stairs,
-            StairCandidates = StairCandidates, CoordinationModels = CoordinationModels,
+            StairCandidates = StairCandidates, CoordinationModels = CoordinationModels, Railings = Railings,
         },
     };
+
+    /// <summary>The drawing's rail width and a handrail's top over the line of nosings (recordings.py's RAIL, HANDRAIL_TOP).</summary>
+    public double Rail => D(Drawing["rail"]);
+
+    public int RailingIndex(string uid) => Railings!.FindIndex(r => r.UniqueId == uid);
+
+    /// <summary>Changes the railing <paramref name="uid"/>, and the same parts wherever a run lists them nearby.</summary>
+    public void SetRailing(string uid, Func<RailingRecord, RailingRecord> change)
+    {
+        var i = RailingIndex(uid);
+        Railings![i] = change(Railings[i]);
+        var r = Railings[i];
+        for (var k = 0; k < Stairs.Count; k++)
+        {
+            var run = Stairs[k].Runs[0];
+            if (run.Near is null)
+                continue;
+            var near = run.Near.Where(e => r.Parts.All(p => p.UniqueId != e.UniqueId)).ToList();
+            if (near.Count == run.Near.Count)
+                continue;
+            near.AddRange(r.Parts.Select(PartNear));
+            Stairs[k] = Stairs[k] with { Runs = [run with { Near = near }] };
+        }
+    }
+
+    /// <summary>A railing part as the Revit layer lists it near a run: its category, its solids' faces, its box.</summary>
+    public static NearbyElement PartNear(RailingPart p) => Boxed(new NearbyElement(
+        p.UniqueId, p.Kind switch { RailingPartKind.TopRail => "OST_RailingTopRail", RailingPartKind.Handrail => "OST_RailingHandRail", _ => "OST_StairsRailing" },
+        p.Kind.ToString(), Faces: p.Solids?.SelectMany(s => s).ToList(), GeometryFailed: p.GeometryFailed));
+
+    /// <summary>A solid from its 8 corners (the 4 of its bottom, then the 4 of its top above them, each anticlockwise
+    /// seen from above): 6 flat faces, each normal facing out (Newell's, turned away from the middle).</summary>
+    public List<SurfaceRecord> Hexahedron(IReadOnlyList<(double X, double Y, double Z)> c)
+    {
+        int[][] quads = [[0, 3, 2, 1], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]];
+        var mid = (X: c.Average(p => p.X), Y: c.Average(p => p.Y), Z: c.Average(p => p.Z));
+        var faces = new List<SurfaceRecord>();
+        foreach (var q in quads)
+        {
+            var pts = q.Select(i => c[i]).ToList();
+            double nx = 0, ny = 0, nz = 0;
+            for (var i = 0; i < 4; i++)
+            {
+                var (x1, y1, z1) = pts[i];
+                var (x2, y2, z2) = pts[(i + 1) % 4];
+                nx += (y1 - y2) * (z1 + z2);
+                ny += (z1 - z2) * (x1 + x2);
+                nz += (x1 - x2) * (y1 + y2);
+            }
+            var len = Math.Sqrt(nx * nx + ny * ny + nz * nz);
+            var (fx, fy, fz) = (pts.Average(p => p.X) - mid.X, pts.Average(p => p.Y) - mid.Y, pts.Average(p => p.Z) - mid.Z);
+            var sign = nx * fx + ny * fy + nz * fz < 0 ? -1 : 1;
+            faces.Add(Face(new(sign * nx / len, sign * ny / len, sign * nz / len), pts));
+        }
+        return faces;
+    }
+
+    /// <summary>A point's place in a stair's frame: (s up its path from the first riser, a across it to the left).</summary>
+    public static (double S, double A) StairFrame(JsonObject st, double x, double y)
+    {
+        var (x0, y0) = P(st["path"]![0]!);
+        var (x1, y1) = P(st["path"]![1]!);
+        var len = Math.Sqrt((x1 - x0) * (x1 - x0) + (y1 - y0) * (y1 - y0));
+        double ux = (x1 - x0) / len, uy = (y1 - y0) / len;
+        return ((x - x0) * ux + (y - y0) * uy, -(x - x0) * uy + (y - y0) * ux);
+    }
+
+    /// <summary>Each handrail of each stair as the railing HouseDraw puts on it: hosted by the stair, with no balusters,
+    /// its top rail (RAIL square, its top HANDRAIL_TOP over the line of nosings, along its path from the first riser to
+    /// the last) the handrail, its type marked so.</summary>
+    private void DrawHandrails()
+    {
+        foreach (var st in Drawing["stairs"]!.AsArray().Select(n => n!.AsObject()))
+        {
+            var id = st["id"]!.GetValue<string>();
+            double b = D(st["base"]), r = D(st["riser"]), t = D(st["tread"]), top = D(Drawing["handrail_top"]);
+            var n = st["risers"]!.GetValue<int>();
+            double Nosing(double s) => b + r + s * r / t;
+            var k = StairIndex(id);
+            foreach (var h in st["handrails"]!.AsArray().Select(x => x!.AsObject()))
+            {
+                var side = h["side"]!.GetValue<string>();
+                var (px, py) = P(h["path"]![0]!);
+                var a = StairFrame(st, px, py).A;
+                double s0 = 0, s1 = (n - 1) * t, a0 = a - Rail / 2, a1 = a + Rail / 2;
+                var corners = new List<(double X, double Y, double Z)>();
+                foreach (var lift in new[] { top - Rail, top })
+                    foreach (var (s, aa) in new[] { (s0, a0), (s1, a0), (s1, a1), (s0, a1) })
+                    {
+                        var (x, y) = StairAt(st, s, aa);
+                        corners.Add((x, y, Nosing(s) + lift));
+                    }
+                var uid = $"railing-{id}-{side}";
+                var parts = new List<RailingPart> { new(uid, RailingPartKind.Railing, []), new($"toprail-{id}-{side}", RailingPartKind.TopRail, [Hexahedron(corners)]) };
+                Railings!.Add(new RailingRecord
+                {
+                    UniqueId = uid, Name = "Gordium test handrail", Host = "stair-" + id,
+                    Path = [new PathCurve(Fake.Place(px, py, b), Fake.Place(D(h["path"]![1]![0]), D(h["path"]![1]![1]), b), true)],
+                    BaseLevelElevation = Fake.Place(0, 0, b).Z, BaseOffset = 0,
+                    TypeMarks = new Dictionary<Guid, MarkValue> { [Marks.TopRailIsHandrail.Guid] = new(true, 1) },
+                    Parts = parts,
+                });
+                Stairs[k] = Stairs[k] with
+                {
+                    Railings = [.. Stairs[k].Railings, uid],
+                    Runs = [Stairs[k].Runs[0] with { Near = [.. Stairs[k].Runs[0].Near!, .. parts.Select(PartNear)] }],
+                };
+            }
+        }
+    }
+
+    /// <summary>Each level guard as HouseDraw draws it: a railing along the edge of a floor, its balusters and rails
+    /// boxes RAIL deep centred on its path, its top rail its own part, a wall at its start and a post (a short wall) at
+    /// its end.</summary>
+    private void DrawGuards()
+    {
+        foreach (var g in Drawing["guards"]!.AsArray().Select(n => n!.AsObject()))
+        {
+            var id = g["id"]!.GetValue<string>();
+            var uid = "railing-" + id;
+            Ids[id] = uid;
+            var z = D(g["level"]);
+            var (x0, y0) = P(g["start"]!);
+            var (x1, y1) = P(g["end"]!);
+            var len = D(g["length"]);
+            double ux = (x1 - x0) / len, uy = (y1 - y0) / len;
+            List<SurfaceRecord> Box(double u0, double u1, double z0, double z1)
+            {
+                var c = new List<(double X, double Y, double Z)>();
+                foreach (var zz in new[] { z0, z1 })
+                    foreach (var (u, n) in new[] { (u0, -Rail / 2), (u1, -Rail / 2), (u1, Rail / 2), (u0, Rail / 2) })
+                        c.Add((x0 + u * ux - n * uy, y0 + u * uy + n * ux, zz));
+                return Hexahedron(c);
+            }
+            var tr = g["top_rail"]!;
+            var railing = new List<IReadOnlyList<SurfaceRecord>>();
+            foreach (var rail in g["rails"]!.AsArray())
+                railing.Add(Box(0, len, z + D(rail!["bottom"]), z + D(rail["top"])));
+            var bal = g["balusters"]!;
+            for (var k = 0; k < bal["count"]!.GetValue<int>(); k++)
+            {
+                var left = D(bal["first"]) + k * D(bal["spacing"]);
+                railing.Add(Box(left, left + D(bal["width"]), z + D(bal["bottom"]), z + D(bal["top"])));
+            }
+            var parts = new List<RailingPart>
+            {
+                new(uid, RailingPartKind.Railing, railing),
+                new("toprail-" + id, RailingPartKind.TopRail, [Box(0, len, z + D(tr["bottom"]), z + D(tr["top"]))]),
+            };
+            var near = new List<NearbyElement>();
+            var floor = g["floor"]!.AsArray().Select(p => P(p!)).ToList();
+            near.Add(new("guardfloor-" + id, "OST_Floors", "Floor at the guard", Faces: Prism(floor, z - D(g["slab"]), z)));
+            foreach (var (w, k) in g["end_walls"]!.AsArray().Select((w, k) => (w!, k)))
+            {
+                var (ax, ay) = P(w["line"]![0]!);
+                var (bx, by) = P(w["line"]![1]!);
+                var half = D(w["thickness"]) / 2;
+                near.Add(new($"guardwall-{id}-{k}", "OST_Walls", "Guard end", Faces: Prism(Rect(ax - half, Math.Min(ay, by), ax + half, Math.Max(ay, by)), z, z + D(g["wall_top"]))));
+            }
+            near.AddRange(parts.Select(PartNear));
+            Railings!.Add(new RailingRecord
+            {
+                UniqueId = uid, Name = g["name"]!.GetValue<string>(),
+                Path = [new PathCurve(Fake.Place(x0, y0, z), Fake.Place(x1, y1, z), true)],
+                BaseLevelElevation = Fake.Place(0, 0, z).Z, BaseOffset = 0, Parts = parts, Near = near.Select(Boxed).ToList(),
+                TypeMarks = new Dictionary<Guid, MarkValue> { [Marks.TopRailIsHandrail.Guid] = new(true, 0) },
+            });
+        }
+    }
+
+    /// <summary>Each door as HouseDraw places it: hosted in its room's outside wall, at the level, with its marks (Escape
+    /// opening No, Exit door as the house says, its type's Operation), its leaf a solid of its family's size, and, where
+    /// the drawing has one, its type's maker's clear opening confirmed with a door's stamp.</summary>
+    private void DrawDoors(double t)
+    {
+        foreach (var d in Drawing["doors"]!.AsArray().Select(n => n!.AsObject()))
+        {
+            var id = d["id"]!.GetValue<string>();
+            var uid = Uid(id);
+            Ids[id] = uid;
+            var z = D(d["level"]);
+            var (cx, cy) = P(d["center"]!);
+            var (ox, oy) = P(d["outward"]!);
+            double width = D(d["width"]), height = D(d["height"]);
+            var word = Operations.Words.First(x => Operations.ForDoor(x) == d["operation"]!.GetValue<string>());
+            var type = new Dictionary<Guid, MarkValue> { [Marks.Operation.Guid] = new(true, Text: word) };
+            if (d["clear"] is JsonObject c)
+            {
+                type[Marks.ClearWidth.Guid] = new(true, Number: D(c["width"]));
+                type[Marks.ClearHeight.Guid] = new(true, Number: D(c["height"]));
+                type[Marks.ClearSource.Guid] = new(true, Text: c["source"]!.GetValue<string>());
+                type[Marks.ClearConfirmed.Guid] = new(true, Text: ClearStamp.Make(
+                    new ClearValues("type-" + id, width, height, word, D(c["width"]), D(c["height"]), null, c["source"]!.GetValue<string>(), Door: true),
+                    "Fake Architect", Confirmed));
+            }
+            Marked.Add(new MarkedElement
+            {
+                UniqueId = uid, BuiltInCategory = Marks.Doors, Name = $"{width * 12:0.##} x {height * 12:0.##}",
+                Number = d["name"]!.GetValue<string>(), Family = "Gordium test door", TypeUniqueId = "type-" + id, PhaseCreated = LastPhase,
+                Instance = new Dictionary<Guid, MarkValue>
+                {
+                    [Marks.EscapeOpening.Guid] = new(true, 0),
+                    [Marks.ExitDoor.Guid] = new(true, d["exit"]!.GetValue<bool>() ? 1 : 0),
+                },
+                Type = type,
+            });
+            Openings.Add(new OpeningRecord
+            {
+                UniqueId = uid, ToRoom = Uid(d["room"]!.GetValue<string>()), Host = DoorWall(d), HostIsWall = true,
+                LevelElevation = Fake.Place(0, 0, z).Z, SillHeight = 0, Location = Fake.Place(cx, cy, z),
+                Along = Fake.Place(-oy, ox, 0) - Fake.Place(0, 0, 0), TypeWidth = width, TypeHeight = height,
+                Placed = Prism(OpeningPlan(cx, cy, ox, oy, width / 2, t, 0.25, 0.75), z, z + height).SelectMany(f => f.Points).ToList(),
+            });
+        }
+    }
+
+    private static string DoorWall(JsonObject d)
+    {
+        var (ox, oy) = P(d["outward"]!);
+        return $"wall-{D(d["level"])}-" + (oy < 0 ? "ymin" : ox < 0 ? "xmin" : oy > 0 ? "ymax" : "xmax");
+    }
 
     /// <summary>The stair <paramref name="houseId"/>'s record and its one run's index there.</summary>
     public int StairIndex(string houseId) => Stairs.FindIndex(s => s.UniqueId == "stair-" + houseId);
@@ -146,7 +368,12 @@ internal sealed class FakeHouse
             {
                 var pts = piece.Select(p => (X: D(p![0]), Y: D(p[1]), Z: D(p[2]))).ToList();
                 var thin = D(Drawing["ceiling_thickness"]);
-                near.Add(new($"over-{id}-{k}", "OST_Ceilings", "Overhead", Faces: [Face(Down(pts), pts), Face(new(0, 0, 1), pts.Select(p => (p.X, p.Y, p.Z + thin)))]));
+                // its top faces up along the piece's own slope (house 4's roof rises 1 in 2), as Revit's extrusion's does
+                // and its sides are faces too (a quad piece: the whole extrusion, as HouseDraw's DirectShape has it)
+                var down = Down(pts);
+                near.Add(new($"over-{id}-{k}", "OST_Ceilings", "Overhead",
+                             Faces: pts.Count == 4 ? Hexahedron([.. pts, .. pts.Select(p => (p.X, p.Y, p.Z + thin))])
+                                 : [Face(down, pts), Face(new(-down.X, -down.Y, -down.Z), pts.Select(p => (p.X, p.Y, p.Z + thin)))]));
             }
             var (px0, py0) = P(st["path"]![0]!);
             var (px1, py1) = P(st["path"]![1]!);
@@ -332,6 +559,18 @@ internal sealed class FakeHouse
             });
         }
         DrawStairs();
+        DrawHandrails();
+        DrawGuards();
+        DrawDoors(t);
+        foreach (var d in Drawing["doors"]!.AsArray().Select(n => n!.AsObject()))
+        {
+            var i = Rooms.FindIndex(r => r.UniqueId == Uid(d["room"]!.GetValue<string>()));
+            Rooms[i] = Rooms[i] with { Over = [.. Rooms[i].Over!, new NearbyElement(Uid(d["id"]!.GetValue<string>()), "OST_Doors", "Gordium test door", Host: DoorWall(d))] };
+        }
+        // the architect's tick once every guard and handrail is drawn as a railing (as HouseDraw sets it)
+        var notDrawn = Drawing["not_drawn"]!.AsArray().Select(n => n!.GetValue<string>()).ToList();
+        if (!notDrawn.Contains("guards") && !notDrawn.Contains("handrails"))
+            ProjectMarks[Marks.AllGuards.Guid] = new(true, 1);
     }
 
     public static FakeHouse Draw(string name, Transform3? turn = null) => new(name, turn ?? Transform3.Identity);

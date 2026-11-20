@@ -16,9 +16,12 @@ namespace Gordium.Revit.Reading;
 /// <param name="Source">The <c>Gordium: Clear source</c>.</param>
 /// <param name="MappedName">A maker's family parameter the clear opening was copied from, or null.</param>
 /// <param name="MappedValue">That parameter's value.</param>
+/// <param name="Door">A door type's clear opening (step 5): the width and height R318.2 measures, with no offset (a
+/// door's clear opening has no bottom in the description); the stamp says it was made for a door, and a door is
+/// confirmed only by a door's stamp.</param>
 public sealed record ClearValues(string? Type, double? Width, double? Height, string? Operation, double? ClearWidth,
                                  double? ClearHeight, double? ClearOffset, string? Source, string? MappedName = null,
-                                 double? MappedValue = null);
+                                 double? MappedValue = null, bool Door = false);
 
 /// <summary>The confirmation stamp (<c>Gordium: Clear confirmed</c>): written by the add-in only when the architect
 /// confirms a window type's clear opening, it records exactly what was confirmed, who and when. The reader sends a
@@ -41,13 +44,14 @@ public static class ClearStamp
         var stamp = new JsonObject
         {
             ["stamp"] = Format,
+            ["for"] = v.Door ? "door" : "window",
             ["type"] = v.Type,
             ["width"] = v.Width,
             ["height"] = v.Height,
             ["operation"] = v.Operation,
             ["clear_width"] = v.ClearWidth,
             ["clear_height"] = v.ClearHeight,
-            ["clear_offset"] = v.ClearOffset,
+            ["clear_offset"] = v.Door ? null : v.ClearOffset,
             ["source"] = v.Source,
             ["mapped"] = v.MappedName is null ? null : new JsonObject { ["name"] = v.MappedName, ["value"] = v.MappedValue },
             ["by"] = by,
@@ -65,7 +69,7 @@ public static class ClearStamp
         if (string.IsNullOrWhiteSpace(v.Operation)) missing.Add(Marks.Operation.Name);
         if (v.ClearWidth is null) missing.Add(Marks.ClearWidth.Name);
         if (v.ClearHeight is null) missing.Add(Marks.ClearHeight.Name);
-        if (v.ClearOffset is null) missing.Add(Marks.ClearOffset.Name + " (blank is not 0)");
+        if (v.ClearOffset is null && !v.Door) missing.Add(Marks.ClearOffset.Name + " (blank is not 0)");
         if (string.IsNullOrWhiteSpace(v.Source)) missing.Add(Marks.ClearSource.Name);
         if (v.MappedName is not null && v.MappedValue is null) missing.Add($"the maker's parameter {v.MappedName}'s value");
         return missing.Count == 0 ? null : string.Join(", ", missing);
@@ -91,6 +95,10 @@ public static class ClearStamp
             return Marks.ClearConfirmed.Name + " isn't Gordium's stamp: confirm the clear opening again";
         if (Missing(now) is { } missing)
             return "its type has no " + missing;
+        // a door is confirmed only by a stamp made for a door (its width and height, no offset); a window by one made
+        // for a window (step 3's stamps say nothing: they were all made for windows)
+        if ((Text(s, "for") ?? (s["for"] is null ? "window" : null)) != (now.Door ? "door" : "window"))
+            return $"the stamp wasn't made for a {(now.Door ? "door" : "window")}: confirm this type's clear opening";
         if (Text(s, "type") != now.Type)
             return "the stamp was made on another type (a duplicated or copied type): confirm this type's clear opening";
         var differs = new List<string>();
@@ -105,7 +113,8 @@ public static class ClearStamp
             differs.Add(Marks.Operation.Name);
         Length("clear_width", now.ClearWidth, Marks.ClearWidth.Name);
         Length("clear_height", now.ClearHeight, Marks.ClearHeight.Name);
-        Length("clear_offset", now.ClearOffset, Marks.ClearOffset.Name);
+        if (!now.Door)
+            Length("clear_offset", now.ClearOffset, Marks.ClearOffset.Name);
         if (Text(s, "source") != now.Source)
             differs.Add(Marks.ClearSource.Name);
         if (s["mapped"] is JsonObject mapped)

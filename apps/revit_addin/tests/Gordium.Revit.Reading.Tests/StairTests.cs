@@ -33,8 +33,10 @@ public sealed class StairTests
         Assert.Equal(16, s1["nosings"]!.AsArray().Count);
         Assert.Equal(10.0, s1["nosings"]![15]![0]![2]!.GetValue<double>(), 9);              // the floor at the head
         Assert.NotEqual("open", s1["sides"]!["left"]!.ToString());
-        Assert.Null(s1["handrails"]);                                                       // railings: step 5
-        Assert.Contains("read with the guards", Note(read, "s1", "handrails"));
+        // step 5: its handrail, the top rail of the railing on its right side, its inner edge 3.5 in off the wall
+        var rail = s1["handrails"]!.AsArray().Single()!;
+        Assert.Equal("right", rail["side"]!.GetValue<string>());
+        Assert.Equal(3.5 / 12, rail["inner_edge"]![0]![1]!.GetValue<double>(), 9);
         Assert.Equal([], InteriorTests.Problems(house, read));
     }
 
@@ -305,7 +307,7 @@ public sealed class StairTests
         house.AddNear("s", new("rail", "OST_StairsRailing", "Guard", Faces: house.StairBox(st, 0, 9.75, -1.6, -1.5, -8, 0)));
         var read = Read(house);
         Assert.Null(Flight(read, "s")!["sides"]);
-        Assert.Contains("railings are read with the guards", Note(read, "s", "sides"));
+        Assert.Contains("where there is no wall: a guard along a stair isn't read yet", Note(read, "s", "sides"));
 
         house = FakeHouse.Draw(Three);
         house.AddNear("s", new("col", "OST_Columns", "Column", Faces: house.StairBox(st, 4, 4.5, -1.9, -1.6, -8.25, 0)));
@@ -449,7 +451,8 @@ public sealed class StairTests
                      (h => new("m", "OST_Mass", "Mass", Faces: h.StairBox(h.StairDrawing("s1"), 3, 4, -1, 1, 12, 13)), "a category Gordium doesn't read"),
                      (h => new("d", "OST_DuctCurves", "Duct", Faces: h.StairBox(h.StairDrawing("s1"), 3, 4, -1, 1, 12, 13)) { GeometryFailed = true }, "couldn't be read"),
                      (h => new("x", "OST_StructuralFraming", "Beam", Faces: h.StairBox(h.StairDrawing("s1"), 3, 4, -1, 1, 1, 13)), "crosses the flight"),
-                     (h => new("hr", "OST_RailingHandRail", "Handrail", Faces: h.StairBox(h.StairDrawing("s1"), 0, 12.5, -1.5, -1.2, 3.5, 3.6)), "a railing"),
+                     // a railing that isn't the stair's (its own handrail, beside the wall, is set aside)
+                     (h => new("hr", "OST_RailingHandRail", "Handrail", Faces: h.StairBox(h.StairDrawing("s1"), 0, 12.5, -0.2, 0.2, 3.5, 3.6)), "a railing"),
                  })
         {
             var house = FakeHouse.Draw(Two);

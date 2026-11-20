@@ -23,6 +23,12 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
 {
     /// <summary>Why <c>stairs</c> was left out (empty when it was sent; step 4).</summary>
     public IReadOnlyList<string> StairsNotRead { get; init; } = [];
+
+    /// <summary>Why <c>doors</c> was left out (empty when it was sent; step 5).</summary>
+    public IReadOnlyList<string> DoorsNotRead { get; init; } = [];
+
+    /// <summary>Why <c>guards</c> was left out (empty when it was sent; step 5).</summary>
+    public IReadOnlyList<string> GuardsNotRead { get; init; } = [];
 }
 
 /// <summary>
@@ -33,8 +39,10 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
 /// an unloaded link leaves <c>rooms</c> out); a part found is never dropped (a value that can't be read exactly is left
 /// out, with its reason in <see cref="InteriorReadResult.Notes"/>); a value is sent only when what is drawn agrees
 /// with it (a room's floor elevation against the slab under it, a window's sill line against the opening it cuts).
-/// The stairs (step 4) are <see cref="StairReader"/>'s. Doors, guards and what the house has none of are later steps:
-/// left out (not read).
+/// The stairs (step 4) are <see cref="StairReader"/>'s. The doors (step 5) are read here: each door's exit mark,
+/// operation and the maker's clear opening its type's stamp confirms (nothing drawn: door families don't model their
+/// stops and leaf consistently); the guards (step 5) are <see cref="GuardReader"/>'s. What the house has none of is a
+/// later step: left out (not read).
 /// </summary>
 public static class InteriorReader
 {
@@ -120,9 +128,11 @@ public static class InteriorReader
         // the reader doesn't walk; nothing found is never "none" (that is the has-none tick's, a later step)
         var stairsNotRead = StairReader.NotRead(model);
         var stairEvidence = new JsonObject();
+        StairReader.RailingUse? use = null;
         if (stairsNotRead.Count == 0)
         {
-            var flights = StairReader.Flights(model, notes, stairEvidence);
+            use = new StairReader.RailingUse();
+            var flights = StairReader.Flights(model, notes, stairEvidence, use);
             if (flights.Count == 0)
                 stairsNotRead = ["No stairs are drawn: no stair is read for egress (never read as a house with none)"];
             else
@@ -130,7 +140,38 @@ public static class InteriorReader
         }
         if (stairEvidence.Count > 0)
             evidence["stairs"] = stairEvidence;
-        return new(interior, roomsNotRead, openingsNotRead, notes, evidence) { StairsNotRead = stairsNotRead };
+
+        // step 5: the doors (each one's exit mark, operation and maker's confirmed clear opening), and the guards, only
+        // on the architect's tick and with every railing on a stair read as a handrail beside a wall; nothing found is
+        // never "none" (that is the has-none tick's, a later step)
+        var doorsNotRead = OpeningsNotRead(model);
+        if (doorsNotRead.Count == 0 && records is not null)
+        {
+            var marked = MarkReading.InDesign(model).ToDictionary(e => e.UniqueId, StringComparer.Ordinal);
+            var doors = new JsonArray();
+            foreach (var d in MarkReading.Doors(model))
+                doors.Add(ReadDoor(records, marked[d.Id], d, notes, evidence));
+            if (doors.Count == 0)
+                doorsNotRead = ["No doors are drawn: no exit door is read (never read as a house with none)"];
+            else
+                interior["doors"] = doors;
+        }
+        var guardsNotRead = GuardReader.NotRead(model, use);
+        var guardEvidence = new JsonObject();
+        if (guardsNotRead.Count == 0)
+        {
+            var guards = GuardReader.Guards(model, notes, guardEvidence);
+            if (guards.Count == 0)
+                guardsNotRead = ["No guards are drawn as railings off a stair: no guard is read for egress (never read as a house with none)"];
+            else
+                interior["guards"] = guards;
+        }
+        if (guardEvidence.Count > 0)
+            evidence["guards"] = guardEvidence;
+        return new(interior, roomsNotRead, openingsNotRead, notes, evidence)
+        {
+            StairsNotRead = stairsNotRead, DoorsNotRead = doorsNotRead, GuardsNotRead = guardsNotRead,
+        };
     }
 
     // ---- what stops a kind being read ---------------------------------------------------------------------------
@@ -499,18 +540,91 @@ public static class InteriorReader
                 Out("stated_clear", why!);
         }
         else if (o.Kind == MarkedKind.Door)
-            Out("stated_clear", "a door's clear opening comes with the doors step (a door's maker's clear width)");
+            Out("stated_clear", "a door's maker's clear opening is sent with the door (doors); as an escape opening its " +
+                                "bottom isn't stated by a door's marks yet");
         return opening;
     }
 
-    /// <summary>The window's values the stamp is checked against, read now.</summary>
-    public static ClearValues ClearNow(MarkedElement e, OpeningRecord rec)
+    /// <summary>The window's (or, with <paramref name="door"/>, the door's) values the stamp is checked against, read
+    /// now.</summary>
+    public static ClearValues ClearNow(MarkedElement e, OpeningRecord rec, bool door = false)
     {
         var mapped = MappedName(Marks.Text(MarkReading.Value(e, Marks.ClearConfirmed)));
         return new(e.TypeUniqueId, rec.TypeWidth, rec.TypeHeight, Marks.Text(MarkReading.Value(e, Marks.Operation)),
                    Marks.Length(MarkReading.Value(e, Marks.ClearWidth)), Marks.Length(MarkReading.Value(e, Marks.ClearHeight)),
-                   Marks.Length(MarkReading.Value(e, Marks.ClearOffset)), Marks.Text(MarkReading.Value(e, Marks.ClearSource)),
-                   mapped, mapped is not null && rec.TypeLengths.TryGetValue(mapped, out var v) ? v : null);
+                   door ? null : Marks.Length(MarkReading.Value(e, Marks.ClearOffset)), Marks.Text(MarkReading.Value(e, Marks.ClearSource)),
+                   mapped, mapped is not null && rec.TypeLengths.TryGetValue(mapped, out var v) ? v : null, door);
+    }
+
+    // ---- a door (step 5) -------------------------------------------------------------------------------------
+
+    /// <summary>A door: its exit mark and operation (a mark never set is not given), and the maker's clear opening its
+    /// type's stamp confirms. Nothing drawn is sent (its stops, hinge pin, leaf, threshold): door families don't model
+    /// them consistently (decision 2), so a drawn size is never read from a family's geometry.</summary>
+    private static JsonObject ReadDoor(InteriorRecords records, MarkedElement e, DoorMarks d, List<InteriorNote> notes,
+                                       JsonObject evidence)
+    {
+        // a door is an opening too: its notes as a door say so (doors.stated_clear, never the opening's stated_clear)
+        void Out(string field, string why) => notes.Add(new(d.Id, "doors." + field, why));
+        var door = new JsonObject { ["id"] = d.Id, ["name"] = MarkingList.Label(e) };
+        if (d.Exit is { } exit)
+            door["exit"] = exit;
+        else
+            Out("exit", Marks.ExitDoor.Name + " is not set");
+        if (d.Operation is { } operation)
+            door["operation"] = operation;
+        else
+            Out("operation", Marks.Operation.Name + " is not set on its type, or isn't a door's word Gordium reads");
+        Out("threshold_top", "a door's drawn stops, hinge, leaf, threshold and head stop aren't read from its family (door " +
+                             "families don't model them consistently): its maker's clear opening is read instead");
+        if (records.Openings.FirstOrDefault(x => x.UniqueId == d.Id) is not { } rec)
+            Out("stated_clear", "the Revit layer gave nothing for this door");
+        else if (DoorClear(e, rec, evidence, out var why) is { } clear)
+            door["stated_clear"] = clear;
+        else
+            Out("stated_clear", why!);
+        return door;
+    }
+
+    /// <summary>The door's maker's clear opening, sent only when its type's stamp, made for a door, confirms every
+    /// value now (the type's id, size and operation, the clear width and height, the source, a mapped maker's
+    /// parameter), and it fits inside the door as placed (its width along the wall, its height), 1/16 in to spare.</summary>
+    private static JsonObject? DoorClear(MarkedElement e, OpeningRecord rec, JsonObject evidence, out string? why)
+    {
+        why = null;
+        var now = ClearNow(e, rec, door: true);
+        if (ClearStamp.Why(Marks.Text(MarkReading.Value(e, Marks.ClearConfirmed)), now, rec.TypeLengths) is { } stamp)
+        {
+            why = stamp;
+            return null;
+        }
+        if (rec.Placed is not { Count: > 0 } placed || rec.Along is not { } along)
+        {
+            why = "its drawn geometry couldn't be read, so the clear opening can't be checked to fit inside it";
+            return null;
+        }
+        var length = Math.Sqrt(along.X * along.X + along.Y * along.Y);
+        if (length < 1e-9)
+        {
+            why = "its direction along the wall couldn't be read";
+            return null;
+        }
+        var u = placed.Select(p => (p.X * along.X + p.Y * along.Y) / length).ToList();
+        double width = u.Max() - u.Min(), height = placed.Max(p => p.Z) - placed.Min(p => p.Z);
+        double clearWidth = now.ClearWidth!.Value, clearHeight = now.ClearHeight!.Value;
+        evidence[e.UniqueId] = new JsonObject
+        {
+            ["placed"] = new JsonObject { ["width"] = width, ["height"] = height },
+            ["wall_opening_by"] = rec.WallOpeningBy,
+            ["revit_layer"] = new JsonArray(rec.Diagnostics.Select(x => (JsonNode?)x).ToArray()),
+        };
+        if (clearWidth > width + Sixteenth || clearHeight > height + Sixteenth)
+        {
+            why = $"its clear opening ({ClearStamp.Inches(clearWidth)} by {ClearStamp.Inches(clearHeight)}) doesn't fit inside the door " +
+                  $"as placed ({ClearStamp.Inches(width)} by {ClearStamp.Inches(height)})";
+            return null;
+        }
+        return new JsonObject { ["width"] = clearWidth, ["height"] = clearHeight, ["source"] = now.Source };
     }
 
     private static string? MappedName(string? stamp)
