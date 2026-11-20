@@ -8,19 +8,19 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "w5": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a3",
-    "w6": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a5",
-    "d1": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a7",
-    "bed3": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a9",
-    "bed4": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017ab",
-    "s1": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017b7"
+    "w5": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017a7",
+    "w6": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017a9",
+    "d1": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ab",
+    "bed3": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ad",
+    "bed4": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017af",
+    "s1": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017bb"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a9",
+        "id": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ad",
         "name": "Bedroom 3 (1)",
         "sleeping": true,
         "floor": [
@@ -68,7 +68,7 @@
         ]
       },
       {
-        "id": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017ab",
+        "id": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017af",
         "name": "Bedroom 4 (2)",
         "sleeping": true,
         "floor": [
@@ -140,9 +140,9 @@
     ],
     "openings": [
       {
-        "id": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a3",
+        "id": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017a7",
         "name": "Gordium test window w5 (22 x 36 in): Family6 (Window 5)",
-        "room": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a9",
+        "room": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ad",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -153,9 +153,9 @@
         }
       },
       {
-        "id": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a5",
+        "id": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017a9",
         "name": "Gordium test window w6 (28 x 36 in): Family7 (Window 6)",
-        "room": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017ab",
+        "room": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017af",
         "escape": true,
         "operation": "casement",
         "stated_clear": {
@@ -166,17 +166,18 @@
         }
       },
       {
-        "id": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a7",
+        "id": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ab",
         "name": "Gordium test door d1 (33.75 x 78 in): Family8 (Front door)",
-        "room": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a9",
+        "room": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ad",
         "escape": false,
         "operation": "side_hinged_door"
       }
     ],
     "stairs": [
       {
-        "id": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017b7",
+        "id": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017bb",
         "name": "Gordium test stair s1",
+        "spiral": false,
         "bottom_elevation": 0,
         "nosings": [
           [
@@ -459,7 +460,7 @@
     ],
     "doors": [
       {
-        "id": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a7",
+        "id": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ab",
         "name": "Gordium test door d1 (33.75 x 78 in): Family8 (Front door)",
         "exit": true,
         "operation": "side_hinged",
@@ -479,38 +480,38 @@
   "guards_not_read": [],
   "drawing_notes": [],
   "drawn": [
-    "rail profile Gordium test rail 1.5 in square: family 5671, type 6010 \u0022Family9\u0022, category OST_ProfileFamilies",
-    "door d1: placed in wall 6028, host 6028, box -0.583,3.344,10 to 1.368,6.656,16.75, type size (2.8125, 6.5)",
+    "rail profile Gordium test rail 1.5 in square: family 5675, type 6014 \u0022Family9\u0022, category OST_ProfileFamilies",
+    "door d1: placed in wall 6032, host 6032, box -0.583,3.344,10 to 1.368,6.656,16.75, type size (2.8125, 6.5)",
     "stair type Gordium test stair s1 from \u0022Stairs 1\u0022: run type monolithic False, risers True, treads True, tread 3 in thick, nosing 0 in",
     "stair s1: 2 railings Revit added deleted (the drawing\u0027s own are drawn next)",
     "railing type Gordium test handrail s1: from \u0022Railing 1\u0022, its own handrails -1 / -1 (positions None / None)",
-    "railing type Gordium test handrail s1: top rail 6087 at 36 in, 0 other rails, balusters none",
-    "stair s1: Revit\u0027s railing 6088 on its right: path (52.5,0,0)-(65,0,0)",
+    "railing type Gordium test handrail s1: top rail 6091 at 36 in, 0 other rails, balusters none",
+    "stair s1: Revit\u0027s railing 6092 on its right: path (52.5,0,0)-(65,0,0)",
     "stair s1: handrail right: drawn inner face -14.5 in across the run\u0027s path, the house\u0027s -14.5 in; moves: inner -16.25 in across, wanted -14.5 | inner -16.25 in across, wanted -14.5 | inner -16.25 in across, wanted -14.5; placement offset 2.75 in",
-    "stair s1: Revit\u0027s railing 6092 on its left: path (52.5,3,0)-(65,3,0)",
-    "stair s1: railing 6088 host 6070, top rail 6098 box 52.5,0.1667,3.4688 to 65,0.2917,13, handrails 0",
+    "stair s1: Revit\u0027s railing 6096 on its left: path (52.5,3,0)-(65,3,0)",
+    "stair s1: railing 6092 host 6074, top rail 6102 box 52.5,0.1667,3.4688 to 65,0.2917,13, handrails 0",
     "stair s1: risers 16 (drawing 16), riser 7.5 in (drawing 7.5), tread 10 in, base 0, top 10; run risers 16, treads 15, width 36 in, supports 0, railings 1; warnings dismissed: none",
     "ticked Gordium: This house has no guards: Yes"
   ],
   "notes": [
     {
-      "part": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a7",
+      "part": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ab",
       "field": "stated_clear",
       "why": "a door\u0027s maker\u0027s clear opening is sent with the door (doors); as an escape opening its bottom isn\u0027t stated by a door\u0027s marks yet"
     },
     {
-      "part": "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a7",
+      "part": "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ab",
       "field": "doors.threshold_top",
       "why": "a door\u0027s drawn stops, hinge, leaf, threshold and head stop aren\u0027t read from its family (door families don\u0027t model them consistently): its maker\u0027s clear opening is read instead"
     }
   ],
   "evidence": {
-    "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a3": {
+    "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017a7": {
       "sill_line": 12,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 12..15, wall box z 10..18.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 6025, wall 6025 0641451b-86d2-45c6-8e4d-86c7f0a26b95-00001789: 14 faces; ids generating them: OST_Walls 6025, OST_Walls 6026, OST_Walls 6028, OST_Windows 6051 (this window), OST_Windows 6053"
+        "host (FamilyInstance.Host) 6029, wall 6029 ae8cf54e-ee5e-4e32-b471-49f086e2647b-0000178d: 14 faces; ids generating them: OST_Walls 6029, OST_Walls 6030, OST_Walls 6032, OST_Windows 6055 (this window), OST_Windows 6057"
       ],
       "wall_opening_bottom": 12,
       "placed": {
@@ -519,12 +520,12 @@
         "width": 1.833333333333334
       }
     },
-    "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a5": {
+    "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017a9": {
       "sill_line": 11,
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 11..14, wall box z 10..18.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 6025, wall 6025 0641451b-86d2-45c6-8e4d-86c7f0a26b95-00001789: 14 faces; ids generating them: OST_Walls 6025, OST_Walls 6026, OST_Walls 6028, OST_Windows 6051, OST_Windows 6053 (this window)"
+        "host (FamilyInstance.Host) 6029, wall 6029 ae8cf54e-ee5e-4e32-b471-49f086e2647b-0000178d: 14 faces; ids generating them: OST_Walls 6029, OST_Walls 6030, OST_Walls 6032, OST_Windows 6055, OST_Windows 6057 (this window)"
       ],
       "wall_opening_bottom": 11,
       "placed": {
@@ -534,13 +535,14 @@
       }
     },
     "stairs": {
-      "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017b7": {
+      "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017bb": {
         "revit_layer": [
-          "run 6071 Straight: base 0, top 10 (relative), risers 16, treads 15, begins/ends with riser True/True, width 36 in; path (52.5,1.5,0) (65,1.5,0)",
+          "run 6075 Straight: base 0, top 10 (relative), risers 16, treads 15, begins/ends with riser True/True, width 36 in; path (52.5,1.5,0) (65,1.5,0)",
           "its geometry: 186 faces (31 facing up, 0 curved), failed False; box 52.5,0,0 to 65.042,3,10",
           "tread tops (z, internal): 0.375 0.625 1 1.25 1.625 1.875 2.25 2.5 2.875 3.125 3.5 3.75 4.125 4.375 4.75 5 5.375 5.625 6 6.25 6.625 6.875 7.25 7.5 7.875 8.125 8.5 8.75 9.125 9.75 9.375",
           "around it: 10 elements: Floors Upper floor at the head of s1, with its stairwell opening (10 faces), Floors Floor at the foot of s1 (6 faces), Ceilings Overhead 1 of s1 (6 faces), Walls Gordium test wall 6 in (6 faces), Walls Gordium test wall 6 in (6 faces), Stairs Stair (186 faces), StairsRailing Gordium test handrail s1 (0 faces), RailingTopRail Gordium test handrail s1 top rail (6 faces), RailingRailPathExtensionLines Model Lines (0 faces), SketchLines Model Lines (0 faces)"
         ],
+        "style": "Straight",
         "tread_faces": 16,
         "tread_groups": [
           {
@@ -839,6 +841,25 @@
         "back": 12.5,
         "foot": 0,
         "head": 10,
+        "run_highest": 9.75,
+        "run_risers_in": [
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5,
+          7.5
+        ],
         "drawn_risers_in": [
           7.5,
           7.5,
@@ -875,12 +896,12 @@
           9.999999999999943
         ],
         "handrails_beside_walls": [
-          "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017c8 (right)"
+          "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017cc (right)"
         ],
         "railings_refused": []
       }
     },
-    "0641451b-86d2-45c6-8e4d-86c7f0a26b95-000017a7": {
+    "ae8cf54e-ee5e-4e32-b471-49f086e2647b-000017ab": {
       "placed": {
         "width": 3.3125,
         "height": 6.7500000000000036
@@ -888,7 +909,7 @@
       "wall_opening_by": "the wall\u0027s faces Revit says this window generated (GetGeneratingElementIds)",
       "revit_layer": [
         "window box z 10..16.75, wall box z 10..18.0833 (internal ft), family placement OneLevelBasedHosted",
-        "host (FamilyInstance.Host) 6028, wall 6028 0641451b-86d2-45c6-8e4d-86c7f0a26b95-0000178c: 9 faces; ids generating them: OST_Walls 6028, OST_Walls 6025, OST_Walls 6027, OST_Doors 6055 (this window)"
+        "host (FamilyInstance.Host) 6032, wall 6032 ae8cf54e-ee5e-4e32-b471-49f086e2647b-00001790: 9 faces; ids generating them: OST_Walls 6032, OST_Walls 6029, OST_Walls 6031, OST_Doors 6059 (this window)"
       ]
     },
     "has_none": {
@@ -977,7 +998,7 @@
   },
   "revit_layer": [
     "design options: ",
-    "stair 6070 \u0022Gordium test stair s1\u0022: base 0, top 10, riser 7.5 in, tread 10 in, risers 16, the stair element\u0027s own geometry 186 faces",
+    "stair 6074 \u0022Gordium test stair s1\u0022: base 0, top 10, riser 7.5 in, tread 10 in, risers 16, the stair element\u0027s own geometry 186 faces",
     "stairs: 1 component stairs (1 runs), 0 other elements that could be one (0 of them generic models nested inside a window or door, not a stair); nested and not inside their window or door: ",
     "railings: 1",
     "enclosed areas on Level 1: 0 (0 with no Room: )",

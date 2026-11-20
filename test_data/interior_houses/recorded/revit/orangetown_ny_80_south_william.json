@@ -8,45 +8,45 @@
     "tool": "Autodesk Revit 2027 (2027.4), Gordium add-in (trial)"
   },
   "ids": {
-    "m1": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041c6",
-    "m2": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041c8",
-    "m3": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ca",
-    "m4": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041cc",
-    "b2a": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ce",
-    "b2b": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d0",
-    "b3a": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d2",
-    "b3b": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d4",
-    "b4a": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d6",
-    "b4b": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d8",
-    "x1": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041da",
-    "x2": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041dc",
-    "bsw1": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041de",
-    "bsw2": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e0",
-    "front": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e2",
-    "master": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e4",
-    "bed2": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e6",
-    "bed3": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e7",
-    "bed4": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e8",
-    "bonus": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e9",
-    "master_bath": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ea",
-    "hall_bath": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041eb",
-    "bed2_alcove": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ec",
-    "bed2_closet": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ed",
-    "wic_master_1": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ee",
-    "wic_master_2": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ef",
-    "linen": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f0",
-    "wic4": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f1",
-    "hall": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f2",
-    "main_floor": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f3",
-    "garage": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f5",
-    "basement": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f6"
+    "m1": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041cc",
+    "m2": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ce",
+    "m3": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d0",
+    "m4": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d2",
+    "b2a": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d4",
+    "b2b": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d6",
+    "b3a": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d8",
+    "b3b": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041da",
+    "b4a": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041dc",
+    "b4b": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041de",
+    "x1": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e0",
+    "x2": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e2",
+    "bsw1": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e4",
+    "bsw2": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e6",
+    "front": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e8",
+    "master": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ea",
+    "bed2": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ec",
+    "bed3": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ed",
+    "bed4": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ee",
+    "bonus": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ef",
+    "master_bath": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f0",
+    "hall_bath": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f1",
+    "bed2_alcove": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f2",
+    "bed2_closet": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f3",
+    "wic_master_1": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f4",
+    "wic_master_2": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f5",
+    "linen": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f6",
+    "wic4": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f7",
+    "hall": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f8",
+    "main_floor": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f9",
+    "garage": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041fb",
+    "basement": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041fc"
   },
   "interior": {
     "format": "gordium.interior/1",
     "units": "ft",
     "rooms": [
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e4",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ea",
         "name": "Master bedroom (1)",
         "sleeping": true,
         "floor": [
@@ -94,7 +94,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e6",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ec",
         "name": "Bedroom 2 (2)",
         "sleeping": true,
         "floor": [
@@ -142,7 +142,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e7",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ed",
         "name": "Bedroom 3 (3)",
         "sleeping": true,
         "floor": [
@@ -190,7 +190,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e8",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ee",
         "name": "Bedroom 4 (4)",
         "sleeping": true,
         "floor": [
@@ -238,7 +238,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e9",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ef",
         "name": "Bonus room (5)",
         "sleeping": false,
         "floor": [
@@ -286,7 +286,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ea",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f0",
         "name": "Master bath (6)",
         "sleeping": false,
         "floor": [
@@ -334,7 +334,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041eb",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f1",
         "name": "Hall bath (7)",
         "sleeping": false,
         "floor": [
@@ -382,7 +382,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ec",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f2",
         "name": "Bedroom 2\u0027s entry alcove (not dimensioned) (8)",
         "sleeping": false,
         "floor": [
@@ -430,7 +430,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ed",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f3",
         "name": "Bedroom 2 closet (9)",
         "sleeping": false,
         "floor": [
@@ -478,7 +478,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ee",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f4",
         "name": "Walk-in closet 1 (10)",
         "sleeping": false,
         "floor": [
@@ -526,7 +526,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ef",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f5",
         "name": "Walk-in closet 2 (11)",
         "sleeping": false,
         "floor": [
@@ -574,7 +574,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f0",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f6",
         "name": "Linen and bedroom 3 closet (12)",
         "sleeping": false,
         "floor": [
@@ -622,7 +622,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f1",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f7",
         "name": "Bedroom 4 walk-in closet (13)",
         "sleeping": false,
         "floor": [
@@ -670,7 +670,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f2",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f8",
         "name": "Hallway, stair, bridge and open to below (14)",
         "sleeping": false,
         "floor": [
@@ -834,7 +834,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f3",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f9",
         "name": "Main floor: kitchen, dinette, family, dining, living, hall, entry, powder, laundry (partitions not drawn) (15)",
         "sleeping": false,
         "floor": [
@@ -3376,7 +3376,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f5",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041fb",
         "name": "Garage (16)",
         "sleeping": false,
         "floor": [
@@ -3898,7 +3898,7 @@
         ]
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f6",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041fc",
         "name": "Unfinished basement (17)",
         "sleeping": false,
         "floor": [
@@ -7643,115 +7643,115 @@
     ],
     "openings": [
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041c6",
-        "name": "Gordium test window m1 (36 x 54 in): Family1 (Master bedroom double-hung 1 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e4",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041cc",
+        "name": "Gordium test window m1 (36 x 54 in): Family18 (Master bedroom double-hung 1 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ea",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041c8",
-        "name": "Gordium test window m2 (36 x 54 in): Family2 (Master bedroom double-hung 2 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e4",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ce",
+        "name": "Gordium test window m2 (36 x 54 in): Family19 (Master bedroom double-hung 2 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ea",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ca",
-        "name": "Gordium test window m3 (24 x 54 in): Family3 (Master bedroom casement C15, 1 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e4",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d0",
+        "name": "Gordium test window m3 (24 x 54 in): Family20 (Master bedroom casement C15, 1 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ea",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041cc",
-        "name": "Gordium test window m4 (24 x 54 in): Family4 (Master bedroom casement C15, 2 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e4",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d2",
+        "name": "Gordium test window m4 (24 x 54 in): Family21 (Master bedroom casement C15, 2 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ea",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ce",
-        "name": "Gordium test window b2a (36 x 54 in): Family5 (Bedroom 2 double-hung 1 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e6",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d4",
+        "name": "Gordium test window b2a (36 x 54 in): Family22 (Bedroom 2 double-hung 1 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ec",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d0",
-        "name": "Gordium test window b2b (36 x 54 in): Family6 (Bedroom 2 double-hung 2 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e6",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d6",
+        "name": "Gordium test window b2b (36 x 54 in): Family23 (Bedroom 2 double-hung 2 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ec",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d2",
-        "name": "Gordium test window b3a (36 x 54 in): Family7 (Bedroom 3 double-hung 1 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e7",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d8",
+        "name": "Gordium test window b3a (36 x 54 in): Family24 (Bedroom 3 double-hung 1 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ed",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d4",
-        "name": "Gordium test window b3b (36 x 54 in): Family8 (Bedroom 3 double-hung 2 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e7",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041da",
+        "name": "Gordium test window b3b (36 x 54 in): Family25 (Bedroom 3 double-hung 2 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ed",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d6",
-        "name": "Gordium test window b4a (36 x 62 in): Family9 (Bedroom 4 double-hung 1 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e8",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041dc",
+        "name": "Gordium test window b4a (36 x 62 in): Family26 (Bedroom 4 double-hung 1 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ee",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d8",
-        "name": "Gordium test window b4b (36 x 62 in): Family10 (Bedroom 4 double-hung 2 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e8",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041de",
+        "name": "Gordium test window b4b (36 x 62 in): Family27 (Bedroom 4 double-hung 2 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ee",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041da",
-        "name": "Gordium test window x1 (36 x 62 in): Family11 (Bonus room double-hung 1 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e9",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e0",
+        "name": "Gordium test window x1 (36 x 62 in): Family28 (Bonus room double-hung 1 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ef",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041dc",
-        "name": "Gordium test window x2 (36 x 62 in): Family12 (Bonus room double-hung 2 of 2)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e9",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e2",
+        "name": "Gordium test window x2 (36 x 62 in): Family29 (Bonus room double-hung 2 of 2)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ef",
         "escape": true,
         "operation": "double_hung"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041de",
-        "name": "Gordium test window bsw1 (24 x 48 in): Family13 (Basement window CW14 in areaway (north wall))",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f6",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e4",
+        "name": "Gordium test window bsw1 (24 x 48 in): Family30 (Basement window CW14 in areaway (north wall))",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041fc",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e0",
-        "name": "Gordium test window bsw2 (24 x 48 in): Family14 (Basement window CW14 in areaway (west wall))",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f6",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e6",
+        "name": "Gordium test window bsw2 (24 x 48 in): Family31 (Basement window CW14 in areaway (west wall))",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041fc",
         "escape": true,
         "operation": "casement"
       },
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e2",
-        "name": "Gordium test door front (36 x 96 in): Family15 (Front entry door)",
-        "room": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041f3",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e8",
+        "name": "Gordium test door front (36 x 96 in): Family32 (Front entry door)",
+        "room": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041f9",
         "escape": false,
         "operation": "side_hinged_door"
       }
     ],
     "doors": [
       {
-        "id": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e2",
-        "name": "Gordium test door front (36 x 96 in): Family15 (Front entry door)",
+        "id": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e8",
+        "name": "Gordium test door front (36 x 96 in): Family32 (Front entry door)",
         "exit": true,
         "operation": "side_hinged"
       }
@@ -7814,7 +7814,7 @@
     "floor at 0 ft: type Gordium test floor 10.5 in, thickness 10.5 in (drawing 10.5), box z -0.875 to 0 ft",
     "floor at -9.875 ft: type Gordium test floor 12 in, thickness 12 in (drawing 12), box z -10.875 to -9.875 ft",
     "floor at -18.875 ft: type Gordium test floor 4 in, thickness 4 in (drawing 4), box z -19.2083 to -18.875 ft",
-    "door front: placed in wall 16712, host 16712, box 15.917,6.083,-9.875 to 19.417,8.035,-1.625, type size (3, 8)",
+    "door front: placed in wall 16718, host 16718, box 15.917,6.083,-9.875 to 19.417,8.035,-1.625, type size (3, 8)",
     "ticked Gordium: This house has no sleeping lofts: Yes",
     "ticked Gordium: This house has no habitable attics: Yes",
     "ticked Gordium: This house has no ramps: Yes",
@@ -7825,87 +7825,87 @@
   ],
   "notes": [
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041c6",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041cc",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041c8",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041ce",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ca",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d0",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041cc",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d2",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041ce",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d4",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d0",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d6",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d2",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041d8",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d4",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041da",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d6",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041dc",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041d8",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041de",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041da",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e0",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041dc",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e2",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041de",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e4",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e0",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e6",
       "field": "stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e2",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e8",
       "field": "stated_clear",
       "why": "a door\u0027s maker\u0027s clear opening is sent with the door (doors); as an escape opening its bottom isn\u0027t stated by a door\u0027s marks yet"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e2",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e8",
       "field": "doors.threshold_top",
       "why": "a door\u0027s drawn stops, hinge, leaf, threshold and head stop aren\u0027t read from its family (door families don\u0027t model them consistently): its maker\u0027s clear opening is read instead"
     },
     {
-      "part": "1a9f38f0-176c-4aa0-a67e-79fb36ba12be-000041e2",
+      "part": "f44754eb-8c7e-4ed4-bd57-c8db13aef3cc-000041e8",
       "field": "doors.stated_clear",
       "why": "its type\u0027s clear opening isn\u0027t confirmed (no Gordium: Clear confirmed)"
     }
@@ -7924,7 +7924,7 @@
         "sent": false,
         "found": "no door in the model",
         "conflicts": [
-          "door \u0022Gordium test door front (36 x 96 in): Family15 (Front entry door)\u0022 is drawn"
+          "door \u0022Gordium test door front (36 x 96 in): Family32 (Front entry door)\u0022 is drawn"
         ],
         "blockers": []
       },
@@ -7994,11 +7994,12 @@
     }
   },
   "revit_layer": [
-    "stairs: 0 component stairs (0 runs), 0 other elements that could be one",
+    "design options: ",
+    "stairs: 0 component stairs (0 runs), 0 other elements that could be one (0 of them generic models nested inside a window or door, not a stair); nested and not inside their window or door: ",
     "railings: 0",
-    "enclosed areas on Level 1: 14 (0 with no Room)",
-    "enclosed areas on Level 2: 2 (0 with no Room)",
-    "enclosed areas on Level 3: 1 (0 with no Room)",
+    "enclosed areas on Level 1: 14 (0 with no Room: )",
+    "enclosed areas on Level 2: 2 (0 with no Room: )",
+    "enclosed areas on Level 3: 1 (0 with no Room: )",
     "ramps: 0 elements in Ramps"
   ]
 }
