@@ -239,7 +239,7 @@ internal static class HouseDraw
     }
 
     /// <summary>A window family of this window's size, made from Window.rft (whose opening cuts the wall from the
-    /// Sill reference plane to the Head one): a frame solid filling the opening, half the template wall's thickness
+    /// Sill reference plane to the Top one): a frame solid filling the opening, half the template wall's thickness
     /// deep, centred in it. One family per window, so each window has a type of its own. Loaded into the project.</summary>
     private static FamilySymbol WindowFamily(RevitApplication app, Document project, JsonObject w)
     {
@@ -260,15 +260,19 @@ internal static class HouseDraw
                 fdoc.Regenerate();
                 var planes = new FilteredElementCollector(fdoc).OfClass(typeof(ReferencePlane)).Cast<ReferencePlane>()
                     .Where(p => !string.IsNullOrEmpty(p.Name)).GroupBy(p => p.Name).ToDictionary(g => g.Key, g => g.First());
-                double At(string plane, Func<XYZ, double> coordinate) => planes.TryGetValue(plane, out var rp)
-                    ? coordinate(rp.GetPlane().Origin)
-                    : throw new InvalidOperationException($"Window.rft has no reference plane \"{plane}\" (it has: " +
-                                                          string.Join(", ", planes.Keys.Order()) + ")");
-                double left = At("Left", p => p.X), right = At("Right", p => p.X);
-                double sill = At("Sill", p => p.Z), head = At("Head", p => p.Z);
-                double y = planes.ContainsKey("Center (Front/Back)") ? At("Center (Front/Back)", p => p.Y) : 0;
+                // Revit 2027.4's Window.rft names them: Center (Front/Back), Center (Left/Right), Left, Reference Plane,
+                // Right, Sill, Top (trial run 1, 2026-11-20): the head is "Top"
+                double At(Func<XYZ, double> coordinate, params string[] names) =>
+                    names.Select(n => planes.TryGetValue(n, out var rp) ? rp : null).FirstOrDefault(rp => rp is not null) is { } found
+                        ? coordinate(found.GetPlane().Origin)
+                        : throw new InvalidOperationException("Window.rft has no reference plane named " +
+                                                              string.Join(" or ", names.Select(n => $"\"{n}\"")) + " (it has: " +
+                                                              string.Join(", ", planes.Keys.Order()) + ")");
+                double left = At(p => p.X, "Left"), right = At(p => p.X, "Right");
+                double sill = At(p => p.Z, "Sill"), head = At(p => p.Z, "Top", "Head");
+                double y = At(p => p.Y, "Center (Front/Back)");
                 if (Math.Abs(right - left - width) > 1e-6 || Math.Abs(head - sill - height) > 1e-6)
-                    throw new InvalidOperationException($"Window.rft's Left/Right and Sill/Head planes didn't flex to {width} x {height} ft " +
+                    throw new InvalidOperationException($"Window.rft's Left/Right and Sill/Top planes didn't flex to {width} x {height} ft " +
                                                         $"(they are {right - left} x {head - sill})");
                 var profile = new CurveArray();
                 var corners = new[] { new XYZ(left, y, sill), new XYZ(right, y, sill), new XYZ(right, y, head), new XYZ(left, y, head) };
