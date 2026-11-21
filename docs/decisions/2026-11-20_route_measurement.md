@@ -100,8 +100,24 @@ area need review.
    zone's free floor: the crossable rooms' outlines (decision 1a) minus walls, holes and obstructions, joined
    through door openings, passing each door at its centre; (b) stays at least 12 in from every corner: each wall
    corner that sticks into the floor, each corner of an obstruction, each door jamb (a ring: a true circle of 12-in
-   radius); except that (c) inside a ring that contains p, or the door centre it passes, the curve may run within
-   that ring until it leaves it. **Two lengths within 10^-6 ft of each other are a tie**, broken toward the cautious
+   radius). For a point clear of every ring (at least 12 in from every corner; on a ring's edge counts as clear),
+   that is its route, and its length is written D(p). (c) **A point inside a ring** (or several) has no clear curve
+   out, so its route first goes straight to the rings' edge, then on clear: its length is
+   d(p) = the least, over every point q on the edge of the rings that hold p, clear of every other ring, that p
+   reaches by a straight line on the floor running inside those rings, of |pq| + D(q). The same at a door centre
+   inside a ring: the route reaches that ring's edge clear, then runs straight to the centre (and leaves it the same
+   way). So d is continuous at a ring's edge (there q is p itself), and never shorter than walking out of the ring
+   and then round (behind test 1's corner: 35.328 ft). This is Gordium's reading of NFPA 7.6.1(2), not the law's
+   words (open question 9). *Rejected:* letting the curve run anywhere within a ring holding p until it left (the
+   earlier (c)): the length then jumps at the ring's edge (behind test 1's corner, 35.380 ft just inside the ring and
+   36.665 ft just outside: 15.4 in over a hair's step), so no sampling bound (decision 3) holds across it, and a
+   point just inside got a shorter route than its neighbour just outside.
+   **An opening narrower than 24 in.** Two corners less than 24 in apart have overlapping rings, and a corner less
+   than 12 in from a wall has its ring on the wall: no clear curve passes between them. Where every way out of a
+   point is closed so, the point has no route: the story needs review (decision 10) with the reason "an opening too
+   narrow for NFPA 7.6.1's 12-in clearance from both sides" (test 18: the back of a niche 20 in wide and 2 ft deep).
+   A door is the one opening a route passes at its centre (decision 1). Gordium's reading too (open question 10).
+   **Two lengths within 10^-6 ft of each other are a tie**, broken toward the cautious
    reading (decision 5: the route that shares more). It is computed exactly (shortest paths among circles and
    polygon obstacles are a standard, exact computation); the build PR's code and its tests are the procedure, and
    each test's figure here comes from this definition, worked two ways. *Rejected:* rings as polygons (an earlier
@@ -114,14 +130,31 @@ area need review.
    polygon the geodesic farthest point is a vertex). **It is not true in general:** with two exits the farthest
    point is where the two routes are equal (a corridor with an exit at each end: the middle, on a wall); with three,
    it can be in the open floor; with a column, it can be behind it where the two ways round are equal (test 2 below).
-   So Gordium takes every corner exactly, and also cuts the floor into triangles no wider than 3 in across and takes
-   every triangle corner. (Only where it matters: triangles start 2 ft across, and only one whose greatest corner
-   value plus its size could beat the best found so far is cut smaller, down to 3 in; the rest are dropped, which the
-   same bound makes safe.) Inside a triangle every point is within 3 in, in a straight free line, of one of its corners,
-   and a travel distance can't grow faster than you walk, so **the true greatest is at most the greatest found plus
-   3 in**. The rules get that upper figure; the panel shows both. The bound is proved for the space the route walks
-   (12 in clear of corners and obstructions); for the thin band inside 12 in, the build PR proves it or adds 12 in
-   to the figure, never neither.
+   So Gordium samples the floor and bounds what lies between samples, in three parts: **F**, the floor clear of every
+   ring; **E**, the rings' edges (the arcs of each ring's circle on the floor and clear of every other ring, found
+   exactly from the circles); and **B**, the band inside the rings.
+   - **F and E: a proved bound.** In F the route's length is D (decision 2), and D can't grow faster than you walk
+     along any curve in F (from x, walk to y and take y's route: that is a route for x). Every arc of E is sampled
+     at most 3 in apart along it, ends included, so every point of E is within 1.5 in, walking along E, of a sample.
+     The floor is cut into triangles, every corner of the floor among their corners, and every triangle corner in F
+     is a sample. A triangle no ring reaches lies in F, and each of its points is within h (its farthest from all
+     three corners) of one, in a straight line inside it. A triangle a ring reaches: from a point x of it in F, the
+     straight line toward the nearest point of that ring in the triangle stays in the triangle, and the first ring
+     edge it meets, y, is in E, at most the triangle's longest side away. So, with triangles no longer than 3 in a
+     side: **every point of F is within the greatest sample plus 3 in** (a triangle in F; h is under 3 in), **or plus
+     4.5 in** (3 in to E, 1.5 in along it), the cautious figure being the triangle's own. (Only where it matters:
+     triangles start 2 ft across, and only one whose greatest corner value plus its own margin could beat the best
+     found so far is cut smaller; the rest are dropped, which the same bound makes safe.) And a point of F with no
+     route is never missed: its straight line to a triangle corner, or to E and along it, reaches a sample that has
+     none too, so the story needs review.
+   - **B: a margin, and one thing not proved.** For p in B, d(p) is |pq| + D(q) for some q on the edge of the rings
+     holding p, and every such q is within 24 in of p (two ring radii). So d(p) is at most 24 in plus the greatest D on
+     the edges of that group of overlapping rings, plus 1.5 in for E's sampling: **25.5 in over that group's greatest
+     edge sample**, proved for every p that has an exit at all. Whether every point of B has one (a straight line to a
+     clear q) isn't proved by sampling: B's points are sampled 3 in apart too and a sample with none needs review,
+     but a pocket of B smaller than that could be missed (open question 11).
+   The rules get the greatest of these bounds; the panel shows the greatest sample, each part's bound and which part
+   gave the figure. (In the note's layouts the far point is a room corner in F, and B's bound is far below it.)
 4. **Exits are marked, never guessed.** A route ends at the centre of the doorway of a door marked with `exit_kind`.
    No exit marked on the story: every route measure there needs review. `exterior_stair_or_ramp`, and any route
    through an unenclosed stair (1016.1's "measurement along stairways"), need review until built.
@@ -187,13 +220,14 @@ area need review.
    1004.1.1 "net"); the computed occupant load is that divided by 35, and a stated load below it needs review
    (1004.1.1's exception needs the building official).
 9. **Tolerances.** Points within 1/16 in are the same point, as elsewhere in the interior code. Route lengths are
-   exact to floating point (decision 2); the greatest over a story carries the 3 in of decision 3 (added). A measure is compared with
+   exact to floating point (decision 2); the greatest over a story carries decision 3's margins (added). A measure is compared with
    its limit as given; a measure exactly at a limit is what the model says (20'-0" is "not more than 20 feet").
 10. **What always gives needs review (the story's route measures), with the reason shown:** an unknown space on the
     story (its outline unknown, it may hold the most remote point or a route; with its outline, one no door or
     passage reaches stays needs review until open question 4 is settled); a room on the story with no `floor`
     (a curved wall: never its chord, which would shorten routes); a door with no `plan` or `sides`; a door whose side
-    is an unknown space or a room not read; a point with no route to any exit (shown, never a number); obstructions
+    is an unknown space or a room not read; a point with no route to any exit (shown, never a number; one shut in by an opening narrower than 24 in says
+    so, decision 2); obstructions
     or rooms read from a link; a corridor not made of straight legs (dead end only); and any reading that could
     shorten a route; a room that reaches an exit only through an end-only room (decision 1a); an `exit_kind` with
     no `exit_id`; a door under 24 in clear; any key of the additions left out. Readings that only lengthen one
@@ -254,9 +288,15 @@ these hand figures as written in the test file, never taken from the code under 
    cross an obstruction. **Near a jamb:** test 4's room from (0, 13.5): the straight line to the door centre
    (10.152 ft) passes within 12 in of the jamb at (8.5, 15), so the route curves round its ring: **10.543 ft**.
    **Behind a corner:** test 1's corridor from (34.5, 6.5), inside the ring of the inside corner (34, 6) and behind
-   it: within that ring to the corner, then straight to the door centre: 0.707 + 34.381 = **35.088 ft**.
+   it (decision 2(c)): straight out to the ring's edge, then on clear. The best edge point is where the line from
+   (34.5, 6.5) past the corner meets the ring, (34 - 0.7071, 6 - 0.7071): 0.7071 + 1 = 1.7071 to it, then straight
+   to the door centre, sqrt(33.5429^2 + 2.2929^2) = 33.6211 (it sees the door clear of the ring): **35.328 ft**.
+   Worked two ways: the least of |pq| + D(q) over the ring's edge in steps of 0.001 degree, and the brute force over
+   64-sided rings (35.3283 inside, 35.3286 outside). The earlier (c) gave 35.088 (within the ring to the corner and
+   straight on), shorter than leaving the ring at all.
    **A start on a corner:** test 1's corridor, from the inside corner (34, 6) itself (inside
-   its own ring): straight to the door centre, **34.381 ft**, never "no route".
+   its own ring): out 1 ft toward the door centre, to the ring's edge on the line to it, then straight on: 1 +
+   33.381 = **34.381 ft** (the same as straight, as nothing is in the way), never "no route".
    **Two exits and a column:** test 2's room and column, exit A the west door centred at (-0.25, 5), exit B a 36-in
    door in the north wall centred at (2, 10.25), its jambs at x 0.5 and 3.5 (each with its ring). At (30, 5) the two ways round the column to A are equally short (the
    room is symmetric about y = 5); taking the one over the top (the tie toward more shared, decision 5), both
@@ -303,6 +343,12 @@ these hand figures as written in the test file, never taken from the code under 
     the route crosses the pantry. And an H-plan corridor with dead ends of 30 by 14 ft and 22 by 8 ft: two pairs,
     the first complying by exception 3 (30 < 2.5 x 14 = 35), the second failing (22 > 20, and 22 is not less than
     20); until `dead_end` exists, the pair 30 ft and 8 ft (fails). Fails if the 14-ft width is paired with 22 ft.
+18. **A niche too narrow:** a room 0 to 20 by 0 to 10, its exit door centred at (-0.25, 5), a niche 20 in wide and
+    2 ft deep in the north wall (x 10 - 0.833 to 10 + 0.833, y 10 to 12). Its mouth's corners are 20 in apart, so
+    their rings overlap across the mouth; (10, 11.5), at the back, is 1.202 ft from each corner, clear of both, and
+    shut in: **no route**, needs review with the reason "an opening too narrow for NFPA 7.6.1's 12-in clearance from
+    both sides". Fails if the rings are left out (it would get a number) or if a point near the back may cross the
+    mouth inside a ring it isn't in.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
@@ -364,3 +410,16 @@ remoteness and areas; the reader; then the eval on the Children's Odyssey model.
    7.5.1.6 allow exit access through an accessory room)? Gordium says no, and needs review where it decides.
 8. **Which rooms may be crossed:** is `pass_through`, stated in the model, the right test of 1014.2 item 1
    ("accessory to one or the other ... a discernible path")? Day-care rooms opening into each other are common.
+9. **A point within 12 in of a corner:** NFPA 7.6.1 measures "(1) ... starting from the most remote point subject to
+   occupancy (2) Curving around any corners or obstructions, with a 12 in. (305 mm) clearance therefrom". It doesn't
+   say how a route starts from a point inside that clearance. Gordium's reading (decision 2(c)): straight out to
+   12 in, then on with the clearance. It is never shorter than any route that keeps the clearance once out; the
+   Handbook's commentary (not in the repo) may say otherwise.
+10. **An opening narrower than 24 in:** the same words, read literally, leave no route through a gap that can't be
+    passed 12 in from both sides (a niche, a gap between casework and a column), so a point beyond one has no route
+    and the story needs review (decision 2, test 18). Is that the intent, or does the clearance give way where the
+    opening is narrower (as it does at a door's centre)? Until answered, needs review, naming the opening.
+11. **Pockets inside the clearance band:** decision 3 proves its bound clear of the rings and on their edges; inside
+    them it proves the 25.5-in margin only for points that have a straight way out to a clear edge. A pocket smaller
+    than the 3-in samples with no such way out isn't ruled out. Accept the sampling there, or ask for an exact check
+    (a later build: the pockets of the band, worked from the circles)?
