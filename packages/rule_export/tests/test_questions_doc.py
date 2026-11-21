@@ -93,6 +93,13 @@ def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_fro
     apart += [rule.split(".", 1)[1] for rule, v in data["verdicts"]["rules"].items() if v["same"] is False]
     assert apart, "the eval file's format changed; update this test"
     assert [key for key in apart if f"`{key}`" not in log] == []
+    unrouted = {room for fig in data["figures"].values()
+                for room in (((fig.get("gordium") or {}).get("story") or {}).get("rooms_without_route") or [])}
+    assert unrouted and sorted(room for room in unrouted if room not in log) == []
+    # the accessory area complies under all four readings: the largest accessory area against 10% of the smallest
+    # story area (decision 8), stated in the log with that limit
+    limit = round(0.1 * min(data["storage"]["gordium_story_sf"]))
+    assert f"{limit:,} sf" in log
 
 
 def test_every_needs_review_claim_is_true_of_the_code():
