@@ -296,3 +296,33 @@ def test_a_room_with_no_route_keeps_the_verdict_needs_review_with_the_figure_ove
     # the travel's: the storeroom's far corner (10, 16) to its door (5, 10.25), then on to the nearest exit:
     # at least sqrt(5^2 + 5.75^2) = 7.620 + ...; well under the room's diagonal sum
     assert story["more"]["egress_travel_distance"]["figure"] > 7.620
+
+
+def test_each_dead_end_is_its_own_pair_never_one_length_with_anothers_width(maine):
+    """Test 17's H-plan (review round 1): dead ends of 30 by 14 ft and 22 by 8 ft are two corridor parts, (30, 14)
+    complying with 1018.4's formula by exception 3 and (22, 8) failing it: never (30, 8)."""
+    from test_routes_dead_ends import h_plan
+    got = measure(h_plan())
+    pairs = sorted((c["measures"]["corridor_dead_end_length"], c["measures"]["corridor_dead_end_least_width"])
+                   for c in got["parts"]["corridor"])
+    assert pairs == [(22.0, 8.0), (30.0, 14.0)]
+    assert {c["id"] for c in got["parts"]["corridor"]} == {"c", "c (dead end 2)"}
+    rule = dict(maine[0]["general.ibc_1018_4_dead_end"], kind="rule")
+    rows = part_rules.rows(rule, got["parts"], NEW_DAY_CARE, maine[1])
+    assert sorted(r["outcome"] for r in rows) == ["fail", "pass"]
+
+
+def alcove_dead_end():
+    """Test 3's branch, 8 ft wide, end wall 16 ft past the corridor, with an alcove 3 ft wide and 11 in deep centred
+    in its end wall: the dead end is 16 + 11/12 + 4 = 20.917 ft."""
+    poly = [(0, 0), (60, 0), (60, 8), (28, 8), (28, 24), (25.5, 24), (25.5, 24 + 11 / 12), (22.5, 24 + 11 / 12),
+            (22.5, 24), (20, 24), (20, 8), (0, 8)]
+    return description([room("c", poly)], [door("a", (-0.25, 4), (0, 1), ("c", "outside"), exit_id="A"),
+                                           door("b", (60.25, 4), (0, 1), ("c", "outside"), exit_id="B")])
+
+
+def test_end_to_end_a_dead_end_with_an_alcove_at_its_end_never_passes_at_20_ft(maine):
+    got = measure(alcove_dead_end())
+    c, = got["parts"]["corridor"]
+    assert c["measures"]["corridor_dead_end_length"] == pytest.approx(20.917, abs=1e-3)
+    assert result(maine, "general.nfpa_16_2_5_2_dead_end", got) == "fail"

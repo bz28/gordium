@@ -111,7 +111,7 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
         use, item = uses.get(rid), items.get(rid) or {}
         name = room.name if room is not None else name_of(item)
         if use == "corridor":
-            parts["corridor"].append(_corridor_part(rid, name, story, found.get(rid), room))
+            parts["corridor"] += _corridor_parts(rid, name, story, found.get(rid), room)
             continue
         parts["space"].append(_space_part(rid, name, story, routes, room, access.get(rid), figures,
                                           sp["not_measured"].get("common_path_of_travel")))
@@ -394,7 +394,11 @@ def _space_part(rid, name, story, routes, room, access, figures, why_not) -> dic
     return p
 
 
-def _corridor_part(rid, name, story, found, room) -> dict:
+def _corridor_parts(rid, name, story, found, room) -> list:
+    """The corridor's part, and one more for each further dead end in it (decision 6: each dead end is its own pair,
+    its length with its own least width, never one's length with another's width): the first part holds the
+    longest dead end, each further part (id "<corridor> (dead end n)") the corridor's other measures again with
+    that dead end's pair, until the branch's `dead_end` part kind exists."""
     p = _part(rid, name, story.level)
     for m in ("corridor_occupant_load", "corridor_fire_rating_hours", "corridor_walls_smoke_partitions"):
         p["not_measured"][m] = Stop("stated_not_given", what=STATED[m]).reason
@@ -402,7 +406,7 @@ def _corridor_part(rid, name, story, found, room) -> dict:
         why = Stop("room_not_measured", name=name, reason="its story's routes need review").reason
         for m in ("corridor_width", "corridor_dead_end_length", "corridor_dead_end_least_width"):
             p["not_measured"][m] = why
-        return p
+        return [p]
     if found.width is not None:
         p["measures"]["corridor_width"] = found.width
     else:
@@ -411,27 +415,35 @@ def _corridor_part(rid, name, story, found, room) -> dict:
     if found.stop is not None:
         for m in ("corridor_dead_end_length", "corridor_dead_end_least_width"):
             p["not_measured"][m] = found.stop
-        return p
-    if found.width is None and not [d for d in found.dead_ends if d.room == rid]:
+        return [p]
+    mine = sorted((d for d in found.dead_ends if d.room == rid), key=lambda d: -d.length[dead_ends.WITHOUT])
+    if found.width is None and not mine:
         for m in ("corridor_dead_end_length", "corridor_dead_end_least_width"):
             p["not_measured"][m] = found.width_stop
-        return p
-    pairs = {r: found.pair(r) for r in (dead_ends.WITHOUT, dead_ends.WITH)}
-    p["more"]["dead_ends"] = [{"from": _xy(d.start), "length": {k: _feet(v) for k, v in d.length.items()},
-                               "least_width": {k: _feet(v) for k, v in d.width.items()},
-                               "centre_line": {k: [_xy(q) for q in v] for k, v in d.line.items()}}
-                              for d in found.dead_ends if d.room == rid]
-    if pairs[dead_ends.WITHOUT] == pairs[dead_ends.WITH]:
-        length, width = pairs[dead_ends.WITHOUT]
-        p["measures"]["corridor_dead_end_length"] = _feet(length)
-        p["measures"]["corridor_dead_end_least_width"] = _feet(width)
-        return p
-    words = (f"{_feet(pairs[dead_ends.WITHOUT][0]):g} ft without the door into a room with another way out (the "
-             f"defined value), {_feet(pairs[dead_ends.WITH][0]):g} ft with it")
-    for k, measure in ((0, "corridor_dead_end_length"), (1, "corridor_dead_end_least_width")):
-        _readings(p, measure, [(_feet(pairs[r][k]), dead_ends.QUESTION, r) for r in (dead_ends.WITHOUT, dead_ends.WITH)],
-                  words)
-    return p
+        return [p]
+    if not mine:                                         # no dead end: 0, with the corridor's own width
+        p["measures"]["corridor_dead_end_length"] = 0.0
+        p["measures"]["corridor_dead_end_least_width"] = _feet(found.width)
+        return [p]
+    out, base = [], ({**p["measures"]}, {**p["not_measured"]})
+    for n, d in enumerate(mine, 1):
+        q = p if n == 1 else {**p, "id": f"{rid} (dead end {n})", "name": f"{name} (dead end {n})",
+                              "measures": dict(base[0]), "not_measured": dict(base[1]), "more": {}}
+        q["more"]["dead_end"] = {"from": _xy(d.start), "length": {k: _feet(v) for k, v in d.length.items()},
+                                 "least_width": {k: _feet(v) for k, v in d.width.items()},
+                                 "centre_line": {k: [_xy(x) for x in v] for k, v in d.line.items()}}
+        pairs = {r: (d.length[r], d.width[r]) for r in (dead_ends.WITHOUT, dead_ends.WITH)}
+        if pairs[dead_ends.WITHOUT] == pairs[dead_ends.WITH]:
+            q["measures"]["corridor_dead_end_length"] = _feet(d.length[dead_ends.WITHOUT])
+            q["measures"]["corridor_dead_end_least_width"] = _feet(d.width[dead_ends.WITHOUT])
+        else:
+            words = (f"{_feet(pairs[dead_ends.WITHOUT][0]):g} ft without the door into a room with another way out "
+                     f"(the defined value), {_feet(pairs[dead_ends.WITH][0]):g} ft with it")
+            for k, measure in ((0, "corridor_dead_end_length"), (1, "corridor_dead_end_least_width")):
+                _readings(q, measure, [(_feet(pairs[r][k]), dead_ends.QUESTION, r)
+                                       for r in (dead_ends.WITHOUT, dead_ends.WITH)], words)
+        out.append(q)
+    return out
 
 
 def _not_measured_yet(parts: dict) -> None:
