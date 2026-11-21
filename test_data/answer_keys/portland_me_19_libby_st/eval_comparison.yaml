@@ -1,4 +1,5 @@
-made_by: packages/model_measurement/tests/make_eval_comparison.py
+made_by: packages/model_measurement/tests/make_eval_comparison.py (run it to reproduce
+  this file)
 units: ft, sf
 sheet_to_model:
   west_outer_face_pt: 302.58
@@ -29,10 +30,21 @@ figures:
       to_the_sheets_exit_with_12_in: 118.762
       to_the_sheets_exit_no_clearance: 116.034
       to_the_nearest_exit_with_12_in: 110.141
-      story_verdict: 'needs review: 5 rooms have no route (decision 1a)'
-      why_different: the sheet's line turns at right angles and runs the corridor's
-        centre line to the east exit; Gordium's is the shortest walk to the same exit
-        (its nearest exit is the north door)
+      nearest_exit: 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
+      story:
+        not_measured: the point (165.625, 70.156) has no route to any exit (a path
+          12 in clear of every corner, through door centres and rooms it may cross)
+        rooms_without_route:
+        - CLOSET (40)
+        - ELEC. (21)
+        - SPRINKLERED ABANDONED SPACE (32)
+        - SPRINKLERED ABANDONED SPACE (33)
+        - STORAGE (13)
+        over_rooms_with_a_route: 110.247
+        from_room: STORAGE (11)
+        at:
+        - 138.9
+        - 84.4833
   common_path:
     sheet_stated: 48.5
     sheet_words: DISTANCE TO COMMON PATH OF TRAVEL = 48'-6"
@@ -52,9 +64,25 @@ figures:
       - 84.483
       with_12_in: 42.604
       no_clearance: 41.066
-      why_different: the sheet's line turns at right angles to the room's door; Gordium's
-        routes to the north and east exits share the walk to and past that door, not
-        the right-angle path
+      exits:
+      - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
+      - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bcac
+      story:
+        not_measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
+          (a path 12 in clear of every corner, through door centres and rooms it may
+          cross)
+        rooms_without_route:
+        - CLOSET (40)
+        - CORRIDOR (26)
+        - ELEC. (21)
+        - SPRINKLERED ABANDONED SPACE (32)
+        - SPRINKLERED ABANDONED SPACE (33)
+        - STORAGE (13)
+        over_rooms_with_a_route: 43.45
+        from_room: MOUNTAIN CLASSROOM (3)
+        at:
+        - 194.0778
+        - 1.5519
   dead_end:
     sheet_stated: 21.5
     sheet_words: DEAD END CORRIDOR DISTANCE = 21'-6"
@@ -65,13 +93,10 @@ figures:
     - - 152.233
       - 53.177
     gordium:
-      measured: null
-      why: 'the corridor isn''t straight legs at right angles: not measured (decision
-        6)'
-      by_hand_centre_line_reading: 32.011
-      why_different: the sheet ends the stub's dead end at the widening's near edge
-        (y 53.17); decision 6 measures to the crossing corridor's centre line (y 42.84),
-        open question 2
+      90a6a430-1684-4046-81c7-ffbf1c99b587-0005be10:
+        not_measured: 'the corridor isn''t made of straight legs meeting at right
+          angles (a part of it has no walls on its two long sides): its dead ends
+          and width aren''t measured in this first version (decision 6)'
   remoteness:
     sheet_stated: 183.833
     sheet_words: 'PROVIDED REMOTENESS: 183''-10" (between its ticks)'
@@ -84,10 +109,10 @@ figures:
     gordium:
       same_pair_nearest_edges: 183.706
       farthest_pair_nearest_edges: 187.164
+      farthest_pair:
+      - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bcac
+      - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bce1
       farthest_pair_door_centres: 189.291
-      why_different: the sheet measures the west and east corridor exits (Gordium's
-        same pair agrees); Gordium's figure is the farthest-apart pair (decision 7),
-        the north-west and east doors
   diagonal:
     sheet_stated: 210.208
     sheet_words: BLDG DIA. 210'-2 1/2" (between its ticks)
@@ -105,13 +130,9 @@ figures:
       - - 195.078
         - 0.0
       ratio: 0.8788
-      why_different: 'the sheet''s ticks are not at the traced outer outline''s corners
-        (its north-east tick lies about 3 ft north of the traced north face): a trace
-        or a drawing difference, not settled'
 storage:
   sheet_stated_sf: 1428
   sheet_story_sf: 16509
-  story_sf_correct: 16539
   gordium_inside_sf: 1178.8
   gordium_outer_faces_sf: 1414.3
   gordium_story_sf:
@@ -123,7 +144,23 @@ storage:
     STORAGE (14): 153.1
     STORAGE (28): 27.6
     STORAGE (29): 103.2
-  why_different: 'the sheet doesn''t list its rooms; over the five rooms marked accessory
-    storage, Gordium''s outer-faces reading is within 1 percent of the sheet''s, its
-    inside reading 17 percent under: the sheet likely measured to the walls'' outer
-    faces (open question 3)'
+by_hand:
+  travel_distance: the sheet's line turns at right angles and runs the corridor's
+    centre line to the east exit; Gordium's is the shortest walk to the same exit
+  common_path: the sheet's line turns at right angles to the room's door; Gordium's
+    two routes share the walk to and past that door
+  dead_end_centre_line_reading:
+    figure: 32.011
+    working: 'the stub''s closed end, y 74.85 (the corridor outline), to the main
+      corridor''s centre line, (37.844 + 47.833) / 2 = 42.839: 74.85 - 42.839 = 32.011
+      ft; the sheet ends at the widening''s near edge, y 53.17 (open question 2)'
+  remoteness: the sheet measures the west and east corridor exits; decision 7 takes
+    the farthest-apart pair
+  diagonal: 'the sheet''s ticks are not at the traced outer outline''s corners (its
+    north-east tick about 3 ft north of the traced north face): a trace or drawing
+    difference, not settled'
+  storage: the sheet doesn't list its rooms; Gordium's outer-faces reading is within
+    1 percent of the sheet's
+  story_sf_correct:
+    figure: 16539
+    working: the sheet's 16,509 is a recorded error (hand_check.yaml)

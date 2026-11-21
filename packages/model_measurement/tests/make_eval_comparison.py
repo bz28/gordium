@@ -48,75 +48,107 @@ SHEET = {   # the sheet's stated figure, and the line it draws for it (vertices 
 }
 
 
-def main(path):
-    from model_measurement.routes import areas, straight
+CO = {"start_room": "STORAGE (11)", "sheet_exit": EAST_EXIT,          # the model's own names for the sheet's
+      "same_pair": ((4.99, 42.82), (189.53, 42.82))}                  # start, exit, and remoteness pair (ft)
+
+
+def _why(story, measured, name) -> dict:
+    """The story's verdict on a route measure, as routes.measure gives it: its figure, or its reason and the
+    figure over the rooms with a route."""
+    sp = measured["parts"]["story"][0]
+    if name in sp["measures"]:
+        return {"figure": round(sp["measures"][name], 3)}
+    more = sp["more"].get(name) or {}
+    out = {"not_measured": sp["not_measured"].get(name)}
+    if "rooms_without_route" in more:
+        out.update(rooms_without_route=sorted(more["rooms_without_route"]),
+                   over_rooms_with_a_route=round(more["figure"], 3) if "figure" in more else None,
+                   from_room=more.get("room"), at=more.get("at"))
+    return out
+
+
+def main(path, out_path=OUT, co=CO):
+    from model_measurement.routes import areas, dead_ends, measure, straight
     from model_measurement.routes.common_path import at_point
     from model_measurement.routes.floor import read
     from model_measurement.routes.paths import StoryRoutes
     description = json.loads(Path(path).read_text(encoding="utf-8"))
     story = next(iter(read(description).stories.values()))
     uses = {r["id"]: r.get("use") for r in description["rooms"]}
-    room11 = next(r for r in story.rooms.values() if r is not None and r.name == "STORAGE (11)")
-    corner = max(room11.outline.exterior.coords, key=lambda c: c[0] + c[1])      # its north-east corner
-    out = {"made_by": "packages/model_measurement/tests/make_eval_comparison.py", "units": "ft, sf",
+    room = next(r for r in story.rooms.values() if r is not None and r.name == co["start_room"])
+    corner = max(room.outline.exterior.coords, key=lambda c: c[0] + c[1])      # its north-east corner
+    out = {"made_by": "packages/model_measurement/tests/make_eval_comparison.py (run it to reproduce this file)",
+           "units": "ft, sf",
            "sheet_to_model": {"west_outer_face_pt": WEST_FACE_PT, "north_outer_face_pt": NORTH_FACE_PT,
                               "north_outer_face_ft": NORTH_FACE_FT, "pt_per_ft": PT_PER_FT}, "figures": {}}
     for name, s in SHEET.items():
         out["figures"][name] = {"sheet_stated": s["stated"], "sheet_words": s["words"],
                                 "sheet_line_as_drawn": drawn(s["line"]),
                                 "sheet_line_in_model": [list(model(p)) for p in s["line"]]}
+    measured = measure(description)                          # the story's verdicts, as the rules get them
     gordium = {}
     for r in (12.0, 0.0):
         routes = StoryRoutes(story, r)
-        to_east = routes.route(corner, [EAST_EXIT])
-        nearest = routes.route(corner)
-        common = at_point(routes, corner)
-        gordium[r] = (to_east.length / FT, nearest.length / FT, common.length / FT)
+        gordium[r] = (routes.route(corner, [co["sheet_exit"]]).length / FT, routes.route(corner),
+                      at_point(routes, corner))
+    nearest = gordium[12.0][1]
     start = [round(corner[0] / FT, 3), round(corner[1] / FT, 3)]
     out["figures"]["travel_distance"]["gordium"] = {
-        "from": list(start), "from_room": "STORAGE (11), its north-east corner (the sheet's start)",
-        "to_the_sheets_exit_with_12_in": round(gordium[12.0][0], 3), "to_the_sheets_exit_no_clearance":
-            round(gordium[0.0][0], 3), "to_the_nearest_exit_with_12_in": round(gordium[12.0][1], 3),
-        "story_verdict": "needs review: 5 rooms have no route (decision 1a)",
-        "why_different": "the sheet's line turns at right angles and runs the corridor's centre line to the east exit; "
-                         "Gordium's is the shortest walk to the same exit (its nearest exit is the north door)"}
+        "from": list(start), "from_room": f"{co['start_room']}, its north-east corner (the sheet's start)",
+        "to_the_sheets_exit_with_12_in": round(gordium[12.0][0], 3),
+        "to_the_sheets_exit_no_clearance": round(gordium[0.0][0], 3),
+        "to_the_nearest_exit_with_12_in": round(nearest.length / FT, 3), "nearest_exit": nearest.exit_id,
+        "story": _why(story, measured, "egress_travel_distance")}
     out["figures"]["common_path"]["gordium"] = {
-        "from": list(start), "with_12_in": round(gordium[12.0][2], 3), "no_clearance": round(gordium[0.0][2], 3),
-        "why_different": "the sheet's line turns at right angles to the room's door; Gordium's routes to the north "
-                         "and east exits share the walk to and past that door, not the right-angle path"}
-    west = next(d for d in story.exits() if abs(d.centre[0] / FT - 4.99) < 0.05 and abs(d.centre[1] / FT - 42.82) < 0.05)
-    east = next(d for d in story.exits() if d.exit_id == EAST_EXIT)
-    pair = straight.opening(west).distance(straight.opening(east)) / FT
+        "from": list(start), "with_12_in": round(gordium[12.0][2].length / FT, 3),
+        "no_clearance": round(gordium[0.0][2].length / FT, 3), "exits": list(gordium[12.0][2].exits),
+        "story": _why(story, measured, "common_path_of_travel")}
+    near = [next(d for d in story.exits() if math.dist((d.centre[0] / FT, d.centre[1] / FT), q) < 0.05)
+            for q in co["same_pair"]]
     far, across, ratio = straight.ratio(story)
     out["figures"]["remoteness"]["gordium"] = {
-        "same_pair_nearest_edges": round(pair, 3), "farthest_pair_nearest_edges": round(far.length / FT, 3),
-        "farthest_pair_door_centres": round(far.centres / FT, 3),
-        "why_different": "the sheet measures the west and east corridor exits (Gordium's same pair agrees); "
-                         "Gordium's figure is the farthest-apart pair (decision 7), the north-west and east doors"}
+        "same_pair_nearest_edges": round(straight.opening(near[0]).distance(straight.opening(near[1])) / FT, 3),
+        "farthest_pair_nearest_edges": round(far.length / FT, 3), "farthest_pair": list(far.exits),
+        "farthest_pair_door_centres": round(far.centres / FT, 3)}
     out["figures"]["diagonal"]["gordium"] = {
         "corner_to_corner": round(across.length / FT, 3), "ends": [[round(v / FT, 3) for v in p] for p in across.corners],
-        "ratio": round(ratio, 4),
-        "why_different": "the sheet's ticks are not at the traced outer outline's corners (its north-east tick lies "
-                         "about 3 ft north of the traced north face): a trace or a drawing difference, not settled"}
+        "ratio": round(ratio, 4)}
+    found = dead_ends.corridors(story, uses, StoryRoutes(story))
     out["figures"]["dead_end"]["gordium"] = {
-        "measured": None, "why": "the corridor isn't straight legs at right angles: not measured (decision 6)",
-        "by_hand_centre_line_reading": round(74.85 - (37.844 + 47.833) / 2, 3),
-        "why_different": "the sheet ends the stub's dead end at the widening's near edge (y 53.17); decision 6 "
-                         "measures to the crossing corridor's centre line (y 42.84), open question 2"}
+        rid: ({"not_measured": c.stop} if c.stop else
+              {"dead_ends": [{"from": [round(v / FT, 3) for v in d.start],
+                              "length": round(d.length[dead_ends.WITHOUT] / FT, 3),
+                              "least_width": round(d.width[dead_ends.WITHOUT] / FT, 3)} for d in c.dead_ends]})
+        for rid, c in sorted(found.items())}
     acc = areas.accessory_area(story, uses)
-    out["storage"] = {"sheet_stated_sf": 1428, "sheet_story_sf": 16509, "story_sf_correct": 16539,
+    out["storage"] = {"sheet_stated_sf": 1428, "sheet_story_sf": 16509,
                       "gordium_inside_sf": round(acc[0].value / FT / FT, 1),
                       "gordium_outer_faces_sf": round(acc[1].value / FT / FT, 1),
                       "gordium_story_sf": [round(x.value / FT / FT, 1) for x in areas.building_area(story)],
                       "rooms": {r.name: round(r.outline.area / FT / FT, 1) for r in story.rooms.values()
-                                if r is not None and uses.get(r.id) == "accessory_storage"},
-                      "why_different": "the sheet doesn't list its rooms; over the five rooms marked accessory "
-                                       "storage, Gordium's outer-faces reading is within 1 percent of the sheet's, "
-                                       "its inside reading 17 percent under: the sheet likely measured to the walls' "
-                                       "outer faces (open question 3)"}
-    OUT.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8")
-    print(OUT)
+                                if r is not None and uses.get(r.id) == "accessory_storage"}}
+    out["by_hand"] = BY_HAND
+    out_path.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    return out
+
+
+BY_HAND = {   # worked by hand from the sheet and the model, not by the route code: each with its working
+    "travel_distance": "the sheet's line turns at right angles and runs the corridor's centre line to the east exit; "
+                       "Gordium's is the shortest walk to the same exit",
+    "common_path": "the sheet's line turns at right angles to the room's door; Gordium's two routes share the walk "
+                   "to and past that door",
+    "dead_end_centre_line_reading": {"figure": 32.011, "working": "the stub's closed end, y 74.85 (the corridor "
+                                     "outline), to the main corridor's centre line, (37.844 + 47.833) / 2 = 42.839: "
+                                     "74.85 - 42.839 = 32.011 ft; the sheet ends at the widening's near edge, y "
+                                     "53.17 (open question 2)"},
+    "remoteness": "the sheet measures the west and east corridor exits; decision 7 takes the farthest-apart pair",
+    "diagonal": "the sheet's ticks are not at the traced outer outline's corners (its north-east tick about 3 ft "
+                "north of the traced north face): a trace or drawing difference, not settled",
+    "storage": "the sheet doesn't list its rooms; Gordium's outer-faces reading is within 1 percent of the sheet's",
+    "story_sf_correct": {"figure": 16539, "working": "the sheet's 16,509 is a recorded error (hand_check.yaml)"},
+}
 
 
 if __name__ == "__main__":
     main(sys.argv[1])
+    print(OUT)
