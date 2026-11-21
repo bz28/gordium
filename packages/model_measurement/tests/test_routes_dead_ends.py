@@ -102,6 +102,21 @@ def test_a_recess_shallower_than_12_in_is_ignored():
     assert [ft(v) for v in c.pair(WITHOUT)] == [20.0, 8.0] and ft(c.width) == 8.0
 
 
+def test_a_recess_in_a_dead_ends_end_wall_never_moves_its_closed_end():
+    # an alcove 3 ft wide, 11 in deep, centred in the branch's end wall (x 22.5 to 25.5): filled to find the legs,
+    # but the dead end runs to its back: 16 + 11/12 + 4 = 20.917 ft (review round 1: it was 20.0, a pass at 20 ft)
+    d = branch()
+    poly = [(0, 0), (60, 0), (60, 8), (28, 8), (28, 24), (25.5, 24), (25.5, 24 + 11 / 12), (22.5, 24 + 11 / 12),
+            (22.5, 24), (20, 24), (20, 8), (0, 8)]
+    d["rooms"][0]["floor"] = [list(p) for p in poly]
+    length, width = only(measure(d)).pair(WITHOUT)
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == 8.0
+    # the same mirrored (the branch running south, its closed end at the leg's other end): the same figure
+    d["rooms"][0]["floor"] = [[x, 8 - y] for x, y in reversed(poly)]
+    length, _ = only(measure(d)).pair(WITHOUT)
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9)
+
+
 def test_an_obstruction_narrows_the_dead_ends_least_width():
     # a cabinet 1 ft deep along the branch's west wall: 10 - 1 = 9 ft clear; 2.5 x 9 = 22.5 < 24.995: no exception
     c = only(measure(branch(10, 20 - 1 / 192, cabinet=1)))

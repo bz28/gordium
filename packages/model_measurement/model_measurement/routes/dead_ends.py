@@ -682,6 +682,12 @@ def _group(story, members, g, legs_all) -> _Floor:
                 lo = cuts[0]
             if _proper_in(leg, cuts[-1], hi) <= SAME:
                 hi = cuts[-1]
+        # an end kept at its rectangle's end is a closed end: run it on to the real floor's end (a recess under
+        # 12 in was filled to find the legs, never to move a closed end)
+        if lo == leg.span[0]:
+            lo = _to_real_end(square, leg, lo, -1)
+        if hi == leg.span[1]:
+            hi = _to_real_end(square, leg, hi, 1)
         leg.kept = (lo, hi)
         legs_all.append(leg)
         marks = sorted({lo, hi, *[c for c in cuts if lo <= c <= hi]})
@@ -701,6 +707,24 @@ def _group(story, members, g, legs_all) -> _Floor:
         if not piece.is_empty and piece.area > SAME * SAME:
             blocks.append(piece.bounds)
     return _Floor(sorted(ids), frame, list(range(base, base + len(legs))), blocks)
+
+
+def _to_real_end(square, leg, u, way) -> float:
+    """Where the centre line, run on from u (a closed end of the filled floor) the way `way`, leaves the real floor:
+    the back of a recess filled in finding the legs, or u itself."""
+    reach = SHALLOW + 2 * SAME
+    ray = LineString([leg.point(u), leg.point(u + way * reach)])
+    got = ray.intersection(square)
+    best = u
+    for part in getattr(got, "geoms", [got]):
+        if part.is_empty or part.geom_type != "LineString":
+            continue
+        ends = [leg.along(c) for c in part.coords]
+        if min(abs(e - u) for e in ends) <= SAME:          # the piece that starts at u
+            far = max(ends, key=lambda e: way * e)
+            if way * far > way * best:
+                best = far
+    return best
 
 
 def _attach(g, legs, floor_of, key, frame, door):
