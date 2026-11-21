@@ -97,20 +97,24 @@ area need review.
    read (that room not read, so its story needs review). A room whose only way to an exit crosses an end-only room
    needs review (an exception, such as 1014.2's for a kitchen, may allow it; Gordium doesn't assume one). This only
    removes routes, so it only lengthens them.
-2. **The rings are exact circles; routes are exact shortest paths among them.** Each ring is a true circle of 12-in
-   radius round a wall corner that sticks into the floor, a jamb, or each corner of an obstruction (an obstruction's
-   straight sides offset by 12 in join its corner circles, and a shortest route only ever touches those circles).
-   The standard **tangent graph**: its nodes are the start point, the door centres, and the points where a straight
-   line touches a ring; its edges are the straight lines from a point to a ring or between two rings (each pair of
-   rings has four, two outer and two crossing) that cross no wall and come within 12 in of no other ring's centre,
-   and the arcs along each ring between its touching points. Dijkstra over it gives the exact shortest route, so the
-   hand figures of the tests hold as written, where two routes part is exact, and no polygon's orientation can change
-   an answer. **Work:** for m rings in a zone, about 4 m squared touching lines, each checked against the zone's walls
-   and rings (about m cubed in all: well under a second for a few hundred rings), Dijkstra on the rest. **Numbers:**
-   in double precision; a line counts as clear of a ring if it passes at least 12 in minus 10^-9 ft from its centre
-   (a line just touching is clear), and lengths are good to far better than 1/1000 ft. *Rejected:* rings as polygons
-   (an earlier draft of this note): a route round a polygon is longer than round the circle by an amount that
-   depends on how the polygon is turned, enough to move test 6's figures and lose its tie.
+2. **What a route is, exactly.** The route from a point p to an exit is **the shortest curve** that (a) lies in the
+   zone's free floor: the crossable rooms' outlines (decision 1a) minus walls, holes and obstructions, joined
+   through door openings, passing each door at its centre; (b) stays at least 12 in from every corner: each wall
+   corner that sticks into the floor, each corner of an obstruction, each door jamb (a ring: a true circle of 12-in
+   radius); except that (c) inside a ring that contains p, or the door centre it passes, the curve may run within
+   that ring until it leaves it. A point inside no ring and seen straight from the door centre has a straight route.
+   This is the definition the tests check; how it is computed is the build PR's.
+   **Computing it** is standard and exact: a visibility graph among circles and polygon obstacles. Its nodes are the
+   start, the door centres and the points where a straight line touches a ring; its edges are the straight segments
+   point to point, point to ring and ring to ring (each pair of rings has four touching lines) that lie wholly in
+   the free floor and keep 12 in from every ring they don't touch, and the arcs along each ring between touching
+   points; Dijkstra over it. The build PR's code and its tests are the procedure's full statement. **Work:** for m
+   rings and w wall segments in a zone, about 4 m squared candidate lines, each checked against the walls,
+   obstructions and rings (about m squared times (m + w) in all: well under a second for a few hundred rings).
+   **Numbers:** double precision; clearance tested to 10^-9 ft (a line just touching a ring is clear); **two lengths
+   within 10^-6 ft of each other are a tie**, broken toward the cautious reading (decision 5: the route that shares
+   more). *Rejected:* rings as polygons (an earlier draft): a route round a polygon is longer than round the circle
+   by an amount that depends on how the polygon is turned, enough to move test 6's figures and lose its tie.
 3. **The most remote point: every corner, plus a fine sampling with a stated bound.** For one exit and a room with no
    column, the farthest point is always a corner of the room: the route to any point ends in a straight line from
    the last corner it turns at, distance from that corner grows toward the edges of the area it sees, and where two
@@ -136,7 +140,8 @@ area need review.
    **last point the two routes share** (a door centre, a ring, a stretch walked together); so a stretch where they
    meet again after parting counts, and two routes that share only the start give 0. The point's common path is the
    least over the pairs of distinct exits: the law ends it as soon as two distinct paths are available, whichever
-   two. Where two routes to one exit are equally short, the one that shares more is taken (the cautious side). Taken
+   two. Where two routes to one exit are equally short (within 10^-6 ft, decision 2), the one that shares more is
+   taken (the cautious side). Taken
    on the real geometry, two doors of one room still give a common path when both routes go round the same corner
    first (test 6).
    **Why the bound of decision 3 holds.** The law's figure at a point p is the least, over every pair of paths a
@@ -223,7 +228,7 @@ area need review.
 ## How we will know it is right
 
 **Synthetic tests, answers worked by hand** (feet; walls 6 in thick, so a door's centre sits 0.25 ft outside the room;
-doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6) was
+doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6, the table and the corner start included) was
 worked two ways for this note: by the tangent-and-arc formulas, and by a throwaway brute-force shortest path over
 fine 512-sided polygons of the rings (neither kept, neither the route code); they agree to 1/1000 ft. The code's tests hold
 these hand figures as written in the test file, never taken from the code under test, which is the third way.
@@ -254,6 +259,12 @@ these hand figures as written in the test file, never taken from the code under 
    tangent 22.338 + arc together 0.925 (53.0 degrees, until the route to (28, 40.25) leaves) = **23.263 ft
    common**, not 0. Fails on a door-graph method. The room's `common_path_of_travel` is a number (the greatest
    sample plus 3 in), never needs review.
+   **A table in the way:** a room 0 to 20 by 0 to 20, a table 6 by 3 ft (7 to 13 by 8.5 to 11.5) in its middle, a
+   start at (10, 0) and the exit door centred at (10, 20.25). The straight line, 20.25 ft, crosses the table; the
+   route goes round one side, touching the rings at two of its corners and running along the side 12 in off it:
+   8.958 + arc 0.450 (25.8 degrees) + 3 + arc 0.439 (25.1 degrees) + 9.196 = **22.043 ft**. Fails if a line may
+   cross an obstruction. **A start on a corner:** test 1's corridor, from the inside corner (34, 6) itself (inside
+   its own ring): straight to the door centre, **34.381 ft**, never "no route".
    **Two exits and a column:** test 2's room and column, exit A the west door centred at (-0.25, 5), exit B a 36-in
    door in the north wall centred at (2, 10.25), its jambs at x 0.5 and 3.5 (each with its ring). At (30, 5) the two ways round the column to A are equally short (the
    room is symmetric about y = 5); taking the one over the top (the tie toward more shared, decision 5), both
