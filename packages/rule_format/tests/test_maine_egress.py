@@ -90,9 +90,10 @@ def test_the_rules_reproduce_the_architects_hand_check(ctx, rules):
             for e in found:
                 given = [p["measures"].get(measure) for p in e["parts"][r["for_each"]]]
                 assert given == [pytest.approx(value, abs=1e-3)], (rid, given)
+                want = (check.get("gordium_result") or {}).get(rid, check["result"])
                 as_rule = e.get("drafted_check", e["expect"])
-                assert as_rule == check["result"] == "pass", rid
-                assert e["expect"] == ("needs_review" if r["kind"] == "flag" else "pass"), rid
+                assert check["result"] == "pass" and as_rule == want, rid
+                assert e["expect"] == ("needs_review" if r["kind"] == "flag" else want), rid
                 seen.add(rid)
     assert {"general.ibc_1016_1_travel_distance", "general.nfpa_16_2_6_2_point_in_room_to_exit",
             "general.ibc_1014_3_common_path", "general.nfpa_16_2_5_3_1_common_path_sprinklered",
@@ -140,3 +141,60 @@ def test_nfpa_feet_printed_ft_back_a_length(ctx):
     assert code_numbers.problems(dict(rule, check="corridor_dead_end_length <= 6100"), [dead_end], ctx)  # the mm
     cut = dict(dead_end, quote="No dead-end corridor shall exceed 20")     # no "ft" printed: no length
     assert any("isn't one of" in p for p in code_numbers.problems(rule, [cut], ctx))
+
+
+# ---- review round 1 (2026-11-20): what the law leaves open, or the rule doesn't count, never passes ----------------
+
+def _rows(rule, kind, measures, given, ctx):
+    return [r["outcome"] for r in parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())]
+
+
+NEW_SPRINKLERED = {"nfpa_day_care_occupancy": True, "day_care_existing": False, "sprinklered_9_7": True,
+                   "sprinkler_supervised_9_7": True}
+
+
+@pytest.mark.parametrize("rid", ["general.nfpa_16_2_5_2_dead_end", "general.nfpa_17_2_5_2_dead_end"])
+def test_a_dead_end_over_20_ft_needs_review_while_maines_flat_20_ft_is_open(ctx, rules, rid):
+    given = NEW_SPRINKLERED | {"day_care_existing": rid.startswith("general.nfpa_17"), "existing_change_of_use": False}
+    for length, want in ((15, "pass"), (21.5, "needs_review"), (45, "needs_review"), (55, "fail")):
+        assert _rows(rules[rid], "corridor", {"corridor_dead_end_length": length}, given, ctx) == [want], length
+    unsprinklered = given | {"sprinklered_9_7": False}
+    assert _rows(rules[rid], "corridor", {"corridor_dead_end_length": 21.5}, unsprinklered, ctx) == ["fail"]
+
+
+@pytest.mark.parametrize("rid", ["general.nfpa_16_1_7_1_occupant_load", "general.nfpa_17_1_7_1_occupant_load"])
+def test_an_occupant_load_with_other_uses_on_the_story_needs_review(ctx, rules, rid):
+    given = {"nfpa_day_care_occupancy": True, "day_care_existing": rid.startswith("general.nfpa_17"),
+             "existing_change_of_use": False}
+    base = {"story_occupant_load": 105, "story_day_care_net_area": 3500}
+    assert _rows(rules[rid], "story", base | {"story_other_use_area": 0}, given, ctx) == ["pass"]
+    assert _rows(rules[rid], "story", base | {"story_other_use_area": 1500}, given, ctx) == ["needs_review"]
+    assert _rows(rules[rid], "story", base, given, ctx) == ["needs_review"]          # not said: never a pass
+
+
+def test_chapter_16_reaches_an_existing_day_care_unless_no_change_of_use_is_stated(ctx, rules):
+    """NFPA 4.6.11 and Chapter 43 (not brought in) can make a changed existing building meet Chapter 16: an existing
+    day care is held to Chapter 16 too unless the architect states there was no change of use."""
+    r = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    existing = NEW_SPRINKLERED | {"day_care_existing": True}
+    long_path = {"common_path_of_travel": 110}
+    assert _rows(r, "story", long_path, existing, ctx) == ["needs_review"]                 # change of use not said
+    assert _rows(r, "story", long_path, existing | {"existing_change_of_use": True}, ctx) == ["fail"]
+    assert _rows(r, "story", long_path, existing | {"existing_change_of_use": False}, ctx) == ["not_applicable"]
+
+
+def test_every_table_has_a_rule_named_for_it_never_a_sections_rule_standing_in():
+    for stem in ("icc.ibc.2009", "gov.law.nfpa.101.2012"):
+        got = yaml.safe_load((MAINE / f"6_coverage_report/{stem}.rules.yaml").read_text(encoding="utf-8"))
+        for pid, e in got["pieces"].items():
+            if pid.startswith("Table "):
+                assert e["rules"] and all("_table_" in r for r in e["rules"]), (pid, e["rules"])
+
+
+def test_the_decision_note_says_what_is_done_with_the_ocrs_misreads():
+    """No Maine book puts a misread right in its text (sources.yaml has no brought_in.misread): the IBC's are named in
+    the labels' notes. The decision note must say so, not that they are put right by line."""
+    sources = load(MAINE / "1_source_documents/sources.yaml")["documents"]
+    assert not any("misread" in (d.get("brought_in") or {}) for d in sources)
+    note = " ".join((REPO / "docs/decisions/2026-11-20_commercial_egress_maine.md").read_text(encoding="utf-8").split())
+    assert "misreads are put right by line" not in note and "named in the labels' notes" in note

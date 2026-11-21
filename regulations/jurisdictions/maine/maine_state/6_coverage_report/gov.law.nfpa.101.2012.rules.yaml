@@ -28,13 +28,12 @@ pieces:
     label: rule
     heading: †
     rules:
-    - general.nfpa_6_1_14_4_1_separation
+    - general.nfpa_table_6_1_14_4_1_b__separation_hours
   Table 7.3.1.2:
     label: rule
     heading: Table 7.3.1.2 Occupant Load Factor
     rules:
-    - general.nfpa_16_1_7_1_occupant_load
-    - general.nfpa_17_1_7_1_occupant_load
+    - general.nfpa_table_7_3_1_2_other_uses
   16.1.7.1:
     label: rule
     heading: Occupant Load › The occupant load, in number of persons for whom

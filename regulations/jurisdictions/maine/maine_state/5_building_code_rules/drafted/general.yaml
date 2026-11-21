@@ -337,6 +337,10 @@ rules:
   title: Occupant load at least net area / 35 (IBC 1004.1.1)
   applies_when: occupancy_group_i4
   check: story_occupant_load >= story_day_care_net_area / 35
+  review_when:
+  - when: story_other_use_area > 0
+    reason: 'Part of the story is in a use other than day care: Table 1004.1.1 gives each function of space its own factor,
+      which this test doesn''t add; a person adds them.'
   for_each: story
   when_none: needs_review
   sources:
@@ -363,6 +367,7 @@ rules:
         measures:
           story_occupant_load: 120
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p1
       outcome: needs_review
@@ -378,6 +383,7 @@ rules:
         measures:
           story_occupant_load: 90
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p2
       outcome: needs_review
@@ -393,6 +399,22 @@ rules:
     expect: needs_review
     note: 'No story: the rule''s when_none (needs_review).'
   - given:
+      occupancy_group_i4: true
+    parts:
+      story:
+      - id: p1
+        name: Day care with offices
+        measures:
+          story_occupant_load: 105
+          story_day_care_net_area: 3500
+          story_other_use_area: 1500
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: needs_review
+    note: 'Other uses on the story (Table 1004.1.1 gives each its own factor): the drafted test sends them to a person too.'
+  - given:
       occupancy_group_i4: false
     parts:
       story:
@@ -401,6 +423,7 @@ rules:
         measures:
           story_occupant_load: 1
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p1
       outcome: not_applicable
@@ -1269,8 +1292,12 @@ rules:
   kind: rule
   topic: density_and_occupancy
   title: Occupant load at least net area / 35 (NFPA 16.1.7.1)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   check: story_occupant_load >= story_day_care_net_area / 35
+  review_when:
+  - when: story_other_use_area > 0
+    reason: 'Part of the story is in a use other than day care (offices, a kitchen, storage...): Table 7.3.1.2 gives each
+      use its own factor, which this rule doesn''t add to the day-care load; a person adds them.'
   for_each: story
   when_none: needs_review
   sources:
@@ -1299,6 +1326,7 @@ rules:
         measures:
           story_occupant_load: 120
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p1
       outcome: pass
@@ -1314,10 +1342,28 @@ rules:
         measures:
           story_occupant_load: 90
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p2
       outcome: fail
     expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      story:
+      - id: p3
+        name: Day care with offices and a kitchen
+        measures:
+          story_occupant_load: 105
+          story_day_care_net_area: 3500
+          story_other_use_area: 1500
+    rows:
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    note: '1,500 sf in other uses (offices, a kitchen: Table 7.3.1.2''s own factors, 100 each): their occupants aren''t counted
+      by this rule, so it needs review, never pass.'
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -1330,6 +1376,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     parts:
       story:
       - id: p1
@@ -1337,6 +1384,7 @@ rules:
         measures:
           story_occupant_load: 1
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p1
       outcome: not_applicable
@@ -1351,7 +1399,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Doors complying with 7.2.1 (NFPA 16.2.2.2.1)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   sources:
   - file: gov.law.nfpa.101.2012.pdf
     page: 174
@@ -1368,6 +1416,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: not_applicable
     note: Not a new day-care occupancy.
   notes: Hand-drafted in a Claude Code session (2026-11-20).
@@ -1377,7 +1426,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Delayed-egress locking (NFPA 16.2.2.2.3.1)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   sources:
   - file: gov.law.nfpa.101.2012.pdf
     page: 174
@@ -1394,6 +1443,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: not_applicable
     note: Not a new day-care occupancy.
   notes: Hand-drafted in a Claude Code session (2026-11-20).
@@ -1403,7 +1453,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Access-controlled egress doors (NFPA 16.2.2.2.3.2)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   sources:
   - file: gov.law.nfpa.101.2012.pdf
     page: 174
@@ -1420,6 +1470,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: not_applicable
     note: Not a new day-care occupancy.
   notes: Hand-drafted in a Claude Code session (2026-11-20).
@@ -1429,7 +1480,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Elevator lobby door locking (NFPA 16.2.2.2.3.3)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   sources:
   - file: gov.law.nfpa.101.2012.pdf
     page: 174
@@ -1446,6 +1497,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: not_applicable
     note: Not a new day-care occupancy.
   notes: Hand-drafted in a Claude Code session (2026-11-20).
@@ -1455,7 +1507,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Latches openable by clients from inside (NFPA 16.2.2.2.4)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   sources:
   - file: gov.law.nfpa.101.2012.pdf
     page: 174
@@ -1473,6 +1525,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: not_applicable
     note: Not a new day-care occupancy.
   notes: Hand-drafted in a Claude Code session (2026-11-20).
@@ -1482,7 +1535,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Bathroom locks openable from outside by staff (NFPA 16.2.2.2.5)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   sources:
   - file: gov.law.nfpa.101.2012.pdf
     page: 174
@@ -1499,6 +1552,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: not_applicable
     note: Not a new day-care occupancy.
   notes: Hand-drafted in a Claude Code session (2026-11-20).
@@ -1508,7 +1562,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Latch only with panic hardware at 100+ (NFPA 16.2.2.2.2)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   check: moe_door_area_occupant_load < 100 or not moe_door_latched or moe_door_panic_hardware
   for_each: means_of_egress_door
   when_none: needs_review
@@ -1591,8 +1645,14 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   check: corridor_dead_end_length <= (50 if sprinklered_9_7 and sprinkler_supervised_9_7 else 20)
+  review_when:
+  - when: corridor_dead_end_length > 20 and corridor_dead_end_length <= 50 and sprinklered_9_7 and sprinkler_supervised_9_7
+    reason: 'Over 20 ft, within this book''s 50 ft (sprinklered, supervised): Maine''s own Life Safety rule (16-219 CMR ch.
+      20) may cap a dead end at a flat 20 ft (today''s rule does; the rule in force in October 2016 is the open question below).
+      Only 20 ft is certain under every reading, so a longer dead end needs review until the State Fire Marshal or the City
+      answers.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -1618,10 +1678,11 @@ rules:
           corridor_dead_end_length: 21.5
     rows:
     - part: p1
-      outcome: pass
-    expect: pass
-    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" against 50 ft (sprinklered,
-      supervised): passes.'
+      outcome: needs_review
+    expect: needs_review
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" is within this book''s
+      50 ft (sprinklered, supervised), but over the flat 20 ft Maine''s 16-219 CMR ch. 20 may set (the open question): needs
+      review, never pass, until it is answered.'
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: false
@@ -1630,11 +1691,27 @@ rules:
     parts:
       corridor:
       - id: p2
+        name: Short dead end
+        measures:
+          corridor_dead_end_length: 15
+    rows:
+    - part: p2
+      outcome: pass
+    expect: pass
+    note: Within 20 ft under every reading.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor:
+      - id: p3
         name: Very long dead end
         measures:
           corridor_dead_end_length: 55
     rows:
-    - part: p2
+    - part: p3
       outcome: fail
     expect: fail
   - given:
@@ -1688,7 +1765,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Common path 100 ft, sprinklered (NFPA 16.2.5.3.1)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing and sprinklered_9_7 and sprinkler_supervised_9_7
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use) and sprinklered_9_7 and sprinkler_supervised_9_7
   check: common_path_of_travel <= 100
   for_each: story
   when_none: needs_review
@@ -1767,7 +1844,8 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Common path 75 ft, not sprinklered (NFPA 16.2.5.3.2)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing and not (sprinklered_9_7 and sprinkler_supervised_9_7)
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use) and not (sprinklered_9_7 and
+    sprinkler_supervised_9_7)
   check: common_path_of_travel <= 75
   for_each: story
   when_none: needs_review
@@ -1845,7 +1923,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Travel room door to exit at most 100 ft (NFPA 16.2.6.2(1))
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   check: egress_travel_from_room_door <= 100
   review_when:
   - when: egress_travel_from_room_door > 100 and sprinklered_9_7 and sprinkler_supervised_9_7
@@ -1934,7 +2012,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Travel point in room to exit at most 150 ft (NFPA 16.2.6.2(2))
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   check: egress_travel_distance <= 150
   review_when:
   - when: egress_travel_distance > 150 and sprinklered_9_7 and sprinkler_supervised_9_7
@@ -2026,7 +2104,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Travel sleeping room to door at most 50 ft (NFPA 16.2.6.2(3))
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   check: egress_travel_in_sleeping_room <= 50
   for_each: story
   when_none: needs_review
@@ -2094,8 +2172,8 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Travel +50 ft where sprinklered (NFPA 16.2.6.3)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing and sprinklered_9_7 and sprinkler_supervised_9_7 and (egress_travel_from_room_door
-    > 100 or egress_travel_distance > 150)
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use) and sprinklered_9_7 and sprinkler_supervised_9_7
+    and (egress_travel_from_room_door > 100 or egress_travel_distance > 150)
   for_each: story
   when_none: not_applicable
   sources:
@@ -2178,7 +2256,7 @@ rules:
   kind: rule
   topic: means_of_egress
   title: Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6)
-  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
   check: corridor_fire_rating_hours >= 1 or client_spaces_open_outside or (sprinklered_9_7 and sprinkler_supervised_9_7 and
     corridor_walls_smoke_partitions)
   for_each: corridor
@@ -2286,6 +2364,10 @@ rules:
   title: Occupant load at least net area / 35 (NFPA 17.1.7.1)
   applies_when: nfpa_day_care_occupancy and day_care_existing
   check: story_occupant_load >= story_day_care_net_area / 35
+  review_when:
+  - when: story_other_use_area > 0
+    reason: 'Part of the story is in a use other than day care (offices, a kitchen, storage...): Table 7.3.1.2 gives each
+      use its own factor, which this rule doesn''t add to the day-care load; a person adds them.'
   for_each: story
   when_none: needs_review
   sources:
@@ -2307,6 +2389,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     parts:
       story:
       - id: p1
@@ -2314,6 +2397,7 @@ rules:
         measures:
           story_occupant_load: 120
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p1
       outcome: pass
@@ -2322,6 +2406,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     parts:
       story:
       - id: p2
@@ -2329,6 +2414,7 @@ rules:
         measures:
           story_occupant_load: 90
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p2
       outcome: fail
@@ -2336,6 +2422,25 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
+    parts:
+      story:
+      - id: p3
+        name: Day care with offices and a kitchen
+        measures:
+          story_occupant_load: 105
+          story_day_care_net_area: 3500
+          story_other_use_area: 1500
+    rows:
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    note: '1,500 sf in other uses (offices, a kitchen: Table 7.3.1.2''s own factors, 100 each): their occupants aren''t counted
+      by this rule, so it needs review, never pass.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      existing_change_of_use: false
     parts:
       story: []
     rows:
@@ -2352,6 +2457,7 @@ rules:
         measures:
           story_occupant_load: 1
           story_day_care_net_area: 3500
+          story_other_use_area: 0
     rows:
     - part: p1
       outcome: not_applicable
@@ -2378,6 +2484,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: needs_review
     note: 'Section 7.2.1 is not brought in: whether each door complies needs review.'
   - given:
@@ -2404,6 +2511,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: needs_review
     note: '7.2.1.6.1 is not brought in: a person checks the system.'
   - given:
@@ -2430,6 +2538,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: needs_review
     note: '7.2.1.6.2 is not brought in: a person checks.'
   - given:
@@ -2456,6 +2565,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: needs_review
     note: '7.2.1.6.3 is not brought in: a person checks.'
   - given:
@@ -2483,6 +2593,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: needs_review
     note: The hardware is a person's check.
   - given:
@@ -2509,6 +2620,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     expect: needs_review
     note: The hardware is a person's check.
   - given:
@@ -2546,6 +2658,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     parts:
       means_of_egress_door:
       - id: p1
@@ -2561,6 +2674,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     parts:
       means_of_egress_door:
       - id: p2
@@ -2576,6 +2690,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     parts:
       means_of_egress_door:
       - id: p3
@@ -2592,6 +2707,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
     parts:
       means_of_egress_door: []
     rows:
@@ -2608,6 +2724,12 @@ rules:
   title: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 17.2.5.2)
   applies_when: nfpa_day_care_occupancy and day_care_existing
   check: corridor_dead_end_length <= (50 if sprinklered_9_7 and sprinkler_supervised_9_7 else 20)
+  review_when:
+  - when: corridor_dead_end_length > 20 and corridor_dead_end_length <= 50 and sprinklered_9_7 and sprinkler_supervised_9_7
+    reason: 'Over 20 ft, within this book''s 50 ft (sprinklered, supervised): Maine''s own Life Safety rule (16-219 CMR ch.
+      20) may cap a dead end at a flat 20 ft (today''s rule does; the rule in force in October 2016 is the open question below).
+      Only 20 ft is certain under every reading, so a longer dead end needs review until the State Fire Marshal or the City
+      answers.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -2623,6 +2745,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -2633,28 +2756,48 @@ rules:
           corridor_dead_end_length: 21.5
     rows:
     - part: p1
-      outcome: pass
-    expect: pass
-    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" against 50 ft (sprinklered,
-      supervised): passes.'
+      outcome: needs_review
+    expect: needs_review
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" is within this book''s
+      50 ft (sprinklered, supervised), but over the flat 20 ft Maine''s 16-219 CMR ch. 20 may set (the open question): needs
+      review, never pass, until it is answered.'
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
       corridor:
       - id: p2
+        name: Short dead end
+        measures:
+          corridor_dead_end_length: 15
+    rows:
+    - part: p2
+      outcome: pass
+    expect: pass
+    note: Within 20 ft under every reading.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      existing_change_of_use: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor:
+      - id: p3
         name: Very long dead end
         measures:
           corridor_dead_end_length: 55
     rows:
-    - part: p2
+    - part: p3
       outcome: fail
     expect: fail
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -2666,6 +2809,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2719,6 +2863,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -2735,6 +2880,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -2750,6 +2896,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -2761,6 +2908,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2798,6 +2946,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2813,6 +2962,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2828,6 +2978,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2839,6 +2990,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -2886,6 +3038,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2901,6 +3054,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2917,6 +3071,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2928,6 +3083,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -2975,6 +3131,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -2992,6 +3149,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -3008,6 +3166,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -3019,6 +3178,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -3063,6 +3223,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -3078,6 +3239,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -3094,6 +3256,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
     parts:
@@ -3142,6 +3305,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -3159,6 +3323,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -3176,6 +3341,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
     parts:
@@ -3225,6 +3391,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
       client_spaces_open_outside: false
@@ -3244,6 +3411,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
       client_spaces_open_outside: false
@@ -3262,6 +3430,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: true
       sprinkler_supervised_9_7: true
       client_spaces_open_outside: false
@@ -3274,6 +3443,7 @@ rules:
   - given:
       nfpa_day_care_occupancy: true
       day_care_existing: true
+      existing_change_of_use: false
       sprinklered_9_7: false
       sprinkler_supervised_9_7: false
       client_spaces_open_outside: false
@@ -3405,6 +3575,240 @@ rules:
   - given: {}
     expect: needs_review
     note: A judgment.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_table_1004_1_1_other_uses
+  kind: flag
+  topic: density_and_occupancy
+  title: Other functions of space on the story (IBC Table 1004.1.1)
+  applies_when: story_other_use_area > 0
+  for_each: story
+  when_none: not_applicable
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 247
+    lines:
+    - 60
+    - 61
+    quote: TABLE 1004.1.1 MAXIMUM FLOOR AREA ALLOWANCES PER OCCUPANT
+  examples:
+  - given:
+      occupancy_group_i4: true
+    parts:
+      story:
+      - id: p1
+        name: Other uses
+        measures:
+          story_other_use_area: 1500
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: Part of the story in another use.
+  - given:
+      occupancy_group_i4: true
+    parts:
+      story:
+      - id: p1
+        name: Day care only
+        measures:
+          story_other_use_area: 0
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Day care only: the section''s rule checks its row.'
+  - given:
+      occupancy_group_i4: true
+    parts:
+      story: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No story: nothing to check here.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    The day-care row (35 net) is general.ibc_1004_1_1_occupant_load''s; any other function of space on the story is a person''s.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_table_1015_1_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Spaces with one exit, other occupancies (IBC Table 1015.1)
+  applies_when: not occupancy_group_i4
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 18
+    - 19
+    quote: TABLE 1015.1 I SPACES WITH ONE EXIT OR EXIT ACCESS DOORWAY
+  examples:
+  - given:
+      occupancy_group_i4: false
+    expect: needs_review
+    note: 'Another occupancy''s row: a person reads it.'
+  - given:
+      occupancy_group_i4: true
+    expect: not_applicable
+    note: 'Group I-4 (day care): the section''s rule checks its row.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Group I-4 and day care (10) is general.ibc_1015_1_two_exits''; another occupancy''s row is a person''s.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_table_1016_1_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Travel distance, other occupancies (IBC Table 1016.1)
+  applies_when: not occupancy_group_i4
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 267
+    lines:
+    - 56
+    - 59
+    quote: TABLE 1016.1 a EXIT ACCESS TRAVEL DISTANCE WITHOUT SPRINKLER WITH SPRINKLER
+  examples:
+  - given:
+      occupancy_group_i4: false
+    expect: needs_review
+    note: 'Another occupancy''s row: a person reads it.'
+  - given:
+      occupancy_group_i4: true
+    expect: not_applicable
+    note: 'Group I-4 (day care): the section''s rule checks its row.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Group I-4 (200 ft sprinklered) is general.ibc_1016_1_travel_distance''s; another occupancy''s row is a person''s.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_table_1018_1_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Corridor rating, other occupancies (IBC Table 1018.1)
+  applies_when: not occupancy_group_i4
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 268
+    lines:
+    - 79
+    - 80
+    quote: TABLE 1018.1 CORRIDOR FIRE-RESISTANCE RATING
+  examples:
+  - given:
+      occupancy_group_i4: false
+    expect: needs_review
+    note: 'Another occupancy''s row: a person reads it.'
+  - given:
+      occupancy_group_i4: true
+    expect: not_applicable
+    note: 'Group I-4 (day care): the section''s rule checks its row.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Group I-4 is general.ibc_1018_1_corridor_rating''s; another occupancy''s row is a person''s.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_table_508_2_5_incidental_rooms
+  kind: flag
+  topic: fire_separation
+  title: Incidental rooms and their separation (IBC Table 508.2.5)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 112
+    lines:
+    - 43
+    - 44
+    quote: TABLE 508.2.5 INCIDENTAL ACCESSORY OCCUPANCIES
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Which rooms are incidental, and the separation or protection each row asks, are a person's check.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_table_7_3_1_2_other_uses
+  kind: flag
+  topic: density_and_occupancy
+  title: Other uses on the story (NFPA Table 7.3.1.2)
+  applies_when: nfpa_day_care_occupancy and story_other_use_area > 0
+  for_each: story
+  when_none: not_applicable
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 77
+    lines:
+    - 3
+    - 3
+    quote: Table 7.3.1.2 Occupant Load Factor
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+    parts:
+      story:
+      - id: p1
+        name: Other uses
+        measures:
+          story_other_use_area: 1500
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: Part of the story in another use.
+  - given:
+      nfpa_day_care_occupancy: true
+    parts:
+      story:
+      - id: p1
+        name: Day care only
+        measures:
+          story_other_use_area: 0
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Day care only: the section''s rule checks its row.'
+  - given:
+      nfpa_day_care_occupancy: true
+    parts:
+      story: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No story: nothing to check here.'
+  notes: Hand-drafted in a Claude Code session (2026-11-20). Day-Care Use (35 net) is the occupant-load rules' (16.1.7.1,
+    17.1.7.1); any other use on the story (kitchens, business, storage...) has its own factor, a person's.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_table_6_1_14_4_1_b__separation_hours
+  kind: flag
+  topic: fire_separation
+  title: Hours of separation by occupancy (Table 6.1.14.4.1(b))
+  applies_when: nfpa_day_care_occupancy
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 50
+    lines:
+    - 4
+    - 4
+    quote: Table 6.1.14.4.1(b) Required Separation of Occupancies (hours) , Part 2
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+    expect: needs_review
+    note: Which column (the other occupancy) and the double-dagger entries are a person's reading.
+  - given:
+      nfpa_day_care_occupancy: false
+    expect: not_applicable
+    note: 'Not this occupancy: the rule does not apply.'
   notes: Hand-drafted in a Claude Code session (2026-11-20).
   drafted_by: claude_code/claude-opus-5-5
   status: draft

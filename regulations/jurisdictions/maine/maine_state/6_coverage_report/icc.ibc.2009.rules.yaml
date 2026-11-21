@@ -58,7 +58,7 @@ pieces:
     label: flag
     heading: Table 508.2.5
     rules:
-    - general.ibc_508_2_5_incidental_accessory
+    - general.ibc_table_508_2_5_incidental_rooms
   508.2.5.3:
     label: flag
     heading: Separation of incidental accessory occupancies › Protection
@@ -78,7 +78,7 @@ pieces:
     label: rule
     heading: Table 1004.1.1
     rules:
-    - general.ibc_1004_1_1_occupant_load
+    - general.ibc_table_1004_1_1_other_uses
   1008.1.2:
     label: rule
     heading: Door swing
@@ -98,7 +98,7 @@ pieces:
     label: rule
     heading: Table 1015.1
     rules:
-    - general.ibc_1015_1_two_exits
+    - general.ibc_table_1015_1_other_occupancies
   1015.1.1:
     label: rule
     heading: Exits or exit access doorways from spaces › Three or more exits or exit access doorways
@@ -128,7 +128,7 @@ pieces:
     label: rule
     heading: Table 1016.1
     rules:
-    - general.ibc_1016_1_travel_distance
+    - general.ibc_table_1016_1_other_occupancies
   '1018.1':
     label: rule
     heading: Construction
@@ -138,7 +138,7 @@ pieces:
     label: rule
     heading: Table 1018.1
     rules:
-    - general.ibc_1018_1_corridor_rating
+    - general.ibc_table_1018_1_other_occupancies
   '1018.2':
     label: rule
     heading: Corridor width

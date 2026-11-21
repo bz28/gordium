@@ -54,6 +54,9 @@ checks:
       restrictive"; with exception 3 the IBC allows 25 ft here, NFPA 50 ft, so IBC is the tighter, as the sheet says.
     result: pass
     gordium_rules: [general.ibc_1018_4_dead_end, general.nfpa_16_2_5_2_dead_end]
+    gordium_result:      # where Gordium's answer is not the sheet's, and why (never a pass the law leaves open)
+      general.nfpa_16_2_5_2_dead_end: needs_review   # 21'-6" is within NFPA 2012's 50 ft, but over the flat 20 ft
+                                                     # Maine's 16-219 CMR ch. 20 may set (open, below): review until answered
     open: >
       Maine's own Life Safety Code rule (16-219 CMR ch. 20) today modifies the dead-end corridor limit to 20 ft; whether
       the 2016 rule did, and for day care, is part of the open edition question (README). Under a flat 20-ft limit with
