@@ -260,6 +260,10 @@ public sealed class RealModelTests
                           "locate any of them", none);
         Assert.Contains("find and fix the overlapping or doubled walls on Level 0 that close them off", none);
         Assert.DoesNotContain("place a Room", none);
+        // the marking list's summary beside it says the same
+        var line = Assert.Single(MarkingList.Build(slivers.Model()).Summary, l => l.StartsWith("2 enclosed areas have no Room"));
+        Assert.Contains("until the overlapping or doubled walls closing them off are fixed (Revit couldn't locate any of them)", line);
+        Assert.DoesNotContain("until a Room is placed in each", line);
     }
 
     [Fact]
