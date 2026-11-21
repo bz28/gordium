@@ -128,9 +128,54 @@ def main(path, out_path=OUT, co=CO):
                       "rooms": {r.name: round(r.outline.area / FT / FT, 1) for r in story.rooms.values()
                                 if r is not None and uses.get(r.id) == "accessory_storage"}}
     _judge_all(out)
+    out["verdicts"] = _verdicts(measured)
+    out["storage"]["under_all_four_readings"] = _storage_readings(measured)
     out["by_hand"] = BY_HAND
     out_path.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8", newline="\n")
     return out
+
+
+SHEET_DEAD_END_WIDTH = 10.0     # ft: the sheet's "(length < 2.5 x 10' = 25')" (hand_check.yaml)
+HAND_CHECK = Path(__file__).resolve().parents[3] / "test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml"
+SHEET_VALUES = {"occupancy_group_i4": True, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False,
+                "nfpa_day_care_occupancy": True, "day_care_existing": False, "sprinklered_9_7": True,
+                "sprinkler_supervised_9_7": True}       # the sheet's building: hand_check.yaml's header
+
+
+def _verdicts(measured) -> dict:
+    """The decision's "every verdict the same as the sheet's": each rule hand_check.yaml names for a route check,
+    run on the parts by parts.rows (the checker's rows), beside the sheet's result."""
+    from rule_format import parts as part_rules
+    from rule_format.rulebook import REPO, Context, load
+    maine = REPO / "regulations/jurisdictions/maine/maine_state"
+    rules = {r["id"]: r for r in load(maine / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    allowed = Context.for_jurisdiction(maine).allowed()
+    key = yaml.safe_load(HAND_CHECK.read_text(encoding="utf-8"))
+    out = {}
+    for check in key["checks"][:5]:                 # travel, common path, dead end, remoteness, storage
+        for rid in check["gordium_rules"]:
+            got = part_rules.rule_result(part_rules.rows(rules[rid], measured["parts"], SHEET_VALUES, allowed))
+            out[rid] = {"gordium": got, "sheet": check["result"], "same": got == check["result"]}
+    return {"rules": out, "every_verdict_the_same": all(v["same"] for v in out.values())}
+
+
+def _storage_readings(measured) -> dict:
+    """508.2.1's check (accessory <= 10 percent of the story) under each of the four pairs of area readings
+    (decision 8), worked by parts.rows on the story part (the rule made a rule here: the IBC's is a flag)."""
+    from rule_format import parts as part_rules
+    from rule_format.rulebook import REPO, Context, load
+    maine = REPO / "regulations/jurisdictions/maine/maine_state"
+    rule = next(r for r in load(maine / "5_building_code_rules/drafted/general.yaml")["rules"]
+                if r["id"] == "general.ibc_508_2_1_accessory_area")
+    rule = dict(rule, kind="rule")
+    allowed = Context.for_jurisdiction(maine).allowed()
+    sp = measured["parts"]["story"][0]
+    combos = part_rules.reading_combinations(rule, sp, set(part_rules.measure_kinds("story")), sp["measures"])
+    if not combos:
+        return {"judged": False, "why": "the story's area readings aren't there to combine"}
+    each = {words: part_rules.part_outcome(rule, {**SHEET_VALUES, **values}, allowed) for words, values in combos}
+    return {"judged": True, "each_pair": each, "complies_under_all_four": set(each.values()) == {"pass"},
+            "sheet": "pass"}
 
 
 TOLERANCES = {   # the decision's "Agreement asked" (docs/decisions/2026-11-20_route_measurement.md, "The eval")
@@ -162,8 +207,18 @@ def _judge_all(out) -> None:
         g = f[name]["gordium"]
         ours = g.get("to_the_sheets_exit_no_clearance", g.get("no_clearance"))
         f[name]["agreement"] = _verdict(sheet, ours, max(0.02 * sheet, 2.0), TOLERANCES[name])
-    lengths = [d["length"] for c in f["dead_end"]["gordium"].values() for d in c.get("dead_ends", [])]
-    f["dead_end"]["agreement"] = _verdict(f["dead_end"]["sheet_stated"], lengths or None, 1.0, TOLERANCES["dead_end"])
+    # the dead end the sheet's line runs along: the one whose closed end is nearest the line's start (within 3 ft)
+    start = f["dead_end"]["sheet_line_in_model"][0]
+    ends = [d for c in f["dead_end"]["gordium"].values() for d in c.get("dead_ends", [])
+            if math.dist(d["from"], start) <= 3.0]
+    mine = min(ends, key=lambda d: math.dist(d["from"], start)) if ends else None
+    length = _verdict(f["dead_end"]["sheet_stated"], mine["length"] if mine else None, 1.0, "length within 1 ft")
+    width = _verdict(SHEET_DEAD_END_WIDTH, mine["least_width"] if mine else None, 1 / 12, "width within 1 in")
+    f["dead_end"]["agreement"] = {"tolerance": TOLERANCES["dead_end"], "length": length, "least_width": width,
+                                  "dead_end": mine["from"] if mine else "none of Gordium's starts within 3 ft of the "
+                                                                         "sheet's line",
+                                  "within_tolerance": None if mine is None else
+                                  bool(length["within_tolerance"] and width["within_tolerance"])}
     g = f["remoteness"]["gordium"]
     f["remoteness"]["agreement"] = _verdict(f["remoteness"]["sheet_stated"],
                                             [g["farthest_pair_nearest_edges"], g["farthest_pair_door_centres"]], 1.0,

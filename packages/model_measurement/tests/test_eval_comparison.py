@@ -41,6 +41,21 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
     for name in ("travel_distance", "common_path", "dead_end", "remoteness", "diagonal"):
         assert "within_tolerance" in got["figures"][name]["agreement"] and got["figures"][name]["agreement"]["tolerance"]
     assert "within_tolerance" in got["storage"]["agreement_inside"]
+    # the dead end the sheet's line runs along, by position: here none starts within 3 ft of it (not judged); and
+    # length and width both judged when one does (review round 3)
+    dead = got["figures"]["dead_end"]["agreement"]
+    assert dead["within_tolerance"] is None and dead["length"]["within_tolerance"] is None
+    fake = {"figures": {k: dict(v) for k, v in got["figures"].items()}, "storage": dict(got["storage"])}
+    line = fake["figures"]["dead_end"]["sheet_line_in_model"]
+    fake["figures"]["dead_end"]["gordium"] = {"x": {"dead_ends": [
+        {"from": [line[0][0] + 20, line[0][1]], "length": 21.5, "least_width": 10.0},     # elsewhere: never taken
+        {"from": list(line[0]), "length": 21.9, "least_width": 9.8}]}}
+    make._judge_all(fake)
+    dead = fake["figures"]["dead_end"]["agreement"]
+    assert dead["dead_end"] == list(line[0]) and dead["length"]["within_tolerance"] is True
+    assert dead["least_width"]["within_tolerance"] is False and dead["within_tolerance"] is False   # 2.4 in off
+    assert set(got["verdicts"]["rules"]) >= {"general.nfpa_16_2_5_2_dead_end", "general.ibc_508_2_1_accessory_area"}
+    assert "every_verdict_the_same" in got["verdicts"] and "judged" in got["storage"]["under_all_four_readings"]
     assert not any("percent" in str(v) or "agree" in str(v) for v in got["by_hand"].values())
 
 
