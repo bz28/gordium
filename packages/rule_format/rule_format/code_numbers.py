@@ -173,17 +173,31 @@ def quote_statements(quote: str) -> set[tuple]:
     return {(value_of(s["value"]), s["unit"]) for s in statements(quote) if value_of(s["value"]) is not None}
 
 
-def candidates(sources: list[dict], ctx) -> list[dict]:
-    """The second-reading numbers a rule may use: those of the pieces its sources sit in that its quotes state."""
+def unverified_reading(entry: dict) -> dict:
+    """A piece of a book not verified (text_verification `not_verified`: no second reading was ever made), read the
+    only way it can be: its numbers as the extracted text has them, with the comparison its recorded words give
+    (numbers.comparisons). For a flag's drafted check only, which never decides a result: it keeps the drafted
+    formula on the book's printed numbers (an OCR misreading included, until a bought copy is checked)."""
+    from document_extraction.numbers import comparisons
+    numbers = [n for n in (entry.get("numbers") or []) if isinstance(n, str)] if isinstance(entry, dict) else []
+    return {"second_reading_numbers": numbers, "second_reading_comparisons": comparisons(numbers)}
+
+
+def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
+    """The second-reading numbers a rule may use: those of the pieces its sources sit in that its quotes state. A
+    book not verified has none for a rule; for a flag (flag=True), its extracted text's numbers (unverified_reading)."""
     out = []
     for s in sources:
         book = ctx.verification.get(s.get("file")) if isinstance(s, dict) and isinstance(s.get("file"), str) else None
         if not book or not isinstance(s.get("quote"), str):
             continue
+        if book.get("not_verified") and not flag:
+            continue                          # never read a second time: backs no number of a rule
         stated = quote_statements(s["quote"])
         worded = _worded_statements(s["quote"])
         for pid in pieces_of(s, book):
-            lengths = _between_ends(readings(book["pieces"].get(pid) or {}))
+            entry = book["pieces"].get(pid) or {}
+            lengths = _between_ends(readings(unverified_reading(entry) if book.get("not_verified") else entry))
             # a value the piece reads more than one way (R320.2: "not less than 34" and, for ship's ladders, "not
             # more than 34"): a reading counts only where the quote states it with the same words before it
             ways: dict = {}
@@ -237,9 +251,16 @@ def cites_book(sources: list[dict], ctx) -> bool:
 def problems(rule: dict, sources: list[dict], ctx) -> list[str]:
     """Every number a rule citing a verified book uses must be a second-reading number of a cited piece, stated in
     the quote, in the measure's unit, used the way the law reads it (module docstring). [] if all are."""
-    allowed = candidates(sources, ctx)
+    flag = rule.get("kind") == "flag"
+    allowed = candidates(sources, ctx, flag=flag)
     units = _units(rule, ctx)
     out = []
+    unverified = sorted({s["file"] for s in sources if isinstance(s, dict) and isinstance(s.get("file"), str)
+                         and (ctx.verification.get(s["file"]) or {}).get("not_verified")})
+    if unverified and not flag:
+        out.append(f"cites {', '.join(unverified)}, whose numbers were never read a second time (not_verified in its "
+                   "text_verification file): a rule may not stand on them; make it a flag (always needs review), "
+                   "its check kept as the drafted test")
     for key in ("applies_when", "check"):
         if isinstance(rule.get(key), str):
             out += _formula_problems(rule[key], key, allowed, units, directions=True)

@@ -700,3 +700,134 @@ def test_a_label_with_readings_still_in_play_never_says_one_reading_decides():
     assert not decides.search(readme)
     # review round 3: the README's lead-in still said the notes give Gordium's reading of both undefined words
     assert "Two words are not defined, and the label's notes give Gordium's reading" not in readme
+
+
+# ---- a book whose numbers could not be read a second time (Maine's 2009 IBC: not_verified) --------------------------
+# Its page images are made from its own OCR, so no independent reading exists (docs/decisions/
+# 2026-11-20_commercial_egress_maine.md). Its file records each piece's numbers only, says why in `not_verified`, and
+# no rule may stand on its numbers: every IBC requirement is a flag, its check kept as the drafted test.
+
+MAINE = REPO / "regulations/jurisdictions/maine/maine_state"
+IBC = "icc.ibc.2009.pdf"
+IBC_RECORD = "text_verification.icc.ibc.2009.yaml"
+COMMON_PATH = {"file": IBC, "page": 265, "lines": [76, 78],
+               "quote": "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not "
+                        "exceed 75 feet (22 860 mm)."}
+
+
+def _copy_of_maine(tmp_path, monkeypatch, change=None):
+    """Maine's state folder, copied, with its IBC record changed by `change`; checked without the cache."""
+    from rule_format.state_law import verification_problems
+    from rule_format.rulebook import load
+    j = tmp_path / "regulations/jurisdictions/maine/maine_state"
+    shutil.copytree(MAINE, j)
+    monkeypatch.setenv(CODE_CACHE_ENV, str(tmp_path / "no_cache"))
+    if change:
+        book = load(j / IBC_RECORD)
+        change(book)
+        (j / IBC_RECORD).write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    return verification_problems(j, Context.for_jurisdiction(j))
+
+
+def test_a_book_not_verified_is_accepted_explicitly(tmp_path, monkeypatch):
+    from rule_format.rulebook import load
+    book = load(MAINE / IBC_RECORD)
+    assert "OCR" in book["not_verified"] and "purchased ICC copy" in book["not_verified"]
+    assert all(set(e) == {"piece_sha256", "numbers"} for e in book["pieces"].values())
+    assert "not exceed 75 foot" in book["pieces"]["1014.3"]["numbers"]
+    problems, _ = _copy_of_maine(tmp_path, monkeypatch)
+    assert problems == [], problems
+
+
+@pytest.mark.parametrize("change,problem", [
+    (lambda b: b["pieces"]["1014.3"].update(second_reading="agrees"), "claim a second reading that was never made"),
+    (lambda b: b["pieces"]["1014.3"].update(second_reading_numbers=["not exceed 75 foot"]),
+     "claim a second reading that was never made"),
+    (lambda b: b["pieces"]["1014.3"].update(second_reading_comparisons=["<="]), "claim a second reading"),
+    (lambda b: b["pieces"]["1014.3"].pop("numbers"), "1014.3: a book not verified (not_verified) records only"),
+    (lambda b: b["pieces"]["1014.3"].update(piece_sha256="0" * 64), "the piece changed since its numbers were recorded"),
+    (lambda b: b["pieces"].pop("1014.3"), "1014.3: brought in but not in"),
+    (lambda b: b.update(not_verified=" "), "not_verified must say, in words, why"),
+    # without not_verified the file is held to the second reading, exactly as before
+    (lambda b: b.pop("not_verified"), "1014.3: needs second_reading_numbers"),
+])
+def test_a_not_verified_record_that_claims_more_or_less_is_refused(tmp_path, monkeypatch, change, problem):
+    problems, _ = _copy_of_maine(tmp_path, monkeypatch, change)
+    assert any(problem in p for p in problems), problems
+
+
+def test_with_the_cache_a_not_verified_number_must_still_be_the_texts(tmp_path, monkeypatch):
+    from rule_format.rulebook import cached_text, load
+    from rule_format.state_law import verification_problems
+    entry = next(d for d in load(MAINE / "1_source_documents/sources.yaml")["documents"] if d["file"] == IBC)
+    if not cached_text(entry).exists():
+        pytest.skip("the code cache with the 2009 IBC is not on this machine (CI)")
+    j = tmp_path / "regulations/jurisdictions/maine/maine_state"
+    shutil.copytree(MAINE, j)
+    book = load(j / IBC_RECORD)
+    book["pieces"]["1014.3"]["numbers"][1] = "not exceed 57 foot"
+    (j / IBC_RECORD).write_text(yaml.safe_dump(book, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    assert any("1014.3: the recorded numbers are not the extracted text's" in p
+               for p in verification_problems(j, Context.for_jurisdiction(j))[0])
+
+
+@pytest.fixture(scope="module")
+def maine():
+    return Context.for_jurisdiction(MAINE)
+
+
+def test_a_rule_may_not_stand_on_a_number_of_a_book_not_verified(maine):
+    from rule_format import code_numbers
+    rule = {"kind": "rule", "check": "common_path_of_travel <= 75", "for_each": "story"}
+    got = code_numbers.problems(rule, [COMMON_PATH], maine)
+    assert any("never read a second time" in p and "make it a flag" in p for p in got), got
+    assert any("number 75 in 'check' isn't one of the second-reading numbers" in p for p in got), got
+    # a rule with no number still stands on the book's OCR words: refused too
+    assert any("never read a second time" in p for p in
+               code_numbers.problems({"kind": "rule", "check": "corridor_walls_smoke_partitions", "for_each": "corridor"},
+                                     [COMMON_PATH], maine))
+
+
+@pytest.mark.parametrize("check, words", [
+    ("common_path_of_travel <= 75", None),                         # the extracted text's number, the law's way
+    ("common_path_of_travel < 75", "needs < 75 to hold"),           # the edge moved
+    ("common_path_of_travel <= 70", "isn't one of"),                # a number the text doesn't print
+    ("common_path_of_travel <= 22860", "isn't one of"),             # the millimetres
+])
+def test_a_flags_drafted_check_uses_the_extracted_texts_numbers_the_laws_way(maine, check, words):
+    from rule_format import code_numbers
+    got = code_numbers.problems({"kind": "flag", "check": check, "for_each": "story"}, [COMMON_PATH], maine)
+    assert (got == []) if words is None else any(words in p for p in got), got
+
+
+def _flag(source, check="common_path_of_travel <= 75", drafted=("pass", "fail")):
+    story = lambda length: {"story": [{"id": "s1", "measures": {"common_path_of_travel": length}}]}
+    return {"id": "general.ibc_1014_3_common_path", "kind": "flag", "topic": "means_of_egress",
+            "title": "Common path of egress travel (1014.3)", "check": check, "for_each": "story",
+            "when_none": "needs_review", "sources": [source],
+            "examples": [{"given": {}, "parts": story(48.5), "rows": [{"part": "s1", "outcome": "needs_review"}],
+                          "expect": "needs_review", "drafted_check": drafted[0]},
+                         {"given": {}, "parts": story(80), "rows": [{"part": "s1", "outcome": "needs_review"}],
+                          "expect": "needs_review", "drafted_check": drafted[1]},
+                         {"given": {}, "parts": {"story": []}, "rows": [{"outcome": "needs_review"}],
+                          "expect": "needs_review"}],
+            "drafted_by": "test", "status": "draft"}
+
+
+def test_a_flag_keeps_its_drafted_check_only_where_its_book_is_not_verified(maine):
+    from rule_format.rulebook import validate
+    assert validate({"district": "general", "rules": [_flag(COMMON_PATH)]}, maine) == []
+    wrong = validate({"district": "general", "rules": [_flag(COMMON_PATH, drafted=("pass", "pass"))]}, maine)
+    assert any("the drafted check gives fail, not pass" in p for p in wrong), wrong
+    assert any("drafted_check passes and fails" in p for p in wrong), wrong
+    # a flag citing a verified book (New York's) has no check, as before
+    ny = Context.for_jurisdiction(NY_STATE)
+    risers = {"file": "gov.ny.residential.2025.pdf", "page": 100, "lines": [42, 42],
+              "quote": "[NY] R318.7.5.1 Risers. The riser height shall be not more than 8 1/4 inches (209 mm)."}
+    flag = _flag(risers, check="stair_riser_height <= 8.25") | {"for_each": "stair", "examples": [
+        {"given": {}, "parts": {"stair": []}, "rows": [{"outcome": "needs_review"}], "expect": "needs_review"}]}
+    assert any("a 'flag' must not have one" in p for p in validate({"district": "general", "rules": [flag]}, ny))
+    # and drafted_check goes only with such a flag
+    flag = dict(flag, examples=[dict(flag["examples"][0], drafted_check="pass")])
+    flag.pop("check")
+    assert any("drafted_check goes only with a flag" in p for p in validate({"district": "general", "rules": [flag]}, ny))

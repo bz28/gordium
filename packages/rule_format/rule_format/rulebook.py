@@ -46,7 +46,7 @@ REVISED_FIELDS = (RULE_FIELDS - {"id", "revised", "drafted_by", "status", "appro
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
-               "examples": {"given", "expect", "note", *parts.EXAMPLE_FIELDS}}
+               "examples": {"given", "expect", "note", "drafted_check", *parts.EXAMPLE_FIELDS}}
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "findings",
                    "answers")
@@ -466,7 +466,9 @@ def _verification(j: Path) -> dict[str, dict]:
             book = load(path)
             name = book["document"]
             cut = read_jsonl(j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
-            out[name] = {"pieces": dict(book["pieces"]), "lines": {r["id"]: r["lines"] for r in cut[1:]}}
+            out[name] = {"pieces": dict(book["pieces"]), "lines": {r["id"]: r["lines"] for r in cut[1:]},
+                         # its numbers were never read a second time (state_law.py): no rule may use them
+                         "not_verified": book.get("not_verified")}
         except Exception:        # reported by its own check, never a crash here
             continue
     return out
@@ -895,8 +897,13 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p.append("missing 'title' (a short label)")
     elif len(title) > TITLE_MAX or len(title.strip().splitlines()) > 1:
         p.append(f"'title' is a one-line label of at most {TITLE_MAX} characters; the rule is its quotes and check")
-    if (rule.get("kind") == "rule") != ("check" in rule):
-        p.append("a 'rule' needs a 'check'; a 'flag' must not have one")
+    # A flag has no check, except one citing a book whose numbers were never read a second time (not_verified,
+    # state_law.py): there it keeps the check it would have as a rule, its drafted test, shown and tested by its
+    # examples' drafted_check, never run for a result (outcome(): a flag always needs review).
+    drafted = rule.get("kind") == "flag" and "check" in rule
+    if (rule.get("kind") == "rule") != ("check" in rule) and not (drafted and _cites_unverified(rule, ctx)):
+        p.append("a 'rule' needs a 'check'; a 'flag' must not have one (unless it cites a book not verified: "
+                 "text_verification not_verified, where its check is the drafted test)")
     p += parts.rule_problems(rule)       # for_each, within, when_none (a rule for each part)
     review_when, sources, examples = (_list_of_dicts(rule, k) for k in ("review_when", "sources", "examples"))
     for key, value in (("review_when", review_when), ("sources", sources), ("examples", examples)):
@@ -973,6 +980,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
     if per_part:
         p += parts.examples_problems(rule, examples or [], ctx.allowed(), run=not p)
+    p += _drafted_check_problems(rule, examples or [], ctx, run=not p)
 
     p += rule_revision_problems(rule.get("revised", []))
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)
@@ -980,6 +988,44 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         used = set().union(*(formula.names(f) for f in conditions if isinstance(f, str) and _parses(f)))
         p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
               for m in sorted(used & set(ctx.proposed))]
+    return p
+
+
+def _cites_unverified(rule: dict, ctx: Context) -> bool:
+    """Whether a rule cites a book whose numbers were never read a second time (text_verification not_verified)."""
+    sources = rule.get("sources")
+    return isinstance(sources, list) and any(
+        isinstance(s, dict) and isinstance(s.get("file"), str)
+        and (ctx.verification.get(s["file"]) or {}).get("not_verified") for s in sources)
+
+
+def _drafted_check_problems(rule: dict, examples: list, ctx: Context, run: bool) -> list[str]:
+    """A flag's drafted test (a flag citing a book not verified keeps its check: _rule_problems): each example's
+    `drafted_check` is what the check gives when the flag is run as a rule (its one answer, for a rule for each
+    part), proved here, with at least one that passes and one that fails, so the drafted formula is exercised. The
+    flag's own result (`expect`) is still needs review (or not applicable). drafted_check goes only with such a
+    flag."""
+    drafted = rule.get("kind") == "flag" and isinstance(rule.get("check"), str)
+    given = [(n, ex) for n, ex in enumerate(examples, 1) if "drafted_check" in ex]
+    if not drafted:
+        return [f"example {n}: drafted_check goes only with a flag that keeps a drafted check" for n, _ in given]
+    p, seen = [], set()
+    as_rule = dict(rule, kind="rule")
+    for n, ex in given:
+        want = ex["drafted_check"]
+        if want not in OUTCOMES:
+            p.append(f"example {n}: drafted_check must be one of {OUTCOMES}")
+            continue
+        seen.add(want)
+        if not run:
+            continue
+        got = parts.worked_example(as_rule, ex, ctx.allowed())
+        got = got[0] if isinstance(got, tuple) else got
+        if got != want:
+            p.append(f"example {n}: the drafted check gives {got}, not {want} (drafted_check)")
+    if not {"pass", "fail"} <= seen:
+        p.append("a flag that keeps a drafted check needs examples whose drafted_check passes and fails, so the "
+                 "drafted test is really exercised")
     return p
 
 
