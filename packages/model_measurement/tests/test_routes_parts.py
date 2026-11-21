@@ -272,3 +272,27 @@ def test_a_passage_whose_middle_is_in_a_ring_needs_review(monkeypatch):
     with pytest.raises(routes_pkg.Stop) as stop:
         routes_pkg._room_access(s, got, s.rooms["s"], got._chain(frozenset(got.exits))[0])
     assert stop.value.key == "passage_in_ring"
+
+
+def storage_in_storage():
+    """A day-care room 0 to 20 by 0 to 10 (marked pass_through) with its exit (-0.25, 5) and a second exit (20.25, 5); a storeroom 0 to 10 by
+    10.5 to 16 off it (door (5, 10.25)), and an inner storeroom 0 to 10 by 16.5 to 20 whose only door (5, 16.25) is
+    into the storeroom: no route crosses a storeroom (IBC 1014.2 item 4), so the inner one has none."""
+    return description([room("r", rect(0, 0, 20, 10), use="day_care", pass_through=True),
+                        room("s1", rect(0, 10.5, 10, 16), use="accessory_storage"),
+                        room("s2", rect(0, 16.5, 10, 20), use="accessory_storage")],
+                       [door("a", (-0.25, 5), (0, 1), ("r", "outside"), exit_id="A"),
+                        door("b", (20.25, 5), (0, 1), ("r", "outside"), exit_id="B"),
+                        door("d1", (5, 10.25), (1, 0), ("r", "s1")), door("d2", (5, 16.25), (1, 0), ("s1", "s2"))])
+
+
+def test_a_room_with_no_route_keeps_the_verdict_needs_review_with_the_figure_over_the_others_in_more():
+    story, = measure(storage_in_storage())["parts"]["story"]
+    for m in ("egress_travel_distance", "common_path_of_travel"):
+        assert m not in story["measures"] and "has no route" in story["not_measured"][m]
+        shown = story["more"][m]
+        assert shown["label"] == "greatest over the rooms with a route; not a verdict, since s2 has none"
+        assert set(shown["rooms_without_route"]) == {"s2"} and shown["rooms"] == 2
+    # the travel's: the storeroom's far corner (10, 16) to its door (5, 10.25), then on to the nearest exit:
+    # at least sqrt(5^2 + 5.75^2) = 7.620 + ...; well under the room's diagonal sum
+    assert story["more"]["egress_travel_distance"]["figure"] > 7.620

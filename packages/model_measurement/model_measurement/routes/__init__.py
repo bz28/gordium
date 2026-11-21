@@ -31,7 +31,7 @@ import math
 
 from model_measurement.interior.read import name_of
 from model_measurement.routes import areas, dead_ends, straight
-from model_measurement.routes.common_path import at_point, story_figure
+from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
 from model_measurement.routes.floor import CLEARANCE, read, region
 from model_measurement.routes.paths import FOOT, StoryRoutes, _Leg
 from model_measurement.routes.remote import farthest
@@ -176,6 +176,10 @@ def _story_routes(sp, story, routes, uses, items, access) -> dict:
         m["egress_travel_distance"] = _feet(travel.figure)
         more["egress_travel_distance"] = _figure(travel)
         more["egress_travel_distance"]["route"] = _drawn(routes.route(travel.at))
+    else:
+        more["egress_travel_distance"] = _over_rooms_with_a_route(story, {
+            rid: _attempt(lambda rid=rid: farthest(_TravelOnly(routes, {rid})))
+            for rid in sorted(k for k, v in story.rooms.items() if v is not None)})
     figures = {}                                  # each space's own common path, or why not (its values kept)
     for rid in sorted(k for k, v in story.rooms.items() if v is not None and uses.get(k) != "corridor"):
         try:
@@ -186,6 +190,9 @@ def _story_routes(sp, story, routes, uses, items, access) -> dict:
     common = None if stopped else _try(sp, "common_path_of_travel", lambda: story_figure(routes))
     if stopped:
         sp["not_measured"]["common_path_of_travel"] = stopped[0].reason
+        corridors = {rid: _attempt(lambda rid=rid: story_figure(routes, rooms={rid}))
+                     for rid in sorted(k for k, v in story.rooms.items() if v is not None and uses.get(k) == "corridor")}
+        more["common_path_of_travel"] = _over_rooms_with_a_route(story, {**figures, **corridors})
     if common is not None:
         m["common_path_of_travel"] = _feet(common.figure)
         more["common_path_of_travel"] = _figure(common)
@@ -229,6 +236,29 @@ def _story_routes(sp, story, routes, uses, items, access) -> dict:
         worst = max(worst, got)
     m["egress_travel_in_sleeping_room"] = _feet(worst)
     return figures
+
+
+def _attempt(work):
+    try:
+        return work()
+    except Stop as s:
+        return s
+
+
+def _over_rooms_with_a_route(story, by_room: dict) -> dict:
+    """Where the story's figure is a stop because some rooms have no route: the greatest over the rooms that do,
+    labelled as no verdict (the measure stays not measured, so every rule reading it needs review), for an eval to
+    set beside a hand-checked sheet. Each room's own figure is decision 3's bound over its points."""
+    good = {rid: f for rid, f in by_room.items() if not isinstance(f, Stop)}
+    none = {rid: f.reason for rid, f in by_room.items() if isinstance(f, Stop)}
+    names = ", ".join(story.rooms[rid].name for rid in sorted(none)) or "none"
+    out = {"label": f"greatest over the rooms with a route; not a verdict, since {names} has none",
+           "rooms_without_route": {story.rooms[rid].name: why for rid, why in sorted(none.items())}}
+    if good:
+        rid, best = max(good.items(), key=lambda x: x[1].figure)
+        out.update(figure=_feet(best.figure), room=story.rooms[rid].name, room_id=rid, at=_xy(best.at),
+                   greatest_sample=_feet(best.greatest), rooms=len(good))
+    return out
 
 
 def _story_areas(sp, story, uses, unknown) -> None:
