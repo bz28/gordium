@@ -1,10 +1,11 @@
 """Every reason a route measurement can stop with (it gets no value, and a rule reading it says NEEDS REVIEW), in
 one place.
 
-The route code (floor.py, paths.py, remote.py) gives a reason only through `Stop(key, ...)`, so this table is the
-whole list: tests/test_routes_floor.py, tests/test_routes_paths.py and tests/test_routes_remote.py make each one happen. Values read through the interior
-reader (`interior/read.py`) stop with that table's reasons (`missing`, `not_a_length`, `not_an_outline` ...), which
-come through here as the `{reason}` of the part they belong to. The design: docs/decisions/2026-11-20_route_measurement.md.
+The route code (floor.py, paths.py, remote.py, common_path.py, dead_ends.py, straight.py, areas.py) gives a reason
+only through `Stop(key, ...)`, so this table is the whole list: the route tests (tests/test_routes_*.py) make each
+one happen. Values read through the interior reader (`interior/read.py`) stop with that table's reasons (`missing`,
+`not_a_length`, `not_an_outline` ...), which come through here as the `{reason}` of the part they belong to. The
+design: docs/decisions/2026-11-20_route_measurement.md.
 """
 
 STOPS = {
@@ -67,6 +68,23 @@ STOPS = {
                          "within 12 in of a corner): its travel figure isn't measured",
     "walk_shut": "the point ({x}, {y}), within 12 in of a corner, has no walk on the floor out to its rings' clear "
                  "edge",
+    # dead ends and corridor widths (dead_ends.py)
+    "corridor_not_legs": "the corridor isn't made of straight legs meeting at right angles ({why}): its dead ends and "
+                         "width aren't measured in this first version (decision 6)",
+    "corridor_end_only": "the corridor {name} can't be crossed ({why}, decision 1a): routes along it never count, so "
+                         "its dead ends aren't worked out",
+    "door_off_legs": "the door {name} isn't on any of the corridor's legs: where it meets the centre line isn't known",
+    "dead_end_unbounded": "from the closed end at ({x}, {y}) no point of the corridors has routes along them to two "
+                          "distinct exits: where its dead end ends isn't defined",
+    # remoteness and the diagonal (straight.py)
+    "too_few_exits": "the story has {count} distinct exit(s) (by `exit_id`): remoteness needs two",
+    "outline_needed": "the story's outline isn't read, so its diagonal and areas aren't measured: {reason}",
+    # areas (areas.py)
+    "area_room_not_read": "the room {name} isn't read, so what it adds to the story's areas isn't known",
+    "area_no_use": "the room {name} has no `use`: which of the story's areas it counts in isn't known",
+    "area_unknown_space": "the story has an enclosed space with no room drawn in it ({name}): which area it counts in "
+                          "isn't known",
+    "area_rooms_overlap": "the rooms {a} and {b} overlap: an area counted twice",
 }
 
 

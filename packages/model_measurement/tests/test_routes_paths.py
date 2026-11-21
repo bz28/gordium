@@ -375,8 +375,11 @@ def test_too_many_tied_routes_is_said(monkeypatch):
 
 PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters", "too_many_ties", "exit_unknown",
              "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last three: test_routes_remote.py
+LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_end_unbounded",   # test_routes_dead_ends.py
+              "too_few_exits", "outline_needed", "area_room_not_read", "area_no_use", "area_unknown_space",
+              "area_rooms_overlap"}                                                  # test_routes_straight_areas.py
 
 
 def test_every_reason_has_a_case():
     from test_routes_floor import FLOOR_CASES
-    assert set(FLOOR_CASES) | PATH_KEYS == set(STOPS)
+    assert set(FLOOR_CASES) | PATH_KEYS | LATER_KEYS == set(STOPS)
