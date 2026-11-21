@@ -213,6 +213,8 @@ public static class Marks
     [
         GenericModels, "OST_SpecialityEquipment", "OST_Site", "OST_Mass", "OST_Furniture", "OST_Casework",
         "OST_StructuralFraming", "OST_StructuralFoundation", "OST_Parking",
+        // review round 1: an AC condenser or a site light standing apart holds every yard; the architect can clear it
+        "OST_MechanicalEquipment", "OST_LightingFixtures",
     ];
 
     /// <summary>An element the architect says is not a stair, a stair's part or a guard (Ben, 2026-11-20, Q2: a real
@@ -232,15 +234,20 @@ public static class Marks
     /// apart"): a freestanding deck, porch, landing or ramp drawn as a Generic Model or a family is "part of the
     /// building in both the determination of required yards and lot coverage" (§325-18A), and no other building or
     /// structure may occupy a yard (§325-3B YARD), so one standing apart from the house keeps the yards needing review
-    /// until it says what it is. The slab mark's words, and "Not a structure" (STRUCTURE: "Anything constructed or
-    /// erected on the ground"; a bench, a sculpture set on the lawn).</summary>
+    /// until it says what it is. Its words (<see cref="SiteObjectKinds"/>): a porch, deck, landing or ramp, or a garage,
+    /// shed or carport (an accessory building, §325-25), each measured as a building; or "Not a structure" (STRUCTURE:
+    /// "Anything constructed or erected on the ground"; a bench, a sculpture set on the lawn). Never the slab words
+    /// (review round 1): a patio or a driveway leaves every check, so those are read on Floors only (site slabs), where
+    /// the shape is a slab; a garage drawn as a Generic Model and marked "Parking" must never vanish from the
+    /// check.</summary>
     public static readonly MarkDefinition SiteObject = new(
         "Gordium: Site object is", new("2f1ba96f-363b-4bdb-a03c-832fad615857"), MarkValueKind.Text, MarkBinding.Instance,
-        SiteObjectCategories, "buildings (a porch...), left_out[].slab or left_out[].could_be_building",
+        SiteObjectCategories, "buildings (a porch, a garage...) or left_out[].could_be_building",
         "For a generic model or family on the lot that isn't part of the house's walls, floors or roof, what it is, one of: " +
-        string.Join(", ", SiteObjectKinds.Words) + ". A porch, deck, landing or ramp is measured as part of the building " +
-        "(lot coverage and the yards); a patio, terrace or walk and parking or a driveway are read as those slabs are; " +
-        "not a structure keeps no yard waiting. Blank: one standing apart from the house keeps the yards needing review.");
+        SiteObjectKinds.Listed + ". A porch, deck, landing or ramp, or a garage, shed or carport, is measured as a " +
+        "building (lot coverage and the yards); not a structure keeps no yard waiting. A patio, walk or driveway is a " +
+        "floor's word (Gordium: Site slab is), not read here. Blank: one standing apart from the house keeps the yards " +
+        "needing review.");
 
     /// <summary>Every mark, in the design note's order.</summary>
     public static readonly IReadOnlyList<MarkDefinition> All =
@@ -351,7 +358,6 @@ public static class SlabKinds
             ? Table[i].Kind : null;
 
     /// <summary>The site description's word for a slab left out (<c>left_out[].slab</c>): null for a building.</summary>
-    /// <remarks>Also what <see cref="SiteObjectKinds"/> sends for a patio or parking marked on another element.</remarks>
     public static string? Described(SlabKind? kind) => kind switch
     {
         null => "unmarked",
@@ -361,25 +367,42 @@ public static class SlabKinds
     };
 }
 
-/// <summary>What <c>Gordium: Site object is</c> says an element is: a slab kind (<see cref="SlabKind"/>, the same words
-/// read the same way), or not a structure at all.</summary>
-/// <param name="Slab">The slab kind; null when it is <see cref="NotAStructure"/>.</param>
-/// <param name="NotAStructure">Not "constructed or erected on the ground" (§325-3B STRUCTURE): no yard waits on it.</param>
-public readonly record struct SiteObjectKind(SlabKind? Slab, bool NotAStructure);
+/// <summary>What <c>Gordium: Site object is</c> says an element is (review round 1: never a slab kind, which would let
+/// a garage marked "Parking" leave every check).</summary>
+public enum SiteObjectKind
+{
+    /// <summary>A porch, deck, landing or ramp (part of the building, §325-18A), or a garage, shed or carport (an
+    /// accessory building, §325-25): measured as a building.</summary>
+    Building,
 
-/// <summary>The words the architect may type in <c>Gordium: Site object is</c>: the slab words (<see cref="SlabKinds"/>)
-/// and "Not a structure", through a fixed table: a word not in it is not stated, never a near guess.</summary>
+    /// <summary>Not "constructed or erected on the ground" (§325-3B STRUCTURE): no yard waits on it; still an object
+    /// on the lot not measured.</summary>
+    NotAStructure,
+}
+
+/// <summary>The words the architect may type in <c>Gordium: Site object is</c>, through a fixed table: a word not in it
+/// (a slab's "Patio" or "Driveway" too: read on Floors only) is not stated, never a near guess.</summary>
 public static class SiteObjectKinds
 {
     public const string NotAStructureWord = "Not a structure";
+    public const string AccessoryWord = "Garage, shed or carport";
+
+    private static readonly (string Word, SiteObjectKind Kind)[] Table =
+    [
+        ("Porch", SiteObjectKind.Building), ("Deck", SiteObjectKind.Building), ("Landing", SiteObjectKind.Building),
+        ("Ramp", SiteObjectKind.Building), (AccessoryWord, SiteObjectKind.Building),
+        (NotAStructureWord, SiteObjectKind.NotAStructure),
+    ];
 
     /// <summary>The words, in the list's order.</summary>
-    public static IReadOnlyList<string> Words { get; } = [.. SlabKinds.Words, NotAStructureWord];
+    public static IReadOnlyList<string> Words { get; } = Table.Select(t => t.Word).ToList();
+
+    /// <summary>The words as the architect reads them in a sentence (one of them holds commas).</summary>
+    public static string Listed { get; } = string.Join(" / ", Table.Select(t => t.Word));
 
     /// <summary>The kind for the architect's word (trimmed, any case), or null.</summary>
     public static SiteObjectKind? Of(string? word) =>
         word is null ? null
-        : string.Equals(word.Trim(), NotAStructureWord, StringComparison.OrdinalIgnoreCase) ? new SiteObjectKind(null, true)
-        : SlabKinds.Of(word) is { } slab ? new SiteObjectKind(slab, false)
-        : null;
+        : Array.FindIndex(Table, t => string.Equals(t.Word, word.Trim(), StringComparison.OrdinalIgnoreCase)) is var i and >= 0
+            ? Table[i].Kind : null;
 }

@@ -90,8 +90,8 @@ internal sealed class Read(RevitModel model)
             case var _ when SiteReader.BuildingCategories.Contains(e.BuiltInCategory):
                 Building(e);
                 break;
-            case var _ when SiteObject(e) is { NotAStructure: false, Slab: SlabKind.Building }:
-                Building(e);                     // marked a porch, deck, landing or ramp: measured as the building
+            case var _ when SiteObject(e) is SiteObjectKind.Building:
+                Building(e);                     // marked a porch, deck, landing, ramp, garage, shed or carport: measured
                 break;
             case { Kind: ElementKind.FamilyInstance or ElementKind.CadImport }:
                 Family(e, context: false);
@@ -114,19 +114,12 @@ internal sealed class Read(RevitModel model)
         && e.InstanceMarks.TryGetValue(Marks.SiteObject.Guid, out var v) ? SiteObjectKinds.Of(Marks.Text(v)) : null;
 
     /// <summary>A candidate as its mark and category say (reading design note, section 1, "Objects standing apart"):
-    /// marked a patio, terrace or walk, or parking or a driveway, it is sent as that slab is (<c>left_out[].slab</c>);
     /// marked "Not a structure", or a tree or entourage (<see cref="SiteReader.NotStructures"/>), it can't be a building
-    /// (<c>could_be_building: false</c>); otherwise as before. Never for a context object (the neighbourhood's).</summary>
-    private static Candidate Marked(RevitElement e, Candidate c)
-    {
-        if (c.Context)
-            return c;
-        var kind = SiteObject(e);
-        if (kind is { Slab: SlabKind.Patio or SlabKind.Parking } k)
-            return c with { Slab = SlabKinds.Described(k.Slab) };
-        return kind is { NotAStructure: true } || SiteReader.NotStructures.Contains(e.BuiltInCategory)
+    /// (<c>could_be_building: false</c>); otherwise as before. Never a slab (<c>left_out[].slab</c> comes from a Floor
+    /// alone, <see cref="SiteSlabs"/>). Never for a context object (the neighbourhood's).</summary>
+    private static Candidate Marked(RevitElement e, Candidate c) =>
+        !c.Context && (SiteObject(e) is SiteObjectKind.NotAStructure || SiteReader.NotStructures.Contains(e.BuiltInCategory))
             ? c with { CouldBeBuilding = false } : c;
-    }
 
     // ---- buildings ----------------------------------------------------------------------------------------------
 

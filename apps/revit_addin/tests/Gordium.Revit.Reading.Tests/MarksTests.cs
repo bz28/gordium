@@ -60,7 +60,8 @@ public sealed class MarksTests
             // what an object on the lot that isn't the building is (reading design note, section 1, "Objects standing apart")
             ("Gordium: Site object is", "2f1ba96f-363b-4bdb-a03c-832fad615857", MarkValueKind.Text, MarkBinding.Instance,
              ["OST_GenericModel", "OST_SpecialityEquipment", "OST_Site", "OST_Mass", "OST_Furniture", "OST_Casework",
-              "OST_StructuralFraming", "OST_StructuralFoundation", "OST_Parking"]),
+              "OST_StructuralFraming", "OST_StructuralFoundation", "OST_Parking", "OST_MechanicalEquipment",
+              "OST_LightingFixtures"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

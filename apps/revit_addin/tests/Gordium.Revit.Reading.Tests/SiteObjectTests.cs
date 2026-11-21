@@ -76,9 +76,14 @@ public sealed class SiteObjectTests(RealWorker worker) : IClassFixture<RealWorke
     [InlineData("porch", "building", null)]
     [InlineData("Landing", "building", null)]
     [InlineData("Ramp", "building", null)]
-    [InlineData("Patio", "patio", true)]
-    [InlineData(" Walk ", "patio", true)]
-    [InlineData("Driveway", "parking", true)]
+    [InlineData("Garage, shed or carport", "building", null)]
+    [InlineData(" garage, SHED or carport ", "building", null)]
+    // review round 1: a slab's words are a floor's alone; on anything else not stated (never a slab, which leaves
+    // every check: a garage marked "Parking" must stay an object that may be a building)
+    [InlineData("Patio", null, true)]
+    [InlineData(" Walk ", null, true)]
+    [InlineData("Driveway", null, true)]
+    [InlineData("Parking", null, true)]
     [InlineData("Not a structure", null, false)]
     [InlineData("not a STRUCTURE", null, false)]
     [InlineData("Shed", null, true)]                    // not a word Gordium reads: not stated, never a near guess
@@ -99,10 +104,40 @@ public sealed class SiteObjectTests(RealWorker worker) : IClassFixture<RealWorke
     [Fact]
     public async Task The_mark_is_read_only_on_the_categories_it_is_bound_to_and_never_on_a_context_object()
     {
-        var site = await Site(House(Thing("fan", "OST_MechanicalEquipment", "Mechanical Equipment", mark: "Not a structure"),
+        var site = await Site(House(Thing("pipe", "OST_PipeAccessory", "Pipe Accessories", mark: "Not a structure"),
                                     Thing("next_door", mark: "Not a structure") with { Mark = GordiumMark.Context }));
-        Assert.True(LeftOut(site, "fan")["could_be_building"]!.GetValue<bool>());
+        Assert.True(LeftOut(site, "pipe")["could_be_building"]!.GetValue<bool>());
         Assert.True(LeftOut(site, "next_door")["could_be_building"]!.GetValue<bool>());
+    }
+
+    /// <summary>Review round 1: an AC condenser or a site light standing apart holds every yard, so the mark is bound
+    /// to Mechanical Equipment and Lighting Fixtures too.</summary>
+    [Theory]
+    [InlineData("OST_MechanicalEquipment", "Mechanical Equipment")]
+    [InlineData("OST_LightingFixtures", "Lighting Fixtures")]
+    public async Task An_ac_condenser_or_a_site_light_can_be_marked_not_a_structure(string category, string name)
+    {
+        var site = await Site(House(Thing("unit", category, name, mark: "Not a structure")));
+        Assert.False(LeftOut(site, "unit")["could_be_building"]!.GetValue<bool>());
+    }
+
+    /// <summary>Review round 1, P0: a 24 x 24 x 10 ft Generic Model 10 ft behind the house marked "Parking" (a garage
+    /// drawn as one) never leaves the check: lot coverage, the rear yard and the objects not included all need review;
+    /// marked "Garage, shed or carport" it is measured as a building.</summary>
+    [Fact]
+    public async Task A_garage_marked_parking_stays_in_the_check_and_one_marked_a_garage_is_measured()
+    {
+        RevitElement Garage(string mark) => FakeRevit.Family("garage", [Block(18, 90, 42, 114, 0, 10)]) with
+        {
+            Name = "Garage",
+            InstanceMarks = new Dictionary<Guid, MarkValue> { [Marks.SiteObject.Guid] = new(true, Text: mark) },
+        };
+        var parking = await Check(House(Garage("Parking")));
+        foreach (var id in new[] { "R-1b.lot_coverage", "R-1b.rear_yard", "scope.not_included" })
+            Assert.Equal(Verdict.NeedsReview, parking[id].Status);
+        var site = await Site(House(Garage("Garage, shed or carport")));
+        Assert.Contains("garage", Ids(site, "buildings"));
+        Assert.DoesNotContain("garage", Ids(site, "left_out"));
     }
 
     // ---- the checks ----------------------------------------------------------------------------------------------
@@ -155,5 +190,21 @@ public sealed class SiteObjectTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Contains(list.Summary, s => s.StartsWith("Gordium: Site object is: set on 2 elements, 1 with a word") &&
                                            s.Contains("Not a structure"));
         Assert.Equal(MarkingListResult.NotAllMarked, list.Headline);
+    }
+
+    /// <summary>Review round 1: where the reader doesn't read the mark (a context object, a Gordium floor block) the
+    /// list says so, never "given"; a slab's word on a non-floor says it is a floor's word.</summary>
+    [Fact]
+    public void The_marking_list_says_where_the_mark_isnt_read_and_a_floor_word_on_a_family()
+    {
+        var list = MarkingList.Build(House(Thing("next_door", mark: "Deck") with { Mark = GordiumMark.Context },
+                                           Thing("block", mark: "Deck") with { Mark = GordiumMark.FloorBlock, FloorMark = "1;10" },
+                                           Thing("garage", mark: "Parking")));
+        var rows = list.Rows.Where(r => r.Kind == MarkedKind.SiteObject).ToDictionary(r => r.Id, r => r.Cells.Single());
+        Assert.Equal(MarkState.NotReadHere, rows["next_door"].State);
+        Assert.Contains("context object", rows["next_door"].Words);
+        Assert.Equal(MarkState.NotReadHere, rows["block"].State);
+        Assert.Equal(MarkState.NotUnderstood, rows["garage"].State);
+        Assert.Contains("a floor's word", rows["garage"].Words);
     }
 }

@@ -102,6 +102,10 @@ public enum MarkState
 
     /// <summary>Set, but not to anything Gordium reads (an operation word not in the list): not stated.</summary>
     NotUnderstood,
+
+    /// <summary>Set on an element the reader doesn't read it on (a context object, one of Gordium's own markers): shown
+    /// with why, never as given; nothing to mark.</summary>
+    NotReadHere,
 }
 
 /// <summary>One mark on one row. <see cref="Suggestion"/> is only shown ("suggested: Yes"); it is never a mark.</summary>
@@ -217,7 +221,7 @@ public static class MarkingList
         {
             var odd = siteObjects.Count(r => r.NeedsMarking);
             summary.Add($"{Marks.SiteObject.Name}: set on {siteObjects.Count} element{(siteObjects.Count == 1 ? "" : "s")}" +
-                        (odd == 0 ? "." : $", {odd} with a word that isn't one of Gordium's (" + string.Join(", ", SiteObjectKinds.Words) +
+                        (odd == 0 ? "." : $", {odd} with a word that isn't one of Gordium's (" + SiteObjectKinds.Listed +
                                          "): read as not marked, so standing apart from the house it keeps the yards needing review."));
         }
         var inHouse = SiteSlabs.MarkedInHouse(model);
@@ -363,9 +367,18 @@ public static class MarkingList
             if (!m.Categories.Contains(e.BuiltInCategory) || !SiteReader.Looked(e) || !SiteReader.OnLotNow(model, e)
                 || Marks.Text(e.InstanceMarks.TryGetValue(m.Guid, out var v) ? v : null) is not { } word)
                 continue;
-            var cell = SiteObjectKinds.Of(word) is null
-                ? new MarkCell(m, MarkState.NotUnderstood, word, null, $"\"{word}\" isn't one of Gordium's ({string.Join(", ", SiteObjectKinds.Words)})")
-                : new MarkCell(m, MarkState.Given, word, null, null);
+            // review round 1: where the reader doesn't read the mark, the list never shows it as given
+            var cell = e.Mark switch
+            {
+                GordiumMark.Context => new MarkCell(m, MarkState.NotReadHere, word, null,
+                                                    "not read here: a Gordium context object (the neighbourhood's), read as one"),
+                not GordiumMark.None => new MarkCell(m, MarkState.NotReadHere, word, null,
+                                                     "not read here: one of Gordium's own markers (a floor block or a grade marker), read as one"),
+                _ when SiteObjectKinds.Of(word) is not null => new MarkCell(m, MarkState.Given, word, null, null),
+                _ when SlabKinds.Of(word) is not null => new MarkCell(m, MarkState.NotUnderstood, word, null,
+                    $"\"{word}\" is a floor's word (Gordium: Site slab is), not read on a {e.Category}: one of {SiteObjectKinds.Listed}"),
+                _ => new MarkCell(m, MarkState.NotUnderstood, word, null, $"\"{word}\" isn't one of Gordium's ({SiteObjectKinds.Listed})"),
+            };
             yield return new(e.UniqueId, MarkedKind.SiteObject, SlabLabel(e), [cell]);
         }
     }
