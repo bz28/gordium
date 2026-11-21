@@ -73,8 +73,7 @@ area need review.
    too and get their 12-in rings: a route that turns just past a door keeps 12 in off the jamb. A door less than
    24 in clear puts its own centre inside its jambs' rings: needs review. Exactly: **crossable** rooms (decision 1a)
    joined by passages form one zone; an end-only room is always a zone of its own, never merged across a passage.
-   Inside each zone, a **tangent graph** over the 12-in rings (decision 2); between zones, the door centres. Distances by Dijkstra from all exits at
-   once. A start point in an end-only room is the one exception: its own room is joined, for its routes only, to
+   Inside each zone, routes as decision 2 defines them; between zones, through the door centres. A start point in an end-only room is the one exception: its own room is joined, for its routes only, to
    each **crossable** zone beyond its passages (a route may leave it that way, never come back in). A passage into
    another end-only room (a kitchen open to a pantry) is no way out for anyone (test 17).
    The IBC's "natural and unobstructed path" names no clearance; Gordium uses NFPA's 12 in for both books. That can
@@ -102,19 +101,11 @@ area need review.
    through door openings, passing each door at its centre; (b) stays at least 12 in from every corner: each wall
    corner that sticks into the floor, each corner of an obstruction, each door jamb (a ring: a true circle of 12-in
    radius); except that (c) inside a ring that contains p, or the door centre it passes, the curve may run within
-   that ring until it leaves it. A point inside no ring and seen straight from the door centre has a straight route.
-   This is the definition the tests check; how it is computed is the build PR's.
-   **Computing it** is standard and exact: a visibility graph among circles and polygon obstacles. Its nodes are the
-   start, the door centres and the points where a straight line touches a ring; its edges are the straight segments
-   point to point, point to ring and ring to ring (each pair of rings has four touching lines) that lie wholly in
-   the free floor and keep 12 in from every ring they don't touch, and the arcs along each ring between touching
-   points; Dijkstra over it. The build PR's code and its tests are the procedure's full statement. **Work:** for m
-   rings and w wall segments in a zone, about 4 m squared candidate lines, each checked against the walls,
-   obstructions and rings (about m squared times (m + w) in all: well under a second for a few hundred rings).
-   **Numbers:** double precision; clearance tested to 10^-9 ft (a line just touching a ring is clear); **two lengths
-   within 10^-6 ft of each other are a tie**, broken toward the cautious reading (decision 5: the route that shares
-   more). *Rejected:* rings as polygons (an earlier draft): a route round a polygon is longer than round the circle
-   by an amount that depends on how the polygon is turned, enough to move test 6's figures and lose its tie.
+   that ring until it leaves it. **Two lengths within 10^-6 ft of each other are a tie**, broken toward the cautious
+   reading (decision 5: the route that shares more). It is computed exactly (shortest paths among circles and
+   polygon obstacles are a standard, exact computation); the build PR's code and its tests are the procedure, and
+   each test's figure here comes from this definition, worked two ways. *Rejected:* rings as polygons (an earlier
+   draft): the length round a polygon depends on how it is turned, enough to move test 6's figures and lose its tie.
 3. **The most remote point: every corner, plus a fine sampling with a stated bound.** For one exit and a room with no
    column, the farthest point is always a corner of the room: the route to any point ends in a straight line from
    the last corner it turns at, distance from that corner grows toward the edges of the area it sees, and where two
@@ -151,11 +142,8 @@ area need review.
    one such pair, so its figure at a sample is never less than the law's. So the story's figure is worked exactly
    as decision 3's: every corner and the 3-in samples, the triangles cut only where they could matter, and the rules
    get the greatest found plus 3 in, which is never less than the law's greatest. No cells and no cases: it is
-   decidable on any floor. **Work:** one shortest-route tree per distinct exit over each zone's tangent graph
-   (decision 2's tangent graph, n nodes; Dijkstra per exit); per sample, its route to each exit from the rings and
-   door centres it can touch (about n tests per exit), and per pair of exits a walk back along the two routes to their
-   last shared point. For k exits and S samples, about S x (k x n + k squared x route length): seconds for a story
-   like the Children's Odyssey (a few thousand samples, hundreds of nodes per zone). One exit on the story: the
+   decidable on any floor: per sample, its route to each exit (decision 2), and per pair of exits a walk back along
+   the two routes to their last shared point. One exit on the story: the
    common path is the travel distance.
 6. **Dead end: from the corridor's shape.** A corridor (a room marked `corridor`) is split into its straight legs
    (each a stretch between parallel walls; recesses shallower than 12 in, such as a door's, ignored); the centre line
@@ -228,7 +216,7 @@ area need review.
 ## How we will know it is right
 
 **Synthetic tests, answers worked by hand** (feet; walls 6 in thick, so a door's centre sits 0.25 ft outside the room;
-doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6, the table and the corner start included) was
+doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6, the table, the jamb, the behind-corner and the corner starts included) was
 worked two ways for this note: by the tangent-and-arc formulas, and by a throwaway brute-force shortest path over
 fine 512-sided polygons of the rings (neither kept, neither the route code); they agree to 1/1000 ft. The code's tests hold
 these hand figures as written in the test file, never taken from the code under test, which is the third way.
@@ -263,7 +251,11 @@ these hand figures as written in the test file, never taken from the code under 
    start at (10, 0) and the exit door centred at (10, 20.25). The straight line, 20.25 ft, crosses the table; the
    route goes round one side, touching the rings at two of its corners and running along the side 12 in off it:
    8.958 + arc 0.450 (25.8 degrees) + 3 + arc 0.439 (25.1 degrees) + 9.196 = **22.043 ft**. Fails if a line may
-   cross an obstruction. **A start on a corner:** test 1's corridor, from the inside corner (34, 6) itself (inside
+   cross an obstruction. **Near a jamb:** test 4's room from (0, 13.5): the straight line to the door centre
+   (10.152 ft) passes within 12 in of the jamb at (8.5, 15), so the route curves round its ring: **10.543 ft**.
+   **Behind a corner:** test 1's corridor from (34.5, 6.5), inside the ring of the inside corner (34, 6) and behind
+   it: within that ring to the corner, then straight to the door centre: 0.707 + 34.381 = **35.088 ft**.
+   **A start on a corner:** test 1's corridor, from the inside corner (34, 6) itself (inside
    its own ring): straight to the door centre, **34.381 ft**, never "no route".
    **Two exits and a column:** test 2's room and column, exit A the west door centred at (-0.25, 5), exit B a 36-in
    door in the north wall centred at (2, 10.25), its jambs at x 0.5 and 3.5 (each with its ring). At (30, 5) the two ways round the column to A are equally short (the
@@ -339,7 +331,7 @@ runs where they are and says it skipped where they aren't.
 ## Where the code would go
 
 - `packages/model_measurement/model_measurement/routes/`: `floor.py` (each story's zones from rooms, holes,
-  obstructions, doors, passages, with the decision 10 checks), `paths.py` (12-in rings, tangent graph, Dijkstra
+  obstructions, doors, passages, with the decision 10 checks), `paths.py` (decision 2's routes, shortest paths
   from the exits), `remote.py` (corners and the 3-in triangles, the bound), `common_path.py`, `dead_ends.py`
   (corridor legs, centre lines), `straight.py` (remoteness, diagonal), `areas.py`, and `__init__.py` giving the
   `story`, `space` and `corridor` parts with their measures, `not_measured` reasons and `more` (the paths drawn).
