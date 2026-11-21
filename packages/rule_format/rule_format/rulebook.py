@@ -306,12 +306,19 @@ def brought_in_pages(entry: dict) -> list[int] | None:
 def kept_text(entry: dict) -> list[dict]:
     """A kept-outside document's extracted text as this branch brings it in: its brought-in pages chosen from the
     cached whole book, row for row what extract_icc(pdf, those pages) gives (header included)."""
-    from document_extraction.book_text import select
+    from document_extraction.book_text import as_printed, select
     pages = brought_in_pages(entry)
     if not pages:                               # never the whole book in its stead (_source_entry_problems)
         raise ValueError(f"{entry['file']}: kept outside the repo with no brought_in.pages")
-    return _kept(f"kept text {pages}", cached_text(entry).read_bytes(),
-                 lambda data: select(_jsonl_rows(data), pages))
+    return _kept(f"kept text {pages} {_misreads(entry)!r}", cached_text(entry).read_bytes(),
+                 lambda data: as_printed(select(_jsonl_rows(data), pages), _misreads(entry))[0])
+
+
+def _misreads(entry: dict) -> dict:
+    """Where a scanned book's OCR misreads the page, by line (sources.yaml brought_in.misread; book_text.as_printed):
+    every check reads the brought-in text with them put right."""
+    b = entry.get("brought_in")
+    return dict(b.get("misread") or {}) if isinstance(b, dict) else {}
 
 
 @dataclass
@@ -403,13 +410,14 @@ class Context:
                                    "pdfplumber; the version is book_text.extractor_key)")
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
-                ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None)
+                ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None,
+                                    _misreads(entry) if outside else None)
                 # (an outside book with no brought_in.pages has a problem, so is never loaded whole)
             cut = j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
             if cut.exists():
                 ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
             if outside and cut.exists() and name in ctx.pages:
-                for problem in _stale_cache_problems(extracted, cut):
+                for problem in _stale_cache_problems(extracted, cut, _misreads(entry)):
                     ctx._problem(name, problem)
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
@@ -435,12 +443,13 @@ class Context:
         self.districts |= districts
         self.cells[name] = cells
 
-    def _load_extracted(self, name, sha, path, pages=None):
+    def _load_extracted(self, name, sha, path, pages=None, misreads=None):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
         The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
         document_extraction --check) and requires an exact match, so this file can't be edited by hand. `pages`: only
         these pages (a book kept outside the repo: its cached text is the whole book; the branch brings in some)."""
-        found = _kept(f"extracted {sha} {pages}", Path(path).read_bytes(), lambda data: _pages_of(data, sha, pages))
+        found = _kept(f"extracted {sha} {pages} {misreads!r}", Path(path).read_bytes(),
+                      lambda data: _pages_of(data, sha, pages, misreads))
         if found is None:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
@@ -448,24 +457,35 @@ class Context:
 
 
 def _verification(j: Path) -> dict[str, dict]:
-    """A law folder's second reading of a book's numbers (text_verification.yaml) with the lines of each piece, for
-    code_numbers; {} if it has none, or it can't be read (its own check, state_law.verification_problems, says why)."""
-    path = j / "text_verification.yaml"
-    try:
-        book = load(path) if path.is_file() else None
-        name = book["document"]
-        cut = read_jsonl(j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
-        return {name: {"pieces": dict(book["pieces"]), "lines": {r["id"]: r["lines"] for r in cut[1:]}}}
-    except Exception:            # reported by its own check, never a crash here
-        return {}
+    """A law folder's second reading of each book's numbers (text_verification.yaml, or one file per book,
+    text_verification.<book>.yaml: verification_files) with the lines of each piece, for code_numbers, by book; a
+    file that can't be read is left out (its own check, state_law.verification_problems, says why)."""
+    out = {}
+    for path in verification_files(j):
+        try:
+            book = load(path)
+            name = book["document"]
+            cut = read_jsonl(j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
+            out[name] = {"pieces": dict(book["pieces"]), "lines": {r["id"]: r["lines"] for r in cut[1:]}}
+        except Exception:        # reported by its own check, never a crash here
+            continue
+    return out
 
 
-def _stale_cache_problems(extracted: Path, cut: Path) -> list[str]:
+def verification_files(j) -> list[Path]:
+    """A law folder's records of the second reading of its books' numbers: text_verification.yaml (one book, as New
+    York's), then text_verification.<book>.yaml, one per book (Maine's two books)."""
+    j = Path(j)
+    return [p for p in [j / "text_verification.yaml", *sorted(j.glob("text_verification.*.yaml"))] if p.is_file()]
+
+
+def _stale_cache_problems(extracted: Path, cut: Path, misreads: dict | None = None) -> list[str]:
     """A cached text that is not the one the repo's pieces were cut from (edited, or left from another extraction):
     each piece's words must still have the fingerprint the sections file records. Only `python -m
     document_extraction --check` re-extracts, so without this an edited cache would feed every other check."""
+    from document_extraction.book_text import as_printed
     from document_extraction.icc_sections import text_fingerprint
-    lines = {(r["page"], r["line"]): r for r in read_jsonl(extracted)[1:]}
+    lines = {(r["page"], r["line"]): r for r in as_printed(read_jsonl(extracted), misreads)[0][1:]}
     out = []
     for piece in read_jsonl(cut)[1:]:
         members = [lines.get((pg, n)) for pg, a, b in piece["lines"] for n in range(a, b + 1)]
@@ -499,12 +519,15 @@ def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | Non
     return cells, districts
 
 
-def _pages_of(data: bytes, sha: str, only: list[int] | None = None) -> dict | None:
+def _pages_of(data: bytes, sha: str, only: list[int] | None = None, misreads: dict | None = None) -> dict | None:
     """An extracted-text .jsonl file's bytes -> page -> line -> the line's words (`only`: these pages), or None when
     its header names another PDF version than `sha` (checked before any row is read, as for _cells_of)."""
     rows = _jsonl_rows(data)
     if not rows or rows[0].get("sha256") != sha:
         return None
+    if misreads:                       # a scanned book: its OCR's misreads put right (book_text.as_printed)
+        from document_extraction.book_text import as_printed
+        rows = as_printed(rows, misreads)[0]
     pages: dict[int, dict[int, list[str]]] = {}
     keep = None if only is None else set(only)
     for row in rows[1:]:
@@ -516,10 +539,11 @@ def _pages_of(data: bytes, sha: str, only: list[int] | None = None) -> dict | No
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
                  "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages",
-                 "kept_outside_repo", "copy", "terms", "edition", "in_force", "brought_in"}
+                 "kept_outside_repo", "copy", "terms", "edition", "in_force", "brought_in", "style"}
 # Document layouts the section splitters know: ecode360 (document_extraction/sections.py), icc (an ICC code book,
-# document_extraction/icc_sections.py)
-LAYOUTS = {"ecode360", "icc"}
+# document_extraction/icc_sections.py), two_column (a book in two columns read from its text layer, with its `style`:
+# document_extraction/columns.py and columns_sections.py)
+LAYOUTS = {"ecode360", "icc", "two_column"}
 # A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU), is each place's own: its
 # jurisdiction.yaml districts.chart_column, through the registry (place.py: Place.district_column), the one
 # definition the chart reader, the inspector and the drafter all use.

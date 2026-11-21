@@ -26,9 +26,11 @@ import yaml
 from rule_format.place import place
 from rule_format.rulebook import cached, cached_text, law_folders, read_jsonl, utf8_console
 
-from . import book_text, icc_sections, sections
+from . import book_text, columns_sections, icc_sections, sections
 from .charts import read_charts
 from .extract import extract, sha256, to_jsonl
+from .columns import extract_columns
+from .columns import read_book as read_columns
 from .icc import extract_icc, read_book
 
 REPO = Path(__file__).resolve().parents[3]
@@ -77,18 +79,26 @@ def _kept_outside(jurisdiction: Path, doc: dict, check: bool) -> bool:
     if sha256(pdf) != doc["sha256"]:
         print(f"✗ {label}: the cached copy's fingerprint doesn't match sources.yaml; not extracted")
         return False
-    if doc.get("layout") != "icc" or not isinstance(doc.get("brought_in"), dict):
-        print(f"✗ {label}: a book kept outside the repo needs layout: icc and brought_in (pages, sections)")
+    two_column = doc.get("layout") == "two_column" and doc.get("style") in columns_sections.STYLES
+    if not (doc.get("layout") == "icc" or two_column) or not isinstance(doc.get("brought_in"), dict):
+        print(f"✗ {label}: a book kept outside the repo needs layout: icc (or two_column with a style, one of "
+              f"{sorted(columns_sections.STYLES)}) and brought_in (pages, sections)")
         return False
     pages = icc_sections.parse_pages(doc["brought_in"]["pages"])
-    rows = extract_icc(pdf, pages)
+    rows = extract_columns(pdf, pages) if two_column else extract_icc(pdf, pages)
     cut = jurisdiction / "2_extracted_text" / f"{Path(doc['file']).stem}.sections.jsonl"
-    ok = _same_as_cached(pdf, text, pages, rows, check)
-    return all([ok, _write_or_check(cut, icc_sections.to_jsonl(icc_sections.split(rows, doc["brought_in"]), rows[0]),
-                                    check)])
+    ok = _same_as_cached(pdf, text, pages, rows, check, read_columns if two_column else read_book)
+    if two_column:              # a scan's OCR misreads put right, as every check reads them (book_text.as_printed)
+        printed, misread = book_text.as_printed(rows, (doc["brought_in"].get("misread") or {}))
+        result = columns_sections.split(printed, doc["brought_in"], doc["style"])
+        result["problems"] = misread + result["problems"]
+    else:
+        result = icc_sections.split(rows, doc["brought_in"])
+    cut_jsonl = columns_sections.to_jsonl if two_column else icc_sections.to_jsonl
+    return all([ok, _write_or_check(cut, cut_jsonl(result, rows[0]), check)])
 
 
-def _same_as_cached(pdf: Path, text: Path, pages: list[int], fresh: list[dict], check: bool) -> bool:
+def _same_as_cached(pdf: Path, text: Path, pages: list[int], fresh: list[dict], check: bool, reader=read_book) -> bool:
     """Whether the cached whole-book text, at `pages`, is `fresh` (those pages just read), byte for byte, header
     included. Not checking: where it isn't, the whole book is read again and written (atomically, so a branch reading
     the cache at the same time never sees half a file)."""
@@ -104,7 +114,7 @@ def _same_as_cached(pdf: Path, text: Path, pages: list[int], fresh: list[dict], 
         print(f"{'✓' if same else '✗'} {label}{'' if same else ': ' + why}")
         return same
     print(f"reading every page of {pdf.name} into the code cache (once per book and extractor version)")
-    book = read_book(pdf)
+    book = reader(pdf)
     if to_jsonl(book_text.select(book, pages)) != to_jsonl(fresh):     # never: each page is read on its own
         print(f"✗ {label}: the whole book's pages are not the pages read alone")
         return False

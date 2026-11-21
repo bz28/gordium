@@ -21,7 +21,7 @@ is also read by a person from the whole printed sentence, without seeing numbers
 import datetime
 from pathlib import Path
 
-from .rulebook import STATE_SETTINGS, Context, kept_text, load, read_jsonl
+from .rulebook import STATE_SETTINGS, Context, kept_text, load, read_jsonl, verification_files
 
 VERIFICATION = "text_verification.yaml"
 READINGS = ("agrees", "differs")
@@ -51,26 +51,47 @@ def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
 
 
 def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[str]]:
-    """(problems, notes) for a state law folder's text_verification.yaml. Notes say what wasn't checked here."""
-    from document_extraction.numbers import COMPARISONS, comparisons, shown, statements_of_lines
-    from .labels import piece_fingerprint
+    """(problems, notes) for a state law folder's records of the second reading: text_verification.yaml, or one
+    text_verification.<book>.yaml per book (rulebook.verification_files). Every book kept outside the repo needs one,
+    naming it; a file naming another book, or a book twice, is a problem. Notes say what wasn't checked here."""
     folder = Path(folder)
-    path = folder / VERIFICATION
+    files = verification_files(folder)
     kept_outside = [n for n, e in ctx.sources.items() if e.get("kept_outside_repo") is True]
-    if not path.exists():
+    if not files:
         return ([f"no {VERIFICATION}: every number of a book kept outside the repo is read twice"] if kept_outside
                 else []), []
+    problems, notes, named = [], [], []
+    for path in files:
+        try:
+            named.append(load(path).get("document"))
+        except Exception:
+            named.append(None)
+        p, n = _verification_problems(folder, ctx, path)
+        prefix = "" if len(files) == 1 else f"{path.name}: "
+        problems += [prefix + x for x in p]
+        notes += n
+    problems += [f"{name}: kept outside the repo, but no {VERIFICATION} (or text_verification.<book>.yaml) names it"
+                 for name in kept_outside if name not in named]
+    problems += [f"{name}: named by more than one record of the second reading" for name in sorted(
+        {x for x in named if x is not None and named.count(x) > 1})]
+    return problems, notes
+
+
+def _verification_problems(folder: Path, ctx: Context, path: Path) -> tuple[list[str], list[str]]:
+    """(problems, notes) for one record of the second reading of a book's numbers."""
+    from document_extraction.numbers import COMPARISONS, comparisons, shown, statements_of_lines
+    from .labels import piece_fingerprint
     book = load(path)
     if not isinstance(book, dict) or not FIELDS - {"notes"} <= set(book) <= FIELDS:
-        return [f"{VERIFICATION} must have {sorted(FIELDS - {'notes'})} (and notes, if any), nothing else"], []
+        return [f"{path.name} must have {sorted(FIELDS - {'notes'})} (and notes, if any), nothing else"], []
     name = book["document"]
     entry = ctx.sources.get(name)
     if entry is None:
-        return [f"{VERIFICATION}: document {name!r} is not in sources.yaml"], []
+        return [f"{path.name}: document {name!r} is not in sources.yaml"], []
     cut = folder / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
     rows = read_jsonl(cut)
     if rows[0].get("sha256") != entry.get("sha256"):
-        return [f"{VERIFICATION}: the sections file was cut from another version of {name}"], []
+        return [f"{path.name}: the sections file was cut from another version of {name}"], []
     pieces = {p["id"]: p for p in rows[1:]}
     problems, notes = [], []
     second = book["second_reading"]
@@ -79,14 +100,14 @@ def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[s
     if not (isinstance(book["copy_checked"], str) and book["copy_checked"].strip()):
         problems.append("copy_checked must say which copy of the book was read")
     recorded = book["pieces"] if isinstance(book["pieces"], dict) else {}
-    problems += [f"{pid}: brought in but not in {VERIFICATION}" for pid in pieces if pid not in recorded]
-    problems += [f"{pid}: in {VERIFICATION} but not a piece" for pid in recorded if pid not in pieces]
+    problems += [f"{pid}: brought in but not in {path.name}" for pid in pieces if pid not in recorded]
+    problems += [f"{pid}: in {path.name} but not a piece" for pid in recorded if pid not in pieces]
     text = None
     if name in ctx.pages:
         lines = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
         text = lambda p: [lines[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1)]
     else:
-        notes.append(f"{VERIFICATION}: the recorded numbers weren't compared with the book's text here "
+        notes.append(f"{path.name}: the recorded numbers weren't compared with the book's text here "
                      f"({ctx.uncached.get(name, 'its text is not loaded')})")
     for pid, e in recorded.items():
         if pid not in pieces:
