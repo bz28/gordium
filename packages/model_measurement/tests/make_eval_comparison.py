@@ -61,7 +61,7 @@ def _why(story, measured, name) -> dict:
     more = sp["more"].get(name) or {}
     out = {"not_measured": sp["not_measured"].get(name)}
     if "rooms_without_route" in more:
-        out.update(rooms_without_route=sorted(more["rooms_without_route"]),
+        out.update(rooms_without_route={room: str(why) for room, why in sorted(more["rooms_without_route"].items())},
                    over_rooms_with_a_route=round(more["figure"], 3) if "figure" in more else None,
                    from_room=more.get("room"), at=more.get("at"))
     return out
