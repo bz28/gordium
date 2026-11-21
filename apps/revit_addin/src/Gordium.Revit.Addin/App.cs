@@ -156,6 +156,20 @@ public sealed class App : IExternalApplication
             }
             return;
         }
+        if (File.Exists(SetMarks.RequestPath))
+        {
+            try
+            {
+                var takenMarks = SetMarks.RequestPath + ".taken";
+                File.Move(SetMarks.RequestPath, takenMarks, overwrite: true);
+                SetMarks.Run(ui.Application, takenMarks);
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("set_marks", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
         if (File.Exists(ModelBuild.RequestPath))
         {
             try

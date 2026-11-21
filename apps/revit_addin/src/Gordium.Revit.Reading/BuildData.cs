@@ -6,9 +6,12 @@ namespace Gordium.Revit.Reading;
 /// <summary>A point on the plan, in feet.</summary>
 public readonly record struct PlanPoint(double X, double Y);
 
-/// <summary>A wall of the data: its centre line from <see cref="Start"/> to <see cref="End"/> on the level.</summary>
+/// <summary>A wall of the data: its centre line from <see cref="Start"/> to <see cref="End"/> on the level.
+/// <see cref="NoJoinStart"/> and <see cref="NoJoinEnd"/>: Revit is not to join the wall at that end (a trimmed end, a
+/// fill's ends: a join there with a wall it overlaps made Revit delete both, "Can't keep elements joined", the Children's
+/// Odyssey build, 2026-11-21).</summary>
 public sealed record BuildWall(int Id, PlanPoint Start, PlanPoint End, double ThicknessIn, string Status, bool SmokePartition,
-                               string? FireRating, double HeightFt, bool Exterior);
+                               string? FireRating, double HeightFt, bool Exterior, bool NoJoinStart = false, bool NoJoinEnd = false);
 
 /// <summary>A door of the data (<see cref="Number"/> its place in the list from 1, as the script's marks D01...): its
 /// centre on its host wall, <see cref="SwingDir"/> the side its leaf opens to, <see cref="Hinge"/> its hinge jamb (a
@@ -36,7 +39,43 @@ public sealed record BuildModel(string Project, string LevelName, double LevelEl
 /// <summary>A correction the request makes to the data before drawing: wall W<see cref="Wall"/>'s end moved to
 /// <see cref="ExtendEndTo"/> (along its own line, at most <see cref="BuildData.MaxCorrection"/> ft), and why. Applied
 /// only when it keeps the wall's direction; logged either way.</summary>
-public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why);
+/// <param name="Wall">The wall's number (W16 is 16).</param>
+/// <param name="ExtendEndTo">Where its end (or, for <see cref="CorrectionKind.TrimStart"/>, its start) goes.</param>
+/// <param name="Why">Why, in words (required).</param>
+/// <param name="Kind">Which end moves, and which way: <see cref="CorrectionKind.ExtendEnd"/> (<c>extend_end_to</c>),
+/// or a trim (<c>trim_end_to</c>, <c>trim_start_to</c>) that only shortens the wall back along its own line: two of the
+/// trace's walls overlapping (a sliver Revit finds as an enclosed area) are joined end to end, never by a Room.</param>
+/// <param name="FillStart">For <see cref="CorrectionKind.Fill"/>: the new wall's start (its end is
+/// <paramref name="ExtendEndTo"/>, <paramref name="Wall"/> unused).</param>
+/// <param name="FillThicknessIn">For <see cref="CorrectionKind.Fill"/>: the new wall's thickness, inches.</param>
+/// <param name="MergeWith">For <see cref="CorrectionKind.Merge"/>: the wall taken into <paramref name="Wall"/>.</param>
+public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why, CorrectionKind Kind = CorrectionKind.ExtendEnd,
+                                    PlanPoint? FillStart = null, double? FillThicknessIn = null, int? MergeWith = null);
+
+/// <summary>What a correction does to its wall.</summary>
+public enum CorrectionKind
+{
+    /// <summary>The end moved along the wall's own line (<c>extend_end_to</c>).</summary>
+    ExtendEnd,
+
+    /// <summary>The end moved back toward the start (<c>trim_end_to</c>): shorter, never longer.</summary>
+    TrimEnd,
+
+    /// <summary>The start moved toward the end (<c>trim_start_to</c>): shorter, never longer.</summary>
+    TrimStart,
+
+    /// <summary>A short wall added where the sheet shows solid wall the trace left hollow (<c>fill</c>: a pocket
+    /// between three of its walls): at most <see cref="BuildData.MaxFillLength"/> long and
+    /// <see cref="BuildData.MaxCorrection"/> thick, every corner within <see cref="BuildData.MaxCorrection"/> of a wall
+    /// of the data, so it fills between walls and never stands on its own.</summary>
+    Fill,
+
+    /// <summary>Two walls the trace drew face to face along the same stretch (<c>merge</c>: a hairline Revit finds as an
+    /// enclosed area with no point inside) drawn as one wall of their two thicknesses, <see cref="WallCorrection.Wall"/>'s
+    /// kept, <see cref="WallCorrection.MergeWith"/> taken into it: only parallel, their faces within 1/16 in, their ends
+    /// within 1/16 in, and no door or window in either.</summary>
+    Merge,
+}
 
 /// <summary>Data the add-in can't build all of: every problem found, each in words (never a part dropped).</summary>
 public sealed class BuildDataException(IReadOnlyList<string> problems)
@@ -94,22 +133,63 @@ public sealed record BuildRequest(string Data, string? Template, string SaveAs, 
                         problems.Add($"correction {k}: not an object");
                         continue;
                     }
+                    if (co.ContainsKey("merge"))
+                    {
+                        // {"merge": ["W57", "W111"], "why": "..."}
+                        static int? Mark(JsonNode? n) => n is JsonValue v && v.TryGetValue<string>(out var t) && t is { Length: > 1 } && t[0] == 'W'
+                            && int.TryParse(t[1..], System.Globalization.NumberStyles.None, CultureInfo.InvariantCulture, out var id) ? id : null;
+                        var pair = co["merge"] as JsonArray;
+                        var (ma, mb) = pair is { Count: 2 } ? (Mark(pair[0]), Mark(pair[1])) : (null, null);
+                        var mwhy = co["why"] is JsonValue myv && myv.TryGetValue<string>(out var mys) && mys.Trim() != "" ? mys : null;
+                        if (ma is null || mb is null || ma == mb)
+                            problems.Add($"correction {k}: merge needs two different walls' marks [\"W57\", \"W111\"]");
+                        if (mwhy is null)
+                            problems.Add($"correction {k}: no why (every correction to the data says why)");
+                        problems.AddRange(co.Select(p => p.Key).Where(x => x is not ("merge" or "why")).Select(x => $"correction {k}: has {x}, which a merge doesn't take"));
+                        if (ma is { } a0 && mb is { } b0 && a0 != b0 && mwhy is not null && co.Count == 2)
+                            corrections.Add(new WallCorrection(a0, default, mwhy, CorrectionKind.Merge, MergeWith: b0));
+                        continue;
+                    }
+                    if (co.ContainsKey("fill"))
+                    {
+                        // {"fill": {"start": [x, y], "end": [x, y], "thickness_in": t}, "why": "..."}: a new short wall
+                        PlanPoint? Pt(JsonNode? n) => n is JsonArray { Count: 2 } pa && pa.All(x => x is JsonValue xv && xv.TryGetValue<double>(out var d) && double.IsFinite(d))
+                            ? new PlanPoint(pa[0]!.GetValue<double>(), pa[1]!.GetValue<double>()) : null;
+                        var f = co["fill"] as JsonObject;
+                        var (fs, fe) = (Pt(f?["start"]), Pt(f?["end"]));
+                        var ft = f?["thickness_in"] is JsonValue tv && tv.TryGetValue<double>(out var td) && double.IsFinite(td) && td > 0 ? td : (double?)null;
+                        var fwhy = co["why"] is JsonValue fyv && fyv.TryGetValue<string>(out var fys) && fys.Trim() != "" ? fys : null;
+                        if (fs is null || fe is null || ft is null)
+                            problems.Add($"correction {k}: fill needs start and end points [x, y] and thickness_in more than 0");
+                        if (fwhy is null)
+                            problems.Add($"correction {k}: no why (every correction to the data says why)");
+                        problems.AddRange(co.Select(p => p.Key).Where(x => x is not ("fill" or "why")).Select(x => $"correction {k}: has {x}, which a fill doesn't take"));
+                        if (fs is { } s0 && fe is { } e0 && ft is { } t0 && fwhy is not null && co.Count == 2)
+                            corrections.Add(new WallCorrection(0, e0, fwhy, CorrectionKind.Fill, s0, t0));
+                        continue;
+                    }
                     var wall = co["wall"] is JsonValue wv && wv.TryGetValue<string>(out var ws) ? ws : null;
                     var id = wall is { Length: > 1 } && wall[0] == 'W' && int.TryParse(wall[1..], System.Globalization.NumberStyles.None,
                                                                                         CultureInfo.InvariantCulture, out var n) ? n : (int?)null;
-                    var to = co["extend_end_to"] is JsonArray { Count: 2 } a && a.All(x => x is JsonValue xv && xv.TryGetValue<double>(out var d) && double.IsFinite(d))
+                    (string Key, CorrectionKind Kind)[] kinds =
+                        [("extend_end_to", CorrectionKind.ExtendEnd), ("trim_end_to", CorrectionKind.TrimEnd), ("trim_start_to", CorrectionKind.TrimStart)];
+                    var given = kinds.Where(x => co.ContainsKey(x.Key)).ToList();
+                    var key = given.Count == 1 ? given[0].Key : "extend_end_to";
+                    var to = co[key] is JsonArray { Count: 2 } a && a.All(x => x is JsonValue xv && xv.TryGetValue<double>(out var d) && double.IsFinite(d))
                         ? new PlanPoint(a[0]!.GetValue<double>(), a[1]!.GetValue<double>()) : (PlanPoint?)null;
                     var why = co["why"] is JsonValue yv && yv.TryGetValue<string>(out var ys) && ys.Trim() != "" ? ys : null;
-                    var unknown = co.Select(p => p.Key).Where(x => x is not ("wall" or "extend_end_to" or "why")).ToList();
+                    var unknown = co.Select(p => p.Key).Where(x => x != "wall" && x != "why" && kinds.All(kd => kd.Key != x)).ToList();
                     if (id is null)
                         problems.Add($"correction {k}: wall is {co["wall"]?.ToJsonString() ?? "missing"}, not a wall's mark (W16)");
-                    if (to is null)
-                        problems.Add($"correction {k}: extend_end_to is {co["extend_end_to"]?.ToJsonString() ?? "missing"}, not a point [x, y]");
+                    if (given.Count > 1)
+                        problems.Add($"correction {k}: gives {string.Join(" and ", given.Select(x => x.Key))}: one change per correction");
+                    else if (to is null)
+                        problems.Add($"correction {k}: {key} is {co[key]?.ToJsonString() ?? "missing"}, not a point [x, y]");
                     if (why is null)
                         problems.Add($"correction {k}: no why (every correction to the data says why)");
                     problems.AddRange(unknown.Select(x => $"correction {k}: has {x}, which isn't asked for"));
-                    if (id is { } i && to is { } p && why is not null)
-                        corrections.Add(new WallCorrection(i, p, why));
+                    if (id is { } i && to is { } p && why is not null && given.Count <= 1)
+                        corrections.Add(new WallCorrection(i, p, why, given.Count == 1 ? given[0].Kind : CorrectionKind.ExtendEnd));
                 }
         }
         var known = new HashSet<string> { "data", "template", "save_as", "swing_opposite_facing", "hinge_opposite_hand", "use_phases", "corrections" };
@@ -457,6 +537,10 @@ public static class BuildData
     /// <summary>The farthest a correction may move a wall's end, in feet: a trace's slip, never a new wall.</summary>
     public const double MaxCorrection = 2.0;
 
+    /// <summary>The longest a fill may be, in feet: a pocket's side (the Children's Odyssey's east-entry jamb pockets,
+    /// 2.78 ft), never a new run of wall.</summary>
+    public const double MaxFillLength = 3.0;
+
     /// <summary>The data with each correction applied, in order, and each in words: applied ("corrected W16: end
     /// (192.424, 48.167) → (193.867, 48.167): why") or refused and not applied (no such wall; the end moved more than
     /// <see cref="MaxCorrection"/> ft; the wall's direction changed, off its own line or turned back). Nothing else in
@@ -470,6 +554,74 @@ public static class BuildData
         static string Xy(PlanPoint p) => string.Create(CultureInfo.InvariantCulture, $"({p.X:0.###}, {p.Y:0.###})");
         foreach (var c in corrections)
         {
+            if (c.Kind == CorrectionKind.Merge)
+            {
+                var (ka, kb) = (walls.FindIndex(x => x.Id == c.Wall), walls.FindIndex(x => x.Id == c.MergeWith));
+                var said = $"W{c.MergeWith} into W{c.Wall}: {c.Why}";
+                string? no = ka < 0 || kb < 0 ? "the data has no such wall"
+                    : model.Doors.Any(d => d.HostWall == c.Wall || d.HostWall == c.MergeWith)
+                      || model.Windows.Any(w => w.HostWall == c.Wall || w.HostWall == c.MergeWith) ? "a door or window is in one of them"
+                    : MergeProblem(walls[ka], walls[kb]);
+                if (no is not null)
+                {
+                    refused.Add($"refused merge {said} ({no})");
+                    continue;
+                }
+                var (wa, wb) = (walls[ka], walls[kb]);
+                double len = Distance(wa.Start, wa.End), ux = (wa.End.X - wa.Start.X) / len, uy = (wa.End.Y - wa.Start.Y) / len;
+                // b's side of a, across: the merged centre line half way between the two outer faces
+                var side = Math.Sign(-(wb.Start.X - wa.Start.X) * uy + (wb.Start.Y - wa.Start.Y) * ux);
+                var shift = side * wb.ThicknessIn / 24;
+                // the merged wall carries the stricter of each: a smoke partition if either is, the one fire rating given
+                // (two different ratings are refused in MergeProblem), exterior if either is; its status (phase) is the
+                // first's, and the line says what each was (review round 1: the second's were dropped in silence)
+                var merged = wa with
+                {
+                    Start = new PlanPoint(wa.Start.X - uy * shift, wa.Start.Y + ux * shift),
+                    End = new PlanPoint(wa.End.X - uy * shift, wa.End.Y + ux * shift),
+                    ThicknessIn = wa.ThicknessIn + wb.ThicknessIn,
+                    SmokePartition = wa.SmokePartition || wb.SmokePartition,
+                    FireRating = wa.FireRating ?? wb.FireRating,
+                    Exterior = wa.Exterior || wb.Exterior,
+                };
+                walls[ka] = merged;
+                walls.RemoveAt(walls.FindIndex(x => x.Id == c.MergeWith));
+                var differ = new List<string>();
+                if (wa.Status != wb.Status)
+                    differ.Add($"status {wa.Status} kept (W{c.MergeWith} was {wb.Status})");
+                if (wa.SmokePartition != wb.SmokePartition)
+                    differ.Add("a smoke partition (one of them was)");
+                if (wa.FireRating != wb.FireRating)
+                    differ.Add($"fire rating {merged.FireRating} (one of them had none)");
+                if (wa.Exterior != wb.Exterior)
+                    differ.Add("exterior (one of them was)");
+                applied.Add(I($"merged {said} (one wall {merged.ThicknessIn:0.##} in thick, centre line moved {Math.Abs(shift):0.###} ft") +
+                            (differ.Count > 0 ? "; " + string.Join("; ", differ) : "") + ")");
+                continue;
+            }
+            if (c.Kind == CorrectionKind.Fill)
+            {
+                var (s, e, t) = (c.FillStart!.Value, c.ExtendEndTo, c.FillThicknessIn!.Value);
+                var length = Distance(s, e);
+                var fill = new BuildWall(walls.Max(x => x.Id) + 1, s, e, t, "Existing", false, null,
+                                         model.Walls.Count == 0 ? 10 : model.Walls.Max(x => x.HeightFt), false, NoJoinStart: true, NoJoinEnd: true);
+                // its four corners, each within the limit of a wall of the data: it fills between walls, never stands alone
+                double ux = (e.X - s.X) / Math.Max(length, 1e-12), uy = (e.Y - s.Y) / Math.Max(length, 1e-12), half = t / 24;
+                PlanPoint[] corners = [new(s.X - uy * half, s.Y + ux * half), new(s.X + uy * half, s.Y - ux * half),
+                                       new(e.X - uy * half, e.Y + ux * half), new(e.X + uy * half, e.Y - ux * half)];
+                var far = corners.Select(p => model.Walls.Count == 0 ? double.PositiveInfinity : model.Walls.Min(w => DistanceToWall(p, w))).Max();
+                var said = I($"a {length:0.###} ft wall {t:0.##} in thick from {Xy(s)} to {Xy(e)}: {c.Why}");
+                if (length < 1e-6 || length > MaxFillLength || t / 12 > MaxCorrection)
+                    refused.Add(I($"refused fill: {said} (a fill is at most {MaxFillLength:0} ft long and {MaxCorrection:0} ft thick)"));
+                else if (far > MaxCorrection)
+                    refused.Add(I($"refused fill: {said} (a corner is {far:0.###} ft from every wall of the data, more than {MaxCorrection:0} ft: not a fill between walls)"));
+                else
+                {
+                    walls.Add(fill);
+                    applied.Add($"filled W{fill.Id}: {said}");
+                }
+                continue;
+            }
             var i = walls.FindIndex(w => w.Id == c.Wall);
             var words = $"W{c.Wall}: end to {Xy(c.ExtendEndTo)}: {c.Why}";
             if (i < 0)
@@ -480,6 +632,28 @@ public static class BuildData
             // measured from the data's own wall, never one an earlier correction moved: two corrections of a wall can't
             // add up past the limit (review round 1)
             var w = model.Walls.First(x => x.Id == c.Wall);
+            if (c.Kind != CorrectionKind.ExtendEnd)
+            {
+                // a trim: the end (or start) moved back along the wall's own line, the wall shorter and still a wall
+                var start = c.Kind == CorrectionKind.TrimStart;
+                var (fixedEnd, movedEnd) = start ? (w.End, w.Start) : (w.Start, w.End);
+                var trim = Distance(movedEnd, c.ExtendEndTo);
+                double tx = movedEnd.X - fixedEnd.X, ty = movedEnd.Y - fixedEnd.Y, qx = c.ExtendEndTo.X - fixedEnd.X, qy = c.ExtendEndTo.Y - fixedEnd.Y;
+                double full = Math.Sqrt(tx * tx + ty * ty), left = Math.Sqrt(qx * qx + qy * qy);
+                var off = left < 1e-9 ? 1 : Math.Abs(tx * qy - ty * qx) / (full * left);
+                var which = start ? "start" : "end";
+                if (trim > MaxCorrection)
+                    refused.Add(I($"refused W{c.Wall}: trimming its {which} {Xy(movedEnd)} → {Xy(c.ExtendEndTo)} moves it {trim:0.###} ft, more than {MaxCorrection:0} ft: {c.Why}"));
+                else if (off > 1e-4 || tx * qx + ty * qy <= 0 || left >= full || left < 1e-9)
+                    refused.Add($"refused W{c.Wall}: {Xy(c.ExtendEndTo)} isn't on the wall between its ends, so trimming its {which} to it " +
+                                $"would lengthen, turn or remove it: {c.Why}");
+                else
+                {
+                    walls[i] = start ? walls[i] with { Start = c.ExtendEndTo, NoJoinStart = true } : walls[i] with { End = c.ExtendEndTo, NoJoinEnd = true };
+                    applied.Add(I($"trimmed W{c.Wall}: {which} {Xy(movedEnd)} → {Xy(c.ExtendEndTo)} ({trim:0.###} ft): {c.Why}"));
+                }
+                continue;
+            }
             var moved = Distance(w.End, c.ExtendEndTo);
             double ox = w.End.X - w.Start.X, oy = w.End.Y - w.Start.Y, nx = c.ExtendEndTo.X - w.Start.X, ny = c.ExtendEndTo.Y - w.Start.Y;
             double oldLength = Math.Sqrt(ox * ox + oy * oy), newLength = Math.Sqrt(nx * nx + ny * ny);
@@ -496,6 +670,28 @@ public static class BuildData
             }
         }
         return (model with { Walls = walls }, applied, refused);
+    }
+
+    /// <summary>Why two walls can't be merged into one (null when they can): parallel, their facing faces within 1/16 in
+    /// of each other, their ends within 1/16 in of each other's.</summary>
+    public static string? MergeProblem(BuildWall a, BuildWall b)
+    {
+        if (a.FireRating is { } ra && b.FireRating is { } rb && ra != rb)
+            return $"their fire ratings differ ({ra}, {rb}): which one the merged wall has isn't known";
+        const double tol = 1.0 / 16 / 12;
+        double la = Distance(a.Start, a.End), ux = (a.End.X - a.Start.X) / la, uy = (a.End.Y - a.Start.Y) / la;
+        double lb = Distance(b.Start, b.End), vx = (b.End.X - b.Start.X) / lb, vy = (b.End.Y - b.Start.Y) / lb;
+        if (Math.Abs(ux * vy - uy * vx) > 1e-6)
+            return "they aren't parallel";
+        double Across(PlanPoint p) => -(p.X - a.Start.X) * uy + (p.Y - a.Start.Y) * ux;
+        double Along(PlanPoint p) => (p.X - a.Start.X) * ux + (p.Y - a.Start.Y) * uy;
+        var gap = Math.Abs(Across(b.Start)) - (a.ThicknessIn + b.ThicknessIn) / 24;
+        if (Math.Abs(Across(b.Start) - Across(b.End)) > tol || Math.Abs(gap) > tol)
+            return I($"their faces aren't together (a gap of {gap * 12:0.###} in)");
+        double b0 = Math.Min(Along(b.Start), Along(b.End)), b1 = Math.Max(Along(b.Start), Along(b.End));
+        if (Math.Abs(b0) > tol || Math.Abs(b1 - la) > tol)
+            return "they don't run the same stretch (their ends more than 1/16 in apart)";
+        return null;
     }
 
     // ---- what the data's walls leave open, and where they overlap --------------------------------------------------

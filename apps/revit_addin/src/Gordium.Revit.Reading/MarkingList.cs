@@ -10,15 +10,18 @@ namespace Gordium.Revit.Reading;
 
 public enum MarkedKind { Room, Window, Door, Level, SiteSlab, SiteObject }
 
-/// <summary>A room's mark, read: <see cref="Sleeping"/> null when not stated.</summary>
-public sealed record RoomMarks(string Id, string? Name, bool? Sleeping);
+/// <summary>A room's marks, read: each null when not stated. <see cref="Use"/> is the description's word (null for a
+/// word not in <see cref="RoomUses"/>), <see cref="UseWord"/> what the architect typed.</summary>
+public sealed record RoomMarks(string Id, string? Name, bool? Sleeping, string? Use = null, string? UseWord = null,
+                               bool? Lockable = null, bool? PassThrough = null);
 
 /// <summary>A window's or door's marks as an opening: null when not stated (an operation word not in the list, or a
 /// door's word that isn't a door's, is not stated).</summary>
 public sealed record OpeningMarks(string Id, MarkedKind Kind, bool? Escape, string? Operation);
 
-/// <summary>A door's marks as a door.</summary>
-public sealed record DoorMarks(string Id, bool? Exit, string? Operation);
+/// <summary>A door's marks as a door. <see cref="ExitKind"/> is the description's word (null when not set, or for a
+/// word not in <see cref="ExitKinds"/>), <see cref="ExitWord"/> what the architect typed.</summary>
+public sealed record DoorMarks(string Id, bool? Exit, string? Operation, string? ExitKind = null, string? ExitWord = null);
 
 /// <summary>What the reader takes from the marks: the rooms, windows and doors in the design checked (the last phase,
 /// the main model and the option checked of each set: the outside reader's one rule), each mark read as stated or
@@ -64,7 +67,9 @@ public static class MarkReading
     public static IReadOnlyList<RoomMarks>? Rooms(RevitModel model) =>
         RoomBlockers(model).Count > 0 ? null
         : InDesign(model).Where(e => KindOf(e) == MarkedKind.Room)
-            .Select(e => new RoomMarks(e.UniqueId, e.Name, Marks.YesNo(Get(e, Marks.SleepingRoom)))).ToList();
+            .Select(e => new RoomMarks(e.UniqueId, e.Name, Marks.YesNo(Get(e, Marks.SleepingRoom)),
+                                       RoomUses.Table.Of(Marks.Text(Get(e, Marks.Use))), Marks.Text(Get(e, Marks.Use)),
+                                       Marks.YesNo(Get(e, Marks.CanBeLocked)), Marks.YesNo(Get(e, Marks.PassThrough)))).ToList();
 
     public static IReadOnlyList<OpeningMarks> Openings(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) is MarkedKind.Window or MarkedKind.Door)
@@ -75,7 +80,8 @@ public static class MarkReading
     public static IReadOnlyList<DoorMarks> Doors(RevitModel model) =>
         InDesign(model).Where(e => KindOf(e) == MarkedKind.Door)
             .Select(e => new DoorMarks(e.UniqueId, Marks.YesNo(Get(e, Marks.ExitDoor)),
-                                       Operations.ForDoor(Marks.Text(Get(e, Marks.Operation))))).ToList();
+                                       Operations.ForDoor(Marks.Text(Get(e, Marks.Operation))),
+                                       ExitKinds.Table.Of(Marks.Text(Get(e, Marks.Exit))), Marks.Text(Get(e, Marks.Exit)))).ToList();
 
     internal static MarkValue? Value(MarkedElement e, MarkDefinition m) => Get(e, m);
 
@@ -106,6 +112,11 @@ public enum MarkState
     /// <summary>Set on an element the reader doesn't read it on (a context object, one of Gordium's own markers): shown
     /// with why, never as given; nothing to mark.</summary>
     NotReadHere,
+
+    /// <summary>Never set, on a mark whose blank the description itself gives a meaning (escape routes: a room with no
+    /// use, lock or pass-through mark is never crossed by a route; a door with no exit mark is not an exit): shown
+    /// with that meaning, and nothing to mark, since a house never needs it. Never sent as a value.</summary>
+    LeftBlank,
 }
 
 /// <summary>One mark on one row. <see cref="Suggestion"/> is only shown ("suggested: Yes"); it is never a mark.</summary>
@@ -330,13 +341,17 @@ public static class MarkingList
             case MarkedKind.Room when e.Placement != RoomPlacement.Placed:
                 return null;                                    // a blocker (RoomBlockers), not a room to mark
             case MarkedKind.Room:
-                return new(e.UniqueId, MarkedKind.Room, RoomLabel(e), [YesNo(e, Marks.SleepingRoom, SuggestSleeping(e))]);
+                return new(e.UniqueId, MarkedKind.Room, RoomLabel(e),
+                           [YesNo(e, Marks.SleepingRoom, SuggestSleeping(e)),
+                            Word(e, Marks.Use, RoomUses.Table, SuggestUse(e), NotCrossed),
+                            Blankable(e, Marks.CanBeLocked), Blankable(e, Marks.PassThrough)]);
             case MarkedKind.Window:
                 return new(e.UniqueId, MarkedKind.Window, Label(e),
                            [YesNo(e, Marks.EscapeOpening, null), Operation(e, door: false)]);
             case MarkedKind.Door:
                 return new(e.UniqueId, MarkedKind.Door, Label(e),
-                           [YesNo(e, Marks.EscapeOpening, null), YesNo(e, Marks.ExitDoor, null), Operation(e, door: true)]);
+                           [YesNo(e, Marks.EscapeOpening, null), YesNo(e, Marks.ExitDoor, null), Operation(e, door: true),
+                            Word(e, Marks.Exit, ExitKinds.Table, null, "not set: not an exit (exits are marked, never guessed)")]);
             default:
                 return null;
         }
@@ -413,6 +428,40 @@ public static class MarkingList
     private static string? SuggestSleeping(MarkedElement e) =>
         e.Name is { } n && SleepingName.IsMatch(n) ? $"suggested: Yes (named \"{n.Trim()}\"); set it yourself to accept" : null;
 
+    private const string NotCrossed = "not set: an escape route never passes through this room";
+
+    /// <summary>Room names offered as a suggestion of the room's use (escape routes), the first that matches. Only a
+    /// suggestion, only on a room whose use is unset, and never sent: the use is the architect's word alone.</summary>
+    private static readonly (Regex Name, string Use)[] UseNames =
+    [
+        (new(@"\b(corridor|hall\s*way|hall|circulation|passage)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "corridor"),
+        (new(@"\b(lobby|vestibule|foyer)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "lobby"),
+        (new(@"\b(kitchen|pantry|kitchenette)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "kitchen"),
+        (new(@"\b(toilet|restroom|rest\s*room|wc|lavatory|bath\s*room)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "toilet"),
+        (new(@"\b(closet|janitor|custodial)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "closet"),
+        (new(@"\b(storage|store\s*room)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "accessory_storage"),
+        (new(@"\b(work\s*room|copy)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "workroom"),
+        (new(@"\b(day\s*care|child\s*care)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant), "day_care"),
+    ];
+
+    private static string? SuggestUse(MarkedElement e) =>
+        e.Name is { } n && UseNames.FirstOrDefault(u => u.Name.IsMatch(n)) is { Name: not null } hit
+            ? $"suggested: {RoomUses.Table.WordFor(hit.Use)} (named \"{n.Trim()}\"); set it yourself to accept" : null;
+
+    /// <summary>A word mark read through its table: given, not a word Gordium reads (to mark), or blank, whose meaning
+    /// is said (nothing to mark: a house never needs it).</summary>
+    private static MarkCell Word(MarkedElement e, MarkDefinition m, WordTable table, string? suggestion, string blank)
+    {
+        var word = Marks.Text(MarkReading.Value(e, m));
+        return word is null ? new(m, MarkState.LeftBlank, null, suggestion, blank)
+            : table.Of(word) is null ? new(m, MarkState.NotUnderstood, word, null, $"\"{word}\" isn't one of Gordium's ({table.Listed})")
+            : new(m, MarkState.Given, word, null, null);
+    }
+
+    /// <summary>A room's Yes/No for escape routes: blank says the room is never crossed by a route, nothing to mark.</summary>
+    private static MarkCell Blankable(MarkedElement e, MarkDefinition m) =>
+        YesNo(e, m, null) is { State: MarkState.Unset } cell ? cell with { State = MarkState.LeftBlank, Words = NotCrossed } : YesNo(e, m, null);
+
     private static MarkCell YesNo(MarkedElement e, MarkDefinition m, string? suggestion) =>
         Marks.YesNo(MarkReading.Value(e, m)) switch
         {
@@ -475,6 +524,18 @@ public static class MarkingList
         Flag([MarkedKind.Room], Marks.SleepingRoom, "rooms", "no room is read for egress");
         Flag([MarkedKind.Window, MarkedKind.Door], Marks.EscapeOpening, "windows and doors", "no escape opening is read");
         Flag([MarkedKind.Door], Marks.ExitDoor, "doors", "no door is read");
+        // escape routes (a commercial story): said only once any of their marks is set, so a house's list stays as it was
+        MarkDefinition[] routeMarks = [Marks.Use, Marks.CanBeLocked, Marks.PassThrough, Marks.Exit];
+        var routeCells = rows.SelectMany(r => r.Cells).Where(c => routeMarks.Contains(c.Mark)).ToList();
+        if (routeCells.Any(c => c.State != MarkState.LeftBlank))
+        {
+            var rooms = rows.Where(r => r.Kind == MarkedKind.Room).ToList();
+            bool Crossing(MarkingRow r) => r.Cells.Where(c => c.Mark != Marks.SleepingRoom).All(c => c.State is MarkState.Given or MarkState.Yes or MarkState.No);
+            var exits = routeCells.Count(c => c.Mark == Marks.Exit && c.State == MarkState.Given);
+            lines.Add($"Escape routes: {rooms.Count(Crossing)} of {rooms.Count} rooms have {Marks.Use.Name}, {Marks.CanBeLocked.Name} and " +
+                      $"{Marks.PassThrough.Name} all set (a room missing any is never passed through by a route); {exits} " +
+                      (exits == 1 ? "door is" : "doors are") + $" marked {Marks.Exit.Name} (a door left blank is not an exit).");
+        }
         var noOperation = rows.Count(r => r.Cells.Any(c => c.Mark == Marks.Operation && c.NeedsMarking));
         if (noOperation > 0)
             lines.Add(string.Format(CultureInfo.InvariantCulture,

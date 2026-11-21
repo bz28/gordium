@@ -142,6 +142,9 @@ exactly:
 | `Gordium: Site object is` | Generic Models, Specialty Equipment, Site, Mass, Furniture, Casework, Structural Framing, Structural Foundations, Parking, Mechanical Equipment, Lighting Fixtures (instance) | Porch, Deck, Landing, Ramp, Garage, shed or carport, Not a structure / unset | The outside reader's: what an element on the lot that isn't the building is ([revit_reading_design.md](revit_reading_design.md) section 1, "Objects standing apart"). A porch, deck, landing or ramp, or a garage, shed or carport, is sent as a building (measured); Not a structure as a left-out object with `could_be_building: false` (no yard waits on it; the architect's statement, listed in the marking list with the element). Never the slab words (review round 1): a patio or a driveway leaves every check, so a slab's word is read on a Floor alone (`Site slab is`); on anything else it is not understood (a garage drawn as a Generic Model and marked Parking stays an object that may be a building). Unset, or another word: as before (left out; standing apart, every required yard needs review). Never read on a context object, on one of Gordium's own markers, or on a category it isn't bound to; the marking list shows those as not read here, with why. Added by Mark for egress with the others; the marking list has a row for each element it is set on (not every unset one: a project has hundreds) |
 | `Gordium: Clear width`, `Clear height`, `Clear source`, `Clear confirmed` on doors | Doors (type) | As windows' | `doors[].stated_clear` (step 5): the same marks bound to Doors too, confirmed and re-checked exactly as windows' (the stamp, made for a door, records the type's `UniqueId`, size and operation, the clear width and height, the source and a mapped maker's parameter; a window's stamp never confirms a door, nor a door's a window); no `Clear offset` (a door's clear opening has no bottom in the format). The width and height are the maker's figure measured as R318.2 measures it (between the face of the door open 90 degrees and the stop; threshold top to stop bottom), never the door's size or rough opening: the marks' own tooltip says so |
 | `Gordium: Zone`, `Use`, `Lot surveyed`, `Corner lot`, `Street edge`, `Ground from` | Project Information | Text, Yes/No; the street edge written by Gordium's pick | the lot facts *Check my project* sends with the interior in one check (zoning's, not egress's): [reading design note, section 9](revit_reading_design.md#9-check-my-project-the-architects-own-model-one-check) |
+| `Gordium: Use` on a Room | Rooms (instance) | Corridor, Lobby, Day care, Accessory storage, Kitchen, Toilet, Closet, Workroom, Other / unset | `rooms[].use` (escape routes, section 10). The same parameter as Project Information's `Use` (one GUID bound to both categories; which use it is follows from the element): Mark for egress extends it to Rooms in a project that already has it. Unset: left out, the room is never crossed by a route. The room's name is only a suggestion in the marking list ("suggested: Corridor (named "Corridor 1")"), never sent |
+| `Gordium: Can be locked`, `Gordium: Pass through` | Rooms (instance) | Yes / No / unset | `rooms[].lockable`, `rooms[].pass_through` (section 10). Unset: left out, the room is never crossed by a route |
+| `Gordium: Exit` | Doors (instance) | Exterior door at discharge, Exit stair enclosure, Exit passageway, Horizontal exit, Exterior exit stair or ramp / unset | `doors[].exit_kind`, and from it `exit_id` (section 10). Unset: not an exit (exits are marked, never guessed) |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick
 Escape opening"); they are visible, print on sheets and survive export and upgrades. Considered: Revit's hidden
@@ -691,6 +694,172 @@ from the pattern's start, the end space, justified at the beginning) places the 
 rail, other rails and balusters come back as solids of six flat faces; `STAIRS_RAILING_BASE_LEVEL_PARAM` and
 `STAIRS_RAILING_HEIGHT_OFFSET` as a railing's base. Then real railings: round handrails (Revit's default profiles are
 circular: their curved faces leave a stair's sides and handrails out, to settle), real balusters and posts.
+
+## 10. Escape routes: what the reader sends for a commercial story
+
+**Built 2026-11-21** (branch `feat/revit-route-fields`, on the route measurement of
+[docs/decisions/2026-11-20_route_measurement.md](../decisions/2026-11-20_route_measurement.md)): the reader sends the
+format's route additions ([the format](../interior/interior_description_format.md#the-route-additions-a-commercial-storys-escape-routes)),
+which `model_measurement.routes` reads to draw each story's escape routes. Every key is optional, so a house's
+description measures exactly as before. The code: `Gordium.Revit.Reading/RouteReader.cs` (every decision, on plain
+records) and `Gordium.Revit.Addin/RevitInterior.cs` (copies the API's values into the records, decides nothing). The
+rule is section 2's: a value is sent only when it is read exactly; anything else is left out, its reason in the
+notes, and the route code then measures nothing it could get wrong (a key left out is "not read", never a default).
+
+### The marks (section 3's table)
+
+- **`Gordium: Use` on a Room, `Gordium: Can be locked`, `Gordium: Pass through`.** The format decides which rooms a
+  route may cross (decision 1a: a corridor, or a room marked pass-through, either one marked not lockable). Each is
+  sent only as the architect set it, a word through a fixed table (`RoomUses`: a word not in it is not stated, never a
+  near guess). The room's name is a suggestion in the marking list, never sent: a room named "Corridor" whose use is
+  unset is still end-only. **Why one `Use` parameter:** Project Information already has `Gordium: Use` (the building's
+  use), and Mark for egress refuses to add a parameter whose name another one has, so a second "Gordium: Use" can't
+  exist; the same parameter on a Room says the room's use (its tooltip says both).
+- **`Gordium: Exit` on a door**, in IBC 2009 1016.1's own list. Unset is not an exit.
+- **Blank is shown with its meaning, not as "to mark".** A house never needs these marks, so a blank one is
+  `LeftBlank` in the marking list ("not set: an escape route never passes through this room"; "not set: not an exit")
+  and doesn't stop "every room, window and door is marked"; a word Gordium doesn't read is "to mark" as any other.
+  Once any of them is set, a summary line counts the rooms with all three room marks and the doors marked as exits.
+
+### What is sent, and from what
+
+| Key | From Revit | Left out (with its reason) when |
+|---|---|---|
+| `levels` | every `Level` holding a room, door or unknown space sent: `UniqueId`, `Name`, `ProjectElevation` in shared coordinates (a roof level with nothing on it isn't a story to walk) | the levels couldn't be read |
+| `level` on rooms, doors, unknown spaces | `Room.Level`, the door's `LevelId`, the enclosed area's level | its level isn't one of the levels read |
+| room `holes` | a room's second and later boundary loops (the outline is the loop of largest area: Revit doesn't promise the outer loop first); `[]` for none | a loop isn't wholly inside the outline (1/16 in clear), two overlap, or the room is marked a sleeping room: **a floor with a hole is never sent for a room marked Sleeping room Yes**, since the house's floor area reads the outline alone and a bedroom's would count the column (then no `floor`, as before). A room not marked is sent with its holes: with a sleeping flag missing the house's measures read no room at all (the Children's Odyssey KITCHEN, 2026-11-21) |
+| room `obstructions` | the room's `Over` collection (every element whose box reaches over it), cut to the room's band: in the Revit layer each of its solids is intersected with a slab over the room's box from 1/16 in above the floor to 80 in up (IBC 1003.3.1's headroom; `BooleanOperationsUtils.ExecuteBooleanOperation`, Intersect), and its footprint is the plan outlines of the result's faces that aren't vertical (a flat face's outline, a curved face's points' convex hull), together exactly what of it stands in the band, whatever its shape (review round 3: picking faces by height kept a standing wall's door threshold and lost the wall). Nothing in the band, no obstruction. `[]` for none | anything not an obstruction category lower than 80 in over the floor (a beam, a bulkhead, a generic model, a low ceiling), any element whose geometry couldn't be read or cut to the band (Revit refused, a mesh, an open shell of surfaces with no volume reaching the band; unless its box is wholly above 80 in), an obstruction the room's solid test found that wasn't read with its geometry, or the floor's elevation unknown |
+| door `plan` | `centre`: half way between the host wall's two side faces (`HostObjectUtils.GetSideFaces`, exterior and interior), at the middle along it of the opening the door cuts in the wall (the wall's faces Revit generates from it; never its casing), or, only when no cut is found, of what is drawn of it strictly between the wall's faces (more than 1/16 in from each); `along`: the wall's direction, turned as `HandOrientation`; `clear_width`: the stamp-confirmed `stated_clear` width only, never the type's size; `wall_thickness`: between the faces | no confirmed clear width; the host isn't a straight wall (a curved wall, a curtain wall: no flat side faces); a side isn't one plane (faces more than 1/16 in apart), the sides aren't parallel, or `HandOrientation` isn't along them; no cut found and none of its geometry strictly between the faces; that opening wider than the door and 8 in of frame (a sidelight, a pocket), or its middle more than 1 in from where the door is placed |
+| door `sides` | `FromRoom`, `ToRoom` (the last phase), both among the rooms read; or one room and `outside` when Revit gives no room on the other side, the room is found on exactly one side (1 in beyond the wall's face) and no room read is drawn on the other | no room either side, the same room both sides, a room not read (another phase or design option), or Revit's "no room" contradicted by a room drawn there. An enclosed area with no Room beyond a door is an unknown space, which keeps its story needing review whatever its doors say |
+| door `exit_kind` | `Gordium: Exit` | unset (not an exit), or a word not in the table (read as not an exit, with a note; the marking list shows it to mark) |
+| door `exit_id` | below | below: the door then isn't read, so its story's routes need review |
+| `passages` | each pair of rooms on one level whose boundaries have a straight segment drawn by the same room separation line (`OST_RoomSeparationLines`), on one line within 1/16 in, sharing more than 1/16 in: the shared piece; `[]` for none | the separation lines couldn't be listed |
+
+**Which exit a door enters (`exit_id`).** Two doors into one stair must be one exit (1015.2.1: a scissor stair is
+"counted as one exit stairway"), so the id is the stair's, not the door's. For an exterior door at discharge (or to an
+exterior stair or ramp) it is the door's own id, and it must open to outside. For a door into an exit stair enclosure
+or exit passageway it is the Room it enters: of the two rooms it joins, the one whose every door either opens to
+outside or is marked the same kind of exit, and that is open to no room along a separation line (a lobby with only an
+exterior door and a stair door is open to the corridor). Both or neither qualifying, or the door opening to outside,
+leaves the id out with why ("mark every door into the enclosure"). A horizontal exit's id isn't read yet (the area
+beyond its wall isn't one Room): such a door isn't read. The rule is cautious: a stair Room with an unmarked door into
+it (a closet) gives no id, never a guess.
+
+**`story_outlines` (decision 8's two readings), from Revit's own room logic** (`StoryOutlines.cs`; the Revit layer's
+part, `RingOf`, is thin). **outer:** in a transaction group always rolled back (its transactions committed: Revit works a
+plan's enclosed areas out again only on a commit, so lines drawn in a sub-transaction were never seen), room separation lines are drawn as a
+rectangle 20 ft beyond the level's walls, a Room is placed in the ring between it and the building, and its boundary
+at the finished faces is read, the rectangle's loop dropped: the exterior walls' outer faces, each side with the wall
+bounding it (doors and windows don't break a room's boundary; interior walls never touch this one). The trial's log
+gives each loop's corners and area, and each side with what bounds it. On the Children's Odyssey (2026-11-21, run by
+the agent in Revit 2027.4): 46 sides, 16,539.9 sq ft to the outer faces (the sheet's 16,539), 15,970.0 inside. Three earlier readings didn't serve on the Children's Odyssey (2026-11-21): the
+walls' cut faces didn't join into loops, the walls' centre lines widened logged every interior T-junction as a gap,
+and an area plan made through the API has no area boundary lines (Revit closed no gross area); a slab's edge says
+nothing reliable (it may stop at the core, the inside face or past the walls). **inner:** that outline with each side
+moved in by the thickness of the wall Revit says bounds it (`Wall.Width`), the corners where the moved sides meet.
+A short side Revit gives no element for (at most 2 ft, between two walls: a wall's end showing where two walls in
+line stand a hair apart, or a jamb ends at an opening) is kept where it is. Exact for straight walls of one
+thickness along a side, since a wall's inside face is its outside face moved by its thickness; read from the rooms instead it would lose what no room covers inside the walls (a shaft, a chase). Left
+out, with the reason in the notes, when the ring Room isn't enclosed, Revit's outline is more than one piece
+(separate buildings), a side is curved or bounded by something other than a wall (its thickness unknown), two walls
+of different thickness run along one straight side, or the level has an enclosed area with no Room (it may be a
+courtyard, which the ring never sees and the outline would count as floor); then the diagonal and the story's areas
+need review.
+
+**Why the footprints, not the boxes.** A box is bigger than the piece (a desk turned 30 degrees fills twice its area
+in an axis-aligned box), and a bigger obstruction is not always the cautious side: routes around it may part sooner,
+shortening the common path of travel. The faces give the shadow exactly, flat faces exactly and a curved face by its
+points' hull (larger only within that one face).
+
+**`fixed`.** Revit can't tell a movable piece from a fixed one, so each category says it once: furniture movable;
+casework, systems furniture, plumbing and lighting fixtures and equipment fixed. Every obstruction counts in the route
+code either way; `fixed` is for the measures that come later.
+
+### How we know
+
+`RouteTests` (fake records, `RouteDrawing.cs`: one story with two offices, a corridor, a lobby open to it along a
+separation line, a stair room, five doors, a desk and a column). The description read from it goes to the real route
+code (`model_measurement.routes.floor.read`, then `paths.StoryRoutes.route`), which reads every story with no reason
+to stop and draws the routes: office A out through its door and along the corridor into the stair (exit: the stair
+Room), office B along the corridor and across the passage out of the lobby's door, the lobby out of its own. Under
+shared coordinates turned 30 degrees and 875,000 ft out the same. Each decision that keeps a false pass out is pinned,
+one change at a time: a use, lock or pass-through mark unset or not a word is left out (the route code then never
+crosses the corridor: office B gets no route); a room's name is never its use; an unset exit mark is no exit (the
+story needs review); two doors into one stair are one exit; a stair Room with a closet door into it gives no id (the
+door isn't read); an exterior-door mark on a door between rooms, and a horizontal exit, give no id; a door with no
+confirmed clear width, non-parallel wall faces or no flat faces has no `plan` (never the type's width); a door Revit
+says opens to no room, with a room drawn there, has no `sides`; a beam at 6 ft, a generic model on the floor, an
+obstruction whose geometry failed, or furniture the solid test found but whose geometry wasn't read, leaves the
+room's obstructions out, while a beam at 7 ft and a light at 8 ft are no obstruction; a wall cabinet from 4 ft 6 in
+counts, and a round table by its hull; a column is a hole only in a room marked not a sleeping room, an inner loop
+crossing the outline is no hole, and the outline is found by area whatever the loops' order; no separation lines or
+no levels read leaves `passages` or `levels` out (never `[]`); a house's description measures as before; a project
+whose `Use` is on Project Information only gets it extended to Rooms. The use and exit words equal the route code's
+own tables (`floor.USES`, `floor.EXIT_KINDS`), read from Python.
+
+**A wall standing in a room** (not bounding it: Revit's solid test finds it inside the room's outline) leaves a
+sleeping room's floor out, as before (its floor area would count the wall). In any other room the floor is sent and
+the wall is an obstruction (kind `fixture`, fixed: the format has no wall kind), its footprint from its faces as any
+obstruction's, so routes only lose floor. Anything else standing in a room (a column that doesn't bound it, a generic
+model, a stair) still leaves the floor out (the Children's Odyssey ADMINISTRATION, 2026-11-21).
+
+### The eval's marks: set_marks_request.json
+
+The architect hasn't marked the Children's Odyssey model, so the route eval's marks are data, each an eval assumption
+with its reason: `test_data/answer_keys/portland_me_19_libby_st/eval_marks.yaml` (every room's use, lock and
+pass-through, each door type's clear opening, the exits read from LS1.0's exit arrows and matched to the model's doors by
+position). `apps/revit_addin/tools/eval_marks_request.py` turns it into a request, and the add-in writes it by request
+file while Revit is idle (`set_marks_request.json` beside the trial log: `{"model", "save_as", "by", "date", "marks"}`,
+`SetMarks.cs`, its decisions `MarksRequest.cs`): only a model and a copy under the trial folder are opened and saved,
+never the architect's files; Gordium's marks are added to the copy first; a room is found by its number, a door by its
+Mark; a word Gordium doesn't read, a value of the wrong kind, a mark not bound to the element, an element not found or
+found twice, or two values for one mark are refused with why; a door's clear opening writes its type's operation,
+clear width, height and source and the stamp, signed with `by` ("eval assumption (Gordium, not the architect)"), so
+the stamp itself says who stood in. Each entry applied or refused is logged (`set_marks` in results.jsonl).
+
+**A door's side with no Room is never called outside on a guess** (the Children's Odyssey's first marked read: 19
+doors "to outside", many into classroom toilets and closets with no Room). The Revit layer outlines each enclosed area
+with no Room (a Room placed in it for the moment, inside a `SubTransaction` always rolled back; the outline is also sent
+as the unknown space's `outline`). A door whose far side Revit gives no room on joins its room and the unknown space
+there, by that space's id (the route code then doesn't read the door: its story needs review); while any such area on
+its level has no outline, the side isn't sent at all; only with every one outlined and none beyond it is it `outside`.
+
+**The eval's Rooms and model corrections.** The request also places Rooms (`place_rooms`: a level, a point, the sheet's
+name and a number no Room has) before it marks: each where Revit gives it an area, in the last phase and on no Room
+already there, else taken back and logged. eval_marks.yaml classifies each of the 18 enclosed areas: 14 spaces the
+sheet draws (the west vestibule, two sprinklered abandoned spaces, six toilet rooms, five closets) get a Room; the two
+slivers Revit can't locate come from the trace's five overlapping wall pairs, which the build's new trims remove
+(`trim_end_to`, `trim_start_to`: a wall shortened along its own line by at most 2 ft, never lengthened or turned,
+BuildData.Correct); the two 1.4 sq ft triangles inside the east entry's angled jambs are solid wall on the sheet, so a
+`fill` adds a short wall over each (at most 3 ft long and 2 ft thick, every corner within 2 ft of a wall of the data:
+a fill between walls, never a wall standing alone). The Revit layer lists every collector before it changes the
+model (the outlines' Rooms placed for the moment made a live iterator throw on the first run). `eval_marks_request.py --build-data
+--build-out` writes the build request with the corrections too.
+
+### To try in Revit (the Children's Odyssey model)
+
+Read inside by request (`read_inside_request.json`, `{"model": "<path>.rvt"}`, section 9): the log's `routes` line
+counts what was read (levels; rooms with a level, floor, holes and obstructions; doors with a place in the wall, sides
+and exits; passages), `evidence.route_doors` gives each door's centre and wall thickness as read (sent or not), and
+`interior` is the description, for `model_measurement.routes` to read. Unmarked, no door has a confirmed clear width
+or an exit, so the first run checks the Revit layer: that `GetSideFaces` gives each door's wall faces, `FromRoom` and
+`ToRoom` its rooms, separation lines the passages, and which categories stand in the rooms. Where a door is along its wall is the opening it cuts in it (the wall's faces Revit generates from the door, never the casing on
+the wall's faces, review round 3), else what is drawn of it strictly between the faces; an opening wider than the
+door and 8 in of frame (a sidelight, a pocket) or centred more than 1 in from where the door is placed leaves `plan`
+out. To check there: that each
+door's centre lies in the middle of its wall within 1/16 in of both rooms' faces (the route code's own test); that a
+real door family's frame is centred on its clear opening (a side-hinged door's clear opening sits off the frame's
+centre by up to half the difference between the frame and the clear width, about 1 in on a 3 ft door; the route
+code places the jambs' 12 in rings from it); what a stair Room with its stair drawn in it gives (open question 1).
+
+### Open questions
+
+1. **A stair Room with its stair in it isn't read.** A stair standing in a room leaves its floor out (section 4, the
+   room's own rule), and a stair is none of the format's obstruction kinds; so a door into it isn't read and a story
+   whose exits are stair Rooms needs review. The format needs a way to say a door enters the exit (its far side the
+   exit itself, not a room): the route code's question, asked there.
+2. **The clear opening's centre** is the door frame's (above), to measure on real families.
+3. **Systems furniture and equipment as fixed**, a reading for the measures after travel distance.
 
 ## Sources
 

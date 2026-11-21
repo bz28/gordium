@@ -34,7 +34,9 @@ public sealed class MarksTests
             ("Gordium: These are all the guards and handrails", "80055f84-3feb-492a-b581-331ff692a2a9", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // Check my project's lot facts (reading design note, section 9)
             ("Gordium: Zone", "7c0c478b-5959-44fd-bf53-ca89d9302bf0", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
-            ("Gordium: Use", "0a732869-f46a-4fbd-bab9-4d60735d96f3", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // escape routes (section 10): the same parameter on a Room says the room's use (its GUID kept: marks set on
+            // Project Information before stay read)
+            ("Gordium: Use", "0a732869-f46a-4fbd-bab9-4d60735d96f3", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation", "OST_Rooms"]),
             ("Gordium: Lot surveyed", "133d30e3-832f-4956-88c3-6b48989ac3f7", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Corner lot", "b37e1302-284e-4440-bc43-a44309ea8991", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Street edge", "260b3e70-6b9b-45d2-8137-a5c18db9ccf5", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
@@ -62,6 +64,10 @@ public sealed class MarksTests
              ["OST_GenericModel", "OST_SpecialityEquipment", "OST_Site", "OST_Mass", "OST_Furniture", "OST_Casework",
               "OST_StructuralFraming", "OST_StructuralFoundation", "OST_Parking", "OST_MechanicalEquipment",
               "OST_LightingFixtures"]),
+            // escape routes (section 10): which rooms a route may cross, and which doors are exits
+            ("Gordium: Can be locked", "5b0d7c3e-2f41-4a8e-9c63-1e7a4f2b9d05", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
+            ("Gordium: Pass through", "c2e94a61-7d3b-4f5e-8a10-6b9d3e2f4c87", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
+            ("Gordium: Exit", "e7a3c519-04d2-4b86-b1f5-93c8d6a2e470", MarkValueKind.Text, MarkBinding.Instance, ["OST_Doors"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
@@ -269,7 +275,7 @@ public sealed class MarksTests
     {
         var model = Model(Room("bed", "Bedroom 2", null));
         Assert.Null(MarkReading.Rooms(model)!.Single().Sleeping);
-        var cell = MarkingList.Build(model).Rows.Single().Cells.Single();
+        var cell = MarkingList.Build(model).Rows.Single().Cells.Single(c => c.Mark == Marks.SleepingRoom);
         Assert.Equal(MarkState.Unset, cell.State);
         Assert.StartsWith("suggested: Yes", cell.Suggestion);
     }
@@ -399,7 +405,7 @@ public sealed class MarksTests
     {
         var list = MarkingList.Build(Model(Room("a", "Master bedroom", false), Room("b", "Sleeping porch", null),
                                            Room("c", "Bedroom closet", true), Room("d", "Bath", null), Room("e", null, null)));
-        var byId = list.Rows.ToDictionary(r => r.Id, r => r.Cells.Single());
+        var byId = list.Rows.ToDictionary(r => r.Id, r => r.Cells.Single(c => c.Mark == Marks.SleepingRoom));
         Assert.Null(byId["a"].Suggestion);                // marked No: the architect's own fact stands
         Assert.NotNull(byId["b"].Suggestion);
         Assert.Null(byId["c"].Suggestion);

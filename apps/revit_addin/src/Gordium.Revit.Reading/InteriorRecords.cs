@@ -46,10 +46,39 @@ public sealed record InteriorRecords
     /// what is in one isn't read, and a stair could be in it.</summary>
     public int CoordinationModels { get; init; }
 
+    /// <summary>Every level (<c>OfClass(typeof(Level))</c>), for the stories of the escape routes (section 10). Null when
+    /// the Revit layer didn't read them: then no <c>levels</c> are sent, and no story's routes are measured.</summary>
+    public IReadOnlyList<LevelRecord>? Levels { get; init; }
+
+    /// <summary>Every room separation line (<c>OfCategory(OST_RoomSeparationLines)</c>), by <c>UniqueId</c>: a room
+    /// boundary segment drawn by one is where two rooms meet with no wall (a passage, section 10). Null when the Revit
+    /// layer didn't read them: then no <c>passages</c> are sent, and no story's routes are measured.</summary>
+    public IReadOnlyList<string>? SeparationLines { get; init; }
+
+    /// <summary>Each level's gross building area (<see cref="GrossArea"/>), by the level's <c>UniqueId</c>, for the story's
+    /// outlines (section 10). Null when the Revit layer didn't read them: then no outline is sent.</summary>
+    public IReadOnlyDictionary<string, GrossArea>? GrossAreas { get; init; }
+
     /// <summary>What the Revit layer looked at and what Revit said (each level's enclosed areas, an error), for the
     /// trial's log only: never read by a decision.</summary>
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
 }
+
+/// <summary>A level's building outline, the exterior walls' outer faces as Revit's room logic gives them (section 10):
+/// room separation lines drawn as a rectangle 20 ft round the level's walls, a Room placed in the ring, its boundary at
+/// the finished faces read (<c>GetBoundarySegments</c>: each loop's segments and the element bounding each, by
+/// <c>UniqueId</c>), the rectangle's loop dropped, all rolled back. <see cref="WallWidths"/>: each bounding wall's full
+/// thickness (<c>Wall.Width</c>). <see cref="Why"/>: why there is none (the ring Room not enclosed, Revit refused).</summary>
+public sealed record GrossArea(IReadOnlyList<IReadOnlyList<BoundarySegmentRecord>>? Loops, IReadOnlyDictionary<string, double> WallWidths,
+                               string? Why = null);
+
+/// <summary>A level (<c>Level</c>): its <c>UniqueId</c>, <c>Name</c> and <c>ProjectElevation</c> (internal).</summary>
+public sealed record LevelRecord(string UniqueId, string Name, double Elevation);
+
+/// <summary>A planar side face of a door's host wall (<c>HostObjectUtils.GetSideFaces</c>, exterior and interior), as a
+/// plane: a point on it (<c>PlanarFace.Origin</c>) and its normal (<c>FaceNormal</c>), internal. The room boundary at
+/// the finished faces runs along these, so the door's place in the middle of its wall is read from them.</summary>
+public sealed record WallFace(Xyz Point, Xyz Normal);
 
 /// <summary>An enclosed area on a level (a <c>PlanCircuit</c>).</summary>
 /// <param name="Level">The level's name (<c>Level.Name</c>), for the words.</param>
@@ -61,7 +90,12 @@ public sealed record InteriorRecords
 /// walls: the Children's Odyssey model, 2026-11-20, threw "Could not obtain valid UV point"): such an area lies in
 /// no Room, so with no Room of its own it stays a space whose use isn't known, never dropped, never a crash.</param>
 /// <param name="LevelId">The level's <c>UniqueId</c>: its "no rooms on this level" mark, and the rooms on it.</param>
-public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz? PointInside, string? LevelId = null);
+/// <param name="Outline">For an area with no Room: its outline (the outer boundary loop, at the finished faces, of a Room
+/// the Revit layer places in it for the moment and takes back, <c>SubTransaction</c> rolled back), each segment's start,
+/// internal; null when it couldn't be read (Revit refused, a curved segment, a model it can't change): then a door
+/// whose far side Revit gives no room on, on that level, can't be said to open to outside (escape routes, section 10).</param>
+public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz? PointInside, string? LevelId = null,
+                                  IReadOnlyList<Xyz>? Outline = null);
 
 /// <summary>A linked Revit model, for the interior: whether its contents are known, where it reaches, and whether it
 /// holds rooms, windows or doors (design note, section 4: a link's rooms or windows leave that kind not read; a loaded
@@ -130,14 +164,30 @@ public sealed record BoundarySegmentRecord(Xyz Start, Xyz End, bool IsLine, stri
 /// <param name="Host">A family instance's host (<c>FamilyInstance.Host</c>), by <c>UniqueId</c>, or null.</param>
 /// <param name="Faces">Its solids' faces (<c>get_Geometry</c>, Fine, a family's instance geometry included), or null
 /// when not asked (<see cref="RoomRecord.Inside"/>).</param>
-/// <param name="GeometryFailed"><c>get_Geometry</c> threw, gave something other than solids, meshes or curves, or held
-/// a face Revit gives no edges or triangles for.</param>
+/// <param name="GeometryFailed"><c>get_Geometry</c> threw, gave something other than solids, meshes or curves, an
+/// instance with no geometry, or held a face Revit gives no edges or triangles for.</param>
 /// <param name="Box">Its box (<c>get_BoundingBox(null)</c>), internal, where asked (a flight's surroundings).</param>
 /// <param name="PhaseDemolished"><c>Element.DemolishedPhaseId</c>, where asked.</param>
 /// <param name="DesignOption"><c>Element.DesignOption</c>'s id, where asked.</param>
 public sealed record NearbyElement(string UniqueId, string BuiltInCategory, string? Name = null, string? Host = null,
                                    IReadOnlyList<SurfaceRecord>? Faces = null, bool GeometryFailed = false,
-                                   RevitBox? Box = null, string? PhaseDemolished = null, string? DesignOption = null);
+                                   RevitBox? Box = null, string? PhaseDemolished = null, string? DesignOption = null)
+{
+    /// <summary>Over a room (<see cref="RoomRecord.Over"/>): the faces of what of the element lies in the room's band, from
+    /// just above its floor to 80 in up (each of its solids intersected with that slab over the room's box,
+    /// <c>BooleanOperationsUtils.ExecuteBooleanOperation</c>, Intersect; empty when none of it does). Null when not
+    /// asked. The room's obstructions are read from these alone (escape routes, section 10).</summary>
+    public IReadOnlyList<SurfaceRecord>? Banded { get; init; }
+
+    /// <summary>The intersection couldn't be made (Revit refused, a mesh, a face it gives no edges for): what of the
+    /// element is in the band isn't known.</summary>
+    public bool BandFailed { get; init; }
+
+    /// <summary>How many of its solids are open shells (faces with no volume: imported surfaces, a DirectShape from an
+    /// open Brep) whose box reaches the band: Revit can't cut them, so what of the element is in the band isn't
+    /// known (review round 4).</summary>
+    public int OpenShells { get; init; }
+}
 
 /// <summary>Something in Stairs, Railings or Generic Models the reader doesn't walk as a stair.</summary>
 /// <param name="UniqueId"><c>Element.UniqueId</c>.</param>
@@ -338,6 +388,14 @@ public sealed record OpeningRecord
 
     /// <summary>The instance's level's elevation (<c>Level.ProjectElevation</c> of its <c>LevelId</c>), internal, or null.</summary>
     public double? LevelElevation { get; init; }
+
+    /// <summary>The instance's level's <c>UniqueId</c> (<c>LevelId</c>), or null: the story a door is on (section 10).</summary>
+    public string? LevelId { get; init; }
+
+    /// <summary>The host wall's side faces (<c>HostObjectUtils.GetSideFaces</c>, both sides), or null when the host
+    /// isn't a wall or any side face isn't planar or couldn't be read (a curved wall, a curtain wall): a door's centre
+    /// and its wall's thickness are read from them (section 10).</summary>
+    public IReadOnlyList<WallFace>? WallSides { get; init; }
 
     /// <summary>Its Sill Height (<c>INSTANCE_SILL_HEIGHT_PARAM</c>), or null when it has none.</summary>
     public double? SillHeight { get; init; }
