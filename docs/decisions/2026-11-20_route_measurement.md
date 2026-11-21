@@ -76,7 +76,8 @@ area need review.
    Inside each zone, a **visibility graph** (the start point, the door centres and the corners of the 12-in rings,
    each joined to every other it can see); between zones, the door centres. Distances by Dijkstra from all exits at
    once. A start point in an end-only room is the one exception: its own room is joined, for its routes only, to
-   the zone beyond each of its passages (a route may leave it that way, never come back in).
+   each **crossable** zone beyond its passages (a route may leave it that way, never come back in). A passage into
+   another end-only room (a kitchen open to a pantry) is no way out for anyone (test 17).
    The IBC's "natural and unobstructed path" names no clearance; Gordium uses NFPA's 12 in for both books. That can
    only lengthen a route, so it can make a borderline design need review or fail, never pass one that shouldn't.
    *Rejected:* **a grid** (a walk on squares): never exact, its error depends on direction (up to 8 percent at 45
@@ -108,7 +109,9 @@ area need review.
    point is where the two routes are equal (a corridor with an exit at each end: the middle, on a wall); with three,
    it can be in the open floor; with a column, it can be behind it where the two ways round are equal (test 2 below).
    So Gordium takes every corner exactly, and also cuts the floor into triangles no wider than 3 in across and takes
-   every triangle corner. Inside a triangle every point is within 3 in, in a straight free line, of one of its corners,
+   every triangle corner. (Only where it matters: triangles start 2 ft across, and only one whose greatest corner
+   value plus its size could beat the best found so far is cut smaller, down to 3 in; the rest are dropped, which the
+   same bound makes safe.) Inside a triangle every point is within 3 in, in a straight free line, of one of its corners,
    and a travel distance can't grow faster than you walk, so **the true greatest is at most the greatest found plus
    3 in**. The rules get that upper figure; the panel shows both. The bound is proved for the space the route walks
    (12 in clear of corners and obstructions); for the thin band inside 12 in, the build PR proves it or adds 12 in
@@ -116,29 +119,34 @@ area need review.
 4. **Exits are marked, never guessed.** A route ends at the centre of the doorway of a door marked with `exit_kind`.
    No exit marked on the story: every route measure there needs review. `exterior_stair_or_ramp`, and any route
    through an unenclosed stair (1016.1's "measurement along stairways"), need review until built.
-5. **Common path: measured on the routes themselves, until they part.** IBC 1002.1: "Paths that merge are common
-   paths of travel." From a point, Gordium takes its shortest route (decisions 1 and 1a) to each distinct exit (by
-   `exit_id`, never by door). Each route is a list of pieces: straight lines, arcs round rings, door centres. Two
-   routes are together while their pieces are the same (the same line, the same ring, within 1/16 in); they **part**
-   at the first point where their next pieces differ (two lines leaving the start in different directions part at
-   the start; two routes round one ring part where the earlier one leaves it), and are together again over any
-   stretch where they meet again. For each pair of exits the common path is the length walked together; the point's
-   is the least over the pairs. Taken on the real geometry, two doors of one room still give a common path when both
-   routes go round the same corner first (test 6). Two shortest routes are one choice among all the routes a person
-   could take, and the law's figure is the least over every choice, so Gordium's is never less than the law's.
-   **The story's greatest, with a bound.** The common path can jump where a small move changes which rings a route
-   turns at (on a line from which a door can just be seen past a ring). So Gordium cuts the floor along those lines
-   into cells: within a cell every route turns at the same rings, so the two routes of each pair part at a fixed
-   point, and the common path is a plain travel distance to it, which changes no faster than you walk. Each cell is
-   cut into 3-in triangles as in decision 3 and every triangle corner is worked with that cell's own routes (on a
-   cell's edge, the routes from inside it, so the larger side of a jump is taken); the rules get the greatest found
-   plus 3 in. Real floors have tens of such lines per room, which is fine; a story with more cells than a stated cap
-   needs review. One exit on the story: the common path is the travel distance.
+5. **Common path: measured on the routes themselves, until they part for good.** IBC 1002.1: "Paths that merge are
+   common paths of travel." From a point, Gordium takes its shortest route (decisions 1 and 1a) to each distinct
+   exit (by `exit_id`, never by door). For two routes, the common path is the travel distance from the point to the
+   **last point the two routes share** (a door centre, a ring, a stretch walked together); so a stretch where they
+   meet again after parting counts, and two routes that share only the start give 0. The point's common path is the
+   least over the pairs of distinct exits: the law ends it as soon as two distinct paths are available, whichever
+   two. Where two routes to one exit are equally short, the one that shares more is taken (the cautious side). Taken
+   on the real geometry, two doors of one room still give a common path when both routes go round the same corner
+   first (test 6).
+   **Why the bound of decision 3 holds.** The law's figure at a point p is the least, over every pair of paths a
+   person could take to two distinct exits, of the distance to their last shared point. It changes no faster than
+   you walk: from a nearby p', walk straight to p and follow p's best pair; both paths share that first straight
+   stretch, so the figure at p' is at most the straight distance plus the figure at p. Gordium's shortest routes are
+   one such pair, so its figure at a sample is never less than the law's. So the story's figure is worked exactly
+   as decision 3's: every corner and the 3-in samples, the triangles cut only where they could matter, and the rules
+   get the greatest found plus 3 in, which is never less than the law's greatest. No cells and no cases: it is
+   decidable on any floor. **Work:** one shortest-route tree per distinct exit over each zone's visibility graph
+   (n nodes: about n squared visibility tests to build, Dijkstra per exit); per sample, its route to each exit from
+   the nodes it can see (about n tests per exit), and per pair of exits a walk back along the two routes to their
+   last shared point. For k exits and S samples, about S x (k x n + k squared x route length): seconds for a story
+   like the Children's Odyssey (a few thousand samples, hundreds of nodes per zone). One exit on the story: the
+   common path is the travel distance.
 6. **Dead end: from the corridor's shape.** A corridor (a room marked `corridor`) is split into its straight legs
    (each a stretch between parallel walls; recesses shallower than 12 in, such as a door's, ignored); the centre line
    runs midway between each leg's walls and legs meet where their centre lines cross. Only corridors count here
-   (the corridor and the corridors joined to it): reaching an exit means reaching, along corridors, a door of an
-   exit (`exit_kind`); a route through a room never counts. A point on the centre line is in a dead end when, cut
+   (the corridor and the corridors joined to it): reaching an exit means reaching, along **crossable** corridors
+   (decision 1a: `lockable: false`), a door of an exit (`exit_kind`); a route through a room, or through a corridor
+   that is end-only, never counts (test 16). A point on the centre line is in a dead end when, cut
    there, one side reaches no exit. The dead end runs along the centre line from the closed end wall to the first
    point from which **routes in two different directions each reach a distinct exit** (by `exit_id`), without coming
    back: a crossing whose two ways both lead to exits, or an exit door in the corridor itself. A crossing whose other
@@ -148,7 +156,11 @@ area need review.
    already takes readings (`design_checker/check.py`, `readings_of` and `named_result`): the row complies only if it
    complies under both, fails if it fails under both, and otherwise needs review. Measuring to the crossing's centre
    line (not its near edge) is the longer reading (open question 2). The least width (exception 3) is the narrowest
-   distance between the dead-end legs' walls (and obstructions in it). A corridor that isn't made of straight legs
+   distance between that dead end's own legs' walls (and obstructions in it). **Several dead ends in one corridor:**
+   each is its own pair (its length, its own least width). The branch's `corridor` part holds one pair, so it
+   becomes a part kind of its own there (`dead_end`, its two measures, one row per dead end); until that change on
+   the branch, the corridor gives the cautious pair, the longest length with the least width of any of its dead
+   ends, under each reading of open question 7 alike. A corridor that isn't made of straight legs
    meeting at right angles (at any rotation) needs review in this first version.
 7. **Remoteness and the diagonal: straight lines, exact.** The distance between two exits is the straight line
    between the nearest edges of their clear openings (NFPA's words; the IBC names no point, and the nearest edge is
@@ -225,8 +237,9 @@ area need review.
 6. **Common path in an L-shaped room:** legs 0 to 30 by 0 to 10 and 20 to 30 by 10 to 40, exit doors centred at
    (22, 40.25) and (28, 40.25), each its own exit. From (0, 0) both routes go round the inside corner (20, 10):
    tangent 22.338 + arc together 0.925 (53.0 degrees, until the route to (28, 40.25) leaves) = **23.263 ft
-   common**, not 0. Fails on a door-graph method. The room's `common_path_of_travel` is a number, not needs review
-   (its cells are few); fails if a jump at the line where a door comes into view is taken as needing review.
+   common**, not 0. Fails on a door-graph method. The room's `common_path_of_travel` is a number (the greatest
+   sample plus 3 in), never needs review; and at test 2's column, where the route to one exit flips from over to
+   under, the samples on both sides are worked and the greater counts.
 7. **One stair, two doors:** a story whose only exit is one stair enclosure entered by two doors 80 ft apart, both
    `exit_enclosure` with one `exit_id`: `story_exit_count` 1, remoteness needs review, common path equals travel
    distance. Fails if doors are taken as exits.
@@ -251,6 +264,13 @@ area need review.
     storage room marked `pass_through: true`: refused on read, its story needs review.
 15. **The area readings:** a checker test on the 10 percent rule with both areas given as readings: all four pairs
     are worked, the outer-accessory over inside-story pair among them; complies only when all four pass.
+16. **A locked corridor:** a corridor 30 ft from its closed end to the next place where two ways reach two exits;
+    15 ft from the end a crossing leads one way to exit A and the other way, through a corridor with
+    `lockable: true`, to exit B: the dead end is 30 ft, failing 1018.4, not 15. Fails if the locked way counts.
+17. **A kitchen and its pantry:** a start in a kitchen joined by a separation line to a pantry (`accessory_storage`)
+    whose door is near an exit: the route leaves by the kitchen's own door (needs review if it has none). Fails if
+    the route crosses the pantry. And an H-plan corridor with dead ends of 30 by 14 ft and 22 by 8 ft: two pairs,
+    the first complying by exception 3, the second failing; until `dead_end` exists, the pair 30 ft and 8 ft.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
