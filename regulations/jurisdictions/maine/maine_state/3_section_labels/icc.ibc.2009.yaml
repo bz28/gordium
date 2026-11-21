@@ -1,0 +1,2473 @@
+# What kind of text each brought-in piece of the 2009 International Building Code is (3_section_labels/README.md).
+# Drafted by hand in a Claude Code session (claude-opus-5-5, 2026-11-20), checked by code (python -m rule_format): each quote is
+# the extracted text's exact words where the code cache has the book (it is kept outside the repo). Drafts: approval is deferred.
+document: icc.ibc.2009.pdf
+labels:
+  '201':
+    label: not_for_checking
+    topic: definitions
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 2
+      - 3
+      quote: SECTION 201 GENERAL
+    piece_sha256: c2c3777450c046eb355eb71f32e4e7bcfb19db6036fe186aad9d95d8c8c6992a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '201.1':
+    label: reference
+    topic: definitions
+    reason: 'Says the words of Chapter 2 have the meanings it gives, for the whole code: how every brought-in definition applies.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 4
+      - 6
+      quote: Unless otherwise expressly stated, the following words and terms shall, for the purposes of this code, have the
+        meanings shown in this chapter.
+    piece_sha256: 9cb64178b9c2da891c8e1db9374567bf18e54a9081f7bd2121bd95bc17a03a97
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '201.2':
+    label: reference
+    topic: definitions
+    reason: 'How words are read (tense, gender, number): a rule of reading, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 7
+      - 8
+      quote: Words used in the present tense include the future;
+    piece_sha256: 547a1f3a4b1cbbdbac6f07dceab6a90139f0d441f197596a3d79277893b46927
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '201.3':
+    label: reference
+    topic: definitions
+    reason: Sends a word this code doesn't define to the meaning the International Fuel Gas, Fire, Mechanical or Plumbing
+      Code gives it (not brought in).
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 11
+      - 15
+      quote: Where terms are not defined in this code and are defined in the International Fuel Gas Code, International Fire
+        Code, International Mechanical Code or International Plumbing Code, such terms shall have the meanings ascribed to
+        them as in those codes.
+    piece_sha256: dbf90b58c9a3cc81e7dca81813c5c3a94fdb61b59695589e6056585ef5af9756
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '201.4':
+    label: reference
+    topic: definitions
+    reason: 'Gives a word with no definition its ordinary meaning in context: a rule of reading, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 16
+      - 19
+      quote: Where terms are not defined through the methods authorized by this section, such terms shall have ordinarily
+        accepted meanings such as the context implies.
+    piece_sha256: 4eb20748c33956fcb245d134616d3997b389efc30110b1c26471e22990981f2e
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '202':
+    label: not_for_checking
+    topic: definitions
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 20
+      - 21
+      quote: SECTION 202 DEFINITIONS
+    piece_sha256: 438cb5c86c293cea6d9ec29faa85274db999b626fc561ee4a3f649a1dd24eabc
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:aggregate:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1502.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 39
+      - 39
+      quote: I AGGREGATE. See Section 1502.1.
+    piece_sha256: 37c1732343ab9ce60a88aab7fe0c19da4e8f369525b4827f7593cff17f500a25
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:approved:
+    label: reference
+    topic: definitions
+    reason: 'Defines APPROVED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 71
+      - 71
+      quote: APPROVED. Acceptable to the code official or authority hav
+    piece_sha256: 670e563e9b507181447218f683309b6ff49804ddfe7b087bcb729b3d9ce3b220
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:area_for_masonry:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 2102.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 80
+      - 80
+      quote: AREA (for masonry). See Section 2102.1. I
+    piece_sha256: c064a17edea910eb66e2fa0830d435dbe5ac7f1a7edbc55db0d1937aa0038f2c
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:area_building:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 502.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 38
+      lines:
+      - 84
+      - 84
+      quote: AREA, BUILDING. See Section 502 .1.
+    piece_sha256: 36d0adcef33857efac32f4b63a154ad6d962bbe506a1de77cdc94be26ed7317c
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:atrium:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 404.1.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 2
+      - 2
+      quote: ATRIUM. See Section 404.1.1.
+    piece_sha256: 6b3dd3a2f31711191886b82fdf80e9adc60e68e0ffec8990208a2dd9795264d0
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 902.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 9
+      - 9
+      quote: '[F] AUTOMATIC. See Section 902 .1.'
+    piece_sha256: f55152bd7d1f6820faf576bf6e630af6ac11f02719a32dfdb2ca7cba1752f256
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic_fire_extinguishing_system:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 902.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 10
+      - 10
+      quote: '[F] AUTOMATIC FIRE-EXTINGUISHING SYSTEM.'
+    piece_sha256: 96e144970735961bd2d8dc3693b2a1fb8deb1a34b159adf8b3ace95846dd3845
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic_sprinkler_system:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 902.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 14
+      - 14
+      quote: '[F] AUTOMATIC SPRINKLER SYSTEM. See Section'
+    piece_sha256: 742ea979e6e746e6fdebe91ebb9ceb50578d45f4fff09f404beef07afae8de24
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:basement_for_other_than_flood_loads:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 502.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 32
+      - 32
+      quote: BASEMENT (for other than flood loads). See Section 502.1.
+    piece_sha256: 50a6eefbae7b39d653ce7abd34312ed79f77c7f02638e089ccffd11aee3b0805
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:basement_for_flood_loads:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1612.2, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 33
+      - 33
+      quote: BASEMENT (for flood loads). See Section 1612.2.
+    piece_sha256: b22057f0ea49f8dd93562a70f5f58e6a4a77065c65531892563a1e96e82a1631
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:building:
+    label: reference
+    topic: definitions
+    reason: 'Defines BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 47
+      - 47
+      quote: BUILDING. Any structure used or intended for supporting or
+    piece_sha256: 3454364ae3558b74cdce47a66bee98ad3f07744b9d7772df43ee1b4cbcc0dbf4
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:building_official:
+    label: reference
+    topic: definitions
+    reason: 'Defines BUILDING OFFICIAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 54
+      - 54
+      quote: BUILDING OFFICIAL. The officer or other designated
+    piece_sha256: 8df0ce9a6c44164ba2366d5df95a34fa956cb7edf416d9976119df450d285c58
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:ceiling_radiation_damper:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 71
+      - 71
+      quote: CEILING RADIATION DAMPER. See Section 702.1 .
+    piece_sha256: 1425c242c69b6c5f63e5c4100549d5477dcb7442fef936846e9a75a5a56e7fb9
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:cell:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 408.1.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 72
+      - 72
+      quote: CELL. See Section 408 .1.1.
+    piece_sha256: 3d85bb334d3e599a9f58fd88a78e8a6bac85f571e2e857c72e22b6c2c8004839
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:cell_masonry:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 2102.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 73
+      - 73
+      quote: CELL (masonry). See Section 2102 .1.
+    piece_sha256: 894755c1045c1661021b4dc115d4814e3cf1fe10ae426d450961e83b0aa81460
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:combination_fire_smoke_damper:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 39
+      lines:
+      - 92
+      - 92
+      quote: COMBINATION FIRE/SMOKE DAMPER. See Section
+    piece_sha256: b4e2c47924d5e67d39798f6d72742d8d9c8bb18908ad4f1b84bce2fd4695765b
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:common_path_of_egress_travel:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 40
+      lines:
+      - 4
+      - 4
+      quote: COMMON PATH OF EGRESS TRAVEL. See Section
+    piece_sha256: e1c795ba899e81198a7910b249764d2154ed71944ef2f788b74ee6e1b3fb7d83
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:corridor:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 40
+      lines:
+      - 41
+      - 41
+      quote: CORRIDOR. See Section 1002.1.
+    piece_sha256: baef4143dd7e0f156339c88ac9407db258639872cba91a334ad5a5086601a73f
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:damper:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 40
+      lines:
+      - 59
+      - 59
+      quote: DAMPER. See Section 702 .1.
+    piece_sha256: 6151f57ef8862d82e32559e77ed704006b2f84e284c035823c3888f4066117f2
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dormitory:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 310.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 13
+      - 13
+      quote: DORMITORY. See Section 310.2 .
+    piece_sha256: acb4a560be49efce2035040a70e6e35ab92925283e2041e383d9bd57313318a6
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dwelling:
+    label: reference
+    topic: definitions
+    reason: 'Defines DWELLING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 22
+      - 22
+      quote: DWELLING. A building that contains one or two dwelling
+    piece_sha256: 7775e676d3711d99b71adb3117ce565896599ce3f351a39a85916fe838b46890
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dwelling_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines DWELLING UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 25
+      - 25
+      quote: DWELLING UNIT. A single unit providing complete, inde
+    piece_sha256: 45ac199ec889b7d75c0a94b3b47def04d5ce63a4c503232db86c9cb84b0a470f
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 51
+      - 51
+      quote: EXIT. See Section 1002.1.
+    piece_sha256: aacd779bf032f4795f2d5613c9e79570562aaeafa61b4e6dce66ca95ebc0b858
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_access:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 52
+      - 52
+      quote: EXIT ACCESS. See Section 1002.1.
+    piece_sha256: 3aaf01d5b435068485e74cf0c1b367ee11339d2dcfcffbde69249619e31167c3
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_access_doorway:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 53
+      - 53
+      quote: EXIT ACCESS DOORWAY. See Section 1002.1. I
+    piece_sha256: bfc78558e630ed61bcf359f5982a4498c9c5c609a592b754a6c4ba4ed699254e
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_discharge:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 54
+      - 54
+      quote: EXIT DISCHARGE. See Section 1002.1.
+    piece_sha256: b6cee1bcb4c708923a0a0e2a10c85a2028a581206240352ab7e3a92d99a48bf2
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_discharge_level_of:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 55
+      - 55
+      quote: EXIT DISCHARGE, LEVEL OF. See Section 1002.1.
+    piece_sha256: 2523d6fe5b5b5465049b70941fcc76fe7fbc1c473d4953a537d2a6ea57548656
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_enclosure:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 56
+      - 56
+      quote: EXIT ENCLOSURE. See Section 1002.1.
+    piece_sha256: 192c0bf780dc2d80835e42467fe6d591f5df09d99adf06c25532b76e53f69e97
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_horizontal:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 57
+      - 57
+      quote: EXIT, HORIZONTAL. See Section 1002.1.
+    piece_sha256: 00e1125e9eaf51abd618a53f1de1cc0396631cfca0acc519b634ec3a93aa30a9
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_passageway:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 58
+      - 58
+      quote: EXIT PASSAGEWAY. See Section 1002.1.
+    piece_sha256: 13a64ae40f77fa9d7e1555398027d1cfb2ab9e1bd3c1d2933e1f91ac122be301
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exterior_wall:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1402.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 78
+      - 78
+      quote: EXTERIOR WALL. See Section 1402.1.
+    piece_sha256: a945fd2754b3ca9a3144daf76c833549ee49f715a8e1448965b550aab0de6c7a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:facility:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1102.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 41
+      lines:
+      - 86
+      - 86
+      quote: FACILITY. See Section 1102.1.
+    piece_sha256: 55b89ebe7088001ab8979b3e05ca3956d4fea00a88e5c35f22e2ec99af86497b
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_barrier:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 4
+      - 4
+      quote: FIRE BARRIER. See Section 702.1.
+    piece_sha256: 0cc0b0d6de8034e86b811e9ead4ac137f1c073d5e1f12a500a43d98a7a06e508
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_damper:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 6
+      - 6
+      quote: FIRE DAMPER. See Section 702 .1.
+    piece_sha256: b6fa10f87cc5f7cc3ee510edde099073a66c13cfc7e45fadafaba899079d05db
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_partition:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 14
+      - 14
+      quote: FIRE PARTITION. See Section 702.1.
+    piece_sha256: 10edacc91bd0dbce5cbdba59088d9eb48b52a25f7d2537d48f6e56ac76f2de23
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_resistance_rating:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 18
+      - 18
+      quote: FIRE-RESISTANCE RATING. See Section 702.1.
+    piece_sha256: ca9f6a133f90088e1f726ef61570f9ef3bc06d534eae39732d6e8acc955aa1c5
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_wall:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 22
+      - 22
+      quote: FIRE WALL. See Section 702.1.
+    piece_sha256: c3494cbccf8912a57262f5f79b058cd2cbadb8cb6cfd0b938242c83b524b658c
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:flight:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 43
+      - 43
+      quote: I FLIGHT. See Section 1002.1.
+    piece_sha256: 8f985b96ee37cfa2f40a369b90d3528a0321e03386e479132587499db4f69dce
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:grade_lumber:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 2302.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 77
+      - 77
+      quote: GRADE (LUMBER). See Section 2302.1.
+    piece_sha256: 6153d685aec003d3961ecc28d0e24e4e9d0bc4bc615d5abacd049a84a4031c0a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:grade_plane:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 502.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 42
+      lines:
+      - 78
+      - 78
+      quote: GRADE PLANE. See Section 502.1.
+    piece_sha256: f87f56ca483f48cab65c7d04cdd7a07c02836dce003fb93325dc68b09541f7bf
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:handling:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 307.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 43
+      lines:
+      - 4
+      - 4
+      quote: '[F] HANDLING. See Section 307.2.'
+    piece_sha256: 6e0cf6b5df552999ea137904ca7761e395295e2b13707732dfd93e8ad4b8f202
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:high_rise_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines HIGH-RISE BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 43
+      lines:
+      - 17
+      - 17
+      quote: HIGH-RISE BUILDING. A building with an occupied floor
+    piece_sha256: 690c8193788314b8fecff19a55b7a42e7638be6cac392fbd45354c2da364a4d0
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:horizontal_assembly:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 43
+      lines:
+      - 25
+      - 25
+      quote: HORIZONTAL ASSEMBLY. See Section 702.1.
+    piece_sha256: a519b04e0a8a9a8c4c9e1f4296647860c1781379df31ce8cc4ccdb43d9569aad
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:hydrogen_cutoff_room:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 421.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 43
+      lines:
+      - 32
+      - 32
+      quote: '[F] HYDROGEN CUTOFF ROOM. See Section 421.2.'
+    piece_sha256: fb619509a732ef2aa52ef6e9bc85670acaf2fe8e950e47f27da20cf3d0e8c120
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:liquid:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 415.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 43
+      lines:
+      - 82
+      - 82
+      quote: '[F] LIQUID. See Section 415.2.'
+    piece_sha256: 43908f8032c5c960bd626ccacca74237bbab2a6e5219b774e081578f97a0fb5c
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:listed:
+    label: reference
+    topic: definitions
+    reason: 'Defines LISTED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 43
+      lines:
+      - 86
+      - 86
+      quote: LISTED. Equipment, materials, products or services included
+    piece_sha256: e30cd66273c345dfa68152b90b3f762a90f2f0e061f090e86d6c690176eed260
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:loads:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1602.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 43
+      lines:
+      - 100
+      - 100
+      quote: LOADS. See Section 1602.1.
+    piece_sha256: 89ebcb93a199fde45fbcfaaefb9cd7c4ebe5980265dd5c0d58cb43fe24fe0c9e
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:lot_line:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOT LINE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 44
+      lines:
+      - 1
+      - 1
+      quote: LOT LINE. A line dividing one lot from another, or from a
+    piece_sha256: 3cdafd81ab80b441d73b932ea86daf254d3f85115c686c28ea0f4b49c3e929ef
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:means_of_egress:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 44
+      lines:
+      - 38
+      - 38
+      quote: MEANS OF EGRESS. See Section 1002.1.
+    piece_sha256: 4e50b4fdc1a3bbe4ee776bc82606231328a8448278c0ad1e2044ede80b198d14
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:mezzanine:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 502.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 44
+      lines:
+      - 61
+      - 61
+      quote: MEZZANINE. See Section 502.1.
+    piece_sha256: 1016438300e97c79ced4d76b699b3f01de82d786942bc8b3a6ac2386f0fa7cdc
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:nosing:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 44
+      lines:
+      - 89
+      - 89
+      quote: NOSING. See Section 1002.1.
+    piece_sha256: 104ca820ab94d654a655fbc534dae1d777aac1ad8380a577fe523b6771b32b49
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:occupant_load:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 44
+      lines:
+      - 94
+      - 94
+      quote: OCCUPANT LOAD. See Section 1002.1.
+    piece_sha256: 962509c34620cfd85472e59af2a24c0208b6035ea1494ca954072e5497c62574
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:open_parking_garage:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 406.3.2, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 45
+      lines:
+      - 6
+      - 6
+      quote: OPEN PARKING GARAGE. See Section 406 .3.2.
+    piece_sha256: 30e161562dc52b6f5a99f78db83860ee17042345b50c9e36557084f9006c61a0
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:permit:
+    label: reference
+    topic: definitions
+    reason: 'Defines PERMIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 45
+      lines:
+      - 37
+      - 37
+      quote: PERMIT. An official document or certificate issued by the
+    piece_sha256: 9558ecda153891f13df4ae92407a8ccb594535cd69889f90941bff0010df0999
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:person:
+    label: reference
+    topic: definitions
+    reason: 'Defines PERSON, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 45
+      lines:
+      - 40
+      - 40
+      quote: PERSON. An individual, heirs, executors, administrators or
+    piece_sha256: 435a7f33bb82d7685b2ab4f5da909ae8d1a05d3ea48c9995365f91cb67d0575c
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:personal_care_service:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 310.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 45
+      lines:
+      - 44
+      - 44
+      quote: PERSONAL CARE SERVICE. See Section 310.2.
+    piece_sha256: 742171869c184b1935b247e5b74a96891b9af4b9905cb96623c520028339f1b5
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:platform:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 410.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 45
+      lines:
+      - 53
+      - 53
+      quote: PLATFORM. See Section 410.2.
+    piece_sha256: 786ab2091bac708f0a1dfcb989d274ab81eaaf234cfca8166402d30fe90328c8
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:public_way:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 45
+      lines:
+      - 74
+      - 74
+      quote: PUBLIC WAY. See Section 1002.1.
+    piece_sha256: 6ace13f9075435384975ef10626d683f4e76c2ed7caaba5670eb0b19537d8e46
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:ramp:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 45
+      lines:
+      - 77
+      - 77
+      quote: RAMP. See Section 1002.1.
+    piece_sha256: 59170482f8cd00a4142224767a390659e20dc55fb149753ef0be129f671be3fb
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:roof_assembly:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1502.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 46
+      lines:
+      - 10
+      - 10
+      quote: ROOF ASSEMBLY. See Section 1502.1.
+    piece_sha256: a2423362d769206de367767553f45be66c10c2f142d8b027a71adbe5d3842a7d
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:scissor_stair:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 46
+      lines:
+      - 26
+      - 26
+      quote: SCISSOR STAIR. See Section 1002.1.
+    piece_sha256: 465a08132964ef588eab0d210202813815e7f5c645b7d055bb8d65675e3b971e
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:sleeping_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines SLEEPING UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 46
+      lines:
+      - 87
+      - 87
+      quote: SLEEPING UNIT. A room or space in which people sleep,
+    piece_sha256: 366e5757c4b0ed07f6441a6b2ba6f5780ae0bf66da32612e2f6d9d2b43c9d370
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:smoke_damper:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 702.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 46
+      lines:
+      - 95
+      - 95
+      quote: SMOKE DAMPER. See Section 702.1.
+    piece_sha256: 3e34df75b0dc199b8de94f29350e6b9f7c76a89ad347d81ef3c4739ff563cadf
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:special_amusement_building:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 411.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 6
+      - 6
+      quote: SPECIAL AMUSEMENT BUILDING. See Section 411.2.
+    piece_sha256: b3a8e1028e7f363d8c77bf8b982d1fbb3c2d0ec96ccc96152e75fc9e33041cb7
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:specified:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 2102.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 13
+      - 13
+      quote: SPECIFIED. See Section 2102 .1.
+    piece_sha256: 2109180c07de7a44e7a3659fb670e9fb50bcf45d1d2b6a2cc8e5390b8da447ff
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stage:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 410.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 20
+      - 20
+      quote: STAGE. See Section 410.2.
+    piece_sha256: f19838c1a2229ba7f172701470fc159c396cd5fde5645c7b2e90d6b1c36415b4
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stair:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 21
+      - 21
+      quote: STAIR. See Section 1002.1.
+    piece_sha256: 4fc268e5ffb22a42ecfadf1d1bdbd21f74595e5fe66b710e361efd1a989aba00
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stairway:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 22
+      - 22
+      quote: STAIRWAY. See Section 1002.1.
+    piece_sha256: ab56015da127999acb05c2c35b0145fc5a70a1327d7c704aa031f5fd59238915
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:story:
+    label: reference
+    topic: definitions
+    reason: 'Defines STORY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 53
+      - 53
+      quote: STORY. That portion of a building included between the upper
+    piece_sha256: 15dc7125ae28f912c084ab794f57bd6470b570dcf2ad3efa59643c2b99f07273
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:story_above_grade_plane:
+    label: reference
+    topic: definitions
+    reason: 'Defines STORY ABOVE GRADE PLANE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 61
+      - 61
+      quote: STORY ABOVE GRADE PLANE. Any story having its fin- I
+    piece_sha256: c84ae76b7008b7c53363bc22bb49b37da63dfbeb03e74490bdc7fa5870183495
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:structure:
+    label: reference
+    topic: definitions
+    reason: 'Defines STRUCTURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 79
+      - 79
+      quote: STRUCTURE. That which is built or constructed.
+    piece_sha256: f023d4d12df850086eb86164a85ff6887159217e3f5cd8cd59b6ec8f96b8b73d
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:suite:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 85
+      - 85
+      quote: SUITE. See Section 1002.1.
+    piece_sha256: 9264d58928f372703308dbcf7fa1dd7d9134020741bfbce93ea77b9a637eaad7
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:swimming_pools:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 3109.2, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 47
+      lines:
+      - 92
+      - 92
+      quote: SWIMMING POOLS. See Section 3109.2.
+    piece_sha256: 8fe0e2cff9259b81a325704a9916aaa982399cdae7d43d1e5d7849d4a28ef5e1
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:use_material:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 415.2, not brought in: no brought-in rule depends on more than the
+      word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 48
+      lines:
+      - 38
+      - 38
+      quote: '[F] USE (MATERIAL) . See Section 415.2.'
+    piece_sha256: ff0f4e835a966c5a3185c34320a01808c3535267d2c401e4e5bf92bfde748108
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:walkway_pedestrian:
+    label: reference
+    topic: definitions
+    reason: 'Defines WALKWAY, PEDESTRIAN, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 48
+      lines:
+      - 63
+      - 63
+      quote: WALKWAY, PEDESTRIAN. A walkway used exclusively as
+    piece_sha256: 9b2470741d2406ccd55799698b84c3354ceb92de7c05a449fd50f7dd9bb027ea
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:wall:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 2102.1, not brought in: no brought-in rule depends on more than
+      the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 48
+      lines:
+      - 65
+      - 66
+      quote: WALL. See Section 2102.1. Cavity wall. See Section 2102.1.
+    piece_sha256: 2bb1b3c24800c31f3c4350e37435b94a8829302b5314c71084349fadd9f2b46b
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:winder:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined (Section 1002.1, brought in): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 48
+      lines:
+      - 93
+      - 93
+      quote: WINDER. See Section 1002.1.
+    piece_sha256: 8d96eac386fb8ba4ba31ac6fc0482599e40986fbf73467dbc911d593d455e678
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '308.5':
+    label: flag
+    topic: uses
+    reason: 'Classifies day care for persons of any age, under 24 hours, as Group I-4, and a facility with five or fewer persons
+      as R-3 (or the Residential Code): the classification decides which egress limits apply, and it is the architect''s statement
+      (the persons cared for aren''t in the model).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 61
+      lines:
+      - 62
+      - 67
+      quote: This group shall include buildings and structures occupied by persons of any age who receive custodial care for
+        less than 24 hours by individuals other than parents or guardians, relatives by blood, marriage or adoption, and in
+        a place other than the home of the person cared for.
+    piece_sha256: fb6bf5d13478ee7394abdb615caa6e43a69f644086bb5ab5707ccc277b2fb03d
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''1-4'' is Group I-4 (the book''s ICC print reads I-4), in the heading. The book''s ICC print reads the letter;
+      this copy''s page image prints the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md);
+      check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  308.5.1:
+    label: flag
+    topic: uses
+    reason: 'Classifies adult day care for more than five unrelated adults as Group I-4 (R-3 where they can respond to an
+      emergency without staff help): the architect''s statement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 61
+      lines:
+      - 71
+      - 74
+      quote: A facility that provides accom modations for less than 24 hours for more than five unre lated adults and provides
+        supervision and personal care services shall be classified as Group 1-4.
+    piece_sha256: e72361a8953bb6dc89692dd8f96972807cbc3fc88b16289bf967882d90d8c444
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''1-4'' is Group I-4 (the book''s ICC print reads I-4). The book''s ICC print reads the letter; this copy''s
+      page image prints the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md);
+      check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  308.5.2:
+    label: flag
+    topic: uses
+    reason: 'Classifies child care for more than five children 2 1/2 years or less as Group I-4, or Group E where no more
+      than 100 children are cared for on a level of exit discharge with an exit door from each room directly outside: which
+      applies is the architect''s statement, which the model can''t show.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 61
+      lines:
+      - 78
+      - 81
+      quote: A facility that provides supervi sion and personal care on less than a 24-hour basis for more than five children
+        2 1/2 years of age or less shall be classified as Group 1-4.
+    piece_sha256: 1f26600902ada8ed630cf87c8b4b08cf9e5a2cfce5b6588284f4c526564bcdd9
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''1-4'' is Group I-4 (the book''s ICC print reads I-4). The book''s ICC print reads the letter; this copy''s
+      page image prints the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md);
+      check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '502':
+    label: not_for_checking
+    topic: definitions
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 106
+      lines:
+      - 16
+      - 17
+      quote: SECTION 502 DEFINITIONS
+    piece_sha256: b5cb23938e9d4961a16796c0edfcb98b1ca1b659f48d38b2609fa4e1ed2ca3d0
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  502:area_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines AREA, BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 106
+      lines:
+      - 21
+      - 21
+      quote: AREA, BUILDING. The area included within surrounding
+    piece_sha256: e98ab8362456a65a77aae64d7ff145b43b821e6482c57c93eee58ba5398a5ac0
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  502:basement:
+    label: reference
+    topic: definitions
+    reason: 'Defines BASEMENT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 106
+      lines:
+      - 27
+      - 27
+      quote: BASEMENT. A storythat is not a story above grade plane (see
+    piece_sha256: be67de8c800ac8fbd9eeaa0827d6578eb6ed66da92d06c610977e07f448c1a18
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  502:grade_plane:
+    label: reference
+    topic: definitions
+    reason: 'Defines GRADE PLANE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 106
+      lines:
+      - 37
+      - 37
+      quote: GRADE PLANE. A reference plane representing the average
+    piece_sha256: 5afde4d58190590b1244430a23a5587ed5944ff2f1301afe44025b0f269ebcb7
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  502:mezzanine:
+    label: reference
+    topic: definitions
+    reason: 'Defines MEZZANINE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 106
+      lines:
+      - 48
+      - 48
+      quote: MEZZANINE. An intermediate level or levels between the
+    piece_sha256: d0fed8c9094417c59e86984c574bfd4f2fbdb8c6630bc646992e6449a440af8a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '508.2':
+    label: reference
+    topic: uses
+    reason: Says what an accessory occupancy is (ancillary to the main occupancy) and sends it to 508.2.1 to 508.2.5.3, which
+      hold the requirements.
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 111
+      lines:
+      - 90
+      - 92
+      quote: Accessory occupancies are those occupancies that are ancillary to the main occupancy of the building or portion
+        thereof.
+    piece_sha256: 5a51da055ead18fb86b2ec8ea646bd31fee1565b8a38305ff8408e47f004800a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.1:
+    label: rule
+    topic: dimensions
+    reason: Caps the aggregate accessory occupancies of a story at 10 percent of its building area, measurable; its second
+      test, Table 503's tabular values, is not brought in, so that part needs review.
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 111
+      lines:
+      - 95
+      - 100
+      quote: Aggregate accessory occupan cies shall not occupy more than 10 percent of the building area of the story in which
+        they are located and shall not exceed the tabular values in Table 503, without building area increases in accordance
+        with Section 506 for such accessory occupancies.
+    piece_sha256: 15c7267b0d2bb754289437cb317a1b5b70c2e22e8ffdf8d087e0b7ec3adeee66
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). Table 503 and Section 506 are not brought in.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.2:
+    label: flag
+    topic: uses
+    reason: 'Each accessory occupancy is classified on its own and each portion of the building follows its own classification''s
+      requirements: a classification the architect states.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 111
+      lines:
+      - 101
+      - 103
+      quote: Accessory occupancies shall be individually classified in accordance with Section 302.1.
+    piece_sha256: c20994d50ee23041590c95667872ae57f178b86cb2d18036383525a5fd6d9c21
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.3:
+    label: flag
+    topic: dimensions
+    reason: 'The building''s allowable area and height follow the main occupancy, each accessory occupancy''s height Table
+      503 (not brought in): needs review.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 111
+      lines:
+      - 109
+      - 110
+      quote: The height of each accessory occupancy shall not exceed the tabular values in
+    piece_sha256: 5bb4e599d9053e88f04fb3098e8eb61ad6061352cc6f02c2fff04298ab19068b
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.4:
+    label: flag
+    topic: fire_separation
+    reason: 'No separation is required between accessory occupancies and the main occupancy, except Group H, incidental accessory
+      occupancies (508.2.5) and dwelling or sleeping units (Section 420, not brought in): which exception applies is the architect''s
+      statement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 112
+      lines:
+      - 5
+      - 7
+      quote: No separation is required between accessory occupancies and the main occupancy.
+    piece_sha256: 06ddec446232a6feaea8d929a746a856ee1596bdf8bbeda2e63ea1d426b65937
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''Group 1-1, R-I'' is Group I-1, R-1. The book''s ICC print reads the letter; this copy''s page image prints
+      the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against
+      a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.5:
+    label: flag
+    topic: fire_separation
+    reason: 'Incidental accessory occupancies (Table 508.2.5: furnace and boiler rooms, laundry rooms over 100 square feet,
+      waste and linen rooms...) are separated or sprinklered as the table says: which rooms are such is the architect''s input.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 112
+      lines:
+      - 22
+      - 24
+      quote: 508.2.5 shall be separated from the remainder of the building or equipped with an automatic fire-extinguishing
+        system, or both, in accordance with Table 508.2.5.
+    piece_sha256: 564cf2611078634f7ddc629944e427e89940aaefe99a31b09e8689b8bebe6083
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.5.1:
+    label: flag
+    topic: fire_separation
+    reason: 'Where Table 508.2.5 asks for a rated separation: a fire barrier (Section 707) or horizontal assembly (Section
+      712), not brought in: needs review.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 112
+      lines:
+      - 28
+      - 34
+      quote: Where Table 508.2.5 specifies a fire-resistance-rated separa tion, the incidental accessory occupancies shall
+        be sepa rated from the remainder of the bUilding by a fire barrier constructed in accordance with Section 707 or a
+        horizon tal assembly constructed in accordance with Section 712, or both.
+    piece_sha256: 1136b6bf715fd7ef838944afe64aebecc35aeec4baaf4a64c89a19299ded36a4
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''I-hour'' is 1-hour; ''Type lIB'' is Type IIB. The book''s ICC print reads the letter; this copy''s page
+      image prints the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md);
+      check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.5.2:
+    label: flag
+    topic: fire_separation
+    reason: 'Where the table permits a sprinkler system instead of a fire barrier: smoke-resisting construction, self- or
+      automatic-closing doors, no air transfer openings: a person checks the assemblies.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 112
+      lines:
+      - 41
+      - 42
+      quote: Where Table 508.2.5 permits an automatic fire-extinguishing system without a fire barrier, the inci-
+    piece_sha256: 05e15cff5114173f8602c7ed3d2a5ad87b55b69019d70fdae2765faed70bfff2
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 508.2.5:
+    label: flag
+    topic: fire_separation
+    reason: 'Lists the incidental accessory occupancies and the separation or protection each needs (1 or 2 hours, or a sprinkler
+      system): which rooms are such, and their assemblies, are the architect''s input.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 112
+      lines:
+      - 57
+      - 57
+      quote: Laundry rooms over 100 square feet
+    piece_sha256: bf3d0ac1d711a34ee58a6dffdfc934c7b3569391f6681097c0248760e631acaf
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''Group E or 1-2'' is Group E or I-2; ''Group 1-3 cells'', ''Group 1-2 waste'' are I-3, I-2; ''Sand U'' is
+      S and U. The book''s ICC print reads the letter; this copy''s page image prints the OCR''s reading, so the image can''t
+      confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.5.3:
+    label: flag
+    topic: fire_separation
+    reason: 'Where the table asks for a sprinkler or extinguishing system, only the incidental room need have it: a person
+      checks the system''s extent.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 113
+      lines:
+      - 21
+      - 23
+      quote: only the space occupied by the inci dental accessory occupancy need be equipped with such a system.
+    piece_sha256: ea57c6eeea0100d723476e877e1b7b270a163a42c684f2064867ec5517311048
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '702':
+    label: not_for_checking
+    topic: definitions
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 10
+      - 11
+      quote: SECTION 702 DEFINITIONS
+    piece_sha256: 556449cdd15bc1c634b9c4062df797d524b1e9a9b9d6375e42bdb0a1cbee59a4
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:ceiling_radiation_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines CEILING RADIATION DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 21
+      - 21
+      quote: CEILING RADIATION DAMPER. A listeddevice installed
+    piece_sha256: 8256d88f5657787e8b4e6653c6df305c75d017a5abff54a6427c88e514a6b737
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:combination_fire_smoke_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMBINATION FIRE/SMOKE DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 25
+      - 25
+      quote: COMBINATION FIRE/SMOKE DAMPER. A listed
+    piece_sha256: a3e08e9f4461bb2d0df635739280109af06c40c95e5763ee5e2f2e022d855a40
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:damper:
+    label: reference
+    topic: definitions
+    reason: 'Points to where the term is defined ("Ceiling radiation damper," "Combination fire/smoke damper," "Fire damper"
+      and "Smoke damper.", not brought in: no brought-in rule depends on more than the word): a pointer, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 32
+      - 32
+      quote: DAMPER. See "Ceiling radiation damper," "Combination
+    piece_sha256: 6a30790f2291bbb706c19de839fcf6bad52fe1ea23b375d82addb274c12ffd74
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:fire_barrier:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE BARRIER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 41
+      - 41
+      quote: FIRE BARRIER. A fire-resistance-rated wall assembly of
+    piece_sha256: c8bdf75020764d1f1d63144175ecc8a17efa6c0c25bba7a7dcdfbb342f93f1ca
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:fire_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 44
+      - 44
+      quote: FIRE DAMPER. A listed device installed in ducts and air
+    piece_sha256: 82ee7d6b26f29e32a754e3fefc8f8eeaeb7bf29f7dac37479ae0064b05e0f1e5
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:fire_partition:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE PARTITION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 56
+      - 56
+      quote: FIRE PARTITION. A vertical assembly of materials
+    piece_sha256: 52b35d1253c3a1659050670eebc1095b0f5e48d67ecddfeefdb965ec32d53d83
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:fire_resistance_rating:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE-RESISTANCE RATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 66
+      - 66
+      quote: FIRE-RESISTANCE RATING. The period of time a build
+    piece_sha256: f453d0655a22303505c9b067740c22860a8b0b12849516b64e1328d53335e7df
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:fire_wall:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE WALL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 120
+      lines:
+      - 85
+      - 85
+      quote: FIRE WALL. A fire- resistance-rated wall having protected
+    piece_sha256: 3975ed15d4c9f581d2dece1f4c5f421c7c9f49a8aad3050402bcc985b5402346
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  702:smoke_damper:
+    label: reference
+    topic: definitions
+    reason: 'Defines SMOKE DAMPER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 121
+      lines:
+      - 38
+      - 38
+      quote: SMOKE DAMPER. A listed device installed in ducts and air
+    piece_sha256: 791593aa6978788f88c33f87e9739d5ee49525a109b2f7a175997db4cebb0ed9
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '902':
+    label: not_for_checking
+    topic: definitions
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 208
+      lines:
+      - 77
+      - 78
+      quote: SECTION 902 DEFINITIONS
+    piece_sha256: b6a3217ceb5a0cfa43bd02cb69afdb47c9bbdb224f869e8b96285dab19ea5a46
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  902:automatic:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 209
+      lines:
+      - 4
+      - 4
+      quote: '[F] AUTOMATIC. As applied to fire protection devices, a'
+    piece_sha256: 7880a49c53967e8dddd18ac32bd44deb26d17814f96d41769ebefd8be6e3289e
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  902:automatic_fire_extinguishing_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC FIRE-EXTINGUISHING SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 209
+      lines:
+      - 9
+      - 9
+      quote: '[F] AUTOMATIC FIRE-EXTINGUISHING SYSTEM.'
+    piece_sha256: 6365736822c7cb9764b4d0213595d66d0487c6be3ec9525e3c3ed3bf5a4a5595
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  902:automatic_sprinkler_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC SPRINKLER SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 209
+      lines:
+      - 17
+      - 17
+      quote: '[F] AUTOMATIC SPRINKLER SYSTEM. An automatic'
+    piece_sha256: 56638f0f7c1c5c0dbefef453832bff638c8ac5335ba2dc453c0a6802beb03c87
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1002':
+    label: not_for_checking
+    topic: definitions
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 16
+      - 17
+      quote: SECTION 1002 DEFINITIONS
+    piece_sha256: e0bbda7a44ed424393e01fc768597c483ca69cfc48c615b9e4a0b0cc832de179
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:common_path_of_egress_travel:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMMON PATH OF EGRESS TRAVEL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 39
+      - 39
+      quote: COMMON PATH OF EGRESS TRAVEL. That portion of
+    piece_sha256: 4dda2d5f8247d5d11595650baa523fb96dc436be719ff86b77acd50e7ae28ecd
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:corridor:
+    label: reference
+    topic: definitions
+    reason: 'Defines CORRIDOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 45
+      - 45
+      quote: CORRIDOR. An enclosed exit access component that defines
+    piece_sha256: da242d3f37092729d545a4920be63d21912267ba297518e7a1e9ee114f648a1f
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 57
+      - 57
+      quote: EXIT. That portion of a means ofegress system which is sepa
+    piece_sha256: 42e4db86ca3cd0919c23ed3e2b1401fa863d4263829d287691e5568f09a89e51
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit_access:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT ACCESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 65
+      - 65
+      quote: EXIT ACCESS. That portion of a means ofegress system that
+    piece_sha256: 05f9209070d392ef8f30c32d4467aece410a92c94fa7c447261c1cbfac762512
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit_access_doorway:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT ACCESS DOORWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 68
+      - 68
+      quote: EXIT ACCESS DOORWAY. A door or access point along the
+    piece_sha256: aba4b5d3cf6373b72eaa9dfb185488bb8cf4e033614590326386f4c3a98d785f
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit_discharge:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT DISCHARGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 72
+      - 72
+      quote: EXIT DISCHARGE. That portion of a means of egress sys
+    piece_sha256: 3ae4f497eb03cff48d9dac8a7fd906c5125d22fb3715c7e18469f5f357f111aa
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit_discharge_level_of:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT DISCHARGE, LEVEL OF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 74
+      - 74
+      quote: EXIT DISCHARGE, LEVEL OF. The story at the point at
+    piece_sha256: b47e32c1b3717d9af822933731688c2f199347e290ba266ebe4b65289f2d7b3a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit_enclosure:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT ENCLOSURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 76
+      - 76
+      quote: EXIT ENCLOSURE. An exit component that is separated
+    piece_sha256: 94deda6baa3f2355c9ebf3c7378648d1e1ff3ea2e3d4a8644e958889f8aae4b9
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit_horizontal:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT, HORIZONTAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 81
+      - 81
+      quote: EXIT, HORIZONTAL. A path of egress travel from one
+    piece_sha256: c98d280774908c01f5fd280d1ff658527496ba9224efef5b580cad2038ccc23c
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:exit_passageway:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT PASSAGEWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 87
+      - 87
+      quote: EXIT PASSAGEWAY. An exit component that is separated
+    piece_sha256: f4b93c1febdcd23982354604794246bb75072c7e778dc0660ee533404a2fb88d
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:flight:
+    label: reference
+    topic: definitions
+    reason: 'Defines FLIGHT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 244
+      lines:
+      - 94
+      - 94
+      quote: FLIGHT. A continuous run of rectangular treads, winders or
+    piece_sha256: 69e4ea402e307cc7fc3647fe4b494036af40b5d94ba3732aa00de07ac0f14509
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:means_of_egress:
+    label: reference
+    topic: definitions
+    reason: 'Defines MEANS OF EGRESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 27
+      - 27
+      quote: MEANS OF EGRESS. A continuous and unobstructed path
+    piece_sha256: ffb5a73ee8e784ad089b11f3526f3bc47b4b582ecfb50006978f19704dec28ff
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:nosing:
+    label: reference
+    topic: definitions
+    reason: 'Defines NOSING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 38
+      - 38
+      quote: NOSING. The leading edge of treads of stairs and of landings
+    piece_sha256: 34993d63c55acd2e5dda53a838765433f4ce546d6a3a869a75b24790060d4b17
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:occupant_load:
+    label: reference
+    topic: definitions
+    reason: 'Defines OCCUPANT LOAD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 40
+      - 40
+      quote: OCCUPANT LOAD. The number of persons for which the
+    piece_sha256: fb8f8d248a379e2a95f8a0bf0c7a915ebb62688d3cba9fa88c1218eb82c23e5a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:public_way:
+    label: reference
+    topic: definitions
+    reason: 'Defines PUBLIC WAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 48
+      - 48
+      quote: PUBLIC WAY. A street, alley or other parcel of land open to
+    piece_sha256: 97202d936b30afeca4c69f8c40ad58f4cf8da3d285c81c210d9ce7f338282140
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:ramp:
+    label: reference
+    topic: definitions
+    reason: 'Defines RAMP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 53
+      - 53
+      quote: RAMP. A walking surface that has a running slope steeper than
+    piece_sha256: 81aebd9c4e393a252c57fbc5844e46fbb03ba5721948e91a75038ae946744c75
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:scissor_stair:
+    label: reference
+    topic: definitions
+    reason: 'Defines SCISSOR STAIR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 56
+      - 56
+      quote: SCISSOR STAIR. Two interlocking stairways providing two
+    piece_sha256: 46de044d5b13f7ad17c2377a0d3830476905c540e6c2a062bee3c0de42663587
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:stair:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 64
+      - 64
+      quote: STAIR. A change in elevation, consisting of one or more ris
+    piece_sha256: 72efe2549558b0f6a4f3999919da830831766565782b86c1155aa768295ae9ac
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:stairway:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIRWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 66
+      - 66
+      quote: STAIRWAY. One or more flights of stairs, either exterior or
+    piece_sha256: bbd03b75dee7a9f2e7f0dabfdbb64561daa82a7cfe75440d659f86f66a6acb52
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:suite:
+    label: reference
+    topic: definitions
+    reason: 'Defines SUITE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 81
+      - 81
+      quote: SUITE. A group of patient treatment rooms or patient sleeping
+    piece_sha256: 90ecf8ff888ebc8abe85e1a42d778f4aa67342d3a2c1e4b629f5dfa79ae4173a
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1002:winder:
+    label: reference
+    topic: definitions
+    reason: 'Defines WINDER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 245
+      lines:
+      - 86
+      - 86
+      quote: WINDER. A tread with nonparallel edges.
+    piece_sha256: c9fefd9b9cc064a6a5af4a39b437e659fbdab70ec7f1cadb2407f684389beaf5
+    notes: Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1004.1':
+    label: flag
+    topic: density_and_occupancy
+    reason: 'The design occupant load is determined by this section, and a primary space''s includes the occupants egressing
+      through it from accessory areas: whose egress passes through which space is the architect''s input.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 246
+      lines:
+      - 98
+      - 102
+      quote: Where occupants from accessory areas egress through a primary space, the calculated occupant load for the primary
+        space shall include the total occupant load of the primary space plus the number of occupants egressing through it
+        from the accessory area.
+    piece_sha256: e5be88fd4bf34872c5071b496334b5370dc776a8cabe12d08e28aeb1d74b1581
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1004.1.1:
+    label: rule
+    topic: density_and_occupancy
+    reason: 'The occupant load is not less than the floor area divided by the Table 1004.1.1 factor for its use (day care:
+      35 net square feet per occupant): measurable.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 246
+      lines:
+      - 105
+      - 107
+      quote: For areas with out fixed seating, the occupant load shall not be less than that number determined by dividing
+        the floor area under
+    piece_sha256: 6a289f922eed4a4c692767cbd127069d105954f0f56090b706a41c9b3ade6f1c
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The exception (an actual number the building official approves) is the
+      official''s decision.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1004.1.1:
+    label: rule
+    topic: density_and_occupancy
+    reason: 'Sets the floor area per occupant for each function of space, the numbers 1004.1.1''s occupant load uses (day
+      care: 35 net).'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 247
+      lines:
+      - 86
+      - 86
+      quote: Day care 35 net
+    piece_sha256: 35fe6940839c9f0dca7a741a5e6f655e34044070935f71e04f0cbbd9d846eb20
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1008.1.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'Egress doors are pivoted or side-hinged swinging doors (with listed exceptions), and swing in the direction of
+      egress where serving 50 or more persons: measurable from the doors marked.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 252
+      lines:
+      - 16
+      - 18
+      quote: Doors shall swing in the direction of egress travel where serving an occupant load of 50 or more persons or a
+        Group H occupancy.
+    piece_sha256: fbb3f530bbdef4b3e64a74d62afd96411ca107a87c939302372ca9176a880997
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''Group 1-3'' (exception 2) is I-3. The book''s ICC print reads the letter; this copy''s page image prints
+      the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against
+      a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1014.3':
+    label: rule
+    topic: means_of_egress
+    reason: Caps the common path of egress travel at 75 feet outside Group H; its exceptions raise it for Groups B, F, S,
+      I-3 and R-2, not I-4.
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 265
+      lines:
+      - 76
+      - 78
+      quote: In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22
+        860 mm).
+    piece_sha256: ba7955d3cd7743cf0877d67d834661c6a30665c5c76799ae29655bf15ac0eb1f
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''H-l'' is H-1; ''Group 1-3'' (exception 3) is I-3. The book''s ICC print reads the letter; this copy''s page
+      image prints the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md);
+      check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1015.1':
+    label: rule
+    topic: means_of_egress
+    reason: 'Two exits or exit access doorways from any space whose occupant load exceeds Table 1015.1''s value or whose common
+      path exceeds 1014.3''s: measurable.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 265
+      lines:
+      - 105
+      - 107
+      quote: 'Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:'
+    piece_sha256: 6a4bfd34ab0aee083b5f0ceae226e0f110d38fd93ab3fb552d265bbccb4e59ca
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''Group 1-2'' (the exception) is I-2. The book''s ICC print reads the letter; this copy''s page image prints
+      the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against
+      a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1015.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Sets the most occupants a space with one exit may hold, by occupancy (Group I-4 and day care: 10), the numbers
+      1015.1 uses.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 266
+      lines:
+      - 25
+      - 25
+      quote: a. Day care maximum occupant load is 10.
+    piece_sha256: 513074f304b849655403e765c630b940c0317a50f6bae7a4ee6459efc4d965e8
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''H-4, H-5, 1-1, 1-3, 1-4, R 10'' is I-1, I-3, I-4 (the decision note''s own example, p.266 line 23); ''H-l''
+      is H-1. The book''s ICC print reads the letter; this copy''s page image prints the OCR''s reading, so the image can''t
+      confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1015.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Three exits from a space of 501 to 1,000 occupants, four above 1,000: measurable.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 266
+      lines:
+      - 27
+      - 28
+      quote: Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000.
+    piece_sha256: f40877c0706be6f3c769a67c9dddaa9b92bfb1a369ca07e7ee7a4f0b50b72301
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1015.2':
+    label: flag
+    topic: means_of_egress
+    reason: 'Exits are located so their availability is obvious, and unobstructed at all times: a judgment; the arrangement
+      is 1015.2.1 and 1015.2.2''s.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 266
+      lines:
+      - 31
+      - 33
+      quote: Required exits shall be located in a manner that makes their availability obvious.
+    piece_sha256: 2d407a60be68fa4e868a5fa1c52063a1cf4859ed4926d76ee1eca42c1be30ef1
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1015.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Two required exits (or exit access doorways) are placed at least one-half of the area''s maximum overall diagonal
+      apart, one-third in a building sprinklered throughout per 903.3.1.1 or 903.3.1.2 (exception 2): measurable.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 266
+      lines:
+      - 38
+      - 42
+      quote: the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the
+        length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line
+        between exit doors or exit access doorways.
+    piece_sha256: c40824268541e34281723f646fc4bef7902884d9fc2c6cc831e3e3f4cdaf2c70
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''I-hour'' (exception 1) is 1-hour. The book''s ICC print reads the letter; this copy''s page image prints
+      the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against
+      a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1015.2.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'Where three or more exits are required, at least two are arranged as 1015.2.1 says: measurable.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 266
+      lines:
+      - 60
+      - 62
+      quote: Where access to three or more exits is required, at least two exit doors or exit access doorways shall be arranged
+        in accordance with the provisions of Section 1015.2.1.
+    piece_sha256: 129ae169235976fec5f84f78ddfa48a6ba37b31e57c06b3f2e61a09a52b99084
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1016.1':
+    label: rule
+    topic: means_of_egress
+    reason: 'Caps exit access travel from the most remote point of each story at Table 1016.1''s distance: measurable; exceptions
+      3 and 4 are not for Group I.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 267
+      lines:
+      - 14
+      - 17
+      quote: Exits shall be so located on each story such that the maximum length of exit access travel, measured from the
+        most remote point within a story along the natural and unobstructed path of egress travel to an
+    piece_sha256: 00359c611d69eb57345497227242921a7878ad1127ec9c36d8578544f6e508d0
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1016.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Sets the exit access travel distance by occupancy, with and without a sprinkler system (Group I-4: not permitted
+      without, 200 feet with), the numbers 1016.1 uses.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 267
+      lines:
+      - 81
+      - 81
+      quote: 1-2,1-3,1-4 Not Permitted 200
+    piece_sha256: 45af30332980112df808c70a29be27ca1ddc7194defdbe8345f0b36f6656311f
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''1-2,1-3,1-4'' is I-2, I-3, I-4; ''1-1'' is I-1; ''5-1'', ''5-2'' are S-1, S-2. The book''s ICC print reads
+      the letter; this copy''s page image prints the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md);
+      check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1018.1':
+    label: rule
+    topic: means_of_egress
+    reason: 'Corridors are fire-resistance rated as Table 1018.1 says (rated walls as fire partitions, Section 709, not brought
+      in): measurable from the stated ratings.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 268
+      lines:
+      - 58
+      - 59
+      quote: Corridors shall be fire-resistance rated in accordance with Table 1018.1.
+    piece_sha256: 030b412eff63916661144bdeed4912c176b99b3c634990b76e84656f43bebe11
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). '
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1018.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Sets the corridor rating by occupancy and occupant load served (Group I-4: not permitted without a sprinkler
+      system, 0 hours with one), the numbers 1018.1 uses.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 268
+      lines:
+      - 87
+      - 87
+      quote: 1-2 ,1-4 All
+    piece_sha256: 7ae14ba3ee2d7477364342d8a532ae0375fabc34a8b3da4678f1a886ba2f66b2
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''1-2 ,1-4'' is I-2, I-4; ''1-1,1-3'' is I-1, I-3; ''H-l'' is H-1; ''Not Permitted I'' (the I-1, I-3 row)
+      is 1 hour; ''Sand U'' is S and U. The book''s ICC print reads the letter; this copy''s page image prints the OCR''s
+      reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against a purchased
+      ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1018.2':
+    label: rule
+    topic: means_of_egress
+    reason: 'Corridors are at least 44 inches wide (36 inches with a required occupant capacity of less than 50): measurable.'
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 269
+      lines:
+      - 2
+      - 4
+      quote: The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm).
+    piece_sha256: c27f170e59dc593a62acd89a026d06b29519509f7eb1f639073ef0813d3e434b
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''Group 1-2'' (exception 6) is I-2; exception 4''s words are read out of order (''In Group E with a / having
+      a required capacity of 100 or more. / corridor''): the book prints ''In Group E with a corridor having a required capacity
+      of 100 or more''. The book''s ICC print reads the letter; this copy''s page image prints the OCR''s reading, so the
+      image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md); check against a purchased ICC copy.
+      Section 1005.1 is not brought in.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1018.4':
+    label: rule
+    topic: means_of_egress
+    reason: No dead end in a corridor longer than 20 feet where more than one exit is required; not limited where it is less
+      than 2.5 times its least width (exception 3); exception 2's 50 feet does not list Group I-4.
+    sources:
+    - file: icc.ibc.2009.pdf
+      page: 269
+      lines:
+      - 26
+      - 28
+      quote: the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in
+        length.
+    piece_sha256: 98d0da3f2ddc8e78cac12ccf44278aff212c30f84f2eef6ae670dfd63ca782f9
+    notes: 'Drafted by hand in a Claude Code session (2026-11-20); no recorded labeling run. Read from an OCR copy only: not
+      verified (text_verification.icc.ibc.2009.yaml). The OCR misreads in this piece, kept in the quote as the extracted text
+      has them: ''Group 1-3'' (exception 1) is I-3; ''1-1'' (exception 2) is I-1; ''Sand U'' is S and U. The book''s ICC print
+      reads the letter; this copy''s page image prints the OCR''s reading, so the image can''t confirm it (docs/decisions/2026-11-20_commercial_egress_maine.md);
+      check against a purchased ICC copy.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft

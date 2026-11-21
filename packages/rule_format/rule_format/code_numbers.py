@@ -198,6 +198,8 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
         for pid in pieces_of(s, book):
             entry = book["pieces"].get(pid) or {}
             lengths = _between_ends(readings(unverified_reading(entry) if book.get("not_verified") else entry))
+            if book.get("not_verified"):          # a flag's drafted check: no second reading says more than this
+                lengths = [_unverified(length) for length in lengths]
             # a value the piece reads more than one way (R320.2: "not less than 34" and, for ship's ladders, "not
             # more than 34"): a reading counts only where the quote states it with the same words before it
             ways: dict = {}
@@ -209,6 +211,20 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
                 if len(ways[tuple(length["statements"])]) > 1 and length["worded"] not in worded:
                     continue
                 out.append(length | {"piece": pid})
+    return out
+
+
+def _unverified(length: dict) -> dict:
+    """A number of a book not verified, for a flag's drafted check (which never decides a result). With no second
+    reading, nothing but the printed text says what it is: a table cell prints its unit in its column's heading
+    ("(feet)", Table 1016.1), never beside the number, so a number with no unit of its own may stand for a length or
+    an area; and where the recorded words give no comparison ("none": every table cell) its direction is not checked.
+    The value must still be printed in a cited piece and stated in the quote, and the examples' drafted_check prove
+    the drafted formula's direction against worked values."""
+    out = dict(length, unverified=True)
+    if set(length["values"]) <= {"count", "any"}:
+        v = length["values"].get("any", length["values"].get("count"))
+        out["values"] = dict(length["values"], ft=v, sf=v, **{"in": v})
     return out
 
 
@@ -330,6 +346,8 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
         reads = {c["comparison"] for c in fits}
         if reads == {"none"} and in_formula:
             continue                                          # a term of the law's formula (20 inches minus ...)
+        if reads == {"none"} and all(c.get("unverified") for c in fits):
+            continue                                          # no reading says its direction (_unverified)
         if reads == {"none"}:
             out.append(f"number {shown} in '{key}': the second reading says the law sets no limit with it ('none': a "
                        f"conversion, a count or a permission, {fits[0]['piece']}: {fits[0]['shown']!r}); it can't be compared with")

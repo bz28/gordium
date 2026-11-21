@@ -87,8 +87,9 @@ def _label_problems(key, entry, ctx: Context, pieces: dict[str, dict], pdf_sha: 
     if sources is None:
         p.append("'sources' must be a list of mappings")
     else:
-        p += _source_problems(sources, ctx)
         owned = {(pg, n) for pg, first, last in pieces[key]["lines"] for n in range(first, last + 1)}
+        for s in sources:
+            p += [x for x in _source_problems([s], ctx) if not _unique_in_piece(s, x, ctx, owned)]
         for s in sources:
             lines, page = s.get("lines"), s.get("page")
             if s.get("file") != document:
@@ -98,6 +99,20 @@ def _label_problems(key, entry, ctx: Context, pieces: dict[str, dict], pdf_sha: 
                 p.append(f"quote on p.{page} lines {lines} is outside this piece")
     p += _revision_problems(entry.get("revised", []), entry.get("label"))
     return p + _approval_problems(entry | {"id": key}, ctx, LABEL_APPROVED)
+
+
+def _unique_in_piece(s: dict, problem: str, ctx: Context, owned: set) -> bool:
+    """A label's quote that occurs more than once on its page counts when exactly one of those places is in the
+    piece itself, at the lines it gives: the piece pins it. A one-line definition can be part of another on the same
+    page (the 2009 IBC's "LOADS. See Section 1602.1." inside "LIVE LOADS. See Section 1602.1."), and its quote can't
+    reach outside its piece, so it could never be made unique on the page. Any other problem still counts."""
+    from .rulebook import locate
+    if " times (lines " not in problem:
+        return False
+    page, lines = s.get("page"), s.get("lines")
+    found = [(a, b) for a, b in locate(s.get("quote") or "", (ctx.pages.get(s.get("file")) or {}).get(page) or {})
+             if (page, a) in owned and (page, b) in owned]
+    return found == [tuple(lines)] if isinstance(lines, list) and len(lines) == 2 else False
 
 
 def _revision_problems(revised, label) -> list[str]:
