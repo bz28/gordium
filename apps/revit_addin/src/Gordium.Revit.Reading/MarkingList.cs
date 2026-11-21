@@ -203,8 +203,10 @@ public static class MarkingList
         // what the reader sends, read once (with the model's inside read): the list says the rooms are read only when
         // the reader sends them (review round 2: with no Room drawn at all it said so beside "No rooms are drawn")
         var read = model.Interior is null ? null : InteriorReader.Read(model);
-        var summary = Summary(rows, placement, others.Count, InteriorReader.UnknownAreas(model).Count,
-                              roomsSent: read?.Interior["rooms"] is not null);
+        var unknownAreas = InteriorReader.UnknownAreas(model);
+        var summary = Summary(rows, placement, others.Count, unknownAreas.Count,
+                              roomsSent: read?.Interior["rooms"] is not null,
+                              placeless: unknownAreas.Count(a => a.PointInside is null));
         // the floors outside the house (SiteSlabs): what each is decides lot coverage and the yards
         if (slabs.Count > 0)
         {
@@ -326,7 +328,7 @@ public static class MarkingList
     }
 
     /// <summary>A level's row: shown when it has an enclosed area with no Room (unset is then to mark: place the Rooms,
-    /// or say the level has none), or when its mark is set either way; never a suggestion (a suggested Yes could hide a
+    /// or fix the walls closing off one Revit can't locate, or say the level has none), or when its mark is set either way; never a suggestion (a suggested Yes could hide a
     /// bedroom).</summary>
     private static MarkingRow? LevelRow(MarkedElement e, List<EnclosedArea> areas)
     {
@@ -387,7 +389,8 @@ public static class MarkingList
         return new(m, MarkState.NotUnderstood, word, null, words);
     }
 
-    private static List<string> Summary(List<MarkingRow> rows, int placement, int others, int unknown, bool roomsSent)
+    private static List<string> Summary(List<MarkingRow> rows, int placement, int others, int unknown, bool roomsSent,
+                                        int placeless = 0)
     {
         var lines = new List<string>();
         var blockers = placement + others;
@@ -404,7 +407,11 @@ public static class MarkingList
             lines.Add((unknown == 1 ? "1 enclosed area has" : $"{unknown} enclosed areas have") + " no Room (listed above): " +
                       (roomsSent ? "the rooms drawn are read, but each such area may be a bedroom, so every sleeping-room rule needs review"
                                      : "once the rooms are read, each such area may be a bedroom, so it keeps every sleeping-room rule needing review") +
-                      $" until a Room is placed in each, or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
+                      // an area Revit can't locate has no place for a Room: its walls are the fix (as AreaBlockers says)
+                      (placeless == 0 ? " until a Room is placed in each"
+                       : placeless == unknown ? " until the overlapping or doubled walls closing " + (unknown == 1 ? "it" : "them") + " off are fixed (Revit couldn't locate " + (unknown == 1 ? "it" : "any of them") + ")"
+                       : " until a Room is placed in each Revit locates, and the overlapping or doubled walls closing off the " + placeless + " it couldn't are fixed") +
+                      $", or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
         void Flag(MarkedKind[] kinds, MarkDefinition m, string plural, string consequence)
         {
             var cells = rows.Where(r => kinds.Contains(r.Kind)).Select(r => r.Cells.First(c => c.Mark == m)).ToList();

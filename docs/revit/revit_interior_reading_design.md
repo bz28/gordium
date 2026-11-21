@@ -101,7 +101,10 @@ exactly:
   them besides placing a Room (marked No if no one sleeps there): **an area that lies in a placed Room of the design
   checked** has that Room (its point inside within the Room's own outline, 1/16 in clear of its edges, same level:
   Revit's circuits are the main model's, so a Room in the design option checked can leave its circuit "no Room";
-  a Room in an option not checked doesn't count); and **the level mark `Gordium: No rooms on this level`** (Yes/No
+  a Room in an option not checked doesn't count; an area Revit can't give a point inside, a sliver between
+  overlapping walls that threw "Could not obtain valid UV point" on the Children's Odyssey model, 2026-11-20, is kept,
+  lies in no Room, has the id `enclosed-area:<level>:no-point:<area>sf`, and its words say to fix the walls, since it
+  has no place to put a Room in); and **the level mark `Gordium: No rooms on this level`** (Yes/No
   on Levels, added by Mark for egress; a level with an area with no Room, or with the mark set, is a row in the
   marking list): on a level marked Yes its areas aren't sent, but a Room drawn on such a level disagrees with it, so
   the mark doesn't count there and the conflict is listed first (never a Room dropped in silence). To see on the
