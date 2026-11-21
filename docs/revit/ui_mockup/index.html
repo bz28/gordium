@@ -164,6 +164,8 @@ button{font:inherit;color:inherit}
 .row.sel .acts{display:flex}
 .stale .row .g svg *{stroke:var(--na)!important;fill:none!important}
 .stale .pill.review,.stale .pill.fail,.stale .pill.pass{background:var(--bg-hover);color:var(--na)}
+.stale .bar svg *,.stale .chip svg *{stroke:var(--na)!important;fill:none!important}
+.stale .seg-review{background:var(--bg-hover);color:var(--na)}
 .banner{display:flex;gap:8px;align-items:flex-start;margin:10px 12px 0;padding:8px 10px;border-radius:4px;border:1px solid var(--line);background:var(--bg-surface)}
 .banner svg{width:16px;height:16px;flex:none;margin-top:1px}
 .banner.warn{border-color:var(--review);background:var(--review-fill)}
@@ -499,7 +501,7 @@ function header(){
   return `<div class="hdr"><div class="hdr-row"><div class="proj"><div class="t">Children’s Odyssey · 19 Libby St</div><div class="s">${checked}</div></div>${btn}</div>
     <div class="ptabs" role="tablist">
       <button class="ptab" role="tab" data-tab="results" aria-selected="${S.tab==="results"}">Results</button>
-      <button class="ptab" role="tab" data-tab="marks" aria-selected="${S.tab==="marks"}">Facts to mark <span class="pill ${todo.todo?"review":todo.confirm?"confirm":"confirm"}">${todo.done} of ${todo.total}</span></button>
+      <button class="ptab" role="tab" data-tab="marks" aria-selected="${S.tab==="marks"}">Facts to mark <span class="pill ${todo.todo?"review":"confirm"}">${todo.done} of ${todo.total}</span></button>
     </div></div>`;
 }
 function render(){
@@ -799,9 +801,12 @@ document.getElementById("backView").onclick = () => { const v = S.zoomStack.pop(
    =================================================================================================== */
 let tt; function toast(m){ const t = document.getElementById("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove("on"), 3600); }
 function openDetail(i){ S.detail = i; S.sel = i; S.view = "detail"; const r = ROWS[i]; select(r.els, false, r.cause==="noroute"?"noroute":null); render(); body.scrollTop = 0; }
+let checkTimer;
 function recheck(){
+  S.stale = S.stale || S.panel==="stale";  // a check started on stale results keeps them grey until its answer
   S.panel = "checking"; S.tab = "results"; render(); document.getElementById("stateSel").value = "checking";
-  setTimeout(() => { S.panel = "results"; S.stale = false; S.view = "list"; document.getElementById("stateSel").value = "results"; render();
+  clearTimeout(checkTimer);
+  checkTimer = setTimeout(() => { if (S.panel!=="checking") return; S.panel = "results"; S.stale = false; S.view = "list"; document.getElementById("stateSel").value = "results"; render();
     toast(S.d33 || Object.keys(S.fix).length ? "Mockup: the results shown are the eval's. A real check would reflect your changes and say which rows changed." : "Checked: the same 8 rows (nothing in the model changed)."); }, 1500);
 }
 body.addEventListener("click", e => {
@@ -831,7 +836,7 @@ body.addEventListener("click", e => {
     case "prev": openDetail(Math.max(0, S.detail-1)); break;
     case "next": openDetail(Math.min(ROWS.length-1, S.detail+1)); break;
     case "recheck": recheck(); break;
-    case "cancel": S.panel = "results"; S.stale = true; document.getElementById("stateSel").value = "stale"; render(); toast("Cancelled: the previous results stay, marked out of date (never shown as the new check's)."); break;
+    case "cancel": clearTimeout(checkTimer); S.panel = "results"; S.stale = true; document.getElementById("stateSel").value = "stale"; render(); toast("Cancelled: the previous results stay, marked out of date (never shown as the new check's)."); break;
     case "law": { const q = Q[t.dataset.q]; toast(`Would open ${q.w.includes("nfpa")||q.w.startsWith("NFPA")?"gov.law.nfpa.101.2012.pdf":"icc.ibc.2009.pdf"} at page ${q.page} (the rulebook's source file; mockup: no network).`); break; }
     case "props": S.propsFor = t.dataset.el; select([t.dataset.el], false); showProps(true); break;
     case "copy": { const r = ROWS[S.detail]; const text = `[needs review] ${r.name} (${r.sec}): ${r.line}. ${r.why}`; navigator.clipboard?.writeText(text).catch(()=>{}); toast("Copied: " + text.slice(0, 120) + "…"); break; }
@@ -874,7 +879,7 @@ document.querySelectorAll("[data-theme-btn]").forEach(b => b.onclick = () => {
   S.theme = b.dataset.themeBtn; document.documentElement.dataset.theme = S.theme;
   document.querySelectorAll("[data-theme-btn]").forEach(x => x.setAttribute("aria-pressed", x===b));
 });
-document.getElementById("stateSel").onchange = e => { S.panel = e.target.value; S.tab = "results"; S.view = "list"; if (S.panel!=="stale") S.stale = false; showProps(false); };
+document.getElementById("stateSel").onchange = e => { S.panel = e.target.value; S.tab = "results"; S.view = "list"; S.stale = S.panel==="stale"; showProps(false); };
 document.getElementById("srcBtn").onclick = e => { S.src = !S.src; e.currentTarget.setAttribute("aria-pressed", S.src); document.getElementById("revit").classList.toggle("show-src", S.src); document.getElementById("legend").classList.toggle("show-src", S.src); showProps(false); };
 // ribbon tooltips: a short title, then a few lines (Revit's ToolTip and LongDescription)
 const tip = document.getElementById("rtip");
