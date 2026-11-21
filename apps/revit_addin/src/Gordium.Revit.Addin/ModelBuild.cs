@@ -50,10 +50,16 @@ internal static class ModelBuild
             var model = BuildData.Parse(JsonNode.Parse(File.ReadAllText(request.Data, Encoding.UTF8)));
             log["project"] = model.Project;
             log["source"] = model.SourceFile is null ? null : $"{model.SourceFile} (sha256 {model.SourceSha256})";
+            // the request's corrections to the data, each applied or refused in words, never silently
+            var (corrected, applied, refused) = BuildData.Correct(model, request.Corrections);
+            model = corrected;
+            log["corrections"] = applied;
+            log["corrections_refused"] = refused;
             var template = ProjectTemplate(app, request.Template);
             log["template"] = template;
             doc = app.NewProjectDocument(template);
             var report = new Report();
+            report.Failed.AddRange(refused.Select(r => $"correction not applied: {r}"));
             Build(app, doc, model, request, report);
             report.Into(log);
             Directory.CreateDirectory(Path.GetDirectoryName(Path.GetFullPath(request.SaveAs))!);

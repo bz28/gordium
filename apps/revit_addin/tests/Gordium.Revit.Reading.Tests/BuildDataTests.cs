@@ -192,8 +192,60 @@ public sealed class BuildDataTests
         Assert.InRange(g3.Length, 1.37, 1.47);
         Assert.Equal((26, 68), (Assert.Single(gaps["10"]).WallBefore, gaps["10"][0].WallAfter));
         Assert.InRange(gaps["21"].Single().Length, 0.45, 0.55);
+        // the two corrections of build_corrected_request.json (LS1.0 shows W16 and W24 running on to the jambs' faces,
+        // x 193.8667) close both classrooms, and change nothing else
+        var (fixedModel, applied, refused) = BuildData.Correct(m, [new WallCorrection(16, new PlanPoint(193.8667, 48.1667), Why),
+                                                                    new WallCorrection(24, new PlanPoint(193.8667, 37.5111), Why)]);
+        Assert.Equal(2, applied.Count);
+        Assert.Empty(refused);
+        Assert.Equal(["10", "21"], fixedModel.Rooms.Where(r => BuildData.BoundaryGaps(r, fixedModel.Walls).Count > 0).Select(r => r.Number).Order());
         // the five "Highlighted walls overlap" warnings of run 1, each a pair the data draws along each other
         Assert.Equal([(2, 119), (27, 120), (28, 121), (32, 105), (33, 34)], BuildData.WallOverlaps(m.Walls).Select(o => (o.A, o.B)));
+    }
+
+    private const string Why = "LS1.0 shows the classroom wall meeting the vestibule wall; the trace stopped 1.4 ft short";
+
+    [Fact]
+    public void A_correction_moves_a_walls_end_along_its_line_and_says_so()
+    {
+        var m = BuildData.Parse(Extracted());
+        var (fixedModel, applied, refused) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(21.5, 0), Why)]);
+        Assert.Equal(new PlanPoint(21.5, 0), fixedModel.Walls[0].End);
+        Assert.Equal(m.Walls[0].Start, fixedModel.Walls[0].Start);
+        Assert.Equal(m.Walls.Skip(1), fixedModel.Walls.Skip(1));
+        Assert.Equal($"corrected W0: end (20, 0) → (21.5, 0) (1.5 ft): {Why}", Assert.Single(applied));
+        Assert.Empty(refused);
+        Assert.Equal(new PlanPoint(20, 0), m.Walls[0].End);          // the data itself untouched
+    }
+
+    [Theory]
+    [InlineData(0, 22.5, 0, "moves it 2.5 ft, more than 2 ft")]
+    [InlineData(0, 21, 0.5, "changes the wall's direction")]            // off its own line
+    [InlineData(5, -0.5, 0, "changes the wall's direction")]            // a 1 ft wall turned back past its start
+    [InlineData(7, 1, 1, "the data has no wall W7")]
+    public void A_correction_that_moves_too_far_or_turns_the_wall_is_refused_and_not_applied(int wall, double x, double y, string words)
+    {
+        var data = BuildData.Parse(Extracted());
+        var m = data with { Walls = [.. data.Walls, data.Walls[0] with { Id = 5, Start = new PlanPoint(0, 0), End = new PlanPoint(1, 0) }] };
+        var (same, applied, refused) = BuildData.Correct(m, [new WallCorrection(wall, new PlanPoint(x, y), Why)]);
+        Assert.Empty(applied);
+        Assert.Contains(words, Assert.Single(refused));
+        Assert.Equal(m.Walls, same.Walls);
+    }
+
+    [Fact]
+    public void The_request_reads_its_corrections_and_refuses_one_without_a_why()
+    {
+        var r = BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt",
+             "corrections": [{"wall": "W16", "extend_end_to": [193.8667, 48.1667], "why": "the trace stopped short"}]}
+            """));
+        Assert.Equal(new WallCorrection(16, new PlanPoint(193.8667, 48.1667), "the trace stopped short"), Assert.Single(r.Corrections));
+        var x = Assert.Throws<BuildDataException>(() => BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt", "corrections": [{"wall": "16", "extend_end_to": [1, 2]}]}
+            """)));
+        Assert.Contains("correction 1: wall is \"16\", not a wall's mark (W16)", x.Problems);
+        Assert.Contains("correction 1: no why (every correction to the data says why)", x.Problems);
     }
 
     [Fact]

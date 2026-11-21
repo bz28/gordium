@@ -460,7 +460,9 @@ LS1.0: 122 walls, 52 doors, 67 windows, 25 rooms, a floor; feet, origin at the S
 2. **The model** (`ModelBuild.cs`, its Revit-free decisions in `Gordium.Revit.Reading/BuildData.cs`): the request
    `%LOCALAPPDATA%\Gordium\trial\build_model_request.json`
    (`{"data": "<data.json>", "template": "<optional .rte>", "save_as": "<model>.rvt"}`, plus the script's toggles
-   `swing_opposite_facing`, `hinge_opposite_hand`, `use_phases`, each true when left out) builds, as the script does:
+   `swing_opposite_facing`, `hinge_opposite_hand`, `use_phases`, each true when left out, and optional
+   `corrections`: `[{"wall": "W16", "extend_end_to": [x, y], "why": "..."}]`, each moving a wall's end along its own
+   line before drawing, logged as applied, or refused and not applied past 2 ft or off the wall's line) builds, as the script does:
    a new project from Revit's `English-Imperial\default.rte`; Level 1 and its plan; a wall type per status, thickness
    and rating (`LS Existing 12"`, `LS New 4.5" 1 HR`), each wall on its centre line with its Comments and Mark, Existing
    walls in the first phase; a door type per kind and size (the template's family; where there is none, as for double

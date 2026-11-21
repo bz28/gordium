@@ -33,6 +33,11 @@ public sealed record BuildModel(string Project, string LevelName, double LevelEl
                                 IReadOnlyList<BuildDoor> Doors, IReadOnlyList<BuildWindow> Windows, IReadOnlyList<BuildRoom> Rooms,
                                 IReadOnlyList<PlanPoint> Footprint, string? SourceFile, string? SourceSha256);
 
+/// <summary>A correction the request makes to the data before drawing: wall W<see cref="Wall"/>'s end moved to
+/// <see cref="ExtendEndTo"/> (along its own line, at most <see cref="BuildData.MaxCorrection"/> ft), and why. Applied
+/// only when it keeps the wall's direction; logged either way.</summary>
+public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why);
+
 /// <summary>Data the add-in can't build all of: every problem found, each in words (never a part dropped).</summary>
 public sealed class BuildDataException(IReadOnlyList<string> problems)
     : Exception("the data can't be built from: " + string.Join("; ", problems))
@@ -46,6 +51,9 @@ public sealed class BuildDataException(IReadOnlyList<string> problems)
 public sealed record BuildRequest(string Data, string? Template, string SaveAs, bool SwingOppositeFacing, bool HingeOppositeHand,
                                   bool UsePhases)
 {
+    /// <summary>The request's corrections to the data (<c>"corrections"</c>), each applied before drawing and logged.</summary>
+    public IReadOnlyList<WallCorrection> Corrections { get; init; } = [];
+
     public static BuildRequest Parse(JsonNode? node)
     {
         var problems = new List<string>();
@@ -73,7 +81,38 @@ public sealed record BuildRequest(string Data, string? Template, string SaveAs, 
             problems.Add($"the request's {key} isn't true or false");
             return true;
         }
-        var known = new HashSet<string> { "data", "template", "save_as", "swing_opposite_facing", "hinge_opposite_hand", "use_phases" };
+        var corrections = new List<WallCorrection>();
+        if (o["corrections"] is { } cs)
+        {
+            if (cs is not JsonArray list)
+                problems.Add("the request's corrections isn't a list");
+            else
+                foreach (var (c, k) in list.Select((c, k) => (c, k + 1)))
+                {
+                    if (c is not JsonObject co)
+                    {
+                        problems.Add($"correction {k}: not an object");
+                        continue;
+                    }
+                    var wall = co["wall"] is JsonValue wv && wv.TryGetValue<string>(out var ws) ? ws : null;
+                    var id = wall is { Length: > 1 } && wall[0] == 'W' && int.TryParse(wall[1..], System.Globalization.NumberStyles.None,
+                                                                                        CultureInfo.InvariantCulture, out var n) ? n : (int?)null;
+                    var to = co["extend_end_to"] is JsonArray { Count: 2 } a && a.All(x => x is JsonValue xv && xv.TryGetValue<double>(out var d) && double.IsFinite(d))
+                        ? new PlanPoint(a[0]!.GetValue<double>(), a[1]!.GetValue<double>()) : (PlanPoint?)null;
+                    var why = co["why"] is JsonValue yv && yv.TryGetValue<string>(out var ys) && ys.Trim() != "" ? ys : null;
+                    var unknown = co.Select(p => p.Key).Where(x => x is not ("wall" or "extend_end_to" or "why")).ToList();
+                    if (id is null)
+                        problems.Add($"correction {k}: wall is {co["wall"]?.ToJsonString() ?? "missing"}, not a wall's mark (W16)");
+                    if (to is null)
+                        problems.Add($"correction {k}: extend_end_to is {co["extend_end_to"]?.ToJsonString() ?? "missing"}, not a point [x, y]");
+                    if (why is null)
+                        problems.Add($"correction {k}: no why (every correction to the data says why)");
+                    problems.AddRange(unknown.Select(x => $"correction {k}: has {x}, which isn't asked for"));
+                    if (id is { } i && to is { } p && why is not null)
+                        corrections.Add(new WallCorrection(i, p, why));
+                }
+        }
+        var known = new HashSet<string> { "data", "template", "save_as", "swing_opposite_facing", "hinge_opposite_hand", "use_phases", "corrections" };
         problems.AddRange(o.Select(p => p.Key).Where(k => !known.Contains(k)).Select(k => $"the request has {k}, which isn't asked for (a misspelling?)"));
         var data = Text("data", true);
         var template = Text("template", false);
@@ -82,7 +121,10 @@ public sealed record BuildRequest(string Data, string? Template, string SaveAs, 
             problems.Add($"save_as {save} isn't a .rvt file");
         if (template is not null && !template.EndsWith(".rte", StringComparison.OrdinalIgnoreCase))
             problems.Add($"template {template} isn't a .rte file");
-        var request = new BuildRequest(data ?? "", template, save ?? "", Flag("swing_opposite_facing"), Flag("hinge_opposite_hand"), Flag("use_phases"));
+        var request = new BuildRequest(data ?? "", template, save ?? "", Flag("swing_opposite_facing"), Flag("hinge_opposite_hand"), Flag("use_phases"))
+        {
+            Corrections = corrections,
+        };
         if (problems.Count > 0)
             throw new BuildDataException(problems);
         return request;
@@ -399,6 +441,50 @@ public static class BuildData
     /// Existing) when the script's USE_PHASES is on and there is more than one; else none, and it is in the view's own
     /// (New Construction), as the script does.</summary>
     public static int? ExistingPhase(int phaseCount, bool usePhases) => usePhases && phaseCount > 1 ? 0 : null;
+
+    // ---- corrections the request makes to the data ----------------------------------------------------------------
+
+    /// <summary>The farthest a correction may move a wall's end, in feet: a trace's slip, never a new wall.</summary>
+    public const double MaxCorrection = 2.0;
+
+    /// <summary>The data with each correction applied, in order, and each in words: applied ("corrected W16: end
+    /// (192.424, 48.167) → (193.867, 48.167): why") or refused and not applied (no such wall; the end moved more than
+    /// <see cref="MaxCorrection"/> ft; the wall's direction changed, off its own line or turned back). Nothing else in
+    /// the data changes.</summary>
+    public static (BuildModel Model, IReadOnlyList<string> Applied, IReadOnlyList<string> Refused) Correct(BuildModel model,
+                                                                                                        IReadOnlyList<WallCorrection> corrections)
+    {
+        var walls = model.Walls.ToList();
+        var applied = new List<string>();
+        var refused = new List<string>();
+        static string Xy(PlanPoint p) => string.Create(CultureInfo.InvariantCulture, $"({p.X:0.###}, {p.Y:0.###})");
+        foreach (var c in corrections)
+        {
+            var i = walls.FindIndex(w => w.Id == c.Wall);
+            var words = $"W{c.Wall}: end to {Xy(c.ExtendEndTo)}: {c.Why}";
+            if (i < 0)
+            {
+                refused.Add($"refused {words}: the data has no wall W{c.Wall}");
+                continue;
+            }
+            var w = walls[i];
+            var moved = Distance(w.End, c.ExtendEndTo);
+            double ox = w.End.X - w.Start.X, oy = w.End.Y - w.Start.Y, nx = c.ExtendEndTo.X - w.Start.X, ny = c.ExtendEndTo.Y - w.Start.Y;
+            double oldLength = Math.Sqrt(ox * ox + oy * oy), newLength = Math.Sqrt(nx * nx + ny * ny);
+            var sine = newLength < 1e-9 ? 1 : Math.Abs(ox * ny - oy * nx) / (oldLength * newLength);
+            var same = newLength >= 1e-9 && ox * nx + oy * ny > 0;
+            if (moved > MaxCorrection)
+                refused.Add($"refused W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} moves it {moved:0.###} ft, more than {MaxCorrection:0} ft: {c.Why}");
+            else if (sine > 1e-4 || !same)
+                refused.Add($"refused W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} changes the wall's direction: {c.Why}");
+            else
+            {
+                walls[i] = w with { End = c.ExtendEndTo };
+                applied.Add($"corrected W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} ({moved:0.###} ft): {c.Why}");
+            }
+        }
+        return (model with { Walls = walls }, applied, refused);
+    }
 
     // ---- what the data's walls leave open, and where they overlap --------------------------------------------------
 
