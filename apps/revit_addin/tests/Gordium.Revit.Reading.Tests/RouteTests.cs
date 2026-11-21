@@ -247,15 +247,22 @@ public sealed class RouteTests
     [Fact]
     public void A_door_whose_drawn_middle_isnt_where_it_is_placed_has_no_place()
     {
-        // review round 1: a sidelight drawn in the wall beside dA (1.5 ft more frame on one side) moves the middle of its
-        // geometry 0.75 ft off the door: its clear opening isn't placed on a guess
+        // review round 1: dA's frame drawn 9 in off where the door is placed: its clear opening isn't placed on a guess
         var floor = new FakeFloor();
         var i = floor.OpeningIndex("dA");
-        var frame = floor.Prism([(10 - 1.625, 9.5), (10 + 1.625 + 1.5, 9.5), (10 + 1.625 + 1.5, 10), (10 - 1.625, 10)], 0, 7);
+        var frame = floor.Prism([(10.75 - 1.625, 9.5), (10.75 + 1.625, 9.5), (10.75 + 1.625, 10), (10.75 - 1.625, 10)], 0, 7);
         floor.Openings[i] = floor.Openings[i] with { Placed = frame.SelectMany(f => f.Points).ToList() };
         var read = InteriorReader.Read(floor.Model());
         Assert.Null(Door(read, "dA")["plan"]);
         Assert.Contains("centred 9 in from where it is placed", FakeFloor.Note(read, "dA", "doors.plan"));
+        // round 2: a door-and-sidelight unit centred on itself (1.5 ft of sidelight each side): wider than the door and a
+        // frame, so its clear opening isn't placed either
+        floor = new FakeFloor();
+        var unit = floor.Prism([(10 - 1.625 - 1.5, 9.5), (10 + 1.625 + 1.5, 9.5), (10 + 1.625 + 1.5, 10), (10 - 1.625 - 1.5, 10)], 0, 7);
+        floor.Openings[i] = floor.Openings[i] with { Placed = unit.SelectMany(f => f.Points).ToList() };
+        read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dA")["plan"]);
+        Assert.Contains("a sidelight or a pocket", FakeFloor.Note(read, "dA", "doors.plan"));
         // the opening it cuts off the middle too: said
         floor = new FakeFloor();
         floor.Openings[i] = floor.Openings[i] with { WallOpening = [floor.Fake.Place(9.5, 9.5, 0), floor.Fake.Place(12.5, 9.5, 7)] };
@@ -376,9 +383,25 @@ public sealed class RouteTests
         floor.AddOver("A", new NearbyElement("tall", "OST_Casework", "Tall cabinet", Faces: floor.Prism([(10, 0), (12, 0), (12, 2), (10, 2)], -0.5, 8)));
         Assert.Equal(2, Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray().Count);   // the desk and the cabinet
 
-        // review round 1, P0: furniture drawn in 2D alone (no 3D faces): where it stands isn't read, never "nothing drawn"
+        // round 2, P0: an L of tall casework (0 to 8 ft, past the headroom) keeps its exact footprint: its notch, (12, 9),
+        // is never inside it (a hull would fill it, and a bigger obstruction can shorten the common path)
         floor = new FakeFloor();
-        floor.AddOver("A", new NearbyElement("desk-2d", "OST_Furniture", "Desk (2D)", Faces: []));
+        List<(double X, double Y)> l = [(10, 5), (14, 5), (14, 6), (11, 6), (11, 9.5), (10, 9.5)];
+        floor.AddOver("A", new NearbyElement("l-case", "OST_Casework", "L counter", Faces: floor.Prism(l, 0, 8)));
+        var ls = Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray()
+            .Select(o => o!["outline"]!.AsArray().Select(p => new P2(p![0]!.GetValue<double>(), p[1]!.GetValue<double>())).ToList()).ToList();
+        Assert.DoesNotContain(ls, o => PlanGeometry.OverlapArea(o, [new(11.9, 8.9), new(12.1, 8.9), new(12.1, 9.1), new(11.9, 9.1)]) is > 1e-9);
+        Assert.Contains(ls, o => o.Count == 6);
+
+        // review round 1, P0: furniture drawn in 2D alone (no 3D faces) with its box over the floor: where it stands
+        // isn't read, never "nothing drawn"; round 2: one whose box is beside the room changes nothing
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("desk-2d-beside", "OST_Furniture", "Desk (2D)", Faces: [],
+                                             Box: new RevitBox(floor.Fake.Place(30, 2, 0), floor.Fake.Place(32, 4, 3))));
+        Assert.NotNull(Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]);
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("desk-2d", "OST_Furniture", "Desk (2D)", Faces: [],
+                                             Box: new RevitBox(floor.Fake.Place(5, 6, 0), floor.Fake.Place(7, 8, 3))));
         var read = InteriorReader.Read(floor.Model());
         Assert.Null(Room(read, "A")["obstructions"]);
         Assert.Contains("no 3D faces", FakeFloor.Note(read, "A", "obstructions"));

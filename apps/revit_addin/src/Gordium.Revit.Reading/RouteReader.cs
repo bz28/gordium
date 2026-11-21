@@ -34,6 +34,10 @@ public static class RouteReader
     /// opening it cuts, ft: 1 in (a frame drawn a little unevenly); farther, its clear opening isn't placed.</summary>
     public const double CentreAgree = 1.0 / 12;
 
+    /// <summary>How much wider than the door (its type's width or its clear width, the larger) what is drawn of it in its
+    /// wall may be, ft: 8 in, two frame jambs of up to 4 in each; wider is a sidelight or a pocket.</summary>
+    public const double FrameAllowance = 8.0 / 12;
+
     /// <summary>What stands in a route's way, by Revit category (the format's kinds: casework, furniture, equipment,
     /// fixture), with whether it is fixed in place. Revit can't tell a movable piece from a fixed one, so each category
     /// says it once (furniture is movable; casework, systems furniture, plumbing and lighting fixtures, and equipment
@@ -312,8 +316,13 @@ public static class RouteReader
             {
                 if (!known)
                     continue;                                // nothing drawn (a base point, a line)
-                // casework, furniture, equipment or a fixture drawn in 2D alone: where it stands isn't read (review
-                // round 1: it was skipped as nothing drawn, and the floor under it crossed)
+                // casework, furniture, equipment or a fixture drawn in 2D alone, its box over the room's floor (or no
+                // box to tell): where it stands isn't read (review round 1: it was skipped as nothing drawn); one whose
+                // box is beside the room changes nothing in it (round 2)
+                if (e.Box is { } flat && Box3.Turned(flat.Min, flat.Max, flat.Transform is { } fown ? model.InternalToShared.After(fown) : model.InternalToShared) is var fb
+                    && AreaIn([new(fb.Min.X, fb.Min.Y), new(fb.Max.X, fb.Min.Y), new(fb.Max.X, fb.Max.Y), new(fb.Min.X, fb.Max.Y)]) is { } over2d
+                    && over2d <= roomArea * 1e-9)
+                    continue;
                 why = $"{InteriorReader.Named(e)} is drawn with no 3D faces, so where it stands isn't read";
                 return null;
             }
@@ -362,20 +371,30 @@ public static class RouteReader
             // a piece crossing the band from below the floor or past the headroom (a wall based below a raised floor, tall
             // casework) may have no flat face in the band: the part within it is taken by all the points of its faces
             // that reach the band, sides included, put together (review round 1: such a wall was dropped in silence)
+            // (round 2: only when the band's own faces gave no shape, and never a hull, which would fill an L's notch:
+            // the plan outlines of its flat faces above or below the band, exact for a prism; none, and it isn't read)
             var reach = e.Faces.Select(f => InteriorReader.Shared(model, f.Points)).Where(p => p.Count > 0
                 && p.Max(q => q.Z) >= floor - S && p.Min(q => q.Z) < floor + Headroom && (known || p.Max(q => q.Z) > floor + S)).ToList();
-            var all = e.Faces.SelectMany(f => InteriorReader.Shared(model, f.Points)).ToList();
-            if (reach.Count > 0 && all.Count > 0 && (all.Min(q => q.Z) < floor - S || all.Max(q => q.Z) >= floor + Headroom))
+            if (shapes.Count == 0 && reach.Count > 0)
             {
-                if (Hull(reach.SelectMany(p => p).Select(q => new P2(q.X, q.Y))) is { } across)
+                var beyond = e.Faces.Where(f => f.Planar && Math.Abs(InteriorReader.Turned(model, f.Normal).Z) > 1e-9)
+                    .Select(f => f.Loops.Select(l => PlanGeometry.Clean(l.Select(c => model.InternalToShared.Apply(c.Start)).Select(p => new P2(p.X, p.Y)).ToList()))
+                        .OfType<List<P2>>().OrderByDescending(PlanGeometry.Area).FirstOrDefault())
+                    .OfType<List<P2>>().ToList();
+                if (beyond.Count == 0 || beyond.Any(b => !PlanGeometry.IsSimple(b)))
                 {
-                    if (AreaIn(across) is not { } a)
+                    why = $"{InteriorReader.Named(e)} crosses its floor or its headroom with no flat face to give its footprint";
+                    return null;
+                }
+                foreach (var b in beyond)
+                {
+                    if (AreaIn(b) is not { } a)
                     {
                         why = $"{InteriorReader.Named(e)} couldn't be read in plan";
                         return null;
                     }
                     meets |= a > roomArea * 1e-9;
-                    shapes.Add(across);
+                    shapes.Add(b);
                 }
             }
             if (!meets)
@@ -444,8 +463,8 @@ public static class RouteReader
                 Out("plan", "the Revit layer gave nothing for this door");
                 continue;
             }
-            var place = Place(model, rec, out var whyNot);
             var width = (door["stated_clear"] as JsonObject)?["width"]?.GetValue<double>();
+            var place = Place(model, rec, out var whyNot, width);
             evidence[id] = place is { } q
                 ? new JsonObject
                 {
@@ -495,7 +514,7 @@ public static class RouteReader
     /// a size Gordium works out), and the wall's thickness between its faces.</summary>
     internal sealed record DoorPlace(P2 Centre, P2 Along, double Thickness, P2 Normal);
 
-    internal static DoorPlace? Place(RevitModel model, OpeningRecord rec, out string? why)
+    internal static DoorPlace? Place(RevitModel model, OpeningRecord rec, out string? why, double? clearWidth = null)
     {
         why = null;
         if (!rec.HostIsWall || rec.WallSides is not { Count: >= 2 } faces)
@@ -565,6 +584,15 @@ public static class RouteReader
             return null;
         }
         var u = (inWall.Min() + inWall.Max()) / 2;
+        // what is drawn in the wall wider than the door itself (its type's width, or its clear width) and a frame
+        // (FrameAllowance) is a sidelight or a pocket even when the unit is centred: where its clear opening is isn't told
+        // (round 2: a door-and-sidelight unit centred on itself passed the centre checks)
+        var door = Math.Max(rec.TypeWidth ?? 0, clearWidth ?? 0);
+        if (inWall.Max() - inWall.Min() > door + FrameAllowance)
+        {
+            why = I($"what is drawn of it in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the door ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in): a sidelight or a pocket?, so where its clear opening is isn't told");
+            return null;
+        }
         // the middle of what is drawn in the wall must agree with where the door is placed and with the opening it cuts:
         // a sidelight or a pocket drawn in the wall moves the middle off the clear opening (review round 1), and then
         // where the clear opening is isn't told
