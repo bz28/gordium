@@ -24,7 +24,7 @@ EXPECTED = {
     "check_finishes_drawn.html": {"H_dimmed_rows": "true", "H_after_cancel_valid": "true",
                                   "F_done_drawn": "true", "G_stale_drawn": "true"},
     "interrupted_checks.html": {"I_not_current": "true", "J_cancel_keeps_results": "true"},
-    "properties_tab.html": {"K_props_consistent": "true", "K_back_to_results": "true"},
+    "properties_tab.html": {"K_props_consistent": "true", "K_keys_inert": "true", "K_back_to_results": "true"},
 }
 
 BROWSERS = [

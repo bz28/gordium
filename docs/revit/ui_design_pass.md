@@ -5,6 +5,8 @@
 **Kept current by:** the PR that builds a part of it marks that part built (or changed, and why); Ben's decisions are written into section 6.
 
 The interactive mockup is [ui_mockup/index.html](ui_mockup/index.html) (open it in a browser: one file, no network).
+Its scenario checks, [ui_mockup/checks/](ui_mockup/checks/run_checks.py), click through each flow in a headless browser
+and fail if stale results ever show as current; CI runs them (`python docs/revit/ui_mockup/checks/run_checks.py`).
 Every figure in it is from the Children's Odyssey eval (19 Libby St, Portland ME):
 `test_data/answer_keys/portland_me_19_libby_st/eval_comparison.yaml` (branch `feat/route-measures-2`),
 `eval_marks.yaml` and `hand_check.yaml`, and the rule quotes from

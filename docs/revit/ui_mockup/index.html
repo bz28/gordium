@@ -863,7 +863,7 @@ body.addEventListener("click", e => {
 body.addEventListener("input", e => { if (e.target.id==="q") { S.q = e.target.value; const pos = e.target.selectionStart; render(); const q = document.getElementById("q"); q.focus(); q.setSelectionRange(pos,pos); } });
 body.addEventListener("keydown", e => {
   if (e.target.tagName==="INPUT") { if (e.key==="Escape") { S.q = ""; render(); body.focus(); } return; }
-  if (S.tab!=="results" || S.panel!=="results" && S.panel!=="stale") return;
+  if (S.props || S.tab!=="results" || S.panel!=="results" && S.panel!=="stale") return;  // Properties owns the keys while shown
   if (S.view==="list") {
     const vis = visibleRows().map(r => ROWS.indexOf(r)); let p = vis.indexOf(S.sel);
     if (e.key==="ArrowDown") { S.sel = vis[Math.min(vis.length-1, p+1)] ?? S.sel; select(ROWS[S.sel].els,false); render(); e.preventDefault(); }
