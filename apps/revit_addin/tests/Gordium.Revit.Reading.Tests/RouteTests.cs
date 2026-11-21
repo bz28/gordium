@@ -429,6 +429,13 @@ public sealed class RouteTests
         var refused = InteriorReader.Read(floor.Model());
         Assert.Null(Room(refused, "A")["obstructions"]);
         Assert.Contains("couldn't be cut out", FakeFloor.Note(refused, "A", "obstructions"));
+        // round 4: a piece of open surfaces (no volume: imported, a DirectShape from an open Brep) reaching the band:
+        // Revit can't cut it, so it is never dropped as nothing in the band; the room's obstructions aren't read
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("shell", "OST_Furniture", "Imported sofa") { Banded = [], OpenShells = 1 });
+        var shell = InteriorReader.Read(floor.Model());
+        Assert.Null(Room(shell, "A")["obstructions"]);
+        Assert.Contains("open surfaces", FakeFloor.Note(shell, "A", "obstructions"));
 
         // review round 1, P0: furniture drawn in 2D alone (no 3D faces) with its box over the floor: where it stands
         // isn't read, never "nothing drawn"; round 2: one whose box is beside the room changes nothing

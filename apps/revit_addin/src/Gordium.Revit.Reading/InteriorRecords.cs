@@ -182,6 +182,11 @@ public sealed record NearbyElement(string UniqueId, string BuiltInCategory, stri
     /// <summary>The intersection couldn't be made (Revit refused, a mesh, a face it gives no edges for): what of the
     /// element is in the band isn't known.</summary>
     public bool BandFailed { get; init; }
+
+    /// <summary>How many of its solids are open shells (faces with no volume: imported surfaces, a DirectShape from an
+    /// open Brep) whose box reaches the band: Revit can't cut them, so what of the element is in the band isn't
+    /// known (review round 4).</summary>
+    public int OpenShells { get; init; }
 }
 
 /// <summary>Something in Stairs, Railings or Generic Models the reader doesn't walk as a stair.</summary>

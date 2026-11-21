@@ -857,33 +857,59 @@ internal static class RevitInterior
     }
 
     /// <summary>What of the element lies in the band: each of its solids (a family's instance geometry included)
-    /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh, or a face of the
-    /// result can't be read.</summary>
-    private static (List<SurfaceRecord> Faces, bool Failed) InBand(Element e, Solid band, Options options)
+    /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh or a kind not read, or a
+    /// face of the result can't be read; and how many open shells (faces, no volume) reach the band.</summary>
+    private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, Options options)
     {
         var faces = new List<SurfaceRecord>();
         var failed = false;
+        var open = 0;
+        var bandBox = band.GetBoundingBox();
+        XYZ bandMin = bandBox.Transform.OfPoint(bandBox.Min), bandMax = bandBox.Transform.OfPoint(bandBox.Max);
+        // every kind of geometry has its own branch: nothing is dropped by default (review round 4)
         void Walk(GeometryElement g)
         {
             foreach (var o in g)
             {
                 switch (o)
                 {
-                    case Solid s when s.Faces.Size > 0 && s.Volume > 1e-12:
+                    case Solid { Faces.Size: 0 }:
+                        break;                                   // an empty solid: nothing drawn
+                    case Solid s when s.Volume <= 1e-12:
+                        // faces with no volume: an open shell (imported surfaces, a DirectShape from an open Brep), which
+                        // can't be cut; counted unless its box lies wholly outside the band
+                        var sb = s.GetBoundingBox();
+                        var corners = new[] { sb.Min, sb.Max, new XYZ(sb.Min.X, sb.Max.Y, sb.Min.Z), new XYZ(sb.Max.X, sb.Min.Y, sb.Max.Z) }
+                            .Select(sb.Transform.OfPoint).ToList();
+                        if (corners.Max(c => c.X) < bandMin.X || corners.Min(c => c.X) > bandMax.X
+                            || corners.Max(c => c.Y) < bandMin.Y || corners.Min(c => c.Y) > bandMax.Y
+                            || corners.Max(c => c.Z) < bandMin.Z || corners.Min(c => c.Z) > bandMax.Z)
+                            break;
+                        open++;
+                        break;
+                    case Solid s:
                         var cut = BooleanOperationsUtils.ExecuteBooleanOperation(s, band, BooleanOperationsType.Intersect);
                         if (cut is null)
-                            break;
+                            break;                               // none of it in the band
                         foreach (Face f in cut.Faces)
                             if (Surface(f) is { } face)
                                 faces.Add(face);
                             else
                                 failed = true;
                         break;
-                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
-                        Walk(inner);
+                    case GeometryInstance gi:
+                        if (gi.GetInstanceGeometry() is { } inner)
+                            Walk(inner);
+                        else
+                            failed = true;
                         break;
-                    case Mesh:
-                        failed = true;
+                    case GeometryElement nested:
+                        Walk(nested);
+                        break;
+                    case Curve or PolyLine or Point:
+                        break;                                   // lines and points: no body to stand in the way
+                    default:
+                        failed = true;                           // a mesh, or a kind not read
                         break;
                 }
             }
@@ -896,9 +922,9 @@ internal static class RevitInterior
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
                                        or Autodesk.Revit.Exceptions.ArgumentException)
         {
-            return ([], true);
+            return ([], true, 0);
         }
-        return (faces, failed);
+        return (faces, failed, open);
     }
 
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
@@ -921,8 +947,8 @@ internal static class RevitInterior
                                              faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
                 if (band is not null)
                 {
-                    var (banded, bandFailed) = InBand(e, band, options);
-                    near = near with { Banded = banded, BandFailed = bandFailed };
+                    var (banded, bandFailed, openShells) = InBand(e, band, options);
+                    near = near with { Banded = banded, BandFailed = bandFailed, OpenShells = openShells };
                 }
                 list.Add(near);
             }

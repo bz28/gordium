@@ -30,12 +30,14 @@ public static class RouteReader
     /// never stops a door's far side being read as outside; any larger one not outlined does.</summary>
     public const double SmallestBeyond = 2.0 * (1.0 / 12);
 
-    /// <summary>How far a door's drawn middle in its wall may be from where it is placed, or from the middle of the
-    /// opening it cuts, ft: 1 in (a frame drawn a little unevenly); farther, its clear opening isn't placed.</summary>
+    /// <summary>How far the middle of the opening a door takes in its wall (the opening it cuts; only when no cut is found,
+    /// what is drawn of it strictly between the wall's faces) may be from where the door is placed, ft: 1 in; farther,
+    /// its clear opening isn't placed.</summary>
     public const double CentreAgree = 1.0 / 12;
 
-    /// <summary>How much wider than the door (its type's width or its clear width, the larger) what is drawn of it in its
-    /// wall may be, ft: 8 in, two frame jambs of up to 4 in each; wider is a sidelight or a pocket.</summary>
+    /// <summary>How much wider than the door (its type's width or its clear width, the larger) the opening it takes in its
+    /// wall may be (the opening it cuts; only when no cut is found, what is drawn of it strictly between the wall's
+    /// faces), ft: 8 in, two frame jambs of up to 4 in each; wider is a sidelight or a pocket.</summary>
     public const double FrameAllowance = 8.0 / 12;
 
     /// <summary>What stands in a route's way, by Revit category (the format's kinds: casework, furniture, equipment,
@@ -330,6 +332,11 @@ public static class RouteReader
             // intersection of each of its solids with that slab (review round 3: picking faces by height kept only a
             // sill's strip of a standing wall). Its footprint is the plan outlines of the result's faces that aren't
             // vertical (a curved face by its points' hull), which together cover what of it is in the band
+            if (e.OpenShells > 0)
+            {
+                why = $"{InteriorReader.Named(e)} is drawn with open surfaces (no volume) reaching within {Headroom * 12:0} in of its floor, which can't be cut to it, so what of it stands there isn't read";
+                return null;
+            }
             if (e.BandFailed || e.Banded is null)
             {
                 if (e.Box is { } box && Box3.Turned(box.Min, box.Max, box.Transform is { } own ? model.InternalToShared.After(own)
@@ -483,8 +490,8 @@ public static class RouteReader
     }
 
     /// <summary>A door's place in its wall, in shared plan coordinates: its clear opening's centre in the middle of the
-    /// wall (half way between the wall's two side faces, at the middle of the door's own drawn geometry along the
-    /// wall), a unit direction along the wall, the maker's clear width (the stamp-confirmed <c>stated_clear</c>, never
+    /// wall (half way between the wall's two side faces, at the middle along the wall of the opening it cuts, or, only
+    /// when no cut is found, of what is drawn of it strictly between the faces), a unit direction along the wall, the maker's clear width (the stamp-confirmed <c>stated_clear</c>, never
     /// a size Gordium works out), and the wall's thickness between its faces.</summary>
     internal sealed record DoorPlace(P2 Centre, P2 Along, double Thickness, P2 Normal);
 
