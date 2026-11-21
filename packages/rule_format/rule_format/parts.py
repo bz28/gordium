@@ -9,6 +9,7 @@ Why and what was rejected: docs/decisions/2026-11-12_rules_for_each_part.md.
 Never a silent pass: parts not read, a malformed part, or nothing to check each give a row of their own.
 """
 
+import itertools
 from pathlib import Path
 
 import yaml
@@ -290,14 +291,17 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     def checked(part, within=None, maybe=None):
         mine = {m: v for m, v in (part.get("measures") or {}).items() if m in own}
         known = {**values, **mine}
-        result, unknown = part_outcome(rule, known, allowed), None
-        if result == "needs_review" and (unknown := fails_whatever(rule, known, allowed)):
+        result, unknown, reason = part_outcome(rule, known, allowed), None, None
+        combos = reading_combinations(rule, part, own, mine)
+        if combos is not None:                   # measures given as named readings: every combination decides
+            result, reason = _under_readings(rule, known, allowed, combos)
+        elif result == "needs_review" and (unknown := fails_whatever(rule, known, allowed)):
             result = "fail"                      # fails whatever the measures not given are (2026-10-21)
         shown = {m: mine.get(m) for m in sorted(formula_names(rule) & own)}
         why = _maybe(part) or maybe
         if why and result != "not_applicable":   # it, or the part it sits in, may not be of its kind at all
             return _row(rule, "needs_review", part, within, reason=why, values=shown)
-        return _row(rule, result, part, within, values=shown, unknown=unknown)
+        return _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
 
     if not parent:
         out += [checked(p) for p in children]
@@ -333,6 +337,67 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
     if not parents and not parent_problems:
         out.append(_row(rule, "not_applicable", reason=f"no {_plural(parent)}"))
     return out
+
+
+MAX_READING_COMBINATIONS = 200      # more than this: not worked out (the row stays needs review)
+
+
+def reading_combinations(rule: dict, part: dict, own: set, mine: dict):
+    """The combinations of the named readings a part gives for the measures this rule reads and the part has no
+    value for (`readings`: {measure: [{"value", "named": {question: answer}}]}, the shape the checker's zoning
+    readings take: design_checker/check.py readings_of). Readings are combined question by question, as there: one
+    answer to an open question holds for the whole part, so a measure takes, under each answer, the value of its
+    reading named so. [(answer words, {measure: value}), ...]; None when the rule reads no such measure (nothing
+    changes for it); [] when the readings can't be read or are too many (the row needs review)."""
+    given = part.get("readings")
+    if not isinstance(given, dict):
+        return None
+    try:
+        names = formula_names(rule)
+    except FormulaError:
+        return None
+    open_ = sorted(n for n in names & own if n not in mine and n in given)
+    if not open_:
+        return None
+    readings = {}
+    for n in open_:
+        got = given[n]
+        if not (isinstance(got, list) and got and all(
+                isinstance(r, dict) and isinstance(r.get("named"), dict) and r["named"]
+                and all(isinstance(k, str) and isinstance(v, str) for k, v in r["named"].items())
+                and type(r.get("value")) in (int, float) for r in got)):
+            return []
+        readings[n] = got
+    tags = sorted({t for n in open_ for r in readings[n] for t in r["named"]})
+    answers = [sorted({r["named"][t] for n in open_ for r in readings[n] if t in r["named"]}) for t in tags]
+    out = []
+    for picked in itertools.product(*answers):
+        answer = dict(zip(tags, picked))
+        combo = {}
+        for n in open_:
+            fits = {r["value"] for r in readings[n] if all(answer.get(t) == v for t, v in r["named"].items())}
+            if len(fits) != 1:
+                return []                        # no reading, or two values, under one answer: not worked out
+            combo[n] = fits.pop()
+        out.append((", ".join(f"{t} = {v}" for t, v in answer.items()), combo))
+        if len(out) > MAX_READING_COMBINATIONS:
+            return []
+    return out
+
+
+def _under_readings(rule: dict, known: dict, allowed: dict, combos: list) -> tuple:
+    """The rule under every combination of readings: pass only if it passes under every one, fail only if it fails
+    under every one, else needs review naming the readings it fails (or can't be told) under."""
+    if not combos:
+        return "needs_review", "its measures' readings can't be combined"
+    got = {words: part_outcome(rule, {**known, **values}, allowed) for words, values in combos}
+    results = set(got.values())
+    if results in ({"pass"}, {"fail"}, {"not_applicable"}):
+        return results.pop(), None
+    bad = [w for w, r in got.items() if r != "pass"]
+    good = [w for w, r in got.items() if r == "pass"]
+    return "needs_review", (f"does not comply (or can't be told) if the open question is answered {' or '.join(bad)}; "
+                            f"complies if {' or '.join(good) or 'none'}")
 
 
 def building_values(values: dict) -> dict:

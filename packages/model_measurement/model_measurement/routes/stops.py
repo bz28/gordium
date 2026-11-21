@@ -82,8 +82,8 @@ STOPS = {
     # the parts handed to the rules (__init__.py)
     "stated_not_given": "stated by the architect ({what}), and the description has no mark for it yet",
     "not_measured_yet": "Gordium doesn't measure this yet",
-    "readings": "given as two readings for open question {question} of the route note ({words}); the checker "
-                "doesn't take a part's readings yet, so a rule reading it needs review",
+    "readings": "given as two readings for open question {question} of the route note ({words}): a rule reading it "
+                "complies only if it complies under both, fails only if it fails under both, else needs review",
     "room_not_measured": "the room {name} isn't read: {reason}",
     "maybe_kind": "the enclosed space {name} has no room drawn in it: it may be a {kind}",
     "exit_access_unclear": "the room {name} is joined by passages to other rooms a route may cross: which of its doors "

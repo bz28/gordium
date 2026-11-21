@@ -10,8 +10,9 @@ way interior/ hands its parts.
 end's least width in feet, areas in square feet). A measure that can't be settled is left out of `measures` and its
 reason put in `not_measured` (a rule reading it then needs review): never a default. A measure given as two named
 readings (decisions 6 and 8: open questions 3 and 7) is left out too, its readings in `readings`, {measure: [{value,
-named: {question: answer}}]}, the shape the checker's readings take (design_checker/check.py readings_of); the
-checker reads a part's measures only, so until it takes a part's readings such a rule needs review. `more` holds the
+named: {question: answer}}]}, the shape the checker's readings take (design_checker/check.py readings_of);
+rule_format.parts.rows decides such a rule under every combination of them (pass only if all pass, fail only if all
+fail, else needs review). `more` holds the
 figures behind each measure: the routes drawn, the bounds, the corridors' centre lines.
 
 The pieces (decision 11): floor.py reads each story's floor, zones and rings (decisions 1, 1a, 10); paths.py draws
