@@ -237,6 +237,18 @@ public sealed class RealModelTests
                           space["name"]!.GetValue<string>());
         // the same id at every read
         Assert.Equal(space["id"]!.GetValue<string>(), InteriorReader.Read(house.Model()).Interior["unknown_spaces"]![0]!["id"]!.GetValue<string>());
+        // it has no place to put a Room in: the architect is told to fix the walls, never "place a Room in it"
+        var alone = Assert.Single(InteriorReader.AreaBlockers(house.Model()));
+        Assert.Contains("find and fix the overlapping or doubled walls on Level 0", alone);
+        Assert.DoesNotContain("place a Room in it", alone);
+
+        // with one that has a place: the log line says which have places, and what to do about the one without
+        house.Areas.Add(Unroomed());
+        var both = Assert.Single(InteriorReader.AreaBlockers(house.Model()));
+        Assert.Contains("each listed in the log, with its place where Revit gives one", both);
+        Assert.Contains("1 of them Revit couldn't locate (no point inside, often a sliver between overlapping walls): " +
+                        "find and fix the overlapping or doubled walls on Level 0", both);
+        Assert.DoesNotContain("each listed with its place in the log", both);
     }
 
     [Fact]

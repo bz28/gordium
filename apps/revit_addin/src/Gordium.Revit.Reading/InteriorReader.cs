@@ -272,15 +272,27 @@ public static class InteriorReader
         UnknownAreas(model).GroupBy(a => (a.LevelId, a.Level)).Select(g =>
         {
             var list = g.ToList();
+            var placeless = list.Count(a => a.PointInside is null);
+            // an area Revit can't give a point inside has no place to put a Room in: say what can be done instead
+            var noPoint = placeless == 0 ? "" : string.Format(CultureInfo.InvariantCulture,
+                "; {0} of them Revit couldn't locate (no point inside, often a sliver between overlapping walls): find and " +
+                "fix the overlapping or doubled walls on {1}", placeless, g.Key.Level);
+            if (list.Count == 1 && placeless == 1)
+                return AreaWords(model, list[0]) + ": it may be a bedroom nobody placed a Room in, so every sleeping-room " +
+                       "rule needs review: find and fix the overlapping or doubled walls on " + g.Key.Level + " that close " +
+                       "it off; on a level with no rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes";
             return list.Count == 1
                 ? AreaWords(model, list[0]) + ": it may be a bedroom nobody placed a Room in, so every sleeping-room rule " +
                   "needs review: place a Room in it (marked No if no one sleeps there), or open it up; on a level with no " +
                   "rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes"
                 : string.Format(CultureInfo.InvariantCulture,
-                      "{0} enclosed areas on {1} have no Room ({2:0.#} to {3:0.#} sq ft; each listed with its place in the log): " +
+                      "{0} enclosed areas on {1} have no Room ({2:0.#} to {3:0.#} sq ft; {5}): " +
                       "each may be a bedroom nobody placed a Room in, so every sleeping-room rule needs review: place a Room " +
-                      "in each (marked No if no one sleeps there), or open it up; if the level has no rooms at all (a roof), " +
-                      "mark it {4} Yes", list.Count, g.Key.Level, list.Min(a => a.Area), list.Max(a => a.Area), Marks.NoRoomsOnLevel.Name);
+                      "in each (marked No if no one sleeps there), or open it up{6}; if the level has no rooms at all (a roof), " +
+                      "mark it {4} Yes", list.Count, g.Key.Level, list.Min(a => a.Area), list.Max(a => a.Area), Marks.NoRoomsOnLevel.Name,
+                      placeless == 0 ? "each listed with its place in the log" : placeless == list.Count ? "each listed in the log"
+                          : "each listed in the log, with its place where Revit gives one",
+                      noPoint);
         }).ToList();
 
     /// <summary>Each enclosed area sent as a space whose use isn't known, one line each, for the log.</summary>
