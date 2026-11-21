@@ -1,0 +1,11 @@
+# -*- coding: utf-8 -*-
+"""A made-up drawing script in the form of the one Ben received (a pyRevit script whose plan is a JSON literal on
+one line): a 20 x 10 ft box of four walls, a partition, a single door with its hinge, a double door, a window and two
+rooms. The extractor reads this file's text only; the line below proves the tests never run it."""
+raise RuntimeError("this script must never be run: the extractor only reads its text")
+import json
+from Autodesk.Revit.DB import *
+
+SWING_OPPOSITE_FACING = True
+DATA = json.loads(r'''{"project":"Tiny box (made up for the tests)","units":"feet","origin":"SW corner","level":{"name":"Level 1","elevation_ft":0.0},"defaults":{"wall_height_ft":10.0},"walls":[{"id":0,"start":[0.0,0.0],"end":[20.0,0.0],"thickness_in":8.0,"status":"Existing","smoke_partition":false,"fire_rating":null,"height_ft":10.0,"exterior":true},{"id":1,"start":[20.0,0.0],"end":[20.0,10.0],"thickness_in":8.0,"status":"Existing","smoke_partition":false,"fire_rating":null,"height_ft":10.0,"exterior":true},{"id":2,"start":[20.0,10.0],"end":[0.0,10.0],"thickness_in":8.0,"status":"Existing","smoke_partition":false,"fire_rating":null,"height_ft":10.0,"exterior":true},{"id":3,"start":[0.0,10.0],"end":[0.0,0.0],"thickness_in":8.0,"status":"Existing","smoke_partition":false,"fire_rating":null,"height_ft":10.0,"exterior":true},{"id":4,"start":[10.0,0.0],"end":[10.0,10.0],"thickness_in":4.5,"status":"New","smoke_partition":true,"fire_rating":"1 HR","height_ft":3.5,"exterior":false}],"doors":[{"center":[5.0,0.0],"width_in":36,"height_in":84,"kind":"single","host_wall":0,"swing_dir":[0.0,1.0],"hinge":[6.5,0.0]},{"center":[10.0,5.0],"width_in":72,"height_in":84,"kind":"double","host_wall":4,"swing_dir":[-1.0,0.0]}],"windows":[{"center":[15.0,10.0],"width_in":33,"height_in":48,"sill_in":36,"host_wall":2}],"rooms":[{"number":"1","name":"Classroom","tag_point":[5.0,5.0],"boundary":[[0.33,0.33],[9.81,0.33],[9.81,9.67],[0.33,9.67],[0.33,0.33]],"area_sf":88.5},{"number":"2","name":"Storage","tag_point":[15.0,5.0],"boundary":[[10.19,0.33],[19.67,0.33],[19.67,9.67],[10.19,9.67],[10.19,0.33]]}],"footprint":[[-0.33,-0.33],[20.33,-0.33],[20.33,10.33],[-0.33,10.33],[-0.33,-0.33]],"stats":{"walls":5,"doors":2,"windows":1,"rooms":2}}''')
+log = []
