@@ -407,6 +407,20 @@ rail, bottom rail and balusters (a box family from Baluster.rft, one per 5 in pa
 are all the guards and handrails". The recording keeps `doors_not_read` and `guards_not_read`; the log every railing's
 parts, solid by solid.
 
+## Escape routes (a commercial story)
+
+By the [design note](../../docs/revit/revit_interior_reading_design.md)'s section 10, `RouteReader.cs` adds the
+format's route keys for `model_measurement.routes`: `levels` and each part's `level`; each room's `use`, `lockable`
+and `pass_through` from the marks `Gordium: Use` (now bound to Rooms too), `Gordium: Can be locked` and `Gordium: Pass
+through` (a room's name is only a suggestion in the marking list); its `holes` (a room marked not a sleeping room
+only) and `obstructions` (casework, furniture, equipment and fixtures lower than 80 in, by their faces' footprints;
+anything else that low leaves them out); each door's `plan` (its centre between its wall's side faces, the confirmed
+clear width), `sides` (`FromRoom`/`ToRoom`, or `outside` when no room is drawn beyond) and, from `Gordium: Exit`,
+`exit_kind` and `exit_id` (every door into one stair is one exit); and `passages` along room separation lines.
+Anything not read exactly is left out with its reason. **How we know:** `RouteTests.cs` reads a fake story
+(`RouteDrawing.cs`) and hands the description to the real route code, which draws its routes; each trap is pinned.
+**In Revit:** Read inside logs a `routes` line counting what was read, and `evidence.route_doors` each door's place.
+
 ## Check my project
 
 The first button for an architect's own model: one click reads the open project outside (zoning) and inside
