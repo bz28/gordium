@@ -117,6 +117,16 @@ use is the one every Rhino check already takes, and both give the same answers (
 - Each `left_out` object but a slab marked `patio` or `parking` (next item) makes the check need review (an "Objects on the lot not included" row; lot coverage and
   the accessory building rules need review); one that touches a building, or isn't known to (`touching: null`),
   makes the yards, height and stories need review too.
+- **One standing apart** (`touching: false`) that could be a structure (`could_be_building: true`) makes every
+  required yard (to the walls and to the eaves) need review, naming it (its `name` when given): it may be a
+  freestanding deck, porch, landing or ramp, "part of the building in both the determination of required yards and
+  lot coverage" (§325-18A), and a YARD "shall not be occupied by any other building or structure from the ground
+  upward unless specifically authorized" (§325-3B). The description has no outline for it, so every yard waits, not
+  only the one it may stand in. `could_be_building: false` (a tool's word that it can't be a structure, "anything
+  constructed or erected on the ground", §325-3B STRUCTURE: Revit sends it for trees, entourage and an element marked
+  Not a structure) keeps no yard waiting; it is still an object on the lot not measured. Every tool before
+  2026-11-20 sent `true` for every object, so none loses a review by this (a fix of the checker, not a new field:
+  the protocol is unchanged). Extras that also name these (`standing_apart`) are refused: one source.
 - **A left-out slab** (`slab`, protocol 1.3), by Chapter 325's BUILDING AREA (§325-3B: "All porches, attached or
   freestanding decks, … ramps, and/or landings" count; it "shall not include parking areas and parking spaces";
   "Pergolas and terraces and patios shall be exempt from total lot coverage requirements. However, neither pergolas

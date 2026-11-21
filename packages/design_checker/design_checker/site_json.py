@@ -46,6 +46,13 @@ LEFT_OUT = {"id": True, "layer": True, "could_be_building": True, "touching": Tr
 SLAB_KINDS = ("unmarked", "patio", "parking")
 SLABS_EXEMPT = ("patio", "parking")       # not buildings: never in lot coverage, never "an object not measured"
 SITE_SLABS = "site_slabs"                 # extras: the description's slabs, as for_measuring hands them to the view
+# extras: the left-out objects standing apart from the building (touching false) that could be a structure
+# (could_be_building true), each {id, name}, as for_measuring hands them to the view. A freestanding deck, porch,
+# landing or ramp is part of the building in the yards (§325-18A), and no other building or structure may stand in a
+# yard (§325-3B YARD), so each keeps every required yard at needs review (present._cautious_for_left_out). Given
+# whenever an object is left out, so an empty list says none stands apart (absent, the view counts every object not
+# touching).
+STANDING_APART = "standing_apart"
 GRADE = {"source": True, "points": True}
 PROBLEM = {"code": True, "args": True}
 OBJECTS = {"site": TOP, "host": HOST, "lot": LOT, "edge": EDGE, "building": BUILDING, "face": FACE,
@@ -450,10 +457,11 @@ def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[
     grade_from other than the description's grade source, or extras naming left-out objects or slabs are refused
     (two sources for one thing), never merged. A left-out slab marked a patio or a driveway (SLABS_EXEMPT) is not an
     object that may be a building, so it is in none of the left-out lists; every slab (each {id, slab, name}) is
-    handed to the view as extras[SITE_SLABS], only when there is one."""
+    handed to the view as extras[SITE_SLABS], only when there is one. The left-out objects standing apart that could
+    be a structure (each {id, name}) are handed to it as extras[STANDING_APART] whenever one is left out."""
     extras = dict(extras or {})
     reasons = [f"extras: {k} belongs in the site description (left_out), not the extras" for k in LEFT_OUT_EXTRAS
-               + (SITE_SLABS,) if k in extras]
+               + (SITE_SLABS, STANDING_APART) if k in extras]
     if "grade_points" in facts:
         reasons.append("facts: grade_points belong in the site description (grade), not the facts")
     grade = site["grade"]
@@ -490,6 +498,9 @@ def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[
                   touching=[o["id"] for o in measured_out if o["touching"] is not False],
                   ground_like=[o["id"] for o in measured_out if o["ground_like"]],
                   context_left_out=sorted(o["id"] for o in measured_out if o["context"]))
+    if measured_out:                         # absent when nothing is left out: every request without one as before
+        extras[STANDING_APART] = [{"id": o["id"], "name": o.get("name")} for o in measured_out
+                                  if o["touching"] is False and o["could_be_building"]]
     slabs = [{"id": o["id"], "slab": o["slab"], "name": o.get("name")} for o in left_out if o.get("slab")]
     if slabs:                                # absent when there are none: every request without one as before
         extras[SITE_SLABS] = slabs
