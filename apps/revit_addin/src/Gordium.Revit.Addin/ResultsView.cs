@@ -89,7 +89,7 @@ internal sealed class ResultsView : C.UserControl
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
-        Say(_checkAgainState.Status(ClearPrefills.StatusLine(content.MarksAdded, content.ClearWords)));
+        Say(_checkAgainState.Status(ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)));
         _body.Children.Clear();
         if (content.Model is not { } model)
         {

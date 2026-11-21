@@ -47,6 +47,9 @@ public sealed class CheckProjectCommand : IExternalCommand
             return (Result.Cancelled, null);
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
+        // the makers' clear openings' words, kept outside the try: a check that fails after the drafts were written
+        // still says they were (review round 7)
+        var clear = "";
         try
         {
             var added = RevitMarks.AddMarks(doc, ui.Application, MarkSetup.Plan(RevitMarks.Bindings(doc)));
@@ -55,7 +58,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             // confirms (never the stamp, so this check sends no clear opening for it)
             // (a failure is shown and the check goes on: the types stay empty, so their clear opening needs review)
             var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
-            var clear = ClearPrefills.Head(filled.Count, failed);
+            clear = ClearPrefills.Head(filled.Count, failed);
             // the street edge asked for only when it is the one fact left and the view shows a property line to click
             var read = ProjectFacts.Read(RevitMarks.Model(doc));
             var view = ShowsPropertyLine(ui.ActiveUIDocument!);
@@ -82,8 +85,8 @@ public sealed class CheckProjectCommand : IExternalCommand
             log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
             Trial.Log("check_project", log);
             // the last check's rows taken down: never left showing as if they were this one's
-            ResultsPane.Failed($"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
-            TaskDialog.Show(Title, $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
+            ResultsPane.Failed(clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
+            TaskDialog.Show(Title, clear + $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
             return (Result.Failed, e.Message);
         }
     }

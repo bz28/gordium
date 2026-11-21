@@ -388,13 +388,25 @@ public sealed class MakerClearOpeningsTests
         Assert.Contains("var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);", check);
         // the results panel (PR #136): the words go to the panel's status line and first into check_project_result.txt,
         // and the fill runs before the street ask
-        Assert.Contains("var clear = ClearPrefills.Head(filled.Count, failed);", check);
+        Assert.Contains("            clear = ClearPrefills.Head(filled.Count, failed);", check);
         Assert.Contains("Show(ui, doc, run, added.Count, ask, clear);", check);
         Assert.Contains("File.WriteAllText(file, clear + run.FullText + \"\\n\"", check);
         Assert.Contains("ClearWords: clear", check);
         Assert.True(check.IndexOf("RevitMarks.TryPrefill(", StringComparison.Ordinal) < check.IndexOf("StreetEdges.Ask(", StringComparison.Ordinal));
         var view = Src("ResultsView.cs");
-        Assert.Contains("ClearPrefills.StatusLine(content.MarksAdded, content.ClearWords)", view);
+        Assert.Contains("ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)", view);
+        // review round 7: a check that fails after the drafts were written still says so, in the panel and the dialog
+        Assert.Contains("ResultsPane.Failed(clear + $\"Nothing was checked", check);
+        Assert.Contains("TaskDialog.Show(Title, clear + $\"Nothing was checked", check);
+        Assert.True(check.IndexOf("var clear = \"\";", StringComparison.Ordinal) < check.IndexOf("        try", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_stale_panel_drops_this_runs_marks_and_clear_openings_line()
+    {
+        var words = ClearPrefills.Head(2, null);
+        Assert.Equal("", ClearPrefills.PanelStatus(3, words, stale: true));
+        Assert.Equal(ClearPrefills.StatusLine(3, words), ClearPrefills.PanelStatus(3, words, stale: false));
     }
 
     [Fact]

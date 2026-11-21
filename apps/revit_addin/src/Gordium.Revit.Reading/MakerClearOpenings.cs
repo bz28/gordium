@@ -266,6 +266,11 @@ public static class ClearPrefills
         string.Join(" ", new[] { marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.", clearWords.Trim() }
             .Where(s => s.Length > 0));
 
+    /// <summary>The panel's status line for what it shows: <see cref="StatusLine"/>, or "" once the results are stale
+    /// (the model changed since: this run's marks added and clear openings are no longer news; review round 7).</summary>
+    public static string PanelStatus(int marksAdded, string clearWords, bool stale) =>
+        stale ? "" : StatusLine(marksAdded, clearWords);
+
     /// <summary>The line of a type filled (<paramref name="done"/>: its marks hold the draft) or still to fill (the
     /// marks are empty: this run writes them, or a write that didn't commit left them so).</summary>
     private static string Line(string label, MakerFormula entry, bool done) =>
