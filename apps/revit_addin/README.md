@@ -139,14 +139,15 @@ nothing. So the decisions are built and tested here, on the Mac.
 1. **What is on the lot in the design checked:** the last phase (only what is demolished by then is gone), the main
    model and one option from every option set (the one being edited, else the primary). The panel must name both
    (`ReadResult.PhaseChecked`, `OptionsChecked`).
-2. **Buildings:** each element of a building category, and each Gordium floor block, is one building: its flat faces
+2. **Buildings:** each element of a building category, each Gordium floor block, and each element marked a porch,
+   deck, landing, ramp, or garage, shed or carport with `Gordium: Site object is` (`SiteReader.IsBuildingPart`) is one building: its flat faces
    with straight edges are sent; a curved face or edge, an open solid or a mesh not known to be closed is reported,
    never sent as if it were flat. A building element with nothing to send is never skipped: it is sent as an object
    that couldn't be (`unsent`), so every building measure needs review.
-3. **Left out:** every other solid or mesh, every family instance and CAD import whatever it holds (a nested family of lines only is skipped inside it, as at the top), every coordination model (its contents aren't read: on the lot and touching), Gordium's
+3. **Left out:** every other solid or mesh, every family instance and CAD import not marked a building, whatever it holds (a nested family of lines only is skipped inside it, as at the top), every coordination model (its contents aren't read: on the lot and touching), Gordium's
    neighbourhood objects, a Toposolid. **Which of them are on the lot and which touch the house is the worker's
    decision** (`objects.left_out`, the one copy every host uses), never the reader's.
-4. **Linked models:** one holding any building element (at any depth) or a closed workset is not sent (every
+4. **Linked models:** one holding any building part (at any depth; `SiteReader.IsBuildingPart`) or a closed workset is not sent (every
    building measure needs review); one not loaded, or a closed workset in the model, means not everything was
    looked at (`inventory_complete: false`).
 5. **The lot:** the lot picked, else the one closed property line; never an open one; arcs followed closely. A
