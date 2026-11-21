@@ -273,26 +273,29 @@ public static class InteriorReader
         {
             var list = g.ToList();
             var placeless = list.Count(a => a.PointInside is null);
-            // an area Revit can't give a point inside has no place to put a Room in: say what can be done instead
-            var noPoint = placeless == 0 ? "" : string.Format(CultureInfo.InvariantCulture,
-                "; {0} of them Revit couldn't locate (no point inside, often a sliver between overlapping walls): find and " +
-                "fix the overlapping or doubled walls on {1}", placeless, g.Key.Level);
-            if (list.Count == 1 && placeless == 1)
+            // an area Revit can't give a point inside has no place to put a Room in: its fix is the walls
+            var fixWalls = "find and fix the overlapping or doubled walls on " + g.Key.Level + " that close it off";
+            var roof = "on a level with no rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes";
+            if (list.Count == 1)
                 return AreaWords(model, list[0]) + ": it may be a bedroom nobody placed a Room in, so every sleeping-room " +
-                       "rule needs review: find and fix the overlapping or doubled walls on " + g.Key.Level + " that close " +
-                       "it off; on a level with no rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes";
-            return list.Count == 1
-                ? AreaWords(model, list[0]) + ": it may be a bedroom nobody placed a Room in, so every sleeping-room rule " +
-                  "needs review: place a Room in it (marked No if no one sleeps there), or open it up; on a level with no " +
-                  "rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes"
-                : string.Format(CultureInfo.InvariantCulture,
-                      "{0} enclosed areas on {1} have no Room ({2:0.#} to {3:0.#} sq ft; {5}): " +
-                      "each may be a bedroom nobody placed a Room in, so every sleeping-room rule needs review: place a Room " +
-                      "in each (marked No if no one sleeps there), or open it up{6}; if the level has no rooms at all (a roof), " +
-                      "mark it {4} Yes", list.Count, g.Key.Level, list.Min(a => a.Area), list.Max(a => a.Area), Marks.NoRoomsOnLevel.Name,
-                      placeless == 0 ? "each listed with its place in the log" : placeless == list.Count ? "each listed in the log"
-                          : "each listed in the log, with its place where Revit gives one",
-                      noPoint);
+                       "rule needs review: " + (placeless == 1 ? fixWalls
+                                                                 : "place a Room in it (marked No if no one sleeps there), or open it up") +
+                       "; " + roof;
+            var what = placeless == 0
+                ? "each listed with its place in the log): each may be a bedroom nobody placed a Room in, so every " +
+                  "sleeping-room rule needs review: place a Room in each (marked No if no one sleeps there), or open it up"
+                : placeless == list.Count
+                    ? "each listed in the log; Revit couldn't locate any of them, often slivers between overlapping walls): " +
+                      "each may be a bedroom nobody placed a Room in, so every sleeping-room rule needs review: " +
+                      "find and fix the overlapping or doubled walls on " + g.Key.Level + " that close them off"
+                    : string.Format(CultureInfo.InvariantCulture,
+                          "each listed in the log, with its place where Revit gives one): each may be a bedroom nobody " +
+                          "placed a Room in, so every sleeping-room rule needs review: place a Room in each of the {0} with " +
+                          "a place (marked No if no one sleeps there), or open it up; the {1} Revit couldn't locate (no point " +
+                          "inside, often a sliver between overlapping walls): find and fix the overlapping or doubled walls " +
+                          "on {2} that close them off", list.Count - placeless, placeless, g.Key.Level);
+            return string.Format(CultureInfo.InvariantCulture, "{0} enclosed areas on {1} have no Room ({2:0.#} to {3:0.#} sq ft; ",
+                                 list.Count, g.Key.Level, list.Min(a => a.Area), list.Max(a => a.Area)) + what + "; " + roof;
         }).ToList();
 
     /// <summary>Each enclosed area sent as a space whose use isn't known, one line each, for the log.</summary>
