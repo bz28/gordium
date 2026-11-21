@@ -66,7 +66,10 @@ public sealed class App : IExternalApplication
             ToolTip = "Draws each hand-worked house of the interior step in a new Revit project, reads it, records it to " +
                       "test_data/interior_houses/recorded/revit/ and checks it against the hand-worked measures",
         });
-        // the results panel (Check my project's), and the one ExternalEvent its clicks run through on Revit's thread
+        // the results panel (Check my project's), in Revit's light or dark theme and following it, and the one
+        // ExternalEvent its clicks run through on Revit's thread
+        ResultsPane.FollowTheme();
+        application.ThemeChanged += ResultsPane.OnThemeChanged;
         ResultsPane.Register(application);
         PanelActions.Start();
         // the results greyed when the checked project changes, taken down when it closes: never a stale pass
@@ -216,6 +219,7 @@ public sealed class App : IExternalApplication
     {
         application.ControlledApplication.DocumentChanged -= ResultsPane.OnDocumentChanged;
         application.ControlledApplication.DocumentClosing -= ResultsPane.OnDocumentClosing;
+        application.ThemeChanged -= ResultsPane.OnThemeChanged;
         var worker = Worker;
         Worker = null;
         if (worker is not null)

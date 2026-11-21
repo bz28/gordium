@@ -25,10 +25,12 @@ internal sealed record PanelContent(string Project, DateTime When, ResultModel? 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup:
 /// the header with Check again, the worker's state and counts, then the worker's groups in its order (what does not
-/// comply first, what complies folded), every row shown (a scrolling list, never cut). Each row: its verdict, its
-/// name, its figures and how far off, its reason, the law's section and a "Law" expander with the law's exact words;
-/// clicking it selects and zooms to its elements. Plain WPF: every Revit call goes through the callbacks, which
-/// queue it for Revit's thread (<see cref="PanelActions"/>).
+/// comply first, what complies folded), every row shown (a scrolling list, never cut). Each row: its verdict (its
+/// status glyph and its words), its name, its figures and how far off, its reason, the law's section and a "Law"
+/// expander with the law's exact words; clicking it selects and zooms to its elements. Plain WPF: every Revit call
+/// goes through the callbacks, which queue it for Revit's thread (<see cref="PanelActions"/>). Every colour is a
+/// token of the theme's dictionary (<see cref="PanelLook"/>), named with SetResourceReference so it follows Revit's
+/// theme; every status is drawn as its glyph and said in words, never by colour alone (<see cref="StatusLook"/>).
 /// </summary>
 internal sealed class ResultsView : C.UserControl
 {
@@ -38,29 +40,32 @@ internal sealed class ResultsView : C.UserControl
     private readonly C.TextBlock _sub = Small("");
     private readonly C.Button _again;
     private readonly C.TextBlock _status = Small("");
-    private readonly C.StackPanel _body = new() { Margin = new W.Thickness(10, 4, 10, 10) };
+    private readonly C.StackPanel _body = new() { Margin = new W.Thickness(12, 4, 12, 12) };
     private PanelContent? _content;
     private C.Border? _selected;
 
-    internal ResultsView(Action<ResultRow> zoom, Action checkAgain, Action projectInformation)
+    internal ResultsView(Action<ResultRow> zoom, Action checkAgain, Action projectInformation, PanelTheme theme)
     {
         _zoom = zoom;
         _checkAgain = checkAgain;
         _projectInformation = projectInformation;
-        SetResourceReference(BackgroundProperty, W.SystemColors.WindowBrushKey);
-        SetResourceReference(ForegroundProperty, W.SystemColors.WindowTextBrushKey);
-        FontSize = 12;
+        PanelLook.Apply(this, theme);
+        SetResourceReference(BackgroundProperty, PanelTokens.BgPane);
+        SetResourceReference(ForegroundProperty, PanelTokens.Text);
+        FontFamily = new M.FontFamily(PanelTokens.TypeOf(Body).Family);
+        FontSize = PanelTokens.TypeOf(Body).Size;
 
-        _again = new C.Button { Content = "Check again", Padding = new W.Thickness(8, 1, 8, 1), Margin = new W.Thickness(8, 0, 0, 0),
+        _again = new C.Button { Content = "Check again", Padding = new W.Thickness(10, 2, 10, 2), Margin = new W.Thickness(8, 0, 0, 0),
                                 Visibility = W.Visibility.Collapsed, VerticalAlignment = W.VerticalAlignment.Center };
+        _again.SetResourceReference(StyleProperty, "button.primary");
         _again.Click += (_, _) => _checkAgain();
         // compact header: the title and Check again on one line, when and which project under it
-        var head = new C.StackPanel { Margin = new W.Thickness(10, 8, 10, 2) };
+        var head = new C.StackPanel { Margin = new W.Thickness(12, 8, 12, 2) };
         var titleLine = new C.DockPanel();
         C.DockPanel.SetDock(_again, C.Dock.Right);
         titleLine.Children.Add(_again);
-        titleLine.Children.Add(new C.TextBlock { Text = "Gordium: Check my project", FontSize = 13, FontWeight = W.FontWeights.SemiBold,
-                                                 VerticalAlignment = W.VerticalAlignment.Center, TextTrimming = W.TextTrimming.CharacterEllipsis });
+        titleLine.Children.Add(Typed(new C.TextBlock { Text = "Gordium: Check my project", VerticalAlignment = W.VerticalAlignment.Center,
+                                                       TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.title"));
         head.Children.Add(titleLine);
         head.Children.Add(_sub);
         _status.Visibility = W.Visibility.Collapsed;
@@ -80,6 +85,9 @@ internal sealed class ResultsView : C.UserControl
         _sub.Text = "Click Check my project on the Gordium tab to check this project.";
     }
 
+    /// <summary>Revit's theme changed: the theme's brushes swapped, everything on screen recoloured in place.</summary>
+    internal void UseTheme(PanelTheme theme) => PanelLook.Apply(this, theme);
+
     // ---- what the panel shows ------------------------------------------------------------------------------
 
     internal void Show(PanelContent content)
@@ -97,46 +105,45 @@ internal sealed class ResultsView : C.UserControl
             _body.Children.Add(Small(content.Files, top: 8));
             return;
         }
+        var stale = model.Stale is not null;                     // stale: every status the clock, never a verdict's colour
         foreach (var part in ResultRows.Layout(model))
             switch (part)
             {
                 case PanelPart.Stale:
-                    _body.Children.Add(new C.TextBlock
-                    {
-                        Text = model.Stale, FontWeight = W.FontWeights.SemiBold, Foreground = Ink(Tone.Review),
-                        TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 0, 0, 2),
-                    });
+                    _body.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview,
+                                              Typed(new C.TextBlock { Text = model.Stale, FontWeight = W.FontWeights.SemiBold,
+                                                                      TextWrapping = W.TextWrapping.Wrap }, Body), bottom: 6));
                     break;
                 case PanelPart.State:
-                    _body.Children.Add(new C.TextBlock
+                    var state = StatusLook.Of(model.StateTone, stale);
+                    _body.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock
                     {
                         Text = ResultText.StateWords(model.State) + (model.Stale is null ? "" : " (before the model changed)"),
-                        FontSize = 13, FontWeight = W.FontWeights.SemiBold, Foreground = Ink(model.StateTone),
                         TextWrapping = W.TextWrapping.Wrap,
-                    });
+                    }, "type.state"), StatusLook.Colour(state)), size: 18));
                     break;
                 case PanelPart.Counts:
                     // one wrap line per law, its short name first: as few lines as the width allows
                     foreach (var line in model.Counts)
                     {
-                        var chips = new C.WrapPanel { Margin = new W.Thickness(0, 2, 0, 0) };
+                        var chips = new C.WrapPanel { Margin = new W.Thickness(0, 4, 0, 0) };
                         if (line.Title is not null)
-                            chips.Children.Add(new C.TextBlock
+                            chips.Children.Add(Ink(Typed(new C.TextBlock
                             {
-                                Text = Short(line.Title), FontSize = 10.5, FontWeight = W.FontWeights.SemiBold, Opacity = 0.8,
+                                Text = Short(line.Title), FontWeight = W.FontWeights.SemiBold,
                                 Margin = new W.Thickness(0, 3, 6, 0), VerticalAlignment = W.VerticalAlignment.Center, ToolTip = line.Title,
-                            });
+                            }, Caption), PanelTokens.TextMuted));
                         foreach (var chip in line.Chips)
-                            chips.Children.Add(Chip(chip));
+                            chips.Children.Add(Chip(chip, stale));
                         _body.Children.Add(chips);
                     }
                     break;
                 case PanelPart.Groups:
                     foreach (var g in model.Groups)
-                        _body.Children.Add(GroupBlock(g));
+                        _body.Children.Add(GroupBlock(g, stale));
                     break;
                 case PanelPart.Inside:
-                    _body.Children.Add(Fold("What wasn't read from the model", true, () => Small(model.Inside), top: 10));
+                    _body.Children.Add(Fold("What wasn't read from the model", true, () => Small(model.Inside), top: 12));
                     break;
                 case PanelPart.Details:
                     _body.Children.Add(Fold("Details", true, () =>
@@ -183,7 +190,8 @@ internal sealed class ResultsView : C.UserControl
     /// <summary>Whether a Check again waits or runs: kept across every redraw (a greyed redraw after an edit).</summary>
     private readonly CheckAgainState _checkAgainState = new();
 
-    /// <summary>While a check runs: Check again greyed, and why.</summary>
+    /// <summary>While a check runs: Check again greyed, and why. The rows stay as they are (stale ones stale) until
+    /// the new answer is shown.</summary>
     internal void Busy(bool busy)
     {
         if (busy)
@@ -198,12 +206,9 @@ internal sealed class ResultsView : C.UserControl
 
     private void ShowMissing(IReadOnlyList<string> missing)
     {
-        _body.Children.Add(new C.TextBlock
-        {
-            Margin = new W.Thickness(0, 0, 0, 6),
-            Text = "Nothing was checked: fill these in first", FontSize = 13, FontWeight = W.FontWeights.SemiBold,
-            Foreground = Ink(Tone.Review), TextWrapping = W.TextWrapping.Wrap,
-        });
+        _body.Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview,
+                                  Typed(new C.TextBlock { Text = "Nothing was checked: fill these in first", TextWrapping = W.TextWrapping.Wrap },
+                                        "type.title"), bottom: 6));
         foreach (var m in missing)
             _body.Children.Add(new C.TextBlock { Text = "• " + m, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 0, 0, 6) });
         var open = new C.Button
@@ -216,41 +221,43 @@ internal sealed class ResultsView : C.UserControl
         _body.Children.Add(Small("Fill in the Gordium marks there, then click Check again (a street edge is asked for by a click when you do)."));
     }
 
-    private W.UIElement GroupBlock(ResultGroup g)
+    private W.UIElement GroupBlock(ResultGroup g, bool stale)
     {
-        var header = new C.TextBlock
+        var status = StatusLook.Of(g.Tone, stale);
+        var header = WithGlyph(status, Ink(Typed(new C.TextBlock
         {
-            Text = $"{g.Title.ToUpperInvariant()} ({g.Count})", FontWeight = W.FontWeights.SemiBold, FontSize = 11.5,
-            Foreground = Ink(g.Tone), TextWrapping = W.TextWrapping.Wrap,
-        };
+            Text = $"{g.Title.ToUpperInvariant()} ({g.Count})", FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap,
+        }, Caption), StatusLook.Colour(status)), size: 14);
         return Fold(header, g.Folded, () =>
         {
             var inner = new C.StackPanel { Margin = new W.Thickness(0, 4, 0, 0) };
             if (g.Lines.Count == 0)
                 foreach (var r in g.Rows)
-                    inner.Children.Add(RowBlock(r));
+                    inner.Children.Add(RowBlock(r, stale));
             else
                 foreach (var l in g.Lines)
-                    inner.Children.Add(Fold(new C.TextBlock { Text = l.Title, TextWrapping = W.TextWrapping.Wrap, Foreground = Ink(l.Tone) }, l.Folded, () =>
+                    inner.Children.Add(Fold(WithGlyph(StatusLook.Of(l.Tone, stale), new C.TextBlock { Text = l.Title, TextWrapping = W.TextWrapping.Wrap }, size: 14),
+                                            l.Folded, () =>
                     {
                         var rows = new C.StackPanel { Margin = new W.Thickness(0, 4, 0, 0) };
                         foreach (var r in l.Rows)
-                            rows.Children.Add(RowBlock(r));
+                            rows.Children.Add(RowBlock(r, stale));
                         return rows;
                     }, indent: 12));
             return inner;
-        }, top: 10);
+        }, top: 12);
     }
 
-    private W.UIElement RowBlock(ResultRow r)
+    private W.UIElement RowBlock(ResultRow r, bool stale)
     {
-        var text = new C.StackPanel { Margin = new W.Thickness(8, 5, 8, 2) };
-        text.Children.Add(new C.TextBlock { Text = r.VerdictWords.ToUpperInvariant(), FontSize = 10, FontWeight = W.FontWeights.SemiBold, Foreground = Ink(r.Tone) });
-        text.Children.Add(new C.TextBlock { Text = r.Name, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap });
+        var status = StatusLook.Of(r.Tone, stale);
+        var text = new C.StackPanel { Margin = new W.Thickness(8, 6, 8, 2) };
+        text.Children.Add(WithGlyph(status, Typed(new C.TextBlock { Text = r.VerdictWords.ToUpperInvariant() }, "type.overline"), size: 14));
+        text.Children.Add(Typed(new C.TextBlock { Text = r.Name, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
         if (r.Figures is not null)
-            text.Children.Add(new C.TextBlock { Text = r.Figures + (r.HowFar is null ? "" : " · " + r.HowFar), TextWrapping = W.TextWrapping.Wrap });
+            text.Children.Add(Typed(new C.TextBlock { Text = r.Figures + (r.HowFar is null ? "" : " · " + r.HowFar), TextWrapping = W.TextWrapping.Wrap }, "type.figure"));
         else if (r.HowFar is not null)
-            text.Children.Add(new C.TextBlock { Text = r.HowFar, TextWrapping = W.TextWrapping.Wrap });
+            text.Children.Add(Typed(new C.TextBlock { Text = r.HowFar, TextWrapping = W.TextWrapping.Wrap }, "type.figure"));
         if (r.Reason is not null && !r.ReasonIsFigures)
             text.Children.Add(Small(r.Reason, top: 1));
 
@@ -263,12 +270,11 @@ internal sealed class ResultsView : C.UserControl
         var labels = r.Elements.Select(uid => _content?.Labels.GetValueOrDefault(uid) ?? "not in this model now").ToList();
         if (r.Elements.Count > 0)
         {
-            var link = new C.TextBlock
+            var link = Ink(Typed(new C.TextBlock
             {
-                Text = "Show in model", Foreground = Ink(Tone.Neutral), TextDecorations = W.TextDecorations.Underline,
+                Text = "Show in model", TextDecorations = W.TextDecorations.Underline,
                 Cursor = I.Cursors.Hand, ToolTip = string.Join("\n", labels.Take(20)) + (labels.Count > 20 ? $"\n{labels.Count - 20} more" : ""),
-                FontSize = 11,
-            };
+            }, Caption), PanelTokens.Accent);
             foot.Children.Add(link);
             link.MouseLeftButtonUp += (_, e) => { e.Handled = true; Pick(self, r); };
             text.Cursor = I.Cursors.Hand;
@@ -282,14 +288,17 @@ internal sealed class ResultsView : C.UserControl
                 q.Children.Add(Small("The checker gave no quote with this row" + (r.Section is null ? "." : $": see {r.Section}.")));
             foreach (var quote in r.Quotes)
             {
-                q.Children.Add(new C.TextBlock { Text = "“" + quote.Text + "”", TextWrapping = W.TextWrapping.Wrap, FontStyle = W.FontStyles.Italic });
+                q.Children.Add(Typed(new C.TextBlock { Text = "“" + quote.Text + "”", TextWrapping = W.TextWrapping.Wrap }, "type.quote"));
                 if (quote.Where is not null)
                     q.Children.Add(Small(quote.Where, bottom: 6));
             }
             return q;
         }, indent: 8));
 
-        var bar = new System.Windows.Shapes.Rectangle { Width = 4, Fill = Ink(r.Tone) };
+        // the bar: the status colour, or muted stripes once stale (never a verdict's colour on a stale row)
+        var bar = new System.Windows.Shapes.Rectangle { Width = 4 };
+        bar.SetResourceReference(System.Windows.Shapes.Shape.FillProperty,
+                                 status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(status));
         var dock = new C.DockPanel();
         C.DockPanel.SetDock(bar, C.Dock.Left);
         dock.Children.Add(bar);
@@ -297,7 +306,18 @@ internal sealed class ResultsView : C.UserControl
         var border = new C.Border
         {
             Child = dock, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
-            BorderBrush = Ink(Tone.Neutral, 0x55), Margin = new W.Thickness(0, 0, 0, 6), Background = M.Brushes.Transparent,
+            Margin = new W.Thickness(0, 0, 0, 6),
+        };
+        Frame(border, selected: false);
+        border.MouseEnter += (_, _) =>
+        {
+            if (!ReferenceEquals(_selected, border))
+                border.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgHover);
+        };
+        border.MouseLeave += (_, _) =>
+        {
+            if (!ReferenceEquals(_selected, border))
+                Frame(border, selected: false);
         };
         self = border;
         if (r.Elements.Count > 0)
@@ -305,54 +325,87 @@ internal sealed class ResultsView : C.UserControl
         return border;
     }
 
+    /// <summary>A row's frame: a card on the pane, or selected (its background and the accent outline).</summary>
+    private static void Frame(C.Border border, bool selected)
+    {
+        border.SetResourceReference(C.Border.BackgroundProperty, selected ? PanelTokens.BgSelected : PanelTokens.BgSurface);
+        border.SetResourceReference(C.Border.BorderBrushProperty, selected ? PanelTokens.Accent : PanelTokens.Line);
+    }
+
     private void Pick(C.Border? border, ResultRow r)
     {
         if (_selected is not null)
-            _selected.BorderBrush = Ink(Tone.Neutral, 0x55);
+            Frame(_selected, selected: false);
         _selected = border;
         if (border is not null)
-            border.BorderBrush = Accent;
+            Frame(border, selected: true);
         _zoom(r);
     }
 
     // ---- small pieces --------------------------------------------------------------------------------------
 
-    private static readonly M.SolidColorBrush Accent = Frozen(M.Color.FromRgb(0x1E, 0x6F, 0xD9));
+    private const string Body = "type.body";
+    private const string Caption = "type.caption";
 
-    private static M.SolidColorBrush Frozen(M.Color c)
+    /// <summary>The text with its type token's style (size, weight, family).</summary>
+    private static C.TextBlock Typed(C.TextBlock t, string token)
     {
-        var b = new M.SolidColorBrush(c);
-        b.Freeze();
+        t.SetResourceReference(StyleProperty, token);
+        return t;
+    }
+
+    /// <summary>The text in a colour token.</summary>
+    private static C.TextBlock Ink(C.TextBlock t, string token)
+    {
+        t.SetResourceReference(C.TextBlock.ForegroundProperty, token);
+        return t;
+    }
+
+    /// <summary>The status's glyph, then the words that say it: shape and word together, never colour alone.</summary>
+    private static C.DockPanel WithGlyph(PanelStatus status, W.UIElement words, double size)
+    {
+        var glyph = PanelLook.Glyph(status, size);
+        glyph.Margin = new W.Thickness(0, 0, 6, 0);
+        var line = new C.DockPanel { LastChildFill = true };
+        C.DockPanel.SetDock(glyph, C.Dock.Left);
+        line.Children.Add(glyph);
+        line.Children.Add(words);
+        return line;
+    }
+
+    /// <summary>A banner: a glyph and its words on a fill, outlined.</summary>
+    private static C.Border Banner(PanelStatus status, string fill, string outline, W.UIElement words, double bottom)
+    {
+        var b = new C.Border
+        {
+            Child = WithGlyph(status, words, size: 16), BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
+            Padding = new W.Thickness(10, 8, 10, 8), Margin = new W.Thickness(0, 0, 0, bottom),
+        };
+        b.SetResourceReference(C.Border.BackgroundProperty, fill);
+        b.SetResourceReference(C.Border.BorderBrushProperty, outline);
         return b;
     }
 
-    private static M.Color ColorOf(Tone t) => t switch
+    /// <summary>One count as the worker said it, with its status's glyph, on its status's fill.</summary>
+    private static C.Border Chip(CountChip chip, bool stale)
     {
-        Tone.Fails => M.Color.FromRgb(0xC6, 0x28, 0x28),
-        Tone.Review => M.Color.FromRgb(0xB2, 0x6A, 0x00),
-        Tone.Complies => M.Color.FromRgb(0x2E, 0x7D, 0x32),
-        _ => M.Color.FromRgb(0x75, 0x75, 0x75),
-    };
-
-    private static M.SolidColorBrush Ink(Tone t, byte alpha = 0xFF)
-    {
-        var c = ColorOf(t);
-        return Frozen(M.Color.FromArgb(alpha, c.R, c.G, c.B));
+        var status = StatusLook.Of(chip.Tone, stale);
+        var b = new C.Border
+        {
+            Child = WithGlyph(status, Typed(new C.TextBlock { Text = chip.Words }, Caption), size: 11),
+            BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(6, 1, 7, 1),
+            Margin = new W.Thickness(0, 2, 4, 0),
+        };
+        b.SetResourceReference(C.Border.BackgroundProperty, StatusLook.ChipBackground(status));
+        b.SetResourceReference(C.Border.BorderBrushProperty, StatusLook.Colour(status));
+        return b;
     }
 
-    private static C.Border Chip(CountChip chip) => new()
-    {
-        Child = new C.TextBlock { Text = chip.Words, FontSize = 10.5 },
-        Background = Ink(chip.Tone, 0x26), BorderBrush = Ink(chip.Tone), BorderThickness = new W.Thickness(1),
-        CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(6, 0, 6, 1), Margin = new W.Thickness(0, 2, 4, 0),
-    };
-
-    private static C.TextBlock Small(string text, double top = 0, double right = 0, double bottom = 0)
-    {
-        var t = new C.TextBlock { Text = text, FontSize = 11, TextWrapping = W.TextWrapping.Wrap, Opacity = 0.8,
-                                  Margin = new W.Thickness(0, top, right, bottom) };
-        return t;
-    }
+    /// <summary>Small muted words: the caption type in text.muted (a colour token, never a faded opacity, so its
+    /// contrast is the one tested).</summary>
+    private static C.TextBlock Small(string text, double top = 0, double right = 0, double bottom = 0) =>
+        Ink(Typed(new C.TextBlock { Text = text, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, top, right, bottom) }, Caption),
+            PanelTokens.TextMuted);
 
     private static C.Expander Fold(object header, bool folded, Func<W.UIElement> build, double top = 0, double indent = 0)
     {
