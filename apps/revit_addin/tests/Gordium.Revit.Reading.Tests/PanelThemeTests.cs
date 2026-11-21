@@ -158,6 +158,58 @@ public sealed class PanelThemeTests(ITestOutputHelper output)
             Assert.DoesNotContain(fixedColour, view, StringComparison.Ordinal);
     }
 
+    private static string Styles() =>
+        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "PanelStyles.xaml"));
+
+    /// <summary>Every value PanelStyles.xaml gives <paramref name="properties"/>, as an attribute
+    /// (<c>Background="..."</c>) or a Setter (<c>Property="Background" Value="..."</c>), with its line.</summary>
+    private static List<(string Property, string Value, int Line)> Values(string xaml, string properties)
+    {
+        var found = new List<(string, string, int)>();
+        int LineOf(int at) => xaml.AsSpan(0, at).Count('\n') + 1;
+        foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(xaml, $@"\b({properties})=""([^""]*)"""))
+            found.Add((m.Groups[1].Value, m.Groups[2].Value, LineOf(m.Index)));
+        foreach (System.Text.RegularExpressions.Match m in System.Text.RegularExpressions.Regex.Matches(
+                     xaml, $@"Property=""({properties})""\s+Value=""([^""]*)"""))
+            found.Add((m.Groups[1].Value, m.Groups[2].Value, LineOf(m.Index)));
+        return found;
+    }
+
+    [Fact]
+    public void The_control_styles_have_no_fixed_colour()
+    {
+        // every colour of the restyled controls is a token (DynamicResource, so it follows Revit's theme), the
+        // control's own (TemplateBinding), or Transparent: never a #hex or a named colour
+        var xaml = Styles();
+        var colours = Values(xaml, "Background|Foreground|BorderBrush|Stroke|Fill");
+        Assert.NotEmpty(colours);
+        var fixedOnes = colours.Where(c => !(c.Value.StartsWith("{DynamicResource ", StringComparison.Ordinal)
+                                             || c.Value.StartsWith("{TemplateBinding ", StringComparison.Ordinal)
+                                             || c.Value == "Transparent"))
+                               .Select(c => $"line {c.Line}: {c.Property}=\"{c.Value}\"").ToList();
+        Assert.Empty(fixedOnes);
+        Assert.DoesNotMatch(@"=""#[0-9A-Fa-f]{3,8}""", xaml);
+    }
+
+    [Fact]
+    public void The_control_styles_take_their_fonts_from_the_type_tokens()
+    {
+        // no font family or size written in the styles: each is a type token's, published by PanelLook.Shared
+        var xaml = Styles();
+        var fonts = Values(xaml, "FontFamily|FontSize");
+        Assert.NotEmpty(fonts);
+        var fromTokens = PanelTokens.Type.SelectMany(t => new[] { t.Name + ".family", t.Name + ".size" }).ToHashSet(StringComparer.Ordinal);
+        var literal = fonts.Where(f => !(f.Value.StartsWith("{DynamicResource ", StringComparison.Ordinal)
+                                         && fromTokens.Contains(f.Value["{DynamicResource ".Length..^1].Trim())))
+                           .Select(f => $"line {f.Line}: {f.Property}=\"{f.Value}\"").ToList();
+        Assert.Empty(literal);
+        // and every resource the styles name is one PanelLook publishes: a colour token or a type token's font
+        var published = PanelTokens.Names.Concat(fromTokens).ToHashSet(StringComparer.Ordinal);
+        var unknown = System.Text.RegularExpressions.Regex.Matches(xaml, @"\{DynamicResource ([^}\s]+)\s*\}")
+                           .Select(m => m.Groups[1].Value).Where(k => !published.Contains(k)).Distinct().ToList();
+        Assert.Empty(unknown);
+    }
+
     [Fact]
     public void The_add_in_never_names_the_pass_green_itself()
     {
