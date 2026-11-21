@@ -504,7 +504,14 @@ internal static class RevitInterior
                 // across a change
                 for (var k = 0; k < listed.Count; k++)
                     if (!areas[before + k].HasRoom)
-                        areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area) };
+                    {
+                        areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area, out var by) };
+                        // an area Revit gives no point in (a sliver) is located by what bounds it, for the log
+                        if (areas[before + k].PointInside is null)
+                            diagnostics.Add($"enclosed area {k} on {level.Name} ({areas[before + k].Area:0.####} sq ft, no point inside): " +
+                                            (by.Count > 0 ? "bounded by " + string.Join(", ", by) : "Revit gave no boundary for a Room in it") +
+                                            (areas[before + k].Outline is { } o ? "; outline " + string.Join(" ", o.Select(q => $"({q.X:0.####},{q.Y:0.####})")) : ""));
+                    }
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
                                 $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
                                 string.Join(", ", areas.Skip(before).Where(a => !a.HasRoom)
@@ -529,8 +536,9 @@ internal static class RevitInterior
     /// the finished faces (the loop of largest area), each segment's start. Null when the document can't be changed for
     /// the moment, Revit refuses, or a segment is curved: the reader then never calls a door's far side on that level
     /// outside (escape routes, section 10).</summary>
-    private static List<Xyz>? OutlineOf(Document doc, Phase phase, Level level, int index, double area)
+    private static List<Xyz>? OutlineOf(Document doc, Phase phase, Level level, int index, double area, out List<string> by)
     {
+        by = [];
         if (!doc.IsModifiable)
             return null;
         using var st = new SubTransaction(doc);
@@ -545,6 +553,9 @@ internal static class RevitInterior
             doc.Create.NewRoom(room, circuit);
             doc.Regenerate();
             var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions { SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish });
+            by = (loops ?? []).SelectMany(l => l).Select(s => doc.GetElement(s.ElementId)).OfType<Element>()
+                .Select(e => $"{e.Category?.Name} {e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? e.Id.Value.ToString(CultureInfo.InvariantCulture)}")
+                .Distinct().ToList();
             if (loops is null || loops.Count == 0 || loops.Any(l => l.Any(s => s.GetCurve() is not Line)))
                 return null;
             static double Area(IList<BoundarySegment> l)

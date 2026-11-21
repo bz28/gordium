@@ -28,7 +28,7 @@ def test_the_libby_street_marks_make_a_request_for_every_room_and_exit():
     assert len(marks["rooms_to_place"]) + len(marks["not_rooms"]) == 18      # every enclosed area with no Room, classified
     build = tool.build_request(marks, "d.json", "m.rvt")
     assert [next(k for k in c if k != "why" and k != "wall") for c in build["corrections"]] == \
-        ["extend_end_to"] * 2 + ["trim_end_to", "trim_start_to", "trim_end_to", "trim_start_to", "trim_start_to"] + ["fill"] * 2
+        ["extend_end_to"] * 2 + ["trim_end_to", "trim_start_to", "trim_end_to", "trim_start_to", "trim_start_to"] + ["merge"] * 2 + ["fill"] * 2
     assert sum(1 for e in entries if e.get("mark") == "Gordium: Use") == 39
     assert [e["door"] for e in entries if e.get("mark") == "Gordium: Exit"] == ["D41", "D02", "D03", "D12"]
     assert made["by"].startswith("eval assumption")

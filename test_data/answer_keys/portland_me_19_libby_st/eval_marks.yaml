@@ -89,8 +89,8 @@ rooms_to_place:
   - {number: "44", name: CLOSET, at: [109.22, 49.73], area_sf: 9.1, use: Closet, lockable: true,
      why: "a small room off CONFERENCE 19 (door D07, its only door), by the corridor; the sheet names none: taken as a closet, end-only"}
 not_rooms:
-  - {area_sf: 0, at: null, what: sliver, why: "Revit gives no point inside it: a sliver between two of the trace's overlapping walls (the build named 5 pairs); the trims below remove every overlap"}
-  - {area_sf: 0, at: null, what: sliver, why: "the second such sliver; the same trims"}
+  - {area_sf: 0, at: [61.29, 36.2], what: sliver, why: "Revit gives no point inside it: the hairline between W57 and W111, drawn face to face (the trims of the overlapping pairs left it, 2026-11-21); merged into one wall below"}
+  - {area_sf: 0, at: [21.45, 36.2], what: sliver, why: "the same between W65 and W114; merged below"}
   - {area_sf: 1.4, at: [190.67, 47.46], what: inside a wall,
      why: "the triangle between the east entry's angled jamb W72 and W16/W29: LS1.0 draws the jamb solid, so it is filled with wall (the first fill below), never a Room"}
   - {area_sf: 1.4, at: [190.67, 38.22], what: inside a wall, why: "the same at the south jamb (W73 with W24/W29): the second fill"}
@@ -105,6 +105,11 @@ model_corrections:
   - {wall: W28, trim_end_to: [194.3667, 36.3244], why: "overlaps W121 along 1.15 ft: ends where W121 begins"}
   - {wall: W105, trim_start_to: [168.7167, 28.1889], why: "overlaps W32 along 0.33 ft: starts where W32 ends"}
   - {wall: W34, trim_start_to: [168.5556, 16.1856], why: "overlaps W33 along 0.34 ft: starts where W33 ends"}
+  # the two 0 sq ft slivers Revit gives no point in: each a hairline between two walls the trace drew face to face
+  # (their faces 0.00003 ft apart along 3.33 ft, found from the traced data; the overlap trims above didn't touch
+  # them), drawn as one wall of the two thicknesses
+  - {merge: [W57, W111], why: "W111 (16 in, New) drawn face to face against W57 (12 in) along 3.33 ft: a 0 sq ft sliver between them"}
+  - {merge: [W65, W114], why: "W114 (16 in, New) drawn face to face against W65 (6 in) along 3.33 ft: a 0 sq ft sliver between them"}
   # the two jamb pockets: each a wall along the angled jamb's inner face, as thick as the triangle is deep (plus 0.01 ft)
   - {fill: {start: [189.6688, 47.2102], end: [192.2294, 48.2972], thickness_in: 12.151},
      why: "LS1.0 draws the east entry's north jamb solid; the trace left a 1.4 sq ft triangle between W72, W16 and W29"}
