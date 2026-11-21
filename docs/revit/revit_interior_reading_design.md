@@ -727,7 +727,7 @@ notes, and the route code then measures nothing it could get wrong (a key left o
 |---|---|---|
 | `levels` | every `Level` holding a room, door or unknown space sent: `UniqueId`, `Name`, `ProjectElevation` in shared coordinates (a roof level with nothing on it isn't a story to walk) | the levels couldn't be read |
 | `level` on rooms, doors, unknown spaces | `Room.Level`, the door's `LevelId`, the enclosed area's level | its level isn't one of the levels read |
-| room `holes` | a room's second and later boundary loops (the outline is the loop of largest area: Revit doesn't promise the outer loop first); `[]` for none | a loop isn't wholly inside the outline (1/16 in clear), two overlap, or the room is a sleeping room or isn't marked: **a floor with a hole is sent only for a room marked Sleeping room No**, since the house's floor area reads the outline alone and a bedroom's would count the column (then no `floor`, as before) |
+| room `holes` | a room's second and later boundary loops (the outline is the loop of largest area: Revit doesn't promise the outer loop first); `[]` for none | a loop isn't wholly inside the outline (1/16 in clear), two overlap, or the room is marked a sleeping room: **a floor with a hole is never sent for a room marked Sleeping room Yes**, since the house's floor area reads the outline alone and a bedroom's would count the column (then no `floor`, as before). A room not marked is sent with its holes: with a sleeping flag missing the house's measures read no room at all (the Children's Odyssey KITCHEN, 2026-11-21) |
 | room `obstructions` | the room's `Over` collection (every element whose box reaches over it), each face with a point lower than 80 in over the floor (IBC 1003.3.1's headroom) that overlaps the floor (its outline less its holes): a flat face's outline, a curved face's points' convex hull (together the piece's shadow, which the route code unites); a vertical face has no footprint of its own. `[]` for none | anything not an obstruction category lower than 80 in over the floor (a beam, a bulkhead, a generic model, a low ceiling), any element whose geometry couldn't be read (unless its box is wholly above 80 in), an obstruction the room's solid test found that wasn't read with its geometry, or the floor's elevation unknown |
 | door `plan` | `centre`: half way between the host wall's two side faces (`HostObjectUtils.GetSideFaces`, exterior and interior), at the middle of the door's own drawn geometry within the wall's thickness along it (its frame; never its trim or a leaf drawn open); `along`: the wall's direction, turned as `HandOrientation`; `clear_width`: the stamp-confirmed `stated_clear` width only, never the type's size; `wall_thickness`: between the faces | no confirmed clear width; the host isn't a straight wall (a curved wall, a curtain wall: no flat side faces); a side isn't one plane (faces more than 1/16 in apart), the sides aren't parallel, or `HandOrientation` isn't along them; none of its geometry is in the wall |
 | door `sides` | `FromRoom`, `ToRoom` (the last phase), both among the rooms read; or one room and `outside` when Revit gives no room on the other side, the room is found on exactly one side (1 in beyond the wall's face) and no room read is drawn on the other | no room either side, the same room both sides, a room not read (another phase or design option), or Revit's "no room" contradicted by a room drawn there. An enclosed area with no Room beyond a door is an unknown space, which keeps its story needing review whatever its doors say |
@@ -781,6 +781,26 @@ crossing the outline is no hole, and the outline is found by area whatever the l
 no levels read leaves `passages` or `levels` out (never `[]`); a house's description measures as before; a project
 whose `Use` is on Project Information only gets it extended to Rooms. The use and exit words equal the route code's
 own tables (`floor.USES`, `floor.EXIT_KINDS`), read from Python.
+
+**A wall standing in a room** (not bounding it: Revit's solid test finds it inside the room's outline) leaves a
+sleeping room's floor out, as before (its floor area would count the wall). In any other room the floor is sent and
+the wall is an obstruction (kind `fixture`, fixed: the format has no wall kind), its footprint from its faces as any
+obstruction's, so routes only lose floor. Anything else standing in a room (a column that doesn't bound it, a generic
+model, a stair) still leaves the floor out (the Children's Odyssey ADMINISTRATION, 2026-11-21).
+
+### The eval's marks: set_marks_request.json
+
+The architect hasn't marked the Children's Odyssey model, so the route eval's marks are data, each an eval assumption
+with its reason: `test_data/answer_keys/portland_me_19_libby_st/eval_marks.yaml` (every room's use, lock and
+pass-through, each door type's clear opening, the exits read from LS1.0's exit arrows and matched to the model's doors by
+position). `apps/revit_addin/tools/eval_marks_request.py` turns it into a request, and the add-in writes it by request
+file while Revit is idle (`set_marks_request.json` beside the trial log: `{"model", "save_as", "by", "date", "marks"}`,
+`SetMarks.cs`, its decisions `MarksRequest.cs`): only a model and a copy under the trial folder are opened and saved,
+never the architect's files; Gordium's marks are added to the copy first; a room is found by its number, a door by its
+Mark; a word Gordium doesn't read, a value of the wrong kind, a mark not bound to the element, an element not found or
+found twice, or two values for one mark are refused with why; a door's clear opening writes its type's operation,
+clear width, height and source and the stamp, signed with `by` ("eval assumption (Gordium, not the architect)"), so
+the stamp itself says who stood in. Each entry applied or refused is logged (`set_marks` in results.jsonl).
 
 ### To try in Revit (the Children's Odyssey model)
 
