@@ -135,7 +135,7 @@ public sealed class MakerClearOpeningsTests
     // ---- which types match, and which sizes are read ---------------------------------------------------------
 
     [Fact]
-    public void A_type_matches_on_its_manufacturer_and_model_exactly_ignoring_case()
+    public void A_type_matches_on_its_manufacturer_and_window_type_ignoring_case_or_an_exact_call_number_model()
     {
         // Marvin's own family: Manufacturer "Marvin Windows and Doors", shared Window Type "Ultimate Casement", Model the
         // call number ("UCA3648"); either the Window Type or a call-number Model matches, with the Manufacturer
