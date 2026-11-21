@@ -218,7 +218,10 @@ area need review.
    least width of any, could fail a corridor whose every dead end complies): the corridor's part holds its longest
    dead end's own pair, each further one a part "<corridor> (dead end n)" with the corridor's other measures. A
    closed end is the farthest point of the real floor across the leg's whole width (a recess under 12 in, filled to
-   find the legs, never moves it). A corridor that isn't made of straight legs
+   find the legs, never moves it); any recess the closed end runs into is part of the dead end, and its narrowest cross-section counts in the
+   least width (the least over every recess there: over-cautious where a separate shallow slot is narrower than the
+   alcove the dead end runs into, which can only give needs review or a fail, never a false pass; a sliver under
+   1/16 in is no floor). A corridor that isn't made of straight legs
    meeting at right angles (at any rotation) needs review in this first version.
 7. **Remoteness and the diagonal: straight lines, exact.** The distance between two exits is the straight line
    between the nearest edges of their clear openings (NFPA's words; the IBC names no point, and the nearest edge is

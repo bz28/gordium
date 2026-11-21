@@ -291,3 +291,40 @@ def test_a_hairline_sliver_in_the_end_wall_neither_lengthens_nor_narrows_a_dead_
     # 1/32 in wide (under the 1/16 in tolerance): 20 ft by 8 ft, as with no slot
     length, width = only(measure(slot(1 / 384))).longest(WITHOUT)
     assert ft(length) == pytest.approx(20.0, abs=1e-9) and ft(width) == 8.0
+
+
+def end_wall(*notches):
+    """Test 3's branch with these notches in its end wall (y 24): each (x0, x1, depth ft), a notch with steps given
+    as [(x0, x1, depth), ...] nested, outermost first."""
+    d = branch()
+    top = [(28, 24)]
+    for steps in notches:
+        pts = []
+        for x0, x1, depth in steps:
+            pts.append((x0, x1, depth))
+        # walk east to west along the end wall, into each step and back out
+        (ox0, ox1, od) = pts[0]
+        seq = [(ox1, 24), (ox1, 24 + od)]
+        for x0, x1, depth in pts[1:]:
+            seq += [(x1, 24 + od), (x1, 24 + depth), (x0, 24 + depth), (x0, 24 + od)]
+        seq += [(ox0, 24 + od), (ox0, 24)]
+        top += seq
+    top += [(20, 24)]
+    d["rooms"][0]["floor"] = [list(p) for p in [(0, 0), (60, 0), (60, 8), (28, 8)] + top + [(20, 8), (0, 8)]]
+    return d
+
+
+def test_a_stepped_recess_takes_its_narrowest_section():
+    # a mouth 3 ft wide, 4 in deep (x 22.5 to 25.5), and in it a slot 0.5 ft wide (x 23.75 to 24.25) to 11 in: the
+    # dead end runs to the slot's back, 20.917 ft, and its least width is the slot's 0.5 ft, never the mouth's 3 ft
+    d = end_wall([(22.5, 25.5, 4 / 12), (23.75, 24.25, 11 / 12)])
+    length, width = only(measure(d)).longest(WITHOUT)
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == pytest.approx(0.5, abs=1e-9)
+
+
+def test_an_alcove_beside_a_separate_narrow_slot_takes_the_slot_width_over_cautious():
+    # an alcove 3 ft wide, 11 in deep (x 20.5 to 23.5) and a separate slot 0.5 ft wide, 4 in deep (x 25 to 25.5):
+    # 20.917 ft long, and (documented as over-cautious) the slot's 0.5 ft as its least width
+    d = end_wall([(25, 25.5, 4 / 12)], [(20.5, 23.5, 11 / 12)])
+    length, width = only(measure(d)).longest(WITHOUT)
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == pytest.approx(0.5, abs=1e-9)

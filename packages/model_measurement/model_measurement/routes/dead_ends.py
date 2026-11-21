@@ -727,8 +727,11 @@ def _to_real_end(square, leg, u, way) -> tuple:
     """A closed end's place on the leg's axis: the farthest point of the real (unfilled) floor beyond u, the way
     `way`, within the leg's whole width (a recess under 12 in filled to find the legs, wherever it is in the end
     wall, counts), and the width across of the narrowest recess it runs into (None if none): the recess is part of
-    the dead-end corridor, so it counts in its least width too (one reading). A sliver thinner than 1/16 in, either
-    way, neither lengthens it nor narrows it."""
+    the dead-end corridor, so it counts in its least width too (one reading). The width is each recess piece's
+    narrowest cross-section (a stepped recess: its narrow slot's), the least over every recess at the closed end:
+    over-cautious where a separate shallow slot is narrower than the alcove the dead end runs into (a narrower figure
+    can only give needs review or a fail, never a false pass). A sliver thinner than 1/16 in, either way, neither
+    lengthens it nor narrows it."""
     w0, w1 = leg.across
     reach = SHALLOW + 2 * SAME
     lo_, hi_ = sorted((u, u + way * reach))
@@ -741,14 +744,31 @@ def _to_real_end(square, leg, u, way) -> tuple:
         ends = [leg.along(c) for c in part.exterior.coords]
         if min(abs(e - u) for e in ends) > SAME:              # floor not opening off the end wall
             continue
-        x0, y0, x1, y1 = part.bounds
-        across = (y1 - y0) if leg.horizontal else (x1 - x0)
         far = max(ends, key=lambda e: way * e)
+        across = _narrowest_section(part, leg)
         if abs(far - u) <= SAME or across <= SAME:           # a sliver: no effect
             continue
         best = far if way * far > way * best else best
         narrow = across if narrow is None else min(narrow, across)
     return best, narrow
+
+
+def _narrowest_section(piece, leg) -> float:
+    """The narrowest cross-section of a recess piece across the leg: sliced between each pair of its corners'
+    places along the leg's axis (each slice's extent across, the narrowest of its pieces), the least of them."""
+    w0, w1 = leg.across
+    marks = sorted({round(leg.along(c), 9) for c in piece.exterior.coords})
+    least = math.inf
+    for a, b in zip(marks, marks[1:]):
+        if b - a <= 1e-9:
+            continue
+        m = (a + b) / 2
+        cut = LineString([(m, w0 - 1) if leg.horizontal else (w0 - 1, m),
+                          (m, w1 + 1) if leg.horizontal else (w1 + 1, m)]).intersection(piece)
+        for seg in getattr(cut, "geoms", [cut]):
+            if not seg.is_empty and seg.length > 0:
+                least = min(least, seg.length)
+    return least
 
 
 def _attach(g, legs, floor_of, key, frame, door):
