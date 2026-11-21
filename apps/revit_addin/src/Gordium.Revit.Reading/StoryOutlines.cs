@@ -21,6 +21,10 @@ public static class StoryOutlines
 {
     private const double Eps = InteriorReader.Sixteenth;
 
+    /// <summary>The longest side with no bounding element read as a wall's end, ft (no wall is thicker); anything longer
+    /// with no element (an area or separation line across an opening) leaves the outlines out.</summary>
+    public const double WallEnd = 2.0;
+
     /// <summary>One story's outlines (shared plan points, anticlockwise), or why not.</summary>
     public sealed record Result(List<P2>? Outer, List<P2>? Inner, string? Why);
 
@@ -51,7 +55,11 @@ public static class StoryOutlines
         {
             if (Length(b - a) <= Eps)
                 continue;
-            double? width = element is not null && gross.WallWidths.TryGetValue(element, out var w) ? w : null;
+            double? width = element is not null && gross.WallWidths.TryGetValue(element, out var w) ? w
+                // a short side Revit gives no element for is a wall's end showing between two walls (a step where two
+                // walls in line stand a hair apart, a jamb's end at an opening: the Children's Odyssey's ring, 2026-11-21):
+                // its line is kept where it is, the walls either side moved in
+                : element is null && Length(b - a) <= WallEnd ? 0 : null;
             if (merged.Count > 0 && InLine(merged[^1].A, merged[^1].B, b))
             {
                 var last = merged[^1];
@@ -68,6 +76,10 @@ public static class StoryOutlines
             merged[0] = (merged[^1].A, merged[0].B, merged[0].Wall, merged[0].Width);
             merged.RemoveAt(merged.Count - 1);
         }
+        // a wall's end shows between two walls, never next to another end
+        for (var i = 0; i < merged.Count; i++)
+            if (merged[i].Width == 0 && (merged[(i + merged.Count - 1) % merged.Count].Width is not > 0 || merged[(i + 1) % merged.Count].Width is not > 0))
+                return new(null, null, $"a short side at {Xy(merged[i].A)} that no element bounds isn't between two walls");
         if (merged.FindIndex(s => s.Width is null) is var open and >= 0)
             return new(null, null, $"a side of the building's outline at {Xy(merged[open].A)} isn't bounded by a wall" +
                                    (merged[open].Wall is { } by ? $" ({by})" : "") + ", so how thick the wall is there isn't known");

@@ -461,6 +461,24 @@ public sealed class RouteTests
     }
 
     [Fact]
+    public void A_short_side_no_element_bounds_is_a_walls_end_kept_where_it_is()
+    {
+        // the Children's Odyssey's ring (2026-11-21): steps of 0.006 to 0.64 ft where two walls in line stand apart, or
+        // a jamb ends at an opening, came back with no element: the wall's end, kept; the walls either side moved in
+        var t = Transform3.Identity;
+        BoundarySegmentRecord S(double x0, double y0, double x1, double y1, string? by) => new(new(x0, y0, 0), new(x1, y1, 0), true, by);
+        var widths = new Dictionary<string, double> { ["s"] = 0.5, ["e"] = 0.5, ["n1"] = 0.5, ["n2"] = 0.5, ["w"] = 0.5 };
+        GrossArea Ring(double step) => new([[S(-0.5, -0.5, 40.5, -0.5, "s"), S(40.5, -0.5, 40.5, 26.5, "e"), S(40.5, 26.5, 20, 26.5, "n1"),
+                                             S(20, 26.5, 20, 26.5 + step, null), S(20, 26.5 + step, -0.5, 26.5 + step, "n2"), S(-0.5, 26.5 + step, -0.5, -0.5, "w")]], widths);
+        var got = StoryOutlines.Of(Ring(0.1), t);
+        Assert.Null(got.Why);
+        Assert.Equal(40 * 26 + 20 * 0.1, PlanGeometry.Area(got.Inner!), 9);
+        Assert.Equal(41 * 27 + 20.5 * 0.1, PlanGeometry.Area(got.Outer!), 9);
+        // a side with no element longer than any wall is thick: an opening across, never guessed
+        Assert.Contains("isn't bounded by a wall", StoryOutlines.Of(Ring(StoryOutlines.WallEnd + 0.5), t).Why);
+    }
+
+    [Fact]
     public void Without_a_closed_gross_area_bounded_by_walls_no_outline_is_sent_and_why_is_said()
     {
         var floor = new FakeFloor();

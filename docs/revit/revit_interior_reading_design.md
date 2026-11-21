@@ -746,17 +746,20 @@ beyond its wall isn't one Room): such a door isn't read. The rule is cautious: a
 it (a closet) gives no id, never a guess.
 
 **`story_outlines` (decision 8's two readings), from Revit's own room logic** (`StoryOutlines.cs`; the Revit layer's
-part, `RingOf`, is thin). **outer:** in a transaction always rolled back, room separation lines are drawn as a
+part, `RingOf`, is thin). **outer:** in a transaction group always rolled back (its transactions committed: Revit works a
+plan's enclosed areas out again only on a commit, so lines drawn in a sub-transaction were never seen), room separation lines are drawn as a
 rectangle 20 ft beyond the level's walls, a Room is placed in the ring between it and the building, and its boundary
 at the finished faces is read, the rectangle's loop dropped: the exterior walls' outer faces, each side with the wall
 bounding it (doors and windows don't break a room's boundary; interior walls never touch this one). The trial's log
-gives each loop's corners and area. Three earlier readings didn't serve on the Children's Odyssey (2026-11-21): the
+gives each loop's corners and area, and each side with what bounds it. On the Children's Odyssey (2026-11-21, run by
+the agent in Revit 2027.4): 46 sides, 16,539.9 sq ft to the outer faces (the sheet's 16,539), 15,970.0 inside. Three earlier readings didn't serve on the Children's Odyssey (2026-11-21): the
 walls' cut faces didn't join into loops, the walls' centre lines widened logged every interior T-junction as a gap,
 and an area plan made through the API has no area boundary lines (Revit closed no gross area); a slab's edge says
 nothing reliable (it may stop at the core, the inside face or past the walls). **inner:** that outline with each side
 moved in by the thickness of the wall Revit says bounds it (`Wall.Width`), the corners where the moved sides meet.
-Exact for straight walls of one thickness along a side, since a wall's inside face is its outside face moved by its
-thickness; read from the rooms instead it would lose what no room covers inside the walls (a shaft, a chase). Left
+A short side Revit gives no element for (at most 2 ft, between two walls: a wall's end showing where two walls in
+line stand a hair apart, or a jamb ends at an opening) is kept where it is. Exact for straight walls of one
+thickness along a side, since a wall's inside face is its outside face moved by its thickness; read from the rooms instead it would lose what no room covers inside the walls (a shaft, a chase). Left
 out, with the reason in the notes, when the ring Room isn't enclosed, Revit's outline is more than one piece
 (separate buildings), a side is curved or bounded by something other than a wall (its thickness unknown), two walls
 of different thickness run along one straight side, or the level has an enclosed area with no Room (it may be a

@@ -14,39 +14,44 @@ by: eval assumption (Gordium, not the architect)
 date: "2026-11-21"
 occupancy: Group I-4 day care (the sheet's travel-distance note, "I-4 not to exceed 200' sprinklered")
 
-# Every room: its use (a word of Gordium's room-use list), and lockable / pass_through. The sheet draws the exit access
-# along the corridor (its travel-distance and common-path lines run there), so the corridor is the only room a route
-# may cross: every other room is marked pass_through false (end-only: a route may start in it, never cross it), the
-# cautious reading even where classrooms open into each other (D25, D26, D49, D50). lockable is not on the sheet: true
-# for storage, toilets, the kitchen and the electrical room (kept locked), false for the occupied rooms; with
-# pass_through false either way the room is end-only. sleeping is false for every room: the sleeping-room flag is the
+# Every room: its use (a word of Gordium's room-use list), and lockable / pass_through. pass_through (2026-11-21, the
+# coordinator's review of the first route run, where 16 toilets and closets opening only into a classroom had no route
+# out): IBC 2009 1014.2 item 1 ("Egress through intervening spaces shall be permitted, provided that such intervening
+# spaces are accessory to the area served, are not a high-hazard occupancy and provide a discernible path of egress
+# travel to an exit") and NFPA 101 7.5.1.6 allow exit access through such a room; item 4 and NFPA rule out kitchens,
+# storage rooms, closets and toilets, and a lockable room is never crossed. So the occupied day-care and staff rooms
+# (classrooms, the playroom, life spaces, the family lounge, conference, treatment, administration) are marked
+# pass_through true, an eval assumption standing in for the architect, who states whether each has that discernible
+# path; storage, closets, toilets, the kitchen, the electrical room and BOOK STORAGE/STAFF LOUNGE (part storage)
+# stay end-only (a route may start in them, never cross them). lockable is not on the sheet: true for storage,
+# toilets, the kitchen and the electrical room (kept locked), false for the occupied rooms. sleeping is false for every room: the sleeping-room flag is the
 # dwelling code's (IRC R310 escape openings), and a day care has no dwelling sleeping rooms (children's naps don't make
 # a classroom one).
 room_defaults: {sleeping: false, pass_through: false}
 rooms:
-  - {number: "2", name: CLASSROOM, use: Day care, lockable: false, why: a classroom of a day-care centre (I-4)}
-  - {number: "3", name: MOUNTAIN CLASSROOM, use: Day care, lockable: false, why: a classroom of a day-care centre}
-  - {number: "4", name: OCEAN CLASSROOM, use: Day care, lockable: false, why: a classroom of a day-care centre}
-  - {number: "5", name: INFANT/TODDLER CLASSROOM, use: Day care, lockable: false, why: a classroom of a day-care centre}
-  - {number: "6", name: SAFARI CLASSROOM, use: Day care, lockable: false, why: a classroom of a day-care centre}
-  - {number: "7", name: FOREST CLASSROOM, use: Day care, lockable: false, why: a classroom of a day-care centre}
-  - {number: "8", name: CLASSROOM, use: Day care, lockable: false, why: a classroom of a day-care centre}
+  - {number: "2", name: CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre (I-4)}
+  - {number: "3", name: MOUNTAIN CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "4", name: OCEAN CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "5", name: INFANT/TODDLER CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "6", name: SAFARI CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "7", name: FOREST CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "8", name: CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
   - {number: "9", name: BOOK STORAGE/STAFF LOUNGE, use: Other, lockable: false,
      why: "a staff lounge with book storage: no word fits (accessory storage would call the lounge storage); Other, end-only"}
   - {number: "10", name: KITCHEN, use: Kitchen, lockable: true, why: its name}
   - {number: "11", name: STORAGE, use: Accessory storage, lockable: true, why: "storage of the centre (the sheet: aggregate storage 1,428 SF, under 10% of the story)"}
-  - {number: "12", name: LIFE SPACE, use: Other, lockable: false, why: "not a use the list names (a children's activity space?); Other, end-only"}
+  - {number: "12", name: LIFE SPACE, use: Other, lockable: false, pass_through: true, why: "not a use the list names (a children's activity space?); Other, end-only"}
   - {number: "13", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
   - {number: "14", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
-  - {number: "15", name: FAMILY LOUNGE, use: Other, lockable: false, why: "a lounge: no word fits; Other, end-only"}
+  - {number: "15", name: FAMILY LOUNGE, use: Other, lockable: false, pass_through: true, why: "a lounge: no word fits; Other, end-only"}
   - {number: "16", name: STAFF TOILET, use: Toilet, lockable: true, why: its name}
-  - {number: "17", name: PLAYROOM, use: Day care, lockable: false, why: the children's playroom of a day-care centre}
-  - {number: "18", name: ADMINISTRATION, use: Other, lockable: false, why: "offices: no word fits; Other, end-only"}
-  - {number: "19", name: CONFERENCE, use: Other, lockable: false, why: "a meeting room: no word fits; Other, end-only"}
+  - {number: "17", name: PLAYROOM, use: Day care, lockable: false, pass_through: true, why: the children's playroom of a day-care centre}
+  - {number: "18", name: ADMINISTRATION, use: Other, lockable: false, pass_through: true, why: "offices: no word fits; Other, end-only"}
+  - {number: "19", name: CONFERENCE, use: Other, lockable: false, pass_through: true, why: "a meeting room: no word fits; Other, end-only"}
   - {number: "21", name: ELEC., use: Other, lockable: true,
      why: "an electrical room: no word fits (it is no closet or storage); Other, end-only and lockable"}
-  - {number: "22", name: LIFE SPACE, use: Other, lockable: false, why: "not a use the list names; Other, end-only"}
-  - {number: "24", name: TREATMENT, use: Other, lockable: false, why: "a treatment room: no word fits; Other, end-only"}
+  - {number: "22", name: LIFE SPACE, use: Other, lockable: false, pass_through: true, why: "not a use the list names; Other, end-only"}
+  - {number: "24", name: TREATMENT, use: Other, lockable: false, pass_through: true, why: "a treatment room: no word fits; Other, end-only"}
   - {number: "26", name: CORRIDOR, use: Corridor, lockable: false, pass_through: false,
      why: "the corridor the sheet's exit-access lines run along; a corridor is crossed as one (pass_through false is still given: the format needs it set)"}
   - {number: "28", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
