@@ -75,6 +75,11 @@ public sealed class BuildDataTests
     [InlineData("units", "data: units is \"metres\", not \"feet\"")]
     [InlineData("open", "footprint: its last point isn't its first (the add-in, as the script, drops the closing point)")]
     [InlineData("rating", "wall 0: fire_rating is \"\", not null or text")]
+    // as the extractor refuses them (review round 1): the key is required, a null hinge is no hinge, a blank level name
+    [InlineData("no rating", "wall 0: no fire_rating")]
+    [InlineData("null hinge", "door 1: hinge is null, not a point [x, y]")]
+    [InlineData("blank level", "data: level isn't a level with a name and elevation_ft")]
+    [InlineData("null area", "room 1: area_sf is null, not a number")]
     public void Each_bad_part_is_refused_in_words(string what, string words)
     {
         var x = Refused(d =>
@@ -89,6 +94,10 @@ public sealed class BuildDataTests
                 case "units": d["units"] = "metres"; break;
                 case "open": d["footprint"]!.AsArray().RemoveAt(d["footprint"]!.AsArray().Count - 1); break;
                 case "rating": d["walls"]![0]!["fire_rating"] = ""; break;
+                case "no rating": d["walls"]![0]!.AsObject().Remove("fire_rating"); break;
+                case "null hinge": d["doors"]![0]!["hinge"] = null; break;
+                case "blank level": d["level"]!["name"] = "   "; break;
+                case "null area": d["rooms"]![0]!["area_sf"] = null; break;
             }
         });
         Assert.Contains(words, x.Problems);
@@ -219,7 +228,7 @@ public sealed class BuildDataTests
     }
 
     [Theory]
-    [InlineData(0, 22.5, 0, "moves it 2.5 ft, more than 2 ft")]
+    [InlineData(0, 22.5, 0, "moves it 2.5 ft from the data's end, more than 2 ft")]
     [InlineData(0, 21, 0.5, "changes the wall's direction")]            // off its own line
     [InlineData(5, -0.5, 0, "changes the wall's direction")]            // a 1 ft wall turned back past its start
     [InlineData(7, 1, 1, "the data has no wall W7")]
@@ -231,6 +240,55 @@ public sealed class BuildDataTests
         Assert.Empty(applied);
         Assert.Contains(words, Assert.Single(refused));
         Assert.Equal(m.Walls, same.Walls);
+    }
+
+    [Fact]
+    public void Two_corrections_of_one_wall_are_measured_from_the_datas_end_so_they_cant_add_up_past_2_ft()
+    {
+        var m = BuildData.Parse(Extracted());
+        var (fixedModel, applied, refused) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(21.5, 0), Why),
+                                                                    new WallCorrection(0, new PlanPoint(23, 0), Why)]);
+        Assert.Single(applied);
+        Assert.Contains("moves it 3 ft from the data's end, more than 2 ft", Assert.Single(refused));
+        Assert.Equal(new PlanPoint(21.5, 0), fixedModel.Walls[0].End);
+    }
+
+    [Fact]
+    public void Every_number_in_the_words_has_a_decimal_point_on_a_machine_that_writes_a_comma()
+    {
+        var was = System.Globalization.CultureInfo.CurrentCulture;
+        System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("de-DE");
+        try
+        {
+            var m = BuildData.Parse(Extracted());
+            var (_, applied, _) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(21.5, 0), Why)]);
+            Assert.Equal($"corrected W0: end (20, 0) → (21.5, 0) (1.5 ft): {Why}", applied.Single());
+            var (_, _, refused) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(22.5, 0), Why)]);
+            Assert.Contains("moves it 2.5 ft", refused.Single());
+            var twin = m.Walls[0] with { Id = 9, Start = new PlanPoint(15, 0.2), End = new PlanPoint(25, 0.2) };
+            Assert.Equal("walls W0 and W9 overlap along 5 ft (2.4 in apart, centre to centre)", BuildData.WallOverlaps([.. m.Walls, twin]).Single().Words);
+            var gap = BuildData.BoundaryGaps(m.Rooms[0], m.Walls.Where(w => w.Id != 0).ToList()).Single();
+            Assert.StartsWith("9.46 ft from (0.34, 0.33) to (9.8, 0.33)", gap.Words);     // to the 0.02 ft sampling
+            Assert.Contains("(12.5%)", BuildData.AreaOff(90, 80.0));
+            Assert.Equal("Window 33.5\" x 48\" (LS1.0)", BuildData.OpeningTypeName("Window", 33.5, 48));
+        }
+        finally
+        {
+            System.Globalization.CultureInfo.CurrentCulture = was;
+        }
+    }
+
+    [Theory]
+    [InlineData(841.0, 841.0, false)]
+    [InlineData(737.9, 734.1, false)]        // run 1's kitchen: 3.8 sq ft, 0.5%
+    [InlineData(27.6, 27.1, false)]          // run 1's storage 28: 1.8%
+    [InlineData(27.7, 27.1, true)]           // 2.2%
+    [InlineData(1745.0, 1737.9, true)]       // 7.1 sq ft, 0.4%
+    [InlineData(830.0, 841.0, true)]         // smaller too
+    public void A_room_more_than_2_percent_or_5_sq_ft_off_the_sheet_is_area_off(double revit, double sheet, bool off)
+    {
+        Assert.Equal(off, BuildData.AreaOff(revit, sheet) is not null);
+        Assert.Null(BuildData.AreaOff(10, null));
     }
 
     [Fact]

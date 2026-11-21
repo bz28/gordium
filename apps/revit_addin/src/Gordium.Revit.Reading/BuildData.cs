@@ -219,7 +219,7 @@ public static class BuildData
             p.Add($"data: units is {data["units"]?.ToJsonString() ?? "missing"}, not \"feet\"");
         string levelName = "";
         double elevation = 0;
-        if (data["level"] is not JsonObject level || Str(level["name"]) is not { Length: > 0 } ln || !Num(level["elevation_ft"], out elevation))
+        if (data["level"] is not JsonObject level || Str(level["name"]) is not { } ln || ln.Trim() == "" || !Num(level["elevation_ft"], out elevation))
             p.Add("data: level isn't a level with a name and elevation_ft");
         else
             levelName = ln;
@@ -251,7 +251,10 @@ public static class BuildData
             if (smoke is null)
                 p.Add($"{where}: smoke_partition isn't true or false");
             string? rating = null;
-            if (w["fire_rating"] is { } fr)
+            // the key is required (null or text), as the extractor and the script read it
+            if (!w.ContainsKey("fire_rating"))
+                p.Add($"{where}: no fire_rating");
+            else if (w["fire_rating"] is { } fr)
             {
                 if (Str(fr) is { } r && r.Trim() != "")
                     rating = r;
@@ -287,12 +290,13 @@ public static class BuildData
             if (d["swing_dir"] is not null && Pt(d["swing_dir"], out _) && Math.Abs(Math.Sqrt(swing.X * swing.X + swing.Y * swing.Y) - 1) >= 0.01)
                 p.Add($"{where}: swing_dir is {d["swing_dir"]!.ToJsonString()}, not a unit vector [x, y]");
             PlanPoint? hinge = null;
-            if (d["hinge"] is { } hn)
+            if (d.ContainsKey("hinge"))
             {
-                if (Pt(hn, out var hp))
+                // given, it is a point (a null hinge is refused, as the extractor refuses it)
+                if (Pt(d["hinge"], out var hp))
                     hinge = hp;
                 else
-                    p.Add($"{where}: hinge is {hn.ToJsonString()}, not a point [x, y]");
+                    p.Add($"{where}: hinge is {d["hinge"]?.ToJsonString() ?? "null"}, not a point [x, y]");
             }
             doors.Add(new BuildDoor(k + 1, center, width, height, kind ?? "", host, swing, hinge));
         }
@@ -321,12 +325,12 @@ public static class BuildData
             else
                 p.Add($"{where}: boundary isn't a list of 3 or more points");
             double? area = null;
-            if (r["area_sf"] is { } an)
+            if (r.ContainsKey("area_sf"))
             {
-                if (Num(an, out var a))
+                if (Num(r["area_sf"], out var a))
                     area = a;
                 else
-                    p.Add($"{where}: area_sf is {an.ToJsonString()}, not a number");
+                    p.Add($"{where}: area_sf is {r["area_sf"]?.ToJsonString() ?? "null"}, not a number");
             }
             rooms.Add(new BuildRoom(number ?? "", name ?? "", tag, boundary, area));
         }
@@ -467,20 +471,22 @@ public static class BuildData
                 refused.Add($"refused {words}: the data has no wall W{c.Wall}");
                 continue;
             }
-            var w = walls[i];
+            // measured from the data's own wall, never one an earlier correction moved: two corrections of a wall can't
+            // add up past the limit (review round 1)
+            var w = model.Walls.First(x => x.Id == c.Wall);
             var moved = Distance(w.End, c.ExtendEndTo);
             double ox = w.End.X - w.Start.X, oy = w.End.Y - w.Start.Y, nx = c.ExtendEndTo.X - w.Start.X, ny = c.ExtendEndTo.Y - w.Start.Y;
             double oldLength = Math.Sqrt(ox * ox + oy * oy), newLength = Math.Sqrt(nx * nx + ny * ny);
             var sine = newLength < 1e-9 ? 1 : Math.Abs(ox * ny - oy * nx) / (oldLength * newLength);
             var same = newLength >= 1e-9 && ox * nx + oy * ny > 0;
             if (moved > MaxCorrection)
-                refused.Add($"refused W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} moves it {moved:0.###} ft, more than {MaxCorrection:0} ft: {c.Why}");
+                refused.Add(I($"refused W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} moves it {moved:0.###} ft from the data's end, more than {MaxCorrection:0} ft: {c.Why}"));
             else if (sine > 1e-4 || !same)
                 refused.Add($"refused W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} changes the wall's direction: {c.Why}");
             else
             {
-                walls[i] = w with { End = c.ExtendEndTo };
-                applied.Add($"corrected W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} ({moved:0.###} ft): {c.Why}");
+                walls[i] = walls[i] with { End = c.ExtendEndTo };
+                applied.Add(I($"corrected W{c.Wall}: end {Xy(w.End)} → {Xy(c.ExtendEndTo)} ({moved:0.###} ft): {c.Why}"));
             }
         }
         return (model with { Walls = walls }, applied, refused);
@@ -494,7 +500,7 @@ public static class BuildData
     /// a foot).</summary>
     public sealed record BoundaryGap(PlanPoint From, PlanPoint To, double Length, int? WallBefore, int? WallAfter)
     {
-        public string Words => $"{Length:0.##} ft from ({From.X:0.###}, {From.Y:0.###}) to ({To.X:0.###}, {To.Y:0.###})" +
+        public string Words => I($"{Length:0.##} ft from ({From.X:0.###}, {From.Y:0.###}) to ({To.X:0.###}, {To.Y:0.###})") +
                                $" ({(WallBefore is { } a ? $"wall W{a}" : "no wall")} to {(WallAfter is { } b ? $"wall W{b}" : "no wall")})";
     }
 
@@ -551,7 +557,7 @@ public static class BuildData
     /// <see cref="Length"/> ft): Revit warns "Highlighted walls overlap" and may ignore one as a room boundary.</summary>
     public sealed record WallOverlap(int A, int B, double Length, double Offset)
     {
-        public string Words => $"walls W{A} and W{B} overlap along {Length:0.##} ft ({Offset * 12:0.#} in apart, centre to centre)";
+        public string Words => I($"walls W{A} and W{B} overlap along {Length:0.##} ft ({Offset * 12:0.#} in apart, centre to centre)");
     }
 
     public static IReadOnlyList<WallOverlap> WallOverlaps(IReadOnlyList<BuildWall> walls)
@@ -577,6 +583,23 @@ public static class BuildData
             }
         return found;
     }
+
+    /// <summary>How a room Revit enclosed differs from the sheet's area, in words, when it is off by more than 2% or
+    /// more than 5 sq ft (either: a wrong test model is a wrong test); null when within both, or the sheet gives none.
+    /// Run 1's 23 enclosed rooms are within both (at most 1.8%, 3.8 sq ft: Revit measures to the walls' faces).</summary>
+    public static string? AreaOff(double revitArea, double? sheetArea)
+    {
+        if (sheetArea is not { } sheet)
+            return null;
+        var off = revitArea - sheet;
+        var share = sheet > 0 ? Math.Abs(off) / sheet : double.PositiveInfinity;
+        return Math.Abs(off) > 5 || share > 0.02
+            ? I($"Revit's {revitArea:0.#} sq ft, the sheet's {sheet:0.#}: {off:+0.#;-0.#} sq ft ({share * 100:0.#}%), more than 2% or 5 sq ft")
+            : null;
+    }
+
+    /// <summary>A message's numbers written the same on every machine (a decimal point, whatever the culture).</summary>
+    internal static string I(FormattableString s) => s.ToString(CultureInfo.InvariantCulture);
 
     public static double Distance(PlanPoint a, PlanPoint b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
 }

@@ -78,6 +78,11 @@ def _broken(change) -> list[str]:
     (lambda d: d["rooms"][1].__setitem__("boundary", [[0, 0], [1, 1]]), "room 2: boundary"),
     (lambda d: d["rooms"][0].__setitem__("name", " "), "room 1: name"),
     (lambda d: d["footprint"].pop(), "footprint: its last point isn't its first"),
+    # the add-in refuses the same (BuildDataTests.Each_bad_part_is_refused_in_words)
+    (lambda d: d["walls"][0].pop("fire_rating"), "wall 0: no fire_rating"),
+    (lambda d: d["doors"][0].__setitem__("hinge", None), "door 1: hinge is null, not a point"),
+    (lambda d: d["level"].__setitem__("name", "   "), "level is"),
+    (lambda d: d["rooms"][0].__setitem__("area_sf", None), "room 1: area_sf is null, not a number"),
     (lambda d: d.__setitem__("units", "metres"), 'units is "metres"'),
     (lambda d: d["stats"].__setitem__("doors", 3), "stats: doors says 3, the data has 2"),
 ])

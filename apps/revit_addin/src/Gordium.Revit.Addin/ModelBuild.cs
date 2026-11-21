@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -141,7 +142,7 @@ internal static class ModelBuild
                                                 .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan)
                                             ?? throw new InvalidOperationException("the template has no floor plan view type")).Id, level.Id);
         });
-        report.Notes.Add($"level \"{level.Name}\" at {level.Elevation:0.###} ft, plan \"{plan.Name}\"");
+        report.Notes.Add(I($"level \"{level.Name}\" at {level.Elevation:0.###} ft, plan \"{plan.Name}\""));
 
         // ---- phases ----
         var phases = doc.Phases;
@@ -168,10 +169,9 @@ internal static class ModelBuild
                 var type = all.FirstOrDefault(t => t.Name == name) ?? (WallType)basic.Duplicate(name);
                 type.SetCompoundStructure(CompoundStructure.CreateSingleLayerCompoundStructure(MaterialFunctionAssignment.Structure,
                                                                                                w.ThicknessIn / 12, material));
-                if (w.FireRating is { } rating && type.get_Parameter(BuiltInParameter.FIRE_RATING) is not { IsReadOnly: false } fire)
-                    report.Notes.Add($"wall type {name}: its Fire Rating couldn't be set to {rating}");
-                else if (w.FireRating is { } r2)
-                    type.get_Parameter(BuiltInParameter.FIRE_RATING).Set(r2);
+                // missing, read-only or refused: a failure in the log (life-safety data), never dropped
+                if (w.FireRating is { } rating)
+                    Need(type.get_Parameter(BuiltInParameter.FIRE_RATING), rating, $"wall type {name}", "Fire Rating", report);
                 wallTypes[name] = type;
             }
         });
@@ -358,7 +358,7 @@ internal static class ModelBuild
                            ?? throw new InvalidOperationException("the template has no floor type");
                 floor = Floor.Create(doc, [loop], type.Id, level.Id);
                 made[floor.Id] = "the floor";
-                report.Notes.Add($"floor: type \"{type.Name}\", {outline.Count} corners, {BuildData.Area(outline):0} sq ft inside its outline");
+                report.Notes.Add(I($"floor: type \"{type.Name}\", {outline.Count} corners, {BuildData.Area(outline):0} sq ft inside its outline"));
             }
             catch (Exception x)
             {
@@ -399,23 +399,39 @@ internal static class ModelBuild
                 }
             }
         });
+        // the walls Revit drew (a wall of the data not drawn leaves its rooms open, and is named so)
+        var drawnWalls = model.Walls.Where(w => walls.ContainsKey(w.Id)).ToList();
         foreach (var (r, room) in rooms.Where(x => x.Room.IsValidObject))
         {
-            var drawn = BuildData.Area(r.Boundary);
-            var line = $"{room.Number} {room.Name}: Revit's area {room.Area:0.#} sq ft, the sheet's {(r.AreaSf is { } a ? $"{a:0.#}" : "none")}, " +
-                       $"inside its boundary {drawn:0.#}";
-            // where the data's walls leave its boundary open: Revit bounds a room by walls alone, drawn where the data
+            var inside = BuildData.Area(r.Boundary);
+            var line = I($"{room.Number} {room.Name}: Revit's area {room.Area:0.#} sq ft, the sheet's {(r.AreaSf is { } a ? a.ToString("0.#", CultureInfo.InvariantCulture) : "none")}, ") +
+                       I($"inside its boundary {inside:0.#}");
+            // where the drawn walls leave its boundary open: Revit bounds a room by walls alone, drawn where the data
             // ends them, so a gap the tracing left is said here, never closed by the builder
-            var gaps = BuildData.BoundaryGaps(r, model.Walls);
-            var open = gaps.Count == 0 ? "" : "; the data's walls leave its boundary open: " + string.Join("; ", gaps.Select(g => g.Words));
+            var gaps = BuildData.BoundaryGaps(r, drawnWalls);
+            string Words(BuildData.BoundaryGap g)
+            {
+                var mid = new PlanPoint((g.From.X + g.To.X) / 2, (g.From.Y + g.To.Y) / 2);
+                var undrawn = model.Walls.Where(w => !walls.ContainsKey(w.Id) && BuildData.DistanceToWall(mid, w) <= 0.25).Select(w => BuildData.WallMark(w)).ToList();
+                return g.Words + (undrawn.Count > 0 ? $" (where the data has {string.Join(", ", undrawn)}, which wasn't drawn)" : "");
+            }
+            var open = gaps.Count == 0 ? "" : "; the drawn walls leave its boundary open: " + string.Join("; ", gaps.Select(Words));
             if (room.Area <= 0)
             {
                 line += ": NOT ENCLOSED (Revit found no walls around its tag point)" + open;
                 report.Failed.Add($"room {r.Number} {r.Name}: placed, but not enclosed by walls (area 0)" +
-                                  (gaps.Count == 0 ? ": no gap in the data's walls along its boundary (look at the walls Revit ignored as overlapping)" : open));
+                                  (gaps.Count == 0 ? ": no gap in the drawn walls along its boundary (look at the walls Revit ignored as overlapping)" : open));
             }
             else
+            {
                 line += open;
+                // a room enclosed, but not the sheet's: a wrong test model is a wrong test
+                if (BuildData.AreaOff(room.Area, r.AreaSf) is { } off)
+                {
+                    line += $": AREA OFF ({off})";
+                    report.Failed.Add($"room {r.Number} {r.Name}: area off: {off}");
+                }
+            }
             report.Rooms.Add(line);
         }
         report.Counts["rooms"] = new { data = model.Rooms.Count, placed = rooms.Count(x => x.Room.IsValidObject),
@@ -498,7 +514,7 @@ internal static class ModelBuild
                 var (sw, sh) = RevitInterior.TypeSize(s);
                 if (!setW || !setH || sw is not { } a || sh is not { } b || Math.Abs(a - w / 12) > 1e-6 || Math.Abs(b - h / 12) > 1e-6)
                 {
-                    report.Notes.Add($"{Label(stock)}: a {BuildData.G(w)} x {BuildData.G(h)} in type couldn't be set (it came out {sw * 12:0.###} x {sh * 12:0.###} in): made from Revit's {(tag == "Door" ? "Door.rft" : "Window.rft")} instead");
+                    report.Notes.Add($"{Label(stock)}: a {BuildData.G(w)} x {BuildData.G(h)} in type couldn't be set (it came out {I($"{sw * 12:0.###} x {sh * 12:0.###}")} in): made from Revit's {(tag == "Door" ? "Door.rft" : "Window.rft")} instead");
                     doc.Delete(s.Id);
                     return null;
                 }
@@ -570,7 +586,7 @@ internal static class ModelBuild
                 double left = planes.TryGetValue("Left", out var l) ? l.X : -width / 2, right = planes.TryGetValue("Right", out var r) ? r.X : width / 2;
                 double y = planes.TryGetValue("Center (Front/Back)", out var c) ? c.Y : 0;
                 if (Math.Abs(right - left - width) > 1e-6)
-                    throw new InvalidOperationException($"Door.rft's Left and Right planes didn't flex to {width} ft (they are {right - left} apart)");
+                    throw new InvalidOperationException(I($"Door.rft's Left and Right planes didn't flex to {width} ft (they are {right - left} apart)"));
                 var profile = new CurveArray();
                 var corners = new[] { new XYZ(left, y, 0), new XYZ(right, y, 0), new XYZ(right, y, height), new XYZ(left, y, height) };
                 for (var i = 0; i < 4; i++)
@@ -607,7 +623,7 @@ internal static class ModelBuild
             var symbols = family.GetFamilySymbolIds().Select(project.GetElement).OfType<FamilySymbol>().ToList();
             return symbols.FirstOrDefault(s => RevitInterior.TypeSize(s) is var (sw, sh) && sw is { } a && sh is { } b
                                                && Math.Abs(a - width) < 1e-9 && Math.Abs(b - height) < 1e-9)
-                   ?? throw new InvalidOperationException($"{name} has no type {width} x {height} ft once loaded");
+                   ?? throw new InvalidOperationException(I($"{name} has no type {width} x {height} ft once loaded"));
         }
         finally
         {
@@ -698,12 +714,15 @@ internal static class ModelBuild
     private static void Need(Parameter? p, double value, string label, string what, Report report)
     {
         if (p is null || p.IsReadOnly || !p.Set(value))
-            report.Failed.Add($"{label}: its {what} couldn't be set to {value * 12:0.###} in");
+            report.Failed.Add(I($"{label}: its {what} couldn't be set to {value * 12:0.###} in"));
     }
 
     private static PlanPoint P(XYZ v) => new(v.X, v.Y);
 
-    private static string Xy(XYZ v) => $"({v.X:0.###}, {v.Y:0.###})";
+    /// <summary>A message's numbers written the same on every machine (a decimal point, whatever Revit's culture).</summary>
+    private static string I(FormattableString s) => s.ToString(CultureInfo.InvariantCulture);
 
-    private static string Xy(PlanPoint v) => $"({v.X:0.###}, {v.Y:0.###})";
+    private static string Xy(XYZ v) => I($"({v.X:0.###}, {v.Y:0.###})");
+
+    private static string Xy(PlanPoint v) => I($"({v.X:0.###}, {v.Y:0.###})");
 }
