@@ -1,6 +1,6 @@
-# Revit add-in: a design pass on the ribbon, the results panel and the marking list (proposal)
+# Revit add-in: a design pass on the ribbon, the results panel and the marking list
 
-**Purpose:** what an architect meets in Gordium's Revit add-in today, step by step with every friction point, and a proposed design (ribbon, results panel, a result's detail, guided fixes, the marking checklist, visual language, states) with what Revit 2025-2027 allows and a build plan in small PRs, each with how it is evaluated. A proposal: nothing here is built until Ben agrees the approach.\
+**Purpose:** what an architect meets in Gordium's Revit add-in today, step by step with every friction point, and a proposed design (ribbon, results panel, a result's detail, guided fixes, the marking checklist, visual language, states) with what Revit 2025-2027 allows and a build plan in small PRs, each with how it is evaluated. Agreed by Ben on 2026-11-21 (section 6); built PR by PR.\
 **For:** Ben; whoever builds the add-in's UI; architects trying the add-in.\
 **Kept current by:** the PR that builds a part of it marks that part built (or changed, and why); Ben's decisions are written into section 6.
 
@@ -104,7 +104,7 @@ the three NFPA rows are rules, needing review here only for what wasn't measured
 ratio 0.8788 meets the one-third the rule needs, but the rule is a **flag**, so its verdict is needs review, never
 "complies". The 71.0 ft is 212.985 / 3; today the worker gives the ratio, not that length (section 4, PR 5). The eval
 doesn't say *why* each of the 5 rooms has no route; the mockup shows only what `eval_marks.yaml` records of each room
-(CLOSET (40): "a 2.5 by 3 ft closet off INFANT/TODDLER CLASSROOM 5 (door D06)"; SPRINKLERED ABANDONED SPACE (32): the
+(CLOSET (40): "a 2.5 by 3 ft closet whose one door (D06) opens into KITCHEN 10"; SPRINKLERED ABANDONED SPACE (32): the
 sheet's "DOOR PERMANENTLY FIXED SHUT"), never a reason it doesn't give.
 
 ### The five biggest problems
@@ -235,7 +235,7 @@ Gordium:
 Resolve: 5 rooms with no route to an exit        0 of 5 looked at
   Each needs a legal walk out. A walk may not cross kitchens, storage rooms or closets (IBC 1014.2 item 4)
   or a room that can be locked (item 2), and passes only through rooms marked Pass through.
-  ☐ CLOSET (40)   off INFANT/TODDLER CLASSROOM (5), door D06       [Show] [Its door] [Properties]
+  ☐ CLOSET (40)   opens only into KITCHEN (10), door D06           [Show] [Its door] [Properties]
   ☐ STORAGE (13)                                                   [Show] ...
   ...
   For each: ( ) I changed the design  ( ) I changed a mark  ( ) Leave it: stays needs review
@@ -382,6 +382,12 @@ different reasons, and one of them (the 5 rooms) can only be resolved in the mod
    colours each with its own shape and word, keyboard throughout, and a check that doesn't freeze Revit.
 
 ## 6. Decisions for Ben
+
+**Decided (Ben, 2026-11-21):** the approach is agreed ("lgtm as long as it's optimal and best practice for
+architects"), with each recommendation below: v1 first and v2 after PR 7's task test (1); the "I've checked this"
+note as a note only, once the approval layer has a place for it (2); no automatic check (3); the worker additions (4).
+The build follows section 4, one PR at a time, each judged by its own eval; a choice an architect's task test shows
+is worse than the alternative is changed, not kept.
 
 1. **Write marks from the panel?** v1 only selects and opens Properties (no change to how marks are written). v2
    writes the word the architect clicks, in one undoable transaction. Recommendation: v2 after the task test of PR 7.
