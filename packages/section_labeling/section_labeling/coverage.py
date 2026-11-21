@@ -251,13 +251,10 @@ def rules_for_pieces(file: str, pieces: dict[str, dict], labels: dict, rules: li
         quoted = {owner.get((s.get("page"), n)) for s in r.get("sources") or [] if isinstance(s, dict) and s.get("file") == file
                   for lines in [s.get("lines") if isinstance(s.get("lines"), list) else []] if len(lines) == 2
                   for n in range(lines[0], lines[1] + 1)}
+        # a table counts only by a rule named for it: a section's rule quoting one row (Table 7.3.1.2's day-care
+        # factor) checks that row, never the table's others (review round 1, 2026-11-20)
         if pid in quoted and rid not in out[pid]:
             out[pid].append(rid)
-            # a table holds the numbers of the section whose rule quotes it (Table 1016.1 for 1016.1): the rule
-            # written for the section is written for each table piece it quotes too (never for any other piece)
-            for t in sorted(q for q in quoted if q in out and q != pid and pieces[q].get("kind") == "table"):
-                if rid not in out[t]:
-                    out[t].append(rid)
     return out
 
 

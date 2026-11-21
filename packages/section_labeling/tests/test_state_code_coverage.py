@@ -48,10 +48,11 @@ def test_the_model_codes_requirement_verbs_put_a_reference_on_the_review_list():
         assert coverage.requirement_words(rows, piece) == [word]
 
 
-def test_a_rule_named_by_its_book_counts_for_its_section_and_the_tables_it_quotes():
+def test_a_rule_named_by_its_book_counts_for_its_section_never_for_a_table_it_quotes():
     """Maine's state folder holds two books, so its rules are named by book first (general.ibc_1016_1_...): the book
-    word is no part of a piece number. A rule written for a section is written for each table piece it quotes too
-    (Table 1016.1 holds 1016.1's numbers), never for any other piece it quotes, nor for a table it doesn't."""
+    word is no part of a piece number. A rule written for a section never counts for a table it quotes (review round
+    1: the occupant-load rules quote Table 7.3.1.2's day-care row only, and the table read as checked); a table
+    counts only by a rule named for it."""
     pieces = {"1016.1": {"id": "1016.1", "title": "Travel distance limitations", "lines": [[1, 1, 5]]},
               "Table 1016.1": {"id": "Table 1016.1", "title": "TABLE 1016.1", "kind": "table", "lines": [[1, 6, 9]]},
               "1014.3": {"id": "1014.3", "title": "Common path", "lines": [[1, 10, 12]]},
@@ -61,8 +62,10 @@ def test_a_rule_named_by_its_book_counts_for_its_section_and_the_tables_it_quote
     rules = [{"id": "general.ibc_1016_1_travel", "sources": [src(1, 2), src(7, 7), src(10, 10)]},
              {"id": "general.nfpa_1014_3_common_path", "sources": [src(6, 6)]}]       # names 1014.3, quotes only a table
     got = coverage.rules_for_pieces("b.pdf", pieces, labels, rules)
-    assert got == {"1016.1": ["general.ibc_1016_1_travel"], "Table 1016.1": ["general.ibc_1016_1_travel"],
-                   "1014.3": [], "Table 1015.1": []}
+    assert got == {"1016.1": ["general.ibc_1016_1_travel"], "Table 1016.1": [], "1014.3": [], "Table 1015.1": []}
+    rules.append({"id": "general.ibc_table_1016_1_other_rows", "sources": [src(6, 6)]})
+    assert coverage.rules_for_pieces("b.pdf", pieces, labels, rules)["Table 1016.1"] == \
+        ["general.ibc_table_1016_1_other_rows"]
     # New York's names (r318_...) carry no book word and are read as before
     assert coverage.rules_for_pieces("b.pdf", {"R318.2": {"id": "R318.2", "title": "x", "lines": [[1, 1, 1]]}},
                                      {"R318.2": {"label": "rule"}}, [{"id": "general.r318_2_door",
