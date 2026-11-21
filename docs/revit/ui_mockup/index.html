@@ -809,11 +809,14 @@ function startChecking(from){
   S.editedDuringCheck = false;
   S.stale = S.stale || from==="stale";
 }
+let checkSeq = 0;  // each check has its own id: only the latest check's answer may land
 function recheck(){
-  startChecking(S.panel);  // a check started on stale results keeps them grey until its answer
+  if (S.panel==="checking") S.editedDuringCheck = false;  // already checking: a new read starts, the earlier state is kept
+  else startChecking(S.panel);  // a check started on stale results keeps them grey until its answer
   S.panel = "checking"; S.tab = "results"; render(); document.getElementById("stateSel").value = "checking";
   clearTimeout(checkTimer);
-  checkTimer = setTimeout(() => { if (S.panel!=="checking") return; S.panel = "results"; S.stale = S.editedDuringCheck; /* an edit after the read leaves the answer stale */ S.view = "list"; document.getElementById("stateSel").value = S.stale ? "stale" : "results"; render();
+  const id = ++checkSeq;
+  checkTimer = setTimeout(() => { if (S.panel!=="checking" || id!==checkSeq) return; S.panel = "results"; S.stale = S.editedDuringCheck; /* an edit after the read leaves the answer stale */ S.view = "list"; document.getElementById("stateSel").value = S.stale ? "stale" : "results"; render();
     toast(S.editedDuringCheck ? "Checked, but the model changed during the check: these results are marked out of date. Check again." : S.d33 || Object.keys(S.fix).length ? "Mockup: the results shown are the eval's. A real check would reflect your changes and say which rows changed." : "Checked: the same 8 rows (nothing in the model changed)."); }, 1500);
 }
 body.addEventListener("click", e => {
@@ -843,7 +846,7 @@ body.addEventListener("click", e => {
     case "prev": openDetail(Math.max(0, S.detail-1)); break;
     case "next": openDetail(Math.min(ROWS.length-1, S.detail+1)); break;
     case "recheck": recheck(); break;
-    case "cancel": clearTimeout(checkTimer); if (S.hadResults) { S.panel = "results"; S.stale = true; document.getElementById("stateSel").value = "stale"; } else { S.panel = S.before; S.stale = false; document.getElementById("stateSel").value = S.before; } render(); toast(S.hadResults ? "Cancelled: the previous results stay, marked out of date (never shown as the new check's)." : "Cancelled: nothing was checked."); break;
+    case "cancel": clearTimeout(checkTimer); checkSeq++; if (S.hadResults) { S.panel = "results"; S.stale = true; document.getElementById("stateSel").value = "stale"; } else { S.panel = S.before; S.stale = false; document.getElementById("stateSel").value = S.before; } render(); toast(S.hadResults ? "Cancelled: the previous results stay, marked out of date (never shown as the new check's)." : "Cancelled: nothing was checked."); break;
     case "law": { const q = Q[t.dataset.q]; toast(`Would open ${q.w.includes("nfpa")||q.w.startsWith("NFPA")?"gov.law.nfpa.101.2012.pdf":"icc.ibc.2009.pdf"} at page ${q.page} (the rulebook's source file; mockup: no network).`); break; }
     case "props": S.propsFor = t.dataset.el; select([t.dataset.el], false); showProps(true); break;
     case "copy": { const r = ROWS[S.detail]; const text = `[needs review] ${r.name} (${r.sec}): ${r.line}. ${r.why}`; navigator.clipboard?.writeText(text).catch(()=>{}); toast("Copied: " + text.slice(0, 120) + "…"); break; }
@@ -886,7 +889,7 @@ document.querySelectorAll("[data-theme-btn]").forEach(b => b.onclick = () => {
   S.theme = b.dataset.themeBtn; document.documentElement.dataset.theme = S.theme;
   document.querySelectorAll("[data-theme-btn]").forEach(x => x.setAttribute("aria-pressed", x===b));
 });
-document.getElementById("stateSel").onchange = e => { if (e.target.value==="checking" && S.panel!=="checking") startChecking(S.panel); S.panel = e.target.value; S.tab = "results"; S.view = "list"; if (S.panel!=="checking") S.stale = S.panel==="stale"; showProps(false); };
+document.getElementById("stateSel").onchange = e => { clearTimeout(checkTimer); checkSeq++; if (e.target.value==="checking" && S.panel!=="checking") startChecking(S.panel); S.panel = e.target.value; S.tab = "results"; S.view = "list"; if (S.panel!=="checking") S.stale = S.panel==="stale"; showProps(false); };
 document.getElementById("srcBtn").onclick = e => { S.src = !S.src; e.currentTarget.setAttribute("aria-pressed", S.src); document.getElementById("revit").classList.toggle("show-src", S.src); document.getElementById("legend").classList.toggle("show-src", S.src); showProps(false); };
 // ribbon tooltips: a short title, then a few lines (Revit's ToolTip and LongDescription)
 const tip = document.getElementById("rtip");
