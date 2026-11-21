@@ -403,7 +403,7 @@ internal static class RevitInterior
         Transaction? t = null;
         if (!doc.IsModifiable && !doc.IsReadOnly)
         {
-            t = new Transaction(doc, "Gordium: read the enclosed areas (rolled back)");
+            t = new Transaction(doc, ResultRows.AreasTransaction);
             t.Start();
         }
         try

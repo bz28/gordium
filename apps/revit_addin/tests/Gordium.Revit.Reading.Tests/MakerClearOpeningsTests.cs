@@ -386,8 +386,27 @@ public sealed class MakerClearOpeningsTests
         Assert.Contains("ClearPrefills.Head(filled.Count, failed)", marks);
         var check = Src("CheckProject.cs");
         Assert.Contains("var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);", check);
-        Assert.Contains("Show(run, added.Count, filled.Count, failed);", check);
-        Assert.Contains("ClearPrefills.Head(clearFilled, clearFailed)", check);
+        // the results panel (PR #136): the words go to the panel's status line and first into check_project_result.txt,
+        // and the fill runs before the street ask
+        Assert.Contains("var clear = ClearPrefills.Head(filled.Count, failed);", check);
+        Assert.Contains("Show(ui, doc, run, added.Count, ask, clear);", check);
+        Assert.Contains("File.WriteAllText(file, clear + run.FullText + \"\\n\"", check);
+        Assert.Contains("ClearWords: clear", check);
+        Assert.True(check.IndexOf("RevitMarks.TryPrefill(", StringComparison.Ordinal) < check.IndexOf("StreetEdges.Ask(", StringComparison.Ordinal));
+        var view = Src("ResultsView.cs");
+        Assert.Contains("ClearPrefills.StatusLine(content.MarksAdded, content.ClearWords)", view);
+    }
+
+    [Fact]
+    public void The_panels_status_line_says_the_marks_added_and_the_clear_openings_words()
+    {
+        const string why = "Revit's transaction ended RolledBack";
+        Assert.Equal("Added 3 Gordium marks to this project. Gordium couldn't write the makers' clear openings (" + why +
+                     "): fill them by hand from the maker's tables; until then their clear opening needs review.",
+                     ClearPrefills.StatusLine(3, ClearPrefills.Head(0, why)));
+        Assert.StartsWith("Gordium filled the maker's clear opening of 1 window type", ClearPrefills.StatusLine(0, ClearPrefills.Head(1, null)));
+        Assert.Equal("Added 3 Gordium marks to this project.", ClearPrefills.StatusLine(3, ClearPrefills.Head(0, null)));
+        Assert.Equal("", ClearPrefills.StatusLine(0, ""));
     }
 
     private static Dictionary<Guid, MarkValue> Op(string word) => new() { [Marks.Operation.Guid] = new(true, Text: word) };

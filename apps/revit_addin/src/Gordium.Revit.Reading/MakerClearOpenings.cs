@@ -260,6 +260,12 @@ public static class ClearPrefills
         : $"Gordium filled the maker's clear opening of {(filled == 1 ? "1 window type" : $"{filled} window types")} " +
           "as a draft: confirm each (Mark for egress lists them); none is sent before.\n\n";
 
+    /// <summary>The results panel's status line: the marks added, then the makers' clear openings' words
+    /// (<see cref="Head"/>, which a failed write must reach: review round 3), "" when neither.</summary>
+    public static string StatusLine(int marksAdded, string clearWords) =>
+        string.Join(" ", new[] { marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.", clearWords.Trim() }
+            .Where(s => s.Length > 0));
+
     /// <summary>The line of a type filled (<paramref name="done"/>: its marks hold the draft) or still to fill (the
     /// marks are empty: this run writes them, or a write that didn't commit left them so).</summary>
     private static string Line(string label, MakerFormula entry, bool done) =>

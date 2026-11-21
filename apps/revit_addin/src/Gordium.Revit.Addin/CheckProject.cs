@@ -17,10 +17,11 @@ namespace Gordium.Revit.Addin;
 /// <summary>
 /// "Check my project" (docs/revit/revit_reading_design.md, section 9): the open project read outside
 /// (<see cref="RevitRead"/>, then SiteReader) and inside (<see cref="RevitInterior"/>, then InteriorReader), with the
-/// lot facts from Gordium's marks on Project Information, sent as one check_site, and shown: the worker's state and
-/// summary, the phase and design options checked, the groups in the worker's order with every failure (ResultText).
+/// lot facts from Gordium's marks on Project Information, sent as one check_site, and shown in the results panel
+/// (<see cref="ResultsPane"/>, rows from ResultRows): the worker's state and counts, the phase and design options
+/// checked, the groups in the worker's order with every row; every row also in check_project_result.txt (ResultText).
 /// Its first run adds the marks (as Mark for egress does); a street edge not set is asked for by a pick; any other
-/// fact missing and nothing is sent: the dialog lists what to fill in. The request and the answer go to the log.
+/// fact missing and nothing is sent: the panel lists what to fill in. The request and the answer go to the log.
 /// </summary>
 [Transaction(TransactionMode.Manual)]
 public sealed class CheckProjectCommand : IExternalCommand
@@ -29,12 +30,21 @@ public sealed class CheckProjectCommand : IExternalCommand
 
     public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
     {
-        var ui = commandData.Application;
+        var (result, why) = Check(commandData.Application);
+        if (why is not null)
+            message = why;
+        return result;
+    }
+
+    /// <summary>The button's check of the active project, shown in the results panel: the button's and the panel's
+    /// Check again (on Revit's thread: a command, or a panel action raised through its ExternalEvent).</summary>
+    internal static (Result Result, string? Why) Check(UIApplication ui)
+    {
         var doc = ui.ActiveUIDocument?.Document;
         if (doc is null || doc.IsFamilyDocument)
         {
             TaskDialog.Show(Title, "Open a project (not a family) to check it.");
-            return Result.Cancelled;
+            return (Result.Cancelled, null);
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
         try
@@ -43,30 +53,43 @@ public sealed class CheckProjectCommand : IExternalCommand
             log["marks_added"] = added.Select(s => $"{s.Action}: {s.Mark.Name}").ToList();
             // each window type a maker's formula covers, its three Clear marks empty: filled as a draft the architect
             // confirms (never the stamp, so this check sends no clear opening for it)
-            // (a failure is logged and the check goes on: the types stay empty, so their clear opening needs review)
+            // (a failure is shown and the check goes on: the types stay empty, so their clear opening needs review)
             var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
-            if (ProjectFacts.Read(RevitMarks.Model(doc)).StreetEdges is null)
+            var clear = ClearPrefills.Head(filled.Count, failed);
+            // the street edge asked for only when it is the one fact left and the view shows a property line to click
+            var read = ProjectFacts.Read(RevitMarks.Model(doc));
+            var view = ShowsPropertyLine(ui.ActiveUIDocument!);
+            var ask = StreetEdges.Ask(read, read.StreetEdges is null, view);
+            log["street_ask"] = ask.ToString();
+            if (ask == StreetAsk.Pick)
                 PickStreet(ui.ActiveUIDocument!, log);
             var run = Run(doc, ui.Application, log);
             // the edge kept can't be sent (no longer a lot edge, or matching two): asked for again at once, as its
-            // message says, and checked once more (the typed reason, never its words)
-            if (StreetEdges.NeedsNewPick(run.Prepared) && PickStreet(ui.ActiveUIDocument!, log))
-                run = Run(doc, ui.Application, log);
-            Show(run, added.Count, filled.Count, failed);
-            return Result.Succeeded;
+            // message says, and checked once more (the typed reason, never its words); in a view that can show it
+            if (StreetEdges.NeedsNewPick(run.Prepared))
+            {
+                ask = StreetEdges.Ask(ProjectFacts.Read(RevitMarks.Model(doc)), needed: true, view);
+                log["street_ask_again"] = ask.ToString();
+                if (ask == StreetAsk.Pick && PickStreet(ui.ActiveUIDocument!, log))
+                    run = Run(doc, ui.Application, log);
+            }
+            Show(ui, doc, run, added.Count, ask, clear);
+            return (Result.Succeeded, null);
         }
         catch (Exception e)
         {
             log["error"] = $"{e.GetType().Name}: {e.Message}";
             log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
             Trial.Log("check_project", log);
+            // the last check's rows taken down: never left showing as if they were this one's
+            ResultsPane.Failed($"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
             TaskDialog.Show(Title, $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
-            message = e.Message;
-            return Result.Failed;
+            return (Result.Failed, e.Message);
         }
     }
 
-    internal sealed record Ran(ProjectPrepared Prepared, CheckResult? Result, ResultWords? Words, string? FullText);
+    internal sealed record Ran(ProjectPrepared Prepared, CheckResult? Result, ResultWords? Words, string? FullText,
+                               ResultModel? Model = null);
 
     /// <summary>Reads, sends and logs one check of the document (everything in the log, whatever happens).</summary>
     internal static Ran Run(Document doc, RevitApplication app, Dictionary<string, object?> log)
@@ -104,39 +127,45 @@ public sealed class CheckProjectCommand : IExternalCommand
                                       uid => Label(doc, uid), street: prepared.Street);
         var full = ResultText.Format(result, PhaseName(doc, prepared.PhaseChecked), prepared.OptionsChecked, prepared.Inside,
                                      uid => Label(doc, uid), maxOtherRows: int.MaxValue, street: prepared.Street).ToString();
+        var model = ResultRows.Build(result, PhaseName(doc, prepared.PhaseChecked), prepared.OptionsChecked, prepared.Inside, prepared.Street);
         log["street"] = prepared.Street;
         log["state"] = result.State.ToString();
         log["summary"] = result.Summary;
         log["shown"] = words.ToString();
         log["notes"] = prepared.Inside?.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
         Trial.Log("check_project", log);
-        return new Ran(prepared, result, words, full);
+        return new Ran(prepared, result, words, full, model);
     }
 
-    private static void Show(Ran run, int marksAdded, int clearFilled, string? clearFailed)
+    /// <summary>The run in the results panel (what to fill in first when nothing was sent), every row in the text
+    /// file; each element's label read here, on Revit's thread, for the panel. <paramref name="clear"/> is
+    /// <see cref="ClearPrefills.Head"/>'s words (the makers' clear openings filled, or why they couldn't be): shown in
+    /// the panel's status line beside the marks added, and first in the text file.</summary>
+    private static void Show(UIApplication ui, Document doc, Ran run, int marksAdded, StreetAsk ask, string clear)
     {
-        var added = (marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.\n\n") +
-                    ClearPrefills.Head(clearFilled, clearFailed);
-        if (run.Words is not { } w)
+        var labels = new Dictionary<string, string>(StringComparer.Ordinal);
+        string files;
+        if (run.Model is { } model)
         {
-            new TaskDialog(Title)
-            {
-                MainInstruction = "Nothing was checked: fill these in first",
-                MainContent = added + string.Join("\n", run.Prepared.Missing.Select(m => "- " + m)),
-                FooterText = $"Logged to {Trial.LogPath()}",
-            }.Show();
-            return;
+            var file = Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "check_project_result.txt");
+            File.WriteAllText(file, clear + run.FullText + "\n", new UTF8Encoding(false));
+            foreach (var uid in model.Groups.SelectMany(g => g.AllRows).SelectMany(r => r.Elements).Distinct(StringComparer.Ordinal))
+                if (Label(doc, uid) is { } label)
+                    labels[uid] = label;
+            files = $"Every row: {file}. The request and the answer: {Trial.LogPath()}";
         }
-        var file = Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "check_project_result.txt");
-        File.WriteAllText(file, run.FullText + "\n", new UTF8Encoding(false));
-        new TaskDialog(Title)
-        {
-            MainInstruction = w.Headline,
-            MainContent = added + w.Checked + "\n\n" + w.Outline,
-            ExpandedContent = w.Main + (w.Inside.Length > 0 ? "\n\n" + w.Inside : ""),
-            FooterText = $"Every row: {file}. The request and the answer: {Trial.LogPath()}",
-        }.Show();
+        else
+            files = $"Logged to {Trial.LogPath()}";
+        ResultsPane.Show(ui, doc, new PanelContent(doc.Title, DateTime.Now, run.Model,
+                                                   StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
+                                                   ClearWords: clear));
     }
+
+    /// <summary>Whether the active view is a plan (a site plan or floor plan) with a property line visible in it:
+    /// the only view a street-edge click can land in.</summary>
+    private static bool ShowsPropertyLine(UIDocument ui) =>
+        ui.ActiveView is ViewPlan { IsTemplate: false } plan
+        && new FilteredElementCollector(ui.Document, plan.Id).OfClass(typeof(PropertyLine)).Any();
 
     /// <summary>Asks the architect to click the lot edges along the street, and keeps them in the Street edge mark.
     /// True when an edge was kept.</summary>
@@ -155,7 +184,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             try
             {
                 picked = ui.Selection.PickObject(ObjectType.Element, new PropertyLines(),
-                    kept.Count == 0 ? "Gordium: click the lot edge along the street (on the property line; Esc to stop)"
+                    kept.Count == 0 ? "Gordium: " + StreetEdges.PickPrompt
                                     : "Gordium: click another lot edge along the street, or press Esc when done");
             }
             catch (Autodesk.Revit.Exceptions.OperationCanceledException)
@@ -195,7 +224,7 @@ public sealed class CheckProjectCommand : IExternalCommand
         log["street_picks"] = said;
         if (kept.Count == 0)
             return false;
-        using var t = new Transaction(doc, "Gordium: the street edge");
+        using var t = new Transaction(doc, ResultRows.StreetTransaction);
         t.Start();
         var p = doc.ProjectInformation.get_Parameter(Marks.StreetEdge.Guid)
                 ?? throw new InvalidOperationException($"{Marks.StreetEdge.Name} isn't on Project Information");

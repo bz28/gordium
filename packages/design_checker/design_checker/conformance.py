@@ -444,6 +444,8 @@ def differences(got: dict, want: dict, ids: dict | None = None, arcs: list | Non
         for k in ("could_be_building", "ground_like", "context"):
             if g[k] != o[k]:
                 out.append(f"left out {o['id']}: {k} {g[k]!r}, expected {o[k]!r}")
+        if g.get("slab") != o.get("slab"):           # what a slab is decides its rows (site_json.SLAB_KINDS)
+            out.append(f"left out {o['id']}: slab {g.get('slab')!r}, expected {o.get('slab')!r}")
         if (g["touching"] is not False) != (o["touching"] is not False):      # null counts as touching
             out.append(f"left out {o['id']}: touching {g['touching']!r}, expected {o['touching']!r}")
     out += [f"left out {i}: listed, but no such object is expected" for i in sorted(left)]

@@ -8,7 +8,7 @@ namespace Gordium.Revit.Reading;
 // the marking list built from them. The one rule (principle 4): a mark never set is not stated, never "No"; a
 // suggestion is shown, never read as a mark.
 
-public enum MarkedKind { Room, Window, Door, Level }
+public enum MarkedKind { Room, Window, Door, Level, SiteSlab }
 
 /// <summary>A room's mark, read: <see cref="Sleeping"/> null when not stated.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping);
@@ -177,10 +177,15 @@ public static class MarkingList
     /// <param name="clearWriteFailed">Why writing the makers' clear openings just failed, or null (<see cref="ClearPrefills.Plan"/>).</param>
     public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null, string? clearWriteFailed = null)
     {
+        // every floor outside the house (SiteSlabs), on the lot or not: which are on it is the check's own decision
+        // (objects.left_out, with the lot the check is given), never guessed here (review round 2), so the list asks for
+        // each and says that one off the lot changes nothing
+        var slabs = SiteSlabs.Find(model).Values.ToList();
         // a level is listed when it has an enclosed area with no Room (whatever its mark), or its mark is set
         var unmarkedAreas = InteriorReader.UnknownAreas(model, levelMarks: false);
         var rows = MarkReading.InDesign(model)
             .Select(e => MarkReading.KindOf(e) == MarkedKind.Level ? LevelRow(e, unmarkedAreas) : Row(e)).OfType<MarkingRow>()
+            .Concat(slabs.Select(SlabRow))
             .OrderByDescending(r => r.NeedsMarking).ThenBy(r => r.Kind)
             .ThenBy(r => r.Label, StringComparer.OrdinalIgnoreCase).ThenBy(r => r.Id, StringComparer.Ordinal)
             .ToList();
@@ -200,6 +205,22 @@ public static class MarkingList
         var read = model.Interior is null ? null : InteriorReader.Read(model);
         var summary = Summary(rows, placement, others.Count, InteriorReader.UnknownAreas(model).Count,
                               roomsSent: read?.Interior["rooms"] is not null);
+        // the floors outside the house (SiteSlabs): what each is decides lot coverage and the yards
+        if (slabs.Count > 0)
+        {
+            var unset = rows.Count(r => r.Kind == MarkedKind.SiteSlab && r.NeedsMarking);
+            summary.Add(unset == 0
+                ? $"{Marks.SiteSlab.Name}: all {slabs.Count} floors outside the house marked."
+                // review round 3: an unknown word ("Garage") does say something, just not one of Gordium's words
+                : $"{Marks.SiteSlab.Name}: {unset} of {slabs.Count} floors outside the house aren't marked with one of " +
+                  "Gordium's words: one on the lot keeps lot coverage and the yards needing review until it says (" +
+                  string.Join(", ", SlabKinds.Words) + "); one off the lot changes nothing.");
+        }
+        var inHouse = SiteSlabs.MarkedInHouse(model);
+        if (inHouse.Count > 0)
+            summary.Add($"{Marks.SiteSlab.Name} is set on {(inHouse.Count == 1 ? "1 floor" : $"{inHouse.Count} floors")} under " +
+                        "the house's walls or roof (" + string.Join(", ", inHouse.Select(SlabLabel).Order(StringComparer.OrdinalIgnoreCase)) +
+                        "): read as part of the building, the mark not read.");
         // step 4: the project-wide tick, always shown; and, with the model's inside read, what could hide a stair
         var stairBlockers = StairReader.Blockers(model);
         summary.Add(MarkReading.AllStairs(model) switch
@@ -316,6 +337,20 @@ public static class MarkingList
         var label = (e.Name ?? e.UniqueId) + (count == 0 ? "" : count == 1 ? " (1 enclosed area with no Room)" : $" ({count} enclosed areas with no Room)");
         return new(e.UniqueId, MarkedKind.Level, label, [cell]);
     }
+
+    /// <summary>A floor outside the house, as a row: its one mark, what it is.</summary>
+    private static MarkingRow SlabRow(SiteSlab s)
+    {
+        var m = Marks.SiteSlab;
+        var cell = s.Word is null ? new MarkCell(m, MarkState.Unset, null, null, "not set")
+            : s.Kind is null ? new MarkCell(m, MarkState.NotUnderstood, s.Word, null,
+                                            $"\"{s.Word}\" isn't one of Gordium's ({string.Join(", ", SlabKinds.Words)})")
+            : new MarkCell(m, MarkState.Given, s.Word, null, null);
+        return new(s.Floor.UniqueId, MarkedKind.SiteSlab, SlabLabel(s.Floor), [cell]);
+    }
+
+    private static string SlabLabel(RevitElement floor) =>
+        $"{(floor.Category.Length > 0 ? floor.Category : "Floors")}: {floor.Name ?? "(no name)"} ({floor.UniqueId})";
 
     internal static string Label(MarkedElement e)
     {

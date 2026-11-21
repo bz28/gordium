@@ -35,7 +35,17 @@ BUILDING = {"id": True, "role": True, "layer": True, "name": False, "floor": Fal
 FACE = {"points": True, "holes": False}
 UNSENT = {"id": True, "layer": True, "kind": True, "problem": True}
 LEFT_OUT = {"id": True, "layer": True, "could_be_building": True, "touching": True, "ground_like": True,
-            "context": True}
+            "context": True, "slab": False, "name": False}
+# What a site slab left out is (left_out[].slab, protocol 1.3): a slab on the ground the tool can't tell is part of a
+# building (Revit: a Floor under none of the house's walls or roofs), by what the architect marked it. A porch, deck,
+# landing or ramp is part of the building in the yards and lot coverage (§325-18A), so it is sent as a building, never
+# as a slab. "unmarked": not marked, so it may be one (every lot coverage and yard row it could change needs review);
+# "patio": a patio, terrace or walk, exempt from lot coverage, but one above grade may not be in a required yard
+# (§325-3B BUILDING AREA, TERRACE OR PATIO), and its height above the ground isn't measured, so the yards need
+# review; "parking": a parking area, parking space or driveway, which building area "shall not include" (§325-3B).
+SLAB_KINDS = ("unmarked", "patio", "parking")
+SLABS_EXEMPT = ("patio", "parking")       # not buildings: never in lot coverage, never "an object not measured"
+SITE_SLABS = "site_slabs"                 # extras: the description's slabs, as for_measuring hands them to the view
 GRADE = {"source": True, "points": True}
 PROBLEM = {"code": True, "args": True}
 OBJECTS = {"site": TOP, "host": HOST, "lot": LOT, "edge": EDGE, "building": BUILDING, "face": FACE,
@@ -232,6 +242,10 @@ def problems_of(doc) -> list[str]:
         for k in ("could_be_building", "ground_like", "context"):
             c.flag(o.get(k), f"{w}.{k}")
         c.flag(o.get("touching"), f"{w}.touching", null=True)
+        if "slab" in o and o["slab"] not in SLAB_KINDS:
+            c.no(f"{w}.slab", f"should be one of {', '.join(SLAB_KINDS)}, not {o['slab']!r}")
+        if "name" in o:
+            c.text(o["name"], f"{w}.name")
     if "grade" in doc and c.fields(doc["grade"], "grade", "grade"):
         g = doc["grade"]
         if g.get("source") not in GRADE_SOURCES:
@@ -433,11 +447,13 @@ def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[
     description's grade, the extras with its left-out objects). Every unsent object's problem goes on one building
     (UNSENT_BUILDING), so every building measure needs review; inventory_complete false puts a problem on every
     building. The grade and the left-out objects come from the description only: facts naming grade points, a
-    grade_from other than the description's grade source, or extras naming left-out objects are refused (two
-    sources for one thing), never merged."""
+    grade_from other than the description's grade source, or extras naming left-out objects or slabs are refused
+    (two sources for one thing), never merged. A left-out slab marked a patio or a driveway (SLABS_EXEMPT) is not an
+    object that may be a building, so it is in none of the left-out lists; every slab (each {id, slab, name}) is
+    handed to the view as extras[SITE_SLABS], only when there is one."""
     extras = dict(extras or {})
     reasons = [f"extras: {k} belongs in the site description (left_out), not the extras" for k in LEFT_OUT_EXTRAS
-               if k in extras]
+               + (SITE_SLABS,) if k in extras]
     if "grade_points" in facts:
         reasons.append("facts: grade_points belong in the site description (grade), not the facts")
     grade = site["grade"]
@@ -458,6 +474,9 @@ def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[
         if grade["source"] != "spot":            # spot grades are what grade points are when no source is named
             facts["grade_from"] = grade["source"]
     left_out = site["left_out"]
+    # a patio or a driveway marked so is not a building: listed in the description (traced), never measured nor
+    # counted as an object that may be one; an unmarked slab is both left out and named (SITE_SLABS) for its rows
+    measured_out = [o for o in left_out if o.get("slab") not in SLABS_EXEMPT]
     advice = extras.get(ADVICE)
     if advice is not None:                   # words for the architect, by left-out object: never a decision's input
         if not isinstance(advice, dict) or not all(isinstance(k, str) and isinstance(v, str) and v.strip()
@@ -467,10 +486,13 @@ def for_measuring(site: dict, facts: dict, extras: dict | None = None) -> tuple[
         if stray:
             raise SiteRefused([f"extras: {', '.join(stray)} given advice ({ADVICE}) but not among the objects left "
                                "out (the site description's left_out)"])
-    extras.update(not_included=[o["id"] for o in left_out],
-                  touching=[o["id"] for o in left_out if o["touching"] is not False],
-                  ground_like=[o["id"] for o in left_out if o["ground_like"]],
-                  context_left_out=sorted(o["id"] for o in left_out if o["context"]))
+    extras.update(not_included=[o["id"] for o in measured_out],
+                  touching=[o["id"] for o in measured_out if o["touching"] is not False],
+                  ground_like=[o["id"] for o in measured_out if o["ground_like"]],
+                  context_left_out=sorted(o["id"] for o in measured_out if o["context"]))
+    slabs = [{"id": o["id"], "slab": o["slab"], "name": o.get("name")} for o in left_out if o.get("slab")]
+    if slabs:                                # absent when there are none: every request without one as before
+        extras[SITE_SLABS] = slabs
     return {"units": site["units"], "lot": site["lot"], "buildings": buildings, "problems": site["problems"]}, facts, extras
 
 

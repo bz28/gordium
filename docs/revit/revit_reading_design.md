@@ -34,6 +34,7 @@ are for the architect's reading only (proposed).
 | Revit element | Sent as | Rhino equivalent | Scene that tests it |
 |---|---|---|---|
 | Proposed building categories: walls, floors, roofs, columns (architectural and structural), stairs, railings, ramps, doors, windows, curtain wall panels and mullions. A component stair's runs, landings and supports, and a railing's top rail and handrails, are their own elements in their own categories: whether they are read as part of the building or through their stair or railing is **to check** (until then they fall to the "any other element" row: left out, touching, the cautious side; and a stair element with no faces of its own is unsent, row "no face to send"). Left off on purpose for the first reader, so they fall to the "any other element" row (left out, and usually touching: the cautious side): structural framing and foundations, ceilings, roof fascias, gutters and soffits, wall sweeps, slab edges, casework | `buildings`: one per element, id its `UniqueId`, faces of all its solids | A solid on the Building layer | 01 (as floor blocks); native elements: **new scene A** |
+| **Site slabs (2026-11-20):** a Floor (a system floor, no Gordium mark of its own) whose plan box (Revit's own) overlaps, by more than the vertex tolerance both ways, the plan box of no wall and no roof in the design checked: a concrete pad, a patio, a driveway or a walk, which the Floor tool draws as it draws the house's floors (found on Autodesk's Pacific Continental sample: a "Concrete 10\"" slab outside the house, partly past the property line, read as a building, so lot coverage did not comply). Chapter 325 counts them by what they are: "All porches, attached or freestanding decks, … ramps, and/or landings shall be considered a part of the building in both the determination of required yards and lot coverage" (§325-18A; §325-3B BUILDING AREA); building area "shall not include parking areas and parking spaces. Pergolas and terraces and patios shall be exempt from total lot coverage requirements. However, neither pergolas or terraces and patios above grade shall be located in a required yard" (§325-3B); TERRACE OR PATIO: "less than 18 inches above grade, without a roof, … Terraces and patios above grade shall not encroach into required yards"; STRUCTURE "shall not include patios or terraces". Revit can't tell which, so the architect says, with the `Gordium: Site slab is` mark ([revit_interior_reading_design.md](revit_interior_reading_design.md), section 3): Porch, Deck, Landing or Ramp; Patio, Terrace or Walk (a walk read as a patio: §325-3B has no walk, TERRACE OR PATIO is "a level plane or surfaced patio", and GREEN SPACE names "sidewalks or patios" together); Parking or Driveway. Every other floor is part of the building, its mark not read (the marking list says so). Either way a wrong sorting is never a false pass: a house floor read as a slab (one drawn only to the walls' inner faces, with no roof drawn yet) makes lot coverage and the yards need review; a slab read as part of the house (one near a diagonal wall's box, under the eaves, or crossed by a garden wall drawn as a Wall) is measured as every floor was before. Not site slabs: an in-place or loadable family in Floors, a floor with no box (read as before). | A porch, deck, landing or ramp: `buildings`, as any floor. Any other: `left_out` with `slab` (`patio`, `parking`, or `unmarked` when unset or a word not in the list) and its `name`; never measured, so never a failure. The checker ([site_description_v1.md](../protocol/site_description_v1.md#how-the-worker-uses-it)): unmarked, lot coverage and every required yard need review, naming it; a patio, the yards need review (its height above the ground isn't measured yet); parking, nothing. An unreadable one is sent as a building part is (unsent) | None (Rhino's Building layer is the architect's choice) | Reader pins (`SiteSlabTests`: the Pacific Continental case, each mark word, the edges of the rule); the checker's: `test_site_slabs.py` |
 | Gordium's own floor blocks (drawn by `start_site`; proposed: DirectShapes carrying a Gordium mark with `"<story>;<height>"`, as Rhino's `gordium:floor` user text) | `buildings`, with `floor` = the height drawn | Floor blocks on `Gordium::Massing` | Every drawn scene: each expected building is a floor block with `floor: 10`, so every scene's house (02's curved one and 03's open one too) is drawn as marked floor blocks, built from real solids (`GeometryCreationUtilities` or `BRepBuilder`, never a faceting builder that would turn 02's curve into flat faces: **to check**) |
 | Curtain wall (the host wall itself) | Proposed: its panels and mullions are their own elements (row 1); the wall sends its own faces only if it has any (**to check**: whether a curtain wall's own geometry is empty, so no face is sent twice) | | **new scene A** |
 | In-place family | Proposed: by its category, like the building-category row; off the building categories, as the family instance row below (left out whatever its geometry, never dropped for having none at Fine detail). `Family.IsInPlace` only names it in the panel | | **new scene A**; empty: **new scene H** |
@@ -285,9 +286,10 @@ the … layer", `not_a_solid` says "explode it". Host-neutral wording for those 
 then `SiteReader`) and the inside (the [interior note](revit_interior_reading_design.md): `RevitInterior`, then
 `InteriorReader`), read one after the other from the same document, sent as **one** `check_site` with the site, the
 lot facts and the `interior`. The two reads must name the same phases and design options (the last phase; each
-set's option being edited, else its primary), or nothing is sent. Code: `ProjectCheck.cs` and `ResultText.cs` in
-`Gordium.Revit.Reading` (tested on fake records against the real worker: scene 01 with interior houses 1 and 5),
-`CheckProject.cs` in the add-in. **Decided (Ben, 2026-11-20, "go with your recommendations").**
+set's option being edited, else its primary), or nothing is sent. Code: `ProjectCheck.cs`, `ResultRows.cs` and
+`ResultText.cs` in `Gordium.Revit.Reading` (tested on fake records against the real worker: scene 01 with interior
+houses 1 and 5), `CheckProject.cs` and the results panel (`ResultsPane.cs`, `ResultsView.cs`, `PanelActions.cs`)
+in the add-in. **Decided (Ben, 2026-11-20, "go with your recommendations").**
 
 **The lot facts are Gordium marks on Project Information**, added by the button's first run (or Mark for egress),
 read by GUID like every mark; unset is not stated:
@@ -302,8 +304,8 @@ read by GUID like every mark; unset is not stated:
 | `Gordium: Ground from` (text: Spot grades / Finished spot grades) | `grade_from`, the ground from Gordium's spot-grade markers (section 5) | not sent: no ground, so height and stories need review. A Toposolid isn't read yet (no terrain code), so a Toposolid ground always needs review |
 
 `jurisdiction` is fixed to the City of Ithaca (`regulations/jurisdictions/new_york/ithaca_city`). A required fact
-(the checker's own list, `host_core.facts.REQUIRED`) missing and **no request is sent**: the dialog lists exactly
-which mark to fill in and how.
+(the checker's own list, `host_core.facts.REQUIRED`) missing and **no request is sent**: the results panel lists
+exactly which mark to fill in and how.
 
 **The street edge is picked, not typed.** The button asks "click the lot edge along the street" on the property
 line (Esc when done; several edges for a frontage drawn in pieces). Revit highlights the whole property line, never
@@ -327,20 +329,70 @@ at once, as its message says (a request file has no pick: the message says to gi
 read at all, the kept edge is sent as it is, named without a length, and the check says there is no lot: the lot's
 rows need review, so the check never complies.
 
-**The dialog.** The headline is the worker's own state and summary line (never a count of the add-in's), then
-the phase and design options checked, then each group in the worker's order with its count and every failure in
-full; *Show details* lists every row: each with its own verdict as the add-in reads it (a status word it doesn't
-know is shown as needs review, with the worker's word), its name, measured against allowed (or the checker's reason,
-where an egress row's figures are), and the Revit element (category and element id, for Select by ID). A row that
-fails, needs review or isn't checked is never cut; rows that comply or don't apply may be, past 30, with "N more (in
-the log)". Then the inside's not-read lists. Every row is written to `check_project_result.txt`, and the full
-request and answer to the trial log.
+**The results panel** (replacing the first version's TaskDialog, as the design doc's "Results panel: first mockup"
+agreed). A Revit dockable pane, *Gordium: Check my project*, tabbed behind Properties on first use (`ResultsPane.cs`,
+`ResultsView.cs`, plain WPF). One Revit-free row model, `ResultRows` (`ResultRows.cs` in `Gordium.Revit.Reading`),
+makes every row's words, and both the panel and `check_project_result.txt` (`ResultText`) read it, so the two
+never say a row differently.
+
+- **One scrolling list**, header included, so rows are never out of reach (Revit trial: at the docked size, about
+  420 by 340 px, a fixed header hid every row). Top to bottom (`ResultRows.Layout`): the stale notice when there is
+  one, the state, the count chips (one compact line per law), then straight away the groups; what wasn't read and
+  a folded *Details* (phase, options, street line, files) after the rows.
+- **Never a stale pass.** Revit's `DocumentChanged` on the project checked, for any change but the check's own
+  committed transactions (adding the marks, keeping the street edge), and for every undo or redo whatever its
+  names (the event's `Operation`: `ResultRows.ChangesTheCheck`), greys everything
+  (`ResultRows.Stale`: no green in the state, chips, groups, lines or rows) and says "The model changed since this
+  check (14:32): click Check again". `DocumentClosing` of it takes the rows down.
+- **Header and counts.** "Gordium: Check my project", when it was checked and which project, and *Check again*.
+  Then the worker's own state, and its counts as **chips in its own words, never recounted**: one line per law
+  (`view.sections[]`: "Zoning (City of Ithaca)", "Egress (NY State Residential Code 2025)"), each summary split at
+  " · " ("4 do not comply", "5 to review", "4 comply", "10 parts not read yet"); when the sections can't be read,
+  the whole summary. A chip is red only for "N do(es) not comply" and green only for exactly "N comply"/"N
+  complies"; anything else is amber, so no chip is ever kinder than its words. Then the phase, design options and
+  street line checked.
+- **Groups**, the worker's, in its order, with its titles and counts and its folding (a group or line holding a
+  failure, or a row read more cautiously than the worker said, is never folded: `CheckResult`). A law's group shows
+  its lines (a part's rules), each folded as the worker says. **No row is ever cut**: the list scrolls; a folded
+  group is built when first opened. A reason repeated per building is said once with its count ("(x12)").
+- **Each row**: its verdict (a status word the add-in doesn't know is "needs review (the checker said ...)", amber),
+  its name, its **figures** and **how far off**, its reason, the law's **section**, and a **Law** expander with the
+  rule's exact quotes and where each is (the answer's `detail.quotes`, else `code.quote`: the check_site answer
+  already carries them, so no protocol change). How far off is **only the worker's own words**: a zoning row's
+  `delta` ("2'-6\" short", "up to 2'-9\" over", "+1,200 sf"; worked out by the worker over every reading, never
+  overstated), or its `margin` from a worker that sends no delta; an empty delta says nothing. An egress row carries
+  neither, so it shows the figures its reason states ("net clear height 20 in, needs ≥ 24 in") and **no margin is
+  worked out**: the figures are the worker's rounded numbers, and their difference could misstate the law.
+- **Click a row** (or *Show in model*): its elements (a zoning row's `objects`, an egress row's `part.id`: Revit
+  UniqueIds) are selected and zoomed to (`Selection.SetElementIds`, `ShowElements`) in the project checked. It says
+  plainly when it can't: that project closed or not the active one, or an element not in the model now (deleted, in
+  a linked model, or an area Gordium read from the walls).
+- **Fixes in place, v1.** Nothing sent because a Project Information fact is missing: the panel lists each, with
+  *Open Project Information* (Revit's own command) and *Check again*. Setting an element's egress marks stays in
+  Properties for now (the row click selects the element, so its marks are there): editing marks from the panel
+  means a transaction per edit and checking each value's kind, kept for when the mockup's "Confirm this type"
+  is built.
+- **Revit's thread.** Every Revit call the panel makes (Check again, select and zoom, open Project Information)
+  goes through **one ExternalEvent** made at startup (`PanelActions.cs`) and runs in Revit's API context; the WPF
+  view never calls the Revit API, and each element's label is read when the check runs. A request Revit refuses
+  is taken back off the queue (`ActionQueue`: never run later, unasked, with the next one) and Check again is
+  usable again. A re-check that fails takes the last check's rows down (never left showing as this one's) and
+  says why.
+- **The street edge is asked for last, where it can be clicked** (Revit trial: from a sheet view with nothing set,
+  the pick waited with no prompt). Only when it is the one fact left and the active view is a plan showing a
+  property line (`StreetEdges.Ask`), with the status bar saying "Click the lot edge along the street (Esc to
+  skip)"; otherwise the panel lists "open a site plan (or a floor plan) that shows the property line, then click
+  Check again".
+
+Every row is also written to `check_project_result.txt` (in full, the same words), and the full request and answer
+to the trial log.
 
 **No clicks.** `check_project_request.json` (`{"model": "<path>.rvt", "marks": {"Gordium: Zone": "R-1b", ...}}`,
 `marks` optional) in the trial folder: the model opened, the marks given set (each by its own kind: a Yes/No mark
 needs true or false, a text mark text; anything else stops the run naming the mark), checked as the button does (no
 pick: the log's `lot_edges_internal` lists each property line's edges in the Street edge mark's own words, internal
-coordinates, to copy one), logged, closed unsaved. A reason the worker repeats per building is shown once with its
+coordinates, to copy one), logged, its rows written to `check_project_result.txt`, closed unsaved. It never opens
+or needs the results panel. A reason the worker repeats per building is shown once with its
 count ("(x12)").
 
 ## Where the decisions are written

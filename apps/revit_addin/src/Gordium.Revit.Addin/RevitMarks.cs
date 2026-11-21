@@ -37,6 +37,8 @@ internal static class RevitMarks
             .Select(e => Element(doc, e)).ToList(),
         Bindings = Bindings(doc),
         ProjectMarks = doc.ProjectInformation is { } info ? Values(info) : new Dictionary<Guid, MarkValue>(),
+        VertexTolerance = doc.Application.VertexTolerance,
+        Elements = RevitRead.HouseOutline(doc),          // the site slabs' rows (SiteSlabs), no geometry
     };
 
     private static MarkedElement Element(Document doc, Element e)
@@ -208,7 +210,7 @@ internal static class RevitMarks
             var definitions = app.OpenSharedParameterFile()
                 ?? throw new InvalidOperationException("Revit couldn't open Gordium's shared-parameter file " + file);
             var group = definitions.Groups.get_Item(Marks.Group) ?? definitions.Groups.Create(Marks.Group);
-            using var t = new Transaction(doc, "Gordium: add the egress marks");
+            using var t = new Transaction(doc, ResultRows.MarksTransaction);
             t.Start();
             foreach (var s in todo)
             {

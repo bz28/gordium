@@ -11,6 +11,17 @@ change can't land without a version and a word here (the rules for minor and maj
 and the command table together (`protocol.table()`: every command, part, field and default), pinned the same way
 by `packages/design_checker/tests/test_protocol.py` ([worker_protocol_v1.md](worker_protocol_v1.md#versions)).
 
+- **2026-11-20 · protocol 1.3 · site description `gordium.site/1`** (schema sha256 `69e49d2db59ee4ab6d8ffae5cfe5d9ae50ff928fc16ad8a52c884a976ad909a1`):
+  a left-out object may say it is a slab on the ground outside the building (`slab`: `unmarked`, `patio` or
+  `parking`) and give its `name`, both optional
+  ([site_description_v1.md](site_description_v1.md#how-the-worker-uses-it)): an unmarked one makes lot coverage and
+  every required yard need review, naming it; a patio, terrace or walk is not in lot coverage but makes the yards
+  need review; a parking area or driveway changes nothing (§325-3B BUILDING AREA, §325-18A). A minor version
+  under the amended rule ([versions](site_description_v1.md#versions)): absent, every answer is exactly as
+  before, and a 1.2 worker refuses a description that has it (an unknown field), never drops it, so no tool can
+  get a pass from a worker that didn't read it. `check_site` refuses extras naming
+  `site_slabs` (the description's own, handed to the view)
+  (command table sha256 `6c95187b02f39da5c433b426c8d93c355deb418a688d0a3640588ccbaddd2084`).
 - **2026-11-19 · protocol 1.2 · site description `gordium.site/1`** (unchanged): `check_site` takes an optional
   `interior`, the house's inside as an interior description (`gordium.interior/1`), and checks the place's inherited
   laws (New York's egress, for Ithaca) on it, as the command line's `--interior` does; without it they wait, as

@@ -22,7 +22,7 @@ from rule_export.workbook import citer, page_link, sections_lookup
 from rule_format import formula
 from rule_format.rulebook import MEASURE_KINDS, REPO, _jsonl_rows, load, outcome
 
-from design_checker import reading_set, rhino_logic
+from design_checker import reading_set, rhino_logic, site_json
 
 COMPLIES, FAILS, REVIEW, NOT_CHECKED = "complies", "does_not_comply", "needs_review", "not_checked"
 # rules the interior description sets aside by saying the house has none of a kind (egress.py: one item per claim,
@@ -2017,6 +2017,50 @@ def _cautious_for_left_out(items, left_out, touching, rules_by_id=None):
         i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=why + " · Add to check…")
 
 
+SLAB_YARDS = BUILDING_MEASURES[:4] + EAVE_YARDS     # the required yards, to the walls and to the eaves
+SLAB_KIND_WORDS = "porch, deck, landing or ramp; patio, terrace or walk; parking or driveway"
+
+
+def _slab_names(slabs) -> str:
+    """The slabs named for the architect: each by its name (the tool's, e.g. a Revit floor type "Concrete 10\\"")
+    and its id, so the row says which element to mark."""
+    said = [f"\"{s['name']}\" ({s['id']})" if s.get("name") else s["id"] for s in slabs]
+    return ("the slab " if len(said) == 1 else "the slabs ") + ", ".join(said)
+
+
+def _cautious_for_site_slabs(items, slabs, rules_by_id=None):
+    """Slabs on the ground outside the building (the site description's left_out[].slab; site_json.SLAB_KINDS) can
+    change a result that looks like it complies, and only by what they are, which the tool can't tell (never a false
+    pass; never a failure either, since a slab isn't measured):
+    - one not marked may be a porch, deck, landing or ramp, which is "part of the building in both the determination
+      of required yards and lot coverage" (§325-18A; BUILDING AREA, §325-3B): lot coverage and every required yard
+      (to the walls and to the eaves) need review, naming it;
+    - a patio, terrace or walk is exempt from lot coverage, but "neither pergolas or terraces and patios above grade
+      shall be located in a required yard" (§325-3B BUILDING AREA; TERRACE OR PATIO: "Terraces and patios above grade
+      shall not encroach into required yards"), and its height above the ground isn't measured: every required yard
+      needs review, naming it;
+    - a parking area, parking space or driveway changes nothing ("shall not include parking areas and parking
+      spaces", §325-3B BUILDING AREA).
+    Run before _cautious_for_left_out, so a row an unmarked slab changes names the slab (it is left out too)."""
+    unmarked = [s for s in slabs or [] if s["slab"] == "unmarked"]
+    patios = [s for s in slabs or [] if s["slab"] == "patio"]
+    for i in items:
+        if i["status"] != COMPLIES:
+            continue
+        reads = _formula_names(i, rules_by_id) | ({i.get("measure")} - {None})
+        if unmarked and reads & ({"building_area"} | set(SLAB_YARDS)):
+            why = (f"Complies for the buildings measured; {_slab_names(unmarked)} on the lot "
+                   f"{'isn' if len(unmarked) == 1 else 'aren'}'t marked, and a porch, deck, landing or ramp counts in "
+                   "lot coverage and the yards (§325-18A) · mark what each is (" + SLAB_KIND_WORDS + ")")
+        elif patios and reads & set(SLAB_YARDS):
+            why = (f"Complies for the buildings measured; {_slab_names(patios)} (patio, terrace or walk) may not be in "
+                   "a required yard if above grade (§325-3B, TERRACE OR PATIO), and its height above the ground isn't "
+                   "measured yet")
+        else:
+            continue
+        i.update(status=REVIEW, mark=MARK[REVIEW], hint=None, reason=why)
+
+
 # What each looked-up fact decides (facts["unsettled"]): every measurement worked out from it. The lot outline decides
 # the lot's area, width and depth and every yard; the street side decides which line is the front, so the yards and
 # the lot's width and depth; the ground decides height and stories. An item needs review when ANY name in its rule's
@@ -2076,6 +2120,14 @@ def _advice(extras, left_out):
     return "".join(" · " + w for w in said)
 
 
+def _unmarked_slabs(extras, left_out):
+    """The left-out row's words for the slabs among its objects that aren't marked: which they are, and what to
+    mark them (words only: _cautious_for_site_slabs decides the rows)."""
+    slabs = [s for s in (extras or {}).get(site_json.SITE_SLABS) or [] if s["slab"] == "unmarked" and s["id"] in left_out]
+    return (f" · {_slab_names(slabs)} {'is a slab' if len(slabs) == 1 else 'are slabs'} on the ground outside the "
+            f"building: mark what {'it is' if len(slabs) == 1 else 'each is'} ({SLAB_KIND_WORDS})") if slabs else ""
+
+
 def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction=None) -> dict:
     """Every item, grouped; the summary; the header. `extras` is what the Rhino command adds: what it sent
     (scope), objects on the lot it didn't include, and the grade and lot sources."""
@@ -2097,6 +2149,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                             use_names)
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
+    _cautious_for_site_slabs(items, extras.get(site_json.SITE_SLABS), rules_by_id)
     _cautious_for_left_out(items, left_out, extras.get("touching"), rules_by_id)
     _cautious_for_unsettled(items, facts.get("unsettled"), rules_by_id)
     for i in items:                                  # THE guard: never above the checker's verdict (round 3)
@@ -2140,7 +2193,8 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "reason": f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t "
                                 "measured (not on the Building layer) · Add to check…" + _on_context(extras) + (
                                     f" (" + str(len(extras.get("ground_like") or [])) + " looks like the ground: if it is, "
-                                    "This is the ground)" if extras.get("ground_like") else "") + _advice(extras, left_out),
+                                    "This is the ground)" if extras.get("ground_like") else "") + _advice(extras, left_out)
+                                + _unmarked_slabs(extras, left_out),
                       "detail": {"line": "", "quotes": [], "citation": "", "links": [], "calc": None,
                                  "scope": _scope(extras, measured), "precision": PRECISION, "at_limit": None}})
     for row in interior:

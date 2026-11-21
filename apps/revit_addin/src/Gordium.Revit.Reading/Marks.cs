@@ -187,6 +187,18 @@ public static class Marks
     public static readonly MarkDefinition NoProjectionOverEscapeOpening = NoneTick(
         "deck or porch or cantilever over an escape opening", "820cd2d1-5b6d-416d-afa8-01cb1f0c4515",
         "has_none: deck_porch_or_cantilever_over_escape_opening", "deck, porch or cantilever over any escape opening");
+    public const string Floors = "OST_Floors";
+
+    /// <summary>What a site slab is (reading design note, section 1, "Site slabs"): on a Floor under none of the
+    /// house's walls or roofs, which Revit can't tell from a porch. Read only on such a floor (<see cref="SiteSlabs"/>);
+    /// unset, the rows it could change need review.</summary>
+    public static readonly MarkDefinition SiteSlab = new(
+        "Gordium: Site slab is", new("56113427-6ae6-430d-95dd-2472fbefff71"), MarkValueKind.Text, MarkBinding.Instance,
+        [Floors], "buildings (a porch...) or left_out[].slab",
+        "For a floor outside the house (under none of its walls or roofs), what it is, one of: " +
+        string.Join(", ", SlabKinds.Words) + ". A porch, deck, landing or ramp counts in lot coverage and the yards; " +
+        "a patio, terrace or walk (less than 18 in above grade, no roof) and parking or a driveway don't count in lot " +
+        "coverage. Blank: lot coverage and the yards need review.");
 
     public const string GenericModels = "OST_GenericModel";
     public const string StairsCategory = "OST_Stairs";
@@ -210,7 +222,7 @@ public static class Marks
         SleepingRoom, EscapeOpening, ExitDoor, Operation, ClearWidth, ClearHeight, ClearOffset, ClearSource,
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
-        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair,
+        NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
@@ -272,4 +284,52 @@ public static class Operations
     /// <summary>The door's operation (<c>doors[].operation</c>), or null (a window's word on a door is not a door's
     /// operation: not stated).</summary>
     public static string? ForDoor(string? word) => Find(word) is var i and >= 0 ? Table[i].Door : null;
+}
+
+/// <summary>What a site slab is, as Chapter 325 sorts it (§325-3B BUILDING AREA, §325-18A, TERRACE OR PATIO).</summary>
+public enum SlabKind
+{
+    /// <summary>A porch, deck, landing or ramp: "part of the building in both the determination of required yards and
+    /// lot coverage" (§325-18A), so read as a building.</summary>
+    Building,
+
+    /// <summary>A patio, terrace or walk: "exempt from total lot coverage requirements", but one "above grade" may not
+    /// be in a required yard (§325-3B). A walk is read as one: §325-3B has no walk, and TERRACE OR PATIO is "a level
+    /// plane or surfaced patio ... less than 18 inches above grade, without a roof" (GREEN SPACE names "sidewalks or
+    /// patios" together).</summary>
+    Patio,
+
+    /// <summary>A parking area, parking space or driveway: building area "shall not include parking areas and parking
+    /// spaces" (§325-3B).</summary>
+    Parking,
+}
+
+/// <summary>The words the architect may type in <c>Gordium: Site slab is</c>, each to its kind through a fixed table:
+/// a word not in it is not stated, never a near guess.</summary>
+public static class SlabKinds
+{
+    private static readonly (string Word, SlabKind Kind)[] Table =
+    [
+        ("Porch", SlabKind.Building), ("Deck", SlabKind.Building), ("Landing", SlabKind.Building), ("Ramp", SlabKind.Building),
+        ("Patio", SlabKind.Patio), ("Terrace", SlabKind.Patio), ("Walk", SlabKind.Patio),
+        ("Parking", SlabKind.Parking), ("Driveway", SlabKind.Parking),
+    ];
+
+    /// <summary>The words, in the list's order.</summary>
+    public static IReadOnlyList<string> Words { get; } = Table.Select(t => t.Word).ToList();
+
+    /// <summary>The kind for the architect's word (trimmed, any case), or null.</summary>
+    public static SlabKind? Of(string? word) =>
+        word is null ? null
+        : Array.FindIndex(Table, t => string.Equals(t.Word, word.Trim(), StringComparison.OrdinalIgnoreCase)) is var i and >= 0
+            ? Table[i].Kind : null;
+
+    /// <summary>The site description's word for a slab left out (<c>left_out[].slab</c>): null for a building.</summary>
+    public static string? Described(SlabKind? kind) => kind switch
+    {
+        null => "unmarked",
+        SlabKind.Patio => "patio",
+        SlabKind.Parking => "parking",
+        _ => null,
+    };
 }

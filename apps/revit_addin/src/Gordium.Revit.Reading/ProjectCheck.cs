@@ -99,6 +99,10 @@ public static class ProjectFacts
 
     private const string Where = " on Project Information (Manage > Project Information)";
 
+    /// <summary>The street edge not set, as the panel lists it.</summary>
+    public static readonly string StreetNotSet = $"{Marks.StreetEdge.Name}: click the lot edge along the street when Check my " +
+                                                 "project asks (in a plan or site view; with no property line drawn, draw it first).";
+
     public static ProjectFactsRead Read(RevitModel model)
     {
         ArgumentNullException.ThrowIfNull(model);
@@ -133,8 +137,7 @@ public static class ProjectFacts
         IReadOnlyList<KeptEdge>? edges = null;
         var street = Marks.Text(Get(Marks.StreetEdge));
         if (street is null)
-            missing.Add($"{Marks.StreetEdge.Name}: click the lot edge along the street when Check my project asks " +
-                        "(in a plan or site view; with no property line drawn, draw it first).");
+            missing.Add(StreetNotSet);
         else if ((edges = StreetEdges.Parse(street)) is null)
             missing.Add($"{Marks.StreetEdge.Name} holds \"{street}\", which isn't an edge Gordium wrote: clear it, then " +
                         "click the lot edge along the street when Check my project asks.");
@@ -181,6 +184,19 @@ public sealed record PickedEdge(Xyz A, Xyz B, bool IsLine, double Length, Xyz? M
 /// <summary>A street edge as the mark keeps it: its ends and, when Gordium wrote them (from round 4), whether it is
 /// straight and its point halfway along. An older mark has the ends alone (<see cref="IsLine"/> null).</summary>
 public sealed record KeptEdge(Xyz A, Xyz B, bool? IsLine = null, Xyz? Mid = null);
+
+/// <summary>Whether "Check my project" asks for the street edge by a click now (<see cref="StreetEdges.Ask"/>).</summary>
+public enum StreetAsk
+{
+    /// <summary>Kept and usable: nothing to ask.</summary>
+    NotNeeded,
+    /// <summary>Asked for now: every other fact is set and the view shows a property line.</summary>
+    Pick,
+    /// <summary>Not asked: other facts are missing (the panel lists them first).</summary>
+    OtherFactsFirst,
+    /// <summary>Not asked: the active view can't show the property line (the panel says to open a site plan).</summary>
+    OpenAPlan,
+}
 
 /// <summary>Why a kept street edge wasn't sent as a lot edge.</summary>
 public enum StreetRefusal
@@ -253,6 +269,42 @@ public static class StreetEdges
                 : new KeptEdge(new Xyz(n[0], n[1], 0), new Xyz(n[2], n[3], 0), v[4] == "line", new Xyz(n[5], n[6], 0)));
         }
         return edges.Count > 0 ? edges : null;
+    }
+
+    /// <summary>What PickObject's status bar says while the street edge is asked for.</summary>
+    public const string PickPrompt = "Click the lot edge along the street (Esc to skip)";
+
+    /// <summary>The words listed in the panel when the street edge is needed but the active view can't show it.</summary>
+    public static readonly string OpenAPlan = $"{Marks.StreetEdge.Name}: open a site plan (or a floor plan) that shows the " +
+                                              "property line, then click Check again: it asks you to click the lot edge along the street.";
+
+    /// <summary>Whether to ask for the street edge now (Revit trial, 2026-11-20: asked from a sheet view, the pick
+    /// waited with no prompt where no property line could be clicked). Only when the street edge is the one fact
+    /// still to give (<paramref name="needed"/>: not set, or kept but no longer a lot edge) and every other fact is
+    /// set, and only in a view that shows a property line (<paramref name="viewShowsPropertyLine"/>: a plan view
+    /// with one visible). <see cref="StreetAsk.OpenAPlan"/>: the panel lists <see cref="OpenAPlan"/> instead.</summary>
+    public static StreetAsk Ask(ProjectFactsRead read, bool needed, bool viewShowsPropertyLine)
+    {
+        ArgumentNullException.ThrowIfNull(read);
+        if (!needed)
+            return StreetAsk.NotNeeded;
+        if (read.Missing.Any(m => !m.StartsWith(Marks.StreetEdge.Name, StringComparison.Ordinal)))
+            return StreetAsk.OtherFactsFirst;
+        return viewShowsPropertyLine ? StreetAsk.Pick : StreetAsk.OpenAPlan;
+    }
+
+    /// <summary>What to fill in, as the panel lists it: when the view couldn't show the property line, the street
+    /// edge's "click when Check my project asks" replaced by <see cref="OpenAPlan"/> (a kept edge's own reason kept,
+    /// <see cref="OpenAPlan"/> after it).</summary>
+    public static IReadOnlyList<string> MissingAsShown(IReadOnlyList<string> missing, StreetAsk ask)
+    {
+        ArgumentNullException.ThrowIfNull(missing);
+        if (ask != StreetAsk.OpenAPlan)
+            return missing;
+        var shown = missing.Where(m => m != ProjectFacts.StreetNotSet).ToList();
+        if (!shown.Contains(OpenAPlan))
+            shown.Add(OpenAPlan);
+        return shown;
     }
 
     /// <summary>Whether the refusal's fix is a new pick (the button then asks for the edge again).</summary>
