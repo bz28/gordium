@@ -131,6 +131,33 @@ def test_an_obstruction_narrows_the_dead_ends_least_width():
     assert ft(width) == pytest.approx(9.0, abs=1e-9) and ft(c.width) == pytest.approx(9.0, abs=1e-9)
 
 
+def with_obstruction(desc, outline):
+    desc["rooms"][0]["obstructions"] = [{"outline": [list(p) for p in outline], "kind": "furniture", "fixed": False}]
+    return desc
+
+
+def test_a_rotated_column_narrows_the_dead_end_at_its_widest():
+    # review round 6, P0: a diamond column 4 ft across in a 14 ft branch leaves 10 ft at its widest, never the 12 ft
+    # a cut midway between its corners finds; 29 ft against 2.5 x 10 = 25 fails the exception, against 30 it passed
+    c = only(measure(with_obstruction(branch(14, 22), [(27, 23), (29, 25), (27, 27), (25, 25)])))
+    length, width = c.longest(WITHOUT)
+    assert ft(length) == pytest.approx(29.0, abs=1e-6)
+    assert ft(width) == pytest.approx(10.0, abs=1e-6)
+
+
+def test_a_slanted_cabinet_narrows_the_dead_end_at_its_deepest():
+    # a triangle 5 ft deep off the 8 ft branch's west wall: 3 ft clear at its point, not the 5.5 ft midway
+    c = only(measure(with_obstruction(branch(), [(20, 14), (25, 16), (20, 18)])))
+    assert ft(c.longest(WITHOUT)[1]) == pytest.approx(3.0, abs=1e-6)
+
+
+def test_a_hairline_between_a_cabinet_and_the_wall_is_no_floor():
+    # review round 6, P3: a cabinet 1/32 in off the branch's west wall leaves 4 ft clear, not 4 ft 1/32 in
+    c = only(measure(with_obstruction(branch(), rect(20 + 1 / 384, 14, 24, 18))))
+    assert c.longest(WITHOUT)[1] == pytest.approx(48.0, abs=1e-6)
+    assert c.width == pytest.approx(48.0, abs=1e-6)
+
+
 # --- test 11: a dead end that branches ---------------------------------------------------------------------------
 
 def test_11_a_dead_end_that_branches_runs_on_past_the_crossing_whose_other_way_is_closed():

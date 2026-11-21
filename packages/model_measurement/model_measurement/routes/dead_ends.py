@@ -25,14 +25,16 @@ whose ways do, or an exit door in the corridor itself. Measured to the crossing'
 each dead end has two named readings: without such doors (the defined value) and with them (a door into a room
 whose other doors reach an exit, without coming back into these corridors, counts as a way to those exits).
 
-**Widths.** A dead end's least width is the narrowest clear width across its own legs' stretches along it: the
-leg's width less what obstructions, columns and bumps block across it (each by its extent across the leg: the less
-favourable side). A corridor's width is the same over its own legs' stretches in it. Each dead end is its own pair,
+**Widths.** A corridor's width is the narrowest clear width across its own legs' stretches in it: the leg's width
+less what obstructions, columns and bumps block across it (each by its extent across the leg: the less favourable
+side). Each dead end is its own pair,
 its length with its own least width: routes/__init__ gives the corridor one part per dead end until the branch's
 `dead_end` part kind exists. A closed end is the farthest point of the real floor across the leg's whole width
 (a recess filled to find the legs never moves it; walls only, so an obstruction never shortens a dead end). A dead
 end's least width is one figure: the narrowest cross-section of the clear floor (the real floor less every
-obstruction and hole) across its legs' whole width, over its own stretches and any recess at its closed end.
+obstruction and hole, opened by 1/16 in so a hairline is no floor) across its legs' whole width, over its own
+stretches and any recess at its closed end, cut at both ends of every slice between corner places (so a slanted
+or rotated obstruction is measured at its widest).
 Lengths in inches.
 """
 
@@ -458,11 +460,15 @@ def _clear(leg: _LegShape, a, b, blocks) -> float:
         if q - p <= 1e-9:
             continue
         spans = sorted((v0, v1) for u0, u1, v0, v1 in mine if u0 < q and u1 > p)
-        blocked, end = 0.0, -math.inf
+        blocked, end = 0.0, w0
         for v0, v1 in spans:
+            if v0 - end < SAME:            # a hairline gap (to a wall or between blocks) is no floor
+                v0 = min(v0, end)
             if v1 > end:
                 blocked += v1 - max(v0, end)
                 end = v1
+        if 0 < w1 - end < SAME:
+            blocked += w1 - end
         least = min(least, w1 - w0 - blocked)
     return least
 
@@ -489,9 +495,12 @@ def _section_width(clear, leg, a, b) -> float:
     for p, q in zip(marks, marks[1:]):
         if q - p <= 1e-9:
             continue
-        m = (p + q) / 2
-        cut = LineString([(m, w0 - 1), (m, w1 + 1)] if leg.horizontal else [(w0 - 1, m), (w1 + 1, m)])
-        least = min(least, cut.intersection(piece).length)
+        # within a slice every edge is straight, so the clear width changes linearly along it and is least at one of
+        # its ends: cut just inside each end (a cut exactly on a mark can run along an edge), and at the middle
+        d = min(1e-6, (q - p) / 4)
+        for m in (p + d, (p + q) / 2, q - d):
+            cut = LineString([(m, w0 - 1), (m, w1 + 1)] if leg.horizontal else [(w0 - 1, m), (w1 + 1, m)])
+            least = min(least, cut.intersection(piece).length)
     return least
 
 
@@ -756,6 +765,9 @@ def _group(story, members, g, legs_all) -> _Floor:
             blocks.append(piece.bounds)
     cut = [Polygon([frame.to(c) for c in o.exterior.coords]) for m in members for o in m.obstructions + m.holes]
     clear = square.difference(unary_union(cut)) if cut else square
+    # opened by 1/16 in as the walls were: a hairline between an obstruction and a wall is no floor (opening only
+    # removes floor, so a width can only come out narrower)
+    clear = clear.buffer(-SAME / 2, join_style=2).buffer(SAME / 2, join_style=2).intersection(square)
     return _Floor(sorted(ids), frame, list(range(base, base + len(legs))), blocks, clear)
 
 

@@ -90,7 +90,7 @@ rooms_to_place:
   - {number: "39", name: TOILET, at: [150.78, 33.08], area_sf: 58.6, use: Toilet, lockable: true,
      why: "OCEAN CLASSROOM 4's toilet room by the corridor: the sheet draws its fixtures"}
   - {number: "40", name: CLOSET, at: [24.11, 36.26], area_sf: 7.6, use: Closet, lockable: true,
-     why: "a 2.5 by 3 ft closet off INFANT/TODDLER CLASSROOM 5 (door D06), by the corridor wall: the sheet draws its door"}
+     why: "a 2.5 by 3 ft closet whose one door (D06) opens into KITCHEN 10, by the corridor wall: the sheet draws its door"}
   - {number: "41", name: CLOSET, at: [28.56, 36.26], area_sf: 8.0, use: Closet, lockable: true,
      why: "the closet beside it (door D39)"}
   - {number: "42", name: CLOSET, at: [175.23, 35.34], area_sf: 7.3, use: Closet, lockable: true,
