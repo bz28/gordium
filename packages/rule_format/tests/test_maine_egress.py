@@ -198,3 +198,28 @@ def test_the_decision_note_says_what_is_done_with_the_ocrs_misreads():
     assert not any("misread" in (d.get("brought_in") or {}) for d in sources)
     note = " ".join((REPO / "docs/decisions/2026-11-20_commercial_egress_maine.md").read_text(encoding="utf-8").split())
     assert "misreads are put right by line" not in note and "named in the labels' notes" in note
+
+
+# ---- review round 2 (2026-11-20) -----------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("rid", ["general.nfpa_16_2_5_2_dead_end", "general.nfpa_17_2_5_2_dead_end"])
+def test_the_dead_end_review_reason_is_project_neutral_and_points_to_the_readme(rules, rid):
+    """The reason is shown to the architect as the row's Why: no "below" (there is nothing below it there) and no
+    one project's date; it names where the open question is."""
+    reason = rules[rid]["review_when"][0]["reason"]
+    assert "below" not in reason and "2016" not in reason, reason
+    assert "regulations/jurisdictions/maine/maine_state/README.md" in reason and "open question 2" in reason
+
+
+@pytest.mark.parametrize("rid", ["general.ibc_table_1015_1_other_occupancies", "general.ibc_table_1016_1_other_occupancies",
+                                 "general.ibc_table_1018_1_other_occupancies"])
+def test_a_tables_other_rows_reach_a_mixed_day_care_building(ctx, rules, rid):
+    """A day care with another occupancy in the building (or with that unstated) needs a person for the other rows;
+    only a day care stated to hold no other occupancy leaves them aside."""
+    from rule_format.rulebook import outcome
+    r = rules[rid]
+    i4 = {"occupancy_group_i4": True}
+    assert outcome(r, i4 | {"other_occupancy_present": True}, ctx.allowed()) == "needs_review"
+    assert outcome(r, i4, ctx.allowed()) == "needs_review"
+    assert outcome(r, i4 | {"other_occupancy_present": False}, ctx.allowed()) == "not_applicable"
+    assert outcome(r, {"occupancy_group_i4": False}, ctx.allowed()) == "needs_review"

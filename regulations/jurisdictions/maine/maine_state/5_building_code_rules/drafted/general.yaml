@@ -1650,9 +1650,9 @@ rules:
   review_when:
   - when: corridor_dead_end_length > 20 and corridor_dead_end_length <= 50 and sprinklered_9_7 and sprinkler_supervised_9_7
     reason: 'Over 20 ft, within this book''s 50 ft (sprinklered, supervised): Maine''s own Life Safety rule (16-219 CMR ch.
-      20) may cap a dead end at a flat 20 ft (today''s rule does; the rule in force in October 2016 is the open question below).
-      Only 20 ft is certain under every reading, so a longer dead end needs review until the State Fire Marshal or the City
-      answers.'
+      20) may cap a dead end at a flat 20 ft (today''s rule does; which rule a project was permitted under is open question
+      2 of regulations/jurisdictions/maine/maine_state/README.md). Only 20 ft is certain under every reading, so a longer
+      dead end needs review until the State Fire Marshal or the City answers.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -2727,9 +2727,9 @@ rules:
   review_when:
   - when: corridor_dead_end_length > 20 and corridor_dead_end_length <= 50 and sprinklered_9_7 and sprinkler_supervised_9_7
     reason: 'Over 20 ft, within this book''s 50 ft (sprinklered, supervised): Maine''s own Life Safety rule (16-219 CMR ch.
-      20) may cap a dead end at a flat 20 ft (today''s rule does; the rule in force in October 2016 is the open question below).
-      Only 20 ft is certain under every reading, so a longer dead end needs review until the State Fire Marshal or the City
-      answers.'
+      20) may cap a dead end at a flat 20 ft (today''s rule does; which rule a project was permitted under is open question
+      2 of regulations/jurisdictions/maine/maine_state/README.md). Only 20 ft is certain under every reading, so a longer
+      dead end needs review until the State Fire Marshal or the City answers.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -3637,7 +3637,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Spaces with one exit, other occupancies (IBC Table 1015.1)
-  applies_when: not occupancy_group_i4
+  applies_when: not occupancy_group_i4 or other_occupancy_present
   sources:
   - file: icc.ibc.2009.pdf
     page: 266
@@ -3652,6 +3652,16 @@ rules:
     note: 'Another occupancy''s row: a person reads it.'
   - given:
       occupancy_group_i4: true
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'Day care with another occupancy in the building (a mixed building): that occupancy''s row is a person''s.'
+  - given:
+      occupancy_group_i4: true
+    expect: needs_review
+    note: 'Whether another occupancy is in the building is not stated: never not applicable.'
+  - given:
+      occupancy_group_i4: true
+      other_occupancy_present: false
     expect: not_applicable
     note: 'Group I-4 (day care): the section''s rule checks its row.'
   notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
@@ -3664,7 +3674,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Travel distance, other occupancies (IBC Table 1016.1)
-  applies_when: not occupancy_group_i4
+  applies_when: not occupancy_group_i4 or other_occupancy_present
   sources:
   - file: icc.ibc.2009.pdf
     page: 267
@@ -3679,6 +3689,16 @@ rules:
     note: 'Another occupancy''s row: a person reads it.'
   - given:
       occupancy_group_i4: true
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'Day care with another occupancy in the building (a mixed building): that occupancy''s row is a person''s.'
+  - given:
+      occupancy_group_i4: true
+    expect: needs_review
+    note: 'Whether another occupancy is in the building is not stated: never not applicable.'
+  - given:
+      occupancy_group_i4: true
+      other_occupancy_present: false
     expect: not_applicable
     note: 'Group I-4 (day care): the section''s rule checks its row.'
   notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
@@ -3691,7 +3711,7 @@ rules:
   kind: flag
   topic: means_of_egress
   title: Corridor rating, other occupancies (IBC Table 1018.1)
-  applies_when: not occupancy_group_i4
+  applies_when: not occupancy_group_i4 or other_occupancy_present
   sources:
   - file: icc.ibc.2009.pdf
     page: 268
@@ -3706,6 +3726,16 @@ rules:
     note: 'Another occupancy''s row: a person reads it.'
   - given:
       occupancy_group_i4: true
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'Day care with another occupancy in the building (a mixed building): that occupancy''s row is a person''s.'
+  - given:
+      occupancy_group_i4: true
+    expect: needs_review
+    note: 'Whether another occupancy is in the building is not stated: never not applicable.'
+  - given:
+      occupancy_group_i4: true
+      other_occupancy_present: false
     expect: not_applicable
     note: 'Group I-4 (day care): the section''s rule checks its row.'
   notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
