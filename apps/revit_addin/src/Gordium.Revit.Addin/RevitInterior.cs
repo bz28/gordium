@@ -927,7 +927,7 @@ internal static class RevitInterior
                     case GeometryElement nested:
                         Walk(nested);
                         break;
-                    case Curve or PolyLine or Point:
+                    case Curve or PolyLine or Autodesk.Revit.DB.Point:
                         break;                                   // lines and points: no body to stand in the way
                     default:
                         failed = true;                           // a mesh, or a kind not read
@@ -1021,7 +1021,7 @@ internal static class RevitInterior
                     case GeometryElement nested:
                         Walk(nested);
                         break;
-                    case Curve or PolyLine or Point:
+                    case Curve or PolyLine or Autodesk.Revit.DB.Point:
                         break;                       // lines and points: no body
                     default:
                         failed = true;               // a mesh over a room isn't read exactly, nor a kind not read
