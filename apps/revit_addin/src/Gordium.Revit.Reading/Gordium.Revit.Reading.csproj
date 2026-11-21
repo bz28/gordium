@@ -11,6 +11,10 @@
     <InternalsVisibleTo Include="Gordium.Revit.Reading.Tests" />
   </ItemGroup>
   <ItemGroup>
+    <!-- makers' clear-opening formulas (data, curated by hand; read by MakerClearOpenings) -->
+    <EmbeddedResource Include="../../data/maker_clear_openings.json" LogicalName="Gordium.Revit.Reading.maker_clear_openings.json" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Gordium.Worker/Gordium.Worker.csproj" />
   </ItemGroup>
 </Project>
