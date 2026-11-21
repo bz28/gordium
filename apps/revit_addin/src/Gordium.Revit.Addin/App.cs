@@ -79,7 +79,7 @@ public sealed class App : IExternalApplication
 
     /// <summary>A run asked for by file, so the trial can be driven with no click: the in-place source
     /// (InPlaceSource.RequestPath), the interior houses (RecordHousesCommand.RequestPath), a project checked
-    /// (CheckProjectCommand.RequestPath) or the scenes
+    /// (CheckProjectCommand.RequestPath), a model built from data (ModelBuild.RequestPath) or the scenes
     /// (RecordScenesCommand.RunRequestPath). Each is taken (renamed) first, so it runs once even if it fails; every result
     /// goes to the log, and nothing ever escapes Revit's Idling event.</summary>
     private static void OnIdling(object? sender, Autodesk.Revit.UI.Events.IdlingEventArgs e)
@@ -153,6 +153,20 @@ public sealed class App : IExternalApplication
             catch (Exception x)       // never out of Revit's Idling event
             {
                 Trial.Log("check_project", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
+            }
+            return;
+        }
+        if (File.Exists(ModelBuild.RequestPath))
+        {
+            try
+            {
+                var takenBuild = ModelBuild.RequestPath + ".taken";
+                File.Move(ModelBuild.RequestPath, takenBuild, overwrite: true);
+                ModelBuild.Run(ui.Application, takenBuild);
+            }
+            catch (Exception x)       // never out of Revit's Idling event
+            {
+                Trial.Log("build_model", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
             }
             return;
         }

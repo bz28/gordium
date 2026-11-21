@@ -1988,19 +1988,38 @@ def _raise_yards(items, measured, values, facts):
         i.pop("_raises", None)
 
 
-def _cautious_for_left_out(items, left_out, touching, rules_by_id=None):
+APART_SHOWN = 5             # objects standing apart named on a row; more are counted
+
+
+def _apart_names(apart) -> str:
+    """The objects standing apart named for the architect: each by its name in the tool and its id (or its id
+    alone), so the row says which to measure or mark; past APART_SHOWN, how many more."""
+    said = [f"\"{o['name']}\" ({o['id']})" if o.get("name") else str(o["id"]) for o in apart[:APART_SHOWN]]
+    more = len(apart) - len(said)
+    return ", ".join(said) + (f" and {more} more" if more else "")
+
+
+def _cautious_for_left_out(items, left_out, touching, rules_by_id=None, apart=None):
     """Solids on the lot that aren't measured can change a result that looks like it complies (never a false
     pass): lot coverage counts every building on the lot, principal and accessory (§325-8A), so it needs review
     whenever one is left out; one touching the building may be part of it (a porch or deck counts in the yards,
     §325-18A), so then the yards (to the walls and to the eaves), height and stories need review too. Any of them
     may itself be an accessory building (§325-25), so the accessory buildings' count and distances need review
-    whenever one is left out. An item counts by every measurement its rule's formula reads, not only its own.
-    `touching` is the ids of the left-out solids that touch the measured buildings; not given, any of them might."""
+    whenever one is left out. One standing apart from the building that could be a structure may be a freestanding
+    deck, porch, landing or ramp, "part of the building in both the determination of required yards and lot
+    coverage" (§325-18A), and no other building or structure may occupy a yard (§325-3B YARD): every required yard
+    (to the walls and to the eaves) needs review, naming it, wherever it stands (the check isn't sent where it is).
+    An item counts by every measurement its rule's formula reads, not only its own.
+    `touching` is the ids of the left-out solids that touch the measured buildings; not given, any of them might.
+    `apart` is the ones standing apart that could be a structure, each {id, name} (site_json.STANDING_APART); not
+    given, every one not touching is."""
     if not left_out:
         return
     n = len(left_out)
     some = f"{n} object{'s' if n != 1 else ''} on the lot {'aren' if n != 1 else 'isn'}'t measured"
     near = list(left_out) if touching is None else [o for o in left_out if o in set(touching)]
+    if apart is None:
+        apart = [{"id": o, "name": None} for o in left_out if o not in set(near)]
     for i in items:
         if i["status"] != COMPLIES:
             continue
@@ -2012,6 +2031,12 @@ def _cautious_for_left_out(items, left_out, touching, rules_by_id=None):
         elif reads & set(BUILDING_MEASURES + EAVE_YARDS) and near:
             why = (f"Complies for the buildings measured; {len(near)} object{'s' if len(near) != 1 else ''} "
                    "touching the building isn't measured (a porch or deck is part of the building, §325-18A)")
+        elif reads & set(SLAB_YARDS) and apart:
+            one = len(apart) == 1
+            why = (f"Complies for the buildings measured; {_apart_names(apart)} on the lot "
+                   f"{'stands' if one else 'stand'} apart from the building and {'isn' if one else 'aren'}'t measured: "
+                   "a freestanding deck, porch, landing or ramp is part of the building in the yards (§325-18A), and "
+                   "no other structure may stand in a required yard (§325-3B YARD)")
         else:
             continue
         i.update(status=REVIEW, mark=MARK[REVIEW], hint="Add to check…", reason=why + " · Add to check…")
@@ -2150,7 +2175,7 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
     left_out = extras.get("not_included") or []
     _raise_yards(items, measured, values, facts)
     _cautious_for_site_slabs(items, extras.get(site_json.SITE_SLABS), rules_by_id)
-    _cautious_for_left_out(items, left_out, extras.get("touching"), rules_by_id)
+    _cautious_for_left_out(items, left_out, extras.get("touching"), rules_by_id, extras.get(site_json.STANDING_APART))
     _cautious_for_unsettled(items, facts.get("unsettled"), rules_by_id)
     for i in items:                                  # THE guard: never above the checker's verdict (round 3)
         checker = i.pop("_checker", None)

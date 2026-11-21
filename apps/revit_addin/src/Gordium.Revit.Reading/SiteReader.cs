@@ -42,6 +42,12 @@ public static class SiteReader
         "OST_MEPSpaces", "OST_SharedBasePoint", "OST_ProjectBasePoint",
     };
 
+    /// <summary>Categories whose elements can't be a structure (reading design note, section 1, "Objects standing
+    /// apart"): trees and plants, and people and cars placed for show, aren't "constructed or erected on the ground"
+    /// (§325-3B STRUCTURE), so one standing apart from the house keeps no yard waiting (<c>could_be_building: false</c>).
+    /// Still left out (an object on the lot not measured: lot coverage needs review, as before).</summary>
+    public static readonly IReadOnlySet<string> NotStructures = new HashSet<string> { "OST_Planting", "OST_Entourage" };
+
     /// <summary>More plan points than this and the box's corners are sent instead (as Rhino's <c>_plan_points</c>).</summary>
     public const int MaxPlanPoints = 50000;
 
@@ -104,17 +110,16 @@ public static class SiteReader
                     continue;
                 var entry = new JsonObject
                 {
-                    ["id"] = c.Id, ["layer"] = c.Layer, ["could_be_building"] = true, ["touching"] = d.Touching,
+                    ["id"] = c.Id, ["layer"] = c.Layer, ["could_be_building"] = c.CouldBeBuilding, ["touching"] = d.Touching,
                     ["ground_like"] = d.Touching is not null && lot is not null && c.Box is { } b
                                       && LooksLikeGround(c.GroundKind, c.Closed, b, lot.Ring),
                     ["context"] = c.Context,
                 };
                 if (c.Slab is not null)          // a site slab (SiteSlabs): what it is marked, and its name to say so
-                {
                     entry["slab"] = c.Slab;
-                    if (c.Name is { Length: > 0 } name)
-                        entry["name"] = name;
-                }
+                // its name, so a row can say which: a slab's, and one standing apart's (it keeps the yards waiting)
+                if ((c.Slab is not null || d.Touching is false) && c.Name is { Length: > 0 } name)
+                    entry["name"] = name;
                 leftOut.Add(entry);
             }
         }
@@ -155,8 +160,8 @@ public static class SiteReader
     /// the model's coordinates); nothing that could be a building (no face: an empty family, lines only) as a nested
     /// family that gives nothing, so its host's place can't be told (touching: null), as a family on its own with
     /// nothing in it; and one whose geometry can't be read makes its host's unreadable. Never folded, so read on
-    /// their own as before (more is only more cautious): a sub-component in a building category or marked as a floor
-    /// block (a window in a kit family is a building wherever it sits, and a linked model holding one still holds a
+    /// their own as before (more is only more cautious): a sub-component that is a building part (a building category, a floor block, or marked a porch, deck,
+    /// landing, ramp, garage, shed or carport: IsBuildingPart) (a window in a kit family is a building wherever it sits, and a linked model holding one still holds a
     /// building: review round 1); one whose host isn't in the list; and one whose chain of hosts never reaches an
     /// element that isn't a sub-component (a loop: Revit can't make one, but nothing is ever dropped for it).</summary>
     internal static IReadOnlyList<RevitElement> Fold(IReadOnlyList<RevitElement> elements)
@@ -227,8 +232,8 @@ public static class SiteReader
         return kept.Count > 0 ? kept : null;
     }
 
-    /// <summary>Whether a sub-component is folded into its host: it isn't a building part (a building category or a
-    /// floor block), its host is in the list, and its chain of hosts has no loop. The chain ends at the first element
+    /// <summary>Whether a sub-component is folded into its host: it isn't a building part (a building category, a
+    /// floor block, or marked a porch, deck, landing, ramp, garage, shed or carport: IsBuildingPart), its host is in the list, and its chain of hosts has no loop. The chain ends at the first element
     /// that is read on its own (one with no host in the list, or a building part), which every folded part above
     /// it reaches.</summary>
     private static bool FoldsInto(RevitElement e, Dictionary<string, RevitElement> byId)
@@ -248,8 +253,14 @@ public static class SiteReader
         return true;
     }
 
-    private static bool IsBuildingPart(RevitElement e) =>
-        e.Mark == GordiumMark.FloorBlock || BuildingCategories.Contains(e.BuiltInCategory);
+    /// <summary>Whether the element is read as a building (the reader's switch and <see cref="Fold"/>/<see cref="Coarser"/>
+    /// ask this one predicate, so they can't drift: review round 2): a floor block, a building category, or an element
+    /// marked a porch, deck, landing, ramp, garage, shed or carport (<see cref="Marks.SiteObject"/>; never a context
+    /// object or another Gordium marker, whose mark isn't read). A building's faces are Fine's alone, its coarser
+    /// drawing weighed (it may be bigger than measured), never added as faces.</summary>
+    internal static bool IsBuildingPart(RevitElement e) =>
+        e.Mark == GordiumMark.FloorBlock || BuildingCategories.Contains(e.BuiltInCategory)
+        || e.Mark == GordiumMark.None && Read.SiteObject(e) is SiteObjectKind.Building;
 
     private static bool AnyFace(IEnumerable<GeometryItem> items) => items.Any(i => i switch
     {

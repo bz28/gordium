@@ -5,10 +5,12 @@ namespace Gordium.Revit.Reading;
 /// <summary>A left-out candidate: an element that could be a building and isn't measured, as sent to
 /// <c>objects.left_out</c> (<see cref="Sent"/>), and what the description lists of it if it is left out. For a site
 /// slab (<see cref="SiteSlabs"/>), <see cref="Slab"/> is the description's <c>left_out[].slab</c> and
-/// <see cref="Name"/> the element's name sent with it (<c>left_out[].name</c>), so the rows can say which; both null
-/// otherwise.</summary>
+/// <see cref="Name"/> the element's name, sent with a slab and with one standing apart (<c>left_out[].name</c>), so the
+/// rows can say which. <see cref="CouldBeBuilding"/>: false for an element that can't be a structure (a tree, an
+/// entourage person or car, an element marked "Not a structure"; <see cref="SiteReader.NotStructures"/>), so standing
+/// apart it keeps no yard waiting.</summary>
 internal sealed record Candidate(string Id, string Layer, bool Context, JsonObject Sent, Box3? Box, string GroundKind, bool Closed,
-                                 string? Slab = null, string? Name = null);
+                                 string? Slab = null, string? Name = null, bool CouldBeBuilding = true);
 
 /// <summary>What the reader gathered from one element's geometry (design note, section 2).</summary>
 internal sealed class Gathered
@@ -84,8 +86,9 @@ internal sealed class Read(RevitModel model)
             case var _ when _slabs.TryGetValue(e.UniqueId, out var slab) && slab.Kind != SlabKind.Building:
                 Slab(e, slab);
                 break;
-            case { Mark: GordiumMark.FloorBlock }:
-            case var _ when SiteReader.BuildingCategories.Contains(e.BuiltInCategory):
+            // a floor block, a building category, or marked a porch, deck, landing, ramp, garage, shed or carport: the
+            // one predicate Fold and Coarser ask too (review round 2)
+            case var _ when SiteReader.IsBuildingPart(e):
                 Building(e);
                 break;
             case { Kind: ElementKind.FamilyInstance or ElementKind.CadImport }:
@@ -100,9 +103,26 @@ internal sealed class Read(RevitModel model)
         }
     }
 
+    // ---- objects on the lot that aren't the building: what the architect marked them --------------------------------
+
+    /// <summary>What <see cref="Marks.SiteObject"/> says the element is, or null (not marked, a word not in
+    /// <see cref="SiteObjectKinds"/>, or a category the mark isn't bound to: never read there).</summary>
+    internal static SiteObjectKind? SiteObject(RevitElement e) =>
+        Marks.SiteObject.Categories.Contains(e.BuiltInCategory)
+        && e.InstanceMarks.TryGetValue(Marks.SiteObject.Guid, out var v) ? SiteObjectKinds.Of(Marks.Text(v)) : null;
+
+    /// <summary>A candidate as its mark and category say (reading design note, section 1, "Objects standing apart"):
+    /// marked "Not a structure", or a tree or entourage (<see cref="SiteReader.NotStructures"/>), it can't be a building
+    /// (<c>could_be_building: false</c>); otherwise as before. Never a slab (<c>left_out[].slab</c> comes from a Floor
+    /// alone, <see cref="SiteSlabs"/>). Never for a context object (the neighbourhood's).</summary>
+    private static Candidate Marked(RevitElement e, Candidate c) =>
+        !c.Context && (SiteObject(e) is SiteObjectKind.NotAStructure || SiteReader.NotStructures.Contains(e.BuiltInCategory))
+            ? c with { CouldBeBuilding = false } : c;
+
     // ---- buildings ----------------------------------------------------------------------------------------------
 
-    /// <summary>A building-category element or a floor block: one building, the faces of all its solids (design
+    /// <summary>A building part (<see cref="SiteReader.IsBuildingPart"/>: a building-category element, a floor block,
+    /// or one marked a porch, deck, landing, ramp, garage, shed or carport with "Gordium: Site object is"): one building, the faces of all its solids (design
     /// note, sections 1 and 2). Never skipped for having nothing to send: then it is an object that couldn't be
     /// sent, so every building measure needs review (Rhino sends an empty solid on the Building layer as a building
     /// with no faces).</summary>
@@ -276,10 +296,11 @@ internal sealed class Read(RevitModel model)
             return;                      // lines and points only: nothing that could be a building
         // a nested family that gave nothing: no box covers all of it, so its place can't be told (touching: null)
         var box = g.MissingPart ? null : Union(g.Box.Box, RevitBox(e, ToShared));
-        Candidates.Add(Make(e, g, box, null, context, g.AnyMesh && !g.AnySolid ? "Mesh" : "Brep", g.AllClosed));
+        Candidates.Add(Marked(e, Make(e, g, box, null, context, g.AnyMesh && !g.AnySolid ? "Mesh" : "Brep", g.AllClosed)));
     }
 
-    /// <summary>A family instance (loadable or in-place) or a 3D CAD import off the building categories: left out
+    /// <summary>A family instance (loadable or in-place) or a 3D CAD import off the building categories, and not marked a
+    /// building with "Gordium: Site object is" (then it is one: <see cref="Building"/>): left out
     /// whatever its geometry, even none (design note, section 1); what it holds, at every depth, sent as its
     /// definition, so a nested family that gives nothing leaves it with no box (touching: null).</summary>
     private void Family(RevitElement e, bool context)
@@ -292,7 +313,7 @@ internal sealed class Read(RevitModel model)
         var key = e.UniqueId;
         Definitions[key] = new JsonObject { ["status"] = SiteReader.NotLinked, ["parts"] = Parts(e.Geometry ?? [], ToShared, key, e) };
         var g = e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
-        Candidates.Add(Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, context, "Family", true));
+        Candidates.Add(Marked(e, Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, context, "Family", true)));
     }
 
     /// <summary>A coordination model: Revit gives no geometry for it (it is drawn for show only), so what it holds
@@ -341,7 +362,7 @@ internal sealed class Read(RevitModel model)
             sent["points"] = new JsonArray(points.Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray());
         if (definition is not null)
             sent["definition"] = definition;
-        return new Candidate(e.UniqueId, e.Category, context, sent, box, kind, closed);
+        return new Candidate(e.UniqueId, e.Category, context, sent, box, kind, closed, Name: e.Name);
     }
 
     /// <summary>What a family holds, each piece a part as host_core reads it: a solid or mesh with faces, its box; a
@@ -377,8 +398,9 @@ internal sealed class Read(RevitModel model)
     // ---- linked models ------------------------------------------------------------------------------------------
 
     /// <summary>A linked Revit model (proposed, design note, section 1). Not loaded: it can't be looked inside, so the
-    /// reader hasn't looked at everything (<c>inventory_complete: false</c>). Loaded and holding any building-category
-    /// element at any depth of links inside links, or a closed workset of its own: an object that couldn't be sent
+    /// reader hasn't looked at everything (<c>inventory_complete: false</c>). Loaded and holding any building part (a
+    /// building-category element, a floor block, or one marked a porch, deck, landing, ramp, garage, shed or carport
+    /// with "Gordium: Site object is": <see cref="SiteReader.IsBuildingPart"/>) at any depth of links inside links, or a closed workset of its own: an object that couldn't be sent
     /// (wherever it is placed), so every building measure needs review (<see cref="UnsendLinks"/>). A loaded link,
     /// either way, is a left-out candidate like a family (listed when objects.left_out says it is on the lot), what
     /// it holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
@@ -406,7 +428,7 @@ internal sealed class Read(RevitModel model)
         Candidates.Add(Make(e, g, inside.MissingPart ? null : box, key, false, "Link", true));
     }
 
-    /// <summary>A linked model holding a building-category element at any depth, or a closed workset of its own: an
+    /// <summary>A linked model holding a building part (<see cref="SiteReader.IsBuildingPart"/>) at any depth, or a closed workset of its own: an
     /// object that couldn't be sent, so every building measure needs review, wherever it is placed (design note,
     /// section 1). Ids are unique across the description and the link itself is also left out under its
     /// <c>UniqueId</c> (as Rhino lists every block off the Building layer: scene 19), so the unsent entry is named
@@ -463,7 +485,8 @@ internal sealed class Read(RevitModel model)
                 parts.Add(new JsonObject { ["box"] = Numbers(nb?.ToArray()), ["definition"] = nested });
                 continue;
             }
-            if (el.Mark == GordiumMark.FloorBlock || SiteReader.BuildingCategories.Contains(el.BuiltInCategory))
+            var buildingPart = SiteReader.IsBuildingPart(el);     // the one predicate (review round 3)
+            if (buildingPart)
                 inside.HoldsBuilding = true;     // read on for its place too: the link is left out (scene 19), and
                                                  // where it stands is where its building parts stand
             if (el.Mark is GordiumMark.SpotGrade or GordiumMark.FinishedGrade)
@@ -476,7 +499,13 @@ internal sealed class Read(RevitModel model)
                 parts.Add(new JsonObject { ["box"] = null });
                 continue;
             }
-            var g = el.Geometry is null ? new Gathered() : Walk(el.Geometry, t, el);
+            // a building part's Medium and Coarse drawing (Fold and Coarser leave it out of its geometry: a building's
+            // faces are Fine's) is walked into its place here too, so a piece drawn only coarser is never dropped from
+            // the link's box and plan (review round 3; more is only more cautious)
+            IReadOnlyList<GeometryItem>? drawn = el.Geometry;
+            if (drawn is not null && buildingPart && SiteReader.Drawn(el.CoarserGeometry) is { Count: > 0 } more)
+                drawn = new List<GeometryItem>(drawn) { new InstanceItem(more) };
+            var g = drawn is null ? new Gathered() : Walk(drawn, t, el);
             if (!g.HasFaces && !anyGeometry && !g.Other && !g.MissingPart)
                 continue;                                        // lines and points only: nothing that could be a building
             var empty = anyGeometry && !g.HasFaces;              // a family with nothing in it: its place can't be told

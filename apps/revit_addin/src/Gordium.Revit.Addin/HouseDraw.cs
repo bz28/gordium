@@ -997,7 +997,7 @@ internal static class HouseDraw
 
     /// <summary>One of Revit's own family templates by file name (<c>Door.rft</c>, <c>Baluster.rft</c>,
     /// <c>Profile-Rail.rft</c>), where <see cref="WindowTemplate"/> looks.</summary>
-    private static string Template(RevitApplication app, string file)
+    internal static string Template(RevitApplication app, string file)
     {
         var tried = new List<string>();
         foreach (var dir in new[]
@@ -1018,12 +1018,13 @@ internal static class HouseDraw
 
     /// <summary>A window family of this window's size, made from Window.rft (whose opening cuts the wall from the
     /// Sill reference plane to the Top one): a frame solid filling the opening, half the template wall's thickness
-    /// deep, centred in it. One family per window, so each window has a type of its own. Loaded into the project.</summary>
-    private static FamilySymbol WindowFamily(RevitApplication app, Document project, JsonObject w)
+    /// deep, centred in it. One family per window, so each window has a type of its own. Loaded into the project, named
+    /// <paramref name="familyName"/> when given (a model built from data: ModelBuild).</summary>
+    internal static FamilySymbol WindowFamily(RevitApplication app, Document project, JsonObject w, string? familyName = null)
     {
         var id = w["id"]!.GetValue<string>();
         double width = D(w["width"]), height = D(w["height"]);
-        var name = $"Gordium test window {id} ({width * 12:0.###} x {height * 12:0.###} in)";
+        var name = familyName ?? $"Gordium test window {id} ({width * 12:0.###} x {height * 12:0.###} in)";
         var fdoc = app.NewFamilyDocument(WindowTemplate(app));
         try
         {
@@ -1087,7 +1088,7 @@ internal static class HouseDraw
         }
     }
 
-    private static FamilyParameter FamilyParameterOf(FamilyManager fm, BuiltInParameter first, BuiltInParameter second, string name) =>
+    internal static FamilyParameter FamilyParameterOf(FamilyManager fm, BuiltInParameter first, BuiltInParameter second, string name) =>
         fm.get_Parameter(first) ?? fm.get_Parameter(second) ?? fm.get_Parameter(name)
         ?? throw new InvalidOperationException($"Window.rft has no {name} parameter (it has: " +
                                                string.Join(", ", fm.Parameters.Cast<FamilyParameter>().Select(p => p.Definition.Name).Order()) + ")");

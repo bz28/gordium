@@ -272,15 +272,30 @@ public static class InteriorReader
         UnknownAreas(model).GroupBy(a => (a.LevelId, a.Level)).Select(g =>
         {
             var list = g.ToList();
-            return list.Count == 1
-                ? AreaWords(model, list[0]) + ": it may be a bedroom nobody placed a Room in, so every sleeping-room rule " +
-                  "needs review: place a Room in it (marked No if no one sleeps there), or open it up; on a level with no " +
-                  "rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes"
-                : string.Format(CultureInfo.InvariantCulture,
-                      "{0} enclosed areas on {1} have no Room ({2:0.#} to {3:0.#} sq ft; each listed with its place in the log): " +
-                      "each may be a bedroom nobody placed a Room in, so every sleeping-room rule needs review: place a Room " +
-                      "in each (marked No if no one sleeps there), or open it up; if the level has no rooms at all (a roof), " +
-                      "mark it {4} Yes", list.Count, g.Key.Level, list.Min(a => a.Area), list.Max(a => a.Area), Marks.NoRoomsOnLevel.Name);
+            var placeless = list.Count(a => a.PointInside is null);
+            // an area Revit can't give a point inside has no place to put a Room in: its fix is the walls
+            var fixWalls = "find and fix the overlapping or doubled walls on " + g.Key.Level + " that close it off";
+            var roof = "on a level with no rooms at all (a roof), mark the level " + Marks.NoRoomsOnLevel.Name + " Yes";
+            if (list.Count == 1)
+                return AreaWords(model, list[0]) + ": it may be a bedroom nobody placed a Room in, so every sleeping-room " +
+                       "rule needs review: " + (placeless == 1 ? fixWalls
+                                                                 : "place a Room in it (marked No if no one sleeps there), or open it up") +
+                       "; " + roof;
+            var what = placeless == 0
+                ? "each listed with its place in the log): each may be a bedroom nobody placed a Room in, so every " +
+                  "sleeping-room rule needs review: place a Room in each (marked No if no one sleeps there), or open it up"
+                : placeless == list.Count
+                    ? "each listed in the log; Revit couldn't locate any of them, often slivers between overlapping walls): " +
+                      "each may be a bedroom nobody placed a Room in, so every sleeping-room rule needs review: " +
+                      "find and fix the overlapping or doubled walls on " + g.Key.Level + " that close them off"
+                    : string.Format(CultureInfo.InvariantCulture,
+                          "each listed in the log, with its place where Revit gives one): each may be a bedroom nobody " +
+                          "placed a Room in, so every sleeping-room rule needs review: place a Room in each of the {0} with " +
+                          "a place (marked No if no one sleeps there), or open it up; the {1} Revit couldn't locate (no point " +
+                          "inside, often a sliver between overlapping walls): find and fix the overlapping or doubled walls " +
+                          "on {2} that close them off", list.Count - placeless, placeless, g.Key.Level);
+            return string.Format(CultureInfo.InvariantCulture, "{0} enclosed areas on {1} have no Room ({2:0.#} to {3:0.#} sq ft; ",
+                                 list.Count, g.Key.Level, list.Min(a => a.Area), list.Max(a => a.Area)) + what + "; " + roof;
         }).ToList();
 
     /// <summary>Each enclosed area sent as a space whose use isn't known, one line each, for the log.</summary>
@@ -288,7 +303,11 @@ public static class InteriorReader
 
     private static string AreaWords(RevitModel model, EnclosedArea a)
     {
-        var p = model.InternalToShared.Apply(a.PointInside);
+        if (a.PointInside is not { } inside)
+            return string.Format(CultureInfo.InvariantCulture,
+                                 "An enclosed area on {0} has no Room ({1:0.#} sq ft; Revit couldn't give a point inside it, " +
+                                 "often a sliver between overlapping walls)", a.Level, a.Area);
+        var p = model.InternalToShared.Apply(inside);
         return string.Format(CultureInfo.InvariantCulture, "An enclosed area on {0} has no Room ({1:0.#} sq ft, around x {2:0.##}, y {3:0.##})",
                              a.Level, a.Area, p.X, p.Y);
     }
@@ -321,9 +340,10 @@ public static class InteriorReader
     /// given, never holds it (read as a chord, the point could be outside the room).</summary>
     private static bool Lies(EnclosedArea a, RoomRecord r)
     {
-        if (a.LevelId is null || r.LevelId != a.LevelId || r.Boundary is not { Count: > 0 } loops || loops.Any(l => l.Count < 3 || l.Any(s => !s.IsLine)))
-            return false;
-        var (x, y) = (a.PointInside.X, a.PointInside.Y);
+        if (a.PointInside is not { } point || a.LevelId is null || r.LevelId != a.LevelId ||
+            r.Boundary is not { Count: > 0 } loops || loops.Any(l => l.Count < 3 || l.Any(s => !s.IsLine)))
+            return false;                                           // no point inside: never said to lie in a Room
+        var (x, y) = (point.X, point.Y);
         var inside = false;
         foreach (var loop in loops)
             foreach (var s in loop)
@@ -381,8 +401,10 @@ public static class InteriorReader
         var ids = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in areas)
         {
-            var p = model.InternalToShared.Apply(a.PointInside);
-            var id = string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:{1:0.###},{2:0.###}", a.LevelId ?? a.Level, p.X, p.Y);
+            var id = a.PointInside is { } inside
+                ? string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:{1:0.###},{2:0.###}", a.LevelId ?? a.Level,
+                                model.InternalToShared.Apply(inside).X, model.InternalToShared.Apply(inside).Y)
+                : string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:no-point:{1:0.###}sf", a.LevelId ?? a.Level, a.Area);
             for (var n = 2; !ids.Add(id); n++)
                 id = $"{id}#{n}";
             spaces.Add(new JsonObject { ["id"] = id, ["name"] = AreaWords(model, a) });
