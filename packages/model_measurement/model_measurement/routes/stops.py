@@ -57,11 +57,14 @@ STOPS = {
                    "the story's figure covers it by its ring cluster's bound (decision 3)",
     "too_narrow": "the point ({x}, {y}) is shut in: an opening too narrow for NFPA 7.6.1's 12-in clearance from both "
                   "sides",
+    "doors_same_centre": "the doors {a} and {b} have the same centre (within 1/16 in): a door listed twice?",
     "door_centre_in_ring": "the door {name}'s centre is within 12 in of a corner other than its jambs: no route through "
                            "it is defined (decision 2)",
     # the most remote point (remote.py)
     "cluster_shut": "the rings round ({x}, {y}) have no clear edge with a route: the floor there is shut in (an "
                     "opening too narrow for NFPA 7.6.1's 12-in clearance from both sides)",
+    "nothing_to_sample": "the story has no clear floor to sample (every room's floor is under obstructions or "
+                         "within 12 in of a corner): its travel figure isn't measured",
     "walk_shut": "the point ({x}, {y}), within 12 in of a corner, has no walk on the floor out to its rings' clear "
                  "edge",
 }

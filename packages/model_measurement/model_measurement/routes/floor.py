@@ -140,9 +140,9 @@ def read(description) -> Floor:
 
     rooms = _list(description, "rooms", "no room is read", stops, required=True)
     if rooms is None:
-        return Floor(stops, stories)
+        return _finish(stops, stories)
     if _twice(rooms, "room", stops):
-        return Floor(stops, stories)
+        return _finish(stops, stories)
     for item in rooms:
         story = story_of(item, "room")
         if story is None:
@@ -172,9 +172,9 @@ def read(description) -> Floor:
 
     doors = _list(description, "doors", "no door is read", stops, required=True)
     if doors is None:
-        return Floor(stops, stories)
+        return _finish(stops, stories)
     if _twice(doors, "door", stops):
-        return Floor(stops, stories)
+        return _finish(stops, stories)
     for item in doors:
         story = story_of(item, "door")
         if story is None:
@@ -195,12 +195,32 @@ def read(description) -> Floor:
     _outlines(outlines, reader, stories)
 
     if stops:
-        return Floor(stops, stories)
+        return _finish(stops, stories)
     for story in stories.values():
+        _coincident_doors(story)
         _zones(story)
         if not story.exits():
             story.stops.append(Stop("no_exit").reason)
+    return _finish(stops, stories)
+
+
+def _finish(stops, stories) -> Floor:
+    """A problem with the whole description is every story's: each story carries it, so no story's routes are
+    measured while it stands (a story left unzoned is never measured without a reason)."""
+    for story in stories.values():
+        for reason in stops:
+            if reason not in story.stops:
+                story.stops.append(reason)
     return Floor(stops, stories)
+
+
+def _coincident_doors(story) -> None:
+    """Two doors with one centre (a door listed twice): which one a route passes is unclear."""
+    doors = list(story.doors.values())
+    for i, a in enumerate(doors):
+        for b in doors[i + 1:]:
+            if math.dist(a.centre, b.centre) <= SAME:
+                story.stops.append(Stop("doors_same_centre", a=a.name, b=b.name).reason)
 
 
 # --- reading -------------------------------------------------------------------------------------------------------

@@ -302,6 +302,8 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
                     "walk out sampled"
             clusters.append(Cluster([rings[k] for k in group], top_v, top_p, margin, how,
                                     top_v + SPACING / 2 + margin))
+    if not math.isfinite(found["best"]):
+        raise Stop("nothing_to_sample")
     parts = [("the clear floor", max(floor_bound, found["best"]))]
     if near is not None:
         parts.append(("the clear floor next to the rings", near))
@@ -321,6 +323,8 @@ def _walk_margin(floor, rings, r, targets) -> float:
                                   for i in range(SIDES)]) for c in rings]).intersection(floor)
     walk = _Walk(floor, targets)
     points = {(round(p[0], 9), round(p[1], 9)): p for t in _triangles(cover, FINE) for p in t}
+    if not points:                                   # nothing sampled is never a margin of 3 in
+        raise Stop("walk_shut", x=_show(rings[0])[0], y=_show(rings[0])[1])
     worst = 0.0
     for p in points.values():
         w = walk(p)

@@ -332,6 +332,16 @@ def test_18_a_point_shut_in_by_an_opening_under_24_in_has_no_route_never_a_numbe
     assert routes(alcove_too_narrow(), clearance=0).route(at(10, 11.5)).feet > 0
 
 
+def test_a_chain_never_passes_a_door_twice(monkeypatch):
+    """Review round 1: two doors with one centre made a zero-length cycle the chain recursed round forever. The
+    reading refuses them (test_routes_floor.py); with that check lifted, the chain still ends."""
+    from model_measurement.routes import floor
+    monkeypatch.setattr(floor, "_coincident_doors", lambda story: None)
+    d = room_on_corridor()
+    d["doors"].append(door("d2", (10, 15.25), (1, 0), ("r", "c")))
+    assert routes(d).route(at(10, 5)).feet > 0
+
+
 def test_an_unknown_exit_id_is_said():
     with pytest.raises(Stop) as stop:
         routes(l_corridor()).route(at(1, 1), ["Z"])
@@ -364,7 +374,7 @@ def test_too_many_tied_routes_is_said(monkeypatch):
 
 
 PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters", "too_many_ties", "exit_unknown",
-             "inside_ring", "too_narrow", "cluster_shut", "walk_shut"}   # the last two: test_routes_remote.py
+             "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last two: test_routes_remote.py
 
 
 def test_every_reason_has_a_case():

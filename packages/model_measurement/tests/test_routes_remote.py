@@ -137,6 +137,24 @@ def test_a_point_with_no_walk_out_needs_review(monkeypatch):
     assert stop.value.key == "walk_shut"
 
 
+def test_a_cluster_whose_cover_gives_no_samples_has_no_margin(monkeypatch):
+    """Never a bare 3-in margin from no samples: made to happen by giving the walk-out cover no triangles."""
+    whole = remote._triangles
+    monkeypatch.setattr(remote, "_triangles", lambda region, longest: [] if longest == remote.FINE
+                        else whole(region, longest))
+    with pytest.raises(Stop) as stop:
+        farthest(routes(stub()))
+    assert stop.value.key == "walk_shut"
+
+
+def test_a_story_with_no_clear_floor_has_no_figure():
+    d = description([room("r", rect(0, 0, 20, 10), obstructions=[rect(0, 0, 20, 10)])],
+                    [door("x", (-0.25, 5), (0, 1), ("r", "outside"), exit_id="A")])
+    with pytest.raises(Stop) as stop:
+        farthest(routes(d))
+    assert stop.value.key == "nothing_to_sample"
+
+
 # --- the brute force -------------------------------------------------------------------------------------------
 
 def _clear_grid(desc, step):

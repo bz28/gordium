@@ -442,15 +442,18 @@ class StoryRoutes:
         self._chains[wanted] = (dist, steps, edges)
         return self._chains[wanted]
 
-    def _chains_from(self, door_id, wanted, at) -> list[tuple]:
-        """Every tied chain from a door centre to an exit: (pieces, doors passed, exit id)."""
+    def _chains_from(self, door_id, wanted, at, passed_by=frozenset()) -> list[tuple]:
+        """Every tied chain from a door centre to an exit: (pieces, doors passed, exit id). A chain never passes a
+        door twice (`passed_by`), so no cycle of zero-length steps can recurse."""
         dist, steps, _ = self._chain(wanted)
         door = self.story.doors[door_id]
         if door.exit_kind and door.exit_id in wanted:
             return [([], (door_id,), door.exit_id)]
         out = []
         for u, paths in steps.get(door_id, []):
-            for rest, passed, exit_id in self._chains_from(u, wanted, at):
+            if u in passed_by or u == door_id:
+                continue
+            for rest, passed, exit_id in self._chains_from(u, wanted, at, passed_by | {door_id}):
                 for q in paths:
                     out.append((q.pieces + rest, (door_id,) + passed, exit_id))
                     if len(out) > MOST_TIES:

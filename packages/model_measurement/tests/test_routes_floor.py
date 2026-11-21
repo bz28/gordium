@@ -9,6 +9,8 @@ from pathlib import Path
 import pytest
 
 from model_measurement.routes.floor import read
+from model_measurement.routes.paths import StoryRoutes
+from model_measurement.routes.remote import farthest
 from model_measurement.routes.stops import STOPS, Stop
 sys.path.insert(0, str(Path(__file__).parent))           # the layouts beside this file (pytest's importlib mode)
 from routes_layouts import description, door, l_corridor, rect, room, room_on_corridor, story
@@ -49,6 +51,26 @@ def test_the_base_layout_reads_with_nothing_to_review():
 def test_a_key_left_out_leaves_every_story_not_measured(path, words):
     floor = read(_without(room_on_corridor(), *path))
     assert any(words in s for s in floor.stops), floor.stops
+    # every story carries it: none is measured (review round 1: a number that left out the unread room)
+    for s in floor.stories.values():
+        assert any(words in r for r in s.stops), s.stops
+        with pytest.raises(Stop) as stop:
+            StoryRoutes(s)
+        assert stop.value.key == "story_not_measured" and words in stop.value.reason
+
+
+def test_an_end_only_room_with_no_level_gives_its_story_no_number():
+    d = room_on_corridor()
+    del d["rooms"][0]["level"]                       # the day-care room (end-only) not placed
+    for s in read(d).stories.values():
+        with pytest.raises(Stop):
+            farthest(StoryRoutes(s))
+
+
+def test_two_doors_with_one_centre_need_review():
+    d = room_on_corridor()
+    d["doors"].append(door("d2", (10, 15.25), (1, 0), ("r", "c")))
+    assert any("have the same centre" in r for r in story(d).stops)
 
 
 def test_an_unknown_space_with_no_level_leaves_every_story_not_measured():
@@ -252,6 +274,8 @@ FLOOR_CASES = {
     "passage_off": _passage_off,
     "zone_in_pieces": room_on_corridor,
     "no_exit": lambda: _without(_without(l_corridor(), "doors", 0, "exit_kind"), "doors", 0, "exit_id"),
+    "doors_same_centre": lambda: _with(room_on_corridor(), room_on_corridor()["doors"]
+                                       + [door("d2", (10, 15.25), (1, 0), ("r", "c"))], "doors"),
     "door_centre_in_ring": lambda: _with(room_on_corridor(), [{"outline": [list(q) for q in rect(9.6, 15.6, 10.4, 16)],
                                                                 "kind": "furniture", "fixed": False}],
                                          "rooms", 1, "obstructions"),
