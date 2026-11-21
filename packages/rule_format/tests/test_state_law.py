@@ -2,6 +2,7 @@
 repo (sources.yaml `kept_outside_repo: true`, its text in the code cache). Decided 2026-11-12:
 docs/decisions/2026-11-12_building_code_text.md."""
 
+import copy
 import shutil
 from pathlib import Path
 
@@ -798,6 +799,41 @@ def test_a_flags_drafted_check_uses_the_extracted_texts_numbers_the_laws_way(mai
     from rule_format import code_numbers
     got = code_numbers.problems({"kind": "flag", "check": check, "for_each": "story"}, [COMMON_PATH], maine)
     assert (got == []) if words is None else any(words in p for p in got), got
+
+
+TRAVEL_ROW = {"file": IBC, "page": 267, "lines": [81, 81], "quote": "1-2,1-3,1-4 Not Permitted 200"}
+
+
+def test_a_table_cell_of_a_book_not_verified_backs_a_flags_drafted_length_only(maine):
+    """Table 1016.1 prints its unit in the column head ("(feet)"), never by the cell, and its cells carry no
+    comparison words: a flag's drafted check may compare the cell's 200 with a length (its direction proved by the
+    examples' drafted_check); a rule never may, and a number the row doesn't print never backs anything."""
+    from rule_format import code_numbers
+    flag = {"kind": "flag", "check": "egress_travel_distance <= 200", "for_each": "story"}
+    assert code_numbers.problems(flag, [TRAVEL_ROW], maine) == []
+    assert any("isn't one of" in p for p in code_numbers.problems(dict(flag, check="egress_travel_distance <= 250"),
+                                                                  [TRAVEL_ROW], maine))
+    assert any("never read a second time" in p for p in code_numbers.problems(dict(flag, kind="rule"), [TRAVEL_ROW],
+                                                                               maine))
+
+
+def test_a_label_quote_repeated_on_its_page_counts_when_its_piece_pins_it_once(maine):
+    """The IBC's "LOADS. See Section 1602.1." (p.43 line 100) is also the end of "LIVE LOADS. See Section 1602.1."
+    (line 94), and a label's quote can't reach outside its piece; the piece pins it, so it counts. A quote at lines
+    outside the piece, or the repeat at the other lines, still does not."""
+    from rule_format.labels import load_pieces, piece_fingerprint, validate_labels
+    header, pieces = load_pieces(MAINE / "2_extracted_text/icc.ibc.2009.sections.jsonl")
+    if IBC not in maine.pages:
+        pytest.skip("the code cache with the 2009 IBC is not on this machine (CI)")
+    entry = {"label": "reference", "topic": "definitions", "reason": "A pointer.",
+             "piece_sha256": piece_fingerprint(pieces["202:loads"], header["sha256"]), "drafted_by": "t",
+             "status": "draft",
+             "sources": [{"file": IBC, "page": 43, "lines": [100, 100], "quote": "LOADS. See Section 1602.1."}]}
+    book = lambda e: {"document": IBC, "labels": {"202:loads": e}}
+    assert validate_labels(book(entry), maine, header, pieces) == []
+    other = copy.deepcopy(entry)
+    other["sources"][0]["lines"] = [94, 94]
+    assert validate_labels(book(other), maine, header, pieces)
 
 
 def _flag(source, check="common_path_of_travel <= 75", drafted=("pass", "fail")):

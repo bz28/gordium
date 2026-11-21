@@ -241,7 +241,10 @@ def rules_for_pieces(file: str, pieces: dict[str, dict], labels: dict, rules: li
         if not isinstance(rid, str):
             continue
         name = rid.split(".", 1)[-1]
-        fits = [pid for pid in ruled if name == _slug(pid) or name.startswith(_slug(pid) + "_")]
+        # a state folder with two books names a rule by its book first (Maine: `general.ibc_1016_1_...`,
+        # `general.nfpa_16_2_6_2_...`): a leading word of letters only is the book, never part of a piece's number
+        names = [name] + ([book_free] if (book_free := re.sub(r"^[a-z]+_", "", name)) != name else [])
+        fits = [pid for pid in ruled for n in names if n == _slug(pid) or n.startswith(_slug(pid) + "_")]
         if not fits:
             continue
         pid = max(fits, key=len)
@@ -250,6 +253,11 @@ def rules_for_pieces(file: str, pieces: dict[str, dict], labels: dict, rules: li
                   for n in range(lines[0], lines[1] + 1)}
         if pid in quoted and rid not in out[pid]:
             out[pid].append(rid)
+            # a table holds the numbers of the section whose rule quotes it (Table 1016.1 for 1016.1): the rule
+            # written for the section is written for each table piece it quotes too (never for any other piece)
+            for t in sorted(q for q in quoted if q in out and q != pid and pieces[q].get("kind") == "table"):
+                if rid not in out[t]:
+                    out[t].append(rid)
     return out
 
 

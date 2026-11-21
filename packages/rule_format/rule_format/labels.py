@@ -88,6 +88,8 @@ def _label_problems(key, entry, ctx: Context, pieces: dict[str, dict], pdf_sha: 
         p.append("'sources' must be a list of mappings")
     else:
         owned = {(pg, n) for pg, first, last in pieces[key]["lines"] for n in range(first, last + 1)}
+        if not sources:
+            p += _source_problems(sources, ctx)          # "needs at least one source"
         for s in sources:
             p += [x for x in _source_problems([s], ctx) if not _unique_in_piece(s, x, ctx, owned)]
         for s in sources:

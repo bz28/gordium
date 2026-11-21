@@ -46,3 +46,25 @@ def test_the_model_codes_requirement_verbs_put_a_reference_on_the_review_list():
                        ("Doors shall be permitted to swing over stairs.", "shall be permitted")):
         rows = [{"file": "b.pdf"}, {"page": 1, "line": 1, "text": text}]
         assert coverage.requirement_words(rows, piece) == [word]
+
+
+def test_a_rule_named_by_its_book_counts_for_its_section_and_the_tables_it_quotes():
+    """Maine's state folder holds two books, so its rules are named by book first (general.ibc_1016_1_...): the book
+    word is no part of a piece number. A rule written for a section is written for each table piece it quotes too
+    (Table 1016.1 holds 1016.1's numbers), never for any other piece it quotes, nor for a table it doesn't."""
+    pieces = {"1016.1": {"id": "1016.1", "title": "Travel distance limitations", "lines": [[1, 1, 5]]},
+              "Table 1016.1": {"id": "Table 1016.1", "title": "TABLE 1016.1", "kind": "table", "lines": [[1, 6, 9]]},
+              "1014.3": {"id": "1014.3", "title": "Common path", "lines": [[1, 10, 12]]},
+              "Table 1015.1": {"id": "Table 1015.1", "title": "TABLE 1015.1", "kind": "table", "lines": [[1, 13, 14]]}}
+    labels = {pid: {"label": "rule"} for pid in pieces}
+    src = lambda a, b: {"file": "b.pdf", "page": 1, "lines": [a, b]}
+    rules = [{"id": "general.ibc_1016_1_travel", "sources": [src(1, 2), src(7, 7), src(10, 10)]},
+             {"id": "general.nfpa_1014_3_common_path", "sources": [src(6, 6)]}]       # names 1014.3, quotes only a table
+    got = coverage.rules_for_pieces("b.pdf", pieces, labels, rules)
+    assert got == {"1016.1": ["general.ibc_1016_1_travel"], "Table 1016.1": ["general.ibc_1016_1_travel"],
+                   "1014.3": [], "Table 1015.1": []}
+    # New York's names (r318_...) carry no book word and are read as before
+    assert coverage.rules_for_pieces("b.pdf", {"R318.2": {"id": "R318.2", "title": "x", "lines": [[1, 1, 1]]}},
+                                     {"R318.2": {"label": "rule"}}, [{"id": "general.r318_2_door",
+                                                                     "sources": [src(1, 1)]}]) == \
+        {"R318.2": ["general.r318_2_door"]}

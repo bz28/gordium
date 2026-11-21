@@ -200,6 +200,7 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
             lengths = _between_ends(readings(unverified_reading(entry) if book.get("not_verified") else entry))
             if book.get("not_verified"):          # a flag's drafted check: no second reading says more than this
                 lengths = [_unverified(length) for length in lengths]
+            lengths = [_in_feet(length, s["quote"]) for length in lengths]
             # a value the piece reads more than one way (R320.2: "not less than 34" and, for ship's ladders, "not
             # more than 34"): a reading counts only where the quote states it with the same words before it
             ways: dict = {}
@@ -212,6 +213,20 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
                     continue
                 out.append(length | {"piece": pid})
     return out
+
+
+def _in_feet(length: dict, quote: str) -> dict:
+    """A number the quote prints in feet as "ft" (NFPA 101: "shall not exceed 100 ft (30 m)"): numbers.py reads no
+    unit from "ft" (its readings, and the recorded second reading, have none), so the quote's own "ft" right after
+    the same number says it is a length in feet. Only a number with no unit of its own, only where the quote prints
+    it so; its comparison stays the second reading's."""
+    if not set(length["values"]) <= {"count", "any"} or len(length["statements"]) != 1:
+        return length
+    value = length["statements"][0][0]
+    printed = re.findall(r"(?<![\w.,/])(\d[\d,]*(?:\.\d+)?)\s*ft\b", quote.lower())
+    if not any(value_of(n) == value for n in printed):
+        return length
+    return dict(length, values=dict(length["values"], ft=value, **{"in": value * 12}))
 
 
 def _unverified(length: dict) -> dict:
