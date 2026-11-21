@@ -1,0 +1,890 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gordium Revit Panel</title>
+<meta name="description" content="Interactive mockup of Gordium's proposed Revit results panel, guided fixes and marking checklist, on the Children's Odyssey eval (19 Libby St, Portland ME). Design pass: docs/revit/ui_design_pass.md.">
+<style>
+/* ---------- tokens: the panel's (proposed, docs/revit/ui_design_pass.md section 2.5) and the Revit-like frame's ---------- */
+:root{
+  --bg-pane:#F4F5F7; --bg-surface:#FFFFFF; --bg-hover:#EEF1F5; --bg-selected:#DCE9FA; --line:#D7DBE1;
+  --text:#1D2229; --text-muted:#5B6470; --accent:#0B66D0; --accent-ink:#FFFFFF;
+  --fail:#C2410C; --fail-fill:#FDE8DF; --review:#9A6700; --review-fill:#FFF4D6; --pass:#0F7B6C; --pass-fill:#DDF3EF;
+  --na:#6B7280; --confirm:#1F5FAD; --confirm-fill:#E3EEFB;
+  --quote-bg:#F7F5EF; --quote-bar:#B9A77A;
+  /* frame */
+  --f-title:#DADDE2; --f-ribbon:#F3F4F6; --f-tabs:#E6E8EB; --f-line:#C9CDD3; --f-text:#22262C; --f-muted:#5F6670;
+  --f-browser:#FAFAFB; --canvas:#FFFFFF; --wall:#1F2328; --room-line:#8A9099; --room-tag:#3A4048; --status:#E9EBEE;
+  --hl:#0B66D0; --hl-fill:rgba(11,102,208,.16); --mock:#7A3FBF; --mock-fill:#F1E8FB;
+  color-scheme: light;
+}
+:root[data-theme="dark"]{
+  --bg-pane:#2B3038; --bg-surface:#343A44; --bg-hover:#3D4450; --bg-selected:#2F4A6E; --line:#4A5260;
+  --text:#E7EAEE; --text-muted:#A9B1BC; --accent:#5AA2F5; --accent-ink:#0E1620;
+  --fail:#FF8A5B; --fail-fill:#4A2A1E; --review:#F2C14E; --review-fill:#4A3F1E; --pass:#4CC6B3; --pass-fill:#1C3E3A;
+  --na:#9AA3AE; --confirm:#7FB2F0; --confirm-fill:#22344D;
+  --quote-bg:#3A3730; --quote-bar:#8C7C55;
+  --f-title:#1F242B; --f-ribbon:#2E343D; --f-tabs:#262B33; --f-line:#454D59; --f-text:#E3E6EA; --f-muted:#9EA6B1;
+  --f-browser:#2A2F37; --canvas:#1E232A; --wall:#DDE2E8; --room-line:#6E7682; --room-tag:#C4CAD2; --status:#252A31;
+  --hl:#5AA2F5; --hl-fill:rgba(90,162,245,.22); --mock:#C69BFF; --mock-fill:#3A2D4D;
+  color-scheme: dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:#C9CED6;color:var(--f-text);font:12px/1.4 "Segoe UI",system-ui,-apple-system,Roboto,Arial,sans-serif}
+:root[data-theme="dark"] body{background:#14171C}
+button{font:inherit;color:inherit}
+.fig{font-variant-numeric:tabular-nums}
+
+/* ---------- mockup controls (outside Revit) ---------- */
+.mockbar{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;padding:10px 16px;background:#1D2229;color:#E7EAEE;font-size:12px}
+.mockbar b{font-weight:600;font-size:13px}
+.mockbar .grp{display:flex;gap:4px;align-items:center}
+.mockbar .seg{border:1px solid #4A5260;border-radius:4px;background:#2B3038;padding:3px 8px;cursor:pointer;color:#E7EAEE}
+.mockbar .seg[aria-pressed="true"]{background:#5AA2F5;color:#0E1620;border-color:#5AA2F5}
+.mockbar select{background:#2B3038;color:#E7EAEE;border:1px solid #4A5260;border-radius:4px;padding:3px 6px;font:inherit}
+.mockbar .hint{color:#A9B1BC;margin-left:auto}
+.wrap{padding:14px 16px 28px;overflow-x:auto}
+
+/* ---------- Revit-like frame ---------- */
+.revit{min-width:1080px;max-width:1500px;margin:0 auto;height:780px;display:grid;grid-template-rows:26px auto 1fr 22px;border:1px solid var(--f-line);box-shadow:0 8px 30px rgba(0,0,0,.25);background:var(--f-ribbon);color:var(--f-text)}
+.titlebar{background:var(--f-title);display:flex;align-items:center;padding:0 10px;gap:10px;font-size:11.5px;color:var(--f-muted)}
+.titlebar .logo{width:16px;height:16px;border-radius:3px;background:#1858A8;color:#fff;font-weight:700;font-size:11px;display:grid;place-items:center}
+.ribbon{border-bottom:1px solid var(--f-line)}
+.rtabs{display:flex;gap:0;background:var(--f-tabs);padding:0 6px;border-bottom:1px solid var(--f-line);overflow:hidden}
+.rtabs span{padding:4px 10px;font-size:11.5px;color:var(--f-muted);white-space:nowrap}
+.rtabs span.file{background:#1858A8;color:#fff}
+.rtabs span.on{background:var(--f-ribbon);color:var(--f-text);border:1px solid var(--f-line);border-bottom-color:var(--f-ribbon);margin-bottom:-1px;font-weight:600}
+.rpanels{display:flex;gap:0;padding:4px 4px 0;height:92px}
+.rpanel{display:flex;flex-direction:column;border-right:1px solid var(--f-line);padding:0 8px}
+.rpanel .btns{display:flex;gap:4px;flex:1;align-items:flex-start}
+.rpanel .pname{font-size:10.5px;color:var(--f-muted);text-align:center;padding:2px 0 3px;border-top:1px solid var(--f-line);margin-top:2px}
+.rbtn{display:flex;flex-direction:column;align-items:center;gap:3px;width:64px;padding:4px 2px;border:1px solid transparent;border-radius:3px;background:none;cursor:pointer;font-size:11px;line-height:1.15;text-align:center}
+.rbtn:hover{background:var(--bg-hover);border-color:var(--f-line)}
+.rbtn svg{width:32px;height:32px}
+.rsmall{display:flex;flex-direction:column;gap:2px}
+.rsmall button{display:flex;gap:6px;align-items:center;background:none;border:1px solid transparent;border-radius:3px;padding:2px 6px;cursor:pointer;font-size:11px}
+.rsmall button:hover{background:var(--bg-hover);border-color:var(--f-line)}
+.rsmall svg{width:16px;height:16px}
+.rtip{position:absolute;z-index:30;max-width:300px;background:var(--bg-surface);color:var(--text);border:1px solid var(--line);box-shadow:0 4px 14px rgba(0,0,0,.2);padding:8px 10px;border-radius:4px;font-size:11.5px;display:none}
+.rtip b{display:block;margin-bottom:3px}
+.main{display:grid;grid-template-columns:190px 1fr 376px;min-height:0}
+.browser{background:var(--f-browser);border-right:1px solid var(--f-line);display:flex;flex-direction:column;min-height:0}
+.ph{font-size:11px;font-weight:600;padding:5px 8px;border-bottom:1px solid var(--f-line);background:var(--f-tabs);display:flex;justify-content:space-between}
+.tree{padding:6px 8px;font-size:11.5px;line-height:1.75;color:var(--f-text);overflow:auto}
+.tree .i1{padding-left:12px}.tree .i2{padding-left:24px}.tree .sel{background:var(--bg-selected);border-radius:2px}
+.view{position:relative;background:var(--canvas);min-width:0;min-height:0;display:flex;flex-direction:column}
+.vtab{display:flex;background:var(--f-tabs);border-bottom:1px solid var(--f-line);font-size:11.5px}
+.vtab span{padding:4px 12px;border-right:1px solid var(--f-line)}
+.vtab span.on{background:var(--canvas);font-weight:600}
+#plan{flex:1;width:100%;min-height:0;display:block}
+.vtools{position:absolute;right:10px;top:34px;display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.vbtn{background:var(--bg-surface);color:var(--text);border:1px solid var(--line);border-radius:4px;padding:4px 8px;cursor:pointer;font-size:11.5px;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.vbtn:hover{background:var(--bg-hover)}
+.legend{position:absolute;left:10px;bottom:10px;background:var(--bg-surface);color:var(--text-muted);border:1px solid var(--line);border-radius:4px;padding:6px 8px;font-size:10.5px;line-height:1.6}
+.legend i{display:inline-block;width:10px;height:10px;margin-right:5px;vertical-align:-1px;border-radius:2px}
+.statusbar{background:var(--status);border-top:1px solid var(--f-line);font-size:11px;color:var(--f-muted);display:flex;align-items:center;padding:0 10px;gap:16px}
+.statusbar .sel{margin-left:auto;color:var(--f-text)}
+
+/* ---------- the Gordium pane ---------- */
+.pane{display:flex;flex-direction:column;min-height:0;border-left:1px solid var(--f-line);background:var(--bg-pane);color:var(--text)}
+.pane .ph{background:var(--f-tabs);color:var(--f-text)}
+.pane-body{flex:1;min-height:0;overflow:auto;position:relative}
+.pane-body:focus{outline:none}
+.dtabs{display:flex;border-top:1px solid var(--f-line);background:var(--f-tabs)}
+.dtabs button{flex:0 0 auto;background:none;border:0;border-right:1px solid var(--f-line);padding:4px 12px;font-size:11.5px;cursor:pointer;color:var(--f-muted)}
+.dtabs button[aria-selected="true"]{background:var(--bg-pane);color:var(--f-text);font-weight:600;margin-top:-1px;border-top:2px solid var(--accent)}
+
+.hdr{padding:10px 12px 0;background:var(--bg-pane);position:sticky;top:0;z-index:5}
+.hdr-row{display:flex;align-items:center;gap:8px}
+.proj{flex:1;min-width:0}
+.proj .t{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.proj .s{font-size:11px;color:var(--text-muted)}
+.btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg-surface);border-radius:4px;padding:4px 10px;cursor:pointer;font-size:12px;color:var(--text);white-space:nowrap}
+.btn:hover{background:var(--bg-hover)}
+.btn:focus-visible,.row:focus-visible,.chip:focus-visible,.ptab:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.btn.primary:hover{filter:brightness(1.07)}
+.btn.small{padding:2px 7px;font-size:11px}
+.btn.ghost{background:none;border-color:transparent;color:var(--accent);padding:2px 4px}
+.btn.ghost:hover{background:var(--bg-hover)}
+.btn[disabled]{opacity:.5;cursor:default}
+.btn svg{width:14px;height:14px}
+.ptabs{display:flex;gap:2px;margin-top:10px;border-bottom:1px solid var(--line)}
+.ptab{background:none;border:0;border-bottom:2px solid transparent;padding:6px 10px 6px;cursor:pointer;font-size:12px;color:var(--text-muted);display:flex;gap:6px;align-items:center}
+.ptab[aria-selected="true"]{color:var(--text);border-bottom-color:var(--accent);font-weight:600}
+.pill{display:inline-flex;align-items:center;gap:4px;border-radius:9px;padding:0 7px;font-size:10.5px;font-weight:600;line-height:17px}
+.pill.review{background:var(--review-fill);color:var(--review)}
+.pill.fail{background:var(--fail-fill);color:var(--fail)}
+.pill.pass{background:var(--pass-fill);color:var(--pass)}
+.pill.confirm{background:var(--confirm-fill);color:var(--confirm)}
+.pill.na{background:var(--bg-hover);color:var(--na)}
+.sec{padding:12px}
+.card{background:var(--bg-surface);border:1px solid var(--line);border-radius:4px}
+.state{font-size:15px;font-weight:600;display:flex;gap:8px;align-items:center}
+.state svg{width:20px;height:20px;flex:none}
+.muted{color:var(--text-muted)}
+.cap{font-size:11px;color:var(--text-muted)}
+.over{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--text-muted)}
+.bar{display:flex;height:22px;border-radius:3px;overflow:hidden;margin-top:8px;border:1px solid var(--line)}
+.bar > div{display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;min-width:0;cursor:pointer}
+.bar .z{flex:0 0 auto;padding:0 8px;background:var(--bg-hover);color:var(--text-muted);font-weight:400}
+.seg-review{background:repeating-linear-gradient(135deg,var(--review-fill) 0 6px,transparent 6px 9px),var(--review-fill);color:var(--review)}
+.legendline{display:flex;gap:12px;flex-wrap:wrap;margin-top:6px;font-size:11px;color:var(--text-muted)}
+.legendline span{display:inline-flex;gap:4px;align-items:center}
+.legendline svg{width:12px;height:12px}
+.cause{display:grid;grid-template-columns:22px 1fr auto;gap:2px 8px;align-items:start;padding:9px 10px;border-top:1px solid var(--line)}
+.cause:first-of-type{border-top:0}
+.cause .n{font-size:11px;font-weight:600;color:var(--review);background:var(--review-fill);border-radius:50%;width:20px;height:20px;display:grid;place-items:center}
+.cause .t{font-weight:600}
+.cause .d{grid-column:2/3;font-size:11px;color:var(--text-muted)}
+.cause .a{grid-row:1/3;grid-column:3;align-self:center}
+.tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:0 12px 8px}
+.chip{border:1px solid var(--line);background:var(--bg-surface);border-radius:12px;padding:2px 9px;font-size:11px;cursor:pointer;display:inline-flex;gap:5px;align-items:center;color:var(--text)}
+.chip[aria-pressed="true"]{background:var(--bg-selected);border-color:var(--accent)}
+.chip svg{width:11px;height:11px}
+.search{flex:1;min-width:110px;display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--bg-surface);border-radius:4px;padding:3px 7px}
+.search input{border:0;outline:0;background:none;color:var(--text);font:inherit;width:100%}
+.search svg{width:13px;height:13px;color:var(--text-muted)}
+.group{margin:4px 0 0}
+.ghead{display:flex;align-items:center;gap:6px;padding:8px 12px 4px;cursor:pointer;user-select:none}
+.ghead .caret{width:10px;transition:transform .15s}
+.ghead[aria-expanded="false"] .caret{transform:rotate(-90deg)}
+.sub{padding:6px 12px 3px 28px;font-size:11px;color:var(--text-muted);display:flex;gap:6px;align-items:center}
+.sub b{color:var(--text);font-weight:600}
+.row{display:grid;grid-template-columns:18px 1fr auto;gap:1px 8px;padding:7px 12px 7px 12px;margin:0 6px;border-radius:4px;cursor:default;border:1px solid transparent;outline:none}
+.row:hover{background:var(--bg-hover)}
+.row.sel{background:var(--bg-selected);border-color:var(--accent)}
+.row .g{grid-row:1/3;padding-top:1px}
+.row .g svg{width:16px;height:16px}
+.row .nm{font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .sc{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.row .ln{grid-column:2/4;font-size:11.5px;color:var(--text-muted)}
+.row .acts{display:none;grid-column:2/4;gap:4px;margin-top:4px}
+.row.sel .acts{display:flex}
+.stale .row .g svg *{stroke:var(--na)!important;fill:none!important}
+.stale .pill.review,.stale .pill.fail,.stale .pill.pass{background:var(--bg-hover);color:var(--na)}
+.banner{display:flex;gap:8px;align-items:flex-start;margin:10px 12px 0;padding:8px 10px;border-radius:4px;border:1px solid var(--line);background:var(--bg-surface)}
+.banner svg{width:16px;height:16px;flex:none;margin-top:1px}
+.banner.warn{border-color:var(--review);background:var(--review-fill)}
+.banner.info{border-color:var(--confirm);background:var(--confirm-fill)}
+.banner.err{border-color:var(--fail);background:var(--fail-fill)}
+.banner .bt{font-weight:600}
+.empty{padding:40px 22px;text-align:center}
+.empty svg{width:44px;height:44px;color:var(--accent)}
+.empty h3{font-size:15px;margin:10px 0 4px}
+.empty p{color:var(--text-muted);margin:0 0 14px}
+.prog{height:4px;background:var(--bg-hover);border-radius:2px;overflow:hidden}
+.prog > i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.steps{list-style:none;margin:12px 0 0;padding:0}
+.steps li{display:flex;gap:8px;align-items:center;padding:4px 0;color:var(--text-muted)}
+.steps li.on{color:var(--text);font-weight:600}
+.steps li.done{color:var(--text)}
+.spin{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* detail */
+.dhead{display:flex;align-items:center;gap:6px;padding:8px 8px 8px 6px;border-bottom:1px solid var(--line);background:var(--bg-pane)}
+.dhead .pos{margin-left:auto;font-size:11px;color:var(--text-muted)}
+.dtitle{padding:12px 12px 0}
+.dtitle h2{font-size:13px;margin:6px 0 2px;line-height:1.3}
+.block{margin:12px 12px 0}
+.block > .over{margin-bottom:5px}
+.why{padding:9px 10px;border-left:3px solid var(--review);background:var(--review-fill);border-radius:0 4px 4px 0}
+.todo{margin:0;padding:0;list-style:none;counter-reset:s}
+.todo li{counter-increment:s;display:grid;grid-template-columns:20px 1fr;gap:6px;padding:5px 0}
+.todo li::before{content:counter(s);width:18px;height:18px;border-radius:50%;background:var(--bg-hover);color:var(--text);font-size:10.5px;font-weight:600;display:grid;place-items:center}
+.todo .b{margin-top:4px;display:flex;gap:4px;flex-wrap:wrap}
+.meas{padding:10px}
+.meas .nums{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.meas .big{font-size:15px;font-weight:600}
+.meter{position:relative;height:10px;background:var(--bg-hover);border-radius:5px;margin:8px 0 4px;overflow:hidden}
+.meter .fill{position:absolute;left:0;top:0;bottom:0;border-radius:5px}
+.meter .fill.partial{background:repeating-linear-gradient(135deg,var(--review) 0 4px,transparent 4px 7px);opacity:.8}
+.meter .fill.meets{background:var(--text-muted);opacity:.55}
+.meter .lim{position:absolute;top:-2px;bottom:-2px;width:2px;background:var(--text)}
+.meas .scale{display:flex;justify-content:space-between;font-size:10.5px;color:var(--text-muted)}
+.quote{position:relative;padding:9px 10px 8px 12px;background:var(--quote-bg);border-left:3px solid var(--quote-bar);border-radius:0 4px 4px 0;margin-bottom:6px}
+.quote q{font-family:Georgia,Cambria,"Times New Roman",serif;font-size:12.5px;line-height:1.45;quotes:"\201C" "\201D"}
+.quote .w{display:flex;justify-content:space-between;align-items:center;margin-top:5px;font-size:10.5px;color:var(--text-muted);gap:6px}
+.els{list-style:none;margin:0;padding:0}
+.els li{display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--line)}
+.els li:first-child{border-top:0}
+.els .en{flex:1;min-width:0}
+.els .en small{display:block;color:var(--text-muted);font-size:10.5px}
+/* guided fix */
+.fixitem{padding:9px 10px;border-top:1px solid var(--line)}
+.fixitem:first-child{border-top:0}
+.fixitem .top{display:flex;gap:8px;align-items:flex-start}
+.box{width:16px;height:16px;border:1.5px solid var(--text-muted);border-radius:3px;flex:none;margin-top:1px;display:grid;place-items:center}
+.box.on{background:var(--accent);border-color:var(--accent)}
+.box.on::after{content:"";width:8px;height:4px;border-left:2px solid var(--accent-ink);border-bottom:2px solid var(--accent-ink);transform:rotate(-45deg) translate(1px,-1px)}
+.box.half{border-color:var(--confirm)}
+.box.half::after{content:"";width:8px;height:8px;background:var(--confirm);border-radius:1px}
+.box.todo{border-color:var(--review)}
+.choices{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0 24px}
+.choice{border:1px solid var(--line);background:var(--bg-surface);border-radius:12px;padding:2px 9px;font-size:11px;cursor:pointer;color:var(--text)}
+.choice[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+/* checklist */
+.ck{display:grid;grid-template-columns:20px 1fr auto;gap:2px 8px;padding:9px 10px;border-top:1px solid var(--line);cursor:pointer}
+.ck:first-child{border-top:0}
+.ck:hover{background:var(--bg-hover)}
+.ck .t{font-weight:600}
+.ck .d{grid-column:2/4;font-size:11px;color:var(--text-muted)}
+.ck .c{font-size:11px;color:var(--text-muted);white-space:nowrap}
+.ckbody{grid-column:2/4;margin-top:6px;cursor:default}
+/* properties palette */
+.props .pr{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line);font-size:11.5px}
+.props .pr > div{padding:3px 8px}
+.props .pr > div:first-child{border-right:1px solid var(--line);color:var(--text-muted)}
+.props .pg{background:var(--bg-hover);font-weight:600;padding:3px 8px;font-size:11.5px;border-bottom:1px solid var(--line)}
+.props .gm{background:var(--bg-selected)}
+/* toast */
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);opacity:0;transition:.2s;background:#1D2229;color:#E7EAEE;padding:8px 14px;border-radius:4px;font-size:12px;max-width:560px;z-index:50;pointer-events:none;box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+/* sources overlay (mockup only) */
+.src{display:none;margin-top:4px;font-size:10.5px;line-height:1.35;color:var(--mock);background:var(--mock-fill);border:1px dashed var(--mock);border-radius:3px;padding:3px 6px}
+.show-src .src{display:block}
+.src::before{content:"Source: ";font-weight:600}
+.kbd{display:inline-block;border:1px solid var(--line);border-bottom-width:2px;border-radius:3px;padding:0 4px;font-size:10px;background:var(--bg-surface);color:var(--text-muted)}
+.keys{padding:10px 12px 14px;font-size:11px;color:var(--text-muted);line-height:1.9}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<div class="mockbar" role="toolbar" aria-label="Mockup controls">
+  <b>Gordium for Revit: UI mockup</b>
+  <div class="grp" aria-label="Revit theme">Theme
+    <button class="seg" data-theme-btn="light" aria-pressed="true">Light</button>
+    <button class="seg" data-theme-btn="dark" aria-pressed="false">Dark</button>
+  </div>
+  <div class="grp">Panel state
+    <select id="stateSel" aria-label="Panel state">
+      <option value="results">Results (the eval)</option>
+      <option value="none">Not checked yet</option>
+      <option value="checking">Checking</option>
+      <option value="missing">Nothing checked: facts missing</option>
+      <option value="error">Error</option>
+      <option value="stale">Stale (model changed)</option>
+    </select>
+  </div>
+  <div class="grp"><button class="seg" id="srcBtn" aria-pressed="false">Show sources</button></div>
+  <span class="hint">Click rows, Show, Resolve, Facts to mark. Keys: ↑ ↓ Enter Space Backspace</span>
+</div>
+
+<div class="wrap">
+<div class="revit" id="revit">
+  <div class="titlebar"><span class="logo">R</span><span>Autodesk Revit 2026 · children_odyssey_corrected.rvt · Floor Plan: Level 1</span></div>
+  <div class="ribbon">
+    <div class="rtabs"><span class="file">File</span><span>Architecture</span><span>Structure</span><span>Systems</span><span>Insert</span><span>Annotate</span><span>Analyze</span><span>Massing &amp; Site</span><span>Collaborate</span><span>View</span><span>Manage</span><span>Add-Ins</span><span class="on">Gordium</span><span>Modify</span></div>
+    <div class="rpanels">
+      <div class="rpanel"><div class="btns">
+        <button class="rbtn" id="rbCheck" data-tip="Check project|Check this project against its zoning and egress rules. Reads the model, sends one check, and shows the results in the Gordium panel. Nothing is sent while a fact is missing: the panel says which.">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 26V8l6-3h16v21H5z"/><path d="M11 5v21M5 15h6"/><circle cx="21" cy="17" r="6.5" fill="var(--bg-surface)" stroke="var(--accent)"/><path d="M18 17.2l2.1 2.1 4-4.3" stroke="var(--accent)" stroke-width="2"/></svg>
+          Check<br>project</button>
+        <button class="rbtn" id="rbMarks" data-tip="Mark facts|The facts only you can state: room uses, exits, clear widths, what may be crossed. Opens the checklist in the Gordium panel, with what is still to do.">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 14.5L14.5 4H26v11.5L15.5 26z"/><circle cx="20.5" cy="9.5" r="2"/><path d="M10.5 15.5l3 3 5.5-6" stroke="var(--accent)" stroke-width="2"/></svg>
+          Mark<br>facts</button>
+      </div><div class="pname">Check</div></div>
+      <div class="rpanel"><div class="btns">
+        <button class="rbtn" id="rbPanel" data-tip="Panel|Shows or hides the Gordium panel (docked with Properties).">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="6" width="24" height="20" rx="1.5"/><path d="M19 6v20"/><path d="M21.5 11h4M21.5 15h4M21.5 19h3" stroke="var(--accent)"/></svg>
+          Panel</button>
+      </div><div class="pname">Results</div></div>
+      <div class="rpanel"><div class="btns"><div class="rsmall">
+        <button data-tip="About|Which Gordium build and rulebook Revit loaded."><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 7v4M8 4.6v.1"/></svg>About</button>
+        <button data-tip="Settings|Units shown, the law links' source, the trial tools (off)."><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="2.2"/><path d="M8 1.8v2M8 12.2v2M1.8 8h2M12.2 8h2M3.6 3.6l1.4 1.4M11 11l1.4 1.4M3.6 12.4L5 11M11 5l1.4-1.4"/></svg>Settings</button>
+      </div></div><div class="pname">Help</div></div>
+      <div class="rpanel" style="border-right:0;justify-content:center"><div class="cap" style="max-width:300px;padding:4px 6px">The trial and test tools (Check box house, Record scenes, Read inside, Record houses) appear here only in a trial build.</div></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="browser">
+      <div class="ph">Project Browser</div>
+      <div class="tree">
+        <div>▾ Views (all)</div>
+        <div class="i1">▾ Floor Plans</div>
+        <div class="i2 sel">Level 1</div>
+        <div class="i2">Site</div>
+        <div class="i1">▸ Ceiling Plans</div>
+        <div class="i1">▸ 3D Views</div>
+        <div class="i1">▸ Elevations</div>
+        <div>▸ Schedules/Quantities</div>
+        <div class="i1">Gordium: route marks</div>
+        <div>▸ Sheets (all)</div>
+        <div class="i1">LS1.0 Life Safety</div>
+        <div>▸ Families</div>
+      </div>
+    </div>
+    <div class="view">
+      <div class="vtab"><span class="on">Level 1</span><span>{3D}</span></div>
+      <svg id="plan" role="img" aria-label="Floor plan of the Children's Odyssey, level 1 (schematic)"></svg>
+      <div class="vtools"><button class="vbtn" id="backView" hidden>↩ Back to my view</button></div>
+      <div class="legend" id="legend">
+        <div><i style="background:var(--hl-fill);border:1.5px solid var(--hl)"></i>Selected by Gordium</div>
+        <div><i style="background:var(--pass)"></i>Exit (marked)</div>
+        <div><i style="border:1.5px dashed var(--review)"></i>Door in an outside wall, no Exit mark</div>
+        <div class="src">Schematic plan: outline 195.1 x 85.5 ft and every point from eval_marks.yaml / eval_comparison.yaml; inner walls approximate</div>
+      </div>
+    </div>
+    <aside class="pane" aria-label="Gordium panel">
+      <div class="ph"><span>Gordium</span><span class="muted">▾ ✕</span></div>
+      <div class="pane-body" id="body" tabindex="0"></div>
+      <div class="dtabs" role="tablist">
+        <button role="tab" id="tabProps" aria-selected="false">Properties</button>
+        <button role="tab" id="tabGordium" aria-selected="true">Gordium</button>
+      </div>
+    </aside>
+  </div>
+  <div class="statusbar"><span id="sbHint">Click to select, TAB for alternates, CTRL adds, SHIFT unselects.</span><span class="sel" id="sbSel">Nothing selected</span></div>
+</div>
+</div>
+<div class="rtip" id="rtip"></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* ===================================================================================================
+   DATA: every figure from the Children's Odyssey eval (19 Libby St, Portland ME)
+   - eval_comparison.yaml (branch feat/route-measures-2): figures, story notes, verdicts (all 8: needs_review)
+   - eval_marks.yaml: rooms, exits, door types (every mark an eval assumption)
+   - hand_check.yaml: the sheet's own check
+   - maine general.yaml (same branch): each rule's kind (flag / rule) and exact quotes, page and lines
+   Nothing here is a result the eval doesn't give. Where the design needs a figure the worker doesn't send today
+   (a limit as a length, how far off on an egress row), the source note says so (design doc, PR 5).
+   =================================================================================================== */
+const SRC_EVAL = "eval_comparison.yaml (feat/route-measures-2)";
+const ROOMS = {
+  "40": {name:"CLOSET (40)", at:[24.11,36.26], w:2.5, h:3.0, note:"7.6 sf closet off INFANT/TODDLER CLASSROOM (5), door D06", marks:{use:"Closet", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms_to_place #40"},
+  "21": {name:"ELEC. (21)", note:"Electrical room; Use Other, Can be locked Yes, a route may end here, never cross it", marks:{use:"Other", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms #21 (position not in the eval data)"},
+  "32": {name:"SPRINKLERED ABANDONED SPACE (32)", at:[53.81,79.51], w:8.0, h:8.4, note:"67.5 sf, north of the PLAYROOM (17); the sheet: “DOOR PERMANENTLY FIXED SHUT”", marks:{use:"Other", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms_to_place #32"},
+  "33": {name:"SPRINKLERED ABANDONED SPACE (33)", at:[152.39,80.16], w:10.0, h:9.9, note:"98.9 sf, north of LIFE SPACE (12)", marks:{use:"Other", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms_to_place #33"},
+  "13": {name:"STORAGE (13)", note:"143.2 sf storage; Accessory storage, Can be locked Yes", marks:{use:"Accessory storage", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms #13; area eval_comparison.yaml storage.rooms (position not in the eval data)"},
+  "26": {name:"CORRIDOR (26)", note:"Common path only: no route to one of the two exits the common path is measured to", marks:{use:"Corridor", lock:"No", pass:"No"}, src:SRC_EVAL+" common_path.gordium.story.rooms_without_route"},
+  "11": {name:"STORAGE (11)", at:[124.2,73.1], w:30.3, h:24.7, note:"751.6 sf; the most remote point found (its north-east corner)", marks:{use:"Accessory storage", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms #11; "+SRC_EVAL},
+  "14": {name:"STORAGE (14)", note:"153.1 sf", src:SRC_EVAL+" storage.rooms"},
+  "28": {name:"STORAGE (28)", note:"27.6 sf", src:SRC_EVAL+" storage.rooms"},
+  "29": {name:"STORAGE (29)", note:"103.2 sf", src:SRC_EVAL+" storage.rooms"},
+  "3":  {name:"MOUNTAIN CLASSROOM (3)", note:"where the longest common path found starts", src:SRC_EVAL+" common_path.gordium.story.from_room"},
+  "d41": {name:"Exit door D41", at:[5.0,85.0], note:"PLAYROOM (17), north-west: one of the two exits farthest apart", src:"eval_marks.yaml exits D41 at (5.0, 85.0); the farthest pair (…5bcac, …5bce1) is D41 and D12: their centres are 189.3 ft apart by eval_marks' positions, the eval's farthest_pair_door_centres 189.291"},
+  "d12": {name:"Exit door D12", at:[189.5,42.8], note:"the corridor's east end: the other", src:"eval_marks.yaml exits D12 at (189.5, 42.8); "+SRC_EVAL+" remoteness.farthest_pair"},
+};
+const NOROUTE5 = ["40","21","32","33","13"];
+const Q = {
+  ibc1016a:{t:"Exits shall be so located on each story such that the maximum length of exit access travel, measured from the most remote point within a story along the natural and unobstructed path of egress travel to an", w:"IBC 2009 1016.1 · icc.ibc.2009.pdf p. 267, lines 14–17", page:267},
+  ibc1016b:{t:"1-2,1-3,1-4 Not Permitted 200", w:"IBC 2009 Table 1016.1 · p. 267, line 81", page:267},
+  ibc1016c:{t:"b. Buildings equipped throughout with an automatic sprinkler system in accor dance with Section 903 .3.1.1 or 903.3.1.2.", w:"IBC 2009 Table 1016.1 note b · p. 267, lines 99–100", page:267},
+  nfpa1626a:{t:"16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:", w:"NFPA 101 2012 16.2.6.2 · gov.law.nfpa.101.2012.pdf p. 174, lines 76–77", page:174},
+  nfpa1626b:{t:"The travel distance between any point in a room and an exit shall not exceed 150 ft (46 m).", w:"NFPA 101 2012 16.2.6.2(2) · p. 174, lines 80–81", page:174},
+  ibc1014:{t:"In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm).", w:"IBC 2009 1014.3 · icc.ibc.2009.pdf p. 265, lines 76–78", page:265},
+  nfpa16253:{t:"16.2.5.3.1 Common path of travel shall not exceed 100 ft (30 m) in a building protected throughout by an approved, supervised automatic sprinkler system in accordance with Section 9.7.", w:"NFPA 101 2012 16.2.5.3.1 · p. 174, lines 66–69", page:174},
+  ibc1018a:{t:"the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length.", w:"IBC 2009 1018.4 · icc.ibc.2009.pdf p. 269, lines 26–28", page:269},
+  ibc1018b:{t:"3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor.", w:"IBC 2009 1018.4 exception 3 · p. 269, lines 39–41", page:269},
+  nfpa1625:{t:"16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m).", w:"NFPA 101 2012 16.2.5.2 · p. 174, lines 59–63", page:174},
+  ibc1015a:{t:"Where two exits or exit access doorways are required from any portion of the exit access,", w:"IBC 2009 1015.2.1 · icc.ibc.2009.pdf p. 266, lines 36–38", page:266},
+  ibc1015b:{t:"the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line between exit doors or exit access doorways.", w:"IBC 2009 1015.2.1 · p. 266, lines 38–42", page:266},
+  ibc1015c:{t:"of the exitdoors or exit access doorways shall not be less than one-third of the length of the maximum overall diagonal dimension of the area served.", w:"IBC 2009 1015.2.1 exception 2 · p. 266, lines 56–58", page:266},
+  ibc508:{t:"Aggregate accessory occupan cies shall not occupy more than 10 percent of the building area of the story in which they are located and shall not exceed the tabular values in Table 503,", w:"IBC 2009 508.2.1 · icc.ibc.2009.pdf p. 111, lines 95–98", page:111},
+  ibc1014_2:{t:"4. Egress shall not pass through kitchens, storage rooms, closets or spaces used for similar purposes.", w:"IBC 2009 1014.2 item 4 · as quoted in eval_marks.yaml and docs/decisions/2026-11-20_route_measurement.md", page:265},
+};
+const FLAG_NOTE = "This rule is drafted as a flag: a person decides it, so it needs review even when the figures are in.";
+const CAUSES = {
+  noroute:{n:1, title:"5 rooms have no route to an exit", d:"4 rules wait on it: travel distance and common path (IBC and NFPA)", act:"Resolve", src:SRC_EVAL+" travel_distance and common_path story.rooms_without_route"},
+  deadend:{n:2, title:"The corridor’s shape isn’t measured yet", d:"2 rules: check the dead end by hand", act:"How to check", src:SRC_EVAL+" dead_end: not_measured (decision 6)"},
+  flag:{n:3, title:"Figures meet the limit; a person decides", d:"2 flag rules: remoteness, accessory storage", act:"Review", src:"general.yaml kind: flag; "+SRC_EVAL+" remoteness, storage"},
+};
+const ROWS = [
+  {id:"ibc_1016_1", cause:"noroute", name:"Exit access travel distance", sec:"IBC 1016.1", law:"IBC 2009 1016.1 and Table 1016.1 (I-4, sprinklered)", kind:"flag",
+   line:"5 rooms not measured · longest found 110.2 ft · limit 200 ft",
+   why:"5 rooms have no route to any exit, so the most remote point on the story isn’t known. A route is a walk 12 in clear of every corner, through door centres and the rooms it may cross.",
+   whysrc:SRC_EVAL+" travel_distance.gordium.story.not_measured: “the point (165.625, 70.156) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)”",
+   todo:[["Find why each of the 5 rooms has no way out, and fix the model or the marks.", [["Open the guided fix","fix"],["Show the 5 rooms","show5"]]],["Check again to see whether every room now has a route.", [["Check again","recheck"]]]],
+   meas:{v:110.2, lim:200, unit:"ft", cmp:"≤", partial:true, label:"longest walk found, over the rooms with a route (from STORAGE (11))", src:SRC_EVAL+" travel_distance.gordium.story.over_rooms_with_a_route: 110.247, from_room STORAGE (11)"},
+   quotes:["ibc1016a","ibc1016b","ibc1016c"], els:[...NOROUTE5,"11"], flag:true},
+  {id:"nfpa_16_2_6_2", cause:"noroute", name:"Travel, any point in a room to an exit", sec:"NFPA 16.2.6.2(2)", law:"NFPA 101 2012 16.2.6.2(2)", kind:"rule",
+   line:"5 rooms not measured · longest found 110.2 ft · limit 150 ft",
+   why:"The same 5 rooms have no route to any exit, so the longest travel isn’t known.",
+   whysrc:SRC_EVAL+" travel_distance (the same story)",
+   todo:[["Resolve the 5 rooms (shared with 3 other rules).", [["Open the guided fix","fix"]]]],
+   meas:{v:110.2, lim:150, unit:"ft", cmp:"≤", partial:true, label:"longest walk found, over the rooms with a route", src:SRC_EVAL+" travel_distance.gordium.story.over_rooms_with_a_route"},
+   quotes:["nfpa1626a","nfpa1626b"], els:[...NOROUTE5,"11"]},
+  {id:"ibc_1014_3", cause:"noroute", name:"Common path of egress travel", sec:"IBC 1014.3", law:"IBC 2009 1014.3", kind:"flag",
+   line:"6 rooms not measured · longest found 43.5 ft · limit 75 ft",
+   why:"6 rooms (the same 5, and CORRIDOR (26)) have no route to one of the two exits the common path is measured to.",
+   whysrc:SRC_EVAL+" common_path.gordium.story.not_measured: “the point (55.308, 78.082) has no route to the exit …bc94”; rooms_without_route (6)",
+   todo:[["Resolve the 5 rooms; then see whether CORRIDOR (26) still has no route to that exit.", [["Open the guided fix","fix"]]]],
+   meas:{v:43.5, lim:75, unit:"ft", cmp:"≤", partial:true, label:"longest common path found, over the rooms with a route (from MOUNTAIN CLASSROOM (3))", src:SRC_EVAL+" common_path.gordium.story.over_rooms_with_a_route: 43.45"},
+   quotes:["ibc1014"], els:[...NOROUTE5,"26","3"], flag:true},
+  {id:"nfpa_16_2_5_3_1", cause:"noroute", name:"Common path, sprinklered", sec:"NFPA 16.2.5.3.1", law:"NFPA 101 2012 16.2.5.3.1", kind:"rule",
+   line:"6 rooms not measured · longest found 43.5 ft · limit 100 ft",
+   why:"The same 6 rooms have no route to one of the two exits.",
+   whysrc:SRC_EVAL+" common_path (the same story)",
+   todo:[["Resolve the 5 rooms (shared).", [["Open the guided fix","fix"]]]],
+   meas:{v:43.5, lim:100, unit:"ft", cmp:"≤", partial:true, label:"longest common path found, over the rooms with a route", src:SRC_EVAL+" common_path"},
+   quotes:["nfpa16253"], els:[...NOROUTE5,"26"]},
+  {id:"ibc_1018_4", cause:"deadend", name:"Dead-end corridor", sec:"IBC 1018.4", law:"IBC 2009 1018.4 and exception 3", kind:"flag",
+   line:"Not measured: the corridor’s shape · limit 20 ft, or under 2.5 × its least width",
+   why:"The corridor isn’t made of straight legs meeting at right angles (a part of it has no walls on its two long sides), so its dead ends and width aren’t measured in this first version.",
+   whysrc:SRC_EVAL+" dead_end.gordium.…5be10.not_measured (decision 6)",
+   todo:[["Measure each dead end by hand: from its closed end to where it meets a path to an exit, and its least width.", [["Show the corridor","show26"]]],["Under IBC: at most 20 ft, or any length when under 2.5 × the least width (exception 3).", []],["Record your figure on the drawing; Gordium keeps this row needs review.", []]],
+   meas:null, quotes:["ibc1018a","ibc1018b"], els:["26"], flag:true},
+  {id:"nfpa_16_2_5_2", cause:"deadend", name:"Dead-end corridor, sprinklered", sec:"NFPA 16.2.5.2", law:"NFPA 101 2012 16.2.5.2", kind:"rule",
+   line:"Not measured: the corridor’s shape · limit 20 ft; 50 ft sprinklered and supervised",
+   why:"Not measured, as IBC 1018.4. Note: over 20 ft, Maine’s own Life Safety rule (16-219 CMR ch. 20) may cap a dead end at a flat 20 ft; that is an open question, so a dead end over 20 ft stays needs review.",
+   whysrc:SRC_EVAL+" dead_end; general.yaml nfpa_16_2_5_2_dead_end review_when (open question 2, maine_state/README.md)",
+   todo:[["Measure it by hand, as for IBC 1018.4.", [["Show the corridor","show26"]]]],
+   meas:null, quotes:["nfpa1625"], els:["26"]},
+  {id:"ibc_1015_2_1", cause:"flag", name:"Exit remoteness", sec:"IBC 1015.2.1", law:"IBC 2009 1015.2.1, exception 2 (sprinklered)", kind:"flag",
+   line:"187.2 ft apart · needs ≥ 71.0 ft (1/3 of the 213.0 ft diagonal) · figures meet it",
+   why:FLAG_NOTE+" It also applies only where two exits are required (1015.1 decides).",
+   whysrc:"general.yaml ibc_1015_2_1_remoteness kind: flag, review_when; "+SRC_EVAL+" remoteness, diagonal",
+   todo:[["Confirm the two exits measured are the ones the rule means.", [["Show the exits","showexits"],["Show the diagonal","diag"]]],["Confirm two exits are required here (IBC 1015.1).", []]],
+   meas:{v:187.2, lim:71.0, unit:"ft", cmp:"≥", partial:false, label:"between the two exits farthest apart (nearest edges)", spare:"116.2 ft to spare",
+         src:SRC_EVAL+" remoteness.gordium.farthest_pair_nearest_edges 187.164; diagonal.corner_to_corner 212.985, ratio 0.8788 (needs ≥ 1/3). The 71.0 ft and the 116.2 ft to spare are 212.985/3 and 187.164 − 70.995: the worker gives the ratio today, the length is PR 5"},
+   quotes:["ibc1015a","ibc1015b","ibc1015c"], els:["d41","d12"], flag:true},
+  {id:"ibc_508_2_1", cause:"flag", name:"Accessory storage area", sec:"IBC 508.2.1", law:"IBC 2009 508.2.1", kind:"flag",
+   line:"1,414 sf · needs ≤ 1,654 sf (10% of the story) · meets it under all 4 readings",
+   why:FLAG_NOTE+" Table 503’s limit is the section’s second test, not checked here.",
+   whysrc:"general.yaml ibc_508_2_1_accessory_area kind: flag; "+SRC_EVAL+" storage.under_all_four_readings: complies_under_all_four true",
+   todo:[["Confirm the rooms counted are the storage (marked Accessory storage).", [["Show the 5 storage rooms","showstore"]]],["Check Table 503’s tabular values.", []]],
+   meas:{v:1414.3, lim:1654.0, unit:"sf", cmp:"≤", partial:false, label:"storage rooms, outer faces; story 16,539.9 sf", spare:"240 sf under",
+         alt:"Inside faces: 1,178.8 sf of 10% × 15,970.0 sf = 1,597.0 sf. Meets it under all four readings of where an area is measured.",
+         src:SRC_EVAL+" storage: gordium_outer_faces_sf 1414.3, gordium_inside_sf 1178.8, gordium_story_sf [15970.0, 16539.9]; the limit as a figure and the 240 sf under are PR 5 (the worker gives them)"},
+   quotes:["ibc508"], els:["11","13","14","28","29"], flag:true},
+];
+const FIX_ITEMS = [...NOROUTE5, "26"];
+
+/* ===================================================================================================
+   STATE
+   =================================================================================================== */
+const S = { theme:"light", panel:"results", view:"list", tab:"results", sel:0, detail:null, filter:"all", q:"",
+  folded:{}, fix:{}, d33:null, stale:false, src:false, selected:[], zoomStack:[], vb:null, overlay:null,
+  propsFor:null, ckOpen:{exits:true} };
+
+/* ===================================================================================================
+   ICONS (status glyphs: shape + colour, never colour alone)
+   =================================================================================================== */
+const G = {
+  review:`<svg viewBox="0 0 16 16"><path d="M8 1.8l6.6 11.6H1.4z" fill="var(--review-fill)" stroke="var(--review)" stroke-width="1.4" stroke-linejoin="round"/><path d="M6.4 6.6a1.7 1.7 0 113 1.1c-.6.5-1.4.8-1.4 1.8M8 11.4v.1" fill="none" stroke="var(--review)" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+  fail:`<svg viewBox="0 0 16 16"><path d="M5.2 1.5h5.6l3.7 3.7v5.6l-3.7 3.7H5.2l-3.7-3.7V5.2z" fill="var(--fail-fill)" stroke="var(--fail)" stroke-width="1.4"/><path d="M5.8 5.8l4.4 4.4M10.2 5.8l-4.4 4.4" stroke="var(--fail)" stroke-width="1.5" stroke-linecap="round"/></svg>`,
+  pass:`<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="var(--pass-fill)" stroke="var(--pass)" stroke-width="1.4"/><path d="M5 8.2l2 2 4-4.4" fill="none" stroke="var(--pass)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`,
+  na:`<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="var(--na)" stroke-width="1.4"/><path d="M5 8h6" stroke="var(--na)" stroke-width="1.6" stroke-linecap="round"/></svg>`,
+  stale:`<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="6.4" fill="none" stroke="var(--na)" stroke-width="1.4"/><path d="M8 4.5V8l2.4 1.6" fill="none" stroke="var(--na)" stroke-width="1.4" stroke-linecap="round"/></svg>`,
+  search:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="7" cy="7" r="4.5"/><path d="M10.4 10.4L14 14"/></svg>`,
+  back:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M10 3L5 8l5 5"/></svg>`,
+  recheck:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M13 8a5 5 0 11-1.5-3.6M13 2.5V5h-2.5"/></svg>`,
+  show:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="4.5"/><path d="M8 1v3M8 12v3M1 8h3M12 8h3"/></svg>`,
+  book:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M2 3h4.5A1.5 1.5 0 018 4.5V14a1.5 1.5 0 00-1.5-1.5H2zM14 3H9.5A1.5 1.5 0 008 4.5V14a1.5 1.5 0 011.5-1.5H14z"/></svg>`,
+  props:`<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="2" y="2" width="12" height="12" rx="1"/><path d="M2 6h12M6 6v8"/></svg>`,
+  info:`<svg viewBox="0 0 16 16" fill="none" stroke="var(--confirm)" stroke-width="1.5"><circle cx="8" cy="8" r="6.3"/><path d="M8 7.2v4M8 4.8v.1" stroke-linecap="round"/></svg>`,
+  logo:`<svg viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 36V12l8-4h22v28H7z"/><path d="M15 8v28M7 21h8"/><circle cx="28" cy="23" r="8" stroke="var(--accent)"/><path d="M24.5 23.2l2.5 2.5 5-5.3" stroke="var(--accent)" stroke-width="2.4"/></svg>`,
+};
+const caret = `<svg class="caret" viewBox="0 0 10 10"><path d="M2 3.5l3 3 3-3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>`;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const src = s => S.src ? `<div class="src">${esc(s)}</div>` : "";
+const fmt = (v,u) => (u==="sf" ? Math.round(v).toLocaleString("en-US") : (v % 1 === 0 && v >= 75 ? String(v) : v.toFixed(1))) + " " + u;
+
+/* ===================================================================================================
+   PANEL RENDERING
+   =================================================================================================== */
+const body = document.getElementById("body");
+function header(){
+  const busy = S.panel==="checking";
+  const checked = S.panel==="none" ? "Not checked yet" : S.panel==="error" ? "Last check failed" : S.panel==="missing" ? "Nothing checked" : "Checked 14:32 · Level 1 · last phase";
+  const btn = S.panel==="none" ? `<button class="btn primary" data-act="recheck">${G.recheck}Check project</button>`
+    : busy ? `<button class="btn" data-act="cancel">Cancel</button>`
+    : `<button class="btn ${S.panel==="stale"||S.stale?"primary":""}" data-act="recheck" title="Check again (F5 in the panel)">${G.recheck}Check again</button>`;
+  const todo = checklistProgress();
+  return `<div class="hdr"><div class="hdr-row"><div class="proj"><div class="t">Children’s Odyssey · 19 Libby St</div><div class="s">${checked}</div></div>${btn}</div>
+    <div class="ptabs" role="tablist">
+      <button class="ptab" role="tab" data-tab="results" aria-selected="${S.tab==="results"}">Results</button>
+      <button class="ptab" role="tab" data-tab="marks" aria-selected="${S.tab==="marks"}">Facts to mark <span class="pill ${todo.todo?"review":todo.confirm?"confirm":"pass"}">${todo.done} of ${todo.total}</span></button>
+    </div></div>`;
+}
+function render(){
+  const stale = S.panel==="stale" || S.stale;
+  let h = header();
+  if (S.tab==="marks") h += checklist();
+  else if (S.panel==="none") h += emptyState();
+  else if (S.panel==="checking") h += checkingState();
+  else if (S.panel==="missing") h += missingState();
+  else if (S.panel==="error") h += errorState();
+  else if (S.view==="detail" || S.view==="fix") {
+    if (stale) h += `<div class="banner warn">${G.stale}<div><div class="bt">The model changed after this check (14:32).</div>What follows may not hold now. <button class="btn ghost" data-act="recheck">Check again</button></div></div>`;
+    h += S.view==="detail" ? detail(stale) : guidedFix();
+  }
+  else h += resultsList(stale);
+  body.innerHTML = h;
+  body.classList.toggle("stale", stale);
+  const r = body.querySelector(".row.sel"); if (r && S.view==="list" && document.activeElement===body) r.scrollIntoView({block:"nearest"});
+}
+function stateLine(stale){
+  if (stale) return `<div class="state" style="color:var(--na)">${G.stale}<span>Results may be out of date</span></div>`;
+  return `<div class="state" style="color:var(--review)">${G.review}<span>Needs review: nothing fails, 8 rules to review</span></div>`;
+}
+function resultsList(stale){
+  let h = "";
+  if (stale) h += `<div class="banner warn">${G.stale}<div><div class="bt">The model changed after this check (14:32).</div>The results may not hold for it now: nothing below is shown as complying. <button class="btn ghost" data-act="recheck">Check again</button>${S.d33?`<div class="cap">Changed: Gordium: Exit on door D33 (${esc(S.d33)}).</div>`:""}</div></div>`;
+  h += `<div class="sec"><div class="card" style="padding:10px 10px 9px">${stateLine(stale)}
+      <div class="cap" style="margin-top:2px">Egress · IBC 2009 and NFPA 101 2012 (Maine) · the 8 route rules</div>
+      <div class="bar" role="img" aria-label="0 do not comply, 8 need review, 0 comply">
+        <div class="z" data-filter="fail" title="Does not comply">${G.fail.replace('<svg','<svg style="width:12px;height:12px;margin-right:4px"')}0</div>
+        <div class="seg-review" style="flex:8" data-filter="review" title="Needs review">8 need review</div>
+        <div class="z" data-filter="pass" title="Complies">${G.pass.replace('<svg','<svg style="width:12px;height:12px;margin-right:4px"')}0</div>
+      </div>
+      ${src("All 8 verdicts needs_review: "+SRC_EVAL+" verdicts.rules (every_verdict_the_same: false; the sheet passes each). Mockup shows only the eval's 8 route rules; a full check lists every rule.")}
+    </div></div>`;
+  h += `<div class="sec" style="padding-top:0"><div class="over" style="margin-bottom:5px">Fix these first</div><div class="card">` +
+    Object.entries(CAUSES).map(([k,c]) => `<div class="cause"><span class="n">${c.n}</span><span class="t">${esc(c.title)}</span><button class="btn small a" data-cause="${k}">${c.act}</button><span class="d">${esc(c.d)}${src(c.src)}</span></div>`).join("") +
+    `</div></div>`;
+  h += `<div class="tools" role="toolbar" aria-label="Filter results">
+      <button class="chip" data-filter="all" aria-pressed="${S.filter==="all"}">All 8</button>
+      <button class="chip" data-filter="fail" aria-pressed="${S.filter==="fail"}">${G.fail}0</button>
+      <button class="chip" data-filter="review" aria-pressed="${S.filter==="review"}">${G.review}8</button>
+      <button class="chip" data-filter="pass" aria-pressed="${S.filter==="pass"}">${G.pass}0</button>
+      <label class="search">${G.search}<input id="q" placeholder="Search rules, sections, rooms" value="${esc(S.q)}" aria-label="Search"></label></div>`;
+  const vis = visibleRows();
+  h += `<div class="group" role="listbox" aria-label="Results">`;
+  if (S.filter==="fail" || S.filter==="pass") h += `<div class="empty" style="padding:18px"><p>${S.filter==="fail"?"Nothing does not comply.":"Nothing complies yet: every rule here needs review."}</p></div>`;
+  else {
+    h += `<div class="ghead" data-fold="review" aria-expanded="${!S.folded.review}">${caret}<span class="over" style="color:var(--review)">Needs review · ${vis.length}</span></div>`;
+    if (!S.folded.review) {
+      for (const [k,c] of Object.entries(CAUSES)) {
+        const rs = vis.filter(r => r.cause===k); if (!rs.length) continue;
+        h += `<div class="sub"><span class="pill review">${c.n}</span><b>${esc(c.title)}</b></div>`;
+        for (const r of rs) h += rowHtml(r);
+      }
+      if (!vis.length) h += `<div class="empty" style="padding:18px"><p>No rule matches “${esc(S.q)}”.</p></div>`;
+    }
+  }
+  h += `<div class="ghead" data-fold="pass" aria-expanded="false">${caret}<span class="over">Complies · 0</span></div>`;
+  h += `</div><div class="keys"><span class="kbd">↑</span> <span class="kbd">↓</span> move · <span class="kbd">Enter</span> open · <span class="kbd">Space</span> show in model · <span class="kbd">Ctrl</span>+<span class="kbd">C</span> copy row · <span class="kbd">Ctrl</span>+<span class="kbd">F</span> search<br>A click selects the row and its elements without moving your view; Show zooms.</div>`;
+  return h;
+}
+function visibleRows(){
+  const q = S.q.trim().toLowerCase();
+  return ROWS.filter(r => !q || [r.name,r.sec,r.law,r.line,...r.els.map(e=>ROOMS[e]?.name||"")].join(" ").toLowerCase().includes(q));
+}
+function rowHtml(r){
+  const i = ROWS.indexOf(r), sel = i===S.sel;
+  return `<div class="row ${sel?"sel":""}" role="option" aria-selected="${sel}" data-row="${i}" tabindex="-1">
+    <span class="g">${G.review}</span><span class="nm">${esc(r.name)}</span><span class="sc">${esc(r.sec)}</span>
+    <span class="ln fig">${esc(r.line)}</span>
+    <span class="acts"><button class="btn small" data-act="open" data-row="${i}">Details</button><button class="btn small" data-act="show" data-row="${i}">${G.show}Show</button>${r.cause==="noroute"?`<button class="btn small" data-act="fix">Resolve the rooms</button>`:""}</span></div>`;
+}
+function detail(stale){
+  const r = ROWS[S.detail], i = S.detail;
+  let h = `<div class="dhead"><button class="btn ghost" data-act="back" aria-label="Back to the list">${G.back}Results</button><span class="pos">${i+1} of ${ROWS.length}</span>
+    <button class="btn ghost" data-act="prev" aria-label="Previous" ${i===0?"disabled":""}>‹</button><button class="btn ghost" data-act="next" aria-label="Next" ${i===ROWS.length-1?"disabled":""}>›</button></div>`;
+  h += `<div class="dtitle"><span class="pill review">${G.review.replace('<svg','<svg style="width:11px;height:11px"')} Needs review</span> <span class="pill na">${r.kind==="flag"?"Flag: a person decides":"Rule"}</span>
+    <h2>${esc(r.name)}</h2><div class="cap">${esc(r.law)} · Level 1 (the story)</div></div>`;
+  h += `<div class="block"><div class="over">Why it needs review</div><div class="why">${esc(r.why)}${r.flag && r.cause!=="flag" ? `<div class="cap" style="margin-top:5px">${esc(FLAG_NOTE)}</div>`:""}${src(r.whysrc)}</div></div>`;
+  h += `<div class="block"><div class="over">What to do</div><ol class="todo">` + r.todo.map(([t,bs]) =>
+      `<li><div>${esc(t)}${bs.length?`<div class="b">${bs.map(([l,a])=>`<button class="btn small ${a==="fix"?"primary":""}" data-act="${a}" data-row="${i}">${esc(l)}</button>`).join("")}</div>`:""}</div></li>`).join("") + `</ol></div>`;
+  if (r.meas) h += measBlock(r.meas, stale);
+  else h += `<div class="block"><div class="over">Measured vs limit</div><div class="card meas"><div class="nums"><span class="big muted">Not measured</span><span class="cap">limit 20 ft${r.id==="nfpa_16_2_5_2"?"; 50 ft sprinklered":", or under 2.5 × least width"}</span></div><div class="cap" style="margin-top:4px">Gordium gives no figure, and never a pass, for a dead end it didn’t measure.</div></div></div>`;
+  h += `<div class="block"><div class="over">The law’s words</div>` + r.quotes.map(k => { const q = Q[k]; return `<div class="quote"><q>${esc(q.t)}</q><div class="w"><span>${esc(q.w)}</span><button class="btn ghost small" data-act="law" data-q="${k}">${G.book}Open the law</button></div></div>`; }).join("") +
+       `<div class="cap">Quoted exactly as the rulebook stores them (text extracted from the PDF, its line breaks kept).</div>${src("regulations/jurisdictions/maine/maine_state/5_building_code_rules/drafted/general.yaml (feat/route-measures-2), each rule's sources[].quote, page, lines")}</div>`;
+  h += `<div class="block"><div class="over" style="display:flex;justify-content:space-between;align-items:center">Elements · ${r.els.length}<button class="btn ghost small" data-act="show" data-row="${i}">${G.show}Show all</button></div><div class="card" style="padding:2px 10px"><ul class="els">` +
+       r.els.map(e => { const o = ROOMS[e]; return `<li><span class="en">${esc(o.name)}<small>${esc(o.note)}</small>${src(o.src)}</span><button class="btn small" data-act="showone" data-el="${e}">${G.show}Show</button></li>`; }).join("") + `</ul></div></div>`;
+  h += `<div class="block" style="margin-bottom:16px"><button class="btn small" data-act="copy">Copy this row</button> <span class="cap">as check_project_result.txt says it</span></div>`;
+  return h;
+}
+function measBlock(m, stale){
+  const max = Math.max(m.v, m.lim) * 1.12;
+  const pct = v => (100 * v / max).toFixed(1) + "%";
+  const cls = m.partial ? "partial" : "meets";
+  return `<div class="block"><div class="over">Measured vs limit</div><div class="card meas">
+    <div class="nums"><span><span class="big fig">${fmt(m.v,m.unit)}</span> <span class="cap">${m.partial?"so far":""}</span></span><span class="cap fig">needs ${m.cmp} ${fmt(m.lim,m.unit)}</span></div>
+    <div class="meter" aria-hidden="true"><div class="fill ${cls}" style="width:${pct(m.v)}"></div><div class="lim" style="left:${pct(m.lim)}"></div></div>
+    <div class="scale"><span>0</span><span>limit ${fmt(m.lim,m.unit)} ┃</span></div>
+    <div class="cap" style="margin-top:4px">${esc(m.label)}.</div>
+    ${m.partial ? `<div class="cap" style="margin-top:4px;color:var(--review)"><b>Not a pass:</b> only the rooms with a route are measured. A room not measured may be farther.</div>`
+                : `<div class="cap" style="margin-top:4px"><b class="fig">${esc(m.spare)}</b> · the figures meet it; the verdict stays needs review (a flag).</div>`}
+    ${m.alt?`<div class="cap" style="margin-top:4px">${esc(m.alt)}</div>`:""}
+    ${src(m.src)}</div></div>`;
+}
+function guidedFix(){
+  const done = FIX_ITEMS.filter(k => S.fix[k]).length;
+  let h = `<div class="dhead"><button class="btn ghost" data-act="back">${G.back}Results</button><span class="pos">Guided fix</span></div>`;
+  h += `<div class="dtitle"><span class="pill review">1</span><h2>Resolve: rooms with no route to an exit</h2>
+    <div class="cap">Clears the wait on 4 rules: travel distance and common path (IBC 1016.1, 1014.3; NFPA 16.2.6.2, 16.2.5.3.1).</div></div>`;
+  h += `<div class="block"><div class="prog"><i style="width:${(100*done/FIX_ITEMS.length).toFixed(0)}%"></i></div><div class="cap" style="margin-top:4px">${done} of ${FIX_ITEMS.length} looked at · Gordium marks nothing resolved: only Check again changes a verdict.</div></div>`;
+  h += `<div class="block"><div class="over">What a route needs</div><div class="card" style="padding:9px 10px">Each room needs a walk to an exit, 12 in clear of every corner, through door centres. A walk passes only through corridors and rooms marked <b>Pass through</b> and not lockable; it may start in a closet or storage room, never cross one.
+    <div class="quote" style="margin:8px 0 0"><q>${esc(Q.ibc1014_2.t)}</q><div class="w"><span>${esc(Q.ibc1014_2.w)}</span></div></div>
+    <div class="cap" style="margin-top:6px">Usual causes: the room’s door isn’t drawn or isn’t read; every way out crosses a room a route may not cross; a gap under 12 in. Whether a room may be crossed is yours to state (IBC 1014.2 item 1).</div>
+    ${src("eval_marks.yaml header (IBC 2009 1014.2 items 1, 2, 4; NFPA 101 7.5.2.1); the measuring's definition of a route: eval_comparison.yaml story.not_measured")}</div></div>`;
+  h += `<div class="block" style="margin-bottom:12px"><div class="over" style="display:flex;justify-content:space-between;align-items:center">Rooms<button class="btn ghost small" data-act="show5">${G.show}Show all</button></div><div class="card">` +
+    FIX_ITEMS.map(k => { const o = ROOMS[k], c = S.fix[k];
+      return `<div class="fixitem"><div class="top"><span class="box ${c?"on":""}"></span><div style="flex:1;min-width:0"><b>${esc(o.name)}</b><div class="cap">${esc(o.note)}</div>${src(o.src)}
+        <div style="display:flex;gap:4px;margin-top:5px;flex-wrap:wrap"><button class="btn small" data-act="showone" data-el="${k}">${G.show}Show</button><button class="btn small" data-act="props" data-el="${k}">${G.props}Properties</button></div></div></div>
+        <div class="choices" role="group" aria-label="What I did for ${esc(o.name)}">${["I changed the model","I changed a mark","Leave it: stays needs review"].map(t=>`<button class="choice" data-fix="${k}" data-v="${esc(t)}" aria-pressed="${c===t}">${esc(t)}</button>`).join("")}</div></div>`; }).join("") +
+    `</div></div>`;
+  h += `<div class="block" style="margin-bottom:18px;display:flex;gap:8px;align-items:center"><button class="btn primary" data-act="recheck" ${done?"":"disabled"}>${G.recheck}Check again</button><span class="cap">${done?"See what your changes did.":"Look at each room first."}</span></div>`;
+  return h;
+}
+function emptyState(){
+  return `<div class="empty">${G.logo}<h3>Check this project</h3><p>Gordium reads the model, checks it against its zoning and egress rules, and lists what fails first. Nothing is sent while a fact is missing.</p>
+    <button class="btn primary" data-act="recheck">${G.recheck}Check project</button> <button class="btn" data-tab="marks">Mark facts first</button>
+    <p class="cap" style="margin-top:14px">Facts marked so far: ${checklistProgress().done} of ${checklistProgress().total} sections.</p></div>`;
+}
+function checkingState(){
+  return `<div class="sec"><div class="card" style="padding:12px"><div style="display:flex;gap:8px;align-items:center"><span class="spin"></span><b>Checking Children’s Odyssey…</b></div>
+    <ul class="steps"><li class="done">✓ Reading the model: 39 rooms, 4 exits, story outline</li><li class="on"><span class="spin" style="width:10px;height:10px"></span> Measuring the routes (Gordium’s checker)</li><li>Checking 8 route rules</li></ul>
+    <div class="cap" style="margin-top:8px">Revit stays usable while the checker works. The last results stay below, dimmed, until the new ones arrive.</div>
+    ${src("Proposed (PR 8): today the check blocks Revit's thread. The counts are eval_marks.yaml's.")}</div></div>
+    <div style="opacity:.45;pointer-events:none">${resultsList(false)}</div>`;
+}
+function missingState(){
+  return `<div class="sec"><div class="banner warn" style="margin:0 0 10px">${G.review}<div><div class="bt">Nothing was checked: 2 facts are missing</div>Gordium sends nothing until they are set, so no result can be a guess.</div></div>
+    <div class="card">
+      <div class="ck" style="cursor:default"><span class="box todo"></span><span class="t">Gordium: Lot surveyed</span><button class="btn small" data-act="pi">Set</button><span class="d">Yes or No, on Project Information: whether the lot lines are surveyed. Needed for every yard and coverage rule.</span></div>
+      <div class="ck" style="cursor:default"><span class="box todo"></span><span class="t">Street edge</span><button class="btn small" data-act="street">Pick it</button><span class="d">Click the lot edge along the street in a site plan; Gordium highlights the edge it took and asks you to confirm it there.</span></div>
+    </div>
+    <div class="cap" style="margin-top:8px">Example: an Ithaca house (these are zoning’s facts; the Children’s Odyssey eval has none missing).</div>
+    ${src("ProjectFacts / ResultsView.ShowMissing today: a bulleted list and one Open Project Information button")}</div>`;
+}
+function errorState(){
+  return `<div class="sec"><div class="banner err" style="margin:0">${G.fail}<div><div class="bt">Gordium’s checker stopped before answering.</div>Nothing was checked, and the last results were taken down so they aren’t mistaken for this check’s.
+    <div style="margin-top:8px;display:flex;gap:6px"><button class="btn small primary" data-act="recheck">Try again</button><button class="btn small" data-act="copyerr">Copy details for support</button></div></div></div>
+    <div class="cap" style="margin-top:8px">The exception and the log’s path go to the clipboard, not the screen. No second dialog.</div></div>`;
+}
+
+/* ---------- Facts to mark: the checklist ---------- */
+function checklistItems(){
+  return [
+    {k:"spaces", st:"done", t:"Spaces with no Room", c:"0 left", d:"18 enclosed areas found on the first read: 14 are now Rooms (VESTIBULE (31) to CLOSET (44)), 4 fixed in the model (2 slivers merged, 2 jambs filled).", s:"eval_marks.yaml rooms_to_place (14), not_rooms (4), model_corrections"},
+    {k:"use", st:"done", t:"Room use", c:"39 of 39", d:"Each room’s Gordium: Use, a word from Gordium’s list (Day care, Kitchen, Accessory storage, Closet, Toilet, Corridor, Lobby, Other…).", s:"eval_marks.yaml rooms (25) + rooms_to_place (14)"},
+    {k:"lock", st:"done", t:"Can be locked", c:"39 of 39", d:"Storage, toilets, the kitchen, the electrical room and the abandoned spaces Yes; occupied rooms No.", s:"eval_marks.yaml lockable"},
+    {k:"pass", st:"confirm", t:"Pass through", c:"15 Yes · to confirm", d:"15 occupied rooms marked Yes: the lenient reading (IBC 1014.2 item 1: rooms accessory to one another, with a discernible path). Whether each has that path is yours to state.", s:"eval_marks.yaml header: pass_through true is the LENIENT reading; 7 classrooms, PLAYROOM, 2 LIFE SPACEs, FAMILY LOUNGE, ADMINISTRATION, CONFERENCE, TREATMENT, VESTIBULE (31)"},
+    {k:"exits", st: S.d33 ? "done" : "todo", t:"Exits", c: S.d33 ? "5 doors decided" : "4 marked · 1 to decide", d:"D41, D02, D03 and D12 marked Exterior door at discharge. Gordium never assumes an exit.", s:"eval_marks.yaml exits, not_exits"},
+    {k:"clear", st:"confirm", t:"Door clear widths", c:"3 types · to confirm", d:"36 in leaf at 34 in clear (D01); 34 in leaf at 32 in (D05); a pair of 36 in leaves, one leaf’s 34 in (D02). Typical figures, no maker’s.", s:"eval_marks.yaml door_types (eval assumption: typical; no maker's figure)"},
+    {k:"sleep", st:"done", t:"Sleeping rooms", c:"39 No", d:"A day care has no dwelling sleeping rooms (the sleeping-room mark is the dwelling code’s).", s:"eval_marks.yaml room_defaults sleeping: false"},
+  ];
+}
+function checklistProgress(){
+  const it = checklistItems();
+  return {total:it.length, done:it.filter(x=>x.st==="done").length, todo:it.filter(x=>x.st==="todo").length, confirm:it.filter(x=>x.st==="confirm").length};
+}
+function checklist(){
+  const it = checklistItems(), p = checklistProgress();
+  let h = `<div class="banner info">${G.info}<div><div class="bt">Every mark here is an eval assumption</div>Gordium stood in for the architect on this model, and signed each stamp so. On a real project you state these.${src("eval_marks.yaml: by: eval assumption (Gordium, not the architect)")}</div></div>`;
+  h += `<div class="sec"><div style="display:flex;justify-content:space-between;align-items:baseline"><b>${p.done} of ${p.total} done</b><span class="cap">${p.todo} to do · ${p.confirm} to confirm</span></div>
+    <div class="prog" style="margin-top:6px"><i style="width:${(100*p.done/p.total).toFixed(0)}%"></i></div></div>`;
+  h += `<div class="sec" style="padding-top:0"><div class="card">` + it.map(x => {
+    const box = x.st==="done" ? "on" : x.st==="confirm" ? "half" : "todo";
+    const open = S.ckOpen[x.k];
+    let inner = "";
+    if (open && x.k==="exits") inner = exitsFix();
+    else if (open && x.k==="pass") inner = `<div class="ckbody"><button class="btn small" data-act="selpass">Select the 15 rooms</button> <span class="cap">Properties then shows their marks together.</span></div>`;
+    else if (open && x.k==="clear") inner = `<div class="ckbody"><button class="btn small" data-act="toast" data-msg="Selects the 3 door types' instances; their Clear marks show in Properties (type parameters)">Select the 3 door types</button></div>`;
+    return `<div class="ck" data-ck="${x.k}"><span class="box ${box}"></span><span class="t">${esc(x.t)}</span><span class="c">${esc(x.c)}</span><span class="d">${esc(x.d)}${src(x.s)}</span>${inner}</div>`;
+  }).join("") + `</div></div>`;
+  h += `<div class="keys">A section opens to its elements. <b>Select the N unset</b> selects them all in Revit, so Properties edits them in one go, as in a schedule.</div>`;
+  return h;
+}
+function exitsFix(){
+  const opts = ["Exterior door at discharge","Exit stair enclosure","Exit passageway","Horizontal exit","Exterior exit stair or ramp","Not an exit"];
+  return `<div class="ckbody"><div class="card" style="padding:9px 10px">
+    <b>Door D33</b> <span class="cap">MOUNTAIN CLASSROOM (3), south-east, in an outside wall</span>
+    <div class="cap" style="margin-top:3px">No Gordium: Exit mark, so it isn’t read as an exit. Is it one?</div>
+    ${src("eval_marks.yaml not_exits D33: “the sheet shows an exit sign at it but no exit arrow; left unmarked (the cautious way: fewer exits only lengthen routes)”")}
+    <div style="display:flex;gap:4px;margin-top:6px"><button class="btn small" data-act="showd33">${G.show}Show</button><button class="btn small" data-act="toast" data-msg="v1: selects D33 and brings up Properties; set Gordium: Exit there">${G.props}Properties</button></div>
+    <div class="choices" style="margin-left:0" role="group" aria-label="Gordium: Exit for D33">${opts.map(o=>`<button class="choice" data-d33="${esc(o)}" aria-pressed="${S.d33===o}">${esc(o)}</button>`).join("")}</div>
+    <div class="cap" style="margin-top:6px">${S.d33 ? `Set to “${esc(S.d33)}”. Results are now out of date: Check again.` : "Your click writes the mark (v2, decision 1): nothing is chosen for you."}</div></div></div>`;
+}
+
+/* ---------- Properties palette (Revit's own, shown when the guided fix opens it) ---------- */
+function propsHtml(){
+  const o = ROOMS[S.propsFor] || ROOMS["40"], m = o.marks || {};
+  const pr = (a,b,gm) => `<div class="pr ${gm?"gm":""}"><div>${a}</div><div>${b}</div></div>`;
+  return `<div class="props" style="color:var(--text)"><div style="padding:8px;border-bottom:1px solid var(--line);display:flex;gap:8px;align-items:center"><span style="width:34px;height:34px;border:1px solid var(--line);display:grid;place-items:center">▭</span><div><b>Rooms</b><div class="cap">${esc(o.name)}</div></div></div>
+    <div class="pg">Constraints</div>${pr("Level","Level 1")}${pr("Upper Limit","Level 1")}
+    <div class="pg">Identity Data</div>${pr("Number", esc((o.name.match(/\((\d+)\)/)||[])[1]||""))}${pr("Name", esc(o.name.replace(/ \(\d+\)$/,"")))}
+    <div class="pg">Data</div>${pr("Gordium: Use", esc(m.use||"(blank)"), true)}${pr("Gordium: Can be locked", esc(m.lock||"(blank)"), true)}${pr("Gordium: Pass through", esc(m.pass||"(blank)"), true)}${pr("Gordium: Sleeping room","No",true)}
+    <div class="sec"><div class="cap">Gordium’s marks are highlighted: the panel opened Properties for this room. Revit’s API can’t scroll Properties to a field, so the panel names it.</div>${src("Values from eval_marks.yaml for this room (pass_through default false: blank on a room the eval didn't mark crossable)")}
+    <button class="btn small" style="margin-top:8px" data-act="toGordium">Back to Gordium</button></div></div>`;
+}
+
+/* ===================================================================================================
+   THE PLAN (schematic, model feet, y up)
+   =================================================================================================== */
+const W = 195.078, H = 85.483, svg = document.getElementById("plan");
+const Y = y => H - y;
+const FULL = [-8, -8, W + 16, H + 16];
+function planSvg(){
+  const L = [];
+  const line = (x1,y1,x2,y2,c="var(--wall)",w=0.9,d="") => L.push(`<line x1="${x1}" y1="${Y(y1)}" x2="${x2}" y2="${Y(y2)}" stroke="${c}" stroke-width="${w}" ${d?`stroke-dasharray="${d}"`:""}/>`);
+  const rect = (x,y,w,h,cls="",extra="") => L.push(`<rect x="${x-w/2}" y="${Y(y+h/2)}" width="${w}" height="${h}" ${cls} ${extra}/>`);
+  const tag = (x,y,t,n) => L.push(`<g font-size="2.3" fill="var(--room-tag)" text-anchor="middle" font-family="Segoe UI,Arial"><text x="${x}" y="${Y(y)}">${t}</text>${n?`<text x="${x}" y="${Y(y)+2.8}" font-size="2">${n}</text>`:""}</g>`);
+  L.push(`<rect x="0" y="0" width="${W}" height="${H}" fill="none" stroke="var(--wall)" stroke-width="1.4"/>`);
+  // corridor
+  line(5,37.84,189.5,37.84,"var(--room-line)",0.6); line(5,47.83,189.5,47.83,"var(--room-line)",0.6);
+  // south classrooms
+  for (const x of [61.3,86.8,112.4,138.0,163.6]) line(x,0,x,37.84,"var(--room-line)",0.6);
+  // north partitions
+  for (const x of [60,100,109,139.3,165]) line(x,47.83,x,H,"var(--room-line)",0.6);
+  line(109,60.76,139.3,60.76,"var(--room-line)",0.6);
+  // vestibule
+  line(13.3,37.84,13.3,47.83,"var(--room-line)",0.6);
+  // toilets, closets (small rooms placed by the eval)
+  for (const [x,y] of [[73.96,33.08],[99.61,33.08],[125.25,33.08],[150.78,33.08]]) rect(x,y,7.6,7.7,`fill="none" stroke="var(--room-line)" stroke-width=".5"`);
+  for (const [x,y] of [[171.94,81.12],[171.94,15.44]]) rect(x,y,6.6,6.6,`fill="none" stroke="var(--room-line)" stroke-width=".5"`);
+  for (const [x,y] of [[28.56,36.26],[175.23,35.34],[175.23,50.43],[109.22,49.73]]) rect(x,y,2.8,2.8,`fill="none" stroke="var(--room-line)" stroke-width=".5"`);
+  // rooms Gordium can highlight
+  for (const [k,o] of Object.entries(ROOMS)) if (o.at && o.w) {
+    const on = S.selected.includes(k);
+    rect(o.at[0],o.at[1],o.w,o.h, `data-el="${k}" fill="${on?"var(--hl-fill)":"none"}" stroke="${on?"var(--hl)":"var(--room-line)"}" stroke-width="${on?1:.5}"`);
+  }
+  tag(30,18,"INFANT/TODDLER","CLASSROOM 5"); tag(74,18,"CLASSROOM","8"); tag(99.6,18,"FOREST","CLASSROOM 7"); tag(125.2,18,"SAFARI","CLASSROOM 6"); tag(150.8,18,"OCEAN","CLASSROOM 4"); tag(180,22,"MOUNTAIN","CLASSROOM 3");
+  tag(28,64,"PLAYROOM","17"); tag(124.2,72,"STORAGE","11"); tag(152,62,"LIFE SPACE","12"); tag(182,64,"CLASSROOM","2"); tag(100,43.2,"CORRIDOR 26",""); tag(104,54,"CONFERENCE","19");
+  tag(24.11,33.2,"40",""); tag(53.81,79,"32",""); tag(152.39,79.6,"33","");
+  // exits
+  for (const [x,y,n] of [[5,85,"D41"],[80.6,80,"D02"],[5,42.8,"D03"],[189.5,42.8,"D12"]]) {
+    const left = x > 150, ty = n==="D41" ? Y(y)+4.2 : Y(y)+0.9;
+    L.push(`<g><rect x="${x-1.6}" y="${Y(y)-1.6}" width="3.2" height="3.2" rx=".6" fill="var(--pass)"/><text x="${left?x-2.4:x+2.4}" y="${ty}" text-anchor="${left?"end":"start"}" font-size="2.2" fill="var(--pass)" font-weight="600" font-family="Segoe UI,Arial">${n}</text></g>`);
+  }
+  // D33: outside wall, no exit mark
+  const d33on = S.selected.includes("d33");
+  L.push(`<g><rect x="${190.4-1.6}" y="${Y(0.7)-1.6}" width="3.2" height="3.2" rx=".6" fill="${S.d33 && S.d33!=="Not an exit" ? "var(--pass)" : "none"}" stroke="${d33on?"var(--hl)":"var(--review)"}" stroke-width="${d33on?.9:.6}" stroke-dasharray="${S.d33?"":"1 .6"}"/><text x="${186}" y="${Y(0.7)-2.4}" font-size="2.2" fill="var(--review)" font-family="Segoe UI,Arial">D33</text></g>`);
+  // the most remote point found, and the points with no route
+  L.push(`<g><circle cx="138.9" cy="${Y(84.483)}" r="1.1" fill="var(--accent)"/><text x="137.6" y="${Y(84.483)+3.4}" font-size="1.9" fill="var(--accent)" text-anchor="end" font-family="Segoe UI,Arial">most remote point found</text></g>`);
+  if (S.overlay==="noroute") for (const [x,y] of [[165.625,70.156],[55.308,78.082]])
+    L.push(`<g><circle cx="${x}" cy="${Y(y)}" r="1.5" fill="none" stroke="var(--review)" stroke-width=".6"/><path d="M${x-1} ${Y(y)-1}l2 2M${x+1} ${Y(y)-1}l-2 2" stroke="var(--review)" stroke-width=".5"/><text x="${x+2}" y="${Y(y)-1.8}" font-size="1.9" fill="var(--review)" font-family="Segoe UI,Arial">no route (${x}, ${y})</text></g>`);
+  if (S.overlay==="diag") {
+    line(0,85.483,195.078,0,"var(--accent)",0.6,"2 1");
+    L.push(`<text x="96" y="${Y(44)}" font-size="2.6" fill="var(--accent)" font-family="Segoe UI,Arial" transform="rotate(23.7 96 ${Y(44)})">diagonal 213.0 ft (1/3 = 71.0 ft)</text>`);
+  }
+  if (S.overlay==="exits") {
+    line(5,85,189.5,42.8,"var(--accent)",0.6,"2 1");
+    L.push(`<text x="90" y="${Y(66)}" font-size="2.6" fill="var(--accent)" font-family="Segoe UI,Arial">exits 187.2 ft apart (nearest edges)</text>`);
+  }
+  for (const k of S.selected) { const o = ROOMS[k]; if (o?.at && !o.w) L.push(`<circle cx="${o.at[0]}" cy="${Y(o.at[1])}" r="3" fill="var(--hl-fill)" stroke="var(--hl)" stroke-width=".8"/>`); }
+  if (S.selected.includes("26")) L.push(`<rect x="13.3" y="${Y(47.83)}" width="${189.5-13.3}" height="${47.83-37.84}" fill="var(--hl-fill)" stroke="var(--hl)" stroke-width=".8"/>`);
+  svg.innerHTML = L.join("");
+  const vb = S.vb || FULL; svg.setAttribute("viewBox", vb.join(" "));
+}
+function bboxOf(keys){
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9, any=false;
+  for (const k of keys) {
+    let o = ROOMS[k]; if (k==="d33") o = {at:[190.4,0.7],w:3,h:3}; if (k==="26") o = {at:[101.4,42.8],w:176,h:10};
+    if (!o?.at) continue; any = true; const w = (o.w||3)/2, h = (o.h||3)/2;
+    x0=Math.min(x0,o.at[0]-w); x1=Math.max(x1,o.at[0]+w); y0=Math.min(y0,o.at[1]-h); y1=Math.max(y1,o.at[1]+h);
+  }
+  if (!any) return null;
+  const pad = 14, w = Math.max(x1-x0+2*pad, 50), h = Math.max(y1-y0+2*pad, 28), cx=(x0+x1)/2, cy=(y0+y1)/2;
+  return [cx-w/2, Y(cy)-h/2, w, h];
+}
+function animateTo(vb){
+  const from = (S.vb || FULL).slice(), t0 = performance.now(), D = 380;
+  const step = t => { const k = Math.min(1,(t-t0)/D), e = 1-Math.pow(1-k,3); S.vb = from.map((v,i)=>v+(vb[i]-v)*e); svg.setAttribute("viewBox", S.vb.join(" ")); if (k<1) requestAnimationFrame(step); };
+  requestAnimationFrame(step);
+}
+function select(keys, zoom, overlay){
+  S.selected = keys; S.overlay = overlay || null; planSvg();
+  const named = keys.map(k => k==="d33" ? "D33" : ROOMS[k]?.name).filter(Boolean);
+  const placed = keys.filter(k => k==="d33" || k==="26" || ROOMS[k]?.at).length;
+  document.getElementById("sbSel").textContent = keys.length ? `${keys.length} element${keys.length>1?"s":""} selected by Gordium: ${named.slice(0,3).join(", ")}${named.length>3?`, +${named.length-3}`:""}` : "Nothing selected";
+  if (zoom) {
+    const b = bboxOf(keys);
+    if (b) { if (!S.zoomStack.length) S.zoomStack.push((S.vb||FULL).slice()); animateTo(b); document.getElementById("backView").hidden = false; }
+    if (placed < keys.length) toast(`${keys.length - placed} of the selected rooms have no position in the eval data, so the mockup can't draw them; Revit would select and zoom to all ${keys.length}.`);
+  }
+}
+document.getElementById("backView").onclick = () => { const v = S.zoomStack.pop() || FULL; S.zoomStack = []; animateTo(v); document.getElementById("backView").hidden = true; };
+
+/* ===================================================================================================
+   EVENTS
+   =================================================================================================== */
+let tt; function toast(m){ const t = document.getElementById("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove("on"), 3600); }
+function openDetail(i){ S.detail = i; S.sel = i; S.view = "detail"; const r = ROWS[i]; select(r.els, false, r.cause==="noroute"?"noroute":null); render(); body.scrollTop = 0; }
+function recheck(){
+  S.panel = "checking"; S.tab = "results"; render(); document.getElementById("stateSel").value = "checking";
+  setTimeout(() => { S.panel = "results"; S.stale = false; S.view = "list"; document.getElementById("stateSel").value = "results"; render();
+    toast(S.d33 || Object.keys(S.fix).length ? "Mockup: the results shown are the eval's. A real check would reflect your changes and say which rows changed." : "Checked: the same 8 rows (nothing in the model changed)."); }, 1500);
+}
+body.addEventListener("click", e => {
+  const t = e.target.closest("[data-act],[data-tab],[data-filter],[data-fold],[data-cause],[data-fix],[data-d33],[data-ck],.row");
+  if (!t) return;
+  if (t.dataset.tab) { S.tab = t.dataset.tab; render(); return; }
+  if (t.dataset.filter) { S.filter = t.dataset.filter; render(); return; }
+  if (t.dataset.fold) { S.folded[t.dataset.fold] = !S.folded[t.dataset.fold]; render(); return; }
+  if (t.dataset.cause) { const c = t.dataset.cause; if (c==="noroute") { S.view = "fix"; select(NOROUTE5, false, "noroute"); render(); body.scrollTop = 0; } else openDetail(ROWS.findIndex(r => r.cause===c)); return; }
+  if (t.dataset.fix) { S.fix[t.dataset.fix] = S.fix[t.dataset.fix]===t.dataset.v ? undefined : t.dataset.v; if (!S.fix[t.dataset.fix]) delete S.fix[t.dataset.fix]; render(); return; }
+  if (t.dataset.d33) { S.d33 = t.dataset.d33; S.stale = true; planSvg(); render(); toast(`Gordium: Exit on D33 set to "${S.d33}" (one undoable change). The results are out of date: Check again.`); return; }
+  if (t.dataset.ck && !t.dataset.act) { if (e.target.closest(".ckbody")) return; S.ckOpen[t.dataset.ck] = !S.ckOpen[t.dataset.ck]; render(); return; }
+  if (t.classList.contains("row") && !t.dataset.act) { const i = +t.dataset.row; S.sel = i; select(ROWS[i].els, false); render(); body.focus(); if (e.detail === 2) openDetail(i); return; }
+  const a = t.dataset.act, i = t.dataset.row !== undefined ? +t.dataset.row : S.detail;
+  switch (a) {
+    case "open": openDetail(i); break;
+    case "show": select(ROWS[i].els, true, ROWS[i].cause==="noroute"?"noroute":null); break;
+    case "showone": select([t.dataset.el], true, null); break;
+    case "show5": select(NOROUTE5, true, "noroute"); break;
+    case "show26": select(["26"], true); break;
+    case "showexits": select(["d41","d12"], true, "exits"); break;
+    case "diag": S.selected = []; S.overlay = "diag"; S.vb = null; planSvg(); animateTo(FULL); toast("The building's maximum overall diagonal, drawn on the view as temporary graphics (no change to the model)."); break;
+    case "showstore": select(["11","13","14","28","29"], true); break;
+    case "showd33": select(["d33"], true); break;
+    case "fix": S.view = "fix"; select(NOROUTE5, false, "noroute"); render(); body.scrollTop = 0; break;
+    case "back": S.view = "list"; render(); break;
+    case "prev": openDetail(Math.max(0, S.detail-1)); break;
+    case "next": openDetail(Math.min(ROWS.length-1, S.detail+1)); break;
+    case "recheck": recheck(); break;
+    case "cancel": S.panel = "results"; S.stale = true; document.getElementById("stateSel").value = "stale"; render(); toast("Cancelled: the previous results stay, marked out of date (never shown as the new check's)."); break;
+    case "law": { const q = Q[t.dataset.q]; toast(`Would open ${q.w.includes("nfpa")||q.w.startsWith("NFPA")?"gov.law.nfpa.101.2012.pdf":"icc.ibc.2009.pdf"} at page ${q.page} (the rulebook's source file; mockup: no network).`); break; }
+    case "props": S.propsFor = t.dataset.el; select([t.dataset.el], false); showProps(true); break;
+    case "copy": { const r = ROWS[S.detail]; const text = `[needs review] ${r.name} (${r.sec}): ${r.line}. ${r.why}`; navigator.clipboard?.writeText(text).catch(()=>{}); toast("Copied: " + text.slice(0, 120) + "…"); break; }
+    case "copyerr": toast("Copied the exception and the log's path for support."); break;
+    case "pi": toast("Opens Project Information (Revit's own dialog); the field to fill is named here: Gordium: Lot surveyed."); break;
+    case "street": toast("Asks you to click the lot edge along the street in a site plan, then highlights that edge and asks to keep it."); break;
+    case "selpass": toast("Selects the 15 rooms marked Pass through Yes; Properties shows their marks together."); break;
+    case "toast": toast(t.dataset.msg); break;
+    case "toGordium": showProps(false); break;
+  }
+});
+body.addEventListener("input", e => { if (e.target.id==="q") { S.q = e.target.value; const pos = e.target.selectionStart; render(); const q = document.getElementById("q"); q.focus(); q.setSelectionRange(pos,pos); } });
+body.addEventListener("keydown", e => {
+  if (e.target.tagName==="INPUT") { if (e.key==="Escape") { S.q = ""; render(); body.focus(); } return; }
+  if (S.tab!=="results" || S.panel!=="results" && S.panel!=="stale") return;
+  if (S.view==="list") {
+    const vis = visibleRows().map(r => ROWS.indexOf(r)); let p = vis.indexOf(S.sel);
+    if (e.key==="ArrowDown") { S.sel = vis[Math.min(vis.length-1, p+1)] ?? S.sel; select(ROWS[S.sel].els,false); render(); e.preventDefault(); }
+    else if (e.key==="ArrowUp") { S.sel = vis[Math.max(0, p-1)] ?? S.sel; select(ROWS[S.sel].els,false); render(); e.preventDefault(); }
+    else if (e.key==="Enter") { openDetail(S.sel); e.preventDefault(); }
+    else if (e.key===" ") { select(ROWS[S.sel].els, true, ROWS[S.sel].cause==="noroute"?"noroute":null); e.preventDefault(); }
+    else if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="f") { document.getElementById("q")?.focus(); e.preventDefault(); }
+    else if ((e.ctrlKey||e.metaKey) && e.key.toLowerCase()==="c") { const r = ROWS[S.sel]; toast(`Copied: [needs review] ${r.name} (${r.sec}): ${r.line}`); }
+  } else if (e.key==="Backspace" || (e.altKey && e.key==="ArrowLeft")) { S.view = "list"; render(); body.focus(); e.preventDefault(); }
+  else if (S.view==="detail" && e.key==="ArrowRight") openDetail(Math.min(ROWS.length-1,S.detail+1));
+  else if (S.view==="detail" && e.key==="ArrowLeft") openDetail(Math.max(0,S.detail-1));
+});
+
+function showProps(on){
+  document.getElementById("tabProps").setAttribute("aria-selected", on);
+  document.getElementById("tabGordium").setAttribute("aria-selected", !on);
+  if (on) { body.innerHTML = propsHtml(); body.classList.remove("stale"); } else render();
+}
+document.getElementById("tabProps").onclick = () => showProps(true);
+document.getElementById("tabGordium").onclick = () => showProps(false);
+document.getElementById("rbCheck").onclick = () => { showProps(false); recheck(); };
+document.getElementById("rbMarks").onclick = () => { S.tab = "marks"; showProps(false); };
+document.getElementById("rbPanel").onclick = () => toast("Shows or hides the Gordium panel (Revit remembers where it is docked).");
+document.querySelectorAll("[data-theme-btn]").forEach(b => b.onclick = () => {
+  S.theme = b.dataset.themeBtn; document.documentElement.dataset.theme = S.theme;
+  document.querySelectorAll("[data-theme-btn]").forEach(x => x.setAttribute("aria-pressed", x===b));
+});
+document.getElementById("stateSel").onchange = e => { S.panel = e.target.value; S.tab = "results"; S.view = "list"; if (S.panel!=="stale") S.stale = false; showProps(false); };
+document.getElementById("srcBtn").onclick = e => { S.src = !S.src; e.currentTarget.setAttribute("aria-pressed", S.src); document.getElementById("revit").classList.toggle("show-src", S.src); document.getElementById("legend").classList.toggle("show-src", S.src); showProps(false); };
+// ribbon tooltips: a short title, then a few lines (Revit's ToolTip and LongDescription)
+const tip = document.getElementById("rtip");
+document.querySelectorAll("[data-tip]").forEach(b => {
+  b.addEventListener("mouseenter", () => { const [t,d] = b.dataset.tip.split("|"); tip.innerHTML = `<b>${esc(t)}</b>${esc(d)}`; const r = b.getBoundingClientRect(); tip.style.left = (r.left + window.scrollX) + "px"; tip.style.top = (r.bottom + window.scrollY + 4) + "px"; tip.style.display = "block"; });
+  b.addEventListener("mouseleave", () => tip.style.display = "none");
+});
+// follow the viewer's own theme on first load (Revit's would be read from UIThemeManager)
+try { if (window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches) document.querySelector('[data-theme-btn="dark"]').click(); } catch (_) {}
+planSvg(); render();
+</script>
+</body>
+</html>
