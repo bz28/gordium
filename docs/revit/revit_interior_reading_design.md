@@ -745,21 +745,23 @@ leaves the id out with why ("mark every door into the enclosure"). A horizontal 
 beyond its wall isn't one Room): such a door isn't read. The rule is cautious: a stair Room with an unmarked door into
 it (a closet) gives no id, never a guess.
 
-**`story_outlines` (decision 8's two readings), from Revit's own gross building area** (`StoryOutlines.cs`; the
-Revit layer's part, `GrossAreasOf`, is thin). **outer:** in a transaction always rolled back, an area plan of the
-model's Gross Building area scheme is made for the level (`ViewPlan.CreateAreaPlan`), an Area placed at each of the
-level's Rooms' points, and the one Revit closes is read (`GetBoundarySegments`, each side with the element bounding it):
-the exterior walls' outer faces, as Revit and architects measure gross area. Two earlier readings didn't serve on the
-Children's Odyssey (2026-11-21): the walls' cut faces didn't join into loops, and the walls' centre lines widened
-logged every interior T-junction as a gap; a slab's edge says nothing reliable (it may stop at the core, the inside
-face or past the walls). **inner:** that outline with each side moved in by the thickness of the wall Revit says bounds
-it (`Wall.Width`), the corners where the moved sides meet. Exact for straight walls of one thickness along a side, since
-a wall's inside face is its outside face moved by its thickness; read from the rooms instead it would lose what no
-room covers inside the walls (a shaft, a chase). Left out, with the reason in the notes, when the model has no Gross
-Building scheme, Revit closes no Area or several, a side is curved, the area has a hole bigger than a sliver (a
-courtyard), a side is bounded by something other than a wall (its thickness unknown), or two walls of different
-thickness run along one straight side; then the diagonal and the story's areas need review. The trial's log says how
-many area boundary lines Revit put in the plan and which areas closed, so a level left out can be looked at.
+**`story_outlines` (decision 8's two readings), from Revit's own room logic** (`StoryOutlines.cs`; the Revit layer's
+part, `RingOf`, is thin). **outer:** in a transaction always rolled back, room separation lines are drawn as a
+rectangle 20 ft beyond the level's walls, a Room is placed in the ring between it and the building, and its boundary
+at the finished faces is read, the rectangle's loop dropped: the exterior walls' outer faces, each side with the wall
+bounding it (doors and windows don't break a room's boundary; interior walls never touch this one). The trial's log
+gives each loop's corners and area. Three earlier readings didn't serve on the Children's Odyssey (2026-11-21): the
+walls' cut faces didn't join into loops, the walls' centre lines widened logged every interior T-junction as a gap,
+and an area plan made through the API has no area boundary lines (Revit closed no gross area); a slab's edge says
+nothing reliable (it may stop at the core, the inside face or past the walls). **inner:** that outline with each side
+moved in by the thickness of the wall Revit says bounds it (`Wall.Width`), the corners where the moved sides meet.
+Exact for straight walls of one thickness along a side, since a wall's inside face is its outside face moved by its
+thickness; read from the rooms instead it would lose what no room covers inside the walls (a shaft, a chase). Left
+out, with the reason in the notes, when the ring Room isn't enclosed, Revit's outline is more than one piece
+(separate buildings), a side is curved or bounded by something other than a wall (its thickness unknown), two walls
+of different thickness run along one straight side, or the level has an enclosed area with no Room (it may be a
+courtyard, which the ring never sees and the outline would count as floor); then the diagonal and the story's areas
+need review.
 
 **Why the footprints, not the boxes.** A box is bigger than the piece (a desk turned 30 degrees fills twice its area
 in an axis-aligned box), and a bigger obstruction is not always the cautious side: routes around it may part sooner,

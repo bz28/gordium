@@ -94,17 +94,16 @@ internal static class RevitInterior
         }
     }
 
-    /// <summary>Each level's gross building area as Revit works it out (the story's outlines, section 10): in a
-    /// transaction always rolled back, an area plan of the model's Gross Building scheme for the level
-    /// (<c>ViewPlan.CreateAreaPlan</c>), an Area placed at each of the level's Rooms' points (a building in one piece
-    /// gives one Area; the rest are redundant), the closed one's boundary read with the walls bounding it. Each level's
-    /// result says why when there is none; null when no level could be tried (the document can't be changed for the
-    /// moment).</summary>
+    /// <summary>Each level's exterior walls' outer faces, by Revit's own room logic (<see cref="RingOf"/>; the story's
+    /// outlines, section 10), for each level with a placed Room, inside a transaction always rolled back. Each level's
+    /// result says why when there is none; null when the document can't be changed for the moment.</summary>
     private static Dictionary<string, GrossArea>? GrossAreasOf(Document doc, List<string> diagnostics)
     {
         if (doc.IsReadOnly)
             return null;
-        var scheme = new FilteredElementCollector(doc).OfClass(typeof(AreaScheme)).Cast<AreaScheme>().ToList().FirstOrDefault(s => s.IsGrossBuildingArea);
+        var walls = new FilteredElementCollector(doc).OfClass(typeof(Wall)).Cast<Wall>().Where(w => !w.ViewSpecific).ToList();
+        var planType = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().ToList()
+            .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan);
         var levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList();
         var rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType().OfType<Room>()
             .Where(r => r.Location is LocationPoint && r.Area > 0).ToList();
@@ -122,9 +121,7 @@ internal static class RevitInterior
                 var points = rooms.Where(r => r.LevelId == level.Id).Select(r => ((LocationPoint)r.Location).Point).ToList();
                 if (points.Count == 0)
                     continue;
-                result[level.UniqueId] = scheme is null
-                    ? new GrossArea(null, new Dictionary<string, double>(), "the model has no Gross Building area scheme")
-                    : GrossOf(doc, scheme, level, points, diagnostics);
+                result[level.UniqueId] = RingOf(doc, level, walls.Where(w => w.LevelId == level.Id).ToList(), planType, diagnostics);
             }
             return result;
         }
@@ -138,46 +135,61 @@ internal static class RevitInterior
         }
     }
 
-    private static GrossArea GrossOf(Document doc, AreaScheme scheme, Level level, List<XYZ> points, List<string> diagnostics)
+    /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
+    /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
+    /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
+    /// the rectangle's loop dropped; all inside a sub-transaction rolled back. Each loop's corners and area are logged.</summary>
+    private static GrossArea RingOf(Document doc, Level level, List<Wall> walls, ViewFamilyType? planType, List<string> diagnostics)
     {
+        GrossArea No(string why) => new(null, new Dictionary<string, double>(), why);
+        var boxes = walls.Select(w => w.get_BoundingBox(null)).OfType<BoundingBoxXYZ>().ToList();
+        if (boxes.Count == 0)
+            return No("no wall stands on the level");
+        if (planType is null)
+            return No("the model has no floor plan view type to draw the ring's lines in");
+        const double Beyond = 20;
+        double x0 = boxes.Min(b => b.Min.X) - Beyond, y0 = boxes.Min(b => b.Min.Y) - Beyond, x1 = boxes.Max(b => b.Max.X) + Beyond, y1 = boxes.Max(b => b.Max.Y) + Beyond;
+        var z = level.ProjectElevation;
         using var st = new SubTransaction(doc);
         try
         {
             st.Start();
-            var plan = ViewPlan.CreateAreaPlan(doc, scheme.Id, level.Id);
+            var view = ViewPlan.Create(doc, planType.Id, level.Id);
+            var sketch = SketchPlane.Create(doc, Plane.CreateByNormalAndOrigin(XYZ.BasisZ, new XYZ(0, 0, z)));
+            var ring = new CurveArray();
+            XYZ[] corners = [new(x0, y0, z), new(x1, y0, z), new(x1, y1, z), new(x0, y1, z)];
+            for (var i = 0; i < 4; i++)
+                ring.Append(Line.CreateBound(corners[i], corners[(i + 1) % 4]));
+            var lines = doc.Create.NewRoomBoundaryLines(sketch, ring, view).Cast<ModelCurve>().Select(c => c.Id).ToHashSet();
             doc.Regenerate();
-            var lines = new FilteredElementCollector(doc, plan.Id).OfCategory(BuiltInCategory.OST_AreaSchemeLines).GetElementCount();
-            var closed = new List<Area>();
-            foreach (var p in points)
-            {
-                var area = doc.Create.NewArea(plan, new UV(p.X, p.Y));
-                doc.Regenerate();
-                if (area.Area > 0)
-                    closed.Add(area);
-            }
-            diagnostics.Add($"gross area of {level.Name}: {lines} area boundary lines in the plan Revit made, {closed.Count} closed areas " +
-                            $"({string.Join(", ", closed.Select(a => $"{a.Area:0.#} sq ft"))})");
-            if (closed.Count != 1)
-                return new GrossArea(null, new Dictionary<string, double>(), closed.Count == 0
-                    ? $"Revit closed no gross area on the level (its area plan has {lines} area boundary lines)"
-                    : $"Revit gives {closed.Count} separate gross areas on the level, not one outline");
-            var loops = closed[0].GetBoundarySegments(new SpatialElementBoundaryOptions());
+            var room = doc.Create.NewRoom(level, new UV(x0 + Beyond / 2, y0 + Beyond / 2));
+            doc.Regenerate();
+            if (room.Area <= 0)
+                return No("the Room placed round the building isn't enclosed (Revit gives it no area)");
+            var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions { SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish });
             var widths = new Dictionary<string, double>(StringComparer.Ordinal);
-            var records = loops.Select(loop => (IReadOnlyList<BoundarySegmentRecord>)loop.Select(s =>
+            var building = loops.Where(l => !l.All(seg => lines.Contains(seg.ElementId))).Select(loop => (IReadOnlyList<BoundarySegmentRecord>)loop.Select(seg =>
             {
-                var c = s.GetCurve();
-                var by = doc.GetElement(s.ElementId);
+                var c = seg.GetCurve();
+                var by = doc.GetElement(seg.ElementId);
                 if (by is Wall w)
                     widths[w.UniqueId] = w.Width;
                 return new BoundarySegmentRecord(P(c.GetEndPoint(0)), P(c.GetEndPoint(1)), c is Line, by?.UniqueId);
             }).ToList()).ToList();
-            return new GrossArea(records, widths);
+            diagnostics.Add($"outer outline of {level.Name}: the ring Room has {loops.Count} loops; the building's: " +
+                            string.Join("; ", building.Select(l =>
+                            {
+                                var p = l.Select(seg => seg.Start).ToList();
+                                var area = Math.Abs(p.Select((a, i) => a.X * p[(i + 1) % p.Count].Y - p[(i + 1) % p.Count].X * a.Y).Sum()) / 2;
+                                return $"{l.Count} corners, {area:0.#} sq ft";
+                            })));
+            return new GrossArea(building, widths);
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
                                        or Autodesk.Revit.Exceptions.InvalidOperationException)
         {
-            diagnostics.Add($"gross area of {level.Name}: Revit refused ({x.GetType().Name}: {x.Message})");
-            return new GrossArea(null, new Dictionary<string, double>(), $"Revit refused ({x.Message})");
+            diagnostics.Add($"outer outline of {level.Name}: Revit refused ({x.GetType().Name}: {x.Message})");
+            return No($"Revit refused ({x.Message})");
         }
         finally
         {

@@ -476,10 +476,15 @@ public sealed class RouteTests
         // two walls of different thickness along one side
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { WallWidths = new Dictionary<string, double>(g.WallWidths) { ["wall-s2"] = 1 } } };
         Assert.Contains("different thickness", OutlineNote(InteriorReader.Read(floor.Model())));
-        // a courtyard: a hole in the gross area
+        // a second building: the ring Room meets two outlines
         BoundarySegmentRecord S(double x0, double y0, double x1, double y1) => new(floor.Fake.Place(x0, y0, 0), floor.Fake.Place(x1, y1, 0), true, "wall-c");
-        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Loops = [g.Loops![0], [S(5, 5, 5, 8), S(5, 8, 8, 8), S(8, 8, 8, 5), S(8, 5, 5, 5)]] } };
-        Assert.Contains("a hole", OutlineNote(InteriorReader.Read(floor.Model())));
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Loops = [g.Loops![0], [S(50, 5, 50, 8), S(50, 8, 53, 8), S(53, 8, 53, 5), S(53, 5, 50, 5)]] } };
+        Assert.Contains("2 separate pieces", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a courtyard: an enclosed area with no Room on the level, whose area the outline would count
+        floor.GrossAreas = new() { [FakeFloor.Level] = g };
+        floor.Areas.Add(new EnclosedArea("Level 1", 30, false, floor.Fake.Place(25, 29, 0), FakeFloor.Level));
+        Assert.Contains("courtyard", OutlineNote(InteriorReader.Read(floor.Model())));
+        floor.Areas.RemoveAt(floor.Areas.Count - 1);
         // a curved side
         floor.GrossAreas = new() { [FakeFloor.Level] = g with { Loops = [[.. g.Loops![0].Take(4), g.Loops[0][4] with { IsLine = false }]] } };
         var read = InteriorReader.Read(floor.Model());

@@ -176,7 +176,10 @@ public static class RouteReader
     internal static (List<P2>? Outer, List<P2>? Inner, string? Why) Outlines(RevitModel model, string level)
     {
         if (model.Interior?.GrossAreas is not { } gross)
-            return (null, null, "Revit's gross building areas weren't read");
+            return (null, null, "the building's outlines weren't read");
+        // a courtyard is an enclosed area with no Room inside the building's outline: its area isn't told apart
+        if (InteriorReader.UnknownSpaceList(model).Any(u => u.Area.LevelId == level && u.Area.Area >= SmallestBeyond))
+            return (null, null, "an enclosed area with no Room on the level may be a courtyard, whose area the outline would count");
         var got = StoryOutlines.Of(gross.GetValueOrDefault(level), model.InternalToShared);
         return (got.Outer, got.Inner, got.Why);
     }

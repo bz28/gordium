@@ -4,16 +4,16 @@ namespace Gordium.Revit.Reading;
 /// Each story's outlines for the escape routes' diagonal and areas (<c>story_outlines: [{level, outer, inner}]</c>,
 /// decision 8 of docs/decisions/2026-11-20_route_measurement.md; design note section 10).
 /// <list type="bullet">
-/// <item><b>outer</b> is Revit's own gross building area of the level (<see cref="GrossArea"/>: an area plan of the
-/// model's Gross Building scheme made for the moment, an Area placed in it, its boundary read, all rolled back): the
-/// exterior walls' outer faces, as Revit and architects measure gross area.</item>
+/// <item><b>outer</b> is the exterior walls' outer faces by Revit's own room logic (<see cref="GrossArea"/>: a Room
+/// placed in a ring of room separation lines drawn round the building, its boundary at the finished faces read, all
+/// rolled back): doors and windows don't break a room's boundary, and interior walls never touch this one.</item>
 /// <item><b>inner</b> is that outline with each side moved in by the thickness of the wall Revit says bounds it there
 /// (<c>BoundarySegment.ElementId</c>, <c>Wall.Width</c>), the corners where the moved sides meet: exact for straight
 /// walls of one thickness along each side, since a wall's inner face is its outer face moved by its thickness. Read
 /// from the rooms instead it would lose what no room covers inside the walls (a shaft, a chase).</item>
 /// </list>
-/// Cautious: no gross area plan, an Area Revit doesn't close, a loop with a curved side, a hole bigger than a sliver
-/// (a courtyard), a side not bounded by a wall (an area boundary line: its thickness unknown), or two walls of
+/// Cautious: a ring Room Revit doesn't close, more than one building outline (separate buildings), a loop with a
+/// curved side, a side not bounded by a wall (an area boundary line: its thickness unknown), or two walls of
 /// different thickness along one straight side: no outlines are sent, with the reason; the diagonal and the story's
 /// areas then need review.
 /// </summary>
@@ -28,20 +28,20 @@ public static class StoryOutlines
     public static Result Of(GrossArea? gross, Transform3 t)
     {
         if (gross is null)
-            return new(null, null, "Revit's gross building area of the level wasn't read");
+            return new(null, null, "the building's outline of the level wasn't read");
         if (gross.Why is { } why)
-            return new(null, null, "Revit's gross building area: " + why);
+            return new(null, null, "the building's outline: " + why);
         if (gross.Loops is not { Count: > 0 } loops)
-            return new(null, null, "Revit's gross building area has no boundary");
+            return new(null, null, "the building's outline has no boundary");
         if (loops.Any(l => l.Any(s => !s.IsLine)))
-            return new(null, null, "Revit's gross building area has a curved side, which isn't read exactly");
+            return new(null, null, "the building's outline has a curved side, which isn't read exactly");
         var plans = loops.Select(l => l.Select(s => (A: P(t.Apply(s.Start)), B: P(t.Apply(s.End)), s.Element)).ToList()).ToList();
         var areas = plans.Select(l => PlanGeometry.SignedArea(l.Select(s => s.A).ToList())).ToList();
         var order = Enumerable.Range(0, plans.Count).OrderByDescending(i => Math.Abs(areas[i])).ToList();
-        var holes = order.Skip(1).Where(i => Math.Abs(areas[i]) > RouteReader.SmallestBeyond).ToList();
-        if (holes.FirstOrDefault(-1) is var hole and >= 0)
-            return new(null, null, $"Revit's gross building area has a hole of {Math.Abs(areas[hole]):0.##} sq ft (a courtyard): " +
-                                   "an outline with a hole isn't sent");
+        // the ring Room meets the building once; another loop is a second building (or a part apart)
+        var others = order.Skip(1).Where(i => Math.Abs(areas[i]) > RouteReader.SmallestBeyond).ToList();
+        if (others.Count > 0)
+            return new(null, null, $"Revit's outline of the building is {others.Count + 1} separate pieces, not one outline");
         var sides = plans[order[0]];
         if (areas[order[0]] < 0)
             sides = Enumerable.Reverse(sides).Select(s => (A: s.B, B: s.A, s.Element)).ToList();
@@ -69,7 +69,7 @@ public static class StoryOutlines
             merged.RemoveAt(merged.Count - 1);
         }
         if (merged.FindIndex(s => s.Width is null) is var open and >= 0)
-            return new(null, null, $"a side of Revit's gross building area at {Xy(merged[open].A)} isn't bounded by a wall" +
+            return new(null, null, $"a side of the building's outline at {Xy(merged[open].A)} isn't bounded by a wall" +
                                    (merged[open].Wall is { } by ? $" ({by})" : "") + ", so how thick the wall is there isn't known");
         var outer = merged.Select(s => s.A).ToList();
         // each side moved in (to its left: the loop is anticlockwise) by its wall's thickness; corners where they meet

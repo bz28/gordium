@@ -64,11 +64,11 @@ public sealed record InteriorRecords
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
 }
 
-/// <summary>A level's gross building area, as Revit gives it (section 10): an area plan of the model's Gross Building
-/// area scheme made for the moment (<c>ViewPlan.CreateAreaPlan</c>), an Area placed in it at a room's point inside,
-/// its boundary read (<c>GetBoundarySegments</c>: each loop's segments and the element bounding each, by
-/// <c>UniqueId</c>), all rolled back. <see cref="WallWidths"/>: each bounding wall's full thickness (<c>Wall.Width</c>).
-/// <see cref="Why"/>: why there is none (no Gross Building scheme, an Area Revit doesn't close, Revit refused).</summary>
+/// <summary>A level's building outline, the exterior walls' outer faces as Revit's room logic gives them (section 10):
+/// room separation lines drawn as a rectangle 20 ft round the level's walls, a Room placed in the ring, its boundary at
+/// the finished faces read (<c>GetBoundarySegments</c>: each loop's segments and the element bounding each, by
+/// <c>UniqueId</c>), the rectangle's loop dropped, all rolled back. <see cref="WallWidths"/>: each bounding wall's full
+/// thickness (<c>Wall.Width</c>). <see cref="Why"/>: why there is none (the ring Room not enclosed, Revit refused).</summary>
 public sealed record GrossArea(IReadOnlyList<IReadOnlyList<BoundarySegmentRecord>>? Loops, IReadOnlyDictionary<string, double> WallWidths,
                                string? Why = null);
 
