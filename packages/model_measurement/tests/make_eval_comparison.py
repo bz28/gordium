@@ -128,7 +128,7 @@ def main(path, out_path=OUT, co=CO):
                       "rooms": {r.name: round(r.outline.area / FT / FT, 1) for r in story.rooms.values()
                                 if r is not None and uses.get(r.id) == "accessory_storage"}}
     out["by_hand"] = BY_HAND
-    out_path.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8")
+    out_path.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8", newline="\n")
     return out
 
 
