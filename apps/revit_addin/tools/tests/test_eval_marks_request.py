@@ -22,8 +22,14 @@ def test_the_libby_street_marks_make_a_request_for_every_room_and_exit():
     made = tool.request(marks, "m.rvt", "c.rvt")
     entries = made["marks"]
     rooms = {e["room"] for e in entries if "room" in e}
-    assert len(rooms) == 25
-    assert sum(1 for e in entries if e.get("mark") == "Gordium: Use") == 25
+    assert len(rooms) == 25 + 14                    # the sheet's rooms and the 14 enclosed areas it names
+    assert len(made["place_rooms"]) == 14
+    assert {"level": "Level 1", "at": [9.16, 42.92], "name": "VESTIBULE", "number": "31"} in made["place_rooms"]
+    assert len(marks["rooms_to_place"]) + len(marks["not_rooms"]) == 18      # every enclosed area with no Room, classified
+    build = tool.build_request(marks, "d.json", "m.rvt")
+    assert [next(k for k in c if k.endswith("_to")) for c in build["corrections"]] == \
+        ["extend_end_to"] * 2 + ["trim_end_to", "trim_start_to", "trim_end_to", "trim_start_to", "trim_start_to"]
+    assert sum(1 for e in entries if e.get("mark") == "Gordium: Use") == 39
     assert [e["door"] for e in entries if e.get("mark") == "Gordium: Exit"] == ["D41", "D02", "D03", "D12"]
     assert made["by"].startswith("eval assumption")
     corridor = [e for e in entries if e.get("room") == "26"]

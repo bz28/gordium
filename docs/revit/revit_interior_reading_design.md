@@ -802,6 +802,23 @@ found twice, or two values for one mark are refused with why; a door's clear ope
 clear width, height and source and the stamp, signed with `by` ("eval assumption (Gordium, not the architect)"), so
 the stamp itself says who stood in. Each entry applied or refused is logged (`set_marks` in results.jsonl).
 
+**A door's side with no Room is never called outside on a guess** (the Children's Odyssey's first marked read: 19
+doors "to outside", many into classroom toilets and closets with no Room). The Revit layer outlines each enclosed area
+with no Room (a Room placed in it for the moment, inside a `SubTransaction` always rolled back; the outline is also sent
+as the unknown space's `outline`). A door whose far side Revit gives no room on joins its room and the unknown space
+there, by that space's id (the route code then doesn't read the door: its story needs review); while any such area on
+its level has no outline, the side isn't sent at all; only with every one outlined and none beyond it is it `outside`.
+
+**The eval's Rooms and model corrections.** The request also places Rooms (`place_rooms`: a level, a point, the sheet's
+name and a number no Room has) before it marks: each where Revit gives it an area, in the last phase and on no Room
+already there, else taken back and logged. eval_marks.yaml classifies each of the 18 enclosed areas: 14 spaces the
+sheet draws (the west vestibule, two sprinklered abandoned spaces, six toilet rooms, five closets) get a Room; the two
+slivers Revit can't locate come from the trace's five overlapping wall pairs, which the build's new trims remove
+(`trim_end_to`, `trim_start_to`: a wall shortened along its own line by at most 2 ft, never lengthened or turned,
+BuildData.Correct); the two 1.4 sq ft pockets inside the east entry's splayed jambs are solid wall on the sheet, neither
+a space nor an overlap, and are left as they are (the story keeps needing review). `eval_marks_request.py --build-data
+--build-out` writes the build request with the corrections too.
+
 ### To try in Revit (the Children's Odyssey model)
 
 Read inside by request (`read_inside_request.json`, `{"model": "<path>.rvt"}`, section 9): the log's `routes` line

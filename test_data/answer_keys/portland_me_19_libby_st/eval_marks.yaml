@@ -53,6 +53,59 @@ rooms:
   - {number: "29", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
   - {number: "30", name: STAFF TOILET, use: Toilet, lockable: true, why: its name}
 
+# The 18 enclosed areas with no Room that the marked model's read found (2026-11-21, co_read5.json: each at its point
+# inside, the model's own feet, the traced data's coordinates), each classified against LS1.0 and the traced data.
+# A real space the sheet draws gets a Room placed at that point with the sheet's name and a use (rooms_to_place, an
+# eval assumption like every mark here); a sliver between two of the trace's overlapping walls is removed by a model
+# correction (model_corrections below), never by a Room; what is neither is left as it is (not_rooms) and keeps the
+# story needing review.
+rooms_to_place:
+  - {number: "31", name: VESTIBULE, at: [9.16, 42.92], area_sf: 69.9, use: Lobby, lockable: false, pass_through: true,
+     why: "the corridor's west vestibule between the door pairs D34 and D03; the sheet's bold exit arrow is drawn in it, so the exit route crosses it (pass_through true: the sheet's own route)"}
+  - {number: "32", name: SPRINKLERED ABANDONED SPACE, at: [53.81, 79.51], area_sf: 67.5, use: Other, lockable: true,
+     why: "the hatched space north of the playroom, labelled 'SPRINKLERED ABANDONED SPACE' with 'DOOR PERMANENTLY FIXED SHUT'; no word fits; Other, end-only"}
+  - {number: "33", name: SPRINKLERED ABANDONED SPACE, at: [152.39, 80.16], area_sf: 98.9, use: Other, lockable: true,
+     why: "the hatched space north of LIFE SPACE 12, labelled 'SPRINKLERED ABANDONED SPACE'; no word fits; Other, end-only"}
+  - {number: "34", name: TOILET, at: [171.94, 81.12], area_sf: 43.6, use: Toilet, lockable: true,
+     why: "the toilet room in CLASSROOM 2's north-west corner: the sheet draws a toilet and a sink in it"}
+  - {number: "35", name: TOILET, at: [171.94, 15.44], area_sf: 43.7, use: Toilet, lockable: true,
+     why: "the toilet room in MOUNTAIN CLASSROOM 3: the sheet draws a toilet and a sink in it"}
+  - {number: "36", name: TOILET, at: [73.96, 33.08], area_sf: 58.5, use: Toilet, lockable: true,
+     why: "CLASSROOM 8's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "37", name: TOILET, at: [99.61, 33.08], area_sf: 58.6, use: Toilet, lockable: true,
+     why: "FOREST CLASSROOM 7's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "38", name: TOILET, at: [125.25, 33.08], area_sf: 58.4, use: Toilet, lockable: true,
+     why: "SAFARI CLASSROOM 6's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "39", name: TOILET, at: [150.78, 33.08], area_sf: 58.6, use: Toilet, lockable: true,
+     why: "OCEAN CLASSROOM 4's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "40", name: CLOSET, at: [24.11, 36.26], area_sf: 7.6, use: Closet, lockable: true,
+     why: "a 2.5 by 3 ft closet off INFANT/TODDLER CLASSROOM 5 (door D06), by the corridor wall: the sheet draws its door"}
+  - {number: "41", name: CLOSET, at: [28.56, 36.26], area_sf: 8.0, use: Closet, lockable: true,
+     why: "the closet beside it (door D39)"}
+  - {number: "42", name: CLOSET, at: [175.23, 35.34], area_sf: 7.3, use: Closet, lockable: true,
+     why: "a closet off MOUNTAIN CLASSROOM 3 (door D51): the sheet draws it walled in an L by the corridor"}
+  - {number: "43", name: CLOSET, at: [175.23, 50.43], area_sf: 8.0, use: Closet, lockable: true,
+     why: "a closet off CLASSROOM 2 (door D52), the same"}
+  - {number: "44", name: CLOSET, at: [109.22, 49.73], area_sf: 9.1, use: Closet, lockable: true,
+     why: "a small room off CONFERENCE 19 (door D07, its only door), by the corridor; the sheet names none: taken as a closet, end-only"}
+not_rooms:
+  - {area_sf: 0, at: null, what: sliver, why: "Revit gives no point inside it: a sliver between two of the trace's overlapping walls (the build named 5 pairs); the trims below remove every overlap"}
+  - {area_sf: 0, at: null, what: sliver, why: "the second such sliver; the same trims"}
+  - {area_sf: 1.4, at: [190.67, 47.46], what: inside a wall,
+     why: "the pocket between the east entry's splayed jamb W72 and W16/W29: solid wall on the sheet, not a space nor an overlap; left as is (no correction kind fits), so the story keeps needing review"}
+  - {area_sf: 1.4, at: [190.67, 38.22], what: inside a wall, why: "the same at the other jamb (W73 with W24/W29)"}
+
+# The build's corrections: the two of build_corrected_request.json, and the five trims that join each overlapping pair
+# the build named end to end (BuildData.Correct: at most 2 ft, along the wall's own line, never longer).
+model_corrections:
+  - {wall: W16, extend_end_to: [193.8667, 48.1667], why: "LS1.0 shows the classroom wall meeting the vestibule wall; the trace stopped 1.4 ft short"}
+  - {wall: W24, extend_end_to: [193.8667, 37.5111], why: "LS1.0 shows the classroom wall meeting the vestibule wall; the trace stopped 1.4 ft short"}
+  - {wall: W119, trim_end_to: [132.9111, 84.9889], why: "overlaps W2 along 0.69 ft: ends where W2 begins"}
+  - {wall: W27, trim_start_to: [194.3667, 49.3578], why: "overlaps W120 along 1.15 ft: starts where W120 ends"}
+  - {wall: W28, trim_end_to: [194.3667, 36.3244], why: "overlaps W121 along 1.15 ft: ends where W121 begins"}
+  - {wall: W105, trim_start_to: [168.7167, 28.1889], why: "overlaps W32 along 0.33 ft: starts where W32 ends"}
+  - {wall: W34, trim_start_to: [168.5556, 16.1856], why: "overlaps W33 along 0.34 ft: starts where W33 ends"}
+
 # Each door type's clear opening, written on the type with its stamp (every door of the type shares it). No maker's
 # figure exists for these doors (the model's families are Revit's stock and Gordium's own): a typical assumption, the
 # leaf less about 2 in (its stop and the open leaf's thickness), and 80 in clear height (the code's least, IBC 1008.1.1),
@@ -75,7 +128,7 @@ exits:
   - {door: D02, exit: Exterior door at discharge, at: [80.6, 80.0],
      why: "the double door north of the corridor to the loading dock: bold up-arrow ('EXISTING LOADING DOCK SLAB IS LEVEL WITH INTERIOR')"}
   - {door: D03, exit: Exterior door at discharge, at: [5.0, 42.8],
-     why: "the corridor's west end, the outer pair of its vestibule: bold left-arrow. The vestibule (D34 to D03) has no Room in the model (an enclosed area with no Room), so this door isn't read until one is placed"}
+     why: "the corridor's west end, the outer pair of its vestibule: bold left-arrow. The vestibule (D34 to D03) has no Room in the model: VESTIBULE 31 is placed in it (rooms_to_place)"}
   - {door: D12, exit: Exterior door at discharge, at: [189.5, 42.8],
      why: "the corridor's east end: bold right-arrow, the end of the sheet's 130'-8\" travel-distance line"}
 not_exits:
