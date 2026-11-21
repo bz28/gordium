@@ -177,6 +177,53 @@ public sealed class SiteObjectTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.False(items.ContainsKey("scope.not_included"));
     }
 
+    // ---- review round 2: one marked a building is a building part everywhere (Fold, Coarser) -------------------------
+
+    private static JsonObject Building(JsonObject site, string id) =>
+        site["buildings"]!.AsArray().Single(o => o!["id"]!.GetValue<string>() == id)!.AsObject();
+
+    private static List<string> Codes(JsonObject b) =>
+        b["problems"]!.AsArray().Select(p => p!["code"]!.GetValue<string>()).ToList();
+
+    [Fact]
+    public async Task One_marked_a_deck_sends_its_fine_faces_alone_and_says_a_coarser_drawing_may_be_bigger()
+    {
+        var deck = Thing("deck", mark: "Deck") with { CoarserGeometry = [Block(20, 90, 40, 110), Block(40, 90, 44, 110)] };
+        var b = Building(await Site(House(deck)), "deck");
+        Assert.Equal(6, b["faces"]!.AsArray().Count);                  // Fine's box alone, never Coarse's added
+        Assert.Equal(["tool_words"], Codes(b));
+        var same = Building(await Site(House(deck with { CoarserGeometry = [Block(20, 90, 40, 110)] })), "deck");
+        Assert.Equal(6, same["faces"]!.AsArray().Count);
+        Assert.Empty(Codes(same));
+    }
+
+    [Fact]
+    public async Task A_part_nested_in_one_marked_a_deck_has_its_coarser_drawing_weighed_never_added_as_faces()
+    {
+        var deck = Thing("deck", mark: "Deck") with { CoarserGeometry = [Block(20, 90, 40, 110)] };
+        var step = FakeRevit.Family("step", [Block(25, 88, 35, 90, 0, 1)])
+            with { SuperComponent = "deck", CoarserGeometry = [Block(25, 88, 35, 90, 0, 1)] };
+        var b = Building(await Site(House(deck, step)), "deck");
+        Assert.Equal(12, b["faces"]!.AsArray().Count);
+        Assert.Empty(Codes(b));
+        b = Building(await Site(House(deck, step with { CoarserGeometry = [Block(25, 86, 35, 90, 0, 1)] })), "deck");
+        Assert.Equal(12, b["faces"]!.AsArray().Count);
+        Assert.Equal(["tool_words"], Codes(b));
+    }
+
+    [Fact]
+    public void The_marking_list_says_a_nested_parts_mark_isnt_read()
+    {
+        var host = Thing("bench", "OST_Furniture", "Furniture") with { Name = "Bench" };
+        var leg = Thing("leg", "OST_Furniture", "Furniture", mark: "Not a structure") with { SuperComponent = "bench" };
+        var cell = MarkingList.Build(House(host, leg)).Rows.Single(r => r.Id == "leg").Cells.Single();
+        Assert.Equal(MarkState.NotReadHere, cell.State);
+        Assert.Contains("part of \"Bench\" (bench)", cell.Words);
+        // one marked a building is read on its own, so its mark is given
+        var deckLeg = leg with { InstanceMarks = new Dictionary<Guid, MarkValue> { [Marks.SiteObject.Guid] = new(true, Text: "Deck") } };
+        Assert.Equal(MarkState.Given, MarkingList.Build(House(host, deckLeg)).Rows.Single(r => r.Id == "leg").Cells.Single().State);
+    }
+
     // ---- the marking list ---------------------------------------------------------------------------------------
 
     [Fact]

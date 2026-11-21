@@ -253,8 +253,14 @@ public static class SiteReader
         return true;
     }
 
-    private static bool IsBuildingPart(RevitElement e) =>
-        e.Mark == GordiumMark.FloorBlock || BuildingCategories.Contains(e.BuiltInCategory);
+    /// <summary>Whether the element is read as a building (the reader's switch and <see cref="Fold"/>/<see cref="Coarser"/>
+    /// ask this one predicate, so they can't drift: review round 2): a floor block, a building category, or an element
+    /// marked a porch, deck, landing, ramp, garage, shed or carport (<see cref="Marks.SiteObject"/>; never a context
+    /// object or another Gordium marker, whose mark isn't read). A building's faces are Fine's alone, its coarser
+    /// drawing weighed (it may be bigger than measured), never added as faces.</summary>
+    internal static bool IsBuildingPart(RevitElement e) =>
+        e.Mark == GordiumMark.FloorBlock || BuildingCategories.Contains(e.BuiltInCategory)
+        || e.Mark == GordiumMark.None && Read.SiteObject(e) is SiteObjectKind.Building;
 
     private static bool AnyFace(IEnumerable<GeometryItem> items) => items.Any(i => i switch
     {

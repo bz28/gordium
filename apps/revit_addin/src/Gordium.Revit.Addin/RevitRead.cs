@@ -197,6 +197,8 @@ internal static class RevitRead
                     ViewSpecific = e.ViewSpecific,
                     Name = e.Name,
                     Kind = Kind(doc, e),
+                    // the marking list says a sub-component's own mark isn't read (it is read as part of its host)
+                    SuperComponent = e is FamilyInstance sub && sub.SuperComponent is { } host ? host.UniqueId : null,
                     Mark = mark,
                     FloorMark = floorMark,
                     InstanceMarks = OwnMarks(e, e.Category),

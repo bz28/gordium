@@ -86,12 +86,10 @@ internal sealed class Read(RevitModel model)
             case var _ when _slabs.TryGetValue(e.UniqueId, out var slab) && slab.Kind != SlabKind.Building:
                 Slab(e, slab);
                 break;
-            case { Mark: GordiumMark.FloorBlock }:
-            case var _ when SiteReader.BuildingCategories.Contains(e.BuiltInCategory):
+            // a floor block, a building category, or marked a porch, deck, landing, ramp, garage, shed or carport: the
+            // one predicate Fold and Coarser ask too (review round 2)
+            case var _ when SiteReader.IsBuildingPart(e):
                 Building(e);
-                break;
-            case var _ when SiteObject(e) is SiteObjectKind.Building:
-                Building(e);                     // marked a porch, deck, landing, ramp, garage, shed or carport: measured
                 break;
             case { Kind: ElementKind.FamilyInstance or ElementKind.CadImport }:
                 Family(e, context: false);

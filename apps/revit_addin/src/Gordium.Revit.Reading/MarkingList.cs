@@ -362,6 +362,7 @@ public static class MarkingList
     private static IEnumerable<MarkingRow> SiteObjectRows(RevitModel model)
     {
         var m = Marks.SiteObject;
+        var names = model.Elements.GroupBy(e => e.UniqueId).ToDictionary(g => g.Key, g => g.First().Name);
         foreach (var e in model.Elements)
         {
             if (!m.Categories.Contains(e.BuiltInCategory) || !SiteReader.Looked(e) || !SiteReader.OnLotNow(model, e)
@@ -374,6 +375,11 @@ public static class MarkingList
                                                     "not read here: a Gordium context object (the neighbourhood's), read as one"),
                 not GordiumMark.None => new MarkCell(m, MarkState.NotReadHere, word, null,
                                                      "not read here: one of Gordium's own markers (a floor block or a grade marker), read as one"),
+                // review round 2: a shared nested family is read as part of its host (SiteReader.Fold), its own mark
+                // not read, unless it is itself read as a building (then it is read on its own)
+                _ when e.SuperComponent is { } host && host != e.UniqueId && !SiteReader.IsBuildingPart(e) =>
+                    new MarkCell(m, MarkState.NotReadHere, word, null,
+                                 $"not read here: part of {(names.TryGetValue(host, out var n) && n is { Length: > 0 } ? $"\"{n}\" ({host})" : host)}, read with it"),
                 _ when SiteObjectKinds.Of(word) is not null => new MarkCell(m, MarkState.Given, word, null, null),
                 _ when SlabKinds.Of(word) is not null => new MarkCell(m, MarkState.NotUnderstood, word, null,
                     $"\"{word}\" is a floor's word (Gordium: Site slab is), not read on a {e.Category}: one of {SiteObjectKinds.Listed}"),
