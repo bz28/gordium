@@ -326,3 +326,37 @@ def test_end_to_end_a_dead_end_with_an_alcove_at_its_end_never_passes_at_20_ft(m
     c, = got["parts"]["corridor"]
     assert c["measures"]["corridor_dead_end_length"] == pytest.approx(20.917, abs=1e-3)
     assert result(maine, "general.nfpa_16_2_5_2_dead_end", got) == "fail"
+
+
+def h_plan_with_doors():
+    """The H-plan (test 17) with the right leg starting at y 30 (its foot 44 - 30 = 14 ft by 8), and a door 3 ft
+    from each closed end into a classroom with its own exterior exit: readings of 30 and 3 ft for the left dead
+    end, 14 and 3 ft for the right."""
+    poly = [(0, 14), (14, 14), (14, 40), (60, 40), (60, 30), (68, 30), (68, 70), (60, 70), (60, 48), (14, 48),
+            (14, 70), (0, 70)]
+    return description([room("c", poly), room("w", rect(-20.5, 14, -0.5, 24), use="day_care"),
+                        room("e", rect(68.5, 30, 88.5, 40), use="day_care")],
+                       [door("a", (7, 70.25), (1, 0), ("c", "outside"), exit_id="A"),
+                        door("b", (64, 70.25), (1, 0), ("c", "outside"), exit_id="B"),
+                        door("wd", (-0.25, 17), (0, 1), ("w", "c")), door("wx", (-20.75, 17), (0, 1), ("w", "outside"), exit_id="W"),
+                        door("ed", (68.25, 33), (0, 1), ("c", "e")), door("ex", (88.75, 33), (0, 1), ("e", "outside"), exit_id="E")])
+
+
+def test_each_dead_end_part_has_its_own_readings(maine):
+    got = measure(h_plan_with_doors())
+    parts = {c["id"]: c for c in got["parts"]["corridor"]}
+    first, second = parts["c"], parts["c (dead end 2)"]
+    assert sorted(r["value"] for r in first["readings"]["corridor_dead_end_length"]) == [3.0, 30.0]
+    assert sorted(r["value"] for r in second["readings"]["corridor_dead_end_length"]) == [3.0, 14.0]
+    assert first["readings"] is not second["readings"]
+    rows = {r["id"]: r["outcome"] for r in part_rules.rows(maine[0]["general.nfpa_16_2_5_2_dead_end"], got["parts"],
+                                                            NEW_DAY_CARE, maine[1])}
+    assert rows == {"c": "needs_review", "c (dead end 2)": "pass"}
+
+
+def test_end_to_end_an_off_centre_alcove_at_a_dead_ends_end_never_passes_at_20_ft(maine):
+    d = alcove_dead_end()
+    d["rooms"][0]["floor"] = [list(p) for p in [(0, 0), (60, 0), (60, 8), (28, 8), (28, 24), (23.5, 24),
+                                                (23.5, 24 + 11 / 12), (20.5, 24 + 11 / 12), (20.5, 24), (20, 24),
+                                                (20, 8), (0, 8)]]
+    assert result(maine, "general.nfpa_16_2_5_2_dead_end", measure(d)) == "fail"

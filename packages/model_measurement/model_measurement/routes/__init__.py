@@ -427,7 +427,8 @@ def _corridor_parts(rid, name, story, found, room) -> list:
         return [p]
     out, base = [], ({**p["measures"]}, {**p["not_measured"]})
     for n, d in enumerate(mine, 1):
-        q = p if n == 1 else {**p, "id": f"{rid} (dead end {n})", "name": f"{name} (dead end {n})",
+        # each further part built fresh: its own measures, reasons, readings and more, never the first part's
+        q = p if n == 1 else {"id": f"{rid} (dead end {n})", "name": f"{name} (dead end {n})", "within": p["within"],
                               "measures": dict(base[0]), "not_measured": dict(base[1]), "more": {}}
         q["more"]["dead_end"] = {"from": _xy(d.start), "length": {k: _feet(v) for k, v in d.length.items()},
                                  "least_width": {k: _feet(v) for k, v in d.width.items()},
