@@ -634,9 +634,9 @@ function emptyState(){
 function checkingState(stale){
   return `<div class="sec"><div class="card" style="padding:12px"><div style="display:flex;gap:8px;align-items:center"><span class="spin"></span><b>Checking Children’s Odyssey…</b></div>
     <ul class="steps"><li class="done">✓ Reading the model: 39 rooms, 4 exits, story outline</li><li class="on"><span class="spin" style="width:10px;height:10px"></span> Measuring the routes (Gordium’s checker)</li><li>Checking 8 route rules</li></ul>
-    <div class="cap" style="margin-top:8px">Revit stays usable while the checker works. The last results stay below, dimmed, until the new ones arrive.</div>
+    <div class="cap" style="margin-top:8px">Revit stays usable while the checker works.${S.hadResults ? " The last results stay below, dimmed, until the new ones arrive." : ""} An edit made now leaves the new answer marked out of date.</div>
     ${src("Proposed (PR 8): today the check blocks Revit's thread. The counts are eval_marks.yaml's.")}</div></div>
-    <div style="opacity:.45;pointer-events:none">${resultsList(stale)}</div>`;
+    ${S.hadResults ? `<div style="opacity:.45;pointer-events:none">${resultsList(stale)}</div>` : ""}`;
 }
 function missingState(){
   return `<div class="sec"><div class="banner warn" style="margin:0 0 10px">${G.review}<div><div class="bt">Nothing was checked: 2 facts are missing</div>Gordium sends nothing until they are set, so no result can be a guess.</div></div>
@@ -803,11 +803,14 @@ let tt; function toast(m){ const t = document.getElementById("toast"); t.textCon
 function openDetail(i){ S.detail = i; S.sel = i; S.view = "detail"; const r = ROWS[i]; select(r.els, false, r.cause==="noroute"?"noroute":null); render(); body.scrollTop = 0; }
 let checkTimer;
 function recheck(){
+  S.before = S.panel==="stale" ? "results" : S.panel;  // where Cancel returns
+  S.hadResults = ["results","stale"].includes(S.panel);
+  S.editedDuringCheck = false;
   S.stale = S.stale || S.panel==="stale";  // a check started on stale results keeps them grey until its answer
   S.panel = "checking"; S.tab = "results"; render(); document.getElementById("stateSel").value = "checking";
   clearTimeout(checkTimer);
-  checkTimer = setTimeout(() => { if (S.panel!=="checking") return; S.panel = "results"; S.stale = false; S.view = "list"; document.getElementById("stateSel").value = "results"; render();
-    toast(S.d33 || Object.keys(S.fix).length ? "Mockup: the results shown are the eval's. A real check would reflect your changes and say which rows changed." : "Checked: the same 8 rows (nothing in the model changed)."); }, 1500);
+  checkTimer = setTimeout(() => { if (S.panel!=="checking") return; S.panel = "results"; S.stale = S.editedDuringCheck;  // an edit after the read leaves the answer stale S.view = "list"; document.getElementById("stateSel").value = "results"; render();
+    toast(S.editedDuringCheck ? "Checked, but the model changed during the check: these results are marked out of date. Check again." : S.d33 || Object.keys(S.fix).length ? "Mockup: the results shown are the eval's. A real check would reflect your changes and say which rows changed." : "Checked: the same 8 rows (nothing in the model changed)."); }, 1500);
 }
 body.addEventListener("click", e => {
   const t = e.target.closest("[data-act],[data-tab],[data-filter],[data-fold],[data-cause],[data-fix],[data-d33],[data-ck],.row");
@@ -817,7 +820,7 @@ body.addEventListener("click", e => {
   if (t.dataset.fold) { S.folded[t.dataset.fold] = !S.folded[t.dataset.fold]; render(); return; }
   if (t.dataset.cause) { const c = t.dataset.cause; if (c==="noroute") { S.view = "fix"; select(NOROUTE5, false, "noroute"); render(); body.scrollTop = 0; } else openDetail(ROWS.findIndex(r => r.cause===c)); return; }
   if (t.dataset.fix) { S.fix[t.dataset.fix] = S.fix[t.dataset.fix]===t.dataset.v ? undefined : t.dataset.v; if (!S.fix[t.dataset.fix]) delete S.fix[t.dataset.fix]; render(); return; }
-  if (t.dataset.d33) { S.d33 = t.dataset.d33; S.stale = true; planSvg(); render(); toast(`Gordium: Exit on D33 set to "${S.d33}" (one undoable change). The results are out of date: Check again.`); return; }
+  if (t.dataset.d33) { S.d33 = t.dataset.d33; S.stale = true; if (S.panel==="checking") S.editedDuringCheck = true; planSvg(); render(); toast(`Gordium: Exit on D33 set to "${S.d33}" (one undoable change). The results are out of date: Check again.`); return; }
   if (t.dataset.ck && !t.dataset.act) { if (e.target.closest(".ckbody")) return; S.ckOpen[t.dataset.ck] = !S.ckOpen[t.dataset.ck]; render(); return; }
   if (t.classList.contains("row") && !t.dataset.act) { const i = +t.dataset.row; S.sel = i; select(ROWS[i].els, false); render(); body.focus(); if (e.detail === 2) openDetail(i); return; }
   const a = t.dataset.act, i = t.dataset.row !== undefined ? +t.dataset.row : S.detail;
@@ -836,7 +839,7 @@ body.addEventListener("click", e => {
     case "prev": openDetail(Math.max(0, S.detail-1)); break;
     case "next": openDetail(Math.min(ROWS.length-1, S.detail+1)); break;
     case "recheck": recheck(); break;
-    case "cancel": clearTimeout(checkTimer); S.panel = "results"; S.stale = true; document.getElementById("stateSel").value = "stale"; render(); toast("Cancelled: the previous results stay, marked out of date (never shown as the new check's)."); break;
+    case "cancel": clearTimeout(checkTimer); if (S.hadResults) { S.panel = "results"; S.stale = true; document.getElementById("stateSel").value = "stale"; } else { S.panel = S.before; S.stale = false; document.getElementById("stateSel").value = S.before; } render(); toast(S.hadResults ? "Cancelled: the previous results stay, marked out of date (never shown as the new check's)." : "Cancelled: nothing was checked."); break;
     case "law": { const q = Q[t.dataset.q]; toast(`Would open ${q.w.includes("nfpa")||q.w.startsWith("NFPA")?"gov.law.nfpa.101.2012.pdf":"icc.ibc.2009.pdf"} at page ${q.page} (the rulebook's source file; mockup: no network).`); break; }
     case "props": S.propsFor = t.dataset.el; select([t.dataset.el], false); showProps(true); break;
     case "copy": { const r = ROWS[S.detail]; const text = `[needs review] ${r.name} (${r.sec}): ${r.line}. ${r.why}`; navigator.clipboard?.writeText(text).catch(()=>{}); toast("Copied: " + text.slice(0, 120) + "…"); break; }
