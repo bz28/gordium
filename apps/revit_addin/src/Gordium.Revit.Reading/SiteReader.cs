@@ -160,8 +160,8 @@ public static class SiteReader
     /// the model's coordinates); nothing that could be a building (no face: an empty family, lines only) as a nested
     /// family that gives nothing, so its host's place can't be told (touching: null), as a family on its own with
     /// nothing in it; and one whose geometry can't be read makes its host's unreadable. Never folded, so read on
-    /// their own as before (more is only more cautious): a sub-component in a building category or marked as a floor
-    /// block (a window in a kit family is a building wherever it sits, and a linked model holding one still holds a
+    /// their own as before (more is only more cautious): a sub-component that is a building part (a building category, a floor block, or marked a porch, deck,
+    /// landing, ramp, garage, shed or carport: IsBuildingPart) (a window in a kit family is a building wherever it sits, and a linked model holding one still holds a
     /// building: review round 1); one whose host isn't in the list; and one whose chain of hosts never reaches an
     /// element that isn't a sub-component (a loop: Revit can't make one, but nothing is ever dropped for it).</summary>
     internal static IReadOnlyList<RevitElement> Fold(IReadOnlyList<RevitElement> elements)
@@ -232,8 +232,8 @@ public static class SiteReader
         return kept.Count > 0 ? kept : null;
     }
 
-    /// <summary>Whether a sub-component is folded into its host: it isn't a building part (a building category or a
-    /// floor block), its host is in the list, and its chain of hosts has no loop. The chain ends at the first element
+    /// <summary>Whether a sub-component is folded into its host: it isn't a building part (a building category, a
+    /// floor block, or marked a porch, deck, landing, ramp, garage, shed or carport: IsBuildingPart), its host is in the list, and its chain of hosts has no loop. The chain ends at the first element
     /// that is read on its own (one with no host in the list, or a building part), which every folded part above
     /// it reaches.</summary>
     private static bool FoldsInto(RevitElement e, Dictionary<string, RevitElement> byId)

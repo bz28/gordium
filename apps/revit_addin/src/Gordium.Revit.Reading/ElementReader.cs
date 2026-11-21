@@ -121,7 +121,8 @@ internal sealed class Read(RevitModel model)
 
     // ---- buildings ----------------------------------------------------------------------------------------------
 
-    /// <summary>A building-category element or a floor block: one building, the faces of all its solids (design
+    /// <summary>A building part (<see cref="SiteReader.IsBuildingPart"/>: a building-category element, a floor block,
+    /// or one marked a porch, deck, landing, ramp, garage, shed or carport with "Gordium: Site object is"): one building, the faces of all its solids (design
     /// note, sections 1 and 2). Never skipped for having nothing to send: then it is an object that couldn't be
     /// sent, so every building measure needs review (Rhino sends an empty solid on the Building layer as a building
     /// with no faces).</summary>
@@ -298,7 +299,8 @@ internal sealed class Read(RevitModel model)
         Candidates.Add(Marked(e, Make(e, g, box, null, context, g.AnyMesh && !g.AnySolid ? "Mesh" : "Brep", g.AllClosed)));
     }
 
-    /// <summary>A family instance (loadable or in-place) or a 3D CAD import off the building categories: left out
+    /// <summary>A family instance (loadable or in-place) or a 3D CAD import off the building categories, and not marked a
+    /// building with "Gordium: Site object is" (then it is one: <see cref="Building"/>): left out
     /// whatever its geometry, even none (design note, section 1); what it holds, at every depth, sent as its
     /// definition, so a nested family that gives nothing leaves it with no box (touching: null).</summary>
     private void Family(RevitElement e, bool context)
