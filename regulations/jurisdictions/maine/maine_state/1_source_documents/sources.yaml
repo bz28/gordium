@@ -26,11 +26,13 @@ documents:
       of the printed book (600 dpi), with a text layer made by OCR (ABBYY FineReader 8.0, per the item's metadata):
       the text can misread a character ("1-4" for the Group I-4, "H-l" for H-1, "I-hour" for 1-hour), run two words
       together ("exitaccess"), drop the hyphen of a word broken at a line's end ("individ" / "ual"), and it records
-      italics but not bold. So the page image is the authority: every number of every brought-in piece is read a
-      second time from the page image by a reader that never saw the OCR (text_verification.icc.ibc.2009.yaml), every
-      quote a rule uses was checked against the page image, and each misread a quote or number depends on is put
-      right by name (brought_in.misread, with what the image prints). The item's HTML and its other OCR files are not
-      used. A working copy: to be checked against a copy bought from ICC (ICC's digital codes site may not be read by
+      italics but not bold. Its page images are made from that same OCR and print its errors (Table 1015.1 reads
+      "1-4" in the image, p.266), so no page image is independent of the OCR, and no second reading of its numbers
+      can be made from this copy: every IBC number is read from an OCR copy only, not verified
+      (text_verification.icc.ibc.2009.yaml, not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md), and
+      every IBC requirement is a flag (always needs review) until checked against a purchased ICC copy. The OCR's
+      meaning-changing misreads a quote holds are named in that piece's label notes, never put right in the text (the
+      sections file stays as cut). The item's HTML and its other OCR files are not used. A working copy: to be checked against a copy bought from ICC (ICC's digital codes site may not be read by
       any script or automated browser: its terms forbid automated extraction and commercial use).
     terms: >
       Copyright 2009 International Code Council. Public.Resource.Org posts it as a legally binding document

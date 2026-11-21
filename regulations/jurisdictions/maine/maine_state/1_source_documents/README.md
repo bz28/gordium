@@ -1,0 +1,3 @@
+# 1_source_documents
+
+`sources.yaml` only: both books (the 2009 International Building Code, ICC's; NFPA 101 Life Safety Code 2012, NFPA's) are copyrighted, so neither is in this folder. `sources.yaml` records where each came from (link), when it was downloaded, its SHA-256 fingerprint, what kind of copy it is (the IBC: OCR text drawn in fonts, no independent page image; NFPA 101: NFPA's own PDF), its terms, when it was law in Maine, and which parts of it are brought in. Both are kept in the code cache outside the repo, under their fingerprints (`kept_outside_repo: true`; [the decision](../../../../../docs/decisions/2026-11-20_commercial_egress_maine.md)). A copy of either in this folder is refused by `python -m rule_format`.

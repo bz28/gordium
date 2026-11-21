@@ -40,8 +40,9 @@ the book's own rule, the book's own errors named.
   errors printed: Table 1015.1 reads "H-4, H-5, 1-1, 1-3, 1-4, R" in the image itself (p.266), where ICC's book
   prints I-1, I-3, I-4. So **no page image in this copy is independent of the OCR**: a second reading from it would
   share the OCR's errors (a "1-hour" read as "I-hour", an I-4 read as 1-4). The precedent's second reading cannot be
-  done honestly from this copy, so `text_verification.icc.ibc.2009.yaml` is not written, and `python -m rule_format`
-  fails on it, on purpose. **Looked for an independent copy (2026-11-20):** the Internet Archive's other 2009 IBC
+  done honestly from this copy, so `text_verification.icc.ibc.2009.yaml` records each piece's numbers only, with a
+  top-level `not_verified` saying why (`rule_format/state_law.py` accepts it explicitly: no second-reading field
+  allowed in it). **Looked for an independent copy (2026-11-20):** the Internet Archive's other 2009 IBC
   postings are Public.Resource.Org's Washington Building Code 2009 (`gov.wa.building.2009`: the same OCR-made pages,
   page for page, e.g. its p.419 is this copy's p.266, same characters and fonts), and an individual's upload
   (`2009InternationalBuildingCode`, 2017, "community" collection, no Public.Resource.Org posting and no stated licence),
@@ -51,9 +52,12 @@ the book's own rule, the book's own errors named.
   The one open item: **buy ICC's 2009 IBC.**
 - **NFPA 101 (2012) is NFPA's own PDF** (real text in its fonts, one licensed copy), so its second reading from the
   page images can go ahead as in New York.
-- **Not done yet:** labels, definitions, rules, `parts.yaml` measures and the coverage report (they depend on the
-  verified text). The answer key from the sheet is recorded:
-  `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml`.
+- **Done since (2026-11-20, step 2):** labels for every piece of both books, definitions, `parts.yaml` kinds (story,
+  space, corridor, means-of-egress door, each measure defined in words), 60 rules (every IBC requirement a flag that
+  keeps its check as the drafted test, proved by each example's `drafted_check`; NFPA rules on the second reading) and
+  the coverage report (nothing left unchecked). On the sheet's own numbers every rule gives the sheet's result
+  (`rule_format/tests/test_maine_egress.py`, against
+  `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml`). The folder's README has the details.
 
 ## Open questions for Ben
 
