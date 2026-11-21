@@ -91,6 +91,22 @@ def test_each_thing_the_add_in_couldnt_build_is_named(change, words):
     assert any(words in p for p in found), found
 
 
+@pytest.mark.parametrize("doors, words", [
+    (2.0, None),                                              # 2.0 is 2, as the add-in reads it
+    (None, "stats: doors says null, the data has 2"),
+    ("2", 'stats: doors says "2", the data has 2'),
+    (True, "stats: doors says true, the data has 2"),
+])
+def test_the_stats_are_checked_as_the_add_in_checks_them(doors, words):
+    # the same cases as BuildDataTests.The_stats_are_checked_as_the_extractor_checks_them
+    found = _broken(lambda d: d["stats"].__setitem__("doors", doors))
+    assert found == [] if words is None else any(words in p for p in found), found
+    assert _broken(lambda d: d.__setitem__("stats", 5)) == ["stats: not an object"]
+    # one window: true is not 1 (Python's True == 1, which the add-in doesn't read as a count)
+    assert _broken(lambda d: d["stats"].__setitem__("windows", True)) == ["stats: windows says true, the data has 1"]
+    assert _broken(lambda d: d.__setitem__("stats", None)) == []
+
+
 def test_the_tiny_data_has_no_problems_and_a_door_needs_no_hinge():
     data = tiny()
     assert "hinge" not in data["doors"][1]

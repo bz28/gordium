@@ -426,7 +426,7 @@ internal static class ModelBuild
             {
                 line += open;
                 // a room enclosed, but not the sheet's: a wrong test model is a wrong test
-                if (BuildData.AreaOff(room.Area, r.AreaSf) is { } off)
+                if (BuildData.RoomAreaOff(room.Area, r) is { } off)
                 {
                     line += $": AREA OFF ({off})";
                     report.Failed.Add($"room {r.Number} {r.Name}: area off: {off}");

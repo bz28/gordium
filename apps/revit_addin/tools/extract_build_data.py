@@ -154,8 +154,9 @@ def problems(data) -> list[str]:
             out.append("stats: not an object")
         else:
             for key in ("walls", "doors", "windows", "rooms"):
-                if key in stats and stats[key] != len(data[key]):
-                    out.append(f"stats: {key} says {stats[key]}, the data has {len(data[key])}")
+                # as the add-in (BuildData.Parse): a number equal to the count (2.0 for 2); null, text or true is not
+                if key in stats and not (_number(stats[key]) and stats[key] == len(data[key])):
+                    out.append(f"stats: {key} says {json.dumps(stats[key])}, the data has {len(data[key])}")
     return out
 
 

@@ -292,6 +292,41 @@ public sealed class BuildDataTests
     }
 
     [Fact]
+    public void A_room_the_sheet_gives_no_area_is_checked_against_its_boundary_and_says_so()
+    {
+        var m = BuildData.Parse(Extracted());
+        var storage = m.Rooms[1];                                     // no area_sf; 9.48 x 9.34 inside its boundary
+        Assert.Null(storage.AreaSf);
+        Assert.Null(BuildData.RoomAreaOff(BuildData.Area(storage.Boundary) + 1, storage));
+        var off = BuildData.RoomAreaOff(100, storage);
+        Assert.NotNull(off);
+        Assert.Contains("its boundary's (the sheet gives no area)", off);
+        Assert.Contains("the sheet's 88.5", BuildData.RoomAreaOff(100, m.Rooms[0]));   // the sheet's, when it gives one
+    }
+
+    [Theory]
+    [InlineData("2.0", null)]                                        // 2.0 is 2, as the extractor reads it
+    [InlineData("null", "stats: doors says null, the data has 2")]
+    [InlineData("\"2\"", "stats: doors says \"2\", the data has 2")]
+    [InlineData("true", "stats: doors says true, the data has 2")]
+    public void The_stats_are_checked_as_the_extractor_checks_them(string doors, string? words)
+    {
+        var data = Extracted();
+        data["stats"]!["doors"] = JsonNode.Parse(doors);
+        if (words is null)
+            Assert.Equal(2, BuildData.Parse(data).Doors.Count);
+        else
+            Assert.Contains(words, Assert.Throws<BuildDataException>(() => BuildData.Parse(data)).Problems);
+        var one = Extracted();
+        one["stats"]!["windows"] = true;                              // one window: true is not 1
+        Assert.Contains("stats: windows says true, the data has 1", Assert.Throws<BuildDataException>(() => BuildData.Parse(one)).Problems);
+        data["stats"] = JsonValue.Create(5);
+        Assert.Contains("stats: not an object", Assert.Throws<BuildDataException>(() => BuildData.Parse(data)).Problems);
+        data["stats"] = null;
+        Assert.Equal(2, BuildData.Parse(data).Doors.Count);
+    }
+
+    [Fact]
     public void The_request_reads_its_corrections_and_refuses_one_without_a_why()
     {
         var r = BuildRequest.Parse(JsonNode.Parse("""

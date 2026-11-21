@@ -343,10 +343,16 @@ public static class BuildData
         }
         else
             p.Add("footprint: not a list of 4 or more points [x, y]");
+        // as the extractor: no stats (or null) is no check; stats not an object is refused; each count given must be a
+        // number equal to the data's (2.0 for 2 is equal; null, text or true is not)
         if (data["stats"] is JsonObject stats)
+        {
             foreach (var (key, count) in new[] { ("walls", walls.Count), ("doors", doors.Count), ("windows", windows.Count), ("rooms", rooms.Count) })
-                if (stats[key] is { } s && !(s is JsonValue sv && sv.TryGetValue(out int n) && n == count))
-                    p.Add($"stats: {key} says {s.ToJsonString()}, the data has {count}");
+                if (stats.ContainsKey(key) && !(Num(stats[key], out var n) && n == count))
+                    p.Add($"stats: {key} says {stats[key]?.ToJsonString() ?? "null"}, the data has {count}");
+        }
+        else if (data["stats"] is not null)
+            p.Add("stats: not an object");
         if (p.Count > 0)
             throw new BuildDataException(p);
         var source = data["extracted_from"] as JsonObject;
@@ -597,6 +603,13 @@ public static class BuildData
             ? I($"Revit's {revitArea:0.#} sq ft, the sheet's {sheet:0.#}: {off:+0.#;-0.#} sq ft ({share * 100:0.#}%), more than 2% or 5 sq ft")
             : null;
     }
+
+    /// <summary>A room Revit enclosed checked against the sheet's area, or, where the data gives none, the area inside
+    /// its boundary, by the same limit (<see cref="AreaOff"/>); the words say which it was checked against. Null when
+    /// within it.</summary>
+    public static string? RoomAreaOff(double revitArea, BuildRoom room) =>
+        room.AreaSf is { } sheet ? AreaOff(revitArea, sheet)
+            : AreaOff(revitArea, Area(room.Boundary))?.Replace("the sheet's", "its boundary's (the sheet gives no area)");
 
     /// <summary>A message's numbers written the same on every machine (a decimal point, whatever the culture).</summary>
     internal static string I(FormattableString s) => s.ToString(CultureInfo.InvariantCulture);
