@@ -856,9 +856,6 @@ internal static class RevitInterior
         }
     }
 
-    /// <summary>What of the element lies in the band: each of its solids (a family's instance geometry included)
-    /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh or a kind not read, or a
-    /// face of the result can't be read; and how many open shells (faces, no volume) reach the band.</summary>
     /// <summary>A solid that isn't closed: no volume, or an edge with no second face (as <c>RevitRead</c>'s edges are
     /// read, <c>Edge.GetFace(1)</c>; round 5); an edge that can't be asked counts as open.</summary>
     internal static bool Open(Solid s)
@@ -879,6 +876,10 @@ internal static class RevitInterior
         }
     }
 
+    /// <summary>What of the element lies in the band: each of its solids (a family's instance geometry included)
+    /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh, an instance with no
+    /// geometry or a kind not read, or a face of the result can't be read; and how many open shells (see
+    /// <see cref="Open"/>: no volume, or an edge with one face) reach the band.</summary>
     private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, Options options)
     {
         var faces = new List<SurfaceRecord>();
@@ -986,8 +987,8 @@ internal static class RevitInterior
         e.get_BoundingBox(null) is { } b ? new RevitBox(P(b.Min), P(b.Max), b.Transform is { IsIdentity: false } bt ? T(bt) : null) : null;
 
     /// <summary>Every face of the element's solids (a family's instance geometry included), and whether anything in its
-    /// geometry couldn't be read as faces (a mesh, <c>get_Geometry</c> throwing, or a face Revit gives no edges or
-    /// triangles for: then no faces at all).</summary>
+    /// geometry couldn't be read as faces (a mesh, <c>get_Geometry</c> throwing, an instance with no geometry, a kind
+    /// not read, or a face Revit gives no edges or triangles for: then no faces at all).</summary>
     private static (List<SurfaceRecord>? Faces, bool Failed) Faces(Element e, Options options)
     {
         var faces = new List<SurfaceRecord>();

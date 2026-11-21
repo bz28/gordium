@@ -164,8 +164,8 @@ public sealed record BoundarySegmentRecord(Xyz Start, Xyz End, bool IsLine, stri
 /// <param name="Host">A family instance's host (<c>FamilyInstance.Host</c>), by <c>UniqueId</c>, or null.</param>
 /// <param name="Faces">Its solids' faces (<c>get_Geometry</c>, Fine, a family's instance geometry included), or null
 /// when not asked (<see cref="RoomRecord.Inside"/>).</param>
-/// <param name="GeometryFailed"><c>get_Geometry</c> threw, gave something other than solids, meshes or curves, or held
-/// a face Revit gives no edges or triangles for.</param>
+/// <param name="GeometryFailed"><c>get_Geometry</c> threw, gave something other than solids, meshes or curves, an
+/// instance with no geometry, or held a face Revit gives no edges or triangles for.</param>
 /// <param name="Box">Its box (<c>get_BoundingBox(null)</c>), internal, where asked (a flight's surroundings).</param>
 /// <param name="PhaseDemolished"><c>Element.DemolishedPhaseId</c>, where asked.</param>
 /// <param name="DesignOption"><c>Element.DesignOption</c>'s id, where asked.</param>
