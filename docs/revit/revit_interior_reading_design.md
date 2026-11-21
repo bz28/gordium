@@ -815,8 +815,10 @@ already there, else taken back and logged. eval_marks.yaml classifies each of th
 sheet draws (the west vestibule, two sprinklered abandoned spaces, six toilet rooms, five closets) get a Room; the two
 slivers Revit can't locate come from the trace's five overlapping wall pairs, which the build's new trims remove
 (`trim_end_to`, `trim_start_to`: a wall shortened along its own line by at most 2 ft, never lengthened or turned,
-BuildData.Correct); the two 1.4 sq ft pockets inside the east entry's splayed jambs are solid wall on the sheet, neither
-a space nor an overlap, and are left as they are (the story keeps needing review). `eval_marks_request.py --build-data
+BuildData.Correct); the two 1.4 sq ft triangles inside the east entry's angled jambs are solid wall on the sheet, so a
+`fill` adds a short wall over each (at most 3 ft long and 2 ft thick, every corner within 2 ft of a wall of the data:
+a fill between walls, never a wall standing alone). The Revit layer lists every collector before it changes the
+model (the outlines' Rooms placed for the moment made a live iterator throw on the first run). `eval_marks_request.py --build-data
 --build-out` writes the build request with the corrections too.
 
 ### To try in Revit (the Children's Odyssey model)
