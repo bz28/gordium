@@ -42,6 +42,10 @@ public static class RouteReader
             ["OST_ElectricalEquipment"] = ("equipment", true),
         };
 
+    /// <summary>A wall standing in a room without bounding it (a room that isn't a sleeping room keeps its floor, section
+    /// 10): the format has no wall kind, so it is sent as a fixed fixture, its footprint taken out of the floor.</summary>
+    public static readonly (string Kind, bool Fixed) StandingWall = ("fixture", true);
+
     // ---- a room's marks ---------------------------------------------------------------------------------------
 
     /// <summary>A room's use, lock and pass-through marks: each sent only as the architect set it (a word through
@@ -261,6 +265,8 @@ public static class RouteReader
             if (e is { GeometryFailed: false, Faces.Count: 0 })
                 continue;                                    // nothing drawn (a base point, a line)
             var known = ObstructionKinds.TryGetValue(e.BuiltInCategory, out var kind);
+            if (plan.StandingWalls?.Contains(e.UniqueId) == true)
+                (known, kind) = (true, StandingWall);        // a wall standing in it: its footprint stands in the way
             if (e.GeometryFailed || e.Faces is null)
             {
                 if (e.Box is { } box && Box3.Turned(box.Min, box.Max, box.Transform is { } own ? model.InternalToShared.After(own)
@@ -316,7 +322,8 @@ public static class RouteReader
                     list.Add(new JsonObject { ["outline"] = Outline(shape), ["kind"] = kind.Kind, ["fixed"] = kind.Fixed });
         }
         // what the solid test found standing in the room must have been looked at above: never skipped unseen
-        if (inside.Where(e => InteriorReader.InDesign(model, e) && ObstructionKinds.ContainsKey(e.BuiltInCategory) && !looked.Contains(e.UniqueId))
+        if (inside.Where(e => InteriorReader.InDesign(model, e) && (ObstructionKinds.ContainsKey(e.BuiltInCategory) || plan.StandingWalls?.Contains(e.UniqueId) == true)
+                              && !looked.Contains(e.UniqueId))
                   .Select(InteriorReader.Named).FirstOrDefault() is { } missed)
         {
             why = $"{missed} stands in it, but its geometry wasn't read";

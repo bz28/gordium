@@ -459,7 +459,8 @@ public static class InteriorReader
     /// <summary>A room's floor as read (shared plan points): its outline, the holes in it (a column or chase it goes
     /// round: its second and later boundary loops), the floor's elevation its level and offset give (null when they
     /// can't be read), and the elements bounding it. What the escape routes are read over (<see cref="RouteReader"/>).</summary>
-    internal sealed record RoomPlan(List<P2> Outer, List<List<P2>> Holes, double? Floor, HashSet<string> Bounding, RoomRecord Record);
+    internal sealed record RoomPlan(List<P2> Outer, List<List<P2>> Holes, double? Floor, HashSet<string> Bounding, RoomRecord Record,
+                                    HashSet<string>? StandingWalls = null);
 
     private static void ReadRoom(RevitModel model, InteriorRecords records, RoomRecord rec, JsonObject room,
                                  List<InteriorNote> notes, bool? sleeping, Dictionary<string, RoomPlan> plans)
@@ -469,16 +470,18 @@ public static class InteriorReader
         void Out(string field, string why) => notes.Add(new(id, field, why));
 
         // the floor's outline: loops of straight segments at the finished faces, nothing inside it unbounded; a loop
-        // inside the outline is a hole (a column, a chase), sent as one only for a room that isn't a sleeping room: the
-        // house's floor area reads the outline alone, so a bedroom's would count the column's floor (never a pass)
+        // inside the outline is a hole (a column, a chase), sent as one for any room but one marked a sleeping room: the
+        // house's floor area reads the outline alone, so a bedroom's would count the column's floor (never a pass). A
+        // room not marked is sent so too: with a sleeping flag missing the house's measures read no room at all
         List<P2>? plan = null;
         List<List<P2>> holes = [];
+        HashSet<string> walls = [];
         var bounding = new HashSet<string>(StringComparer.Ordinal);
         if (rec.Boundary is not { } loops || loops.Count == 0)
             Out("floor", "Revit gives no boundary for this room");
-        else if (loops.Count > 1 && sleeping is not false)
+        else if (loops.Count > 1 && sleeping is true)
             Out("floor", $"it has {loops.Count} boundary loops (a column or a chase inside it): a floor with a hole isn't read yet " +
-                         "for a sleeping room (or one not marked), whose floor area would count the hole");
+                         "for a sleeping room, whose floor area would count the hole");
         else if (loops.Any(l => l.Any(s => !s.IsLine)))
             Out("floor", "its boundary has a curved segment: read only as straight segments, never as a chord");
         else
@@ -507,12 +510,19 @@ public static class InteriorReader
                 plan = null;
             }
             else if (inside.Where(e => InDesign(model, e) && !bounding.Contains(e.UniqueId) && !NotBuilding.Contains(e.BuiltInCategory)
-                                       && !InBoundingWall(e, bounding))
-                           .Select(e => Named(e)).Distinct().ToList() is { Count: > 0 } standing)
+                                       && !InBoundingWall(e, bounding)).ToList() is { Count: > 0 } standing)
             {
-                Out("floor", "something stands inside its outline without bounding it (" + string.Join(", ", standing) +
-                             "): it may be two rooms, or smaller than its outline");
-                plan = null;
+                // a wall standing in a room that isn't a sleeping room is sent with the floor, as an obstruction (the
+                // route code then only loses floor: more cautious); a sleeping room's floor area would count it, so a
+                // sleeping room's floor is left out as before, and anything else standing in any room leaves it out
+                if (sleeping is true || standing.Any(e => e.BuiltInCategory != "OST_Walls"))
+                {
+                    Out("floor", "something stands inside its outline without bounding it (" + string.Join(", ", standing.Select(Named).Distinct()) +
+                                 "): it may be two rooms, or smaller than its outline");
+                    plan = null;
+                }
+                else
+                    walls = standing.Select(e => e.UniqueId).ToHashSet(StringComparer.Ordinal);
             }
         }
         // a loaded link reaching over the room: what's in it (a slab, a beam) isn't read yet
@@ -532,7 +542,7 @@ public static class InteriorReader
             return;
         }
         room["floor"] = new JsonArray(plan.Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray());
-        plans[id] = new(plan, holes, null, bounding, rec);
+        plans[id] = new(plan, holes, null, bounding, rec, walls);
 
         // the floor's elevation: its level and offset, checked against the slab top under the whole room
         if (rec.LevelElevation is not { } level || rec.BaseOffset is not { } offset)

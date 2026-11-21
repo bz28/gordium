@@ -348,6 +348,39 @@ public sealed class RouteTests
     }
 
     [Fact]
+    public void A_room_not_marked_is_sent_with_its_holes_and_a_wall_standing_in_a_room_is_an_obstruction()
+    {
+        // the Children's Odyssey model (2026-11-21): KITCHEN (10) round a chase, its Sleeping room not set; a wall
+        // standing in ADMINISTRATION (18). Not marked, the house's measures read no room at all, so the holes are safe
+        var floor = new FakeFloor();
+        floor.SetMark("B", Marks.SleepingRoom, null);
+        floor.AddOver("A", new NearbyElement("wall-in", "OST_Walls", "LS Existing 12\"", Faces: floor.Prism([(8, 5), (14, 5), (14, 6), (8, 6)], 0, 10)));
+        var i = floor.RoomIndex("A");
+        floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("wall-in", "OST_Walls", "LS Existing 12\"")] };
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Single(Room(read, "B")["holes"]!.AsArray());
+        Assert.NotNull(Room(read, "A")["floor"]);
+        var wall = Assert.Single(Room(read, "A")["obstructions"]!.AsArray(), o => o!["outline"]!.AsArray().Count == 4
+                                 && o["outline"]!.AsArray().Any(p => p![0]!.GetValue<double>() == 14));
+        Assert.Equal("fixture", wall!["kind"]!.GetValue<string>());
+        Assert.True(wall["fixed"]!.GetValue<bool>());
+
+        // the same wall in a sleeping room: its floor area would count it, so no floor (the house's reading as before)
+        floor.SetMark("A", Marks.SleepingRoom, new(true, 1));
+        Assert.Null(Room(InteriorReader.Read(floor.Model()), "A")["floor"]);
+
+        // anything else standing in a room (a column that doesn't bound it) still leaves its floor out
+        floor = new FakeFloor();
+        floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("col-x", "OST_Columns", "Column")] };
+        Assert.Null(Room(InteriorReader.Read(floor.Model()), "A")["floor"]);
+
+        // a wall the solid test found standing in it, but whose geometry wasn't read: its obstructions aren't read
+        floor = new FakeFloor();
+        floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("wall-in", "OST_Walls", "Partition")] };
+        Assert.Null(Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]);
+    }
+
+    [Fact]
     public void Passages_and_levels_not_read_are_left_out_never_empty()
     {
         var floor = new FakeFloor { SeparationLines = null, Levels = null };
