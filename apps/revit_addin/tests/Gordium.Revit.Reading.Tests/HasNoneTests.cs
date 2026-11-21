@@ -284,7 +284,7 @@ public sealed class HasNoneTests
         // was listed and no proposal shown. The command builds it from RevitInterior.Model (the reader's own model)
         var command = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "RevitMarks.cs"));
         Assert.Contains("var model = RevitInterior.Model(doc);", command);    // read once: the list and the log's ids
-        Assert.Contains("MarkingList.Build(model, plan)", command);
+        Assert.Contains("MarkingList.Build(model, plan, clearWriteFailed: failed)", command);   // (and a failed clear-opening write)
         Assert.DoesNotContain("MarkingList.Build(RevitMarks.Model(doc)", command);
         // and through that model a conflict is listed first (the Reading-layer seam the command calls)
         var house = FakeHouse.Draw("2_two_story_small_window");

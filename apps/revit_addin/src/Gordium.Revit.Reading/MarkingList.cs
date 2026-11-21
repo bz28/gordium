@@ -172,7 +172,10 @@ public static class MarkingList
     /// direction that could hide a bedroom), and a suggestion is never read as the mark.</summary>
     private static readonly Regex SleepingName = new(@"\b(bed\s*room|sleeping)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null)
+    /// <param name="model">The model read.</param>
+    /// <param name="setup">The mark-setup steps planned.</param>
+    /// <param name="clearWriteFailed">Why writing the makers' clear openings just failed, or null (<see cref="ClearPrefills.Plan"/>).</param>
+    public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null, string? clearWriteFailed = null)
     {
         // a level is listed when it has an enclosed area with no Room (whatever its mark), or its mark is set
         var unmarkedAreas = InteriorReader.UnknownAreas(model, levelMarks: false);
@@ -228,7 +231,7 @@ public static class MarkingList
             HasNoneConflicts = ticks.Where(t => t.Ticked is true && t.Conflicts.Count > 0)
                 .SelectMany(t => t.WhyNot.Take(t.Conflicts.Count)).ToList(),
             HasNoneLines = ticks.Select(t => TickLine(t, read)).ToList(),
-            ClearLines = ClearPrefills.Plan(model).Select(p => p.Line).ToList(),
+            ClearLines = ClearPrefills.Plan(model, clearWriteFailed).Select(p => p.Line).ToList(),
         };
     }
 

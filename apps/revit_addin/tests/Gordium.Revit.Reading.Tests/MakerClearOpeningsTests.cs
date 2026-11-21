@@ -312,6 +312,46 @@ public sealed class MakerClearOpeningsTests
         Assert.Contains("Gordium will fill the clear opening from Marvin", MarkingList.Text(list));
     }
 
+    // ---- review round 2 -----------------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_failed_write_is_said_in_the_dialog_and_the_list_never_says_will_fill()
+    {
+        const string why = "Revit's transaction ended RolledBack";
+        Assert.Equal("Gordium couldn't write the makers' clear openings (Revit's transaction ended RolledBack): fill them by " +
+                     "hand from the maker's tables; until then their clear opening needs review.\n\n", ClearPrefills.Head(0, why));
+        Assert.Equal("", ClearPrefills.Head(0));
+        var p = Assert.Single(ClearPrefills.Plan(Model(Window("a")), writeFailed: why));
+        Assert.Equal(PrefillState.NotFilled, p.State);
+        Assert.Null(p.ClearWidth);
+        Assert.Contains("Gordium couldn't write its clear opening from Marvin", p.Line);
+        Assert.Contains("until then its clear opening needs review", p.Line);
+        Assert.DoesNotContain("will fill", p.Line);
+        Assert.DoesNotContain("confirm it", p.Line);
+        var list = MarkingList.Build(Model(Window("a")), clearWriteFailed: why);
+        Assert.DoesNotContain("will fill", MarkingList.Text(list));
+        Assert.Contains("Gordium couldn't write its clear opening", MarkingList.Text(list));
+    }
+
+    [Fact]
+    public void A_gordium_draft_on_a_type_that_no_longer_matches_is_never_called_typed()
+    {
+        var fill = ClearPrefills.Plan(Model(Window("a")))[0];
+        var written = new Dictionary<Guid, MarkValue>
+        {
+            [Marks.ClearWidth.Guid] = new(true, Number: fill.ClearWidth), [Marks.ClearHeight.Guid] = new(true, Number: fill.ClearHeight),
+            [Marks.ClearSource.Guid] = new(true, Text: fill.Source),
+        };
+        // the Model and Window Type changed (another Marvin line), and then the Manufacturer too
+        foreach (var maker in new[] { "Marvin Windows and Doors", "Acme Windows" })
+        {
+            var p = Assert.Single(ClearPrefills.Plan(Model(Window("a", maker: maker, model: "UCAPO2864", windowType: "Ultimate Casement Push Out", type: written))));
+            Assert.Equal(PrefillState.Differs, p.State);
+            Assert.Contains("was filled by Gordium from Marvin Ultimate Casement (UCA) earlier, but the type no longer matches", p.Line);
+            Assert.DoesNotContain("as typed on it", p.Line);
+        }
+    }
+
     // ---- review round 1 -----------------------------------------------------------------------------------------
 
     [Fact]

@@ -162,12 +162,15 @@ public static class ClearPrefills
     private const double SameFeet = 1e-9;
 
     /// <summary>A line per window type in the design checked that a maker's data concerns (no line for the others).</summary>
-    public static IReadOnlyList<ClearPrefill> Plan(RevitModel model)
+    /// <param name="model">The model read.</param>
+    /// <param name="writeFailed">Why the write just tried failed (a type Revit wouldn't set, a transaction rolled
+    /// back), or null: the types it left empty are then said not filled, with the reason, never "will fill".</param>
+    public static IReadOnlyList<ClearPrefill> Plan(RevitModel model, string? writeFailed = null)
     {
         var plans = new List<ClearPrefill>();
         foreach (var e in MarkReading.InDesign(model).Where(e => MarkReading.KindOf(e) == MarkedKind.Window && e.TypeUniqueId is not null)
                      .GroupBy(e => e.TypeUniqueId!).Select(g => g.First()))
-            if (For(e) is { } p)
+            if (For(e, writeFailed) is { } p)
                 plans.Add(p);
         return plans.OrderBy(p => p.Label, StringComparer.OrdinalIgnoreCase).ThenBy(p => p.TypeId, StringComparer.Ordinal).ToList();
     }
@@ -176,7 +179,7 @@ public static class ClearPrefills
     private static string Label(MarkedElement e) =>
         string.Join(": ", new[] { e.Family, e.Name }.Where(s => !string.IsNullOrWhiteSpace(s))) is { Length: > 0 } l ? l : e.TypeUniqueId!;
 
-    internal static ClearPrefill? For(MarkedElement e)
+    internal static ClearPrefill? For(MarkedElement e, string? writeFailed = null)
     {
         if (Marks.Text(MarkReading.Value(e, Marks.ClearConfirmed)) is not null)
             return null;                                     // confirmed by the architect: Gordium proposes nothing
@@ -186,6 +189,14 @@ public static class ClearPrefills
         double? width = Marks.Length(MarkReading.Value(e, Marks.ClearWidth)), height = Marks.Length(MarkReading.Value(e, Marks.ClearHeight));
         var source = Marks.Text(MarkReading.Value(e, Marks.ClearSource));
         var empty = width is null && height is null && source is null;
+        var gordiums = source is not null && source.StartsWith(SourcePrefix, StringComparison.Ordinal);
+        if (entry is null && gordiums)
+            // Gordium's own values, written when the type matched an entry: never called typed by hand (review round 2)
+            return new(e.TypeUniqueId!, label, PrefillState.Differs,
+                $"{label}: its clear opening was filled by Gordium from {source![SourcePrefix.Length..].Split(',')[0]} earlier, but " +
+                $"the type no longer matches (its Manufacturer {Quote(e.TypeManufacturer)}, Window Type {Quote(windowType)}, Model " +
+                $"{Quote(e.TypeModel)}): re-check it against the maker's tables before confirming, or empty its " +
+                $"{Marks.ClearWidth.Name}, {Marks.ClearHeight.Name} and {Marks.ClearSource.Name}.");
         if (entry is null)
         {
             if (MakerClearOpenings.MakerOf(e.TypeManufacturer) is not { } maker)
@@ -212,9 +223,14 @@ public static class ClearPrefills
                 return new(e.TypeUniqueId!, label, PrefillState.NotFilled,
                     $"{label}: {entry.Maker} {entry.ProductLine}, but its clear opening isn't filled: {why}. Take it from " +
                     $"{entry.Maker}'s tables ({entry.Url}).");
+            if (writeFailed is not null)
+                // the write just failed: the type is still empty, and is never said to be filled or to fill
+                return new(e.TypeUniqueId!, label, PrefillState.NotFilled,
+                    $"{label}: Gordium couldn't write its clear opening from {entry.Maker} {entry.FormulaPage} ({writeFailed}): " +
+                    $"fill it by hand from {entry.Maker}'s tables ({entry.Url}); until then its clear opening needs review.");
             return new(e.TypeUniqueId!, label, PrefillState.Fill, Line(label, entry, done: false) + ask, f.Width, f.Height, f.Source);
         }
-        if (source is null || !source.StartsWith(SourcePrefix, StringComparison.Ordinal))
+        if (!gordiums)
             return null;                                     // the architect's own values: kept, nothing to say
         if (fill is { } now && width is { } w && height is { } h && Math.Abs(w - now.Width) <= SameFeet
             && Math.Abs(h - now.Height) <= SameFeet && source == now.Source)
@@ -229,8 +245,12 @@ public static class ClearPrefills
     /// committed, none when it rolled back (Revit returns the status, it doesn't throw).</summary>
     public static IReadOnlyList<ClearPrefill> Written(IReadOnlyList<ClearPrefill> todo, bool committed) => committed ? todo : [];
 
-    /// <summary>The dialog's first words when types were just filled (empty when none were).</summary>
-    public static string Head(int filled) => filled == 0 ? ""
+    /// <summary>The dialog's first words: the types just filled, or why the write failed (empty when there was none).</summary>
+    public static string Head(int filled, string? failed = null) =>
+        failed is not null
+        ? $"Gordium couldn't write the makers' clear openings ({failed}): fill them by hand from the maker's tables; until " +
+          "then their clear opening needs review.\n\n"
+        : filled == 0 ? ""
         : $"Gordium filled the maker's clear opening of {(filled == 1 ? "1 window type" : $"{filled} window types")} " +
           "as a draft: confirm each (Mark for egress lists them); none is sent before.\n\n";
 

@@ -44,7 +44,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             // each window type a maker's formula covers, its three Clear marks empty: filled as a draft the architect
             // confirms (never the stamp, so this check sends no clear opening for it)
             // (a failure is logged and the check goes on: the types stay empty, so their clear opening needs review)
-            var filled = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
+            var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
             if (ProjectFacts.Read(RevitMarks.Model(doc)).StreetEdges is null)
                 PickStreet(ui.ActiveUIDocument!, log);
             var run = Run(doc, ui.Application, log);
@@ -52,7 +52,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             // message says, and checked once more (the typed reason, never its words)
             if (StreetEdges.NeedsNewPick(run.Prepared) && PickStreet(ui.ActiveUIDocument!, log))
                 run = Run(doc, ui.Application, log);
-            Show(run, added.Count, filled.Count);
+            Show(run, added.Count, filled.Count, failed);
             return Result.Succeeded;
         }
         catch (Exception e)
@@ -113,9 +113,10 @@ public sealed class CheckProjectCommand : IExternalCommand
         return new Ran(prepared, result, words, full);
     }
 
-    private static void Show(Ran run, int marksAdded, int clearFilled)
+    private static void Show(Ran run, int marksAdded, int clearFilled, string? clearFailed)
     {
-        var added = (marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.\n\n") + ClearPrefills.Head(clearFilled);
+        var added = (marksAdded == 0 ? "" : $"Added {marksAdded} Gordium marks to this project.\n\n") +
+                    ClearPrefills.Head(clearFilled, clearFailed);
         if (run.Words is not { } w)
         {
             new TaskDialog(Title)

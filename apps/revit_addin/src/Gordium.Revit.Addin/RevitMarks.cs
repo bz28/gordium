@@ -78,32 +78,35 @@ internal static class RevitMarks
         return values;
     }
 
-    /// <summary>Writes each window type's draft clear opening (<see cref="ClearPrefills"/>: only types whose three
-    /// marks are empty, in one transaction; never <c>Gordium: Clear confirmed</c>). A mark Revit won't set throws, and
-    /// the transaction rolls back: nothing is filled half way. Returns the plans written.</summary>
-    /// <summary><see cref="Prefill"/>, its failure logged (<c>clear_fill_failed</c>) and nothing counted as filled: a type
-    /// that can't be written never stops the marking list or the check.</summary>
-    internal static List<ClearPrefill> TryPrefill(Document doc, RevitModel model, Dictionary<string, object?> log)
+    /// <summary><see cref="Prefill"/>, never throwing: a type that can't be written, or a transaction Revit rolled back,
+    /// counts nothing as filled and gives the reason (logged as <c>clear_fill_failed</c>, and shown by the dialog and
+    /// the marking list), so it never stops the marking list or the check.</summary>
+    internal static (List<ClearPrefill> Filled, string? Failed) TryPrefill(Document doc, RevitModel model, Dictionary<string, object?> log)
     {
+        (List<ClearPrefill> Filled, string? Failed) result;
         try
         {
-            var filled = Prefill(doc, model, why => log["clear_fill_failed"] = why);
-            log["clear_filled"] = filled.Select(p => $"{p.TypeId} {p.Label}: {p.Source}").ToList();
-            return filled;
+            result = Prefill(doc, model);
         }
         catch (Exception e) when (e is InvalidOperationException or Autodesk.Revit.Exceptions.ApplicationException)
         {
-            log["clear_fill_failed"] = $"{e.GetType().Name}: {e.Message} (nothing filled; rolled back)";
-            log["clear_filled"] = new List<string>();
-            return [];
+            result = ([], $"{e.Message}; nothing was written");
         }
+        log["clear_filled"] = result.Filled.Select(p => $"{p.TypeId} {p.Label}: {p.Source}").ToList();
+        if (result.Failed is not null)
+            log["clear_fill_failed"] = result.Failed;
+        return result;
     }
 
-    internal static List<ClearPrefill> Prefill(Document doc, RevitModel model, Action<string>? log = null)
+    /// <summary>Writes each window type's draft clear opening (<see cref="ClearPrefills"/>: only types whose three
+    /// marks are empty, in one transaction; never <c>Gordium: Clear confirmed</c>). A mark Revit won't set throws, and
+    /// the transaction rolls back: nothing is filled half way. Returns the plans written, and why none were when Revit
+    /// rolled the transaction back.</summary>
+    internal static (List<ClearPrefill> Filled, string? Failed) Prefill(Document doc, RevitModel model)
     {
         var todo = ClearPrefills.Plan(model).Where(p => p.State == PrefillState.Fill).ToList();
         if (todo.Count == 0)
-            return todo;
+            return (todo, null);
         using var t = new Transaction(doc, "Gordium: fill the makers' clear openings (drafts to confirm)");
         t.Start();
         foreach (var p in todo)
@@ -125,9 +128,8 @@ internal static class RevitMarks
         // Revit rolls a transaction back (a failure it can't resolve, an element another user owns) by returning a
         // status, not by throwing: only a commit Revit reports done counts as filled
         var status = t.Commit();
-        if (status != TransactionStatus.Committed)
-            log?.Invoke($"the makers' clear openings weren't filled: Revit's transaction ended {status}");
-        return ClearPrefills.Written(todo, committed: status == TransactionStatus.Committed).ToList();
+        var committed = status == TransactionStatus.Committed;
+        return (ClearPrefills.Written(todo, committed).ToList(), committed ? null : $"Revit's transaction ended {status}");
     }
 
     /// <summary>Revit's own three states of a room that isn't on the plan: no <c>Location</c> (unplaced); placed
@@ -268,10 +270,10 @@ public sealed class MarkForEgressCommand : IExternalCommand
             var model = RevitInterior.Model(doc);
             // each window type a maker's formula covers, its three Clear marks empty: filled as a draft (never the
             // Clear confirmed stamp), then the model read again so the list shows what is now in it
-            var filled = RevitMarks.TryPrefill(doc, model, log);
+            var (filled, failed) = RevitMarks.TryPrefill(doc, model, log);
             if (filled.Count > 0)
                 model = RevitInterior.Model(doc);
-            var list = MarkingList.Build(model, plan);
+            var list = MarkingList.Build(model, plan, clearWriteFailed: failed);
             log["clear_lines"] = list.ClearLines;
             // every element the list counts by type, by id
             log["stair_candidates"] = (model.Interior?.StairCandidates ?? [])
@@ -299,7 +301,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
                 }),
             }).ToList();
             Trial.Log("mark_for_egress", log);
-            var head = (added.Count == 0 ? "" : $"Added {added.Count} Gordium marks to this project.\n\n") + ClearPrefills.Head(filled.Count);
+            var head = (added.Count == 0 ? "" : $"Added {added.Count} Gordium marks to this project.\n\n") + ClearPrefills.Head(filled.Count, failed);
             var dialog = new TaskDialog("Gordium: mark for egress")
             {
                 MainInstruction = list.Headline,
