@@ -241,6 +241,8 @@ public sealed class RealModelTests
         var alone = Assert.Single(InteriorReader.AreaBlockers(house.Model()));
         Assert.Contains("find and fix the overlapping or doubled walls on Level 0", alone);
         Assert.DoesNotContain("place a Room in it", alone);
+        Assert.Contains("until the overlapping or doubled walls closing it off are fixed (Revit couldn't locate it)",
+                        Assert.Single(MarkingList.Build(house.Model()).Summary, l => l.StartsWith("1 enclosed area has no Room")));
 
         // with one that has a place: the log line says which have places, and what to do about the one without
         house.Areas.Add(Unroomed());
@@ -250,6 +252,10 @@ public sealed class RealModelTests
         Assert.Contains("the 1 Revit couldn't locate (no point inside, often a sliver between overlapping walls): " +
                         "find and fix the overlapping or doubled walls on Level 0", both);
         Assert.DoesNotContain("each listed with its place in the log", both);
+        var mixed = Assert.Single(MarkingList.Build(house.Model()).Summary, l => l.StartsWith("2 enclosed areas have no Room"));
+        Assert.Contains("until a Room is placed in each Revit locates, and the overlapping or doubled walls closing off the 1 " +
+                        "it couldn't are fixed", mixed);
+        Assert.DoesNotContain("until a Room is placed in each,", mixed);
 
         // several, none with a place: never told to place a Room in any of them
         var slivers = Ranch();
