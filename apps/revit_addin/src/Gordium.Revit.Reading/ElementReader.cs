@@ -5,10 +5,12 @@ namespace Gordium.Revit.Reading;
 /// <summary>A left-out candidate: an element that could be a building and isn't measured, as sent to
 /// <c>objects.left_out</c> (<see cref="Sent"/>), and what the description lists of it if it is left out. For a site
 /// slab (<see cref="SiteSlabs"/>), <see cref="Slab"/> is the description's <c>left_out[].slab</c> and
-/// <see cref="Name"/> the element's name sent with it (<c>left_out[].name</c>), so the rows can say which; both null
-/// otherwise.</summary>
+/// <see cref="Name"/> the element's name, sent with a slab and with one standing apart (<c>left_out[].name</c>), so the
+/// rows can say which. <see cref="CouldBeBuilding"/>: false for an element that can't be a structure (a tree, an
+/// entourage person or car, an element marked "Not a structure"; <see cref="SiteReader.NotStructures"/>), so standing
+/// apart it keeps no yard waiting.</summary>
 internal sealed record Candidate(string Id, string Layer, bool Context, JsonObject Sent, Box3? Box, string GroundKind, bool Closed,
-                                 string? Slab = null, string? Name = null);
+                                 string? Slab = null, string? Name = null, bool CouldBeBuilding = true);
 
 /// <summary>What the reader gathered from one element's geometry (design note, section 2).</summary>
 internal sealed class Gathered
@@ -88,6 +90,9 @@ internal sealed class Read(RevitModel model)
             case var _ when SiteReader.BuildingCategories.Contains(e.BuiltInCategory):
                 Building(e);
                 break;
+            case var _ when SiteObject(e) is { NotAStructure: false, Slab: SlabKind.Building }:
+                Building(e);                     // marked a porch, deck, landing or ramp: measured as the building
+                break;
             case { Kind: ElementKind.FamilyInstance or ElementKind.CadImport }:
                 Family(e, context: false);
                 break;
@@ -98,6 +103,29 @@ internal sealed class Read(RevitModel model)
                 Ordinary(e, context: false);
                 break;
         }
+    }
+
+    // ---- objects on the lot that aren't the building: what the architect marked them --------------------------------
+
+    /// <summary>What <see cref="Marks.SiteObject"/> says the element is, or null (not marked, a word not in
+    /// <see cref="SiteObjectKinds"/>, or a category the mark isn't bound to: never read there).</summary>
+    internal static SiteObjectKind? SiteObject(RevitElement e) =>
+        Marks.SiteObject.Categories.Contains(e.BuiltInCategory)
+        && e.InstanceMarks.TryGetValue(Marks.SiteObject.Guid, out var v) ? SiteObjectKinds.Of(Marks.Text(v)) : null;
+
+    /// <summary>A candidate as its mark and category say (reading design note, section 1, "Objects standing apart"):
+    /// marked a patio, terrace or walk, or parking or a driveway, it is sent as that slab is (<c>left_out[].slab</c>);
+    /// marked "Not a structure", or a tree or entourage (<see cref="SiteReader.NotStructures"/>), it can't be a building
+    /// (<c>could_be_building: false</c>); otherwise as before. Never for a context object (the neighbourhood's).</summary>
+    private static Candidate Marked(RevitElement e, Candidate c)
+    {
+        if (c.Context)
+            return c;
+        var kind = SiteObject(e);
+        if (kind is { Slab: SlabKind.Patio or SlabKind.Parking } k)
+            return c with { Slab = SlabKinds.Described(k.Slab) };
+        return kind is { NotAStructure: true } || SiteReader.NotStructures.Contains(e.BuiltInCategory)
+            ? c with { CouldBeBuilding = false } : c;
     }
 
     // ---- buildings ----------------------------------------------------------------------------------------------
@@ -276,7 +304,7 @@ internal sealed class Read(RevitModel model)
             return;                      // lines and points only: nothing that could be a building
         // a nested family that gave nothing: no box covers all of it, so its place can't be told (touching: null)
         var box = g.MissingPart ? null : Union(g.Box.Box, RevitBox(e, ToShared));
-        Candidates.Add(Make(e, g, box, null, context, g.AnyMesh && !g.AnySolid ? "Mesh" : "Brep", g.AllClosed));
+        Candidates.Add(Marked(e, Make(e, g, box, null, context, g.AnyMesh && !g.AnySolid ? "Mesh" : "Brep", g.AllClosed)));
     }
 
     /// <summary>A family instance (loadable or in-place) or a 3D CAD import off the building categories: left out
@@ -292,7 +320,7 @@ internal sealed class Read(RevitModel model)
         var key = e.UniqueId;
         Definitions[key] = new JsonObject { ["status"] = SiteReader.NotLinked, ["parts"] = Parts(e.Geometry ?? [], ToShared, key, e) };
         var g = e.Geometry is null ? new Gathered() : Walk(e.Geometry, ToShared, e);
-        Candidates.Add(Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, context, "Family", true));
+        Candidates.Add(Marked(e, Make(e, g, Union(g.Box.Box, RevitBox(e, ToShared)), key, context, "Family", true)));
     }
 
     /// <summary>A coordination model: Revit gives no geometry for it (it is drawn for show only), so what it holds
@@ -341,7 +369,7 @@ internal sealed class Read(RevitModel model)
             sent["points"] = new JsonArray(points.Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray());
         if (definition is not null)
             sent["definition"] = definition;
-        return new Candidate(e.UniqueId, e.Category, context, sent, box, kind, closed);
+        return new Candidate(e.UniqueId, e.Category, context, sent, box, kind, closed, Name: e.Name);
     }
 
     /// <summary>What a family holds, each piece a part as host_core reads it: a solid or mesh with faces, its box; a

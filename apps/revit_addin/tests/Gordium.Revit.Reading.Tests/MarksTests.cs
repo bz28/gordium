@@ -57,6 +57,10 @@ public sealed class MarksTests
             ("Gordium: Not a stair", "6f527562-6b18-467b-9e86-5a2c5489dbc2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_GenericModel", "OST_Stairs", "OST_StairsRailing"]),
             // what a floor outside the house is (reading design note, section 1, "Site slabs")
             ("Gordium: Site slab is", "56113427-6ae6-430d-95dd-2472fbefff71", MarkValueKind.Text, MarkBinding.Instance, ["OST_Floors"]),
+            // what an object on the lot that isn't the building is (reading design note, section 1, "Objects standing apart")
+            ("Gordium: Site object is", "2f1ba96f-363b-4bdb-a03c-832fad615857", MarkValueKind.Text, MarkBinding.Instance,
+             ["OST_GenericModel", "OST_SpecialityEquipment", "OST_Site", "OST_Mass", "OST_Furniture", "OST_Casework",
+              "OST_StructuralFraming", "OST_StructuralFoundation", "OST_Parking"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

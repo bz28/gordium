@@ -134,9 +134,9 @@ internal static class RevitRead
             SuperComponent = e is FamilyInstance sub && sub.SuperComponent is { } host ? host.UniqueId : null,
             Mark = mark,
             FloorMark = floorMark,
-            // a floor's own marks, for Gordium: Site slab is (SiteSlabs); read on floors only, so no other element pays
-            InstanceMarks = category?.BuiltInCategory == BuiltInCategory.OST_Floors
-                ? RevitMarks.Values(e) : new Dictionary<Guid, MarkValue>(),
+            // an element's own marks, for Gordium: Site slab is (SiteSlabs) and Site object is (ElementReader.SiteObject);
+            // read on floors and the site-object categories only, so no other element pays
+            InstanceMarks = OwnMarks(e, category),
             PhaseCreated = Id(e.CreatedPhaseId),
             PhaseDemolished = Id(e.DemolishedPhaseId),
             DesignOption = Id(e.DesignOption?.Id),
@@ -164,13 +164,27 @@ internal static class RevitRead
         _ => ElementKind.Ordinary,
     };
 
+    /// <summary>The categories whose elements' own marks are read (<see cref="OwnMarks"/>): floors (Site slab is) and
+    /// those <see cref="Marks.SiteObject"/> is bound to (a name Revit doesn't have is skipped, never a crash).</summary>
+    private static readonly HashSet<BuiltInCategory> MarkedOnElement =
+    [
+        BuiltInCategory.OST_Floors,
+        .. Marks.SiteObject.Categories.Select(c => Enum.TryParse<BuiltInCategory>(c, out var b) ? b : BuiltInCategory.INVALID)
+            .Where(b => b != BuiltInCategory.INVALID),
+    ];
+
+    private static Dictionary<Guid, MarkValue> OwnMarks(Element e, Category? category) =>
+        category is not null && MarkedOnElement.Contains(category.BuiltInCategory) ? RevitMarks.Values(e) : new Dictionary<Guid, MarkValue>();
+
     /// <summary>The floors, walls and roofs of the document without their geometry (Revit's own box only), each as
     /// <see cref="Element"/> copies it otherwise: what <see cref="SiteSlabs"/> sorts by, for the marking list, which
-    /// must name exactly the site slabs the reader reads.</summary>
+    /// must name exactly the site slabs the reader reads; and the elements of the site-object categories
+    /// (<see cref="Marks.SiteObjectCategories"/>), for the marking list's site-object rows.</summary>
     internal static List<RevitElement> HouseOutline(Document doc)
     {
         var list = new List<RevitElement>();
-        foreach (var c in new[] { BuiltInCategory.OST_Floors, BuiltInCategory.OST_Walls, BuiltInCategory.OST_Roofs })
+        var siteObjects = MarkedOnElement.Where(c => c != BuiltInCategory.OST_Floors);
+        foreach (var c in new[] { BuiltInCategory.OST_Floors, BuiltInCategory.OST_Walls, BuiltInCategory.OST_Roofs }.Concat(siteObjects))
             foreach (var e in new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType())
             {
                 var box = e.get_BoundingBox(null);
@@ -185,7 +199,7 @@ internal static class RevitRead
                     Kind = Kind(doc, e),
                     Mark = mark,
                     FloorMark = floorMark,
-                    InstanceMarks = c == BuiltInCategory.OST_Floors ? RevitMarks.Values(e) : new Dictionary<Guid, MarkValue>(),
+                    InstanceMarks = OwnMarks(e, e.Category),
                     PhaseCreated = Id(e.CreatedPhaseId),
                     PhaseDemolished = Id(e.DemolishedPhaseId),
                     DesignOption = Id(e.DesignOption?.Id),

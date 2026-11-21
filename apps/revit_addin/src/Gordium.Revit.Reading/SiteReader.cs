@@ -42,6 +42,12 @@ public static class SiteReader
         "OST_MEPSpaces", "OST_SharedBasePoint", "OST_ProjectBasePoint",
     };
 
+    /// <summary>Categories whose elements can't be a structure (reading design note, section 1, "Objects standing
+    /// apart"): trees and plants, and people and cars placed for show, aren't "constructed or erected on the ground"
+    /// (§325-3B STRUCTURE), so one standing apart from the house keeps no yard waiting (<c>could_be_building: false</c>).
+    /// Still left out (an object on the lot not measured: lot coverage needs review, as before).</summary>
+    public static readonly IReadOnlySet<string> NotStructures = new HashSet<string> { "OST_Planting", "OST_Entourage" };
+
     /// <summary>More plan points than this and the box's corners are sent instead (as Rhino's <c>_plan_points</c>).</summary>
     public const int MaxPlanPoints = 50000;
 
@@ -104,17 +110,16 @@ public static class SiteReader
                     continue;
                 var entry = new JsonObject
                 {
-                    ["id"] = c.Id, ["layer"] = c.Layer, ["could_be_building"] = true, ["touching"] = d.Touching,
+                    ["id"] = c.Id, ["layer"] = c.Layer, ["could_be_building"] = c.CouldBeBuilding, ["touching"] = d.Touching,
                     ["ground_like"] = d.Touching is not null && lot is not null && c.Box is { } b
                                       && LooksLikeGround(c.GroundKind, c.Closed, b, lot.Ring),
                     ["context"] = c.Context,
                 };
                 if (c.Slab is not null)          // a site slab (SiteSlabs): what it is marked, and its name to say so
-                {
                     entry["slab"] = c.Slab;
-                    if (c.Name is { Length: > 0 } name)
-                        entry["name"] = name;
-                }
+                // its name, so a row can say which: a slab's, and one standing apart's (it keeps the yards waiting)
+                if ((c.Slab is not null || d.Touching is false) && c.Name is { Length: > 0 } name)
+                    entry["name"] = name;
                 leftOut.Add(entry);
             }
         }

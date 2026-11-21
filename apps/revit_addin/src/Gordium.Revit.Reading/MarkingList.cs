@@ -8,7 +8,7 @@ namespace Gordium.Revit.Reading;
 // the marking list built from them. The one rule (principle 4): a mark never set is not stated, never "No"; a
 // suggestion is shown, never read as a mark.
 
-public enum MarkedKind { Room, Window, Door, Level, SiteSlab }
+public enum MarkedKind { Room, Window, Door, Level, SiteSlab, SiteObject }
 
 /// <summary>A room's mark, read: <see cref="Sleeping"/> null when not stated.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping);
@@ -179,6 +179,7 @@ public static class MarkingList
         var rows = MarkReading.InDesign(model)
             .Select(e => MarkReading.KindOf(e) == MarkedKind.Level ? LevelRow(e, unmarkedAreas) : Row(e)).OfType<MarkingRow>()
             .Concat(slabs.Select(SlabRow))
+            .Concat(SiteObjectRows(model))
             .OrderByDescending(r => r.NeedsMarking).ThenBy(r => r.Kind)
             .ThenBy(r => r.Label, StringComparer.OrdinalIgnoreCase).ThenBy(r => r.Id, StringComparer.Ordinal)
             .ToList();
@@ -208,6 +209,16 @@ public static class MarkingList
                 : $"{Marks.SiteSlab.Name}: {unset} of {slabs.Count} floors outside the house aren't marked with one of " +
                   "Gordium's words: one on the lot keeps lot coverage and the yards needing review until it says (" +
                   string.Join(", ", SlabKinds.Words) + "); one off the lot changes nothing.");
+        }
+        // the elements marked with Site object is (only those: which elements stand apart from the house, and so keep
+        // the yards waiting, is the check's own decision, its rows naming each)
+        var siteObjects = rows.Where(r => r.Kind == MarkedKind.SiteObject).ToList();
+        if (siteObjects.Count > 0)
+        {
+            var odd = siteObjects.Count(r => r.NeedsMarking);
+            summary.Add($"{Marks.SiteObject.Name}: set on {siteObjects.Count} element{(siteObjects.Count == 1 ? "" : "s")}" +
+                        (odd == 0 ? "." : $", {odd} with a word that isn't one of Gordium's (" + string.Join(", ", SiteObjectKinds.Words) +
+                                         "): read as not marked, so standing apart from the house it keeps the yards needing review."));
         }
         var inHouse = SiteSlabs.MarkedInHouse(model);
         if (inHouse.Count > 0)
@@ -339,6 +350,24 @@ public static class MarkingList
                                             $"\"{s.Word}\" isn't one of Gordium's ({string.Join(", ", SlabKinds.Words)})")
             : new MarkCell(m, MarkState.Given, s.Word, null, null);
         return new(s.Floor.UniqueId, MarkedKind.SiteSlab, SlabLabel(s.Floor), [cell]);
+    }
+
+    /// <summary>Each element in the design checked with <see cref="Marks.SiteObject"/> set, as a row: what it is, or a
+    /// word Gordium doesn't read (it then needs marking). Unset ones aren't listed: a project has hundreds (furniture,
+    /// fittings), and the check's own rows name each one standing apart.</summary>
+    private static IEnumerable<MarkingRow> SiteObjectRows(RevitModel model)
+    {
+        var m = Marks.SiteObject;
+        foreach (var e in model.Elements)
+        {
+            if (!m.Categories.Contains(e.BuiltInCategory) || !SiteReader.Looked(e) || !SiteReader.OnLotNow(model, e)
+                || Marks.Text(e.InstanceMarks.TryGetValue(m.Guid, out var v) ? v : null) is not { } word)
+                continue;
+            var cell = SiteObjectKinds.Of(word) is null
+                ? new MarkCell(m, MarkState.NotUnderstood, word, null, $"\"{word}\" isn't one of Gordium's ({string.Join(", ", SiteObjectKinds.Words)})")
+                : new MarkCell(m, MarkState.Given, word, null, null);
+            yield return new(e.UniqueId, MarkedKind.SiteObject, SlabLabel(e), [cell]);
+        }
     }
 
     private static string SlabLabel(RevitElement floor) =>
