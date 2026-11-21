@@ -19,8 +19,13 @@ Two parts, the figure the greater:
   edge meeting the ring passes through its corner), else the greatest sampled walk on the floor (no clearance) out
   to its edge samples, over the corners of 3-in triangles covering it, plus 3 in.
 
-Every sample with no route stops the figure (needs review), the reason named; an edge arc shut in by rings is
-sampled at its ends at least, so a pocket shut in by rings is found from its own arcs. Lengths in inches.
+- **The pockets** (clear floor shut in by rings: a route there exists only with no clearance). Their samples are
+  left out of the two parts above and bounded through the clusters round them: those clusters' greatest routed
+  edge sample, plus 1.5 in, plus the greatest sampled walk out of the pocket and the rings, plus 3 in.
+
+Any other sample with no route, or a pocket or cluster with no routed clear edge round it, stops the figure (needs
+review), the reason named; every edge arc is sampled at its ends at least, so a pocket shut in by rings is found from
+its own arcs. Lengths in inches.
 """
 
 import heapq
@@ -217,7 +222,8 @@ class _Walk:
 
 
 def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
-    """The story's travel figure (decision 3): Stop when any sample has no route (the reason named)."""
+    """The story's travel figure (decision 3). A sample with a route only with no clearance is in a pocket, bounded
+    through its clusters; Stop when any other sample has no route, or a pocket or cluster has no routed edge."""
     r = routes.r
     cache = {}
     found = {"best": -math.inf, "at": None}
