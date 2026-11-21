@@ -624,7 +624,7 @@ def test_the_cached_texts_name_is_the_books_and_the_extractors_never_the_branchs
     assert book_text.file_name(a) == book_text.file_name(b)
     copy = tmp_path / "code"
     copy.mkdir()
-    for name in book_text.TEXT_CODE:
+    for name in {n for names in book_text.TEXT_CODE.values() for n in names}:
         shutil.copy(book_text.HERE / name, copy / name)
     monkeypatch.setattr(book_text, "HERE", copy)
     before = book_text.file_name(a)

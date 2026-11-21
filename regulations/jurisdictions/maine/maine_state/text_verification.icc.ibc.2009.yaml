@@ -1,0 +1,902 @@
+# The 2009 IBC's numbers, recorded but NOT verified: no second reading could be made from this copy
+# (not_verified says why). Written by code from the extracted text (state_law.numbers_of); checked by
+# python -m rule_format (fingerprints always; the numbers against the text where the code cache has the book).
+document: icc.ibc.2009.pdf
+copy_checked: Public.Resource.Org's copy on the Internet Archive (item gov.law.icc.ibc.2009, icc.ibc.2009.pdf, sha256 b75f0234ed3d160fe389eab61c1208fe43a941119ab6b5fd4388edc4742d7c70)
+second_reading:
+  by: 'nobody: no second reading was made (not_verified)'
+  'on': 2026-11-20
+  how: Not read a second time. Each piece's numbers are recorded as the extracted text has them (rule_format.state_law.numbers_of),
+    so a later reading from a bought copy can be compared with them number by number.
+not_verified: 'Every number here is read from an OCR copy only: not verified. The copy''s PDF holds no page images (every
+  page is ABBYY FineReader''s OCR text drawn in fonts), and the item''s 600 dpi page images (icc.ibc.2009_jp2.zip) are made
+  from that same OCR and print its errors (Table 1015.1 reads ''1-4'' where ICC''s book prints I-4, p.266), so no reading
+  independent of the OCR exists in this copy (docs/decisions/2026-11-20_commercial_egress_maine.md). Check every number against
+  a purchased ICC copy of the 2009 International Building Code. Until then a rule may not use this book''s numbers: every
+  IBC requirement is a flag (always needs review), its check kept as the drafted test (rule_format/code_numbers.py).'
+pieces:
+  '201':
+    piece_sha256: c2c3777450c046eb355eb71f32e4e7bcfb19db6036fe186aad9d95d8c8c6992a
+    numbers:
+    - '201'
+  '201.1':
+    piece_sha256: 9cb64178b9c2da891c8e1db9374567bf18e54a9081f7bd2121bd95bc17a03a97
+    numbers:
+    - '201.1'
+  '201.2':
+    piece_sha256: 547a1f3a4b1cbbdbac6f07dceab6a90139f0d441f197596a3d79277893b46927
+    numbers:
+    - '201.2'
+  '201.3':
+    piece_sha256: dbf90b58c9a3cc81e7dca81813c5c3a94fdb61b59695589e6056585ef5af9756
+    numbers:
+    - '201.3'
+  '201.4':
+    piece_sha256: 4eb20748c33956fcb245d134616d3997b389efc30110b1c26471e22990981f2e
+    numbers:
+    - '201.4'
+  '202':
+    piece_sha256: 438cb5c86c293cea6d9ec29faa85274db999b626fc561ee4a3f649a1dd24eabc
+    numbers:
+    - '202'
+  202:aggregate:
+    piece_sha256: 37c1732343ab9ce60a88aab7fe0c19da4e8f369525b4827f7593cff17f500a25
+    numbers:
+    - '1502.1'
+  202:approved:
+    piece_sha256: 670e563e9b507181447218f683309b6ff49804ddfe7b087bcb729b3d9ce3b220
+    numbers: []
+  202:area_for_masonry:
+    piece_sha256: c064a17edea910eb66e2fa0830d435dbe5ac7f1a7edbc55db0d1937aa0038f2c
+    numbers:
+    - '2102.1'
+    - 2102.1 gross
+    - '2102.1'
+    - '2102.1'
+  202:area_building:
+    piece_sha256: 36d0adcef33857efac32f4b63a154ad6d962bbe506a1de77cdc94be26ed7317c
+    numbers:
+    - '502'
+    - '.1'
+  202:atrium:
+    piece_sha256: 6b3dd3a2f31711191886b82fdf80e9adc60e68e0ffec8990208a2dd9795264d0
+    numbers: []
+  202:automatic:
+    piece_sha256: f55152bd7d1f6820faf576bf6e630af6ac11f02719a32dfdb2ca7cba1752f256
+    numbers:
+    - '902'
+    - '.1'
+  202:automatic_fire_extinguishing_system:
+    piece_sha256: 96e144970735961bd2d8dc3693b2a1fb8deb1a34b159adf8b3ace95846dd3845
+    numbers:
+    - '902.1'
+  202:automatic_sprinkler_system:
+    piece_sha256: 742ea979e6e746e6fdebe91ebb9ceb50578d45f4fff09f404beef07afae8de24
+    numbers:
+    - '902.1'
+  202:basement_for_other_than_flood_loads:
+    piece_sha256: 50a6eefbae7b39d653ce7abd34312ed79f77c7f02638e089ccffd11aee3b0805
+    numbers:
+    - '502.1'
+  202:basement_for_flood_loads:
+    piece_sha256: b22057f0ea49f8dd93562a70f5f58e6a4a77065c65531892563a1e96e82a1631
+    numbers:
+    - '1612.2'
+  202:building:
+    piece_sha256: 3454364ae3558b74cdce47a66bee98ad3f07744b9d7772df43ee1b4cbcc0dbf4
+    numbers: []
+  202:building_official:
+    piece_sha256: 8df0ce9a6c44164ba2366d5df95a34fa956cb7edf416d9976119df450d285c58
+    numbers: []
+  202:ceiling_radiation_damper:
+    piece_sha256: 1425c242c69b6c5f63e5c4100549d5477dcb7442fef936846e9a75a5a56e7fb9
+    numbers:
+    - '702.1'
+  202:cell:
+    piece_sha256: 3d85bb334d3e599a9f58fd88a78e8a6bac85f571e2e857c72e22b6c2c8004839
+    numbers:
+    - '408'
+  202:cell_masonry:
+    piece_sha256: 894755c1045c1661021b4dc115d4814e3cf1fe10ae426d450961e83b0aa81460
+    numbers:
+    - '2102'
+    - '.1'
+  202:combination_fire_smoke_damper:
+    piece_sha256: b4e2c47924d5e67d39798f6d72742d8d9c8bb18908ad4f1b84bce2fd4695765b
+    numbers:
+    - '702.1'
+  202:common_path_of_egress_travel:
+    piece_sha256: e1c795ba899e81198a7910b249764d2154ed71944ef2f788b74ee6e1b3fb7d83
+    numbers:
+    - '1002.1'
+  202:corridor:
+    piece_sha256: baef4143dd7e0f156339c88ac9407db258639872cba91a334ad5a5086601a73f
+    numbers:
+    - '1002.1'
+  202:damper:
+    piece_sha256: 6151f57ef8862d82e32559e77ed704006b2f84e284c035823c3888f4066117f2
+    numbers:
+    - '702'
+    - '.1'
+  202:dormitory:
+    piece_sha256: acb4a560be49efce2035040a70e6e35ab92925283e2041e383d9bd57313318a6
+    numbers:
+    - '310.2'
+  202:dwelling:
+    piece_sha256: 7775e676d3711d99b71adb3117ce565896599ce3f351a39a85916fe838b46890
+    numbers:
+    - one
+    - two
+  202:dwelling_unit:
+    piece_sha256: 45ac199ec889b7d75c0a94b3b47def04d5ce63a4c503232db86c9cb84b0a470f
+    numbers:
+    - one or more
+  202:exit:
+    piece_sha256: aacd779bf032f4795f2d5613c9e79570562aaeafa61b4e6dce66ca95ebc0b858
+    numbers:
+    - '1002.1'
+  202:exit_access:
+    piece_sha256: 3aaf01d5b435068485e74cf0c1b367ee11339d2dcfcffbde69249619e31167c3
+    numbers:
+    - '1002.1'
+  202:exit_access_doorway:
+    piece_sha256: bfc78558e630ed61bcf359f5982a4498c9c5c609a592b754a6c4ba4ed699254e
+    numbers:
+    - '1002.1'
+  202:exit_discharge:
+    piece_sha256: b6cee1bcb4c708923a0a0e2a10c85a2028a581206240352ab7e3a92d99a48bf2
+    numbers:
+    - '1002.1'
+  202:exit_discharge_level_of:
+    piece_sha256: 2523d6fe5b5b5465049b70941fcc76fe7fbc1c473d4953a537d2a6ea57548656
+    numbers:
+    - '1002.1'
+  202:exit_enclosure:
+    piece_sha256: 192c0bf780dc2d80835e42467fe6d591f5df09d99adf06c25532b76e53f69e97
+    numbers:
+    - '1002.1'
+  202:exit_horizontal:
+    piece_sha256: 00e1125e9eaf51abd618a53f1de1cc0396631cfca0acc519b634ec3a93aa30a9
+    numbers:
+    - '1002.1'
+  202:exit_passageway:
+    piece_sha256: 13a64ae40f77fa9d7e1555398027d1cfb2ab9e1bd3c1d2933e1f91ac122be301
+    numbers:
+    - '1002.1'
+  202:exterior_wall:
+    piece_sha256: a945fd2754b3ca9a3144daf76c833549ee49f715a8e1448965b550aab0de6c7a
+    numbers:
+    - '1402.1'
+  202:facility:
+    piece_sha256: 55b89ebe7088001ab8979b3e05ca3956d4fea00a88e5c35f22e2ec99af86497b
+    numbers:
+    - '1102.1'
+  202:fire_barrier:
+    piece_sha256: 0cc0b0d6de8034e86b811e9ead4ac137f1c073d5e1f12a500a43d98a7a06e508
+    numbers:
+    - '702.1'
+  202:fire_damper:
+    piece_sha256: b6fa10f87cc5f7cc3ee510edde099073a66c13cfc7e45fadafaba899079d05db
+    numbers:
+    - '702'
+    - '.1'
+  202:fire_partition:
+    piece_sha256: 10edacc91bd0dbce5cbdba59088d9eb48b52a25f7d2537d48f6e56ac76f2de23
+    numbers:
+    - '702.1'
+  202:fire_resistance_rating:
+    piece_sha256: ca9f6a133f90088e1f726ef61570f9ef3bc06d534eae39732d6e8acc955aa1c5
+    numbers:
+    - '702.1'
+  202:fire_wall:
+    piece_sha256: c3494cbccf8912a57262f5f79b058cd2cbadb8cb6cfd0b938242c83b524b658c
+    numbers:
+    - '702.1'
+  202:flight:
+    piece_sha256: 8f985b96ee37cfa2f40a369b90d3528a0321e03386e479132587499db4f69dce
+    numbers:
+    - '1002.1'
+  202:grade_lumber:
+    piece_sha256: 6153d685aec003d3961ecc28d0e24e4e9d0bc4bc615d5abacd049a84a4031c0a
+    numbers:
+    - '2302.1'
+  202:grade_plane:
+    piece_sha256: f87f56ca483f48cab65c7d04cdd7a07c02836dce003fb93325dc68b09541f7bf
+    numbers:
+    - '502.1'
+  202:handling:
+    piece_sha256: 6e0cf6b5df552999ea137904ca7761e395295e2b13707732dfd93e8ad4b8f202
+    numbers:
+    - '307.2'
+  202:high_rise_building:
+    piece_sha256: 690c8193788314b8fecff19a55b7a42e7638be6cac392fbd45354c2da364a4d0
+    numbers:
+    - more than 75 foot
+    - 22 mm
+    - 860 mm
+  202:horizontal_assembly:
+    piece_sha256: a519b04e0a8a9a8c4c9e1f4296647860c1781379df31ce8cc4ccdb43d9569aad
+    numbers:
+    - '702.1'
+  202:hydrogen_cutoff_room:
+    piece_sha256: fb619509a732ef2aa52ef6e9bc85670acaf2fe8e950e47f27da20cf3d0e8c120
+    numbers:
+    - '421.2'
+  202:liquid:
+    piece_sha256: 43908f8032c5c960bd626ccacca74237bbab2a6e5219b774e081578f97a0fb5c
+    numbers:
+    - '415.2'
+  202:listed:
+    piece_sha256: e30cd66273c345dfa68152b90b3f762a90f2f0e061f090e86d6c690176eed260
+    numbers: []
+  202:loads:
+    piece_sha256: 89ebcb93a199fde45fbcfaaefb9cd7c4ebe5980265dd5c0d58cb43fe24fe0c9e
+    numbers:
+    - '1602.1'
+  202:lot_line:
+    piece_sha256: 3cdafd81ab80b441d73b932ea86daf254d3f85115c686c28ea0f4b49c3e929ef
+    numbers:
+    - one
+  202:means_of_egress:
+    piece_sha256: 4e50b4fdc1a3bbe4ee776bc82606231328a8448278c0ad1e2044ede80b198d14
+    numbers:
+    - '1002.1'
+  202:mezzanine:
+    piece_sha256: 1016438300e97c79ced4d76b699b3f01de82d786942bc8b3a6ac2386f0fa7cdc
+    numbers:
+    - '502.1'
+  202:nosing:
+    piece_sha256: 104ca820ab94d654a655fbc534dae1d777aac1ad8380a577fe523b6771b32b49
+    numbers:
+    - '1002.1'
+  202:occupant_load:
+    piece_sha256: 962509c34620cfd85472e59af2a24c0208b6035ea1494ca954072e5497c62574
+    numbers:
+    - '1002.1'
+  202:open_parking_garage:
+    piece_sha256: 30e161562dc52b6f5a99f78db83860ee17042345b50c9e36557084f9006c61a0
+    numbers:
+    - '406'
+  202:permit:
+    piece_sha256: 9558ecda153891f13df4ae92407a8ccb594535cd69889f90941bff0010df0999
+    numbers: []
+  202:person:
+    piece_sha256: 435a7f33bb82d7685b2ab4f5da909ae8d1a05d3ea48c9995365f91cb67d0575c
+    numbers: []
+  202:personal_care_service:
+    piece_sha256: 742171869c184b1935b247e5b74a96891b9af4b9905cb96623c520028339f1b5
+    numbers:
+    - '310.2'
+  202:platform:
+    piece_sha256: 786ab2091bac708f0a1dfcb989d274ab81eaaf234cfca8166402d30fe90328c8
+    numbers:
+    - '410.2'
+  202:public_way:
+    piece_sha256: 6ace13f9075435384975ef10626d683f4e76c2ed7caaba5670eb0b19537d8e46
+    numbers:
+    - '1002.1'
+  202:ramp:
+    piece_sha256: 59170482f8cd00a4142224767a390659e20dc55fb149753ef0be129f671be3fb
+    numbers:
+    - '1002.1'
+  202:roof_assembly:
+    piece_sha256: a2423362d769206de367767553f45be66c10c2f142d8b027a71adbe5d3842a7d
+    numbers:
+    - '1502.1'
+  202:scissor_stair:
+    piece_sha256: 465a08132964ef588eab0d210202813815e7f5c645b7d055bb8d65675e3b971e
+    numbers:
+    - '1002.1'
+  202:sleeping_unit:
+    piece_sha256: 366e5757c4b0ed07f6441a6b2ba6f5780ae0bf66da32612e2f6d9d2b43c9d370
+    numbers: []
+  202:smoke_damper:
+    piece_sha256: 3e34df75b0dc199b8de94f29350e6b9f7c76a89ad347d81ef3c4739ff563cadf
+    numbers:
+    - '702.1'
+  202:special_amusement_building:
+    piece_sha256: b3a8e1028e7f363d8c77bf8b982d1fbb3c2d0ec96ccc96152e75fc9e33041cb7
+    numbers:
+    - '411.2'
+  202:specified:
+    piece_sha256: 2109180c07de7a44e7a3659fb670e9fb50bcf45d1d2b6a2cc8e5390b8da447ff
+    numbers:
+    - '2102'
+    - '.1'
+    - '2102.1'
+  202:stage:
+    piece_sha256: f19838c1a2229ba7f172701470fc159c396cd5fde5645c7b2e90d6b1c36415b4
+    numbers:
+    - '410.2'
+  202:stair:
+    piece_sha256: 4fc268e5ffb22a42ecfadf1d1bdbd21f74595e5fe66b710e361efd1a989aba00
+    numbers:
+    - '1002.1'
+  202:stairway:
+    piece_sha256: ab56015da127999acb05c2c35b0145fc5a70a1327d7c704aa031f5fd59238915
+    numbers:
+    - '1002.1'
+  202:story:
+    piece_sha256: 15dc7125ae28f912c084ab794f57bd6470b570dcf2ad3efa59643c2b99f07273
+    numbers:
+    - '502.1'
+    - two
+  202:story_above_grade_plane:
+    piece_sha256: c84ae76b7008b7c53363bc22bb49b37da63dfbeb03e74490bdc7fa5870183495
+    numbers:
+    - more than 6 foot
+    - 1829 mm
+    - more than 12 foot
+    - 3658 mm
+  202:structure:
+    piece_sha256: f023d4d12df850086eb86164a85ff6887159217e3f5cd8cd59b6ec8f96b8b73d
+    numbers: []
+  202:suite:
+    piece_sha256: 9264d58928f372703308dbcf7fa1dd7d9134020741bfbce93ea77b9a637eaad7
+    numbers:
+    - '1002.1'
+  202:swimming_pools:
+    piece_sha256: 8fe0e2cff9259b81a325704a9916aaa982399cdae7d43d1e5d7849d4a28ef5e1
+    numbers:
+    - '3109.2'
+  202:use_material:
+    piece_sha256: ff0f4e835a966c5a3185c34320a01808c3535267d2c401e4e5bf92bfde748108
+    numbers:
+    - '415.2'
+  202:walkway_pedestrian:
+    piece_sha256: 9b2470741d2406ccd55799698b84c3354ceb92de7c05a449fd50f7dd9bb027ea
+    numbers: []
+  202:wall:
+    piece_sha256: 2bb1b3c24800c31f3c4350e37435b94a8829302b5314c71084349fadd9f2b46b
+    numbers:
+    - '2102.1'
+    - '2102.1'
+    - '2102'
+    - '.1'
+    - '2102.1'
+    - '2102.1'
+    - '2102.1'
+  202:winder:
+    piece_sha256: 8d96eac386fb8ba4ba31ac6fc0482599e40986fbf73467dbc911d593d455e678
+    numbers:
+    - '1002.1'
+  '308.5':
+    piece_sha256: fb6bf5d13478ee7394abdb615caa6e43a69f644086bb5ab5707ccc277b2fb03d
+    numbers:
+    - '308.5'
+    - '1'
+    - less than 24
+    - five or fewer
+    - '101.2'
+  308.5.1:
+    piece_sha256: e72361a8953bb6dc89692dd8f96972807cbc3fc88b16289bf967882d90d8c444
+    numbers:
+    - less than 24
+    - more than five
+    - '1'
+  308.5.2:
+    piece_sha256: 1f26600902ada8ed630cf87c8b4b08cf9e5a2cfce5b6588284f4c526564bcdd9
+    numbers:
+    - '24'
+    - more than five
+    - 2 1/2
+    - '1'
+    - more than five
+    - no more than 100
+    - 2 1/2
+  '502':
+    piece_sha256: b5cb23938e9d4961a16796c0edfcb98b1ca1b659f48d38b2609fa4e1ed2ca3d0
+    numbers:
+    - '502'
+  502:area_building:
+    piece_sha256: e98ab8362456a65a77aae64d7ff145b43b821e6482c57c93eee58ba5398a5ac0
+    numbers: []
+  502:basement:
+    piece_sha256: be67de8c800ac8fbd9eeaa0827d6578eb6ed66da92d06c610977e07f448c1a18
+    numbers:
+    - '202'
+    - '1612'
+    - '1612.2'
+  502:grade_plane:
+    piece_sha256: 5afde4d58190590b1244430a23a5587ed5944ff2f1301afe44025b0f269ebcb7
+    numbers:
+    - more than 6 foot
+    - 1829 mm
+    - 6 foot
+    - 1829 mm
+  502:mezzanine:
+    piece_sha256: d0fed8c9094417c59e86984c574bfd4f2fbdb8c6630bc646992e6449a440af8a
+    numbers:
+    - '505'
+  '508.2':
+    piece_sha256: 5a51da055ead18fb86b2ec8ea646bd31fee1565b8a38305ff8408e47f004800a
+    numbers:
+    - '508.2'
+  508.2.1:
+    piece_sha256: 15c7267b0d2bb754289437cb317a1b5b70c2e22e8ffdf8d087e0b7ec3adeee66
+    numbers:
+    - not occupy more than 10 percent
+    - '503'
+    - '506'
+  508.2.2:
+    piece_sha256: c20994d50ee23041590c95667872ae57f178b86cb2d18036383525a5fd6d9c21
+    numbers: []
+  508.2.3:
+    piece_sha256: 5bb4e599d9053e88f04fb3098e8eb61ad6061352cc6f02c2fff04298ab19068b
+    numbers:
+    - '503.1'
+    - '503'
+    - '504'
+  508.2.4:
+    piece_sha256: 06ddec446232a6feaea8d929a746a856ee1596bdf8bbeda2e63ea1d426b65937
+    numbers:
+    - '508.4'
+    - '1'
+    - '420'
+  508.2.5:
+    piece_sha256: 564cf2611078634f7ddc629944e427e89940aaefe99a31b09e8689b8bebe6083
+    numbers: []
+  508.2.5.1:
+    piece_sha256: 1136b6bf715fd7ef838944afe64aebecc35aeec4baaf4a64c89a19299ded36a4
+    numbers:
+    - '707'
+    - '712'
+  508.2.5.2:
+    piece_sha256: 05e15cff5114173f8602c7ed3d2a5ad87b55b69019d70fdae2765faed70bfff2
+    numbers:
+    - '80'
+    - '711.7'
+  Table 508.2.5:
+    piece_sha256: bf3d0ac1d711a34ee58a6dffdfc934c7b3569391f6681097c0248760e631acaf
+    numbers:
+    - 400,000
+    - '15'
+    - and 10
+    - '1'
+    - 100 square foot
+    - '1'
+    - '1'
+    - 100 square foot
+    - more than 50
+    - 1,000 pound
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '2'
+    - '2'
+    - '1'
+    - '2'
+    - 51 square foot
+    - 1 square foot
+    - 0.0929 m
+    - 1 pound
+    - '6.9'
+    - '1'
+    - '0.293'
+    - '1'
+    - '746'
+    - '1'
+    - '3.785'
+  508.2.5.3:
+    piece_sha256: ea57c6eeea0100d723476e877e1b7b270a163a42c684f2064867ec5517311048
+    numbers: []
+  '702':
+    piece_sha256: 556449cdd15bc1c634b9c4062df797d524b1e9a9b9d6375e42bdb0a1cbee59a4
+    numbers:
+    - '702'
+  702:ceiling_radiation_damper:
+    piece_sha256: 8256d88f5657787e8b4e6653c6df305c75d017a5abff54a6427c88e514a6b737
+    numbers: []
+  702:combination_fire_smoke_damper:
+    piece_sha256: a3e08e9f4461bb2d0df635739280109af06c40c95e5763ee5e2f2e022d855a40
+    numbers: []
+  702:damper:
+    piece_sha256: 6a30790f2291bbb706c19de839fcf6bad52fe1ea23b375d82addb274c12ffd74
+    numbers: []
+  702:fire_barrier:
+    piece_sha256: c8bdf75020764d1f1d63144175ecc8a17efa6c0c25bba7a7dcdfbb342f93f1ca
+    numbers: []
+  702:fire_damper:
+    piece_sha256: 82ee7d6b26f29e32a754e3fefc8f8eeaeb7bf29f7dac37479ae0064b05e0f1e5
+    numbers: []
+  702:fire_partition:
+    piece_sha256: 52b35d1253c3a1659050670eebc1095b0f5e48d67ecddfeefdb965ec32d53d83
+    numbers: []
+  702:fire_resistance_rating:
+    piece_sha256: f453d0655a22303505c9b067740c22860a8b0b12849516b64e1328d53335e7df
+    numbers:
+    - '703'
+  702:fire_wall:
+    piece_sha256: 3975ed15d4c9f581d2dece1f4c5f421c7c9f49a8aad3050402bcc985b5402346
+    numbers: []
+  702:smoke_damper:
+    piece_sha256: 791593aa6978788f88c33f87e9739d5ee49525a109b2f7a175997db4cebb0ed9
+    numbers: []
+  '902':
+    piece_sha256: b6a3217ceb5a0cfa43bd02cb69afdb47c9bbdb224f869e8b96285dab19ea5a46
+    numbers:
+    - '902'
+  902:automatic:
+    piece_sha256: 7880a49c53967e8dddd18ac32bd44deb26d17814f96d41769ebefd8be6e3289e
+    numbers: []
+  902:automatic_fire_extinguishing_system:
+    piece_sha256: 6365736822c7cb9764b4d0213595d66d0487c6be3ec9525e3c3ed3bf5a4a5595
+    numbers: []
+  902:automatic_sprinkler_system:
+    piece_sha256: 56638f0f7c1c5c0dbefef453832bff638c8ac5335ba2dc453c0a6802beb03c87
+    numbers: []
+  '1002':
+    piece_sha256: e0bbda7a44ed424393e01fc768597c483ca69cfc48c615b9e4a0b0cc832de179
+    numbers:
+    - '1002'
+  1002:common_path_of_egress_travel:
+    piece_sha256: 4dda2d5f8247d5d11595650baa523fb96dc436be719ff86b77acd50e7ae28ecd
+    numbers:
+    - two
+    - two
+  1002:corridor:
+    piece_sha256: da242d3f37092729d545a4920be63d21912267ba297518e7a1e9ee114f648a1f
+    numbers: []
+  1002:exit:
+    piece_sha256: 42e4db86ca3cd0919c23ed3e2b1401fa863d4263829d287691e5568f09a89e51
+    numbers: []
+  1002:exit_access:
+    piece_sha256: 05f9209070d392ef8f30c32d4467aece410a92c94fa7c447261c1cbfac762512
+    numbers: []
+  1002:exit_access_doorway:
+    piece_sha256: aba4b5d3cf6373b72eaa9dfb185488bb8cf4e033614590326386f4c3a98d785f
+    numbers: []
+  1002:exit_discharge:
+    piece_sha256: 3ae4f497eb03cff48d9dac8a7fd906c5125d22fb3715c7e18469f5f357f111aa
+    numbers: []
+  1002:exit_discharge_level_of:
+    piece_sha256: b47e32c1b3717d9af822933731688c2f199347e290ba266ebe4b65289f2d7b3a
+    numbers: []
+  1002:exit_enclosure:
+    piece_sha256: 94deda6baa3f2355c9ebf3c7378648d1e1ff3ea2e3d4a8644e958889f8aae4b9
+    numbers: []
+  1002:exit_horizontal:
+    piece_sha256: c98d280774908c01f5fd280d1ff658527496ba9224efef5b580cad2038ccc23c
+    numbers:
+    - one
+  1002:exit_passageway:
+    piece_sha256: f4b93c1febdcd23982354604794246bb75072c7e778dc0660ee533404a2fb88d
+    numbers: []
+  1002:flight:
+    piece_sha256: 69e4ea402e307cc7fc3647fe4b494036af40b5d94ba3732aa00de07ac0f14509
+    numbers:
+    - one
+  1002:means_of_egress:
+    piece_sha256: ffb5a73ee8e784ad089b11f3526f3bc47b4b582ecfb50006978f19704dec28ff
+    numbers:
+    - three
+  1002:nosing:
+    piece_sha256: 34993d63c55acd2e5dda53a838765433f4ce546d6a3a869a75b24790060d4b17
+    numbers: []
+  1002:occupant_load:
+    piece_sha256: fb8f8d248a379e2a95f8a0bf0c7a915ebb62688d3cba9fa88c1218eb82c23e5a
+    numbers: []
+  1002:public_way:
+    piece_sha256: 97202d936b30afeca4c69f8c40ad58f4cf8da3d285c81c210d9ce7f338282140
+    numbers:
+    - not less than 10 foot
+    - 3048 mm
+  1002:ramp:
+    piece_sha256: 81aebd9c4e393a252c57fbc5844e46fbb03ba5721948e91a75038ae946744c75
+    numbers:
+    - steeper than one unit vertical
+    - 20 unit horizontal
+    - 5 percent
+  1002:scissor_stair:
+    piece_sha256: 46de044d5b13f7ad17c2377a0d3830476905c540e6c2a062bee3c0de42663587
+    numbers:
+    - two
+    - two
+    - within one
+  1002:stair:
+    piece_sha256: 72efe2549558b0f6a4f3999919da830831766565782b86c1155aa768295ae9ac
+    numbers:
+    - one or more
+  1002:stairway:
+    piece_sha256: bbd03b75dee7a9f2e7f0dabfdbb64561daa82a7cfe75440d659f86f66a6acb52
+    numbers:
+    - one or more
+    - one
+  1002:suite:
+    piece_sha256: 90ecf8ff888ebc8abe85e1a42d778f4aa67342d3a2c1e4b629f5dfa79ae4173a
+    numbers:
+    - '1'
+  1002:winder:
+    piece_sha256: c9fefd9b9cc064a6a5af4a39b437e659fbdab70ec7f1cadb2407f684389beaf5
+    numbers: []
+  '1004.1':
+    piece_sha256: e5be88fd4bf34872c5071b496334b5370dc776a8cabe12d08e28aeb1d74b1581
+    numbers:
+    - '1004.1'
+  1004.1.1:
+    piece_sha256: 6a289f922eed4a4c692767cbd127069d105954f0f56090b706a41c9b3ade6f1c
+    numbers:
+    - one
+  Table 1004.1.1:
+    piece_sha256: 35fe6940839c9f0dca7a741a5e6f655e34044070935f71e04f0cbbd9d846eb20
+    numbers:
+    - 300 gross
+    - 300 gross
+    - 500 gross
+    - 20 gross
+    - 300 gross
+    - 100 gross
+    - 15 gross
+    - 11 gross
+    - '1004.7'
+    - '7'
+    - '5'
+    - '15'
+    - '5'
+    - 15 foot
+    - '7'
+    - 100 gross
+    - '40'
+    - '35'
+    - 50 gross
+    - '20'
+    - '50'
+    - 50 gross
+    - 200 gross
+    - 100 gross
+    - 240 gross
+    - 100 gross
+    - 120 gross
+    - 200 gross
+    - '50'
+    - 100 gross
+    - 50 gross
+    - 60 gross
+    - 30 gross
+    - 300 gross
+    - 200 gross
+    - 200 gross
+    - 50 gross
+    - 15 gross
+    - '15'
+    - 500 gross
+    - 51 square foot
+    - 1 square foot
+    - 0.0929 m
+  1008.1.2:
+    piece_sha256: fbb3f530bbdef4b3e64a74d62afd96411ca107a87c939302372ca9176a880997
+    numbers:
+    - 10 or less
+    - '1'
+    - 10 or less
+    - 50 or more
+  '1014.3':
+    piece_sha256: ba7955d3cd7743cf0877d67d834661c6a30665c5c76799ae29655bf15ac0eb1f
+    numbers:
+    - '1014.3'
+    - not exceed 75 foot
+    - 22 mm
+    - 860 mm
+    - not exceed 25 foot
+    - 7620 mm
+    - '1028.8'
+    - not be more than 100 foot
+    - 30 mm
+    - 480 mm
+    - not more than 30
+    - not be more than 100 foot
+    - 30 mm
+    - 480 mm
+    - '1'
+    - not be more than 100 foot
+    - 30480 mm
+    - not be more than 125 foot
+    - 38 mm
+    - 100 mm
+  '1015.1':
+    piece_sha256: 6a4bfd34ab0aee083b5f0ceae226e0f110d38fd93ab3fb552d265bbccb4e59ca
+    numbers:
+    - '1015.1'
+    - two
+    - one
+    - '1'
+    - one
+    - '1015.1'
+    - one
+    - '20'
+    - '903'
+    - '903'
+    - one
+    - '1014.3'
+    - '1015.3'
+    - '1015.4'
+    - '1015.5'
+    - '1015.6'
+    - '1004.1'
+  Table 1015.1:
+    piece_sha256: 513074f304b849655403e765c630b940c0317a50f6bae7a4ee6459efc4d965e8
+    numbers:
+    - '1015.1'
+    - one
+    - '49'
+    - '3'
+    - '1'
+    - '1'
+    - '1'
+    - '10'
+    - '29'
+    - '10'
+  1015.1.1:
+    piece_sha256: f40877c0706be6f3c769a67c9dddaa9b92bfb1a369ca07e7ee7a4f0b50b72301
+    numbers:
+    - three or more
+    - three
+    - '501'
+    - 1,000
+    - four
+    - greater than 1,000
+  '1015.2':
+    piece_sha256: 2d407a60be68fa4e868a5fa1c52063a1cf4859ed4926d76ee1eca42c1be30ef1
+    numbers:
+    - '1015.2'
+  1015.2.1:
+    piece_sha256: c40824268541e34281723f646fc4bef7902884d9fc2c6cc831e3e3f4cdaf2c70
+    numbers:
+    - two
+    - two
+    - not less than one-half
+    - one
+    - '1018'
+    - not be less than one-third
+  1015.2.2:
+    piece_sha256: 129ae169235976fec5f84f78ddfa48a6ba37b31e57c06b3f2e61a09a52b99084
+    numbers:
+    - three or more
+    - three or more
+    - at least two
+  '1016.1':
+    piece_sha256: 00359c611d69eb57345497227242921a7878ad1127ec9c36d8578544f6e508d0
+    numbers:
+    - '1016.1'
+    - '1016.1'
+    - 50 percent
+    - two
+    - two
+    - at least two
+    - at least two
+  Table 1016.1:
+    piece_sha256: 45af30332980112df808c70a29be27ca1ddc7194defdbe8345f0b36f6656311f
+    numbers:
+    - '1016.1'
+    - '5'
+    - '200'
+    - '250'
+    - '1'
+    - '250'
+    - '200'
+    - '300'
+    - '5'
+    - '300'
+    - '400'
+    - '75'
+    - '100'
+    - '150'
+    - '175'
+    - '200'
+    - '1'
+    - '1'
+    - '1'
+    - '200'
+    - 1 foot
+    - 304 mm
+    - .8 mm
+    - '402.4'
+    - '404.9'
+    - '407.4'
+    - '1'
+    - '408'
+    - and 408
+    - '1'
+    - '411'
+    - '.4'
+    - '1'
+    - '1015.4'
+    - '1015.5'
+    - '1021'
+    - '.2'
+    - one
+    - '1028.7'
+    - '1028.7'
+    - '3103.4'
+    - '3104'
+    - '.9'
+    - '903'
+    - '903'
+    - '903'
+    - '903'
+  '1018.1':
+    piece_sha256: 030b412eff63916661144bdeed4912c176b99b3c634990b76e84656f43bebe11
+    numbers:
+    - '1018.1'
+    - '1018.1'
+    - '709'
+    - at least one
+    - at least one-half
+    - '1015.1'
+  Table 1018.1:
+    piece_sha256: 7ae14ba3ee2d7477364342d8a532ae0375fabc34a8b3da4678f1a886ba2f66b2
+    numbers:
+    - '1018.1'
+    - greater than 30
+    - greater than 30
+    - greater than 10
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '407'
+    - '.2'
+    - and 407
+    - '.3'
+    - '1'
+    - '1'
+    - '1'
+    - '0'
+    - '0.5'
+    - '0'
+    - '1'
+    - '408.8'
+  '1018.2':
+    piece_sha256: c27f170e59dc593a62acd89a026d06b29519509f7eb1f639073ef0813d3e434b
+    numbers:
+    - '1018.2'
+    - '1005.1'
+    - not less than 44 inch
+    - 1118 mm
+    - twenty-four inch
+    - 610 mm
+    - thirty-six inch
+    - 914 mm
+    - less than 50
+    - thirty-six inch
+    - 914 mm
+    - seventy-two inch
+    - 1829 mm
+    - 100 or more
+    - seventy-two inch
+    - 1829 mm
+    - ninety-six inch
+    - 2438 mm
+    - 1 inch
+  '1018.4':
+    piece_sha256: 98d0da3f2ddc8e78cac12ccf44278aff212c30f84f2eef6ae670dfd63ca782f9
+    numbers:
+    - '1018.4'
+    - more than one
+    - no dead ends in corridors more than 20 foot
+    - 6096 mm
+    - '1'
+    - '2'
+    - '3'
+    - '4'
+    - '308.4'
+    - not exceed 50 foot
+    - 15 mm
+    - 240 mm
+    - 1 m
+    - not exceed 50 foot
+    - 15 mm
+    - 240 mm
+    - less than 2.5

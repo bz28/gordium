@@ -241,13 +241,18 @@ def rules_for_pieces(file: str, pieces: dict[str, dict], labels: dict, rules: li
         if not isinstance(rid, str):
             continue
         name = rid.split(".", 1)[-1]
-        fits = [pid for pid in ruled if name == _slug(pid) or name.startswith(_slug(pid) + "_")]
+        # a state folder with two books names a rule by its book first (Maine: `general.ibc_1016_1_...`,
+        # `general.nfpa_16_2_6_2_...`): a leading word of letters only is the book, never part of a piece's number
+        names = [name] + ([book_free] if (book_free := re.sub(r"^[a-z]+_", "", name)) != name else [])
+        fits = [pid for pid in ruled for n in names if n == _slug(pid) or n.startswith(_slug(pid) + "_")]
         if not fits:
             continue
         pid = max(fits, key=len)
         quoted = {owner.get((s.get("page"), n)) for s in r.get("sources") or [] if isinstance(s, dict) and s.get("file") == file
                   for lines in [s.get("lines") if isinstance(s.get("lines"), list) else []] if len(lines) == 2
                   for n in range(lines[0], lines[1] + 1)}
+        # a table counts only by a rule named for it: a section's rule quoting one row (Table 7.3.1.2's day-care
+        # factor) checks that row, never the table's others (review round 1, 2026-11-20)
         if pid in quoted and rid not in out[pid]:
             out[pid].append(rid)
     return out

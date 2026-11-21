@@ -1,0 +1,2374 @@
+# A second, independent reading of every number in the brought-in pieces of NFPA 101, Life Safety Code, 2012 edition,
+# from the page images (rule_format/state_law.py says what is checked), as for New York's book.
+# Status of every piece: verified against the Public.Resource.Org copy only; check against a copy bought from NFPA.
+document: gov.law.nfpa.101.2012.pdf
+copy_checked: 'The Public.Resource.Org copy on the Internet Archive (sha256 in sources.yaml): NFPA''s own PDF, real
+  text in its fonts. Verified against this copy only; check against a copy bought from NFPA.'
+second_reading:
+  by: claude_code/claude-opus-5-5 (a helper agent that never saw the extracted text, and a second helper for the
+    comparison words)
+  'on': 2026-11-20
+  how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
+    labeled by its id (22 pages, 147 boxes); a helper that never saw the extracted text transcribed every line of
+    every box (tables row by row); the transcript went through document_extraction/numbers.py: 143 pieces, 493 numbers;
+    141 pieces agree. The two that differ are tables (Table 6.1.14.4.1(b), Table 7.3.1.2), whose cells the extraction
+    reads in column bands and the helper row by row: see their flags. A second helper that saw only each piece''s
+    transcribed text and its numbers'' values marked each number''s comparison from the whole sentence (second_reading_comparisons).
+    The transcript, the page images and the comparison file are kept in the code cache (second_reading/step_1_*),
+    outside the repo, since they hold the book''s words.'
+pieces:
+  '3.1':
+    piece_sha256: ffe0460bf051c181f451f7a38021a95d9a051adb85656f833651c14cdd41ffce
+    numbers:
+    - '3.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '3.1'
+    second_reading_comparisons:
+    - none
+  '3.3':
+    piece_sha256: 1161aa515ff6101e4fc4cdef865da69b98a10813d4d04a2053bee102e12f179e
+    numbers:
+    - '3.3'
+    second_reading: agrees
+    second_reading_numbers:
+    - '3.3'
+    second_reading_comparisons:
+    - none
+  3.3.4:
+    piece_sha256: 7eef08375effb8900306dafaff6146cf97e6ff60205def3fbb012c4f2cd74428
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.5:
+    piece_sha256: 47a6597639609dfcaa4d299282c581371dbedaf51f4006803696eb330ff519ad
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.18:
+    piece_sha256: f871a549c6b308af68d01841b265a82b19b8adbd5c806e8158653f7c7ce5377f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.19:
+    piece_sha256: 35530962c6c3270552f4f7c2fa4122196092da49413ddf6e131c31daf6f0ecee
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.20:
+    piece_sha256: 7fa9a8597b0ed099beb517b64542e64986f519b0e703d1566056e5fbf72e8245
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.21:
+    piece_sha256: 23c758e0b8c0d5d3b1465eb44a3bc4e0473fa73cac06ada5c613cc6471ec4948
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.21.2:
+    piece_sha256: 6da79d33254f11de40f50a098b0c7c6609c396bdcbb227f58b4e714b325e6260
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.21.2.1:
+    piece_sha256: ce13eac77e39634f8c537745ef5d5b8e633788cded6d97bd3202489d85d4ada4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.21.3:
+    piece_sha256: 4548a7d6e89632d44e57a5a6aa20f9681e83eeaad93f18f2343363a064b57229
+    numbers:
+    - fifty percent
+    - ten
+    - and 100 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - fifty percent
+    - ten
+    - and 100 percent
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+  3.3.23:
+    piece_sha256: 9608f7cea86f7d8c8f825cc5bb30a656341e8954c0422c2db375302c6b2f9c9e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.23.1:
+    piece_sha256: fd7d0d18da7279110c9ea73883d71ecc893217a15e038b3eba1160ad17aed6d3
+    numbers:
+    - '2008'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2008'
+    second_reading_comparisons:
+    - none
+  3.3.23.1.1:
+    piece_sha256: a2826b1e75fa506b841926feee601e81ed7a9f648ce25d0c1ee0c89bba03d8ed
+    numbers:
+    - '2010'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2010'
+    second_reading_comparisons:
+    - none
+  3.3.30:
+    piece_sha256: a0c0f0f0ca98e37307948f952b1ac4a2f6a314246b7b31b67ca7149392c40291
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.31:
+    piece_sha256: 650be9d24cbf5bec41d4f1d222849d1eb608c006af10589542444540c63d831b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.35:
+    piece_sha256: a370d16283e035f1af46c79fb31c24b2e24c34d145dfc1d3f2ef869f5c354b87
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.36:
+    piece_sha256: 6671305d1875962ac3bb8dbef2adecf78c510269746d6b736e3877d21a9f6fe9
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.36.2:
+    piece_sha256: a7f52e2693cbb6798797477076bf082ab065eb72908affebd6ee8f790c201acc
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.36.3:
+    piece_sha256: 3f9699a5e58f0b8943619743e2dac54edfe071ffc46b7c55013f6e8d408b1d7e
+    numbers:
+    - three or more
+    second_reading: agrees
+    second_reading_numbers:
+    - three or more
+    second_reading_comparisons:
+    - '>='
+  3.3.36.9:
+    piece_sha256: 10803826c3b7298827424a3209d34d49de83cc0591dacad1fa3afa7fbbde8095
+    numbers:
+    - two or more
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - two or more
+    - one or more
+    second_reading_comparisons:
+    - '>='
+    - '>='
+  3.3.47:
+    piece_sha256: 618d559aada2541ab44b13bc211f5bacb61c7226af91a38933be3778f2bcd612
+    numbers:
+    - two
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - two
+    second_reading_comparisons:
+    - none
+    - none
+  3.3.51:
+    piece_sha256: f4d3d19a07fdd0fe295ab6d4e4dbb60f9507488f6617e843358d421c101ed578
+    numbers:
+    - three or more
+    second_reading: agrees
+    second_reading_numbers:
+    - three or more
+    second_reading_comparisons:
+    - '>='
+  3.3.51.2:
+    piece_sha256: 4a101b08d46ae74d80d4a55ef2a2cbcb2b100366ef005233b3fa7322d73f7000
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.54:
+    piece_sha256: 8f604e6bb5ebedd641d6c43dc8acdda428a50c0a945709f758a138fee7c2e141
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.61:
+    piece_sha256: 7b1325df028c613fa1518dd0782630a068aa6467f5b92a1d6c8c00b77525310b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.62:
+    piece_sha256: f46b6b4aca277b80d662caa6731d2bd97a0776e48eba17306e32fe79163c21bc
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.62.2:
+    piece_sha256: 7221295cde2a6f5154ce3f611bea5b9ad07f7d94e20d9d181553d1706e0c4d77
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.63:
+    piece_sha256: ff78ba43c8008e88abb35d3f3808a9e69198a67e600f712f1671770f1d5e3378
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.64:
+    piece_sha256: 92974f2de74bd3f6988889efe44d7b7864648c9971cc6720414f555255e5d544
+    numbers:
+    - more than 16
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 16
+    - one
+    second_reading_comparisons:
+    - '>'
+    - none
+  3.3.66:
+    piece_sha256: d5c803ba1305c7e773501a952b325d5507bb4ae748ee42cb441ce0333477f285
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  3.3.70:
+    piece_sha256: 913d5ff8fc036fc68d60d09dc4db064cfe77d394b78c8ddbd98df8fbdb9489fb
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.79:
+    piece_sha256: fa95a61cef09a7173e68844b001d3bd7e2d2b0593c3beb5719a92a5851e073ed
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.79.1:
+    piece_sha256: 1e5c907faf7582c80c735d02384fdac675954f89534daf459113b79ca9898330
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.81:
+    piece_sha256: e5ec1a3ce3b37a69ad66f6eb1a666b038d79177556c25d3f2f12eedab30346d0
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.82:
+    piece_sha256: d28e4c15db33677d297b2315886cfff52d4e36cad639063f397609998c27f11a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.83:
+    piece_sha256: a897339316c9b53b36f98081cf96abe8248d84ae8eb41506aabe6103d02ae98e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.88:
+    piece_sha256: 83cb3e35ffc835c95dd7025c2fb8acb75f42135d6f9aae42b1713de04e9f018a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.91:
+    piece_sha256: 31e2a0f96a9246c47c4a9325ebfe7a1014f3a161132e93876df9455f50495ead
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.96:
+    piece_sha256: b2d07c033c09e87e22fe6bcf4d36ffe87ddc5fb88db05445268af279d30810f8
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.97:
+    piece_sha256: b30f2d490d97aec8437ebaa3d65e9186dd2b9e018f3595ffcdf94e3a3106f411
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.98:
+    piece_sha256: 2eda582b343d71516e8aeac6314d1ab284b76e94b21f462a0a3a18d4a2b69802
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.101:
+    piece_sha256: 064f59b1cbf3029502589e27f67c00c4eceb1e410ee1637e27f7ed7fd4897b39
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.109:
+    piece_sha256: c48c14e0e7d109eb4ef7964be4a6b41246aca4d4aee91ec6a74f07e3d5bb945d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.119:
+    piece_sha256: f46351e56f15eb7ca394e936fc727b9486fd24098dd2c8bca4b6453f20d04641
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.123:
+    piece_sha256: 0fcc29cc177b58dbeb81503e17dc42e272bf87ca0e6ac0b02b04341c7183e881
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.124:
+    piece_sha256: 650b10859d6db6717661d7cfde3525bf9dc8771543657dbbd950ab86902fe63b
+    numbers:
+    - more than 6
+    - 1830 mm
+    - '6'
+    - 1830 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 6
+    - 1830 mm
+    - '6'
+    - 1830 mm
+    second_reading_comparisons:
+    - '>'
+    - none
+    - none
+    - none
+  3.3.126:
+    piece_sha256: ac0d67c01e9e42af8c3db8d6e7e926b57a633df9851c4cbab3b47f45ac44dd29
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.127:
+    piece_sha256: bb4dd4dade4f75bebde95a82b3b14ee631872c053a2113fbc34bd6ae33f4b5f9
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.128:
+    piece_sha256: b59662b7681ebbb71aa7a152b8ce0857bb1cd14705c9c015ee088f247b79a781
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.133:
+    piece_sha256: 9b1c116681b34f57ff0b6fe9d916711665f70ecf594ea3623b6ef2e3b23b2ea2
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.133.1:
+    piece_sha256: 31d1b884b65345dba5c1f8e3b00579101a3892e94c8e02a1156acf39156bf7bf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.133.2:
+    piece_sha256: 3e32e5c00c3d59454b627d25f6471b3451e6b39118007624d0395fde58e04008
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.140:
+    piece_sha256: fc515248e32ffc3295148beada51f302fe2b39fd95b96c0bb45281ced1bfaea6
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.140.1:
+    piece_sha256: 1adbf701582d09e51f081a69c38f66bfad1e4c16cdf0e1f9ca4f6eca69d6a123
+    numbers:
+    - more than 3
+    - not more than 12
+    - less than 24
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 3
+    - not more than 12
+    - less than 24
+    second_reading_comparisons:
+    - '>'
+    - <=
+    - <
+  3.3.143:
+    piece_sha256: 1c49c2b52638757d51c4feb8ab92debf5aea20002f2184a7a24d882c41af5ea7
+    numbers:
+    - more than 16
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 16
+    second_reading_comparisons:
+    - '>'
+  3.3.162:
+    piece_sha256: cfa9bded5829b9b4e11cb791cc9b4416d8ecee888e76fdb897112e4b9aad634f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.162.2:
+    piece_sha256: e0238a756add5467321220766d5bf17eb34a1fc70a3b48733389b24a5f033513
+    numbers:
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    second_reading_comparisons:
+    - none
+  3.3.163:
+    piece_sha256: 8a86f80754e25b03e6a24c6d1969c28763ef4bfe4439d3c7f2cf4ef5b7a85d72
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.166:
+    piece_sha256: 923f04f0f38eb9ffa58df71f37e47d2a3590c1fa499dad1844c49e816f6b55bf
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  3.3.167:
+    piece_sha256: 76da610031f020c7955b93416e43d03ebf1576861e5b856a04cac18bb44d23ab
+    numbers:
+    - two or more
+    - not exceed three
+    second_reading: agrees
+    second_reading_numbers:
+    - two or more
+    - not exceed three
+    second_reading_comparisons:
+    - '>='
+    - <=
+  3.3.168:
+    piece_sha256: 9fcef68d47a6687ab7642e81fda5c545cc60b58882aca731b87f4deab25ded24
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.169:
+    piece_sha256: 47758e7da1a6c4f610a169548f15f4e99ae2bb1d79468b4ba97d8e50756e7d1d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.170:
+    piece_sha256: 572dbc85f48c2761c268d9ddb97e05490894c433baca9f77d7ba762227595c09
+    numbers:
+    - three
+    - '1'
+    - '2'
+    - '3'
+    second_reading: agrees
+    second_reading_numbers:
+    - three
+    - '1'
+    - '2'
+    - '3'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  3.3.172:
+    piece_sha256: 2b7fda60d8ae679bcedf66923013e6ccbe76654c91522418735f7d1cf48d0903
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.174:
+    piece_sha256: 9d8aef52df26738f7f1a48b6892ad13eda632120c7d957d4c2596cd939aa8d83
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.178:
+    piece_sha256: 5642a4ae7b4cd47371788303ad5c5d8ae91ccef92a6c82fc6462d2ddeff3b3b4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.180:
+    piece_sha256: 1be17ba42b10d5ab2765ed6ff8d576204f0e45f694b00926da6868ba96a1ac26
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.188:
+    piece_sha256: 639f078760f87b4276a1da82b95a67720aecb513cc8c7034d89913eb7b5753be
+    numbers:
+    - '7'
+    - '1.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '7'
+    - '1.2'
+    second_reading_comparisons:
+    - none
+    - none
+  3.3.188.9:
+    piece_sha256: 5847c14c033243df66c799ba175c4fb23821fe07b06c6359eaa9c0ff9274c0cd
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.188.11:
+    piece_sha256: 5675d96135ad9fae2079914adc92412bb42f4b82a8ddd82f4ba6309c45f04f3a
+    numbers:
+    - two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - two or more
+    second_reading_comparisons:
+    - '>='
+  3.3.188.12:
+    piece_sha256: 05e8dea71b8aeb33c543654511cfece7f3ffbffc8d9b086652920d6f39bf5afb
+    numbers:
+    - four or more
+    second_reading: agrees
+    second_reading_numbers:
+    - four or more
+    second_reading_comparisons:
+    - '>='
+  3.3.188.14:
+    piece_sha256: 86aba0be07dd040817ca189eb90f7fe1ce477255fffe2c54a98e36169f3901ae
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.190:
+    piece_sha256: cb7454c954009baf2ea2a5b7143a2547ac3d22e8921bd77eaaded7ebadac7b66
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.199:
+    piece_sha256: 956151621b65f7d08dffec6416ef0e957fbeef7683146b7b105780a820a66f53
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.206:
+    piece_sha256: 9ec0f4c842cd379e41c1b4bea37e871ccbd0d370e53d137358491fd13c507fa2
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.218:
+    piece_sha256: 6673b080876127936c3f73cf303226108079e750089f8d8b4337c3161d7d4ced
+    numbers:
+    - not less than 10
+    - 3050 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 10
+    - 3050 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+  3.3.221:
+    piece_sha256: 614f9dde20fdf002f8ed8eff07aa2418384dda04f7e9fff069efd9b645af7765
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.221.2:
+    piece_sha256: ba33ad9b19607a02baa89487bad79a21c796c2e916c9195b398c13b8466e15b8
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.230:
+    piece_sha256: 4276abebb4d044adec2877c612c99bfd5585525757c62f0ecdb52f1c2265ec39
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.237:
+    piece_sha256: 1962f57659db7698729ddebd003bf93d03768a4a19474036b52f748cf2442688
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.237.2:
+    piece_sha256: 04e283ca57ae41eb118873a34c5b17e43d35459b994490b6452d466d92426640
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.243:
+    piece_sha256: 15b30ee156b0e15fd216f84885dfcd342d18f64aa3b959eec12c1c74d7ede363
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.254:
+    piece_sha256: 46431dcb83ae94fbff5f0dff85ea8edb02e31eaec803a51b169196c0e1037335
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.261:
+    piece_sha256: a46f25e2e7b42159f8f379b5dfb7d9273d8da9763926b7d3fb4ef67b23a7d839
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.262:
+    piece_sha256: 8a9fd74a6a56cf62c7cd44173972ae91a51c1c017c1c413568def468d0f40516
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.263:
+    piece_sha256: 7e192355ce7dc5c6cc55127ac3e7ab8470cf789da98346c78c337631487f2841
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.268:
+    piece_sha256: 277bb667337a69480f71bd21fc0cb533e10041ef403c8d7fe003233ff4e611c4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.269:
+    piece_sha256: a43586dc758f077265b5b83f8329247b9d2ba0e8eb9aeede1f3d1b11790a31cc
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.270:
+    piece_sha256: 2147cf2298b4ee0b17f706efb7fe94c6cf293ef57d0e4e209d6c445e0c0f5ce4
+    numbers:
+    - not more than three riser
+    second_reading: agrees
+    second_reading_numbers:
+    - not more than three riser
+    second_reading_comparisons:
+    - <=
+  3.3.271:
+    piece_sha256: 1b581541441673c8cf4c68e58443d940c34df88e129fcfa2cbb1b5a9a28d875e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.273:
+    piece_sha256: 4e7e3408d85e211eb8d15dd788a21617adf2febc73242a7ec88f4b11a6c4786b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.280:
+    piece_sha256: 9873b1f8df357823c6d79589d970d2e4470d8cae7fc9542e4495b003b00ef4f4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  3.3.287:
+    piece_sha256: 20070bcad73c417fe138ce3deb9e72eddeb4eab2efb8303143ff2294ecf574c0
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  6.1.14.4:
+    piece_sha256: 2a59f0720c811134c8bbca010faedbae637fdb54fbf0c14d33b47113a904c302
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  6.1.14.4.1:
+    piece_sha256: ac89cf0797dce9115c7c89709f85f2ab5090651d89db856c54b282d97ead4278
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  6.1.14.4.2:
+    piece_sha256: 4788010386be58c28e77aa7cb08d7f7ccab84513c3e63c5cb0a8c165ab9ccf6e
+    numbers:
+    - '3'
+    - '2'
+    - '1'
+    - '8'
+    second_reading: agrees
+    second_reading_numbers:
+    - '3'
+    - '2'
+    - '1'
+    - '8'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  6.1.14.4.3:
+    piece_sha256: 2b39fbf44d5745a6045988681d573a8ea6e25a75e8eecf2ef6581017cfa0c590
+    numbers:
+    - '1'
+    - no case shall it be reduced to less than 1
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - no case shall it be reduced to less than 1
+    second_reading_comparisons:
+    - none
+    - '>='
+  6.1.14.4.4:
+    piece_sha256: f1f3394c09007fff563723f2d8856bce2247ba9239eed07f72d869c00dd8d4c9
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  Table 6.1.14.4.1(b):
+    piece_sha256: f481d0275af2efddd9461722bf9d3b61050523ad52c240715b7e7bffadf41dcc
+    numbers:
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '1'
+    - '300'
+    - '300'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '1000'
+    - '1000'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '12'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - one
+    - '1'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - two
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '1'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '1'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '0'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '0'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - no case to less than 1
+    - '1'
+    second_reading: differs
+    second_reading_numbers:
+    - '2'
+    - '300'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '1'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '300'
+    - '1000'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '1000'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '12'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - one
+    - two
+    - '1'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '1'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '1'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '1'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '0'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '0'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '2'
+    - '3'
+    - '3'
+    - '2'
+    - '3'
+    - '2'
+    - '2'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '2'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '2'
+    - '2'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '3'
+    - '2'
+    - '2'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - '1'
+    - no case to less than 1
+    - '1'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - '>'
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - '>'
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>'
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    flags:
+    - 'The two readings differ in order only where the table is read: the extraction takes the table''s cells in
+      column bands (its left half, then its right half), the second reading row by row. The ratings of the row the
+      day-care check uses (Day-Care >12 Clients) and of every other row were compared row by row in the transcript
+      (second_reading/step_1_transcript.json): a rule citing this table uses the second reading''s values.'
+    - '''300'', ''1000'' and ''12'' are recorded with no comparison because the table prints them with symbols,
+      not words (Assembly <= 300; > 300 to <= 1000; > 1000; Day-Care > 12 Clients); the second reading (<=, >, <=,
+      >, >) is right: they bound which row applies, and set no limit on a design.'
+  Table 7.3.1.2:
+    piece_sha256: f9a8deedf022013e7cfe73f601e8d80dd435c35eea2ff2fcb68633d962b1ec75
+    numbers:
+    - '2'
+    - '2'
+    - '7'
+    - '0.65'
+    - '15'
+    - '1.4'
+    - '1'
+    - '1'
+    - '18'
+    - '455'
+    - '100'
+    - '9.3'
+    - '100'
+    - '9.3'
+    - '50'
+    - '4.6'
+    - '50'
+    - '4.6'
+    - '30'
+    - '2.8'
+    - '50'
+    - '4.6'
+    - '15'
+    - '1.4'
+    - '15'
+    - '1.4'
+    - '100'
+    - '9.3'
+    - '11'
+    - '1'
+    - '50'
+    - '4.6'
+    - '20'
+    - '1.9'
+    - '50'
+    - '4.6'
+    - '35'
+    - '3.3'
+    - '240'
+    - '22.3'
+    - '120'
+    - '11.1'
+    - '100'
+    - '9.3'
+    - and 120
+    - '11.1'
+    - and 200
+    - '18.6'
+    - '200'
+    - '18.6'
+    - '200'
+    - '18.6'
+    - '100'
+    - '9.3'
+    - '100'
+    - '9.3'
+    - '40'
+    - '3.7'
+    - '2'
+    - '2'
+    - '300'
+    - '27.9'
+    - '500'
+    - '46.5'
+    - '30'
+    - '2.8'
+    - two
+    - '40'
+    - '3.7'
+    - '30'
+    - '2.8'
+    - '60'
+    - '5.6'
+    - '300'
+    - '27.9'
+    - two or more
+    - '2'
+    - '2'
+    - one
+    - '40'
+    - 3.7 m
+    second_reading: differs
+    second_reading_numbers:
+    - '7'
+    - '0.65'
+    - '15'
+    - '1.4'
+    - '1'
+    - '18'
+    - '1'
+    - '455'
+    - '100'
+    - '9.3'
+    - '100'
+    - '9.3'
+    - '50'
+    - '4.6'
+    - '50'
+    - '4.6'
+    - '30'
+    - '2.8'
+    - '50'
+    - '4.6'
+    - '15'
+    - '1.4'
+    - '15'
+    - '1.4'
+    - '100'
+    - '9.3'
+    - '11'
+    - '1'
+    - '50'
+    - '4.6'
+    - '20'
+    - '1.9'
+    - '50'
+    - '4.6'
+    - '35'
+    - '3.3'
+    - '240'
+    - '22.3'
+    - '120'
+    - '11.1'
+    - '100'
+    - '9.3'
+    - '120'
+    - '11.1'
+    - '200'
+    - '18.6'
+    - '200'
+    - '18.6'
+    - '200'
+    - '18.6'
+    - '100'
+    - '9.3'
+    - '100'
+    - '9.3'
+    - '40'
+    - '3.7'
+    - 300 inch
+    - 27.9 inch
+    - '500'
+    - '46.5'
+    - '30'
+    - '2.8'
+    - two or more
+    - '40'
+    - '3.7'
+    - '30'
+    - '2.8'
+    - '60'
+    - '5.6'
+    - '300'
+    - '27.9'
+    - two or more
+    - one
+    - '40'
+    - 3.7 m
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - none
+    flags:
+    - 'The two readings differ in order and in a few words only where the table is read: the extraction takes cells
+      in column bands with the raised 2 of ft2 and m2 as separate numbers (''2''), and joins a row''s wrapped label
+      to the next number (''and 120'', ''and 200''); the second reading reads row by row. Day-Care Use: 35 net (3.3
+      net), the value the day-care occupant load uses, reads the same in both.'
+    - '''two'' ("Sales area on two or more street floors") is recorded with no comparison; the second reading (>=)
+      is right: it names which row applies (two street floors or more), and is no limit on a design.'
+  16.1.7:
+    piece_sha256: 2b7f9c8a6c89ee5a415f34646bc82f59724c7b3c69c5de6d8f5c1d391fa7ab8b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.1.7.1:
+    piece_sha256: 59910d1e1377de1ac16402c7dd01530d39fa7f41c54ac3a84b07ac9c4bcf2821
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.1.7.2:
+    piece_sha256: 4fd75fed2242b4a6aac5283d203170433c963b6e26dfca931f220929dd00cc0f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2:
+    piece_sha256: f12e259d2767a8416627d355bae0be6b07fd1df7cbec6335af5c1535db2eb325
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2.1:
+    piece_sha256: 00441c55a37fe3539000f91fc4de971440e55b4fa3f8e27a64dda2fc3070b6f0
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2.2:
+    piece_sha256: 63a30ad1c6859c88b2ea7bf69013adb0ed7297f5594e11974f1d2643d271e7e7
+    numbers:
+    - 100 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - 100 or more
+    second_reading_comparisons:
+    - '>='
+  16.2.2.2.3:
+    piece_sha256: d000da7a5e0f889e0138fc581fa0bdd43eb5c40cb201f250cf48283c9f73f938
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2.3.1:
+    piece_sha256: 4df4d66d633ba1b902164817e138c38956d58fcf9845aec5c08ed4dfa0b83801
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2.3.2:
+    piece_sha256: c9cc2365911c30d10eb28844abf755641427b6ee3e36f87161e770a37686e6bf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2.3.3:
+    piece_sha256: 3db03b873298fe770d5e6bb9cbe8d106a0c9dccece8c50756a33a36de64e886c
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2.4:
+    piece_sha256: 393264a7e8956495afdd46b7a82319da1c88d9b235f27c722b6d3a5487a5674d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.2.2.5:
+    piece_sha256: 15b9822c53a24358f5efc8b3fd4911f1eb52ce1aed6825b5185f8506603d5a19
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.5.2:
+    piece_sha256: 3efac514e7d4cd4cda54d30da95e3dc3f48d95627831922fcbb0934eb1962049
+    numbers:
+    - no dead-end corridor shall exceed 20
+    - 6100 mm
+    - 9.7 inch
+    - not exceed 50
+    - 15 m
+    second_reading: agrees
+    second_reading_numbers:
+    - no dead-end corridor shall exceed 20
+    - 6100 mm
+    - 9.7 inch
+    - not exceed 50
+    - 15 m
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+    - <=
+    - none
+  16.2.5.3:
+    piece_sha256: 5767a8869d50ce43f53833aa42ce62f559cfa02c64c513a0fac52252806fb9ed
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.5.3.1:
+    piece_sha256: 8c234993adf56457a786f28ad9e9f6a3691f7b477809524c7b3b2ff1de1a3f6d
+    numbers:
+    - not exceed 100
+    - 30 m
+    - '9.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 100
+    - 30 m
+    - '9.7'
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+  16.2.5.3.2:
+    piece_sha256: bb8c71a1a8e1ee8fd156580c733f10b180641f7626646b0ceacd6a8b820b2608
+    numbers:
+    - not exceed 75
+    - 23 m
+    - '9.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 75
+    - 23 m
+    - '9.7'
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+  16.2.6:
+    piece_sha256: ffa4a918dab9c87c0676f4f34be6e798013edae9958d179ef8ef5bc515c42a92
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  16.2.6.1:
+    piece_sha256: 126700b5efb90492515be8ef9e4e9d48cd71e2ef4ef20eea778ca5eed649263c
+    numbers:
+    - '7.6'
+    second_reading: agrees
+    second_reading_numbers:
+    - '7.6'
+    second_reading_comparisons:
+    - none
+  16.2.6.2:
+    piece_sha256: b84f4a97429f80c6565ed28c5d0c92494852f9f72df38e2868a0287f88f9dc39
+    numbers:
+    - '1'
+    - not exceed 100
+    - 30 m
+    - '2'
+    - not exceed 150
+    - 46 m
+    - '3'
+    - not exceed 50
+    - 15 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - not exceed 100
+    - 30 m
+    - '2'
+    - not exceed 150
+    - 46 m
+    - '3'
+    - not exceed 50
+    - 15 m
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+  16.2.6.3:
+    piece_sha256: ec6e644f6f9c95d348133d3e2acc846fe0b9d2f77a4dc183d44344a365dfa065
+    numbers:
+    - '2'
+    - '50'
+    - 15 m
+    - '9.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2'
+    - '50'
+    - 15 m
+    - '9.7'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  16.3.6:
+    piece_sha256: f96eb37a64bd5403459f67b61195ea632b6736e3b80f5022c539351f5fcc42f2
+    numbers:
+    - '1'
+    - '8.3'
+    - '1'
+    - not less than one
+    - '2'
+    - '9.7'
+    - '8.4'
+    - '3'
+    - '1'
+    - '4'
+    - '1'
+    - '8.3'
+    - '5'
+    - '9.7'
+    - '8.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - '8.3'
+    - '1'
+    - not less than one
+    - '2'
+    - '9.7'
+    - '8.4'
+    - '3'
+    - '1'
+    - '4'
+    - '1'
+    - '8.3'
+    - '5'
+    - '9.7'
+    - '8.4'
+    second_reading_comparisons:
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    flags:
+    - '''1'' (three times: "walls having not less than a 1-hour fire resistance rating" twice, items (4) and the
+      opening, and "an assembly having a 1-hour fire resistance rating", item (3)) is recorded with no comparison
+      because numbers.py reads "1-hour" as a number joined to a word; the second reading (>=) is right: each is
+      a minimum rating.'
+  17.1.7:
+    piece_sha256: fbdcf8d0832b3efa76f54cabe0fbb04a5bfff3b8bd89a0240e365b51686a00d1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.1.7.1:
+    piece_sha256: cbd865912a34e44849aa6ea1a9a8d58ae97aa3857af9afa5b8fd66a7e32c3461
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.1.7.2:
+    piece_sha256: 905a3e050896b49a1f97b0cf5ecd13a9490a63cabf6f2a6d9d41981d138e5abd
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2:
+    piece_sha256: a4537f8af577e2b11eaae967b9402cfc0e1e18d59f49beffa9a7438f5082f276
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2.1:
+    piece_sha256: d9148209c1a9aabd1934dac7d354f63c91b0e516a5547e2969613ca1e34e61c3
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2.2:
+    piece_sha256: e75ad629a4f13f2a2a2fdb0f836e454d87d3b9b1697181d62b08b3051334d1ed
+    numbers:
+    - 100 or more
+    second_reading: agrees
+    second_reading_numbers:
+    - 100 or more
+    second_reading_comparisons:
+    - '>='
+  17.2.2.2.3:
+    piece_sha256: 5f15fff1ef91df925b81990dd372ce3550cd2a5c6b97d88c9f4a3ae4be376a3e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2.3.1:
+    piece_sha256: 21f7dc28c86b928a18904621cd9e3d1b1d61fe727e349ce170b3f875cf4f9d55
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2.3.2:
+    piece_sha256: d9c65b6df67f1c9c23a4a0152ccb6b99ee322db9e2de04c301f48feeafc2520c
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2.3.3:
+    piece_sha256: 8629ca730e113df37378cf73f17a7798ffbce317b3079e0fa162227997b9bb38
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2.4:
+    piece_sha256: 57e1a9e2487dd523bc178dd865b2d0706d10c10d6ba3d3219e0b6d353cf49cba
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.2.2.5:
+    piece_sha256: a35b9b80554e8ff9232a50a1c2347383e390e5400e25c6c043d9b52bb704e65b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.5.2:
+    piece_sha256: f6d924c550486993ca9438f48020dd13a0a876e47afaf3538b33bee6856d8edb
+    numbers:
+    - no dead-end corridor shall exceed 20
+    - 6100 mm
+    - 9.7 inch
+    - not exceed 50
+    - 15 m
+    second_reading: agrees
+    second_reading_numbers:
+    - no dead-end corridor shall exceed 20
+    - 6100 mm
+    - 9.7 inch
+    - not exceed 50
+    - 15 m
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+    - <=
+    - none
+  17.2.5.3:
+    piece_sha256: 0655ae05de98eb2d0445ab9c5df9258892e34e36225895e8e6397c850fcef5e0
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.5.3.1:
+    piece_sha256: cf2eced24c83ec3dad9421534e12fef0f964bcdab92854722f626c503e42136c
+    numbers:
+    - not exceed 100
+    - 30 m
+    - '9.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 100
+    - 30 m
+    - '9.7'
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+  17.2.5.3.2:
+    piece_sha256: 6892998e6641501d684abe653838f98a8e6cff4c611f476b7aa469bdd9ffa98d
+    numbers:
+    - not exceed 75
+    - 23 m
+    - '9.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - not exceed 75
+    - 23 m
+    - '9.7'
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+  17.2.6:
+    piece_sha256: 5bea4774edcb66b121cf9d08e0b509a33d26d5a74a854ca8f4911b4acfa61eaa
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  17.2.6.1:
+    piece_sha256: 86eec51669af7fbe89051e77e6a4a87b419323f53edd40d3dd4ab56cc14714b5
+    numbers:
+    - '7.6'
+    second_reading: agrees
+    second_reading_numbers:
+    - '7.6'
+    second_reading_comparisons:
+    - none
+  17.2.6.2:
+    piece_sha256: 3b1d54f0dd2eaba864b44cdd63b602b061e0c7c3900e1e98dcca86361724c826
+    numbers:
+    - '1'
+    - not exceed 100
+    - 30 m
+    - '2'
+    - not exceed 150
+    - 46 m
+    - '3'
+    - not exceed 50
+    - 15 m
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - not exceed 100
+    - 30 m
+    - '2'
+    - not exceed 150
+    - 46 m
+    - '3'
+    - not exceed 50
+    - 15 m
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+  17.2.6.3:
+    piece_sha256: 79e309c0145edc656a72cfc8756b55f436ea42f7b7355e2d247e1794edc05755
+    numbers:
+    - '2'
+    - '50'
+    - 15 m
+    - '9.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2'
+    - '50'
+    - 15 m
+    - '9.7'
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  17.3.6:
+    piece_sha256: 174b35e971a9f0f92eaa0d0509612a34eaaf53d51a7ca8bbb32ddfa60a1bd10c
+    numbers:
+    - minimum 1/2
+    - '8.3'
+    - '1'
+    - not less than one
+    - '2'
+    - '9.7'
+    - '8.4'
+    - '3'
+    - 1/2
+    - '4'
+    - minimum 1/2
+    - '8.3'
+    - '5'
+    - '9.7'
+    - '8.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - minimum 1/2
+    - '8.3'
+    - '1'
+    - not less than one
+    - '2'
+    - '9.7'
+    - '8.4'
+    - '3'
+    - 1/2
+    - '4'
+    - minimum 1/2
+    - '8.3'
+    - '5'
+    - '9.7'
+    - '8.4'
+    second_reading_comparisons:
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    - none
+    - none
+    flags:
+    - '''1/2'' in item (3) ("an assembly having a mini- mum 1/2-hour fire resistance rating", "minimum" broken across
+      two lines) is recorded with no comparison because numbers.py reads "mini- mum" as no word; the second reading
+      (>=) is right: it is a minimum rating.'

@@ -1,0 +1,12 @@
+# Gordium's settings for Maine's own law: the building and life-safety codes every place in Maine inherits (a Maine
+# place would list this folder in its jurisdiction.yaml `inherits:`; none does yet). Kept by hand. This folder is no
+# place (no boundary, no lot lookup), so the place registry and the Rhino plugin never read it as one
+# (rule_format/rulebook.py: state_folders). Decided 2026-11-20: docs/decisions/2026-11-20_commercial_egress_maine.md.
+
+name: Maine
+
+results_title: Egress (IBC 2009 and NFPA 101 2012, as Maine's codes)   # how a check's results of this law are headed
+
+law:                                  # the documents in 1_source_documents/sources.yaml, by what they are
+  building_code: icc.ibc.2009.pdf               # 2009 International Building Code (kept outside the repo)
+  life_safety_code: gov.law.nfpa.101.2012.pdf   # NFPA 101, Life Safety Code, 2012 edition (kept outside the repo)

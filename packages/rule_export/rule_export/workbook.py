@@ -35,6 +35,7 @@ HIDDEN = {
     "piece_sha256": "a fingerprint for code, not for reading",
     "run": "the file of recorded AI calls; for auditing, not reading",
     "layout": "tells the code how to cut a document into pieces; not for reading",
+    "style": "tells the code how a two-column book prints its headings (with layout); not for reading",
     # A code book kept outside the repo (a state law folder's: New York's Residential Code). The workbook lists a
     # place's own documents; a state's book is not in it until its rules are (egress step 3), which shows these.
     "kept_outside_repo": "only a state code book kept outside the repo has it; not in a place's workbook yet",

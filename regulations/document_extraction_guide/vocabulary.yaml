@@ -28,5 +28,8 @@ topics:
   means_of_egress:         Ways out of a building (exits, stairs, ramps, landings, handrails, guards,
                            emergency escape and rescue openings), from a building code such as New York's
                            Residential Code R318-R321.
+  fire_separation:         Fire-resistance-rated separations between occupancies or rooms (and the sprinkler
+                           protection that replaces or reduces them), from a building or life-safety code such as the
+                           IBC's 508 or NFPA 101's 6.1.14.
   definitions:             What words mean.
   administration:          Enforcement, appeals, penalties.

@@ -21,13 +21,19 @@ is also read by a person from the whole printed sentence, without seeing numbers
 import datetime
 from pathlib import Path
 
-from .rulebook import STATE_SETTINGS, Context, kept_text, load, read_jsonl
+from .rulebook import STATE_SETTINGS, Context, kept_text, load, read_jsonl, verification_files
 
 VERIFICATION = "text_verification.yaml"
 READINGS = ("agrees", "differs")
-FIELDS = {"document", "copy_checked", "second_reading", "pieces", "notes"}
+FIELDS = {"document", "copy_checked", "second_reading", "pieces", "notes", "not_verified"}
 PIECE_FIELDS = {"piece_sha256", "numbers", "second_reading", "second_reading_numbers", "second_reading_comparisons",
                 "flags"}
+# A book whose numbers could not be read a second time (Maine's 2009 IBC: its page images are made from its own OCR,
+# so no independent reading exists; docs/decisions/2026-11-20_commercial_egress_maine.md) says so, in words, in a
+# top-level `not_verified`. Then each piece records only its fingerprint and its numbers as the extracted text has
+# them, and never a second reading: none was made. code_numbers.py gives such a book's numbers to no rule (kind
+# rule); a flag may use them in its drafted check, which never decides a result.
+NOT_VERIFIED_PIECE_FIELDS = {"piece_sha256", "numbers"}
 
 
 def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
@@ -51,26 +57,53 @@ def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
 
 
 def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[str]]:
-    """(problems, notes) for a state law folder's text_verification.yaml. Notes say what wasn't checked here."""
-    from document_extraction.numbers import COMPARISONS, comparisons, shown, statements_of_lines
-    from .labels import piece_fingerprint
+    """(problems, notes) for a state law folder's records of the second reading: text_verification.yaml, or one
+    text_verification.<book>.yaml per book (rulebook.verification_files). Every book kept outside the repo needs one,
+    naming it; a file naming another book, or a book twice, is a problem. Notes say what wasn't checked here."""
     folder = Path(folder)
-    path = folder / VERIFICATION
+    files = verification_files(folder)
     kept_outside = [n for n, e in ctx.sources.items() if e.get("kept_outside_repo") is True]
-    if not path.exists():
+    if not files:
         return ([f"no {VERIFICATION}: every number of a book kept outside the repo is read twice"] if kept_outside
                 else []), []
+    problems, notes, named = [], [], []
+    for path in files:
+        try:
+            named.append(load(path).get("document"))
+        except Exception:
+            named.append(None)
+        p, n = _verification_problems(folder, ctx, path)
+        prefix = "" if len(files) == 1 else f"{path.name}: "
+        problems += [prefix + x for x in p]
+        notes += n
+    problems += [f"{name}: kept outside the repo, but no {VERIFICATION} (or text_verification.<book>.yaml) names it"
+                 for name in kept_outside if name not in named]
+    problems += [f"{name}: named by more than one record of the second reading" for name in sorted(
+        {x for x in named if x is not None and named.count(x) > 1})]
+    return problems, notes
+
+
+def _verification_problems(folder: Path, ctx: Context, path: Path) -> tuple[list[str], list[str]]:
+    """(problems, notes) for one record of the second reading of a book's numbers."""
+    from document_extraction.numbers import COMPARISONS, comparisons, shown, statements_of_lines
+    from .labels import piece_fingerprint
     book = load(path)
-    if not isinstance(book, dict) or not FIELDS - {"notes"} <= set(book) <= FIELDS:
-        return [f"{VERIFICATION} must have {sorted(FIELDS - {'notes'})} (and notes, if any), nothing else"], []
+    optional = {"notes", "not_verified"}
+    if not isinstance(book, dict) or not FIELDS - optional <= set(book) <= FIELDS:
+        return [f"{path.name} must have {sorted(FIELDS - optional)} (and notes or not_verified, if any), "
+                f"nothing else"], []
+    unverified = "not_verified" in book
+    if unverified and not (isinstance(book["not_verified"], str) and book["not_verified"].strip()):
+        return [f"{path.name}: not_verified must say, in words, why no second reading could be made and what to "
+                f"check the numbers against"], []
     name = book["document"]
     entry = ctx.sources.get(name)
     if entry is None:
-        return [f"{VERIFICATION}: document {name!r} is not in sources.yaml"], []
+        return [f"{path.name}: document {name!r} is not in sources.yaml"], []
     cut = folder / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
     rows = read_jsonl(cut)
     if rows[0].get("sha256") != entry.get("sha256"):
-        return [f"{VERIFICATION}: the sections file was cut from another version of {name}"], []
+        return [f"{path.name}: the sections file was cut from another version of {name}"], []
     pieces = {p["id"]: p for p in rows[1:]}
     problems, notes = [], []
     second = book["second_reading"]
@@ -79,17 +112,31 @@ def verification_problems(folder: Path, ctx: Context) -> tuple[list[str], list[s
     if not (isinstance(book["copy_checked"], str) and book["copy_checked"].strip()):
         problems.append("copy_checked must say which copy of the book was read")
     recorded = book["pieces"] if isinstance(book["pieces"], dict) else {}
-    problems += [f"{pid}: brought in but not in {VERIFICATION}" for pid in pieces if pid not in recorded]
-    problems += [f"{pid}: in {VERIFICATION} but not a piece" for pid in recorded if pid not in pieces]
+    problems += [f"{pid}: brought in but not in {path.name}" for pid in pieces if pid not in recorded]
+    problems += [f"{pid}: in {path.name} but not a piece" for pid in recorded if pid not in pieces]
     text = None
     if name in ctx.pages:
         lines = {(r["page"], r["line"]): r["text"] for r in kept_text(entry)[1:]}
         text = lambda p: [lines[(pg, n)] for pg, a, b in p["lines"] for n in range(a, b + 1)]
     else:
-        notes.append(f"{VERIFICATION}: the recorded numbers weren't compared with the book's text here "
+        notes.append(f"{path.name}: the recorded numbers weren't compared with the book's text here "
                      f"({ctx.uncached.get(name, 'its text is not loaded')})")
     for pid, e in recorded.items():
         if pid not in pieces:
+            continue
+        if unverified:                     # numbers recorded, never read a second time: none was made
+            if not isinstance(e, dict) or set(e) != NOT_VERIFIED_PIECE_FIELDS:
+                second = sorted(k for k in (e if isinstance(e, dict) else {}) if k.startswith("second_reading"))
+                problems.append(f"{pid}: a book not verified (not_verified) records only "
+                                f"{sorted(NOT_VERIFIED_PIECE_FIELDS)} for each piece"
+                                + (f"; {second} claim a second reading that was never made" if second else ""))
+                continue
+            if e["piece_sha256"] != piece_fingerprint(pieces[pid], rows[0]["sha256"]):
+                problems.append(f"{pid}: the piece changed since its numbers were recorded; record them again")
+            if not (isinstance(e["numbers"], list) and all(isinstance(n, str) for n in e["numbers"])):
+                problems.append(f"{pid}: numbers must be a list of the numbers as the extracted text has them")
+            elif text is not None and e["numbers"] != [shown(s) for s in statements_of_lines(text(pieces[pid]))]:
+                problems.append(f"{pid}: the recorded numbers are not the extracted text's numbers now")
             continue
         if not isinstance(e, dict) or set(e) - PIECE_FIELDS:
             problems.append(f"{pid}: fields must be among {sorted(PIECE_FIELDS)}")

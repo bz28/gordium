@@ -173,17 +173,34 @@ def quote_statements(quote: str) -> set[tuple]:
     return {(value_of(s["value"]), s["unit"]) for s in statements(quote) if value_of(s["value"]) is not None}
 
 
-def candidates(sources: list[dict], ctx) -> list[dict]:
-    """The second-reading numbers a rule may use: those of the pieces its sources sit in that its quotes state."""
+def unverified_reading(entry: dict) -> dict:
+    """A piece of a book not verified (text_verification `not_verified`: no second reading was ever made), read the
+    only way it can be: its numbers as the extracted text has them, with the comparison its recorded words give
+    (numbers.comparisons). For a flag's drafted check only, which never decides a result: it keeps the drafted
+    formula on the book's printed numbers (an OCR misreading included, until a bought copy is checked)."""
+    from document_extraction.numbers import comparisons
+    numbers = [n for n in (entry.get("numbers") or []) if isinstance(n, str)] if isinstance(entry, dict) else []
+    return {"second_reading_numbers": numbers, "second_reading_comparisons": comparisons(numbers)}
+
+
+def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
+    """The second-reading numbers a rule may use: those of the pieces its sources sit in that its quotes state. A
+    book not verified has none for a rule; for a flag (flag=True), its extracted text's numbers (unverified_reading)."""
     out = []
     for s in sources:
         book = ctx.verification.get(s.get("file")) if isinstance(s, dict) and isinstance(s.get("file"), str) else None
         if not book or not isinstance(s.get("quote"), str):
             continue
+        if book.get("not_verified") and not flag:
+            continue                          # never read a second time: backs no number of a rule
         stated = quote_statements(s["quote"])
         worded = _worded_statements(s["quote"])
         for pid in pieces_of(s, book):
-            lengths = _between_ends(readings(book["pieces"].get(pid) or {}))
+            entry = book["pieces"].get(pid) or {}
+            lengths = _between_ends(readings(unverified_reading(entry) if book.get("not_verified") else entry))
+            if book.get("not_verified"):          # a flag's drafted check: no second reading says more than this
+                lengths = [_unverified(length) for length in lengths]
+            lengths = [_in_feet(length, s["quote"]) for length in lengths]
             # a value the piece reads more than one way (R320.2: "not less than 34" and, for ship's ladders, "not
             # more than 34"): a reading counts only where the quote states it with the same words before it
             ways: dict = {}
@@ -195,6 +212,34 @@ def candidates(sources: list[dict], ctx) -> list[dict]:
                 if len(ways[tuple(length["statements"])]) > 1 and length["worded"] not in worded:
                     continue
                 out.append(length | {"piece": pid})
+    return out
+
+
+def _in_feet(length: dict, quote: str) -> dict:
+    """A number the quote prints in feet as "ft" (NFPA 101: "shall not exceed 100 ft (30 m)"): numbers.py reads no
+    unit from "ft" (its readings, and the recorded second reading, have none), so the quote's own "ft" right after
+    the same number says it is a length in feet. Only a number with no unit of its own, only where the quote prints
+    it so; its comparison stays the second reading's."""
+    if not set(length["values"]) <= {"count", "any"} or len(length["statements"]) != 1:
+        return length
+    value = length["statements"][0][0]
+    printed = re.findall(r"(?<![\w.,/])(\d[\d,]*(?:\.\d+)?)\s*ft\b", quote.lower())
+    if not any(value_of(n) == value for n in printed):
+        return length
+    return dict(length, values=dict(length["values"], ft=value, **{"in": value * 12}))
+
+
+def _unverified(length: dict) -> dict:
+    """A number of a book not verified, for a flag's drafted check (which never decides a result). With no second
+    reading, nothing but the printed text says what it is: a table cell prints its unit in its column's heading
+    ("(feet)", Table 1016.1), never beside the number, so a number with no unit of its own may stand for a length or
+    an area; and where the recorded words give no comparison ("none": every table cell) its direction is not checked.
+    The value must still be printed in a cited piece and stated in the quote, and the examples' drafted_check prove
+    the drafted formula's direction against worked values."""
+    out = dict(length, unverified=True)
+    if set(length["values"]) <= {"count", "any"}:
+        v = length["values"].get("any", length["values"].get("count"))
+        out["values"] = dict(length["values"], ft=v, sf=v, **{"in": v})
     return out
 
 
@@ -237,9 +282,16 @@ def cites_book(sources: list[dict], ctx) -> bool:
 def problems(rule: dict, sources: list[dict], ctx) -> list[str]:
     """Every number a rule citing a verified book uses must be a second-reading number of a cited piece, stated in
     the quote, in the measure's unit, used the way the law reads it (module docstring). [] if all are."""
-    allowed = candidates(sources, ctx)
+    flag = rule.get("kind") == "flag"
+    allowed = candidates(sources, ctx, flag=flag)
     units = _units(rule, ctx)
     out = []
+    unverified = sorted({s["file"] for s in sources if isinstance(s, dict) and isinstance(s.get("file"), str)
+                         and (ctx.verification.get(s["file"]) or {}).get("not_verified")})
+    if unverified and not flag:
+        out.append(f"cites {', '.join(unverified)}, whose numbers were never read a second time (not_verified in its "
+                   "text_verification file): a rule may not stand on them; make it a flag (always needs review), "
+                   "its check kept as the drafted test")
     for key in ("applies_when", "check"):
         if isinstance(rule.get(key), str):
             out += _formula_problems(rule[key], key, allowed, units, directions=True)
@@ -309,6 +361,8 @@ def _formula_problems(text: str, key: str, allowed: list[dict], units: dict, dir
         reads = {c["comparison"] for c in fits}
         if reads == {"none"} and in_formula:
             continue                                          # a term of the law's formula (20 inches minus ...)
+        if reads == {"none"} and all(c.get("unverified") for c in fits):
+            continue                                          # no reading says its direction (_unverified)
         if reads == {"none"}:
             out.append(f"number {shown} in '{key}': the second reading says the law sets no limit with it ('none': a "
                        f"conversion, a count or a permission, {fits[0]['piece']}: {fits[0]['shown']!r}); it can't be compared with")

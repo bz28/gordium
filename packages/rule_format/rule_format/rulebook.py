@@ -46,7 +46,7 @@ REVISED_FIELDS = (RULE_FIELDS - {"id", "revised", "drafted_by", "status", "appro
 TEXT_FIELDS = ("id", "kind", "topic", "title", "drafted_by", "status", "approved_by")
 TITLE_MAX = 80                                    # a label, one line: long enough to name, too short to retell
 ITEM_FIELDS = {"review_when": {"when", "reason"}, "sources": {"file", "page", "lines", "quote", "cell", "not_limits"},
-               "examples": {"given", "expect", "note", *parts.EXAMPLE_FIELDS}}
+               "examples": {"given", "expect", "note", "drafted_check", *parts.EXAMPLE_FIELDS}}
 CELL_FIELDS = {"section", "row", "column"}   # a chart cell source: {file, page, cell: {section, row, column}}
 APPROVED_FIELDS = ("id", "kind", "topic", "title", "applies_when", "check", "review_when", "sources", "findings",
                    "answers")
@@ -306,12 +306,19 @@ def brought_in_pages(entry: dict) -> list[int] | None:
 def kept_text(entry: dict) -> list[dict]:
     """A kept-outside document's extracted text as this branch brings it in: its brought-in pages chosen from the
     cached whole book, row for row what extract_icc(pdf, those pages) gives (header included)."""
-    from document_extraction.book_text import select
+    from document_extraction.book_text import as_printed, select
     pages = brought_in_pages(entry)
     if not pages:                               # never the whole book in its stead (_source_entry_problems)
         raise ValueError(f"{entry['file']}: kept outside the repo with no brought_in.pages")
-    return _kept(f"kept text {pages}", cached_text(entry).read_bytes(),
-                 lambda data: select(_jsonl_rows(data), pages))
+    return _kept(f"kept text {pages} {_misreads(entry)!r}", cached_text(entry).read_bytes(),
+                 lambda data: as_printed(select(_jsonl_rows(data), pages), _misreads(entry))[0])
+
+
+def _misreads(entry: dict) -> dict:
+    """Where a scanned book's OCR misreads the page, by line (sources.yaml brought_in.misread; book_text.as_printed):
+    every check reads the brought-in text with them put right."""
+    b = entry.get("brought_in")
+    return dict(b.get("misread") or {}) if isinstance(b, dict) else {}
 
 
 @dataclass
@@ -403,13 +410,14 @@ class Context:
                                    "pdfplumber; the version is book_text.extractor_key)")
             # Text is only trusted for a document whose own checks all passed.
             if extracted.exists() and name not in ctx.file_problems:
-                ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None)
+                ctx._load_extracted(name, sha, extracted, brought_in_pages(entry) if outside else None,
+                                    _misreads(entry) if outside else None)
                 # (an outside book with no brought_in.pages has a problem, so is never loaded whole)
             cut = j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl"
             if cut.exists():
                 ctx.pieces |= {row["id"] for row in read_jsonl(cut)[1:]}
             if outside and cut.exists() and name in ctx.pages:
-                for problem in _stale_cache_problems(extracted, cut):
+                for problem in _stale_cache_problems(extracted, cut, _misreads(entry)):
                     ctx._problem(name, problem)
             cells = j / "2_extracted_text" / f"{Path(name).stem}.cells.jsonl"
             if entry.get("chart_pages") and cells.exists() and name not in ctx.file_problems:
@@ -435,12 +443,13 @@ class Context:
         self.districts |= districts
         self.cells[name] = cells
 
-    def _load_extracted(self, name, sha, path, pages=None):
+    def _load_extracted(self, name, sha, path, pages=None, misreads=None):
         """Extracted text: a header line {"file", "sha256"}, then one {"page", "line", "text", ...} per line.
         The header ties it to the PDF version; CI re-extracts the text from the PDF (python -m
         document_extraction --check) and requires an exact match, so this file can't be edited by hand. `pages`: only
         these pages (a book kept outside the repo: its cached text is the whole book; the branch brings in some)."""
-        found = _kept(f"extracted {sha} {pages}", Path(path).read_bytes(), lambda data: _pages_of(data, sha, pages))
+        found = _kept(f"extracted {sha} {pages} {misreads!r}", Path(path).read_bytes(),
+                      lambda data: _pages_of(data, sha, pages, misreads))
         if found is None:
             self._problem(name, f"{path.name} was extracted from a different version; re-extract")
             return
@@ -448,24 +457,37 @@ class Context:
 
 
 def _verification(j: Path) -> dict[str, dict]:
-    """A law folder's second reading of a book's numbers (text_verification.yaml) with the lines of each piece, for
-    code_numbers; {} if it has none, or it can't be read (its own check, state_law.verification_problems, says why)."""
-    path = j / "text_verification.yaml"
-    try:
-        book = load(path) if path.is_file() else None
-        name = book["document"]
-        cut = read_jsonl(j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
-        return {name: {"pieces": dict(book["pieces"]), "lines": {r["id"]: r["lines"] for r in cut[1:]}}}
-    except Exception:            # reported by its own check, never a crash here
-        return {}
+    """A law folder's second reading of each book's numbers (text_verification.yaml, or one file per book,
+    text_verification.<book>.yaml: verification_files) with the lines of each piece, for code_numbers, by book; a
+    file that can't be read is left out (its own check, state_law.verification_problems, says why)."""
+    out = {}
+    for path in verification_files(j):
+        try:
+            book = load(path)
+            name = book["document"]
+            cut = read_jsonl(j / "2_extracted_text" / f"{Path(name).stem}.sections.jsonl")
+            out[name] = {"pieces": dict(book["pieces"]), "lines": {r["id"]: r["lines"] for r in cut[1:]},
+                         # its numbers were never read a second time (state_law.py): no rule may use them
+                         "not_verified": book.get("not_verified")}
+        except Exception:        # reported by its own check, never a crash here
+            continue
+    return out
 
 
-def _stale_cache_problems(extracted: Path, cut: Path) -> list[str]:
+def verification_files(j) -> list[Path]:
+    """A law folder's records of the second reading of its books' numbers: text_verification.yaml (one book, as New
+    York's), then text_verification.<book>.yaml, one per book (Maine's two books)."""
+    j = Path(j)
+    return [p for p in [j / "text_verification.yaml", *sorted(j.glob("text_verification.*.yaml"))] if p.is_file()]
+
+
+def _stale_cache_problems(extracted: Path, cut: Path, misreads: dict | None = None) -> list[str]:
     """A cached text that is not the one the repo's pieces were cut from (edited, or left from another extraction):
     each piece's words must still have the fingerprint the sections file records. Only `python -m
     document_extraction --check` re-extracts, so without this an edited cache would feed every other check."""
+    from document_extraction.book_text import as_printed
     from document_extraction.icc_sections import text_fingerprint
-    lines = {(r["page"], r["line"]): r for r in read_jsonl(extracted)[1:]}
+    lines = {(r["page"], r["line"]): r for r in as_printed(read_jsonl(extracted), misreads)[0][1:]}
     out = []
     for piece in read_jsonl(cut)[1:]:
         members = [lines.get((pg, n)) for pg, a, b in piece["lines"] for n in range(a, b + 1)]
@@ -499,12 +521,15 @@ def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | Non
     return cells, districts
 
 
-def _pages_of(data: bytes, sha: str, only: list[int] | None = None) -> dict | None:
+def _pages_of(data: bytes, sha: str, only: list[int] | None = None, misreads: dict | None = None) -> dict | None:
     """An extracted-text .jsonl file's bytes -> page -> line -> the line's words (`only`: these pages), or None when
     its header names another PDF version than `sha` (checked before any row is read, as for _cells_of)."""
     rows = _jsonl_rows(data)
     if not rows or rows[0].get("sha256") != sha:
         return None
+    if misreads:                       # a scanned book: its OCR's misreads put right (book_text.as_printed)
+        from document_extraction.book_text import as_printed
+        rows = as_printed(rows, misreads)[0]
     pages: dict[int, dict[int, list[str]]] = {}
     keep = None if only is None else set(only)
     for row in rows[1:]:
@@ -516,10 +541,11 @@ def _pages_of(data: bytes, sha: str, only: list[int] | None = None) -> dict | No
 
 SOURCE_FIELDS = {"file", "title", "publisher", "url", "downloaded_on", "sha256", "pages", "contents", "notes",
                  "adopted_on", "created_on", "quotable", "not_quotable_because", "layout", "chart_pages",
-                 "kept_outside_repo", "copy", "terms", "edition", "in_force", "brought_in"}
+                 "kept_outside_repo", "copy", "terms", "edition", "in_force", "brought_in", "style"}
 # Document layouts the section splitters know: ecode360 (document_extraction/sections.py), icc (an ICC code book,
-# document_extraction/icc_sections.py)
-LAYOUTS = {"ecode360", "icc"}
+# document_extraction/icc_sections.py), two_column (a book in two columns read from its text layer, with its `style`:
+# document_extraction/columns.py and columns_sections.py)
+LAYOUTS = {"ecode360", "icc", "two_column"}
 # A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU), is each place's own: its
 # jurisdiction.yaml districts.chart_column, through the registry (place.py: Place.district_column), the one
 # definition the chart reader, the inspector and the drafter all use.
@@ -871,8 +897,13 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         p.append("missing 'title' (a short label)")
     elif len(title) > TITLE_MAX or len(title.strip().splitlines()) > 1:
         p.append(f"'title' is a one-line label of at most {TITLE_MAX} characters; the rule is its quotes and check")
-    if (rule.get("kind") == "rule") != ("check" in rule):
-        p.append("a 'rule' needs a 'check'; a 'flag' must not have one")
+    # A flag has no check, except one citing a book whose numbers were never read a second time (not_verified,
+    # state_law.py): there it keeps the check it would have as a rule, its drafted test, shown and tested by its
+    # examples' drafted_check, never run for a result (outcome(): a flag always needs review).
+    drafted = rule.get("kind") == "flag" and "check" in rule
+    if (rule.get("kind") == "rule") != ("check" in rule) and not (drafted and _cites_unverified(rule, ctx)):
+        p.append("a 'rule' needs a 'check'; a 'flag' must not have one (unless it cites a book not verified: "
+                 "text_verification not_verified, where its check is the drafted test)")
     p += parts.rule_problems(rule)       # for_each, within, when_none (a rule for each part)
     review_when, sources, examples = (_list_of_dicts(rule, k) for k in ("review_when", "sources", "examples"))
     for key, value in (("review_when", review_when), ("sources", sources), ("examples", examples)):
@@ -949,6 +980,7 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
             p.append(f"example {n}: expected {ex['expect']}, got {got}")
     if per_part:
         p += parts.examples_problems(rule, examples or [], ctx.allowed(), run=not p)
+    p += _drafted_check_problems(rule, examples or [], ctx, run=not p)
 
     p += rule_revision_problems(rule.get("revised", []))
     p += _approval_problems(rule, ctx, APPROVED_FIELDS)
@@ -956,6 +988,44 @@ def _rule_problems(rule: dict, district: str, ctx: Context) -> list[str]:
         used = set().union(*(formula.names(f) for f in conditions if isinstance(f, str) and _parses(f)))
         p += [f"uses proposed measure '{m}': an engineer must add it to measures.yaml before this can be approved"
               for m in sorted(used & set(ctx.proposed))]
+    return p
+
+
+def _cites_unverified(rule: dict, ctx: Context) -> bool:
+    """Whether a rule cites a book whose numbers were never read a second time (text_verification not_verified)."""
+    sources = rule.get("sources")
+    return isinstance(sources, list) and any(
+        isinstance(s, dict) and isinstance(s.get("file"), str)
+        and (ctx.verification.get(s["file"]) or {}).get("not_verified") for s in sources)
+
+
+def _drafted_check_problems(rule: dict, examples: list, ctx: Context, run: bool) -> list[str]:
+    """A flag's drafted test (a flag citing a book not verified keeps its check: _rule_problems): each example's
+    `drafted_check` is what the check gives when the flag is run as a rule (its one answer, for a rule for each
+    part), proved here, with at least one that passes and one that fails, so the drafted formula is exercised. The
+    flag's own result (`expect`) is still needs review (or not applicable). drafted_check goes only with such a
+    flag."""
+    drafted = rule.get("kind") == "flag" and isinstance(rule.get("check"), str)
+    given = [(n, ex) for n, ex in enumerate(examples, 1) if "drafted_check" in ex]
+    if not drafted:
+        return [f"example {n}: drafted_check goes only with a flag that keeps a drafted check" for n, _ in given]
+    p, seen = [], set()
+    as_rule = dict(rule, kind="rule")
+    for n, ex in given:
+        want = ex["drafted_check"]
+        if want not in OUTCOMES:
+            p.append(f"example {n}: drafted_check must be one of {OUTCOMES}")
+            continue
+        seen.add(want)
+        if not run:
+            continue
+        got = parts.worked_example(as_rule, ex, ctx.allowed())
+        got = got[0] if isinstance(got, tuple) else got
+        if got != want:
+            p.append(f"example {n}: the drafted check gives {got}, not {want} (drafted_check)")
+    if not {"pass", "fail"} <= seen:
+        p.append("a flag that keeps a drafted check needs examples whose drafted_check passes and fails, so the "
+                 "drafted test is really exercised")
     return p
 
 
