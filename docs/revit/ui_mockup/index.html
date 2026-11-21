@@ -802,14 +802,18 @@ document.getElementById("backView").onclick = () => { const v = S.zoomStack.pop(
 let tt; function toast(m){ const t = document.getElementById("toast"); t.textContent = m; t.classList.add("on"); clearTimeout(tt); tt = setTimeout(()=>t.classList.remove("on"), 3600); }
 function openDetail(i){ S.detail = i; S.sel = i; S.view = "detail"; const r = ROWS[i]; select(r.els, false, r.cause==="noroute"?"noroute":null); render(); body.scrollTop = 0; }
 let checkTimer;
-function recheck(){
-  S.before = S.panel==="stale" ? "results" : S.panel;  // where Cancel returns
-  S.hadResults = ["results","stale"].includes(S.panel);
+function startChecking(from){
+  // entering Checking from any state: what Cancel returns to, and whether there are earlier results to keep dimmed
+  S.hadResults = ["results","stale"].includes(from);
+  S.before = S.hadResults ? "results" : (["none","error","missing"].includes(from) ? from : "none");
   S.editedDuringCheck = false;
-  S.stale = S.stale || S.panel==="stale";  // a check started on stale results keeps them grey until its answer
+  S.stale = S.stale || from==="stale";
+}
+function recheck(){
+  startChecking(S.panel);  // a check started on stale results keeps them grey until its answer
   S.panel = "checking"; S.tab = "results"; render(); document.getElementById("stateSel").value = "checking";
   clearTimeout(checkTimer);
-  checkTimer = setTimeout(() => { if (S.panel!=="checking") return; S.panel = "results"; S.stale = S.editedDuringCheck;  // an edit after the read leaves the answer stale S.view = "list"; document.getElementById("stateSel").value = "results"; render();
+  checkTimer = setTimeout(() => { if (S.panel!=="checking") return; S.panel = "results"; S.stale = S.editedDuringCheck; /* an edit after the read leaves the answer stale */ S.view = "list"; document.getElementById("stateSel").value = S.stale ? "stale" : "results"; render();
     toast(S.editedDuringCheck ? "Checked, but the model changed during the check: these results are marked out of date. Check again." : S.d33 || Object.keys(S.fix).length ? "Mockup: the results shown are the eval's. A real check would reflect your changes and say which rows changed." : "Checked: the same 8 rows (nothing in the model changed)."); }, 1500);
 }
 body.addEventListener("click", e => {
@@ -882,7 +886,7 @@ document.querySelectorAll("[data-theme-btn]").forEach(b => b.onclick = () => {
   S.theme = b.dataset.themeBtn; document.documentElement.dataset.theme = S.theme;
   document.querySelectorAll("[data-theme-btn]").forEach(x => x.setAttribute("aria-pressed", x===b));
 });
-document.getElementById("stateSel").onchange = e => { S.panel = e.target.value; S.tab = "results"; S.view = "list"; S.stale = S.panel==="stale"; showProps(false); };
+document.getElementById("stateSel").onchange = e => { if (e.target.value==="checking" && S.panel!=="checking") startChecking(S.panel); S.panel = e.target.value; S.tab = "results"; S.view = "list"; if (S.panel!=="checking") S.stale = S.panel==="stale"; showProps(false); };
 document.getElementById("srcBtn").onclick = e => { S.src = !S.src; e.currentTarget.setAttribute("aria-pressed", S.src); document.getElementById("revit").classList.toggle("show-src", S.src); document.getElementById("legend").classList.toggle("show-src", S.src); showProps(false); };
 // ribbon tooltips: a short title, then a few lines (Revit's ToolTip and LongDescription)
 const tip = document.getElementById("rtip");
