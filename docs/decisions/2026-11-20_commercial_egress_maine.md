@@ -41,7 +41,14 @@ the book's own rule, the book's own errors named.
   prints I-1, I-3, I-4. So **no page image in this copy is independent of the OCR**: a second reading from it would
   share the OCR's errors (a "1-hour" read as "I-hour", an I-4 read as 1-4). The precedent's second reading cannot be
   done honestly from this copy, so `text_verification.icc.ibc.2009.yaml` is not written, and `python -m rule_format`
-  fails on it, on purpose. **Ben decides:** buy ICC's 2009 IBC (PDF), or name another copy that is a true scan.
+  fails on it, on purpose. **Looked for an independent copy (2026-11-20):** the Internet Archive's other 2009 IBC
+  postings are Public.Resource.Org's Washington Building Code 2009 (`gov.wa.building.2009`: the same OCR-made pages,
+  page for page, e.g. its p.419 is this copy's p.266, same characters and fonts), and an individual's upload
+  (`2009InternationalBuildingCode`, 2017, "community" collection, no Public.Resource.Org posting and no stated licence),
+  which is not used: its provenance is unknown. So **every IBC number is "read from an OCR copy only: not verified"**
+  (`text_verification.icc.ibc.2009.yaml`, `not_verified`), and every IBC requirement is drafted as a flag: its check
+  formula is kept, but it always needs review, never passes, until the numbers are checked against a purchased ICC copy.
+  The one open item: **buy ICC's 2009 IBC.**
 - **NFPA 101 (2012) is NFPA's own PDF** (real text in its fonts, one licensed copy), so its second reading from the
   page images can go ahead as in New York.
 - **Not done yet:** labels, definitions, rules, `parts.yaml` measures and the coverage report (they depend on the
@@ -50,14 +57,22 @@ the book's own rule, the book's own errors named.
 
 ## Open questions for Ben
 
-1. **Copies to buy:** ICC 2009 IBC (blocking, above) and NFPA 101 2012 (to confirm this copy).
-2. **NFPA edition:** the sheet's numbers match the 2012 edition; Maine's Fire Marshal rule (16-219 CMR ch. 20)
-   adopted an earlier edition in 2016 (2009, as Ben has it) and today names the 2018 edition with Maine's own
-   modifications, one of them the dead-end corridor limit (20 ft). Which edition and modifications applied on the
-   permit date decides the dead-end result (21'-6": passes the IBC by its exception 3 and NFPA 2012's 50 ft when
-   sprinklered; fails a flat 20 ft).
-3. **IBC edition:** MUBEC's rules are 16-642 CMR (filed October 2010); that the 2009 IBC was in force in Portland in
-   October 2016 is the sheet's word, not yet the rule text's.
+1. **Copies to buy:** ICC's 2009 IBC (the one item that keeps IBC rules from passing) and NFPA 101 2012 (to confirm
+   this copy).
+2. **Two Maine rules, two books.** The building code is MUBEC (10 M.R.S. ch. 1103), whose rules are **16-642 CMR**
+   (Technical Building Codes and Standards Board; filed October 2010). The Life Safety Code is adopted by the State Fire
+   Marshal's own rule, **16-219 CMR ch. 20** (Fire Safety in Buildings and Structures), with Maine's exclusions and
+   modifications.
+3. **The 2016 editions are open.** Found: today's MUBEC uses the 2021 I-codes (since 2025-04-07), before that the 2015
+   I-codes; the rules filed in 2010 adopted the 2009 I-codes; no rule text was found online saying which IBC edition
+   Portland enforced in October 2016 (the sheet says the 2009 IBC). Today's 16-219 CMR ch. 20 names the 2018 NFPA 101
+   (amended 2021-01-25); in 2016 it named an earlier edition (2009, as Ben has it, and a Maine Municipal Association
+   note says the same); the sheet's section numbers match the 2012 edition. Sources: law.cornell.edu (16-219 CMR ch.
+   20), maine.gov Fire Marshal rules page and MUBEC Ch 1, read 2026-11-20.
+4. **Maine's dead-end limit would fail the sheet.** Today's 16-219 CMR ch. 20 modifies the dead-end corridor limit to
+   20 ft. The sheet's dead end is 21'-6": it passes the 2009 IBC only by 1018.4 exception 3 (less than 2.5 x its 10-ft
+   width = 25 ft) and NFPA 2012's 50 ft in a sprinklered building, but **fails a flat 20-ft limit**. Whether the 2016
+   rule had that modification, and for day care, is part of question 3.
 
 ## Alternatives rejected
 
