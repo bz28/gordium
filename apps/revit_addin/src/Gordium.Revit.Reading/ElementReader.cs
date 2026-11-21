@@ -482,7 +482,8 @@ internal sealed class Read(RevitModel model)
                 parts.Add(new JsonObject { ["box"] = Numbers(nb?.ToArray()), ["definition"] = nested });
                 continue;
             }
-            if (el.Mark == GordiumMark.FloorBlock || SiteReader.BuildingCategories.Contains(el.BuiltInCategory))
+            var buildingPart = SiteReader.IsBuildingPart(el);     // the one predicate (review round 3)
+            if (buildingPart)
                 inside.HoldsBuilding = true;     // read on for its place too: the link is left out (scene 19), and
                                                  // where it stands is where its building parts stand
             if (el.Mark is GordiumMark.SpotGrade or GordiumMark.FinishedGrade)
@@ -495,7 +496,13 @@ internal sealed class Read(RevitModel model)
                 parts.Add(new JsonObject { ["box"] = null });
                 continue;
             }
-            var g = el.Geometry is null ? new Gathered() : Walk(el.Geometry, t, el);
+            // a building part's Medium and Coarse drawing (Fold and Coarser leave it out of its geometry: a building's
+            // faces are Fine's) is walked into its place here too, so a piece drawn only coarser is never dropped from
+            // the link's box and plan (review round 3; more is only more cautious)
+            IReadOnlyList<GeometryItem>? drawn = el.Geometry;
+            if (drawn is not null && buildingPart && SiteReader.Drawn(el.CoarserGeometry) is { Count: > 0 } more)
+                drawn = new List<GeometryItem>(drawn) { new InstanceItem(more) };
+            var g = drawn is null ? new Gathered() : Walk(drawn, t, el);
             if (!g.HasFaces && !anyGeometry && !g.Other && !g.MissingPart)
                 continue;                                        // lines and points only: nothing that could be a building
             var empty = anyGeometry && !g.HasFaces;              // a family with nothing in it: its place can't be told

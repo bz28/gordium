@@ -211,6 +211,23 @@ public sealed class SiteObjectTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal(["tool_words"], Codes(b));
     }
 
+    /// <summary>Review round 3: inside a linked model, one marked a deck is a building part too (the link holds a
+    /// building), and its Medium/Coarse-only piece stays in the link's place (Fold and Coarser leave it out of the
+    /// geometry, so LookInside walks it itself).</summary>
+    [Fact]
+    public void In_a_linked_model_one_marked_a_deck_holds_a_building_and_its_coarser_piece_keeps_its_place()
+    {
+        var deck = Thing("deck", mark: "Deck") with { CoarserGeometry = [Block(40, 90, 44, 110)] };
+        var linked = new RevitModel { Document = "site.rvt", Elements = [deck] };
+        var model = House();
+        var read = new Read(model);
+        read.Element(FakeRevit.LinkOf("link", linked));
+        Assert.Contains(read.Unsent, u => u["id"]!.GetValue<string>() == SiteReader.LinkedModelKind);
+        var link = read.Candidates.Single(c => c.Id == "link");
+        Assert.Equal(44, link.Sent["box"]!.AsArray()[3]!.GetValue<double>(), 6);      // x1: the coarser piece's
+        Assert.Contains(link.Sent["points"]!.AsArray(), p => Math.Abs(p![0]!.GetValue<double>() - 44) < 1e-6);
+    }
+
     [Fact]
     public void The_marking_list_says_a_nested_parts_mark_isnt_read()
     {
