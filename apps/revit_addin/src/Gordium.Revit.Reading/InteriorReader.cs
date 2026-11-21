@@ -24,6 +24,10 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
     /// <summary>Why <c>stairs</c> was left out (empty when it was sent; step 4).</summary>
     public IReadOnlyList<string> StairsNotRead { get; init; } = [];
 
+    /// <summary>Each escape-route value left out (section 10), apart from <see cref="InteriorReadResult.Notes"/>: a house
+    /// never sets the route marks, so its count of values left out stays as it was (review round 1).</summary>
+    public IReadOnlyList<InteriorNote> RouteNotes { get; init; } = [];
+
     /// <summary>Why <c>doors</c> was left out (empty when it was sent; step 5).</summary>
     public IReadOnlyList<string> DoorsNotRead { get; init; } = [];
 
@@ -98,6 +102,7 @@ public static class InteriorReader
     public static InteriorReadResult Read(RevitModel model)
     {
         var notes = new List<InteriorNote>();
+        var routeNotes = new List<InteriorNote>();           // the escape routes' own, kept apart from a house's
         var evidence = new JsonObject();
         var interior = new JsonObject { ["format"] = "gordium.interior/1", ["units"] = "ft" };
         var roomsNotRead = RoomsNotRead(model);
@@ -122,7 +127,7 @@ public static class InteriorReader
                     notes.Add(new(r.Id, "floor", "the Revit layer gave nothing for this room"));
                 else
                     ReadRoom(model, records, rec, room, notes, r.Sleeping, plans);
-                RouteReader.RoomMarks(r, room, notes);
+                RouteReader.RoomMarks(r, room, routeNotes);
                 rooms.Add(room);
             }
         }
@@ -223,7 +228,7 @@ public static class InteriorReader
         // escape routes (section 10): each story's levels, rooms' holes and obstructions, doors' places, sides and
         // exits, and the passages between rooms, every one left out with its reason when it can't be read exactly
         if (records is not null)
-            RouteReader.Add(model, records, interior, plans, notes, evidence);
+            RouteReader.Add(model, records, interior, plans, routeNotes, evidence);
 
         // step 6: the format's has_none claims, each only on its tick, with nothing drawn against it and nothing that
         // could hide one; every tick's reading kept as evidence
@@ -233,6 +238,7 @@ public static class InteriorReader
         evidence["has_none"] = new JsonObject(ticks.Select(t => KeyValuePair.Create(t.Kind.Kind, (JsonNode?)HasNone.Evidence(t))));
         return new(interior, roomsNotRead, openingsNotRead, notes, evidence)
         {
+            RouteNotes = routeNotes,
             StairsNotRead = stairsNotRead, DoorsNotRead = doorsNotRead, GuardsNotRead = guardsNotRead, Ticks = ticks,
             UnknownSpaces = unknown.Count > 0 ? UnknownAreaWords(model) : [], LevelConflicts = LevelConflicts(model),
             NotAStair = StairReader.NotAStairLines(model), NotAStairConflicts = StairReader.NotAStairConflicts(model),

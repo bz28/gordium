@@ -202,5 +202,5 @@ internal sealed class FakeFloor
         r.Interior[key]?.AsArray().Select(x => x!.AsObject()).FirstOrDefault(x => x["id"]!.GetValue<string>() == Uid(id));
 
     public static string? Note(InteriorReadResult r, string id, string field) =>
-        r.Notes.FirstOrDefault(n => n.Part == Uid(id) && n.Field == field)?.Why;
+        r.Notes.Concat(r.RouteNotes).FirstOrDefault(n => n.Part == Uid(id) && n.Field == field)?.Why;
 }

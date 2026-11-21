@@ -30,6 +30,10 @@ public static class RouteReader
     /// never stops a door's far side being read as outside; any larger one not outlined does.</summary>
     public const double SmallestBeyond = 2.0 * (1.0 / 12);
 
+    /// <summary>How far a door's drawn middle in its wall may be from where it is placed, or from the middle of the
+    /// opening it cuts, ft: 1 in (a frame drawn a little unevenly); farther, its clear opening isn't placed.</summary>
+    public const double CentreAgree = 1.0 / 12;
+
     /// <summary>What stands in a route's way, by Revit category (the format's kinds: casework, furniture, equipment,
     /// fixture), with whether it is fixed in place. Revit can't tell a movable piece from a fixed one, so each category
     /// says it once (furniture is movable; casework, systems furniture, plumbing and lighting fixtures, and equipment
@@ -301,11 +305,18 @@ public static class RouteReader
                 || e.BuiltInCategory is "OST_Rooms" or "OST_RoomSeparationLines")
                 continue;                                    // the room, what bounds it, a window or door in its walls
             looked.Add(e.UniqueId);
-            if (e is { GeometryFailed: false, Faces.Count: 0 })
-                continue;                                    // nothing drawn (a base point, a line)
             var known = ObstructionKinds.TryGetValue(e.BuiltInCategory, out var kind);
             if (plan.StandingWalls?.Contains(e.UniqueId) == true)
                 (known, kind) = (true, StandingWall);        // a wall standing in it: its footprint stands in the way
+            if (e is { GeometryFailed: false, Faces.Count: 0 })
+            {
+                if (!known)
+                    continue;                                // nothing drawn (a base point, a line)
+                // casework, furniture, equipment or a fixture drawn in 2D alone: where it stands isn't read (review
+                // round 1: it was skipped as nothing drawn, and the floor under it crossed)
+                why = $"{InteriorReader.Named(e)} is drawn with no 3D faces, so where it stands isn't read";
+                return null;
+            }
             if (e.GeometryFailed || e.Faces is null)
             {
                 if (e.Box is { } box && Box3.Turned(box.Min, box.Max, box.Transform is { } own ? model.InternalToShared.After(own)
@@ -347,6 +358,25 @@ public static class RouteReader
                 }
                 meets |= a > roomArea * 1e-9;
                 shapes.Add(shape);
+            }
+            // a piece crossing the band from below the floor or past the headroom (a wall based below a raised floor, tall
+            // casework) may have no flat face in the band: the part within it is taken by all the points of its faces
+            // that reach the band, sides included, put together (review round 1: such a wall was dropped in silence)
+            var reach = e.Faces.Select(f => InteriorReader.Shared(model, f.Points)).Where(p => p.Count > 0
+                && p.Max(q => q.Z) >= floor - S && p.Min(q => q.Z) < floor + Headroom && (known || p.Max(q => q.Z) > floor + S)).ToList();
+            var all = e.Faces.SelectMany(f => InteriorReader.Shared(model, f.Points)).ToList();
+            if (reach.Count > 0 && all.Count > 0 && (all.Min(q => q.Z) < floor - S || all.Max(q => q.Z) >= floor + Headroom))
+            {
+                if (Hull(reach.SelectMany(p => p).Select(q => new P2(q.X, q.Y))) is { } across)
+                {
+                    if (AreaIn(across) is not { } a)
+                    {
+                        why = $"{InteriorReader.Named(e)} couldn't be read in plan";
+                        return null;
+                    }
+                    meets |= a > roomArea * 1e-9;
+                    shapes.Add(across);
+                }
             }
             if (!meets)
                 continue;                                    // beside the room, or above the headroom
@@ -535,6 +565,26 @@ public static class RouteReader
             return null;
         }
         var u = (inWall.Min() + inWall.Max()) / 2;
+        // the middle of what is drawn in the wall must agree with where the door is placed and with the opening it cuts:
+        // a sidelight or a pocket drawn in the wall moves the middle off the clear opening (review round 1), and then
+        // where the clear opening is isn't told
+        if (rec.Location is not { } placedAt)
+        {
+            why = "its placement point couldn't be read, so its drawn middle can't be checked against it";
+            return null;
+        }
+        var atPoint = t.Apply(placedAt);
+        var uPoint = P2Dot(new P2(atPoint.X, atPoint.Y), along);
+        double? uCut = rec.WallOpening is { Count: > 0 } cut
+            ? cut.Select(t.Apply).Select(p => P2Dot(new P2(p.X, p.Y), along)).ToList() is var cu ? (cu.Min() + cu.Max()) / 2 : null
+            : null;
+        if (Math.Abs(u - uPoint) > CentreAgree || uCut is { } uc && Math.Abs(u - uc) > CentreAgree)
+        {
+            why = I($"what is drawn of it in its wall is centred {Math.Abs(u - uPoint) * 12:0.##} in from where it is placed") +
+                  (uCut is { } k ? I($" and {Math.Abs(u - k) * 12:0.##} in from the opening it cuts") : "") +
+                  " (a sidelight or a pocket drawn in the wall?), so where its clear opening is isn't told";
+            return null;
+        }
         var c = (a + b) / 2;
         var centre = new P2(u * along.X + c * n0.X, u * along.Y + c * n0.Y);
         return new(centre, along, thickness, n0);

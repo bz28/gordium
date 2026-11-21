@@ -66,7 +66,7 @@ public sealed class RouteTests
         var floor = new FakeFloor();
         var read = InteriorReader.Read(floor.Model());
         // every route field of every part is read: no route note at all
-        Assert.Equal([], read.Notes.Where(n => n.Field is "level" or "use" or "lockable" or "pass_through" or "obstructions" or "levels" or "passages"
+        Assert.Equal([], read.RouteNotes.Where(n => n.Field is "level" or "use" or "lockable" or "pass_through" or "obstructions" or "levels" or "passages"
                                                || n.Field.StartsWith("doors.plan", StringComparison.Ordinal) || n.Field.StartsWith("doors.sides", StringComparison.Ordinal)
                                                || n.Field.StartsWith("doors.exit", StringComparison.Ordinal) || n.Field.StartsWith("doors.level", StringComparison.Ordinal))
                                 .Select(n => $"{n.Part} {n.Field}: {n.Why}"));
@@ -245,6 +245,24 @@ public sealed class RouteTests
     }
 
     [Fact]
+    public void A_door_whose_drawn_middle_isnt_where_it_is_placed_has_no_place()
+    {
+        // review round 1: a sidelight drawn in the wall beside dA (1.5 ft more frame on one side) moves the middle of its
+        // geometry 0.75 ft off the door: its clear opening isn't placed on a guess
+        var floor = new FakeFloor();
+        var i = floor.OpeningIndex("dA");
+        var frame = floor.Prism([(10 - 1.625, 9.5), (10 + 1.625 + 1.5, 9.5), (10 + 1.625 + 1.5, 10), (10 - 1.625, 10)], 0, 7);
+        floor.Openings[i] = floor.Openings[i] with { Placed = frame.SelectMany(f => f.Points).ToList() };
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dA")["plan"]);
+        Assert.Contains("centred 9 in from where it is placed", FakeFloor.Note(read, "dA", "doors.plan"));
+        // the opening it cuts off the middle too: said
+        floor = new FakeFloor();
+        floor.Openings[i] = floor.Openings[i] with { WallOpening = [floor.Fake.Place(9.5, 9.5, 0), floor.Fake.Place(12.5, 9.5, 7)] };
+        Assert.Contains("from the opening it cuts", FakeFloor.Note(InteriorReader.Read(floor.Model()), "dA", "doors.plan"));
+    }
+
+    [Fact]
     public void A_door_opens_to_outside_only_when_no_room_is_drawn_beyond_it()
     {
         // Revit gives no room beyond dA (as on a door whose far room is in another phase), but the corridor is there
@@ -343,6 +361,34 @@ public sealed class RouteTests
     }
 
     [Fact]
+    public void A_piece_crossing_the_floor_or_drawn_in_2D_alone_is_never_dropped()
+    {
+        // review round 1, P0: a wall standing in the room from 1 ft under its floor to 10 ft up has no flat face in the
+        // band: its footprint still stands in the way
+        var floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("wall-in", "OST_Walls", "Partition", Faces: floor.Prism([(8, 5), (14, 5), (14, 6), (8, 6)], -1, 10)));
+        var i = floor.RoomIndex("A");
+        floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("wall-in", "OST_Walls", "Partition")] };
+        var obstructions = Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray();
+        Assert.Contains(obstructions, o => o!["outline"]!.AsArray().Any(p => p![0]!.GetValue<double>() == 14 && p[1]!.GetValue<double>() == 6));
+        // tall casework from under the floor past the headroom, the same
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("tall", "OST_Casework", "Tall cabinet", Faces: floor.Prism([(10, 0), (12, 0), (12, 2), (10, 2)], -0.5, 8)));
+        Assert.Equal(2, Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray().Count);   // the desk and the cabinet
+
+        // review round 1, P0: furniture drawn in 2D alone (no 3D faces): where it stands isn't read, never "nothing drawn"
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("desk-2d", "OST_Furniture", "Desk (2D)", Faces: []));
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Room(read, "A")["obstructions"]);
+        Assert.Contains("no 3D faces", FakeFloor.Note(read, "A", "obstructions"));
+        // a line or a base point of any other category is still nothing drawn
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("line", "OST_Lines", "Line", Faces: []));
+        Assert.NotNull(Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]);
+    }
+
+    [Fact]
     public void A_low_hung_obstruction_and_a_curved_one_count_by_their_whole_footprint()
     {
         var floor = new FakeFloor();
@@ -435,7 +481,7 @@ public sealed class RouteTests
                              new Dictionary<string, double> { ["wall-s1"] = 0.5, ["wall-s2"] = 0.5, ["wall-e"] = 0.5, ["wall-n"] = northWidth, ["wall-w"] = 0.5 });
     }
 
-    private static string? OutlineNote(InteriorReadResult r) => r.Notes.SingleOrDefault(n => n.Field == "story_outlines")?.Why;
+    private static string? OutlineNote(InteriorReadResult r) => r.RouteNotes.SingleOrDefault(n => n.Field == "story_outlines")?.Why;
 
     [Fact]
     public void A_storys_outlines_are_revits_gross_area_and_its_walls_inside_faces()
@@ -536,6 +582,12 @@ public sealed class RouteTests
         Assert.Null(read.Interior["levels"]);
         Assert.All(read.Interior["rooms"]!.AsArray(), r => Assert.Null(r!["level"]));
         Assert.Equal([], InteriorTests.Problems(house, read));
+        // review round 1: the route notes are kept apart, so a house's "values left out" stays its own
+        string[] route = ["use", "lockable", "pass_through", "level", "holes", "obstructions", "levels", "passages", "story_outlines"];
+        Assert.DoesNotContain(read.Notes, n => route.Contains(n.Field) || n.Field.StartsWith("doors.plan", StringComparison.Ordinal)
+                                               || n.Field.StartsWith("doors.sides", StringComparison.Ordinal) || n.Field.StartsWith("doors.level", StringComparison.Ordinal)
+                                               || n.Field.StartsWith("doors.exit_", StringComparison.Ordinal));
+        Assert.NotEmpty(read.RouteNotes);
     }
 
     // ---- the marks in a project and in the list ----------------------------------------------------------------

@@ -263,6 +263,16 @@ public sealed class BuildDataTests
             Assert.Contains(words, no.Single());
             Assert.Contains(same.Walls, x => x.Id == 111);
         }
+        // review round 1: the second wall's smoke partition and rating are carried (the stricter), and said; two
+        // different ratings are refused
+        var rated = data with { Walls = [.. data.Walls, a with { SmokePartition = false, FireRating = null }, b with { SmokePartition = true, FireRating = "1 hr" }] };
+        var (carried, said, _) = BuildData.Correct(rated, [merge]);
+        var kept = carried.Walls.Single(x => x.Id == 57);
+        Assert.Equal((true, "1 hr"), (kept.SmokePartition, kept.FireRating));
+        Assert.Contains("a smoke partition", said.Single());
+        Assert.Contains("status Existing kept (W111 was New)", said.Single());
+        var clash = data with { Walls = [.. data.Walls, a with { FireRating = "2 hr" }, b with { FireRating = "1 hr" }] };
+        Assert.Contains("fire ratings differ", BuildData.Correct(clash, [merge]).Refused.Single());
         var hosting = m with { Doors = [.. m.Doors, data.Doors[0] with { HostWall = 111 }] };
         Assert.Contains("a door or window", BuildData.Correct(hosting, [merge]).Refused.Single());
         var r = BuildRequest.Parse(JsonNode.Parse("""

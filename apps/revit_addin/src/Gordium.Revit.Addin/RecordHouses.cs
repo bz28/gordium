@@ -235,6 +235,7 @@ public sealed class ReadInteriorCommand : IExternalCommand
             log["guards_not_read"] = read.GuardsNotRead;
             log["has_none"] = read.Ticks.Select(t => t.Sent ? $"{t.Kind.Kind}: sent" : $"{t.Kind.Kind}: " + string.Join("; ", t.WhyNot)).ToList();
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
+            log["route_notes"] = read.RouteNotes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["evidence"] = read.Evidence.ToJsonString();
             log["routes"] = RouteReader.Summary(read);       // the escape routes' fields, counted (section 10)
             log["revit_layer"] = model.Interior!.Diagnostics;

@@ -572,15 +572,31 @@ public static class BuildData
                 // b's side of a, across: the merged centre line half way between the two outer faces
                 var side = Math.Sign(-(wb.Start.X - wa.Start.X) * uy + (wb.Start.Y - wa.Start.Y) * ux);
                 var shift = side * wb.ThicknessIn / 24;
+                // the merged wall carries the stricter of each: a smoke partition if either is, the one fire rating given
+                // (two different ratings are refused in MergeProblem), exterior if either is; its status (phase) is the
+                // first's, and the line says what each was (review round 1: the second's were dropped in silence)
                 var merged = wa with
                 {
                     Start = new PlanPoint(wa.Start.X - uy * shift, wa.Start.Y + ux * shift),
                     End = new PlanPoint(wa.End.X - uy * shift, wa.End.Y + ux * shift),
                     ThicknessIn = wa.ThicknessIn + wb.ThicknessIn,
+                    SmokePartition = wa.SmokePartition || wb.SmokePartition,
+                    FireRating = wa.FireRating ?? wb.FireRating,
+                    Exterior = wa.Exterior || wb.Exterior,
                 };
                 walls[ka] = merged;
                 walls.RemoveAt(walls.FindIndex(x => x.Id == c.MergeWith));
-                applied.Add(I($"merged {said} (one wall {merged.ThicknessIn:0.##} in thick, centre line moved {Math.Abs(shift):0.###} ft)"));
+                var differ = new List<string>();
+                if (wa.Status != wb.Status)
+                    differ.Add($"status {wa.Status} kept (W{c.MergeWith} was {wb.Status})");
+                if (wa.SmokePartition != wb.SmokePartition)
+                    differ.Add("a smoke partition (one of them was)");
+                if (wa.FireRating != wb.FireRating)
+                    differ.Add($"fire rating {merged.FireRating} (one of them had none)");
+                if (wa.Exterior != wb.Exterior)
+                    differ.Add("exterior (one of them was)");
+                applied.Add(I($"merged {said} (one wall {merged.ThicknessIn:0.##} in thick, centre line moved {Math.Abs(shift):0.###} ft") +
+                            (differ.Count > 0 ? "; " + string.Join("; ", differ) : "") + ")");
                 continue;
             }
             if (c.Kind == CorrectionKind.Fill)
@@ -660,6 +676,8 @@ public static class BuildData
     /// of each other, their ends within 1/16 in of each other's.</summary>
     public static string? MergeProblem(BuildWall a, BuildWall b)
     {
+        if (a.FireRating is { } ra && b.FireRating is { } rb && ra != rb)
+            return $"their fire ratings differ ({ra}, {rb}): which one the merged wall has isn't known";
         const double tol = 1.0 / 16 / 12;
         double la = Distance(a.Start, a.End), ux = (a.End.X - a.Start.X) / la, uy = (a.End.Y - a.Start.Y) / la;
         double lb = Distance(b.Start, b.End), vx = (b.End.X - b.Start.X) / lb, vy = (b.End.Y - b.Start.Y) / lb;

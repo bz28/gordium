@@ -132,10 +132,6 @@ internal static class RevitInterior
         return result;
     }
 
-    /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
-    /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
-    /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
-    /// the rectangle's loop dropped; all inside a sub-transaction rolled back. Each loop's corners and area are logged.</summary>
     /// <summary>A transaction whose warnings are dismissed (no dialog in a read), its errors rolling it back.</summary>
     private static void Quiet(Transaction t)
     {
@@ -155,6 +151,12 @@ internal static class RevitInterior
         }
     }
 
+    /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
+    /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
+    /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
+    /// the rectangle's loop dropped. The lines and the Room are each made in a committed transaction (Revit works a
+    /// plan's enclosed areas out again only on a commit) inside the transaction group <see cref="GrossAreasOf"/> rolls
+    /// back. Each loop's corners and area, and each side with what bounds it, are logged.</summary>
     private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, ViewFamilyType? planType, List<string> diagnostics)
     {
         GrossArea No(string why) => new(null, new Dictionary<string, double>(), why);
