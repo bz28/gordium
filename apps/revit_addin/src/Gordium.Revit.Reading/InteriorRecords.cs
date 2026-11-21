@@ -57,9 +57,11 @@ public sealed record InteriorRecords
 /// <param name="HasRoom"><c>PlanCircuit.IsRoomLocated</c>.</param>
 /// <param name="PointInside"><c>PlanCircuit.GetPointInside()</c> at the level's elevation (internal): for the words,
 /// and to find a Room of the design checked it lies in (a Room in a design option Revit's main-model circuits don't
-/// count, <see cref="InteriorReader.UnknownAreas"/>).</param>
+/// count, <see cref="InteriorReader.UnknownAreas"/>). Null when Revit can't give one (a sliver between overlapping
+/// walls: the Children's Odyssey model, 2026-11-20, threw "Could not obtain valid UV point"): such an area lies in
+/// no Room, so with no Room of its own it stays a space whose use isn't known, never dropped, never a crash.</param>
 /// <param name="LevelId">The level's <c>UniqueId</c>: its "no rooms on this level" mark, and the rooms on it.</param>
-public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz PointInside, string? LevelId = null);
+public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz? PointInside, string? LevelId = null);
 
 /// <summary>A linked Revit model, for the interior: whether its contents are known, where it reaches, and whether it
 /// holds rooms, windows or doors (design note, section 4: a link's rooms or windows leave that kind not read; a loaded

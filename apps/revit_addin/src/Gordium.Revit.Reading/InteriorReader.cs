@@ -288,7 +288,11 @@ public static class InteriorReader
 
     private static string AreaWords(RevitModel model, EnclosedArea a)
     {
-        var p = model.InternalToShared.Apply(a.PointInside);
+        if (a.PointInside is not { } inside)
+            return string.Format(CultureInfo.InvariantCulture,
+                                 "An enclosed area on {0} has no Room ({1:0.#} sq ft; Revit couldn't give a point inside it, " +
+                                 "often a sliver between overlapping walls)", a.Level, a.Area);
+        var p = model.InternalToShared.Apply(inside);
         return string.Format(CultureInfo.InvariantCulture, "An enclosed area on {0} has no Room ({1:0.#} sq ft, around x {2:0.##}, y {3:0.##})",
                              a.Level, a.Area, p.X, p.Y);
     }
@@ -321,9 +325,10 @@ public static class InteriorReader
     /// given, never holds it (read as a chord, the point could be outside the room).</summary>
     private static bool Lies(EnclosedArea a, RoomRecord r)
     {
-        if (a.LevelId is null || r.LevelId != a.LevelId || r.Boundary is not { Count: > 0 } loops || loops.Any(l => l.Count < 3 || l.Any(s => !s.IsLine)))
-            return false;
-        var (x, y) = (a.PointInside.X, a.PointInside.Y);
+        if (a.PointInside is not { } point || a.LevelId is null || r.LevelId != a.LevelId ||
+            r.Boundary is not { Count: > 0 } loops || loops.Any(l => l.Count < 3 || l.Any(s => !s.IsLine)))
+            return false;                                           // no point inside: never said to lie in a Room
+        var (x, y) = (point.X, point.Y);
         var inside = false;
         foreach (var loop in loops)
             foreach (var s in loop)
@@ -381,8 +386,10 @@ public static class InteriorReader
         var ids = new HashSet<string>(StringComparer.Ordinal);
         foreach (var a in areas)
         {
-            var p = model.InternalToShared.Apply(a.PointInside);
-            var id = string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:{1:0.###},{2:0.###}", a.LevelId ?? a.Level, p.X, p.Y);
+            var id = a.PointInside is { } inside
+                ? string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:{1:0.###},{2:0.###}", a.LevelId ?? a.Level,
+                                model.InternalToShared.Apply(inside).X, model.InternalToShared.Apply(inside).Y)
+                : string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:no-point:{1:0.###}sf", a.LevelId ?? a.Level, a.Area);
             for (var n = 2; !ids.Add(id); n++)
                 id = $"{id}#{n}";
             spaces.Add(new JsonObject { ["id"] = id, ["name"] = AreaWords(model, a) });

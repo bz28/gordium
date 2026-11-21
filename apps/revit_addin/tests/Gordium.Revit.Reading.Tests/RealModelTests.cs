@@ -223,6 +223,23 @@ public sealed class RealModelTests
     }
 
     [Fact]
+    public void An_enclosed_area_revit_gives_no_point_inside_stays_a_space_whose_use_isnt_known()
+    {
+        // the Children's Odyssey model (2026-11-20): Revit threw "Could not obtain valid UV point" for a sliver between
+        // overlapping walls; such an area is kept, lies in no Room, and keeps every sleeping-room rule needing review
+        var house = Ranch();
+        house.Areas.Add(new EnclosedArea("Level 0", 0.4, false, null, Level0));
+        var read = InteriorReader.Read(house.Model());
+        Assert.Equal(3, read.Interior["rooms"]!.AsArray().Count);
+        var space = Assert.Single(read.Interior["unknown_spaces"]!.AsArray())!;
+        Assert.Equal("enclosed-area:level-0:no-point:0.4sf", space["id"]!.GetValue<string>());
+        Assert.StartsWith("An enclosed area on Level 0 has no Room (0.4 sq ft; Revit couldn't give a point inside it",
+                          space["name"]!.GetValue<string>());
+        // the same id at every read
+        Assert.Equal(space["id"]!.GetValue<string>(), InteriorReader.Read(house.Model()).Interior["unknown_spaces"]![0]!["id"]!.GetValue<string>());
+    }
+
+    [Fact]
     public void An_enclosed_area_with_no_room_is_sent_as_a_space_whose_use_isnt_known_and_the_rooms_drawn_are_read()
     {
         var house = Ranch();

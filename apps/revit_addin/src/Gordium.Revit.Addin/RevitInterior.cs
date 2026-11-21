@@ -429,14 +429,25 @@ internal static class RevitInterior
                 var before = areas.Count;
                 foreach (PlanCircuit c in circuits)
                 {
-                    var inside = c.GetPointInside();
-                    areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated,
-                                               new Xyz(inside.U, inside.V, level.ProjectElevation), level.UniqueId));
+                    // Revit refuses a point inside a degenerate circuit (a sliver between overlapping walls: the
+                    // Children's Odyssey model, 2026-11-20): the area is kept with no point, never dropped
+                    Xyz? point = null;
+                    try
+                    {
+                        var inside = c.GetPointInside();
+                        point = new Xyz(inside.U, inside.V, level.ProjectElevation);
+                    }
+                    catch (Autodesk.Revit.Exceptions.InvalidOperationException)
+                    {
+                    }
+                    areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId));
                 }
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
                                 $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
                                 string.Join(", ", areas.Skip(before).Where(a => !a.HasRoom)
-                                    .Select(a => $"{a.Area:0.#} sq ft at ({a.PointInside.X:0.##}, {a.PointInside.Y:0.##}) internal")) + ")");
+                                    .Select(a => a.PointInside is { } p
+                                        ? $"{a.Area:0.#} sq ft at ({p.X:0.##}, {p.Y:0.##}) internal"
+                                        : $"{a.Area:0.#} sq ft, no point inside")) + ")");
             }
             return areas;
         }
