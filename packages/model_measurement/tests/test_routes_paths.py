@@ -374,7 +374,7 @@ def test_too_many_tied_routes_is_said(monkeypatch):
 
 
 PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters", "too_many_ties", "exit_unknown",
-             "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last two: test_routes_remote.py
+             "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last three: test_routes_remote.py
 
 
 def test_every_reason_has_a_case():

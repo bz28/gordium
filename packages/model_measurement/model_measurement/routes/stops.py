@@ -1,8 +1,8 @@
 """Every reason a route measurement can stop with (it gets no value, and a rule reading it says NEEDS REVIEW), in
 one place.
 
-The route code (floor.py, paths.py) gives a reason only through `Stop(key, ...)`, so this table is the whole list:
-tests/test_routes_floor.py and tests/test_routes_paths.py make each one happen. Values read through the interior
+The route code (floor.py, paths.py, remote.py) gives a reason only through `Stop(key, ...)`, so this table is the
+whole list: tests/test_routes_floor.py, tests/test_routes_paths.py and tests/test_routes_remote.py make each one happen. Values read through the interior
 reader (`interior/read.py`) stop with that table's reasons (`missing`, `not_a_length`, `not_an_outline` ...), which
 come through here as the `{reason}` of the part they belong to. The design: docs/decisions/2026-11-20_route_measurement.md.
 """
