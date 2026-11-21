@@ -198,6 +198,15 @@ def _verdict(sheet, ours, allowed, words) -> dict:
             "allowed": round(allowed, 3), "within_tolerance": abs(diff) <= allowed + 1e-9}
 
 
+def _no_dead_end(by_corridor) -> str:
+    """Why no dead end of Gordium's is judged: it measured none on the corridor (and why), or its dead ends start
+    elsewhere than the sheet's line."""
+    stops = [c["not_measured"] for c in by_corridor.values() if "not_measured" in c]
+    if not any(c.get("dead_ends") for c in by_corridor.values()):
+        return ("Gordium measured no dead end on this corridor: " + "; ".join(stops)) if stops else             "Gordium found no dead end on these corridors"
+    return "Gordium's dead ends start elsewhere: none within 3 ft of the sheet's line"
+
+
 def _judge_all(out) -> None:
     """Each figure against the decision's tolerance: within or outside, and by how much (worked here, never written
     in)."""
@@ -215,8 +224,7 @@ def _judge_all(out) -> None:
     length = _verdict(f["dead_end"]["sheet_stated"], mine["length"] if mine else None, 1.0, "length within 1 ft")
     width = _verdict(SHEET_DEAD_END_WIDTH, mine["least_width"] if mine else None, 1 / 12, "width within 1 in")
     f["dead_end"]["agreement"] = {"tolerance": TOLERANCES["dead_end"], "length": length, "least_width": width,
-                                  "dead_end": mine["from"] if mine else "none of Gordium's starts within 3 ft of the "
-                                                                         "sheet's line",
+                                  "dead_end": mine["from"] if mine else _no_dead_end(f["dead_end"]["gordium"]),
                                   "within_tolerance": None if mine is None else
                                   bool(length["within_tolerance"] and width["within_tolerance"])}
     g = f["remoteness"]["gordium"]

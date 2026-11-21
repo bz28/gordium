@@ -45,6 +45,8 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
     # length and width both judged when one does (review round 3)
     dead = got["figures"]["dead_end"]["agreement"]
     assert dead["within_tolerance"] is None and dead["length"]["within_tolerance"] is None
+    assert dead["dead_end"] == "Gordium's dead ends start elsewhere: none within 3 ft of the sheet's line"
+    assert make._no_dead_end({"c": {"not_measured": "why"}}) == "Gordium measured no dead end on this corridor: why"
     fake = {"figures": {k: dict(v) for k, v in got["figures"].items()}, "storage": dict(got["storage"])}
     line = fake["figures"]["dead_end"]["sheet_line_in_model"]
     fake["figures"]["dead_end"]["gordium"] = {"x": {"dead_ends": [
