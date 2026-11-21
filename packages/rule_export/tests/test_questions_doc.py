@@ -77,6 +77,24 @@ def test_every_result_changing_discrepancy_of_another_place_says_where_it_is_tra
         assert (REPO / tracked.group(1)).is_file(), f"discrepancy {number}: {tracked.group(1)} doesn't exist"
 
 
+def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_from_the_sheet():
+    """Every figure the childcare eval marks outside its tolerance, and every rule whose verdict differs from the
+    sheet's, has a row in the childcare log of docs/discrepancies_with_architects.md (named by its key in the eval
+    file), so no difference is left out of review."""
+    import yaml
+
+    data = yaml.safe_load((REPO / "test_data/answer_keys/portland_me_19_libby_st/eval_comparison.yaml")
+                          .read_text(encoding="utf-8"))
+    log = DISCREPANCIES.split("# Children's Odyssey", 1)[1]
+    apart = [f"figures.{name}" for name, fig in data["figures"].items()
+             if (fig.get("agreement") or {}).get("within_tolerance") is False]
+    apart += [f"storage.{key}" for key, value in data["storage"].items()
+              if isinstance(value, dict) and value.get("within_tolerance") is False]
+    apart += [rule.split(".", 1)[1] for rule, v in data["verdicts"]["rules"].items() if v["same"] is False]
+    assert apart, "the eval file's format changed; update this test"
+    assert [key for key in apart if f"`{key}`" not in log] == []
+
+
 def test_every_needs_review_claim_is_true_of_the_code():
     """Today measurements are typed in, and only a rule with a review condition gives NEEDS REVIEW. So each
     'Until you answer' line that promises NEEDS REVIEW must be about measuring a model (being built), or name
