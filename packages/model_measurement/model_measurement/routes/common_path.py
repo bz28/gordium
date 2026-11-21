@@ -18,11 +18,14 @@ margins): the law's figure changes no faster than you walk, and Gordium's routes
 its figure at a sample is never less than the law's. Lengths in inches.
 """
 
+import bisect
+import heapq
 import math
 from dataclasses import dataclass, field
 from itertools import combinations
 
-from model_measurement.routes.paths import EPS, StoryRoutes, _show
+from model_measurement.routes.paths import (EPS, MOST_TIES, TIE, Route, StoryRoutes, _piece_length, _show,
+                                            _signature, _tidy)
 from model_measurement.routes.remote import Remote, farthest
 from model_measurement.routes.stops import Stop
 
@@ -159,6 +162,151 @@ def shared(a, b) -> float:
     return best
 
 
+# --- every tied route, fast -----------------------------------------------------------------------------------------
+
+class _Prepared:
+    """A zone's graph among its rings and door centres, built once, with each door centre's distance to every node:
+    the same graph paths.py's `travel` uses, kept here with its pieces so a route's first leg is read from it."""
+
+    def __init__(self, engine, centres):
+        self.engine = engine
+        self.targets = [tuple(map(float, t)) for t in centres]
+        self.xy, self.adj, self.on, ids = engine._graph(self.targets)
+        self.ids = dict(zip(self.targets, ids))
+        self.dist = {t: _dijkstra(self.adj, n) for t, n in self.ids.items()}
+        self._last = None
+
+    def _onward(self, n, t, out, at):
+        """Every tied walk on the graph from node n to target t (each within 1e-6 ft of the shortest, as paths.py's
+        `_tied` keeps them)."""
+        goal, D = self.ids[t], self.dist[t]
+        top = D[n] + TIE
+
+        def walk(v, so_far, pieces, seen):
+            if len(out) > MOST_TIES:
+                raise Stop("too_many_ties", most=MOST_TIES, x=at[0], y=at[1])
+            if v == goal:
+                out.append(list(pieces))
+                return
+            for u, w, piece in self.adj[v]:
+                if u in seen or so_far + w + D[u] > top:
+                    continue
+                pieces.append(piece)
+                walk(u, so_far + w, pieces, seen | {u})
+                pieces.pop()
+
+        walk(n, 0.0, [], {n})
+
+    def firsts(self, p) -> list:
+        """Every way a curve from p (clear of every ring) can reach the graph: by a tangent to a ring and round it to
+        the first node there, each way (length, pieces, node). Worked once per point, for every target."""
+        if self._last is not None and self._last[0] == p:
+            return self._last[1]
+        e, r = self.engine, self.engine.r
+        out = []
+        for k in range(len(e.rings)):
+            ring = self.on[k]
+            if not ring:
+                continue
+            c = (float(e.rings[k][0]), float(e.rings[k][1]))
+            angles = [a for a, _ in ring]
+            for ang, q, length in e._tangents(p, k, c):
+                i = bisect.bisect_left(angles, ang)
+                after, before = ring[i % len(ring)], ring[(i - 1) % len(ring)]
+                lead = [("line", p, q)] if q is not None else []
+                up, down = (after[0] - ang) % (2 * math.pi), (ang - before[0]) % (2 * math.pi)
+                for n1, a0, sweep, piece in ((after[1], ang, up, ("arc", c, r, ang, up)),
+                                             (before[1], before[0], down, ("arc", c, r, ang, -down))):
+                    if e._arc_clear(k, c, a0, sweep):
+                        out.append((length + r * sweep, lead + [piece], n1))
+        self._last = (p, out)
+        return out
+
+    def legs(self, p, t) -> list:
+        """(length, pieces) of every tied shortest curve from p (clear of every ring) to the target t, as
+        `_Leg.dist` measures it: straight to t, or by a tangent to a ring and round it to the first node there."""
+        D = self.dist[t]
+        cands = [(lead_len + D[n], lead, n) for lead_len, lead, n in self.firsts(p) if math.isfinite(D[n])]
+        if self.engine.clear(p, t):
+            cands.append((math.dist(p, t), [("line", p, t)], None))
+        if not cands:
+            return []
+        best = min(f[0] for f in cands)
+        out = []
+        for total, lead, n in cands:
+            if total > best + TIE:
+                continue
+            if n is None:
+                out.append((total, lead))
+                continue
+            walks = []
+            self._onward(n, t, walks, _show(p))
+            out += [(total, lead + w) for w in walks]
+        return out
+
+
+def _dijkstra(adj, source) -> list:
+    dist = [math.inf] * len(adj)
+    dist[source] = 0.0
+    heap = [(0.0, source)]
+    while heap:
+        d, v = heapq.heappop(heap)
+        if d > dist[v]:
+            continue
+        for u, w, _ in adj[v]:
+            if d + w < dist[u]:
+                dist[u] = d + w
+                heapq.heappush(heap, (d + w, u))
+    return dist
+
+
+def tied_routes(routes: StoryRoutes, point, exit_id) -> list:
+    """Every tied shortest route from a point to one exit, as `routes.routes(point, [exit_id])` gives them, its
+    first leg read from the zone's graph built once (the slow way where a start is joined beyond its passages, or
+    sits on the line between two rooms, or the clearance is 0)."""
+    p = (float(point[0]), float(point[1]))
+    rooms = routes.rooms_at(p)
+    if routes.r <= 0 or len(rooms) != 1 or len(routes._starts(rooms[0])) != 1:
+        return routes.routes(p, [exit_id])
+    room, at = rooms[0], _show(p)
+    wanted = routes._wanted([exit_id])
+    dist, _, _ = routes._chain(wanted)
+    routes._check_start(room, p, at)
+    zone = routes._starts(room)[0][0]
+    engine = routes._engine(zone)
+    if not engine.covers(p):
+        raise Stop("not_on_floor", x=at[0], y=at[1])
+    cache = routes.__dict__.setdefault("_common_prepared", {})
+    if zone.rooms not in cache:
+        cache[zone.rooms] = _Prepared(engine, [routes.story.doors[d].centre for d in zone.doors])
+    prepared = cache[zone.rooms]
+    legs = []
+    for d in zone.doors:
+        if not math.isfinite(dist.get(d, math.inf)):
+            continue
+        t = tuple(map(float, routes.story.doors[d].centre))
+        legs += [(length + dist[d], pieces, d) for length, pieces in prepared.legs(p, t)]
+    if not legs:
+        raise routes._no_route(p, at, [exit_id], wanted)
+    best = min(x[0] for x in legs)
+    out = []
+    for total, pieces, d in sorted(legs, key=lambda x: x[0]):
+        if total > best + TIE:
+            break
+        for rest, passed, eid in routes._chains_from(d, wanted, at):
+            whole = _tidy(pieces + rest)
+            out.append(Route(sum(_piece_length(q) for q in whole), whole, passed, eid))
+            if len(out) > MOST_TIES:
+                raise Stop("too_many_ties", most=MOST_TIES, x=at[0], y=at[1])
+    seen, unique = set(), []
+    for x in out:
+        key = _signature(x.pieces)
+        if key not in seen:
+            seen.add(key)
+            unique.append(x)
+    return unique
+
+
 # --- a point ---------------------------------------------------------------------------------------------------------
 
 def at_point(routes: StoryRoutes, point) -> CommonPath:
@@ -166,7 +314,7 @@ def at_point(routes: StoryRoutes, point) -> CommonPath:
     tied, first = {}, None
     for e in sorted(routes.exits):
         try:
-            tied[e] = routes.routes(point, [e])
+            tied[e] = tied_routes(routes, point, e)
         except Stop as s:
             if s.key not in UNREACHED:
                 raise
@@ -187,8 +335,14 @@ def at_point(routes: StoryRoutes, point) -> CommonPath:
 # --- the story's figure ----------------------------------------------------------------------------------------------
 
 class _Rooms:
+    """The rooms farthest() walks, in an order that finds a large figure early (rooms a route can't cross first,
+    the largest first; corridors and other crossable rooms last), so the triangles that can't beat it are dropped
+    sooner. The order changes nothing else: every triangle is dropped only on its own proved bound."""
+
     def __init__(self, story, rooms):
-        self.rooms = {k: v for k, v in story.rooms.items() if rooms is None or k in rooms}
+        got = [(k, v) for k, v in story.rooms.items() if (rooms is None or k in rooms) and v is not None]
+        got.sort(key=lambda kv: (kv[1].crossable, -kv[1].outline.area, kv[0]))
+        self.rooms = dict(got)
 
 
 class _CommonPathSampler:
@@ -202,7 +356,11 @@ class _CommonPathSampler:
         return self._routes.rings_for(room)
 
     def travel(self, point, exit_ids=None):
-        return at_point(self._routes, point).length
+        cache = self._routes.__dict__.setdefault("_common_values", {})
+        key = (round(point[0], 9), round(point[1], 9))
+        if key not in cache:
+            cache[key] = at_point(self._routes, point).length
+        return cache[key]
 
 
 def story_figure(routes: StoryRoutes, rooms=None) -> Remote:

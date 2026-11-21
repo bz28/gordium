@@ -79,6 +79,19 @@ STOPS = {
     # remoteness and the diagonal (straight.py)
     "too_few_exits": "the story has {count} distinct exit(s) (by `exit_id`): remoteness needs two",
     "outline_needed": "the story's outline isn't read, so its diagonal and areas aren't measured: {reason}",
+    # the parts handed to the rules (__init__.py)
+    "stated_not_given": "stated by the architect ({what}), and the description has no mark for it yet",
+    "not_measured_yet": "Gordium doesn't measure this yet",
+    "readings": "given as two readings for open question {question} of the route note ({words}); the checker "
+                "doesn't take a part's readings yet, so a rule reading it needs review",
+    "room_not_measured": "the room {name} isn't read: {reason}",
+    "maybe_kind": "the enclosed space {name} has no room drawn in it: it may be a {kind}",
+    "exit_access_unclear": "the room {name} is joined by passages to other rooms a route may cross: which of its doors "
+                           "lead out without coming back into it isn't worked out",
+    "passage_in_ring": "the passage from the room {name} has its middle within 12 in of a corner: whether a route "
+                       "leaves by it isn't worked out",
+    "no_room_doors": "the story has no room besides its corridors: no room door to measure from",
+    "no_exit_access": "the room {name} has no door from which a route reaches an exit without coming back into it",
     # areas (areas.py)
     "area_room_not_read": "the room {name} isn't read, so what it adds to the story's areas isn't known",
     "area_no_use": "the room {name} has no `use`: which of the story's areas it counts in isn't known",

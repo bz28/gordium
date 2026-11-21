@@ -377,7 +377,9 @@ PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters",
              "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last three: test_routes_remote.py
 LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_end_unbounded",   # test_routes_dead_ends.py
               "too_few_exits", "outline_needed", "area_room_not_read", "area_no_use", "area_unknown_space",
-              "area_rooms_overlap"}                                                  # test_routes_straight_areas.py
+              "area_rooms_overlap",                                                  # test_routes_straight_areas.py
+              "stated_not_given", "not_measured_yet", "readings", "room_not_measured", "maybe_kind",
+              "exit_access_unclear", "passage_in_ring", "no_room_doors", "no_exit_access"}   # test_routes_parts.py
 
 
 def test_every_reason_has_a_case():

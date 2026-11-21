@@ -176,3 +176,23 @@ def test_the_sampler_reads_only_the_rooms_asked_for():
     west = story_figure(got, rooms={"w"})
     assert ft(west.greatest) <= math.hypot(10.25, 5) + TOL           # 11.404: its far corners, never the east room's
     assert common_path._CommonPathSampler(got, {"w"}).story.rooms.keys() == {"w"}
+
+
+@pytest.mark.parametrize("layout", [lambda: column_room(north_exit=True), l_room, third_exit])
+def test_the_fast_tied_routes_are_the_slow_ones(layout):
+    """common_path.tied_routes reads a route's first leg from each zone's graph built once; on a 2-ft grid of every
+    room it gives the same tied routes (lengths to 1e-6 in) as paths.py's routes(), or the same reason for none."""
+    got = routes(layout())
+    for room_ in got.story.rooms.values():
+        x0, y0, x1, y1 = room_.outline.bounds
+        for i in range(0, int((x1 - x0) / FT) + 1, 2):
+            for j in range(0, int((y1 - y0) / FT) + 1, 2):
+                p = (x0 + i * FT, y0 + j * FT)
+                for e in got.exits:
+                    ways = []
+                    for find in (got.routes, lambda q, ex: common_path.tied_routes(got, q, ex[0])):
+                        try:
+                            ways.append(sorted(round(x.length, 6) for x in find(p, [e])))
+                        except Stop as s:
+                            ways.append(s.key)
+                    assert ways[0] == ways[1], (p, e, ways)
