@@ -213,7 +213,7 @@ not in the list, or a window's word on a door, is not stated, never a near guess
   (`MarkingListResult.Headline`) says every room, window and door is marked only when rooms are drawn and nothing
   is unset or in the way.
 
-In Revit, **Mark for egress** (the Gordium tab's Egress panel) adds the marks on first use, in one undoable
+In Revit, **Mark facts** (the Gordium tab's Check panel; the command is `MarkForEgressCommand`) adds the marks on first use, in one undoable
 transaction, then shows the list in a dialog and logs every row to `results.jsonl`. That dialog is the minimal
 first view; the dockable list comes with the UI pass. Nothing is sent to the checker yet: the interior reader
 (section 7, step 3) builds the description's flags from `MarkReading` alone.
@@ -270,7 +270,7 @@ nothing. What it sends, and what it leaves out:
 Every value left out has its reason in `InteriorReadResult.Notes`; for each escape window, `Evidence` records the
 sill line, the wall opening's bottom and the window's placed extents the check used.
 
-**Read inside** (the Egress panel) reads the open project this way and logs the description and every note.
+**Read inside** (the Trial panel, a test tool) reads the open project this way and logs the description and every note.
 
 **How we know (without Revit):** `InteriorTests.cs` draws houses 1, 2 and 5 as fake Revit records from the houses'
 own data (`InteriorDrawing.cs`, through `python -m model_measurement.interior.recordings draw`) and checks the
@@ -286,7 +286,7 @@ inch below the sill line or not found, a clear opening wider than the window, no
 undone once to check their tests then fail (the sill line check, the enclosed areas, never `[]`, the slab covering
 the whole room, the stamp's type, the clear opening fitting the window, what stands inside a room).
 
-**How we will know in Revit (the recordings):** **Record houses** (the Egress panel, or the request file below)
+**How we will know in Revit (the recordings):** **Record houses** (the Trial panel, or the request file below)
 draws houses 1, 2 and 5 in new projects (`HouseDraw.cs`: the houses' numbers from the same Python, exterior walls
 with their inside faces on the rooms' outline, a slab under each level, room separation lines, Rooms named and
 marked, ceilings as thin DirectShapes whose undersides are the house's ceilings, one `Window.rft` family per window
@@ -423,7 +423,7 @@ Anything not read exactly is left out with its reason. **How we know:** `RouteTe
 
 ## Check my project
 
-The first button for an architect's own model: one click reads the open project outside (zoning) and inside
+(The **Check project** button; the command is `CheckProjectCommand`.) The first button for an architect's own model: one click reads the open project outside (zoning) and inside
 (egress) and sends **one** `check_site`, with the lot facts the architect states as Gordium marks on Project
 Information (`Gordium: Zone`, `Use`, `Lot surveyed`, `Street edge`, and optionally `Corner lot` and `Ground from`;
 the jurisdiction is the City of Ithaca). Why each choice:
@@ -532,10 +532,25 @@ CI restores in locked mode.
 `Gordium.Worker.slnx` (which CI and the Mac build and test). It is built once per Revit version installed:
 `net10.0-windows` against Revit 2027, `net8.0-windows` against Revit 2026.
 
-So far it is the trial's (runbook days 3 and 4): a **Gordium** tab with two buttons, **Check my project** (above) and **Mark for egress**
-(above).
+**The Gordium tab** (`Ribbon.cs`, built from `RibbonPlan` in `Gordium.Revit.Reading`; design pass section 2.2):
 
-- **About** shows and logs which build Revit loaded and on which .NET runtime.
+| Panel | Button | What it does |
+|---|---|---|
+| Check | **Check project** | the check above |
+| Check | **Mark facts** | the marking list above (for now in a dialog: the checklist in the panel comes later) |
+| Results | **Panel** | shows the results panel, or hides it when it is showing; usable with no project open |
+| Help | **About** | shows and logs which build Revit loaded and on which .NET runtime; usable with no project open |
+| Trial | **Check box house**, **Record scenes**, **Read inside**, **Record houses** | the trial's test tools, only in a trial build or with `GORDIUM_TRIAL=1` |
+
+Each button has a one-line tooltip and up to three lines more on a longer hover (Revit's `LongDescription`), and an
+icon at 16 and 32 px in Revit's light and dark themes: simple strokes drawn to PNG by `RibbonIcons` from the panel's
+colour tokens (the outline in `text`, the mark in `accent`), swapped on `ThemeChanged` (Revit doesn't switch an
+add-in's images by theme itself). No Settings button: there is nothing to set yet. `install_trial_addin.ps1` builds
+a trial build (`-p:GordiumTrial=true`, the Trial panel always there); `-Architect` installs the build an architect
+gets. The request files the trial runs by (read in `App`'s Idling handler) never use a button, so they work in both.
+How we know: `RibbonTests.cs` (which buttons exist with the switch off and on, the tooltips' length, every icon a
+valid PNG at both sizes in both themes, never the pass green).
+
 - **Check box house** starts the worker with the clone's venv Python (or reuses the running one), says `hello`,
   sends `check_site` for conformance scene 01 (`test_data/host_conformance/expected/01_box_house.site.json`, with
   the scene's facts), and compares every row with the scene's hand-worked verdicts. The facts and verdicts come
