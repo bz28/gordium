@@ -32,7 +32,7 @@ The **Gordium** tab has three panels, in this order: **Trial** (About, Check box
 | F2 | The order is backwards: marking comes before checking in the work, but **Mark for egress** sits after **Check my project**, in a panel called "Egress" (zoning facts are marked too, on Project Information). | `App.OnStartup` |
 | F3 | No icons: every button is text only (`PushButtonData` with no `LargeImage`), so the tab looks unfinished next to Revit's own. | `App.OnStartup` |
 | F4 | Tooltips are paragraphs. Check my project's is 70 words ("...the lot facts on Project Information (Gordium's marks, added on first use)..."); Revit shows a short tooltip and a longer description on a longer hover (`LongDescription`), which isn't used. | `App.OnStartup` |
-| F5 | "Read inside" says "nothing is sent to the checker yet" and only writes a log: a button an architect can press that does nothing they can see. | `ReadInteriorCommand` |
+| F5 | "Read inside" shows what it read in a dialog but sends nothing to the checker ("nothing is sent to the checker yet"): a test tool an architect can press that looks like a check and isn't one. | `ReadInteriorCommand` |
 
 ### Step 2: mark the facts (Mark for egress)
 
@@ -103,9 +103,12 @@ the three NFPA rows are rules, needing review here only for what wasn't measured
 **farthest-apart pair**, 187.164 ft (decision 7), not the sheet's pair (Gordium measures that one 183.706 ft); the
 ratio 0.8788 meets the one-third the rule needs, but the rule is a **flag**, so its verdict is needs review, never
 "complies". The 71.0 ft is 212.985 / 3; today the worker gives the ratio, not that length (section 4, PR 5). The eval
-doesn't say *why* each of the 5 rooms has no route; the mockup shows only what `eval_marks.yaml` records of each room
-(CLOSET (40): "a 2.5 by 3 ft closet whose one door (D06) opens into KITCHEN 10"; SPRINKLERED ABANDONED SPACE (32): the
-sheet's "DOOR PERMANENTLY FIXED SHUT"), never a reason it doesn't give.
+doesn't say *why* each of the 5 rooms has no route; the mockup shows only what the model and the sheet show of each room
+(CLOSET (40): its one door, D06, joins it to KITCHEN (10) in the model's description, and the sheet draws that door
+swinging into the kitchen; SPRINKLERED ABANDONED SPACE (32): the sheet's "DOOR PERMANENTLY FIXED SHUT"), never a reason
+none of them gives. (`eval_marks.yaml`'s note on CLOSET (40) says "off INFANT/TODDLER CLASSROOM 5": that difference is
+logged for review in `docs/discrepancies_with_architects.md`, P1, on branch `feat/route-measures-2`; answer keys are
+never edited to settle it.)
 
 ### The five biggest problems
 
@@ -279,21 +282,24 @@ then one section per kind of fact, each a row with its count and state, expandin
 | `bg.pane` | #F4F5F7 | #2B3038 |
 | `bg.surface` | #FFFFFF | #343A44 |
 | `bg.hover` | #EEF1F5 | #3D4450 |
-| `bg.selected` | #DCE9FA | #2F4A6E |
+| `bg.selected` | #DCE9FA | #284263 |
 | `line` | #D7DBE1 | #4A5260 |
 | `text` | #1D2229 | #E7EAEE |
-| `text.muted` | #5B6470 | #A9B1BC |
-| `accent` | #0B66D0 | #5AA2F5 |
-| `status.fail` | #C2410C (vermilion) | #FF8A5B |
-| `status.review` | #9A6700 (amber), fill #FFF4D6 | #F2C14E, fill #4A3F1E |
-| `status.pass` | #0F7B6C (blue-green) | #4CC6B3 |
-| `status.na` | #6B7280 | #9AA3AE |
+| `text.muted` | #5B6470 | #B8C0CA |
+| `accent` | #0A5FC2 | #82B8F7 |
+| `status.fail` | #B03A0A (vermilion), fill #FDE8DF | #FFA07A, fill #4A2A1E |
+| `status.review` | #8A5C00 (amber), fill #FFF4D6 | #F2C14E, fill #4A3F1E |
+| `status.pass` | #0B6E61 (blue-green), fill #DDF3EF | #5ED3C0, fill #1C3E3A |
+| `status.na` | #5F6672 | #B4BCC6 |
 | `status.stale` | hatched `text.muted` | hatched `text.muted` |
+| `marked` (a fact the architect set: a marked exit, a finished checklist) | #1F5FAD, fill #E3EEFB | #9CC4F3, fill #22344D |
 
 The status hues follow the Okabe-Ito colour-blind-safe set (vermilion, amber, blue-green), and **every status has its
 own shape and word**: fail an octagon with ✕, needs review a triangle with ?, complies a circle with ✓, not
-applicable a dash, stale a clock. Colour is never the only signal. Text tokens are chosen for 4.5:1 contrast on
-their surfaces (PR 1 tests it).
+applicable a dash, stale a clock. Colour is never the only signal. **`status.pass` is used only for the checker's
+"complies"**: a marked exit or a finished checklist uses `marked`, never green. Every text colour (`text`, `text.muted`,
+`accent`, each status ink, `marked`) clears 4.5:1 on every surface it can sit on (`bg.pane`, `bg.surface`, `bg.hover`,
+`bg.selected`, and its own fill), in both themes; PR 1 tests each of those pairs.
 
 **Spacing and shape.** A 4 px grid: rows 8 px padding, sections 16 px apart, the pane's gutters 12 px; corner radius
 4 (Revit's own controls are near-square); 1 px lines; no shadows except the detail sliding in. Controls restyled
@@ -307,10 +313,10 @@ five status glyphs, show (crosshair), select (cursor), open law (book), properti
 | State | What the pane shows |
 |---|---|
 | Not checked yet | The Gordium mark, one sentence ("Check this project against its zoning and egress rules"), **Check project** and **Mark facts first**, and the checklist's progress if marks exist. |
-| Checking | The last results stay, dimmed, with a progress line by stage: "Reading the model (rooms 39)... Checking (Gordium's checker)... "; Check again becomes Cancel. Revit is not frozen during the checker's part (PR 8). |
+| Checking | The last results stay, dimmed, and still stale-styled (grey, never green) if the model changed since that check, until the new answer arrives; a progress line by stage: "Reading the model (rooms 39)... Checking (Gordium's checker)... "; Check again becomes Cancel. Revit is not frozen during the checker's part (PR 8). |
 | Nothing checked: facts missing | "Nothing was checked: 2 facts are missing", each fact as a row with its own **Set** button (opens Project Information, the field named) and why it's needed; Check again. |
 | Error | One plain sentence ("Gordium's checker stopped before answering"), **Try again**, and **Copy details for support** (the exception and the log path go to the clipboard, not the screen). No TaskDialog as well. |
-| Stale | A banner: "The model changed after this check (14:32). The results may not hold." with **Check again**; rows keep their words, lose their colour (as today: never a stale green), and rows whose elements the edit touched get a dot ("changed since"). |
+| Stale | A banner: "The model changed after this check (14:32). The results may not hold." with **Check again**; rows keep their words and lose their colour (as today: never a stale green). **Every row may have changed**: an edit can change a row without touching its elements (moving a door changes every route row). A row whose own elements were edited gets a dot ("an element of this row changed"); a row without a dot is never shown as unchanged. |
 | Empty law | A law with nothing checked says so ("Zoning: not checked: no lot in this model"), never an empty space. |
 | Project closed / another project active | "These results are for Children's Odyssey. Switch to it to show elements." Show buttons disabled with that as their tooltip. |
 
@@ -395,7 +401,8 @@ is worse than the alternative is changed, not kept.
    the verdict staying needs review (never complies). Recommendation: yes, as a note only; it needs a place in the
    format, so it waits for the approval layer's design.
 3. **Check again automatically** after the model has been idle for a few seconds? Recommendation: no for now (a
-   check reads the whole model); show "changed since" dots instead.
+   check reads the whole model); the stale banner says every row may have changed, and a dot marks a row whose own
+   elements were edited (no dot never means unchanged).
 4. **The worker additions of PR 5** (causes as data, limits as lengths, egress how far off, quote sources).
    Recommendation: yes; they keep every figure the worker's.
 

@@ -9,9 +9,9 @@
 /* ---------- tokens: the panel's (proposed, docs/revit/ui_design_pass.md section 2.5) and the Revit-like frame's ---------- */
 :root{
   --bg-pane:#F4F5F7; --bg-surface:#FFFFFF; --bg-hover:#EEF1F5; --bg-selected:#DCE9FA; --line:#D7DBE1;
-  --text:#1D2229; --text-muted:#5B6470; --accent:#0B66D0; --accent-ink:#FFFFFF;
-  --fail:#C2410C; --fail-fill:#FDE8DF; --review:#9A6700; --review-fill:#FFF4D6; --pass:#0F7B6C; --pass-fill:#DDF3EF;
-  --na:#6B7280; --confirm:#1F5FAD; --confirm-fill:#E3EEFB;
+  --text:#1D2229; --text-muted:#5B6470; --accent:#0A5FC2; --accent-ink:#FFFFFF;
+  --fail:#B03A0A; --fail-fill:#FDE8DF; --review:#8A5C00; --review-fill:#FFF4D6; --pass:#0B6E61; --pass-fill:#DDF3EF;
+  --na:#5F6672; --confirm:#1F5FAD; --confirm-fill:#E3EEFB;
   --quote-bg:#F7F5EF; --quote-bar:#B9A77A;
   /* frame */
   --f-title:#DADDE2; --f-ribbon:#F3F4F6; --f-tabs:#E6E8EB; --f-line:#C9CDD3; --f-text:#22262C; --f-muted:#5F6670;
@@ -20,10 +20,10 @@
   color-scheme: light;
 }
 :root[data-theme="dark"]{
-  --bg-pane:#2B3038; --bg-surface:#343A44; --bg-hover:#3D4450; --bg-selected:#2F4A6E; --line:#4A5260;
-  --text:#E7EAEE; --text-muted:#A9B1BC; --accent:#5AA2F5; --accent-ink:#0E1620;
-  --fail:#FF8A5B; --fail-fill:#4A2A1E; --review:#F2C14E; --review-fill:#4A3F1E; --pass:#4CC6B3; --pass-fill:#1C3E3A;
-  --na:#9AA3AE; --confirm:#7FB2F0; --confirm-fill:#22344D;
+  --bg-pane:#2B3038; --bg-surface:#343A44; --bg-hover:#3D4450; --bg-selected:#284263; --line:#4A5260;
+  --text:#E7EAEE; --text-muted:#B8C0CA; --accent:#82B8F7; --accent-ink:#0E1620;
+  --fail:#FFA07A; --fail-fill:#4A2A1E; --review:#F2C14E; --review-fill:#4A3F1E; --pass:#5ED3C0; --pass-fill:#1C3E3A;
+  --na:#B4BCC6; --confirm:#9CC4F3; --confirm-fill:#22344D;
   --quote-bg:#3A3730; --quote-bar:#8C7C55;
   --f-title:#1F242B; --f-ribbon:#2E343D; --f-tabs:#262B33; --f-line:#454D59; --f-text:#E3E6EA; --f-muted:#9EA6B1;
   --f-browser:#2A2F37; --canvas:#1E232A; --wall:#DDE2E8; --room-line:#6E7682; --room-tag:#C4CAD2; --status:#252A31;
@@ -323,7 +323,7 @@ button{font:inherit;color:inherit}
       <div class="vtools"><button class="vbtn" id="backView" hidden>↩ Back to my view</button></div>
       <div class="legend" id="legend">
         <div><i style="background:var(--hl-fill);border:1.5px solid var(--hl)"></i>Selected by Gordium</div>
-        <div><i style="background:var(--pass)"></i>Exit (marked)</div>
+        <div><i style="background:var(--confirm)"></i>Exit (marked)</div>
         <div><i style="border:1.5px dashed var(--review)"></i>Door in an outside wall, no Exit mark</div>
         <div class="src">Schematic plan: outline 195.1 x 85.5 ft and every point from eval_marks.yaml / eval_comparison.yaml; inner walls approximate</div>
       </div>
@@ -356,7 +356,7 @@ button{font:inherit;color:inherit}
    =================================================================================================== */
 const SRC_EVAL = "eval_comparison.yaml (feat/route-measures-2)";
 const ROOMS = {
-  "40": {name:"CLOSET (40)", at:[24.11,36.26], w:2.5, h:3.0, note:"7.6 sf closet whose one door (D06) opens into KITCHEN (10)", marks:{use:"Closet", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms_to_place #40"},
+  "40": {name:"CLOSET (40)", at:[24.11,36.26], w:2.5, h:3.0, note:"7.6 sf closet whose one door (D06) opens into KITCHEN (10)", marks:{use:"Closet", lock:"Yes", pass:"(blank)"}, src:"marks: eval_marks.yaml rooms_to_place #40; door D06 to KITCHEN (10): the model's description and LS1.0 (eval_marks.yaml's note differs: logged for review, docs/discrepancies_with_architects.md P1)"},
   "21": {name:"ELEC. (21)", note:"Electrical room; Use Other, Can be locked Yes, a route may end here, never cross it", marks:{use:"Other", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms #21 (position not in the eval data)"},
   "32": {name:"SPRINKLERED ABANDONED SPACE (32)", at:[53.81,79.51], w:8.0, h:8.4, note:"67.5 sf, north of the PLAYROOM (17); the sheet: “DOOR PERMANENTLY FIXED SHUT”", marks:{use:"Other", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms_to_place #32"},
   "33": {name:"SPRINKLERED ABANDONED SPACE (33)", at:[152.39,80.16], w:10.0, h:9.9, note:"98.9 sf, north of LIFE SPACE (12)", marks:{use:"Other", lock:"Yes", pass:"(blank)"}, src:"eval_marks.yaml rooms_to_place #33"},
@@ -499,7 +499,7 @@ function header(){
   return `<div class="hdr"><div class="hdr-row"><div class="proj"><div class="t">Children’s Odyssey · 19 Libby St</div><div class="s">${checked}</div></div>${btn}</div>
     <div class="ptabs" role="tablist">
       <button class="ptab" role="tab" data-tab="results" aria-selected="${S.tab==="results"}">Results</button>
-      <button class="ptab" role="tab" data-tab="marks" aria-selected="${S.tab==="marks"}">Facts to mark <span class="pill ${todo.todo?"review":todo.confirm?"confirm":"pass"}">${todo.done} of ${todo.total}</span></button>
+      <button class="ptab" role="tab" data-tab="marks" aria-selected="${S.tab==="marks"}">Facts to mark <span class="pill ${todo.todo?"review":todo.confirm?"confirm":"confirm"}">${todo.done} of ${todo.total}</span></button>
     </div></div>`;
 }
 function render(){
@@ -507,7 +507,7 @@ function render(){
   let h = header();
   if (S.tab==="marks") h += checklist();
   else if (S.panel==="none") h += emptyState();
-  else if (S.panel==="checking") h += checkingState();
+  else if (S.panel==="checking") h += checkingState(stale);
   else if (S.panel==="missing") h += missingState();
   else if (S.panel==="error") h += errorState();
   else if (S.view==="detail" || S.view==="fix") {
@@ -629,12 +629,12 @@ function emptyState(){
     <button class="btn primary" data-act="recheck">${G.recheck}Check project</button> <button class="btn" data-tab="marks">Mark facts first</button>
     <p class="cap" style="margin-top:14px">Facts marked so far: ${checklistProgress().done} of ${checklistProgress().total} sections.</p></div>`;
 }
-function checkingState(){
+function checkingState(stale){
   return `<div class="sec"><div class="card" style="padding:12px"><div style="display:flex;gap:8px;align-items:center"><span class="spin"></span><b>Checking Children’s Odyssey…</b></div>
     <ul class="steps"><li class="done">✓ Reading the model: 39 rooms, 4 exits, story outline</li><li class="on"><span class="spin" style="width:10px;height:10px"></span> Measuring the routes (Gordium’s checker)</li><li>Checking 8 route rules</li></ul>
     <div class="cap" style="margin-top:8px">Revit stays usable while the checker works. The last results stay below, dimmed, until the new ones arrive.</div>
     ${src("Proposed (PR 8): today the check blocks Revit's thread. The counts are eval_marks.yaml's.")}</div></div>
-    <div style="opacity:.45;pointer-events:none">${resultsList(false)}</div>`;
+    <div style="opacity:.45;pointer-events:none">${resultsList(stale)}</div>`;
 }
 function missingState(){
   return `<div class="sec"><div class="banner warn" style="margin:0 0 10px">${G.review}<div><div class="bt">Nothing was checked: 2 facts are missing</div>Gordium sends nothing until they are set, so no result can be a guess.</div></div>
@@ -743,11 +743,11 @@ function planSvg(){
   // exits
   for (const [x,y,n] of [[5,85,"D41"],[80.6,80,"D02"],[5,42.8,"D03"],[189.5,42.8,"D12"]]) {
     const left = x > 150, ty = n==="D41" ? Y(y)+4.2 : Y(y)+0.9;
-    L.push(`<g><rect x="${x-1.6}" y="${Y(y)-1.6}" width="3.2" height="3.2" rx=".6" fill="var(--pass)"/><text x="${left?x-2.4:x+2.4}" y="${ty}" text-anchor="${left?"end":"start"}" font-size="2.2" fill="var(--pass)" font-weight="600" font-family="Segoe UI,Arial">${n}</text></g>`);
+    L.push(`<g><rect x="${x-1.6}" y="${Y(y)-1.6}" width="3.2" height="3.2" rx=".6" fill="var(--confirm)"/><text x="${left?x-2.4:x+2.4}" y="${ty}" text-anchor="${left?"end":"start"}" font-size="2.2" fill="var(--confirm)" font-weight="600" font-family="Segoe UI,Arial">${n}</text></g>`);
   }
   // D33: outside wall, no exit mark
   const d33on = S.selected.includes("d33");
-  L.push(`<g><rect x="${190.4-1.6}" y="${Y(0.7)-1.6}" width="3.2" height="3.2" rx=".6" fill="${S.d33 && S.d33!=="Not an exit" ? "var(--pass)" : "none"}" stroke="${d33on?"var(--hl)":"var(--review)"}" stroke-width="${d33on?.9:.6}" stroke-dasharray="${S.d33?"":"1 .6"}"/><text x="${186}" y="${Y(0.7)-2.4}" font-size="2.2" fill="var(--review)" font-family="Segoe UI,Arial">D33</text></g>`);
+  L.push(`<g><rect x="${190.4-1.6}" y="${Y(0.7)-1.6}" width="3.2" height="3.2" rx=".6" fill="${S.d33 && S.d33!=="Not an exit" ? "var(--confirm)" : "none"}" stroke="${d33on?"var(--hl)":"var(--review)"}" stroke-width="${d33on?.9:.6}" stroke-dasharray="${S.d33?"":"1 .6"}"/><text x="${186}" y="${Y(0.7)-2.4}" font-size="2.2" fill="var(--review)" font-family="Segoe UI,Arial">D33</text></g>`);
   // the most remote point found, and the points with no route
   L.push(`<g><circle cx="138.9" cy="${Y(84.483)}" r="1.1" fill="var(--accent)"/><text x="137.6" y="${Y(84.483)+3.4}" font-size="1.9" fill="var(--accent)" text-anchor="end" font-family="Segoe UI,Arial">most remote point found</text></g>`);
   if (S.overlay==="noroute") for (const [x,y] of [[165.625,70.156],[55.308,78.082]])
