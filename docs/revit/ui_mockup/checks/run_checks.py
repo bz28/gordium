@@ -31,7 +31,7 @@ BROWSERS = [
     r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe",
     r"C:\Program Files\Microsoft\Edge\Application\msedge.exe",
     r"C:\Program Files\Google\Chrome\Application\chrome.exe",
-    "microsoft-edge", "google-chrome", "chromium", "chromium-browser",
+    "google-chrome", "chromium", "chromium-browser", "microsoft-edge",
 ]
 
 
@@ -49,17 +49,22 @@ def run(exe, scenario, work):
     at = page.rfind("</body>")
     target = work / scenario
     target.write_text(page[:at] + script + page[at:], encoding="utf-8")
-    done = subprocess.run([exe, "--headless=new", "--disable-gpu", f"--user-data-dir={work / 'profile'}",
-                           "--virtual-time-budget=9000", "--dump-dom", target.as_uri()],
-                          capture_output=True, text=True, encoding="utf-8", timeout=120)
+    flags = ["--headless=new", "--disable-gpu", f"--user-data-dir={work / 'profile'}", "--virtual-time-budget=9000"]
+    if sys.platform.startswith("linux"):
+        flags += ["--no-sandbox", "--disable-dev-shm-usage"]     # CI containers: no user namespaces, a small /dev/shm
+    done = subprocess.run([exe, *flags, "--dump-dom", target.as_uri()],
+                          capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
     m = re.search(r'<pre id="PIN">([^<]*)</pre>', done.stdout)
     if not m:
+        print(f"  {scenario}: the browser exited {done.returncode}; stdout {len(done.stdout)} chars, ends "
+              f"{done.stdout[-300:]!r}; stderr ends {done.stderr[-1200:]!r}")
         return None
     return dict(part.split("=", 1) for part in m.group(1).split() if "=" in part)
 
 
 def main():
     exe = browser()
+    print(f"browser: {exe}")
     if not exe:
         print("no Edge or Chrome found: the checks did not run")
         return 2
