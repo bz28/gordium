@@ -111,9 +111,13 @@ area need review.
    across the ring beats the arc round it). Neither gives a figure a sampling bound can hold, and neither is the law's.
    **An opening narrower than 24 in.** Two corners less than 24 in apart have overlapping rings, and a corner less
    than 12 in from a wall has its ring on the wall: no clear curve passes between them. Where every way out of a
-   point is closed so, the point has no route: the story needs review (decision 10) with the reason "an opening too
-   narrow for NFPA 7.6.1's 12-in clearance from both sides" (test 18: the back of a niche 20 in wide and 2 ft deep).
-   A door is the one opening a route passes at its centre (decision 1). Gordium's reading too (open question 10).
+   point is closed so, the point has no route of its own: it is in a **pocket** shut in by that ring cluster, and
+   (decided 2026-11-21, Ben through the coordinator: such nooks, beside jambs, behind doors, small alcoves, are in
+   almost every real story, and needs review for each made nearly every real story need review) the pocket belongs
+   to the cluster: decision 3 bounds its points as it bounds the points inside the rings (test 18: the back of a
+   niche 20 in wide and 2 ft deep is now a number). Only a pocket with no routed clear edge round it (truly shut in)
+   needs review. A door is the one opening a route passes at its centre (decision 1). Gordium's reading (open
+   question 10).
    **Two lengths within 10^-6 ft of each other are a tie**, broken toward the cautious
    reading (decision 5: the route that shares more). It is computed exactly (shortest paths among circles and
    polygon obstacles are a standard, exact computation); the build PR's code and its tests are the procedure, and
@@ -154,10 +158,16 @@ area need review.
      point. Otherwise it is worked like D: W(p), the shortest walk from p to the cluster's routed clear edge, can't
      grow faster than you walk, so it is sampled at the corners of 3-in triangles covering the cluster's floor and
      bounded by the greatest sample plus 3 in. This is cautious by construction: from inside a ring, the law's route
-     is at most that walk plus the edge's route (open question 9). **A clear edge arc with no route** (the floor
-     behind it shut in by rings: the back of a niche under 24 in, test 18), and a cluster none of whose arcs has a
-     route, need review, the reason named. Every arc of E is found exactly from the circles and every arc sampled,
-     ends included, so a pocket shut in by rings is found from its own arcs, never left to where samples fall.
+     is at most that walk plus the edge's route (open question 9). **A pocket** (clear floor whose points have a
+     route only with no clearance, shut in by rings: the back of a niche under 24 in, test 18) is bounded the same
+     way: the greatest route on the routed clear edge of the clusters round it, plus 1.5 in, plus the greatest walk
+     on the floor with no clearance from any point of the pocket or of those rings to that edge (sampled at the
+     corners of 3-in triangles, plus 3 in). It is an upper bound on what Gordium gives a pocket's points (the walk
+     out, then that edge point's route) for the same reason as a cluster's: the walk can't grow faster than you
+     walk, and the edge's routes are bounded as E's are. An edge arc facing a pocket has no route and is no part of
+     the routed edge; a pocket (or cluster) with no routed clear edge round it needs review, the reason named.
+     Every arc of E is found exactly from the circles and every arc sampled, ends included, so a pocket shut in by
+     rings is found from its own arcs, never left to where samples fall.
    The rules get the greatest of these bounds; the panel shows the greatest sample, each bound and which part (the
    clear floor, or which cluster) gave the figure.
 4. **Exits are marked, never guessed.** A route ends at the centre of the doorway of a door marked with `exit_kind`.
@@ -234,8 +244,8 @@ area need review.
     story (its outline unknown, it may hold the most remote point or a route; with its outline, one no door or
     passage reaches stays needs review until open question 4 is settled); a room on the story with no `floor`
     (a curved wall: never its chord, which would shorten routes); a door with no `plan` or `sides`; a door whose side
-    is an unknown space or a room not read; a point of the clear floor with no route to any exit, or a cluster with no routed clear edge (decision 3: shown,
-    never a number; one shut in by an opening narrower than 24 in says so, decision 2); obstructions
+    is an unknown space or a room not read; a point of the clear floor with no route to any exit even with no
+    clearance, or a cluster or pocket with no routed clear edge round it (decision 3: shown, never a number); obstructions
     or rooms read from a link; a corridor not made of straight legs (dead end only); and any reading that could
     shorten a route; a room that reaches an exit only through an end-only room (decision 1a); an `exit_kind` with
     no `exit_id`; a door under 24 in clear; any key of the additions left out. Readings that only lengthen one
@@ -366,8 +376,11 @@ these hand figures as written in the test file, never taken from the code under 
 18. **A niche too narrow:** a room 0 to 20 by 0 to 10, its exit door centred at (-0.25, 5), a niche 20 in wide and
     2 ft deep in the north wall (x 10 - 0.833 to 10 + 0.833, y 10 to 12). Its mouth's corners are 20 in apart, so
     their rings overlap across the mouth; (10, 11.5), at the back, is sqrt(0.833^2 + 1.5^2) = 1.716 ft from each corner, clear of both, and
-    shut in: **no route**, needs review with the reason "an opening too narrow for NFPA 7.6.1's 12-in clearance from
-    both sides". Fails if the rings are left out (it would get a number).
+    shut in: no route of its own, a pocket (decided 2026-11-21: before, the story needed review). Its bound: the
+    mouth cluster's greatest routed edge route plus 1.5 in plus the walk out, whose greatest is from a back corner
+    (10 -+ 0.833, 12) straight to the rings' cusp (10, 9.447), sqrt(0.8333^2 + 2.5528^2) = 2.6854 ft; sampled and
+    plus 3 in, a margin of 2.935 to 3.060 ft. The story's figure is the far corners', 20.858 ft plus at most 3 in.
+    Fails if the pocket's bound is left out; a pocket with no routed edge round it still needs review.
 19. **A coarse triangle not dropped on 3 in:** a corridor 0 to 40 by 0 to 6, exit doors centred at (-0.25, 3) and
     (40.25, 3). The triangle (19, 0), (21, 0), (19, 1.5) has corner values 19.482, 19.482 and 19.308, so corners plus
     3 in is 19.732, which the sample (20.5, 3) at 19.75 beats; yet (20, 0) inside it has sqrt(20.25^2 + 3^2) =
@@ -446,5 +459,7 @@ remoteness and areas; the reader; then the eval on the Children's Odyssey model.
    Handbook's commentary (not in the repo) may say how a start inside the clearance is measured.
 10. **An opening narrower than 24 in:** the same words, read literally, leave no route through a gap that can't be
     passed 12 in from both sides (a niche, a gap between casework and a column), so a point beyond one has no route
-    and the story needs review (decision 2, test 18). Is that the intent, or does the clearance give way where the
-    opening is narrower (as it does at a door's centre)? Until answered, needs review, naming the opening.
+    of its own. Gordium (decided 2026-11-21) bounds such a pocket's points through the ring cluster that shuts it in:
+    the walk out with no clearance, then the cluster's greatest routed edge route (decision 3, test 18), an upper
+    bound, so no false pass. Is that the intent, or does the clearance give way where the opening is narrower (as it
+    does at a door's centre)? Either answer gives no more than Gordium's figure.
