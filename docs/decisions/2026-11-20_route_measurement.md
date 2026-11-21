@@ -141,9 +141,10 @@ area need review.
      edge it meets, y, is in E, at most the triangle's longest side away. So, with triangles no longer than 3 in a
      side: **every point of F is within the greatest sample plus 3 in** (a triangle in F; h is under 3 in), **or plus
      4.5 in** (3 in to E, 1.5 in along it), the cautious figure being the triangle's own. (Only where it matters:
-     triangles start 2 ft across, and a triangle no ring reaches whose greatest corner value plus 3 in can't beat the
-     best found so far is dropped, which that bound makes safe; a triangle a ring reaches is never dropped, but cut
-     to 3 in and every corner taken.) And a point of F with no route is never missed: its straight line to a triangle
+     triangles start 2 ft across, and a triangle no ring reaches is dropped only when its greatest corner value plus
+     its own h (the greatest distance from any of its points to its nearest corner: about 1 ft for a 2-ft triangle,
+     under 3 in only once cut to 3 in) can't beat the best found so far, which that bound makes safe (test 19); a
+     triangle a ring reaches is never dropped, but cut to 3 in and every corner taken.) And a point of F with no route is never missed: its straight line to a triangle
      corner, or to E and along it, reaches a sample that has none too, so the story needs review.
    - **Each cluster: its clear edge's greatest route plus its margin.** For a cluster (one ring, or rings that
      overlap), take the greatest D over its clear edge (its arcs of E that have a route, each sampled as above, plus
@@ -178,7 +179,7 @@ area need review.
    stretch, so the figure at p' is at most the straight distance plus the figure at p. Gordium's shortest routes are
    one such pair, so its figure at a sample is never less than the law's. So the story's figure is worked exactly
    as decision 3's, with decision 3's margins: on the clear floor the greatest sample plus 3 in (or 4.5 in in a
-   triangle a ring reaches, the walk to E and along it being shared by both routes); for each cluster, the greatest
+   triangle a ring reaches; a triangle dropped only on its greatest corner value plus its own h, as in decision 3, the walk to E and along it being shared by both routes); for each cluster, the greatest
    common path over its routed clear edge plus 1.5 in plus the cluster's margin (the walk out is shared by both
    routes, so it adds to the common path in full); the rules get the greatest of these, never less than the law's
    greatest. No cells and no cases: it is
@@ -233,8 +234,8 @@ area need review.
     story (its outline unknown, it may hold the most remote point or a route; with its outline, one no door or
     passage reaches stays needs review until open question 4 is settled); a room on the story with no `floor`
     (a curved wall: never its chord, which would shorten routes); a door with no `plan` or `sides`; a door whose side
-    is an unknown space or a room not read; a point with no route to any exit (shown, never a number; one shut in by an opening narrower than 24 in says
-    so, decision 2); obstructions
+    is an unknown space or a room not read; a point of the clear floor with no route to any exit, or a cluster with no routed clear edge (decision 3: shown,
+    never a number; one shut in by an opening narrower than 24 in says so, decision 2); obstructions
     or rooms read from a link; a corridor not made of straight legs (dead end only); and any reading that could
     shorten a route; a room that reaches an exit only through an end-only room (decision 1a); an `exit_kind` with
     no `exit_id`; a door under 24 in clear; any key of the additions left out. Readings that only lengthen one
@@ -300,7 +301,7 @@ these hand figures as written in the test file, never taken from the code under 
    (34, 7), on the wall x = 34, clockwise round the corner to (33, 6); its greatest route is at (34, 7): round the
    ring 176.661 degrees, 3.0833 ft, to the tangent toward the door centre, then 34.3666 = **37.450 ft**, so the
    corner's cluster bound is 37.450 + 1.5 in + 12 in = **38.575 ft**. Worked two ways: the arc-and-tangent
-   formula (37.4499), and the brute force from (34, 7) over 64-sided rings (37.4487 inside, 37.4524 outside). The
+   formula (37.4499), and the brute force from (34, 7) over 64-sided rings: inside 37.4487, outside 37.4524, a bracket 0.004 ft wide that holds 37.4499. The
    clear floor's greatest is test 1's 60.393 at (40, 30), so the story's figure is the clear floor's bound, between
    60.393 and 60.643 ft; the points behind the corner (once 35.088 ft from (34.5, 6.5) under the first definition
    from inside a ring, then 35.328 under the second, and 34.381 from the corner (34, 6) itself) are covered by
@@ -357,8 +358,13 @@ these hand figures as written in the test file, never taken from the code under 
     2 ft deep in the north wall (x 10 - 0.833 to 10 + 0.833, y 10 to 12). Its mouth's corners are 20 in apart, so
     their rings overlap across the mouth; (10, 11.5), at the back, is sqrt(0.833^2 + 1.5^2) = 1.716 ft from each corner, clear of both, and
     shut in: **no route**, needs review with the reason "an opening too narrow for NFPA 7.6.1's 12-in clearance from
-    both sides". Fails if the rings are left out (it would get a number) or if a point near the back may cross the
-    mouth inside a ring it isn't in.
+    both sides". Fails if the rings are left out (it would get a number).
+19. **A coarse triangle not dropped on 3 in:** a corridor 0 to 40 by 0 to 6, exit doors centred at (-0.25, 3) and
+    (40.25, 3). The triangle (19, 0), (21, 0), (19, 1.5) has corner values 19.482, 19.482 and 19.308, so corners plus
+    3 in is 19.732, which the sample (20.5, 3) at 19.75 beats; yet (20, 0) inside it has sqrt(20.25^2 + 3^2) =
+    **20.471 ft**, the story's true greatest (on the wall, where the two exits' routes are equal). Its own h is
+    about 1 ft, so it is kept and cut. The story's figure is at least 20.471. Fails if a 2-ft triangle may be dropped
+    on its corners plus 3 in.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
