@@ -110,7 +110,10 @@ def test_a_solid_left_out_makes_coverage_need_review_and_one_touching_the_buildi
     detached = _garage(False)
     assert detached["Lot coverage"]["status"] == present.REVIEW
     assert "lot coverage counts every building" in detached["Lot coverage"]["reason"]
-    assert detached["Front yard"]["status"] == present.COMPLIES          # a detached garage: the yards stand
+    # standing apart, it may be a freestanding deck (§325-18A): the yards wait too, never a pass (test_objects_apart)
+    assert detached["Front yard"]["status"] == present.REVIEW and "stands apart" in detached["Front yard"]["reason"]
+    assert detached["Building height"]["status"] == present.REVIEW       # its rule reads the yards (§325-16C)
+    assert detached["Stories"]["status"] == present.COMPLIES             # a freestanding deck adds no story
     attached = _garage(True)
     for name in ("Front yard", "Rear yard", "Building height", "Stories"):
         assert attached[name]["status"] == present.REVIEW, name

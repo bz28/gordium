@@ -42,3 +42,24 @@ fixed:
     the garage it couldn't see makes it 2,076 sf. Fixed in code (design_checker/present.py
     _cautious_for_left_out): any solid on the lot left out of the check makes lot coverage need review, and one
     touching the building makes the yards, height and stories need review too (it may be a porch or deck).
+disagreements:
+  R-1b.rear_yard: &apart
+    gordium: needs_review
+    direction: gordium_more_cautious
+    finding: >-
+      2026-11-20 (branch fix/revit-site-objects). The hand-worked result knows the solid is a garage (an accessory
+      building: the rear yard is to the rearmost main building, and §325-25 exempts accessory structures from the
+      side yards). Gordium doesn't: the solid isn't measured and nothing says what it is, and a freestanding deck
+      is "part of the building in both the determination of required yards and lot coverage" (§325-18A, p. 49;
+      DECK, p. 7: "A structure freestanding or attached to a building"). Read as a deck, it stands 120 - 114 = 6 ft
+      from the rear lot line, short of 30 ft: so the yards can't comply until it is measured (on the Building layer
+      and listed as an accessory building) or said to be one. The check isn't sent where it stands, so every yard
+      waits, and the height with them (its rule reads the yards: §325-16C's bonus). Never a failure. Before this,
+      the yards said complies for any left-out solid not touching the house: a false pass when it is a deck.
+    question_for_architects: >-
+      For a solid on the lot that Gordium can't measure and that stands apart from the house, is it right that the
+      yards wait until you say whether it is an accessory building (a garage, a shed) or a freestanding deck,
+      porch, landing or ramp (part of the building in the yards)?
+  R-1b.side_yards: *apart
+  R-1b.front_yard: *apart
+  R-1b.height: *apart

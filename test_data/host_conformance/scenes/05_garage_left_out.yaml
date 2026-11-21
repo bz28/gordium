@@ -3,8 +3,12 @@ what: >-
   Scenario 06 (test_sites/new_york/ithaca_city/scenarios/06_detached_garage_not_on_the_building_layer.yaml): the
   1,500 sf house plus a 24 × 24 ft garage at the back of the lot, drawn on the Default layer, so it isn't measured.
   The host must list the garage as left out: lot coverage counts it (1,500 + 576 = 2,076 sf > 1,800 sf), so
-  coverage must never say complies. It doesn't touch the house (10 ft apart), so the yards, height and stories are
-  still checked.
+  coverage must never say complies. It doesn't touch the house (10 ft apart), so the height and stories are still
+  checked; the yards are not (changed 2026-11-20, found on running after the fix, never hand-worked away): standing
+  apart, unmeasured, it may be a freestanding deck, which is part of the building in the yards (§325-18A), and as
+  one it would stand 6 ft from the rear lot line (120 - 114), short of the 30 ft rear yard. The check isn't sent
+  where a left-out object stands, so every yard waits on it, and the height with them (its rule reads the yards:
+  §325-16C's bonus). Before, the yards said complies: a false pass.
 buildings:
   - {id: house, outline: [[15, 30], [45, 30], [45, 80], [15, 80]], base: 0, floors: [10, 10]}
 others:
@@ -15,11 +19,11 @@ expected:
   scope.not_included: needs_review               # 1 solid on the lot isn't on the Building layer
   R-1b.lot_area_one_family_detached: complies
   R-1b.lot_width_one_family_detached: complies
-  R-1b.front_yard: complies                      # 30 ≥ 25
-  R-1b.side_yards#east: complies
-  R-1b.side_yards#west: complies
-  R-1b.rear_yard: complies                       # to the rearmost MAIN building: 40 ≥ 30
-  R-1b.yard_projections: complies
-  R-1b.height: complies
+  R-1b.front_yard: needs_review                  # 30 ≥ 25 to the house; the garage may be a freestanding deck
+  R-1b.side_yards#east: needs_review             # (§325-18A): every yard waits on it
+  R-1b.side_yards#west: needs_review
+  R-1b.rear_yard: needs_review                   # 40 ≥ 30 to the house; 6 ft to the garage, read as a deck
+  R-1b.yard_projections: needs_review
+  R-1b.height: needs_review                      # complies as measured; its rule reads the yards (§325-16C)
   R-1b.stories: complies
   R-1b.lot_coverage: needs_review                # 2,076 sf with the garage: never "complies"

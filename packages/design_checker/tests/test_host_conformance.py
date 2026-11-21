@@ -319,14 +319,16 @@ def test_an_invalid_description_is_reported_as_invalid_and_nothing_else_is_check
 
 def test_a_host_that_says_a_left_out_object_doesnt_touch_when_it_does_fails():
     """The porch against the house's west wall may be part of the house: a host that says it doesn't touch would
-    let the yards, height and stories pass with it unmeasured."""
+    let the stories pass with it unmeasured (the yards and the height still wait: standing apart, it may be a
+    freestanding deck, test_objects_apart)."""
     scene = SCENES["15_objects_left_out_touching_on_context_and_a_block"]
     doc = c.expected_site(scene)
     porch = next(o for o in doc["left_out"] if o["id"] == "porch")
     porch["touching"] = False
     found = c.conformance(scene, doc)
     assert "left out porch: touching False, expected True" in found
-    assert any(d.startswith("verdict R-1b.side_yards#west: complies, expected needs_review") for d in found)
+    assert any(d.startswith("verdict R-1b.stories: complies, expected needs_review") for d in found)
+    assert not any(d.startswith("verdict R-1b.side_yards") for d in found)
 
 
 @pytest.mark.parametrize("outline, block", [([[2, 50], [12, 50], [12, 60], [2, 60]], False),    # west side, middle
@@ -1003,7 +1005,7 @@ def test_blocks_with_nothing_to_measure_are_listed_touching_unknown_never_placed
     """Scene 26 (note scene H): the shed's own solid stands 10 ft from the house, but its nested part has no box.
     A host that placed the shed by its solid alone says it doesn't touch: the empty block still keeps the yards at
     needs review, so only the description comparison catches that (it does); a host that did so for both blocks
-    would let the yards comply."""
+    would let the stories comply (the yards still wait on objects standing apart: test_objects_apart)."""
     scene = SCENES["26_blocks_with_nothing_to_measure"]
     got = cr.describe(scene)
     assert sorted((o["id"], o["touching"]) for o in got["left_out"]) == \
@@ -1016,7 +1018,7 @@ def test_blocks_with_nothing_to_measure_are_listed_touching_unknown_never_placed
         o["touching"] = False
     found = c.conformance(scene, doc)
     assert "left out shed_with_empty_part: touching False, expected None" in found
-    assert any(d.startswith("verdict R-1b.side_yards#west: complies, expected needs_review") for d in found)
+    assert any(d.startswith("verdict R-1b.stories: complies, expected needs_review") for d in found)
     dropped = c.expected_site(scene)
     dropped["left_out"] = [o for o in dropped["left_out"] if o["id"] != "empty_block"]
     assert "left out empty_block: not listed (it makes the check need review)" in c.differences(dropped, c.expected_site(scene))
