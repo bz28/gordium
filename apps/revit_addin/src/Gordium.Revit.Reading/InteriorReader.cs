@@ -24,6 +24,10 @@ public sealed record InteriorReadResult(JsonObject Interior, IReadOnlyList<strin
     /// <summary>Why <c>stairs</c> was left out (empty when it was sent; step 4).</summary>
     public IReadOnlyList<string> StairsNotRead { get; init; } = [];
 
+    /// <summary>Each escape-route value left out (section 10), apart from <see cref="InteriorReadResult.Notes"/>: a house
+    /// never sets the route marks, so its count of values left out stays as it was (review round 1).</summary>
+    public IReadOnlyList<InteriorNote> RouteNotes { get; init; } = [];
+
     /// <summary>Why <c>doors</c> was left out (empty when it was sent; step 5).</summary>
     public IReadOnlyList<string> DoorsNotRead { get; init; } = [];
 
@@ -98,6 +102,7 @@ public static class InteriorReader
     public static InteriorReadResult Read(RevitModel model)
     {
         var notes = new List<InteriorNote>();
+        var routeNotes = new List<InteriorNote>();           // the escape routes' own, kept apart from a house's
         var evidence = new JsonObject();
         var interior = new JsonObject { ["format"] = "gordium.interior/1", ["units"] = "ft" };
         var roomsNotRead = RoomsNotRead(model);
@@ -106,6 +111,7 @@ public static class InteriorReader
 
         var marks = MarkReading.Rooms(model);
         var rooms = new JsonArray();
+        var plans = new Dictionary<string, RoomPlan>(StringComparer.Ordinal);
         if (roomsNotRead.Count == 0 && marks is not null && records is not null)
         {
             var marked = MarkReading.InDesign(model).ToDictionary(e => e.UniqueId, StringComparer.Ordinal);
@@ -120,7 +126,8 @@ public static class InteriorReader
                 if (rec is null)
                     notes.Add(new(r.Id, "floor", "the Revit layer gave nothing for this room"));
                 else
-                    ReadRoom(model, records, rec, room, notes);
+                    ReadRoom(model, records, rec, room, notes, r.Sleeping, plans);
+                RouteReader.RoomMarks(r, room, routeNotes);
                 rooms.Add(room);
             }
         }
@@ -218,6 +225,11 @@ public static class InteriorReader
         if (guardEvidence.Count > 0)
             evidence["guards"] = guardEvidence;
 
+        // escape routes (section 10): each story's levels, rooms' holes and obstructions, doors' places, sides and
+        // exits, and the passages between rooms, every one left out with its reason when it can't be read exactly
+        if (records is not null)
+            RouteReader.Add(model, records, interior, plans, routeNotes, evidence);
+
         // step 6: the format's has_none claims, each only on its tick, with nothing drawn against it and nothing that
         // could hide one; every tick's reading kept as evidence
         List<NoneTick> ticks = [noStairs, noDoors, noGuards, .. HasNone.Claims.Select(k => HasNone.Read(model, k, use))];
@@ -226,6 +238,7 @@ public static class InteriorReader
         evidence["has_none"] = new JsonObject(ticks.Select(t => KeyValuePair.Create(t.Kind.Kind, (JsonNode?)HasNone.Evidence(t))));
         return new(interior, roomsNotRead, openingsNotRead, notes, evidence)
         {
+            RouteNotes = routeNotes,
             StairsNotRead = stairsNotRead, DoorsNotRead = doorsNotRead, GuardsNotRead = guardsNotRead, Ticks = ticks,
             UnknownSpaces = unknown.Count > 0 ? UnknownAreaWords(model) : [], LevelConflicts = LevelConflicts(model),
             NotAStair = StairReader.NotAStairLines(model), NotAStairConflicts = StairReader.NotAStairConflicts(model),
@@ -398,8 +411,28 @@ public static class InteriorReader
     private static JsonArray UnknownSpaces(RevitModel model, List<EnclosedArea> areas)
     {
         var spaces = new JsonArray();
+        foreach (var (a, id, outline) in UnknownSpaceList(model, areas))
+        {
+            var space = new JsonObject { ["id"] = id, ["name"] = AreaWords(model, a) };
+            // its story (escape routes): an unknown space on a story keeps that story's routes needing review
+            if (a.LevelId is { } level && (model.Interior?.Levels ?? []).Any(l => l.UniqueId == level))
+                space["level"] = level;
+            if (outline is not null)
+                space["outline"] = new JsonArray(outline.Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray());
+            spaces.Add(space);
+        }
+        return spaces;
+    }
+
+    /// <summary>Each enclosed area sent as a space whose use isn't known, with its id in the description (from its level
+    /// and place, the same at every read of the same model) and its outline in shared plan points (the loop Revit gives a
+    /// Room placed in it for the moment, <see cref="EnclosedArea.Outline"/>), null when that couldn't be read or isn't a
+    /// simple outline of straight segments.</summary>
+    internal static List<(EnclosedArea Area, string Id, List<P2>? Outline)> UnknownSpaceList(RevitModel model, List<EnclosedArea>? areas = null)
+    {
+        var list = new List<(EnclosedArea, string, List<P2>?)>();
         var ids = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var a in areas)
+        foreach (var a in areas ?? UnknownAreas(model))
         {
             var id = a.PointInside is { } inside
                 ? string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:{1:0.###},{2:0.###}", a.LevelId ?? a.Level,
@@ -407,9 +440,11 @@ public static class InteriorReader
                 : string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:no-point:{1:0.###}sf", a.LevelId ?? a.Level, a.Area);
             for (var n = 2; !ids.Add(id); n++)
                 id = $"{id}#{n}";
-            spaces.Add(new JsonObject { ["id"] = id, ["name"] = AreaWords(model, a) });
+            var outline = a.Outline is { Count: >= 3 } o
+                ? PlanGeometry.Clean(o.Select(model.InternalToShared.Apply).Select(p => new P2(p.X, p.Y)).ToList()) : null;
+            list.Add((a, id, outline is not null && PlanGeometry.IsSimple(outline) ? outline : null));
         }
-        return spaces;
+        return list;
     }
 
     private static IEnumerable<string> WorksetAndLinkBlockers(RevitModel model, bool rooms)
@@ -445,32 +480,51 @@ public static class InteriorReader
 
     // ---- a room --------------------------------------------------------------------------------------------------
 
+    /// <summary>A room's floor as read (shared plan points): its outline, the holes in it (a column or chase it goes
+    /// round: its second and later boundary loops), the floor's elevation its level and offset give (null when they
+    /// can't be read), and the elements bounding it. What the escape routes are read over (<see cref="RouteReader"/>).</summary>
+    internal sealed record RoomPlan(List<P2> Outer, List<List<P2>> Holes, double? Floor, HashSet<string> Bounding, RoomRecord Record,
+                                    HashSet<string>? StandingWalls = null);
+
     private static void ReadRoom(RevitModel model, InteriorRecords records, RoomRecord rec, JsonObject room,
-                                 List<InteriorNote> notes)
+                                 List<InteriorNote> notes, bool? sleeping, Dictionary<string, RoomPlan> plans)
     {
         var id = rec.UniqueId;
         var t = model.InternalToShared;
         void Out(string field, string why) => notes.Add(new(id, field, why));
 
-        // the floor's outline: one loop of straight segments at the finished faces, nothing inside it unbounded
+        // the floor's outline: loops of straight segments at the finished faces, nothing inside it unbounded; a loop
+        // inside the outline is a hole (a column, a chase), sent as one for any room but one marked a sleeping room: the
+        // house's floor area reads the outline alone, so a bedroom's would count the column's floor (never a pass). A
+        // room not marked is sent so too: with a sleeping flag missing the house's measures read no room at all
         List<P2>? plan = null;
+        List<List<P2>> holes = [];
+        HashSet<string> walls = [];
         var bounding = new HashSet<string>(StringComparer.Ordinal);
         if (rec.Boundary is not { } loops || loops.Count == 0)
             Out("floor", "Revit gives no boundary for this room");
-        else if (loops.Count > 1)
-            Out("floor", $"it has {loops.Count} boundary loops (a column or a chase inside it): a floor with a hole isn't read yet");
-        else if (loops[0].Any(s => !s.IsLine))
+        else if (loops.Count > 1 && sleeping is true)
+            Out("floor", $"it has {loops.Count} boundary loops (a column or a chase inside it): a floor with a hole isn't read yet " +
+                         "for a sleeping room, whose floor area would count the hole");
+        else if (loops.Any(l => l.Any(s => !s.IsLine)))
             Out("floor", "its boundary has a curved segment: read only as straight segments, never as a chord");
         else
         {
-            foreach (var s in loops[0].Where(s => s.Element is not null))
+            foreach (var s in loops.SelectMany(l => l).Where(s => s.Element is not null))
                 bounding.Add(s.Element!);
-            var points = loops[0].Select(s => t.Apply(s.Start)).Select(p => new P2(p.X, p.Y)).ToList();
-            var clean = PlanGeometry.Clean(points);
-            if (clean is null || !PlanGeometry.IsSimple(clean))
+            var cleaned = loops.Select(l => PlanGeometry.Clean(l.Select(s => t.Apply(s.Start)).Select(p => new P2(p.X, p.Y)).ToList())).ToList();
+            if (cleaned.Any(c => c is null || !PlanGeometry.IsSimple(c)))
                 Out("floor", "its boundary isn't a simple outline");
             else
-                plan = clean;
+            {
+                // the outline is the loop with the largest area (Revit doesn't promise the outer loop comes first)
+                var outer = cleaned.OrderByDescending(c => PlanGeometry.Area(c!)).First()!;
+                var inner = cleaned.Where(c => !ReferenceEquals(c, outer)).Select(c => c!).ToList();
+                if (RouteReader.HolesProblem(outer, inner) is { } holesWhy)
+                    Out("floor", holesWhy);
+                else
+                    (plan, holes) = (outer, inner);
+            }
         }
         if (plan is not null)
         {
@@ -480,12 +534,19 @@ public static class InteriorReader
                 plan = null;
             }
             else if (inside.Where(e => InDesign(model, e) && !bounding.Contains(e.UniqueId) && !NotBuilding.Contains(e.BuiltInCategory)
-                                       && !InBoundingWall(e, bounding))
-                           .Select(e => Named(e)).Distinct().ToList() is { Count: > 0 } standing)
+                                       && !InBoundingWall(e, bounding)).ToList() is { Count: > 0 } standing)
             {
-                Out("floor", "something stands inside its outline without bounding it (" + string.Join(", ", standing) +
-                             "): it may be two rooms, or smaller than its outline");
-                plan = null;
+                // a wall standing in a room that isn't a sleeping room is sent with the floor, as an obstruction (the
+                // route code then only loses floor: more cautious); a sleeping room's floor area would count it, so a
+                // sleeping room's floor is left out as before, and anything else standing in any room leaves it out
+                if (sleeping is true || standing.Any(e => e.BuiltInCategory != "OST_Walls"))
+                {
+                    Out("floor", "something stands inside its outline without bounding it (" + string.Join(", ", standing.Select(Named).Distinct()) +
+                                 "): it may be two rooms, or smaller than its outline");
+                    plan = null;
+                }
+                else
+                    walls = standing.Select(e => e.UniqueId).ToHashSet(StringComparer.Ordinal);
             }
         }
         // a loaded link reaching over the room: what's in it (a slab, a beam) isn't read yet
@@ -505,6 +566,7 @@ public static class InteriorReader
             return;
         }
         room["floor"] = new JsonArray(plan.Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray());
+        plans[id] = new(plan, holes, null, bounding, rec, walls);
 
         // the floor's elevation: its level and offset, checked against the slab top under the whole room
         if (rec.LevelElevation is not { } level || rec.BaseOffset is not { } offset)
@@ -515,6 +577,7 @@ public static class InteriorReader
         }
         var at = rec.Boundary![0][0].Start;
         var claimed = t.Apply(new Xyz(at.X, at.Y, level + offset)).Z;
+        plans[id] = plans[id] with { Floor = claimed };
         if (SlabProblem(model, rec, plan, claimed) is { } slab)
             Out("floor_elevation", slab);
         else
@@ -530,15 +593,15 @@ public static class InteriorReader
     /// standing inside the room nor a ceiling over it (its trim may reach into the room). Only windows and doors:
     /// anything else a bounding wall hosts (a wall-hosted bulkhead, a shelf, a soffit) is read like any other element
     /// (review round 1: a wall-hosted Generic Model 6.5 ft up was never a ceiling).</summary>
-    private static bool InBoundingWall(NearbyElement e, HashSet<string> bounding) =>
+    internal static bool InBoundingWall(NearbyElement e, HashSet<string> bounding) =>
         e.BuiltInCategory is "OST_Windows" or "OST_Doors" && e.Host is { } h && bounding.Contains(h);
 
     /// <summary>In the design checked (the outside reader's one rule, as the stairs' and guards' surroundings): an
     /// element demolished by the last phase, or in a design option that isn't the one checked of its set (a secondary
     /// option's wall, roof or floor: Revit's collectors give every option's), isn't in, under or over the room.</summary>
-    private static bool InDesign(RevitModel model, NearbyElement e) => SiteReader.InDesignChecked(model, e.PhaseDemolished, e.DesignOption);
+    internal static bool InDesign(RevitModel model, NearbyElement e) => SiteReader.InDesignChecked(model, e.PhaseDemolished, e.DesignOption);
 
-    private static string Named(NearbyElement e) =>
+    internal static string Named(NearbyElement e) =>
         string.IsNullOrWhiteSpace(e.Name) ? e.BuiltInCategory.Replace("OST_", "") : $"{e.BuiltInCategory.Replace("OST_", "")} \"{e.Name}\"";
 
     private static bool Reaches(RevitModel model, RevitBox box, List<P2> plan)
@@ -548,9 +611,9 @@ public static class InteriorReader
         return b.Min.X < x1 && b.Max.X > x0 && b.Min.Y < y1 && b.Max.Y > y0;
     }
 
-    private static List<Xyz> Shared(RevitModel model, IEnumerable<Xyz> points) => points.Select(model.InternalToShared.Apply).ToList();
+    internal static List<Xyz> Shared(RevitModel model, IEnumerable<Xyz> points) => points.Select(model.InternalToShared.Apply).ToList();
 
-    private static Xyz Turned(RevitModel model, Xyz v)
+    internal static Xyz Turned(RevitModel model, Xyz v)
     {
         var t = model.InternalToShared;
         return v.X * t.BasisX + v.Y * t.BasisY + v.Z * t.BasisZ;

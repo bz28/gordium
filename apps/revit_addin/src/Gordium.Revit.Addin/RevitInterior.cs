@@ -67,8 +67,216 @@ internal static class RevitInterior
             Railings = railings,
             Ramps = RampsOf(doc, diagnostics),
             CoordinationModels = coordination,
+            Levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+                .Select(l => new LevelRecord(l.UniqueId, l.Name, l.ProjectElevation)).ToList(),
+            SeparationLines = SeparationLinesOf(doc, diagnostics),
+            GrossAreas = phase is null ? null : GrossAreasOf(doc, phase, diagnostics),
             Diagnostics = diagnostics,
         };
+    }
+
+    /// <summary>Every room separation line (escape routes, section 10: where two rooms meet with no wall), by
+    /// <c>UniqueId</c>; null when they couldn't be listed (then no passage is sent).</summary>
+    private static List<string>? SeparationLinesOf(Document doc, List<string> diagnostics)
+    {
+        try
+        {
+            var lines = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_RoomSeparationLines)
+                .WhereElementIsNotElementType().Select(e => e.UniqueId).ToList();
+            diagnostics.Add($"room separation lines: {lines.Count}");
+            return lines;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"the room separation lines couldn't be read ({x.GetType().Name}: {x.Message})");
+            return null;
+        }
+    }
+
+    /// <summary>Each level's exterior walls' outer faces, by Revit's own room logic (<see cref="RingOf"/>; the story's
+    /// outlines, section 10), for each level with a placed Room, inside a transaction always rolled back. Each level's
+    /// result says why when there is none; null when the document can't be changed for the moment.</summary>
+    private static Dictionary<string, GrossArea>? GrossAreasOf(Document doc, Phase phase, List<string> diagnostics)
+    {
+        // Revit works a plan's enclosed areas out again only when a transaction is committed: so a transaction group,
+        // its transactions committed and the whole group then rolled back (the model unchanged); that needs no
+        // transaction open already
+        if (doc.IsReadOnly || doc.IsModifiable)
+        {
+            diagnostics.Add("outer outlines: not read (the document is read-only or already in a transaction)");
+            return null;
+        }
+        var walls = new FilteredElementCollector(doc).OfClass(typeof(Wall)).Cast<Wall>().Where(w => !w.ViewSpecific).ToList();
+        var planType = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>().ToList()
+            .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan);
+        var levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList();
+        var rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType().OfType<Room>()
+            .Where(r => r.Location is LocationPoint && r.Area > 0).ToList();
+        var result = new Dictionary<string, GrossArea>(StringComparer.Ordinal);
+        foreach (var level in levels)
+        {
+            if (!rooms.Any(r => r.LevelId == level.Id))
+                continue;
+            using var group = new TransactionGroup(doc, ResultRows.AreasTransaction);
+            group.Start();
+            try
+            {
+                result[level.UniqueId] = RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(), planType, diagnostics);
+            }
+            finally
+            {
+                group.RollBack();                            // every transaction in it taken back: the model as it was
+            }
+        }
+        return result;
+    }
+
+    /// <summary>A transaction whose warnings are dismissed (no dialog in a read), its errors rolling it back.</summary>
+    private static void Quiet(Transaction t)
+    {
+        var o = t.GetFailureHandlingOptions();
+        o.SetFailuresPreprocessor(new DismissWarnings());
+        o.SetClearAfterRollback(true);
+        t.SetFailureHandlingOptions(o);
+    }
+
+    private sealed class DismissWarnings : IFailuresPreprocessor
+    {
+        public FailureProcessingResult PreprocessFailures(FailuresAccessor a)
+        {
+            foreach (var f in a.GetFailureMessages().Where(f => f.GetSeverity() == FailureSeverity.Warning).ToList())
+                a.DeleteWarning(f);
+            return FailureProcessingResult.Continue;
+        }
+    }
+
+    /// <summary>The level's exterior walls' outer faces by Revit's own room logic: room separation lines drawn as a
+    /// rectangle 20 ft beyond the level's walls, a Room placed in the ring between it and the building, its boundary at
+    /// the finished faces read (doors and windows don't break a room's boundary; interior walls never touch this one),
+    /// the rectangle's loop dropped. The lines and the Room are each made in a committed transaction (Revit works a
+    /// plan's enclosed areas out again only on a commit) inside the transaction group <see cref="GrossAreasOf"/> rolls
+    /// back. Each loop's corners and area, and each side with what bounds it, are logged.</summary>
+    private static GrossArea RingOf(Document doc, Phase phase, Level level, List<Wall> walls, ViewFamilyType? planType, List<string> diagnostics)
+    {
+        GrossArea No(string why) => new(null, new Dictionary<string, double>(), why);
+        var boxes = walls.Select(w => w.get_BoundingBox(null)).OfType<BoundingBoxXYZ>().ToList();
+        if (boxes.Count == 0)
+            return No("no wall stands on the level");
+        if (planType is null)
+            return No("the model has no floor plan view type to draw the ring's lines in");
+        const double Beyond = 20;
+        double x0 = boxes.Min(b => b.Min.X) - Beyond, y0 = boxes.Min(b => b.Min.Y) - Beyond, x1 = boxes.Max(b => b.Max.X) + Beyond, y1 = boxes.Max(b => b.Max.Y) + Beyond;
+        var z = level.ProjectElevation;
+        try
+        {
+            HashSet<ElementId> lines;
+            using (var draw = new Transaction(doc, "Gordium: the ring's lines (taken back)"))
+            {
+                Quiet(draw);
+                draw.Start();
+                // the level's own floor plan when it has one (else one made for the moment), in the phase rooms are read in
+                var view = new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>().ToList()
+                    .FirstOrDefault(v => !v.IsTemplate && v.ViewType == ViewType.FloorPlan && v.GenLevel?.Id == level.Id)
+                    ?? ViewPlan.Create(doc, planType.Id, level.Id);
+                view.get_Parameter(BuiltInParameter.VIEW_PHASE)?.Set(phase.Id);
+                var sketch = SketchPlane.Create(doc, level.Id);
+                var ring = new CurveArray();
+                XYZ[] corners = [new(x0, y0, z), new(x1, y0, z), new(x1, y1, z), new(x0, y1, z)];
+                for (var i = 0; i < 4; i++)
+                    ring.Append(Line.CreateBound(corners[i], corners[(i + 1) % 4]));
+                lines = doc.Create.NewRoomBoundaryLines(sketch, ring, view).Cast<ModelCurve>().Select(c => c.Id).ToHashSet();
+                if (draw.Commit() != TransactionStatus.Committed)
+                    return No("Revit didn't keep the ring's lines");
+            }
+            var circuits = doc.get_PlanTopology(level, phase)?.Circuits?.Cast<PlanCircuit>().ToList() ?? [];
+            var ringCircuit = circuits.OrderByDescending(c => c.Area).FirstOrDefault();
+            var expected = (x1 - x0) * (y1 - y0);
+            diagnostics.Add($"outer outline of {level.Name}: {lines.Count} separation lines drawn round ({x0:0.#}, {y0:0.#})-({x1:0.#}, {y1:0.#}), " +
+                            $"{circuits.Count} enclosed areas, the largest {ringCircuit?.Area:0.#} sq ft (the rectangle {expected:0.#})");
+            Room room;
+            using (var place = new Transaction(doc, "Gordium: the ring's Room (taken back)"))
+            {
+                Quiet(place);
+                place.Start();
+                if (ringCircuit is not null && !ringCircuit.IsRoomLocated && ringCircuit.Area > expected / 2)
+                {
+                    room = doc.Create.NewRoom(phase);
+                    doc.Create.NewRoom(room, ringCircuit);
+                }
+                else
+                    room = doc.Create.NewRoom(level, new UV(x0 + Beyond / 2, y0 + Beyond / 2));   // the ring's point, 10 ft outside the walls
+                if (place.Commit() != TransactionStatus.Committed)
+                    return No("Revit didn't keep the ring's Room");
+            }
+            diagnostics.Add($"outer outline of {level.Name}: the ring Room {(room.Area > 0 ? "closed" : "not closed")}, {room.Area:0.#} sq ft");
+            if (room.Area <= 0)
+                return No($"the Room placed round the building isn't enclosed (Revit gives it no area; the largest enclosed area {ringCircuit?.Area:0.#} sq ft)");
+            var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions { SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish });
+            var widths = new Dictionary<string, double>(StringComparer.Ordinal);
+            var building = loops.Where(l => !l.All(seg => lines.Contains(seg.ElementId))).Select(loop => (IReadOnlyList<BoundarySegmentRecord>)loop.Select(seg =>
+            {
+                var c = seg.GetCurve();
+                var by = doc.GetElement(seg.ElementId);
+                if (by is Wall w)
+                    widths[w.UniqueId] = w.Width;
+                return new BoundarySegmentRecord(P(c.GetEndPoint(0)), P(c.GetEndPoint(1)), c is Line, by?.UniqueId);
+            }).ToList()).ToList();
+            diagnostics.Add($"outer outline of {level.Name}: the ring Room has {loops.Count} loops; the building's: " +
+                            string.Join("; ", building.Select(l =>
+                            {
+                                var p = l.Select(seg => seg.Start).ToList();
+                                var area = Math.Abs(p.Select((a, i) => a.X * p[(i + 1) % p.Count].Y - p[(i + 1) % p.Count].X * a.Y).Sum()) / 2;
+                                return $"{l.Count} corners, {area:0.#} sq ft";
+                            })));
+            // each side and what bounds it, so a side the reader can't use can be found in the model
+            foreach (var l in loops.Where(l => !l.All(seg => lines.Contains(seg.ElementId))))
+                diagnostics.Add($"outer outline of {level.Name}, sides: " + string.Join(" ", l.Select(seg =>
+                {
+                    var c = seg.GetCurve();
+                    var by = doc.GetElement(seg.ElementId);
+                    return $"({c.GetEndPoint(0).X:0.###},{c.GetEndPoint(0).Y:0.###})-({c.GetEndPoint(1).X:0.###},{c.GetEndPoint(1).Y:0.###}) " +
+                           $"{by?.Category?.BuiltInCategory.ToString().Replace("OST_", "") ?? "none"} {by?.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString()};";
+                })));
+            return new GrossArea(building, widths);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            diagnostics.Add($"outer outline of {level.Name}: Revit refused ({x.GetType().Name}: {x.Message})");
+            return No($"Revit refused ({x.Message})");
+        }
+    }
+
+    /// <summary>The door's host wall's side faces (<c>HostObjectUtils.GetSideFaces</c>, exterior then interior), each a
+    /// plane; null when the host isn't a wall, a side has no face, a face isn't planar (a curved wall) or Revit refuses
+    /// (a curtain wall): then the door's place in its wall isn't read.</summary>
+    private static List<WallFace>? SidesOf(Element? host)
+    {
+        if (host is not Wall wall)
+            return null;
+        try
+        {
+            var sides = new List<WallFace>();
+            foreach (var side in new[] { ShellLayerType.Exterior, ShellLayerType.Interior })
+            {
+                var refs = HostObjectUtils.GetSideFaces(wall, side);
+                if (refs is null || refs.Count == 0)
+                    return null;
+                foreach (var r in refs)
+                {
+                    if (wall.GetGeometryObjectFromReference(r) is not PlanarFace f)
+                        return null;
+                    sides.Add(new WallFace(P(f.Origin), P(f.FaceNormal)));
+                }
+            }
+            return sides;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     // ---- stairs (step 4) ---------------------------------------------------------------------------------------
@@ -95,7 +303,7 @@ internal static class RevitInterior
                 candidates.Add(Candidate(e));
             foreach (var e in Models(doc, BuiltInCategory.OST_GenericModel))
                 candidates.Add(Candidate(e));
-            foreach (var m in new FilteredElementCollector(doc).OfClass(typeof(MultistoryStairs)))
+            foreach (var m in new FilteredElementCollector(doc).OfClass(typeof(MultistoryStairs)).ToList())
                 candidates.Add(new StairCandidate(m.UniqueId, m.Category?.BuiltInCategory.ToString() ?? "OST_MultistoryStairs", m.Name,
                                                   "a multistory stair", Id(m.DemolishedPhaseId), Id(m.DesignOption?.Id)));
         }
@@ -133,7 +341,7 @@ internal static class RevitInterior
     }
 
     private static IEnumerable<Element> Models(Document doc, BuiltInCategory c) =>
-        new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().Where(e => !e.ViewSpecific);
+        new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().Where(e => !e.ViewSpecific).ToList();
 
     private static StairCandidate Candidate(Element e) => new(
         e.UniqueId, e.Category?.BuiltInCategory.ToString() ?? "", e.Name,
@@ -409,7 +617,9 @@ internal static class RevitInterior
         try
         {
             var areas = new List<EnclosedArea>();
-            foreach (var level in new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>())
+            // every collector listed before the model changes (an outline places a Room for the moment: a live
+            // iterator then throws, "changes made to the Element table", the Children's Odyssey read, 2026-11-21)
+            foreach (var level in new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList())
             {
                 PlanTopology topology;
                 try
@@ -427,7 +637,9 @@ internal static class RevitInterior
                     return null;
                 }
                 var before = areas.Count;
-                foreach (PlanCircuit c in circuits)
+                // first every circuit of the level read, the model unchanged
+                var listed = circuits.Cast<PlanCircuit>().ToList();
+                foreach (var c in listed)
                 {
                     // Revit refuses a point inside a degenerate circuit (a sliver between overlapping walls: the
                     // Children's Odyssey model, 2026-11-20): the area is kept with no point, never dropped
@@ -442,6 +654,19 @@ internal static class RevitInterior
                     }
                     areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId));
                 }
+                // then each one with no Room outlined, one sub-transaction each, rolled back; the circuit taken afresh
+                // from the level's topology each time (by its place in the list, its area checked), never one held
+                // across a change
+                for (var k = 0; k < listed.Count; k++)
+                    if (!areas[before + k].HasRoom)
+                    {
+                        areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area, out var by) };
+                        // an area Revit gives no point in (a sliver) is located by what bounds it, for the log
+                        if (areas[before + k].PointInside is null)
+                            diagnostics.Add($"enclosed area {k} on {level.Name} ({areas[before + k].Area:0.####} sq ft, no point inside): " +
+                                            (by.Count > 0 ? "bounded by " + string.Join(", ", by) : "Revit gave no boundary for a Room in it") +
+                                            (areas[before + k].Outline is { } o ? "; outline " + string.Join(" ", o.Select(q => $"({q.X:0.####},{q.Y:0.####})")) : ""));
+                    }
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
                                 $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
                                 string.Join(", ", areas.Skip(before).Where(a => !a.HasRoom)
@@ -461,10 +686,56 @@ internal static class RevitInterior
         }
     }
 
+    /// <summary>An enclosed area's outline: a Room placed in it for the moment (<c>NewRoom(phase)</c>, then
+    /// <c>NewRoom(room, circuit)</c>) inside a <c>SubTransaction</c> that is always rolled back, its outer boundary loop at
+    /// the finished faces (the loop of largest area), each segment's start. Null when the document can't be changed for
+    /// the moment, Revit refuses, or a segment is curved: the reader then never calls a door's far side on that level
+    /// outside (escape routes, section 10).</summary>
+    private static List<Xyz>? OutlineOf(Document doc, Phase phase, Level level, int index, double area, out List<string> by)
+    {
+        by = [];
+        if (!doc.IsModifiable)
+            return null;
+        using var st = new SubTransaction(doc);
+        try
+        {
+            var fresh = doc.get_PlanTopology(level, phase)?.Circuits?.Cast<PlanCircuit>().ToList();
+            if (fresh is null || index >= fresh.Count || Math.Abs(fresh[index].Area - area) > 1e-9 || fresh[index].IsRoomLocated)
+                return null;                                     // not the same circuit: never outlined on a guess
+            var circuit = fresh[index];
+            st.Start();
+            var room = doc.Create.NewRoom(phase);
+            doc.Create.NewRoom(room, circuit);
+            doc.Regenerate();
+            var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions { SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish });
+            by = (loops ?? []).SelectMany(l => l).Select(s => doc.GetElement(s.ElementId)).OfType<Element>()
+                .Select(e => $"{e.Category?.Name} {e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() ?? e.Id.Value.ToString(CultureInfo.InvariantCulture)}")
+                .Distinct().ToList();
+            if (loops is null || loops.Count == 0 || loops.Any(l => l.Any(s => s.GetCurve() is not Line)))
+                return null;
+            static double Area(IList<BoundarySegment> l)
+            {
+                var p = l.Select(s => s.GetCurve().GetEndPoint(0)).ToList();
+                return Math.Abs(p.Select((a, i) => a.X * p[(i + 1) % p.Count].Y - p[(i + 1) % p.Count].X * a.Y).Sum()) / 2;
+            }
+            return loops.OrderByDescending(Area).First().Select(s => P(s.GetCurve().GetEndPoint(0))).ToList();
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return null;
+        }
+        finally
+        {
+            if (st.HasStarted() && !st.HasEnded())
+                st.RollBack();
+        }
+    }
+
     private static List<InteriorLink> Links(Document doc)
     {
         var links = new List<InteriorLink>();
-        foreach (var li in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>())
+        foreach (var li in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>().ToList())
         {
             var type = doc.GetElement(li.GetTypeId()) as RevitLinkType;
             var linked = li.GetLinkDocument();
@@ -519,15 +790,16 @@ internal static class RevitInterior
         if (boundary is not { Count: > 0 } || elevation is null || offset is null || loops is null)
             return record;
         var floor = elevation.Value + offset.Value;
-        var outer = loops[0];
-        var xs = outer.SelectMany(s => new[] { s.GetCurve().GetEndPoint(0), s.GetCurve().GetEndPoint(1) }).ToList();
+        // every loop's extent (Revit doesn't promise the outer loop first: a room round a column has two)
+        var xs = loops.SelectMany(l => l).SelectMany(s => new[] { s.GetCurve().GetEndPoint(0), s.GetCurve().GetEndPoint(1) }).ToList();
         double x0 = xs.Min(p => p.X), y0 = xs.Min(p => p.Y), x1 = xs.Max(p => p.X), y1 = xs.Max(p => p.Y);
         return record with
         {
             Inside = Inside(doc, room, loops, floor, level!),
             Under = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor - InteriorReader.SlabBand), new XYZ(x1, y1, floor + InteriorReader.SlabBand)),
                          [BuiltInCategory.OST_Floors, BuiltInCategory.OST_StructuralFoundation]),
-            Over = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null),
+            Over = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,
+                        Band(x0, y0, x1, y1, floor)),
         };
     }
 
@@ -564,14 +836,126 @@ internal static class RevitInterior
         }
     }
 
+    /// <summary>The room's band (escape routes, section 10): a slab over the room's box from 1/16 in above its floor
+    /// to 80 in up (<see cref="RouteReader.Headroom"/>); null when Revit can't make it.</summary>
+    private static Solid? Band(double x0, double y0, double x1, double y1, double floor)
+    {
+        try
+        {
+            var z = floor + Sixteenth;
+            var loop = CurveLoop.Create(new List<Curve>
+            {
+                Line.CreateBound(new XYZ(x0, y0, z), new XYZ(x1, y0, z)), Line.CreateBound(new XYZ(x1, y0, z), new XYZ(x1, y1, z)),
+                Line.CreateBound(new XYZ(x1, y1, z), new XYZ(x0, y1, z)), Line.CreateBound(new XYZ(x0, y1, z), new XYZ(x0, y0, z)),
+            });
+            return GeometryCreationUtilities.CreateExtrusionGeometry([loop], XYZ.BasisZ, RouteReader.Headroom - Sixteenth);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>A solid that isn't closed: no volume, or an edge with no second face (as <c>RevitRead</c>'s edges are
+    /// read, <c>Edge.GetFace(1)</c>; round 5); an edge that can't be asked counts as open.</summary>
+    internal static bool Open(Solid s)
+    {
+        if (s.Volume <= 1e-12)
+            return true;
+        try
+        {
+            foreach (Edge edge in s.Edges)
+                if (edge.GetFace(1) is null)
+                    return true;
+            return false;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return true;
+        }
+    }
+
+    /// <summary>What of the element lies in the band: each of its solids (a family's instance geometry included)
+    /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh, an instance with no
+    /// geometry or a kind not read, or a face of the result can't be read; and how many open shells (see
+    /// <see cref="Open"/>: no volume, or an edge with one face) reach the band.</summary>
+    private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, Options options)
+    {
+        var faces = new List<SurfaceRecord>();
+        var failed = false;
+        var open = 0;
+        var bandBox = band.GetBoundingBox();
+        XYZ bandMin = bandBox.Transform.OfPoint(bandBox.Min), bandMax = bandBox.Transform.OfPoint(bandBox.Max);
+        // every kind of geometry has its own branch: nothing is dropped by default (review round 4)
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                switch (o)
+                {
+                    case Solid { Faces.Size: 0 }:
+                        break;                                   // an empty solid: nothing drawn
+                    case Solid s when Open(s):
+                        // an open shell (imported surfaces, a DirectShape from an open Brep: no volume, or an edge with
+                        // one face), which can't be cut; counted unless its box lies wholly outside the band
+                        var sb = s.GetBoundingBox();
+                        var corners = new[] { sb.Min, sb.Max, new XYZ(sb.Min.X, sb.Max.Y, sb.Min.Z), new XYZ(sb.Max.X, sb.Min.Y, sb.Max.Z) }
+                            .Select(sb.Transform.OfPoint).ToList();
+                        if (corners.Max(c => c.X) < bandMin.X || corners.Min(c => c.X) > bandMax.X
+                            || corners.Max(c => c.Y) < bandMin.Y || corners.Min(c => c.Y) > bandMax.Y
+                            || corners.Max(c => c.Z) < bandMin.Z || corners.Min(c => c.Z) > bandMax.Z)
+                            break;
+                        open++;
+                        break;
+                    case Solid s:
+                        var cut = BooleanOperationsUtils.ExecuteBooleanOperation(s, band, BooleanOperationsType.Intersect);
+                        if (cut is null)
+                            break;                               // none of it in the band
+                        foreach (Face f in cut.Faces)
+                            if (Surface(f) is { } face)
+                                faces.Add(face);
+                            else
+                                failed = true;
+                        break;
+                    case GeometryInstance gi:
+                        if (gi.GetInstanceGeometry() is { } inner)
+                            Walk(inner);
+                        else
+                            failed = true;
+                        break;
+                    case GeometryElement nested:
+                        Walk(nested);
+                        break;
+                    case Curve or PolyLine or Autodesk.Revit.DB.Point:
+                        break;                                   // lines and points: no body to stand in the way
+                    default:
+                        failed = true;                           // a mesh, or a kind not read
+                        break;
+                }
+            }
+        }
+        try
+        {
+            if (e.get_Geometry(options) is { } g)
+                Walk(g);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            return ([], true, 0);
+        }
+        return (faces, failed, open);
+    }
+
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
-    /// (any for null), with their faces.</summary>
-    private static List<NearbyElement>? Near(Document doc, ElementId skip, Outline box, BuiltInCategory[]? categories)
+    /// (any for null), with their faces; with <paramref name="band"/>, also what of each lies in it.</summary>
+    private static List<NearbyElement>? Near(Document doc, ElementId skip, Outline box, BuiltInCategory[]? categories, Solid? band = null)
     {
         try
         {
             var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
-            var found = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box));
+            var found = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box)).ToList();
             var list = new List<NearbyElement>();
             foreach (var e in found)
             {
@@ -580,8 +964,14 @@ internal static class RevitInterior
                 if (categories is not null && !categories.Contains(cat.BuiltInCategory))
                     continue;
                 var (faces, failed) = Faces(e, options);
-                list.Add(new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
-                                           faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id)));
+                var near = new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                                             faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
+                if (band is not null)
+                {
+                    var (banded, bandFailed, openShells) = InBand(e, band, options);
+                    near = near with { Banded = banded, BandFailed = bandFailed, OpenShells = openShells };
+                }
+                list.Add(near);
             }
             return list;
         }
@@ -597,8 +987,8 @@ internal static class RevitInterior
         e.get_BoundingBox(null) is { } b ? new RevitBox(P(b.Min), P(b.Max), b.Transform is { IsIdentity: false } bt ? T(bt) : null) : null;
 
     /// <summary>Every face of the element's solids (a family's instance geometry included), and whether anything in its
-    /// geometry couldn't be read as faces (a mesh, <c>get_Geometry</c> throwing, or a face Revit gives no edges or
-    /// triangles for: then no faces at all).</summary>
+    /// geometry couldn't be read as faces (a mesh, <c>get_Geometry</c> throwing, an instance with no geometry, a kind
+    /// not read, or a face Revit gives no edges or triangles for: then no faces at all).</summary>
     private static (List<SurfaceRecord>? Faces, bool Failed) Faces(Element e, Options options)
     {
         var faces = new List<SurfaceRecord>();
@@ -622,11 +1012,19 @@ internal static class RevitInterior
                                 unreadable = true;
                         }
                         break;
-                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
-                        Walk(inner);
+                    case GeometryInstance gi:
+                        if (gi.GetInstanceGeometry() is { } inner)
+                            Walk(inner);
+                        else
+                            failed = true;           // an instance with no geometry to read (round 5: as InBand)
                         break;
-                    case Mesh:
-                        failed = true;               // a mesh over a room isn't read exactly
+                    case GeometryElement nested:
+                        Walk(nested);
+                        break;
+                    case Curve or PolyLine or Autodesk.Revit.DB.Point:
+                        break;                       // lines and points: no body
+                    default:
+                        failed = true;               // a mesh over a room isn't read exactly, nor a kind not read
                         break;
                 }
             }
@@ -684,6 +1082,8 @@ internal static class RevitInterior
             Host = fi.Host?.UniqueId,
             HostIsWall = fi.Host is Wall,
             LevelElevation = level?.ProjectElevation,
+            LevelId = level?.UniqueId,
+            WallSides = SidesOf(fi.Host),
             SillHeight = fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM) is { HasValue: true } s ? s.AsDouble() : null,
             Location = fi.Location is LocationPoint lp ? P(lp.Point) : null,
             Along = P(fi.HandOrientation),

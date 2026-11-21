@@ -136,6 +136,7 @@ public sealed class CheckProjectCommand : IExternalCommand
         log["summary"] = result.Summary;
         log["shown"] = words.ToString();
         log["notes"] = prepared.Inside?.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
+        log["route_notes"] = prepared.Inside?.RouteNotes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();   // the escape routes, apart
         Trial.Log("check_project", log);
         return new Ran(prepared, result, words, full, model);
     }

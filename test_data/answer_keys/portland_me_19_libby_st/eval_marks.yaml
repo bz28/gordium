@@ -1,0 +1,158 @@
+# The route eval's marks for the Children's Odyssey model (19 Libby St, Portland ME; rebuilt from sheet LS1.0 by
+# apps/revit_addin's ModelBuild, corrected: children_odyssey_corrected.rvt in the trial folder).
+#
+# EVERY MARK HERE IS AN EVAL ASSUMPTION: Gordium standing in for the architect, who has not marked this model. Each one
+# says why it was chosen. Where the sheet gives no clear answer the cautious way is taken (a door not an exit, a narrower
+# clear width), with one exception said plainly below: the occupied rooms a route may cross (pass_through true), the
+# lenient choice, which can only shorten routes. The set-marks request writes them into a copy of the
+# model, the clear-opening stamps signed "eval assumption (Gordium, not the architect)" (MarksRequest.cs; design note
+# docs/revit/revit_interior_reading_design.md section 10). The sheet itself is Ben's and not in the repo (hand_check.yaml).
+#
+# Not a rulebook: no `rules:` key; it loads with the strict loader (rule_format/tests/test_kept.py).
+
+model: children_odyssey_corrected.rvt
+by: eval assumption (Gordium, not the architect)
+date: "2026-11-21"
+occupancy: Group I-4 day care (the sheet's travel-distance note, "I-4 not to exceed 200' sprinklered")
+
+# Every room: its use (a word of Gordium's room-use list), and lockable / pass_through. pass_through (2026-11-21, the
+# coordinator's review of the first route run, where 16 toilets and closets opening only into a classroom had no route
+# out). IBC 2009 1014.2, from the cached code text (as docs/decisions/2026-11-20_route_measurement.md quotes it):
+# "1. Egress from a room or space shall not pass through adjoining or intervening rooms or areas, except where such
+# adjoining rooms or areas and the area served are accessory to one or the other, are not a Group H occupancy and
+# provide a discernible path of egress travel to an exit." "2. An exit access shall not pass through a room that can be
+# locked to prevent egress." "4. Egress shall not pass through kitchens, storage rooms, closets or spaces used for
+# similar purposes." NFPA 101 2012 7.5.2.1: "Access to an exit shall not be through kitchens, storerooms ...,
+# restrooms, workrooms, closets, bedrooms or similar spaces, or other rooms or spaces subject to locking". The
+# occupied rooms of this one day-care centre (classrooms, the playroom, life spaces, the family lounge, conference,
+# treatment, administration) are taken as accessory to one another, not Group H, with a discernible path, so marked
+# pass_through true: an eval assumption standing in for the architect, and the LENIENT reading (it can only shorten
+# routes; whether each room has that discernible path is the architect's to state). Storage, closets, toilets, the
+# kitchen, the electrical room and BOOK STORAGE/STAFF LOUNGE (part storage) stay end-only (item 4, 7.5.2.1: a route may
+# start in them, never cross them). lockable is not on the sheet: true for storage,
+# toilets, the kitchen and the electrical room (kept locked), false for the occupied rooms. sleeping is false for every room: the sleeping-room flag is the
+# dwelling code's (IRC R310 escape openings), and a day care has no dwelling sleeping rooms (children's naps don't make
+# a classroom one).
+room_defaults: {sleeping: false, pass_through: false}
+rooms:
+  - {number: "2", name: CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre (I-4)}
+  - {number: "3", name: MOUNTAIN CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "4", name: OCEAN CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "5", name: INFANT/TODDLER CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "6", name: SAFARI CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "7", name: FOREST CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "8", name: CLASSROOM, use: Day care, lockable: false, pass_through: true, why: a classroom of a day-care centre}
+  - {number: "9", name: BOOK STORAGE/STAFF LOUNGE, use: Other, lockable: false,
+     why: "a staff lounge with book storage: no word fits (accessory storage would call the lounge storage); Other, end-only"}
+  - {number: "10", name: KITCHEN, use: Kitchen, lockable: true, why: its name}
+  - {number: "11", name: STORAGE, use: Accessory storage, lockable: true, why: "storage of the centre (the sheet: aggregate storage 1,428 SF, under 10% of the story)"}
+  - {number: "12", name: LIFE SPACE, use: Other, lockable: false, pass_through: true, why: "not a use the list names (a children's activity space?); Other, crossable as an occupied room of the centre (header)"}
+  - {number: "13", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
+  - {number: "14", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
+  - {number: "15", name: FAMILY LOUNGE, use: Other, lockable: false, pass_through: true, why: "a lounge: no word fits; Other, crossable as an occupied room of the centre (header)"}
+  - {number: "16", name: STAFF TOILET, use: Toilet, lockable: true, why: its name}
+  - {number: "17", name: PLAYROOM, use: Day care, lockable: false, pass_through: true, why: the children's playroom of a day-care centre}
+  - {number: "18", name: ADMINISTRATION, use: Other, lockable: false, pass_through: true, why: "offices: no word fits; Other, crossable as an occupied room of the centre (header)"}
+  - {number: "19", name: CONFERENCE, use: Other, lockable: false, pass_through: true, why: "a meeting room: no word fits; Other, crossable as an occupied room of the centre (header)"}
+  - {number: "21", name: ELEC., use: Other, lockable: true,
+     why: "an electrical room: no word fits (it is no closet or storage); Other, end-only and lockable"}
+  - {number: "22", name: LIFE SPACE, use: Other, lockable: false, pass_through: true, why: "not a use the list names; Other, crossable as an occupied room of the centre (header)"}
+  - {number: "24", name: TREATMENT, use: Other, lockable: false, pass_through: true, why: "a treatment room: no word fits; Other, crossable as an occupied room of the centre (header)"}
+  - {number: "26", name: CORRIDOR, use: Corridor, lockable: false, pass_through: false,
+     why: "the corridor the sheet's exit-access lines run along; a corridor is crossed as one (pass_through false is still given: the format needs it set)"}
+  - {number: "28", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
+  - {number: "29", name: STORAGE, use: Accessory storage, lockable: true, why: storage of the centre}
+  - {number: "30", name: STAFF TOILET, use: Toilet, lockable: true, why: its name}
+
+# The 18 enclosed areas with no Room that the marked model's read found (2026-11-21, co_read5.json: each at its point
+# inside, the model's own feet, the traced data's coordinates), each classified against LS1.0 and the traced data.
+# A real space the sheet draws gets a Room placed at that point with the sheet's name and a use (rooms_to_place, an
+# eval assumption like every mark here); a sliver between two of the trace's overlapping walls is removed by a model
+# correction (model_corrections below), never by a Room; what is neither is left as it is (not_rooms) and keeps the
+# story needing review.
+rooms_to_place:
+  - {number: "31", name: VESTIBULE, at: [9.16, 42.92], area_sf: 69.9, use: Lobby, lockable: false, pass_through: true,
+     why: "the corridor's west vestibule between the door pairs D34 and D03; the sheet's bold exit arrow is drawn in it, so the exit route crosses it (pass_through true: the sheet's own route)"}
+  - {number: "32", name: SPRINKLERED ABANDONED SPACE, at: [53.81, 79.51], area_sf: 67.5, use: Other, lockable: true,
+     why: "the hatched space north of the playroom, labelled 'SPRINKLERED ABANDONED SPACE' with 'DOOR PERMANENTLY FIXED SHUT'; no word fits; Other, end-only"}
+  - {number: "33", name: SPRINKLERED ABANDONED SPACE, at: [152.39, 80.16], area_sf: 98.9, use: Other, lockable: true,
+     why: "the hatched space north of LIFE SPACE 12, labelled 'SPRINKLERED ABANDONED SPACE'; no word fits; Other, end-only"}
+  - {number: "34", name: TOILET, at: [171.94, 81.12], area_sf: 43.6, use: Toilet, lockable: true,
+     why: "the toilet room in CLASSROOM 2's north-west corner: the sheet draws a toilet and a sink in it"}
+  - {number: "35", name: TOILET, at: [171.94, 15.44], area_sf: 43.7, use: Toilet, lockable: true,
+     why: "the toilet room in MOUNTAIN CLASSROOM 3: the sheet draws a toilet and a sink in it"}
+  - {number: "36", name: TOILET, at: [73.96, 33.08], area_sf: 58.5, use: Toilet, lockable: true,
+     why: "CLASSROOM 8's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "37", name: TOILET, at: [99.61, 33.08], area_sf: 58.6, use: Toilet, lockable: true,
+     why: "FOREST CLASSROOM 7's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "38", name: TOILET, at: [125.25, 33.08], area_sf: 58.4, use: Toilet, lockable: true,
+     why: "SAFARI CLASSROOM 6's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "39", name: TOILET, at: [150.78, 33.08], area_sf: 58.6, use: Toilet, lockable: true,
+     why: "OCEAN CLASSROOM 4's toilet room by the corridor: the sheet draws its fixtures"}
+  - {number: "40", name: CLOSET, at: [24.11, 36.26], area_sf: 7.6, use: Closet, lockable: true,
+     why: "a 2.5 by 3 ft closet off INFANT/TODDLER CLASSROOM 5 (door D06), by the corridor wall: the sheet draws its door"}
+  - {number: "41", name: CLOSET, at: [28.56, 36.26], area_sf: 8.0, use: Closet, lockable: true,
+     why: "the closet beside it (door D39)"}
+  - {number: "42", name: CLOSET, at: [175.23, 35.34], area_sf: 7.3, use: Closet, lockable: true,
+     why: "a closet off MOUNTAIN CLASSROOM 3 (door D51): the sheet draws it walled in an L by the corridor"}
+  - {number: "43", name: CLOSET, at: [175.23, 50.43], area_sf: 8.0, use: Closet, lockable: true,
+     why: "a closet off CLASSROOM 2 (door D52), the same"}
+  - {number: "44", name: CLOSET, at: [109.22, 49.73], area_sf: 9.1, use: Closet, lockable: true,
+     why: "a small room off CONFERENCE 19 (door D07, its only door), by the corridor; the sheet names none: taken as a closet, end-only"}
+not_rooms:
+  - {area_sf: 0, at: [61.29, 36.2], what: sliver, why: "Revit gives no point inside it: the hairline between W57 and W111, drawn face to face (the trims of the overlapping pairs left it, 2026-11-21); merged into one wall below"}
+  - {area_sf: 0, at: [21.45, 36.2], what: sliver, why: "the same between W65 and W114; merged below"}
+  - {area_sf: 1.4, at: [190.67, 47.46], what: inside a wall,
+     why: "the triangle between the east entry's angled jamb W72 and W16/W29: LS1.0 draws the jamb solid, so it is filled with wall (the first fill below), never a Room"}
+  - {area_sf: 1.4, at: [190.67, 38.22], what: inside a wall, why: "the same at the south jamb (W73 with W24/W29): the second fill"}
+
+# The build's corrections: the two of build_corrected_request.json, and the five trims that join each overlapping pair
+# the build named end to end (BuildData.Correct: at most 2 ft, along the wall's own line, never longer).
+model_corrections:
+  - {wall: W16, extend_end_to: [193.8667, 48.1667], why: "LS1.0 shows the classroom wall meeting the vestibule wall; the trace stopped 1.4 ft short"}
+  - {wall: W24, extend_end_to: [193.8667, 37.5111], why: "LS1.0 shows the classroom wall meeting the vestibule wall; the trace stopped 1.4 ft short"}
+  - {wall: W119, trim_end_to: [132.9111, 84.9889], why: "overlaps W2 along 0.69 ft: ends where W2 begins"}
+  - {wall: W27, trim_start_to: [194.3667, 49.3578], why: "overlaps W120 along 1.15 ft: starts where W120 ends"}
+  - {wall: W28, trim_end_to: [194.3667, 36.3244], why: "overlaps W121 along 1.15 ft: ends where W121 begins"}
+  - {wall: W105, trim_start_to: [168.7167, 28.1889], why: "overlaps W32 along 0.33 ft: starts where W32 ends"}
+  - {wall: W34, trim_start_to: [168.5556, 16.1856], why: "overlaps W33 along 0.34 ft: starts where W33 ends"}
+  # the two 0 sq ft slivers Revit gives no point in: each a hairline between two walls the trace drew face to face
+  # (their faces 0.00003 ft apart along 3.33 ft, found from the traced data; the overlap trims above didn't touch
+  # them), drawn as one wall of the two thicknesses
+  - {merge: [W57, W111], why: "W111 (16 in, New) drawn face to face against W57 (12 in) along 3.33 ft: a 0 sq ft sliver between them"}
+  - {merge: [W65, W114], why: "W114 (16 in, New) drawn face to face against W65 (6 in) along 3.33 ft: a 0 sq ft sliver between them"}
+  # the two jamb pockets: each a wall along the angled jamb's inner face, as thick as the triangle is deep (plus 0.01 ft)
+  - {fill: {start: [189.6688, 47.2102], end: [192.2294, 48.2972], thickness_in: 12.151},
+     why: "LS1.0 draws the east entry's north jamb solid; the trace left a 1.4 sq ft triangle between W72, W16 and W29"}
+  - {fill: {start: [189.6682, 38.4693], end: [192.2283, 37.3825], thickness_in: 12.185},
+     why: "LS1.0 draws the east entry's south jamb solid; the trace left a 1.4 sq ft triangle between W73, W24 and W29"}
+
+# Each door type's clear opening, written on the type with its stamp (every door of the type shares it). No maker's
+# figure exists for these doors (the model's families are Revit's stock and Gordium's own): a typical assumption, the
+# leaf less about 2 in (its stop and the open leaf's thickness), and 80 in clear height (the code's least, IBC 1008.1.1),
+# never more than the leaf.
+door_types:
+  - {leaf_in: 36, doors: [D01], clear_width_in: 34, clear_height_in: 80, operation: Side-hinged door,
+     source: "eval assumption: a 36-in leaf at 34 in clear, 80 in high (typical; no maker's figure)"}
+  - {leaf_in: 34, doors: [D05], clear_width_in: 32, clear_height_in: 80, operation: Side-hinged door,
+     source: "eval assumption: a 34-in leaf at 32 in clear, 80 in high (typical; no maker's figure)"}
+  - {leaf_in: 72, pair: true, doors: [D02], clear_width_in: 34, clear_height_in: 80, operation: Side-hinged door,
+     source: "eval assumption: a pair of 36-in leaves, one leaf's 34 in clear (the other taken as latched: the cautious width)"}
+
+# The exits, from LS1.0's legend: an exit is shown by its bold arrow (the legend's "EXIT ENTRANCE" arrow); the circled
+# symbol beside many doors is the exit sign, shown at classroom doors back to the corridor too, so it alone doesn't make
+# an exit. Matched to the model's doors (D01... in the traced data's order, children_odyssey.json) by position on the
+# rendered sheet (1/8" = 1'-0", origin the building's south-west outside corner).
+exits:
+  - {door: D41, exit: Exterior door at discharge, at: [5.0, 85.0],
+     why: "the playroom's north-west door: the sheet's bold up-arrow at it, the landing 'CUT AND GRIND SLAB TO PROVIDE LEVEL LANDING'"}
+  - {door: D02, exit: Exterior door at discharge, at: [80.6, 80.0],
+     why: "the double door north of the corridor to the loading dock: bold up-arrow ('EXISTING LOADING DOCK SLAB IS LEVEL WITH INTERIOR')"}
+  - {door: D03, exit: Exterior door at discharge, at: [5.0, 42.8],
+     why: "the corridor's west end, the outer pair of its vestibule: bold left-arrow. The vestibule (D34 to D03) has no Room in the model: VESTIBULE 31 is placed in it (rooms_to_place)"}
+  - {door: D12, exit: Exterior door at discharge, at: [189.5, 42.8],
+     why: "the corridor's east end: bold right-arrow, the end of the sheet's 130'-8\" travel-distance line"}
+not_exits:
+  - {door: D33, at: [190.4, 0.7],
+     why: "Mountain Classroom's south-east door: the sheet shows an exit sign at it but no exit arrow; left unmarked (the cautious way: fewer exits only lengthen routes)"}
+  - {door: D34, at: [13.3, 42.8], why: the inner pair of the west vestibule (the exit is its outer pair, D03)}

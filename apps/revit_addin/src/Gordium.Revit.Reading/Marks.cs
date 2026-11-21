@@ -115,11 +115,37 @@ public static class Marks
         [ProjectInformation], "facts.zone",
         "The lot's zoning district exactly as the City of Ithaca's zoning map writes it (R-1b, R-2a, R-3a...). Typed by you, so confirmed: Gordium never fills it from an address lookup.");
 
-    /// <summary>The use, in the checker's own word (one_family_detached...).</summary>
+    /// <summary>The use: on Project Information the building's, in the checker's own word (one_family_detached...); on
+    /// a Room the room's (escape routes, docs/revit/revit_interior_reading_design.md section 10), one of
+    /// <see cref="RoomUses.Words"/>. One parameter for both (the same GUID, bound to both categories): Gordium can't add
+    /// a second parameter of the same name (MarkSetup refuses a name another parameter has), and which use it is
+    /// follows from the element it is on.</summary>
     public static readonly MarkDefinition Use = new(
         "Gordium: Use", new("0a732869-f46a-4fbd-bab9-4d60735d96f3"), MarkValueKind.Text, MarkBinding.Instance,
-        [ProjectInformation], "facts.use",
-        "What the building is used for, in Gordium's word for the use (one_family_detached, one_family_semi_detached...). A word the district doesn't list needs review, never a pass.");
+        [ProjectInformation, Rooms], "facts.use (on Project Information), rooms[].use (on a Room)",
+        "On Project Information: what the building is used for, in Gordium's word for the use (one_family_detached, one_family_semi_detached...); a word the district doesn't list needs review, never a pass. " +
+        "On a Room: what the room is, one of: " + string.Join(", ", RoomUses.Words) + ". Blank: an escape route never passes through the room.");
+
+    /// <summary>Whether a room can be locked (<c>rooms[].lockable</c>): a route never passes through one that can.
+    /// Blank is not stated: the room is end-only.</summary>
+    public static readonly MarkDefinition CanBeLocked = new(
+        "Gordium: Can be locked", new("5b0d7c3e-2f41-4a8e-9c63-1e7a4f2b9d05"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Rooms], "rooms[].lockable",
+        "Yes when the room can be locked against the people passing through it (then no escape route passes through it); No when it can't. Blank: an escape route never passes through the room.");
+
+    /// <summary>Whether the architect states a room is one an exit route may pass through (<c>rooms[].pass_through</c>,
+    /// IBC 1014.2 item 1). Blank is not stated: the room is end-only.</summary>
+    public static readonly MarkDefinition PassThrough = new(
+        "Gordium: Pass through", new("c2e94a61-7d3b-4f5e-8a10-6b9d3e2f4c87"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Rooms], "rooms[].pass_through",
+        "Yes when an escape route may pass through this room: it is accessory to the rooms it serves, with a discernible path to an exit (IBC 1014.2 item 1). No when it may not. A corridor needs Yes or No too. Blank: an escape route never passes through the room.");
+
+    /// <summary>Which exit a door is (<c>doors[].exit_kind</c>), in IBC 1016.1's own list, one of
+    /// <see cref="ExitKinds.Words"/>. Blank: not an exit (exits are marked, never guessed).</summary>
+    public static readonly MarkDefinition Exit = new(
+        "Gordium: Exit", new("e7a3c519-04d2-4b86-b1f5-93c8d6a2e470"), MarkValueKind.Text, MarkBinding.Instance,
+        [Doors], "doors[].exit_kind, doors[].exit_id",
+        "For a door that is an exit of the building, which kind, one of: " + ExitKinds.Listed + ". Every door into one stair enclosure is the same exit. Blank: not an exit (Gordium never guesses one).");
 
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
@@ -256,6 +282,7 @@ public static class Marks
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
+        CanBeLocked, PassThrough, Exit,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
@@ -317,6 +344,55 @@ public static class Operations
     /// <summary>The door's operation (<c>doors[].operation</c>), or null (a window's word on a door is not a door's
     /// operation: not stated).</summary>
     public static string? ForDoor(string? word) => Find(word) is var i and >= 0 ? Table[i].Door : null;
+}
+
+/// <summary>A fixed table from the architect's word to the interior description's own (trimmed, any case): a word not
+/// in it is not stated, never a near guess. The room uses and the exit kinds (escape routes).</summary>
+public sealed class WordTable(params (string Word, string Described)[] table)
+{
+    /// <summary>The words the architect may type, in the list's order.</summary>
+    public IReadOnlyList<string> Words { get; } = table.Select(t => t.Word).ToList();
+
+    /// <summary>The words as the architect reads them in a sentence.</summary>
+    public string Listed => string.Join(", ", Words);
+
+    /// <summary>The description's word for the architect's, or null.</summary>
+    public string? Of(string? word) =>
+        word is null ? null
+        : Array.FindIndex(table, t => string.Equals(t.Word, word.Trim(), StringComparison.OrdinalIgnoreCase)) is var i and >= 0
+            ? table[i].Described : null;
+
+    /// <summary>The architect's word for the description's.</summary>
+    public string WordFor(string described) => table.First(t => t.Described == described).Word;
+}
+
+/// <summary>A room's use (<c>Gordium: Use</c> on a Room) → <c>rooms[].use</c> (the route code's <c>USES</c>).</summary>
+public static class RoomUses
+{
+    public static WordTable Table { get; } = new(
+        ("Corridor", "corridor"), ("Lobby", "lobby"), ("Day care", "day_care"), ("Accessory storage", "accessory_storage"),
+        ("Kitchen", "kitchen"), ("Toilet", "toilet"), ("Closet", "closet"), ("Workroom", "workroom"), ("Other", "other"));
+
+    public static IReadOnlyList<string> Words => Table.Words;
+}
+
+/// <summary>Which exit a door is (<c>Gordium: Exit</c>) → <c>doors[].exit_kind</c>, IBC 2009 1016.1's own list (the
+/// route code's <c>EXIT_KINDS</c>).</summary>
+public static class ExitKinds
+{
+    public const string Discharge = "exterior_at_discharge";
+    public const string Enclosure = "exit_enclosure";
+    public const string Passageway = "exit_passageway";
+    public const string Horizontal = "horizontal_exit";
+    public const string OutsideStair = "exterior_stair_or_ramp";
+
+    public static WordTable Table { get; } = new(
+        ("Exterior door at discharge", Discharge), ("Exit stair enclosure", Enclosure), ("Exit passageway", Passageway),
+        ("Horizontal exit", Horizontal), ("Exterior exit stair or ramp", OutsideStair));
+
+    public static IReadOnlyList<string> Words => Table.Words;
+
+    public static string Listed => Table.Listed;
 }
 
 /// <summary>What a site slab is, as Chapter 325 sorts it (§325-3B BUILDING AREA, §325-18A, TERRACE OR PATIO).</summary>

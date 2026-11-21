@@ -210,6 +210,169 @@ public sealed class BuildDataTests
         Assert.Equal(["10", "21"], fixedModel.Rooms.Where(r => BuildData.BoundaryGaps(r, fixedModel.Walls).Count > 0).Select(r => r.Number).Order());
         // the five "Highlighted walls overlap" warnings of run 1, each a pair the data draws along each other
         Assert.Equal([(2, 119), (27, 120), (28, 121), (32, 105), (33, 34)], BuildData.WallOverlaps(m.Walls).Select(o => (o.A, o.B)));
+        // the eval's five trims (test_data/answer_keys/portland_me_19_libby_st/eval_marks.yaml, model_corrections): each
+        // pair joined end to end, no overlap left (the slivers Revit found as enclosed areas with no Room)
+        var (trimmed, done, notDone) = BuildData.Correct(fixedModel, LibbyTrims);
+        Assert.Equal(5, done.Count);
+        Assert.Empty(notDone);
+        Assert.Empty(BuildData.WallOverlaps(trimmed.Walls));
+        // and the two fills of the east entry's jamb pockets: added, overlapping no wall along its length
+        var (filled, fillsDone, fillsNot) = BuildData.Correct(trimmed, LibbyFills);
+        Assert.Equal(["filled W122", "filled W123"], fillsDone.Select(a => a[..11]));
+        Assert.Empty(fillsNot);
+        Assert.Empty(BuildData.WallOverlaps(filled.Walls));
+        // and the two merges of the walls drawn face to face (the 0 sq ft slivers Revit gave no point in)
+        var (_, mergesDone, mergesNot) = BuildData.Correct(filled, LibbyMerges);
+        Assert.Equal(2, mergesDone.Count);
+        Assert.Empty(mergesNot);
+    }
+
+    /// <summary>The two merges of eval_marks.yaml's model_corrections.</summary>
+    internal static readonly WallCorrection[] LibbyMerges =
+    [
+        new(57, default, "W111 drawn face to face against W57: a 0 sq ft sliver between them", CorrectionKind.Merge, MergeWith: 111),
+        new(65, default, "W114 drawn face to face against W65: a 0 sq ft sliver between them", CorrectionKind.Merge, MergeWith: 114),
+    ];
+
+    [Fact]
+    public void A_merge_draws_two_walls_face_to_face_as_one_and_refuses_any_other_pair()
+    {
+        var data = BuildData.Parse(Extracted());
+        var w = data.Walls[0];
+        // a 12 in wall at x 61.7889 and a 16 in one beside it, faces together: the Children's Odyssey's W57 and W111
+        var a = w with { Id = 57, Start = new PlanPoint(61.7889, 38.1778), End = new PlanPoint(61.7889, 34.8445), ThicknessIn = 12 };
+        var b = w with { Id = 111, Start = new PlanPoint(60.6222, 38.1778), End = new PlanPoint(60.6222, 34.8444), ThicknessIn = 16, Status = "New" };
+        var m = data with { Walls = [.. data.Walls, a, b] };
+        var merge = new WallCorrection(57, default, "face to face", CorrectionKind.Merge, MergeWith: 111);
+        var (merged, applied, refused) = BuildData.Correct(m, [merge]);
+        Assert.Empty(refused);
+        Assert.DoesNotContain(merged.Walls, x => x.Id == 111);
+        var one = merged.Walls.Single(x => x.Id == 57);
+        Assert.Equal(28, one.ThicknessIn);
+        Assert.Equal(61.1222, one.Start.X, 4);                    // half way between the outer faces, 59.9555 and 62.2889
+        Assert.StartsWith("merged W111 into W57", applied.Single());
+        foreach (var (other, words) in new[]
+                 {
+                     (b with { Start = new PlanPoint(60.5, 38.1778), End = new PlanPoint(60.5, 34.8444) }, "faces aren't together"),
+                     (b with { End = new PlanPoint(60.6222, 36) }, "the same stretch"),
+                     (b with { End = new PlanPoint(59.6222, 34.8444) }, "aren't parallel"),
+                 })
+        {
+            var (same, none, no) = BuildData.Correct(data with { Walls = [.. data.Walls, a, other] }, [merge]);
+            Assert.Empty(none);
+            Assert.Contains(words, no.Single());
+            Assert.Contains(same.Walls, x => x.Id == 111);
+        }
+        // review round 1: the second wall's smoke partition and rating are carried (the stricter), and said; two
+        // different ratings are refused
+        var rated = data with { Walls = [.. data.Walls, a with { SmokePartition = false, FireRating = null }, b with { SmokePartition = true, FireRating = "1 hr" }] };
+        var (carried, said, _) = BuildData.Correct(rated, [merge]);
+        var kept = carried.Walls.Single(x => x.Id == 57);
+        Assert.Equal((true, "1 hr"), (kept.SmokePartition, kept.FireRating));
+        Assert.Contains("a smoke partition", said.Single());
+        Assert.Contains("status Existing kept (W111 was New)", said.Single());
+        var clash = data with { Walls = [.. data.Walls, a with { FireRating = "2 hr" }, b with { FireRating = "1 hr" }] };
+        Assert.Contains("fire ratings differ", BuildData.Correct(clash, [merge]).Refused.Single());
+        var hosting = m with { Doors = [.. m.Doors, data.Doors[0] with { HostWall = 111 }] };
+        Assert.Contains("a door or window", BuildData.Correct(hosting, [merge]).Refused.Single());
+        var r = BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt", "corrections": [{"merge": ["W57", "W111"], "why": "face to face"}]}
+            """));
+        Assert.Equal(merge, Assert.Single(r.Corrections));
+    }
+
+    /// <summary>The two fills of eval_marks.yaml's model_corrections: LS1.0 draws the east entry's angled jambs solid.</summary>
+    internal static readonly WallCorrection[] LibbyFills =
+    [
+        new(0, new PlanPoint(192.2294, 48.2972), "LS1.0: the north jamb of the east entry is solid wall", CorrectionKind.Fill, new PlanPoint(189.6688, 47.2102), 12.151),
+        new(0, new PlanPoint(192.2283, 37.3825), "LS1.0: the south jamb of the east entry is solid wall", CorrectionKind.Fill, new PlanPoint(189.6682, 38.4693), 12.185),
+    ];
+
+    [Fact]
+    public void A_fill_adds_a_short_wall_only_between_walls_of_the_data()
+    {
+        var m = BuildData.Parse(Extracted());                    // wall W0 from (0, 0) to (20, 0)
+        WallCorrection Fill(double x0, double y0, double x1, double y1, double t) =>
+            new(0, new PlanPoint(x1, y1), Why, CorrectionKind.Fill, new PlanPoint(x0, y0), t);
+        var (filled, applied, refused) = BuildData.Correct(m, [Fill(5, 1, 7, 1, 12)]);
+        Assert.Empty(refused);
+        var added = filled.Walls[^1];
+        Assert.Equal((m.Walls.Max(w => w.Id) + 1, new PlanPoint(5, 1), new PlanPoint(7, 1), 12.0), (added.Id, added.Start, added.End, added.ThicknessIn));
+        Assert.Equal((true, true), (added.NoJoinStart, added.NoJoinEnd));       // a fill joins nothing
+        Assert.StartsWith($"filled W{added.Id}: a 2 ft wall 12 in thick from (5, 1) to (7, 1)", applied.Single());
+        foreach (var (c, words) in new[]
+                 {
+                     (Fill(5, 1, 8.5, 1, 12), "at most 3 ft long"),        // a run of wall, not a fill
+                     (Fill(5, 1, 7, 1, 30), "2 ft thick"),
+                     (Fill(5, 6, 7, 6, 12), "from every wall of the data"),  // standing on its own
+                 })
+        {
+            var (same, none, no) = BuildData.Correct(m, [c]);
+            Assert.Empty(none);
+            Assert.Contains(words, no.Single());
+            Assert.Equal(m.Walls, same.Walls);
+        }
+        var r = BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt",
+             "corrections": [{"fill": {"start": [5, 1], "end": [7, 1], "thickness_in": 12}, "why": "solid on the sheet"}]}
+            """));
+        Assert.Equal(CorrectionKind.Fill, Assert.Single(r.Corrections).Kind);
+        Assert.Throws<BuildDataException>(() => BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt", "corrections": [{"fill": {"start": [5, 1], "end": [7, 1]}, "why": "no thickness"}]}
+            """)));
+    }
+
+    /// <summary>The five trims of eval_marks.yaml's model_corrections.</summary>
+    internal static readonly WallCorrection[] LibbyTrims =
+    [
+        new(119, new PlanPoint(132.9111, 84.9889), "overlaps W2 along 0.69 ft: ends where W2 begins", CorrectionKind.TrimEnd),
+        new(27, new PlanPoint(194.3667, 49.3578), "overlaps W120 along 1.15 ft: starts where W120 ends", CorrectionKind.TrimStart),
+        new(28, new PlanPoint(194.3667, 36.3244), "overlaps W121 along 1.15 ft: ends where W121 begins", CorrectionKind.TrimEnd),
+        new(105, new PlanPoint(168.7167, 28.1889), "overlaps W32 along 0.33 ft: starts where W32 ends", CorrectionKind.TrimStart),
+        new(34, new PlanPoint(168.5556, 16.1856), "overlaps W33 along 0.34 ft: starts where W33 ends", CorrectionKind.TrimStart),
+    ];
+
+    [Fact]
+    public void A_trim_only_shortens_a_wall_along_its_line_by_at_most_2_ft()
+    {
+        var m = BuildData.Parse(Extracted());                    // wall W0 from (0, 0) to (20, 0)
+        var (end, applied, _) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(18.5, 0), Why, CorrectionKind.TrimEnd)]);
+        Assert.Equal((new PlanPoint(0, 0), new PlanPoint(18.5, 0)), (end.Walls[0].Start, end.Walls[0].End));
+        Assert.Equal($"trimmed W0: end (20, 0) → (18.5, 0) (1.5 ft): {Why}", applied.Single());
+        var (start, _, _) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(1, 0), Why, CorrectionKind.TrimStart)]);
+        Assert.Equal((new PlanPoint(1, 0), new PlanPoint(20, 0)), (start.Walls[0].Start, start.Walls[0].End));
+        // the trimmed end alone is drawn with its joins disallowed (a join there made Revit delete both walls)
+        Assert.Equal((false, true), (end.Walls[0].NoJoinStart, end.Walls[0].NoJoinEnd));
+        Assert.Equal((true, false), (start.Walls[0].NoJoinStart, start.Walls[0].NoJoinEnd));
+        Assert.Equal((false, false), (m.Walls[0].NoJoinStart, m.Walls[0].NoJoinEnd));
+        foreach (var (to, kind, words) in new[]
+                 {
+                     (new PlanPoint(17.5, 0), CorrectionKind.TrimEnd, "more than 2 ft"),
+                     (new PlanPoint(21, 0), CorrectionKind.TrimEnd, "would lengthen"),         // a trim never lengthens
+                     (new PlanPoint(-1, 0), CorrectionKind.TrimStart, "would lengthen"),
+                     (new PlanPoint(19, 0.5), CorrectionKind.TrimEnd, "would lengthen, turn"),  // off its line
+                 })
+        {
+            var (same, none, refused) = BuildData.Correct(m, [new WallCorrection(0, to, Why, kind)]);
+            Assert.Empty(none);
+            Assert.Contains(words, refused.Single());
+            Assert.Equal(m.Walls, same.Walls);
+        }
+    }
+
+    [Fact]
+    public void The_request_reads_a_trim_and_refuses_two_changes_in_one_correction()
+    {
+        var r = BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt",
+             "corrections": [{"wall": "W119", "trim_end_to": [132.9111, 84.9889], "why": "overlaps W2"}]}
+            """));
+        Assert.Equal(new WallCorrection(119, new PlanPoint(132.9111, 84.9889), "overlaps W2", CorrectionKind.TrimEnd), Assert.Single(r.Corrections));
+        var x = Assert.Throws<BuildDataException>(() => BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt",
+             "corrections": [{"wall": "W1", "trim_end_to": [1, 2], "extend_end_to": [1, 3], "why": "both"}]}
+            """)));
+        Assert.Contains(x.Problems, p => p.Contains("one change per correction"));
     }
 
     private const string Why = "LS1.0 shows the classroom wall meeting the vestibule wall; the trace stopped 1.4 ft short";

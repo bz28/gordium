@@ -189,6 +189,11 @@ internal static class ModelBuild
                     var wall = Wall.Create(doc, Line.CreateBound(At(w.Start), At(w.End)), wallTypes[BuildData.WallTypeName(w)].Id, level.Id,
                                            w.HeightFt, 0, false, false);
                     wall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM)?.Set(0);      // its location line the centre line
+                    // a trimmed end, a fill's ends: never joined (Revit deleted both walls of such a join)
+                    if (w.NoJoinStart)
+                        WallUtils.DisallowWallJoinAtEnd(wall, 0);
+                    if (w.NoJoinEnd)
+                        WallUtils.DisallowWallJoinAtEnd(wall, 1);
                     Need(wall.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS), BuildData.WallComment(w), label, "Comments", report);
                     Need(wall.get_Parameter(BuiltInParameter.ALL_MODEL_MARK), BuildData.WallMark(w), label, "Mark", report);
                     if (existing is not null && w.Status == "Existing")
@@ -213,6 +218,41 @@ internal static class ModelBuild
         });
         foreach (var id in walls.Where(p => !p.Value.IsValidObject).Select(p => p.Key).ToList())
             walls.Remove(id);
+        // a wall Revit removed at commit is drawn again alone, its joins disallowed at both ends, each in its own
+        // transaction; the log says so either way (never a wall dropped in silence)
+        foreach (var w in model.Walls.Where(w => !walls.ContainsKey(w.Id)).ToList())
+        {
+            var label = $"wall {BuildData.WallMark(w)}";
+            var again = new Dictionary<ElementId, string>();
+            Wall? redrawn = null;
+            try
+            {
+                Step(doc, $"Gordium: wall {BuildData.WallMark(w)} again, its joins disallowed", report, again, _ =>
+                {
+                    redrawn = Wall.Create(doc, Line.CreateBound(At(w.Start), At(w.End)), wallTypes[BuildData.WallTypeName(w)].Id, level.Id,
+                                          w.HeightFt, 0, false, false);
+                    redrawn.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM)?.Set(0);
+                    WallUtils.DisallowWallJoinAtEnd(redrawn, 0);
+                    WallUtils.DisallowWallJoinAtEnd(redrawn, 1);
+                    Need(redrawn.get_Parameter(BuiltInParameter.ALL_MODEL_INSTANCE_COMMENTS), BuildData.WallComment(w), label, "Comments", report);
+                    Need(redrawn.get_Parameter(BuiltInParameter.ALL_MODEL_MARK), BuildData.WallMark(w), label, "Mark", report);
+                    if (existing is not null && w.Status == "Existing")
+                        redrawn.CreatedPhaseId = existing.Id;
+                    again[redrawn.Id] = label;
+                });
+            }
+            catch (Exception x)
+            {
+                report.Failed.Add($"{label}: drawn again alone with its joins disallowed, and still not kept: {x.Message}");
+                continue;
+            }
+            if (redrawn is { IsValidObject: true })
+            {
+                walls[w.Id] = redrawn;
+                report.Notes.Add($"{label}: Revit removed it at the first commit; drawn again alone with its joins disallowed at both ends, and kept");
+                report.Failed.RemoveAll(f => f.StartsWith(label + ":", StringComparison.Ordinal) && f.Contains("removed when Revit committed \"Gordium: walls\"", StringComparison.Ordinal));
+            }
+        }
         report.Counts["walls"] = new { data = model.Walls.Count, drawn = walls.Count };
         // Revit's "Highlighted walls overlap" warnings, named from the data: walls drawn as the data has them
         foreach (var o in BuildData.WallOverlaps(model.Walls))
