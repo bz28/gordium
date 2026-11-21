@@ -28,8 +28,10 @@ the book's own rule, the book's own errors named.
    one is a problem unless named. Tables are pieces of their own, their lines named in `sources.yaml` (`tables`).
    Definitions: the IBC by its italics (its preface: "Selected terms set forth in Chapter 2 ... are italicized"),
    matched by their letters so the OCR's run-together words still name them; NFPA marks none, so every Chapter 3
-   term a piece prints (3.1). The OCR's misreads are put right by line, by name (`brought_in.misread`), never in the
-   cached text. The cached text's key covers `columns.py`, so the cache stays the same for every branch.
+   term a piece prints (3.1). The OCR's misreads are never put right in the text (cached or cut): no Maine book has
+   a `brought_in.misread` entry, and the IBC's meaning-changing ones ("1-4" for I-4, "I-hour" for 1-hour) are named
+   in the labels' notes instead, so the sections file stays as cut. (`brought_in.misread`, which would put a misread
+   right by line, by name, is kept for a book whose page images can confirm one.) The cached text's key covers `columns.py`, so the cache stays the same for every branch.
 5. **Multiple books per state folder:** one `text_verification.<book>.yaml` per book (`rulebook.verification_files`);
    New York's single `text_verification.yaml` is unchanged.
 
@@ -53,7 +55,7 @@ the book's own rule, the book's own errors named.
 - **NFPA 101 (2012) is NFPA's own PDF** (real text in its fonts, one licensed copy), so its second reading from the
   page images can go ahead as in New York.
 - **Done since (2026-11-20, step 2):** labels for every piece of both books, definitions, `parts.yaml` kinds (story,
-  space, corridor, means-of-egress door, each measure defined in words), 60 rules (every IBC requirement a flag that
+  space, corridor, means-of-egress door, each measure defined in words), 67 rules (every IBC requirement a flag that
   keeps its check as the drafted test, proved by each example's `drafted_check`; NFPA rules on the second reading) and
   the coverage report (nothing left unchecked). On the sheet's own numbers every rule gives the sheet's result
   (`rule_format/tests/test_maine_egress.py`, against
@@ -76,7 +78,8 @@ the book's own rule, the book's own errors named.
 4. **Maine's dead-end limit would fail the sheet.** Today's 16-219 CMR ch. 20 modifies the dead-end corridor limit to
    20 ft. The sheet's dead end is 21'-6": it passes the 2009 IBC only by 1018.4 exception 3 (less than 2.5 x its 10-ft
    width = 25 ft) and NFPA 2012's 50 ft in a sprinklered building, but **fails a flat 20-ft limit**. Whether the 2016
-   rule had that modification, and for day care, is part of question 3.
+   rule had that modification, and for day care, is part of question 3. Until it is answered, the NFPA dead-end rules
+   give needs review for a sprinklered dead end over 20 ft and within 50 ft, never pass.
 
 ## Alternatives rejected
 
