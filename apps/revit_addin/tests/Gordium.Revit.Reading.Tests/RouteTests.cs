@@ -1,0 +1,411 @@
+using System.Text.Json.Nodes;
+using Xunit;
+
+namespace Gordium.Revit.Reading.Tests;
+
+/// <summary>The interior reader's escape-route fields (docs/revit/revit_interior_reading_design.md, section 10; the
+/// keys: docs/interior/interior_description_format.md, "The route additions"). A small commercial story drawn as fake
+/// Revit records (RouteDrawing.cs) is read, and the real route code reads the description and draws its routes
+/// (<c>model_measurement.routes</c>); then each trap, one change at a time, must leave out exactly what it can't read,
+/// never send a guess. Each test here pins a decision that keeps a false pass out.</summary>
+public sealed class RouteTests
+{
+    private static JsonObject Room(InteriorReadResult r, string id) => FakeFloor.Part(r, "rooms", id)!;
+
+    private static JsonObject Door(InteriorReadResult r, string id) => FakeFloor.Part(r, "doors", id)!;
+
+    private static string U(string id) => FakeFloor.Uid(id);
+
+    /// <summary>The route code's own reading of the description: the description's and each story's reasons not to
+    /// measure, and the route from each point (inches) named: the doors it passes and the exit it reaches.</summary>
+    internal static JsonObject Routes(InteriorReadResult read, Dictionary<string, (double X, double Y)>? from = null)
+    {
+        const string code = """
+            import json, sys
+            from model_measurement.routes import floor, paths
+            with open(sys.argv[1], encoding="utf-8") as f:
+                d = json.load(f)
+            got = floor.read(d)
+            out = {"stops": got.stops, "stories": {k: s.stops for k, s in got.stories.items()}, "routes": {},
+                   "crossable": {k: r.crossable for s in got.stories.values() for k, r in s.rooms.items() if r is not None}}
+            for k, s in got.stories.items():
+                if s.stops:
+                    continue
+                routes = paths.StoryRoutes(s)
+                for name, p in json.loads(sys.argv[2]).items():
+                    try:
+                        x = routes.route(p)
+                        out["routes"][name] = {"doors": list(x.doors), "exit": x.exit_id, "length": x.length}
+                    except Exception as e:
+                        out["routes"][name] = {"stop": getattr(e, "reason", str(e))}
+            print(json.dumps(out))
+            """;
+        var path = Path.Combine(Path.GetTempPath(), $"gordium_routes_{Guid.NewGuid():N}.json");
+        File.WriteAllText(path, read.Interior.ToJsonString());
+        try
+        {
+            var points = new JsonObject((from ?? []).Select(p => KeyValuePair.Create(p.Key, (JsonNode?)new JsonArray(p.Value.X * 12, p.Value.Y * 12))));
+            return JsonNode.Parse(Env.RunCode(code, path, points.ToJsonString()))!.AsObject();
+        }
+        finally
+        {
+            File.Delete(path);
+        }
+    }
+
+    private static List<string> StoryStops(JsonObject routes) =>
+        routes["stops"]!.AsArray().Concat(routes["stories"]!.AsObject().SelectMany(s => s.Value!.AsArray())).Select(x => x!.GetValue<string>()).ToList();
+
+    // ---- the story, end to end ----------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_commercial_story_read_from_its_records_is_measured_by_the_route_code()
+    {
+        var floor = new FakeFloor();
+        var read = InteriorReader.Read(floor.Model());
+        // every route field of every part is read: no route note at all
+        Assert.Equal([], read.Notes.Where(n => n.Field is "level" or "use" or "lockable" or "pass_through" or "obstructions" or "levels" or "passages"
+                                               || n.Field.StartsWith("doors.plan", StringComparison.Ordinal) || n.Field.StartsWith("doors.sides", StringComparison.Ordinal)
+                                               || n.Field.StartsWith("doors.exit", StringComparison.Ordinal) || n.Field.StartsWith("doors.level", StringComparison.Ordinal))
+                                .Select(n => $"{n.Part} {n.Field}: {n.Why}"));
+        Assert.Equal([FakeFloor.Level], read.Interior["levels"]!.AsArray().Select(l => l!["id"]!.GetValue<string>()));
+        Assert.Equal("corridor", Room(read, "C")["use"]!.GetValue<string>());
+        Assert.True(Room(read, "L")["pass_through"]!.GetValue<bool>());
+        Assert.Single(Room(read, "B")["holes"]!.AsArray());                     // the column
+        Assert.Empty(Room(read, "A")["holes"]!.AsArray());
+        var desk = Assert.Single(Room(read, "A")["obstructions"]!.AsArray())!;   // its top and bottom: one footprint
+        Assert.Equal("furniture", desk["kind"]!.GetValue<string>());
+        Assert.False(desk["fixed"]!.GetValue<bool>());
+        Assert.Empty(Room(read, "C")["obstructions"]!.AsArray());              // the wall beside it isn't in it
+        var dA = Door(read, "dA");
+        Assert.Equal([10.0, 9.75], dA["plan"]!["centre"]!.AsArray().Select(x => x!.GetValue<double>()));
+        Assert.Equal(0.5, dA["plan"]!["wall_thickness"]!.GetValue<double>(), 12);
+        Assert.Equal(FakeFloor.Clear, dA["plan"]!["clear_width"]!.GetValue<double>());
+        Assert.Equal([U("A"), U("C")], dA["sides"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Null(dA["exit_kind"]);
+        Assert.Equal([U("L"), RouteReader.Outside], Door(read, "dE")["sides"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal("exterior_at_discharge", Door(read, "dE")["exit_kind"]!.GetValue<string>());
+        Assert.Equal(U("dE"), Door(read, "dE")["exit_id"]!.GetValue<string>());
+        Assert.Equal("exit_enclosure", Door(read, "dS")["exit_kind"]!.GetValue<string>());
+        Assert.Equal(U("S"), Door(read, "dS")["exit_id"]!.GetValue<string>());   // the stair it enters
+        var passage = Assert.Single(read.Interior["passages"]!.AsArray())!;
+        Assert.Equal([U("C"), U("L")], passage["rooms"]!.AsArray().Select(x => x!.GetValue<string>()).Order());
+
+        // the route code reads it all and draws the routes: from office A out through its door, along the corridor,
+        // into the stair (its nearest exit); from office B along the corridor, across the passage into the lobby and
+        // out of the lobby's door; from the lobby out of its own door
+        var routes = Routes(read, new() { ["office A"] = (15, 2), ["office B"] = (35, 2), ["lobby"] = (30, 24) });
+        Assert.Equal([], StoryStops(routes));
+        var a = routes["routes"]!["office A"]!;
+        Assert.Null(a["stop"]);
+        Assert.Equal([U("dA"), U("dS")], a["doors"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal(U("S"), a["exit"]!.GetValue<string>());
+        Assert.Equal([U("dB"), U("dE")], routes["routes"]!["office B"]!["doors"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal(U("dE"), routes["routes"]!["office B"]!["exit"]!.GetValue<string>());
+        Assert.Equal([U("dE")], routes["routes"]!["lobby"]!["doors"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.True(routes["crossable"]![U("C")]!.GetValue<bool>());
+        Assert.Equal(
+        [
+            "levels: 1 (Level 1)",
+            "rooms: 5; with a level 5, a floor 5, holes 5 (1 in all), obstructions 5 (1 footprints); use 5, can be locked 5, pass through 5",
+            "doors: 5; with a level 5, a place in its wall 5 (its wall read 5), sides 5 (2 to outside), exits 2 (2 exits by id)",
+            "passages: 1",
+            "unknown spaces: 0",
+        ], RouteReader.Summary(read));
+        Assert.False(routes["crossable"]![U("A")]!.GetValue<bool>());
+    }
+
+    [Fact]
+    public void The_story_under_turned_and_moved_shared_coordinates_reads_the_same()
+    {
+        var turn = Transform3.TurnThenMove(Math.PI / 6, new Xyz(875_000.25, -12_345.5, 400.0));
+        var floor = new FakeFloor(turn);
+        var read = InteriorReader.Read(floor.Model());
+        var dA = Door(read, "dA");
+        Assert.Equal(0.5, dA["plan"]!["wall_thickness"]!.GetValue<double>(), 9);
+        Assert.Equal([U("A"), U("C")], dA["sides"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Single(read.Interior["passages"]!.AsArray());
+        Assert.Single(Room(read, "A")["obstructions"]!.AsArray());
+        Assert.Equal(0.0, read.Interior["levels"]![0]!["elevation"]!.GetValue<double>(), 9);   // shared: the level at 0
+        Assert.Equal([], StoryStops(Routes(read)));
+    }
+
+    // ---- a room's marks: the architect's word alone, unset is left out -----------------------------------------
+
+    [Fact]
+    public void A_rooms_use_lock_and_pass_through_are_sent_only_as_marked()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("C", Marks.Use, null);                                  // unset
+        floor.SetMark("L", Marks.Use, new(true, Text: "Hallway"));             // not one of Gordium's words
+        floor.SetMark("A", Marks.CanBeLocked, null);
+        floor.SetMark("B", Marks.PassThrough, new(false, 0));                  // never set (Revit reads 0)
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Room(read, "C")["use"]);                                    // never its name ("Corridor")
+        Assert.Contains("is not set", FakeFloor.Note(read, "C", "use"));
+        Assert.Null(Room(read, "L")["use"]);
+        Assert.Contains("\"Hallway\", not one of Gordium's", FakeFloor.Note(read, "L", "use"));
+        Assert.Null(Room(read, "A")["lockable"]);
+        Assert.Null(Room(read, "B")["pass_through"]);
+        // the route code then never crosses the corridor: office B has no route (never a route through it)
+        var routes = Routes(read, new() { ["office B"] = (35, 2) });
+        Assert.False(routes["crossable"]![U("C")]!.GetValue<bool>());
+        Assert.NotNull(routes["routes"]!["office B"]!["stop"]);
+    }
+
+    [Fact]
+    public void The_use_words_and_exit_words_reach_exactly_the_route_codes_words()
+    {
+        var json = JsonNode.Parse(Env.RunCode(
+            "import json; from model_measurement.routes import floor; print(json.dumps({'uses': list(floor.USES), 'exits': list(floor.EXIT_KINDS)}))"))!;
+        Assert.Equal(json["uses"]!.AsArray().Select(x => x!.GetValue<string>()), RoomUses.Words.Select(w => RoomUses.Table.Of(w)!));
+        Assert.Equal(json["exits"]!.AsArray().Select(x => x!.GetValue<string>()), ExitKinds.Words.Select(w => ExitKinds.Table.Of(w)!));
+        Assert.Equal("day_care", RoomUses.Table.Of(" day CARE "));
+        Assert.Null(RoomUses.Table.Of("Day-care"));                            // near is not a word
+        Assert.Null(RoomUses.Table.Of("Hall"));
+    }
+
+    // ---- exits: marked, never guessed; one stair is one exit ---------------------------------------------------
+
+    [Fact]
+    public void A_door_with_no_exit_mark_is_not_an_exit_and_an_unknown_word_is_not_one_either()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("dE", Marks.Exit, null);
+        floor.SetMark("dS", Marks.Exit, new(true, Text: "Stair"));
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dE")["exit_kind"]);
+        Assert.Null(Door(read, "dS")["exit_kind"]);
+        Assert.Contains("\"Stair\", not one of Gordium's", FakeFloor.Note(read, "dS", "doors.exit_kind"));
+        // no exit marked: the route code says so, never a route
+        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("exit", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public void Every_door_into_one_stair_enclosure_is_one_exit()
+    {
+        var floor = new FakeFloor();
+        floor.Door("dS3", "L", "S", horizontal: false, u: 20, n0: 10, n1: 10.5, exit: "Exit stair enclosure");
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Equal(U("S"), Door(read, "dS")["exit_id"]!.GetValue<string>());
+        Assert.Equal(U("S"), Door(read, "dS3")["exit_id"]!.GetValue<string>());
+        Assert.Equal([], StoryStops(Routes(read)));
+    }
+
+    [Fact]
+    public void A_stair_door_whose_enclosure_cant_be_told_is_not_read()
+    {
+        // a closet door into the stair room, unmarked: the stair room no longer has only exit doors, so which room the
+        // marked door enters is not known: no exit id, and the route code reads the door as not read (needs review)
+        var floor = new FakeFloor();
+        floor.Door("dX", "S", "L", horizontal: false, u: 20, n0: 10, n1: 10.5);
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Equal("exit_enclosure", Door(read, "dS")["exit_kind"]!.GetValue<string>());
+        Assert.Null(Door(read, "dS")["exit_id"]);
+        Assert.Contains("neither room it joins", FakeFloor.Note(read, "dS", "doors.exit_id"));
+        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("exit_id", StringComparison.Ordinal));
+
+        // marked as a door to outside but between two rooms; a horizontal exit: neither is read as an exit
+        floor = new FakeFloor();
+        floor.SetMark("dA", Marks.Exit, new(true, Text: "Exterior door at discharge"));
+        floor.SetMark("dB", Marks.Exit, new(true, Text: "Horizontal exit"));
+        read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dA")["exit_id"]);
+        Assert.Contains("opens to no outside", FakeFloor.Note(read, "dA", "doors.exit_id"));
+        Assert.Null(Door(read, "dB")["exit_id"]);
+        Assert.Contains("horizontal exit", FakeFloor.Note(read, "dB", "doors.exit_id"));
+    }
+
+    // ---- a door's place and sides ------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_doors_place_is_sent_only_from_its_confirmed_clear_width_and_two_flat_parallel_wall_faces()
+    {
+        var floor = new FakeFloor();
+        floor.Marked[floor.MarkedIndex("dA")] = floor.Marked[floor.MarkedIndex("dA")] with
+        {
+            Type = new Dictionary<Guid, MarkValue>(floor.Marked[floor.MarkedIndex("dA")].Type) { [Marks.ClearConfirmed.Guid] = new(false) },
+        };
+        var i = floor.OpeningIndex("dB");
+        floor.Openings[i] = floor.Openings[i] with { WallSides = [floor.Openings[i].WallSides![0], floor.Openings[i].WallSides![0] with { Normal = new(0.6, 0.8, 0) }] };
+        var j = floor.OpeningIndex("dS");
+        floor.Openings[j] = floor.Openings[j] with { WallSides = null };      // a curved wall, a curtain wall
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dA")["plan"]);                                  // never its type's width
+        Assert.Contains("clear width isn't confirmed", FakeFloor.Note(read, "dA", "doors.plan"));
+        Assert.NotNull(Door(read, "dA")["sides"]);                              // what it joins is read all the same
+        Assert.Equal(0.5, read.Evidence["route_doors"]![U("dA")]!["wall_thickness"]!.GetValue<double>(), 12);   // its wall, for the trial
+        Assert.Null(Door(read, "dB")["plan"]);
+        Assert.Contains("aren't parallel", FakeFloor.Note(read, "dB", "doors.plan"));
+        Assert.Null(Door(read, "dS")["plan"]);
+        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("plan", StringComparison.Ordinal));
+    }
+
+    [Fact]
+    public void A_door_opens_to_outside_only_when_no_room_is_drawn_beyond_it()
+    {
+        // Revit gives no room beyond dA (as on a door whose far room is in another phase), but the corridor is there
+        var floor = new FakeFloor();
+        var i = floor.OpeningIndex("dA");
+        floor.Openings[i] = floor.Openings[i] with { ToRoom = null };
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dA")["sides"]);
+        Assert.Contains($"room {U("C")} is drawn there", FakeFloor.Note(read, "dA", "doors.sides"));
+
+        // a room on one side that isn't one of the rooms read; the same room on both sides; no room at all
+        floor = new FakeFloor();
+        floor.Openings[i] = floor.Openings[i] with { ToRoom = "uid-elsewhere" };
+        var j = floor.OpeningIndex("dB");
+        floor.Openings[j] = floor.Openings[j] with { ToRoom = U("B") };
+        var k = floor.OpeningIndex("dS2");
+        floor.Openings[k] = floor.Openings[k] with { FromRoom = null };
+        read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dA")["sides"]);
+        Assert.Null(Door(read, "dB")["sides"]);
+        Assert.Null(Door(read, "dS2")["sides"]);
+        Assert.Contains("no room on either side", FakeFloor.Note(read, "dS2", "doors.sides"));
+    }
+
+    // ---- what stands in a room ---------------------------------------------------------------------------------
+
+    [Fact]
+    public void Anything_else_lower_than_the_headroom_over_a_rooms_floor_leaves_its_obstructions_not_read()
+    {
+        // a beam 6 ft up over the corridor: not an obstruction kind, so the corridor isn't read (never ignored)
+        var floor = new FakeFloor();
+        floor.AddOver("C", new NearbyElement("beam", "OST_StructuralFraming", "Beam", Faces: floor.Prism([(15, 12), (16, 12), (16, 14), (15, 14)], 6, 6.5)));
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Room(read, "C")["obstructions"]);
+        Assert.Contains("Beam", FakeFloor.Note(read, "C", "obstructions"));
+        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("obstructions", StringComparison.Ordinal));
+
+        // the same beam at 7 ft (above the 80 in headroom) stands in no one's way; a light fixture at 8 ft neither
+        floor = new FakeFloor();
+        floor.AddOver("C", new NearbyElement("beam", "OST_StructuralFraming", "Beam", Faces: floor.Prism([(15, 12), (16, 12), (16, 14), (15, 14)], 7, 7.5)));
+        floor.AddOver("C", new NearbyElement("light", "OST_LightingFixtures", "Pendant", Faces: floor.Prism([(20, 12), (21, 12), (21, 13), (20, 13)], 8, 8.5)));
+        Assert.Empty(Room(InteriorReader.Read(floor.Model()), "C")["obstructions"]!.AsArray());
+
+        // a generic model on the floor that Revit's solid test didn't find; casework whose geometry failed
+        floor = new FakeFloor();
+        floor.AddOver("C", new NearbyElement("gm", "OST_GenericModel", "Planter", Faces: floor.Prism([(15, 12), (16, 12), (16, 14), (15, 14)], 0, 3)));
+        Assert.Null(Room(InteriorReader.Read(floor.Model()), "C")["obstructions"]);
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("cw", "OST_Casework", "Counter", GeometryFailed: true));
+        Assert.Contains("couldn't be read", FakeFloor.Note(InteriorReader.Read(floor.Model()), "A", "obstructions"));
+
+        // furniture Revit's solid test found standing in the room but that wasn't read with its geometry
+        floor = new FakeFloor();
+        var i = floor.RoomIndex("A");
+        floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("chair", "OST_Furniture", "Chair")] };
+        Assert.Contains("Chair", FakeFloor.Note(InteriorReader.Read(floor.Model()), "A", "obstructions"));
+    }
+
+    [Fact]
+    public void A_low_hung_obstruction_and_a_curved_one_count_by_their_whole_footprint()
+    {
+        var floor = new FakeFloor();
+        // a wall cabinet from 4.5 to 7 ft (under the headroom): counts; a round table (a curved face): its hull
+        floor.AddOver("A", new NearbyElement("cab", "OST_Casework", "Wall cabinet", Faces: floor.Prism([(10, 0), (14, 0), (14, 1), (10, 1)], 4.5, 7)));
+        var round = Enumerable.Range(0, 12).Select(k => (X: 15 + Math.Cos(k * Math.PI / 6), Y: 5 + Math.Sin(k * Math.PI / 6))).ToList();
+        floor.AddOver("A", new NearbyElement("table", "OST_Furniture", "Round table",
+            Faces: [new SurfaceRecord(false, new Xyz(0, 0, 0), [], round.SelectMany(p => new[] { floor.Fake.Place(p.X, p.Y, 0), floor.Fake.Place(p.X, p.Y, 2.4) }).ToList())]));
+        var obstructions = Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray();
+        Assert.Equal(3, obstructions.Count);
+        Assert.Contains(obstructions, o => o!["kind"]!.GetValue<string>() == "casework" && o["fixed"]!.GetValue<bool>());
+        Assert.Contains(obstructions, o => o!["outline"]!.AsArray().Count == 12);
+    }
+
+    // ---- a room's holes, the passages, the levels -------------------------------------------------------------
+
+    [Fact]
+    public void A_column_is_a_hole_only_in_a_room_that_isnt_a_sleeping_room()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("B", Marks.SleepingRoom, new(true, 1));
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(Room(read, "B")["floor"]);                                 // the house's floor area would count the column
+        Assert.Null(Room(read, "B")["holes"]);
+        Assert.Contains("2 boundary loops", FakeFloor.Note(read, "B", "floor"));
+
+        // an inner loop that crosses the outline is no hole
+        floor = new FakeFloor();
+        var i = floor.RoomIndex("B");
+        floor.Rooms[i] = floor.Rooms[i] with
+        {
+            Boundary = [floor.Rooms[i].Boundary![0], [floor.Seg(39, 4, 41, 4, "col-1"), floor.Seg(41, 4, 41, 5, "col-1"), floor.Seg(41, 5, 39, 5, "col-1"), floor.Seg(39, 5, 39, 4, "col-1")]],
+        };
+        read = InteriorReader.Read(floor.Model());
+        Assert.Null(Room(read, "B")["floor"]);
+        Assert.Contains("isn't wholly inside", FakeFloor.Note(read, "B", "floor"));
+
+        // the outline found by area, whatever order Revit gives the loops in
+        floor = new FakeFloor();
+        floor.Rooms[i] = floor.Rooms[i] with { Boundary = [floor.Rooms[i].Boundary![1], floor.Rooms[i].Boundary![0]] };
+        read = InteriorReader.Read(floor.Model());
+        Assert.Equal(4, Room(read, "B")["floor"]!.AsArray().Count);
+        Assert.Single(Room(read, "B")["holes"]!.AsArray());
+        Assert.Equal(1.0, PlanGeometry.Area(Room(read, "B")["holes"]![0]!.AsArray().Select(p => new P2(p![0]!.GetValue<double>(), p[1]!.GetValue<double>())).ToList()), 9);
+    }
+
+    [Fact]
+    public void Passages_and_levels_not_read_are_left_out_never_empty()
+    {
+        var floor = new FakeFloor { SeparationLines = null, Levels = null };
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Null(read.Interior["passages"]);                                // never [] (that says the rooms meet nowhere)
+        Assert.Null(read.Interior["levels"]);
+        Assert.Null(Room(read, "C")["level"]);
+        Assert.Null(Door(read, "dA")["level"]);
+        var stops = StoryStops(Routes(read));
+        Assert.Contains(stops, s => s.Contains("levels", StringComparison.Ordinal));
+
+        // no separation line in the model: the corridor and lobby meet along nothing Gordium reads as one, so no passage
+        floor = new FakeFloor { SeparationLines = [] };
+        Assert.Empty(InteriorReader.Read(floor.Model()).Interior["passages"]!.AsArray());
+    }
+
+    [Fact]
+    public void A_houses_description_measures_as_before()
+    {
+        // the houses of the step (InteriorTests) carry no levels: no route field is guessed for them
+        var house = FakeHouse.Draw("1_ranch_compliant");
+        var read = InteriorReader.Read(house.Model());
+        Assert.Null(read.Interior["levels"]);
+        Assert.All(read.Interior["rooms"]!.AsArray(), r => Assert.Null(r!["level"]));
+        Assert.Equal([], InteriorTests.Problems(house, read));
+    }
+
+    // ---- the marks in a project and in the list ----------------------------------------------------------------
+
+    [Fact]
+    public void A_project_with_gordiums_use_on_project_information_gets_it_on_rooms_too()
+    {
+        var bound = Marks.All.Select(m => new BoundParameter(m.Name, m.Guid, m.Kind, m.Kind.ToString(), m.Binding == MarkBinding.Instance,
+                                                              m == Marks.Use ? [Marks.ProjectInformation] : m.Categories)).ToList();
+        var step = MarkSetup.Plan(bound).Single(s => s.Mark == Marks.Use);
+        Assert.Equal(MarkSetupAction.AddCategories, step.Action);
+        Assert.Equal([Marks.ProjectInformation, Marks.Rooms], step.Categories);
+    }
+
+    [Fact]
+    public void The_marking_list_shows_the_route_marks_a_name_only_ever_suggests_and_blank_needs_nothing()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("C", Marks.Use, null);
+        floor.SetMark("A", Marks.Use, new(true, Text: "Office"));
+        floor.SetMark("dE", Marks.Exit, null);
+        var list = MarkingList.Build(floor.Model());
+        MarkCell Cell(string id, MarkDefinition m) => list.Rows.Single(r => r.Id == U(id)).Cells.Single(c => c.Mark == m);
+        Assert.Equal(MarkState.LeftBlank, Cell("C", Marks.Use).State);
+        Assert.StartsWith("suggested: Corridor", Cell("C", Marks.Use).Suggestion);
+        Assert.False(Cell("C", Marks.Use).NeedsMarking);                       // a house never needs it
+        Assert.Equal(MarkState.NotUnderstood, Cell("A", Marks.Use).State);      // a word Gordium doesn't read: to mark
+        Assert.True(Cell("A", Marks.Use).NeedsMarking);
+        Assert.Equal(MarkState.LeftBlank, Cell("dE", Marks.Exit).State);
+        Assert.Contains("not an exit", Cell("dE", Marks.Exit).Words);
+        Assert.Equal(MarkState.Given, Cell("dS", Marks.Exit).State);
+        Assert.Contains(list.Summary, l => l.StartsWith("Escape routes: 3 of 5 rooms", StringComparison.Ordinal) && l.Contains("1 door is marked"));
+        // the suggestion is never what is sent
+        Assert.Null(Room(InteriorReader.Read(floor.Model()), "C")["use"]);
+    }
+}
