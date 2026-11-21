@@ -30,7 +30,10 @@ leg's width less what obstructions, columns and bumps block across it (each by i
 favourable side). A corridor's width is the same over its own legs' stretches in it. Each dead end is its own pair,
 its length with its own least width: routes/__init__ gives the corridor one part per dead end until the branch's
 `dead_end` part kind exists. A closed end is the farthest point of the real floor across the leg's whole width
-(a recess filled to find the legs never moves it). Lengths in inches.
+(a recess filled to find the legs never moves it; walls only, so an obstruction never shortens a dead end). A dead
+end's least width is one figure: the narrowest cross-section of the clear floor (the real floor less every
+obstruction and hole) across its legs' whole width, over its own stretches and any recess at its closed end.
+Lengths in inches.
 """
 
 import heapq
@@ -338,7 +341,6 @@ def _proper_in(leg, a, b) -> float:
 class _Graph:
     def __init__(self):
         self.xy, self.edges, self.adj = [], [], []     # edges: (u, v, length, leg index or None, (a, b) along)
-        self.recess = {}                               # closed end node -> the narrowest recess it runs into (in)
 
     def node(self, p) -> int:
         for k, q in enumerate(self.xy):
@@ -465,27 +467,63 @@ def _clear(leg: _LegShape, a, b, blocks) -> float:
     return least
 
 
+def _section_width(clear, leg, a, b) -> float:
+    """The narrowest cross-section of the clear floor (the real floor less every obstruction and hole) across the
+    leg's whole width between along a and b: sliced between each pair of corner places along the axis (of the
+    walls, the recesses, the obstructions and the holes there), each slice's clear width across (its free pieces
+    added), the least of them."""
+    w0, w1 = leg.across
+    lo, hi = min(a, b), max(a, b)
+    if hi - lo <= 1e-9:
+        return math.inf
+    band = box(lo, w0, hi, w1) if leg.horizontal else box(w0, lo, w1, hi)
+    piece = clear.intersection(band)
+    marks = {lo, hi}
+    for g in getattr(piece, "geoms", [piece]):
+        if g.is_empty or not hasattr(g, "exterior"):
+            continue
+        for ring in [g.exterior, *g.interiors]:
+            marks |= {leg.along(c) for c in ring.coords if lo <= leg.along(c) <= hi}
+    marks = sorted(marks)
+    least = math.inf
+    for p, q in zip(marks, marks[1:]):
+        if q - p <= 1e-9:
+            continue
+        m = (p + q) / 2
+        cut = LineString([(m, w0 - 1), (m, w1 + 1)] if leg.horizontal else [(w0 - 1, m), (w1 + 1, m)])
+        least = min(least, cut.intersection(piece).length)
+    return least
+
+
+def _dead_end_stretches(leg, a, b) -> list:
+    """The along ranges of a walked edge that are the dead end's own: the leg's own stretch (both walls walls), and
+    any part beyond the leg's rectangle (a recess at the closed end); never a crossing's floor."""
+    lo, hi = min(a, b), max(a, b)
+    out = [(max(lo, p), min(hi, q)) for p, q in leg.proper]
+    s0, s1 = leg.span
+    out += [(lo, min(hi, s0)), (max(lo, s1), hi)]
+    return [(p, q) for p, q in out if q - p > 1e-9]
+
+
 def _least_width(legs, g, walked, floors, floor_of, start_floor, start) -> float:
-    """The narrowest clear width along the walked edges' own stretches (each leg with its own floor's blocks); a dead
-    end of no length (or walked only in crossings): the leg it starts in (`start`, in its floor's frame)."""
+    """A dead end's least width (one function, review round 5): the narrowest cross-section of the clear floor
+    within the dead end's band, over its own stretches from its closed end (recess included) to its far end, each
+    leg with its own floor. A dead end of no length (or walked only in crossings): the leg it starts in."""
     widths = []
     for k in walked:
         _, _, _, li, (a, b) = g.edges[k]
         if li is None:
             continue
-        leg, blocks = legs[li], floors[floor_of[li]].blocks
-        lo, hi = min(a, b), max(a, b)
-        for p, q in leg.proper:
-            s, e = max(lo, p), min(hi, q)
-            if e - s > 1e-9:
-                widths.append(_clear(leg, s, e, blocks))
+        leg, clear = legs[li], floors[floor_of[li]].clear
+        widths += [_section_width(clear, leg, p, q) for p, q in _dead_end_stretches(leg, a, b)]
     if not widths:
         floor = floors[start_floor]
         for li in floor.legs:
             leg = legs[li]
             x0, x1, y0, y1 = leg.rect
             if x0 - SAME <= start[0] <= x1 + SAME and y0 - SAME <= start[1] <= y1 + SAME:
-                widths += [_clear(leg, p, q, floor.blocks) for p, q in leg.proper]
+                widths += [_section_width(floor.clear, leg, p, q) for p, q in leg.proper]
+    widths = [w for w in widths if math.isfinite(w)]
     return min(widths) if widths else 0.0
 
 
@@ -497,7 +535,8 @@ class _Floor:
     rooms: list
     frame: _Frame
     legs: list                 # indices into the story's legs
-    blocks: list               # (x0, y0, x1, y1) in the frame: what narrows its width
+    blocks: list               # (x0, y0, x1, y1) in the frame: what narrows its width (the corridor's width)
+    clear: object = None       # the real floor less every obstruction and hole, in the frame (the dead ends' width)
 
 
 def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
@@ -597,8 +636,7 @@ def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
         for reading in (WITHOUT, WITH):
             length, walked = got if reading == WITHOUT else (found[WITH].get(leaf) or (0.0, []))
             de.length[reading] = length
-            de.width[reading] = min(_least_width(legs, g, walked, floors, floor_of, key, floor.frame.to(start)),
-                                    g.recess.get(leaf, math.inf))
+            de.width[reading] = _least_width(legs, g, walked, floors, floor_of, key, floor.frame.to(start))
             de.line[reading] = _walked_line(g, leaf, walked)
         out[room].dead_ends.append(de)
     return out
@@ -694,18 +732,14 @@ def _group(story, members, g, legs_all) -> _Floor:
                 hi = cuts[-1]
         # an end kept at its rectangle's end is a closed end: run it on to the real floor's end (a recess under
         # 12 in was filled to find the legs, never to move a closed end)
-        recess = {}
         if lo == leg.span[0]:
-            lo, recess[lo] = _to_real_end(square, leg, lo, -1)
+            lo = _to_real_end(square, leg, lo, -1)
         if hi == leg.span[1]:
-            hi, recess[hi] = _to_real_end(square, leg, hi, 1)
+            hi = _to_real_end(square, leg, hi, 1)
         leg.kept = (lo, hi)
         legs_all.append(leg)
         marks = sorted({lo, hi, *[c for c in cuts if lo <= c <= hi]})
         nodes = [g.node(frame.back(leg.point(u))) for u in marks]
-        for u, n in zip(marks, nodes):                 # a closed end in a recess: the recess is part of the dead end
-            if recess.get(u) is not None:
-                g.recess[n] = min(g.recess.get(n, math.inf), recess[u])
         mine += nodes
         for (u, v), (m0, m1) in zip(zip(nodes, nodes[1:]), zip(marks, marks[1:])):
             g.edge(u, v, base + i, (m0, m1))
@@ -720,24 +754,22 @@ def _group(story, members, g, legs_all) -> _Floor:
     for piece in getattr(bumps, "geoms", [bumps]):
         if not piece.is_empty and piece.area > SAME * SAME:
             blocks.append(piece.bounds)
-    return _Floor(sorted(ids), frame, list(range(base, base + len(legs))), blocks)
+    cut = [Polygon([frame.to(c) for c in o.exterior.coords]) for m in members for o in m.obstructions + m.holes]
+    clear = square.difference(unary_union(cut)) if cut else square
+    return _Floor(sorted(ids), frame, list(range(base, base + len(legs))), blocks, clear)
 
 
-def _to_real_end(square, leg, u, way) -> tuple:
+def _to_real_end(square, leg, u, way) -> float:
     """A closed end's place on the leg's axis: the farthest point of the real (unfilled) floor beyond u, the way
     `way`, within the leg's whole width (a recess under 12 in filled to find the legs, wherever it is in the end
-    wall, counts), and the width across of the narrowest recess it runs into (None if none): the recess is part of
-    the dead-end corridor, so it counts in its least width too (one reading). The width is each recess piece's
-    narrowest cross-section (a stepped recess: its narrow slot's), the least over every recess at the closed end:
-    over-cautious where a separate shallow slot is narrower than the alcove the dead end runs into (a narrower figure
-    can only give needs review or a fail, never a false pass). A sliver thinner than 1/16 in, either way, neither
-    lengthens it nor narrows it."""
+    wall, counts: it is part of the dead end), or u itself. Walls only: an obstruction never shortens a dead end. A
+    sliver thinner than 1/16 in is no floor (the floor was opened by 1/16 in)."""
     w0, w1 = leg.across
     reach = SHALLOW + 2 * SAME
     lo_, hi_ = sorted((u, u + way * reach))
     band = box(lo_, w0, hi_, w1) if leg.horizontal else box(w0, lo_, w1, hi_)
     got = band.intersection(square)
-    best, narrow = u, None
+    best = u
     for part in getattr(got, "geoms", [got]):
         if part.is_empty or part.area <= 0:
             continue
@@ -745,30 +777,9 @@ def _to_real_end(square, leg, u, way) -> tuple:
         if min(abs(e - u) for e in ends) > SAME:              # floor not opening off the end wall
             continue
         far = max(ends, key=lambda e: way * e)
-        across = _narrowest_section(part, leg)
-        if abs(far - u) <= SAME or across <= SAME:           # a sliver: no effect
-            continue
-        best = far if way * far > way * best else best
-        narrow = across if narrow is None else min(narrow, across)
-    return best, narrow
-
-
-def _narrowest_section(piece, leg) -> float:
-    """The narrowest cross-section of a recess piece across the leg: sliced between each pair of its corners'
-    places along the leg's axis (each slice's extent across, the narrowest of its pieces), the least of them."""
-    w0, w1 = leg.across
-    marks = sorted({round(leg.along(c), 9) for c in piece.exterior.coords})
-    least = math.inf
-    for a, b in zip(marks, marks[1:]):
-        if b - a <= 1e-9:
-            continue
-        m = (a + b) / 2
-        cut = LineString([(m, w0 - 1) if leg.horizontal else (w0 - 1, m),
-                          (m, w1 + 1) if leg.horizontal else (w1 + 1, m)]).intersection(piece)
-        for seg in getattr(cut, "geoms", [cut]):
-            if not seg.is_empty and seg.length > 0:
-                least = min(least, seg.length)
-    return least
+        if way * far > way * best:
+            best = far
+    return best
 
 
 def _attach(g, legs, floor_of, key, frame, door):

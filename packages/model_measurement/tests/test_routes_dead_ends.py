@@ -322,9 +322,55 @@ def test_a_stepped_recess_takes_its_narrowest_section():
     assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == pytest.approx(0.5, abs=1e-9)
 
 
-def test_an_alcove_beside_a_separate_narrow_slot_takes_the_slot_width_over_cautious():
+def test_an_alcove_beside_a_separate_narrow_slot_takes_the_alcoves_width():
     # an alcove 3 ft wide, 11 in deep (x 20.5 to 23.5) and a separate slot 0.5 ft wide, 4 in deep (x 25 to 25.5):
-    # 20.917 ft long, and (documented as over-cautious) the slot's 0.5 ft as its least width
+    # 20.917 ft long; each slice adds the clear floor across it, so the least width is the alcove's 3 ft (round 5:
+    # one width function over the clear floor, no longer the separate slot's 0.5)
     d = end_wall([(25, 25.5, 4 / 12)], [(20.5, 23.5, 11 / 12)])
+    length, width = only(measure(d)).longest(WITHOUT)
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == pytest.approx(3.0, abs=1e-9)
+
+
+def alcove_10_ft(blocker=None, hole=None):
+    """A corridor 0 to 60 by 0 to 10, exits at both ends; a branch 10 ft wide (x 20 to 30) whose end wall is 20 ft
+    past the corridor's wall (y 30), and in it an alcove 10 ft wide... the whole branch end: an alcove 10 ft wide,
+    11 in deep (y 30 to 30.917). `blocker` / `hole`: casework / a column (x0, y0, x1, y1) in the alcove."""
+    poly = [(0, 0), (60, 0), (60, 10), (30, 10), (30, 30), (29, 30), (29, 30 + 11 / 12), (21, 30 + 11 / 12), (21, 30),
+            (20, 30), (20, 10), (0, 10)]
+    return description([room("c", poly, obstructions=[rect(*blocker)] if blocker else (),
+                             holes=[rect(*hole)] if hole else ())],
+                       [door("a", (-0.25, 5), (0, 1), ("c", "outside"), exit_id="A"),
+                        door("b", (60.25, 5), (0, 1), ("c", "outside"), exit_id="B")])
+
+
+@pytest.mark.parametrize("kind", ["blocker", "hole"])
+def test_casework_or_a_column_in_an_end_alcove_narrows_the_dead_end(kind):
+    # the alcove is 8 ft wide (x 21 to 29); casework or a column x 22 to 29 leaves 1 ft clear in it: the least width
+    # is 1 ft (the dead end, 20 + 11/12 + 5 = 25.917 ft, then needs width over 10.37 for exception 3: not met)
+    got = only(measure(alcove_10_ft(**{kind: (22, 30, 29, 30 + 11 / 12)})))
+    length, width = got.longest(WITHOUT)
+    assert ft(length) == pytest.approx(20 + 11 / 12 + 5, abs=1e-9)           # an obstruction never shortens it
+    assert ft(width) == pytest.approx(1.0, abs=1e-9)
+
+
+def test_walls_narrowing_an_end_alcove_narrow_the_dead_end():
+    # the alcove walled down to 1 ft (x 21 to 22): its least width 1 ft
+    d = alcove_10_ft()
+    d["rooms"][0]["floor"] = [list(p) for p in [(0, 0), (60, 0), (60, 10), (30, 10), (30, 30), (22, 30),
+                                                (22, 30 + 11 / 12), (21, 30 + 11 / 12), (21, 30), (20, 30), (20, 10),
+                                                (0, 10)]]
+    length, width = only(measure(d)).longest(WITHOUT)
+    assert ft(length) == pytest.approx(20 + 11 / 12 + 5, abs=1e-9) and ft(width) == pytest.approx(1.0, abs=1e-9)
+
+
+def test_an_obstruction_in_the_leg_itself_narrows_the_dead_end():
+    # casework 2 ft deep along the branch's west wall at y 15 to 18: 10 - 2 = 8 ft clear there
+    length, width = only(measure(alcove_10_ft(blocker=(20, 15, 22, 18)))).longest(WITHOUT)
+    assert ft(width) == pytest.approx(8.0, abs=1e-9)
+
+
+def test_a_deep_mouth_with_a_short_slot_still_takes_the_slots_width():
+    # a mouth 3 ft wide, 8 in deep, a slot 0.5 ft wide to 11 in in it: sliced at every corner, the slot's 0.5 ft
+    d = end_wall([(22.5, 25.5, 8 / 12), (23.75, 24.25, 11 / 12)])
     length, width = only(measure(d)).longest(WITHOUT)
     assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == pytest.approx(0.5, abs=1e-9)
