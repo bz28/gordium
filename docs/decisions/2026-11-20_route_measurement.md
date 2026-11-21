@@ -315,10 +315,17 @@ these hand figures as written in the test file, never taken from the code under 
    routes reach the ring at (17, 7) by the same tangent (arriving at 76.89 degrees), 13.115 ft, and go round it
    together until B's leaves at 85.79 degrees on the cross tangent to the ring of B's jamb at (3.5, 10) (A's goes on
    to 90): 13.115 + 0.155 = **13.270 ft common at (30, 5)**. Just below y = 5 the route to A goes under and they part
-   at the start (0); just above, a little less than 13.270. The clear floor's bound there (a triangle no ring
-   reaches) is 13.270 plus 3 in at most, so the story's figure is between 13.270 and **13.520 ft** where every
-   cluster's bound (decision 5's margins) is below that, which the build's test checks. Fails if the tie at (30, 5) is broken toward the
-   way under (0 there).
+   at the start (0); just above, a little less than 13.270. Fails if the tie at (30, 5) is broken toward the way
+   under (0 there). **(30, 5) is not the story's greatest** (corrected 2026-11-21; this said the figure was at most
+   13.520 ft): along the south wall both shortest routes go under the column, by one tangent to the ring at
+   (13, 3) and round it until A's leaves for its door centre, so the common path there is that tangent plus 0.104 ft
+   of arc: 16.547 at (29.2, 0), 16.746 at (29.4, 0), rising until B's shortest way flips to over the column, at
+   x 29.422 to 29.426 (the 64-sided brute force's bracket; the formula's tangent-and-arc figure agrees with the
+   code's to 1e-6 ft), where it is **16.769 ft** (16.767 to 16.772), and 0 just past (B's route then parts at the
+   start). So Gordium's common path at a point jumps where a shortest route flips sides. The story's figure is
+   still a proved bound on the law's greatest (the law's figure changes no faster than you walk, decision 5), but
+   not on Gordium's own pointwise figure near such a jump: the build gives 16.755 here, between 13.270 and
+   16.772 + 4.5 in = 17.147, which the test checks.
 7. **One stair, two doors:** a story whose only exit is one stair enclosure entered by two doors 80 ft apart, both
    `exit_enclosure` with one `exit_id`: `story_exit_count` 1, remoteness needs review, common path equals travel
    distance. Fails if doors are taken as exits.

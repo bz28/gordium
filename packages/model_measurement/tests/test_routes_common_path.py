@@ -74,12 +74,23 @@ def test_6_two_exits_and_a_column_the_tie_is_broken_toward_more_shared():
     assert 13.0 < above < 13.270
 
 
-def test_6_two_exits_and_a_column_the_story_figure_holds_the_far_walls_middle():
-    """The story's figure is at least 13.270 (at (30, 5)). The note expected it at most 13.520: decision 5's own
-    definition gives more (points along the south wall, whose shortest routes to both exits go under the column
-    together), recorded as a hole in the note, not tuned here."""
+def test_6_two_exits_and_a_column_along_the_south_wall_both_routes_go_under_together():
+    """By hand: from (x, 0) both routes take the tangent to the ring at (13, 3) on its south side and go round it
+    until A's leaves on the tangent to its door centre (-0.25, 5): sqrt(d^2 - 1) + the arc between the two tangent
+    points, d the distance to (13, 3): 16.547 at x = 29.2, 16.746 at 29.4. At 29.5, past where B's shortest way
+    flips to over the column (x 29.422 to 29.426, the brute force's bracket), they part at the start: 0."""
+    got = routes(column_room(north_exit=True))
+    assert ft(at_point(got, at(29.2, 0)).length) == pytest.approx(16.547, abs=TOL)
+    assert ft(at_point(got, at(29.4, 0)).length) == pytest.approx(16.746, abs=TOL)
+    assert at_point(got, at(29.5, 0)).length == pytest.approx(0.0, abs=1e-9)
+
+
+def test_6_two_exits_and_a_column_the_story_figure_is_between_its_bounds():
+    """The greatest pointwise common path is 16.769 ft (16.767 to 16.772) at the flip on the south wall (the note's
+    test 6, corrected 2026-11-21: it said at most 13.520). The story's figure bounds the law's greatest, never above
+    the greatest sample plus 4.5 in: between 13.270 and 16.772 + 0.375 = 17.147."""
     got = story_figure(routes(column_room(north_exit=True)))
-    assert ft(got.figure) >= 13.270 - TOL
+    assert 13.270 - TOL <= ft(got.figure) <= 17.147 + TOL
 
 
 # --- the definition's parts ---------------------------------------------------------------------------------------
