@@ -43,8 +43,8 @@ public sealed class CheckProjectCommand : IExternalCommand
             log["marks_added"] = added.Select(s => $"{s.Action}: {s.Mark.Name}").ToList();
             // each window type a maker's formula covers, its three Clear marks empty: filled as a draft the architect
             // confirms (never the stamp, so this check sends no clear opening for it)
-            var filled = RevitMarks.Prefill(doc, RevitMarks.Model(doc));
-            log["clear_filled"] = filled.Select(p => $"{p.TypeId} {p.Label}: {p.Source}").ToList();
+            // (a failure is logged and the check goes on: the types stay empty, so their clear opening needs review)
+            var filled = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
             if (ProjectFacts.Read(RevitMarks.Model(doc)).StreetEdges is null)
                 PickStreet(ui.ActiveUIDocument!, log);
             var run = Run(doc, ui.Application, log);

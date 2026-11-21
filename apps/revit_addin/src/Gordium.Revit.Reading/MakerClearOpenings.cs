@@ -183,49 +183,63 @@ public static class ClearPrefills
         var label = Label(e);
         var windowType = Shared(e, MakerClearOpenings.Entries.Select(x => x.WindowTypeParameter)) is { } wt ? Marks.Text(wt) : null;
         var entry = MakerClearOpenings.Match(e.TypeManufacturer, windowType, e.TypeModel);
+        double? width = Marks.Length(MarkReading.Value(e, Marks.ClearWidth)), height = Marks.Length(MarkReading.Value(e, Marks.ClearHeight));
+        var source = Marks.Text(MarkReading.Value(e, Marks.ClearSource));
+        var empty = width is null && height is null && source is null;
         if (entry is null)
         {
             if (MakerClearOpenings.MakerOf(e.TypeManufacturer) is not { } maker)
                 return null;
+            var pdfs = string.Join("; ", maker.Pdfs.Select(p => $"{p.Title}: {p.Url}"));
             return new(e.TypeUniqueId!, label, PrefillState.KnownMakerOnly,
                 $"{label}: made by {maker.Maker}, but its Window Type ({Quote(windowType)}) and Model ({Quote(e.TypeModel)}) " +
-                "aren't a product line Gordium has a " +
-                $"formula for, so its clear opening isn't filled: take it from {maker.Maker}'s clear-opening tables (" +
-                string.Join("; ", maker.Pdfs.Select(p => $"{p.Title}: {p.Url}")) + ") into " + Marks.ClearWidth.Name + ", " +
-                Marks.ClearHeight.Name + " and " + Marks.ClearSource.Name + ".");
+                "aren't a product line Gordium has a formula for, so Gordium fills nothing: " + (empty
+                    ? $"take its clear opening from {maker.Maker}'s clear-opening tables ({pdfs}) into {Marks.ClearWidth.Name}, " +
+                      $"{Marks.ClearHeight.Name} and {Marks.ClearSource.Name}."
+                    : $"its {Marks.ClearWidth.Name}, {Marks.ClearHeight.Name} and {Marks.ClearSource.Name} are as typed on it " +
+                      $"(check them against {maker.Maker}'s clear-opening tables: {pdfs})."));
         }
-        double? width = Marks.Length(MarkReading.Value(e, Marks.ClearWidth)), height = Marks.Length(MarkReading.Value(e, Marks.ClearHeight));
-        var source = Marks.Text(MarkReading.Value(e, Marks.ClearSource));
         var vent = Shared(e, [entry.VentAreaParameter]) is { HasValue: true, Number: { } a } && double.IsFinite(a) ? a : (double?)null;
         var (fill, why) = Compute(entry, e.TypeWidth, e.TypeHeight, e.TypeModel, vent);
-        if (width is null && height is null && source is null)
+        // the formula is for its operation only: an Operation set to another is never filled; unset, the line asks for it
+        var operation = Marks.Text(MarkReading.Value(e, Marks.Operation));
+        if (fill is not null && operation is not null && Operations.ForOpening(operation) != Operations.ForOpening(entry.Operation))
+            (fill, why) = (null, $"its {Marks.Operation.Name} is \"{operation}\", but {entry.Maker}'s formula is for a {entry.Operation}");
+        var ask = operation is null ? $" Set its {Marks.Operation.Name} to {entry.Operation} (the formula is for one)." : "";
+        if (empty)
         {
             if (fill is not { } f)
                 return new(e.TypeUniqueId!, label, PrefillState.NotFilled,
                     $"{label}: {entry.Maker} {entry.ProductLine}, but its clear opening isn't filled: {why}. Take it from " +
                     $"{entry.Maker}'s tables ({entry.Url}).");
-            return new(e.TypeUniqueId!, label, PrefillState.Fill, FilledLine(label, entry), f.Width, f.Height, f.Source);
+            return new(e.TypeUniqueId!, label, PrefillState.Fill, Line(label, entry, done: false) + ask, f.Width, f.Height, f.Source);
         }
         if (source is null || !source.StartsWith(SourcePrefix, StringComparison.Ordinal))
             return null;                                     // the architect's own values: kept, nothing to say
         if (fill is { } now && width is { } w && height is { } h && Math.Abs(w - now.Width) <= SameFeet
             && Math.Abs(h - now.Height) <= SameFeet && source == now.Source)
-            return new(e.TypeUniqueId!, label, PrefillState.Filled, FilledLine(label, entry));
+            return new(e.TypeUniqueId!, label, PrefillState.Filled, Line(label, entry, done: true) + ask);
         return new(e.TypeUniqueId!, label, PrefillState.Differs,
             $"{label}: its {Marks.ClearSource.Name} says Gordium filled it, but its clear opening isn't what Gordium would " +
             $"fill now ({(fill is null ? why : "the type was resized, or a value edited since")}): check all three against " +
             $"{entry.Maker}'s tables ({entry.Url}) before confirming, or empty them for Gordium to fill again.");
     }
 
+    /// <summary>The types counted as filled after the write: all of them only when Revit reports the transaction
+    /// committed, none when it rolled back (Revit returns the status, it doesn't throw).</summary>
+    public static IReadOnlyList<ClearPrefill> Written(IReadOnlyList<ClearPrefill> todo, bool committed) => committed ? todo : [];
+
     /// <summary>The dialog's first words when types were just filled (empty when none were).</summary>
     public static string Head(int filled) => filled == 0 ? ""
         : $"Gordium filled the maker's clear opening of {(filled == 1 ? "1 window type" : $"{filled} window types")} " +
           "as a draft: confirm each (Mark for egress lists them); none is sent before.\n\n";
 
-    private static string FilledLine(string label, MakerFormula entry) =>
-        $"{label}: Gordium filled the clear opening from {entry.Maker} {entry.FormulaPage}: confirm it (check the hinge/hardware: " +
-        $"{entry.Caveats}). It is a draft until you confirm it: no clear opening is sent before. {Marks.ClearOffset.Name} is " +
-        "yours to set (the maker's formula doesn't give it).";
+    /// <summary>The line of a type filled (<paramref name="done"/>: its marks hold the draft) or still to fill (the
+    /// marks are empty: this run writes them, or a write that didn't commit left them so).</summary>
+    private static string Line(string label, MakerFormula entry, bool done) =>
+        $"{label}: Gordium {(done ? "filled" : "will fill")} the clear opening from {entry.Maker} {entry.FormulaPage}: confirm it " +
+        $"(check the hinge/hardware: {entry.Caveats}). It is a draft until you confirm it: no clear opening is sent before. " +
+        $"{Marks.ClearOffset.Name} is yours to set (the maker's formula doesn't give it).";
 
     /// <summary>The type's maker's shared parameter (the first of these GUIDs it has), or null.</summary>
     private static MarkValue? Shared(MarkedElement e, IEnumerable<Guid> guids) =>
@@ -257,7 +271,11 @@ public static class ClearPrefills
             return (null, $"its frame ({MakerClearOpenings.In(w)} by {MakerClearOpenings.In(h)}) is outside where Gordium uses the " +
                           $"formula ({MakerClearOpenings.In(entry.FrameWidthMin)} to {MakerClearOpenings.In(entry.FrameWidthMax)} " +
                           $"wide, up to {MakerClearOpenings.In(entry.FrameHeightMax)} high)");
-        if (entry.CallNumber(model) is { } cn)
+        // every fill needs a call-number Model agreeing with the frame: a mulled family can be a standard frame size
+        // overall (two 18 in units, 36 in), and only the Model says which unit it is
+        if (entry.CallNumber(model) is not { } cn)
+            return (null, $"its Model ({Quote(model)}) isn't a {entry.Maker} call number, so Gordium can't tell its Width is " +
+                          "one unit's frame (a mulled unit's could be a standard size too)");
         {
             var wi = entry.WidthCns.ToList().IndexOf(cn.Width);
             var hi = entry.HeightCns.ToList().IndexOf(cn.Height);
@@ -274,7 +292,7 @@ public static class ClearPrefills
         var source = $"{SourcePrefix}{entry.Maker} {entry.ProductLine}, {entry.FormulaPage} ({entry.Url}): " +
                      $"clear width = frame width - {MakerClearOpenings.In(entry.WidthMinus)}, clear height = frame height - " +
                      $"{MakerClearOpenings.In(entry.HeightMinus)}; frame {MakerClearOpenings.In(w)} by {MakerClearOpenings.In(h)} (the type's Width " +
-                     "and Height). A draft until the architect confirms it.";
+                     $"and Height, call number {model!.Trim()}).";
         return ((cw / 12, ch / 12, source), null);
     }
 

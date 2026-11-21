@@ -13,7 +13,7 @@
         "window_type": ["Ultimate Casement"],
         "window_type_parameter": "eafa4376-701d-423a-906c-e9e76dd752ca",
         "model_call_number": "^UCA(\\d{2})(\\d{2})$",
-        "how": "the type's Manufacturer equals one of manufacturer AND (its shared Window Type parameter, read by GUID, equals one of window_type, OR its Model is a call number UCAwwhh). Whenever the Model is such a call number, its width (ww) and height (hh) call numbers must be the standard table's for the type's frame Width and Height, else no pre-fill: Marvin's mulled families (Window-Casement-Marvin-Ultimate-4W_1H, MultiW_1H, 1W_2H...) carry the same Window Type and a single unit's Model, so a Width that isn't that unit's frame is never filled. Window Type matches exactly (\"Ultimate Casement - Tripane\" doesn't).",
+        "how": "the type's Manufacturer equals one of manufacturer AND (its shared Window Type parameter, read by GUID, equals one of window_type, OR its Model is a call number UCAwwhh). Every pre-fill needs the Model to be such a call number, and its width (ww) and height (hh) call numbers must be the standard table's for the type's frame Width and Height, else no pre-fill (a Window Type match alone is named in the list, never filled: a mulled unit can be a standard frame size overall); the type's Gordium: Operation, when set, must be this entry's operation: Marvin's mulled families (Window-Casement-Marvin-Ultimate-4W_1H, MultiW_1H, 1W_2H...) carry the same Window Type and a single unit's Model, so a Width that isn't that unit's frame is never filled. Window Type matches exactly (\"Ultimate Casement - Tripane\" doesn't).",
         "source": "marvin_revit"
       },
       "cross_check": {

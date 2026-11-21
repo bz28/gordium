@@ -39,7 +39,7 @@ public sealed class MakerClearOpeningsTests
     {
         // Marvin ADM, UCA UCANF-6 (PDF page 8): "2864 1-8 57/64 (531) 4-10 1/64 (1473) 8.42 (0.78) E ..."; its frame
         // (UCA UCANF-29, Standard Unit Measurements: Casement): CN 28 "2-4", CN 64 "5-3 1/8"
-        var (fill, why) = ClearPrefills.Compute(Marvin, 28.0 / 12, 63.125 / 12);
+        var (fill, why) = ClearPrefills.Compute(Marvin, 28.0 / 12, 63.125 / 12, "UCA2864");
         Assert.Null(why);
         var (w, h, _) = fill!.Value;
         Assert.Equal(20.875, w * 12, 9);                          // 28 - 7 1/8
@@ -240,8 +240,12 @@ public sealed class MakerClearOpeningsTests
         Assert.Equal(20.875 / 12, p.ClearWidth!.Value, 12);
         Assert.Equal(58.0 / 12, p.ClearHeight!.Value, 12);
         Assert.StartsWith(ClearPrefills.SourcePrefix + "Marvin Ultimate Casement (UCA), full frame, UCA UCANF-25 (PDF page 27)", p.Source);
-        Assert.Contains("clear width = frame width - 7.125 in, clear height = frame height - 5.125 in; frame 28 in by 63.125 in", p.Source);
-        Assert.StartsWith("Marvin Ultimate Casement: CN 2864: Gordium filled the clear opening from Marvin UCA UCANF-25 (PDF page 27)" +
+        Assert.EndsWith("clear width = frame width - 7.125 in, clear height = frame height - 5.125 in; frame 28 in by 63.125 in " +
+                        "(the type's Width and Height, call number UCA2864).", p.Source);
+        // the source is sent as stated_clear.source once confirmed: facts only, never "draft" (review round 1)
+        Assert.DoesNotContain("draft", p.Source, StringComparison.OrdinalIgnoreCase);
+        // not yet written: "will fill", never "filled" (a write Revit rolls back leaves it so: review round 1)
+        Assert.StartsWith("Marvin Ultimate Casement: CN 2864: Gordium will fill the clear opening from Marvin UCA UCANF-25 (PDF page 27)" +
                           ", Ver 2019.3 2019-06-24: confirm it (check the hinge/hardware: the formulas are Marvin's \"with Standard Screen\"", p.Line);
         Assert.Contains("wash/egress hinge", p.Line);
         Assert.DoesNotContain("meets", p.Line);                  // a maker's E mark is never said as a pass
@@ -276,7 +280,8 @@ public sealed class MakerClearOpeningsTests
         var again = Assert.Single(ClearPrefills.Plan(Model(Window("a", type: written))));
         Assert.Equal(PrefillState.Filled, again.State);
         Assert.Null(again.ClearWidth);                           // nothing written twice
-        Assert.Equal(fill.Line, again.Line);
+        Assert.DoesNotContain("Gordium filled", fill.Line);
+        Assert.Equal(fill.Line.Replace("Gordium will fill", "Gordium filled"), again.Line);
         var resized = Assert.Single(ClearPrefills.Plan(Model(Window("a", w: 32, type: written))));
         Assert.Equal(PrefillState.Differs, resized.State);
         Assert.Contains("resized", resized.Line);
@@ -303,8 +308,65 @@ public sealed class MakerClearOpeningsTests
     public void The_marking_list_shows_the_line()
     {
         var list = MarkingList.Build(Model(Window("a")));
-        Assert.Contains(list.ClearLines, l => l.Contains("Gordium filled the clear opening from Marvin"));
-        Assert.Contains("Gordium filled the clear opening from Marvin", MarkingList.Text(list));
+        Assert.Contains(list.ClearLines, l => l.Contains("Gordium will fill the clear opening from Marvin"));
+        Assert.Contains("Gordium will fill the clear opening from Marvin", MarkingList.Text(list));
+    }
+
+    // ---- review round 1 -----------------------------------------------------------------------------------------
+
+    [Fact]
+    public void A_write_revit_rolled_back_counts_nothing_as_filled()
+    {
+        var todo = ClearPrefills.Plan(Model(Window("a")));
+        Assert.Empty(ClearPrefills.Written(todo, committed: false));
+        Assert.Equal(todo, ClearPrefills.Written(todo, committed: true));
+    }
+
+    private static Dictionary<Guid, MarkValue> Op(string word) => new() { [Marks.Operation.Guid] = new(true, Text: word) };
+
+    [Fact]
+    public void The_formula_is_used_only_for_its_operation_and_an_unset_operation_is_asked_for()
+    {
+        var hopper = Assert.Single(ClearPrefills.Plan(Model(Window("a", type: Op("Hopper")))));
+        Assert.Equal(PrefillState.NotFilled, hopper.State);
+        Assert.Contains("its Gordium: Operation is \"Hopper\", but Marvin's formula is for a Casement", hopper.Line);
+        var casement = Assert.Single(ClearPrefills.Plan(Model(Window("a", type: Op("casement")))));
+        Assert.Equal(PrefillState.Fill, casement.State);
+        Assert.DoesNotContain("Set its Gordium: Operation", casement.Line);
+        var unset = Assert.Single(ClearPrefills.Plan(Model(Window("a"))));
+        Assert.Equal(PrefillState.Fill, unset.State);
+        Assert.EndsWith("Set its Gordium: Operation to Casement (the formula is for one).", unset.Line);
+        // a draft written, then the operation changed: no longer what Gordium would fill
+        var written = new Dictionary<Guid, MarkValue>(Op("Awning"))
+        {
+            [Marks.ClearWidth.Guid] = new(true, Number: unset.ClearWidth), [Marks.ClearHeight.Guid] = new(true, Number: unset.ClearHeight),
+            [Marks.ClearSource.Guid] = new(true, Text: unset.Source),
+        };
+        Assert.Equal(PrefillState.Differs, Assert.Single(ClearPrefills.Plan(Model(Window("a", type: written)))).State);
+    }
+
+    [Fact]
+    public void A_known_makers_line_says_what_its_marks_hold()
+    {
+        var empty = Assert.Single(ClearPrefills.Plan(Model(Window("a", maker: "Andersen", model: "400 Series"))));
+        Assert.Contains("take its clear opening from Andersen's clear-opening tables", empty.Line);
+        var typed = new Dictionary<Guid, MarkValue> { [Marks.ClearWidth.Guid] = new(true, Number: 2.0) };
+        var line = Assert.Single(ClearPrefills.Plan(Model(Window("a", maker: "Andersen", model: "400 Series", type: typed)))).Line;
+        Assert.Contains("are as typed on it", line);
+        Assert.DoesNotContain("isn't filled", line);
+        Assert.DoesNotContain("take its clear opening", line);
+    }
+
+    [Fact]
+    public void A_window_type_match_without_a_call_number_model_is_never_filled()
+    {
+        // a mulled unit of two 18 in casements is 36 in overall: a standard frame width, so only the Model tells
+        foreach (var model in new string?[] { null, "3648 CSMT", "Ultimate Casement" })
+        {
+            var p = Assert.Single(ClearPrefills.Plan(Model(Window("a", model: model, w: 36, h: 47.125))));
+            Assert.Equal(PrefillState.NotFilled, p.State);
+            Assert.Contains("isn't a Marvin call number", p.Line);
+        }
     }
 
     [Fact]
@@ -316,6 +378,7 @@ public sealed class MakerClearOpeningsTests
         var o = house.OpeningIndex("we2");
         foreach (var mark in new[] { Marks.ClearWidth, Marks.ClearHeight, Marks.ClearSource, Marks.ClearConfirmed })
             house.SetType("we2", mark, null);
+        house.SetType("we2", Marks.Operation, new MarkValue(true, Text: "Casement"));      // the formula's operation
         house.Marked[m] = house.Marked[m] with
         {
             TypeManufacturer = "Marvin Windows and Doors", TypeModel = "UCA2864", TypeWidth = 28.0 / 12, TypeHeight = 63.125 / 12,
