@@ -55,6 +55,29 @@ public sealed class MarksRequestTests
     }
 
     [Fact]
+    public void A_room_to_place_needs_its_level_a_point_a_name_and_a_number_no_room_has()
+    {
+        var floor = new FakeFloor();
+        floor.Marked.Add(new MarkedElement { UniqueId = FakeFloor.Level, BuiltInCategory = Marks.Levels, Name = "Level 1" });
+        JsonObject Place(string level, double x, string name, string number) => new()
+        {
+            ["level"] = level, ["at"] = new JsonArray(x, 28.0), ["name"] = name, ["number"] = number,
+        };
+        var (rooms, refused) = MarksRequest.Placements(new JsonArray(
+            Place("Level 1", 25, "TOILET", "31"),
+            Place("Level 2", 25, "TOILET", "32"),                 // no such level
+            Place("Level 1", 25, "TOILET", "A"),                  // a number a Room has
+            Place("Level 1", 26, "CLOSET", "31"),                 // a number placed already
+            Place("Level 1", 27, "", "33"),                       // no name
+            new JsonObject { ["level"] = "Level 1", ["name"] = "X", ["number"] = "34" }), floor.Model());   // no point
+        var room = Assert.Single(rooms);
+        Assert.Equal(new RoomToPlace(FakeFloor.Level, "Level 1", 25, 28, "TOILET", "31"), room);
+        Assert.Equal(5, refused.Count);
+        Assert.Contains(refused, r => r.Contains("no levels are named \"Level 2\""));
+        Assert.Contains(refused, r => r.Contains("numbered A is already"));
+    }
+
+    [Fact]
     public void A_clear_opening_written_with_its_stamp_reads_back_as_the_doors_clear_width()
     {
         var floor = new FakeFloor();

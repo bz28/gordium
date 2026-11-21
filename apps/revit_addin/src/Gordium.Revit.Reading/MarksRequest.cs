@@ -12,6 +12,10 @@ namespace Gordium.Revit.Reading;
 /// <param name="Label">The element, in words, for the log.</param>
 public sealed record MarkWrite(string Element, bool OnType, MarkDefinition Mark, MarkValue Value, string Label);
 
+/// <summary>A Room the request places before marking: on the level (its <c>UniqueId</c>), at a point (internal feet),
+/// with its name and number.</summary>
+public sealed record RoomToPlace(string Level, string LevelName, double X, double Y, string Name, string Number);
+
 /// <summary>What a marks request writes, and every entry it refuses with why.</summary>
 public sealed record MarksPlan(IReadOnlyList<MarkWrite> Writes, IReadOnlyList<string> Refused);
 
@@ -195,6 +199,42 @@ public static class MarksRequest
     private static string? Text(JsonNode? n) =>
         n is JsonValue v && v.GetValueKind() == JsonValueKind.String && v.GetValue<string>() is { } s && !string.IsNullOrWhiteSpace(s)
             ? s.Trim() : null;
+
+    /// <summary>The Rooms the request places before marking (<c>place_rooms</c>: <c>{"level": "Level 1", "at": [x, y],
+    /// "name": "TOILET", "number": "31"}</c>, the point in the model's internal feet): each on a level of the model, at a
+    /// finite point, with a name and a number no Room of the model has nor another placement; anything else refused
+    /// with why. Where it lands is the Revit layer's to check (in an enclosed area with no Room, in the last phase), and
+    /// a Room that isn't is taken back.</summary>
+    public static (List<RoomToPlace> Rooms, List<string> Refused) Placements(JsonArray? place, RevitModel model)
+    {
+        var rooms = new List<RoomToPlace>();
+        var refused = new List<string>();
+        var levels = model.Marked.Where(e => MarkReading.KindOf(e) == MarkedKind.Level).ToList();
+        var numbers = MarkReading.InDesign(model).Where(e => MarkReading.KindOf(e) == MarkedKind.Room)
+            .Select(e => e.Number?.Trim()).OfType<string>().ToHashSet(StringComparer.Ordinal);
+        foreach (var (entry, n) in (place ?? []).Select((e, i) => (e, i + 1)))
+        {
+            var where = $"room to place {n}";
+            if (entry is not JsonObject o)
+            {
+                refused.Add($"{where}: not a mapping");
+                continue;
+            }
+            var (levelName, name, number) = (Text(o["level"]), Text(o["name"]), Text(o["number"]));
+            var at = o["at"] is JsonArray { Count: 2 } a && Number(a[0]) is { } x && Number(a[1]) is { } y ? (X: x, Y: y) : ((double X, double Y)?)null;
+            var level = levels.Where(l => l.Name?.Trim() == levelName).ToList();
+            var why = name is null || number is null ? "needs a name and a number"
+                : at is null ? "needs `at`, a point [x, y] in feet"
+                : level.Count != 1 ? $"{(level.Count == 0 ? "no" : level.Count.ToString(CultureInfo.InvariantCulture))} levels are named \"{levelName}\""
+                : !numbers.Add(number) ? $"a Room numbered {number} is already in the model or the request"
+                : null;
+            if (why is not null)
+                refused.Add($"{where} ({name ?? "?"} {number ?? "?"}): {why}");
+            else
+                rooms.Add(new RoomToPlace(level[0].UniqueId, levelName!, at!.Value.X, at.Value.Y, name!, number!));
+        }
+        return (rooms, refused);
+    }
 
     /// <summary>The request's date: given, or today's (UTC) when not.</summary>
     public static string Date(JsonNode? n) => Text(n) ?? DateTime.UtcNow.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
