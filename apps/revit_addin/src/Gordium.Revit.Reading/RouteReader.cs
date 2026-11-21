@@ -24,6 +24,12 @@ public static class RouteReader
 
     private const double S = InteriorReader.Sixteenth;
 
+    /// <summary>The least floor a door opens onto, sq ft: its narrowest clear width the route code reads (24 in) by an
+    /// inch beyond its wall's face. An enclosed area with no Room smaller than this (a sliver between two walls drawn face
+    /// to face, which Revit can't outline: the Children's Odyssey's two, 0 sq ft) can't be what is beyond a door, so it
+    /// never stops a door's far side being read as outside; any larger one not outlined does.</summary>
+    public const double SmallestBeyond = 2.0 * (1.0 / 12);
+
     /// <summary>What stands in a route's way, by Revit category (the format's kinds: casework, furniture, equipment,
     /// fixture), with whether it is fixed in place. Revit can't tell a movable piece from a fixed one, so each category
     /// says it once (furniture is movable; casework, systems furniture, plumbing and lighting fixtures, and equipment
@@ -566,6 +572,8 @@ public static class RouteReader
         var level = mine.Record.LevelId;
         foreach (var (area, id, outline) in unknown.Where(u => u.Area.LevelId == level || u.Area.LevelId is null))
         {
+            if (outline is null && area.Area < SmallestBeyond)
+                continue;                                    // a sliver: too small to be what a door opens onto
             if (outline is null)
             {
                 why = "Revit gives no room on one side, and an enclosed area with no Room on its level couldn't be outlined, " +

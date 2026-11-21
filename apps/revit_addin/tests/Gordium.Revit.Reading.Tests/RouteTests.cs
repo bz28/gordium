@@ -291,6 +291,18 @@ public sealed class RouteTests
         Assert.Null(Door(read, "dS2")["sides"]);
         Assert.Contains("couldn't be outlined", FakeFloor.Note(read, "dS2", "doors.sides"));
         Assert.Equal([U("A"), U("C")], Door(read, "dA")["sides"]!.AsArray().Select(x => x!.GetValue<string>()));   // two rooms: as before
+
+        // a 0 sq ft sliver Revit can't outline or locate (two walls face to face, the Children's Odyssey's two): too
+        // small to be beyond any door, so the exterior doors open to outside and the exit is read (review: 2026-11-21,
+        // every exterior door had lost its sides to the slivers)
+        floor.Areas[^1] = new EnclosedArea("Level 1", 0, false, null, FakeFloor.Level);
+        read = InteriorReader.Read(floor.Model());
+        Assert.Equal([U("L"), RouteReader.Outside], Door(read, "dE")["sides"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Equal(U("dE"), Door(read, "dE")["exit_id"]!.GetValue<string>());
+        Assert.Equal([U("S"), RouteReader.Outside], Door(read, "dS2")["sides"]!.AsArray().Select(x => x!.GetValue<string>()));
+        // one just large enough to be beyond a door, not outlined: still never outside
+        floor.Areas[^1] = new EnclosedArea("Level 1", RouteReader.SmallestBeyond, false, null, FakeFloor.Level);
+        Assert.Null(Door(InteriorReader.Read(floor.Model()), "dE")["sides"]);
     }
 
     // ---- what stands in a room ---------------------------------------------------------------------------------
