@@ -505,6 +505,8 @@ function header(){
     </div></div>`;
 }
 function render(){
+  // one source of truth for the palette tab: with Properties showing, a check that lands updates state only
+  if (S.props) { body.innerHTML = propsHtml(); body.classList.remove("stale"); return; }
   const stale = S.panel==="stale" || S.stale;
   let h = header();
   if (S.tab==="marks") h += checklist();
@@ -878,7 +880,7 @@ body.addEventListener("keydown", e => {
 function showProps(on){
   document.getElementById("tabProps").setAttribute("aria-selected", on);
   document.getElementById("tabGordium").setAttribute("aria-selected", !on);
-  if (on) { body.innerHTML = propsHtml(); body.classList.remove("stale"); } else render();
+  S.props = on; render();
 }
 document.getElementById("tabProps").onclick = () => showProps(true);
 document.getElementById("tabGordium").onclick = () => showProps(false);

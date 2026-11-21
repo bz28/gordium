@@ -1,0 +1,16 @@
+<script>
+window.addEventListener('load',()=>{ try {
+ const out=[]; const sel=document.getElementById('stateSel');
+ const greenIn=(root)=>{const p=getComputedStyle(document.documentElement).getPropertyValue('--pass').trim().toLowerCase();
+   let n=0; root.querySelectorAll('svg *').forEach(e=>{const cs=getComputedStyle(e); [cs.stroke,cs.fill].forEach(v=>{ if(v&&v!=='none'){ const c=document.createElement('div'); c.style.color=p; document.body.appendChild(c); const pp=getComputedStyle(c).color; c.remove(); if(v===pp) n++; }});}); return n;};
+ // A: choose Stale, then Check again: body stays stale while checking
+ sel.value='stale'; sel.onchange({target:sel}); recheck();
+ out.push('A_checking_stale='+(S.panel==='checking' && document.getElementById('body').classList.contains('stale')));
+ // C: stale state: no complies green in the bar or chips
+ sel.value='stale'; sel.onchange({target:sel});
+ out.push('C_green_in_stale='+greenIn(document.getElementById('body')));
+ // B: start a check then cancel; after 2 s still stale
+ sel.value='results'; sel.onchange({target:sel}); recheck(); document.querySelector('[data-act="cancel"]').click();
+ setTimeout(()=>{ out.push('B_after_cancel_stale='+(S.stale===true)); const d=document.createElement('pre'); d.id='PIN'; d.textContent=out.join(' '); document.body.appendChild(d); },2500);
+ } catch(e){ const d=document.createElement('pre'); d.id='PIN'; d.textContent='ERR '+e; document.body.appendChild(d);} });
+</script>

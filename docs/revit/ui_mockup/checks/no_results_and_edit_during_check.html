@@ -1,0 +1,17 @@
+<script>
+window.addEventListener('load',()=>{ const out=[]; const fin=()=>{const d=document.createElement('pre'); d.id='PIN'; d.textContent=out.join(' '); document.body.appendChild(d);};
+ try {
+ const sel=document.getElementById('stateSel'), body=document.getElementById('body');
+ // E: from Not checked yet: no rows while checking; cancel returns with no rows and no "Checked 14:32"
+ sel.value='none'; sel.onchange({target:sel}); recheck();
+ out.push('E_rows_while_checking='+body.querySelectorAll('.row').length);
+ document.querySelector('[data-act="cancel"]').click();
+ out.push('E_after_cancel_rows='+body.querySelectorAll('.row').length+'_panel='+S.panel);
+ // D: start a check from results, edit D33 during it, wait: still stale
+ sel.value='results'; sel.onchange({target:sel}); recheck();
+ S.tab='marks'; S.ckOpen.exits=true; render();
+
+ const c=document.querySelector('[data-d33]'); out.push('D_found_choice='+!!c); if (c) c.click();
+ setTimeout(()=>{ out.push('D_stale_after_answer='+(S.stale===true)); fin(); },2500);
+ } catch(e){ out.push('ERR '+e); fin(); } });
+</script>
