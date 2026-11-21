@@ -6,9 +6,12 @@ namespace Gordium.Revit.Reading;
 /// <summary>A point on the plan, in feet.</summary>
 public readonly record struct PlanPoint(double X, double Y);
 
-/// <summary>A wall of the data: its centre line from <see cref="Start"/> to <see cref="End"/> on the level.</summary>
+/// <summary>A wall of the data: its centre line from <see cref="Start"/> to <see cref="End"/> on the level.
+/// <see cref="NoJoinStart"/> and <see cref="NoJoinEnd"/>: Revit is not to join the wall at that end (a trimmed end, a
+/// fill's ends: a join there with a wall it overlaps made Revit delete both, "Can't keep elements joined", the Children's
+/// Odyssey build, 2026-11-21).</summary>
 public sealed record BuildWall(int Id, PlanPoint Start, PlanPoint End, double ThicknessIn, string Status, bool SmokePartition,
-                               string? FireRating, double HeightFt, bool Exterior);
+                               string? FireRating, double HeightFt, bool Exterior, bool NoJoinStart = false, bool NoJoinEnd = false);
 
 /// <summary>A door of the data (<see cref="Number"/> its place in the list from 1, as the script's marks D01...): its
 /// centre on its host wall, <see cref="SwingDir"/> the side its leaf opens to, <see cref="Hinge"/> its hinge jamb (a
@@ -532,7 +535,7 @@ public static class BuildData
                 var (s, e, t) = (c.FillStart!.Value, c.ExtendEndTo, c.FillThicknessIn!.Value);
                 var length = Distance(s, e);
                 var fill = new BuildWall(walls.Max(x => x.Id) + 1, s, e, t, "Existing", false, null,
-                                         model.Walls.Count == 0 ? 10 : model.Walls.Max(x => x.HeightFt), false);
+                                         model.Walls.Count == 0 ? 10 : model.Walls.Max(x => x.HeightFt), false, NoJoinStart: true, NoJoinEnd: true);
                 // its four corners, each within the limit of a wall of the data: it fills between walls, never stands alone
                 double ux = (e.X - s.X) / Math.Max(length, 1e-12), uy = (e.Y - s.Y) / Math.Max(length, 1e-12), half = t / 24;
                 PlanPoint[] corners = [new(s.X - uy * half, s.Y + ux * half), new(s.X + uy * half, s.Y - ux * half),
@@ -577,7 +580,7 @@ public static class BuildData
                                 $"would lengthen, turn or remove it: {c.Why}");
                 else
                 {
-                    walls[i] = start ? walls[i] with { Start = c.ExtendEndTo } : walls[i] with { End = c.ExtendEndTo };
+                    walls[i] = start ? walls[i] with { Start = c.ExtendEndTo, NoJoinStart = true } : walls[i] with { End = c.ExtendEndTo, NoJoinEnd = true };
                     applied.Add(I($"trimmed W{c.Wall}: {which} {Xy(movedEnd)} → {Xy(c.ExtendEndTo)} ({trim:0.###} ft): {c.Why}"));
                 }
                 continue;

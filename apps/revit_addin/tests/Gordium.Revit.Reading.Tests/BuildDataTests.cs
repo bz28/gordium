@@ -240,6 +240,7 @@ public sealed class BuildDataTests
         Assert.Empty(refused);
         var added = filled.Walls[^1];
         Assert.Equal((m.Walls.Max(w => w.Id) + 1, new PlanPoint(5, 1), new PlanPoint(7, 1), 12.0), (added.Id, added.Start, added.End, added.ThicknessIn));
+        Assert.Equal((true, true), (added.NoJoinStart, added.NoJoinEnd));       // a fill joins nothing
         Assert.StartsWith($"filled W{added.Id}: a 2 ft wall 12 in thick from (5, 1) to (7, 1)", applied.Single());
         foreach (var (c, words) in new[]
                  {
@@ -282,6 +283,10 @@ public sealed class BuildDataTests
         Assert.Equal($"trimmed W0: end (20, 0) → (18.5, 0) (1.5 ft): {Why}", applied.Single());
         var (start, _, _) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(1, 0), Why, CorrectionKind.TrimStart)]);
         Assert.Equal((new PlanPoint(1, 0), new PlanPoint(20, 0)), (start.Walls[0].Start, start.Walls[0].End));
+        // the trimmed end alone is drawn with its joins disallowed (a join there made Revit delete both walls)
+        Assert.Equal((false, true), (end.Walls[0].NoJoinStart, end.Walls[0].NoJoinEnd));
+        Assert.Equal((true, false), (start.Walls[0].NoJoinStart, start.Walls[0].NoJoinEnd));
+        Assert.Equal((false, false), (m.Walls[0].NoJoinStart, m.Walls[0].NoJoinEnd));
         foreach (var (to, kind, words) in new[]
                  {
                      (new PlanPoint(17.5, 0), CorrectionKind.TrimEnd, "more than 2 ft"),
