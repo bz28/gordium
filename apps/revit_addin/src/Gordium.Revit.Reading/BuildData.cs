@@ -36,7 +36,26 @@ public sealed record BuildModel(string Project, string LevelName, double LevelEl
 /// <summary>A correction the request makes to the data before drawing: wall W<see cref="Wall"/>'s end moved to
 /// <see cref="ExtendEndTo"/> (along its own line, at most <see cref="BuildData.MaxCorrection"/> ft), and why. Applied
 /// only when it keeps the wall's direction; logged either way.</summary>
-public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why);
+/// <param name="Wall">The wall's number (W16 is 16).</param>
+/// <param name="ExtendEndTo">Where its end (or, for <see cref="CorrectionKind.TrimStart"/>, its start) goes.</param>
+/// <param name="Why">Why, in words (required).</param>
+/// <param name="Kind">Which end moves, and which way: <see cref="CorrectionKind.ExtendEnd"/> (<c>extend_end_to</c>),
+/// or a trim (<c>trim_end_to</c>, <c>trim_start_to</c>) that only shortens the wall back along its own line: two of the
+/// trace's walls overlapping (a sliver Revit finds as an enclosed area) are joined end to end, never by a Room.</param>
+public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why, CorrectionKind Kind = CorrectionKind.ExtendEnd);
+
+/// <summary>What a correction does to its wall.</summary>
+public enum CorrectionKind
+{
+    /// <summary>The end moved along the wall's own line (<c>extend_end_to</c>).</summary>
+    ExtendEnd,
+
+    /// <summary>The end moved back toward the start (<c>trim_end_to</c>): shorter, never longer.</summary>
+    TrimEnd,
+
+    /// <summary>The start moved toward the end (<c>trim_start_to</c>): shorter, never longer.</summary>
+    TrimStart,
+}
 
 /// <summary>Data the add-in can't build all of: every problem found, each in words (never a part dropped).</summary>
 public sealed class BuildDataException(IReadOnlyList<string> problems)
@@ -97,19 +116,25 @@ public sealed record BuildRequest(string Data, string? Template, string SaveAs, 
                     var wall = co["wall"] is JsonValue wv && wv.TryGetValue<string>(out var ws) ? ws : null;
                     var id = wall is { Length: > 1 } && wall[0] == 'W' && int.TryParse(wall[1..], System.Globalization.NumberStyles.None,
                                                                                         CultureInfo.InvariantCulture, out var n) ? n : (int?)null;
-                    var to = co["extend_end_to"] is JsonArray { Count: 2 } a && a.All(x => x is JsonValue xv && xv.TryGetValue<double>(out var d) && double.IsFinite(d))
+                    (string Key, CorrectionKind Kind)[] kinds =
+                        [("extend_end_to", CorrectionKind.ExtendEnd), ("trim_end_to", CorrectionKind.TrimEnd), ("trim_start_to", CorrectionKind.TrimStart)];
+                    var given = kinds.Where(x => co.ContainsKey(x.Key)).ToList();
+                    var key = given.Count == 1 ? given[0].Key : "extend_end_to";
+                    var to = co[key] is JsonArray { Count: 2 } a && a.All(x => x is JsonValue xv && xv.TryGetValue<double>(out var d) && double.IsFinite(d))
                         ? new PlanPoint(a[0]!.GetValue<double>(), a[1]!.GetValue<double>()) : (PlanPoint?)null;
                     var why = co["why"] is JsonValue yv && yv.TryGetValue<string>(out var ys) && ys.Trim() != "" ? ys : null;
-                    var unknown = co.Select(p => p.Key).Where(x => x is not ("wall" or "extend_end_to" or "why")).ToList();
+                    var unknown = co.Select(p => p.Key).Where(x => x != "wall" && x != "why" && kinds.All(kd => kd.Key != x)).ToList();
                     if (id is null)
                         problems.Add($"correction {k}: wall is {co["wall"]?.ToJsonString() ?? "missing"}, not a wall's mark (W16)");
-                    if (to is null)
-                        problems.Add($"correction {k}: extend_end_to is {co["extend_end_to"]?.ToJsonString() ?? "missing"}, not a point [x, y]");
+                    if (given.Count > 1)
+                        problems.Add($"correction {k}: gives {string.Join(" and ", given.Select(x => x.Key))}: one change per correction");
+                    else if (to is null)
+                        problems.Add($"correction {k}: {key} is {co[key]?.ToJsonString() ?? "missing"}, not a point [x, y]");
                     if (why is null)
                         problems.Add($"correction {k}: no why (every correction to the data says why)");
                     problems.AddRange(unknown.Select(x => $"correction {k}: has {x}, which isn't asked for"));
-                    if (id is { } i && to is { } p && why is not null)
-                        corrections.Add(new WallCorrection(i, p, why));
+                    if (id is { } i && to is { } p && why is not null && given.Count <= 1)
+                        corrections.Add(new WallCorrection(i, p, why, given.Count == 1 ? given[0].Kind : CorrectionKind.ExtendEnd));
                 }
         }
         var known = new HashSet<string> { "data", "template", "save_as", "swing_opposite_facing", "hinge_opposite_hand", "use_phases", "corrections" };
@@ -480,6 +505,28 @@ public static class BuildData
             // measured from the data's own wall, never one an earlier correction moved: two corrections of a wall can't
             // add up past the limit (review round 1)
             var w = model.Walls.First(x => x.Id == c.Wall);
+            if (c.Kind != CorrectionKind.ExtendEnd)
+            {
+                // a trim: the end (or start) moved back along the wall's own line, the wall shorter and still a wall
+                var start = c.Kind == CorrectionKind.TrimStart;
+                var (fixedEnd, movedEnd) = start ? (w.End, w.Start) : (w.Start, w.End);
+                var trim = Distance(movedEnd, c.ExtendEndTo);
+                double tx = movedEnd.X - fixedEnd.X, ty = movedEnd.Y - fixedEnd.Y, qx = c.ExtendEndTo.X - fixedEnd.X, qy = c.ExtendEndTo.Y - fixedEnd.Y;
+                double full = Math.Sqrt(tx * tx + ty * ty), left = Math.Sqrt(qx * qx + qy * qy);
+                var off = left < 1e-9 ? 1 : Math.Abs(tx * qy - ty * qx) / (full * left);
+                var which = start ? "start" : "end";
+                if (trim > MaxCorrection)
+                    refused.Add(I($"refused W{c.Wall}: trimming its {which} {Xy(movedEnd)} → {Xy(c.ExtendEndTo)} moves it {trim:0.###} ft, more than {MaxCorrection:0} ft: {c.Why}"));
+                else if (off > 1e-4 || tx * qx + ty * qy <= 0 || left >= full || left < 1e-9)
+                    refused.Add($"refused W{c.Wall}: {Xy(c.ExtendEndTo)} isn't on the wall between its ends, so trimming its {which} to it " +
+                                $"would lengthen, turn or remove it: {c.Why}");
+                else
+                {
+                    walls[i] = start ? walls[i] with { Start = c.ExtendEndTo } : walls[i] with { End = c.ExtendEndTo };
+                    applied.Add(I($"trimmed W{c.Wall}: {which} {Xy(movedEnd)} → {Xy(c.ExtendEndTo)} ({trim:0.###} ft): {c.Why}"));
+                }
+                continue;
+            }
             var moved = Distance(w.End, c.ExtendEndTo);
             double ox = w.End.X - w.Start.X, oy = w.End.Y - w.Start.Y, nx = c.ExtendEndTo.X - w.Start.X, ny = c.ExtendEndTo.Y - w.Start.Y;
             double oldLength = Math.Sqrt(ox * ox + oy * oy), newLength = Math.Sqrt(nx * nx + ny * ny);

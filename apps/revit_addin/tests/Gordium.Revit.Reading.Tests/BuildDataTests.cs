@@ -210,6 +210,61 @@ public sealed class BuildDataTests
         Assert.Equal(["10", "21"], fixedModel.Rooms.Where(r => BuildData.BoundaryGaps(r, fixedModel.Walls).Count > 0).Select(r => r.Number).Order());
         // the five "Highlighted walls overlap" warnings of run 1, each a pair the data draws along each other
         Assert.Equal([(2, 119), (27, 120), (28, 121), (32, 105), (33, 34)], BuildData.WallOverlaps(m.Walls).Select(o => (o.A, o.B)));
+        // the eval's five trims (test_data/answer_keys/portland_me_19_libby_st/eval_marks.yaml, model_corrections): each
+        // pair joined end to end, no overlap left (the slivers Revit found as enclosed areas with no Room)
+        var (trimmed, done, notDone) = BuildData.Correct(fixedModel, LibbyTrims);
+        Assert.Equal(5, done.Count);
+        Assert.Empty(notDone);
+        Assert.Empty(BuildData.WallOverlaps(trimmed.Walls));
+    }
+
+    /// <summary>The five trims of eval_marks.yaml's model_corrections.</summary>
+    internal static readonly WallCorrection[] LibbyTrims =
+    [
+        new(119, new PlanPoint(132.9111, 84.9889), "overlaps W2 along 0.69 ft: ends where W2 begins", CorrectionKind.TrimEnd),
+        new(27, new PlanPoint(194.3667, 49.3578), "overlaps W120 along 1.15 ft: starts where W120 ends", CorrectionKind.TrimStart),
+        new(28, new PlanPoint(194.3667, 36.3244), "overlaps W121 along 1.15 ft: ends where W121 begins", CorrectionKind.TrimEnd),
+        new(105, new PlanPoint(168.7167, 28.1889), "overlaps W32 along 0.33 ft: starts where W32 ends", CorrectionKind.TrimStart),
+        new(34, new PlanPoint(168.5556, 16.1856), "overlaps W33 along 0.34 ft: starts where W33 ends", CorrectionKind.TrimStart),
+    ];
+
+    [Fact]
+    public void A_trim_only_shortens_a_wall_along_its_line_by_at_most_2_ft()
+    {
+        var m = BuildData.Parse(Extracted());                    // wall W0 from (0, 0) to (20, 0)
+        var (end, applied, _) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(18.5, 0), Why, CorrectionKind.TrimEnd)]);
+        Assert.Equal((new PlanPoint(0, 0), new PlanPoint(18.5, 0)), (end.Walls[0].Start, end.Walls[0].End));
+        Assert.Equal($"trimmed W0: end (20, 0) → (18.5, 0) (1.5 ft): {Why}", applied.Single());
+        var (start, _, _) = BuildData.Correct(m, [new WallCorrection(0, new PlanPoint(1, 0), Why, CorrectionKind.TrimStart)]);
+        Assert.Equal((new PlanPoint(1, 0), new PlanPoint(20, 0)), (start.Walls[0].Start, start.Walls[0].End));
+        foreach (var (to, kind, words) in new[]
+                 {
+                     (new PlanPoint(17.5, 0), CorrectionKind.TrimEnd, "more than 2 ft"),
+                     (new PlanPoint(21, 0), CorrectionKind.TrimEnd, "would lengthen"),         // a trim never lengthens
+                     (new PlanPoint(-1, 0), CorrectionKind.TrimStart, "would lengthen"),
+                     (new PlanPoint(19, 0.5), CorrectionKind.TrimEnd, "would lengthen, turn"),  // off its line
+                 })
+        {
+            var (same, none, refused) = BuildData.Correct(m, [new WallCorrection(0, to, Why, kind)]);
+            Assert.Empty(none);
+            Assert.Contains(words, refused.Single());
+            Assert.Equal(m.Walls, same.Walls);
+        }
+    }
+
+    [Fact]
+    public void The_request_reads_a_trim_and_refuses_two_changes_in_one_correction()
+    {
+        var r = BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt",
+             "corrections": [{"wall": "W119", "trim_end_to": [132.9111, 84.9889], "why": "overlaps W2"}]}
+            """));
+        Assert.Equal(new WallCorrection(119, new PlanPoint(132.9111, 84.9889), "overlaps W2", CorrectionKind.TrimEnd), Assert.Single(r.Corrections));
+        var x = Assert.Throws<BuildDataException>(() => BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt",
+             "corrections": [{"wall": "W1", "trim_end_to": [1, 2], "extend_end_to": [1, 3], "why": "both"}]}
+            """)));
+        Assert.Contains(x.Problems, p => p.Contains("one change per correction"));
     }
 
     private const string Why = "LS1.0 shows the classroom wall meeting the vestibule wall; the trace stopped 1.4 ft short";
