@@ -133,6 +133,43 @@ A claim isn't taken (its kind stays not read, its rules need review, and the rea
 - **Revit** knows every element in the model, so it can *propose* a claim (no Ramp elements; no stair of a ship's-ladder type; no Room tagged as a loft), but a ramp drawn as a sloped floor, or a ship's ladder as a generic family, is invisible to that scan. A proposal is sent only once the architect ticks it, and the source says both ("no Ramp elements in the model; ticked by the architect"). The add-in's status list (`Answers.cs`) doesn't know the checker's `not_applicable` item status yet: it sends no interior today, so it never receives one, but it must learn the status before it sends `has_none`.
 - **An IFC reader** proposes the same way from element types (`IfcRamp`, `IfcStair` of type `LADDER`) and sends a claim only once it is ticked.
 
+## The route additions (a commercial story's escape routes)
+
+Added within `gordium.interior/1` (2026-11-21) for measuring a story's routes: travel distance, and later common
+path, dead ends, remoteness and areas ([the design](../decisions/2026-11-20_route_measurement.md)). Every key is
+optional, so a house description measures exactly as before; the route code reads them
+(`model_measurement/routes/floor.py`) and **a key left out is "not read", never a default**: what each absence does
+is in the last column. Coordinates are plan points in `units`, like everything else.
+
+| Key | Where | What it says | Left out |
+|---|---|---|---|
+| `levels: [{id, name, elevation}]` | the description | the stories | no story's routes are measured |
+| `level` | each room, door and unknown space | the id of the story it is on | no story's routes are measured (a part that can't be placed) |
+| `use` | a room | one of `corridor`, `lobby`, `day_care`, `accessory_storage`, `kitchen`, `toilet`, `closet`, `workroom`, `other` | the room is end-only (a route may start in it, never cross it) |
+| `lockable`, `pass_through` | a room | true or false: whether it can be locked; whether the architect states it is accessory to the rooms it serves, with a discernible path to an exit (IBC 1014.2 item 1) | the room is end-only |
+| `holes` | a room | the outline of each column or chase inside it (`[]` for none) | the room isn't read: its story's routes need review |
+| `obstructions: [{outline, kind, fixed}]` | a room | the plan footprint of each piece of casework, furniture, equipment or fixture (`kind`: `casework`, `furniture`, `equipment`, `fixture`; `fixed` true or false); every one counts (`[]` for none) | the room isn't read: its story's routes need review |
+| `plan: {centre, along, clear_width, wall_thickness}` | a door | its clear opening's centre in the middle of the wall, a direction along the wall, the clear width, the wall's thickness | the door isn't read: its story's routes need review |
+| `sides: [a, b]` | a door | what it joins: two room ids, or a room id and `outside` | the same |
+| `exit_kind` | a door | which exit it is, in IBC 1016.1's own list: `exterior_at_discharge`, `exit_enclosure`, `exit_passageway`, `horizontal_exit`, `exterior_stair_or_ramp` | not an exit (exits are marked, never guessed) |
+| `exit_id` | a door with `exit_kind` | which exit it enters: every door into one stair enclosure carries the same id | the door isn't read (an `exit_id` with no `exit_kind` isn't read either) |
+| `passages: [{rooms: [a, b], line}]` | the description | two rooms joined with no wall or door between them (a room separation line), the line where they meet (`[]` for none) | no story's routes are measured |
+| `story_outlines: [{level, outer, inner}]` | the description | the outside faces and the inside faces of each story's exterior walls | the diagonal and the story's area aren't measured |
+| `outline` | an unknown space | where it is | (an unknown space on a story makes its routes need review either way) |
+
+Which rooms a route may cross (decision 1a): a **corridor**, or a room marked `pass_through: true`, either one with
+`lockable: false` and `pass_through` given. Every other room is **end-only**: kitchens, accessory storage, toilets,
+closets, workrooms, sleeping rooms, a room that can be locked, and a room whose `use`, `lockable` or `pass_through`
+isn't given. `pass_through: true` on an end-only use, a sleeping room or a room with `lockable: true` is refused:
+the room isn't read and its story's routes need review.
+
+A door's centre sits in the middle of its wall, so each of its rooms is found by geometry: that room's face of the
+opening (half the wall's thickness from the centre) is on the room's outline, within 1/16 in. A door under 24 in
+clear needs review (its centre is inside its jambs' 12-in rings), as does an exit to an exterior stair or ramp
+(travel along it isn't measured yet). A story also needs review while it has an unknown space, a room with no
+`floor`, a room or door that isn't read, a door onto a room that isn't read, two rooms that overlap, or no door
+marked as an exit.
+
 ## What comes back
 
 ```yaml
