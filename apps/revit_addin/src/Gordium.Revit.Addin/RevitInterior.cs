@@ -148,7 +148,7 @@ internal static class RevitInterior
                 candidates.Add(Candidate(e));
             foreach (var e in Models(doc, BuiltInCategory.OST_GenericModel))
                 candidates.Add(Candidate(e));
-            foreach (var m in new FilteredElementCollector(doc).OfClass(typeof(MultistoryStairs)))
+            foreach (var m in new FilteredElementCollector(doc).OfClass(typeof(MultistoryStairs)).ToList())
                 candidates.Add(new StairCandidate(m.UniqueId, m.Category?.BuiltInCategory.ToString() ?? "OST_MultistoryStairs", m.Name,
                                                   "a multistory stair", Id(m.DemolishedPhaseId), Id(m.DesignOption?.Id)));
         }
@@ -186,7 +186,7 @@ internal static class RevitInterior
     }
 
     private static IEnumerable<Element> Models(Document doc, BuiltInCategory c) =>
-        new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().Where(e => !e.ViewSpecific);
+        new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().Where(e => !e.ViewSpecific).ToList();
 
     private static StairCandidate Candidate(Element e) => new(
         e.UniqueId, e.Category?.BuiltInCategory.ToString() ?? "", e.Name,
@@ -462,7 +462,9 @@ internal static class RevitInterior
         try
         {
             var areas = new List<EnclosedArea>();
-            foreach (var level in new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>())
+            // every collector listed before the model changes (an outline places a Room for the moment: a live
+            // iterator then throws, "changes made to the Element table", the Children's Odyssey read, 2026-11-21)
+            foreach (var level in new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList())
             {
                 PlanTopology topology;
                 try
@@ -480,7 +482,9 @@ internal static class RevitInterior
                     return null;
                 }
                 var before = areas.Count;
-                foreach (var c in circuits.Cast<PlanCircuit>().ToList())   // listed first: an outline places a Room for the moment
+                // first every circuit of the level read, the model unchanged
+                var listed = circuits.Cast<PlanCircuit>().ToList();
+                foreach (var c in listed)
                 {
                     // Revit refuses a point inside a degenerate circuit (a sliver between overlapping walls: the
                     // Children's Odyssey model, 2026-11-20): the area is kept with no point, never dropped
@@ -493,9 +497,14 @@ internal static class RevitInterior
                     catch (Autodesk.Revit.Exceptions.InvalidOperationException)
                     {
                     }
-                    areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId,
-                                               c.IsRoomLocated ? null : OutlineOf(doc, phase, c)));
+                    areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId));
                 }
+                // then each one with no Room outlined, one sub-transaction each, rolled back; the circuit taken afresh
+                // from the level's topology each time (by its place in the list, its area checked), never one held
+                // across a change
+                for (var k = 0; k < listed.Count; k++)
+                    if (!areas[before + k].HasRoom)
+                        areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area) };
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
                                 $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
                                 string.Join(", ", areas.Skip(before).Where(a => !a.HasRoom)
@@ -520,13 +529,17 @@ internal static class RevitInterior
     /// the finished faces (the loop of largest area), each segment's start. Null when the document can't be changed for
     /// the moment, Revit refuses, or a segment is curved: the reader then never calls a door's far side on that level
     /// outside (escape routes, section 10).</summary>
-    private static List<Xyz>? OutlineOf(Document doc, Phase phase, PlanCircuit circuit)
+    private static List<Xyz>? OutlineOf(Document doc, Phase phase, Level level, int index, double area)
     {
         if (!doc.IsModifiable)
             return null;
         using var st = new SubTransaction(doc);
         try
         {
+            var fresh = doc.get_PlanTopology(level, phase)?.Circuits?.Cast<PlanCircuit>().ToList();
+            if (fresh is null || index >= fresh.Count || Math.Abs(fresh[index].Area - area) > 1e-9 || fresh[index].IsRoomLocated)
+                return null;                                     // not the same circuit: never outlined on a guess
+            var circuit = fresh[index];
             st.Start();
             var room = doc.Create.NewRoom(phase);
             doc.Create.NewRoom(room, circuit);
@@ -556,7 +569,7 @@ internal static class RevitInterior
     private static List<InteriorLink> Links(Document doc)
     {
         var links = new List<InteriorLink>();
-        foreach (var li in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>())
+        foreach (var li in new FilteredElementCollector(doc).OfClass(typeof(RevitLinkInstance)).Cast<RevitLinkInstance>().ToList())
         {
             var type = doc.GetElement(li.GetTypeId()) as RevitLinkType;
             var linked = li.GetLinkDocument();
@@ -663,7 +676,7 @@ internal static class RevitInterior
         try
         {
             var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
-            var found = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box));
+            var found = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box)).ToList();
             var list = new List<NearbyElement>();
             foreach (var e in found)
             {

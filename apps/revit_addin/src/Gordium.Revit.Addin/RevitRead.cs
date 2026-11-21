@@ -35,7 +35,7 @@ internal static class RevitRead
     {
         var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
         var elements = new List<RevitElement>();
-        foreach (var e in new FilteredElementCollector(doc).WhereElementIsNotElementType())
+        foreach (var e in new FilteredElementCollector(doc).WhereElementIsNotElementType().ToList())
             elements.Add(Element(doc, e, options, version, vertexTolerance, depth));
         return new RevitModel
         {
@@ -185,7 +185,7 @@ internal static class RevitRead
         var list = new List<RevitElement>();
         var siteObjects = MarkedOnElement.Where(c => c != BuiltInCategory.OST_Floors);
         foreach (var c in new[] { BuiltInCategory.OST_Floors, BuiltInCategory.OST_Walls, BuiltInCategory.OST_Roofs }.Concat(siteObjects))
-            foreach (var e in new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType())
+            foreach (var e in new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().ToList())
             {
                 var box = e.get_BoundingBox(null);
                 var (mark, floorMark) = Mark(e);
@@ -292,10 +292,10 @@ internal static class RevitRead
     internal static List<LotLineElement> LotLines(Document doc)
     {
         var lines = new List<LotLineElement>();
-        foreach (var pl in new FilteredElementCollector(doc).OfClass(typeof(PropertyLine)).Cast<PropertyLine>())
+        foreach (var pl in new FilteredElementCollector(doc).OfClass(typeof(PropertyLine)).Cast<PropertyLine>().ToList())
             lines.Add(new LotLineElement(pl.UniqueId, true,
                 pl.GetBoundary().SelectMany(loop => loop).Select(Curve).ToList()));
-        foreach (var ce in new FilteredElementCollector(doc).OfClass(typeof(CurveElement)).Cast<CurveElement>())
+        foreach (var ce in new FilteredElementCollector(doc).OfClass(typeof(CurveElement)).Cast<CurveElement>().ToList())
             if (ce.CurveElementType == CurveElementType.ModelCurve && ce.GeometryCurve is { } c)
                 lines.Add(new LotLineElement(ce.UniqueId, false, [Curve(c)]));
         return lines;
