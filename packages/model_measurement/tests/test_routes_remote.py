@@ -114,11 +114,30 @@ def test_a_cluster_of_two_rings_has_its_walk_out_sampled():
     assert pair.bound == pytest.approx(pair.edge_greatest + 1.5 + pair.margin, abs=1e-9)
 
 
-def test_18_a_niche_under_24_in_makes_the_story_need_review():
+def test_18_a_niche_under_24_in_is_a_pocket_bounded_through_its_cluster():
+    """Test 18 (decided 2026-11-21): the niche's back, shut in by its mouth's two rings, belongs to their cluster:
+    its points count as the cluster's greatest routed clear-edge route plus 1.5 in plus the walk out with no
+    clearance. By hand: the farthest walk out is from a back corner, (10 -+ 0.833, 12), straight to the rings' cusp
+    (10, 10 - sqrt(1 - 0.833^2)) = (10, 9.447): sqrt(0.8333^2 + 2.5528^2) = 2.6854 ft (the circle there is 2 ft from the
+    corner's own ring centre: no nearer routed point). Sampled to edge samples within 1.5 in, plus 3 in: the margin
+    is 2.935 to 3.060 ft. The story's figure is the room's far corners', sqrt(20.25^2 + 5^2) = 20.858, plus at most
+    3 in: the pocket never governs here."""
+    got = farthest(routes(niche()))
+    pocket = next(c for c in got.clusters if c.how == "pocket shut in by rings")
+    assert 2.6854 + 0.25 - TOL <= ft(pocket.margin) <= 2.6854 + 0.125 + 0.25 + TOL
+    assert pocket.bound == pytest.approx(pocket.edge_greatest + 1.5 + pocket.margin, abs=1e-9)
+    assert got.figure >= pocket.bound
+    assert 20.858 - TOL <= ft(got.figure) <= 20.858 + 0.25 + TOL
+
+
+def test_a_pocket_with_no_routed_edge_round_it_needs_review():
+    """A pocket whose clusters have no clear edge with a route is truly shut in: needs review, never a number."""
+    from shapely.geometry import Polygon as P
+    floor = P([(0, 0), (240, 0), (240, 120), (0, 120)])
     with pytest.raises(Stop) as stop:
-        farthest(routes(niche()))
-    assert stop.value.key == "too_narrow"
-    assert "an opening too narrow for NFPA 7.6.1's 12-in clearance from both sides" in stop.value.reason
+        remote._pocket_bound(floor, P([(100, 100), (110, 100), (110, 110), (100, 110)]), (105, 105),
+                             [(100.0, 100.0)], 12.0, {0: []}, [[0]])
+    assert stop.value.key == "cluster_shut"
 
 
 def test_a_cluster_with_no_clear_edge_needs_review(monkeypatch):
