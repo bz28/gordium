@@ -213,9 +213,12 @@ area need review.
    line (not its near edge) is the longer reading (open question 2). The least width (exception 3) is the narrowest
    distance between that dead end's own legs' walls (and obstructions in it). **Several dead ends in one corridor:**
    each is its own pair (its length, its own least width). The branch's `corridor` part holds one pair, so it
-   becomes a part kind of its own there (`dead_end`, its two measures, one row per dead end); until that change on
-   the branch, the corridor gives the cautious pair, the longest length with the least width of any of its dead
-   ends, under each reading of open question 7 alike. A corridor that isn't made of straight legs
+   becomes a part kind of its own there (`dead_end`, its two measures, one row per dead end); until then the
+   corridor gives one part per dead end (built 2026-11-21, review: the cautious pair, the longest length with the
+   least width of any, could fail a corridor whose every dead end complies): the corridor's part holds its longest
+   dead end's own pair, each further one a part "<corridor> (dead end n)" with the corridor's other measures. A
+   closed end is the farthest point of the real floor across the leg's whole width (a recess under 12 in, filled to
+   find the legs, never moves it). A corridor that isn't made of straight legs
    meeting at right angles (at any rotation) needs review in this first version.
 7. **Remoteness and the diagonal: straight lines, exact.** The distance between two exits is the straight line
    between the nearest edges of their clear openings (NFPA's words; the IBC names no point, and the nearest edge is

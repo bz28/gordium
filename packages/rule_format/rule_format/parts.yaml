@@ -261,7 +261,7 @@ corridor:
     corridor_occupant_load:   {unit: count, meaning: "Occupant load served by the corridor (IBC 2009 Table 1018.1; 1018.2 exception 2's required occupant capacity)"}
     corridor_fire_rating_hours: {unit: count, meaning: "Fire-resistance rating of the corridor's walls, in hours (0 where they are not rated), as the architect states the assemblies (IBC 2009 1018.1; NFPA 101 2012 16.3.6, 17.3.6)"}
     corridor_walls_smoke_partitions: {unit: yes_no, meaning: "The corridor's walls form smoke partitions in accordance with NFPA 101 2012 Section 8.4 (3.3.254 SMOKE PARTITION: a continuous membrane designed to form a barrier to limit the transfer of smoke), as the architect states it"}
-    corridor_dead_end_length: {unit: ft, meaning: "Length of the corridor's longest dead end: measured along the corridor's centerline from its closed end to the nearest point from which travel to two exits (or exit access doorways) in different directions is available; 0 where the corridor has no dead end (IBC 2009 1018.4; NFPA 101 2012 16.2.5.2)"}
+    corridor_dead_end_length: {unit: ft, meaning: "Length of a dead end of the corridor (each dead end its own corridor part, its length with its own least width, until a part kind of its own exists): measured along the corridor's centerline from its closed end to the nearest point from which travel to two exits (or exit access doorways) in different directions is available; 0 where the corridor has no dead end (IBC 2009 1018.4; NFPA 101 2012 16.2.5.2)"}
     corridor_dead_end_least_width: {unit: ft, meaning: "Least clear width of that dead-end part of the corridor (IBC 2009 1018.4 exception 3: 'the least width of the dead-end corridor'), in feet"}
 
 means_of_egress_door:

@@ -27,9 +27,10 @@ whose other doors reach an exit, without coming back into these corridors, count
 
 **Widths.** A dead end's least width is the narrowest clear width across its own legs' stretches along it: the
 leg's width less what obstructions, columns and bumps block across it (each by its extent across the leg: the less
-favourable side). A corridor's width is the same over its own legs' stretches in it. Several dead ends in one
-corridor: until the branch's `dead_end` part kind, the corridor gives the cautious pair, its longest dead end with
-the least width of any of its dead ends, under each reading alike. Lengths in inches.
+favourable side). A corridor's width is the same over its own legs' stretches in it. Each dead end is its own pair,
+its length with its own least width: routes/__init__ gives the corridor one part per dead end until the branch's
+`dead_end` part kind exists. A closed end is the farthest point of the real floor across the leg's whole width
+(a recess filled to find the legs never moves it). Lengths in inches.
 """
 
 import heapq
@@ -38,7 +39,7 @@ from dataclasses import dataclass, field, replace
 
 import numpy as np
 import shapely
-from shapely.geometry import LineString, Point, Polygon
+from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.polygon import orient
 from shapely.ops import unary_union
 
@@ -69,13 +70,15 @@ class Corridor:
     stop: str | None = None                # why its dead ends aren't worked out
     centre_lines: list = field(default_factory=list)     # [((x, y), (x, y)), ...] plan, in
 
-    def pair(self, reading) -> tuple:
-        """(the longest dead end, the least width of any of its dead ends) under a reading; no dead end: (0, the
-        corridor's width)."""
+    def longest(self, reading) -> tuple:
+        """The corridor's longest dead end's own pair under a reading (its length, its own least width); no dead end:
+        (0, the corridor's width). Each dead end is its own pair (decision 6): routes/__init__ gives one corridor
+        part per dead end."""
         mine = [d for d in self.dead_ends if d.room == self.room]
         if not mine:
             return 0.0, self.width
-        return max(d.length[reading] for d in mine), min(d.width[reading] for d in mine)
+        top = max(mine, key=lambda d: d.length[reading])
+        return top.length[reading], top.width[reading]
 
 
 # --- turning a floor square -----------------------------------------------------------------------------------------
@@ -577,7 +580,10 @@ def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
         key = owner[leaf]
         floor = floors[key]
         start = g.xy[leaf]
-        room = next((m for m in floor.rooms if rooms[m].outline.buffer(2 * SAME).covers(Point(start))), None)
+        # the room holding the closed end (a point on the leg's axis, which may lie off the floor beside a recess
+        # in the end wall: then the nearest of the floor's rooms, within the 12 in a recess can reach)
+        near = min(floor.rooms, key=lambda m: rooms[m].outline.distance(Point(start)))
+        room = near if rooms[near].outline.distance(Point(start)) <= SHALLOW + 2 * SAME else None
         if got is None or room is None:
             why = (Stop("dead_end_unbounded", x=_show(start)[0], y=_show(start)[1]).reason if got is None else
                    Stop("door_off_legs", name=f"at the closed end ({_show(start)[0]}, {_show(start)[1]})").reason)
@@ -710,17 +716,20 @@ def _group(story, members, g, legs_all) -> _Floor:
 
 
 def _to_real_end(square, leg, u, way) -> float:
-    """Where the centre line, run on from u (a closed end of the filled floor) the way `way`, leaves the real floor:
-    the back of a recess filled in finding the legs, or u itself."""
+    """A closed end's place on the leg's axis: the farthest point of the real (unfilled) floor beyond u, the way
+    `way`, within the leg's whole width (a recess under 12 in filled to find the legs, wherever it is in the end
+    wall, counts), or u itself."""
+    w0, w1 = leg.across
     reach = SHALLOW + 2 * SAME
-    ray = LineString([leg.point(u), leg.point(u + way * reach)])
-    got = ray.intersection(square)
+    lo_, hi_ = sorted((u, u + way * reach))
+    band = box(lo_, w0, hi_, w1) if leg.horizontal else box(w0, lo_, w1, hi_)
+    got = band.intersection(square)
     best = u
     for part in getattr(got, "geoms", [got]):
-        if part.is_empty or part.geom_type != "LineString":
+        if part.is_empty or part.area <= 0:
             continue
-        ends = [leg.along(c) for c in part.coords]
-        if min(abs(e - u) for e in ends) <= SAME:          # the piece that starts at u
+        ends = [leg.along(c) for c in part.exterior.coords]
+        if min(abs(e - u) for e in ends) <= SAME:            # the floor that opens off the end wall
             far = max(ends, key=lambda e: way * e)
             if way * far > way * best:
                 best = far

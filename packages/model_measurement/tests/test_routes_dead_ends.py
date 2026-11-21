@@ -49,9 +49,9 @@ def only(got, rid="c"):
 
 def test_3_a_branch_8_ft_wide_16_ft_deep_is_a_dead_end_of_20_ft_exactly():
     c = only(measure(branch()))
-    length, width = c.pair(WITHOUT)
+    length, width = c.longest(WITHOUT)
     assert ft(length) == 20.0 and ft(width) == 8.0                    # 16 + 4, exactly
-    assert c.pair(WITH) == c.pair(WITHOUT)                            # no door in it: one reading
+    assert c.longest(WITH) == c.longest(WITHOUT)                            # no door in it: one reading
     assert ft(c.width) == 8.0
     assert len(c.dead_ends) == 1                                      # the branch's centre line ends at the crossing
 
@@ -68,17 +68,17 @@ def test_an_exit_door_in_the_corridor_itself_ends_a_dead_end():
     d = description([room("c", rect(0, 0, 60, 8))],
                     [door("a", (-0.25, 4), (0, 1), ("c", "outside"), exit_id="A"),
                      door("b", (58, -0.25), (1, 0), ("c", "outside"), exit_id="B")])
-    assert [ft(v) for v in only(measure(d)).pair(WITHOUT)] == [2.0, 8.0]
+    assert [ft(v) for v in only(measure(d)).longest(WITHOUT)] == [2.0, 8.0]
 
 
 def test_3_a_sixteenth_longer_is_longer():
-    length, _ = only(measure(branch(beyond=16 + 1 / 192))).pair(WITHOUT)
+    length, _ = only(measure(branch(beyond=16 + 1 / 192))).longest(WITHOUT)
     assert ft(length) == pytest.approx(20 + 1 / 192, abs=1e-9)        # 20'-0 1/16"
 
 
 def test_3_ten_ft_wide_the_dead_end_is_25_ft_or_just_under():
-    assert [ft(v) for v in only(measure(branch(10, 20))).pair(WITHOUT)] == [25.0, 10.0]
-    length, width = only(measure(branch(10, 20 - 1 / 192))).pair(WITHOUT)
+    assert [ft(v) for v in only(measure(branch(10, 20))).longest(WITHOUT)] == [25.0, 10.0]
+    length, width = only(measure(branch(10, 20 - 1 / 192))).longest(WITHOUT)
     assert ft(length) == pytest.approx(25 - 1 / 192, abs=1e-9) and ft(width) == 10.0     # 24'-11 15/16"
 
 
@@ -93,13 +93,13 @@ def test_3_turned_30_degrees_the_figures_are_the_same():
     for x in d["doors"]:
         x["plan"]["centre"] = turn(x["plan"]["centre"])
         x["plan"]["along"] = turn(x["plan"]["along"])
-    length, width = only(measure(d)).pair(WITHOUT)
+    length, width = only(measure(d)).longest(WITHOUT)
     assert ft(length) == pytest.approx(20.0, abs=1e-9) and ft(width) == pytest.approx(8.0, abs=1e-9)
 
 
 def test_a_recess_shallower_than_12_in_is_ignored():
     c = only(measure(branch(recess=True)))
-    assert [ft(v) for v in c.pair(WITHOUT)] == [20.0, 8.0] and ft(c.width) == 8.0
+    assert [ft(v) for v in c.longest(WITHOUT)] == [20.0, 8.0] and ft(c.width) == 8.0
 
 
 def test_a_recess_in_a_dead_ends_end_wall_never_moves_its_closed_end():
@@ -109,18 +109,25 @@ def test_a_recess_in_a_dead_ends_end_wall_never_moves_its_closed_end():
     poly = [(0, 0), (60, 0), (60, 8), (28, 8), (28, 24), (25.5, 24), (25.5, 24 + 11 / 12), (22.5, 24 + 11 / 12),
             (22.5, 24), (20, 24), (20, 8), (0, 8)]
     d["rooms"][0]["floor"] = [list(p) for p in poly]
-    length, width = only(measure(d)).pair(WITHOUT)
+    length, width = only(measure(d)).longest(WITHOUT)
     assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == 8.0
+    # off centre (x 20.5 to 23.5, missing the centre line x = 24): the closed end is the farthest real floor across
+    # the leg's whole width, so the same 20.917 ft (review round 2: it was 20.0)
+    off = [(0, 0), (60, 0), (60, 8), (28, 8), (28, 24), (23.5, 24), (23.5, 24 + 11 / 12), (20.5, 24 + 11 / 12),
+           (20.5, 24), (20, 24), (20, 8), (0, 8)]
+    d["rooms"][0]["floor"] = [list(p) for p in off]
+    length, _ = only(measure(d)).longest(WITHOUT)
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9)
     # the same mirrored (the branch running south, its closed end at the leg's other end): the same figure
     d["rooms"][0]["floor"] = [[x, 8 - y] for x, y in reversed(poly)]
-    length, _ = only(measure(d)).pair(WITHOUT)
+    length, _ = only(measure(d)).longest(WITHOUT)
     assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9)
 
 
 def test_an_obstruction_narrows_the_dead_ends_least_width():
     # a cabinet 1 ft deep along the branch's west wall: 10 - 1 = 9 ft clear; 2.5 x 9 = 22.5 < 24.995: no exception
     c = only(measure(branch(10, 20 - 1 / 192, cabinet=1)))
-    length, width = c.pair(WITHOUT)
+    length, width = c.longest(WITHOUT)
     assert ft(width) == pytest.approx(9.0, abs=1e-9) and ft(c.width) == pytest.approx(9.0, abs=1e-9)
 
 
@@ -135,7 +142,7 @@ def test_11_a_dead_end_that_branches_runs_on_past_the_crossing_whose_other_way_i
                                    [door("a", (-0.25, 4), (0, 1), ("c", "outside"), exit_id="A"),
                                     door("b", (60.25, 4), (0, 1), ("c", "outside"), exit_id="B")])))
     assert sorted(ft(d.length[WITHOUT]) for d in got.dead_ends) == [33.0, 33.0]
-    assert [ft(v) for v in got.pair(WITHOUT)] == [33.0, 8.0]
+    assert [ft(v) for v in got.longest(WITHOUT)] == [33.0, 8.0]
 
 
 # --- test 8: a classroom door in a dead end (open question 7) ------------------------------------------------------
@@ -154,16 +161,16 @@ def classroom_in_dead_end():
 
 def test_8_a_door_into_a_room_with_another_way_out_gives_two_readings():
     c = only(measure(classroom_in_dead_end()))
-    assert ft(c.pair(WITHOUT)[0]) == 30.0                             # 26 + 4: the defined value
-    assert ft(c.pair(WITH)[0]) == 5.0                                 # to the door, 5 ft from the end
-    assert ft(c.pair(WITHOUT)[1]) == 8.0 and ft(c.pair(WITH)[1]) == 8.0
+    assert ft(c.longest(WITHOUT)[0]) == 30.0                             # 26 + 4: the defined value
+    assert ft(c.longest(WITH)[0]) == 5.0                                 # to the door, 5 ft from the end
+    assert ft(c.longest(WITHOUT)[1]) == 8.0 and ft(c.longest(WITH)[1]) == 8.0
 
 
 def test_8_a_door_into_a_room_with_no_other_way_out_ends_nothing():
     d = classroom_in_dead_end()
     d["doors"] = [x for x in d["doors"] if x["id"] != "kx"]
     c = only(measure(d))
-    assert ft(c.pair(WITH)[0]) == 30.0 and ft(c.pair(WITHOUT)[0]) == 30.0
+    assert ft(c.longest(WITH)[0]) == 30.0 and ft(c.longest(WITHOUT)[0]) == 30.0
 
 
 def test_8_a_room_whose_other_way_out_cant_be_reached_inside_it_ends_nothing():
@@ -172,7 +179,7 @@ def test_8_a_room_whose_other_way_out_cant_be_reached_inside_it_ends_nothing():
     d["rooms"][1]["obstructions"] = [{"outline": [list(p) for p in rect(38, 24, 39, 34)], "kind": "casework",
                                       "fixed": True}]
     c = only(measure(d))
-    assert ft(c.pair(WITH)[0]) == 30.0
+    assert ft(c.longest(WITH)[0]) == 30.0
 
 
 # --- test 16: a locked corridor ------------------------------------------------------------------------------------
@@ -191,7 +198,7 @@ def locked_side_corridor():
 
 def test_16_a_locked_side_corridor_never_ends_a_dead_end():
     got = measure(locked_side_corridor())
-    assert [ft(v) for v in only(got, "m").pair(WITHOUT)] == [30.0, 8.0]
+    assert [ft(v) for v in only(got, "m").longest(WITHOUT)] == [30.0, 8.0]
     assert got["s"].stop is not None and "can't be crossed" in got["s"].stop
     assert ft(got["s"].width) == 8.0                                  # its width is still its own
 
@@ -213,7 +220,7 @@ def test_17_each_dead_end_has_its_own_length_and_least_width_and_the_corridor_th
     c = only(measure(h_plan()))
     pairs = sorted((ft(d.length[WITHOUT]), ft(d.width[WITHOUT])) for d in c.dead_ends)
     assert pairs == [(22.0, 8.0), (30.0, 14.0)]                       # 30 < 2.5 x 14 = 35; 22 > 20, not < 20
-    assert [ft(v) for v in c.pair(WITHOUT)] == [30.0, 8.0]            # until `dead_end` exists: fails
+    assert [ft(v) for v in c.longest(WITHOUT)] == [30.0, 14.0]           # the longest, with its own width
 
 
 # --- doors between corridors, and what needs review ----------------------------------------------------------------
@@ -229,7 +236,7 @@ def two_corridors_and_a_door():
 
 
 def test_a_door_between_two_corridors_carries_the_way_across():
-    assert [ft(v) for v in only(measure(two_corridors_and_a_door()), "w").pair(WITHOUT)] == [20.0, 8.0]
+    assert [ft(v) for v in only(measure(two_corridors_and_a_door()), "w").longest(WITHOUT)] == [20.0, 8.0]
 
 
 def test_one_exit_along_the_corridors_leaves_a_dead_end_unbounded():
