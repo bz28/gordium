@@ -69,14 +69,16 @@ def test_an_unmarked_slab_makes_lot_coverage_and_every_yard_need_review_naming_i
     assert after["R-1b.height"]["status"] == present.REVIEW and NAME in after["R-1b.height"]["reason"]
 
 
-def test_a_generic_left_out_object_not_touching_leaves_the_yards_alone_so_the_slab_is_what_reviews_them():
-    """The difference the slab makes: a left-out object that doesn't touch the house only reviews lot coverage;
-    an unmarked slab, which may be a freestanding deck (§325-18A), reviews the yards too."""
+def test_a_generic_left_out_object_not_touching_reviews_the_yards_too_but_a_slab_is_named_as_one_to_mark():
+    """A left-out object standing apart that could be a structure reviews the yards as an unmarked slab does (it may
+    be a freestanding deck, §325-18A: test_objects_apart); the slab's rows say it is a slab to mark."""
     doc = with_slab("unmarked")
     del doc["left_out"][0]["slab"]
     plain = statuses(doc)
     assert plain[COVERAGE]["status"] == present.REVIEW
-    assert all(plain[r]["status"] == present.COMPLIES for r in YARDS)
+    assert all(plain[r]["status"] == present.REVIEW and "stands apart" in plain[r]["reason"] for r in YARDS)
+    slab = statuses(with_slab("unmarked"))
+    assert all("isn't marked" in slab[r]["reason"] for r in YARDS)
 
 
 def test_a_patio_is_not_in_lot_coverage_but_every_yard_needs_review_naming_it():

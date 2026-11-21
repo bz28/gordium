@@ -47,10 +47,18 @@ public sealed class CheckProjectCommand : IExternalCommand
             return (Result.Cancelled, null);
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
+        // the makers' clear openings' words, kept outside the try: a check that fails after the drafts were written
+        // still says they were (review round 7)
+        var clear = "";
         try
         {
             var added = RevitMarks.AddMarks(doc, ui.Application, MarkSetup.Plan(RevitMarks.Bindings(doc)));
             log["marks_added"] = added.Select(s => $"{s.Action}: {s.Mark.Name}").ToList();
+            // each window type a maker's formula covers, its three Clear marks empty: filled as a draft the architect
+            // confirms (never the stamp, so this check sends no clear opening for it)
+            // (a failure is shown and the check goes on: the types stay empty, so their clear opening needs review)
+            var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
+            clear = ClearPrefills.Head(filled.Count, failed);
             // the street edge asked for only when it is the one fact left and the view shows a property line to click
             var read = ProjectFacts.Read(RevitMarks.Model(doc));
             var view = ShowsPropertyLine(ui.ActiveUIDocument!);
@@ -68,7 +76,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                 if (ask == StreetAsk.Pick && PickStreet(ui.ActiveUIDocument!, log))
                     run = Run(doc, ui.Application, log);
             }
-            Show(ui, doc, run, added.Count, ask);
+            Show(ui, doc, run, added.Count, ask, clear);
             return (Result.Succeeded, null);
         }
         catch (Exception e)
@@ -77,8 +85,8 @@ public sealed class CheckProjectCommand : IExternalCommand
             log["where"] = e.StackTrace?.Split('\n').Take(8).Select(l => l.Trim()).ToList();
             Trial.Log("check_project", log);
             // the last check's rows taken down: never left showing as if they were this one's
-            ResultsPane.Failed($"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
-            TaskDialog.Show(Title, $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
+            ResultsPane.Failed(clear + $"Nothing was checked: {e.GetType().Name}: {e.Message} (logged to {Trial.LogPath()})");
+            TaskDialog.Show(Title, clear + $"Nothing was checked: {e.GetType().Name}\n{e.Message}\n\nLogged to {Trial.LogPath()}");
             return (Result.Failed, e.Message);
         }
     }
@@ -133,15 +141,17 @@ public sealed class CheckProjectCommand : IExternalCommand
     }
 
     /// <summary>The run in the results panel (what to fill in first when nothing was sent), every row in the text
-    /// file; each element's label read here, on Revit's thread, for the panel.</summary>
-    private static void Show(UIApplication ui, Document doc, Ran run, int marksAdded, StreetAsk ask)
+    /// file; each element's label read here, on Revit's thread, for the panel. <paramref name="clear"/> is
+    /// <see cref="ClearPrefills.Head"/>'s words (the makers' clear openings filled, or why they couldn't be): shown in
+    /// the panel's status line beside the marks added, and first in the text file.</summary>
+    private static void Show(UIApplication ui, Document doc, Ran run, int marksAdded, StreetAsk ask, string clear)
     {
         var labels = new Dictionary<string, string>(StringComparer.Ordinal);
         string files;
         if (run.Model is { } model)
         {
             var file = Path.Combine(Path.GetDirectoryName(Trial.LogPath())!, "check_project_result.txt");
-            File.WriteAllText(file, run.FullText + "\n", new UTF8Encoding(false));
+            File.WriteAllText(file, clear + run.FullText + "\n", new UTF8Encoding(false));
             foreach (var uid in model.Groups.SelectMany(g => g.AllRows).SelectMany(r => r.Elements).Distinct(StringComparer.Ordinal))
                 if (Label(doc, uid) is { } label)
                     labels[uid] = label;
@@ -150,7 +160,8 @@ public sealed class CheckProjectCommand : IExternalCommand
         else
             files = $"Logged to {Trial.LogPath()}";
         ResultsPane.Show(ui, doc, new PanelContent(doc.Title, DateTime.Now, run.Model,
-                                                   StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files));
+                                                   StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
+                                                   ClearWords: clear));
     }
 
     /// <summary>Whether the active view is a plan (a site plan or floor plan) with a property line visible in it:

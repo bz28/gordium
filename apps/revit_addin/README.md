@@ -139,14 +139,15 @@ nothing. So the decisions are built and tested here, on the Mac.
 1. **What is on the lot in the design checked:** the last phase (only what is demolished by then is gone), the main
    model and one option from every option set (the one being edited, else the primary). The panel must name both
    (`ReadResult.PhaseChecked`, `OptionsChecked`).
-2. **Buildings:** each element of a building category, and each Gordium floor block, is one building: its flat faces
+2. **Buildings:** each element of a building category, each Gordium floor block, and each element marked a porch,
+   deck, landing, ramp, or garage, shed or carport with `Gordium: Site object is` (`SiteReader.IsBuildingPart`) is one building: its flat faces
    with straight edges are sent; a curved face or edge, an open solid or a mesh not known to be closed is reported,
    never sent as if it were flat. A building element with nothing to send is never skipped: it is sent as an object
    that couldn't be (`unsent`), so every building measure needs review.
-3. **Left out:** every other solid or mesh, every family instance and CAD import whatever it holds (a nested family of lines only is skipped inside it, as at the top), every coordination model (its contents aren't read: on the lot and touching), Gordium's
+3. **Left out:** every other solid or mesh, every family instance and CAD import not marked a building, whatever it holds (a nested family of lines only is skipped inside it, as at the top), every coordination model (its contents aren't read: on the lot and touching), Gordium's
    neighbourhood objects, a Toposolid. **Which of them are on the lot and which touch the house is the worker's
    decision** (`objects.left_out`, the one copy every host uses), never the reader's.
-4. **Linked models:** one holding any building element (at any depth) or a closed workset is not sent (every
+4. **Linked models:** one holding any building part (at any depth; `SiteReader.IsBuildingPart`) or a closed workset is not sent (every
    building measure needs review); one not loaded, or a closed workset in the model, means not everything was
    looked at (`inventory_complete: false`).
 5. **The lot:** the lot picked, else the one closed property line; never an open one; arcs followed closely. A
@@ -306,6 +307,16 @@ a re-recording of 830fbedc: hosted, nothing cut; the walls are also committed fi
 above); the enclosed areas are read inside a rolled-back transaction (Revit works them out only in a document it can
 change).
 
+**Makers' clear openings, filled as drafts** (`MakerClearOpenings.cs`, data in
+[`data/maker_clear_openings.json`](data/maker_clear_openings.json), embedded in the library; design note, section
+5a). Mark for egress and Check my project fill an empty window type's `Clear width`, `Clear height` and `Clear
+source` from its maker's published formula when its Manufacturer and a call-number Model (Marvin's "UCA3648") match an
+entry, its Gordium: Operation is the entry's or unset, its Width and Height are surely the maker's frame size, and the family's own Vent Area, when it has
+one, agrees; never `Clear confirmed`, so nothing is sent until that type is confirmed. The
+data is not a rule and not measuring code: a hand-curated list of makers' figures, each entry pinned by
+`MakerClearOpeningsTests` to rows of the maker's own table (first entry: Marvin Ultimate Casement, CN 2864 and three
+more rows).
+
 For a clone with no venv of its own (a git worktree), install with the main clone's Python:
 `install_trial_addin.ps1 -Python C:\...\gordium\.venv\Scripts\python.exe`; the add-in then runs Python with this
 clone's packages first (`PYTHONPATH`), so the code run is always this clone's.
@@ -444,6 +455,38 @@ recounted; the worker's delta and never a margin it didn't give; egress figures 
 worked out; sections and quotes; count chips coloured only by their words; every text-file row word for word the
 panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote). The WPF panel itself
 is checked in Revit (it needs Revit to run).
+
+## Build a model from data
+
+A real .rvt built with no click from a drawing script's building data: the C# port of the pyRevit/Dynamo script Ben
+received (the Children's Odyssey childcare centre, 19 Libby St, Portland ME, rebuilt from its life-safety sheet
+LS1.0: 122 walls, 52 doors, 67 windows, 25 rooms, a floor; feet, origin at the SW corner).
+
+1. **The data, out of the script's text** (`tools/extract_build_data.py`): the script is untrusted downloaded code,
+   so it is never run or imported. Its syntax is parsed (`ast.parse`) and the one string literal of
+   `DATA = json.loads(r'''...''')` decoded; the data's shape is checked (each door and window's wall exists, the counts
+   are the script's own `stats`) and written with `extracted_from` (the script's name and sha256). Anything wrong is
+   printed and nothing written.
+   `python -I apps/revit_addin/tools/extract_build_data.py <script.py> --out <data.json>`
+2. **The model** (`ModelBuild.cs`, its Revit-free decisions in `Gordium.Revit.Reading/BuildData.cs`): the request
+   `%LOCALAPPDATA%\Gordium\trial\build_model_request.json`
+   (`{"data": "<data.json>", "template": "<optional .rte>", "save_as": "<model>.rvt"}`, plus the script's toggles
+   `swing_opposite_facing`, `hinge_opposite_hand`, `use_phases`, each true when left out, and optional
+   `corrections`: `[{"wall": "W16", "extend_end_to": [x, y], "why": "..."}]`, each moving a wall's end along its own
+   line before drawing, logged as applied, or refused and not applied past 2 ft or off the wall's line) builds, as the script does:
+   a new project from Revit's `English-Imperial\default.rte`; Level 1 and its plan; a wall type per status, thickness
+   and rating (`LS Existing 12"`, `LS New 4.5" 1 HR`), each wall on its centre line with its Comments and Mark, Existing
+   walls in the first phase; a door type per kind and size (the template's family; where there is none, as for double
+   doors in Revit 2027's install, a family made from Revit's Door.rft with its leaves' swing drawn in plan), each door
+   flipped to swing (`swing_dir`) and hinge (`hinge`) as the data says; windows at their sill; the floor under the
+   footprint; a Room at each tag point with its Name (in capitals, as the script) and Number, tagged. Saved, closed.
+   The log line `build_model` gives the counts drawn beside the data's, **every element not built with Revit's
+   reason** (the script dropped them quietly), each door's flips and each room's area beside the sheet's.
+
+How we know: `test_extract_build_data.py` (a made-up script that raises if run is read whole; every malformed part
+named; Ben's script, when `GORDIUM_MOCK_REVIT_SCRIPT` names it, gives 122/52/67/25) and `BuildDataTests` (the
+extractor's output read whole by the add-in; the script's names, marks, keyword picks and door flips; the floor
+outline; the request). The model itself is checked in Revit.
 
 ## Running it
 

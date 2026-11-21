@@ -116,7 +116,9 @@ def test_a_garage_left_out_is_in_the_description_and_still_needs_review():
     assert items["scope.not_included"]["status"] == "needs_review"
     assert items["scope.not_included"]["objects"] == ["garage"]
     assert items["R-1b.lot_coverage"]["status"] == "needs_review"
-    assert items["R-1b.front_yard"]["status"] == COMPLIES        # not touching: the yards stand
+    # not touching, but standing apart it may be a freestanding deck (§325-18A): the yards wait, stories stand
+    assert items["R-1b.front_yard"]["status"] == "needs_review" and "stands apart" in items["R-1b.front_yard"]["reason"]
+    assert items["R-1b.stories"]["status"] == COMPLIES
 
 
 def test_a_left_out_object_not_known_to_touch_counts_as_touching():

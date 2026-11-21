@@ -118,6 +118,24 @@ public sealed record MarkedElement
 
     /// <summary>The type marks (read from the element's type), by the mark's GUID.</summary>
     public IReadOnlyDictionary<Guid, MarkValue> Type { get; init; } = new Dictionary<Guid, MarkValue>();
+
+    /// <summary>A window's or door's type's Manufacturer (<c>ALL_MODEL_MANUFACTURER</c>), as typed; null when not set.</summary>
+    public string? TypeManufacturer { get; init; }
+
+    /// <summary>Its type's Model (<c>ALL_MODEL_MODEL</c>), as typed; null when not set.</summary>
+    public string? TypeModel { get; init; }
+
+    /// <summary>Its type's own Width and Height, feet, read as <see cref="OpeningRecord.TypeWidth"/> is; null when the
+    /// type has none.</summary>
+    public double? TypeWidth { get; init; }
+
+    /// <inheritdoc cref="TypeWidth"/>
+    public double? TypeHeight { get; init; }
+
+    /// <summary>The makers' shared type parameters the clear-opening data names (<see cref="MakerClearOpenings.SharedParameters"/>:
+    /// Marvin's Window Type and Vent Area), by GUID (<c>Element.get_Parameter(Guid)</c> on the type, never by name);
+    /// an Area as Revit gives it (internal: sq ft).</summary>
+    public IReadOnlyDictionary<Guid, MarkValue> TypeShared { get; init; } = new Dictionary<Guid, MarkValue>();
 }
 
 /// <summary>Whether a Room is a room on the plan (Revit's own words for the others).</summary>
@@ -236,7 +254,8 @@ public sealed record RevitElement
     public string? FloorMark { get; init; }
 
     /// <summary>The architect's marks on the element itself, by the mark's GUID (<c>Element.get_Parameter(Guid)</c>; a
-    /// mark it doesn't have is absent): read for Floors only, for <see cref="Marks.SiteSlab"/>.</summary>
+    /// mark it doesn't have is absent): read for Floors, for <see cref="Marks.SiteSlab"/>, and for the categories
+    /// <see cref="Marks.SiteObject"/> is bound to (<see cref="Marks.SiteObjectCategories"/>).</summary>
     public IReadOnlyDictionary<Guid, MarkValue> InstanceMarks { get; init; } = new Dictionary<Guid, MarkValue>();
 
     /// <summary><c>Element.CreatedPhaseId</c>, or null when the element has no phase.</summary>

@@ -8,7 +8,7 @@ namespace Gordium.Revit.Reading;
 // the marking list built from them. The one rule (principle 4): a mark never set is not stated, never "No"; a
 // suggestion is shown, never read as a mark.
 
-public enum MarkedKind { Room, Window, Door, Level, SiteSlab }
+public enum MarkedKind { Room, Window, Door, Level, SiteSlab, SiteObject }
 
 /// <summary>A room's mark, read: <see cref="Sleeping"/> null when not stated.</summary>
 public sealed record RoomMarks(string Id, string? Name, bool? Sleeping);
@@ -102,6 +102,10 @@ public enum MarkState
 
     /// <summary>Set, but not to anything Gordium reads (an operation word not in the list): not stated.</summary>
     NotUnderstood,
+
+    /// <summary>Set on an element the reader doesn't read it on (a context object, one of Gordium's own markers): shown
+    /// with why, never as given; nothing to mark.</summary>
+    NotReadHere,
 }
 
 /// <summary>One mark on one row. <see cref="Suggestion"/> is only shown ("suggested: Yes"); it is never a mark.</summary>
@@ -151,6 +155,10 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// reader found, as a proposal only).</summary>
     public IReadOnlyList<string> HasNoneLines { get; init; } = [];
 
+    /// <summary>A line per window type a maker's clear-opening data concerns (<see cref="ClearPrefills"/>): filled by
+    /// Gordium as a draft to confirm, not filled and why, or the maker's PDF to take it from.</summary>
+    public IReadOnlyList<string> ClearLines { get; init; } = [];
+
     /// <summary>The list's headline: every room, window and door marked only when there are rooms, nothing is
     /// unset, and nothing stops a mark or a room being read.</summary>
     public string Headline =>
@@ -168,7 +176,10 @@ public static class MarkingList
     /// direction that could hide a bedroom), and a suggestion is never read as the mark.</summary>
     private static readonly Regex SleepingName = new(@"\b(bed\s*room|sleeping)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null)
+    /// <param name="model">The model read.</param>
+    /// <param name="setup">The mark-setup steps planned.</param>
+    /// <param name="clearWriteFailed">Why writing the makers' clear openings just failed, or null (<see cref="ClearPrefills.Plan"/>).</param>
+    public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null, string? clearWriteFailed = null)
     {
         // every floor outside the house (SiteSlabs), on the lot or not: which are on it is the check's own decision
         // (objects.left_out, with the lot the check is given), never guessed here (review round 2), so the list asks for
@@ -179,6 +190,7 @@ public static class MarkingList
         var rows = MarkReading.InDesign(model)
             .Select(e => MarkReading.KindOf(e) == MarkedKind.Level ? LevelRow(e, unmarkedAreas) : Row(e)).OfType<MarkingRow>()
             .Concat(slabs.Select(SlabRow))
+            .Concat(SiteObjectRows(model))
             .OrderByDescending(r => r.NeedsMarking).ThenBy(r => r.Kind)
             .ThenBy(r => r.Label, StringComparer.OrdinalIgnoreCase).ThenBy(r => r.Id, StringComparer.Ordinal)
             .ToList();
@@ -196,8 +208,10 @@ public static class MarkingList
         // what the reader sends, read once (with the model's inside read): the list says the rooms are read only when
         // the reader sends them (review round 2: with no Room drawn at all it said so beside "No rooms are drawn")
         var read = model.Interior is null ? null : InteriorReader.Read(model);
-        var summary = Summary(rows, placement, others.Count, InteriorReader.UnknownAreas(model).Count,
-                              roomsSent: read?.Interior["rooms"] is not null);
+        var unknownAreas = InteriorReader.UnknownAreas(model);
+        var summary = Summary(rows, placement, others.Count, unknownAreas.Count,
+                              roomsSent: read?.Interior["rooms"] is not null,
+                              placeless: unknownAreas.Count(a => a.PointInside is null));
         // the floors outside the house (SiteSlabs): what each is decides lot coverage and the yards
         if (slabs.Count > 0)
         {
@@ -208,6 +222,16 @@ public static class MarkingList
                 : $"{Marks.SiteSlab.Name}: {unset} of {slabs.Count} floors outside the house aren't marked with one of " +
                   "Gordium's words: one on the lot keeps lot coverage and the yards needing review until it says (" +
                   string.Join(", ", SlabKinds.Words) + "); one off the lot changes nothing.");
+        }
+        // the elements marked with Site object is (only those: which elements stand apart from the house, and so keep
+        // the yards waiting, is the check's own decision, its rows naming each)
+        var siteObjects = rows.Where(r => r.Kind == MarkedKind.SiteObject).ToList();
+        if (siteObjects.Count > 0)
+        {
+            var odd = siteObjects.Count(r => r.NeedsMarking);
+            summary.Add($"{Marks.SiteObject.Name}: set on {siteObjects.Count} element{(siteObjects.Count == 1 ? "" : "s")}" +
+                        (odd == 0 ? "." : $", {odd} with a word that isn't one of Gordium's (" + SiteObjectKinds.Listed +
+                                         "): read as not marked, so standing apart from the house it keeps the yards needing review."));
         }
         var inHouse = SiteSlabs.MarkedInHouse(model);
         if (inHouse.Count > 0)
@@ -245,6 +269,7 @@ public static class MarkingList
             HasNoneConflicts = ticks.Where(t => t.Ticked is true && t.Conflicts.Count > 0)
                 .SelectMany(t => t.WhyNot.Take(t.Conflicts.Count)).ToList(),
             HasNoneLines = ticks.Select(t => TickLine(t, read)).ToList(),
+            ClearLines = ClearPrefills.Plan(model, clearWriteFailed).Select(p => p.Line).ToList(),
         };
     }
 
@@ -318,7 +343,7 @@ public static class MarkingList
     }
 
     /// <summary>A level's row: shown when it has an enclosed area with no Room (unset is then to mark: place the Rooms,
-    /// or say the level has none), or when its mark is set either way; never a suggestion (a suggested Yes could hide a
+    /// or fix the walls closing off one Revit can't locate, or say the level has none), or when its mark is set either way; never a suggestion (a suggested Yes could hide a
     /// bedroom).</summary>
     private static MarkingRow? LevelRow(MarkedElement e, List<EnclosedArea> areas)
     {
@@ -339,6 +364,39 @@ public static class MarkingList
                                             $"\"{s.Word}\" isn't one of Gordium's ({string.Join(", ", SlabKinds.Words)})")
             : new MarkCell(m, MarkState.Given, s.Word, null, null);
         return new(s.Floor.UniqueId, MarkedKind.SiteSlab, SlabLabel(s.Floor), [cell]);
+    }
+
+    /// <summary>Each element in the design checked with <see cref="Marks.SiteObject"/> set, as a row: what it is, or a
+    /// word Gordium doesn't read (it then needs marking). Unset ones aren't listed: a project has hundreds (furniture,
+    /// fittings), and the check's own rows name each one standing apart.</summary>
+    private static IEnumerable<MarkingRow> SiteObjectRows(RevitModel model)
+    {
+        var m = Marks.SiteObject;
+        var names = model.Elements.GroupBy(e => e.UniqueId).ToDictionary(g => g.Key, g => g.First().Name);
+        foreach (var e in model.Elements)
+        {
+            if (!m.Categories.Contains(e.BuiltInCategory) || !SiteReader.Looked(e) || !SiteReader.OnLotNow(model, e)
+                || Marks.Text(e.InstanceMarks.TryGetValue(m.Guid, out var v) ? v : null) is not { } word)
+                continue;
+            // review round 1: where the reader doesn't read the mark, the list never shows it as given
+            var cell = e.Mark switch
+            {
+                GordiumMark.Context => new MarkCell(m, MarkState.NotReadHere, word, null,
+                                                    "not read here: a Gordium context object (the neighbourhood's), read as one"),
+                not GordiumMark.None => new MarkCell(m, MarkState.NotReadHere, word, null,
+                                                     "not read here: one of Gordium's own markers (a floor block or a grade marker), read as one"),
+                // review round 2: a shared nested family is read as part of its host (SiteReader.Fold), its own mark
+                // not read, unless it is itself read as a building (then it is read on its own)
+                _ when e.SuperComponent is { } host && host != e.UniqueId && !SiteReader.IsBuildingPart(e) =>
+                    new MarkCell(m, MarkState.NotReadHere, word, null,
+                                 $"not read here: part of {(names.TryGetValue(host, out var n) && n is { Length: > 0 } ? $"\"{n}\" ({host})" : host)}, read with it"),
+                _ when SiteObjectKinds.Of(word) is not null => new MarkCell(m, MarkState.Given, word, null, null),
+                _ when SlabKinds.Of(word) is not null => new MarkCell(m, MarkState.NotUnderstood, word, null,
+                    $"\"{word}\" is a floor's word (Gordium: Site slab is), not read on a {e.Category}: one of {SiteObjectKinds.Listed}"),
+                _ => new MarkCell(m, MarkState.NotUnderstood, word, null, $"\"{word}\" isn't one of Gordium's ({SiteObjectKinds.Listed})"),
+            };
+            yield return new(e.UniqueId, MarkedKind.SiteObject, SlabLabel(e), [cell]);
+        }
     }
 
     private static string SlabLabel(RevitElement floor) =>
@@ -379,7 +437,8 @@ public static class MarkingList
         return new(m, MarkState.NotUnderstood, word, null, words);
     }
 
-    private static List<string> Summary(List<MarkingRow> rows, int placement, int others, int unknown, bool roomsSent)
+    private static List<string> Summary(List<MarkingRow> rows, int placement, int others, int unknown, bool roomsSent,
+                                        int placeless = 0)
     {
         var lines = new List<string>();
         var blockers = placement + others;
@@ -396,7 +455,11 @@ public static class MarkingList
             lines.Add((unknown == 1 ? "1 enclosed area has" : $"{unknown} enclosed areas have") + " no Room (listed above): " +
                       (roomsSent ? "the rooms drawn are read, but each such area may be a bedroom, so every sleeping-room rule needs review"
                                      : "once the rooms are read, each such area may be a bedroom, so it keeps every sleeping-room rule needing review") +
-                      $" until a Room is placed in each, or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
+                      // an area Revit can't locate has no place for a Room: its walls are the fix (as AreaBlockers says)
+                      (placeless == 0 ? " until a Room is placed in each"
+                       : placeless == unknown ? " until the overlapping or doubled walls closing " + (unknown == 1 ? "it" : "them") + " off are fixed (Revit couldn't locate " + (unknown == 1 ? "it" : "any of them") + ")"
+                       : " until a Room is placed in each Revit locates, and the overlapping or doubled walls closing off the " + placeless + " it couldn't are fixed") +
+                      $", or its level is marked {Marks.NoRoomsOnLevel.Name} Yes.");
         void Flag(MarkedKind[] kinds, MarkDefinition m, string plural, string consequence)
         {
             var cells = rows.Where(r => kinds.Contains(r.Kind)).Select(r => r.Cells.First(c => c.Mark == m)).ToList();
@@ -430,7 +493,7 @@ public static class MarkingList
             sb.Append("Can't add ").Append(p).Append('\n');
         foreach (var b in list.RoomBlockers.Concat(list.UnknownAreas).Concat(list.StairBlockers).Concat(list.NotAStair))
             sb.Append(b).Append('\n');
-        foreach (var s in list.Summary.Concat(list.HasNoneLines))
+        foreach (var s in list.Summary.Concat(list.HasNoneLines).Concat(list.ClearLines))
             sb.Append(s).Append('\n');
         var shown = 0;
         foreach (var r in list.Rows)

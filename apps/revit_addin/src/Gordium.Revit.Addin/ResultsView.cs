@@ -16,8 +16,11 @@ namespace Gordium.Revit.Addin;
 /// <param name="MarksAdded">How many of Gordium's marks this run added to the project.</param>
 /// <param name="Labels">Each element's label ("Windows id 341207"), by UniqueId; one not in the model is absent.</param>
 /// <param name="Files">Where every row and the request and the answer are kept.</param>
+/// <param name="ClearWords">What happened to the makers' clear openings this run (<c>ClearPrefills.Head</c>: filled as
+/// drafts, or why they couldn't be written), "" when nothing.</param>
 internal sealed record PanelContent(string Project, DateTime When, ResultModel? Model, IReadOnlyList<string> Missing,
-                                    int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files);
+                                    int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files,
+                                    string ClearWords);
 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup:
@@ -86,7 +89,7 @@ internal sealed class ResultsView : C.UserControl
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
-        Say(_checkAgainState.Status(content.MarksAdded == 0 ? "" : $"Added {content.MarksAdded} Gordium marks to this project."));
+        Say(_checkAgainState.Status(ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)));
         _body.Children.Clear();
         if (content.Model is not { } model)
         {
@@ -155,7 +158,7 @@ internal sealed class ResultsView : C.UserControl
     {
         if (_content is not { Model: { Stale: null } model } content)
             return;
-        Show(content with { Model = ResultRows.Stale(model, content.When), MarksAdded = 0 });
+        Show(content with { Model = ResultRows.Stale(model, content.When), MarksAdded = 0, ClearWords = "" });
     }
 
     /// <summary>A check that failed: every row of the last check taken down, and why.</summary>

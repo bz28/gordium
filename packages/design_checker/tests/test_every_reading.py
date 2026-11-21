@@ -732,10 +732,12 @@ def test_a_solid_left_out_anywhere_on_the_lot_makes_the_accessory_building_rule_
 def test_a_solid_left_out_touching_the_house_makes_the_eaves_rule_need_review():
     """Eaves 2 ft past walls 12 ft from the line comply (Y1); a solid touching the house left out of the measuring
     may be a porch, part of the building (§325-18A), its roof nearer the line: the eaves rule needs review, as the
-    yards do. Not touching, it stands."""
+    yards do. Not touching, it needs review too: standing apart it may be a freestanding deck (§325-18A,
+    test_objects_apart)."""
     house = (12, 30, 42, 70)
     b = floors(*house, 2) + [roof(*house, 20, 28, 2.0, 0)]
     assert status(run(b), "R-1b.yard_projections") == present.COMPLIES
-    assert status(_with_left_out(b, []), "R-1b.yard_projections") == present.COMPLIES
+    apart = rows(_with_left_out(b, []), "R-1b.yard_projections")[0]
+    assert apart["status"] == present.REVIEW and "stands apart" in apart["reason"]
     item = rows(_with_left_out(b, ["other"]), "R-1b.yard_projections")[0]
     assert item["status"] == present.REVIEW and "touching the building" in item["reason"]

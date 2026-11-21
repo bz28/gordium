@@ -223,6 +223,56 @@ public sealed class RealModelTests
     }
 
     [Fact]
+    public void An_enclosed_area_revit_gives_no_point_inside_stays_a_space_whose_use_isnt_known()
+    {
+        // the Children's Odyssey model (2026-11-20): Revit threw "Could not obtain valid UV point" for a sliver between
+        // overlapping walls; such an area is kept, lies in no Room, and keeps every sleeping-room rule needing review
+        var house = Ranch();
+        house.Areas.Add(new EnclosedArea("Level 0", 0.4, false, null, Level0));
+        var read = InteriorReader.Read(house.Model());
+        Assert.Equal(3, read.Interior["rooms"]!.AsArray().Count);
+        var space = Assert.Single(read.Interior["unknown_spaces"]!.AsArray())!;
+        Assert.Equal("enclosed-area:level-0:no-point:0.4sf", space["id"]!.GetValue<string>());
+        Assert.StartsWith("An enclosed area on Level 0 has no Room (0.4 sq ft; Revit couldn't give a point inside it",
+                          space["name"]!.GetValue<string>());
+        // the same id at every read
+        Assert.Equal(space["id"]!.GetValue<string>(), InteriorReader.Read(house.Model()).Interior["unknown_spaces"]![0]!["id"]!.GetValue<string>());
+        // it has no place to put a Room in: the architect is told to fix the walls, never "place a Room in it"
+        var alone = Assert.Single(InteriorReader.AreaBlockers(house.Model()));
+        Assert.Contains("find and fix the overlapping or doubled walls on Level 0", alone);
+        Assert.DoesNotContain("place a Room in it", alone);
+        Assert.Contains("until the overlapping or doubled walls closing it off are fixed (Revit couldn't locate it)",
+                        Assert.Single(MarkingList.Build(house.Model()).Summary, l => l.StartsWith("1 enclosed area has no Room")));
+
+        // with one that has a place: the log line says which have places, and what to do about the one without
+        house.Areas.Add(Unroomed());
+        var both = Assert.Single(InteriorReader.AreaBlockers(house.Model()));
+        Assert.Contains("each listed in the log, with its place where Revit gives one", both);
+        Assert.Contains("place a Room in each of the 1 with a place", both);
+        Assert.Contains("the 1 Revit couldn't locate (no point inside, often a sliver between overlapping walls): " +
+                        "find and fix the overlapping or doubled walls on Level 0", both);
+        Assert.DoesNotContain("each listed with its place in the log", both);
+        var mixed = Assert.Single(MarkingList.Build(house.Model()).Summary, l => l.StartsWith("2 enclosed areas have no Room"));
+        Assert.Contains("until a Room is placed in each Revit locates, and the overlapping or doubled walls closing off the 1 " +
+                        "it couldn't are fixed", mixed);
+        Assert.DoesNotContain("until a Room is placed in each,", mixed);
+
+        // several, none with a place: never told to place a Room in any of them
+        var slivers = Ranch();
+        slivers.Areas.Add(new EnclosedArea("Level 0", 0.4, false, null, Level0));
+        slivers.Areas.Add(new EnclosedArea("Level 0", 0.6, false, null, Level0));
+        var none = Assert.Single(InteriorReader.AreaBlockers(slivers.Model()));
+        Assert.StartsWith("2 enclosed areas on Level 0 have no Room (0.4 to 0.6 sq ft; each listed in the log; Revit couldn't " +
+                          "locate any of them", none);
+        Assert.Contains("find and fix the overlapping or doubled walls on Level 0 that close them off", none);
+        Assert.DoesNotContain("place a Room", none);
+        // the marking list's summary beside it says the same
+        var line = Assert.Single(MarkingList.Build(slivers.Model()).Summary, l => l.StartsWith("2 enclosed areas have no Room"));
+        Assert.Contains("until the overlapping or doubled walls closing them off are fixed (Revit couldn't locate any of them)", line);
+        Assert.DoesNotContain("until a Room is placed in each", line);
+    }
+
+    [Fact]
     public void An_enclosed_area_with_no_room_is_sent_as_a_space_whose_use_isnt_known_and_the_rooms_drawn_are_read()
     {
         var house = Ranch();
