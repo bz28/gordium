@@ -153,7 +153,7 @@ internal sealed class FakeFloor
         Marked.Add(new MarkedElement
         {
             UniqueId = uid, BuiltInCategory = Marks.Doors, Name = "36 x 84", Number = id, Family = "Single door",
-            TypeUniqueId = "type-" + id, PhaseCreated = Phase, Instance = instance, Type = type,
+            TypeUniqueId = "type-" + id, PhaseCreated = Phase, Instance = instance, Type = type, TypeWidth = Frame, TypeHeight = Height,
         });
         (double X, double Y) At(double a, double n) => horizontal ? (a, n) : (n, a);
         var frame = new List<(double X, double Y)> { At(u - Frame / 2, n0), At(u + Frame / 2, n0), At(u + Frame / 2, n1), At(u - Frame / 2, n1) };
