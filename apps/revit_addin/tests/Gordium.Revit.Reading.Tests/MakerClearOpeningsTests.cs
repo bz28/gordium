@@ -320,7 +320,8 @@ public sealed class MakerClearOpeningsTests
         const string why = "Revit's transaction ended RolledBack";
         Assert.Equal("Gordium couldn't write the makers' clear openings (Revit's transaction ended RolledBack): fill them by " +
                      "hand from the maker's tables; until then their clear opening needs review.\n\n", ClearPrefills.Head(0, why));
-        Assert.Equal("", ClearPrefills.Head(0));
+        Assert.Equal("", ClearPrefills.Head(0, null));
+        Assert.StartsWith("Gordium filled the maker's clear opening of 2 window types", ClearPrefills.Head(2, null));
         var p = Assert.Single(ClearPrefills.Plan(Model(Window("a")), writeFailed: why));
         Assert.Equal(PrefillState.NotFilled, p.State);
         Assert.Null(p.ClearWidth);
@@ -360,6 +361,30 @@ public sealed class MakerClearOpeningsTests
         var todo = ClearPrefills.Plan(Model(Window("a")));
         Assert.Empty(ClearPrefills.Written(todo, committed: false));
         Assert.Equal(todo, ClearPrefills.Written(todo, committed: true));
+        // review round 3: the outcome from Revit's TransactionStatus, its reason shown by the dialog and the list
+        var (none, why) = ClearPrefills.Outcome(todo, "RolledBack");
+        Assert.Empty(none);
+        Assert.Equal("Revit's transaction ended RolledBack", why);
+        var (all, ok) = ClearPrefills.Outcome(todo, "Committed");
+        Assert.Equal(todo, all);
+        Assert.Null(ok);
+    }
+
+    [Fact]
+    public void The_add_in_shows_a_failed_write_in_both_dialogs_and_the_marking_list()
+    {
+        // review round 3: the Revit layer's call sites, read as text (the Revit layer isn't built on the test machine's
+        // reference set), each passing the failure on
+        string Src(string file) => File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", file));
+        var marks = Src("RevitMarks.cs");
+        Assert.Contains("ClearPrefills.Outcome(todo, t.Commit().ToString())", marks);
+        Assert.Contains("var (filled, failed) = RevitMarks.TryPrefill(doc, model, log);", marks);
+        Assert.Contains("MarkingList.Build(model, plan, clearWriteFailed: failed)", marks);
+        Assert.Contains("ClearPrefills.Head(filled.Count, failed)", marks);
+        var check = Src("CheckProject.cs");
+        Assert.Contains("var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);", check);
+        Assert.Contains("Show(run, added.Count, filled.Count, failed);", check);
+        Assert.Contains("ClearPrefills.Head(clearFilled, clearFailed)", check);
     }
 
     private static Dictionary<Guid, MarkValue> Op(string word) => new() { [Marks.Operation.Guid] = new(true, Text: word) };

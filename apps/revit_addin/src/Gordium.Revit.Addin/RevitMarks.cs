@@ -127,9 +127,8 @@ internal static class RevitMarks
         }
         // Revit rolls a transaction back (a failure it can't resolve, an element another user owns) by returning a
         // status, not by throwing: only a commit Revit reports done counts as filled
-        var status = t.Commit();
-        var committed = status == TransactionStatus.Committed;
-        return (ClearPrefills.Written(todo, committed).ToList(), committed ? null : $"Revit's transaction ended {status}");
+        var (filled, failed) = ClearPrefills.Outcome(todo, t.Commit().ToString());
+        return (filled.ToList(), failed);
     }
 
     /// <summary>Revit's own three states of a room that isn't on the plan: no <c>Location</c> (unplaced); placed

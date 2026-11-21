@@ -245,8 +245,14 @@ public static class ClearPrefills
     /// committed, none when it rolled back (Revit returns the status, it doesn't throw).</summary>
     public static IReadOnlyList<ClearPrefill> Written(IReadOnlyList<ClearPrefill> todo, bool committed) => committed ? todo : [];
 
+    /// <summary>The write's outcome from Revit's transaction status (<c>TransactionStatus</c>'s name): the types filled
+    /// when it is <c>Committed</c>, else none and the reason, which the dialog (<see cref="Head"/>) and the marking list
+    /// (<see cref="Plan"/>) show.</summary>
+    public static (IReadOnlyList<ClearPrefill> Filled, string? Failed) Outcome(IReadOnlyList<ClearPrefill> todo, string status) =>
+        status == "Committed" ? (Written(todo, true), null) : (Written(todo, false), $"Revit's transaction ended {status}");
+
     /// <summary>The dialog's first words: the types just filled, or why the write failed (empty when there was none).</summary>
-    public static string Head(int filled, string? failed = null) =>
+    public static string Head(int filled, string? failed) =>
         failed is not null
         ? $"Gordium couldn't write the makers' clear openings ({failed}): fill them by hand from the maker's tables; until " +
           "then their clear opening needs review.\n\n"

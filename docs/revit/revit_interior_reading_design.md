@@ -476,13 +476,18 @@ it works, in **Mark for egress** and **Check my project**:
   from", so a later read knows the values are Gordium's (and says so if the type was resized or its operation changed
   since). "Draft" is said in the marking list, never in the source.
 - **The marking list says it**: "Gordium will fill ..." for a type still empty, and "Gordium filled the clear opening
-  from Marvin UCA UCANF-25 ...: confirm it (check the hinge/hardware: ...)" once its marks hold the values. A write
-  Revit rolls back (its transaction's status, not an exception) counts as nothing filled, and a type that can't be
-  written is logged (`clear_fill_failed`) while the list or the check goes on. A maker's "E" mark in its table is
-  never read, and never turns into a pass.
+  from Marvin UCA UCANF-25 ...: confirm it (check the hinge/hardware: ...)" once its marks hold the values. **A write
+  that fails** (a type Revit won't set, or a transaction Revit rolls back: its status, not an exception) counts as
+  nothing filled (`ClearPrefills.Outcome`), and the reason is shown, not only logged (`clear_fill_failed`): both
+  dialogs open with "Gordium couldn't write the makers' clear openings (<reason>): fill them by hand from the maker's
+  tables; until then their clear opening needs review", and each type left empty says the same in the marking list,
+  never "will fill"; the list and the check go on. A maker's "E" mark in its table is never read, and never turns
+  into a pass.
 - **No match**: nothing changes (each type is asked, as before); when its Manufacturer is a maker Gordium knows
   (Marvin, Andersen, Pella) the list names that maker's clear-opening PDF, saying whether the type's marks are empty
-  or hold values typed on it.
+  or hold values typed on it. A type whose `Clear source` is Gordium's ("Gordium filled from") but that no longer
+  matches an entry (whatever its Manufacturer) says "its clear opening was filled by Gordium from <maker> earlier, but
+  the type no longer matches: re-check it", never that its values were typed.
 - **Not yet shown in Revit end to end** (2026-11-20): Marvin's UCA3648 family wouldn't place in Autodesk's Pacific
   Continental sample (every wall: "There exist geometry collision"), so the fill has been checked on records made from
   the family's own PartAtom and type catalog only (section 9 lists what is still to check).
