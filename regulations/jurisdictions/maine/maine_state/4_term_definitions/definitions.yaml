@@ -1,0 +1,412 @@
+# How Maine's 2009 IBC and NFPA 101 (2012) define the words its commercial egress rules depend on: whole
+# definitions, quoted exactly (file, page, lines), no paraphrase (drafting_rules.md). The IBC: a word printed in
+# italics has Chapter 2's meaning (its preface; 201.1). NFPA 101 marks no defined word: by 3.1 its Chapter 3
+# definitions apply to the terms wherever the Code uses them. Keys are ibc_ or nfpa_ and the term: a rule of
+# one book reads its own book's definition. IBC quotes are read from an OCR copy only: not verified. Quotes
+# are checked against the books' text by python -m rule_format where the code cache exists. Drafted in a
+# Claude Code session (claude-opus-5-5, 2026-11-20); drafts (approval deferred, 2026-10-19).
+
+ibc_story:
+  term: STORY
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 47
+    lines:
+    - 53
+    - 60
+    quote: STORY. That portion of a building included between the upper surface of a floor and the upper surface of the floor
+      or roof next above (also see "Basement," "Mezzanine" and Section 502.1). It is measured as the vertical distance from
+      top to top of two successive tiers of beams or finished floor surfaces and, for the topmost story, from the top of the
+      floor finish to the top of the ceiling joists or, where there is not a ceiling, to the top of the roof rafters.
+  notes: Measured by the parts.yaml kind story.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_area_building:
+  term: AREA, BUILDING
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 106
+    lines:
+    - 21
+    - 26
+    quote: AREA, BUILDING. The area included within surrounding exterior walls (or exterior walls and fire walls) exclusive
+      of vent shafts and courts. Areas of the building not provided with surrounding walls shall be included in the building
+      area if such areas are included within the horizontal projection of the roof or floor above.
+  notes: '502.1''s building area, taken for one story, is 508.2.1''s ''building area of the story'' (parts.yaml story_building_area).
+    EXTERIOR WALL points to 1402.1, not brought in: an exterior wall keeps its ordinary meaning here (201.4) until it is.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_means_of_egress:
+  term: MEANS OF EGRESS
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 245
+    lines:
+    - 27
+    - 31
+    quote: 'MEANS OF EGRESS. A continuous and unobstructed path of vertical and horizontal egress travel from any occupied
+      por tion of a building or structure to a public way A means of egress consists of three separate and distinct parts:
+      the exit access, the exit and the exit discharge.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_exit:
+  term: EXIT
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 244
+    lines:
+    - 57
+    - 64
+    quote: EXIT. That portion of a means ofegress system which is sepa rated from other interior spaces of a building or structure
+      by fire-resistance-rated construction and opening protectives as required to provide a protected path of egress travel
+      between the exit access and the exit discharge. Exits include exterior exit doors at the level ofexit discharge, vertical
+      exit enclosures, exit passageways, exterior exit stairways, exterior exit ramps and horizontal exits.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_exit_access:
+  term: EXIT ACCESS
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 244
+    lines:
+    - 65
+    - 67
+    quote: EXIT ACCESS. That portion of a means ofegress system that leads from any occupied portion of a building or structure
+      to an exit.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_exit_access_doorway:
+  term: EXIT ACCESS DOORWAY
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 244
+    lines:
+    - 68
+    - 71
+    quote: EXIT ACCESS DOORWAY. A door or access point along the path of egress travel from an occupied room, area or space
+      where the path of egress enters an intervening room, corridor, unenclosed exit access stair or unenclosed exit access
+      ramp.
+  notes: Counted by story_exit_count and space_exit_count.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_exit_discharge:
+  term: EXIT DISCHARGE
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 244
+    lines:
+    - 72
+    - 73
+    quote: EXIT DISCHARGE. That portion of a means of egress sys tem between the termination of an exit and a public way
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_exit_discharge_level_of:
+  term: EXIT DISCHARGE, LEVEL OF
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 244
+    lines:
+    - 74
+    - 75
+    quote: EXIT DISCHARGE, LEVEL OF. The story at the point at which an exit terminates and an exit discharge begins.
+  notes: 308.5.2's exception and 1016.1 use it.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_common_path_of_egress_travel:
+  term: COMMON PATH OF EGRESS TRAVEL
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 244
+    lines:
+    - 39
+    - 44
+    quote: COMMON PATH OF EGRESS TRAVEL. That portion of exit access which the occupants are required to traverse before two
+      separate and distinct paths of egress travel to two exits are available. Paths that merge are common paths of travel.
+      Com mon paths of egress travel shall be included within the permit ted travel distance.
+  notes: Measured by common_path_of_travel and space_common_path (parts.yaml). The same idea as NFPA's COMMON PATH OF TRAVEL
+    (nfpa_common_path_of_travel); IBC adds that merging paths are common paths.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_corridor:
+  term: CORRIDOR
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 244
+    lines:
+    - 45
+    - 46
+    quote: CORRIDOR. An enclosed exit access component that defines and provides a path of egress travel to an exit.
+  notes: The parts.yaml kind corridor.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_occupant_load:
+  term: OCCUPANT LOAD
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 245
+    lines:
+    - 40
+    - 41
+    quote: OCCUPANT LOAD. The number of persons for which the means of egress of a building or portion thereof is designed.
+  notes: story_occupant_load, space_occupant_load, corridor_occupant_load, moe_door_occupant_load.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_automatic_sprinkler_system:
+  term: AUTOMATIC SPRINKLER SYSTEM
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 209
+    lines:
+    - 17
+    - 26
+    quote: '[F] AUTOMATIC SPRINKLER SYSTEM. An automatic sprinkler system, for fire protection purposes, is an integrated
+      system of underground and overhead piping designed in accor dance with fire protection engineering standards. The system
+      includes a suitable water supply. The portion of the system above the ground is a network of specially sized or hydrauli
+      cally designed piping installed in a structure or area, generally overhead, and to which automatic sprinklers are connected
+      in a systematic pattern. The system is usually activated by heat from a fire and discharges water over the fire area.'
+  notes: 'The proposed measures sprinklered_903_3_1_1 and sprinklered_903_3_1_2 (903.3.1.1, 903.3.1.2: not brought in).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_fire_partition:
+  term: FIRE PARTITION
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 120
+    lines:
+    - 56
+    - 58
+    quote: FIRE PARTITION. A vertical assembly of materials designed to restrict the spread of fire in which openings are
+      pro tected.
+  notes: '1018.1: rated corridor walls are fire partitions (Section 709, not brought in).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_fire_resistance_rating:
+  term: FIRE-RESISTANCE RATING
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 120
+    lines:
+    - 66
+    - 70
+    quote: FIRE-RESISTANCE RATING. The period of time a build ing element, component or assembly maintains the ability to
+      confine a fire, continues to perform a given structural function, or both, as determined by the tests, or the methods
+      based on tests, prescribed in Section 703.
+  notes: corridor_fire_rating_hours.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+ibc_fire_barrier:
+  term: FIRE BARRIER
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 120
+    lines:
+    - 41
+    - 43
+    quote: FIRE BARRIER. A fire-resistance-rated wall assembly of materials designed to restrict the spread of fire in which
+      conti nuity is maintained.
+  notes: 508.2.5.1.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_existing:
+  term: Existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 32
+    lines:
+    - 64
+    - 65
+    quote: 3.3.79* Existing. That which is already in existence on the date this edition of the Code goes into effect.
+  notes: 'Decides Chapter 17 (existing) or 16 (new): the proposed measure day_care_existing. ''The date this edition of the
+    Code goes into effect'' is the date Maine''s rule adopting it took effect: an open question (README).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_day_care_home:
+  term: Day-Care Home
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 34
+    lines:
+    - 23
+    - 26
+    quote: 3.3.140.1* Day-Care Home. A building or portion of a build- ing in which more than 3 but not more than 12 clients
+      receive care, maintenance, and supervision, by other than their rela- tive(s) or legal guardians(s), for less than 24
+      hours per day.
+  notes: 'Not more than 12 clients: Chapters 16 and 17 are for day-care occupancies of more than 12 (Table 6.1.14.4.1(b) ''Day-Care
+    >12 Clients'').'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_means_of_egress:
+  term: Means of Egress
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 35
+    lines:
+    - 27
+    - 30
+    quote: '3.3.170* Means of Egress. A continuous and unobstructed way of travel from any point in a building or structure
+      to a public way consisting of three separate and distinct parts: (1) the exit access, (2) the exit, and (3) the exit
+      discharge.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_exit:
+  term: Exit
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 32
+    lines:
+    - 70
+    - 73
+    quote: 3.3.81* Exit. That portion of a means of egress that is sepa- rated from all other spaces of a building or structure
+      by con- struction or equipment as required to provide a protected way of travel to the exit discharge.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_exit_access:
+  term: Exit Access
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 32
+    lines:
+    - 81
+    - 82
+    quote: 3.3.82 Exit Access. That portion of a means of egress that leads to an exit.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_exit_discharge:
+  term: Exit Discharge
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 32
+    lines:
+    - 83
+    - 84
+    quote: 3.3.83 Exit Discharge. That portion of a means of egress be- tween the termination of an exit and a public way.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_common_path_of_travel:
+  term: Common Path of Travel
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 31
+    lines:
+    - 49
+    - 51
+    quote: 3.3.47* Common Path of Travel. The portion of exit access that must be traversed before two separate and distinct
+      paths of travel to two exits are available.
+  notes: Measured by common_path_of_travel (parts.yaml).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_occupant_load:
+  term: Occupant Load
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 34
+    lines:
+    - 93
+    - 94
+    quote: 3.3.162.2 Occupant Load. The total number of persons that might occupy a building or portion thereof at any one
+      time.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_gross_floor_area:
+  term: Gross Floor Area
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 29
+    lines:
+    - 83
+    - 87
+    quote: 3.3.21.2.1* Gross Floor Area. The floor area within the in- side perimeter of the outside walls of the building
+      under consideration with no deductions for hallways, stairs, clos- ets, thickness of interior walls, columns, elevator
+      and build- ing services shafts, or other features.
+  notes: 'Table 7.3.1.2: factors are gross unless marked net; day care''s is net (story_day_care_net_area).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_smoke_partition:
+  term: Smoke Partition
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 37
+    lines:
+    - 102
+    - 103
+    quote: 3.3.254* Smoke Partition. A continuous membrane that is de- signed to form a barrier to limit the transfer of smoke.
+  notes: '16.3.6(2), 17.3.6(2): corridor_walls_smoke_partitions (Section 8.4, not brought in, sets how they are built).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_fire_resistance_rating:
+  term: Fire Resistance Rating
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 37
+    lines:
+    - 18
+    - 21
+    quote: 3.3.221.2 Fire Resistance Rating. The time, in minutes or hours, that materials or assemblies have withstood a
+      fire exposure as determined by the tests, or methods based on tests, prescribed by this Code.
+  notes: corridor_fire_rating_hours; Table 6.1.14.4.1(b).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_separated_occupancy:
+  term: Separated Occupancy
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 36
+    lines:
+    - 26
+    - 28
+    quote: 3.3.188.14 Separated Occupancy. A multiple occupancy where the occupancies are separated by fire resistance– rated
+      assemblies.
+  notes: 6.1.14.4.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_multiple_occupancy:
+  term: Multiple Occupancy
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 36
+    lines:
+    - 16
+    - 17
+    quote: 3.3.188.11 Multiple Occupancy. A building or structure in which two or more classes of occupancy exist.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_panic_hardware:
+  term: Panic Hardware
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 34
+    lines:
+    - 11
+    - 14
+    quote: 3.3.133.2 Panic Hardware. A door-latching assembly in- corporating an actuating member or bar that releases the
+      latch bolt upon the application of a force in the direction of egress travel.
+  notes: '16.2.2.2.2: moe_door_panic_hardware.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_fire_exit_hardware:
+  term: Fire Exit Hardware
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 34
+    lines:
+    - 6
+    - 10
+    quote: 3.3.133.1 Fire Exit Hardware. A door-latching assembly in- corporating an actuating member or bar that releases
+      the latch bolt upon the application of a force in the direction of egress travel and that additionally provides fire
+      protec- tion where used as part of a fire door assembly.
+  notes: '16.2.2.2.2: moe_door_panic_hardware.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+nfpa_story:
+  term: Story
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 38
+    lines:
+    - 38
+    - 40
+    quote: 3.3.268 Story. The portion of a building located between the upper surface of a floor and the upper surface of
+      the floor or roof next above.
+  notes: The parts.yaml kind story; the IBC's STORY (ibc_story) says how it is measured.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
