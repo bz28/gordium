@@ -216,6 +216,51 @@ public sealed class BuildDataTests
         Assert.Equal(5, done.Count);
         Assert.Empty(notDone);
         Assert.Empty(BuildData.WallOverlaps(trimmed.Walls));
+        // and the two fills of the east entry's jamb pockets: added, overlapping no wall along its length
+        var (filled, fillsDone, fillsNot) = BuildData.Correct(trimmed, LibbyFills);
+        Assert.Equal(["filled W122", "filled W123"], fillsDone.Select(a => a[..11]));
+        Assert.Empty(fillsNot);
+        Assert.Empty(BuildData.WallOverlaps(filled.Walls));
+    }
+
+    /// <summary>The two fills of eval_marks.yaml's model_corrections: LS1.0 draws the east entry's angled jambs solid.</summary>
+    internal static readonly WallCorrection[] LibbyFills =
+    [
+        new(0, new PlanPoint(192.2294, 48.2972), "LS1.0: the north jamb of the east entry is solid wall", CorrectionKind.Fill, new PlanPoint(189.6688, 47.2102), 12.151),
+        new(0, new PlanPoint(192.2283, 37.3825), "LS1.0: the south jamb of the east entry is solid wall", CorrectionKind.Fill, new PlanPoint(189.6682, 38.4693), 12.185),
+    ];
+
+    [Fact]
+    public void A_fill_adds_a_short_wall_only_between_walls_of_the_data()
+    {
+        var m = BuildData.Parse(Extracted());                    // wall W0 from (0, 0) to (20, 0)
+        WallCorrection Fill(double x0, double y0, double x1, double y1, double t) =>
+            new(0, new PlanPoint(x1, y1), Why, CorrectionKind.Fill, new PlanPoint(x0, y0), t);
+        var (filled, applied, refused) = BuildData.Correct(m, [Fill(5, 1, 7, 1, 12)]);
+        Assert.Empty(refused);
+        var added = filled.Walls[^1];
+        Assert.Equal((m.Walls.Max(w => w.Id) + 1, new PlanPoint(5, 1), new PlanPoint(7, 1), 12.0), (added.Id, added.Start, added.End, added.ThicknessIn));
+        Assert.StartsWith($"filled W{added.Id}: a 2 ft wall 12 in thick from (5, 1) to (7, 1)", applied.Single());
+        foreach (var (c, words) in new[]
+                 {
+                     (Fill(5, 1, 8.5, 1, 12), "at most 3 ft long"),        // a run of wall, not a fill
+                     (Fill(5, 1, 7, 1, 30), "2 ft thick"),
+                     (Fill(5, 6, 7, 6, 12), "from every wall of the data"),  // standing on its own
+                 })
+        {
+            var (same, none, no) = BuildData.Correct(m, [c]);
+            Assert.Empty(none);
+            Assert.Contains(words, no.Single());
+            Assert.Equal(m.Walls, same.Walls);
+        }
+        var r = BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt",
+             "corrections": [{"fill": {"start": [5, 1], "end": [7, 1], "thickness_in": 12}, "why": "solid on the sheet"}]}
+            """));
+        Assert.Equal(CorrectionKind.Fill, Assert.Single(r.Corrections).Kind);
+        Assert.Throws<BuildDataException>(() => BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt", "corrections": [{"fill": {"start": [5, 1], "end": [7, 1]}, "why": "no thickness"}]}
+            """)));
     }
 
     /// <summary>The five trims of eval_marks.yaml's model_corrections.</summary>

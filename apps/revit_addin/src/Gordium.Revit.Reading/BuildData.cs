@@ -42,7 +42,11 @@ public sealed record BuildModel(string Project, string LevelName, double LevelEl
 /// <param name="Kind">Which end moves, and which way: <see cref="CorrectionKind.ExtendEnd"/> (<c>extend_end_to</c>),
 /// or a trim (<c>trim_end_to</c>, <c>trim_start_to</c>) that only shortens the wall back along its own line: two of the
 /// trace's walls overlapping (a sliver Revit finds as an enclosed area) are joined end to end, never by a Room.</param>
-public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why, CorrectionKind Kind = CorrectionKind.ExtendEnd);
+/// <param name="FillStart">For <see cref="CorrectionKind.Fill"/>: the new wall's start (its end is
+/// <paramref name="ExtendEndTo"/>, <paramref name="Wall"/> unused).</param>
+/// <param name="FillThicknessIn">For <see cref="CorrectionKind.Fill"/>: the new wall's thickness, inches.</param>
+public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why, CorrectionKind Kind = CorrectionKind.ExtendEnd,
+                                    PlanPoint? FillStart = null, double? FillThicknessIn = null);
 
 /// <summary>What a correction does to its wall.</summary>
 public enum CorrectionKind
@@ -55,6 +59,12 @@ public enum CorrectionKind
 
     /// <summary>The start moved toward the end (<c>trim_start_to</c>): shorter, never longer.</summary>
     TrimStart,
+
+    /// <summary>A short wall added where the sheet shows solid wall the trace left hollow (<c>fill</c>: a pocket
+    /// between three of its walls): at most <see cref="BuildData.MaxFillLength"/> long and
+    /// <see cref="BuildData.MaxCorrection"/> thick, every corner within <see cref="BuildData.MaxCorrection"/> of a wall
+    /// of the data, so it fills between walls and never stands on its own.</summary>
+    Fill,
 }
 
 /// <summary>Data the add-in can't build all of: every problem found, each in words (never a part dropped).</summary>
@@ -111,6 +121,24 @@ public sealed record BuildRequest(string Data, string? Template, string SaveAs, 
                     if (c is not JsonObject co)
                     {
                         problems.Add($"correction {k}: not an object");
+                        continue;
+                    }
+                    if (co.ContainsKey("fill"))
+                    {
+                        // {"fill": {"start": [x, y], "end": [x, y], "thickness_in": t}, "why": "..."}: a new short wall
+                        PlanPoint? Pt(JsonNode? n) => n is JsonArray { Count: 2 } pa && pa.All(x => x is JsonValue xv && xv.TryGetValue<double>(out var d) && double.IsFinite(d))
+                            ? new PlanPoint(pa[0]!.GetValue<double>(), pa[1]!.GetValue<double>()) : null;
+                        var f = co["fill"] as JsonObject;
+                        var (fs, fe) = (Pt(f?["start"]), Pt(f?["end"]));
+                        var ft = f?["thickness_in"] is JsonValue tv && tv.TryGetValue<double>(out var td) && double.IsFinite(td) && td > 0 ? td : (double?)null;
+                        var fwhy = co["why"] is JsonValue fyv && fyv.TryGetValue<string>(out var fys) && fys.Trim() != "" ? fys : null;
+                        if (fs is null || fe is null || ft is null)
+                            problems.Add($"correction {k}: fill needs start and end points [x, y] and thickness_in more than 0");
+                        if (fwhy is null)
+                            problems.Add($"correction {k}: no why (every correction to the data says why)");
+                        problems.AddRange(co.Select(p => p.Key).Where(x => x is not ("fill" or "why")).Select(x => $"correction {k}: has {x}, which a fill doesn't take"));
+                        if (fs is { } s0 && fe is { } e0 && ft is { } t0 && fwhy is not null && co.Count == 2)
+                            corrections.Add(new WallCorrection(0, e0, fwhy, CorrectionKind.Fill, s0, t0));
                         continue;
                     }
                     var wall = co["wall"] is JsonValue wv && wv.TryGetValue<string>(out var ws) ? ws : null;
@@ -482,6 +510,10 @@ public static class BuildData
     /// <summary>The farthest a correction may move a wall's end, in feet: a trace's slip, never a new wall.</summary>
     public const double MaxCorrection = 2.0;
 
+    /// <summary>The longest a fill may be, in feet: a pocket's side (the Children's Odyssey's east-entry jamb pockets,
+    /// 2.78 ft), never a new run of wall.</summary>
+    public const double MaxFillLength = 3.0;
+
     /// <summary>The data with each correction applied, in order, and each in words: applied ("corrected W16: end
     /// (192.424, 48.167) → (193.867, 48.167): why") or refused and not applied (no such wall; the end moved more than
     /// <see cref="MaxCorrection"/> ft; the wall's direction changed, off its own line or turned back). Nothing else in
@@ -495,6 +527,29 @@ public static class BuildData
         static string Xy(PlanPoint p) => string.Create(CultureInfo.InvariantCulture, $"({p.X:0.###}, {p.Y:0.###})");
         foreach (var c in corrections)
         {
+            if (c.Kind == CorrectionKind.Fill)
+            {
+                var (s, e, t) = (c.FillStart!.Value, c.ExtendEndTo, c.FillThicknessIn!.Value);
+                var length = Distance(s, e);
+                var fill = new BuildWall(walls.Max(x => x.Id) + 1, s, e, t, "Existing", false, null,
+                                         model.Walls.Count == 0 ? 10 : model.Walls.Max(x => x.HeightFt), false);
+                // its four corners, each within the limit of a wall of the data: it fills between walls, never stands alone
+                double ux = (e.X - s.X) / Math.Max(length, 1e-12), uy = (e.Y - s.Y) / Math.Max(length, 1e-12), half = t / 24;
+                PlanPoint[] corners = [new(s.X - uy * half, s.Y + ux * half), new(s.X + uy * half, s.Y - ux * half),
+                                       new(e.X - uy * half, e.Y + ux * half), new(e.X + uy * half, e.Y - ux * half)];
+                var far = corners.Select(p => model.Walls.Count == 0 ? double.PositiveInfinity : model.Walls.Min(w => DistanceToWall(p, w))).Max();
+                var said = I($"a {length:0.###} ft wall {t:0.##} in thick from {Xy(s)} to {Xy(e)}: {c.Why}");
+                if (length < 1e-6 || length > MaxFillLength || t / 12 > MaxCorrection)
+                    refused.Add(I($"refused fill: {said} (a fill is at most {MaxFillLength:0} ft long and {MaxCorrection:0} ft thick)"));
+                else if (far > MaxCorrection)
+                    refused.Add(I($"refused fill: {said} (a corner is {far:0.###} ft from every wall of the data, more than {MaxCorrection:0} ft: not a fill between walls)"));
+                else
+                {
+                    walls.Add(fill);
+                    applied.Add($"filled W{fill.Id}: {said}");
+                }
+                continue;
+            }
             var i = walls.FindIndex(w => w.Id == c.Wall);
             var words = $"W{c.Wall}: end to {Xy(c.ExtendEndTo)}: {c.Why}";
             if (i < 0)
