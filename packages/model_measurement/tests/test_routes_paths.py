@@ -341,6 +341,23 @@ def test_a_path_leaving_its_starts_ring_and_coming_back_is_refused():
     paths._check_lifted(paths.Path(0.0, back.pieces[:1]), (0.0, 0.0), 12.0, (6.0, 0.0), (30.0, 0.0))
 
 
+def test_an_arc_is_kept_only_where_it_stays_in_the_floor_and_out_of_other_rings():
+    """Round a ring at (120, 120) in (radius 12): another ring at (138, 120) covers its arc within acos(18 / 24) =
+    41.4 degrees of east; a wall 100 to 140 by 126 to 128 crosses it between 30 and 41.8 degrees (and between 138.2
+    and 150)."""
+    import numpy as np
+    from shapely.geometry import Polygon
+    from model_measurement.routes import paths
+    floor = Polygon([(0, 0), (240, 0), (240, 240), (0, 240)], [[(100, 126), (140, 126), (140, 128), (100, 128)]])
+    active = np.array([(120.0, 120.0), (138.0, 120.0)])
+    leg = paths._Leg(floor, active, [], 12.0)
+    deg = math.radians
+    assert leg._arc_clear(0, active, (120.0, 120.0), deg(160), deg(100))        # the west side: clear
+    assert leg._arc_clear(0, active, (120.0, 120.0), deg(45), deg(90))          # over the wall's top: clear
+    assert not leg._arc_clear(0, active, (120.0, 120.0), deg(-45), deg(40))     # into the other ring
+    assert not leg._arc_clear(0, active, (120.0, 120.0), deg(140), deg(5))      # through the wall's west end
+
+
 def test_too_many_tied_routes_is_said(monkeypatch):
     from model_measurement.routes import paths
     monkeypatch.setattr(paths, "MOST_TIES", 1)
