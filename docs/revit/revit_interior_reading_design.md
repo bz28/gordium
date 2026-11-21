@@ -745,21 +745,21 @@ leaves the id out with why ("mark every door into the enclosure"). A horizontal 
 beyond its wall isn't one Room): such a door isn't read. The rule is cautious: a stair Room with an unmarked door into
 it (a closet) gives no id, never a guess.
 
-**`story_outlines` (decision 8's two readings), from what is drawn, not the slab's edge** (`StoryOutlines.cs`). A
-floor slab may stop at the walls' core, their inside face or run past them, and a wall type's Function is a setting
-the firm chooses, so neither says where the exterior walls' faces are. Instead: **outer** is the outside boundary of
-everything on the story put together, every room's floor, every outlined enclosed area with no Room, and every wall's
-footprint as the wall is, before anything is cut into it (its centre line, from its Location Line setting, widened to
-its full thickness; an end within 1/2 in of another wall carried on half its thickness, as Revit's join cleanup
-carries it to the corner, each gap joined and each end left apart within 2 ft said in the notes; the first read from
-the walls' cut faces didn't close on the Children's Odyssey, 2026-11-21);
-the **exterior walls** are the walls with a piece of that boundary on their footprint; **inner** is the outside boundary
-of the rooms, the outlined areas and every other wall: the exterior walls' inside faces. Walls drawn a hair apart (1/16
-in) count as one solid. Left out, with the reason in the notes, when the pieces don't close into one loop, when the
-loop holds a hole bigger than a sliver (a courtyard, or a space no Room or outline accounts for: counting it as floor
-would understate the share of the story a use takes), when a room's floor or an enclosed area's outline isn't read,
-or when a wall's geometry can't be read or has a curved face (read as its points' hull it would add floor that isn't
-there). Then the diagonal and the story's areas need review (the format's rule).
+**`story_outlines` (decision 8's two readings), from Revit's own gross building area** (`StoryOutlines.cs`; the
+Revit layer's part, `GrossAreasOf`, is thin). **outer:** in a transaction always rolled back, an area plan of the
+model's Gross Building area scheme is made for the level (`ViewPlan.CreateAreaPlan`), an Area placed at each of the
+level's Rooms' points, and the one Revit closes is read (`GetBoundarySegments`, each side with the element bounding it):
+the exterior walls' outer faces, as Revit and architects measure gross area. Two earlier readings didn't serve on the
+Children's Odyssey (2026-11-21): the walls' cut faces didn't join into loops, and the walls' centre lines widened
+logged every interior T-junction as a gap; a slab's edge says nothing reliable (it may stop at the core, the inside
+face or past the walls). **inner:** that outline with each side moved in by the thickness of the wall Revit says bounds
+it (`Wall.Width`), the corners where the moved sides meet. Exact for straight walls of one thickness along a side, since
+a wall's inside face is its outside face moved by its thickness; read from the rooms instead it would lose what no
+room covers inside the walls (a shaft, a chase). Left out, with the reason in the notes, when the model has no Gross
+Building scheme, Revit closes no Area or several, a side is curved, the area has a hole bigger than a sliver (a
+courtyard), a side is bounded by something other than a wall (its thickness unknown), or two walls of different
+thickness run along one straight side; then the diagonal and the story's areas need review. The trial's log says how
+many area boundary lines Revit put in the plan and which areas closed, so a level left out can be looked at.
 
 **Why the footprints, not the boxes.** A box is bigger than the piece (a desk turned 30 degrees fills twice its area
 in an axis-aligned box), and a bigger obstruction is not always the cautious side: routes around it may part sooner,
