@@ -46,10 +46,27 @@ public sealed record InteriorRecords
     /// what is in one isn't read, and a stair could be in it.</summary>
     public int CoordinationModels { get; init; }
 
+    /// <summary>Every level (<c>OfClass(typeof(Level))</c>), for the stories of the escape routes (section 10). Null when
+    /// the Revit layer didn't read them: then no <c>levels</c> are sent, and no story's routes are measured.</summary>
+    public IReadOnlyList<LevelRecord>? Levels { get; init; }
+
+    /// <summary>Every room separation line (<c>OfCategory(OST_RoomSeparationLines)</c>), by <c>UniqueId</c>: a room
+    /// boundary segment drawn by one is where two rooms meet with no wall (a passage, section 10). Null when the Revit
+    /// layer didn't read them: then no <c>passages</c> are sent, and no story's routes are measured.</summary>
+    public IReadOnlyList<string>? SeparationLines { get; init; }
+
     /// <summary>What the Revit layer looked at and what Revit said (each level's enclosed areas, an error), for the
     /// trial's log only: never read by a decision.</summary>
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
 }
+
+/// <summary>A level (<c>Level</c>): its <c>UniqueId</c>, <c>Name</c> and <c>ProjectElevation</c> (internal).</summary>
+public sealed record LevelRecord(string UniqueId, string Name, double Elevation);
+
+/// <summary>A planar side face of a door's host wall (<c>HostObjectUtils.GetSideFaces</c>, exterior and interior), as a
+/// plane: a point on it (<c>PlanarFace.Origin</c>) and its normal (<c>FaceNormal</c>), internal. The room boundary at
+/// the finished faces runs along these, so the door's place in the middle of its wall is read from them.</summary>
+public sealed record WallFace(Xyz Point, Xyz Normal);
 
 /// <summary>An enclosed area on a level (a <c>PlanCircuit</c>).</summary>
 /// <param name="Level">The level's name (<c>Level.Name</c>), for the words.</param>
@@ -338,6 +355,14 @@ public sealed record OpeningRecord
 
     /// <summary>The instance's level's elevation (<c>Level.ProjectElevation</c> of its <c>LevelId</c>), internal, or null.</summary>
     public double? LevelElevation { get; init; }
+
+    /// <summary>The instance's level's <c>UniqueId</c> (<c>LevelId</c>), or null: the story a door is on (section 10).</summary>
+    public string? LevelId { get; init; }
+
+    /// <summary>The host wall's side faces (<c>HostObjectUtils.GetSideFaces</c>, both sides), or null when the host
+    /// isn't a wall or any side face isn't planar or couldn't be read (a curved wall, a curtain wall): a door's centre
+    /// and its wall's thickness are read from them (section 10).</summary>
+    public IReadOnlyList<WallFace>? WallSides { get; init; }
 
     /// <summary>Its Sill Height (<c>INSTANCE_SILL_HEIGHT_PARAM</c>), or null when it has none.</summary>
     public double? SillHeight { get; init; }

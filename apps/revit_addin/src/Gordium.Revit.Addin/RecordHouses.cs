@@ -236,6 +236,7 @@ public sealed class ReadInteriorCommand : IExternalCommand
             log["has_none"] = read.Ticks.Select(t => t.Sent ? $"{t.Kind.Kind}: sent" : $"{t.Kind.Kind}: " + string.Join("; ", t.WhyNot)).ToList();
             log["notes"] = read.Notes.Select(n => $"{n.Part} {n.Field}: {n.Why}").ToList();
             log["evidence"] = read.Evidence.ToJsonString();
+            log["routes"] = RouteReader.Summary(read);       // the escape routes' fields, counted (section 10)
             log["revit_layer"] = model.Interior!.Diagnostics;
             // every element that could be a stair, by id (the dialog and the marking list count them by type)
             log["stair_candidates"] = model.Interior.StairCandidates.Select(c =>
@@ -257,7 +258,8 @@ public sealed class ReadInteriorCommand : IExternalCommand
             var none = read.Ticks.Where(t => t.Sent).Select(t => t.Kind.Words).ToList() is { Count: > 0 } sent
                 ? "Read as none (ticked): " + string.Join(", ", sent) : "Nothing read as none";
             var notes = string.Join("\n", read.Notes.Take(20).Select(n => $"- {n.Field}: {n.Why}"));
-            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n{none}\n\n{read.Notes.Count} values left out" +
+            return ($"{rooms}\n{openings}\n{stairs}\n{doors}\n{guards}\n{none}\nEscape routes: " + string.Join("; ", RouteReader.Summary(read)) +
+                    $"\n\n{read.Notes.Count} values left out" +
                     (notes.Length > 0 ? ":\n" + notes : ""), read);
         }
         catch (Exception e)

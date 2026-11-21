@@ -67,8 +67,61 @@ internal static class RevitInterior
             Railings = railings,
             Ramps = RampsOf(doc, diagnostics),
             CoordinationModels = coordination,
+            Levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
+                .Select(l => new LevelRecord(l.UniqueId, l.Name, l.ProjectElevation)).ToList(),
+            SeparationLines = SeparationLinesOf(doc, diagnostics),
             Diagnostics = diagnostics,
         };
+    }
+
+    /// <summary>Every room separation line (escape routes, section 10: where two rooms meet with no wall), by
+    /// <c>UniqueId</c>; null when they couldn't be listed (then no passage is sent).</summary>
+    private static List<string>? SeparationLinesOf(Document doc, List<string> diagnostics)
+    {
+        try
+        {
+            var lines = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_RoomSeparationLines)
+                .WhereElementIsNotElementType().Select(e => e.UniqueId).ToList();
+            diagnostics.Add($"room separation lines: {lines.Count}");
+            return lines;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"the room separation lines couldn't be read ({x.GetType().Name}: {x.Message})");
+            return null;
+        }
+    }
+
+    /// <summary>The door's host wall's side faces (<c>HostObjectUtils.GetSideFaces</c>, exterior then interior), each a
+    /// plane; null when the host isn't a wall, a side has no face, a face isn't planar (a curved wall) or Revit refuses
+    /// (a curtain wall): then the door's place in its wall isn't read.</summary>
+    private static List<WallFace>? SidesOf(Element? host)
+    {
+        if (host is not Wall wall)
+            return null;
+        try
+        {
+            var sides = new List<WallFace>();
+            foreach (var side in new[] { ShellLayerType.Exterior, ShellLayerType.Interior })
+            {
+                var refs = HostObjectUtils.GetSideFaces(wall, side);
+                if (refs is null || refs.Count == 0)
+                    return null;
+                foreach (var r in refs)
+                {
+                    if (wall.GetGeometryObjectFromReference(r) is not PlanarFace f)
+                        return null;
+                    sides.Add(new WallFace(P(f.Origin), P(f.FaceNormal)));
+                }
+            }
+            return sides;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return null;
+        }
     }
 
     // ---- stairs (step 4) ---------------------------------------------------------------------------------------
@@ -519,8 +572,8 @@ internal static class RevitInterior
         if (boundary is not { Count: > 0 } || elevation is null || offset is null || loops is null)
             return record;
         var floor = elevation.Value + offset.Value;
-        var outer = loops[0];
-        var xs = outer.SelectMany(s => new[] { s.GetCurve().GetEndPoint(0), s.GetCurve().GetEndPoint(1) }).ToList();
+        // every loop's extent (Revit doesn't promise the outer loop first: a room round a column has two)
+        var xs = loops.SelectMany(l => l).SelectMany(s => new[] { s.GetCurve().GetEndPoint(0), s.GetCurve().GetEndPoint(1) }).ToList();
         double x0 = xs.Min(p => p.X), y0 = xs.Min(p => p.Y), x1 = xs.Max(p => p.X), y1 = xs.Max(p => p.Y);
         return record with
         {
@@ -684,6 +737,8 @@ internal static class RevitInterior
             Host = fi.Host?.UniqueId,
             HostIsWall = fi.Host is Wall,
             LevelElevation = level?.ProjectElevation,
+            LevelId = level?.UniqueId,
+            WallSides = SidesOf(fi.Host),
             SillHeight = fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM) is { HasValue: true } s ? s.AsDouble() : null,
             Location = fi.Location is LocationPoint lp ? P(lp.Point) : null,
             Along = P(fi.HandOrientation),
