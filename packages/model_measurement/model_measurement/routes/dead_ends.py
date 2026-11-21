@@ -338,6 +338,7 @@ def _proper_in(leg, a, b) -> float:
 class _Graph:
     def __init__(self):
         self.xy, self.edges, self.adj = [], [], []     # edges: (u, v, length, leg index or None, (a, b) along)
+        self.recess = {}                               # closed end node -> the narrowest recess it runs into (in)
 
     def node(self, p) -> int:
         for k, q in enumerate(self.xy):
@@ -596,7 +597,8 @@ def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
         for reading in (WITHOUT, WITH):
             length, walked = got if reading == WITHOUT else (found[WITH].get(leaf) or (0.0, []))
             de.length[reading] = length
-            de.width[reading] = _least_width(legs, g, walked, floors, floor_of, key, floor.frame.to(start))
+            de.width[reading] = min(_least_width(legs, g, walked, floors, floor_of, key, floor.frame.to(start)),
+                                    g.recess.get(leaf, math.inf))
             de.line[reading] = _walked_line(g, leaf, walked)
         out[room].dead_ends.append(de)
     return out
@@ -662,6 +664,8 @@ def _group(story, members, g, legs_all) -> _Floor:
     ids = {m.id for m in members}
     lines = [seg for a, b, seg in story.passages if a in ids and b in ids]
     whole = unary_union([m.outline for m in members] + [seg.buffer(SAME, cap_style="flat") for seg in lines])
+    # slivers thinner than 1/16 in (a hairline gap in a wall) are no floor: they neither lengthen nor narrow anything
+    whole = whole.buffer(-SAME / 2, join_style=2).buffer(SAME / 2, join_style=2)
     if whole.geom_type != "Polygon":
         raise Stop("corridor_not_legs", why="its rooms joined by passages don't make one floor")
     edges = list(zip(whole.exterior.coords[:-1], whole.exterior.coords[1:]))
@@ -690,14 +694,18 @@ def _group(story, members, g, legs_all) -> _Floor:
                 hi = cuts[-1]
         # an end kept at its rectangle's end is a closed end: run it on to the real floor's end (a recess under
         # 12 in was filled to find the legs, never to move a closed end)
+        recess = {}
         if lo == leg.span[0]:
-            lo = _to_real_end(square, leg, lo, -1)
+            lo, recess[lo] = _to_real_end(square, leg, lo, -1)
         if hi == leg.span[1]:
-            hi = _to_real_end(square, leg, hi, 1)
+            hi, recess[hi] = _to_real_end(square, leg, hi, 1)
         leg.kept = (lo, hi)
         legs_all.append(leg)
         marks = sorted({lo, hi, *[c for c in cuts if lo <= c <= hi]})
         nodes = [g.node(frame.back(leg.point(u))) for u in marks]
+        for u, n in zip(marks, nodes):                 # a closed end in a recess: the recess is part of the dead end
+            if recess.get(u) is not None:
+                g.recess[n] = min(g.recess.get(n, math.inf), recess[u])
         mine += nodes
         for (u, v), (m0, m1) in zip(zip(nodes, nodes[1:]), zip(marks, marks[1:])):
             g.edge(u, v, base + i, (m0, m1))
@@ -715,25 +723,32 @@ def _group(story, members, g, legs_all) -> _Floor:
     return _Floor(sorted(ids), frame, list(range(base, base + len(legs))), blocks)
 
 
-def _to_real_end(square, leg, u, way) -> float:
+def _to_real_end(square, leg, u, way) -> tuple:
     """A closed end's place on the leg's axis: the farthest point of the real (unfilled) floor beyond u, the way
     `way`, within the leg's whole width (a recess under 12 in filled to find the legs, wherever it is in the end
-    wall, counts), or u itself."""
+    wall, counts), and the width across of the narrowest recess it runs into (None if none): the recess is part of
+    the dead-end corridor, so it counts in its least width too (one reading). A sliver thinner than 1/16 in, either
+    way, neither lengthens it nor narrows it."""
     w0, w1 = leg.across
     reach = SHALLOW + 2 * SAME
     lo_, hi_ = sorted((u, u + way * reach))
     band = box(lo_, w0, hi_, w1) if leg.horizontal else box(w0, lo_, w1, hi_)
     got = band.intersection(square)
-    best = u
+    best, narrow = u, None
     for part in getattr(got, "geoms", [got]):
         if part.is_empty or part.area <= 0:
             continue
         ends = [leg.along(c) for c in part.exterior.coords]
-        if min(abs(e - u) for e in ends) <= SAME:            # the floor that opens off the end wall
-            far = max(ends, key=lambda e: way * e)
-            if way * far > way * best:
-                best = far
-    return best
+        if min(abs(e - u) for e in ends) > SAME:              # floor not opening off the end wall
+            continue
+        x0, y0, x1, y1 = part.bounds
+        across = (y1 - y0) if leg.horizontal else (x1 - x0)
+        far = max(ends, key=lambda e: way * e)
+        if abs(far - u) <= SAME or across <= SAME:           # a sliver: no effect
+            continue
+        best = far if way * far > way * best else best
+        narrow = across if narrow is None else min(narrow, across)
+    return best, narrow
 
 
 def _attach(g, legs, floor_of, key, frame, door):

@@ -110,7 +110,7 @@ def test_a_recess_in_a_dead_ends_end_wall_never_moves_its_closed_end():
             (22.5, 24), (20, 24), (20, 8), (0, 8)]
     d["rooms"][0]["floor"] = [list(p) for p in poly]
     length, width = only(measure(d)).longest(WITHOUT)
-    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == 8.0
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == 3.0     # the alcove's (round 3)
     # off centre (x 20.5 to 23.5, missing the centre line x = 24): the closed end is the farthest real floor across
     # the leg's whole width, so the same 20.917 ft (review round 2: it was 20.0)
     off = [(0, 0), (60, 0), (60, 8), (28, 8), (28, 24), (23.5, 24), (23.5, 24 + 11 / 12), (20.5, 24 + 11 / 12),
@@ -267,3 +267,27 @@ def test_a_door_that_cant_be_put_on_the_centre_lines_needs_review(monkeypatch):
     monkeypatch.setattr(dead_ends, "_attach", lambda *a, **k: None)
     got = measure(branch())["c"]
     assert got.stop is not None and "isn't on any of the corridor's legs" in got.stop
+
+
+def slot(width_ft):
+    """Test 3's branch (8 ft wide, end wall 16 ft past the corridor) with a slot `width_ft` wide and 11 in deep in
+    its end wall at x 23.75 onward."""
+    d = branch()
+    w = width_ft
+    d["rooms"][0]["floor"] = [list(p) for p in [(0, 0), (60, 0), (60, 8), (28, 8), (28, 24), (23.75 + w, 24),
+                                                (23.75 + w, 24 + 11 / 12), (23.75, 24 + 11 / 12), (23.75, 24),
+                                                (20, 24), (20, 8), (0, 8)]]
+    return d
+
+
+def test_a_recess_that_lengthens_a_dead_end_counts_in_its_least_width():
+    # a slot 0.5 ft wide: the dead end runs to its back, 20.917 ft, and its least width is the slot's, 0.5 ft
+    # (exception 3: 20.917 < 2.5 x 0.5 = 1.25 is not met). Review round 3: it was the branch's 8 ft.
+    length, width = only(measure(slot(0.5))).longest(WITHOUT)
+    assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == pytest.approx(0.5, abs=1e-9)
+
+
+def test_a_hairline_sliver_in_the_end_wall_neither_lengthens_nor_narrows_a_dead_end():
+    # 1/32 in wide (under the 1/16 in tolerance): 20 ft by 8 ft, as with no slot
+    length, width = only(measure(slot(1 / 384))).longest(WITHOUT)
+    assert ft(length) == pytest.approx(20.0, abs=1e-9) and ft(width) == 8.0
