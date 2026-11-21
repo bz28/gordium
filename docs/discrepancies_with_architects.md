@@ -83,3 +83,22 @@ With those numbers the R-1b results agree with the spreadsheet on 7 of its 11 ro
 The architects used the right documents and copied the R-1b numbers correctly. The mistakes are in **applying** them: comparing the wrong numbers, assuming a rectangular lot, and not counting what the law adds (porches and decks in coverage, how height is measured). Their example house would actually **fail** coverage, and the model would fail rear yard and coverage. These are exactly the mistakes Gordium should catch, so they make good first test cases.
 
 Open questions for them are in `questions_for_architects.md`.
+
+---
+
+# Children's Odyssey, 19 Libby St, Portland ME: for review
+
+**What this is:** where Gordium's figures, the architect's life-safety sheet (LS1.0) and our own eval files disagree on the
+childcare centre. Nothing in `test_data/answer_keys/` is changed to settle any of these: each is logged here with its
+proof, for Ben (and, where it's the law, the architects) to review. Gordium's figures are from
+`test_data/answer_keys/portland_me_19_libby_st/eval_comparison.yaml` (made by `tests/make_eval_comparison.py`).
+
+| # | What | Sheet (LS1.0) | Gordium / the model | Why, and the proof | Severity |
+|---|---|---|---|---|---|
+| P1 | **CLOSET (40): which room its door opens into** | its door swings into KITCHEN (10), in the kitchen's corner by the corridor wall | the same: door D06 joins CLOSET (40) and KITCHEN (10); the closet spans x 22.2 to 26.0 ft, inside the kitchen's 1.0 to 26.0 ft, and INFANT/TODDLER CLASSROOM (5) starts at 26.6 ft | **Our own `eval_marks.yaml` (PR #144) says "a closet off INFANT/TODDLER CLASSROOM 5 (door D06)"**: its note disagrees with the sheet and the model. Found 2026-11-21 reading the model's description (door D06's `sides`) and a crop of the sheet. The marks themselves (Closet, lockable) are unaffected; only the note's wording. Proposed: correct the note. | ⚪ |
+| P2 | **Dead end** | 21'-6" (limit 2.5 × 10 ft = 25 ft) | not measured (the corridor jogs and widens; the first version measures only straight legs at right angles) | Measured by hand on the model along the corridor's centre line: about 32 ft. NFPA 101 A.7.5.1.5 measures a dead end along the centre line to "point C, located at the centerline of the corridor". If that reading holds, the dead end **exceeds** 25 ft. | 🔴 |
+| P3 | **Travel distance** | 130'-8" (limit 200 ft) | 118.76 ft over the rooms with a route; 5 rooms have none, so needs review | The sheet's path is drawn orthogonally (along the grid); Gordium's is the shortest real walk, 12 in clear of corners, which is shorter. Both are well under 200 ft. | 🟡 |
+| P4 | **Common path** | 48'-6" (limit 75 ft) | 42.6 ft | Same reason as P3. | 🟡 |
+| P5 | **Five rooms with no legal route** | not discussed | STORAGE (13) (only into STORAGE (14)); ELEC. (21) and CLOSET (40) (only into the kitchen); SPRINKLERED ABANDONED SPACE (32) and (33) | IBC 2009 1014.2 item 4 and NFPA 7.5.2.1: no egress through kitchens, storerooms or closets. The sheet marks one abandoned space's door "permanently fixed shut". Proposed: a "not occupied" mark (NFPA 7.6.1 measures from points "subject to occupancy"). | 🟡 |
+| P6 | **Building diagonal** | 210'-2½" | 213.0 ft | Unexplained so far (2.9 ft, 1.4%). Remoteness passes under either (exits 183.7 ft apart; one third of either diagonal is about 71 ft). | ⚪ |
+| P7 | **Storage area** | 1,428 sf | 1,414 sf | Within 1%; complies under all four readings of where an area is measured. | ⚪ |
