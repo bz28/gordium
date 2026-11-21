@@ -396,8 +396,9 @@ internal sealed class Read(RevitModel model)
     // ---- linked models ------------------------------------------------------------------------------------------
 
     /// <summary>A linked Revit model (proposed, design note, section 1). Not loaded: it can't be looked inside, so the
-    /// reader hasn't looked at everything (<c>inventory_complete: false</c>). Loaded and holding any building-category
-    /// element at any depth of links inside links, or a closed workset of its own: an object that couldn't be sent
+    /// reader hasn't looked at everything (<c>inventory_complete: false</c>). Loaded and holding any building part (a
+    /// building-category element, a floor block, or one marked a porch, deck, landing, ramp, garage, shed or carport
+    /// with "Gordium: Site object is": <see cref="SiteReader.IsBuildingPart"/>) at any depth of links inside links, or a closed workset of its own: an object that couldn't be sent
     /// (wherever it is placed), so every building measure needs review (<see cref="UnsendLinks"/>). A loaded link,
     /// either way, is a left-out candidate like a family (listed when objects.left_out says it is on the lot), what
     /// it holds sent as its definition. Inside a link every element counts, whatever its phase or design option: the
@@ -425,7 +426,7 @@ internal sealed class Read(RevitModel model)
         Candidates.Add(Make(e, g, inside.MissingPart ? null : box, key, false, "Link", true));
     }
 
-    /// <summary>A linked model holding a building-category element at any depth, or a closed workset of its own: an
+    /// <summary>A linked model holding a building part (<see cref="SiteReader.IsBuildingPart"/>) at any depth, or a closed workset of its own: an
     /// object that couldn't be sent, so every building measure needs review, wherever it is placed (design note,
     /// section 1). Ids are unique across the description and the link itself is also left out under its
     /// <c>UniqueId</c> (as Rhino lists every block off the Building layer: scene 19), so the unsent entry is named
