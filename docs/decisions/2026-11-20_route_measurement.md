@@ -211,7 +211,11 @@ area need review.
 
 ## How we will know it is right
 
-**Synthetic tests, answers worked by hand** (feet; walls 6 in thick, so a door's centre sits 0.25 ft outside the room):
+**Synthetic tests, answers worked by hand** (feet; walls 6 in thick, so a door's centre sits 0.25 ft outside the room;
+doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6) was
+worked two ways for this note: by the tangent-and-arc formulas, and by a throwaway brute-force shortest path over
+fine polygons of the rings (neither kept, neither the route code); they agree to 1/1000 ft. The code's tests hold
+these hand figures as written in the test file, never taken from the code under test, which is the third way.
 
 1. **An L-shaped corridor:** legs 0 to 40 by 0 to 6, and 34 to 40 by 6 to 30; exit door centre at (-0.25, 3). The
    farthest point is the corner (40, 30). Its route curves round the inside corner (34, 6) at 12 in: tangent
@@ -239,13 +243,14 @@ area need review.
    tangent 22.338 + arc together 0.925 (53.0 degrees, until the route to (28, 40.25) leaves) = **23.263 ft
    common**, not 0. Fails on a door-graph method. The room's `common_path_of_travel` is a number (the greatest
    sample plus 3 in), never needs review.
-   **Two exits and a column:** test 2's room and column, exit A the west door centred at (-0.25, 5), exit B a door
-   in the north wall centred at (2, 10.25). At (30, 5) the two ways round the column to A are equally short (the
+   **Two exits and a column:** test 2's room and column, exit A the west door centred at (-0.25, 5), exit B a 36-in
+   door in the north wall centred at (2, 10.25), its jambs at x 0.5 and 3.5 (each with its ring). At (30, 5) the two ways round the column to A are equally short (the
    room is symmetric about y = 5); taking the one over the top (the tie toward more shared, decision 5), both
-   routes reach the ring at (17, 7) by the same tangent, 13.115 ft, and go round it together until B's leaves at
-   81.5 degrees (A's goes on to 90): 13.115 + 0.081 = **13.195 ft common at (30, 5)**. Just below y = 5 the route to
-   A goes under and they part at the start (0); just above, a little less than 13.195. The story's figure is
-   13.195 plus 3 in at most, so between 13.195 and **13.445 ft**. Fails if the tie at (30, 5) is broken toward the
+   routes reach the ring at (17, 7) by the same tangent (arriving at 76.89 degrees), 13.115 ft, and go round it
+   together until B's leaves at 85.79 degrees on the cross tangent to the ring of B's jamb at (3.5, 10) (A's goes on
+   to 90): 13.115 + 0.155 = **13.270 ft common at (30, 5)**. Just below y = 5 the route to A goes under and they part
+   at the start (0); just above, a little less than 13.270. The story's figure is 13.270 plus 3 in at most, so
+   between 13.270 and **13.520 ft**. Fails if the tie at (30, 5) is broken toward the
    way under (0 there).
 7. **One stair, two doors:** a story whose only exit is one stair enclosure entered by two doors 80 ft apart, both
    `exit_enclosure` with one `exit_id`: `story_exit_count` 1, remoteness needs review, common path equals travel
@@ -255,8 +260,9 @@ area need review.
    5; the readings are 30 ft (fails) and 5 ft (complies), so needs review. Fails if the door ends the dead end
    (5 ft, complies).
 9. **Storage on the line:** a storage room under 10 percent of the story's inside area when measured inside its
-   own walls, over it when measured to their outer faces: needs review, not complies (and fails if both readings of
-   the storage are over it).
+   own walls, over it when measured to their outer faces: needs review, not complies. It needs review unless all
+   four pairs of readings fail; it fails only when the storage is over 10 percent even inside its walls and of the
+   story's outer area.
 10. **A jamb:** a route turning 90 degrees just past a 36-in door keeps 12 in off the jamb (longer than with no
     ring there); a 22-in door: needs review.
 11. **A dead end that branches:** a corridor 8 ft wide with an exit at each end; a stem 8 ft wide reaching 10 ft
