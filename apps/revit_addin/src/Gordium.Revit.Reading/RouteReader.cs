@@ -314,7 +314,9 @@ public static class RouteReader
             var known = ObstructionKinds.TryGetValue(e.BuiltInCategory, out var kind);
             if (plan.StandingWalls?.Contains(e.UniqueId) == true)
                 (known, kind) = (true, StandingWall);        // a wall standing in it: its footprint stands in the way
-            if (e is { GeometryFailed: false, Faces.Count: 0 })
+            // no 3D faces, and the band's cut agrees nothing is there (round 5: an open shell or a failed cut is never
+            // passed over as nothing drawn)
+            if (e is { GeometryFailed: false, Faces.Count: 0, BandFailed: false, OpenShells: 0 })
             {
                 if (!known)
                     continue;                                // nothing drawn (a base point, a line)

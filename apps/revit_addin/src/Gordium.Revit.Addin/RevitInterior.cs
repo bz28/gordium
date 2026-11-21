@@ -859,6 +859,26 @@ internal static class RevitInterior
     /// <summary>What of the element lies in the band: each of its solids (a family's instance geometry included)
     /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh or a kind not read, or a
     /// face of the result can't be read; and how many open shells (faces, no volume) reach the band.</summary>
+    /// <summary>A solid that isn't closed: no volume, or an edge with no second face (as <c>RevitRead</c>'s edges are
+    /// read, <c>Edge.GetFace(1)</c>; round 5); an edge that can't be asked counts as open.</summary>
+    internal static bool Open(Solid s)
+    {
+        if (s.Volume <= 1e-12)
+            return true;
+        try
+        {
+            foreach (Edge edge in s.Edges)
+                if (edge.GetFace(1) is null)
+                    return true;
+            return false;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return true;
+        }
+    }
+
     private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, Options options)
     {
         var faces = new List<SurfaceRecord>();
@@ -875,9 +895,9 @@ internal static class RevitInterior
                 {
                     case Solid { Faces.Size: 0 }:
                         break;                                   // an empty solid: nothing drawn
-                    case Solid s when s.Volume <= 1e-12:
-                        // faces with no volume: an open shell (imported surfaces, a DirectShape from an open Brep), which
-                        // can't be cut; counted unless its box lies wholly outside the band
+                    case Solid s when Open(s):
+                        // an open shell (imported surfaces, a DirectShape from an open Brep: no volume, or an edge with
+                        // one face), which can't be cut; counted unless its box lies wholly outside the band
                         var sb = s.GetBoundingBox();
                         var corners = new[] { sb.Min, sb.Max, new XYZ(sb.Min.X, sb.Max.Y, sb.Min.Z), new XYZ(sb.Max.X, sb.Min.Y, sb.Max.Z) }
                             .Select(sb.Transform.OfPoint).ToList();
@@ -991,11 +1011,19 @@ internal static class RevitInterior
                                 unreadable = true;
                         }
                         break;
-                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
-                        Walk(inner);
+                    case GeometryInstance gi:
+                        if (gi.GetInstanceGeometry() is { } inner)
+                            Walk(inner);
+                        else
+                            failed = true;           // an instance with no geometry to read (round 5: as InBand)
                         break;
-                    case Mesh:
-                        failed = true;               // a mesh over a room isn't read exactly
+                    case GeometryElement nested:
+                        Walk(nested);
+                        break;
+                    case Curve or PolyLine or Point:
+                        break;                       // lines and points: no body
+                    default:
+                        failed = true;               // a mesh over a room isn't read exactly, nor a kind not read
                         break;
                 }
             }

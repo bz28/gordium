@@ -436,6 +436,14 @@ public sealed class RouteTests
         var shell = InteriorReader.Read(floor.Model());
         Assert.Null(Room(shell, "A")["obstructions"]);
         Assert.Contains("open surfaces", FakeFloor.Note(shell, "A", "obstructions"));
+        // round 5: a generic model with no faces read but the band's cut saying open surfaces, or a failed cut (a null
+        // instance, a kind not read): never passed over as nothing drawn
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("gm-shell", "OST_GenericModel", "Imported mass", Faces: []) { Banded = [], OpenShells = 1 });
+        Assert.Contains("open surfaces", FakeFloor.Note(InteriorReader.Read(floor.Model()), "A", "obstructions"));
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("gm-null", "OST_GenericModel", "Generic", Faces: []) { Banded = [], BandFailed = true });
+        Assert.Contains("couldn't be cut out", FakeFloor.Note(InteriorReader.Read(floor.Model()), "A", "obstructions"));
 
         // review round 1, P0: furniture drawn in 2D alone (no 3D faces) with its box over the floor: where it stands
         // isn't read, never "nothing drawn"; round 2: one whose box is beside the room changes nothing
