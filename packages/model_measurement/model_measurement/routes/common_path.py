@@ -147,14 +147,28 @@ def _starts(pieces) -> list:
     return out
 
 
+def _box(piece) -> tuple:
+    """(x0, y0, x1, y1) holding the piece (an arc: its whole circle)."""
+    if piece[0] == "line":
+        (x0, y0), (x1, y1) = piece[1], piece[2]
+        return min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)
+    (cx, cy), r = piece[1], piece[2]
+    return cx - r, cy - r, cx + r, cy + r
+
+
 def shared(a, b) -> float:
     """The travel distance (in) from the start of two routes from one point to the last point they share. Both are
     shortest routes from that point, so the stretch of each up to a shared point is as long as the other's; the
     greater of the two is taken (the cautious side)."""
     sa, sb = _starts(a.pieces), _starts(b.pieces)
+    boxes_b = [_box(q) for q in b.pieces]
     best = 0.0
     for i, p in enumerate(a.pieces):
+        bp = _box(p)
         for j, q in enumerate(b.pieces):
+            bq = boxes_b[j]
+            if bp[0] > bq[2] + TOL or bq[0] > bp[2] + TOL or bp[1] > bq[3] + TOL or bq[1] > bp[3] + TOL:
+                continue                                 # pieces apart: nothing shared
             for x in _meetings(p, q):
                 u, v = _along(p, x), _along(q, x)
                 if u is not None and v is not None:
@@ -170,10 +184,8 @@ class _Prepared:
 
     def __init__(self, engine, centres):
         self.engine = engine
-        self.targets = [tuple(map(float, t)) for t in centres]
-        self.xy, self.adj, self.on, ids = engine._graph(self.targets)
-        self.ids = dict(zip(self.targets, ids))
-        self.dist = {t: _dijkstra(self.adj, n) for t, n in self.ids.items()}
+        engine.prepare(centres)                          # the zone's one graph (paths.py builds it for the chain)
+        self.targets, self.on, self.dist, _, self.xy, self.adj, self.ids = engine._base
         self._last = None
 
     def _onward(self, n, t, out, at):

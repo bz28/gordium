@@ -385,3 +385,21 @@ LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_e
 def test_every_reason_has_a_case():
     from test_routes_floor import FLOOR_CASES
     assert set(FLOOR_CASES) | PATH_KEYS | LATER_KEYS == set(STOPS)
+
+
+@pytest.mark.parametrize("layout", [room_on_corridor, lambda: column_room(north_exit=True), table_room])
+def test_the_legs_between_door_centres_from_the_zones_one_graph_are_its_own_graphs(layout):
+    """paths.py builds one graph per zone with every door centre on it, for the legs between them and for
+    sampling; each leg is the same as one found on a graph of its own (lengths and ties), and the fast length
+    from a point is the slow one."""
+    got = routes(layout())
+    s = got.story
+    for zone in s.zones:
+        engine = got._engine(zone)
+        centres = [s.doors[d].centre for d in zone.doors]
+        engine.prepare(centres)
+        for i, a in enumerate(centres):
+            for b in centres[i + 1:]:
+                fast = sorted(round(x.length, 6) for x in engine.between(a, b))
+                slow = sorted(round(x.length, 6) for x in engine.paths(a, b))
+                assert fast == slow, (a, b, fast, slow)

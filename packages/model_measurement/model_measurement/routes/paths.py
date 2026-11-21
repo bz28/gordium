@@ -212,25 +212,62 @@ class _Leg:
         return out
 
     def prepare(self, targets) -> None:
-        """The graph among the rings and these targets (door centres), with each target's distance to every node."""
+        """The graph among the rings and these targets (door centres), with each target's distance to every node:
+        built once per zone, for the legs between door centres (`between`) and for sampling (`dist`)."""
         targets = [tuple(map(float, t)) for t in targets]
         if self._base is not None and self._base[0] == targets:
             return
         xy, adj, on, ids = self._graph(targets + self.bends)
         dists = {t: _dijkstra(adj, n) for t, n in zip(targets, ids)}
-        self._base = (targets, on, dists, ids[len(targets):])
+        self._base = (targets, on, dists, ids[len(targets):], xy, adj, dict(zip(targets, ids)))
+        self._ways = None
 
-    def dist(self, p, t) -> float:
-        """The length of the shortest curve from p (clear of every ring) to the target t (one given to `prepare`):
-        inf if there is none. Such a curve goes straight to t, or to a corner (no clearance), or to a ring at a
-        tangent point and round it to the first node there: every way it can leave a ring is a node of the graph."""
-        _, on, dists, bend_ids = self._base
-        t = tuple(map(float, t))
-        D = dists[t]
-        best = math.dist(p, t) if self.clear(p, t) else math.inf
-        for b, n in zip(self.bends, bend_ids):
-            if math.isfinite(D[n]) and math.dist(p, b) + D[n] < best and self.clear(p, b):
-                best = math.dist(p, b) + D[n]
+    def between(self, a, b) -> list[Path]:
+        """Every tied shortest curve from the target a to the target b (both given to `prepare`), on the graph
+        built once: the same curves `paths(a, b)` finds on a graph of its own (other targets' nodes only add points
+        on curves the floor already holds, never a shorter one)."""
+        a, b = tuple(map(float, a)), tuple(map(float, b))
+        if math.dist(a, b) <= EPS:
+            return [Path(0.0, [])]
+        _, _, dists, _, _, adj, ids = self._base
+        D, P, T = dists[b], ids[a], ids[b]
+        if not math.isfinite(D[P]):
+            return []
+        found = []
+
+        def walk(v, so_far, pieces, seen):
+            if len(found) > 4 * MOST_TIES:
+                return
+            if v == T:
+                found.append(list(pieces))
+                return
+            for u, w, piece in adj[v]:
+                if u in seen or so_far + w + D[u] > D[P] + TIE:
+                    continue
+                pieces.append(piece)
+                walk(u, so_far + w, pieces, seen | {u})
+                pieces.pop()
+
+        walk(P, 0.0, [], {P})
+        if len(found) > 4 * MOST_TIES:
+            raise Stop("too_many_ties", most=MOST_TIES, x=_show(a)[0], y=_show(a)[1])
+        out, seen = [], set()
+        for pieces in found:
+            pieces = _tidy(pieces)
+            key = _signature(pieces)
+            if key not in seen:
+                seen.add(key)
+                out.append(Path(sum(_piece_length(q) for q in pieces), pieces))
+        return out
+
+    def _ways_from(self, p) -> list:
+        """Every way a curve from p reaches the graph other than straight to a target: to a corner (no clearance),
+        or by a tangent to a ring and round it to the first node there, each way: [(length, node)]. Worked once per
+        point, for every target."""
+        if self._ways is not None and self._ways[0] == p:
+            return self._ways[1]
+        _, on, _, bend_ids, _, _, _ = self._base
+        ways = [(math.dist(p, b), n) for b, n in zip(self.bends, bend_ids) if self.clear(p, b)]
         for k in range(len(self.rings)):
             ring = on[k]
             if not ring:
@@ -238,16 +275,26 @@ class _Leg:
             c = (float(self.rings[k][0]), float(self.rings[k][1]))
             angles = [a for a, _ in ring]
             for ang, _, length in self._tangents(p, k, c):
-                if length >= best:
-                    continue
                 i = bisect.bisect_left(angles, ang)
                 after, before = ring[i % len(ring)], ring[(i - 1) % len(ring)]
                 # round the ring each way to the first node met
                 for (a1, n1), a0, sweep in ((after, ang, (after[0] - ang) % (2 * math.pi)),
                                             (before, before[0], (ang - before[0]) % (2 * math.pi))):
-                    got = length + self.r * sweep + D[n1]
-                    if got < best and self._arc_clear(k, c, a0, sweep):
-                        best = got
+                    if self._arc_clear(k, c, a0, sweep):
+                        ways.append((length + self.r * sweep, n1))
+        self._ways = (p, ways)
+        return ways
+
+    def dist(self, p, t) -> float:
+        """The length of the shortest curve from p (clear of every ring) to the target t (one given to `prepare`):
+        inf if there is none. Such a curve goes straight to t, or to a corner (no clearance), or to a ring at a
+        tangent point and round it to the first node there: every way it can leave a ring is a node of the graph."""
+        D = self._base[2][tuple(map(float, t))]
+        t = tuple(map(float, t))
+        best = math.dist(p, t) if self.clear(p, t) else math.inf
+        for length, n in self._ways_from(p):
+            if length + D[n] < best:
+                best = length + D[n]
         return best
 
     def _arc_clear(self, k, c, a0, sweep) -> bool:
@@ -407,9 +454,11 @@ class StoryRoutes:
         doors = self.story.doors
         edges = {}
         for zone in self.story.zones:
+            engine = self._engine(zone)
+            engine.prepare([doors[d].centre for d in zone.doors])     # one graph per zone, every door centre on it
             for i, a in enumerate(zone.doors):
                 for b in zone.doors[i + 1:]:
-                    paths = self._leg(zone, doors[a].centre, doors[b].centre)
+                    paths = engine.between(doors[a].centre, doors[b].centre)
                     if paths:
                         edges.setdefault(a, []).append((b, zone, paths))
                         edges.setdefault(b, []).append((a, zone, [Path(q.length, [_reverse(x) for x in
@@ -469,7 +518,12 @@ class StoryRoutes:
 
     def rooms_at(self, p) -> list:
         """The rooms read whose outline holds p (two on the line between rooms)."""
-        return [r for r in self.story.rooms.values() if r is not None and r.outline.buffer(EPS).covers(Point(p))]
+        if not hasattr(self, "_grown"):                  # each outline grown by EPS once, prepared
+            self._grown = [(r, r.outline.buffer(EPS)) for r in self.story.rooms.values() if r is not None]
+            for _, g in self._grown:
+                prepare(g)
+        q = Point(p)
+        return [r for r, g in self._grown if g.covers(q)]
 
     def rings_for(self, room) -> list:
         """The centres of every ring a route from this room meets (its zone's, or for an end-only room those of its

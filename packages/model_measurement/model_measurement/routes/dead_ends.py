@@ -745,6 +745,7 @@ def _ways_out(story: Story, routes: StoryRoutes, corridor_ids: set) -> dict:
     keep = [z for z in story.zones if not set(z.rooms) & corridor_ids]
     sub = replace(story, zones=keep, zone_of={k: z for k, z in story.zone_of.items() if z in keep})
     other = StoryRoutes(sub, routes.r)
+    other._engines = routes._engines                  # the zones' graphs, built once
     chains = {e: other._chain(frozenset([e]))[0] for e in other.exits}
     out = {}
     for door in story.doors.values():

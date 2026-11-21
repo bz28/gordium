@@ -307,6 +307,7 @@ def _room_access(story, routes, room, chain) -> dict:
         keep = [z for z in story.zones if z is not zone]
         sub = StoryRoutes(replace(story, zones=keep, zone_of={k: z for k, z in story.zone_of.items() if z in keep}),
                           routes.r)
+        sub._engines = routes._engines                       # the zones' graphs, built once
         chain = sub._chain(frozenset(sub.exits))[0]
     got = {}
     for d in story.doors.values():
