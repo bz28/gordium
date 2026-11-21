@@ -37,6 +37,17 @@ def test_the_libby_street_marks_make_a_request_for_every_room_and_exit():
     assert {"room": "26", "mark": "Gordium: Can be locked", "value": False} in corridor
 
 
+def test_each_rooms_reason_agrees_with_its_marks():
+    # review round 1: six rooms marked pass_through true said "end-only"
+    marks = yaml.safe_load(LIBBY.read_text(encoding="utf-8"))
+    defaults = marks["room_defaults"]
+    for room in marks["rooms"] + marks["rooms_to_place"]:
+        through = room.get("pass_through", defaults["pass_through"])
+        if through:
+            assert "end-only" not in room["why"], room["number"]
+    assert "LENIENT" in LIBBY.read_text(encoding="utf-8")       # the header says which way the crossing choice leans
+
+
 def test_a_room_missing_a_flag_stops_the_tool():
     with pytest.raises(tool.BadMarks):
         tool.request({"by": "x", "rooms": [{"number": "1", "use": "Other", "lockable": True}]}, "m", "c")
