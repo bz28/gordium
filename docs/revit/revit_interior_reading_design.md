@@ -442,8 +442,8 @@ add-in also keeps a short, hand-curated file of makers' own clear-opening formul
 (`apps/revit_addin/data/maker_clear_openings.json`, embedded in `Gordium.Revit.Reading`; `MakerClearOpenings.cs`).
 Each entry names the maker and product line, the Revit type values it matches (for Marvin, read from Marvin's own
 Revit family, 2026-11-20: the type's Manufacturer "Marvin Windows and Doors", and either its shared Window Type
-parameter "Ultimate Casement", read by GUID, or a Model that is a call number such as "UCA3648", exactly, ignoring
-case; only a call-number Model is ever filled), the formula from the frame size, where it holds, the PDF (URL, fingerprint, page, exact
+parameter "Ultimate Casement", read by GUID, those two ignoring case, or a Model that is a call number written exactly
+as Marvin writes it, such as "UCA3648", case and all; only a call-number Model is ever filled), the formula from the frame size, where it holds, the PDF (URL, fingerprint, page, exact
 quote, date opened) and the hardware caveats, and is pinned by a test that reproduces rows of the maker's own table.
 First entry: **Marvin Ultimate Casement** (full frame), from Marvin's Architectural Detail Manual: "Clear Opening
 Width = Frame OSM Width - 7 1/8"" for frames 20 in and wider, "Clear Opening Height = Frame OSM Height - 5 1/8""

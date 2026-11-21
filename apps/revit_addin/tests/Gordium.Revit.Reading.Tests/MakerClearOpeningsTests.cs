@@ -147,6 +147,9 @@ public sealed class MakerClearOpeningsTests
         Assert.Null(MakerClearOpenings.Match("Marvin Windows and Doors", null, "Ultimate Casement"));   // a Model naming the line: no longer
         Assert.Null(MakerClearOpenings.Match("Marvin Inc", "Ultimate Casement", "UCA3648"));
         Assert.Null(MakerClearOpenings.Match(null, "Ultimate Casement", "UCA3648"));
+        // review round 4: the call number is matched exactly as Marvin writes it, case and all (the design note says so)
+        Assert.Null(Marvin.CallNumber("uca3648"));
+        Assert.Equal(("36", "48"), Marvin.CallNumber("UCA3648"));
         Assert.Null(MakerClearOpenings.Match("Marvin Windows and Doors", null, null));
     }
 
