@@ -70,7 +70,7 @@ internal static class RevitInterior
             Levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
                 .Select(l => new LevelRecord(l.UniqueId, l.Name, l.ProjectElevation)).ToList(),
             SeparationLines = SeparationLinesOf(doc, diagnostics),
-            Walls = WallsOf(doc, diagnostics),
+            GrossAreas = GrossAreasOf(doc, diagnostics),
             Diagnostics = diagnostics,
         };
     }
@@ -94,71 +94,96 @@ internal static class RevitInterior
         }
     }
 
-    /// <summary>Every wall's centre line and full thickness, before anything is cut into it (the story's outlines,
-    /// section 10): its location line moved to the middle of the wall from its Location Line setting (wall centre line,
-    /// either finish face; a core one from the type's layers); null when they couldn't be listed.</summary>
-    private static List<WallRecord>? WallsOf(Document doc, List<string> diagnostics)
+    /// <summary>Each level's gross building area as Revit works it out (the story's outlines, section 10): in a
+    /// transaction always rolled back, an area plan of the model's Gross Building scheme for the level
+    /// (<c>ViewPlan.CreateAreaPlan</c>), an Area placed at each of the level's Rooms' points (a building in one piece
+    /// gives one Area; the rest are redundant), the closed one's boundary read with the walls bounding it. Each level's
+    /// result says why when there is none; null when no level could be tried (the document can't be changed for the
+    /// moment).</summary>
+    private static Dictionary<string, GrossArea>? GrossAreasOf(Document doc, List<string> diagnostics)
     {
+        if (doc.IsReadOnly)
+            return null;
+        var scheme = new FilteredElementCollector(doc).OfClass(typeof(AreaScheme)).Cast<AreaScheme>().ToList().FirstOrDefault(s => s.IsGrossBuildingArea);
+        var levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList();
+        var rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType().OfType<Room>()
+            .Where(r => r.Location is LocationPoint && r.Area > 0).ToList();
+        var result = new Dictionary<string, GrossArea>(StringComparer.Ordinal);
+        Transaction? t = null;
+        if (!doc.IsModifiable)
+        {
+            t = new Transaction(doc, ResultRows.AreasTransaction);
+            t.Start();
+        }
         try
         {
-            var list = new List<WallRecord>();
-            foreach (var w in new FilteredElementCollector(doc).OfClass(typeof(Wall)).Cast<Wall>().Where(w => !w.ViewSpecific).ToList())
+            foreach (var level in levels)
             {
-                var width = w.Width;
-                string? why = null;
-                Xyz a = default, b = default;
-                if (w.Location is not LocationCurve { Curve: Line line })
-                    why = "its location isn't a straight line (a curved wall, or none)";
-                else
-                {
-                    // the location line's distance from the centre, toward the wall's exterior side (Orientation)
-                    var key = w.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM)?.AsInteger();
-                    double? toExterior = key switch
-                    {
-                        0 => 0,                                  // wall centre line
-                        2 => width / 2,                          // finish face, exterior
-                        3 => -width / 2,                         // finish face, interior
-                        _ => CoreOffset(w, key),
-                    };
-                    if (toExterior is not { } off)
-                        why = $"its location line (setting {key}) couldn't be put on its centre line";
-                    else
-                    {
-                        // the centre is that far back from the location line, away from the exterior
-                        var shift = w.Orientation.Multiply(-off);
-                        a = P(line.GetEndPoint(0) + shift);
-                        b = P(line.GetEndPoint(1) + shift);
-                    }
-                }
-                list.Add(new WallRecord(w.UniqueId, a, b, width, (doc.GetElement(w.LevelId) as Level)?.UniqueId, why,
-                                        Id(w.DemolishedPhaseId), Id(w.DesignOption?.Id)));
+                var points = rooms.Where(r => r.LevelId == level.Id).Select(r => ((LocationPoint)r.Location).Point).ToList();
+                if (points.Count == 0)
+                    continue;
+                result[level.UniqueId] = scheme is null
+                    ? new GrossArea(null, new Dictionary<string, double>(), "the model has no Gross Building area scheme")
+                    : GrossOf(doc, scheme, level, points, diagnostics);
             }
-            diagnostics.Add($"walls: {list.Count} ({list.Count(x => x.NotRead is not null)} whose centre line couldn't be read)");
-            return list;
+            return result;
         }
-        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
-                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        finally
         {
-            diagnostics.Add($"the walls couldn't be read ({x.GetType().Name}: {x.Message})");
-            return null;
+            if (t is not null)
+            {
+                t.RollBack();
+                t.Dispose();
+            }
         }
     }
 
-    /// <summary>For a location line on the core (core centre line 1, core face exterior 4, core face interior 5): its
-    /// distance from the wall's centre toward its exterior, from the type's layers; null when they can't be read.</summary>
-    private static double? CoreOffset(Wall w, int? key)
+    private static GrossArea GrossOf(Document doc, AreaScheme scheme, Level level, List<XYZ> points, List<string> diagnostics)
     {
-        if (key is not (1 or 4 or 5) || w.WallType.GetCompoundStructure() is not { } cs)
-            return null;
-        var widths = cs.GetLayers().Select(l => l.Width).ToList();
-        int first = cs.GetFirstCoreLayerIndex(), last = cs.GetLastCoreLayerIndex();
-        if (first < 0 || last < first || last >= widths.Count)
-            return null;
-        // layers run from the exterior side: the core's exterior face is the layers before it in
-        var total = widths.Sum();
-        double coreOut = widths.Take(first).Sum(), coreIn = widths.Take(last + 1).Sum();
-        double At(double fromExterior) => total / 2 - fromExterior;    // distance toward the exterior from the centre
-        return key switch { 4 => At(coreOut), 5 => At(coreIn), _ => At((coreOut + coreIn) / 2) };
+        using var st = new SubTransaction(doc);
+        try
+        {
+            st.Start();
+            var plan = ViewPlan.CreateAreaPlan(doc, scheme.Id, level.Id);
+            doc.Regenerate();
+            var lines = new FilteredElementCollector(doc, plan.Id).OfCategory(BuiltInCategory.OST_AreaSchemeLines).GetElementCount();
+            var closed = new List<Area>();
+            foreach (var p in points)
+            {
+                var area = doc.Create.NewArea(plan, new UV(p.X, p.Y));
+                doc.Regenerate();
+                if (area.Area > 0)
+                    closed.Add(area);
+            }
+            diagnostics.Add($"gross area of {level.Name}: {lines} area boundary lines in the plan Revit made, {closed.Count} closed areas " +
+                            $"({string.Join(", ", closed.Select(a => $"{a.Area:0.#} sq ft"))})");
+            if (closed.Count != 1)
+                return new GrossArea(null, new Dictionary<string, double>(), closed.Count == 0
+                    ? $"Revit closed no gross area on the level (its area plan has {lines} area boundary lines)"
+                    : $"Revit gives {closed.Count} separate gross areas on the level, not one outline");
+            var loops = closed[0].GetBoundarySegments(new SpatialElementBoundaryOptions());
+            var widths = new Dictionary<string, double>(StringComparer.Ordinal);
+            var records = loops.Select(loop => (IReadOnlyList<BoundarySegmentRecord>)loop.Select(s =>
+            {
+                var c = s.GetCurve();
+                var by = doc.GetElement(s.ElementId);
+                if (by is Wall w)
+                    widths[w.UniqueId] = w.Width;
+                return new BoundarySegmentRecord(P(c.GetEndPoint(0)), P(c.GetEndPoint(1)), c is Line, by?.UniqueId);
+            }).ToList()).ToList();
+            return new GrossArea(records, widths);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            diagnostics.Add($"gross area of {level.Name}: Revit refused ({x.GetType().Name}: {x.Message})");
+            return new GrossArea(null, new Dictionary<string, double>(), $"Revit refused ({x.Message})");
+        }
+        finally
+        {
+            if (st.HasStarted() && !st.HasEnded())
+                st.RollBack();
+        }
     }
 
     /// <summary>The door's host wall's side faces (<c>HostObjectUtils.GetSideFaces</c>, exterior then interior), each a

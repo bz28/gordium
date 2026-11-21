@@ -55,23 +55,22 @@ public sealed record InteriorRecords
     /// layer didn't read them: then no <c>passages</c> are sent, and no story's routes are measured.</summary>
     public IReadOnlyList<string>? SeparationLines { get; init; }
 
-    /// <summary>Every wall (<c>OfClass(typeof(Wall))</c>, not view-specific), for the story's outlines (section 10). Null
-    /// when the Revit layer didn't read them: then no outline is sent.</summary>
-    public IReadOnlyList<WallRecord>? Walls { get; init; }
+    /// <summary>Each level's gross building area (<see cref="GrossArea"/>), by the level's <c>UniqueId</c>, for the story's
+    /// outlines (section 10). Null when the Revit layer didn't read them: then no outline is sent.</summary>
+    public IReadOnlyDictionary<string, GrossArea>? GrossAreas { get; init; }
 
     /// <summary>What the Revit layer looked at and what Revit said (each level's enclosed areas, an error), for the
     /// trial's log only: never read by a decision.</summary>
     public IReadOnlyList<string> Diagnostics { get; init; } = [];
 }
 
-/// <summary>A wall (<c>Wall</c>) as it is, before anything is cut into it: its centre line's ends (its location line,
-/// <c>LocationCurve.Curve</c>, moved to the middle of its thickness by the Revit layer from its location line setting,
-/// <c>WALL_KEY_REF_PARAM</c>), internal; its full thickness (<c>Wall.Width</c>); its base level (<c>LevelId</c>'s
-/// <c>UniqueId</c>); its phase and design option. <paramref name="NotRead"/>: why its centre line couldn't be read (a
-/// curved wall, a location line on the core whose layers couldn't be read): then no outline is sent on its level.
-/// The story's outlines are read from these (section 10).</summary>
-public sealed record WallRecord(string UniqueId, Xyz Start, Xyz End, double Width, string? LevelId, string? NotRead = null,
-                                string? PhaseDemolished = null, string? DesignOption = null);
+/// <summary>A level's gross building area, as Revit gives it (section 10): an area plan of the model's Gross Building
+/// area scheme made for the moment (<c>ViewPlan.CreateAreaPlan</c>), an Area placed in it at a room's point inside,
+/// its boundary read (<c>GetBoundarySegments</c>: each loop's segments and the element bounding each, by
+/// <c>UniqueId</c>), all rolled back. <see cref="WallWidths"/>: each bounding wall's full thickness (<c>Wall.Width</c>).
+/// <see cref="Why"/>: why there is none (no Gross Building scheme, an Area Revit doesn't close, Revit refused).</summary>
+public sealed record GrossArea(IReadOnlyList<IReadOnlyList<BoundarySegmentRecord>>? Loops, IReadOnlyDictionary<string, double> WallWidths,
+                               string? Why = null);
 
 /// <summary>A level (<c>Level</c>): its <c>UniqueId</c>, <c>Name</c> and <c>ProjectElevation</c> (internal).</summary>
 public sealed record LevelRecord(string UniqueId, string Name, double Elevation);

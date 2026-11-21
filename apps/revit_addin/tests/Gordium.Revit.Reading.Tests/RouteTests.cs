@@ -424,86 +424,67 @@ public sealed class RouteTests
 
     // ---- the story's outlines (decision 8) ------------------------------------------------------------------------
 
-    private static List<P2> Box(double x0, double y0, double x1, double y1) => [new(x0, y0), new(x1, y0), new(x1, y1), new(x0, y1)];
-
-    [Fact]
-    public void A_storys_outlines_are_its_exterior_walls_outer_and_inner_faces_or_left_out()
+    /// <summary>Revit's gross building area of the fake story as the Revit layer gives it: the walls' outer faces,
+    /// each side with the wall bounding it (the south side in two pieces, one wall split in line).</summary>
+    private static GrossArea Gross(FakeFloor floor, double northWidth = 0.5)
     {
-        // two rooms, a wall between them, four exterior walls 6 in thick
-        List<List<P2>> rooms = [Box(0, 0, 10, 10), Box(10.5, 0, 20, 10)];
-        var walls = new Dictionary<string, List<List<P2>>>
-        {
-            ["s"] = [Box(-0.5, -0.5, 20.5, 0)], ["n"] = [Box(-0.5, 10, 20.5, 10.5)], ["w"] = [Box(-0.5, 0, 0, 10)],
-            ["e"] = [Box(20, 0, 20.5, 10)], ["mid"] = [Box(10, 0, 10.5, 10)],
-        };
-        var got = StoryOutlines.Of(rooms, [], walls);
-        Assert.Null(got.Why);
-        Assert.Equal(21.0 * 11, PlanGeometry.Area(got.Outer!), 9);         // to the outer faces
-        Assert.Equal(20.0 * 10, PlanGeometry.Area(got.Inner!), 9);         // to the inside faces: the rooms and the wall between
-
-        // a room not drawn: an unaccounted hole (it could be a courtyard), never counted as floor
-        Assert.Contains("hole", StoryOutlines.Of([rooms[0]], [], walls).Why);
-        // the same space outlined as an enclosed area with no Room: accounted for
-        Assert.Null(StoryOutlines.Of([rooms[0]], [rooms[1]], walls).Why);
-        // a second building apart: not one outline
-        Assert.Contains("separate pieces", StoryOutlines.Of([.. rooms, Box(40, 0, 50, 10)], [], walls).Why);
+        BoundarySegmentRecord S(double x0, double y0, double x1, double y1, string? by) =>
+            new(floor.Fake.Place(x0, y0, 0), floor.Fake.Place(x1, y1, 0), true, by);
+        return new GrossArea([[S(-0.5, -0.5, 20, -0.5, "wall-s1"), S(20, -0.5, 40.5, -0.5, "wall-s2"), S(40.5, -0.5, 40.5, 26.5, "wall-e"),
+                               S(40.5, 26.5, -0.5, 26.5, "wall-n"), S(-0.5, 26.5, -0.5, -0.5, "wall-w")]],
+                             new Dictionary<string, double> { ["wall-s1"] = 0.5, ["wall-s2"] = 0.5, ["wall-e"] = 0.5, ["wall-n"] = northWidth, ["wall-w"] = 0.5 });
     }
 
-    /// <summary>The fake story's walls as the Revit layer gives them: each wall's centre line and thickness.</summary>
-    private static List<WallRecord> StoryWalls(FakeFloor floor)
-    {
-        WallRecord W(string id, double x0, double y0, double x1, double y1, double width = 0.5) =>
-            new(id, floor.Fake.Place(x0, y0, 0), floor.Fake.Place(x1, y1, 0), width, FakeFloor.Level);
-        return
-        [
-            W("wall-s", -0.25, -0.25, 40.25, -0.25), W("wall-n", -0.25, 26.25, 40.25, 26.25), W("wall-w", -0.25, -0.25, -0.25, 26.25),
-            W("wall-e", 40.25, -0.25, 40.25, 26.25), W("wall-ab", 20.25, 0, 20.25, 9.5), W("wall-c1", 0, 9.75, 40, 9.75),
-            W("wall-c2", 0, 16.25, 10, 16.25), W("wall-sl", 10.25, 16, 10.25, 26),
-        ];
-    }
+    private static string? OutlineNote(InteriorReadResult r) => r.Notes.SingleOrDefault(n => n.Field == "story_outlines")?.Why;
 
     [Fact]
-    public void The_fake_storys_outlines_are_sent_and_read_by_the_route_code()
+    public void A_storys_outlines_are_revits_gross_area_and_its_walls_inside_faces()
     {
-        // the walls as they are, before anything is cut into them: the lobby's and the stair's exterior doors (dE, dS2)
-        // cut their walls' faces, never their outline
         var floor = new FakeFloor();
-        floor.Walls = StoryWalls(floor);
+        floor.GrossAreas = new() { [FakeFloor.Level] = Gross(floor) };
         var read = InteriorReader.Read(floor.Model());
         var outline = Assert.Single(read.Interior["story_outlines"]!.AsArray())!;
         Assert.Equal(FakeFloor.Level, outline["level"]!.GetValue<string>());
         P2 At(JsonNode p) => new(p[0]!.GetValue<double>(), p[1]!.GetValue<double>());
-        Assert.Equal(41.0 * 27, PlanGeometry.Area(outline["outer"]!.AsArray().Select(p => At(p!)).ToList()), 9);
+        var outer = outline["outer"]!.AsArray().Select(p => At(p!)).ToList();
+        Assert.Equal(4, outer.Count);                                      // the split south side taken as one
+        Assert.Equal(41.0 * 27, PlanGeometry.Area(outer), 9);
         Assert.Equal(40.0 * 26, PlanGeometry.Area(outline["inner"]!.AsArray().Select(p => At(p!)).ToList()), 9);
         var routes = Routes(read);
         Assert.Null(routes["outlines"]![FakeFloor.Level]!["stop"]);
         Assert.Equal(41.0 * 27 * 144, routes["outlines"]![FakeFloor.Level]!["outer"]!.GetValue<double>(), 6);   // sq in
 
-        // a curved wall (its centre line not read): no outline, with why
-        floor.Walls = [.. floor.Walls, new WallRecord("arc", default, default, 0.5, FakeFloor.Level, "its location isn't a straight line")];
-        read = InteriorReader.Read(floor.Model());
-        Assert.Null(read.Interior["story_outlines"]);
-        Assert.Contains("isn't a straight line", read.Notes.Single(n => n.Field == "story_outlines").Why);
-        floor.Walls = null;
-        Assert.Contains("walls weren't read", InteriorReader.Read(floor.Model()).Notes.Single(n => n.Field == "story_outlines").Why);
+        // a thicker north wall: its inside face moved in by its own thickness
+        floor.GrossAreas = new() { [FakeFloor.Level] = Gross(floor, northWidth: 1) };
+        outline = InteriorReader.Read(floor.Model()).Interior["story_outlines"]![0]!;
+        Assert.Equal(40.0 * 25.5, PlanGeometry.Area(outline["inner"]!.AsArray().Select(p => At(p!)).ToList()), 9);
     }
 
     [Fact]
-    public void Two_walls_a_hair_apart_are_joined_and_a_wider_gap_is_left_open_and_said()
+    public void Without_a_closed_gross_area_bounded_by_walls_no_outline_is_sent_and_why_is_said()
     {
         var floor = new FakeFloor();
-        WallRecord W(string id, double x0, double y0, double x1, double y1) => new(id, floor.Fake.Place(x0, y0, 0), floor.Fake.Place(x1, y1, 0), 0.5, FakeFloor.Level);
-        // an L corner whose second wall stops 1/4 in short of the first's face: joined, carried to the outer corner
-        var said = new List<string>();
-        var feet = RouteReader.WallFootprints(floor.Model(), [W("a", 0, 0, 10, 0), W("b", 0, 0.25 + 0.25 / 12, 0, 10)], said);
-        Assert.Contains(said, s => s.Contains("joined to wall a across 0.25 in"));
-        Assert.Equal(0.0, feet["b"][0].Min(p => p.Y), 9);                // carried into the first wall: the gap closed
-        Assert.Equal(-0.25 - 0.25 / 12, feet["a"][0].Min(p => p.X), 9);   // and the first carried past the corner
-        // the same 1 in short: left apart, said, and the outline doesn't close round it
-        said.Clear();
-        feet = RouteReader.WallFootprints(floor.Model(), [W("a", 0, 0, 10, 0), W("b", 0, 0.25 + 1.0 / 12, 0, 10)], said);
-        Assert.Contains(said, s => s.Contains("is 1 in from wall a: left apart"));
-        Assert.Equal(0.25 + 1.0 / 12, feet["b"][0].Min(p => p.Y), 9);
+        Assert.Contains("weren't read", OutlineNote(InteriorReader.Read(floor.Model())));                 // not read at all
+        floor.GrossAreas = [];
+        Assert.Contains("wasn't read", OutlineNote(InteriorReader.Read(floor.Model())));                  // not for this level
+        floor.GrossAreas = new() { [FakeFloor.Level] = new GrossArea(null, new Dictionary<string, double>(), "Revit closed no gross area on the level") };
+        Assert.Contains("closed no gross area", OutlineNote(InteriorReader.Read(floor.Model())));
+        var g = Gross(floor);
+        // a side bounded by an area boundary line, not a wall: its thickness unknown
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Loops = [[.. g.Loops![0].Take(4), g.Loops[0][4] with { Element = "area-line" }]] } };
+        Assert.Contains("isn't bounded by a wall", OutlineNote(InteriorReader.Read(floor.Model())));
+        // two walls of different thickness along one side
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { WallWidths = new Dictionary<string, double>(g.WallWidths) { ["wall-s2"] = 1 } } };
+        Assert.Contains("different thickness", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a courtyard: a hole in the gross area
+        BoundarySegmentRecord S(double x0, double y0, double x1, double y1) => new(floor.Fake.Place(x0, y0, 0), floor.Fake.Place(x1, y1, 0), true, "wall-c");
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Loops = [g.Loops![0], [S(5, 5, 5, 8), S(5, 8, 8, 8), S(8, 8, 8, 5), S(8, 5, 5, 5)]] } };
+        Assert.Contains("a hole", OutlineNote(InteriorReader.Read(floor.Model())));
+        // a curved side
+        floor.GrossAreas = new() { [FakeFloor.Level] = g with { Loops = [[.. g.Loops![0].Take(4), g.Loops[0][4] with { IsLine = false }]] } };
+        var read = InteriorReader.Read(floor.Model());
+        Assert.Contains("curved", OutlineNote(read));
+        Assert.Null(read.Interior["story_outlines"]);
     }
 
     [Fact]
