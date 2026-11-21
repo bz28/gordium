@@ -445,6 +445,36 @@ worked out; sections and quotes; count chips coloured only by their words; every
 panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote). The WPF panel itself
 is checked in Revit (it needs Revit to run).
 
+## Build a model from data
+
+A real .rvt built with no click from a drawing script's building data: the C# port of the pyRevit/Dynamo script Ben
+received (the Children's Odyssey childcare centre, 19 Libby St, Portland ME, rebuilt from its life-safety sheet
+LS1.0: 122 walls, 52 doors, 67 windows, 25 rooms, a floor; feet, origin at the SW corner).
+
+1. **The data, out of the script's text** (`tools/extract_build_data.py`): the script is untrusted downloaded code,
+   so it is never run or imported. Its syntax is parsed (`ast.parse`) and the one string literal of
+   `DATA = json.loads(r'''...''')` decoded; the data's shape is checked (each door and window's wall exists, the counts
+   are the script's own `stats`) and written with `extracted_from` (the script's name and sha256). Anything wrong is
+   printed and nothing written.
+   `python -I apps/revit_addin/tools/extract_build_data.py <script.py> --out <data.json>`
+2. **The model** (`ModelBuild.cs`, its Revit-free decisions in `Gordium.Revit.Reading/BuildData.cs`): the request
+   `%LOCALAPPDATA%\Gordium\trial\build_model_request.json`
+   (`{"data": "<data.json>", "template": "<optional .rte>", "save_as": "<model>.rvt"}`, plus the script's toggles
+   `swing_opposite_facing`, `hinge_opposite_hand`, `use_phases`, each true when left out) builds, as the script does:
+   a new project from Revit's `English-Imperial\default.rte`; Level 1 and its plan; a wall type per status, thickness
+   and rating (`LS Existing 12"`, `LS New 4.5" 1 HR`), each wall on its centre line with its Comments and Mark, Existing
+   walls in the first phase; a door type per kind and size (the template's family; where there is none, as for double
+   doors in Revit 2027's install, a family made from Revit's Door.rft with its leaves' swing drawn in plan), each door
+   flipped to swing (`swing_dir`) and hinge (`hinge`) as the data says; windows at their sill; the floor under the
+   footprint; a Room at each tag point with its Name (in capitals, as the script) and Number, tagged. Saved, closed.
+   The log line `build_model` gives the counts drawn beside the data's, **every element not built with Revit's
+   reason** (the script dropped them quietly), each door's flips and each room's area beside the sheet's.
+
+How we know: `test_extract_build_data.py` (a made-up script that raises if run is read whole; every malformed part
+named; Ben's script, when `GORDIUM_MOCK_REVIT_SCRIPT` names it, gives 122/52/67/25) and `BuildDataTests` (the
+extractor's output read whole by the add-in; the script's names, marks, keyword picks and door flips; the floor
+outline; the request). The model itself is checked in Revit.
+
 ## Running it
 
 Needs the .NET 10 SDK, the .NET 8 runtime beside it (`dotnet --list-runtimes` shows Microsoft.NETCore.App 8.x and
