@@ -48,8 +48,9 @@ public sealed record BuildModel(string Project, string LevelName, double LevelEl
 /// <param name="FillStart">For <see cref="CorrectionKind.Fill"/>: the new wall's start (its end is
 /// <paramref name="ExtendEndTo"/>, <paramref name="Wall"/> unused).</param>
 /// <param name="FillThicknessIn">For <see cref="CorrectionKind.Fill"/>: the new wall's thickness, inches.</param>
+/// <param name="MergeWith">For <see cref="CorrectionKind.Merge"/>: the wall taken into <paramref name="Wall"/>.</param>
 public sealed record WallCorrection(int Wall, PlanPoint ExtendEndTo, string Why, CorrectionKind Kind = CorrectionKind.ExtendEnd,
-                                    PlanPoint? FillStart = null, double? FillThicknessIn = null);
+                                    PlanPoint? FillStart = null, double? FillThicknessIn = null, int? MergeWith = null);
 
 /// <summary>What a correction does to its wall.</summary>
 public enum CorrectionKind
@@ -68,6 +69,12 @@ public enum CorrectionKind
     /// <see cref="BuildData.MaxCorrection"/> thick, every corner within <see cref="BuildData.MaxCorrection"/> of a wall
     /// of the data, so it fills between walls and never stands on its own.</summary>
     Fill,
+
+    /// <summary>Two walls the trace drew face to face along the same stretch (<c>merge</c>: a hairline Revit finds as an
+    /// enclosed area with no point inside) drawn as one wall of their two thicknesses, <see cref="WallCorrection.Wall"/>'s
+    /// kept, <see cref="WallCorrection.MergeWith"/> taken into it: only parallel, their faces within 1/16 in, their ends
+    /// within 1/16 in, and no door or window in either.</summary>
+    Merge,
 }
 
 /// <summary>Data the add-in can't build all of: every problem found, each in words (never a part dropped).</summary>
@@ -124,6 +131,23 @@ public sealed record BuildRequest(string Data, string? Template, string SaveAs, 
                     if (c is not JsonObject co)
                     {
                         problems.Add($"correction {k}: not an object");
+                        continue;
+                    }
+                    if (co.ContainsKey("merge"))
+                    {
+                        // {"merge": ["W57", "W111"], "why": "..."}
+                        static int? Mark(JsonNode? n) => n is JsonValue v && v.TryGetValue<string>(out var t) && t is { Length: > 1 } && t[0] == 'W'
+                            && int.TryParse(t[1..], System.Globalization.NumberStyles.None, CultureInfo.InvariantCulture, out var id) ? id : null;
+                        var pair = co["merge"] as JsonArray;
+                        var (ma, mb) = pair is { Count: 2 } ? (Mark(pair[0]), Mark(pair[1])) : (null, null);
+                        var mwhy = co["why"] is JsonValue myv && myv.TryGetValue<string>(out var mys) && mys.Trim() != "" ? mys : null;
+                        if (ma is null || mb is null || ma == mb)
+                            problems.Add($"correction {k}: merge needs two different walls' marks [\"W57\", \"W111\"]");
+                        if (mwhy is null)
+                            problems.Add($"correction {k}: no why (every correction to the data says why)");
+                        problems.AddRange(co.Select(p => p.Key).Where(x => x is not ("merge" or "why")).Select(x => $"correction {k}: has {x}, which a merge doesn't take"));
+                        if (ma is { } a0 && mb is { } b0 && a0 != b0 && mwhy is not null && co.Count == 2)
+                            corrections.Add(new WallCorrection(a0, default, mwhy, CorrectionKind.Merge, MergeWith: b0));
                         continue;
                     }
                     if (co.ContainsKey("fill"))
@@ -530,6 +554,35 @@ public static class BuildData
         static string Xy(PlanPoint p) => string.Create(CultureInfo.InvariantCulture, $"({p.X:0.###}, {p.Y:0.###})");
         foreach (var c in corrections)
         {
+            if (c.Kind == CorrectionKind.Merge)
+            {
+                var (ka, kb) = (walls.FindIndex(x => x.Id == c.Wall), walls.FindIndex(x => x.Id == c.MergeWith));
+                var said = $"W{c.MergeWith} into W{c.Wall}: {c.Why}";
+                string? no = ka < 0 || kb < 0 ? "the data has no such wall"
+                    : model.Doors.Any(d => d.HostWall == c.Wall || d.HostWall == c.MergeWith)
+                      || model.Windows.Any(w => w.HostWall == c.Wall || w.HostWall == c.MergeWith) ? "a door or window is in one of them"
+                    : MergeProblem(walls[ka], walls[kb]);
+                if (no is not null)
+                {
+                    refused.Add($"refused merge {said} ({no})");
+                    continue;
+                }
+                var (wa, wb) = (walls[ka], walls[kb]);
+                double len = Distance(wa.Start, wa.End), ux = (wa.End.X - wa.Start.X) / len, uy = (wa.End.Y - wa.Start.Y) / len;
+                // b's side of a, across: the merged centre line half way between the two outer faces
+                var side = Math.Sign(-(wb.Start.X - wa.Start.X) * uy + (wb.Start.Y - wa.Start.Y) * ux);
+                var shift = side * wb.ThicknessIn / 24;
+                var merged = wa with
+                {
+                    Start = new PlanPoint(wa.Start.X - uy * shift, wa.Start.Y + ux * shift),
+                    End = new PlanPoint(wa.End.X - uy * shift, wa.End.Y + ux * shift),
+                    ThicknessIn = wa.ThicknessIn + wb.ThicknessIn,
+                };
+                walls[ka] = merged;
+                walls.RemoveAt(walls.FindIndex(x => x.Id == c.MergeWith));
+                applied.Add(I($"merged {said} (one wall {merged.ThicknessIn:0.##} in thick, centre line moved {Math.Abs(shift):0.###} ft)"));
+                continue;
+            }
             if (c.Kind == CorrectionKind.Fill)
             {
                 var (s, e, t) = (c.FillStart!.Value, c.ExtendEndTo, c.FillThicknessIn!.Value);
@@ -601,6 +654,26 @@ public static class BuildData
             }
         }
         return (model with { Walls = walls }, applied, refused);
+    }
+
+    /// <summary>Why two walls can't be merged into one (null when they can): parallel, their facing faces within 1/16 in
+    /// of each other, their ends within 1/16 in of each other's.</summary>
+    public static string? MergeProblem(BuildWall a, BuildWall b)
+    {
+        const double tol = 1.0 / 16 / 12;
+        double la = Distance(a.Start, a.End), ux = (a.End.X - a.Start.X) / la, uy = (a.End.Y - a.Start.Y) / la;
+        double lb = Distance(b.Start, b.End), vx = (b.End.X - b.Start.X) / lb, vy = (b.End.Y - b.Start.Y) / lb;
+        if (Math.Abs(ux * vy - uy * vx) > 1e-6)
+            return "they aren't parallel";
+        double Across(PlanPoint p) => -(p.X - a.Start.X) * uy + (p.Y - a.Start.Y) * ux;
+        double Along(PlanPoint p) => (p.X - a.Start.X) * ux + (p.Y - a.Start.Y) * uy;
+        var gap = Math.Abs(Across(b.Start)) - (a.ThicknessIn + b.ThicknessIn) / 24;
+        if (Math.Abs(Across(b.Start) - Across(b.End)) > tol || Math.Abs(gap) > tol)
+            return I($"their faces aren't together (a gap of {gap * 12:0.###} in)");
+        double b0 = Math.Min(Along(b.Start), Along(b.End)), b1 = Math.Max(Along(b.Start), Along(b.End));
+        if (Math.Abs(b0) > tol || Math.Abs(b1 - la) > tol)
+            return "they don't run the same stretch (their ends more than 1/16 in apart)";
+        return null;
     }
 
     // ---- what the data's walls leave open, and where they overlap --------------------------------------------------

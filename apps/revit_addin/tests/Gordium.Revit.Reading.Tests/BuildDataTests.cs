@@ -221,6 +221,54 @@ public sealed class BuildDataTests
         Assert.Equal(["filled W122", "filled W123"], fillsDone.Select(a => a[..11]));
         Assert.Empty(fillsNot);
         Assert.Empty(BuildData.WallOverlaps(filled.Walls));
+        // and the two merges of the walls drawn face to face (the 0 sq ft slivers Revit gave no point in)
+        var (_, mergesDone, mergesNot) = BuildData.Correct(filled, LibbyMerges);
+        Assert.Equal(2, mergesDone.Count);
+        Assert.Empty(mergesNot);
+    }
+
+    /// <summary>The two merges of eval_marks.yaml's model_corrections.</summary>
+    internal static readonly WallCorrection[] LibbyMerges =
+    [
+        new(57, default, "W111 drawn face to face against W57: a 0 sq ft sliver between them", CorrectionKind.Merge, MergeWith: 111),
+        new(65, default, "W114 drawn face to face against W65: a 0 sq ft sliver between them", CorrectionKind.Merge, MergeWith: 114),
+    ];
+
+    [Fact]
+    public void A_merge_draws_two_walls_face_to_face_as_one_and_refuses_any_other_pair()
+    {
+        var data = BuildData.Parse(Extracted());
+        var w = data.Walls[0];
+        // a 12 in wall at x 61.7889 and a 16 in one beside it, faces together: the Children's Odyssey's W57 and W111
+        var a = w with { Id = 57, Start = new PlanPoint(61.7889, 38.1778), End = new PlanPoint(61.7889, 34.8445), ThicknessIn = 12 };
+        var b = w with { Id = 111, Start = new PlanPoint(60.6222, 38.1778), End = new PlanPoint(60.6222, 34.8444), ThicknessIn = 16, Status = "New" };
+        var m = data with { Walls = [.. data.Walls, a, b] };
+        var merge = new WallCorrection(57, default, "face to face", CorrectionKind.Merge, MergeWith: 111);
+        var (merged, applied, refused) = BuildData.Correct(m, [merge]);
+        Assert.Empty(refused);
+        Assert.DoesNotContain(merged.Walls, x => x.Id == 111);
+        var one = merged.Walls.Single(x => x.Id == 57);
+        Assert.Equal(28, one.ThicknessIn);
+        Assert.Equal(61.1222, one.Start.X, 4);                    // half way between the outer faces, 59.9555 and 62.2889
+        Assert.StartsWith("merged W111 into W57", applied.Single());
+        foreach (var (other, words) in new[]
+                 {
+                     (b with { Start = new PlanPoint(60.5, 38.1778), End = new PlanPoint(60.5, 34.8444) }, "faces aren't together"),
+                     (b with { End = new PlanPoint(60.6222, 36) }, "the same stretch"),
+                     (b with { End = new PlanPoint(59.6222, 34.8444) }, "aren't parallel"),
+                 })
+        {
+            var (same, none, no) = BuildData.Correct(data with { Walls = [.. data.Walls, a, other] }, [merge]);
+            Assert.Empty(none);
+            Assert.Contains(words, no.Single());
+            Assert.Contains(same.Walls, x => x.Id == 111);
+        }
+        var hosting = m with { Doors = [.. m.Doors, data.Doors[0] with { HostWall = 111 }] };
+        Assert.Contains("a door or window", BuildData.Correct(hosting, [merge]).Refused.Single());
+        var r = BuildRequest.Parse(JsonNode.Parse("""
+            {"data": "d.json", "save_as": "o.rvt", "corrections": [{"merge": ["W57", "W111"], "why": "face to face"}]}
+            """));
+        Assert.Equal(merge, Assert.Single(r.Corrections));
     }
 
     /// <summary>The two fills of eval_marks.yaml's model_corrections: LS1.0 draws the east entry's angled jambs solid.</summary>
