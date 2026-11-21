@@ -45,6 +45,14 @@ figures:
         at:
         - 138.9
         - 84.4833
+    agreement:
+      tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
+        figure
+      sheet: 130.667
+      gordium: 116.034
+      difference: -14.633
+      allowed: 2.613
+      within_tolerance: false
   common_path:
     sheet_stated: 48.5
     sheet_words: DISTANCE TO COMMON PATH OF TRAVEL = 48'-6"
@@ -83,6 +91,14 @@ figures:
         at:
         - 194.0778
         - 1.5519
+    agreement:
+      tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
+        figure
+      sheet: 48.5
+      gordium: 41.066
+      difference: -7.434
+      allowed: 2.0
+      within_tolerance: false
   dead_end:
     sheet_stated: 21.5
     sheet_words: DEAD END CORRIDOR DISTANCE = 21'-6"
@@ -97,6 +113,10 @@ figures:
         not_measured: 'the corridor isn''t made of straight legs meeting at right
           angles (a part of it has no walls on its two long sides): its dead ends
           and width aren''t measured in this first version (decision 6)'
+    agreement:
+      tolerance: length within 1 ft, width within 1 in
+      within_tolerance: null
+      why: Gordium gives no figure
   remoteness:
     sheet_stated: 183.833
     sheet_words: 'PROVIDED REMOTENESS: 183''-10" (between its ticks)'
@@ -113,6 +133,14 @@ figures:
       - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bcac
       - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bce1
       farthest_pair_door_centres: 189.291
+    agreement:
+      tolerance: within 1 ft of Gordium's nearest-edge figure or of its door-centre
+        figure
+      sheet: 183.833
+      gordium: 187.164
+      difference: 3.331
+      allowed: 1.0
+      within_tolerance: false
   diagonal:
     sheet_stated: 210.208
     sheet_words: BLDG DIA. 210'-2 1/2" (between its ticks)
@@ -130,6 +158,13 @@ figures:
       - - 195.078
         - 0.0
       ratio: 0.8788
+    agreement:
+      tolerance: within 6 in
+      sheet: 210.208
+      gordium: 212.985
+      difference: 2.777
+      allowed: 0.5
+      within_tolerance: false
 storage:
   sheet_stated_sf: 1428
   sheet_story_sf: 16509
@@ -144,6 +179,21 @@ storage:
     STORAGE (14): 153.1
     STORAGE (28): 27.6
     STORAGE (29): 103.2
+  agreement_inside:
+    tolerance: the inside-walls figure within 1 percent
+    sheet: 1428
+    gordium: 1178.8
+    difference: -249.2
+    allowed: 14.28
+    within_tolerance: false
+  agreement_story_area:
+    tolerance: the outer-faces story area within 1 percent of 16,539 sf (the sheet's
+      16,509 is a recorded error)
+    sheet: 16539
+    gordium: 16539.9
+    difference: 0.9
+    allowed: 165.39
+    within_tolerance: true
 by_hand:
   travel_distance: the sheet's line turns at right angles and runs the corridor's
     centre line to the east exit; Gordium's is the shortest walk to the same exit
@@ -159,8 +209,7 @@ by_hand:
   diagonal: 'the sheet''s ticks are not at the traced outer outline''s corners (its
     north-east tick about 3 ft north of the traced north face): a trace or drawing
     difference, not settled'
-  storage: the sheet doesn't list its rooms; Gordium's outer-faces reading is within
-    1 percent of the sheet's
+  storage: the sheet doesn't list its rooms; Gordium counts the rooms marked accessory_storage
   story_sf_correct:
     figure: 16539
     working: the sheet's 16,509 is a recorded error (hand_check.yaml)
