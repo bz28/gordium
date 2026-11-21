@@ -40,7 +40,7 @@ checks:
     law: [IBC 2009 1014.3 (75 ft; its exceptions are for Groups B, F, S, I-3 and R-2, not I-4), NFPA 101 2012 16.2.5.3.1 (100 ft sprinklered)]
     most_restrictive: IBC 1014.3, 75 ft (NFPA allows 100 ft in a sprinklered building), as the sheet says
     result: pass
-    gordium_rules: [general.ibc_1014_3_common_path, general.nfpa_16_2_5_3_common_path]
+    gordium_rules: [general.ibc_1014_3_common_path, general.nfpa_16_2_5_3_1_common_path_sprinklered]
 
   - what: Dead-end corridor
     sheet_says: 'DEAD END CORRIDOR DISTANCE = 21''-6" (length < 2.5 x 10'' = 25'') 1018.4 Ex. 3 2009 IBC (most restrictive)'
@@ -65,7 +65,7 @@ checks:
     diagonal: {text: 210'-2 1/2", feet: 210.208}
     limit: {text: "one-third of the diagonal: 70'-1\"", feet: 70.069}
     law: [IBC 2009 1015.2.1 (one-half of the maximum overall diagonal) and its exception 2 (one-third, sprinklered throughout per 903.3.1.1 or 903.3.1.2)]
-    ratio: 0.8746     # 183.833 / 210.208: at least 1/3 needed (sprinklered)
+    ratio: 0.8745     # 183.833 / 210.208 = 0.87453: at least 1/3 needed (sprinklered)
     result: pass
     gordium_rules: [general.ibc_1015_2_1_remoteness]
     note: "210'-2 1/2\" / 3 = 70.069 ft = 70'-0 13/16\"; the sheet rounds it up to 70'-1\", which is the cautious way."
@@ -89,7 +89,7 @@ checks:
     sheet_says: 'Per NFPA 101 table 6.1.14.4.1 (b), the separation is to be 2 hours. This rating is permitted to be reduced by one hour due to the building being protected by an approved automatic sprinkler system in accordance with 9.7.1.1 (1) and supervised in accordance with 9.7.2.'
     law: [NFPA 101 2012 6.1.14.4.1, 6.1.14.4.3 and Table 6.1.14.4.1(b)]
     result: 1 hour required; the sheet's legend shows "NEW WALL - 1 HOUR"
-    gordium_rules: [general.nfpa_6_1_14_4_separation]
+    gordium_rules: [general.nfpa_6_1_14_4_1_separation, general.nfpa_6_1_14_4_3_sprinkler_reduction]
     note: The other occupancy is not named on the sheet, so the row of Table 6.1.14.4.1(b) it read is not known; needs review.
 
 # The sheet's own errors, named (never smoothed over):

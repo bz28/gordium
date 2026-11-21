@@ -7,36 +7,145 @@
 occupancy_group_i4:
   meaning: "The building (or the part of it checked) is classified in Group I-4, day care facilities (IBC 2009 308.5), as the architect states it; not Group E or R-3 by 308.5's and 308.5.2's limits"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.ibc_1004_1_1_occupant_load
+  - general.ibc_1014_3_common_path
+  - general.ibc_1015_1_two_exits
+  - general.ibc_1016_1_travel_distance
+  - general.ibc_1018_1_corridor_rating
+  - general.ibc_1018_4_dead_end
 sprinklered_903_3_1_1:
   meaning: "The building is equipped throughout with an automatic sprinkler system in accordance with IBC 2009 Section 903.3.1.1 (NFPA 13), as the architect states it"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.ibc_1015_2_1_remoteness
+  - general.ibc_1015_2_2_three_or_more_exits
+  - general.ibc_1016_1_travel_distance
+  - general.ibc_1018_1_corridor_rating
 sprinklered_903_3_1_2:
   meaning: "The building is equipped throughout with an automatic sprinkler system in accordance with IBC 2009 Section 903.3.1.2 (NFPA 13R), as the architect states it; Section 903 (not brought in) says where such a system is permitted"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.ibc_1015_2_1_remoteness
+  - general.ibc_1015_2_2_three_or_more_exits
+  - general.ibc_1016_1_travel_distance
+  - general.ibc_1018_1_corridor_rating
 nfpa_day_care_occupancy:
   meaning: "The building (or the part of it checked) is a day-care occupancy that NFPA 101 2012 Chapter 16 (new) or Chapter 17 (existing) applies to, as the architect states it (more than 12 clients: a day-care home, 3.3.140.1, is not one; the chapters' scope sections, 16.1.1 and 17.1.1, are not brought in)"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.nfpa_16_1_7_1_occupant_load
+  - general.nfpa_16_2_2_2_1_doors_complying_with
+  - general.nfpa_16_2_2_2_2_panic_hardware
+  - general.nfpa_16_2_2_2_3_1_delayed_egress_locking
+  - general.nfpa_16_2_2_2_3_2_access_controlled_egress
+  - general.nfpa_16_2_2_2_3_3_elevator_lobby_door
+  - general.nfpa_16_2_2_2_4_latches_openable_by
+  - general.nfpa_16_2_2_2_5_bathroom_locks_openable
+  - general.nfpa_16_2_5_2_dead_end
+  - general.nfpa_16_2_5_3_1_common_path_sprinklered
+  - general.nfpa_16_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_16_2_6_2_point_in_room_to_exit
+  - general.nfpa_16_2_6_2_room_door_to_exit
+  - general.nfpa_16_2_6_2_sleeping_room_to_door
+  - general.nfpa_16_2_6_3_sprinkler_increase
+  - general.nfpa_16_3_6_corridor_walls
+  - general.nfpa_17_1_7_1_occupant_load
+  - general.nfpa_17_2_2_2_1_doors_complying_with
+  - general.nfpa_17_2_2_2_2_panic_hardware
+  - general.nfpa_17_2_2_2_3_1_delayed_egress_locking
+  - general.nfpa_17_2_2_2_3_2_access_controlled_egress
+  - general.nfpa_17_2_2_2_3_3_elevator_lobby_door
+  - general.nfpa_17_2_2_2_4_latches_openable_by
+  - general.nfpa_17_2_2_2_5_bathroom_locks_openable
+  - general.nfpa_17_2_5_2_dead_end
+  - general.nfpa_17_2_5_3_1_common_path_sprinklered
+  - general.nfpa_17_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_17_2_6_2_point_in_room_to_exit
+  - general.nfpa_17_2_6_2_room_door_to_exit
+  - general.nfpa_17_2_6_2_sleeping_room_to_door
+  - general.nfpa_17_2_6_3_sprinkler_increase
+  - general.nfpa_17_3_6_corridor_walls
+  - general.nfpa_6_1_14_4_1_separation
 day_care_existing:
   meaning: "The day-care occupancy is an existing one (NFPA 101 2012 3.3.79 EXISTING: already in existence on the date this edition of the Code goes into effect), so Chapter 17 applies, not Chapter 16 (new), as the architect states it"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.nfpa_16_1_7_1_occupant_load
+  - general.nfpa_16_2_2_2_1_doors_complying_with
+  - general.nfpa_16_2_2_2_2_panic_hardware
+  - general.nfpa_16_2_2_2_3_1_delayed_egress_locking
+  - general.nfpa_16_2_2_2_3_2_access_controlled_egress
+  - general.nfpa_16_2_2_2_3_3_elevator_lobby_door
+  - general.nfpa_16_2_2_2_4_latches_openable_by
+  - general.nfpa_16_2_2_2_5_bathroom_locks_openable
+  - general.nfpa_16_2_5_2_dead_end
+  - general.nfpa_16_2_5_3_1_common_path_sprinklered
+  - general.nfpa_16_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_16_2_6_2_point_in_room_to_exit
+  - general.nfpa_16_2_6_2_room_door_to_exit
+  - general.nfpa_16_2_6_2_sleeping_room_to_door
+  - general.nfpa_16_2_6_3_sprinkler_increase
+  - general.nfpa_16_3_6_corridor_walls
+  - general.nfpa_17_1_7_1_occupant_load
+  - general.nfpa_17_2_2_2_1_doors_complying_with
+  - general.nfpa_17_2_2_2_2_panic_hardware
+  - general.nfpa_17_2_2_2_3_1_delayed_egress_locking
+  - general.nfpa_17_2_2_2_3_2_access_controlled_egress
+  - general.nfpa_17_2_2_2_3_3_elevator_lobby_door
+  - general.nfpa_17_2_2_2_4_latches_openable_by
+  - general.nfpa_17_2_2_2_5_bathroom_locks_openable
+  - general.nfpa_17_2_5_2_dead_end
+  - general.nfpa_17_2_5_3_1_common_path_sprinklered
+  - general.nfpa_17_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_17_2_6_2_point_in_room_to_exit
+  - general.nfpa_17_2_6_2_room_door_to_exit
+  - general.nfpa_17_2_6_2_sleeping_room_to_door
+  - general.nfpa_17_2_6_3_sprinkler_increase
+  - general.nfpa_17_3_6_corridor_walls
 sprinklered_9_7:
   meaning: "The building is protected throughout by an approved automatic sprinkler system in accordance with NFPA 101 2012 Section 9.7, as the architect states it"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.nfpa_16_2_5_2_dead_end
+  - general.nfpa_16_2_5_3_1_common_path_sprinklered
+  - general.nfpa_16_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_16_2_6_2_point_in_room_to_exit
+  - general.nfpa_16_2_6_2_room_door_to_exit
+  - general.nfpa_16_2_6_3_sprinkler_increase
+  - general.nfpa_16_3_6_corridor_walls
+  - general.nfpa_17_2_5_2_dead_end
+  - general.nfpa_17_2_5_3_1_common_path_sprinklered
+  - general.nfpa_17_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_17_2_6_2_point_in_room_to_exit
+  - general.nfpa_17_2_6_2_room_door_to_exit
+  - general.nfpa_17_2_6_3_sprinkler_increase
+  - general.nfpa_17_3_6_corridor_walls
+  - general.nfpa_6_1_14_4_3_sprinkler_reduction
 sprinkler_supervised_9_7:
   meaning: "That sprinkler system is supervised in accordance with NFPA 101 2012 Section 9.7 (9.7.2: electrical supervision of its valves and water flow), as the architect states it"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.nfpa_16_2_5_2_dead_end
+  - general.nfpa_16_2_5_3_1_common_path_sprinklered
+  - general.nfpa_16_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_16_2_6_2_point_in_room_to_exit
+  - general.nfpa_16_2_6_2_room_door_to_exit
+  - general.nfpa_16_2_6_3_sprinkler_increase
+  - general.nfpa_16_3_6_corridor_walls
+  - general.nfpa_17_2_5_2_dead_end
+  - general.nfpa_17_2_5_3_1_common_path_sprinklered
+  - general.nfpa_17_2_5_3_2_common_path_not_sprinklered
+  - general.nfpa_17_3_6_corridor_walls
+  - general.nfpa_6_1_14_4_3_sprinkler_reduction
 sprinkler_9_7_1_1_1:
   meaning: "That sprinkler system is installed in accordance with NFPA 101 2012 9.7.1.1(1) (NFPA 13), as the architect states it"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.nfpa_6_1_14_4_3_sprinkler_reduction
 client_spaces_open_outside:
   meaning: "Every space normally subject to client occupancy (student occupancy, as 17.3.6(1) prints it) has not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with NFPA 101 2012 7.5.3, as the architect states it (16.3.6(1), 17.3.6(1))"
   unit: yes_no
-  needed_by: []
+  needed_by:
+  - general.nfpa_16_3_6_corridor_walls
+  - general.nfpa_17_3_6_corridor_walls

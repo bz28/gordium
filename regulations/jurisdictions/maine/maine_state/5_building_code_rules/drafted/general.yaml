@@ -1,0 +1,3410 @@
+# Commercial egress rules for a day-care centre under Maine's codes, as the architect's sheet reads them: the
+# 2009 IBC and NFPA 101 (2012) (README.md). Hand-drafted in a Claude Code session (claude-opus-5-5, 2026-11-20),
+# checked by code (python -m rule_format). Every IBC requirement is a flag: the IBC copy is read from OCR only,
+# not verified, so its check is the drafted test (drafted_check in each example) and it always needs review.
+# NFPA rules use the second reading's numbers only (text_verification.gov.law.nfpa.101.2012.yaml). Where both
+# books set a limit, both apply and the stricter governs (each pair's notes). Graded against
+# test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml. Drafts: approval is deferred.
+district: general
+rules:
+- id: general.ibc_308_5_classification
+  kind: flag
+  topic: uses
+  title: Group I-4, day care facilities (IBC 308.5)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 61
+    lines:
+    - 62
+    - 67
+    quote: This group shall include buildings and structures occupied by persons of any age who receive custodial care for
+      less than 24 hours by individuals other than parents or guardians, relatives by blood, marriage or adoption, and in
+      a place other than the home of the person cared for.
+  - file: icc.ibc.2009.pdf
+    page: 61
+    lines:
+    - 67
+    - 69
+    quote: A facility such as the above with five or fewer persons shall be classified as a Group R-3 or shall comply with
+      the Interna tional Residential Code in accordance with Section 101.2.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Which group the building is in decides every limit below; the architect states it (occupancy_group_i4), a person
+      confirms.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    The rules of this rulebook are drafted for Group I-4 only (their applies_when); a building in another group needs its
+    own rules, so this flag always shows. Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_308_5_1_adult_care_classification
+  kind: flag
+  topic: uses
+  title: Adult care facility classified I-4 (IBC 308.5.1)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 61
+    lines:
+    - 71
+    - 74
+    quote: A facility that provides accom modations for less than 24 hours for more than five unre lated adults and provides
+      supervision and personal care services shall be classified as Group 1-4.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Adult day care for more than five: I-4, or R-3 by the exception; the architect states it.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    ''1-4'' is the OCR''s reading of I-4 (the book''s ICC print reads I-4). Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_308_5_2_child_care_classification
+  kind: flag
+  topic: uses
+  title: Child care facility classified I-4 or E (IBC 308.5.2)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 61
+    lines:
+    - 78
+    - 81
+    quote: A facility that provides supervi sion and personal care on less than a 24-hour basis for more than five children
+      2 1/2 years of age or less shall be classified as Group 1-4.
+  - file: icc.ibc.2009.pdf
+    page: 61
+    lines:
+    - 82
+    - 88
+    quote: 'Exception: A child day care facility that provides care for more than five but no more than 100 children 2 1/2
+      years or less of age, where the rooms in which the chil dren are cared for are located on a level ofexit discharge serving
+      such rooms and each of these child care rooms has an exitdoor directly to the exterior, shall be classified as Group
+      E.'
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'More than five children 2 1/2 or younger: I-4, unless the exception makes it Group E; the children''s ages and
+      the rooms'' doors are the architect''s statement.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    ''1-4'' is the OCR''s reading of I-4 (the book''s ICC print reads I-4). The answer key''s sheet says I-4. Hand-drafted
+    in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_1_accessory_area
+  kind: flag
+  topic: dimensions
+  title: Accessory occupancies at most 10% of the story (IBC 508.2.1)
+  check: story_accessory_area <= 0.10 * story_building_area
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 111
+    lines:
+    - 95
+    - 98
+    quote: Aggregate accessory occupan cies shall not occupy more than 10 percent of the building area of the story in which
+      they are located and shall not exceed the tabular values in Table 503,
+  examples:
+  - given: {}
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          story_accessory_area: 1428
+          story_building_area: 16509
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 1,428 sf of storage against 10%
+      of 16,509 sf = 1,650.9 sf: passes (the story is 16,539 sf as Ben reports it, 1,653.9 sf: passes either way).'
+  - given: {}
+    parts:
+      story:
+      - id: p2
+        name: Storage over 10%
+        measures:
+          story_accessory_area: 1700
+          story_building_area: 16509
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 1,700 sf is more than 1,650.9 sf.
+  - given: {}
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Its second test, Table 503''s tabular values (and Section 506''s increases), is not brought in: that part needs a person
+    whatever this test gives. The sheet cites only Table 503 and names no section for the 10 percent (hand_check.yaml sheet_errors).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_2_classification
+  kind: flag
+  topic: uses
+  title: Each accessory occupancy classified on its own (IBC 508.2.2)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 111
+    lines:
+    - 101
+    - 103
+    quote: Accessory occupancies shall be individually classified in accordance with Section 302.1.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Each accessory occupancy's own classification is the architect's statement.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_3_area_and_height
+  kind: flag
+  topic: dimensions
+  title: Accessory occupancy area and height (IBC 508.2.3)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 111
+    lines:
+    - 109
+    - 110
+    quote: The height of each accessory occupancy shall not exceed the tabular values in
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 503 and Sections 503.1 and 504 are not brought in: a person checks.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_4_separation
+  kind: flag
+  topic: fire_separation
+  title: No separation from the main occupancy, with exceptions (IBC 508.2.4)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 112
+    lines:
+    - 5
+    - 7
+    quote: No separation is required between accessory occupancies and the main occupancy.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Whether an exception (Group H, incidental, dwelling or sleeping units) applies is the architect's statement.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_5_incidental_accessory
+  kind: flag
+  topic: fire_separation
+  title: Incidental accessory occupancies separated (IBC 508.2.5)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 112
+    lines:
+    - 22
+    - 24
+    quote: 508.2.5 shall be separated from the remainder of the building or equipped with an automatic fire-extinguishing
+      system, or both, in accordance with Table 508.2.5.
+  - file: icc.ibc.2009.pdf
+    page: 112
+    lines:
+    - 57
+    - 57
+    quote: Laundry rooms over 100 square feet
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Which rooms are incidental (Table 508.2.5) and how they are separated are the architect's input.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_5_1_rated_separation
+  kind: flag
+  topic: fire_separation
+  title: Rated separation of incidental rooms (IBC 508.2.5.1)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 112
+    lines:
+    - 28
+    - 31
+    quote: Where Table 508.2.5 specifies a fire-resistance-rated separa tion, the incidental accessory occupancies shall be
+      sepa rated from the remainder of the bUilding by a fire barrier
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Sections 707 and 712 are not brought in: a person checks the assemblies.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_5_2_smoke_resisting_separation
+  kind: flag
+  topic: fire_separation
+  title: Smoke-resisting separation where sprinklered (IBC 508.2.5.2)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 112
+    lines:
+    - 41
+    - 42
+    quote: Where Table 508.2.5 permits an automatic fire-extinguishing system without a fire barrier, the inci-
+  examples:
+  - given: {}
+    expect: needs_review
+    note: The walls, doors and openings are a person's check.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_508_2_5_3_protection
+  kind: flag
+  topic: fire_separation
+  title: Sprinkler protection of the incidental room only (IBC 508.2.5.3)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 113
+    lines:
+    - 21
+    - 23
+    quote: only the space occupied by the inci dental accessory occupancy need be equipped with such a system.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: The system's extent is a person's check.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1004_1_design_occupant_load
+  kind: flag
+  topic: density_and_occupancy
+  title: Design occupant load, accessory areas included (IBC 1004.1)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 246
+    lines:
+    - 98
+    - 102
+    quote: Where occupants from accessory areas egress through a primary space, the calculated occupant load for the primary
+      space shall include the total occupant load of the primary space plus the number of occupants egressing through it from
+      the accessory area.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Whose egress passes through which space is the architect's input.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1004_1_1_occupant_load
+  kind: flag
+  topic: density_and_occupancy
+  title: Occupant load at least net area / 35 (IBC 1004.1.1)
+  applies_when: occupancy_group_i4
+  check: story_occupant_load >= story_day_care_net_area / 35
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 246
+    lines:
+    - 105
+    - 107
+    quote: For areas with out fixed seating, the occupant load shall not be less than that number determined by dividing the
+      floor area under
+  - file: icc.ibc.2009.pdf
+    page: 247
+    lines:
+    - 86
+    - 86
+    quote: Day care 35 net
+  examples:
+  - given:
+      occupancy_group_i4: true
+    parts:
+      story:
+      - id: p1
+        name: Day care, 3,500 sf net
+        measures:
+          story_occupant_load: 120
+          story_day_care_net_area: 3500
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+    note: 3,500 / 35 = 100 occupants at least; 120 stated.
+  - given:
+      occupancy_group_i4: true
+    parts:
+      story:
+      - id: p2
+        name: Too few occupants
+        measures:
+          story_occupant_load: 90
+          story_day_care_net_area: 3500
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 90 is fewer than 100.
+  - given:
+      occupancy_group_i4: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      occupancy_group_i4: false
+    parts:
+      story:
+      - id: p1
+        name: Office
+        measures:
+          story_occupant_load: 1
+          story_day_care_net_area: 3500
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    drafted_check: not_applicable
+    note: 'Not Group I-4: the day-care factor is not this building''s.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    The sheet gives no occupant load. Most restrictive: NFPA 101 16.1.7.1 uses the same 35 net (Table 7.3.1.2), and the greater
+    of that and the maximum probable population; both apply, the stricter governs (general.nfpa_16_1_7_1_occupant_load).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1008_1_2_door_swing
+  kind: flag
+  topic: means_of_egress
+  title: Egress doors swinging; with egress at 50 or more (IBC 1008.1.2)
+  check: moe_door_swinging and (moe_door_occupant_load < 50 or moe_door_swings_with_egress)
+  for_each: means_of_egress_door
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 251
+    lines:
+    - 92
+    - 93
+    quote: Egress doors shall be of the pivoted or side-hinged swinging type .
+  - file: icc.ibc.2009.pdf
+    page: 252
+    lines:
+    - 16
+    - 18
+    quote: Doors shall swing in the direction of egress travel where serving an occupant load of 50 or more persons or a Group
+      H occupancy.
+  examples:
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Classroom door, 20 occupants
+        measures:
+          moe_door_swinging: true
+          moe_door_occupant_load: 20
+          moe_door_swings_with_egress: false
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given: {}
+    parts:
+      means_of_egress_door:
+      - id: p2
+        name: Exit door, 120 occupants, swings in
+        measures:
+          moe_door_swinging: true
+          moe_door_occupant_load: 120
+          moe_door_swings_with_egress: false
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: Serves 50 or more and swings against egress.
+  - given: {}
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No means of egress door: the rule''s when_none (needs_review).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Its exceptions (revolving, horizontal sliding and power-operated doors complying with 1008.1.4, not brought in; private
+    garages, offices, factory and storage areas of 10 or fewer) are a person''s check: a door that is not swinging fails this
+    drafted test, never passes it.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1014_3_common_path
+  kind: flag
+  topic: means_of_egress
+  title: Common path of egress travel at most 75 ft (IBC 1014.3)
+  applies_when: occupancy_group_i4
+  check: common_path_of_travel <= 75
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 265
+    lines:
+    - 76
+    - 78
+    quote: In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22
+      860 mm).
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          common_path_of_travel: 48.5
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 48''-6" against 75''-0": passes.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p2
+        name: Long common path
+        measures:
+          common_path_of_travel: 80
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 80 ft is over 75 ft.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Its exceptions raise the limit for Groups B, F, S, I-3 and R-2, not I-4 (sprinklered or not). Most restrictive: NFPA 101
+    16.2.5.3.1 allows 100 ft in a building sprinklered throughout (approved, supervised, Section 9.7), 16.2.5.3.2 75 ft otherwise;
+    both apply and the stricter governs: this rule''s 75 ft, as the sheet says (''1014.3 2009 IBC (most restrictive)'').'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1015_1_two_exits
+  kind: flag
+  topic: means_of_egress
+  title: Two exits from a space over 10 occupants or a long common path (IBC 1015.1)
+  applies_when: occupancy_group_i4
+  check: space_exit_count >= 2 or (space_occupant_load <= 10 and space_common_path <= 75)
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 265
+    lines:
+    - 105
+    - 107
+    quote: 'Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:'
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 25
+    - 25
+    quote: a. Day care maximum occupant load is 10.
+  - file: icc.ibc.2009.pdf
+    page: 265
+    lines:
+    - 76
+    - 78
+    quote: In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22
+      860 mm).
+  examples:
+  - given:
+      occupancy_group_i4: true
+    parts:
+      space:
+      - id: p1
+        name: Classroom, 30 occupants, two doors
+        measures:
+          space_occupant_load: 30
+          space_exit_count: 2
+          space_common_path: 40
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given:
+      occupancy_group_i4: true
+    parts:
+      space:
+      - id: p2
+        name: Classroom, 30 occupants, one door
+        measures:
+          space_occupant_load: 30
+          space_exit_count: 1
+          space_common_path: 40
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 'Over 10 occupants: two needed.'
+  - given:
+      occupancy_group_i4: true
+    parts:
+      space:
+      - id: p3
+        name: Office, 4 occupants, one door
+        measures:
+          space_occupant_load: 4
+          space_exit_count: 1
+          space_common_path: 30
+    rows:
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given:
+      occupancy_group_i4: true
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Table 1015.1''s I-4 row prints ''1-4'' (the OCR''s reading; ICC''s book prints I-4) and its footnote a sets day care at
+    10. Condition 3 (1015.3 to 1015.6.1, not brought in) is a person''s check.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1015_1_1_three_or_more_exits
+  kind: flag
+  topic: means_of_egress
+  title: Three exits from 501-1,000 occupants, four above (IBC 1015.1.1)
+  check: (space_occupant_load < 501 or space_exit_count >= 3) and (space_occupant_load <= 1000 or space_exit_count >= 4)
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 27
+    - 28
+    quote: Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000.
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 28
+    - 30
+    quote: Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000.
+  examples:
+  - given: {}
+    parts:
+      space:
+      - id: p1
+        name: Hall, 600 occupants, three doors
+        measures:
+          space_occupant_load: 600
+          space_exit_count: 3
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given: {}
+    parts:
+      space:
+      - id: p2
+        name: Hall, 600 occupants, two doors
+        measures:
+          space_occupant_load: 600
+          space_exit_count: 2
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+  - given: {}
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1015_2_arrangement
+  kind: flag
+  topic: means_of_egress
+  title: Exits obvious and unobstructed (IBC 1015.2)
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 31
+    - 33
+    quote: Required exits shall be located in a manner that makes their availability obvious. Exits shall be unobstructed
+      at all times.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Whether exits are obvious and unobstructed is a person's judgment.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Hand-drafted in a Claude Code session (2026-11-20).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1015_2_1_remoteness
+  kind: flag
+  topic: means_of_egress
+  title: Two exits at least 1/2 the diagonal apart, 1/3 sprinklered (IBC 1015.2.1)
+  check: exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2)
+  review_when:
+  - when: story_exit_count < 2
+    reason: 'Fewer than two exits on the story: this applies where two are required (1015.1 decides whether they are); a person
+      checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 36
+    - 38
+    quote: Where two exits or exit access doorways are required from any portion of the exit access,
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 38
+    - 42
+    quote: the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the
+      length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line between
+      exit doors or exit access doorways.
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 56
+    - 58
+    quote: of the exitdoors or exit access doorways shall not be less than one-third of the length of the maximum overall
+      diagonal dimension of the area served.
+  examples:
+  - given:
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          exit_remoteness_ratio: 0.8745
+          story_exit_count: 2
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 183''-10" apart over a 210''-2
+      1/2" diagonal = 0.8745, at least 1/3 (70''-0 13/16"; the sheet rounds up to 70''-1"): passes.'
+  - given:
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p2
+        name: Exits close together
+        measures:
+          exit_remoteness_ratio: 0.3
+          story_exit_count: 2
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 0.30 is under 1/3.
+  - given:
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          exit_remoteness_ratio: 0.4
+          story_exit_count: 2
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 'Not sprinklered: one-half applies, and 0.4 is under it.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Exception 1 (exit enclosures joined by a 1-hour corridor: measured along the corridor; ''I-hour'' is the OCR''s reading
+    of 1-hour) is a person''s check. NFPA 101''s day-care chapters set no remoteness of their own in the brought-in parts
+    (7.5.1.3, not brought in, would): this IBC rule is the only one here.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1015_2_2_three_or_more_exits
+  kind: flag
+  topic: means_of_egress
+  title: 'Three or more exits: two arranged per 1015.2.1 (IBC 1015.2.2)'
+  check: story_exit_count < 3 or exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1
+    / 2)
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 60
+    - 62
+    quote: Where access to three or more exits is required, at least two exit doors or exit access doorways shall be arranged
+      in accordance with the provisions of Section 1015.2.1.
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 38
+    - 42
+    quote: the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the
+      length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line between
+      exit doors or exit access doorways.
+  - file: icc.ibc.2009.pdf
+    page: 266
+    lines:
+    - 56
+    - 58
+    quote: of the exitdoors or exit access doorways shall not be less than one-third of the length of the maximum overall
+      diagonal dimension of the area served.
+  examples:
+  - given:
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Three exits, far apart
+        measures:
+          exit_remoteness_ratio: 0.6
+          story_exit_count: 3
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given:
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p2
+        name: Three exits, close
+        measures:
+          exit_remoteness_ratio: 0.2
+          story_exit_count: 3
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+  - given:
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    exit_remoteness_ratio is of the two farthest-apart exits, so it is the best pair 1015.2.2 asks for.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1016_1_travel_distance
+  kind: flag
+  topic: means_of_egress
+  title: Exit access travel at most 200 ft, I-4 sprinklered (IBC 1016.1)
+  applies_when: occupancy_group_i4
+  check: (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and egress_travel_distance <= 200
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 267
+    lines:
+    - 14
+    - 17
+    quote: Exits shall be so located on each story such that the maximum length of exit access travel, measured from the most
+      remote point within a story along the natural and unobstructed path of egress travel to an
+  - file: icc.ibc.2009.pdf
+    page: 267
+    lines:
+    - 81
+    - 81
+    quote: 1-2,1-3,1-4 Not Permitted 200
+  - file: icc.ibc.2009.pdf
+    page: 267
+    lines:
+    - 99
+    - 100
+    quote: b. Buildings equipped throughout with an automatic sprinkler system in accor dance with Section 903 .3.1.1 or 903.3.1.2.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 130''-8" against 200'' (I-4, sprinklered):
+      passes.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p2
+        name: Long travel
+        measures:
+          egress_travel_distance: 210
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 210 ft is over 200 ft.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          egress_travel_distance: 100
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 'Table 1016.1: Group I-4 without a sprinkler system is Not Permitted.'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Table 1016.1''s row prints ''1-2,1-3,1-4'' (the OCR''s reading of I-2, I-3, I-4). Exceptions 3 and 4 are for occupancies
+    other than Groups H and I. Most restrictive: NFPA 101 16.2.6.2(2) allows 150 ft from any point in a room, plus 50 ft sprinklered
+    (16.2.6.3: 200 ft), and 16.2.6.2(1) 100 ft (150 ft) from a room door; both apply, the stricter governs. At the sheet''s
+    130''-8" both pass; NFPA''s room-door limit is the tighter where a room door is far from an exit.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1018_1_corridor_rating
+  kind: flag
+  topic: means_of_egress
+  title: 'Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1)'
+  applies_when: occupancy_group_i4
+  check: sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 268
+    lines:
+    - 58
+    - 59
+    quote: Corridors shall be fire-resistance rated in accordance with Table 1018.1.
+  - file: icc.ibc.2009.pdf
+    page: 268
+    lines:
+    - 87
+    - 87
+    quote: 1-2 ,1-4 All
+  - file: icc.ibc.2009.pdf
+    page: 268
+    lines:
+    - 97
+    - 97
+    quote: Not Permitted 0
+  - file: icc.ibc.2009.pdf
+    page: 268
+    lines:
+    - 101
+    - 101
+    quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2
+      where allowed.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Main corridor, sprinklered
+        measures:
+          corridor_fire_rating_hours: 0
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          corridor_fire_rating_hours: 1
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 'I-4 without a sprinkler system: Not Permitted.'
+  - given:
+      occupancy_group_i4: true
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Table 1018.1''s rows are read in two runs (occupancy and load; then the ratings), so the I-4 row (''1-2 ,1-4 All'', the
+    OCR''s reading of I-2, I-4) and its ratings (''Not Permitted 0'') are quoted apart; ICC''s book prints them in one row.
+    Most restrictive: NFPA 101 16.3.6 requires 1-hour corridor walls unless the building is sprinklered (approved, supervised)
+    and the walls form smoke partitions, or every client space opens outside; both apply, the stricter governs (NFPA''s smoke
+    partitions).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1018_2_corridor_width
+  kind: flag
+  topic: means_of_egress
+  title: Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2)
+  check: corridor_width >= (36 if corridor_occupant_load < 50 else 44)
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 269
+    lines:
+    - 2
+    - 4
+    quote: The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm).
+  - file: icc.ibc.2009.pdf
+    page: 269
+    lines:
+    - 9
+    - 10
+    quote: 2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50.
+  examples:
+  - given: {}
+    parts:
+      corridor:
+      - id: p1
+        name: Main corridor
+        measures:
+          corridor_width: 60
+          corridor_occupant_load: 120
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given: {}
+    parts:
+      corridor:
+      - id: p2
+        name: Narrow corridor
+        measures:
+          corridor_width: 40
+          corridor_occupant_load: 120
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 40 in is under 44 in.
+  - given: {}
+    parts:
+      corridor:
+      - id: p3
+        name: Back corridor, 20 occupants
+        measures:
+          corridor_width: 40
+          corridor_occupant_load: 20
+    rows:
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+    note: 'Exception 2: 36 in.'
+  - given: {}
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    Section 1005.1 (width by occupant load, not brought in) may ask more: a person checks. Exceptions 1, 3, 4, 5 and 6 are
+    for other spaces and occupancies.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.ibc_1018_4_dead_end
+  kind: flag
+  topic: means_of_egress
+  title: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4)
+  applies_when: occupancy_group_i4
+  check: corridor_dead_end_length <= 20 or corridor_dead_end_length < 2.5 * corridor_dead_end_least_width
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: icc.ibc.2009.pdf
+    page: 269
+    lines:
+    - 26
+    - 28
+    quote: the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in
+      length.
+  - file: icc.ibc.2009.pdf
+    page: 269
+    lines:
+    - 39
+    - 41
+    quote: 3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5
+      times the least width of the dead-end corridor.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor (the sheet)
+        measures:
+          corridor_dead_end_length: 21.5
+          corridor_dead_end_least_width: 10
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" is over 20 ft, but less
+      than 2.5 x 10 ft = 25 ft: exception 3, passes.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p2
+        name: Long dead end
+        measures:
+          corridor_dead_end_length: 26
+          corridor_dead_end_least_width: 10
+    rows:
+    - part: p2
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: fail
+    note: 26 ft is over 20 ft and not under 25 ft.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p3
+        name: Short dead end
+        measures:
+          corridor_dead_end_length: 15
+          corridor_dead_end_least_width: 5
+    rows:
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    drafted_check: pass
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  open_questions:
+  - 'Which dead-end limit Maine enforced on the October 2016 permit: the 2009 IBC''s (20 ft, with exception 3) and NFPA 101''s
+    (50 ft sprinklered), or a Maine modification of 16-219 CMR ch. 20 setting a flat 20 ft (today''s rule has one)?'
+  research:
+  - question: 'Which dead-end limit Maine enforced on the October 2016 permit: the 2009 IBC''s (20 ft, with exception 3) and
+      NFPA 101''s (50 ft sprinklered), or a Maine modification of 16-219 CMR ch. 20 setting a flat 20 ft (today''s rule has
+      one)?'
+    searched:
+    - '1018.4'
+    - 16.2.5.2
+    - 17.2.5.2
+    sources:
+    - rank: 2
+      cite: '16-219 CMR ch. 20, Fire Safety in Buildings and Structures (Maine State Fire Marshal), as published today (amended
+        2021-01-25): adopts the 2018 NFPA 101 with Maine''s modifications, one setting the dead-end corridor limit at 20 ft;
+        read 2026-11-20 (docs/decisions/2026-11-20_commercial_egress_maine.md)'
+    why_open: The rule text in force in October 2016 was not found online; today's names a later edition. A question for the
+      City of Portland or the State Fire Marshal's office.
+  notes: 'Read from an OCR copy only: not verified; needs review until checked against a purchased ICC copy. So this is a
+    flag (always needs review); its check is the drafted test, never run for a result, and each example''s drafted_check is
+    what that test gives (text_verification.icc.ibc.2009.yaml not_verified; docs/decisions/2026-11-20_commercial_egress_maine.md).
+    It applies where more than one exit or exit access doorway is required (1015.1): with one, a person decides. Exception
+    2''s 50 ft (sprinklered) lists Groups B, E, F, I-1, M, R-1, R-2, R-4, S and U, not I-4; exception 1 is Group I-3. Most
+    restrictive: NFPA 101 16.2.5.2 allows 50 ft in a building sprinklered throughout (approved, supervised), 20 ft otherwise;
+    both apply, the stricter governs: here the IBC''s 25 ft (2.5 x 10 ft), as the sheet says. Maine''s own Life Safety rule
+    (16-219 CMR ch. 20) today sets a flat 20 ft limit, which 21''-6" would fail: open (README).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_1_7_1_occupant_load
+  kind: rule
+  topic: density_and_occupancy
+  title: Occupant load at least net area / 35 (NFPA 16.1.7.1)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  check: story_occupant_load >= story_day_care_net_area / 35
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 173
+    lines:
+    - 29
+    - 34
+    quote: 16.1.7.1 The occupant load, in number of persons for whom means of egress and other provisions are required, either
+      shall be determined on the basis of the occupant load factors of Table 7.3.1.2 that are characteristic of the use of
+      the space or shall be determined as the maximum probable population of the space under consideration, whichever is greater.
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 77
+    lines:
+    - 41
+    - 41
+    quote: Day-Care Use 35 net 3.3 net
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      story:
+      - id: p1
+        name: Day care, 3,500 sf net
+        measures:
+          story_occupant_load: 120
+          story_day_care_net_area: 3500
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 3,500 / 35 = 100 at least; 120 stated.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      story:
+      - id: p2
+        name: Too few occupants
+        measures:
+          story_occupant_load: 90
+          story_day_care_net_area: 3500
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      story:
+      - id: p1
+        name: Other chapter
+        measures:
+          story_occupant_load: 1
+          story_day_care_net_area: 3500
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not a new day-care occupancy: the other chapter''s rule applies.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). The stated occupant load is the design number; the maximum probable
+    population, where greater, is the architect''s statement. Most restrictive: IBC 1004.1.1 uses the same 35 net (a flag:
+    OCR copy); both apply, the stricter governs.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_2_2_1_doors_complying_with
+  kind: flag
+  topic: means_of_egress
+  title: Doors complying with 7.2.1 (NFPA 16.2.2.2.1)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 8
+    - 9
+    quote: 16.2.2.2.1 General. Doors complying with 7.2.1 shall be per- mitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: needs_review
+    note: 'Section 7.2.1 is not brought in: whether each door complies needs review.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: not_applicable
+    note: Not a new day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_2_2_3_1_delayed_egress_locking
+  kind: flag
+  topic: means_of_egress
+  title: Delayed-egress locking (NFPA 16.2.2.2.3.1)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 16
+    - 17
+    quote: 16.2.2.2.3.1 Delayed-egress locking systems complying with 7.2.1.6.1 shall be permitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: needs_review
+    note: '7.2.1.6.1 is not brought in: a person checks the system.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: not_applicable
+    note: Not a new day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_2_2_3_2_access_controlled_egress
+  kind: flag
+  topic: means_of_egress
+  title: Access-controlled egress doors (NFPA 16.2.2.2.3.2)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 18
+    - 19
+    quote: 16.2.2.2.3.2 Access-controlled egress door assemblies com- plying with 7.2.1.6.2 shall be permitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: needs_review
+    note: '7.2.1.6.2 is not brought in: a person checks.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: not_applicable
+    note: Not a new day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_2_2_3_3_elevator_lobby_door
+  kind: flag
+  topic: means_of_egress
+  title: Elevator lobby door locking (NFPA 16.2.2.2.3.3)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 20
+    - 21
+    quote: 16.2.2.2.3.3 Elevator lobby exit access door assemblies lock- ing in accordance with 7.2.1.6.3 shall be permitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: needs_review
+    note: '7.2.1.6.3 is not brought in: a person checks.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: not_applicable
+    note: Not a new day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_2_2_4_latches_openable_by
+  kind: flag
+  topic: means_of_egress
+  title: Latches openable by clients from inside (NFPA 16.2.2.2.4)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 22
+    - 24
+    quote: Every door latch to closets, storage areas, kitchens, and other similar spaces or areas shall be such that clients
+      can open the door from inside the space or area.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: needs_review
+    note: The hardware is a person's check.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: not_applicable
+    note: Not a new day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_2_2_5_bathroom_locks_openable
+  kind: flag
+  topic: means_of_egress
+  title: Bathroom locks openable from outside by staff (NFPA 16.2.2.2.5)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 25
+    - 26
+    quote: Every bathroom door lock shall be designed to allow opening of the locked door from the outside by
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: needs_review
+    note: The hardware is a person's check.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: not_applicable
+    note: Not a new day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_2_2_2_panic_hardware
+  kind: rule
+  topic: means_of_egress
+  title: Latch only with panic hardware at 100+ (NFPA 16.2.2.2.2)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  check: moe_door_area_occupant_load < 100 or not moe_door_latched or moe_door_panic_hardware
+  for_each: means_of_egress_door
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 10
+    - 11
+    quote: 16.2.2.2.2 Panic Hardware or Fire Exit Hardware. Any door in a required means of egress from an area having an
+      occupant
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 12
+    - 14
+    quote: load of 100 or more persons shall be permitted to be provided with a latch or lock only if the latch or lock is
+      panic hardware or fire exit hardware complying with 7.2.1.7.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Main exit, panic bar
+        measures:
+          moe_door_area_occupant_load: 150
+          moe_door_latched: true
+          moe_door_panic_hardware: true
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      means_of_egress_door:
+      - id: p2
+        name: Main exit, lever latch
+        measures:
+          moe_door_area_occupant_load: 150
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      means_of_egress_door:
+      - id: p3
+        name: Classroom door
+        measures:
+          moe_door_area_occupant_load: 30
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+    rows:
+    - part: p3
+      outcome: pass
+    expect: pass
+    note: Under 100.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No means of egress door: the rule''s when_none (needs_review).'
+  notes: Hand-drafted in a Claude Code session (2026-11-20). Whether the hardware complies with 7.2.1.7 (not brought in) is
+    the architect's statement (moe_door_panic_hardware).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_5_2_dead_end
+  kind: rule
+  topic: means_of_egress
+  title: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  check: corridor_dead_end_length <= (50 if sprinklered_9_7 and sprinkler_supervised_9_7 else 20)
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 59
+    - 63
+    quote: 16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an
+      approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall
+      not exceed 50 ft (15 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor (the sheet)
+        measures:
+          corridor_dead_end_length: 21.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" against 50 ft (sprinklered,
+      supervised): passes.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor:
+      - id: p2
+        name: Very long dead end
+        measures:
+          corridor_dead_end_length: 55
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      corridor:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          corridor_dead_end_length: 21.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: 20 ft, and 21''-6" is over.'
+  open_questions:
+  - Whether Maine's 16-219 CMR ch. 20, as in force in October 2016, modified this dead-end limit (today's rule sets a flat
+    20 ft).
+  research:
+  - question: Whether Maine's 16-219 CMR ch. 20, as in force in October 2016, modified this dead-end limit (today's rule sets
+      a flat 20 ft).
+    searched:
+    - 16.2.5.2
+    - '1018.4'
+    sources:
+    - rank: 2
+      cite: '16-219 CMR ch. 20 (Maine State Fire Marshal), as published today (amended 2021-01-25): the 2018 NFPA 101 with
+        Maine''s modifications, one a 20-ft dead-end limit; read 2026-11-20'
+    why_open: The rule text in force in 2016 was not found online; a question for the State Fire Marshal's office or the City
+      of Portland.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
+    2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs (the
+    sheet: 25 ft by the IBC). Maine''s 16-219 CMR ch. 20 today sets a flat 20 ft: open (general.ibc_1018_4_dead_end, README).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_5_3_1_common_path_sprinklered
+  kind: rule
+  topic: means_of_egress
+  title: Common path 100 ft, sprinklered (NFPA 16.2.5.3.1)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing and sprinklered_9_7 and sprinkler_supervised_9_7
+  check: common_path_of_travel <= 100
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 66
+    - 69
+    quote: 16.2.5.3.1 Common path of travel shall not exceed 100 ft (30 m) in a building protected throughout by an approved,
+      supervised automatic sprinkler system in accordance with Section 9.7.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          common_path_of_travel: 48.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 48''-6" against 100 ft.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p2
+        name: Long common path
+        measures:
+          common_path_of_travel: 110
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          common_path_of_travel: 48.5
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not sprinklered: 16.2.5.3.2 applies.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1014.3''s 75 ft (a flag: OCR copy) is
+    stricter than this 100 ft; both apply, the stricter governs, as the sheet says.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_5_3_2_common_path_not_sprinklered
+  kind: rule
+  topic: means_of_egress
+  title: Common path 75 ft, not sprinklered (NFPA 16.2.5.3.2)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing and not (sprinklered_9_7 and sprinkler_supervised_9_7)
+  check: common_path_of_travel <= 75
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 70
+    - 72
+    quote: 16.2.5.3.2 Common path of travel shall not exceed 75 ft (23 m) in a building not protected throughout by an approved,
+      super- vised automatic sprinkler system in accordance with Section 9.7.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Short common path
+        measures:
+          common_path_of_travel: 48.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Long common path
+        measures:
+          common_path_of_travel: 80
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: Sprinklered
+        measures:
+          common_path_of_travel: 80
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Sprinklered (approved, supervised): 16.2.5.3.1 applies.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: the same 75 ft as IBC 1014.3 (a flag: OCR
+    copy); both apply, the stricter governs (they agree).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_6_2_room_door_to_exit
+  kind: rule
+  topic: means_of_egress
+  title: Travel room door to exit at most 100 ft (NFPA 16.2.6.2(1))
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  check: egress_travel_from_room_door <= 100
+  review_when:
+  - when: egress_travel_from_room_door > 100 and sprinklered_9_7 and sprinkler_supervised_9_7
+    reason: 'Over 100 ft in a building protected throughout by an approved, supervised automatic sprinkler system (Section
+      9.7): 16.2.6.3 permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_16_2_6_3_sprinkler_increase);
+      a person applies it.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 76
+    - 77
+    quote: '16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 78
+    - 79
+    quote: The travel distance between any room door intended as an exit access and an exit shall not exceed 100 ft (30 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Floor, room doors near exits
+        measures:
+          egress_travel_from_room_door: 80
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Floor, a far room door
+        measures:
+          egress_travel_from_room_door: 120
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: 120 ft is over 100 ft.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p9
+        name: Sprinklered, over the limit
+        measures:
+          egress_travel_from_room_door: 130
+    rows:
+    - part: p9
+      outcome: needs_review
+    expect: needs_review
+    note: 'Sprinklered: 16.2.6.3''s increase applies; a person checks.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). The sheet gives no room-door distance, so this needs that length
+    (needs review on the sheet''s data). Travel is measured per Section 7.6 (not brought in): parts.yaml says how.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_6_2_point_in_room_to_exit
+  kind: rule
+  topic: means_of_egress
+  title: Travel point in room to exit at most 150 ft (NFPA 16.2.6.2(2))
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  check: egress_travel_distance <= 150
+  review_when:
+  - when: egress_travel_distance > 150 and sprinklered_9_7 and sprinkler_supervised_9_7
+    reason: 'Over 150 ft in a building protected throughout by an approved, supervised automatic sprinkler system (Section
+      9.7): 16.2.6.3 permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_16_2_6_3_sprinkler_increase);
+      a person applies it.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 76
+    - 77
+    quote: '16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 80
+    - 81
+    quote: The travel distance between any point in a room and an exit shall not exceed 150 ft (46 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 130''-8" is within 150 ft without
+      the sprinkler increase: passes.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Long travel
+        measures:
+          egress_travel_distance: 160
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: 160 ft is over 150 ft.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p9
+        name: Sprinklered, over the limit
+        measures:
+          egress_travel_distance: 180
+    rows:
+    - part: p9
+      outcome: needs_review
+    expect: needs_review
+    note: 'Sprinklered: 16.2.6.3''s increase applies; a person checks.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1016.1 allows 200 ft for I-4 sprinklered
+    (a flag: OCR copy); NFPA 150 ft plus 50 ft sprinklered (16.2.6.3): both apply, the stricter governs; the sheet''s 130''-8"
+    passes both.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_6_2_sleeping_room_to_door
+  kind: rule
+  topic: means_of_egress
+  title: Travel sleeping room to door at most 50 ft (NFPA 16.2.6.2(3))
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  check: egress_travel_in_sleeping_room <= 50
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 76
+    - 77
+    quote: '16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 82
+    - 84
+    quote: The travel distance between any point in a sleeping room and an exit access door in that room shall not exceed
+      50 ft (15 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Nap room
+        measures:
+          egress_travel_in_sleeping_room: 30
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Large nap room
+        measures:
+          egress_travel_in_sleeping_room: 60
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 60 ft is over 50 ft.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: Hand-drafted in a Claude Code session (2026-11-20). 16.2.6.3's increase is for items (1) and (2) only, never (3).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_2_6_3_sprinkler_increase
+  kind: flag
+  topic: means_of_egress
+  title: Travel +50 ft where sprinklered (NFPA 16.2.6.3)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing and sprinklered_9_7 and sprinkler_supervised_9_7 and (egress_travel_from_room_door
+    > 100 or egress_travel_distance > 150)
+  for_each: story
+  when_none: not_applicable
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 85
+    - 85
+    quote: 16.2.6.3 The travel distance required by 16.2.6.2(1) and
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 86
+    - 86
+    quote: (2) shall be permitted to be increased by 50 ft (15 m) in
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 78
+    - 79
+    quote: The travel distance between any room door intended as an exit access and an exit shall not exceed 100 ft (30 m).
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 174
+    lines:
+    - 80
+    - 81
+    quote: The travel distance between any point in a room and an exit shall not exceed 150 ft (46 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: Over the plain limit
+        measures:
+          egress_travel_distance: 170
+          egress_travel_from_room_door: 90
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: '170 ft: over 150 ft, within the increased limit; a person applies the increase.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: Within the plain limits
+        measures:
+          egress_travel_distance: 130.667
+          egress_travel_from_room_door: 90
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Within 100 and 150 ft: the increase is not needed.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No story: nothing to increase (the other rules need the stories).'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). A flag: the second reading reads its 50 ft as no limit of its
+    own (''none'', a permission to exceed), so code never adds it; where a travel is over 16.2.6.2''s plain limits in such
+    a building, a person applies it.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_16_3_6_corridor_walls
+  kind: rule
+  topic: means_of_egress
+  title: Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6)
+  applies_when: nfpa_day_care_occupancy and not day_care_existing
+  check: corridor_fire_rating_hours >= 1 or client_spaces_open_outside or (sprinklered_9_7 and sprinkler_supervised_9_7 and
+    corridor_walls_smoke_partitions)
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 176
+    lines:
+    - 26
+    - 29
+    quote: '16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance
+      rating in accordance with Section 8.3, unless otherwise permitted by any of the following:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 176
+    lines:
+    - 30
+    - 33
+    quote: Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than
+      one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3.
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 176
+    lines:
+    - 34
+    - 38
+    quote: In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec-
+      tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor-
+      dance with Section 8.4.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+      client_spaces_open_outside: false
+    parts:
+      corridor:
+      - id: p1
+        name: Main corridor (the sheet)
+        measures:
+          corridor_fire_rating_hours: 0
+          corridor_walls_smoke_partitions: true
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): sprinklered throughout (supervised),
+      corridor walls drawn as smoke partitions: item (2), passes.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+      client_spaces_open_outside: false
+    parts:
+      corridor:
+      - id: p2
+        name: Corridor, open walls
+        measures:
+          corridor_fire_rating_hours: 0
+          corridor_walls_smoke_partitions: false
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: Not rated and not smoke partitions.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+      client_spaces_open_outside: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+      client_spaces_open_outside: false
+    parts:
+      corridor:
+      - id: p1
+        name: Unsprinklered, rated
+        measures:
+          corridor_fire_rating_hours: 1
+          corridor_walls_smoke_partitions: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Rated walls.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Items (3) to (5) (walls ending at a rated ceiling; lavatories)
+    permit less, so leaving them out never passes what fails; a design relying on them fails here and a person checks. Most
+    restrictive: IBC 1018.1 asks 0 hours for I-4 sprinklered (a flag: OCR copy); both apply, the stricter governs: NFPA''s
+    smoke partitions.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_1_7_1_occupant_load
+  kind: rule
+  topic: density_and_occupancy
+  title: Occupant load at least net area / 35 (NFPA 17.1.7.1)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  check: story_occupant_load >= story_day_care_net_area / 35
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 180
+    lines:
+    - 15
+    - 20
+    quote: 17.1.7.1 The occupant load, in number of persons for whom means of egress and other provisions are required, either
+      shall be determined on the basis of the occupant load factors of Table 7.3.1.2 that are characteristic of the use of
+      the space or shall be determined as the maximum probable population of the space under consideration, whichever is greater.
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 77
+    lines:
+    - 41
+    - 41
+    quote: Day-Care Use 35 net 3.3 net
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      story:
+      - id: p1
+        name: Day care, 3,500 sf net
+        measures:
+          story_occupant_load: 120
+          story_day_care_net_area: 3500
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 3,500 / 35 = 100 at least; 120 stated.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      story:
+      - id: p2
+        name: Too few occupants
+        measures:
+          story_occupant_load: 90
+          story_day_care_net_area: 3500
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    parts:
+      story:
+      - id: p1
+        name: Other chapter
+        measures:
+          story_occupant_load: 1
+          story_day_care_net_area: 3500
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not a existing day-care occupancy: the other chapter''s rule applies.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). The stated occupant load is the design number; the maximum probable
+    population, where greater, is the architect''s statement. Most restrictive: IBC 1004.1.1 uses the same 35 net (a flag:
+    OCR copy); both apply, the stricter governs.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_2_2_1_doors_complying_with
+  kind: flag
+  topic: means_of_egress
+  title: Doors complying with 7.2.1 (NFPA 17.2.2.2.1)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 180
+    lines:
+    - 35
+    - 36
+    quote: 17.2.2.2.1 General. Doors complying with 7.2.1 shall be per- mitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: needs_review
+    note: 'Section 7.2.1 is not brought in: whether each door complies needs review.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: not_applicable
+    note: Not a existing day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_2_2_3_1_delayed_egress_locking
+  kind: flag
+  topic: means_of_egress
+  title: Delayed-egress locking (NFPA 17.2.2.2.3.1)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 7
+    - 8
+    quote: 17.2.2.2.3.1 Delayed-egress locking systems complying with 7.2.1.6.1 shall be permitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: needs_review
+    note: '7.2.1.6.1 is not brought in: a person checks the system.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: not_applicable
+    note: Not a existing day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_2_2_3_2_access_controlled_egress
+  kind: flag
+  topic: means_of_egress
+  title: Access-controlled egress doors (NFPA 17.2.2.2.3.2)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 9
+    - 10
+    quote: 17.2.2.2.3.2 Access-controlled egress door assemblies com- plying with 7.2.1.6.2 shall be permitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: needs_review
+    note: '7.2.1.6.2 is not brought in: a person checks.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: not_applicable
+    note: Not a existing day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_2_2_3_3_elevator_lobby_door
+  kind: flag
+  topic: means_of_egress
+  title: Elevator lobby door locking (NFPA 17.2.2.2.3.3)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 11
+    - 12
+    quote: 17.2.2.2.3.3 Elevator lobby exit access door assemblies lock- ing in accordance with 7.2.1.6.3 shall be permitted.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: needs_review
+    note: '7.2.1.6.3 is not brought in: a person checks.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: not_applicable
+    note: Not a existing day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_2_2_4_latches_openable_by
+  kind: flag
+  topic: means_of_egress
+  title: Latches openable by clients from inside (NFPA 17.2.2.2.4)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 13
+    - 15
+    quote: Every door latch to closets, storage areas, kitchens, and other similar spaces or areas shall be such that clients
+      can open the door from inside the space or area.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: needs_review
+    note: The hardware is a person's check.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: not_applicable
+    note: Not a existing day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_2_2_5_bathroom_locks_openable
+  kind: flag
+  topic: means_of_egress
+  title: Bathroom locks openable from outside by staff (NFPA 17.2.2.2.5)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 16
+    - 17
+    quote: Every bathroom door lock shall be designed to allow opening of the locked door from the
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    expect: needs_review
+    note: The hardware is a person's check.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: false
+    expect: not_applicable
+    note: Not a existing day-care occupancy.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_2_2_2_panic_hardware
+  kind: rule
+  topic: means_of_egress
+  title: Latch only with panic hardware at 100+ (NFPA 17.2.2.2.2)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  check: moe_door_area_occupant_load < 100 or not moe_door_latched or moe_door_panic_hardware
+  for_each: means_of_egress_door
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 180
+    lines:
+    - 37
+    - 38
+    quote: 17.2.2.2.2 Panic Hardware or Fire Exit Hardware. Any door in a required means of egress from an area having an
+      occupant
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 3
+    - 5
+    quote: load of 100 or more persons shall be permitted to be provided with a latch or lock only if the latch or lock is
+      panic hardware or fire exit hardware complying with 7.2.1.7.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      means_of_egress_door:
+      - id: p1
+        name: Main exit, panic bar
+        measures:
+          moe_door_area_occupant_load: 150
+          moe_door_latched: true
+          moe_door_panic_hardware: true
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      means_of_egress_door:
+      - id: p2
+        name: Main exit, lever latch
+        measures:
+          moe_door_area_occupant_load: 150
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      means_of_egress_door:
+      - id: p3
+        name: Classroom door
+        measures:
+          moe_door_area_occupant_load: 30
+          moe_door_latched: true
+          moe_door_panic_hardware: false
+    rows:
+    - part: p3
+      outcome: pass
+    expect: pass
+    note: Under 100.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+    parts:
+      means_of_egress_door: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No means of egress door: the rule''s when_none (needs_review).'
+  notes: Hand-drafted in a Claude Code session (2026-11-20). Whether the hardware complies with 7.2.1.7 (not brought in) is
+    the architect's statement (moe_door_panic_hardware).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_5_2_dead_end
+  kind: rule
+  topic: means_of_egress
+  title: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 17.2.5.2)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  check: corridor_dead_end_length <= (50 if sprinklered_9_7 and sprinkler_supervised_9_7 else 20)
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 84
+    - 88
+    quote: 17.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an
+      approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall
+      not exceed 50 ft (15 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor (the sheet)
+        measures:
+          corridor_dead_end_length: 21.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" against 50 ft (sprinklered,
+      supervised): passes.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor:
+      - id: p2
+        name: Very long dead end
+        measures:
+          corridor_dead_end_length: 55
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      corridor:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          corridor_dead_end_length: 21.5
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: 20 ft, and 21''-6" is over.'
+  open_questions:
+  - Whether Maine's 16-219 CMR ch. 20, as in force in October 2016, modified this dead-end limit (today's rule sets a flat
+    20 ft).
+  research:
+  - question: Whether Maine's 16-219 CMR ch. 20, as in force in October 2016, modified this dead-end limit (today's rule sets
+      a flat 20 ft).
+    searched:
+    - 17.2.5.2
+    - '1018.4'
+    sources:
+    - rank: 2
+      cite: '16-219 CMR ch. 20 (Maine State Fire Marshal), as published today (amended 2021-01-25): the 2018 NFPA 101 with
+        Maine''s modifications, one a 20-ft dead-end limit; read 2026-11-20'
+    why_open: The rule text in force in 2016 was not found online; a question for the State Fire Marshal's office or the City
+      of Portland.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1018.4 allows 20 ft, or any length under
+    2.5 times the least width (exception 3), and not 50 ft for I-4 (a flag: OCR copy); both apply, the stricter governs (the
+    sheet: 25 ft by the IBC). Maine''s 16-219 CMR ch. 20 today sets a flat 20 ft: open (general.ibc_1018_4_dead_end, README).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_5_3_1_common_path_sprinklered
+  kind: rule
+  topic: means_of_egress
+  title: Common path 100 ft, sprinklered (NFPA 17.2.5.3.1)
+  applies_when: nfpa_day_care_occupancy and day_care_existing and sprinklered_9_7 and sprinkler_supervised_9_7
+  check: common_path_of_travel <= 100
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 91
+    - 94
+    quote: 17.2.5.3.1 Common path of travel shall not exceed 100 ft (30 m) in a building protected throughout by an approved,
+      supervised automatic sprinkler system in accordance with Section 9.7.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          common_path_of_travel: 48.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 48''-6" against 100 ft.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p2
+        name: Long common path
+        measures:
+          common_path_of_travel: 110
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          common_path_of_travel: 48.5
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Not sprinklered: 17.2.5.3.2 applies.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1014.3''s 75 ft (a flag: OCR copy) is
+    stricter than this 100 ft; both apply, the stricter governs, as the sheet says.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_5_3_2_common_path_not_sprinklered
+  kind: rule
+  topic: means_of_egress
+  title: Common path 75 ft, not sprinklered (NFPA 17.2.5.3.2)
+  applies_when: nfpa_day_care_occupancy and day_care_existing and not (sprinklered_9_7 and sprinkler_supervised_9_7)
+  check: common_path_of_travel <= 75
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 95
+    - 97
+    quote: 17.2.5.3.2 Common path of travel shall not exceed 75 ft (23 m) in a building not protected throughout by an approved,
+      super- vised automatic sprinkler system in accordance with Section 9.7.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Short common path
+        measures:
+          common_path_of_travel: 48.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Long common path
+        measures:
+          common_path_of_travel: 80
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: Sprinklered
+        measures:
+          common_path_of_travel: 80
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Sprinklered (approved, supervised): 17.2.5.3.1 applies.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: the same 75 ft as IBC 1014.3 (a flag: OCR
+    copy); both apply, the stricter governs (they agree).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_6_2_room_door_to_exit
+  kind: rule
+  topic: means_of_egress
+  title: Travel room door to exit at most 100 ft (NFPA 17.2.6.2(1))
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  check: egress_travel_from_room_door <= 100
+  review_when:
+  - when: egress_travel_from_room_door > 100 and sprinklered_9_7
+    reason: 'Over 100 ft in a building protected throughout by an approved automatic sprinkler system (Section 9.7): 17.2.6.3
+      permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_17_2_6_3_sprinkler_increase); a
+      person applies it.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 103
+    - 104
+    quote: '17.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 17.2.6.3:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 105
+    - 106
+    quote: The travel distance between any room door intended as an exit access and an exit shall not exceed 100 ft (30 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Floor, room doors near exits
+        measures:
+          egress_travel_from_room_door: 80
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Floor, a far room door
+        measures:
+          egress_travel_from_room_door: 120
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: 120 ft is over 100 ft.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p9
+        name: Sprinklered, over the limit
+        measures:
+          egress_travel_from_room_door: 130
+    rows:
+    - part: p9
+      outcome: needs_review
+    expect: needs_review
+    note: 'Sprinklered: 17.2.6.3''s increase applies; a person checks.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). The sheet gives no room-door distance, so this needs that length
+    (needs review on the sheet''s data). Travel is measured per Section 7.6 (not brought in): parts.yaml says how.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_6_2_point_in_room_to_exit
+  kind: rule
+  topic: means_of_egress
+  title: Travel point in room to exit at most 150 ft (NFPA 17.2.6.2(2))
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  check: egress_travel_distance <= 150
+  review_when:
+  - when: egress_travel_distance > 150 and sprinklered_9_7
+    reason: 'Over 150 ft in a building protected throughout by an approved automatic sprinkler system (Section 9.7): 17.2.6.3
+      permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_17_2_6_3_sprinkler_increase); a
+      person applies it.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 103
+    - 104
+    quote: '17.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 17.2.6.3:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 107
+    - 108
+    quote: The travel distance between any point in a room and an exit shall not exceed 150 ft (46 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 130''-8" is within 150 ft without
+      the sprinkler increase: passes.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Long travel
+        measures:
+          egress_travel_distance: 160
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: 160 ft is over 150 ft.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p9
+        name: Sprinklered, over the limit
+        measures:
+          egress_travel_distance: 180
+    rows:
+    - part: p9
+      outcome: needs_review
+    expect: needs_review
+    note: 'Sprinklered: 17.2.6.3''s increase applies; a person checks.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Most restrictive: IBC 1016.1 allows 200 ft for I-4 sprinklered
+    (a flag: OCR copy); NFPA 150 ft plus 50 ft sprinklered (17.2.6.3): both apply, the stricter governs; the sheet''s 130''-8"
+    passes both.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_6_2_sleeping_room_to_door
+  kind: rule
+  topic: means_of_egress
+  title: Travel sleeping room to door at most 50 ft (NFPA 17.2.6.2(3))
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  check: egress_travel_in_sleeping_room <= 50
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 103
+    - 104
+    quote: '17.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 17.2.6.3:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 109
+    - 111
+    quote: The travel distance between any point in a sleeping room and an exit access door in that room shall not exceed
+      50 ft (15 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p1
+        name: Nap room
+        measures:
+          egress_travel_in_sleeping_room: 30
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story:
+      - id: p2
+        name: Large nap room
+        measures:
+          egress_travel_in_sleeping_room: 60
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 60 ft is over 50 ft.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: Hand-drafted in a Claude Code session (2026-11-20). 17.2.6.3's increase is for items (1) and (2) only, never (3).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_2_6_3_sprinkler_increase
+  kind: flag
+  topic: means_of_egress
+  title: Travel +50 ft where sprinklered (NFPA 17.2.6.3)
+  applies_when: nfpa_day_care_occupancy and day_care_existing and sprinklered_9_7 and (egress_travel_from_room_door > 100
+    or egress_travel_distance > 150)
+  for_each: story
+  when_none: not_applicable
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 112
+    - 112
+    quote: 17.2.6.3 The travel distance required by 17.2.6.2(1) and
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 113
+    - 113
+    quote: (2) shall be permitted to be increased by 50 ft (15 m) in
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 105
+    - 106
+    quote: The travel distance between any room door intended as an exit access and an exit shall not exceed 100 ft (30 m).
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 181
+    lines:
+    - 107
+    - 108
+    quote: The travel distance between any point in a room and an exit shall not exceed 150 ft (46 m).
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: Over the plain limit
+        measures:
+          egress_travel_distance: 170
+          egress_travel_from_room_door: 90
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: '170 ft: over 150 ft, within the increased limit; a person applies the increase.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story:
+      - id: p1
+        name: Within the plain limits
+        measures:
+          egress_travel_distance: 130.667
+          egress_travel_from_room_door: 90
+    rows:
+    - part: p1
+      outcome: not_applicable
+    expect: not_applicable
+    note: 'Within 100 and 150 ft: the increase is not needed.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+    parts:
+      story: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No story: nothing to increase (the other rules need the stories).'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). A flag: the second reading reads its 50 ft as no limit of its
+    own (''none'', a permission to exceed), so code never adds it; where a travel is over 17.2.6.2''s plain limits in such
+    a building, a person applies it. Chapter 17 prints ''an approved automatic sprinkler system'' (not ''supervised'').'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_17_3_6_corridor_walls
+  kind: rule
+  topic: means_of_egress
+  title: Corridor walls 1/2 h, or smoke partitions sprinklered (NFPA 17.3.6)
+  applies_when: nfpa_day_care_occupancy and day_care_existing
+  check: corridor_fire_rating_hours >= 1 / 2 or client_spaces_open_outside or (sprinklered_9_7 and sprinkler_supervised_9_7
+    and corridor_walls_smoke_partitions)
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 183
+    lines:
+    - 77
+    - 80
+    quote: '17.3.6 Corridors. Every interior corridor shall be constructed of walls having a minimum 1/2-hour fire resistance
+      rating in accordance with Section 8.3, unless otherwise permitted by any of the following:'
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 183
+    lines:
+    - 81
+    - 84
+    quote: Corridor protection shall not be required where all spaces normally subject to student occupancy have not less
+      than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3.
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 183
+    lines:
+    - 85
+    - 89
+    quote: In buildings protected throughout by an approved auto- matic sprinkler system with valve supervision in accor-
+      dance with Section 9.7, corridor walls shall not be re- quired to be rated, provided that such walls form smoke partitions
+      in accordance with Section 8.4.
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+      client_spaces_open_outside: false
+    parts:
+      corridor:
+      - id: p1
+        name: Main corridor (the sheet)
+        measures:
+          corridor_fire_rating_hours: 0
+          corridor_walls_smoke_partitions: true
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): sprinklered throughout (supervised),
+      corridor walls drawn as smoke partitions: item (2), passes.'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+      client_spaces_open_outside: false
+    parts:
+      corridor:
+      - id: p2
+        name: Corridor, open walls
+        measures:
+          corridor_fire_rating_hours: 0
+          corridor_walls_smoke_partitions: false
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: Not rated and not smoke partitions.
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: true
+      sprinkler_supervised_9_7: true
+      client_spaces_open_outside: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  - given:
+      nfpa_day_care_occupancy: true
+      day_care_existing: true
+      sprinklered_9_7: false
+      sprinkler_supervised_9_7: false
+      client_spaces_open_outside: false
+    parts:
+      corridor:
+      - id: p1
+        name: Unsprinklered, rated
+        measures:
+          corridor_fire_rating_hours: 1
+          corridor_walls_smoke_partitions: false
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Rated walls.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). Items (3) to (5) (walls ending at a rated ceiling; lavatories)
+    permit less, so leaving them out never passes what fails; a design relying on them fails here and a person checks. Most
+    restrictive: IBC 1018.1 asks 0 hours for I-4 sprinklered (a flag: OCR copy); both apply, the stricter governs: NFPA''s
+    smoke partitions. Item (1) prints ''student occupancy'' (16.3.6(1): ''client''); item (2) prints ''with valve supervision'':
+    read as sprinkler_supervised_9_7, Gordium''s reading for the architects to confirm.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_6_1_14_4_1_separation
+  kind: flag
+  topic: fire_separation
+  title: Day care separated from other occupancies (NFPA 6.1.14.4.1)
+  applies_when: nfpa_day_care_occupancy
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 48
+    lines:
+    - 18
+    - 21
+    quote: Where separated occupancies are provided, each part of the building comprising a distinct occupancy, as de- scribed
+      in this chapter, shall be completely separated from other occupancies by fire-resistive assemblies,
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 50
+    lines:
+    - 14
+    - 14
+    quote: Day-Care 2 2 2 2 2 3 2
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 50
+    lines:
+    - 4
+    - 4
+    quote: Table 6.1.14.4.1(b) Required Separation of Occupancies (hours) , Part 2
+  examples:
+  - given:
+      nfpa_day_care_occupancy: true
+    expect: needs_review
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): the sheet reads 2 hours from Table
+      6.1.14.4.1(b), reduced to 1 hour sprinklered (6.1.14.4.3); the other occupancy is not named, so the row''s column is
+      not known: needs review.'
+  - given:
+      nfpa_day_care_occupancy: false
+    expect: not_applicable
+    note: Not a day-care occupancy.
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). A flag: which occupancy the day care is separated from, and
+    the assembly between them, are the architect''s input (no part kind yet). The table''s cells are read in column bands
+    (its flags, text_verification.gov.law.nfpa.101.2012.yaml); its Part 1, Table 6.1.14.4.1(a), is not brought in.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_6_1_14_4_2_separation_ratings
+  kind: flag
+  topic: fire_separation
+  title: Separations 3, 2 or 1 h, per Chapter 8 (NFPA 6.1.14.4.2)
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 48
+    lines:
+    - 24
+    - 27
+    quote: 6.1.14.4.2 Occupancy separations shall be classified as 3-hour fire resistance–rated, 2-hour fire resistance–rated,
+      or 1-hour fire resistance–rated and shall meet the requirements of Chapter 8.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Chapter 8 is not brought in: a person checks the assemblies.'
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_6_1_14_4_3_sprinkler_reduction
+  kind: flag
+  topic: fire_separation
+  title: Separation reduced 1 h, not below 1 h, sprinklered (6.1.14.4.3)
+  applies_when: sprinklered_9_7 and sprinkler_9_7_1_1_1 and sprinkler_supervised_9_7
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 48
+    lines:
+    - 28
+    - 34
+    quote: 6.1.14.4.3 The minimum fire resistance rating specified in Table 6.1.14.4.1(a) and Table 6.1.14.4.1(b) shall be
+      permitted to be reduced by 1 hour, but in no case shall it be reduced to less than 1 hour, where the building is protected
+      throughout by an approved automatic sprinkler system in accordance with 9.7.1.1(1) and supervised in accordance with
+      9.7.2, unless pro- hibited by the double-dagger footnote entries in the tables.
+  examples:
+  - given:
+      sprinklered_9_7: true
+      sprinkler_9_7_1_1_1: true
+      sprinkler_supervised_9_7: true
+    expect: needs_review
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 2 hours reduced to 1 hour (the
+      sheet''s ''NEW WALL - 1 HOUR''); a person applies it to the row.'
+  - given:
+      sprinklered_9_7: false
+      sprinkler_9_7_1_1_1: false
+      sprinkler_supervised_9_7: false
+    expect: not_applicable
+    note: 'Not sprinklered: no reduction.'
+  notes: 'Hand-drafted in a Claude Code session (2026-11-20). A flag with general.nfpa_6_1_14_4_1_separation: the row and
+    the double-dagger entries are a person''s reading.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.nfpa_6_1_14_4_4_separation_form
+  kind: flag
+  topic: fire_separation
+  title: Separations vertical, horizontal or both (NFPA 6.1.14.4.4)
+  sources:
+  - file: gov.law.nfpa.101.2012.pdf
+    page: 48
+    lines:
+    - 35
+    - 38
+    quote: 6.1.14.4.4 Occupancy separations shall be vertical, horizon- tal, or both or, when necessary, of such other form
+      as required to provide complete separation between occupancy divisions in the building.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: A judgment.
+  notes: Hand-drafted in a Claude Code session (2026-11-20).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
