@@ -1,0 +1,129 @@
+made_by: packages/model_measurement/tests/make_eval_comparison.py
+units: ft, sf
+sheet_to_model:
+  west_outer_face_pt: 302.58
+  north_outer_face_pt: 539.1
+  north_outer_face_ft: 85.4833
+  pt_per_ft: 9.0
+figures:
+  travel_distance:
+    sheet_stated: 130.667
+    sheet_words: MAXIMUM TRAVEL DISTANCE TO EXIT = 130'-8"
+    sheet_line_as_drawn: 130.325
+    sheet_line_in_model:
+    - - 138.907
+      - 84.49
+    - - 128.627
+      - 60.763
+    - - 116.093
+      - 60.763
+    - - 116.093
+      - 42.277
+    - - 189.54
+      - 42.277
+    gordium:
+      from:
+      - 138.9
+      - 84.483
+      from_room: STORAGE (11), its north-east corner (the sheet's start)
+      to_the_sheets_exit_with_12_in: 118.762
+      to_the_sheets_exit_no_clearance: 116.034
+      to_the_nearest_exit_with_12_in: 110.141
+      story_verdict: 'needs review: 5 rooms have no route (decision 1a)'
+      why_different: the sheet's line turns at right angles and runs the corridor's
+        centre line to the east exit; Gordium's is the shortest walk to the same exit
+        (its nearest exit is the north door)
+  common_path:
+    sheet_stated: 48.5
+    sheet_words: DISTANCE TO COMMON PATH OF TRAVEL = 48'-6"
+    sheet_line_as_drawn: 48.404
+    sheet_line_in_model:
+    - - 139.32
+      - 84.31
+    - - 128.92
+      - 60.317
+    - - 117.42
+      - 60.317
+    - - 117.42
+      - 49.563
+    gordium:
+      from:
+      - 138.9
+      - 84.483
+      with_12_in: 42.604
+      no_clearance: 41.066
+      why_different: the sheet's line turns at right angles to the room's door; Gordium's
+        routes to the north and east exits share the walk to and past that door, not
+        the right-angle path
+  dead_end:
+    sheet_stated: 21.5
+    sheet_words: DEAD END CORRIDOR DISTANCE = 21'-6"
+    sheet_line_as_drawn: 21.487
+    sheet_line_in_model:
+    - - 152.233
+      - 74.663
+    - - 152.233
+      - 53.177
+    gordium:
+      measured: null
+      why: 'the corridor isn''t straight legs at right angles: not measured (decision
+        6)'
+      by_hand_centre_line_reading: 32.011
+      why_different: the sheet ends the stub's dead end at the widening's near edge
+        (y 53.17); decision 6 measures to the crossing corridor's centre line (y 42.84),
+        open question 2
+  remoteness:
+    sheet_stated: 183.833
+    sheet_words: 'PROVIDED REMOTENESS: 183''-10" (between its ticks)'
+    sheet_line_as_drawn: 183.713
+    sheet_line_in_model:
+    - - 5.493
+      - 40.463
+    - - 189.207
+      - 40.463
+    gordium:
+      same_pair_nearest_edges: 183.706
+      farthest_pair_nearest_edges: 187.164
+      farthest_pair_door_centres: 189.291
+      why_different: the sheet measures the west and east corridor exits (Gordium's
+        same pair agrees); Gordium's figure is the farthest-apart pair (decision 7),
+        the north-west and east doors
+  diagonal:
+    sheet_stated: 210.208
+    sheet_words: BLDG DIA. 210'-2 1/2" (between its ticks)
+    sheet_line_as_drawn: 210.088
+    sheet_line_in_model:
+    - - 191.924
+      - 88.528
+    - - -0.953
+      - 5.25
+    gordium:
+      corner_to_corner: 212.985
+      ends:
+      - - 0.0
+        - 85.483
+      - - 195.078
+        - 0.0
+      ratio: 0.8788
+      why_different: 'the sheet''s ticks are not at the traced outer outline''s corners
+        (its north-east tick lies about 3 ft north of the traced north face): a trace
+        or a drawing difference, not settled'
+storage:
+  sheet_stated_sf: 1428
+  sheet_story_sf: 16509
+  story_sf_correct: 16539
+  gordium_inside_sf: 1178.8
+  gordium_outer_faces_sf: 1414.3
+  gordium_story_sf:
+  - 15970.0
+  - 16539.9
+  rooms:
+    STORAGE (11): 751.6
+    STORAGE (13): 143.2
+    STORAGE (14): 153.1
+    STORAGE (28): 27.6
+    STORAGE (29): 103.2
+  why_different: 'the sheet doesn''t list its rooms; over the five rooms marked accessory
+    storage, Gordium''s outer-faces reading is within 1 percent of the sheet''s, its
+    inside reading 17 percent under: the sheet likely measured to the walls'' outer
+    faces (open question 3)'
