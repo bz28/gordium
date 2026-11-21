@@ -71,24 +71,32 @@ area need review.
    column, a cabinet) it keeps 12 in away, curving round (7.6.1(2)), and it passes through every door at the centre
    of its clear opening, in the middle of the wall (7.6.1(3)(a) "Center of the doorway"). A door's jambs are corners
    too and get their 12-in rings: a route that turns just past a door keeps 12 in off the jamb. A door less than
-   24 in clear puts its own centre inside its jambs' rings: needs review. Exactly: rooms joined by passages form one zone; inside each zone, a **visibility graph** (the
-   start point, the door centres and the corners of the 12-in rings, each joined to every other it can see);
-   between zones, the door centres. Distances by Dijkstra from all exits at once.
+   24 in clear puts its own centre inside its jambs' rings: needs review. Exactly: **crossable** rooms (decision 1a)
+   joined by passages form one zone; an end-only room is always a zone of its own, never merged across a passage.
+   Inside each zone, a **visibility graph** (the start point, the door centres and the corners of the 12-in rings,
+   each joined to every other it can see); between zones, the door centres. Distances by Dijkstra from all exits at
+   once. A start point in an end-only room is the one exception: its own room is joined, for its routes only, to
+   the zone beyond each of its passages (a route may leave it that way, never come back in).
    The IBC's "natural and unobstructed path" names no clearance; Gordium uses NFPA's 12 in for both books. That can
    only lengthen a route, so it can make a borderline design need review or fail, never pass one that shouldn't.
    *Rejected:* **a grid** (a walk on squares): never exact, its error depends on direction (up to 8 percent at 45
    degrees on an 8-way grid) and on where the grid falls; **rectilinear** (along x and y only): up to 41 percent
    long, not "natural"; **corridor centre lines** for the whole route: 7.6.1(1) says "centerline of the natural
    path", which Gordium reads as the middle of the path walked, with (2) setting how close it comes to corners; the
-   corridor-centreline reading is open question 1. **One graph for the whole story**: correct but slow; since every
-   route must pass through door centres, splitting by zone gives the same lengths.
+   corridor-centreline reading is open question 1. **One graph for the whole story**: slow, and it would let a
+   straight line cut across an end-only room joined by a passage; between zones every route passes a door centre,
+   so splitting by zone gives the same lengths as one graph over the crossable floor.
 1a. **Which rooms a route may cross** (IBC 1014.2, NFPA 7.5.1.6 and 7.5.2.1). A route may start anywhere, ends at an
-   exit, and passes only through: the room it starts in, corridors, lobbies, and rooms marked `pass_through: true`
-   (the architect stating the room is accessory to the ones it serves, not lockable, with a discernible path:
-   1014.2 item 1). Kitchens, storage, toilets, closets, workrooms, sleeping rooms, rooms marked `lockable`, and rooms
-   with no `use` are **end-only**: a route may start in them, never cross them. A room whose only way to an exit
-   crosses an end-only room needs review (an exception, such as 1014.2's for a kitchen, may allow it; Gordium
-   doesn't assume one). This only removes routes, so it only lengthens them.
+   exit, and passes only through the room it starts in, corridors, and rooms marked `pass_through: true` (the
+   architect stating the room is accessory to the ones it serves, with a discernible path to an exit: 1014.2 item 1,
+   which NFPA 7.5.1.6 also allows). A `lobby` is no exception: the IBC names none, and NFPA's covers only lobbies
+   "constructed as required for corridors", so a lobby is crossed only with `pass_through: true`. Every crossable
+   room also states `lockable: false`. Kitchens, storage, toilets, closets, workrooms, sleeping rooms, rooms with
+   `lockable: true` or no `lockable`, and rooms with no `use` are **end-only**: a route may start in them, never
+   cross them. End-only always wins: `pass_through: true` on an end-only use or with `lockable: true` is refused on
+   read (that room not read, so its story needs review). A room whose only way to an exit crosses an end-only room
+   needs review (an exception, such as 1014.2's for a kitchen, may allow it; Gordium doesn't assume one). This only
+   removes routes, so it only lengthens them.
 2. **The 12-in rings are drawn slightly outside the circle** (a 16-sided polygon around it), so a route around one
    is at most 1.3 percent of its curve longer (under 1/2 in a corner), never shorter.
 3. **The most remote point: every corner, plus a fine sampling with a stated bound.** For one exit and a room with no
@@ -110,26 +118,38 @@ area need review.
    through an unenclosed stair (1016.1's "measurement along stairways"), need review until built.
 5. **Common path: measured on the routes themselves, until they part.** IBC 1002.1: "Paths that merge are common
    paths of travel." From a point, Gordium takes its shortest route (decisions 1 and 1a) to each distinct exit (by
-   `exit_id`, never by door). For each pair of exits, the common path is the length the two routes walk together:
-   the same lines and the same arcs round the same rings, from the start until they part, plus any stretch where
-   they meet again. The point's common path is the least over the pairs. Taken on the real geometry, two doors of
-   one room still give a common path when both routes go round the same corner first (test 6). Two shortest routes
-   are one choice among all the routes a person could take, and the law's figure is the least over every choice, so
-   Gordium's is never less than the law's: the cautious side. The story's figure is the greatest over the corners and
-   samples of decision 3; since the common path can jump where a route switches corners, a triangle whose corners'
-   routes turn at different corners is split until they agree, and one that still doesn't at 1/2 in across needs
-   review. One exit on the story: the common path is the travel distance.
+   `exit_id`, never by door). Each route is a list of pieces: straight lines, arcs round rings, door centres. Two
+   routes are together while their pieces are the same (the same line, the same ring, within 1/16 in); they **part**
+   at the first point where their next pieces differ (two lines leaving the start in different directions part at
+   the start; two routes round one ring part where the earlier one leaves it), and are together again over any
+   stretch where they meet again. For each pair of exits the common path is the length walked together; the point's
+   is the least over the pairs. Taken on the real geometry, two doors of one room still give a common path when both
+   routes go round the same corner first (test 6). Two shortest routes are one choice among all the routes a person
+   could take, and the law's figure is the least over every choice, so Gordium's is never less than the law's.
+   **The story's greatest, with a bound.** The common path can jump where a small move changes which rings a route
+   turns at (on a line from which a door can just be seen past a ring). So Gordium cuts the floor along those lines
+   into cells: within a cell every route turns at the same rings, so the two routes of each pair part at a fixed
+   point, and the common path is a plain travel distance to it, which changes no faster than you walk. Each cell is
+   cut into 3-in triangles as in decision 3 and every triangle corner is worked with that cell's own routes (on a
+   cell's edge, the routes from inside it, so the larger side of a jump is taken); the rules get the greatest found
+   plus 3 in. Real floors have tens of such lines per room, which is fine; a story with more cells than a stated cap
+   needs review. One exit on the story: the common path is the travel distance.
 6. **Dead end: from the corridor's shape.** A corridor (a room marked `corridor`) is split into its straight legs
-   (each a stretch between parallel walls; recesses shallower than 12 in, such as a door's, ignored); the
-   centre line runs midway between each leg's walls and legs meet where their centre lines cross. A stretch is a dead
-   end when, cut there, one side reaches no exit; its length runs along the centre line from the closed end wall to
-   the first point where a second direction opens: a crossing corridor's centre line, or a door in the corridor
-   itself that is an exit (`exit_kind`). A door into a room that has another way out never ends it (that room would
-   be an intervening room, 1014.2 item 1 and 7.5.1.6); if counting that door would change the verdict, the dead end
-   needs review, with open question 7. Measuring to the crossing's centre line (not its near edge) is the longer of
-   the two readings (open question 2). The least width (exception 3) is the narrowest distance between the dead-end
-   legs' walls (and obstructions in it). A corridor that isn't made of straight legs meeting at right angles (at any rotation)
-   needs review in this first version.
+   (each a stretch between parallel walls; recesses shallower than 12 in, such as a door's, ignored); the centre line
+   runs midway between each leg's walls and legs meet where their centre lines cross. Only corridors count here
+   (the corridor and the corridors joined to it): reaching an exit means reaching, along corridors, a door of an
+   exit (`exit_kind`); a route through a room never counts. A point on the centre line is in a dead end when, cut
+   there, one side reaches no exit. The dead end runs along the centre line from the closed end wall to the first
+   point from which **routes in two different directions each reach a distinct exit** (by `exit_id`), without coming
+   back: a crossing whose two ways both lead to exits, or an exit door in the corridor itself. A crossing whose other
+   ways are closed doesn't end it (test 11). A door into a room with another way out never ends it (that room would
+   be an intervening room, 1014.2 item 1 and 7.5.1.6). Where such a door would end it sooner, the length is given
+   as two named readings for open question 7 (without the door, the defined value; with it), the way the checker
+   already takes readings (`design_checker/check.py`, `readings_of` and `named_result`): the row complies only if it
+   complies under both, fails if it fails under both, and otherwise needs review. Measuring to the crossing's centre
+   line (not its near edge) is the longer reading (open question 2). The least width (exception 3) is the narrowest
+   distance between the dead-end legs' walls (and obstructions in it). A corridor that isn't made of straight legs
+   meeting at right angles (at any rotation) needs review in this first version.
 7. **Remoteness and the diagonal: straight lines, exact.** The distance between two exits is the straight line
    between the nearest edges of their clear openings (NFPA's words; the IBC names no point, and the nearest edge is
    the shortest choice), through walls, as the books say "in a straight line". Between two exits with several doors
@@ -138,14 +158,18 @@ area need review.
    The diagonal is the longest straight line between two corners of the story's **outer** outline (the longest line
    in a polygon always ends at corners, so this is exact; the outer faces give the longer diagonal, the cautious
    side). The ratio is the branch's `exit_remoteness_ratio`.
-8. **Areas: two readings, the less favourable governs.** 502.1 measures building area "within surrounding exterior
-   walls" without saying which face, and nothing says where a storage room's area stops. So each is taken both ways:
-   the story inside its exterior walls and to their outer faces; the accessory rooms (`accessory_storage`) inside
-   their finished walls and to the outer faces of the walls around them. The 10 percent test (508.2.1) complies only
-   with the largest accessory area over the smallest story area; if it complies only the other way, needs review
-   (open question 3); it fails if it fails both ways. Day-care net area: the rooms marked `day_care`, inside their
-   walls (Table 1004.1.1 "net"); the computed occupant load is that divided by 35, and a stated load below it needs
-   review (1004.1.1's exception needs the building official).
+8. **Areas: two readings each, as the checker takes readings.** 502.1 measures building area "within surrounding
+   exterior walls" without saying which face, and nothing says where a storage room's area stops. So
+   `story_building_area` is given as two named readings for one open question (inside the exterior walls; to their
+   outer faces), and `story_accessory_area` (the rooms marked `accessory_storage`) as two for a second question
+   (inside their walls; to the outer faces of the walls around them), with no single value. The checker
+   (`readings_of`, which combines readings question by question, so two questions give all four pairs, and
+   `named_result`) then gives the 10 percent rule (508.2.1): complies if it passes under all four, which is the
+   largest accessory area over the smallest story area; fails if it fails under all four; else needs review,
+   naming the readings it fails under. The branch's `story_accessory_area` meaning ("to the inside of the walls")
+   must change to say so, on that branch. Day-care net area: the rooms marked `day_care`, inside their walls (Table
+   1004.1.1 "net"); the computed occupant load is that divided by 35, and a stated load below it needs review
+   (1004.1.1's exception needs the building official).
 9. **Tolerances.** Points within 1/16 in are the same point, as elsewhere in the interior code. Route lengths carry
    the under-1/2 in per corner of decision 2 (always long) and the 3 in of decision 3 (added). A measure is compared with
    its limit as given; a measure exactly at a limit is what the model says (20'-0" is "not more than 20 feet").
@@ -164,8 +188,8 @@ area need review.
 | Measure | How |
 |---|---|
 | `egress_travel_distance`, `common_path_of_travel` | decisions 1 to 5, the greatest over the story |
-| `egress_travel_from_room_door` | from each door leaving a room (not an exit) to the nearest exit, the greatest |
-| `egress_travel_in_sleeping_room` | from each point of a `sleeping` room to the nearest door of that room; 0 with no sleeping room on the story |
+| `egress_travel_from_room_door` | from each **exit access door** of a room (a door from which a permitted route reaches an exit without coming back into the room: the doors `space_exit_count` counts; never one into a closet or toilet) to the nearest exit, the greatest |
+| `egress_travel_in_sleeping_room` | from each point of a `sleeping` room to the nearest of that room's exit access doors (as above, never a closet or toilet door); a sleeping room with none needs review; 0 with no sleeping room on the story |
 | `story_exit_count`, `space_exit_count` | distinct `exit_id`s on the story; a space's doors and passages from which a permitted route reaches an exit without coming back into it, each counted once |
 | `space_common_path` | decision 5 over the space's own points |
 | `exit_remoteness_ratio` | decision 7 |
@@ -189,8 +213,11 @@ area need review.
    end wall 16 ft beyond the corridor's wall: dead end 16 + 4 = **20'-0" exactly, complies** with 1018.4; 1/16 in
    longer fails (2.5 x 8 = 20 is not "less than"). Corridor and branch 10 ft wide, dead end 25'-0" exactly: fails
    (exception 3 needs less than 25); 24'-11 15/16" complies by exception 3.
-4. Also: a room with two doors to two exits (common path 0); one door onto a corridor with exits both ways (common
-   path to the corridor's centre line); two exits in a rectangle (remoteness by nearest edges, diagonal corner to
+4. Also: an open room with two doors to two exits, seen directly (common path 0: the two lines part at the start);
+   a room 0 to 20 by 0 to 15 whose one 36-in door, centred at (10, 15.25), opens on a corridor with an exit each way:
+   from (0, 0) the route to the door centre is a straight 18.236 ft (it passes the jamb's ring at 1.12 ft), and the
+   two routes part there, turning opposite ways, so the common path is **18.236 ft**, not the figure to the
+   corridor's centre line; two exits in a rectangle (remoteness by nearest edges, diagonal corner to
    corner); each needs-review case of decision 10 and each key left out, one test each, failing on revert.
 5. **A storeroom shortcut:** two rooms side by side, each with an exit, the far room's only short way to the near
    exit through a room marked `accessory_storage`: the travel distance is the long way round; with no other way,
@@ -198,7 +225,8 @@ area need review.
 6. **Common path in an L-shaped room:** legs 0 to 30 by 0 to 10 and 20 to 30 by 10 to 40, exit doors centred at
    (22, 40.25) and (28, 40.25), each its own exit. From (0, 0) both routes go round the inside corner (20, 10):
    tangent 22.338 + arc together 0.925 (53.0 degrees, until the route to (28, 40.25) leaves) = **23.263 ft
-   common**, not 0. Fails on a door-graph method.
+   common**, not 0. Fails on a door-graph method. The room's `common_path_of_travel` is a number, not needs review
+   (its cells are few); fails if a jump at the line where a door comes into view is taken as needing review.
 7. **One stair, two doors:** a story whose only exit is one stair enclosure entered by two doors 80 ft apart, both
    `exit_enclosure` with one `exit_id`: `story_exit_count` 1, remoteness needs review, common path equals travel
    distance. Fails if doors are taken as exits.
@@ -209,6 +237,20 @@ area need review.
    faces: needs review, not complies.
 10. **A jamb:** a route turning 90 degrees just past a 36-in door keeps 12 in off the jamb (longer than with no
     ring there); a 22-in door: needs review.
+11. **A dead end that branches:** a corridor 8 ft wide with an exit at each end; a stem 8 ft wide reaching 10 ft
+    past its wall; at the stem's end a leg 8 ft wide running 15 ft each side of the stem's centre line, both ends
+    closed. From a closed end: 15 + (4 + 10 + 4) = **33 ft, fails** 1018.4 (2.5 x 8 = 20). Fails if the dead end
+    stops at the stem's crossing (15 ft).
+12. **A storage alcove on a passage:** a corridor with a storage alcove (`accessory_storage`) joined to it by a
+    separation line, the straight line from a far point to the exit cutting across the alcove: the travel distance
+    is the route that stays out of it. Fails if the zone includes the alcove for routes not starting there.
+13. **A sleeping room's closet:** a sleeping room 60 by 20 ft, its corridor door at one end, a closet door at the
+    far end: `egress_travel_in_sleeping_room` about 60 ft, failing 16.2.6.2(3)'s 50 ft. Fails if any door counts.
+14. **A lobby:** two exits reached from a wing only through a room marked `lobby` with no `pass_through`: the travel
+    distance takes the way round, or needs review if there is none. Fails if a lobby is crossable by its use. And a
+    storage room marked `pass_through: true`: refused on read, its story needs review.
+15. **The area readings:** a checker test on the 10 percent rule with both areas given as readings: all four pairs
+    are worked, the outer-accessory over inside-story pair among them; complies only when all four pass.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
@@ -221,7 +263,7 @@ unknown space, commit `67dd698f`). Measured on that model:
 | Common path 48'-6" | 75' | within 2 percent or 2 ft |
 | Dead end 21'-6", least width 10' | 2.5 x 10' = 25' | length within 1 ft, width within 1 in |
 | Remoteness 183'-10" | 70'-1" (diagonal 210'-2 1/2" / 3) | within 1 ft of Gordium's nearest-edge figure or of its door-centre figure (both reported: the sheet may measure either; they differ by up to half the two doors' widths); diagonal within 6 in |
-| Storage 1,428 sf | 1,650 sf (10 percent of the story) | the inside-walls figures within 1 percent; story area against 16,539 sf (the sheet's 16,509 is a recorded error); the governing pair (decision 8) reported too |
+| Storage 1,428 sf | 1,650 sf (10 percent of the story) | the inside-walls figures within 1 percent; story area against 16,539 sf (the sheet's 16,509 is a recorded error); the rule complies under all four readings (decision 8), or the readings it fails under are a finding |
 
 And every verdict the same as the sheet's (all comply). **Why these tolerances:** the sheet's lengths are hand-drawn
 paths on a 1/8 in = 1 ft drawing, where 1/32 in of pencil is 3 in, and the start point and the bends are chosen by
