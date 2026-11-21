@@ -258,9 +258,11 @@ area need review.
 ## How we will know it is right
 
 **Synthetic tests, answers worked by hand** (feet; walls 6 in thick, so a door's centre sits 0.25 ft outside the room;
-doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6, the table, the jamb and test 1's corner cluster included) was
+doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6, the table and the jamb) was
 worked two ways for this note: by the tangent-and-arc formulas, and by a throwaway brute-force shortest path over
-fine 512-sided polygons of the rings (neither kept, neither the route code); they agree to 1/1000 ft. The code's tests hold
+fine 512-sided polygons of the rings (neither kept, neither the route code); they agree to 1/1000 ft. Test 1's corner
+cluster was checked by a coarser bracket instead (64-sided rings inside and outside each circle, holding the formula's
+figure), as test 1 says. The code's tests hold
 these hand figures as written in the test file, never taken from the code under test, which is the third way.
 
 1. **An L-shaped corridor:** legs 0 to 40 by 0 to 6, and 34 to 40 by 6 to 30; exit door centre at (-0.25, 3). The
@@ -362,9 +364,11 @@ these hand figures as written in the test file, never taken from the code under 
 19. **A coarse triangle not dropped on 3 in:** a corridor 0 to 40 by 0 to 6, exit doors centred at (-0.25, 3) and
     (40.25, 3). The triangle (19, 0), (21, 0), (19, 1.5) has corner values 19.482, 19.482 and 19.308, so corners plus
     3 in is 19.732, which the sample (20.5, 3) at 19.75 beats; yet (20, 0) inside it has sqrt(20.25^2 + 3^2) =
-    **20.471 ft**, the story's true greatest (on the wall, where the two exits' routes are equal). Its own h is
-    about 1 ft, so it is kept and cut. The story's figure is at least 20.471. Fails if a 2-ft triangle may be dropped
-    on its corners plus 3 in.
+    **20.471 ft**, the story's true greatest (on the wall, where the two exits' routes are equal). It is a right
+    triangle with a 2.5-ft hypotenuse, so its own h is exactly **1.25 ft** (at (20, 0.75), the hypotenuse's middle):
+    19.482 + 1.25 = 20.732 beats 19.75, so it is kept and cut. Pinned two ways, so it fails whatever mesh the build
+    uses: the drop test itself, given this triangle and a best so far of 19.75, must say "kept" (it fails if h is
+    replaced by 3 in: 19.732 < 19.75, dropped); and the story's figure is at least 20.471.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
