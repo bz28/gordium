@@ -307,6 +307,16 @@ a re-recording of 830fbedc: hosted, nothing cut; the walls are also committed fi
 above); the enclosed areas are read inside a rolled-back transaction (Revit works them out only in a document it can
 change).
 
+**Makers' clear openings, filled as drafts** (`MakerClearOpenings.cs`, data in
+[`data/maker_clear_openings.json`](data/maker_clear_openings.json), embedded in the library; design note, section
+5a). Mark for egress and Check my project fill an empty window type's `Clear width`, `Clear height` and `Clear
+source` from its maker's published formula when its Manufacturer and a call-number Model (Marvin's "UCA3648") match an
+entry, its Gordium: Operation is the entry's or unset, its Width and Height are surely the maker's frame size, and the family's own Vent Area, when it has
+one, agrees; never `Clear confirmed`, so nothing is sent until that type is confirmed. The
+data is not a rule and not measuring code: a hand-curated list of makers' figures, each entry pinned by
+`MakerClearOpeningsTests` to rows of the maker's own table (first entry: Marvin Ultimate Casement, CN 2864 and three
+more rows).
+
 For a clone with no venv of its own (a git worktree), install with the main clone's Python:
 `install_trial_addin.ps1 -Python C:\...\gordium\.venv\Scripts\python.exe`; the add-in then runs Python with this
 clone's packages first (`PYTHONPATH`), so the code run is always this clone's.

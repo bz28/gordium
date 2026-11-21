@@ -155,6 +155,10 @@ public sealed record MarkingListResult(IReadOnlyList<string> SetupProblems, IRea
     /// reader found, as a proposal only).</summary>
     public IReadOnlyList<string> HasNoneLines { get; init; } = [];
 
+    /// <summary>A line per window type a maker's clear-opening data concerns (<see cref="ClearPrefills"/>): filled by
+    /// Gordium as a draft to confirm, not filled and why, or the maker's PDF to take it from.</summary>
+    public IReadOnlyList<string> ClearLines { get; init; } = [];
+
     /// <summary>The list's headline: every room, window and door marked only when there are rooms, nothing is
     /// unset, and nothing stops a mark or a room being read.</summary>
     public string Headline =>
@@ -172,7 +176,10 @@ public static class MarkingList
     /// direction that could hide a bedroom), and a suggestion is never read as the mark.</summary>
     private static readonly Regex SleepingName = new(@"\b(bed\s*room|sleeping)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
-    public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null)
+    /// <param name="model">The model read.</param>
+    /// <param name="setup">The mark-setup steps planned.</param>
+    /// <param name="clearWriteFailed">Why writing the makers' clear openings just failed, or null (<see cref="ClearPrefills.Plan"/>).</param>
+    public static MarkingListResult Build(RevitModel model, IReadOnlyList<MarkSetupStep>? setup = null, string? clearWriteFailed = null)
     {
         // every floor outside the house (SiteSlabs), on the lot or not: which are on it is the check's own decision
         // (objects.left_out, with the lot the check is given), never guessed here (review round 2), so the list asks for
@@ -260,6 +267,7 @@ public static class MarkingList
             HasNoneConflicts = ticks.Where(t => t.Ticked is true && t.Conflicts.Count > 0)
                 .SelectMany(t => t.WhyNot.Take(t.Conflicts.Count)).ToList(),
             HasNoneLines = ticks.Select(t => TickLine(t, read)).ToList(),
+            ClearLines = ClearPrefills.Plan(model, clearWriteFailed).Select(p => p.Line).ToList(),
         };
     }
 
@@ -478,7 +486,7 @@ public static class MarkingList
             sb.Append("Can't add ").Append(p).Append('\n');
         foreach (var b in list.RoomBlockers.Concat(list.UnknownAreas).Concat(list.StairBlockers).Concat(list.NotAStair))
             sb.Append(b).Append('\n');
-        foreach (var s in list.Summary.Concat(list.HasNoneLines))
+        foreach (var s in list.Summary.Concat(list.HasNoneLines).Concat(list.ClearLines))
             sb.Append(s).Append('\n');
         var shown = 0;
         foreach (var r in list.Rows)

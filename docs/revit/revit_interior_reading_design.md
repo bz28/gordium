@@ -437,7 +437,65 @@ unconfirmed (no clear opening sent) until the architect ticks it again: a compar
 never a write to the model. `Clear source` stays the maker's publication (catalogue, product
 line, a hardware option such as egress hinges), with the family parameter named beside it. The maker's parameter
 gives width and height only: the offset of the clear opening above the sill line is always confirmed on the
-type's section the add-in shows. Every room, window and door needs its Yes or No (a schedule fills the No's in
+type's section the add-in shows.
+
+**Makers' formulas, filled as a draft** (2026-11-20). Most real families carry only frame or rough sizes, so the
+add-in also keeps a short, hand-curated file of makers' own clear-opening formulas
+(`apps/revit_addin/data/maker_clear_openings.json`, embedded in `Gordium.Revit.Reading`; `MakerClearOpenings.cs`).
+Each entry names the maker and product line, the Revit type values it matches (for Marvin, read from Marvin's own
+Revit family, 2026-11-20: the type's Manufacturer "Marvin Windows and Doors", and either its shared Window Type
+parameter "Ultimate Casement", read by GUID, those two ignoring case, or a Model that is a call number written exactly
+as Marvin writes it, such as "UCA3648", case and all; only a call-number Model is ever filled), the formula from the frame size, where it holds, the PDF (URL, fingerprint, page, exact
+quote, date opened) and the hardware caveats, and is pinned by a test that reproduces rows of the maker's own table.
+First entry: **Marvin Ultimate Casement** (full frame), from Marvin's Architectural Detail Manual: "Clear Opening
+Width = Frame OSM Width - 7 1/8"" for frames 20 in and wider, "Clear Opening Height = Frame OSM Height - 5 1/8""
+(page UCA UCANF-25). From CN 2864's frame (28 by 63 1/8 in, page UCA UCANF-29) it gives 20 7/8 by 58 in; Marvin's
+table (page UCA UCANF-6) prints "2864 1-8 57/64 (531) 4-10 1/64 (1473) 8.42": 1/64 in more on each, so the formula
+is the smaller and the tests hold it within 1/64 in of every row checked and never above. Andersen's A-Series hung
+size guide prints formulas but no clear-opening row to reproduce, so it isn't an entry (only its PDF is named). How
+it works, in **Mark for egress** and **Check my project**:
+
+- **Only the frame is read.** A family's Width may be the frame or the rough opening. Marvin's standard frame,
+  rough and masonry sizes never coincide (a test checks it), so a type's Width and Height that are both a standard
+  frame size can only be the frame; a rough or masonry opening, or a custom size, is not filled, and the list says why.
+  Marvin's frames are filled only 20 to 36 in wide and up to 71 1/8 in high (larger frames may get custodial sash
+  limiters). Marvin's family carries the frame as Width and Height (UCA3648: 3'-0" by 3'-11 1/8", with Rough_Width
+  3'-1" beside it).
+- **Cross-checks from the family.** Every fill needs a Model that is a call number, and it must be the frame's
+  (UCA3648 is 36 by 47 1/8 in), else nothing is filled: Marvin's mulled families (4W_1H, MultiW_1H, 1W_2H...) carry
+  the same Window Type and one unit's Model, and a mulled unit can be a standard frame size overall (two 18 in units,
+  36 in), so a Window Type with no call-number Model is never filled (review round 1). The type's `Gordium:
+  Operation`, when set, must be the formula's (Casement), else nothing is filled; unset, the line asks for it. And when the type has Marvin's
+  shared Vent Area (by GUID), the formula's area must agree within 0.02 sq ft, else nothing is filled and the list
+  says why (UCA3648: 28 7/8 by 42 in = 8.42 sq ft by the formula, Vent Area 8.43). The family's "Egress Window"
+  Yes/No is never read.
+- **A draft, never a confirmation.** Only a window type whose `Clear width`, `Clear height` and `Clear source` are
+  all empty is filled (never over a value typed by hand, never half of one; never a type with a `Clear
+  confirmed` stamp), and `Clear confirmed` is never written: the reader sends no clear opening until the type's own
+  stamp is made (section 3), so a draft alone always leaves the window's clear measures not measured (needs
+  review). `Clear offset` stays the architect's. The `Clear source` holds facts only (it is sent as the clear
+  opening's source once confirmed): the maker, page, formula, frame size and call number, starting "Gordium filled
+  from", so a later read knows the values are Gordium's (and says so if the type was resized or its operation changed
+  since). "Draft" is said in the marking list, never in the source.
+- **The marking list says it**: "Gordium will fill ..." for a type still empty, and "Gordium filled the clear opening
+  from Marvin UCA UCANF-25 ...: confirm it (check the hinge/hardware: ...)" once its marks hold the values. **A write
+  that fails** (a type Revit won't set, or a transaction Revit rolls back: its status, not an exception) counts as
+  nothing filled (`ClearPrefills.Outcome`), and the reason is shown, not only logged (`clear_fill_failed`): Mark for
+  egress's dialog opens with it, and Check my project's results panel shows it in its status line (beside the marks
+  added) and first in check_project_result.txt: "Gordium couldn't write the makers' clear openings (<reason>): fill them by hand from the maker's
+  tables; until then their clear opening needs review", and each type left empty says the same in the marking list,
+  never "will fill"; the list and the check go on. A maker's "E" mark in its table is never read, and never turns
+  into a pass.
+- **No match**: nothing changes (each type is asked, as before); when its Manufacturer is a maker Gordium knows
+  (Marvin, Andersen, Pella) the list names that maker's clear-opening PDF, saying whether the type's marks are empty
+  or hold values typed on it. A type whose `Clear source` is Gordium's ("Gordium filled from") but that no longer
+  matches an entry (whatever its Manufacturer) says "its clear opening was filled by Gordium from <maker> earlier, but
+  the type no longer matches: re-check it", never that its values were typed.
+- **Not yet shown in Revit end to end** (2026-11-20): Marvin's UCA3648 family wouldn't place in Autodesk's Pacific
+  Continental sample (every wall: "There exist geometry collision"), so the fill has been checked on records made from
+  the family's own PartAtom and type catalog only (section 9 lists what is still to check).
+
+Every room, window and door needs its Yes or No (a schedule fills the No's in
 bulk): one left blank leaves that whole kind not read. Then tick what the house has none of, and "these are all the
 stairs / guards". The marking list puts anything unset first.
 
@@ -611,6 +669,15 @@ element's own geometry repeats its runs' (step 4 leaves a multi-run stair's side
 makes the last tread read deeper than typed, so no nosings are sent: to settle with real stairs); real stair types'
 supports beside the treads.
 
+For the makers' formulas (section 5a), **not yet verified in Revit**: Marvin's UCA3648 family wouldn't place in the
+Pacific Continental sample (every wall: "There exist geometry collision", 2026-11-20); to try in a plain project with
+a plain wall. To check on a real Marvin Ultimate Casement family (Marvin's own Revit
+download, Window-Casement-Marvin-Ultimate.rfa, loaded into a project) at the next run: that the type's
+Manufacturer, Model and shared Window Type and Vent Area read through the Revit API as its PartAtom and type catalog
+give them (UCA3648: "Marvin Windows and Doors", "UCA3648", "Ultimate Casement", 8.43 sq ft); that UCA3648 is filled
+28 7/8 by 42 in and UCA2864 20 7/8 by 58 in, and a mulled family's type (4W_1H) is not; that the three marks are
+written once and a second Mark for egress writes nothing; that `Clear confirmed` stays empty.
+
 For doors, handrails and guards (step 5), to check on houses 1, 2, 4, 5 and 6 drawn by the add-in: that a door made
 from Door.rft gives its placed width along `HandOrientation` and its height as its type's; that `Railing.Create` on a
 stair's treads then `SetPath` gives a railing the stair lists (`GetAssociatedRailings`) with its top rail along the
@@ -630,3 +697,17 @@ members named here (`Room.GetBoundarySegments`, `SpatialElementBoundaryOptions`,
 `Railing.HostId`/`GetHandRails`/`TopRail`) were each found in the trial laptop's Revit 2027.4 `RevitAPI.dll` (2026-11-19), and the class each
 belongs to was checked in this note's first review round (the stair's typed riser and tread are on `Stairs`, not
 `StairsRun`); how each behaves on real models is checked in the trial before code relies on it (section 9).
+
+Makers' clear openings (section 5a), each downloaded and read 2026-11-20: Marvin's Ultimate Casement Revit families,
+https://www.marvin.com/f/1019562/x/b07c991491/marvin-ultimate-casement-revit.zip (from
+https://www.marvin.com/support/technical-specifications/ultimate-casement-window; never committed here):
+Window-Casement-Marvin-Ultimate.txt's row "UCA3648,Marvin Windows and Doors,Ultimate Casement,36,48,Yes,DP50,3648
+CSMT,UCA3648", and the .rfa's PartAtom (Window Type, shared, eafa4376-701d-423a-906c-e9e76dd752ca; Vent Area, shared,
+0d21ad7d-0db0-489a-a1fa-10d502d650b7, 8.43 SF; Width 3' - 0", Height 3' - 11 1/8", Rough Width 3' - 1"). Marvin, Architectural Detail Manual,
+Ultimate Casement, Awning and Picture (UCA UCANF, 14131101),
+https://marvin.com/f/1019562/x/eaabd5bb0d/adm-ultimate-casement-awning-picture.pdf (SHA-256 19e504b6...b411), pages
+UCA UCANF-1, -2, -6, -25 and -29; Andersen, A-Series double-hung size guide (2023-24 A-Series Product Guide),
+https://www.andersenwindows.com/-/media/aw/files/technical-docs/sizing/sizing-windows--a-series-hung.pdf, page 3 of 3
+("Clear Opening* Width = window width - 4.06"" and its heights; no clear-opening rows); Pella, Reserve casement ADM,
+https://media.pella.com/professional/adm/Clad-Wood/Pella-Reserve_Casement.pdf ("Clear opening (egress) information does
+not take into consideration the addition of a Rolscreen (or any other accessory) to the product", page 20 of the PDF).
