@@ -66,6 +66,17 @@ def test_every_result_changing_discrepancy_is_on_the_page():
     assert sorted(red - cited) == [] and sorted(cited - red) == []
 
 
+def test_every_result_changing_discrepancy_of_another_place_says_where_it_is_tracked():
+    """The page above is Ithaca's. Another place's result-changing (🔴) item (numbered P1, P2, ...) must name the
+    file where its question is tracked, and that file must exist, so no such item is left with no one to answer it."""
+    rows = re.findall(r"^\| (P\d+) \|(.*🔴.*)$", DISCREPANCIES, re.M)
+    assert rows, "the other places' discrepancies table format changed; update this test"
+    for number, row in rows:
+        tracked = re.search(r"Tracked in `([^`]+)`", row)
+        assert tracked, f"discrepancy {number} is result-changing but says nowhere where it is tracked"
+        assert (REPO / tracked.group(1)).is_file(), f"discrepancy {number}: {tracked.group(1)} doesn't exist"
+
+
 def test_every_needs_review_claim_is_true_of_the_code():
     """Today measurements are typed in, and only a rule with a review condition gives NEEDS REVIEW. So each
     'Until you answer' line that promises NEEDS REVIEW must be about measuring a model (being built), or name
