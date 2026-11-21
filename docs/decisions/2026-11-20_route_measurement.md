@@ -238,16 +238,25 @@ area need review.
    (22, 40.25) and (28, 40.25), each its own exit. From (0, 0) both routes go round the inside corner (20, 10):
    tangent 22.338 + arc together 0.925 (53.0 degrees, until the route to (28, 40.25) leaves) = **23.263 ft
    common**, not 0. Fails on a door-graph method. The room's `common_path_of_travel` is a number (the greatest
-   sample plus 3 in), never needs review; and at test 2's column, where the route to one exit flips from over to
-   under, the samples on both sides are worked and the greater counts.
+   sample plus 3 in), never needs review.
+   **Two exits and a column:** test 2's room and column, exit A the west door centred at (-0.25, 5), exit B a door
+   in the north wall centred at (2, 10.25). At (30, 5) the two ways round the column to A are equally short (the
+   room is symmetric about y = 5); taking the one over the top (the tie toward more shared, decision 5), both
+   routes reach the ring at (17, 7) by the same tangent, 13.115 ft, and go round it together until B's leaves at
+   81.5 degrees (A's goes on to 90): 13.115 + 0.081 = **13.195 ft common at (30, 5)**. Just below y = 5 the route to
+   A goes under and they part at the start (0); just above, a little less than 13.195. The story's figure is
+   13.195 plus 3 in at most, so between 13.195 and **13.445 ft**. Fails if the tie at (30, 5) is broken toward the
+   way under (0 there).
 7. **One stair, two doors:** a story whose only exit is one stair enclosure entered by two doors 80 ft apart, both
    `exit_enclosure` with one `exit_id`: `story_exit_count` 1, remoteness needs review, common path equals travel
    distance. Fails if doors are taken as exits.
-8. **A classroom door in a dead end:** a branch 8 ft wide, its end wall 26 ft beyond an 8-ft corridor (dead end
-   30 ft), a classroom door 5 ft from the end, the classroom with its own exterior exit: the dead end is 30 ft, not
-   5; counting the door would make it comply, so needs review. Fails if the door ends the dead end.
-9. **Storage on the line:** a storage room under 10 percent of the story inside its walls, over it to their outer
-   faces: needs review, not complies.
+8. **A classroom door in a dead end:** a branch 8 ft wide, its end wall 26 ft beyond an 8-ft corridor with an exit
+   at each end (dead end 26 + 4 = 30 ft), a classroom door 5 ft from the end, the classroom with its own exterior exit: the dead end is 30 ft, not
+   5; the readings are 30 ft (fails) and 5 ft (complies), so needs review. Fails if the door ends the dead end
+   (5 ft, complies).
+9. **Storage on the line:** a storage room under 10 percent of the story's inside area when measured inside its
+   own walls, over it when measured to their outer faces: needs review, not complies (and fails if both readings of
+   the storage are over it).
 10. **A jamb:** a route turning 90 degrees just past a 36-in door keeps 12 in off the jamb (longer than with no
     ring there); a 22-in door: needs review.
 11. **A dead end that branches:** a corridor 8 ft wide with an exit at each end; a stem 8 ft wide reaching 10 ft
@@ -264,13 +273,16 @@ area need review.
     storage room marked `pass_through: true`: refused on read, its story needs review.
 15. **The area readings:** a checker test on the 10 percent rule with both areas given as readings: all four pairs
     are worked, the outer-accessory over inside-story pair among them; complies only when all four pass.
-16. **A locked corridor:** a corridor 30 ft from its closed end to the next place where two ways reach two exits;
-    15 ft from the end a crossing leads one way to exit A and the other way, through a corridor with
-    `lockable: true`, to exit B: the dead end is 30 ft, failing 1018.4, not 15. Fails if the locked way counts.
+16. **A locked corridor:** a corridor 8 ft wide from a closed end; 15 ft along it, a single side corridor with
+    `lockable: true` leads to exit B (the other side a plain wall); the main corridor goes on to a crossing whose
+    centre line is 30 ft from the closed end and whose two ways reach exits A and C. With the fix: **30 ft, fails**
+    1018.4 (over 20; 2.5 x 8 = 20). With the locked way counted, the dead end would stop at 15 ft (two directions,
+    to B and onward to A and C) and comply: so it fails on revert.
 17. **A kitchen and its pantry:** a start in a kitchen joined by a separation line to a pantry (`accessory_storage`)
     whose door is near an exit: the route leaves by the kitchen's own door (needs review if it has none). Fails if
     the route crosses the pantry. And an H-plan corridor with dead ends of 30 by 14 ft and 22 by 8 ft: two pairs,
-    the first complying by exception 3, the second failing; until `dead_end` exists, the pair 30 ft and 8 ft.
+    the first complying by exception 3 (30 < 2.5 x 14 = 35), the second failing (22 > 20, and 22 is not less than
+    20); until `dead_end` exists, the pair 30 ft and 8 ft (fails). Fails if the 14-ft width is paired with 22 ft.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
