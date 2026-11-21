@@ -123,7 +123,10 @@ figures:
         tolerance: width within 1 in
         within_tolerance: null
         why: Gordium gives no figure
-      dead_end: none of Gordium's starts within 3 ft of the sheet's line
+      dead_end: 'Gordium measured no dead end on this corridor: the corridor isn''t
+        made of straight legs meeting at right angles (a part of it has no walls on
+        its two long sides): its dead ends and width aren''t measured in this first
+        version (decision 6)'
       within_tolerance: null
   remoteness:
     sheet_stated: 183.833
