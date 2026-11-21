@@ -115,8 +115,16 @@ figures:
           and width aren''t measured in this first version (decision 6)'
     agreement:
       tolerance: length within 1 ft, width within 1 in
+      length:
+        tolerance: length within 1 ft
+        within_tolerance: null
+        why: Gordium gives no figure
+      least_width:
+        tolerance: width within 1 in
+        within_tolerance: null
+        why: Gordium gives no figure
+      dead_end: none of Gordium's starts within 3 ft of the sheet's line
       within_tolerance: null
-      why: Gordium gives no figure
   remoteness:
     sheet_stated: 183.833
     sheet_words: 'PROVIDED REMOTENESS: 183''-10" (between its ticks)'
@@ -194,6 +202,50 @@ storage:
     difference: 0.9
     allowed: 165.39
     within_tolerance: true
+  under_all_four_readings:
+    judged: true
+    each_pair:
+      accessory_area_face = inside, story_area_face = inside: pass
+      accessory_area_face = inside, story_area_face = outer_faces: pass
+      accessory_area_face = outer_faces, story_area_face = inside: pass
+      accessory_area_face = outer_faces, story_area_face = outer_faces: pass
+    complies_under_all_four: true
+    sheet: pass
+verdicts:
+  rules:
+    general.ibc_1016_1_travel_distance:
+      gordium: needs_review
+      sheet: pass
+      same: false
+    general.nfpa_16_2_6_2_point_in_room_to_exit:
+      gordium: needs_review
+      sheet: pass
+      same: false
+    general.ibc_1014_3_common_path:
+      gordium: needs_review
+      sheet: pass
+      same: false
+    general.nfpa_16_2_5_3_1_common_path_sprinklered:
+      gordium: needs_review
+      sheet: pass
+      same: false
+    general.ibc_1018_4_dead_end:
+      gordium: needs_review
+      sheet: pass
+      same: false
+    general.nfpa_16_2_5_2_dead_end:
+      gordium: needs_review
+      sheet: pass
+      same: false
+    general.ibc_1015_2_1_remoteness:
+      gordium: needs_review
+      sheet: pass
+      same: false
+    general.ibc_508_2_1_accessory_area:
+      gordium: needs_review
+      sheet: pass
+      same: false
+  every_verdict_the_same: false
 by_hand:
   travel_distance: the sheet's line turns at right angles and runs the corridor's
     centre line to the east exit; Gordium's is the shortest walk to the same exit
