@@ -33,6 +33,15 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
     assert got["figures"]["travel_distance"]["gordium"]["story"] == {
         "figure": round(sp["measures"]["egress_travel_distance"], 3)}
     assert set(got["by_hand"]) >= {"dead_end_centre_line_reading", "story_sf_correct"}
+    # each figure judged against the decision's tolerance by the script (review round 2)
+    travel = got["figures"]["travel_distance"]
+    sheet, ours = travel["sheet_stated"], travel["gordium"]["to_the_sheets_exit_no_clearance"]
+    assert travel["agreement"]["within_tolerance"] == (abs(ours - sheet) <= max(0.02 * sheet, 2.0))
+    assert travel["agreement"]["difference"] == round(ours - sheet, 3)
+    for name in ("travel_distance", "common_path", "dead_end", "remoteness", "diagonal"):
+        assert "within_tolerance" in got["figures"][name]["agreement"] and got["figures"][name]["agreement"]["tolerance"]
+    assert "within_tolerance" in got["storage"]["agreement_inside"]
+    assert not any("percent" in str(v) or "agree" in str(v) for v in got["by_hand"].values())
 
 
 @pytest.mark.skipif(not os.environ.get("GORDIUM_CO_DESCRIPTION"),

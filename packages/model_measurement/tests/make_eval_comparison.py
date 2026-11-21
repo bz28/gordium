@@ -127,9 +127,53 @@ def main(path, out_path=OUT, co=CO):
                       "gordium_story_sf": [round(x.value / FT / FT, 1) for x in areas.building_area(story)],
                       "rooms": {r.name: round(r.outline.area / FT / FT, 1) for r in story.rooms.values()
                                 if r is not None and uses.get(r.id) == "accessory_storage"}}
+    _judge_all(out)
     out["by_hand"] = BY_HAND
     out_path.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8", newline="\n")
     return out
+
+
+TOLERANCES = {   # the decision's "Agreement asked" (docs/decisions/2026-11-20_route_measurement.md, "The eval")
+    "travel_distance": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+    "common_path": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+    "dead_end": "length within 1 ft, width within 1 in",
+    "remoteness": "within 1 ft of Gordium's nearest-edge figure or of its door-centre figure",
+    "diagonal": "within 6 in",
+    "storage_inside": "the inside-walls figure within 1 percent",
+    "story_area": "the outer-faces story area within 1 percent of 16,539 sf (the sheet's 16,509 is a recorded error)",
+}
+
+
+def _verdict(sheet, ours, allowed, words) -> dict:
+    if ours is None:
+        return {"tolerance": words, "within_tolerance": None, "why": "Gordium gives no figure"}
+    best = min(ours, key=lambda v: abs(v - sheet)) if isinstance(ours, list) else ours
+    diff = round(best - sheet, 3)
+    return {"tolerance": words, "sheet": sheet, "gordium": best, "difference": diff,
+            "allowed": round(allowed, 3), "within_tolerance": abs(diff) <= allowed + 1e-9}
+
+
+def _judge_all(out) -> None:
+    """Each figure against the decision's tolerance: within or outside, and by how much (worked here, never written
+    in)."""
+    f = out["figures"]
+    for name in ("travel_distance", "common_path"):
+        sheet = f[name]["sheet_stated"]
+        g = f[name]["gordium"]
+        ours = g.get("to_the_sheets_exit_no_clearance", g.get("no_clearance"))
+        f[name]["agreement"] = _verdict(sheet, ours, max(0.02 * sheet, 2.0), TOLERANCES[name])
+    lengths = [d["length"] for c in f["dead_end"]["gordium"].values() for d in c.get("dead_ends", [])]
+    f["dead_end"]["agreement"] = _verdict(f["dead_end"]["sheet_stated"], lengths or None, 1.0, TOLERANCES["dead_end"])
+    g = f["remoteness"]["gordium"]
+    f["remoteness"]["agreement"] = _verdict(f["remoteness"]["sheet_stated"],
+                                            [g["farthest_pair_nearest_edges"], g["farthest_pair_door_centres"]], 1.0,
+                                            TOLERANCES["remoteness"])
+    f["diagonal"]["agreement"] = _verdict(f["diagonal"]["sheet_stated"], f["diagonal"]["gordium"]["corner_to_corner"],
+                                          0.5, TOLERANCES["diagonal"])
+    st = out["storage"]
+    st["agreement_inside"] = _verdict(st["sheet_stated_sf"], st["gordium_inside_sf"], 0.01 * st["sheet_stated_sf"],
+                                      TOLERANCES["storage_inside"])
+    st["agreement_story_area"] = _verdict(16539, st["gordium_story_sf"][-1], 0.01 * 16539, TOLERANCES["story_area"])
 
 
 BY_HAND = {   # worked by hand from the sheet and the model, not by the route code: each with its working
@@ -144,7 +188,7 @@ BY_HAND = {   # worked by hand from the sheet and the model, not by the route co
     "remoteness": "the sheet measures the west and east corridor exits; decision 7 takes the farthest-apart pair",
     "diagonal": "the sheet's ticks are not at the traced outer outline's corners (its north-east tick about 3 ft "
                 "north of the traced north face): a trace or drawing difference, not settled",
-    "storage": "the sheet doesn't list its rooms; Gordium's outer-faces reading is within 1 percent of the sheet's",
+    "storage": "the sheet doesn't list its rooms; Gordium counts the rooms marked accessory_storage",
     "story_sf_correct": {"figure": 16539, "working": "the sheet's 16,509 is a recorded error (hand_check.yaml)"},
 }
 
