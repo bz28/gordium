@@ -745,11 +745,18 @@ leaves the id out with why ("mark every door into the enclosure"). A horizontal 
 beyond its wall isn't one Room): such a door isn't read. The rule is cautious: a stair Room with an unmarked door into
 it (a closet) gives no id, never a guess.
 
-**What isn't sent yet, and why.** `story_outlines` (the exterior walls' faces): Revit's wall Function is a type
-setting the firm chooses, not a fact, and the outline of a story from its walls is its own piece of work; left out,
-the diagonal and the story's area need review (the format's rule). An unknown space's `outline`: Revit's
-`PlanCircuit` gives no boundary (finding one needs a temporary Room in a rolled-back transaction), and the route code's
-answer is the same either way (an unknown space on a story keeps its routes needing review).
+**`story_outlines` (decision 8's two readings), from what is drawn, not the slab's edge** (`StoryOutlines.cs`). A
+floor slab may stop at the walls' core, their inside face or run past them, and a wall type's Function is a setting
+the firm chooses, so neither says where the exterior walls' faces are. Instead: **outer** is the outside boundary of
+everything on the story put together, every room's floor, every outlined enclosed area with no Room, and every wall's
+footprint (its faces that aren't vertical, projected; a door cutting a wall's bottom face is bridged by its top face);
+the **exterior walls** are the walls with a piece of that boundary on their footprint; **inner** is the outside boundary
+of the rooms, the outlined areas and every other wall: the exterior walls' inside faces. Walls drawn a hair apart (1/16
+in) count as one solid. Left out, with the reason in the notes, when the pieces don't close into one loop, when the
+loop holds a hole bigger than a sliver (a courtyard, or a space no Room or outline accounts for: counting it as floor
+would understate the share of the story a use takes), when a room's floor or an enclosed area's outline isn't read,
+or when a wall's geometry can't be read or has a curved face (read as its points' hull it would add floor that isn't
+there). Then the diagonal and the story's areas need review (the format's rule).
 
 **Why the footprints, not the boxes.** A box is bigger than the piece (a desk turned 30 degrees fills twice its area
 in an axis-aligned box), and a bigger obstruction is not always the cautious side: routes around it may part sooner,
