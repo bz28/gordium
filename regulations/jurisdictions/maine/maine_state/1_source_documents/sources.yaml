@@ -1,0 +1,169 @@
+# Source documents for Maine's own law (the building and life-safety codes a Maine place inherits).
+# Both books are copyrighted (International Code Council; National Fire Protection Association), so neither is in this
+# folder: kept_outside_repo: true means the book and its extracted text are in the code cache on the machines that
+# have it, <cache>/<sha256>/<file> (rule_format/rulebook.py: code_cache), with the text of every page
+# (document_extraction/book_text.py), the same for every branch; brought_in.pages says which of its pages this branch
+# reads. The repo keeps only short exact quotes, each with its section, page and a link (decided 2026-11-12:
+# docs/decisions/2026-11-12_building_code_text.md; for Maine: docs/decisions/2026-11-20_commercial_egress_maine.md).
+# sha256 is the book's fingerprint: if a single byte changes, it changes.
+# Pages are the PDF's own page numbers (1 = the first page of the file), never the book's printed page numbers.
+# Everything here is verified against these copies only; check against a copy bought from ICC and from NFPA.
+
+documents:
+
+  - file: icc.ibc.2009.pdf
+    title: 2009 International Building Code (IBC)
+    publisher: International Code Council (first printing February 2009)
+    edition: 2009   # ISBN 978-1-58001-725-1 (soft-cover edition), as its copyright page prints
+    url: https://archive.org/details/gov.law.icc.ibc.2009
+    downloaded_on: 2026-11-20   # https://archive.org/download/gov.law.icc.ibc.2009/icc.ibc.2009.pdf
+    sha256: b75f0234ed3d160fe389eab61c1208fe43a941119ab6b5fd4388edc4742d7c70
+    pages: 703
+    kept_outside_repo: true
+    copy: >
+      Posted to the Internet Archive by Public.Resource.Org on 2012-07-31 (item gov.law.icc.ibc.2009; this PDF is the
+      item's icc.ibc.2009.pdf, sha1 bf1e4c88c20f93c9a67d1741d5ca160aa2b1d67e, as archive.org lists it). It is a SCAN
+      of the printed book (600 dpi), with a text layer made by OCR (ABBYY FineReader 8.0, per the item's metadata):
+      the text can misread a character ("1-4" for the Group I-4, "H-l" for H-1, "I-hour" for 1-hour), run two words
+      together ("exitaccess"), drop the hyphen of a word broken at a line's end ("individ" / "ual"), and it records
+      italics but not bold. So the page image is the authority: every number of every brought-in piece is read a
+      second time from the page image by a reader that never saw the OCR (text_verification.icc.ibc.2009.yaml), every
+      quote a rule uses was checked against the page image, and each misread a quote or number depends on is put
+      right by name (brought_in.misread, with what the image prints). The item's HTML and its other OCR files are not
+      used. A working copy: to be checked against a copy bought from ICC (ICC's digital codes site may not be read by
+      any script or automated browser: its terms forbid automated extraction and commercial use).
+    terms: >
+      Copyright 2009 International Code Council. Public.Resource.Org posts it as a legally binding document
+      incorporated by reference. Gordium keeps only short exact quotes, with section, page and a link, in the repo; the
+      book and its full text stay outside it.
+    in_force: >
+      Maine's building code (the Maine Uniform Building and Energy Code, MUBEC: 10 M.R.S. ch. 1103; its rules are
+      16-642 CMR, the Technical Building Codes and Standards Board, filed in October 2010) adopted the 2009 I-codes;
+      the 2015 editions followed, and the 2021 editions since 2025-04-07. The architect's life-safety sheet for the
+      first project (LS1.0, 19 Libby Street, Portland, October 2016) cites the 2009 IBC throughout, so it is read here
+      as the code that applied to it. Which IBC edition was in force on the project's permit date is an open question
+      (README: the 2016 rule text was not found online); this book is the edition the sheet cites, so it is a fair
+      answer key either way.
+    layout: two_column   # read column by column from the text layer (document_extraction/columns.py)
+    style: ibc_2009      # cut at the book's own headings (document_extraction/columns_sections.py)
+    brought_in:
+      pages: 38-50, 61, 106, 111-113, 120-121, 208-211, 244-248, 251-252, 265-269
+      sections: [ '201', '308.5', '508.2', '1004.1', '1008.1.2', '1014.3', '1015.1', '1015.2', '1016.1', '1018.1',
+                  '1018.2', '1018.4', Table 1004.1.1, Table 1015.1, Table 1016.1, Table 1018.1, Table 508.2.5 ]
+      italic_not_defined:    # by piece: italic words no definition on the pages read names, each with why (any other
+                             # is a problem). Most are the OCR's: a word run into a defined term, or a term broken at a
+                             # line's end with its hyphen dropped; the rest are other codes' titles, printed in italics.
+        '201.3':
+          international fuel gas code international fire code international mechanical code: The titles of other
+            codes, printed in italics as titles (201.3 sends terms they define to them); no term.
+          international plumbing code: As above.
+        '308.5':
+          interna tional residential code: The title International Residential Code, broken at a line's end ("Interna-"
+            / "tional", the OCR drops the hyphen); a title, no term.
+        '308.5.2':
+          door: The OCR runs "exit" and "door" together ("exitdoor"); EXIT is defined (brought in), "door" keeps its
+            ordinary meaning (201.4).
+        '508.2.3':
+          height: The OCR runs "height" and "for" together ("heightfor"); the book's HEIGHT, BUILDING is not this
+            phrase. Ordinary meaning (201.4), as the book prints "height" of an accessory occupancy.
+        '508.2.4':
+          dwell: '"dwell-" / "ing or" broken at a line''s end, the hyphen dropped (DWELLING UNIT and SLEEPING UNIT are
+            matched in the rest of the phrase).'
+          ingor: As "dwell" (the OCR runs "ing" and "or" together).
+        702:ceiling_radiation_damper:
+          device: The OCR runs "listed" and "device" together ("listeddevice"); LISTED is defined, "device" is not.
+        902:automatic_fire_extinguishing_system:
+          fireextinguish: '"approvedfire-extinguish" / "ing agent": the OCR runs APPROVED into "fire-extinguishing",
+            broken at a line''s end. No term "fire-extinguishing"; ordinary meaning (201.4).'
+        202:specified:
+          i'oj: 'The OCR''s reading of the italic symbol f''m in the next entry, "SPECIFIED COMPRESSIVE STRENGTH OF /
+            MASONRY (f''m). See Section 2102.1." (p.47 lines 14-15, checked on the page image). That entry is printed
+            across two lines and the OCR leaves its parenthesis open, so the cutter leaves it in SPECIFIED''s piece; it
+            is a masonry term, pointing to 2102.1, and used by no brought-in piece.'
+        1002:exit:
+          exterior: The italic run takes in "exterior" before the defined EXIT DISCHARGE (or exit); no definition names
+            "exterior" alone (EXTERIOR WALL is another term). Ordinary meaning (201.4).
+        '1004.1.1':
+          by: The OCR runs "approved" and "by" together ("approvedby"); APPROVED is defined.
+        '1014.3':
+          common path of egress travelshall: The OCR runs "travel" and "shall" together; the phrase is COMMON PATH OF
+            EGRESS TRAVEL (brought in from this piece's other uses of it).
+        '1015.2.1':
+          doors: The OCR runs "exit" and "doors" together ("exitdoors"); EXIT is defined, "doors" is not.
+          separation: The OCR runs "exit" and "separation" together ("exitseparation"); EXIT is defined.
+        '1016.1':
+          exterior: As in 1002:exit ("exterior exit door"); ordinary meaning.
+        '1018.2':
+          width: The OCR runs "corridor" and "width" together ("corridorwidth"); CORRIDOR is defined.
+        '1018.4':
+          doorwayis: The OCR runs "doorway" and "is" together ("doorwayis"); EXIT ACCESS DOORWAY is defined (brought in
+            from this piece's other uses).
+      tables:      # each table's lines, checked on the page image (the text layer doesn't say where a table ends);
+                   # every table on the pages read is named, brought in or not
+        Table 508.2.5: p.112 lines 43-87
+        Table 508.4: p.113 lines 58-104
+        Table 1004.1.1: p.247 lines 60-115
+        Table 1008.1.4.1: p.252 lines 54-67
+        Table 1015.1: p.266 lines 18-25
+        Table 1016.1: p.267 lines 56-104
+        Table 1018.1: p.268 lines 79-101
+    contents: >
+      Commercial egress step 1 (2026-11-20), for a day-care centre: 308.5 (Group I-4, day care, with 308.5.1 and
+      308.5.2, and its Group E and R-3 limits); 508.2 (accessory occupancies: 508.2.1's 10 percent of the story; 508.2.5
+      and Table 508.2.5, incidental accessory occupancies such as storage rooms); 1004.1 and Table 1004.1.1 (occupant
+      load); 1008.1.2 (door swing); 1014.3 (common path of egress travel); 1015.1 and Table 1015.1 (spaces with one
+      exit), 1015.2 (exit remoteness); 1016.1 and Table 1016.1 (travel distance); 1018.1 and Table 1018.1 (corridor
+      fire-resistance), 1018.2 (corridor width), 1018.4 (dead ends); 201 (how definitions apply) and every definition
+      they use, by the book's italics (its preface: "Selected terms set forth in Chapter 2, Definitions, are
+      italicized where they appear in code text"), with the sections Chapter 2 points them to (1002.1, 502.1, 702.1,
+      902.1).
+
+  - file: gov.law.nfpa.101.2012.pdf
+    title: NFPA 101, Life Safety Code, 2012 Edition
+    publisher: National Fire Protection Association (2012 edition)
+    edition: 2012
+    url: https://archive.org/details/gov.law.nfpa.101.bis.2012
+    downloaded_on: 2026-11-20   # https://archive.org/download/gov.law.nfpa.101.bis.2012/gov.law.nfpa.101.2012.pdf
+    sha256: 1da1b91f0256e291e0d4a00fb2a6310c09f10d79b47d18afaf5f2a7dfbc99227
+    pages: 505
+    kept_outside_repo: true
+    copy: >
+      Posted to the Internet Archive by Public.Resource.Org on 2023-12-25 (item gov.law.nfpa.101.bis.2012; this PDF is
+      the item's gov.law.nfpa.101.2012.pdf, sha1 a3164481359810b1644696a5400a7285690859f6). Not a scan: NFPA's own PDF,
+      with real text in its fonts (NewBaskerville), stamped "Posted by Public.Resource.Org. Not affiliated with NFPA"
+      at the top of every page and carrying a licence number ({520B73D4-A0E1-47A7-8A16-26DB4E480E5E}) and a diagonal
+      watermark across every page, so it is one licensed copy. The archive's OCR files of it are not used. Its numbers
+      are still read a second time from the page images (text_verification.gov.law.nfpa.101.2012.yaml). A working
+      copy: to be checked against a copy bought from NFPA (NFPA's free online access may not be read by any script).
+    terms: >
+      Copyright 2011 National Fire Protection Association. Public.Resource.Org posts it as incorporated by reference
+      into federal law (38 CFR 51.200, et alia), after Public.Resource.Org v. ASTM (D.C. Cir., 2023-09-12). Gordium
+      keeps only short exact quotes, with section, page and a link, in the repo; the book and its full text stay
+      outside it.
+    in_force: >
+      Maine's State Fire Marshal adopts the Life Safety Code by rule (16-219 CMR ch. 20, Fire Safety in Buildings and
+      Structures), with Maine's own exclusions and modifications. Today's rule names the 2018 edition (amended
+      2021-01-25); in 2016 it named an earlier edition (the 2009 edition, as Ben has it). The architect's sheet (LS1.0,
+      October 2016) cites section numbers that match this 2012 edition (16.2.6.2-16.2.6.3, 16.3.6, Table
+      6.1.14.4.1(b)), so it is read here as the sheet's answer key. Which edition, and which of Maine's modifications
+      (today's rule changes the dead-end limit, for one), applied on the permit date is an open question (README).
+    layout: two_column
+    style: nfpa_101_2012
+    brought_in:
+      pages: 28-39, 48-50, 77, 172-174, 176, 179-183
+      sections: [ '3.1', '6.1.14.4', '16.1.7', '16.2.2.2', '16.2.5.2', '16.2.5.3', '16.2.6', '16.3.6', '17.1.7',
+                  '17.2.2.2', '17.2.5.2', '17.2.5.3', '17.2.6', '17.3.6', Table 6.1.14.4.1(b), Table 7.3.1.2 ]
+      tables:      # each table's lines, checked on the page image; where the text runs between a table's title and its
+                   # rows, both are named
+        Table 6.1.14.4.1(a): p.49 lines 3-85
+        Table 6.1.14.4.1(b): p.50 lines 3-95
+        Table 7.3.1.2: p.77 lines 3-139
+        Table 16.1.6.1: p.173 lines 23, 43-98
+        Table 17.1.6.1: p.180 lines 21, 39-101
+    contents: >
+      Commercial egress step 1 (2026-11-20), for a day-care centre, new (Chapter 16) and existing (Chapter 17): the
+      occupant load (16.1.7, 17.1.7), doors (16.2.2.2, 17.2.2.2), dead ends (16.2.5.2, 17.2.5.2), common path of
+      travel (16.2.5.3, 17.2.5.3), travel distance (16.2.6, 17.2.6), corridors (16.3.6, 17.3.6); separated occupancies
+      (6.1.14.4 and Table 6.1.14.4.1(b)); 3.1 (how the definitions apply) and every Chapter 3 definition whose term
+      they print (the book marks no defined word; 3.1: "The definitions contained in this chapter shall apply to the
+      terms used in this Code").
