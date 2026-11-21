@@ -78,7 +78,12 @@ public sealed record WallFace(Xyz Point, Xyz Normal);
 /// walls: the Children's Odyssey model, 2026-11-20, threw "Could not obtain valid UV point"): such an area lies in
 /// no Room, so with no Room of its own it stays a space whose use isn't known, never dropped, never a crash.</param>
 /// <param name="LevelId">The level's <c>UniqueId</c>: its "no rooms on this level" mark, and the rooms on it.</param>
-public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz? PointInside, string? LevelId = null);
+/// <param name="Outline">For an area with no Room: its outline (the outer boundary loop, at the finished faces, of a Room
+/// the Revit layer places in it for the moment and takes back, <c>SubTransaction</c> rolled back), each segment's start,
+/// internal; null when it couldn't be read (Revit refused, a curved segment, a model it can't change): then a door
+/// whose far side Revit gives no room on, on that level, can't be said to open to outside (escape routes, section 10).</param>
+public sealed record EnclosedArea(string Level, double Area, bool HasRoom, Xyz? PointInside, string? LevelId = null,
+                                  IReadOnlyList<Xyz>? Outline = null);
 
 /// <summary>A linked Revit model, for the interior: whether its contents are known, where it reaches, and whether it
 /// holds rooms, windows or doors (design note, section 4: a link's rooms or windows leave that kind not read; a loaded

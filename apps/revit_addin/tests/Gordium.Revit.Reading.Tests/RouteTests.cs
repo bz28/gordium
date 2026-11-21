@@ -266,6 +266,33 @@ public sealed class RouteTests
         Assert.Contains("no room on either side", FakeFloor.Note(read, "dS2", "doors.sides"));
     }
 
+    [Fact]
+    public void A_door_onto_an_enclosed_area_with_no_room_names_it_never_outside()
+    {
+        // the Children's Odyssey (2026-11-21): 19 doors read "to outside", many of them into classroom toilets and
+        // closets with no Room. An enclosed area beyond the lobby's door: the door joins the lobby and that space
+        var floor = new FakeFloor();
+        (double X, double Y)[] beyondE = [(20, 26.5), (30, 26.5), (30, 32), (20, 32)];
+        floor.Areas.Add(new EnclosedArea("Level 1", 55, false, floor.Fake.Place(25, 29, 0), FakeFloor.Level,
+                                         beyondE.Select(p => floor.Fake.Place(p.X, p.Y, 0)).ToList()));
+        var read = InteriorReader.Read(floor.Model());
+        var space = Assert.Single(read.Interior["unknown_spaces"]!.AsArray())!;
+        var id = space["id"]!.GetValue<string>();
+        Assert.Equal(4, space["outline"]!.AsArray().Count);
+        Assert.Equal([U("L"), id], Door(read, "dE")["sides"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Null(Door(read, "dE")["exit_id"]);                               // an exterior door's mark, but no outside
+        Assert.Equal([U("S"), RouteReader.Outside], Door(read, "dS2")["sides"]!.AsArray().Select(x => x!.GetValue<string>()));
+        Assert.Contains(StoryStops(Routes(read)), s => s.Contains("enclosed space", StringComparison.Ordinal));
+
+        // its outline not read: no door on that level with no room beyond it is called outside
+        floor.Areas[^1] = floor.Areas[^1] with { Outline = null };
+        read = InteriorReader.Read(floor.Model());
+        Assert.Null(Door(read, "dE")["sides"]);
+        Assert.Null(Door(read, "dS2")["sides"]);
+        Assert.Contains("couldn't be outlined", FakeFloor.Note(read, "dS2", "doors.sides"));
+        Assert.Equal([U("A"), U("C")], Door(read, "dA")["sides"]!.AsArray().Select(x => x!.GetValue<string>()));   // two rooms: as before
+    }
+
     // ---- what stands in a room ---------------------------------------------------------------------------------
 
     [Fact]

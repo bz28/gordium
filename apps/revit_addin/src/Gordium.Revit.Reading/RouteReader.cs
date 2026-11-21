@@ -362,6 +362,7 @@ public static class RouteReader
         var sent = rooms.Select(r => r["id"]!.GetValue<string>()).ToHashSet(StringComparer.Ordinal);
         var marks = MarkReading.Doors(model).ToDictionary(d => d.Id, StringComparer.Ordinal);
         var openings = records.Openings.ToDictionary(o => o.UniqueId, StringComparer.Ordinal);
+        var unknown = InteriorReader.UnknownSpaceList(model);
         var sides = new Dictionary<string, string[]>(StringComparer.Ordinal);
         foreach (var door in doors.Select(d => d!.AsObject()))
         {
@@ -392,7 +393,7 @@ public static class RouteReader
             else
                 Out("plan", (place is null ? whyNot! : "its maker's clear width isn't confirmed (no stated_clear is sent), so where a route passes it isn't read")
                             + ": its story's escape routes aren't measured");
-            if (Sides(rec, place, sent, plans, out whyNot) is { } joins)
+            if (Sides(rec, place, sent, plans, unknown, out whyNot) is { } joins)
             {
                 door["sides"] = new JsonArray(joins.Select(s => (JsonNode)s).ToArray());
                 sides[id] = joins;
@@ -512,7 +513,8 @@ public static class RouteReader
     /// room and outside when Revit gives no room on its other side and no room read is drawn there (1 in beyond the
     /// wall's face). Null, with why, otherwise.</summary>
     internal static string[]? Sides(OpeningRecord rec, DoorPlace? place, HashSet<string> sent,
-                                    Dictionary<string, InteriorReader.RoomPlan> plans, out string? why)
+                                    Dictionary<string, InteriorReader.RoomPlan> plans,
+                                    List<(EnclosedArea Area, string Id, List<P2>? Outline)> unknown, out string? why)
     {
         why = null;
         var (from, to) = (rec.FromRoom, rec.ToRoom);
@@ -558,6 +560,20 @@ public static class RouteReader
         {
             why = $"Revit gives no room on one side, but room {there.Record.UniqueId} is drawn there";
             return null;
+        }
+        // an enclosed area with no Room beyond it is that unknown space, never outside (the Children's Odyssey's
+        // classroom toilets and closets, 2026-11-21); one on its level whose outline couldn't be read could be it
+        var level = mine.Record.LevelId;
+        foreach (var (area, id, outline) in unknown.Where(u => u.Area.LevelId == level || u.Area.LevelId is null))
+        {
+            if (outline is null)
+            {
+                why = "Revit gives no room on one side, and an enclosed area with no Room on its level couldn't be outlined, " +
+                      "so that side may be it: never read as outside";
+                return null;
+            }
+            if (StrictlyInside(beyond, outline))
+                return [room, id];
         }
         return [room, Outside];
     }

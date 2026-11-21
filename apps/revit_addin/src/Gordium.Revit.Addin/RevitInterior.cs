@@ -480,7 +480,7 @@ internal static class RevitInterior
                     return null;
                 }
                 var before = areas.Count;
-                foreach (PlanCircuit c in circuits)
+                foreach (var c in circuits.Cast<PlanCircuit>().ToList())   // listed first: an outline places a Room for the moment
                 {
                     // Revit refuses a point inside a degenerate circuit (a sliver between overlapping walls: the
                     // Children's Odyssey model, 2026-11-20): the area is kept with no point, never dropped
@@ -493,7 +493,8 @@ internal static class RevitInterior
                     catch (Autodesk.Revit.Exceptions.InvalidOperationException)
                     {
                     }
-                    areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId));
+                    areas.Add(new EnclosedArea(level.Name, c.Area, c.IsRoomLocated, point, level.UniqueId,
+                                               c.IsRoomLocated ? null : OutlineOf(doc, phase, c)));
                 }
                 diagnostics.Add($"enclosed areas on {level.Name}: {areas.Count - before} " +
                                 $"({areas.Skip(before).Count(a => !a.HasRoom)} with no Room: " +
@@ -511,6 +512,44 @@ internal static class RevitInterior
                 t.RollBack();
                 t.Dispose();
             }
+        }
+    }
+
+    /// <summary>An enclosed area's outline: a Room placed in it for the moment (<c>NewRoom(phase)</c>, then
+    /// <c>NewRoom(room, circuit)</c>) inside a <c>SubTransaction</c> that is always rolled back, its outer boundary loop at
+    /// the finished faces (the loop of largest area), each segment's start. Null when the document can't be changed for
+    /// the moment, Revit refuses, or a segment is curved: the reader then never calls a door's far side on that level
+    /// outside (escape routes, section 10).</summary>
+    private static List<Xyz>? OutlineOf(Document doc, Phase phase, PlanCircuit circuit)
+    {
+        if (!doc.IsModifiable)
+            return null;
+        using var st = new SubTransaction(doc);
+        try
+        {
+            st.Start();
+            var room = doc.Create.NewRoom(phase);
+            doc.Create.NewRoom(room, circuit);
+            doc.Regenerate();
+            var loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions { SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish });
+            if (loops is null || loops.Count == 0 || loops.Any(l => l.Any(s => s.GetCurve() is not Line)))
+                return null;
+            static double Area(IList<BoundarySegment> l)
+            {
+                var p = l.Select(s => s.GetCurve().GetEndPoint(0)).ToList();
+                return Math.Abs(p.Select((a, i) => a.X * p[(i + 1) % p.Count].Y - p[(i + 1) % p.Count].X * a.Y).Sum()) / 2;
+            }
+            return loops.OrderByDescending(Area).First().Select(s => P(s.GetCurve().GetEndPoint(0))).ToList();
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
+                                       or Autodesk.Revit.Exceptions.InvalidOperationException)
+        {
+            return null;
+        }
+        finally
+        {
+            if (st.HasStarted() && !st.HasEnded())
+                st.RollBack();
         }
     }
 

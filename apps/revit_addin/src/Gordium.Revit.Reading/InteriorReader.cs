@@ -405,8 +405,28 @@ public static class InteriorReader
     private static JsonArray UnknownSpaces(RevitModel model, List<EnclosedArea> areas)
     {
         var spaces = new JsonArray();
+        foreach (var (a, id, outline) in UnknownSpaceList(model, areas))
+        {
+            var space = new JsonObject { ["id"] = id, ["name"] = AreaWords(model, a) };
+            // its story (escape routes): an unknown space on a story keeps that story's routes needing review
+            if (a.LevelId is { } level && (model.Interior?.Levels ?? []).Any(l => l.UniqueId == level))
+                space["level"] = level;
+            if (outline is not null)
+                space["outline"] = new JsonArray(outline.Select(p => (JsonNode)new JsonArray(p.X, p.Y)).ToArray());
+            spaces.Add(space);
+        }
+        return spaces;
+    }
+
+    /// <summary>Each enclosed area sent as a space whose use isn't known, with its id in the description (from its level
+    /// and place, the same at every read of the same model) and its outline in shared plan points (the loop Revit gives a
+    /// Room placed in it for the moment, <see cref="EnclosedArea.Outline"/>), null when that couldn't be read or isn't a
+    /// simple outline of straight segments.</summary>
+    internal static List<(EnclosedArea Area, string Id, List<P2>? Outline)> UnknownSpaceList(RevitModel model, List<EnclosedArea>? areas = null)
+    {
+        var list = new List<(EnclosedArea, string, List<P2>?)>();
         var ids = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var a in areas)
+        foreach (var a in areas ?? UnknownAreas(model))
         {
             var id = a.PointInside is { } inside
                 ? string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:{1:0.###},{2:0.###}", a.LevelId ?? a.Level,
@@ -414,13 +434,11 @@ public static class InteriorReader
                 : string.Format(CultureInfo.InvariantCulture, "enclosed-area:{0}:no-point:{1:0.###}sf", a.LevelId ?? a.Level, a.Area);
             for (var n = 2; !ids.Add(id); n++)
                 id = $"{id}#{n}";
-            var space = new JsonObject { ["id"] = id, ["name"] = AreaWords(model, a) };
-            // its story (escape routes): an unknown space on a story keeps that story's routes needing review
-            if (a.LevelId is { } level && (model.Interior?.Levels ?? []).Any(l => l.UniqueId == level))
-                space["level"] = level;
-            spaces.Add(space);
+            var outline = a.Outline is { Count: >= 3 } o
+                ? PlanGeometry.Clean(o.Select(model.InternalToShared.Apply).Select(p => new P2(p.X, p.Y)).ToList()) : null;
+            list.Add((a, id, outline is not null && PlanGeometry.IsSimple(outline) ? outline : null));
         }
-        return spaces;
+        return list;
     }
 
     private static IEnumerable<string> WorksetAndLinkBlockers(RevitModel model, bool rooms)
