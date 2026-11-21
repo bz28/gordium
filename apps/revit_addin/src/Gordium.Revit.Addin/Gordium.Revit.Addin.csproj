@@ -39,6 +39,12 @@
     <Reference Include="RevitAPIUI" HintPath="$(RevitDir)\RevitAPIUI.dll" Private="false" />
   </ItemGroup>
   <ItemGroup>
+    <!-- the results panel's restyled controls: built in as a resource and read with XamlReader (PanelLook), not
+         compiled as a Page, so no pack URI has to find this assembly inside Revit -->
+    <Page Remove="PanelStyles.xaml" />
+    <EmbeddedResource Include="PanelStyles.xaml" LogicalName="Gordium.Revit.Addin.PanelStyles.xaml" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="../Gordium.Worker/Gordium.Worker.csproj" />
     <ProjectReference Include="../Gordium.Revit.Reading/Gordium.Revit.Reading.csproj" />
   </ItemGroup>
