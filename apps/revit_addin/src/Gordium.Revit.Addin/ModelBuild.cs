@@ -208,6 +208,9 @@ internal static class ModelBuild
         foreach (var id in walls.Where(p => !p.Value.IsValidObject).Select(p => p.Key).ToList())
             walls.Remove(id);
         report.Counts["walls"] = new { data = model.Walls.Count, drawn = walls.Count };
+        // Revit's "Highlighted walls overlap" warnings, named from the data: walls drawn as the data has them
+        foreach (var o in BuildData.WallOverlaps(model.Walls))
+            report.Notes.Add($"the data's {o.Words}");
 
         // ---- door and window types ----
         var types = OpeningTypes(app, doc, model, report);
@@ -395,11 +398,18 @@ internal static class ModelBuild
             var drawn = BuildData.Area(r.Boundary);
             var line = $"{room.Number} {room.Name}: Revit's area {room.Area:0.#} sq ft, the sheet's {(r.AreaSf is { } a ? $"{a:0.#}" : "none")}, " +
                        $"inside its boundary {drawn:0.#}";
+            // where the data's walls leave its boundary open: Revit bounds a room by walls alone, drawn where the data
+            // ends them, so a gap the tracing left is said here, never closed by the builder
+            var gaps = BuildData.BoundaryGaps(r, model.Walls);
+            var open = gaps.Count == 0 ? "" : "; the data's walls leave its boundary open: " + string.Join("; ", gaps.Select(g => g.Words));
             if (room.Area <= 0)
             {
-                line += ": NOT ENCLOSED (Revit found no walls around its tag point)";
-                report.Failed.Add($"room {r.Number} {r.Name}: placed, but not enclosed by walls (area 0)");
+                line += ": NOT ENCLOSED (Revit found no walls around its tag point)" + open;
+                report.Failed.Add($"room {r.Number} {r.Name}: placed, but not enclosed by walls (area 0)" +
+                                  (gaps.Count == 0 ? ": no gap in the data's walls along its boundary (look at the walls Revit ignored as overlapping)" : open));
             }
+            else
+                line += open;
             report.Rooms.Add(line);
         }
         report.Counts["rooms"] = new { data = model.Rooms.Count, placed = rooms.Count(x => x.Room.IsValidObject),

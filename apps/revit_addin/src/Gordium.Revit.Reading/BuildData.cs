@@ -400,5 +400,97 @@ public static class BuildData
     /// (New Construction), as the script does.</summary>
     public static int? ExistingPhase(int phaseCount, bool usePhases) => usePhases && phaseCount > 1 ? 0 : null;
 
+    // ---- what the data's walls leave open, and where they overlap --------------------------------------------------
+
+    /// <summary>A stretch of a room's boundary (the sheet's) with no wall of the data along it: Revit finds a room's
+    /// outline from walls alone, so a room whose boundary has one leaks through it and is not enclosed.
+    /// <see cref="WallBefore"/> and <see cref="WallAfter"/> are the walls nearest its two ends (none when none is within
+    /// a foot).</summary>
+    public sealed record BoundaryGap(PlanPoint From, PlanPoint To, double Length, int? WallBefore, int? WallAfter)
+    {
+        public string Words => $"{Length:0.##} ft from ({From.X:0.###}, {From.Y:0.###}) to ({To.X:0.###}, {To.Y:0.###})" +
+                               $" ({(WallBefore is { } a ? $"wall W{a}" : "no wall")} to {(WallAfter is { } b ? $"wall W{b}" : "no wall")})";
+    }
+
+    /// <summary>How far a point is from a wall's plan rectangle (its centre line, its thickness across, its ends where
+    /// the data puts them: a wall is drawn no longer than the data).</summary>
+    public static double DistanceToWall(PlanPoint p, BuildWall w)
+    {
+        var length = Distance(w.Start, w.End);
+        double ux = (w.End.X - w.Start.X) / length, uy = (w.End.Y - w.Start.Y) / length;
+        double u = (p.X - w.Start.X) * ux + (p.Y - w.Start.Y) * uy, v = -(p.X - w.Start.X) * uy + (p.Y - w.Start.Y) * ux;
+        double du = Math.Max(0, Math.Max(-u, u - length)), dv = Math.Max(0, Math.Abs(v) - w.ThicknessIn / 24);
+        return Math.Sqrt(du * du + dv * dv);
+    }
+
+    /// <summary>Every stretch of <paramref name="room"/>'s boundary farther than <paramref name="tolerance"/> from every
+    /// wall (sampled every <paramref name="step"/> ft along each side; each stretch widened by the tolerance to where
+    /// the walls' ends are). Doors and windows stand in their walls, so an opening is no gap. The sheet's boundary
+    /// lies on the walls' faces within a few hundredths of a foot; 0.25 ft is well clear of that.</summary>
+    public static IReadOnlyList<BoundaryGap> BoundaryGaps(BuildRoom room, IReadOnlyList<BuildWall> walls, double tolerance = 0.25, double step = 0.02)
+    {
+        var gaps = new List<BoundaryGap>();
+        var ring = room.Boundary.Count > 1 && Distance(room.Boundary[0], room.Boundary[^1]) < 1e-9 ? room.Boundary.Take(room.Boundary.Count - 1).ToList()
+                   : room.Boundary.ToList();
+        int? Nearest(PlanPoint p) => walls.Select(w => (w.Id, D: DistanceToWall(p, w))).Where(x => x.D <= 1).OrderBy(x => x.D)
+                                          .Select(x => (int?)x.Id).FirstOrDefault();
+        for (var i = 0; i < ring.Count; i++)
+        {
+            var (a, b) = (ring[i], ring[(i + 1) % ring.Count]);
+            var length = Distance(a, b);
+            if (length < 1e-9)
+                continue;
+            PlanPoint At(double s) => new(a.X + (b.X - a.X) * s / length, a.Y + (b.Y - a.Y) * s / length);
+            var n = Math.Max(1, (int)Math.Ceiling(length / step));
+            double? open = null;
+            for (var k = 0; k <= n + 1; k++)
+            {
+                var s = Math.Min(k * length / n, length);
+                var covered = k > n || walls.Any(w => DistanceToWall(At(s), w) <= tolerance);
+                if (!covered && open is null)
+                    open = s;
+                else if (covered && open is { } o)
+                {
+                    var last = Math.Min((k - 1) * length / n, length);
+                    double from = Math.Max(0, o - tolerance), to = Math.Min(length, last + tolerance);
+                    gaps.Add(new BoundaryGap(At(from), At(to), to - from, Nearest(At(from)), Nearest(At(to))));
+                    open = null;
+                }
+            }
+        }
+        return gaps;
+    }
+
+    /// <summary>Two walls of the data that lie along each other (parallel, closer than their half thicknesses, sharing
+    /// <see cref="Length"/> ft): Revit warns "Highlighted walls overlap" and may ignore one as a room boundary.</summary>
+    public sealed record WallOverlap(int A, int B, double Length, double Offset)
+    {
+        public string Words => $"walls W{A} and W{B} overlap along {Length:0.##} ft ({Offset * 12:0.#} in apart, centre to centre)";
+    }
+
+    public static IReadOnlyList<WallOverlap> WallOverlaps(IReadOnlyList<BuildWall> walls)
+    {
+        var found = new List<WallOverlap>();
+        for (var i = 0; i < walls.Count; i++)
+            for (var j = i + 1; j < walls.Count; j++)
+            {
+                var (a, b) = (walls[i], walls[j]);
+                var la = Distance(a.Start, a.End);
+                double ux = (a.End.X - a.Start.X) / la, uy = (a.End.Y - a.Start.Y) / la;
+                var lb = Distance(b.Start, b.End);
+                double vx = (b.End.X - b.Start.X) / lb, vy = (b.End.Y - b.Start.Y) / lb;
+                if (Math.Abs(ux * vy - uy * vx) > 0.02)
+                    continue;
+                var offset = Math.Abs(-(b.Start.X - a.Start.X) * uy + (b.Start.Y - a.Start.Y) * ux);
+                if (offset >= (a.ThicknessIn + b.ThicknessIn) / 24 - 0.01)
+                    continue;
+                double t0 = (b.Start.X - a.Start.X) * ux + (b.Start.Y - a.Start.Y) * uy, t1 = (b.End.X - a.Start.X) * ux + (b.End.Y - a.Start.Y) * uy;
+                var shared = Math.Min(la, Math.Max(t0, t1)) - Math.Max(0, Math.Min(t0, t1));
+                if (shared > 0.05)
+                    found.Add(new WallOverlap(a.Id, b.Id, shared, offset));
+            }
+        return found;
+    }
+
     public static double Distance(PlanPoint a, PlanPoint b) => Math.Sqrt((a.X - b.X) * (a.X - b.X) + (a.Y - b.Y) * (a.Y - b.Y));
 }

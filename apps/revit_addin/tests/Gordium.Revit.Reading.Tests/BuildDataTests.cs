@@ -178,6 +178,47 @@ public sealed class BuildDataTests
         Assert.Equal((122, 52, 67, 25), (m.Walls.Count, m.Doors.Count, m.Windows.Count, m.Rooms.Count));
         Assert.Equal(5, m.Doors.Count(d => d.IsDouble));
         Assert.True(BuildData.FloorOutline(m.Footprint).Count >= 3);
+        // Revit 2027 run 1: rooms 2 and 3 not enclosed. The tracing stops walls W16 and W24 1.44 ft short of the east
+        // vestibule's jambs W27 and W28 (ends at x 192.42, faces at 193.87), opening both classrooms to the open-air
+        // entrance (no wall across it, x 194.58, y 36.32 to 49.36). Rooms 10 and 21 share a 0.5 ft gap between W26 and
+        // W68 that Revit closed itself (both enclosed in run 1, as two rooms)
+        var gaps = m.Rooms.ToDictionary(r => r.Number, r => BuildData.BoundaryGaps(r, m.Walls));
+        Assert.Equal(["10", "2", "21", "3"], gaps.Where(g => g.Value.Count > 0).Select(g => g.Key).Order());
+        var g2 = Assert.Single(gaps["2"]);
+        Assert.Equal((16, 27), (g2.WallBefore, g2.WallAfter));
+        Assert.InRange(g2.Length, 1.37, 1.47);
+        var g3 = Assert.Single(gaps["3"]);
+        Assert.Equal((28, 24), (g3.WallBefore, g3.WallAfter));
+        Assert.InRange(g3.Length, 1.37, 1.47);
+        Assert.Equal((26, 68), (Assert.Single(gaps["10"]).WallBefore, gaps["10"][0].WallAfter));
+        Assert.InRange(gaps["21"].Single().Length, 0.45, 0.55);
+        // the five "Highlighted walls overlap" warnings of run 1, each a pair the data draws along each other
+        Assert.Equal([(2, 119), (27, 120), (28, 121), (32, 105), (33, 34)], BuildData.WallOverlaps(m.Walls).Select(o => (o.A, o.B)));
+    }
+
+    [Fact]
+    public void A_wall_the_data_stops_short_leaves_its_room_open_and_the_gap_is_named()
+    {
+        var m = BuildData.Parse(Extracted());
+        Assert.All(m.Rooms, r => Assert.Empty(BuildData.BoundaryGaps(r, m.Walls)));      // the tiny box is closed
+        // its south wall starting at x 2, not 0 (as the tracing stopped W16 short of W27): 1.67 ft open, W3 to W0
+        var walls = m.Walls.Select(w => w.Id == 0 ? w with { Start = new PlanPoint(2, 0) } : w).ToList();
+        var gap = Assert.Single(BuildData.BoundaryGaps(m.Rooms[0], walls));
+        Assert.Equal((3, 0), (gap.WallBefore, gap.WallAfter));
+        Assert.InRange(gap.Length, 1.667 - 0.05, 1.667 + 0.05);      // to the sampling step, 0.02 ft each end
+        Assert.Equal(0.33, gap.From.Y, 9);
+        Assert.Empty(BuildData.BoundaryGaps(m.Rooms[1], walls));
+    }
+
+    [Fact]
+    public void Walls_drawn_along_each_other_are_named_and_walls_meeting_at_a_corner_are_not()
+    {
+        var m = BuildData.Parse(Extracted());
+        Assert.Empty(BuildData.WallOverlaps(m.Walls));
+        var twin = m.Walls[0] with { Id = 9, Start = new PlanPoint(15, 0.2), End = new PlanPoint(25, 0.2) };
+        var o = Assert.Single(BuildData.WallOverlaps([.. m.Walls, twin]));
+        Assert.Equal((0, 9, 5.0), (o.A, o.B, Math.Round(o.Length, 9)));
+        Assert.Equal("walls W0 and W9 overlap along 5 ft (2.4 in apart, centre to centre)", o.Words);
     }
 
     [Fact]
