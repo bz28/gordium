@@ -48,7 +48,12 @@ internal static class PanelLook
     /// <summary>The key of a status glyph's outline or mark geometry ("glyph.fails.outline").</summary>
     internal static string GlyphKey(PanelStatus s, bool outline) => $"glyph.{s.ToString().ToLowerInvariant()}.{(outline ? "outline" : "mark")}";
 
-    /// <summary>What every theme shares: the type tokens as TextBlock styles and the status glyphs' geometries.</summary>
+    /// <summary>The key of a type token's font family ("type.body.family") and of its size ("type.body.size").</summary>
+    internal static string FamilyKey(string token) => token + ".family";
+
+    internal static string SizeKey(string token) => token + ".size";
+
+    /// <summary>What every theme shares: the type tokens as TextBlock styles (and each one's family and size) and the status glyphs' geometries.</summary>
     internal static W.ResourceDictionary Shared()
     {
         var d = new W.ResourceDictionary();
@@ -62,6 +67,9 @@ internal static class PanelLook
                 style.Setters.Add(new W.Setter(W.Documents.Typography.NumeralAlignmentProperty, W.FontNumeralAlignment.Tabular));
             style.Seal();
             d[t.Name] = style;
+            // the token's family and size on their own, for the controls' styles (PanelStyles.xaml)
+            d[FamilyKey(t.Name)] = new M.FontFamily(t.Family);
+            d[SizeKey(t.Name)] = t.Size;
         }
         foreach (var s in StatusLook.All)
         {
