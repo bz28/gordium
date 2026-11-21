@@ -46,7 +46,8 @@ public sealed class App : IExternalApplication
         {
             ToolTip = "Checks this project against the City of Ithaca's zoning (the outside) and New York's egress rules " +
                       "(the inside) in one check, with the lot facts on Project Information (Gordium's marks, added on " +
-                      "first use); a fact not set and nothing is sent: it lists what to fill in",
+                      "first use); the results open in the Gordium panel beside Properties: click a row to select and " +
+                      "zoom to it. A fact not set and nothing is sent: the panel lists what to fill in",
         });
         var egress = application.CreateRibbonPanel(Tab, "Egress");
         egress.AddItem(new PushButtonData("gordium_mark_for_egress", "Mark for\negress", dll,
@@ -65,6 +66,12 @@ public sealed class App : IExternalApplication
             ToolTip = "Draws each hand-worked house of the interior step in a new Revit project, reads it, records it to " +
                       "test_data/interior_houses/recorded/revit/ and checks it against the hand-worked measures",
         });
+        // the results panel (Check my project's), and the one ExternalEvent its clicks run through on Revit's thread
+        ResultsPane.Register(application);
+        PanelActions.Start();
+        // the results greyed when the checked project changes, taken down when it closes: never a stale pass
+        application.ControlledApplication.DocumentChanged += ResultsPane.OnDocumentChanged;
+        application.ControlledApplication.DocumentClosing += ResultsPane.OnDocumentClosing;
         application.Idling += OnIdling;
         Trial.Log("startup", new Dictionary<string, object?> { ["build"] = Trial.Build(), ["runtime"] = Trial.Runtime() });
         return Result.Succeeded;
@@ -179,6 +186,8 @@ public sealed class App : IExternalApplication
 
     public Result OnShutdown(UIControlledApplication application)
     {
+        application.ControlledApplication.DocumentChanged -= ResultsPane.OnDocumentChanged;
+        application.ControlledApplication.DocumentClosing -= ResultsPane.OnDocumentClosing;
         var worker = Worker;
         Worker = null;
         if (worker is not null)
