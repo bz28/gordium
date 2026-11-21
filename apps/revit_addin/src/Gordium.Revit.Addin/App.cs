@@ -1,5 +1,4 @@
 using System.IO;
-using System.Reflection;
 using Autodesk.Revit.UI;
 using Gordium.Worker;
 
@@ -9,67 +8,26 @@ namespace Gordium.Revit.Addin;
 /// checker (the worker) when Revit closes.</summary>
 public sealed class App : IExternalApplication
 {
-    internal const string Tab = "Gordium";
-
     /// <summary>The one worker this Revit session uses, started by the first button that needs it.</summary>
     internal static WorkerClient? Worker { get; set; }
 
     public Result OnStartup(UIControlledApplication application)
     {
+        // the Gordium tab: Check, Results, Help, and Trial only in a trial build or with GORDIUM_TRIAL=1 (the request
+        // files below work either way: they never use a button)
         try
         {
-            application.CreateRibbonTab(Tab);
+            Ribbon.Build(application);
         }
-        catch (Autodesk.Revit.Exceptions.ArgumentException)
+        catch (Exception x)       // no tab is no reason to lose the results panel or the request files
         {
-            // the tab already exists (another Gordium build loaded): add the panel to it
+            Trial.Log("ribbon", new Dictionary<string, object?> { ["error"] = $"{x.GetType().Name}: {x.Message}" });
         }
-        var panel = application.CreateRibbonPanel(Tab, "Trial");
-        var dll = Assembly.GetExecutingAssembly().Location;
-        panel.AddItem(new PushButtonData("gordium_about", "About", dll, typeof(AboutCommand).FullName)
-        {
-            ToolTip = "Which build of the Gordium add-in Revit loaded, and on which .NET runtime",
-        });
-        panel.AddItem(new PushButtonData("gordium_check_box_house", "Check box\nhouse", dll,
-                                         typeof(CheckBoxHouseCommand).FullName)
-        {
-            ToolTip = "Starts Gordium's checker and checks conformance scene 01 (the box house), comparing every " +
-                      "row with the hand-worked verdicts",
-        });
-        panel.AddItem(new PushButtonData("gordium_record_scenes", "Record\nscenes", dll, typeof(RecordScenesCommand).FullName)
-        {
-            ToolTip = "Draws each conformance scene in a new Revit model, reads it as a check would, records it to " +
-                      "test_data/host_conformance/recorded/revit/ and checks it by the suite's own rules",
-        });
-        var check = application.CreateRibbonPanel(Tab, "Check");
-        check.AddItem(new PushButtonData("gordium_check_project", "Check my\nproject", dll, typeof(CheckProjectCommand).FullName)
-        {
-            ToolTip = "Checks this project against the City of Ithaca's zoning (the outside) and New York's egress rules " +
-                      "(the inside) in one check, with the lot facts on Project Information (Gordium's marks, added on " +
-                      "first use); the results open in the Gordium panel beside Properties: click a row to select and " +
-                      "zoom to it. A fact not set and nothing is sent: the panel lists what to fill in",
-        });
-        var egress = application.CreateRibbonPanel(Tab, "Egress");
-        egress.AddItem(new PushButtonData("gordium_mark_for_egress", "Mark for\negress", dll,
-                                          typeof(MarkForEgressCommand).FullName)
-        {
-            ToolTip = "Adds Gordium's egress marks to this project if they aren't there, then lists every room, window " +
-                      "and door with its marks, anything not set first",
-        });
-        egress.AddItem(new PushButtonData("gordium_read_interior", "Read\ninside", dll, typeof(ReadInteriorCommand).FullName)
-        {
-            ToolTip = "Reads this project's rooms and escape windows as Gordium's egress check would, and says what is " +
-                      "left out and why (logged; nothing is sent to the checker yet)",
-        });
-        egress.AddItem(new PushButtonData("gordium_record_houses", "Record\nhouses", dll, typeof(RecordHousesCommand).FullName)
-        {
-            ToolTip = "Draws each hand-worked house of the interior step in a new Revit project, reads it, records it to " +
-                      "test_data/interior_houses/recorded/revit/ and checks it against the hand-worked measures",
-        });
         // the results panel (Check my project's), in Revit's light or dark theme and following it, and the one
         // ExternalEvent its clicks run through on Revit's thread
         ResultsPane.FollowTheme();
         application.ThemeChanged += ResultsPane.OnThemeChanged;
+        application.ThemeChanged += Ribbon.OnThemeChanged;
         ResultsPane.Register(application);
         PanelActions.Start();
         // the results greyed when the checked project changes, taken down when it closes: never a stale pass
@@ -220,6 +178,7 @@ public sealed class App : IExternalApplication
         application.ControlledApplication.DocumentChanged -= ResultsPane.OnDocumentChanged;
         application.ControlledApplication.DocumentClosing -= ResultsPane.OnDocumentClosing;
         application.ThemeChanged -= ResultsPane.OnThemeChanged;
+        application.ThemeChanged -= Ribbon.OnThemeChanged;
         var worker = Worker;
         Worker = null;
         if (worker is not null)

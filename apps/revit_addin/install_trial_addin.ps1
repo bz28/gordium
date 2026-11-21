@@ -7,14 +7,19 @@
 # trusts the publisher, and doesn't ask.
 # -Python names the Python to run for a clone with no venv of its own (a git worktree): written beside the build
 # (gordium_python.txt); the add-in then points it at this clone's packages (PYTHONPATH), so the code run is this clone's.
-param([string]$Revit = "2027", [string]$Python = "")
+# The build is a trial build (-p:GordiumTrial=true): the Gordium tab has its Trial panel (Check box house, Record scenes,
+# Read inside, Record houses). -Architect installs the build an architect gets: Check, Results and Help only (the Trial
+# panel then only with GORDIUM_TRIAL=1 in Revit's environment). The request files work in both.
+param([string]$Revit = "2027", [string]$Python = "", [switch]$Architect)
 $ErrorActionPreference = "Stop"
 $tfm = @{ "2027" = "net10.0-windows"; "2026" = "net8.0-windows" }[$Revit]
 if (-not $tfm) { throw "Revit $Revit is not one the add-in is built for (2026, 2027)" }
 if (Get-Process Revit -ErrorAction SilentlyContinue) { throw "Revit is running: close it first (it locks the add-in's files)" }
 $project = Join-Path $PSScriptRoot "src\Gordium.Revit.Addin"
 $clone = (Resolve-Path (Join-Path $PSScriptRoot "..\..")).Path
-dotnet build $project -c Release -f $tfm -v q
+$trialBuild = if ($Architect) { "false" } else { "true" }
+# -t:Rebuild: the trial switch is compiled in, so a build left by the other kind is never reused
+dotnet build $project -c Release -f $tfm -v q -t:Rebuild "-p:GordiumTrial=$trialBuild"
 if ($LASTEXITCODE -ne 0) { throw "build failed" }
 $target = Join-Path $env:LOCALAPPDATA "Gordium\addin\$Revit\current"
 if (Test-Path $target) { Remove-Item (Join-Path $target "*") -Recurse -Force }
@@ -52,4 +57,4 @@ $manifest = @"
 </RevitAddIns>
 "@
 [IO.File]::WriteAllText((Join-Path $manifestDir "Gordium.addin"), $manifest, (New-Object Text.UTF8Encoding $false))
-"Installed $tfm build for Revit $Revit at $target (clone: $clone), signed: $([bool]$cert). Start Revit."
+"Installed $tfm $(if ($Architect) { 'architect' } else { 'trial' }) build for Revit $Revit at $target (clone: $clone), signed: $([bool]$cert). Start Revit."
