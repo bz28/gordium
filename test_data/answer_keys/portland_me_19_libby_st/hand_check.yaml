@@ -1,0 +1,108 @@
+# Answer key: the architect's own life-safety check of a day-care centre, as its sheet prints it.
+# Project: Children's Odyssey, 19 Libby Street, Portland, Maine (Archetype Architects; sheet LS1.0 "LIFE SAFETY",
+# "1ST FLOOR - LIFESAFETY", 1/8" = 1'-0", dated OCT, 2016, Revision 1; sealed by a Maine licensed architect).
+# The sheet itself is Ben's (shared 2026-11-20) and is NOT in the repo: it is a client's drawing. This file records only
+# what the sheet states and what the codes say of it, so Gordium's rules for the same law can be graded against a
+# licensed architect's hand check (docs/decisions/2026-11-20_commercial_egress_maine.md).
+#
+# Every value below was read from the sheet's PDF text (its notes are real text, not a picture) and checked by eye on
+# the rendered sheet. Lengths are feet-inches as the sheet prints them, with feet as a number beside each.
+# Rules: regulations/jurisdictions/maine/maine_state/5_building_code_rules/drafted/general.yaml (draft).
+# Not a rulebook: no `rules:` key, so rule_format's rulebook checks don't read it; it loads with the strict loader
+# (rule_format/tests/test_kept.py).
+
+project:
+  name: Children's Odyssey
+  address: 19 Libby Street, Portland, ME 04103
+  sheet: LS1.0 Life Safety (1st floor), Oct 2016, Revision 1
+  occupancy: Group I-4 (day care), per the sheet's notes ("I-4 not to exceed 200' sprinklered")
+  sprinklered: true      # "REQUIRED REMOTENESS (FULLY SPRINKLERED)"; NFPA note: "protected by an approved automatic
+                         # sprinkler system in accordance with 9.7.1.1 (1) and supervised in accordance with 9.7.2"
+  codes_the_sheet_cites: [2009 IBC, NFPA 101 (section numbers of the 2012 edition)]
+
+checks:
+  - what: Exit access travel distance (the most remote point to an exit)
+    sheet_says: 'MAXIMUM TRAVEL DISTANCE TO EXIT = 130''-8" (I-4 not to exceed 200'' sprinklered) 1016.1 2009 IBC, NFPA 16.2.6.2-16.2.6.3'
+    measured: {text: 130'-8", feet: 130.667}
+    limit: {text: 200', feet: 200}
+    law: [IBC 2009 1016.1 and Table 1016.1 (I-4, with sprinkler system), NFPA 101 2012 16.2.6.2(2) and 16.2.6.3 (150 ft, plus 50 ft sprinklered)]
+    result: pass
+    gordium_rules: [general.ibc_1016_1_travel_distance, general.nfpa_16_2_6_2_point_in_room_to_exit]
+    note: >
+      NFPA 16.2.6.2(1) sets a second limit the sheet does not show: from any room door intended as an exit access to
+      an exit, 100 ft, increased to 150 ft sprinklered (16.2.6.3). The sheet gives no room-door distance, so Gordium
+      needs that length (egress_travel_from_room_door) and cannot grade it from this sheet.
+
+  - what: Common path of egress travel
+    sheet_says: 'DISTANCE TO COMMON PATH OF TRAVEL = 48''-6" (distance not to exceed 75''-0") SPRINKLERED 1014.3 2009 IBC (most restrictive)'
+    measured: {text: 48'-6", feet: 48.5}
+    limit: {text: 75'-0", feet: 75}
+    law: [IBC 2009 1014.3 (75 ft; its exceptions are for Groups B, F, S, I-3 and R-2, not I-4), NFPA 101 2012 16.2.5.3.1 (100 ft sprinklered)]
+    most_restrictive: IBC 1014.3, 75 ft (NFPA allows 100 ft in a sprinklered building), as the sheet says
+    result: pass
+    gordium_rules: [general.ibc_1014_3_common_path, general.nfpa_16_2_5_3_common_path]
+
+  - what: Dead-end corridor
+    sheet_says: 'DEAD END CORRIDOR DISTANCE = 21''-6" (length < 2.5 x 10'' = 25'') 1018.4 Ex. 3 2009 IBC (most restrictive)'
+    measured: {text: 21'-6", feet: 21.5}
+    dead_end_least_width: {text: 10', feet: 10}
+    limit: {text: "20' (IBC 1018.4); not limited where the length is less than 2.5 x the least width = 25' (exception 3)", feet: 25}
+    law: [IBC 2009 1018.4 and its exception 3, NFPA 101 2012 16.2.5.2 (20 ft; 50 ft in a sprinklered building)]
+    most_restrictive: >
+      Over 20 ft, so IBC 1018.4 passes only by its exception 3 (21.5 < 2.5 x 10 = 25). NFPA 16.2.5.2 allows 50 ft in a
+      building protected throughout by an approved, supervised sprinkler system. The sheet calls IBC "most
+      restrictive"; with exception 3 the IBC allows 25 ft here, NFPA 50 ft, so IBC is the tighter, as the sheet says.
+    result: pass
+    gordium_rules: [general.ibc_1018_4_dead_end, general.nfpa_16_2_5_2_dead_end]
+    open: >
+      Maine's own Life Safety Code rule (16-219 CMR ch. 20) today modifies the dead-end corridor limit to 20 ft; whether
+      the 2016 rule did, and for day care, is part of the open edition question (README). Under a flat 20-ft limit with
+      no width exception, 21'-6" would fail.
+
+  - what: Exit (or exit access doorway) remoteness
+    sheet_says: 'REQUIRED REMOTENESS (FULLY SPRINKLERED): BLDG DIA./3 = 210''-2 1/2"/3 = 70''-1" PROVIDED REMOTENESS: 183''-10"'
+    measured: {text: 183'-10", feet: 183.833}
+    diagonal: {text: 210'-2 1/2", feet: 210.208}
+    limit: {text: "one-third of the diagonal: 70'-1\"", feet: 70.069}
+    law: [IBC 2009 1015.2.1 (one-half of the maximum overall diagonal) and its exception 2 (one-third, sprinklered throughout per 903.3.1.1 or 903.3.1.2)]
+    ratio: 0.8746     # 183.833 / 210.208: at least 1/3 needed (sprinklered)
+    result: pass
+    gordium_rules: [general.ibc_1015_2_1_remoteness]
+    note: "210'-2 1/2\" / 3 = 70.069 ft = 70'-0 13/16\"; the sheet rounds it up to 70'-1\", which is the cautious way."
+
+  - what: Accessory storage area on the story
+    sheet_says: 'Aggregate storage area = 1,428 SF < 1,650 SF = (16,509 x 10%) Aggregate storage area is less than 10% of this story''s area and does not exceed the tabular values in Table 503.'
+    measured: {sf: 1428}
+    story_area_on_sheet: {sf: 16509}
+    limit: {text: "10 percent of the building area of the story", sf: 1650.9}
+    law: [IBC 2009 508.2.1 ("Aggregate accessory occupancies shall not occupy more than 10 percent of the building area of the story in which they are located and shall not exceed the tabular values in Table 503")]
+    result: pass
+    gordium_rules: [general.ibc_508_2_1_accessory_area]
+
+  - what: Corridors
+    sheet_says: 'Per NFPA 101 16.3.6, Corridors shall be 1 hr rated unless permitted by the following: (2) In buildings protected throughout by an approved, supervised automatic sprinkler system, corridor walls shall not be required to be rated, provided that such walls form smoke partitions.'
+    law: [NFPA 101 2012 16.3.6 and its item (2), IBC 2009 1018.1 and Table 1018.1 (I-4, with sprinkler system: 0 hours)]
+    result: pass, the corridor walls drawn as smoke partitions (the sheet's legend), sprinklered throughout
+    gordium_rules: [general.nfpa_16_3_6_corridor_walls, general.ibc_1018_1_corridor_rating]
+
+  - what: Separation of the day care from the other occupancy (the 1926 building, Phase 2)
+    sheet_says: 'Per NFPA 101 table 6.1.14.4.1 (b), the separation is to be 2 hours. This rating is permitted to be reduced by one hour due to the building being protected by an approved automatic sprinkler system in accordance with 9.7.1.1 (1) and supervised in accordance with 9.7.2.'
+    law: [NFPA 101 2012 6.1.14.4.1, 6.1.14.4.3 and Table 6.1.14.4.1(b)]
+    result: 1 hour required; the sheet's legend shows "NEW WALL - 1 HOUR"
+    gordium_rules: [general.nfpa_6_1_14_4_separation]
+    note: The other occupancy is not named on the sheet, so the row of Table 6.1.14.4.1(b) it read is not known; needs review.
+
+# The sheet's own errors, named (never smoothed over):
+sheet_errors:
+  - what: Story area
+    sheet: 16,509 sf ("1,650 SF = (16,509 x 10%)")
+    found: 16,539 sf, the story's area as Ben reported it (2026-11-20; not re-measured here); 10 percent of it is 1,653.9 sf
+    matters: No. 1,428 sf passes either way; the limit moves by 3 sf.
+  - what: Which section sets the 10 percent limit
+    sheet: '"does not exceed the tabular values in Table 503"; no section is named for the 10 percent'
+    found: >
+      The 10 percent limit is 508.2.1 of the 2009 IBC ("shall not occupy more than 10 percent of the building area of
+      the story"); Table 503 is that same section's second test ("and shall not exceed the tabular values in Table
+      503"). The sheet cites only the table and names no section for the 10 percent. Not a wrong result, a missing
+      citation.
+    matters: No (citation only).
