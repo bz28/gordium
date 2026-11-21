@@ -1,0 +1,42 @@
+# Facts about the whole building that Maine's commercial egress rules read (2026-11-20), stated by the architect:
+# not in measures.yaml (Ithaca's zoning measures), so listed here for engineers, never used silently, and a rule using
+# one can't be approved until an engineer adds it to measures.yaml (rulebook.py: PROPOSED_MEASURES). Each is a yes or
+# no, worded as the books word the condition, so a rule reads the book's own test. Written by hand in a Claude Code
+# session; needed_by: the rules that read each one.
+
+occupancy_group_i4:
+  meaning: "The building (or the part of it checked) is classified in Group I-4, day care facilities (IBC 2009 308.5), as the architect states it; not Group E or R-3 by 308.5's and 308.5.2's limits"
+  unit: yes_no
+  needed_by: []
+sprinklered_903_3_1_1:
+  meaning: "The building is equipped throughout with an automatic sprinkler system in accordance with IBC 2009 Section 903.3.1.1 (NFPA 13), as the architect states it"
+  unit: yes_no
+  needed_by: []
+sprinklered_903_3_1_2:
+  meaning: "The building is equipped throughout with an automatic sprinkler system in accordance with IBC 2009 Section 903.3.1.2 (NFPA 13R), as the architect states it; Section 903 (not brought in) says where such a system is permitted"
+  unit: yes_no
+  needed_by: []
+nfpa_day_care_occupancy:
+  meaning: "The building (or the part of it checked) is a day-care occupancy that NFPA 101 2012 Chapter 16 (new) or Chapter 17 (existing) applies to, as the architect states it (more than 12 clients: a day-care home, 3.3.140.1, is not one; the chapters' scope sections, 16.1.1 and 17.1.1, are not brought in)"
+  unit: yes_no
+  needed_by: []
+day_care_existing:
+  meaning: "The day-care occupancy is an existing one (NFPA 101 2012 3.3.79 EXISTING: already in existence on the date this edition of the Code goes into effect), so Chapter 17 applies, not Chapter 16 (new), as the architect states it"
+  unit: yes_no
+  needed_by: []
+sprinklered_9_7:
+  meaning: "The building is protected throughout by an approved automatic sprinkler system in accordance with NFPA 101 2012 Section 9.7, as the architect states it"
+  unit: yes_no
+  needed_by: []
+sprinkler_supervised_9_7:
+  meaning: "That sprinkler system is supervised in accordance with NFPA 101 2012 Section 9.7 (9.7.2: electrical supervision of its valves and water flow), as the architect states it"
+  unit: yes_no
+  needed_by: []
+sprinkler_9_7_1_1_1:
+  meaning: "That sprinkler system is installed in accordance with NFPA 101 2012 9.7.1.1(1) (NFPA 13), as the architect states it"
+  unit: yes_no
+  needed_by: []
+client_spaces_open_outside:
+  meaning: "Every space normally subject to client occupancy (student occupancy, as 17.3.6(1) prints it) has not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with NFPA 101 2012 7.5.3, as the architect states it (16.3.6(1), 17.3.6(1))"
+  unit: yes_no
+  needed_by: []
