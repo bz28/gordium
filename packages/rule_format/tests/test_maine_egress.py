@@ -223,3 +223,21 @@ def test_a_tables_other_rows_reach_a_mixed_day_care_building(ctx, rules, rid):
     assert outcome(r, i4, ctx.allowed()) == "needs_review"
     assert outcome(r, i4 | {"other_occupancy_present": False}, ctx.allowed()) == "not_applicable"
     assert outcome(r, {"occupancy_group_i4": False}, ctx.allowed()) == "needs_review"
+
+
+def test_every_rule_citing_a_readme_open_question_is_named_in_that_question(rules):
+    """Review round 3: a reason sending the architect to "open question N" of the README must be about question N,
+    which names the rule (the dead-end reasons cited question 2 in words describing question 1)."""
+    import re
+    readme = (MAINE / "README.md").read_text(encoding="utf-8")
+    items = dict(re.findall(r"^(\d+)\. (.*)$", readme.split("## Open questions", 1)[1], re.M))
+    cited = 0
+    for rid, r in rules.items():
+        for w in r.get("review_when") or []:
+            for n in re.findall(r"open question (\d+) of regulations/jurisdictions/maine/maine_state/README\.md",
+                                " ".join(w["reason"].split())):
+                cited += 1
+                assert f"`{rid}`" in items[n], (rid, n)
+    assert cited >= 2
+    assert "whether that flat 20 ft governs" in rules["general.nfpa_16_2_5_2_dead_end"]["review_when"][0]["reason"]
+    assert "flat 20-ft dead-end limit governs" in items["2"]

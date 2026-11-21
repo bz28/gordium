@@ -1650,9 +1650,9 @@ rules:
   review_when:
   - when: corridor_dead_end_length > 20 and corridor_dead_end_length <= 50 and sprinklered_9_7 and sprinkler_supervised_9_7
     reason: 'Over 20 ft, within this book''s 50 ft (sprinklered, supervised): Maine''s own Life Safety rule (16-219 CMR ch.
-      20) may cap a dead end at a flat 20 ft (today''s rule does; which rule a project was permitted under is open question
-      2 of regulations/jurisdictions/maine/maine_state/README.md). Only 20 ft is certain under every reading, so a longer
-      dead end needs review until the State Fire Marshal or the City answers.'
+      20) may cap a dead end at a flat 20 ft (today''s rule does; whether that flat 20 ft governs is open question 2 of regulations/jurisdictions/maine/maine_state/README.md).
+      Only 20 ft is certain under every reading, so a longer dead end needs review until the State Fire Marshal or the City
+      answers.'
   for_each: corridor
   when_none: not_applicable
   sources:
@@ -2727,9 +2727,9 @@ rules:
   review_when:
   - when: corridor_dead_end_length > 20 and corridor_dead_end_length <= 50 and sprinklered_9_7 and sprinkler_supervised_9_7
     reason: 'Over 20 ft, within this book''s 50 ft (sprinklered, supervised): Maine''s own Life Safety rule (16-219 CMR ch.
-      20) may cap a dead end at a flat 20 ft (today''s rule does; which rule a project was permitted under is open question
-      2 of regulations/jurisdictions/maine/maine_state/README.md). Only 20 ft is certain under every reading, so a longer
-      dead end needs review until the State Fire Marshal or the City answers.'
+      20) may cap a dead end at a flat 20 ft (today''s rule does; whether that flat 20 ft governs is open question 2 of regulations/jurisdictions/maine/maine_state/README.md).
+      Only 20 ft is certain under every reading, so a longer dead end needs review until the State Fire Marshal or the City
+      answers.'
   for_each: corridor
   when_none: not_applicable
   sources:
