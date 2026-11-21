@@ -247,26 +247,31 @@ public sealed class RouteTests
     [Fact]
     public void A_door_whose_drawn_middle_isnt_where_it_is_placed_has_no_place()
     {
-        // review round 1: dA's frame drawn 9 in off where the door is placed: its clear opening isn't placed on a guess
+        // review round 1: dA's opening cut 9 in off where the door is placed: its clear opening isn't placed on a guess
         var floor = new FakeFloor();
         var i = floor.OpeningIndex("dA");
-        var frame = floor.Prism([(10.75 - 1.625, 9.5), (10.75 + 1.625, 9.5), (10.75 + 1.625, 10), (10.75 - 1.625, 10)], 0, 7);
-        floor.Openings[i] = floor.Openings[i] with { Placed = frame.SelectMany(f => f.Points).ToList() };
+        List<Xyz> Cut(double x0, double x1) => [floor.Fake.Place(x0, 9.5, 0), floor.Fake.Place(x1, 10, 7)];
+        floor.Openings[i] = floor.Openings[i] with { WallOpening = Cut(10.75 - 1.625, 10.75 + 1.625) };
         var read = InteriorReader.Read(floor.Model());
         Assert.Null(Door(read, "dA")["plan"]);
         Assert.Contains("centred 9 in from where it is placed", FakeFloor.Note(read, "dA", "doors.plan"));
-        // round 2: a door-and-sidelight unit centred on itself (1.5 ft of sidelight each side): wider than the door and a
-        // frame, so its clear opening isn't placed either
+        // round 2: a door-and-sidelight unit centred on itself (1.5 ft of sidelight each side, cut in the wall with it):
+        // wider than the door and a frame, so its clear opening isn't placed either
         floor = new FakeFloor();
-        var unit = floor.Prism([(10 - 1.625 - 1.5, 9.5), (10 + 1.625 + 1.5, 9.5), (10 + 1.625 + 1.5, 10), (10 - 1.625 - 1.5, 10)], 0, 7);
-        floor.Openings[i] = floor.Openings[i] with { Placed = unit.SelectMany(f => f.Points).ToList() };
+        floor.Openings[i] = floor.Openings[i] with { WallOpening = Cut(10 - 1.625 - 1.5, 10 + 1.625 + 1.5) };
         read = InteriorReader.Read(floor.Model());
         Assert.Null(Door(read, "dA")["plan"]);
         Assert.Contains("a sidelight or a pocket", FakeFloor.Note(read, "dA", "doors.plan"));
-        // the opening it cuts off the middle too: said
+        // round 3: a 36-in door with 4-in casing on both faces of its wall: the casing isn't the opening, the door is placed
         floor = new FakeFloor();
-        floor.Openings[i] = floor.Openings[i] with { WallOpening = [floor.Fake.Place(9.5, 9.5, 0), floor.Fake.Place(12.5, 9.5, 7)] };
-        Assert.Contains("from the opening it cuts", FakeFloor.Note(InteriorReader.Read(floor.Model()), "dA", "doors.plan"));
+        var casing = floor.Prism([(10 - 1.625 - 0.333, 9.4), (10 + 1.625 + 0.333, 9.4), (10 + 1.625 + 0.333, 9.5), (10 - 1.625 - 0.333, 9.5)], 0, 7)
+            .Concat(floor.Prism([(10 - 1.625 - 0.333, 10), (10 + 1.625 + 0.333, 10), (10 + 1.625 + 0.333, 10.1), (10 - 1.625 - 0.333, 10.1)], 0, 7));
+        floor.Openings[i] = floor.Openings[i] with { Placed = [.. floor.Openings[i].Placed!, .. casing.SelectMany(f => f.Points)] };
+        Assert.Equal([10.0, 9.75], Door(InteriorReader.Read(floor.Model()), "dA")["plan"]!["centre"]!.AsArray().Select(x => x!.GetValue<double>()));
+        // no cut found: what is drawn strictly between the faces alone; a frame flush with them and casing on them give
+        // nothing there, so its place isn't read
+        floor.Openings[i] = floor.Openings[i] with { WallOpening = null };
+        Assert.Contains("between the wall's faces", FakeFloor.Note(InteriorReader.Read(floor.Model()), "dA", "doors.plan"));
     }
 
     [Fact]
@@ -358,7 +363,7 @@ public sealed class RouteTests
         Assert.Null(Room(InteriorReader.Read(floor.Model()), "C")["obstructions"]);
         floor = new FakeFloor();
         floor.AddOver("A", new NearbyElement("cw", "OST_Casework", "Counter", GeometryFailed: true));
-        Assert.Contains("couldn't be read", FakeFloor.Note(InteriorReader.Read(floor.Model()), "A", "obstructions"));
+        Assert.Contains("couldn't be cut out", FakeFloor.Note(InteriorReader.Read(floor.Model()), "A", "obstructions"));
 
         // furniture Revit's solid test found standing in the room but that wasn't read with its geometry
         floor = new FakeFloor();
@@ -378,6 +383,19 @@ public sealed class RouteTests
         floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("wall-in", "OST_Walls", "Partition")] };
         var obstructions = Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray();
         Assert.Contains(obstructions, o => o!["outline"]!.AsArray().Any(p => p![0]!.GetValue<double>() == 14 && p[1]!.GetValue<double>() == 6));
+        // round 3: a standing wall with a door's threshold (a small flat face) in its band: what Revit cuts out of it is
+        // its whole body in the band, the threshold with it; the footprint is all of it, never the threshold's strip
+        floor = new FakeFloor();
+        var body = floor.Prism([(8, 5), (14, 5), (14, 6), (8, 6)], InteriorReader.Sixteenth, RouteReader.Headroom);
+        var sill = floor.Face(new(0, 0, 1), [(10.0, 5.0, 0.1), (13.0, 5.0, 0.1), (13.0, 6.0, 0.1), (10.0, 6.0, 0.1)]);
+        floor.Rooms[i] = floor.Rooms[i] with
+        {
+            Inside = [new NearbyElement("wall-in", "OST_Walls", "Partition")],
+            Over = [.. floor.Rooms[i].Over!, new NearbyElement("wall-in", "OST_Walls", "Partition", Faces: body) { Banded = [sill, .. body] }],
+        };
+        var footprints = Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray()
+            .Select(o => o!["outline"]!.AsArray().Select(p => new P2(p![0]!.GetValue<double>(), p[1]!.GetValue<double>())).ToList()).ToList();
+        Assert.Contains(footprints, o => Math.Abs(PlanGeometry.Area(o) - 6) < 1e-9);       // the wall's whole 6 by 1 ft
         // tall casework from under the floor past the headroom, the same
         floor = new FakeFloor();
         floor.AddOver("A", new NearbyElement("tall", "OST_Casework", "Tall cabinet", Faces: floor.Prism([(10, 0), (12, 0), (12, 2), (10, 2)], -0.5, 8)));
@@ -392,6 +410,25 @@ public sealed class RouteTests
             .Select(o => o!["outline"]!.AsArray().Select(p => new P2(p![0]!.GetValue<double>(), p[1]!.GetValue<double>())).ToList()).ToList();
         Assert.DoesNotContain(ls, o => PlanGeometry.OverlapArea(o, [new(11.9, 8.9), new(12.1, 8.9), new(12.1, 9.1), new(11.9, 9.1)]) is > 1e-9);
         Assert.Contains(ls, o => o.Count == 6);
+
+        // round 3: a shelf wholly above the band (7 ft 2 in to 8 ft): Revit's intersection gives nothing, no obstruction
+        floor = new FakeFloor();
+        var before = Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray().Count;
+        floor.AddOver("A", new NearbyElement("shelf", "OST_Casework", "High shelf", Faces: floor.Prism([(10, 5), (14, 5), (14, 6), (10, 6)], 7.17, 8)));
+        Assert.Equal(before, Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray().Count);
+        // a wall standing in the room from the floor below (its base 10 ft down) to the ceiling: its whole body counts
+        floor = new FakeFloor();
+        floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("wall-low", "OST_Walls", "Partition")] };
+        floor.AddOver("A", new NearbyElement("wall-low", "OST_Walls", "Partition", Faces: floor.Prism([(8, 5), (14, 5), (14, 6), (8, 6)], -10, 9)));
+        Assert.Contains(Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]!.AsArray()
+            .Select(o => o!["outline"]!.AsArray().Select(p => new P2(p![0]!.GetValue<double>(), p[1]!.GetValue<double>())).ToList()),
+            o => Math.Abs(PlanGeometry.Area(o) - 6) < 1e-9);
+        // the intersection refused (a mesh, Revit threw): the room's obstructions aren't read, and why is said
+        floor = new FakeFloor();
+        floor.AddOver("A", new NearbyElement("mesh", "OST_Furniture", "Sofa (mesh)") { Banded = [], BandFailed = true });
+        var refused = InteriorReader.Read(floor.Model());
+        Assert.Null(Room(refused, "A")["obstructions"]);
+        Assert.Contains("couldn't be cut out", FakeFloor.Note(refused, "A", "obstructions"));
 
         // review round 1, P0: furniture drawn in 2D alone (no 3D faces) with its box over the floor: where it stands
         // isn't read, never "nothing drawn"; round 2: one whose box is beside the room changes nothing

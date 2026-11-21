@@ -326,30 +326,33 @@ public static class RouteReader
                 why = $"{InteriorReader.Named(e)} is drawn with no 3D faces, so where it stands isn't read";
                 return null;
             }
-            if (e.GeometryFailed || e.Faces is null)
+            // what of it lies in the room's band, from just above its floor to the headroom: the Revit layer's
+            // intersection of each of its solids with that slab (review round 3: picking faces by height kept only a
+            // sill's strip of a standing wall). Its footprint is the plan outlines of the result's faces that aren't
+            // vertical (a curved face by its points' hull), which together cover what of it is in the band
+            if (e.BandFailed || e.Banded is null)
             {
                 if (e.Box is { } box && Box3.Turned(box.Min, box.Max, box.Transform is { } own ? model.InternalToShared.After(own)
                                                                                                 : model.InternalToShared).Min.Z >= floor + Headroom)
                     continue;                                // wholly above the headroom
-                why = $"the geometry of {InteriorReader.Named(e)} in or over it couldn't be read";
+                why = e.Banded is null && !e.BandFailed
+                    ? $"what of {InteriorReader.Named(e)} stands within {Headroom * 12:0} in of its floor wasn't read"
+                    : $"what of {InteriorReader.Named(e)} stands within {Headroom * 12:0} in of its floor couldn't be cut out (Revit refused, or a mesh)";
                 return null;
             }
             var shapes = new List<List<P2>>();
             var meets = false;
-            foreach (var f in e.Faces)
+            foreach (var f in e.Banded)
             {
-                var pts = InteriorReader.Shared(model, f.Points);
-                if (pts.Count == 0 || pts.Max(p => p.Z) < floor - S || pts.Min(p => p.Z) >= floor + Headroom)
-                    continue;                                // under the floor, or above the headroom
-                if (!known && pts.Max(p => p.Z) <= floor + S)
-                    continue;                                // the floor it stands on (a slab's top or sides)
                 List<P2>? shape;
                 if (f.Planar)
                 {
                     if (Math.Abs(InteriorReader.Turned(model, f.Normal).Z) <= 1e-9)
                         continue;                            // a side: no footprint of its own
-                    shape = f.Loops.Select(l => PlanGeometry.Clean(l.Select(c => model.InternalToShared.Apply(c.Start)).Select(p => new P2(p.X, p.Y)).ToList()))
-                        .OfType<List<P2>>().OrderByDescending(PlanGeometry.Area).FirstOrDefault();
+                    shape = f.Loops.Any(l => l.Any(c => !c.IsLine))
+                        ? Hull(InteriorReader.Shared(model, f.Points).Select(q => new P2(q.X, q.Y)))   // an arc edge: its hull
+                        : f.Loops.Select(l => PlanGeometry.Clean(l.Select(c => model.InternalToShared.Apply(c.Start)).Select(q => new P2(q.X, q.Y)).ToList()))
+                            .OfType<List<P2>>().OrderByDescending(PlanGeometry.Area).FirstOrDefault();
                     if (shape is not null && !PlanGeometry.IsSimple(shape))
                     {
                         why = $"a face of {InteriorReader.Named(e)} in it isn't a simple outline in plan";
@@ -357,7 +360,7 @@ public static class RouteReader
                     }
                 }
                 else
-                    shape = Hull(pts.Select(p => new P2(p.X, p.Y)));
+                    shape = Hull(InteriorReader.Shared(model, f.Points).Select(q => new P2(q.X, q.Y)));
                 if (shape is null)
                     continue;                                // a face with no area in plan
                 if (AreaIn(shape) is not { } a)
@@ -367,35 +370,6 @@ public static class RouteReader
                 }
                 meets |= a > roomArea * 1e-9;
                 shapes.Add(shape);
-            }
-            // a piece crossing the band from below the floor or past the headroom (a wall based below a raised floor, tall
-            // casework) may have no flat face in the band: the part within it is taken by all the points of its faces
-            // that reach the band, sides included, put together (review round 1: such a wall was dropped in silence)
-            // (round 2: only when the band's own faces gave no shape, and never a hull, which would fill an L's notch:
-            // the plan outlines of its flat faces above or below the band, exact for a prism; none, and it isn't read)
-            var reach = e.Faces.Select(f => InteriorReader.Shared(model, f.Points)).Where(p => p.Count > 0
-                && p.Max(q => q.Z) >= floor - S && p.Min(q => q.Z) < floor + Headroom && (known || p.Max(q => q.Z) > floor + S)).ToList();
-            if (shapes.Count == 0 && reach.Count > 0)
-            {
-                var beyond = e.Faces.Where(f => f.Planar && Math.Abs(InteriorReader.Turned(model, f.Normal).Z) > 1e-9)
-                    .Select(f => f.Loops.Select(l => PlanGeometry.Clean(l.Select(c => model.InternalToShared.Apply(c.Start)).Select(p => new P2(p.X, p.Y)).ToList()))
-                        .OfType<List<P2>>().OrderByDescending(PlanGeometry.Area).FirstOrDefault())
-                    .OfType<List<P2>>().ToList();
-                if (beyond.Count == 0 || beyond.Any(b => !PlanGeometry.IsSimple(b)))
-                {
-                    why = $"{InteriorReader.Named(e)} crosses its floor or its headroom with no flat face to give its footprint";
-                    return null;
-                }
-                foreach (var b in beyond)
-                {
-                    if (AreaIn(b) is not { } a)
-                    {
-                        why = $"{InteriorReader.Named(e)} couldn't be read in plan";
-                        return null;
-                    }
-                    meets |= a > roomArea * 1e-9;
-                    shapes.Add(b);
-                }
             }
             if (!meets)
                 continue;                                    // beside the room, or above the headroom
@@ -575,42 +549,39 @@ public static class RouteReader
         var along = new P2(-n0.Y, n0.X);
         if (P2Dot(alongPlan, along) < 0)
             along = new P2(-along.X, -along.Y);
-        // the door's own drawn geometry within the wall's thickness (its frame; never its trim or a leaf drawn open)
-        var inWall = placed.Select(t.Apply).Select(p => new P2(p.X, p.Y))
-            .Where(p => P2Dot(p, n0) >= Math.Min(a, b) - S && P2Dot(p, n0) <= Math.Max(a, b) + S).Select(p => P2Dot(p, along)).ToList();
+        // where the door is along its wall: the opening it cuts in the wall (its rough opening: never the casing on the
+        // wall's faces, round 3), else what is drawn of it strictly between the wall's faces (a point on a face may be
+        // a casing's back); neither, and it isn't told
+        var cutAlong = rec.WallOpening is { Count: > 0 } cut
+            ? cut.Select(t.Apply).Select(p => P2Dot(new P2(p.X, p.Y), along)).ToList() : null;
+        var inWall = cutAlong ?? placed.Select(t.Apply).Select(p => new P2(p.X, p.Y))
+            .Where(p => P2Dot(p, n0) > Math.Min(a, b) + S && P2Dot(p, n0) < Math.Max(a, b) - S).Select(p => P2Dot(p, along)).ToList();
         if (inWall.Count == 0)
         {
-            why = "none of its drawn geometry is within its wall's thickness, so where it is along the wall isn't read";
+            why = "it cuts no opening found in its wall and none of its drawn geometry is between the wall's faces, so where it is along the wall isn't read";
             return null;
         }
         var u = (inWall.Min() + inWall.Max()) / 2;
-        // what is drawn in the wall wider than the door itself (its type's width, or its clear width) and a frame
-        // (FrameAllowance) is a sidelight or a pocket even when the unit is centred: where its clear opening is isn't told
-        // (round 2: a door-and-sidelight unit centred on itself passed the centre checks)
+        // an opening wider than the door itself (its type's width, or its clear width) and a frame (FrameAllowance) holds
+        // a sidelight or a pocket even when the unit is centred: where its clear opening is isn't told (round 2)
         var door = Math.Max(rec.TypeWidth ?? 0, clearWidth ?? 0);
         if (inWall.Max() - inWall.Min() > door + FrameAllowance)
         {
-            why = I($"what is drawn of it in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the door ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in): a sidelight or a pocket?, so where its clear opening is isn't told");
+            why = I($"the opening it takes in its wall is {(inWall.Max() - inWall.Min()) * 12:0.##} in wide, more than the door ({door * 12:0.##} in) and a frame ({FrameAllowance * 12:0} in): a sidelight or a pocket?, so where its clear opening is isn't told");
             return null;
         }
-        // the middle of what is drawn in the wall must agree with where the door is placed and with the opening it cuts:
-        // a sidelight or a pocket drawn in the wall moves the middle off the clear opening (review round 1), and then
-        // where the clear opening is isn't told
+        // the middle of that opening must agree with where the door is placed (round 1)
         if (rec.Location is not { } placedAt)
         {
-            why = "its placement point couldn't be read, so its drawn middle can't be checked against it";
+            why = "its placement point couldn't be read, so its opening's middle can't be checked against it";
             return null;
         }
         var atPoint = t.Apply(placedAt);
         var uPoint = P2Dot(new P2(atPoint.X, atPoint.Y), along);
-        double? uCut = rec.WallOpening is { Count: > 0 } cut
-            ? cut.Select(t.Apply).Select(p => P2Dot(new P2(p.X, p.Y), along)).ToList() is var cu ? (cu.Min() + cu.Max()) / 2 : null
-            : null;
-        if (Math.Abs(u - uPoint) > CentreAgree || uCut is { } uc && Math.Abs(u - uc) > CentreAgree)
+        if (Math.Abs(u - uPoint) > CentreAgree)
         {
-            why = I($"what is drawn of it in its wall is centred {Math.Abs(u - uPoint) * 12:0.##} in from where it is placed") +
-                  (uCut is { } k ? I($" and {Math.Abs(u - k) * 12:0.##} in from the opening it cuts") : "") +
-                  " (a sidelight or a pocket drawn in the wall?), so where its clear opening is isn't told";
+            why = I($"the opening it takes in its wall is centred {Math.Abs(u - uPoint) * 12:0.##} in from where it is placed") +
+                  " (a sidelight or a pocket?), so where its clear opening is isn't told";
             return null;
         }
         var c = (a + b) / 2;

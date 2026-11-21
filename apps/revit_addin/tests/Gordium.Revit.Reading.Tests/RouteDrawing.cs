@@ -89,8 +89,37 @@ internal sealed class FakeFloor
     public void AddOver(string room, NearbyElement e)
     {
         var i = RoomIndex(room);
-        Rooms[i] = Rooms[i] with { Over = [.. Rooms[i].Over!, e] };
+        Rooms[i] = Rooms[i] with { Over = [.. Rooms[i].Over!, Band(e)] };
     }
+
+    /// <summary>What of an element lies in a room's band (floor at 0, from 1/16 in up to 80 in), as the Revit layer's
+    /// intersection gives it: for a prism (flat faces only, its plan its bottom face), the prism cut to the band; for any
+    /// other shape, its faces that reach the band, as they are (the tests' curved pieces stand within it); a failed
+    /// geometry, a failed intersection.</summary>
+    public NearbyElement Band(NearbyElement e)
+    {
+        if (e.Banded is not null || e.BandFailed)
+            return e;                                        // the test says what the intersection gives
+        if (e.GeometryFailed || e.Faces is null)
+            return e with { BandFailed = e.GeometryFailed };
+        double lo = InteriorReader.Sixteenth, hi = RouteReader.Headroom;
+        var shared = e.Faces.Select(f => f.Points.Select(InternalToSharedPoint).ToList()).ToList();
+        var all = shared.SelectMany(p => p).ToList();
+        if (all.Count == 0)
+            return e with { Banded = [] };
+        double z0 = all.Min(q => q.Z), z1 = all.Max(q => q.Z);
+        if (z1 <= lo || z0 >= hi)
+            return e with { Banded = [] };
+        if (e.Faces.All(f => f.Planar))
+        {
+            var bottom = e.Faces.Select((f, k) => (f, k)).First(x => (Fake.InternalToShared.Apply(x.f.Normal) - Fake.InternalToShared.Apply(new Xyz(0, 0, 0))).Z < -0.5);
+            var plan = shared[bottom.k].Select(q => (q.X, q.Y)).ToList();
+            return e with { Banded = Prism(plan, Math.Max(z0, lo), Math.Min(z1, hi)) };
+        }
+        return e with { Banded = e.Faces.Where((f, k) => shared[k].Max(q => q.Z) > lo && shared[k].Min(q => q.Z) < hi).ToList() };
+    }
+
+    private Xyz InternalToSharedPoint(Xyz p) => Fake.InternalToShared.Apply(p);
 
     /// <summary>Sets (a value) or clears (null) one of a room's or door's own marks.</summary>
     public void SetMark(string id, MarkDefinition mark, MarkValue? value)
@@ -127,7 +156,7 @@ internal sealed class FakeFloor
         {
             UniqueId = uid, Level = "Level 1", LevelId = Level, LevelElevation = Fake.Place(0, 0, 0).Z, BaseOffset = 0,
             Boundary = hole is null ? [loop] : [loop, hole], Inside = [], Under = [slab],
-            Over = [ceiling, new NearbyElement("wall-c1", "OST_Walls", "Wall", Faces: Prism([(0, 9.5), (40, 9.5), (40, 10), (0, 10)], 0, 10))],
+            Over = [Band(ceiling), Band(new NearbyElement("wall-c1", "OST_Walls", "Wall", Faces: Prism([(0, 9.5), (40, 9.5), (40, 10), (0, 10)], 0, 10)))],
         });
         Areas.Add(new EnclosedArea("Level 1", 100, true, Fake.Place(plan[0].X + 0.5, plan[0].Y + 0.5, 0), Level));
     }
@@ -167,6 +196,7 @@ internal sealed class FakeFloor
             LevelElevation = Fake.Place(0, 0, 0).Z, LevelId = Level, SillHeight = 0, Location = Fake.Place(cx, cy, 0),
             Along = Fake.Place(horizontal ? 1 : 0, horizontal ? 0 : 1, 0) - Fake.Place(0, 0, 0), TypeWidth = Frame, TypeHeight = Height,
             Placed = Prism(frame, 0, Height).SelectMany(f => f.Points).ToList(),
+            WallOpening = frame.SelectMany(p => new[] { Fake.Place(p.X, p.Y, 0), Fake.Place(p.X, p.Y, Height) }).ToList(),   // the rough opening it cuts
             WallSides =
             [
                 new WallFace(Fake.Place(At(0, n0).X, At(0, n0).Y, 0), Fake.Place(horizontal ? 0 : -1, horizontal ? -1 : 0, 0) - Fake.Place(0, 0, 0)),

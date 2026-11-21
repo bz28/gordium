@@ -171,7 +171,18 @@ public sealed record BoundarySegmentRecord(Xyz Start, Xyz End, bool IsLine, stri
 /// <param name="DesignOption"><c>Element.DesignOption</c>'s id, where asked.</param>
 public sealed record NearbyElement(string UniqueId, string BuiltInCategory, string? Name = null, string? Host = null,
                                    IReadOnlyList<SurfaceRecord>? Faces = null, bool GeometryFailed = false,
-                                   RevitBox? Box = null, string? PhaseDemolished = null, string? DesignOption = null);
+                                   RevitBox? Box = null, string? PhaseDemolished = null, string? DesignOption = null)
+{
+    /// <summary>Over a room (<see cref="RoomRecord.Over"/>): the faces of what of the element lies in the room's band, from
+    /// just above its floor to 80 in up (each of its solids intersected with that slab over the room's box,
+    /// <c>BooleanOperationsUtils.ExecuteBooleanOperation</c>, Intersect; empty when none of it does). Null when not
+    /// asked. The room's obstructions are read from these alone (escape routes, section 10).</summary>
+    public IReadOnlyList<SurfaceRecord>? Banded { get; init; }
+
+    /// <summary>The intersection couldn't be made (Revit refused, a mesh, a face it gives no edges for): what of the
+    /// element is in the band isn't known.</summary>
+    public bool BandFailed { get; init; }
+}
 
 /// <summary>Something in Stairs, Railings or Generic Models the reader doesn't walk as a stair.</summary>
 /// <param name="UniqueId"><c>Element.UniqueId</c>.</param>

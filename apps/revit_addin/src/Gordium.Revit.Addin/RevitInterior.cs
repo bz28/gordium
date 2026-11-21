@@ -798,7 +798,8 @@ internal static class RevitInterior
             Inside = Inside(doc, room, loops, floor, level!),
             Under = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor - InteriorReader.SlabBand), new XYZ(x1, y1, floor + InteriorReader.SlabBand)),
                          [BuiltInCategory.OST_Floors, BuiltInCategory.OST_StructuralFoundation]),
-            Over = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null),
+            Over = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,
+                        Band(x0, y0, x1, y1, floor)),
         };
     }
 
@@ -835,9 +836,74 @@ internal static class RevitInterior
         }
     }
 
+    /// <summary>The room's band (escape routes, section 10): a slab over the room's box from 1/16 in above its floor
+    /// to 80 in up (<see cref="RouteReader.Headroom"/>); null when Revit can't make it.</summary>
+    private static Solid? Band(double x0, double y0, double x1, double y1, double floor)
+    {
+        try
+        {
+            var z = floor + Sixteenth;
+            var loop = CurveLoop.Create(new List<Curve>
+            {
+                Line.CreateBound(new XYZ(x0, y0, z), new XYZ(x1, y0, z)), Line.CreateBound(new XYZ(x1, y0, z), new XYZ(x1, y1, z)),
+                Line.CreateBound(new XYZ(x1, y1, z), new XYZ(x0, y1, z)), Line.CreateBound(new XYZ(x0, y1, z), new XYZ(x0, y0, z)),
+            });
+            return GeometryCreationUtilities.CreateExtrusionGeometry([loop], XYZ.BasisZ, RouteReader.Headroom - Sixteenth);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            return null;
+        }
+    }
+
+    /// <summary>What of the element lies in the band: each of its solids (a family's instance geometry included)
+    /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh, or a face of the
+    /// result can't be read.</summary>
+    private static (List<SurfaceRecord> Faces, bool Failed) InBand(Element e, Solid band, Options options)
+    {
+        var faces = new List<SurfaceRecord>();
+        var failed = false;
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                switch (o)
+                {
+                    case Solid s when s.Faces.Size > 0 && s.Volume > 1e-12:
+                        var cut = BooleanOperationsUtils.ExecuteBooleanOperation(s, band, BooleanOperationsType.Intersect);
+                        if (cut is null)
+                            break;
+                        foreach (Face f in cut.Faces)
+                            if (Surface(f) is { } face)
+                                faces.Add(face);
+                            else
+                                failed = true;
+                        break;
+                    case GeometryInstance gi when gi.GetInstanceGeometry() is { } inner:
+                        Walk(inner);
+                        break;
+                    case Mesh:
+                        failed = true;
+                        break;
+                }
+            }
+        }
+        try
+        {
+            if (e.get_Geometry(options) is { } g)
+                Walk(g);
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            return ([], true);
+        }
+        return (faces, failed);
+    }
+
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
-    /// (any for null), with their faces.</summary>
-    private static List<NearbyElement>? Near(Document doc, ElementId skip, Outline box, BuiltInCategory[]? categories)
+    /// (any for null), with their faces; with <paramref name="band"/>, also what of each lies in it.</summary>
+    private static List<NearbyElement>? Near(Document doc, ElementId skip, Outline box, BuiltInCategory[]? categories, Solid? band = null)
     {
         try
         {
@@ -851,8 +917,14 @@ internal static class RevitInterior
                 if (categories is not null && !categories.Contains(cat.BuiltInCategory))
                     continue;
                 var (faces, failed) = Faces(e, options);
-                list.Add(new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
-                                           faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id)));
+                var near = new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
+                                             faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
+                if (band is not null)
+                {
+                    var (banded, bandFailed) = InBand(e, band, options);
+                    near = near with { Banded = banded, BandFailed = bandFailed };
+                }
+                list.Add(near);
             }
             return list;
         }
