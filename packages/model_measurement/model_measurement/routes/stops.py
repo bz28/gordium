@@ -53,6 +53,17 @@ STOPS = {
     "too_many_ties": "more than {most} routes from ({x}, {y}) are equally short (within 1e-6 ft): which to take "
                      "isn't worked out",
     "exit_unknown": "no exit on the story has the exit id {exit_id!r}",
+    "inside_ring": "the point ({x}, {y}) is within 12 in of a corner: no route is defined from there (decision 2); "
+                   "the story's figure covers it by its ring cluster's bound (decision 3)",
+    "too_narrow": "the point ({x}, {y}) is shut in: an opening too narrow for NFPA 7.6.1's 12-in clearance from both "
+                  "sides",
+    "door_centre_in_ring": "the door {name}'s centre is within 12 in of a corner other than its jambs: no route through "
+                           "it is defined (decision 2)",
+    # the most remote point (remote.py)
+    "cluster_shut": "the rings round ({x}, {y}) have no clear edge with a route: the floor there is shut in (an "
+                    "opening too narrow for NFPA 7.6.1's 12-in clearance from both sides)",
+    "walk_shut": "the point ({x}, {y}), within 12 in of a corner, has no walk on the floor out to its rings' clear "
+                 "edge",
 }
 
 

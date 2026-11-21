@@ -252,6 +252,9 @@ FLOOR_CASES = {
     "passage_off": _passage_off,
     "zone_in_pieces": room_on_corridor,
     "no_exit": lambda: _without(_without(l_corridor(), "doors", 0, "exit_kind"), "doors", 0, "exit_id"),
+    "door_centre_in_ring": lambda: _with(room_on_corridor(), [{"outline": [list(q) for q in rect(9.6, 15.6, 10.4, 16)],
+                                                                "kind": "furniture", "fixed": False}],
+                                         "rooms", 1, "obstructions"),
     "outline_not_read": lambda: _with(room_on_corridor(), [{"level": "L1", "outer": [[0, 0]], "inner": [[0, 0]]}],
                                       "story_outlines"),
 }

@@ -2,27 +2,28 @@
 
 The route from a point p to an exit is the shortest curve that (a) lies in the free floor of the rooms it may cross
 (floor.py's zones), passing each door at its centre; (b) stays at least 12 in from every corner that sticks into the
-floor, every obstruction corner and every door jamb (a true circle of 12-in radius: a ring); except that (c) inside
-a ring that contains p, or the door centre it passes, it may run within that ring until it leaves it.
+floor, every obstruction corner and every door jamb (a true circle of 12-in radius: a ring). A route is defined only
+from a point clear of every ring (on a ring's edge counts as clear): from inside one, `routes` stops (inside_ring),
+and decision 3 (remote.py) covers those points by their cluster's bound. A point shut in by rings has no route; when
+it has one with no clearance, the reason says the opening is too narrow for the clearance.
 
 How it is computed. Every route passes a door centre between zones, so a route is a chain of legs, each in one zone
 from a point or door centre to a door centre (decision 1). A leg is a shortest path among circles and polygon walls,
 which is made only of straight lines tangent to rings and arcs along them (bending at no other place: a wall's own
 corner always has its ring, and where a ring meets a wall or another ring the free floor turns away from the path).
-So each leg is found exactly on a graph: its ends; the corners whose rings are lifted (c); the tangent points of
-every line from those points to each ring and of the four lines common to each pair of rings; each line kept only
-if it stays in the floor and out of every ring; and the arcs between neighbouring tangent points on each ring, kept
-only if they stay in the floor and out of every other ring. Dijkstra on it gives the leg, and Dijkstra over the door
-centres, from the exits, the chain. Two lengths within 1e-6 ft are a tie (decision 2): every tied route is kept, so
-the common path (a later step) can take the one that shares more (decision 5).
+So each leg is found exactly on a graph: its ends; the tangent points of every line from them to each ring and of
+the four lines common to each pair of rings; each line kept only if it stays in the floor and out of every ring; and
+the arcs between neighbouring tangent points on each ring, kept only if they stay in the floor and out of every other
+ring. Dijkstra on it gives the leg, and Dijkstra over the door centres, from the exits, the chain. Two lengths within
+1e-6 ft are a tie (decision 2): every tied route is kept, so the common path (a later step) can take the one that
+shares more (decision 5). `travel` gives the length alone, from the same graph built once per zone, for sampling.
 
-A ring lifted for a leg must be the leg's start or end piece only: a route that left it and came back in is longer
-under the definition, so it stops (needs review) rather than give a short figure; so does a route from an end-only
-room that goes back into it.
+A route from an end-only room into the floor beyond its passage that comes back into the room stops (needs review).
 
 Lengths are inches; `Route.feet` gives feet.
 """
 
+import bisect
 import heapq
 import math
 from dataclasses import dataclass
@@ -78,14 +79,17 @@ def _piece_length(piece) -> float:
 
 
 class _Leg:
-    """The shortest curves in one floor from p to t, among the rings (decision 2)."""
+    """The shortest curves in one floor, among the rings (decision 2). `paths(p, t)` gives every tied curve from p
+    to t with its pieces; `dist(p, t)` the length alone, fast, for sampling (decision 3): the graph among the rings
+    and the targets is built once (`prepare`), and each point only adds its own tangent lines."""
 
     def __init__(self, floor, rings, corners, r):
         self.floor, self.r = floor, r
         self.cover = floor.buffer(EPS)
         prepare(self.cover)
-        self.rings = np.array(rings, dtype=float).reshape(-1, 2)
-        self.corners = [tuple(c) for c in corners]
+        self.rings = np.array(rings, dtype=float).reshape(-1, 2) if r > 0 else np.zeros((0, 2))
+        # with no clearance a route bends at the floor's corners; with it, every corner has its ring
+        self.bends = [tuple(c) for c in corners] if r == 0 else []
         segs = []
         for poly in getattr(floor, "geoms", [floor]):
             if poly.geom_type != "Polygon":
@@ -94,23 +98,41 @@ class _Leg:
                 pts = list(ring.coords)
                 segs += [(*pts[i], *pts[i + 1]) for i in range(len(pts) - 1)]
         self.walls = np.array(segs, dtype=float).reshape(-1, 4)
+        self._base = None
 
     def covers(self, p) -> bool:
         return self.cover.covers(Point(p))
 
-    def paths(self, p, t) -> list[Path]:
+    def inside(self, p) -> bool:
+        """Whether p is inside a ring (closer than 12 in to a corner): no route is defined from there."""
+        return bool(len(self.rings)) and bool((np.hypot(*(self.rings - p).T) < self.r - EPS).any())
+
+    def clear(self, a, b) -> bool:
+        if math.dist(a, b) <= EPS:
+            return True
+        if not self.cover.covers(LineString([a, b])):
+            return False
+        return not len(self.rings) or _seg_dist(self.rings, a, b).min() >= self.r - EPS
+
+    def _tangents(self, p, k, c):
+        """Where lines from p touch ring k, clear: (angle, the point or None when p is on the ring, length)."""
         r = self.r
-        if math.dist(p, t) <= EPS:
-            return [Path(0.0, [])]
-        if r > 0 and len(self.rings):
-            near = (np.hypot(*(self.rings - p).T) < r - EPS) | (np.hypot(*(self.rings - t).T) < r - EPS)
-        else:
-            near = np.zeros(len(self.rings), dtype=bool)
-        lifted = self.rings[near]
-        active = self.rings[~near] if r > 0 else self.rings[:0]
-        bends = [c for c in self.corners
-                 if (not len(active) or np.hypot(*(active - c).T).min() >= r - EPS)
-                 and math.dist(c, p) > EPS and math.dist(c, t) > EPS]
+        d = math.dist(p, c)
+        if d < r - EPS:
+            return []
+        base = math.atan2(p[1] - c[1], p[0] - c[0])
+        if d <= r + EPS:
+            return [(base % (2 * math.pi), None, 0.0)]
+        alpha, out = math.acos(r / d), []
+        for ang in (base + alpha, base - alpha):
+            q = (c[0] + r * math.cos(ang), c[1] + r * math.sin(ang))
+            if self.clear(p, q):
+                out.append((ang % (2 * math.pi), q, math.dist(p, q)))
+        return out
+
+    def _graph(self, points):
+        """The graph among the rings and these points: (xy, adj, on, ids), `on[k]` ring k's nodes by angle."""
+        r, rings = self.r, self.rings
         xy, adj = [], []
 
         def node(pt):
@@ -123,41 +145,26 @@ class _Leg:
             adj[a].append((b, w, piece))
             adj[b].append((a, w, _reverse(piece)))
 
-        def clear(a, b) -> bool:
-            if math.dist(a, b) <= EPS:
-                return True
-            if not self.cover.covers(LineString([a, b])):
-                return False
-            return not len(active) or _seg_dist(active, a, b).min() >= r - EPS
-
-        P, T = node(p), node(t)
-        points = [P, T] + [node(b) for b in bends]
-        on = [[] for _ in range(len(active))]
-        for i, a in enumerate(points):
-            for b in points[i + 1:]:
-                if clear(xy[a], xy[b]):
+        ids = [node(q) for q in points]
+        on = [[] for _ in range(len(rings))]
+        for i, a in enumerate(ids):
+            for b in ids[i + 1:]:
+                if self.clear(xy[a], xy[b]):
                     link(a, b, ("line", xy[a], xy[b]))
-        for k, c in enumerate(active):
+        for k, c in enumerate(rings):
             c = (float(c[0]), float(c[1]))
-            for a in points:
-                d = math.dist(xy[a], c)
-                if d < r - EPS:
-                    continue
-                base = math.atan2(xy[a][1] - c[1], xy[a][0] - c[0])
-                if d <= r + EPS:
-                    on[k].append((base % (2 * math.pi), a))
-                    continue
-                alpha = math.acos(r / d)
-                for ang in (base + alpha, base - alpha):
-                    q = (c[0] + r * math.cos(ang), c[1] + r * math.sin(ang))
-                    if clear(xy[a], q):
+            for a in ids:
+                for ang, q, _ in self._tangents(xy[a], k, c):
+                    if q is None:
+                        on[k].append((ang, a))
+                    else:
                         n = node(q)
-                        on[k].append((ang % (2 * math.pi), n))
+                        on[k].append((ang, n))
                         link(a, n, ("line", xy[a], q))
-        for i in range(len(active)):
-            ci = (float(active[i][0]), float(active[i][1]))
-            for j in range(i + 1, len(active)):
-                cj = (float(active[j][0]), float(active[j][1]))
+        for i in range(len(rings)):
+            ci = (float(rings[i][0]), float(rings[i][1]))
+            for j in range(i + 1, len(rings)):
+                cj = (float(rings[j][0]), float(rings[j][1]))
                 d = math.dist(ci, cj)
                 if d <= EPS:
                     continue
@@ -169,38 +176,82 @@ class _Leg:
                 for ai, aj in pairs:
                     qi = (ci[0] + r * math.cos(ai), ci[1] + r * math.sin(ai))
                     qj = (cj[0] + r * math.cos(aj), cj[1] + r * math.sin(aj))
-                    if clear(qi, qj):
+                    if self.clear(qi, qj):
                         ni, nj = node(qi), node(qj)
                         on[i].append((ai % (2 * math.pi), ni))
                         on[j].append((aj % (2 * math.pi), nj))
                         link(ni, nj, ("line", qi, qj))
-        for k in range(len(active)):
-            c = (float(active[k][0]), float(active[k][1]))
-            ring = sorted(on[k])
+        for k in range(len(rings)):
+            c = (float(rings[k][0]), float(rings[k][1]))
+            on[k].sort()
+            ring = on[k]
             if len(ring) < 2:
                 continue
             for m, (a0, n0) in enumerate(ring):
                 a1, n1 = ring[(m + 1) % len(ring)]
                 sweep = (a1 - a0) % (2 * math.pi)
-                if self._arc_clear(k, active, c, a0, sweep):
+                if self._arc_clear(k, c, a0, sweep):
                     link(n0, n1, ("arc", c, r, a0, sweep))
-        found = _tied(adj, P, T)
+        return xy, adj, on, ids
+
+    def paths(self, p, t) -> list[Path]:
+        if math.dist(p, t) <= EPS:
+            return [Path(0.0, [])]
+        bends = [b for b in self.bends if math.dist(b, p) > EPS and math.dist(b, t) > EPS]
+        xy, adj, _, ids = self._graph([p, t] + bends)
+        found = _tied(adj, ids[0], ids[1])
         if found is None:
             raise Stop("too_many_ties", most=MOST_TIES, x=_show(p)[0], y=_show(p)[1])
         out, seen = [], set()
         for pieces in found:
             pieces = _tidy(pieces)
             key = _signature(pieces)
-            if key in seen:
-                continue
-            seen.add(key)
-            path = Path(sum(_piece_length(q) for q in pieces), pieces)
-            for c in lifted:
-                _check_lifted(path, (float(c[0]), float(c[1])), r, p, t)
-            out.append(path)
+            if key not in seen:
+                seen.add(key)
+                out.append(Path(sum(_piece_length(q) for q in pieces), pieces))
         return out
 
-    def _arc_clear(self, k, active, c, a0, sweep) -> bool:
+    def prepare(self, targets) -> None:
+        """The graph among the rings and these targets (door centres), with each target's distance to every node."""
+        targets = [tuple(map(float, t)) for t in targets]
+        if self._base is not None and self._base[0] == targets:
+            return
+        xy, adj, on, ids = self._graph(targets + self.bends)
+        dists = {t: _dijkstra(adj, n) for t, n in zip(targets, ids)}
+        self._base = (targets, on, dists, ids[len(targets):])
+
+    def dist(self, p, t) -> float:
+        """The length of the shortest curve from p (clear of every ring) to the target t (one given to `prepare`):
+        inf if there is none. Such a curve goes straight to t, or to a corner (no clearance), or to a ring at a
+        tangent point and round it to the first node there: every way it can leave a ring is a node of the graph."""
+        _, on, dists, bend_ids = self._base
+        t = tuple(map(float, t))
+        D = dists[t]
+        best = math.dist(p, t) if self.clear(p, t) else math.inf
+        for b, n in zip(self.bends, bend_ids):
+            if math.isfinite(D[n]) and math.dist(p, b) + D[n] < best and self.clear(p, b):
+                best = math.dist(p, b) + D[n]
+        for k in range(len(self.rings)):
+            ring = on[k]
+            if not ring:
+                continue
+            c = (float(self.rings[k][0]), float(self.rings[k][1]))
+            angles = [a for a, _ in ring]
+            for ang, _, length in self._tangents(p, k, c):
+                if length >= best:
+                    continue
+                i = bisect.bisect_left(angles, ang)
+                after, before = ring[i % len(ring)], ring[(i - 1) % len(ring)]
+                # round the ring each way to the first node met
+                for (a1, n1), a0, sweep in ((after, ang, (after[0] - ang) % (2 * math.pi)),
+                                            (before, before[0], (ang - before[0]) % (2 * math.pi))):
+                    got = length + self.r * sweep + D[n1]
+                    if got < best and self._arc_clear(k, c, a0, sweep):
+                        best = got
+        return best
+
+    def _arc_clear(self, k, c, a0, sweep) -> bool:
+        active = self.rings
         r, slack = self.r, EPS / self.r
         if sweep <= slack:
             return True
@@ -221,6 +272,21 @@ class _Leg:
             if not self.cover.covers(Point(c[0] + r * math.cos(mid), c[1] + r * math.sin(mid))):
                 return False
         return True
+
+
+def _dijkstra(adj, source) -> list:
+    dist = [math.inf] * len(adj)
+    dist[source] = 0.0
+    heap = [(0.0, source)]
+    while heap:
+        d, v = heapq.heappop(heap)
+        if d > dist[v]:
+            continue
+        for u, w, _ in adj[v]:
+            if d + w < dist[u]:
+                dist[u] = d + w
+                heapq.heappush(heap, (d + w, u))
+    return dist
 
 
 def _seg_dist(centres, a, b):
@@ -252,19 +318,9 @@ def _circle_walls(walls, c, r, a0):
 
 
 def _tied(adj, P, T) -> list[list]:
-    """Every shortest walk from P to T (within TIE), as lists of pieces: Dijkstra from T, then every next step
-    that keeps to the least."""
-    dist = [math.inf] * len(adj)
-    dist[T] = 0.0
-    heap = [(0.0, T)]
-    while heap:
-        d, v = heapq.heappop(heap)
-        if d > dist[v]:
-            continue
-        for u, w, _ in adj[v]:
-            if d + w < dist[u]:
-                dist[u] = d + w
-                heapq.heappush(heap, (d + w, u))
+    """Every shortest walk from P to T (within TIE), as lists of pieces: Dijkstra from T, then every next
+    step that keeps to the least."""
+    dist = _dijkstra(adj, T)
     if not math.isfinite(dist[P]):
         return []
     out = []
@@ -313,54 +369,6 @@ def _signature(pieces) -> tuple:
     return tuple(round(v, 4) for q in pieces for e in _ends(q) for v in e)
 
 
-def _inside_spans(pieces, c, r) -> list[tuple]:
-    """Where along the path (as lengths from its start) it is strictly inside the ring at c."""
-    spans, s0 = [], 0.0
-    for q in pieces:
-        n = _piece_length(q)
-        if q[0] == "line":
-            a, b = np.array(q[1]), np.array(q[2])
-            d, f = b - a, a - np.array(c)
-            A, B, C = d @ d, 2 * (f @ d), f @ f - r * r
-            disc = B * B - 4 * A * C
-            if A > 0 and disc > 0:
-                u0, u1 = (-B - math.sqrt(disc)) / (2 * A), (-B + math.sqrt(disc)) / (2 * A)
-                lo, hi = max(u0, 0.0), min(u1, 1.0)
-                if hi - lo > 0:
-                    spans.append((s0 + lo * n, s0 + hi * n))
-        else:
-            _, cc, rr, a, sweep = q
-            d = math.dist(cc, c)
-            if d < 2 * r:
-                phi, beta = math.atan2(c[1] - cc[1], c[0] - cc[0]), math.acos(d / (2 * r))
-                sign = 1 if sweep > 0 else -1
-                # along the arc, angle a + sign * x for x in [0, |sweep|]: inside where it is within beta of phi
-                for k in (-1, 0, 1):
-                    mid = (sign * (phi - a)) % (2 * math.pi) + 2 * math.pi * k
-                    lo, hi = max(mid - beta, 0.0), min(mid + beta, abs(sweep))
-                    if hi - lo > 0:
-                        spans.append((s0 + lo * rr, s0 + hi * rr))
-        s0 += n
-    spans.sort()
-    merged = []
-    for lo, hi in spans:
-        if merged and lo <= merged[-1][1] + EPS:
-            merged[-1] = (merged[-1][0], max(merged[-1][1], hi))
-        else:
-            merged.append((lo, hi))
-    return [(lo, hi) for lo, hi in merged if hi - lo > EPS]
-
-
-def _check_lifted(path: Path, c, r, p, t) -> None:
-    """A ring lifted for a leg (it holds p or t) may hold only the leg's start piece (p's) and end piece (t's). The
-    path starts inside it if it holds p and ends inside it if it holds t, so those pieces are its first and last
-    spans inside: any more is a way back in."""
-    spans = _inside_spans(path.pieces, c, r)
-    allowed = (math.dist(p, c) < r - EPS) + (math.dist(t, c) < r - EPS)
-    if len(spans) > allowed:
-        raise Stop("route_reenters", x=_show(p)[0], y=_show(p)[1])
-
-
 # --- a story's routes ------------------------------------------------------------------------------------------------
 
 class StoryRoutes:
@@ -372,6 +380,7 @@ class StoryRoutes:
             raise Stop("story_not_measured", reasons="; ".join(story.stops))
         self.story, self.r = story, clearance
         self._engines, self._legs, self._chains, self._regions = {}, {}, {}, {}
+        self._start_cache, self._plain = {}, None
         self.exits = {}
         for d in story.exits():
             self.exits.setdefault(d.exit_id, []).append(d.id)
@@ -448,33 +457,94 @@ class StoryRoutes:
                         raise Stop("too_many_ties", most=MOST_TIES, x=at[0], y=at[1])
         return out
 
-    def routes(self, point, exit_ids=None) -> list[Route]:
-        """Every shortest route (ties within 1e-6 ft) from a point (inches) to the nearest of the exits named by
-        exit id (all the story's exits if none are named)."""
-        p = (float(point[0]), float(point[1]))
-        at = _show(p)
+    def _wanted(self, exit_ids) -> frozenset:
         wanted = frozenset(self.exits if exit_ids is None else exit_ids)
         for e in wanted:
             if e not in self.exits:
                 raise Stop("exit_unknown", exit_id=e)
+        return wanted
+
+    def rooms_at(self, p) -> list:
+        """The rooms read whose outline holds p (two on the line between rooms)."""
+        return [r for r in self.story.rooms.values() if r is not None and r.outline.buffer(EPS).covers(Point(p))]
+
+    def rings_for(self, room) -> list:
+        """The centres of every ring a route from this room meets (its zone's, or for an end-only room those of its
+        own floor and of each floor it is joined to for a start in it)."""
+        out = []
+        for zone, _ in self._starts(room):
+            out += [c for c in zone.rings if all(math.dist(c, q) > SAME for q in out)]
+        return out
+
+    def _check_start(self, room, p, at) -> None:
+        if self.r > 0 and any(self._engine(zone).inside(p) for zone, _ in self._starts(room)):
+            raise Stop("inside_ring", x=at[0], y=at[1])
+
+    def _no_route(self, p, at, exit_ids, wanted):
+        """No route: say so, and say it is an opening too narrow for the clearance when one with none exists."""
+        if self.r > 0:
+            if self._plain is None:
+                self._plain = StoryRoutes(self.story, 0.0)
+            try:
+                self._plain.route(p, exit_ids)
+            except Stop:
+                pass
+            else:
+                return Stop("too_narrow", x=at[0], y=at[1])
+        return Stop("no_route", x=at[0], y=at[1], exits="any exit" if exit_ids is None else
+                    "the exit " + ", ".join(sorted(wanted)))
+
+    def routes(self, point, exit_ids=None) -> list[Route]:
+        """Every shortest route (ties within 1e-6 ft) from a point (inches), clear of every ring, to the nearest of
+        the exits named by exit id (all the story's exits if none are named)."""
+        p = (float(point[0]), float(point[1]))
+        at = _show(p)
+        wanted = self._wanted(exit_ids)
         dist, _, _ = self._chain(wanted)
-        rooms = [r for r in self.story.rooms.values() if r is not None and r.outline.buffer(EPS).covers(Point(p))]
+        rooms = self.rooms_at(p)
         if not rooms:
             raise Stop("not_on_floor", x=at[0], y=at[1])
         best_of_rooms = None
         for room in rooms:
+            self._check_start(room, p, at)
             found = self._from_room(room, p, wanted, dist, at)
             if found is None:
-                continue
+                raise self._no_route(p, at, exit_ids, wanted)    # a start in either room may need it
             if best_of_rooms is None or found[0].length > best_of_rooms[0].length + TIE:
                 best_of_rooms = found                       # a point on two rooms' line: the longer (cautious)
-        if best_of_rooms is None:
-            raise Stop("no_route", x=at[0], y=at[1], exits="any exit" if exit_ids is None else
-                       "the exit " + ", ".join(sorted(wanted)))
         return best_of_rooms
 
     def route(self, point, exit_ids=None) -> Route:
         return self.routes(point, exit_ids)[0]
+
+    def travel(self, point, exit_ids=None) -> float:
+        """The length (inches) of the shortest route from a point clear of every ring to the nearest exit named,
+        as `route(...).length` gives it, from each zone's graph built once (decision 3 samples with it)."""
+        p = (float(point[0]), float(point[1]))
+        at = _show(p)
+        wanted = self._wanted(exit_ids)
+        dist, _, _ = self._chain(wanted)
+        rooms = self.rooms_at(p)
+        if not rooms:
+            raise Stop("not_on_floor", x=at[0], y=at[1])
+        worst = -math.inf
+        for room in rooms:
+            self._check_start(room, p, at)
+            starts = self._starts(room)
+            if len(starts) > 1:                              # an end-only room joined beyond its passages
+                worst = max(worst, self.route(p, exit_ids).length)
+                continue
+            zone = starts[0][0]
+            engine = self._engine(zone)
+            if not engine.covers(p):
+                raise Stop("not_on_floor", x=at[0], y=at[1])
+            doors = [d for d in zone.doors if math.isfinite(dist.get(d, math.inf))]
+            engine.prepare([self.story.doors[d].centre for d in zone.doors])
+            best = min((engine.dist(p, self.story.doors[d].centre) + dist[d] for d in doors), default=math.inf)
+            if not math.isfinite(best):
+                raise self._no_route(p, at, exit_ids, wanted)
+            worst = max(worst, best)
+        return worst
 
     def _region(self, room_ids) -> Zone:
         key = tuple(sorted(room_ids))
@@ -482,10 +552,10 @@ class StoryRoutes:
             self._regions[key] = region(self.story, key)
         return self._regions[key]
 
-    def _from_room(self, room, p, wanted, dist, at):
-        """The shortest routes from p, a point in this room: in its zone; or, in an end-only room, in the room
-        alone to its own doors, and joined to each crossable zone beyond its passages to that zone's doors (a
-        route may leave it that way, never come back in: decision 1)."""
+    def _starts(self, room) -> list:
+        """The floors a route from this room walks first: (zone, the room when it is left by a passage, or None)."""
+        if room.id in self._start_cache:
+            return self._start_cache[room.id]
         story = self.story
         if room.crossable:
             starts = [(story.zone_of[room.id], None)]
@@ -497,6 +567,15 @@ class StoryRoutes:
                 if zone is not None and all(z is not zone for z in beyond):
                     beyond.append(zone)
             starts += [(self._region([room.id, *zone.rooms]), room) for zone in beyond]
+        self._start_cache[room.id] = starts
+        return starts
+
+    def _from_room(self, room, p, wanted, dist, at):
+        """The shortest routes from p, a point in this room: in its zone; or, in an end-only room, in the room
+        alone to its own doors, and joined to each crossable zone beyond its passages to that zone's doors (a
+        route may leave it that way, never come back in: decision 1)."""
+        story = self.story
+        starts = self._starts(room)
         if not any(self._engine(zone).covers(p) for zone, _ in starts):
             raise Stop("not_on_floor", x=at[0], y=at[1])
         own = set(starts[0][0].doors)

@@ -54,13 +54,23 @@ def test_1_the_clearance_lengthens_the_route():
     assert feet(with_rings, 40, 30) > feet(without, 40, 30) + 1.2     # one corner adds 1.27 ft
 
 
-def test_behind_a_corner_the_route_runs_inside_its_ring_to_the_corner():
-    """From (34.5, 6.5), inside the ring of the inside corner (34, 6) and behind it: 0.707 + 34.381."""
-    assert feet(routes(l_corridor()), 34.5, 6.5) == pytest.approx(35.088, abs=TOL)
+def test_no_route_is_defined_from_inside_a_ring():
+    """Decision 2: from (34.5, 6.5), behind test 1's inside corner (34, 6) and inside its ring, and from the corner
+    itself, no route (the story's figure covers them by the corner's cluster, decision 3: test_routes_remote.py).
+    For contrast only: the note's earlier definitions gave 35.088 and 35.328 there, and 34.381 from the corner."""
+    got = routes(l_corridor())
+    for x, y in ((34.5, 6.5), (34, 6), (34 + 0.999 * math.cos(math.pi / 4), 6 + 0.999 * math.sin(math.pi / 4))):
+        with pytest.raises(Stop) as stop:
+            got.route(at(x, y))
+        assert stop.value.key == "inside_ring"
+        with pytest.raises(Stop):
+            got.travel(at(x, y))
 
 
-def test_a_start_on_a_corner_goes_straight_never_no_route():
-    assert feet(routes(l_corridor()), 34, 6) == pytest.approx(34.381, abs=TOL)
+def test_a_point_on_a_rings_edge_counts_as_clear():
+    # (34, 7) on the wall x = 34, on the corner's ring: round it 176.661 degrees (3.0833 ft) to the tangent toward
+    # the door centre, then 34.3666: 37.450 (the note's test 1 cluster edge)
+    assert feet(routes(l_corridor()), 34, 7) == pytest.approx(37.450, abs=TOL)
 
 
 # --- test 2: a room with a column ---------------------------------------------------------------------------------
@@ -81,6 +91,23 @@ def test_two_exits_and_a_column_both_tied_ways_round_are_kept():
     assert [round(r.feet, 3) for r in got] == [30.931, 30.931]
     sides = sorted(max(y for q in r.pieces if q[0] == "line" for _, y in (q[1], q[2])) > 7 * FT for r in got)
     assert sides == [False, True]                                     # one under the column, one over
+
+
+def test_6_both_routes_go_round_the_inside_corner_together():
+    """Test 6's travel parts: an L-shaped room (legs 0 to 30 by 0 to 10 and 20 to 30 by 10 to 40), exits centred at
+    (22, 40.25) and (28, 40.25). From (0, 0) each route's first piece is the tangent to the ring at (20, 10), 22.338;
+    the route to (28, 40.25) leaves the ring after 0.925 (53.0 degrees), the other goes on round it."""
+    d = description([room("l", [(0, 0), (30, 0), (30, 40), (20, 40), (20, 10), (0, 10)], use="day_care")],
+                    [door("a", (22, 40.25), (1, 0), ("l", "outside"), exit_id="A"),
+                     door("b", (28, 40.25), (1, 0), ("l", "outside"), exit_id="B")])
+    got = routes(d)
+    to_b, to_a = got.route(at(0, 0), ["B"]), got.route(at(0, 0), ["A"])
+    for route in (to_a, to_b):
+        assert route.pieces[0][0] == "line" and math.dist(*route.pieces[0][1:]) / FT == pytest.approx(22.338, abs=TOL)
+        assert route.pieces[1][0] == "arc" and route.pieces[1][1] == at(20, 10)
+    assert abs(to_b.pieces[1][4]) * 12 / FT == pytest.approx(0.925, abs=TOL)
+    assert math.degrees(abs(to_b.pieces[1][4])) == pytest.approx(53.0, abs=0.05)
+    assert abs(to_a.pieces[1][4]) > abs(to_b.pieces[1][4])
 
 
 # --- the table, a jamb, test 4 -----------------------------------------------------------------------------------
@@ -283,62 +310,32 @@ def test_a_point_off_the_floor_has_no_route():
 
 
 def alcove_too_narrow():
-    """A room 0 to 20 by 0 to 10 with a niche 20 in wide and 2 ft deep in its north wall: the niche's mouth corners'
-    rings (20 in apart, 12 in each) close it."""
+    """Test 18: a room 0 to 20 by 0 to 10 with a niche 20 in wide and 2 ft deep in its north wall: the niche's mouth
+    corners' rings (20 in apart, 12 in each) close it."""
     w = 10 / 12
     return description([room("r", [(0, 0), (20, 0), (20, 10), (10 + w, 10), (10 + w, 12), (10 - w, 12),
                                    (10 - w, 10), (0, 10)], use="day_care")],
                        [door("x", (-0.25, 5), (0, 1), ("r", "outside"), exit_id="A")])
 
 
-def test_a_point_shut_in_by_rings_has_no_route_never_a_number():
-    """At (10, 11.5) the niche's back is 1.5 ft deep, 1.20 ft from each mouth corner: outside both rings, and the
-    rings overlap across the mouth, so no curve 12 in clear of both gets out (decision 2): no route (decision 10)."""
+def test_18_a_point_shut_in_by_an_opening_under_24_in_has_no_route_never_a_number():
+    """At (10, 11.5) the niche's back is sqrt(0.833^2 + 1.5^2) = 1.716 ft from each mouth corner: clear of both
+    rings, which overlap across the mouth, so no clear curve gets out (decision 2); with no clearance it would."""
     got = routes(alcove_too_narrow())
     with pytest.raises(Stop) as stop:
         got.route(at(10, 11.5))
-    assert stop.value.key == "no_route"
-    # inside a ring in the niche's mouth, the route may run within it until it leaves (c): 11.634 by the code's
-    # definition; checked here only to be a number
-    assert got.route(at(10, 10.5)).feet > 9.75
+    assert stop.value.key == "too_narrow"
+    assert "an opening too narrow for NFPA 7.6.1's 12-in clearance from both sides" in stop.value.reason
+    with pytest.raises(Stop) as stop:
+        got.travel(at(10, 11.5))
+    assert stop.value.key == "too_narrow"
+    assert routes(alcove_too_narrow(), clearance=0).route(at(10, 11.5)).feet > 0
 
 
 def test_an_unknown_exit_id_is_said():
     with pytest.raises(Stop) as stop:
         routes(l_corridor()).route(at(1, 1), ["Z"])
     assert stop.value.key == "exit_unknown"
-
-
-def test_a_route_that_would_come_back_into_a_lifted_ring_isnt_measured(monkeypatch):
-    """A leg whose shortest curve, with a ring lifted for its start, leaves that ring and comes back in is longer
-    under the definition: it stops rather than give the short figure (here a ring at the point's own corner made
-    to look entered twice)."""
-    from model_measurement.routes import paths
-    monkeypatch.setattr(paths, "_inside_spans", lambda pieces, c, r: [(0.0, 1.0), (5.0, 6.0)])
-    with pytest.raises(Stop) as stop:
-        routes(l_corridor()).route(at(34.5, 6.5))
-    assert stop.value.key == "route_reenters"
-
-
-def test_where_a_path_is_inside_a_ring_is_exact():
-    from model_measurement.routes import paths
-    # a line through the ring at the origin (r 12 in) from (-20, 5): inside where |x| < sqrt(144 - 25) = 10.9087,
-    # that is from 20 - 10.9087 = 9.0913 to 20 + 10.9087 = 30.9087 along it
-    [(lo, hi)] = paths._inside_spans([("line", (-20.0, 5.0), (40.0, 5.0))], (0.0, 0.0), 12.0)
-    assert (lo, hi) == (pytest.approx(9.0913, abs=1e-4), pytest.approx(30.9087, abs=1e-4))
-    # an arc of the ring at (20, 0) from (8, 0) a quarter turn clockwise: inside the origin's ring while within
-    # acos(20 / 24) = 33.557 degrees of (8, 0): 0.585686 rad x 12 = 7.0282 in
-    [(lo, hi)] = paths._inside_spans([("arc", (20.0, 0.0), 12.0, math.pi, -math.pi / 2)], (0.0, 0.0), 12.0)
-    assert (lo, hi) == (pytest.approx(0.0, abs=1e-9), pytest.approx(7.0282, abs=1e-4))
-
-
-def test_a_path_leaving_its_starts_ring_and_coming_back_is_refused():
-    from model_measurement.routes import paths
-    # from (6, 0), inside the ring at the origin: out along y = 0, then back across the ring toward (-30, 6)
-    back = paths.Path(0.0, [("line", (6.0, 0.0), (30.0, 0.0)), ("line", (30.0, 0.0), (-30.0, 6.0))])
-    with pytest.raises(Stop):
-        paths._check_lifted(back, (0.0, 0.0), 12.0, (6.0, 0.0), (-30.0, 6.0))
-    paths._check_lifted(paths.Path(0.0, back.pieces[:1]), (0.0, 0.0), 12.0, (6.0, 0.0), (30.0, 0.0))
 
 
 def test_an_arc_is_kept_only_where_it_stays_in_the_floor_and_out_of_other_rings():
@@ -352,10 +349,10 @@ def test_an_arc_is_kept_only_where_it_stays_in_the_floor_and_out_of_other_rings(
     active = np.array([(120.0, 120.0), (138.0, 120.0)])
     leg = paths._Leg(floor, active, [], 12.0)
     deg = math.radians
-    assert leg._arc_clear(0, active, (120.0, 120.0), deg(160), deg(100))        # the west side: clear
-    assert leg._arc_clear(0, active, (120.0, 120.0), deg(45), deg(90))          # over the wall's top: clear
-    assert not leg._arc_clear(0, active, (120.0, 120.0), deg(-45), deg(40))     # into the other ring
-    assert not leg._arc_clear(0, active, (120.0, 120.0), deg(140), deg(5))      # through the wall's west end
+    assert leg._arc_clear(0, (120.0, 120.0), deg(160), deg(100))        # the west side: clear
+    assert leg._arc_clear(0, (120.0, 120.0), deg(45), deg(90))          # over the wall's top: clear
+    assert not leg._arc_clear(0, (120.0, 120.0), deg(-45), deg(40))     # into the other ring
+    assert not leg._arc_clear(0, (120.0, 120.0), deg(140), deg(5))      # through the wall's west end
 
 
 def test_too_many_tied_routes_is_said(monkeypatch):
@@ -366,7 +363,8 @@ def test_too_many_tied_routes_is_said(monkeypatch):
     assert stop.value.key == "too_many_ties"
 
 
-PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters", "too_many_ties", "exit_unknown"}
+PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters", "too_many_ties", "exit_unknown",
+             "inside_ring", "too_narrow", "cluster_shut", "walk_shut"}   # the last two: test_routes_remote.py
 
 
 def test_every_reason_has_a_case():

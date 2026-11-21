@@ -6,7 +6,7 @@ outside it (its sides touching it). A route that avoids the outside polygons avo
 at least the true route's; the true route avoids the inside polygons, so the shortest route round those is at most
 the true one's. Both are found by the plain visibility graph (every corner of the floor that is left, every pair
 that sees each other, Dijkstra). The exact route must fall between them, and they must be within 0.01 ft of each
-other, so this pins the exact figure to within that band on four layouts and twenty starting points.
+other, so this pins the exact figure to within that band on four layouts and twenty-one starting points (some just outside a ring).
 """
 
 import heapq
@@ -108,13 +108,13 @@ LAYOUTS = {
     "l_corridor": (l_corridor, lambda: unary_union([Polygon(ft((0, 0), (40, 0), (40, 30), (34, 30), (34, 6), (0, 6))),
                                                    half_door(-0.25, 1.5, 0.01, 4.5)]),
                    ft((34, 6), (0, 1.5), (0, 4.5)), (-0.25, 3),
-                   [(40, 30), (37, 20), (34.5, 6.5), (10, 1), (39, 0.5)]),
+                   [(40, 30), (37, 20), (34.3, 7.2), (35.5, 6.5), (10, 1), (39, 0.5)]),
     # test 2's room less its column; rings: the column's corners and the two jambs
     "column": (column_room, lambda: unary_union([Polygon(ft((0, 0), (30, 0), (30, 10), (0, 10))),
                                                 half_door(-0.25, 3.5, 0.01, 6.5)]).difference(
                    Polygon(ft((13, 3), (17, 3), (17, 7), (13, 7)))),
                ft((13, 3), (17, 3), (17, 7), (13, 7), (0, 3.5), (0, 6.5)), (-0.25, 5),
-               [(30, 5), (30, 0), (25, 8), (13.5, 7.5), (20, 4.2)]),
+               [(30, 5), (30, 0), (25, 8), (12, 7.8), (20, 4.2)]),
     # the table room; rings: the table's corners and the two jambs
     "table": (table_room, lambda: unary_union([Polygon(ft((0, 0), (20, 0), (20, 20), (0, 20))),
                                               half_door(8.5, 19.99, 11.5, 20.25)]).difference(

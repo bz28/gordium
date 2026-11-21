@@ -524,6 +524,9 @@ def region(story: Story, room_ids, crossable: bool = False, joined=()) -> Zone:
             + [v for r in rooms for o in r.obstructions for v in o.exterior.coords[:-1]]:
         if all(math.dist(c, q) > SAME for q in rings):
             rings.append(tuple(c))
+    for d in doors:                                  # decision 2: no route is defined through it
+        if any(math.dist(story.doors[d].centre, c) < CLEARANCE - 1e-6 for c in rings):
+            raise Stop("door_centre_in_ring", name=story.doors[d].name)
     return Zone(tuple(sorted(ids)), crossable, floor, corners, rings, doors, lines)
 
 
