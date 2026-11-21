@@ -73,8 +73,7 @@ area need review.
    too and get their 12-in rings: a route that turns just past a door keeps 12 in off the jamb. A door less than
    24 in clear puts its own centre inside its jambs' rings: needs review. Exactly: **crossable** rooms (decision 1a)
    joined by passages form one zone; an end-only room is always a zone of its own, never merged across a passage.
-   Inside each zone, a **visibility graph** (the start point, the door centres and the corners of the 12-in rings,
-   each joined to every other it can see); between zones, the door centres. Distances by Dijkstra from all exits at
+   Inside each zone, a **tangent graph** over the 12-in rings (decision 2); between zones, the door centres. Distances by Dijkstra from all exits at
    once. A start point in an end-only room is the one exception: its own room is joined, for its routes only, to
    each **crossable** zone beyond its passages (a route may leave it that way, never come back in). A passage into
    another end-only room (a kitchen open to a pantry) is no way out for anyone (test 17).
@@ -98,8 +97,20 @@ area need review.
    read (that room not read, so its story needs review). A room whose only way to an exit crosses an end-only room
    needs review (an exception, such as 1014.2's for a kitchen, may allow it; Gordium doesn't assume one). This only
    removes routes, so it only lengthens them.
-2. **The 12-in rings are drawn slightly outside the circle** (a 16-sided polygon around it), so a route around one
-   is at most 1.3 percent of its curve longer (under 1/2 in a corner), never shorter.
+2. **The rings are exact circles; routes are exact shortest paths among them.** Each ring is a true circle of 12-in
+   radius round a wall corner that sticks into the floor, a jamb, or each corner of an obstruction (an obstruction's
+   straight sides offset by 12 in join its corner circles, and a shortest route only ever touches those circles).
+   The standard **tangent graph**: its nodes are the start point, the door centres, and the points where a straight
+   line touches a ring; its edges are the straight lines from a point to a ring or between two rings (each pair of
+   rings has four, two outer and two crossing) that cross no wall and come within 12 in of no other ring's centre,
+   and the arcs along each ring between its touching points. Dijkstra over it gives the exact shortest route, so the
+   hand figures of the tests hold as written, where two routes part is exact, and no polygon's orientation can change
+   an answer. **Work:** for m rings in a zone, about 4 m squared touching lines, each checked against the zone's walls
+   and rings (about m cubed in all: well under a second for a few hundred rings), Dijkstra on the rest. **Numbers:**
+   in double precision; a line counts as clear of a ring if it passes at least 12 in minus 10^-9 ft from its centre
+   (a line just touching is clear), and lengths are good to far better than 1/1000 ft. *Rejected:* rings as polygons
+   (an earlier draft of this note): a route round a polygon is longer than round the circle by an amount that
+   depends on how the polygon is turned, enough to move test 6's figures and lose its tie.
 3. **The most remote point: every corner, plus a fine sampling with a stated bound.** For one exit and a room with no
    column, the farthest point is always a corner of the room: the route to any point ends in a straight line from
    the last corner it turns at, distance from that corner grows toward the edges of the area it sees, and where two
@@ -135,9 +146,9 @@ area need review.
    one such pair, so its figure at a sample is never less than the law's. So the story's figure is worked exactly
    as decision 3's: every corner and the 3-in samples, the triangles cut only where they could matter, and the rules
    get the greatest found plus 3 in, which is never less than the law's greatest. No cells and no cases: it is
-   decidable on any floor. **Work:** one shortest-route tree per distinct exit over each zone's visibility graph
-   (n nodes: about n squared visibility tests to build, Dijkstra per exit); per sample, its route to each exit from
-   the nodes it can see (about n tests per exit), and per pair of exits a walk back along the two routes to their
+   decidable on any floor. **Work:** one shortest-route tree per distinct exit over each zone's tangent graph
+   (decision 2's tangent graph, n nodes; Dijkstra per exit); per sample, its route to each exit from the rings and
+   door centres it can touch (about n tests per exit), and per pair of exits a walk back along the two routes to their
    last shared point. For k exits and S samples, about S x (k x n + k squared x route length): seconds for a story
    like the Children's Odyssey (a few thousand samples, hundreds of nodes per zone). One exit on the story: the
    common path is the travel distance.
@@ -182,8 +193,8 @@ area need review.
    must change to say so, on that branch. Day-care net area: the rooms marked `day_care`, inside their walls (Table
    1004.1.1 "net"); the computed occupant load is that divided by 35, and a stated load below it needs review
    (1004.1.1's exception needs the building official).
-9. **Tolerances.** Points within 1/16 in are the same point, as elsewhere in the interior code. Route lengths carry
-   the under-1/2 in per corner of decision 2 (always long) and the 3 in of decision 3 (added). A measure is compared with
+9. **Tolerances.** Points within 1/16 in are the same point, as elsewhere in the interior code. Route lengths are
+   exact to floating point (decision 2); the greatest over a story carries the 3 in of decision 3 (added). A measure is compared with
    its limit as given; a measure exactly at a limit is what the model says (20'-0" is "not more than 20 feet").
 10. **What always gives needs review (the story's route measures), with the reason shown:** an unknown space on the
     story (its outline unknown, it may hold the most remote point or a route; with its outline, one no door or
@@ -214,7 +225,7 @@ area need review.
 **Synthetic tests, answers worked by hand** (feet; walls 6 in thick, so a door's centre sits 0.25 ft outside the room;
 doors 36 in clear, each jamb with its 12-in ring). Every figure needing tangents and arcs (tests 1, 2, 4 and 6) was
 worked two ways for this note: by the tangent-and-arc formulas, and by a throwaway brute-force shortest path over
-fine polygons of the rings (neither kept, neither the route code); they agree to 1/1000 ft. The code's tests hold
+fine 512-sided polygons of the rings (neither kept, neither the route code); they agree to 1/1000 ft. The code's tests hold
 these hand figures as written in the test file, never taken from the code under test, which is the third way.
 
 1. **An L-shaped corridor:** legs 0 to 40 by 0 to 6, and 34 to 40 by 6 to 30; exit door centre at (-0.25, 3). The
@@ -317,7 +328,7 @@ runs where they are and says it skipped where they aren't.
 ## Where the code would go
 
 - `packages/model_measurement/model_measurement/routes/`: `floor.py` (each story's zones from rooms, holes,
-  obstructions, doors, passages, with the decision 10 checks), `paths.py` (12-in rings, visibility graph, Dijkstra
+  obstructions, doors, passages, with the decision 10 checks), `paths.py` (12-in rings, tangent graph, Dijkstra
   from the exits), `remote.py` (corners and the 3-in triangles, the bound), `common_path.py`, `dead_ends.py`
   (corridor legs, centre lines), `straight.py` (remoteness, diagonal), `areas.py`, and `__init__.py` giving the
   `story`, `space` and `corridor` parts with their measures, `not_measured` reasons and `more` (the paths drawn).
