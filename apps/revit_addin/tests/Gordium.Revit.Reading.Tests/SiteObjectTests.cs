@@ -211,6 +211,24 @@ public sealed class SiteObjectTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal(["tool_words"], Codes(b));
     }
 
+    /// <summary>Review round 7: a DirectShape (not a family) marked a deck with no geometry is a building part, so it is
+    /// unsent (every building measure needs review), never skipped as an element with nothing that could be a
+    /// building, as an unmarked one is.</summary>
+    [Fact]
+    public void A_direct_shape_marked_a_deck_with_no_geometry_is_unsent_never_skipped()
+    {
+        var shape = Thing("shape", mark: "Deck") with { Kind = ElementKind.Ordinary, Geometry = null, CoarserGeometry = null };
+        var read = new Read(House());
+        read.Element(shape);
+        Assert.Contains(read.Unsent, u => u["id"]!.GetValue<string>() == "shape" &&
+                                          u["kind"]!.GetValue<string>() == "a Generic Models element with no geometry");
+        Assert.DoesNotContain(read.Candidates, c => c.Id == "shape");
+
+        var unmarked = new Read(House());
+        unmarked.Element(shape with { InstanceMarks = new Dictionary<Guid, MarkValue>() });
+        Assert.DoesNotContain(unmarked.Unsent, u => u["id"]!.GetValue<string>() == "shape");     // skipped, as before
+    }
+
     /// <summary>Review round 3: inside a linked model, one marked a deck is a building part too (the link holds a
     /// building), and its Medium/Coarse-only piece stays in the link's place (Fold and Coarser leave it out of the
     /// geometry, so LookInside walks it itself).</summary>
