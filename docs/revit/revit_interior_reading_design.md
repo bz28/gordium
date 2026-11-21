@@ -749,7 +749,10 @@ it (a closet) gives no id, never a guess.
 floor slab may stop at the walls' core, their inside face or run past them, and a wall type's Function is a setting
 the firm chooses, so neither says where the exterior walls' faces are. Instead: **outer** is the outside boundary of
 everything on the story put together, every room's floor, every outlined enclosed area with no Room, and every wall's
-footprint (its faces that aren't vertical, projected; a door cutting a wall's bottom face is bridged by its top face);
+footprint as the wall is, before anything is cut into it (its centre line, from its Location Line setting, widened to
+its full thickness; an end within 1/2 in of another wall carried on half its thickness, as Revit's join cleanup
+carries it to the corner, each gap joined and each end left apart within 2 ft said in the notes; the first read from
+the walls' cut faces didn't close on the Children's Odyssey, 2026-11-21);
 the **exterior walls** are the walls with a piece of that boundary on their footprint; **inner** is the outside boundary
 of the rooms, the outlined areas and every other wall: the exterior walls' inside faces. Walls drawn a hair apart (1/16
 in) count as one solid. Left out, with the reason in the notes, when the pieces don't close into one loop, when the
