@@ -70,6 +70,7 @@ internal static class RevitInterior
             Levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
                 .Select(l => new LevelRecord(l.UniqueId, l.Name, l.ProjectElevation)).ToList(),
             SeparationLines = SeparationLinesOf(doc, diagnostics),
+            Walls = WallsOf(doc, diagnostics),
             Diagnostics = diagnostics,
         };
     }
@@ -91,6 +92,73 @@ internal static class RevitInterior
             diagnostics.Add($"the room separation lines couldn't be read ({x.GetType().Name}: {x.Message})");
             return null;
         }
+    }
+
+    /// <summary>Every wall's centre line and full thickness, before anything is cut into it (the story's outlines,
+    /// section 10): its location line moved to the middle of the wall from its Location Line setting (wall centre line,
+    /// either finish face; a core one from the type's layers); null when they couldn't be listed.</summary>
+    private static List<WallRecord>? WallsOf(Document doc, List<string> diagnostics)
+    {
+        try
+        {
+            var list = new List<WallRecord>();
+            foreach (var w in new FilteredElementCollector(doc).OfClass(typeof(Wall)).Cast<Wall>().Where(w => !w.ViewSpecific).ToList())
+            {
+                var width = w.Width;
+                string? why = null;
+                Xyz a = default, b = default;
+                if (w.Location is not LocationCurve { Curve: Line line })
+                    why = "its location isn't a straight line (a curved wall, or none)";
+                else
+                {
+                    // the location line's distance from the centre, toward the wall's exterior side (Orientation)
+                    var key = w.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM)?.AsInteger();
+                    double? toExterior = key switch
+                    {
+                        0 => 0,                                  // wall centre line
+                        2 => width / 2,                          // finish face, exterior
+                        3 => -width / 2,                         // finish face, interior
+                        _ => CoreOffset(w, key),
+                    };
+                    if (toExterior is not { } off)
+                        why = $"its location line (setting {key}) couldn't be put on its centre line";
+                    else
+                    {
+                        // the centre is that far back from the location line, away from the exterior
+                        var shift = w.Orientation.Multiply(-off);
+                        a = P(line.GetEndPoint(0) + shift);
+                        b = P(line.GetEndPoint(1) + shift);
+                    }
+                }
+                list.Add(new WallRecord(w.UniqueId, a, b, width, (doc.GetElement(w.LevelId) as Level)?.UniqueId, why,
+                                        Id(w.DemolishedPhaseId), Id(w.DesignOption?.Id)));
+            }
+            diagnostics.Add($"walls: {list.Count} ({list.Count(x => x.NotRead is not null)} whose centre line couldn't be read)");
+            return list;
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            diagnostics.Add($"the walls couldn't be read ({x.GetType().Name}: {x.Message})");
+            return null;
+        }
+    }
+
+    /// <summary>For a location line on the core (core centre line 1, core face exterior 4, core face interior 5): its
+    /// distance from the wall's centre toward its exterior, from the type's layers; null when they can't be read.</summary>
+    private static double? CoreOffset(Wall w, int? key)
+    {
+        if (key is not (1 or 4 or 5) || w.WallType.GetCompoundStructure() is not { } cs)
+            return null;
+        var widths = cs.GetLayers().Select(l => l.Width).ToList();
+        int first = cs.GetFirstCoreLayerIndex(), last = cs.GetLastCoreLayerIndex();
+        if (first < 0 || last < first || last >= widths.Count)
+            return null;
+        // layers run from the exterior side: the core's exterior face is the layers before it in
+        var total = widths.Sum();
+        double coreOut = widths.Take(first).Sum(), coreIn = widths.Take(last + 1).Sum();
+        double At(double fromExterior) => total / 2 - fromExterior;    // distance toward the exterior from the centre
+        return key switch { 4 => At(coreOut), 5 => At(coreIn), _ => At((coreOut + coreIn) / 2) };
     }
 
     /// <summary>The door's host wall's side faces (<c>HostObjectUtils.GetSideFaces</c>, exterior then interior), each a

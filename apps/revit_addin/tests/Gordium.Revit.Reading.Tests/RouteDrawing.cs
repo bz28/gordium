@@ -32,6 +32,7 @@ internal sealed class FakeFloor
     public List<EnclosedArea> Areas { get; } = [];
     public List<LevelRecord>? Levels { get; set; }
     public List<string>? SeparationLines { get; set; } = ["sep-1"];
+    public List<WallRecord>? Walls { get; set; }
 
     public RevitModel Model() => new()
     {
@@ -41,7 +42,7 @@ internal sealed class FakeFloor
         Marked = Marked,
         Interior = new InteriorRecords
         {
-            Rooms = Rooms, Openings = Openings, EnclosedAreas = Areas, Levels = Levels, SeparationLines = SeparationLines,
+            Rooms = Rooms, Openings = Openings, EnclosedAreas = Areas, Levels = Levels, SeparationLines = SeparationLines, Walls = Walls,
             Stairs = [], Railings = [], Ramps = [],
         },
     };

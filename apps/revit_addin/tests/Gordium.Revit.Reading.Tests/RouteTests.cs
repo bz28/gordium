@@ -449,22 +449,26 @@ public sealed class RouteTests
         Assert.Contains("separate pieces", StoryOutlines.Of([.. rooms, Box(40, 0, 50, 10)], [], walls).Why);
     }
 
+    /// <summary>The fake story's walls as the Revit layer gives them: each wall's centre line and thickness.</summary>
+    private static List<WallRecord> StoryWalls(FakeFloor floor)
+    {
+        WallRecord W(string id, double x0, double y0, double x1, double y1, double width = 0.5) =>
+            new(id, floor.Fake.Place(x0, y0, 0), floor.Fake.Place(x1, y1, 0), width, FakeFloor.Level);
+        return
+        [
+            W("wall-s", -0.25, -0.25, 40.25, -0.25), W("wall-n", -0.25, 26.25, 40.25, 26.25), W("wall-w", -0.25, -0.25, -0.25, 26.25),
+            W("wall-e", 40.25, -0.25, 40.25, 26.25), W("wall-ab", 20.25, 0, 20.25, 9.5), W("wall-c1", 0, 9.75, 40, 9.75),
+            W("wall-c2", 0, 16.25, 10, 16.25), W("wall-sl", 10.25, 16, 10.25, 26),
+        ];
+    }
+
     [Fact]
     public void The_fake_storys_outlines_are_sent_and_read_by_the_route_code()
     {
+        // the walls as they are, before anything is cut into them: the lobby's and the stair's exterior doors (dE, dS2)
+        // cut their walls' faces, never their outline
         var floor = new FakeFloor();
-        var t = FakeFloor.T;
-        NearbyElement Wall(string id, double x0, double y0, double x1, double y1) =>
-            new(id, "OST_Walls", "Wall", Faces: floor.Prism([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 0, 10));
-        NearbyElement[] walls =
-        [
-            Wall("wall-s", -t, -t, 40 + t, 0), Wall("wall-n", -t, 26, 40 + t, 26 + t), Wall("wall-w", -t, 0, 0, 26),
-            Wall("wall-e", 40, 0, 40 + t, 26), Wall("wall-ab", 20, 0, 20.5, 9.5), Wall("wall-c2", 0, 16, 10, 16.5),
-            Wall("wall-sl", 10, 16, 10.5, 26),
-        ];
-        foreach (var r in new[] { "A", "B", "C", "L", "S" })
-            foreach (var w in walls)
-                floor.AddOver(r, w);
+        floor.Walls = StoryWalls(floor);
         var read = InteriorReader.Read(floor.Model());
         var outline = Assert.Single(read.Interior["story_outlines"]!.AsArray())!;
         Assert.Equal(FakeFloor.Level, outline["level"]!.GetValue<string>());
@@ -475,12 +479,31 @@ public sealed class RouteTests
         Assert.Null(routes["outlines"]![FakeFloor.Level]!["stop"]);
         Assert.Equal(41.0 * 27 * 144, routes["outlines"]![FakeFloor.Level]!["outer"]!.GetValue<double>(), 6);   // sq in
 
-        // the exterior wall's geometry not read: no outline, with why
-        var i = floor.RoomIndex("A");
-        floor.Rooms[i] = floor.Rooms[i] with { Over = [.. floor.Rooms[i].Over!.Where(e => e.UniqueId != "wall-s"), new NearbyElement("wall-s", "OST_Walls", "Wall", GeometryFailed: true)] };
+        // a curved wall (its centre line not read): no outline, with why
+        floor.Walls = [.. floor.Walls, new WallRecord("arc", default, default, 0.5, FakeFloor.Level, "its location isn't a straight line")];
         read = InteriorReader.Read(floor.Model());
         Assert.Null(read.Interior["story_outlines"]);
-        Assert.Contains("couldn't be read", read.Notes.Single(n => n.Field == "story_outlines").Why);
+        Assert.Contains("isn't a straight line", read.Notes.Single(n => n.Field == "story_outlines").Why);
+        floor.Walls = null;
+        Assert.Contains("walls weren't read", InteriorReader.Read(floor.Model()).Notes.Single(n => n.Field == "story_outlines").Why);
+    }
+
+    [Fact]
+    public void Two_walls_a_hair_apart_are_joined_and_a_wider_gap_is_left_open_and_said()
+    {
+        var floor = new FakeFloor();
+        WallRecord W(string id, double x0, double y0, double x1, double y1) => new(id, floor.Fake.Place(x0, y0, 0), floor.Fake.Place(x1, y1, 0), 0.5, FakeFloor.Level);
+        // an L corner whose second wall stops 1/4 in short of the first's face: joined, carried to the outer corner
+        var said = new List<string>();
+        var feet = RouteReader.WallFootprints(floor.Model(), [W("a", 0, 0, 10, 0), W("b", 0, 0.25 + 0.25 / 12, 0, 10)], said);
+        Assert.Contains(said, s => s.Contains("joined to wall a across 0.25 in"));
+        Assert.Equal(0.0, feet["b"][0].Min(p => p.Y), 9);                // carried into the first wall: the gap closed
+        Assert.Equal(-0.25 - 0.25 / 12, feet["a"][0].Min(p => p.X), 9);   // and the first carried past the corner
+        // the same 1 in short: left apart, said, and the outline doesn't close round it
+        said.Clear();
+        feet = RouteReader.WallFootprints(floor.Model(), [W("a", 0, 0, 10, 0), W("b", 0, 0.25 + 1.0 / 12, 0, 10)], said);
+        Assert.Contains(said, s => s.Contains("is 1 in from wall a: left apart"));
+        Assert.Equal(0.25 + 1.0 / 12, feet["b"][0].Min(p => p.Y), 9);
     }
 
     [Fact]

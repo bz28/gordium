@@ -30,7 +30,11 @@ public static class StoryOutlines
     private const double Sliver = RouteReader.SmallestBeyond;
 
     /// <summary>One story's outlines (shared plan points, anticlockwise), or why not.</summary>
-    public sealed record Result(List<P2>? Outer, List<P2>? Inner, string? Why);
+    public sealed record Result(List<P2>? Outer, List<P2>? Inner, string? Why)
+    {
+        /// <summary>Where the boundary's pieces end without meeting another (shared plan points), when they don't close.</summary>
+        public IReadOnlyList<P2> OpenEnds { get; init; } = [];
+    }
 
     /// <param name="rooms">Each room's floor outline on the story (shared plan points).</param>
     /// <param name="spaces">Each enclosed area with no Room on it that was outlined.</param>
@@ -45,27 +49,41 @@ public static class StoryOutlines
         var wallPolys = walls.ToDictionary(w => w.Key, w => w.Value.Select(L).ToList());
         var all = spaceRooms.Select(p => (Poly: p, Wall: (string?)null))
             .Concat(wallPolys.SelectMany(w => w.Value.Select(p => (Poly: p, Wall: (string?)w.Key)))).ToList();
-        var outer = Boundary(all, out var exterior, out var why);
+        var outer = Boundary(all, out var exterior, out var why, out var open);
+        var back = new P2(-origin.X, -origin.Y);
         if (outer is null)
-            return new(null, null, "its outer outline: " + why);
-        var inside = spaceRooms.Select(p => (Poly: p, Wall: (string?)null))
-            .Concat(wallPolys.Where(w => !exterior.Contains(w.Key)).SelectMany(w => w.Value.Select(p => (Poly: p, Wall: (string?)w.Key)))).ToList();
-        var inner = Boundary(inside, out _, out why);
+            return new(null, null, "its outer outline: " + why) { OpenEnds = PlanGeometry.Local(open, back) };
+        // the other walls, less what of them is inside an exterior wall (an end carried into it at a join): only the
+        // parts inside the exterior walls' inner faces count
+        var cut = wallPolys.Where(w => exterior.Contains(w.Key)).SelectMany(w => w.Value).Where(p => PlanGeometry.Clean(p) is { } c && PlanGeometry.IsConvex(c)).ToList();
+        var inside = spaceRooms.Select(p => (Poly: p, Wall: (string?)null)).ToList();
+        foreach (var w in wallPolys.Where(w => !exterior.Contains(w.Key)))
+            foreach (var p in w.Value)
+            {
+                List<List<P2>>? pieces = PlanGeometry.Clean(p) is { } c && PlanGeometry.IsConvex(c) ? [c] : null;
+                foreach (var e in cut)
+                    pieces = pieces is null ? null : PlanGeometry.Subtract(pieces, e);
+                if (pieces is null)
+                    return new(null, null, "its inner outline: a wall's footprint isn't a simple outline");
+                inside.AddRange(pieces.Where(q => PlanGeometry.Area(q) > 1e-9).Select(q => (Poly: q, Wall: (string?)w.Key)));
+            }
+        var inner = Boundary(inside, out _, out why, out open);
         if (inner is null)
-            return new(null, null, "its inner outline: " + why);
+            return new(null, null, "its inner outline: " + why) { OpenEnds = PlanGeometry.Local(open, back) };
         if (PlanGeometry.Area(inner) >= PlanGeometry.Area(outer) || PlanGeometry.OverlapArea(outer, inner) is not { } shared
             || shared < PlanGeometry.Area(inner) * (1 - 1e-9))
             return new(null, null, "its inner outline isn't inside its outer one");
-        var back = new P2(-origin.X, -origin.Y);
         return new(PlanGeometry.Local(outer, back), PlanGeometry.Local(inner, back), null);
     }
 
     /// <summary>The outside boundary of the polygons put together, anticlockwise; null with why when it isn't one loop
     /// with no hole bigger than a sliver. <paramref name="touching"/>: the walls with a piece of it on their footprint.</summary>
-    internal static List<P2>? Boundary(List<(List<P2> Poly, string? Wall)> polys, out HashSet<string> touching, out string? why)
+    internal static List<P2>? Boundary(List<(List<P2> Poly, string? Wall)> polys, out HashSet<string> touching, out string? why,
+                                       out List<P2> openEnds)
     {
         touching = new HashSet<string>(StringComparer.Ordinal);
         why = null;
+        openEnds = [];
         var cleaned = new List<(List<P2> Poly, string? Wall)>();
         foreach (var (poly, wall) in polys)
             if (PlanGeometry.Clean(poly) is { } c && PlanGeometry.IsSimple(c))
@@ -119,6 +137,9 @@ public static class StoryOutlines
         var loops = Chain(unique);
         if (loops is null)
         {
+            // where pieces end with no piece starting there (and start with none ending there): to be found in the model
+            openEnds = unique.Where(p => !unique.Any(q => Close(q.A, p.B))).Select(p => p.B)
+                .Concat(unique.Where(p => !unique.Any(q => Close(q.B, p.A))).Select(p => p.A)).ToList();
             why = "its pieces don't join into closed loops";
             return null;
         }

@@ -151,7 +151,9 @@ public static class RouteReader
             var outlines = new JsonArray();
             foreach (var level in records.Levels!.Where(l => used.Contains(l.UniqueId)))
             {
-                var (outer, inner, why) = Outlines(model, level.UniqueId, plans);
+                var said = new List<string>();
+                var (outer, inner, why) = Outlines(model, level.UniqueId, plans, said);
+                notes.AddRange(said.Select(x => new InteriorNote(level.UniqueId, "story_outlines.walls", x)));
                 if (outer is not null && inner is not null)
                     outlines.Add(new JsonObject { ["level"] = level.UniqueId, ["outer"] = Outline(outer), ["inner"] = Outline(inner) });
                 else
@@ -173,52 +175,85 @@ public static class RouteReader
     private static JsonArray Outline(List<P2> p) => new(p.Select(q => (JsonNode)new JsonArray(q.X, q.Y)).ToArray());
 
     /// <summary>One story's outlines (<see cref="StoryOutlines"/>) from its rooms' floors, its outlined enclosed areas
-    /// with no Room, and its walls (each wall over a room of the story, standing on that floor: its faces that aren't
-    /// vertical, projected), or why not: a room on it whose floor isn't read, a wall whose geometry couldn't be read or
-    /// has a curved face (a curve read as its points' hull would add floor that isn't there).</summary>
+    /// with no Room, and its walls as they are before anything is cut into them (<see cref="WallFootprints"/>), or why
+    /// not: a room on it whose floor isn't read, a wall whose centre line couldn't be read (a curved wall). The ends
+    /// joined across a gap, and the ends left apart, are in <paramref name="said"/>.</summary>
     internal static (List<P2>? Outer, List<P2>? Inner, string? Why) Outlines(RevitModel model, string level,
-                                                                          Dictionary<string, InteriorReader.RoomPlan> plans)
+                                                                          Dictionary<string, InteriorReader.RoomPlan> plans,
+                                                                          List<string>? said = null)
     {
         var onLevel = (model.Interior?.Rooms ?? []).Where(r => r.LevelId == level)
             .Where(r => MarkReading.InDesign(model).Any(e => e.UniqueId == r.UniqueId)).ToList();
         if (onLevel.FirstOrDefault(r => !plans.ContainsKey(r.UniqueId)) is { } unread)
             return (null, null, $"room {unread.UniqueId}'s floor isn't read, so what the story covers isn't known");
         var mine = onLevel.Select(r => plans[r.UniqueId]).ToList();
-        if (mine.FirstOrDefault(p => p.Floor is not null)?.Floor is not { } floor)
-            return (null, null, "no room's floor elevation on it is read");
         var spaces = new List<List<P2>>();
         foreach (var (area, _, outline) in InteriorReader.UnknownSpaceList(model).Where(u => u.Area.LevelId == level))
             if (outline is not null)
                 spaces.Add(outline);
             else if (area.Area >= SmallestBeyond)
                 return (null, null, "an enclosed area with no Room on it couldn't be outlined, so what the story covers isn't known");
-        var walls = new Dictionary<string, List<List<P2>>>(StringComparer.Ordinal);
-        foreach (var e in mine.SelectMany(p => p.Record.Over ?? []).Where(e => e.BuiltInCategory == "OST_Walls" && InteriorReader.InDesign(model, e)))
-        {
-            if (walls.ContainsKey(e.UniqueId))
-                continue;
-            if (e.GeometryFailed || e.Faces is null)
-                return (null, null, $"the geometry of {InteriorReader.Named(e)} couldn't be read");
-            var points = e.Faces.SelectMany(f => InteriorReader.Shared(model, f.Points)).ToList();
-            if (points.Count == 0 || points.Min(p => p.Z) > floor + 1 || points.Max(p => p.Z) <= floor + S)
-                continue;                                    // a wall of another story, over this one's rooms
-            var feet = new List<List<P2>>();
-            foreach (var f in e.Faces)
-            {
-                if (!f.Planar)
-                    return (null, null, $"{InteriorReader.Named(e)} has a curved face, which isn't read exactly");
-                if (Math.Abs(InteriorReader.Turned(model, f.Normal).Z) <= 1e-9)
-                    continue;                                // a side: no footprint of its own
-                var loop = f.Loops.Select(l => l.Select(c => model.InternalToShared.Apply(c.Start)).Select(p => new P2(p.X, p.Y)).ToList())
-                    .OrderByDescending(l => PlanGeometry.Area(l)).FirstOrDefault();
-                if (loop is { Count: >= 3 })
-                    feet.Add(loop);
-            }
-            walls[e.UniqueId] = feet;
-        }
-        var got = StoryOutlines.Of(mine.Select(p => p.Outer).ToList(), spaces, walls);
+        if (model.Interior?.Walls is not { } all)
+            return (null, null, "the model's walls weren't read");
+        var walls = all.Where(w => w.LevelId == level && SiteReader.InDesignChecked(model, w.PhaseDemolished, w.DesignOption)).ToList();
+        if (walls.FirstOrDefault(w => w.NotRead is not null) is { } bad)
+            return (null, null, $"wall {bad.UniqueId}: {bad.NotRead}");
+        var got = StoryOutlines.Of(mine.Select(p => p.Outer).ToList(), spaces, WallFootprints(model, walls, said ?? []));
+        if (got.Why is not null && got.OpenEnds.Count > 0)
+            return (null, null, got.Why + " (open ends at " + string.Join(", ", got.OpenEnds.Take(6).Select(Xy)) + ")");
         return (got.Outer, got.Inner, got.Why);
     }
+
+    /// <summary>The most two wall ends may be apart and still be read as joined, ft: 1/2 in (a trace's or a model's
+    /// slip; a wider gap is an opening, never closed by Gordium).</summary>
+    public const double JoinGap = 0.5 / 12;
+
+    /// <summary>Each wall's footprint as the wall is, before anything is cut into it: its centre line widened to its full
+    /// thickness. An end that meets another wall (within <see cref="JoinGap"/> of its footprint) is carried on half the
+    /// wall's thickness, as Revit's join cleanup carries it to the outer corner; an end farther from every other wall is
+    /// left as it is (a wall ending at an opening). Each end joined across a gap, and each end within 2 ft of a wall
+    /// but left apart, is said.</summary>
+    internal static Dictionary<string, List<List<P2>>> WallFootprints(RevitModel model, List<WallRecord> walls, List<string> said)
+    {
+        var t = model.InternalToShared;
+        var lines = walls.Select(w => (W: w, A: Plan(t.Apply(w.Start)), B: Plan(t.Apply(w.End)))).Where(l => (l.B - l.A) is var d && P2Dot(d, d) > S * S).ToList();
+        List<P2> Rect(P2 a, P2 b, double width)
+        {
+            var u = Unit(b - a);
+            var n = new P2(-u.Y * width / 2, u.X * width / 2);
+            return [a - n, b - n, b + n, a + n];
+        }
+        double Gap(P2 p, (WallRecord W, P2 A, P2 B) other)
+        {
+            var d = DistanceToSegment(p, other.A, other.B) - other.W.Width / 2;
+            return Math.Max(0, d);
+        }
+        var feet = new Dictionary<string, List<List<P2>>>(StringComparer.Ordinal);
+        foreach (var l in lines)
+        {
+            var u = Unit(l.B - l.A);
+            P2 End(P2 p, int sign)
+            {
+                var others = lines.Where(o => o.W.UniqueId != l.W.UniqueId).Select(o => (o, g: Gap(p, o))).OrderBy(x => x.g).ToList();
+                if (others.Count == 0 || others[0].g > JoinGap)
+                {
+                    if (others.Count > 0 && others[0].g <= 2)
+                        said.Add(I($"wall {l.W.UniqueId}'s end at {Xy(p)} is {others[0].g * 12:0.##} in from wall {others[0].o.W.UniqueId}: left apart (more than 1/2 in)"));
+                    return p;
+                }
+                if (others[0].g > 1e-9)
+                    said.Add(I($"wall {l.W.UniqueId}'s end at {Xy(p)} joined to wall {others[0].o.W.UniqueId} across {others[0].g * 12:0.###} in"));
+                var reach = l.W.Width / 2 + others[0].g;
+                return new P2(p.X + sign * u.X * reach, p.Y + sign * u.Y * reach);
+            }
+            feet[l.W.UniqueId] = [Rect(End(l.A, -1), End(l.B, 1), l.W.Width)];
+        }
+        return feet;
+    }
+
+    private static string Xy(P2 p) => I($"({p.X:0.###}, {p.Y:0.###})");
+
+    private static string I(FormattableString s) => s.ToString(CultureInfo.InvariantCulture);
 
     /// <summary>What was read for the escape routes, counted, for Read inside's log and dialog (the trial's check on a
     /// real model): the levels, the rooms with each field, the doors with each, the passages.</summary>
