@@ -145,6 +145,22 @@ public static class RouteReader
             Doors(model, records, doors, roomObjects, plans, notes, joined, routeEvidence,
                   id => Level(id, records.Openings.FirstOrDefault(o => o.UniqueId == id)?.LevelId, "doors.level"));
 
+        // each story's outlines (the diagonal and the areas, decision 8): only where they close exactly
+        if (levels is not null)
+        {
+            var outlines = new JsonArray();
+            foreach (var level in records.Levels!.Where(l => used.Contains(l.UniqueId)))
+            {
+                var (outer, inner, why) = Outlines(model, level.UniqueId, plans);
+                if (outer is not null && inner is not null)
+                    outlines.Add(new JsonObject { ["level"] = level.UniqueId, ["outer"] = Outline(outer), ["inner"] = Outline(inner) });
+                else
+                    notes.Add(new(level.UniqueId, "story_outlines", why! + ": the diagonal and the story's areas aren't measured"));
+            }
+            if (outlines.Count > 0)
+                interior["story_outlines"] = outlines;
+        }
+
         if (levels is not null && used.Count > 0)
             interior["levels"] = new JsonArray(records.Levels!.Where(l => used.Remove(l.UniqueId)).Select(l => (JsonNode)new JsonObject
             {
@@ -155,6 +171,54 @@ public static class RouteReader
     }
 
     private static JsonArray Outline(List<P2> p) => new(p.Select(q => (JsonNode)new JsonArray(q.X, q.Y)).ToArray());
+
+    /// <summary>One story's outlines (<see cref="StoryOutlines"/>) from its rooms' floors, its outlined enclosed areas
+    /// with no Room, and its walls (each wall over a room of the story, standing on that floor: its faces that aren't
+    /// vertical, projected), or why not: a room on it whose floor isn't read, a wall whose geometry couldn't be read or
+    /// has a curved face (a curve read as its points' hull would add floor that isn't there).</summary>
+    internal static (List<P2>? Outer, List<P2>? Inner, string? Why) Outlines(RevitModel model, string level,
+                                                                          Dictionary<string, InteriorReader.RoomPlan> plans)
+    {
+        var onLevel = (model.Interior?.Rooms ?? []).Where(r => r.LevelId == level)
+            .Where(r => MarkReading.InDesign(model).Any(e => e.UniqueId == r.UniqueId)).ToList();
+        if (onLevel.FirstOrDefault(r => !plans.ContainsKey(r.UniqueId)) is { } unread)
+            return (null, null, $"room {unread.UniqueId}'s floor isn't read, so what the story covers isn't known");
+        var mine = onLevel.Select(r => plans[r.UniqueId]).ToList();
+        if (mine.FirstOrDefault(p => p.Floor is not null)?.Floor is not { } floor)
+            return (null, null, "no room's floor elevation on it is read");
+        var spaces = new List<List<P2>>();
+        foreach (var (area, _, outline) in InteriorReader.UnknownSpaceList(model).Where(u => u.Area.LevelId == level))
+            if (outline is not null)
+                spaces.Add(outline);
+            else if (area.Area >= SmallestBeyond)
+                return (null, null, "an enclosed area with no Room on it couldn't be outlined, so what the story covers isn't known");
+        var walls = new Dictionary<string, List<List<P2>>>(StringComparer.Ordinal);
+        foreach (var e in mine.SelectMany(p => p.Record.Over ?? []).Where(e => e.BuiltInCategory == "OST_Walls" && InteriorReader.InDesign(model, e)))
+        {
+            if (walls.ContainsKey(e.UniqueId))
+                continue;
+            if (e.GeometryFailed || e.Faces is null)
+                return (null, null, $"the geometry of {InteriorReader.Named(e)} couldn't be read");
+            var points = e.Faces.SelectMany(f => InteriorReader.Shared(model, f.Points)).ToList();
+            if (points.Count == 0 || points.Min(p => p.Z) > floor + 1 || points.Max(p => p.Z) <= floor + S)
+                continue;                                    // a wall of another story, over this one's rooms
+            var feet = new List<List<P2>>();
+            foreach (var f in e.Faces)
+            {
+                if (!f.Planar)
+                    return (null, null, $"{InteriorReader.Named(e)} has a curved face, which isn't read exactly");
+                if (Math.Abs(InteriorReader.Turned(model, f.Normal).Z) <= 1e-9)
+                    continue;                                // a side: no footprint of its own
+                var loop = f.Loops.Select(l => l.Select(c => model.InternalToShared.Apply(c.Start)).Select(p => new P2(p.X, p.Y)).ToList())
+                    .OrderByDescending(l => PlanGeometry.Area(l)).FirstOrDefault();
+                if (loop is { Count: >= 3 })
+                    feet.Add(loop);
+            }
+            walls[e.UniqueId] = feet;
+        }
+        var got = StoryOutlines.Of(mine.Select(p => p.Outer).ToList(), spaces, walls);
+        return (got.Outer, got.Inner, got.Why);
+    }
 
     /// <summary>What was read for the escape routes, counted, for Read inside's log and dialog (the trial's check on a
     /// real model): the levels, the rooms with each field, the doors with each, the passages.</summary>
@@ -179,6 +243,7 @@ public static class RouteReader
             $"exits {Doors("exit_kind")} ({doors.Where(d => d["exit_id"] is not null).Select(d => d["exit_id"]!.GetValue<string>()).Distinct().Count()} exits by id)",
             i["passages"] is JsonArray passages ? $"passages: {passages.Count}" : "passages: not sent",
             $"unknown spaces: {i["unknown_spaces"]?.AsArray().Count ?? 0}",
+            i["story_outlines"] is JsonArray so ? $"story outlines: {so.Count}" : "story outlines: not sent (the notes say why)",
         ];
     }
 

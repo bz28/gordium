@@ -27,7 +27,9 @@ public sealed class RouteTests
                 d = json.load(f)
             got = floor.read(d)
             out = {"stops": got.stops, "stories": {k: s.stops for k, s in got.stories.items()}, "routes": {},
-                   "crossable": {k: r.crossable for s in got.stories.values() for k, r in s.rooms.items() if r is not None}}
+                   "crossable": {k: r.crossable for s in got.stories.values() for k, r in s.rooms.items() if r is not None},
+                   "outlines": {k: {"stop": s.outline_stop, "outer": s.outer.area if s.outer is not None else None,
+                                    "inner": s.inner.area if s.inner is not None else None} for k, s in got.stories.items()}}
             for k, s in got.stories.items():
                 if s.stops:
                     continue
@@ -111,6 +113,7 @@ public sealed class RouteTests
             "doors: 5; with a level 5, a place in its wall 5 (its wall read 5), sides 5 (2 to outside), exits 2 (2 exits by id)",
             "passages: 1",
             "unknown spaces: 0",
+            "story outlines: not sent (the notes say why)",
         ], RouteReader.Summary(read));
         Assert.False(routes["crossable"]![U("A")]!.GetValue<bool>());
     }
@@ -417,6 +420,67 @@ public sealed class RouteTests
         floor = new FakeFloor();
         floor.Rooms[i] = floor.Rooms[i] with { Inside = [new NearbyElement("wall-in", "OST_Walls", "Partition")] };
         Assert.Null(Room(InteriorReader.Read(floor.Model()), "A")["obstructions"]);
+    }
+
+    // ---- the story's outlines (decision 8) ------------------------------------------------------------------------
+
+    private static List<P2> Box(double x0, double y0, double x1, double y1) => [new(x0, y0), new(x1, y0), new(x1, y1), new(x0, y1)];
+
+    [Fact]
+    public void A_storys_outlines_are_its_exterior_walls_outer_and_inner_faces_or_left_out()
+    {
+        // two rooms, a wall between them, four exterior walls 6 in thick
+        List<List<P2>> rooms = [Box(0, 0, 10, 10), Box(10.5, 0, 20, 10)];
+        var walls = new Dictionary<string, List<List<P2>>>
+        {
+            ["s"] = [Box(-0.5, -0.5, 20.5, 0)], ["n"] = [Box(-0.5, 10, 20.5, 10.5)], ["w"] = [Box(-0.5, 0, 0, 10)],
+            ["e"] = [Box(20, 0, 20.5, 10)], ["mid"] = [Box(10, 0, 10.5, 10)],
+        };
+        var got = StoryOutlines.Of(rooms, [], walls);
+        Assert.Null(got.Why);
+        Assert.Equal(21.0 * 11, PlanGeometry.Area(got.Outer!), 9);         // to the outer faces
+        Assert.Equal(20.0 * 10, PlanGeometry.Area(got.Inner!), 9);         // to the inside faces: the rooms and the wall between
+
+        // a room not drawn: an unaccounted hole (it could be a courtyard), never counted as floor
+        Assert.Contains("hole", StoryOutlines.Of([rooms[0]], [], walls).Why);
+        // the same space outlined as an enclosed area with no Room: accounted for
+        Assert.Null(StoryOutlines.Of([rooms[0]], [rooms[1]], walls).Why);
+        // a second building apart: not one outline
+        Assert.Contains("separate pieces", StoryOutlines.Of([.. rooms, Box(40, 0, 50, 10)], [], walls).Why);
+    }
+
+    [Fact]
+    public void The_fake_storys_outlines_are_sent_and_read_by_the_route_code()
+    {
+        var floor = new FakeFloor();
+        var t = FakeFloor.T;
+        NearbyElement Wall(string id, double x0, double y0, double x1, double y1) =>
+            new(id, "OST_Walls", "Wall", Faces: floor.Prism([(x0, y0), (x1, y0), (x1, y1), (x0, y1)], 0, 10));
+        NearbyElement[] walls =
+        [
+            Wall("wall-s", -t, -t, 40 + t, 0), Wall("wall-n", -t, 26, 40 + t, 26 + t), Wall("wall-w", -t, 0, 0, 26),
+            Wall("wall-e", 40, 0, 40 + t, 26), Wall("wall-ab", 20, 0, 20.5, 9.5), Wall("wall-c2", 0, 16, 10, 16.5),
+            Wall("wall-sl", 10, 16, 10.5, 26),
+        ];
+        foreach (var r in new[] { "A", "B", "C", "L", "S" })
+            foreach (var w in walls)
+                floor.AddOver(r, w);
+        var read = InteriorReader.Read(floor.Model());
+        var outline = Assert.Single(read.Interior["story_outlines"]!.AsArray())!;
+        Assert.Equal(FakeFloor.Level, outline["level"]!.GetValue<string>());
+        P2 At(JsonNode p) => new(p[0]!.GetValue<double>(), p[1]!.GetValue<double>());
+        Assert.Equal(41.0 * 27, PlanGeometry.Area(outline["outer"]!.AsArray().Select(p => At(p!)).ToList()), 9);
+        Assert.Equal(40.0 * 26, PlanGeometry.Area(outline["inner"]!.AsArray().Select(p => At(p!)).ToList()), 9);
+        var routes = Routes(read);
+        Assert.Null(routes["outlines"]![FakeFloor.Level]!["stop"]);
+        Assert.Equal(41.0 * 27 * 144, routes["outlines"]![FakeFloor.Level]!["outer"]!.GetValue<double>(), 6);   // sq in
+
+        // the exterior wall's geometry not read: no outline, with why
+        var i = floor.RoomIndex("A");
+        floor.Rooms[i] = floor.Rooms[i] with { Over = [.. floor.Rooms[i].Over!.Where(e => e.UniqueId != "wall-s"), new NearbyElement("wall-s", "OST_Walls", "Wall", GeometryFailed: true)] };
+        read = InteriorReader.Read(floor.Model());
+        Assert.Null(read.Interior["story_outlines"]);
+        Assert.Contains("couldn't be read", read.Notes.Single(n => n.Field == "story_outlines").Why);
     }
 
     [Fact]
