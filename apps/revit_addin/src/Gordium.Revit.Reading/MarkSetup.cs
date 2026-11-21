@@ -45,14 +45,14 @@ public static class MarkSetup
                 ? new(m, MarkSetupAction.Add, m.Categories, null)
                 : new(m, MarkSetupAction.Conflict, [],
                       $"the project already has a parameter named \"{clash.Name}\" that isn't Gordium's: rename or remove it, " +
-                      "then mark for egress again. Until then this mark is not read.");
+                      "then click Mark facts again. Until then this mark is not read.");
         }
         var b = mine[0];
         if (mine.Count > 1 || b.Kind != m.Kind || b.IsInstance != (m.Binding == MarkBinding.Instance))
             return new(m, MarkSetupAction.Conflict, [],
                        $"\"{m.Name}\" is in the project but not as Gordium sets it ({m.Kind}, {binding}; found " +
                        $"{b.Kind?.ToString() ?? b.DataType}, {(b.IsInstance ? "on each element" : "on each type")}): " +
-                       "remove it in Manage ▸ Project Parameters, then mark for egress again. Until then this mark is not read.");
+                       "remove it in Manage ▸ Project Parameters, then click Mark facts again. Until then this mark is not read.");
         var missing = m.Categories.Where(c => !b.Categories.Contains(c)).ToList();
         return missing.Count == 0
             ? new(m, MarkSetupAction.None, b.Categories, null)

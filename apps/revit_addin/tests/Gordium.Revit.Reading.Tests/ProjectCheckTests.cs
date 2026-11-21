@@ -301,7 +301,7 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         // one the button asks a new pick for (never read from the words)
         var (both, why2) = StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity);
         Assert.Null(both);
-        Assert.Contains("Check my project asks you to click the lot edge along the street again", why2, StringComparison.Ordinal);
+        Assert.Contains("Check project asks you to click the lot edge along the street again", why2, StringComparison.Ordinal);
         Assert.Equal(StreetRefusal.Ambiguous, StreetEdges.Match([(edge.A, edge.B)], lot, Transform3.Identity).Reason);
         var prepared = new ProjectPrepared(null, [why2!], null, [], null, StreetRefused: StreetRefusal.Ambiguous);
         Assert.True(StreetEdges.NeedsNewPick(prepared));

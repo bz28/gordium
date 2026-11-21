@@ -127,7 +127,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
             if (_checked is null || !e.Document.Equals(_checked))
                 return;
             _checked = null;
-            Failed("The project checked was closed: open it and click Check my project.");
+            Failed("The project checked was closed: open it and click Check project.");
         }
         catch (Exception x)       // never out of Revit's event
         {

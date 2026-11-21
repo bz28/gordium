@@ -82,7 +82,7 @@ internal sealed class ResultsView : C.UserControl
             HorizontalScrollBarVisibility = C.ScrollBarVisibility.Disabled,
             Content = all,
         };
-        _sub.Text = "Click Check my project on the Gordium tab to check this project.";
+        _sub.Text = "Click Check project on the Gordium tab to check this project.";
     }
 
     /// <summary>Revit's theme changed: the theme's brushes swapped, everything on screen recoloured in place.</summary>
