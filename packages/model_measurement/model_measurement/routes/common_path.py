@@ -299,7 +299,7 @@ def tied_routes(routes: StoryRoutes, point, exit_id) -> list:
         t = tuple(map(float, routes.story.doors[d].centre))
         legs += [(length + dist[d], pieces, d) for length, pieces in prepared.legs(p, t)]
     if not legs:
-        raise routes._no_route(p, at, [exit_id], wanted)
+        raise routes._no_route(p, at, [exit_id], wanted, room)
     best = min(x[0] for x in legs)
     out = []
     for total, pieces, d in sorted(legs, key=lambda x: x[0]):
