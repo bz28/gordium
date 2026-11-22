@@ -178,7 +178,8 @@ area need review.
    needs review. A door is the one opening a route passes at its centre (decision 1). Gordium's reading (open
    question 10).
    **Two lengths within 10^-6 ft of each other are a tie**, broken toward the cautious
-   reading (decision 5: the route that shares more). It is computed exactly (shortest paths among circles and
+   reading (decision 5: the route that shares more; worked on the tied routes all together, never by listing
+   them, amended 2026-11-22 below). It is computed exactly (shortest paths among circles and
    polygon obstacles are a standard, exact computation); the build PR's code and its tests are the procedure, and
    each test's figure here comes from this definition, worked two ways. *Rejected:* rings as polygons (an earlier
    draft): the length round a polygon depends on how it is turned, enough to move test 6's figures and lose its tie.
@@ -242,6 +243,24 @@ area need review.
    taken (the cautious side). Taken
    on the real geometry, two doors of one room still give a common path when both routes go round the same corner
    first (test 6).
+   **Ties, all of them, without listing them** (amended 2026-11-22). What "the one that shares more" means, exactly:
+   a person may take any tied route to either exit, so for two exits the cautious figure is the greatest shared
+   walk over every pair, one tied route to each. That greatest is **the travel distance to the farthest point that
+   some tied route to the first exit and some tied route to the second both pass**. Why: if a pair both pass q, each
+   reaches q at D(q) (every start of a shortest route is a shortest route, decision 2), so the pair shares at least
+   D(q); and a pair's last shared point is such a q. So Gordium takes, for each exit, the **union** of its tied
+   routes, and the farthest point the two unions share. The union is read off the zones' graphs (decision 2) without
+   listing a route: a piece of the graph from u to v lies on some tied route when the distance to u, the piece and the
+   distance from v to the exit add up to the route's length (within 10^-6 ft); a chain of doors likewise (a door
+   lies on one when its distance from the point and its distance to the exit add up). Its size grows with the graph,
+   never with the number of tied routes, which can be 2 to the power of the number of symmetric choices (test 22:
+   seven pairs of doors, 128 routes). Travel reads only the length, the same for every tied route: any one is taken.
+   *Why it changed:* the build listed the tied routes and stopped past 64 ("which to take isn't worked out"); on the
+   Children's Odyssey corridor it stopped at a point on the south wall where one route, running along the common
+   tangent of the 12-in rings of a row of alcove corners, was listed 128 times, once for each set of those rings'
+   tangent points it was split at (test 21). The union holds each such piece once. *Rejected:* a larger cap (still a
+   stop, and 2^k is soon past any); dropping the duplicates only (a row of columns, each passed either side, still
+   gives 2^k distinct routes).
    **Why the bound of decision 3 holds.** The law's figure at a point p is the least, over every pair of paths a
    person could take to two distinct exits, of the distance to their last shared point. It changes no faster than
    you walk: from a nearby p', walk straight to p and follow p's best pair; both paths share that first straight
@@ -268,8 +287,11 @@ area need review.
    be an intervening room, 1014.2 item 1 and 7.5.1.6). Where such a door would end it sooner, the length is given
    as two named readings for open question 7 (without the door, the defined value; with it), the way the checker
    already takes readings (`design_checker/check.py`, `readings_of` and `named_result`): the row complies only if it
-   complies under both, fails if it fails under both, and otherwise needs review. Measuring to the crossing's centre
-   line (not its near edge) is the longer reading (open question 2). The least width (exception 3) is the narrowest
+   complies under both, fails if it fails under both, and otherwise needs review. The dead end is measured to the
+   crossing corridor's centre line, never its near edge: NFPA 101 2012 A.7.5.1.5 (p.381 of the PDF, printed
+   101-378) measures "along the centerline of the corridor to point C, located at the centerline of the corridor,
+   which then provides the choice of two different paths to remote exits ... The space between point B and point C
+   is a dead end" (open question 2, answered 2026-11-22). The least width (exception 3) is the narrowest
    distance between that dead end's own legs' walls (and obstructions in it). **Several dead ends in one corridor:**
    each is its own pair (its length, its own least width). The branch's `corridor` part holds one pair, so it
    becomes a part kind of its own there (`dead_end`, its two measures, one row per dead end); until then the
@@ -282,6 +304,74 @@ area need review.
    floor (the real floor less every obstruction and hole) across its legs' whole width, over its own stretches and
    any recess at its closed end, each slice's clear pieces added; a sliver under 1/16 in is no floor. A corridor that isn't made of straight legs
    meeting at right angles (at any rotation) needs review in this first version.
+   **Corridors that jog, widen, step or have alcoves** (amended 2026-11-22; until then each needed review, the
+   Children's Odyssey corridor among them). *What the books and practice say* (read 2026-11-22). NFPA 101 2012
+   A.7.5.1.5 (above) and its next words: "Common paths of travel and dead-end travel are measured using the same
+   principles used to measure travel distance as described in Section 7.6", whose 7.6.1 (p.81) measures "(1) Along
+   the centerline of the natural path of travel ... (2) Curving around any corners or obstructions"; A.7.6 (p.381):
+   "A dead end exists where an occupant enters a corridor thinking there is an exit at the end and, finding none, is
+   forced to retrace the path traveled to reach a choice of egress travel paths"; the 2021 edition says the same in
+   A.7.5.1.2.1 (https://content.civicplus.com/api/assets/4a9e120a-7362-4fbb-8d69-73362399fda8, read 2026-11-22).
+   IBC 2009 1018.4 (OCR copy only: not verified) and 2025 BCNYS 1020.5 (the cached PDF, p.344) define the limit and
+   exception 3 ("less than 2.5 times the least width of the dead-end corridor") but say nothing of how a length is
+   measured; the IBC Commentary was not found on the public web (to read in a purchased copy). ICC Interpretation
+   68-23 (2021 IBC 1020.5, 2024-02-05, https://www3.iccsafe.org/cs/committeeArea/pdf_file/BU_21_68_23.pdf) allows an
+   intervening door to split a dead end, each segment "within the dead-end corridor length requirements", and says
+   nothing of measuring; ICC's own course slides (2021 IBC Means of Egress,
+   https://www.iccsafe.org/wp-content/uploads/Session-62-and-63-2021-IBC-Means-of-Egress.pdf) read exception 3 per
+   portion: "When L < 2.5 x W, that portion of the corridor is not regulated for the dead-end condition";
+   practitioners measure "from the end point of the corridor to the location where occupants have a choice of two
+   directions leading to separate exits" (L. Greene, iDigHardware, 2021-07-13, https://idighardware.com/?p=31328)
+   and take the least width "at its narrowest point" (EVstudio, 2019-10-27,
+   https://evstudio.com/dead-end-corridors-what-are-they-and-why-are-they-important/); none of these is an
+   interpretation. No source found says how a jog or a widening is walked. **Classified:** the centre line and its
+   end at the crossing corridor's centre line are answered by the law (A.7.5.1.5); following that centre line
+   through a jog, a widening or a wall that steps is strong common practice (the books' "centerline of the
+   corridor", the sheet's own lines drawn along the corridor's middle at right angles); where the crossing corridor
+   widens, which of its centre lines is point C is genuinely unsettled, so Gordium takes the farther (below), shown,
+   never a pass it could lose under the other.
+   *The method* (on the corridors' floor turned square, as before; a wall not at right angles: needs review):
+   - **Stretches.** The floor is cut on every corner's x and y into cells; each maximal rectangle of cells is looked
+     at both ways. A side of it is a wall where no floor lies beyond it, or only floor less than 12 in deep (a wall
+     stepping back by under 12 in, a door's recess). It is a **stretch** along a way where both its sides along that
+     way are walls for 12 in or more (its own stretch; less is a door's lip or a wall's end) and where somewhere
+     along its own stretch its centre line is at least half its width, less 12 in, from every wall (else a nearer wall
+     lies between its two: it is the side of a wider floor, never a stretch of corridor). A stretch both ways runs
+     along its longer side; a square one: needs review. Every part of the floor must lie in a stretch, or within
+     12 in of one, else needs review.
+   - **A wall that steps by under 12 in moves no centre line.** Stretches along one way that overlap, their walls
+     within 12 in of each other on each side, are one stretch: its walls the outermost, its centre line midway, its
+     own stretches theirs together (as a recess under 12 in moves none). Walls that wander 12 in or more in all
+     within such a group: needs review.
+   - **Where centre lines meet.** Two stretches at right angles: their centre lines cross (as before); also where one
+     ends, within 12 in, on the other's floor (past a lip or the end of a wall): its centre line runs on straight
+     across that floor, if the floor holds it, to the other's. Two stretches along one way whose walls differ by
+     12 in or more (a **widening**, a narrowing, a **jog**), overlapping or meeting end to end: joined by a **step**,
+     straight across at right angles, at each end of the stretch where both run and at every crossing of either
+     inside it; never inside a stretch at right angles to both (its centre line joins them there), and never where
+     both end against one wall (each a closed end).
+   - **Ends.** A centre line runs past its last crossing or step only with its own stretch there (as before). An end
+     at its rectangle's end with nothing joined there is a closed end only if walled across the stretch's whole
+     width (then run to the real floor's end, as before); floor beyond such an end that no centre line reaches:
+     needs review.
+   - **Length.** Along the centre lines: their straight runs and the steps between them. Then **point C**: where the
+     first point with two ways (above) is a crossing, the dead end runs on along its own centre line, still out of
+     its own stretch (inside the crossing corridor's floor), to the farthest centre line it crosses there of that
+     crossing corridor (the stretch it crossed and those joined to it by steps), never past an exit: a widened
+     crossing corridor has two centre lines, its narrow one and its widened part's, and the farther is the cautious
+     one. *Rejected:* the nearer (the widened part's middle; 24 ft in test 23(c), the farther 26 ft): defensible as
+     "the centerline", but the shorter; the near edge: A.7.5.1.5 rules it out.
+   - **Least width:** as before (the narrowest cross-section of the clear floor across the walked stretches' whole
+     width, over their own stretches), and at each step walked, the cross-section across the part of the two
+     stretches' widths they share there (the throat of a jog).
+   - **What still needs review** (the reason named): a wall not at right angles (a curved wall has no floor at all,
+     decision 10); a square stretch; floor in no stretch; an **island** (a hole, or an obstruction clear of every
+     wall, longer than the stretch holding it is wide: the corridor runs round both sides of it, two passages the
+     method doesn't follow); a stretch's end on floor no centre line reaches. **The corridor's width** where its
+     floor needed any of the above (a step, a group of stretches, a centre line run on past a lip) needs review too:
+     which stretches give a corridor's width, rather than its alcoves', isn't worked out (with walls that step, the
+     outermost walls would overstate it).
+   Hand-worked: test 23.
 7. **Remoteness and the diagonal: straight lines, exact.** The distance between two exits is the straight line
    between the nearest edges of their clear openings (NFPA's words; the IBC names no point, and the nearest edge is
    the shortest choice), through walls, as the books say "in a straight line". Between two exits with several doors
@@ -311,7 +401,8 @@ area need review.
     (a curved wall: never its chord, which would shorten routes); a door with no `plan` or `sides`; a door whose side
     is an unknown space or a room not read; a point of the clear floor with no route to any exit even with no
     clearance, or a cluster or pocket with no routed clear edge round it (decision 3: shown, never a number); obstructions
-    or rooms read from a link; a corridor not made of straight legs (dead end only); and any reading that could
+    or rooms read from a link; a corridor decision 6 can't settle (a wall not at right angles, a square stretch, floor
+    in no stretch, an island: dead end and width; a corridor whose walls step, widen or jog: its width); and any reading that could
     shorten a route; a room that reaches an exit only through an end-only room (decision 1a; a closet, storeroom or
     toilet opening only into the room it serves goes through it, the reading said beside the figure, which never
     passes until it is confirmed); an `exit_kind` with
@@ -329,7 +420,7 @@ area need review.
 | `space_common_path` | decision 5 over the space's own points |
 | `exit_remoteness_ratio` | decision 7 |
 | `story_building_area`, `story_accessory_area`, `story_day_care_net_area` | decision 8 |
-| `corridor_width`, `corridor_dead_end_length`, `corridor_dead_end_least_width` | decision 6; the width is the least distance between the corridor's walls and obstructions; a door swinging into it isn't in the description, so a rule needing the width with doors open needs review |
+| `corridor_width`, `corridor_dead_end_length`, `corridor_dead_end_least_width` | decision 6; the width is the least distance between the corridor's walls and obstructions (needs review where its walls step, widen or jog: decision 6 as amended 2026-11-22); a door swinging into it isn't in the description, so a rule needing the width with doors open needs review |
 | `story_occupant_load`, `space_occupant_load`, `corridor_occupant_load`, `corridor_fire_rating_hours`, `corridor_walls_smoke_partitions` | stated by the architect (a mark), as the branch defines them; the computed day-care load (decision 8) is shown beside a stated one |
 
 ## How we will know it is right
@@ -472,6 +563,55 @@ these hand figures as written in the test file, never taken from the code under 
     second door, into the corridor: its own route, never through the kitchen; a room `other` (the electrical room)
     off the kitchen: no route. The door from the closet is its exit access door, and the story's figure carries the
     reading's `confirm`.
+21. **One route along a row of rings** (decision 5's ties, amended 2026-11-22). A corridor 0 to 60 by 0 to 10 with
+    ten columns (holes) 1 ft square, x 6 + 5m to 7 + 5m (m = 0 to 9), y 6 to 7; exit A in the west wall centred at
+    (-0.25, 5), exit B in it centred at (-0.25, 1.5) (36 in each); east of it, beyond a 6-in wall, a room 60.5 to 70.5
+    by 0 to 10 (`day_care`) whose one door is centred at (60.25, 5). From (70, 5): straight to the door, 9.75 ft;
+    then to A straight along y = 5, which is exactly 12 in below every column's south corners (tangent to their 20
+    rings, on their edge: clear), 60.5 ft: **70.25 ft**; to B straight from the door centre, sqrt(60.5^2 + 3.5^2) =
+    60.601 ft (at x 52 the line is at y 4.523, 1.477 ft below the nearest corner; it passes x 0 at y 1.514, 1.49 ft
+    from B's north jamb), **70.351 ft**. The two part at the door centre (A's runs due west, B's 3.3 degrees south of
+    it): the common path is **9.75 ft**. Worked two ways: by these lengths, and by the coordinates (each leg a straight
+    line between two given points). From (58, 5) in the corridor the two part at the start: **0**. Fails on revert:
+    the listing found the one route to A once for every set of the 20 tangent points it could be split at, and
+    stopped past 64.
+22. **Many tied routes** (the same). A room 0 to 10 by 0 to 10 (`day_care`); from it, through door centres at x =
+    10.25 + 6m (m = 0 to 14; walls 6 in thick), fourteen rooms 5.5 ft long and 10 ft wide (`corridor`), then a room
+    94.5 to 114.5 by 0 to 10 (`corridor`) with exit A centred at (114.75, 7.5) and exit B at (114.75, 2.5) in its east
+    wall. The doors at even m are one door each, centred on y = 5; at odd m, two, centred at y 2.5 and 7.5 (36 in
+    each). Each pair of rooms between two even-m doors is crossed through either of its two middle doors, each way
+    sqrt(6^2 + 2.5^2) = **6.5 ft** a leg (a 5-12-13 triangle, halved; the lines pass the jambs 1.29 ft off), so 13 ft
+    a pair either way: 2^7 = **128 tied routes** to each exit. From (1, 5): 9.25 to the first door, 7 x 13 = 91 through
+    the pairs, so both routes reach the last door, (94.25, 5), at **100.25 ft**, and part there (A's up 2.5 ft over
+    20.5, B's down): the common path is **100.25 ft**, travel to either 100.25 + sqrt(20.5^2 + 2.5^2) = **120.902
+    ft**. Worked two ways: by the legs (9.25 + 14 x 6.5), and by each leg's coordinates. Fails on revert (128 > 64:
+    stopped).
+23. **Dead ends in corridors that jog, widen or step** (decision 6, amended 2026-11-22). Each: a corridor 0 to 60
+    (x) with an exit at each end, its centre line y = 4 unless said; feet; each figure worked two ways, leg by leg
+    along the centre lines and as the closed end's distance from point C along x plus along y (each centre line runs
+    one way only, so the two agree).
+    (a) **An L:** the corridor 0 to 8 wide; a stem x 20 to 28 from its north wall to y 26, turning east into an arm
+    y 18 to 26 closed at x 40. From (40, 22): 16 along the arm to the stem's centre line, 18 down it: **34 ft**; |40 -
+    24| + |22 - 4| = 34. Least width **8**.
+    (b) **A jog:** a stem x 20 to 28 from the corridor's north wall (y 8) to y 20, jogging 3 ft east into x 23 to 31,
+    closed at y 32. From (27, 32): 12 down to the jog, a step 3 ft west, 16 down to the corridor's centre line:
+    **31 ft**; |27 - 24| + |32 - 4| = 31. Least width **5 ft**: the throat between the jog's corners (23, 20) and (28,
+    20), never the legs' 8. The corridor's width: needs review (a step). Fails if a jog needs review (before) or if
+    the throat is missed (8).
+    (c) **A widening (the eval's case):** the corridor 0 to 8 wide, its north wall stepped back to y 12 over x 15 to
+    45; a branch x 26 to 34 from there to y 30, closed. Point C: the widened stretch's centre line is y 6, the
+    corridor's y 4; the farther: from (30, 30), **26 ft** (30 - 4; or 18 to the widening, 6 across it to its middle, 2
+    on to y 4); to the widened middle it would be 24, to the near edge 18. Least width **8**. Fails on revert to the
+    nearer (24) or to needs review.
+    (d) **A T:** the corridor 0 to 10 wide (centre line y 5), a branch 6 ft wide (x 27 to 33) to y 30: **25 ft** (20
+    beyond the wall plus 5 to the centre line; 30 - 5); least width **6**; fails IBC 1018.4 (over 20, and 25 is not
+    under 2.5 x 6 = 15). Measured to the near edge it would be 20 and comply: so this pins open question 2's answer.
+    (e) **A wall stepping 4 in:** test 3's branch with its east wall stepped out 4 in from y 14 to its end (x 28 1/3):
+    one centre line, x 24 1/6, midway between the outermost walls: **20 ft** (24 - 4), as with no step; least width
+    **8** (at y 8 to 14). The corridor's width: needs review. Two steps of 8 in each (x 28 2/3 from y 14, 29 1/3 from
+    y 19): 16 in in all, needs review.
+    (f) **What needs review:** a corridor 0 to 12 wide round an island 20 by 4 ft (x 20 to 40, y 4 to 8): needs
+    review, named; with a column 1 ft square instead, measured as before.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
@@ -539,8 +679,14 @@ remoteness and areas; the reader; then the eval on the Children's Odyssey model.
 1. **Which centre line?** NFPA 7.6.1(1) "along the centerline of the natural path": Gordium reads it as the walked
    path, 12 in off corners. Another reading is the corridor's own centre line, longer at every turn. The eval shows
    which the sheet used; the NFPA Handbook's commentary would settle it (not in the repo).
-2. **Where a dead end ends:** at the crossing corridor's centre line (Gordium's, the longer) or its near edge? They differ by
-   half the crossing corridor's width; the sheet's 21'-6" may be either.
+2. **Where a dead end ends** (answered 2026-11-22): at the crossing corridor's centre line, never its near edge. NFPA
+   101 2012 A.7.5.1.5 measures "along the centerline of the corridor to point C, located at the centerline of the
+   corridor, which then provides the choice of two different paths to remote exits ... The space between point B and
+   point C is a dead end" (decision 6). The IBC (1018.4, 2009; 1020.5, 2025 BCNYS) says nothing of where; its
+   Commentary is still to read. Left open, for the architects: where the crossing corridor widens (the Children's
+   Odyssey east stub opens into a widened stretch of the main corridor), which of its centre lines is point C; Gordium
+   takes the farther (32.0 ft on the eval, against 29.3 ft to the widened part's middle and the sheet's 21'-6" to the
+   near edge).
 3. **Areas:** 502.1 says "within surrounding exterior walls": the inside or the outer faces? And a storage room's
    area: inside its walls, or to their outer faces? Until answered, the less favourable governs (decision 8).
 4. **Tiny unknown spaces:** a sliver between overlapping walls holds no one, but Gordium can't tell a sliver from a
