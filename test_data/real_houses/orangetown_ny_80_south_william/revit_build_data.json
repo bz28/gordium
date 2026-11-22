@@ -1,0 +1,2451 @@
+{
+ "project": "80 South William Street (Lot 2), Orangetown NY: the house as layout.yaml places it (the NY Revit eval)",
+ "units": "feet",
+ "type_suffix": "Orangetown A-1 to A-5",
+ "levels": [
+  {
+   "name": "Second floor",
+   "elevation_ft": 0.0,
+   "source": "layout.yaml levels[second_floor].elevation: house.yaml's datum: the second floor's finished floor (A-4 'SEC. FLR')"
+  },
+  {
+   "name": "Main floor",
+   "elevation_ft": -9.875,
+   "source": "layout.yaml levels[main_floor].elevation: not dimensioned: answer_key.yaml's reading from the framing (stair_riser): the main floor's 9'-0\" ceiling (108, A-4) + 1/2 in gypsum board + the second floor's 2x10 joists (9 1/4) + 3/4 in subfloor = 118.5 in below the second floor"
+  },
+  {
+   "name": "Basement",
+   "elevation_ft": -18.875,
+   "source": "layout.yaml levels[basement].elevation: not dimensioned: answer_key.yaml's reading (stair_riser): 'SLAB' to 'CLG.' 8'-0\" (96, A-4) + the A-5 section's 2x12 joists (11 1/4) + 3/4 in subfloor = 108 in below the main floor (the A-2 basement plan's 2x10 would make it 106: the drawings disagree, README #12)"
+  }
+ ],
+ "walls": [
+  {
+   "id": 1,
+   "level": "Second floor",
+   "start": [
+    0.0,
+    42.083333333
+   ],
+   "end": [
+    42.0,
+    42.083333333
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.north [0, 0, 504, 6] (in): exterior, 6\": A-3 '6\"' at each end of the north chain; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 2,
+   "level": "Second floor",
+   "start": [
+    0.25,
+    2.166666667
+   ],
+   "end": [
+    0.25,
+    41.833333333
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.west [0, 6, 6, 482] (in): exterior: A-3 left overall 40'-2\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 3,
+   "level": "Second floor",
+   "start": [
+    41.75,
+    3.5
+   ],
+   "end": [
+    41.75,
+    41.833333333
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.east [498, 6, 504, 466] (in): exterior: A-3 right overall 39'-4\" (to d 472, with the south wall); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 4,
+   "level": "Second floor",
+   "start": [
+    0.5,
+    2.416666667
+   ],
+   "end": [
+    13.833333333,
+    2.416666667
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.south_bonus [6, 476, 166, 482] (in): exterior: the bonus room's south wall; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 5,
+   "level": "Second floor",
+   "start": [
+    14.083333333,
+    2.166666667
+   ],
+   "end": [
+    14.083333333,
+    16.166666667
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.bonus_east [166, 314, 172, 482] (in): 6\": A-3 '6\"' east of the bonus room's 13'-4\"; exterior south of d 428; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 6,
+   "level": "Second floor",
+   "start": [
+    14.333333333,
+    6.416666667
+   ],
+   "end": [
+    21.0,
+    6.416666667
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.south_open [172, 428, 252, 434] (in): exterior over the entry: A-3 'F.G. SEE ELEVATION'; d from A-2's 4'-0\" porch; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 7,
+   "level": "Second floor",
+   "start": [
+    21.25,
+    3.0
+   ],
+   "end": [
+    21.25,
+    12.166666667
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.wic4_west [252, 362, 258, 472] (in): 6\": A-3 '6\"' west of the closet's 3'-4\"; exterior south of d 434; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 8,
+   "level": "Second floor",
+   "start": [
+    21.5,
+    3.25
+   ],
+   "end": [
+    42.0,
+    3.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.south [258, 466, 504, 472] (in): exterior: bedroom 4's south wall (its recess left out); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 9,
+   "level": "Second floor",
+   "start": [
+    14.166666667,
+    24.833333333
+   ],
+   "end": [
+    14.166666667,
+    41.833333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.master_east [168, 6, 172, 210] (in): 4\": A-3 '4\"' after the master's 13'-6\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 10,
+   "level": "Second floor",
+   "start": [
+    0.5,
+    24.666666667
+   ],
+   "end": [
+    14.333333333,
+    24.666666667
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.master_south [6, 210, 172, 214] (in): 4\": A-3 '4\"' after the master's 17'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 11,
+   "level": "Second floor",
+   "start": [
+    7.25,
+    16.5
+   ],
+   "end": [
+    7.25,
+    24.5
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.wic_divider [85, 214, 89, 310] (in): 4\": A-3 6'-7\" | 4\" | 6'-7\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 12,
+   "level": "Second floor",
+   "start": [
+    14.166666667,
+    16.5
+   ],
+   "end": [
+    14.166666667,
+    24.5
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.wic_east [168, 214, 172, 310] (in): 4\": A-3 '4\"' after the second 6'-7\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 13,
+   "level": "Second floor",
+   "start": [
+    0.5,
+    16.333333333
+   ],
+   "end": [
+    14.333333333,
+    16.333333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bonus_north [6, 310, 172, 314] (in): 4\": A-3 '4\"' after the closets' 8'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 14,
+   "level": "Second floor",
+   "start": [
+    14.333333333,
+    31.333333333
+   ],
+   "end": [
+    30.166666667,
+    31.333333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bath_south [172, 130, 362, 134] (in): 4\": A-3 5'-0\" | 4\" | 5'-0\" | 4\" (the baths' south wall); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 15,
+   "level": "Second floor",
+   "start": [
+    24.333333333,
+    31.5
+   ],
+   "end": [
+    24.333333333,
+    41.833333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bath_divider [290, 6, 294, 130] (in): 4\": A-3 '4\"' after the shower's 3'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 16,
+   "level": "Second floor",
+   "start": [
+    30.333333333,
+    27.833333333
+   ],
+   "end": [
+    30.333333333,
+    41.833333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.hall_bath_east [362, 6, 366, 174] (in): 4\": A-3 '4\"' after the hall bath's 5'-8\"; on down past bedroom 2's alcove; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 17,
+   "level": "Second floor",
+   "start": [
+    34.166666667,
+    30.0
+   ],
+   "end": [
+    41.5,
+    30.0
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bed2_south [410, 146, 498, 150] (in): 4\": A-3 '4\"' after bedroom 2's 11'-8\" (the closet's north wall); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 18,
+   "level": "Second floor",
+   "start": [
+    34.333333333,
+    27.833333333
+   ],
+   "end": [
+    34.333333333,
+    29.833333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.closet2_west [410, 150, 414, 174] (in): 4\": the closet's 7'-0\" from the east wall (A-3 '7'-0\"'); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 19,
+   "level": "Second floor",
+   "start": [
+    24.833333333,
+    27.666666667
+   ],
+   "end": [
+    41.5,
+    27.666666667
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bed3_north [298, 174, 498, 178] (in): 4\": A-3 '4\"' after the closet's 2'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 20,
+   "level": "Second floor",
+   "start": [
+    25.0,
+    16.166666667
+   ],
+   "end": [
+    25.0,
+    27.5
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.linen_west [298, 178, 302, 314] (in): 4\": A-3 3'-10\" | 4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 21,
+   "level": "Second floor",
+   "start": [
+    27.333333333,
+    16.166666667
+   ],
+   "end": [
+    27.333333333,
+    27.5
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bed3_west [326, 178, 330, 314] (in): 4\": A-3 2'-0\" | 4\" | 14'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 22,
+   "level": "Second floor",
+   "start": [
+    24.833333333,
+    16.0
+   ],
+   "end": [
+    41.5,
+    16.0
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bed3_south [298, 314, 498, 318] (in): 4\": A-3 'LOAD BEARING WALL', '4\"' after bedroom 3's 11'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 23,
+   "level": "Second floor",
+   "start": [
+    25.0,
+    3.5
+   ],
+   "end": [
+    25.0,
+    15.833333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.bed4_west [298, 318, 302, 466] (in): 4\": A-3 3'-4\" | 4\" | 16'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 24,
+   "level": "Second floor",
+   "start": [
+    21.0,
+    12.333333333
+   ],
+   "end": [
+    24.833333333,
+    12.333333333
+   ],
+   "thickness_in": 4.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[second_floor].walls.wic4_north [252, 358, 298, 362] (in): 4\": A-3 bridge 4'-0\" | 4\" | 8'-8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 25,
+   "level": "Main floor",
+   "start": [
+    0.0,
+    42.083333333
+   ],
+   "end": [
+    42.0,
+    42.083333333
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.north [0, 0, 504, 6] (in): exterior: A-2 42'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 26,
+   "level": "Main floor",
+   "start": [
+    0.25,
+    2.166666667
+   ],
+   "end": [
+    0.25,
+    41.833333333
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.west [0, 6, 6, 482] (in): exterior: A-2 left overall 40'-2\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 27,
+   "level": "Main floor",
+   "start": [
+    41.75,
+    0.0
+   ],
+   "end": [
+    41.75,
+    41.833333333
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.east [498, 6, 504, 508] (in): exterior: A-2 right overall 42'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 28,
+   "level": "Main floor",
+   "start": [
+    0.5,
+    2.416666667
+   ],
+   "end": [
+    13.833333333,
+    2.416666667
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.south_living [6, 476, 166, 482] (in): exterior: the living room's front (its bay left out: see assumptions); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 29,
+   "level": "Main floor",
+   "start": [
+    14.083333333,
+    2.166666667
+   ],
+   "end": [
+    14.083333333,
+    6.666666667
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.porch_west [166, 428, 172, 482] (in): exterior: A-2 '6\"' west of the porch's 6'-8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 30,
+   "level": "Main floor",
+   "start": [
+    14.333333333,
+    6.416666667
+   ],
+   "end": [
+    21.0,
+    6.416666667
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.entry_front [172, 428, 252, 434] (in): exterior: the entry's front wall, A-2 porch 4'-0\" deep to the house front; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 31,
+   "level": "Main floor",
+   "start": [
+    21.25,
+    0.0
+   ],
+   "end": [
+    21.25,
+    22.5
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.garage_west [252, 238, 258, 508] (in): A-2 garage 20'-0\" between 6\" walls (south chain 14'-4\" | 6'-8\" | 21'-0\"); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 32,
+   "level": "Main floor",
+   "start": [
+    21.5,
+    22.25
+   ],
+   "end": [
+    41.5,
+    22.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": false,
+   "source": "layout.yaml levels[main_floor].walls.garage_north [258, 238, 498, 244] (in): A-2 laundry 5'-8\" | 6\" | garage 21'-6\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 33,
+   "level": "Main floor",
+   "start": [
+    21.5,
+    0.25
+   ],
+   "end": [
+    41.5,
+    0.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 9.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.garage_south [258, 502, 498, 508] (in): exterior: the garage front; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 34,
+   "level": "Basement",
+   "start": [
+    0.0,
+    42.0
+   ],
+   "end": [
+    42.0,
+    42.0
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.north [0, 0, 504, 8] (in): 8\" poured concrete (A-2 wall legend, basement plan); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 35,
+   "level": "Basement",
+   "start": [
+    0.333333333,
+    2.166666667
+   ],
+   "end": [
+    0.333333333,
+    41.666666667
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.west [0, 8, 8, 482] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 36,
+   "level": "Basement",
+   "start": [
+    41.666666667,
+    21.833333333
+   ],
+   "end": [
+    41.666666667,
+    41.666666667
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.east [496, 8, 504, 246] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 37,
+   "level": "Basement",
+   "start": [
+    0.666666667,
+    2.5
+   ],
+   "end": [
+    13.666666667,
+    2.5
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.south [8, 474, 164, 482] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 38,
+   "level": "Basement",
+   "start": [
+    21.0,
+    22.166666667
+   ],
+   "end": [
+    41.333333333,
+    22.166666667
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.unexcavated_north [252, 238, 496, 246] (in): A-2 13'-4\" + 5'-10\" from the inside north face; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 39,
+   "level": "Basement",
+   "start": [
+    21.333333333,
+    2.166666667
+   ],
+   "end": [
+    21.333333333,
+    21.833333333
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.unexcavated_west [252, 246, 260, 482] (in): A-2 south chain 13'-8\" | 8\" | 6'-8\" | 8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 40,
+   "level": "Basement",
+   "start": [
+    14.333333333,
+    6.166666667
+   ],
+   "end": [
+    21.0,
+    6.166666667
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.small_unexcavated_north [172, 430, 252, 438] (in): A-2 'UNEXCAVATED' 6'-8\" x 3'-0\" (to the inside south face, d 474); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  },
+  {
+   "id": 41,
+   "level": "Basement",
+   "start": [
+    14.0,
+    2.166666667
+   ],
+   "end": [
+    14.0,
+    6.5
+   ],
+   "thickness_in": 8.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 8.083333333,
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.small_unexcavated_west [164, 430, 172, 482] (in): A-2 south chain 13'-8\" | 8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
+  }
+ ],
+ "doors": [
+  {
+   "center": [
+    17.666666667,
+    6.416666667
+   ],
+   "width_in": 36.0,
+   "height_in": 96.0,
+   "kind": "single",
+   "host_wall": 30,
+   "house_id": "front",
+   "exit": true,
+   "operation": "side_hinged",
+   "source": "layout.yaml doors[front]: A-2 entry door '3'-0\"x8'-0\"' between two '12\" TFG' sidelites, centred in the porch's 6'-8\" (x 172 to 252); house.yaml doors[front]: exit the only side-hinged door from the house straight outside: A-2 main floor plan, entry door '3'-0\"x8'-0\"' to the covered porch. The rear doors are sliding ('60611 SL DR', A-2; 'SLIDING DR 60611', A-5 schedule) and the other door leads into the garage (R318.1: egress is 'without requiring travel through a garage'). No sheet names the required egress door; operation A-2 main floor plan, drawn with a swing arc. No swing_dir or hinge: house.yaml absent.hinge_side (readable from the swing arc, but not needed without the stops and the leaf (left out rather than half-given))"
+  }
+ ],
+ "windows": [
+  {
+   "center": [
+    5.666666667,
+    42.083333333
+   ],
+   "width_in": 36.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 1,
+   "house_id": "m1",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[m1]: A-3 '(2) 3046 DH', the pair's centre 7'-3\" from the west face (A-3 top chain); size 3046: the size code read by common naming, 3'-0\" x 4'-6\" (README; house.yaml 'the unit's size code'); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[m1]: escape A-5 window schedule, M. BEDROOM 'DOUBLE HUNG' remark 'EGRESS'; A-4 rear elevation (right pair) marked E ('INDICATES EGRESS WINDOW', A-1)"
+  },
+  {
+   "center": [
+    8.833333333,
+    42.083333333
+   ],
+   "width_in": 36.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 1,
+   "house_id": "m2",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[m2]: as m1; size 3046: the size code read by common naming, 3'-0\" x 4'-6\" (README; house.yaml 'the unit's size code'); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[m2]: escape A-5 window schedule, M. BEDROOM 'DOUBLE HUNG' remark 'EGRESS'; A-4 rear elevation (right pair) marked E ('INDICATES EGRESS WINDOW', A-1)"
+  },
+  {
+   "center": [
+    0.25,
+    39.833333333
+   ],
+   "width_in": 24.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 2,
+   "house_id": "m3",
+   "escape": true,
+   "operation": "casement",
+   "source": "layout.yaml windows[m3]: A-3 'C15', its centre 2'-6\" from the north face (A-3 left chain); size C15: not on the drawings: 'C15' has no dimensions (house.yaml m3); drawn 2'-0\" wide and as tall as the 3046s beside it (ASSUMED: layout.yaml sizes); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[m3]: escape A-4 left side elevation, both C15 casements marked E. The A-5 schedule lists '(2) CASEMENT C15' for the master bedroom with no 'EGRESS' remark: the two sheets differ"
+  },
+  {
+   "center": [
+    0.25,
+    26.833333333
+   ],
+   "width_in": 24.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 2,
+   "house_id": "m4",
+   "escape": true,
+   "operation": "casement",
+   "source": "layout.yaml windows[m4]: A-3 'C15', its centre 2'-6\" + 13'-0\" from the north face; size C15: not on the drawings: 'C15' has no dimensions (house.yaml m3); drawn 2'-0\" wide and as tall as the 3046s beside it (ASSUMED: layout.yaml sizes); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[m4]: escape A-4 left side elevation, both C15 casements marked E. The A-5 schedule lists '(2) CASEMENT C15' for the master bedroom with no 'EGRESS' remark: the two sheets differ"
+  },
+  {
+   "center": [
+    34.416666667,
+    42.083333333
+   ],
+   "width_in": 36.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 1,
+   "house_id": "b2a",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[b2a]: A-3 '(2) 3046 DH', the pair's centre 7'-3\" + 10'-4\" + 8'-4\" + 10'-1\" = 36'-0\" from the west face; size 3046: the size code read by common naming, 3'-0\" x 4'-6\" (README; house.yaml 'the unit's size code'); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[b2a]: escape A-5 window schedule, BEDROOM 2 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 rear elevation (left pair) marked E"
+  },
+  {
+   "center": [
+    37.583333333,
+    42.083333333
+   ],
+   "width_in": 36.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 1,
+   "house_id": "b2b",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[b2b]: as b2a; size 3046: the size code read by common naming, 3'-0\" x 4'-6\" (README; house.yaml 'the unit's size code'); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[b2b]: escape A-5 window schedule, BEDROOM 2 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 rear elevation (left pair) marked E"
+  },
+  {
+   "center": [
+    41.75,
+    23.416666667
+   ],
+   "width_in": 36.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 3,
+   "house_id": "b3a",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[b3a]: A-3 '(2) 3046 DH' on the east wall, the pair's centre 18'-10\" north of the south face (A-3 right chain): d 472 - 226 = 246, the middle of bedroom 3; size 3046: the size code read by common naming, 3'-0\" x 4'-6\" (README; house.yaml 'the unit's size code'); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[b3a]: escape A-5 window schedule, BEDROOM 3 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 right side elevation (upper pair) marked E"
+  },
+  {
+   "center": [
+    41.75,
+    20.25
+   ],
+   "width_in": 36.0,
+   "height_in": 54.0,
+   "sill_in": 27.0,
+   "host_wall": 3,
+   "house_id": "b3b",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[b3b]: as b3a; size 3046: the size code read by common naming, 3'-0\" x 4'-6\" (README; house.yaml 'the unit's size code'); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[b3b]: escape A-5 window schedule, BEDROOM 3 'DOUBLE HUNG 3046' remark 'EGRESS'; A-4 right side elevation (upper pair) marked E"
+  },
+  {
+   "center": [
+    29.916666667,
+    3.25
+   ],
+   "width_in": 36.0,
+   "height_in": 62.0,
+   "sill_in": 19.0,
+   "host_wall": 8,
+   "house_id": "b4a",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[b4a]: A-3 '(2) 3052 DH', centred in the 10'-0\" recess (A-3 south chain 5'-6\" | 10'-0\" | 5'-6\": x 318 to 438, centre 378); size 3052: 3'-0\" x 5'-2\" by the same naming; sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[b4a]: escape A-5 window schedule, BEDROOM 4 'DOUBLE HUNG' remark 'EGRESS'; A-4 front elevation (dormer pair, right) marked E"
+  },
+  {
+   "center": [
+    33.083333333,
+    3.25
+   ],
+   "width_in": 36.0,
+   "height_in": 62.0,
+   "sill_in": 19.0,
+   "host_wall": 8,
+   "house_id": "b4b",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[b4b]: as b4a; size 3052: 3'-0\" x 5'-2\" by the same naming; sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[b4b]: escape A-5 window schedule, BEDROOM 4 'DOUBLE HUNG' remark 'EGRESS'; A-4 front elevation (dormer pair, right) marked E"
+  },
+  {
+   "center": [
+    5.583333333,
+    2.416666667
+   ],
+   "width_in": 36.0,
+   "height_in": 62.0,
+   "sill_in": 19.0,
+   "host_wall": 4,
+   "house_id": "x1",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[x1]: A-3 '(2) 3052 DH' in the bonus room's south wall, drawn centred over the bay below (A-2 chain 3'-2\" | 2'-0\" | 4'-0\" | 2'-0\" | 3'-2\": centre 7'-2\" = 86); size 3052: 3'-0\" x 5'-2\" by the same naming; sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[x1]: escape A-4 front elevation (left, second floor pair) marked E; the bonus room is not in the A-5 schedule"
+  },
+  {
+   "center": [
+    8.75,
+    2.416666667
+   ],
+   "width_in": 36.0,
+   "height_in": 62.0,
+   "sill_in": 19.0,
+   "host_wall": 4,
+   "house_id": "x2",
+   "escape": true,
+   "operation": "double_hung",
+   "source": "layout.yaml windows[x2]: as x1; size 3052: 3'-0\" x 5'-2\" by the same naming; sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[x2]: escape A-4 front elevation (left, second floor pair) marked E; the bonus room is not in the A-5 schedule"
+  },
+  {
+   "center": [
+    7.75,
+    42.0
+   ],
+   "width_in": 24.0,
+   "height_in": 48.0,
+   "sill_in": 33.0,
+   "host_wall": 34,
+   "house_id": "bsw1",
+   "escape": true,
+   "operation": "casement",
+   "source": "layout.yaml windows[bsw1]: A-2 basement plan 'CW14' in its areaway, its centre 7'-9\" from the west face (A-2 top chain); size CW14: not on the drawings: 'CW14' has no dimensions (house.yaml bsw1); drawn 2'-0\" x 4'-0\" (ASSUMED: layout.yaml sizes); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[bsw1]: escape A-2 basement plan 'CW14' in a 'BOWMAN KEMP AREAWAY ... PROVIDE FALL PROTECTION' ('SEE DETAIL THIS SHEET': A-2's own escape-opening detail gives only the minimums); A-5 'WALL SECTION THRU. WINDOW WELL' labels the window in the well 'EGRESS' and shows an escape ladder"
+  },
+  {
+   "center": [
+    0.333333333,
+    22.5
+   ],
+   "width_in": 24.0,
+   "height_in": 48.0,
+   "sill_in": 33.0,
+   "host_wall": 35,
+   "house_id": "bsw2",
+   "escape": true,
+   "operation": "casement",
+   "source": "layout.yaml windows[bsw2]: A-2 basement plan 'CW14' in its areaway, its centre 19'-10\" from the north face (A-2 left chain); size CW14: not on the drawings: 'CW14' has no dimensions (house.yaml bsw1); drawn 2'-0\" x 4'-0\" (ASSUMED: layout.yaml sizes); sill: layout.yaml head 81 in (A-1 header note) less its height; house.yaml openings[bsw2]: escape A-2 basement plan 'CW14' in a 'BOWMAN KEMP AREAWAY ... PROVIDE FALL PROTECTION' ('SEE DETAIL THIS SHEET': A-2's own escape-opening detail gives only the minimums); A-5 'WALL SECTION THRU. WINDOW WELL' labels the window in the well 'EGRESS' and shows an escape ladder"
+  }
+ ],
+ "rooms": [
+  {
+   "number": "1",
+   "name": "Master bedroom",
+   "level": "Second floor",
+   "tag_point": [
+    7.25,
+    33.333333333
+   ],
+   "boundary": [
+    [
+     0.5,
+     41.833333333
+    ],
+    [
+     0.5,
+     24.833333333
+    ],
+    [
+     14.0,
+     24.833333333
+    ],
+    [
+     14.0,
+     41.833333333
+    ],
+    [
+     0.5,
+     41.833333333
+    ]
+   ],
+   "sleeping": true,
+   "house_id": "master",
+   "source": "house.yaml rooms[master]: name and sleeping; its floor A-3 2nd floor plan, inside dimensions 13'-6\" (east-west) by 17'-0\" (north-south); placed by layout.yaml levels[second_floor].rooms[master].floor",
+   "area_sf": 229.5
+  },
+  {
+   "number": "2",
+   "name": "Bedroom 2",
+   "level": "Second floor",
+   "tag_point": [
+    36.0,
+    36.0
+   ],
+   "boundary": [
+    [
+     30.5,
+     41.833333333
+    ],
+    [
+     30.5,
+     30.166666667
+    ],
+    [
+     41.5,
+     30.166666667
+    ],
+    [
+     41.5,
+     41.833333333
+    ],
+    [
+     30.5,
+     41.833333333
+    ]
+   ],
+   "sleeping": true,
+   "house_id": "bed2",
+   "source": "house.yaml rooms[bed2]: name and sleeping; its floor A-3 2nd floor plan, inside dimensions 11'-0\" by 11'-8\" (the main rectangle). The entry alcove between the bath wall and the closet, where the door opens, has no dimension: left out, so the area is understated, never overstated; placed by layout.yaml levels[second_floor].rooms[bed2].floor",
+   "area_sf": 128.333333333
+  },
+  {
+   "number": "3",
+   "name": "Bedroom 3",
+   "level": "Second floor",
+   "tag_point": [
+    34.5,
+    21.833333333
+   ],
+   "boundary": [
+    [
+     27.5,
+     27.5
+    ],
+    [
+     27.5,
+     16.166666667
+    ],
+    [
+     41.5,
+     16.166666667
+    ],
+    [
+     41.5,
+     27.5
+    ],
+    [
+     27.5,
+     27.5
+    ]
+   ],
+   "sleeping": true,
+   "house_id": "bed3",
+   "source": "house.yaml rooms[bed3]: name and sleeping; its floor A-3 2nd floor plan, inside dimensions 14'-0\" by 11'-4\"; placed by layout.yaml levels[second_floor].rooms[bed3].floor",
+   "area_sf": 158.666666667
+  },
+  {
+   "number": "4",
+   "name": "Bedroom 4",
+   "level": "Second floor",
+   "tag_point": [
+    33.333333333,
+    9.666666667
+   ],
+   "boundary": [
+    [
+     25.166666667,
+     15.833333333
+    ],
+    [
+     25.166666667,
+     3.5
+    ],
+    [
+     41.5,
+     3.5
+    ],
+    [
+     41.5,
+     15.833333333
+    ],
+    [
+     25.166666667,
+     15.833333333
+    ]
+   ],
+   "sleeping": true,
+   "house_id": "bed4",
+   "source": "house.yaml rooms[bed4]: name and sleeping; its floor A-3 2nd floor plan, inside dimensions 16'-4\" by 12'-4\" (the main rectangle). The window recess on the south wall has no inside dimension (its 10'-0\" and 1'-4\" are outside dimensions): left out, so the area is understated, never overstated; placed by layout.yaml levels[second_floor].rooms[bed4].floor",
+   "area_sf": 201.444444444
+  },
+  {
+   "number": "5",
+   "name": "Bonus room",
+   "level": "Second floor",
+   "tag_point": [
+    7.166666667,
+    9.416666667
+   ],
+   "boundary": [
+    [
+     0.5,
+     16.166666667
+    ],
+    [
+     0.5,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     16.166666667
+    ],
+    [
+     0.5,
+     16.166666667
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "bonus",
+   "source": "house.yaml rooms[bonus]: name and sleeping; its floor A-3 2nd floor plan, inside dimensions 13'-4\" by 13'-6\"; placed by layout.yaml levels[second_floor].rooms[bonus].floor",
+   "area_sf": 180.0
+  },
+  {
+   "number": "6",
+   "name": "Master bath",
+   "level": "Second floor",
+   "tag_point": [
+    19.25,
+    36.666666667
+   ],
+   "boundary": [
+    [
+     14.333333333,
+     41.833333333
+    ],
+    [
+     14.333333333,
+     31.5
+    ],
+    [
+     24.166666667,
+     31.5
+    ],
+    [
+     24.166666667,
+     41.833333333
+    ],
+    [
+     14.333333333,
+     41.833333333
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "master_bath",
+   "source": "layout.yaml levels[second_floor].rooms[master_bath]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[master_bath].floor"
+  },
+  {
+   "number": "7",
+   "name": "Hall bath",
+   "level": "Second floor",
+   "tag_point": [
+    27.333333333,
+    36.666666667
+   ],
+   "boundary": [
+    [
+     24.5,
+     41.833333333
+    ],
+    [
+     24.5,
+     31.5
+    ],
+    [
+     30.166666667,
+     31.5
+    ],
+    [
+     30.166666667,
+     41.833333333
+    ],
+    [
+     24.5,
+     41.833333333
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "hall_bath",
+   "source": "layout.yaml levels[second_floor].rooms[hall_bath]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[hall_bath].floor"
+  },
+  {
+   "number": "8",
+   "name": "Bedroom 2's entry alcove (not dimensioned)",
+   "level": "Second floor",
+   "tag_point": [
+    32.333333333,
+    29.0
+   ],
+   "boundary": [
+    [
+     30.5,
+     30.166666667
+    ],
+    [
+     30.5,
+     27.833333333
+    ],
+    [
+     34.166666667,
+     27.833333333
+    ],
+    [
+     34.166666667,
+     30.166666667
+    ],
+    [
+     30.5,
+     30.166666667
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "bed2_alcove",
+   "source": "layout.yaml levels[second_floor].rooms[bed2_alcove]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[bed2_alcove].floor"
+  },
+  {
+   "number": "9",
+   "name": "Bedroom 2 closet",
+   "level": "Second floor",
+   "tag_point": [
+    38.0,
+    28.833333333
+   ],
+   "boundary": [
+    [
+     34.5,
+     29.833333333
+    ],
+    [
+     34.5,
+     27.833333333
+    ],
+    [
+     41.5,
+     27.833333333
+    ],
+    [
+     41.5,
+     29.833333333
+    ],
+    [
+     34.5,
+     29.833333333
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "bed2_closet",
+   "source": "layout.yaml levels[second_floor].rooms[bed2_closet]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[bed2_closet].floor"
+  },
+  {
+   "number": "10",
+   "name": "Walk-in closet 1",
+   "level": "Second floor",
+   "tag_point": [
+    3.791666667,
+    20.5
+   ],
+   "boundary": [
+    [
+     0.5,
+     24.5
+    ],
+    [
+     0.5,
+     16.5
+    ],
+    [
+     7.083333333,
+     16.5
+    ],
+    [
+     7.083333333,
+     24.5
+    ],
+    [
+     0.5,
+     24.5
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "wic_master_1",
+   "source": "layout.yaml levels[second_floor].rooms[wic_master_1]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[wic_master_1].floor"
+  },
+  {
+   "number": "11",
+   "name": "Walk-in closet 2",
+   "level": "Second floor",
+   "tag_point": [
+    10.708333333,
+    20.5
+   ],
+   "boundary": [
+    [
+     7.416666667,
+     24.5
+    ],
+    [
+     7.416666667,
+     16.5
+    ],
+    [
+     14.0,
+     16.5
+    ],
+    [
+     14.0,
+     24.5
+    ],
+    [
+     7.416666667,
+     24.5
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "wic_master_2",
+   "source": "layout.yaml levels[second_floor].rooms[wic_master_2]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[wic_master_2].floor"
+  },
+  {
+   "number": "12",
+   "name": "Linen and bedroom 3 closet",
+   "level": "Second floor",
+   "tag_point": [
+    26.166666667,
+    21.833333333
+   ],
+   "boundary": [
+    [
+     25.166666667,
+     27.5
+    ],
+    [
+     25.166666667,
+     16.166666667
+    ],
+    [
+     27.166666667,
+     16.166666667
+    ],
+    [
+     27.166666667,
+     27.5
+    ],
+    [
+     25.166666667,
+     27.5
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "linen",
+   "source": "layout.yaml levels[second_floor].rooms[linen]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[linen].floor"
+  },
+  {
+   "number": "13",
+   "name": "Bedroom 4 walk-in closet",
+   "level": "Second floor",
+   "tag_point": [
+    23.166666667,
+    7.833333333
+   ],
+   "boundary": [
+    [
+     21.5,
+     12.166666667
+    ],
+    [
+     21.5,
+     3.5
+    ],
+    [
+     24.833333333,
+     3.5
+    ],
+    [
+     24.833333333,
+     12.166666667
+    ],
+    [
+     21.5,
+     12.166666667
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "wic4",
+   "source": "layout.yaml levels[second_floor].rooms[wic4]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[wic4].floor"
+  },
+  {
+   "number": "14",
+   "name": "Hallway, stair, bridge and open to below",
+   "level": "Second floor",
+   "tag_point": [
+    19.583333333,
+    20.166666667
+   ],
+   "boundary": [
+    [
+     14.333333333,
+     31.166666667
+    ],
+    [
+     14.333333333,
+     6.666666667
+    ],
+    [
+     21.0,
+     6.666666667
+    ],
+    [
+     21.0,
+     12.5
+    ],
+    [
+     24.833333333,
+     12.5
+    ],
+    [
+     24.833333333,
+     27.833333333
+    ],
+    [
+     30.166666667,
+     27.833333333
+    ],
+    [
+     30.166666667,
+     31.166666667
+    ],
+    [
+     14.333333333,
+     31.166666667
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "hall",
+   "source": "layout.yaml levels[second_floor].rooms[hall]: its name and sleeping are the layout's own; placed by layout.yaml levels[second_floor].rooms[hall].floor"
+  },
+  {
+   "number": "15",
+   "name": "Main floor: kitchen, dinette, family, dining, living, hall, entry, powder, laundry (partitions not drawn)",
+   "level": "Main floor",
+   "tag_point": [
+    10.75,
+    14.583333333
+   ],
+   "boundary": [
+    [
+     0.5,
+     41.833333333
+    ],
+    [
+     0.5,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     6.666666667
+    ],
+    [
+     21.0,
+     6.666666667
+    ],
+    [
+     21.0,
+     22.5
+    ],
+    [
+     41.5,
+     22.5
+    ],
+    [
+     41.5,
+     41.833333333
+    ],
+    [
+     0.5,
+     41.833333333
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "main_floor",
+   "source": "layout.yaml levels[main_floor].rooms[main_floor]: its name and sleeping are the layout's own; placed by layout.yaml levels[main_floor].rooms[main_floor].floor"
+  },
+  {
+   "number": "16",
+   "name": "Garage",
+   "level": "Main floor",
+   "tag_point": [
+    31.5,
+    11.25
+   ],
+   "boundary": [
+    [
+     21.5,
+     22.0
+    ],
+    [
+     21.5,
+     0.5
+    ],
+    [
+     41.5,
+     0.5
+    ],
+    [
+     41.5,
+     22.0
+    ],
+    [
+     21.5,
+     22.0
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "garage",
+   "source": "layout.yaml levels[main_floor].rooms[garage]: its name and sleeping are the layout's own; placed by layout.yaml levels[main_floor].rooms[garage].floor"
+  },
+  {
+   "number": "17",
+   "name": "Unfinished basement",
+   "level": "Basement",
+   "tag_point": [
+    10.833333333,
+    14.5
+   ],
+   "boundary": [
+    [
+     0.666666667,
+     41.666666667
+    ],
+    [
+     0.666666667,
+     2.833333333
+    ],
+    [
+     13.666666667,
+     2.833333333
+    ],
+    [
+     13.666666667,
+     6.5
+    ],
+    [
+     21.0,
+     6.5
+    ],
+    [
+     21.0,
+     22.5
+    ],
+    [
+     41.333333333,
+     22.5
+    ],
+    [
+     41.333333333,
+     41.666666667
+    ],
+    [
+     0.666666667,
+     41.666666667
+    ]
+   ],
+   "sleeping": false,
+   "house_id": "basement",
+   "source": "house.yaml rooms[basement]: name and sleeping; its floor is layout.yaml's (house.yaml: not needed: not a sleeping room (the basement plan is dimensioned to the outside of the foundation)); placed by layout.yaml levels[basement].rooms[basement].floor"
+  }
+ ],
+ "floors": [
+  {
+   "level": "Second floor",
+   "outline": [
+    [
+     0.0,
+     2.166666667
+    ],
+    [
+     14.333333333,
+     2.166666667
+    ],
+    [
+     14.333333333,
+     6.166666667
+    ],
+    [
+     21.0,
+     6.166666667
+    ],
+    [
+     21.0,
+     3.0
+    ],
+    [
+     42.0,
+     3.0
+    ],
+    [
+     42.0,
+     42.333333333
+    ],
+    [
+     0.0,
+     42.333333333
+    ],
+    [
+     0.0,
+     2.166666667
+    ]
+   ],
+   "thickness_in": 10.5,
+   "source": "layout.yaml levels[second_floor]: the level's walls and rooms together; its thickness the gap the layout leaves between the ceiling below and this floor (layout.yaml assumptions: 'Each floor slab drawn as thick as the gap the layout leaves under it')"
+  },
+  {
+   "level": "Main floor",
+   "outline": [
+    [
+     0.0,
+     42.333333333
+    ],
+    [
+     0.0,
+     2.166666667
+    ],
+    [
+     14.333333333,
+     2.166666667
+    ],
+    [
+     14.333333333,
+     6.166666667
+    ],
+    [
+     21.0,
+     6.166666667
+    ],
+    [
+     21.0,
+     0.0
+    ],
+    [
+     42.0,
+     0.0
+    ],
+    [
+     42.0,
+     42.333333333
+    ],
+    [
+     0.0,
+     42.333333333
+    ]
+   ],
+   "thickness_in": 12.0,
+   "source": "layout.yaml levels[main_floor]: the level's walls and rooms together; its thickness the gap the layout leaves between the ceiling below and this floor (layout.yaml assumptions: 'Each floor slab drawn as thick as the gap the layout leaves under it')"
+  },
+  {
+   "level": "Basement",
+   "outline": [
+    [
+     0.0,
+     42.333333333
+    ],
+    [
+     0.0,
+     2.166666667
+    ],
+    [
+     14.333333333,
+     2.166666667
+    ],
+    [
+     14.333333333,
+     5.833333333
+    ],
+    [
+     21.0,
+     5.833333333
+    ],
+    [
+     21.0,
+     2.166666667
+    ],
+    [
+     21.666666667,
+     2.166666667
+    ],
+    [
+     21.666666667,
+     21.833333333
+    ],
+    [
+     42.0,
+     21.833333333
+    ],
+    [
+     42.0,
+     42.333333333
+    ],
+    [
+     0.0,
+     42.333333333
+    ]
+   ],
+   "thickness_in": 4.0,
+   "source": "layout.yaml levels[basement]: the level's walls and rooms together; its thickness layout.yaml levels[basement].slab: A-2 basement plan '4\" CONC. SLAB (3500 PSI) ON 6 MIL VAPOR BARRIER'"
+  }
+ ],
+ "ceilings": [
+  {
+   "name": "Master bedroom",
+   "outline": [
+    [
+     0.5,
+     41.833333333
+    ],
+    [
+     0.5,
+     24.833333333
+    ],
+    [
+     14.0,
+     24.833333333
+    ],
+    [
+     14.0,
+     41.833333333
+    ],
+    [
+     0.5,
+     41.833333333
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Bedroom 2",
+   "outline": [
+    [
+     30.5,
+     41.833333333
+    ],
+    [
+     30.5,
+     30.166666667
+    ],
+    [
+     41.5,
+     30.166666667
+    ],
+    [
+     41.5,
+     41.833333333
+    ],
+    [
+     30.5,
+     41.833333333
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Bedroom 3",
+   "outline": [
+    [
+     27.5,
+     27.5
+    ],
+    [
+     27.5,
+     16.166666667
+    ],
+    [
+     41.5,
+     16.166666667
+    ],
+    [
+     41.5,
+     27.5
+    ],
+    [
+     27.5,
+     27.5
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Bedroom 4",
+   "outline": [
+    [
+     25.166666667,
+     15.833333333
+    ],
+    [
+     25.166666667,
+     3.5
+    ],
+    [
+     41.5,
+     3.5
+    ],
+    [
+     41.5,
+     15.833333333
+    ],
+    [
+     25.166666667,
+     15.833333333
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Bonus room",
+   "outline": [
+    [
+     0.5,
+     16.166666667
+    ],
+    [
+     0.5,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     16.166666667
+    ],
+    [
+     0.5,
+     16.166666667
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Master bath",
+   "outline": [
+    [
+     14.333333333,
+     41.833333333
+    ],
+    [
+     14.333333333,
+     31.5
+    ],
+    [
+     24.166666667,
+     31.5
+    ],
+    [
+     24.166666667,
+     41.833333333
+    ],
+    [
+     14.333333333,
+     41.833333333
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Hall bath",
+   "outline": [
+    [
+     24.5,
+     41.833333333
+    ],
+    [
+     24.5,
+     31.5
+    ],
+    [
+     30.166666667,
+     31.5
+    ],
+    [
+     30.166666667,
+     41.833333333
+    ],
+    [
+     24.5,
+     41.833333333
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Bedroom 2's entry alcove (not dimensioned)",
+   "outline": [
+    [
+     30.5,
+     30.166666667
+    ],
+    [
+     30.5,
+     27.833333333
+    ],
+    [
+     34.166666667,
+     27.833333333
+    ],
+    [
+     34.166666667,
+     30.166666667
+    ],
+    [
+     30.5,
+     30.166666667
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Bedroom 2 closet",
+   "outline": [
+    [
+     34.5,
+     29.833333333
+    ],
+    [
+     34.5,
+     27.833333333
+    ],
+    [
+     41.5,
+     27.833333333
+    ],
+    [
+     41.5,
+     29.833333333
+    ],
+    [
+     34.5,
+     29.833333333
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Walk-in closet 1",
+   "outline": [
+    [
+     0.5,
+     24.5
+    ],
+    [
+     0.5,
+     16.5
+    ],
+    [
+     7.083333333,
+     16.5
+    ],
+    [
+     7.083333333,
+     24.5
+    ],
+    [
+     0.5,
+     24.5
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Walk-in closet 2",
+   "outline": [
+    [
+     7.416666667,
+     24.5
+    ],
+    [
+     7.416666667,
+     16.5
+    ],
+    [
+     14.0,
+     16.5
+    ],
+    [
+     14.0,
+     24.5
+    ],
+    [
+     7.416666667,
+     24.5
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Linen and bedroom 3 closet",
+   "outline": [
+    [
+     25.166666667,
+     27.5
+    ],
+    [
+     25.166666667,
+     16.166666667
+    ],
+    [
+     27.166666667,
+     16.166666667
+    ],
+    [
+     27.166666667,
+     27.5
+    ],
+    [
+     25.166666667,
+     27.5
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Bedroom 4 walk-in closet",
+   "outline": [
+    [
+     21.5,
+     12.166666667
+    ],
+    [
+     21.5,
+     3.5
+    ],
+    [
+     24.833333333,
+     3.5
+    ],
+    [
+     24.833333333,
+     12.166666667
+    ],
+    [
+     21.5,
+     12.166666667
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Hallway, stair, bridge and open to below",
+   "outline": [
+    [
+     14.333333333,
+     31.166666667
+    ],
+    [
+     14.333333333,
+     6.666666667
+    ],
+    [
+     21.0,
+     6.666666667
+    ],
+    [
+     21.0,
+     12.5
+    ],
+    [
+     24.833333333,
+     12.5
+    ],
+    [
+     24.833333333,
+     27.833333333
+    ],
+    [
+     30.166666667,
+     27.833333333
+    ],
+    [
+     30.166666667,
+     31.166666667
+    ],
+    [
+     14.333333333,
+     31.166666667
+    ]
+   ],
+   "underside_ft": 8.0,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[second_floor].ceiling: A-4 elevations, 'SEC. FLR' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Main floor: kitchen, dinette, family, dining, living, hall, entry, powder, laundry (partitions not drawn)",
+   "outline": [
+    [
+     0.5,
+     41.833333333
+    ],
+    [
+     0.5,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     2.666666667
+    ],
+    [
+     13.833333333,
+     6.666666667
+    ],
+    [
+     21.0,
+     6.666666667
+    ],
+    [
+     21.0,
+     22.5
+    ],
+    [
+     41.5,
+     22.5
+    ],
+    [
+     41.5,
+     41.833333333
+    ],
+    [
+     0.5,
+     41.833333333
+    ]
+   ],
+   "underside_ft": -0.875,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[main_floor].ceiling: A-4 elevations, 'MAIN FLR' to 'CLG.' 9'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Garage",
+   "outline": [
+    [
+     21.5,
+     22.0
+    ],
+    [
+     21.5,
+     0.5
+    ],
+    [
+     41.5,
+     0.5
+    ],
+    [
+     41.5,
+     22.0
+    ],
+    [
+     21.5,
+     22.0
+    ]
+   ],
+   "underside_ft": -0.875,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[main_floor].ceiling: A-4 elevations, 'MAIN FLR' to 'CLG.' 9'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  },
+  {
+   "name": "Unfinished basement",
+   "outline": [
+    [
+     0.666666667,
+     41.666666667
+    ],
+    [
+     0.666666667,
+     2.833333333
+    ],
+    [
+     13.666666667,
+     2.833333333
+    ],
+    [
+     13.666666667,
+     6.5
+    ],
+    [
+     21.0,
+     6.5
+    ],
+    [
+     21.0,
+     22.5
+    ],
+    [
+     41.333333333,
+     22.5
+    ],
+    [
+     41.333333333,
+     41.666666667
+    ],
+    [
+     0.666666667,
+     41.666666667
+    ]
+   ],
+   "underside_ft": -10.875,
+   "thickness_in": 1.0,
+   "source": "layout.yaml levels[basement].ceiling: A-4 'SLAB' to 'CLG.' 8'-0\" (a thin solid whose underside is the ceiling, as the Revit recording drew it)"
+  }
+ ],
+ "separations": [
+  {
+   "level": "Second floor",
+   "start": [
+    30.5,
+    30.166666667
+   ],
+   "end": [
+    34.166666667,
+    30.166666667
+   ],
+   "source": "layout.yaml levels[second_floor].separations (the assumption 'Bedroom 2's entry alcove ... a room separation line between it and the bedroom')"
+  }
+ ],
+ "lot": {
+  "outline": [
+   [
+    -20.0,
+    -30.0
+   ],
+   [
+    62.0,
+    -30.0
+   ],
+   [
+    62.0,
+    72.333333333
+   ],
+   [
+    -20.0,
+    72.333333333
+   ],
+   [
+    -20.0,
+    -30.0
+   ]
+  ],
+  "source": "EVAL STAND-IN, not from the drawings: a rectangle 20 ft clear of the house's sides and 30 ft front and back. Check my project sends nothing without a property line and a street edge (ProjectFacts), and the repository has no survey of Lot 2. Every zoning row of the check is Ithaca's, which doesn't apply in Orangetown, and is left out of the comparison; no egress rule reads the lot (egress.check reads the interior and the dwelling units only)"
+ },
+ "plan": "x east from the house's west outer face, y north from its south-most face (the garage front), feet (layout.yaml's x, and d turned: y = (508 in - d) / 12); z 0 the second floor's finished floor",
+ "made_from": {
+  "tool": "apps/revit_addin/tools/evals/make_ny_build_data.py",
+  "sources": [
+   {
+    "file": "test_data/real_houses/orangetown_ny_80_south_william/layout.yaml",
+    "sha256": "8737ddab646ce813e10451000c9af5f08cc1ccbb218066615c107b8788438c1d"
+   },
+   {
+    "file": "test_data/real_houses/orangetown_ny_80_south_william/house.yaml",
+    "sha256": "2325662aae7834d240ae9edff286eca52b4627d4d41fb94dd997c7a737412ed5"
+   }
+  ]
+ },
+ "not_drawn": {
+  "stairs": "house.yaml has no stairs: 'No floor-to-floor height is dimensioned, so no riser height or nosing elevation can be placed, and no tread depth is dimensioned' (layout.yaml not_drawn.stairs places them only). Every stair rule stays needs review (evaluation.md, why D)",
+  "guards": "house.yaml's 5 railings have no members ('drawn ... but not dimensioned', absent.members): not drawn (layout.yaml not_drawn.guards). The guard rules read open sides, which nothing produces yet (evaluation.md, why G), so drawing them would change no verdict",
+  "interior doors, sliders, garage doors, main-floor partitions": "layout.yaml assumptions: house.yaml describes only the front door and the marked escape windows; a drawn door is read as a door"
+ },
+ "assumptions": [
+  {
+   "what": "Floor-to-floor heights (main floor 118.5 in, basement 108 in below the main floor)",
+   "why": "not dimensioned (A-4 gives floor-to-ceiling heights only); answer_key.yaml's framing reading",
+   "effect": "none: no stair is drawn, and no measure in scope compares levels"
+  },
+  {
+   "what": "Each floor slab drawn as thick as the gap the layout leaves under it: the second floor's 10.5 in (2x10 joists, subfloor and board), the main floor's 12 in (2x12 joists and subfloor, A-5); the basement's 4 in concrete (A-2)",
+   "why": "a slab thicker than the gap would cut into the cited ceiling below it (A-4's 9'-0\" main floor)",
+   "effect": "none: every ceiling is drawn where A-4 puts it, and no slab reaches below one"
+  },
+  {
+   "what": "Each window pair drawn 2 in apart (`pair_gap`), centred on the pair's dimensioned centre",
+   "why": "the plans show mulled pairs with one centre dimension; each unit is its own family, so they are kept from overlapping",
+   "effect": "none: no window has a clear opening to measure"
+  },
+  {
+   "what": "Bedroom 4's 10'-0\" x 1'-4\" window recess left out; its windows drawn in the straight south wall at d 466-472",
+   "why": "house.yaml leaves the recess out (no inside dimension: its 10'-0\" and 1'-4\" are outside dimensions), and its windows must open from bedroom 4",
+   "effect": "none: the area stays house.yaml's (understated, never overstated); the windows have no clear opening to measure"
+  },
+  {
+   "what": "Bedroom 2's entry alcove (x 366-410, d 146-174) drawn as a room of its own, a room separation line between it and the bedroom",
+   "why": "house.yaml leaves it out (not dimensioned); its size here is what the dimensioned walls around it leave",
+   "effect": "none: bedroom 2's area stays house.yaml's 128.3 sq ft (understated, never overstated)"
+  },
+  {
+   "what": "Bedroom 2's closet against the east wall",
+   "why": "drawn there on A-3; only its 7'-0\" width is dimensioned",
+   "effect": "none: it bounds the alcove only"
+  },
+  {
+   "what": "C15 and CW14 sizes, and every window's top at 6'-9\"",
+   "why": "the codes have no dimensions on the drawings; A-1's general header note",
+   "effect": "none: no window has a clear opening, so no window size is measured"
+  },
+  {
+   "what": "The bonus room's windows centred in its south wall",
+   "why": "A-3 gives the pair no centre dimension; drawn centred over the bay below",
+   "effect": "none"
+  },
+  {
+   "what": "Second floor: the bridge (7 1/2 in lower), the stairwell and the open areas are drawn on the floor's level, one room with the hallway; the floor slab is drawn whole",
+   "why": "a level per walking surface would split the hall; nothing on them is measured (stairs and guards aren't drawn)",
+   "effect": "none"
+  },
+  {
+   "what": "Main floor: its interior partitions, the living room's bay and the family room's fireplace bump-out aren't drawn; the garage is drawn on the main floor's level",
+   "why": "no main-floor room is in house.yaml and nothing on the main floor but the front door is measured; every extra enclosed area is a chance of one without a Room, which stops every room being read. The garage slab's height disagrees between sheets (README question 10)",
+   "effect": "none on any measure; the front door is in its own wall, as drawn"
+  },
+  {
+   "what": "Interior doors, the rear sliders, the garage doors and every window not in house.yaml aren't drawn",
+   "why": "house.yaml describes only the front door and the marked escape windows; a drawn door is read as a door of the house",
+   "effect": "none: expected.yaml has only the front door"
+  },
+  {
+   "what": "The basement as one room in its foundation walls; the unexcavated areas outside it; the basement stair's walls and the mechanical area not drawn",
+   "why": "the basement isn't a sleeping room; its escape windows aren't checked (expected.yaml not_checked)",
+   "effect": "none"
+  },
+  {
+   "what": "The lot (a stand-in rectangle) and its south edge as the street",
+   "why": "Check my project needs a property line and a street edge to send anything",
+   "effect": "none on egress; the Ithaca zoning rows it brings are left out of the comparison"
+  },
+  {
+   "what": "Every wall drawn 'New', no smoke partition, no fire rating (the build data's own fields)",
+   "why": "the data format needs them; the drawings' house is new construction (A-1 'PROPOSED')",
+   "effect": "none: no rule reads a wall's phase or rating"
+  }
+ ],
+ "stats": {
+  "walls": 41,
+  "doors": 1,
+  "windows": 14,
+  "rooms": 17
+ }
+}

@@ -30,7 +30,7 @@ public sealed record MarksPlan(IReadOnlyList<MarkWrite> Writes, IReadOnlyList<st
 ///            {"unique_id": "...", "mark": "Gordium: Pass through", "value": false},
 ///            {"door": "D01", "clear": {"width_in": 34, "height_in": 80, "operation": "Side-hinged door", "source": "..."}}]}
 /// </code>
-/// A room is found by its number, a door by its Mark, any element by its <c>UniqueId</c>; one that isn't found, or is
+/// A room is found by its number, a door or a window by its Mark, any element by its <c>UniqueId</c>; one that isn't found, or is
 /// found twice, is refused. A value of the wrong kind, a word Gordium doesn't read (a use, an exit, an operation), a mark
 /// not bound to the element's category, or two different values for one mark on one element (two doors of one type
 /// given different clear openings) is refused, never guessed. A clear opening writes the type's operation, clear
@@ -101,8 +101,10 @@ public static class MarksRequest
             (found, what) = (elements.Where(e => MarkReading.KindOf(e) == MarkedKind.Room && e.Number?.Trim() == room).ToList(), $"room number {room}");
         else if (Text(o["door"]) is { } door)
             (found, what) = (elements.Where(e => MarkReading.KindOf(e) == MarkedKind.Door && e.Number?.Trim() == door).ToList(), $"door Mark {door}");
+        else if (Text(o["window"]) is { } window)
+            (found, what) = (elements.Where(e => MarkReading.KindOf(e) == MarkedKind.Window && e.Number?.Trim() == window).ToList(), $"window Mark {window}");
         else
-            return (null, "names no unique_id, room or door");
+            return (null, "names no unique_id, room, door or window");
         return found.Count switch
         {
             1 => (found[0], null),

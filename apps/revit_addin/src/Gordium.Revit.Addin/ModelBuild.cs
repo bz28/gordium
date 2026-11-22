@@ -26,6 +26,12 @@ namespace Gordium.Revit.Addin;
 /// from Revit's Door.rft), each door in its wall (Mark D01...), its facing and hand flipped to swing and hinge as the data
 /// says; a window type per size (Mark WN01..., at its sill); the floor under the footprint; and a Room at each tag point
 /// with its Name (in capitals, as the script) and Number, tagged in the plan. Then saved as the request's .rvt and closed.</para>
+/// <para>Data with several levels (apps/revit_addin/tools/evals/make_ny_build_data.py: the New York eval's buildings): each
+/// level and its plan (the template's levels the data doesn't have deleted), each wall and room on its own level and
+/// each door and window on its wall's, the data's floor slabs (a type per thickness, its top at its offset) in place of
+/// the footprint's floor, each room's ceiling a thin solid in Ceilings (as HouseDraw draws one), its room separation
+/// lines, the lot as a property line and its spot grades as Gordium's spot-grade markers. A door with no swing in the
+/// data is left as Revit places it.</para>
 /// <para>Unlike the script, nothing fails quietly: every element Revit refused or removed is in the log with Revit's
 /// reason, the counts drawn are set beside the data's, and each door's flips and each room's area (Revit's beside the
 /// sheet's) are logged.</para>
@@ -124,25 +130,43 @@ internal static class ModelBuild
 
     private static void Build(RevitApplication app, Document doc, BuildModel model, BuildRequest request, Report report)
     {
-        var z = model.LevelElevation;
-        XYZ At(PlanPoint p, double above = 0) => new(p.X, p.Y, z + above);
-
-        // ---- level and plan ----
-        Level level = null!;
-        ViewPlan plan = null!;
-        Step(doc, "Gordium: Level 1 and its plan", report, [], _ =>
+        // ---- the levels and their plans (the data's one level, or each of its levels) ----
+        var levels = new Dictionary<string, Level>();
+        var plans = new Dictionary<string, ViewPlan>();
+        Step(doc, "Gordium: the levels and their plans", report, [], _ =>
         {
-            level = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
-                        .FirstOrDefault(l => Math.Abs(l.Elevation - z) < 1e-6) ?? Level.Create(doc, z);
-            if (level.Name != model.LevelName && !new FilteredElementCollector(doc).OfClass(typeof(Level)).Any(l => l.Name == model.LevelName))
-                level.Name = model.LevelName;
-            plan = new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>()
-                       .FirstOrDefault(v => !v.IsTemplate && v.ViewType == ViewType.FloorPlan && v.GenLevel?.Id == level.Id)
-                   ?? ViewPlan.Create(doc, (new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
-                                                .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan)
-                                            ?? throw new InvalidOperationException("the template has no floor plan view type")).Id, level.Id);
+            var several = model.Levels.Count > 1;
+            var template = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>().ToList();
+            foreach (var lv in model.Levels)
+                levels[lv.Name] = template.FirstOrDefault(l => Math.Abs(l.Elevation - lv.ElevationFt) < 1e-6 && !levels.ContainsValue(l))
+                                  ?? Level.Create(doc, lv.ElevationFt);
+            if (several)
+            {
+                // the template's own levels the data doesn't have (Level 2 at 10 ft) taken out, so every level of the
+                // model is the data's (a wall through an extra level would enclose areas there with no Room)
+                foreach (var extra in template.Where(l => !levels.ContainsValue(l)))
+                {
+                    report.Notes.Add(I($"the template's level \"{extra.Name}\" at {extra.Elevation:0.###} ft deleted: not in the data"));
+                    doc.Delete(extra.Id);
+                }
+            }
+            foreach (var (name, level) in levels)
+                if (level.Name != name && !new FilteredElementCollector(doc).OfClass(typeof(Level)).Any(l => l.Name == name))
+                    level.Name = name;
+            var planType = new FilteredElementCollector(doc).OfClass(typeof(ViewFamilyType)).Cast<ViewFamilyType>()
+                               .FirstOrDefault(v => v.ViewFamily == ViewFamily.FloorPlan)
+                           ?? throw new InvalidOperationException("the template has no floor plan view type");
+            foreach (var (name, level) in levels)
+                plans[name] = new FilteredElementCollector(doc).OfClass(typeof(ViewPlan)).Cast<ViewPlan>()
+                                  .FirstOrDefault(v => !v.IsTemplate && v.ViewType == ViewType.FloorPlan && v.GenLevel?.Id == level.Id)
+                              ?? ViewPlan.Create(doc, planType.Id, level.Id);
         });
-        report.Notes.Add(I($"level \"{level.Name}\" at {level.Elevation:0.###} ft, plan \"{plan.Name}\""));
+        foreach (var lv in model.Levels)
+            report.Notes.Add(I($"level \"{levels[lv.Name].Name}\" at {levels[lv.Name].Elevation:0.###} ft (the data's {lv.Name} at {lv.ElevationFt:0.###}), plan \"{plans[lv.Name].Name}\""));
+        Level LevelOf(string? name) => levels[model.LevelOf(name).Name];
+        ViewPlan PlanOf(string? name) => plans[model.LevelOf(name).Name];
+        XYZ At(PlanPoint p, string? level, double above = 0) => new(p.X, p.Y, model.LevelOf(level).ElevationFt + above);
+        string? WallLevel(int wall) => model.Walls.First(w => w.Id == wall).Level;
 
         // ---- phases ----
         var phases = doc.Phases;
@@ -186,7 +210,7 @@ internal static class ModelBuild
                 var label = $"wall {BuildData.WallMark(w)}";
                 try
                 {
-                    var wall = Wall.Create(doc, Line.CreateBound(At(w.Start), At(w.End)), wallTypes[BuildData.WallTypeName(w)].Id, level.Id,
+                    var wall = Wall.Create(doc, Line.CreateBound(At(w.Start, w.Level), At(w.End, w.Level)), wallTypes[BuildData.WallTypeName(w)].Id, LevelOf(w.Level).Id,
                                            w.HeightFt, 0, false, false);
                     wall.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM)?.Set(0);      // its location line the centre line
                     // a trimmed end, a fill's ends: never joined (Revit deleted both walls of such a join)
@@ -229,7 +253,7 @@ internal static class ModelBuild
             {
                 Step(doc, $"Gordium: wall {BuildData.WallMark(w)} again, its joins disallowed", report, again, _ =>
                 {
-                    redrawn = Wall.Create(doc, Line.CreateBound(At(w.Start), At(w.End)), wallTypes[BuildData.WallTypeName(w)].Id, level.Id,
+                    redrawn = Wall.Create(doc, Line.CreateBound(At(w.Start, w.Level), At(w.End, w.Level)), wallTypes[BuildData.WallTypeName(w)].Id, LevelOf(w.Level).Id,
                                           w.HeightFt, 0, false, false);
                     redrawn.get_Parameter(BuiltInParameter.WALL_KEY_REF_PARAM)?.Set(0);
                     WallUtils.DisallowWallJoinAtEnd(redrawn, 0);
@@ -281,7 +305,7 @@ internal static class ModelBuild
                 }
                 try
                 {
-                    var fi = doc.Create.NewFamilyInstance(At(d.Center), t.Symbol, host, level, StructuralType.NonStructural);
+                    var fi = doc.Create.NewFamilyInstance(At(d.Center, WallLevel(d.HostWall)), t.Symbol, host, LevelOf(WallLevel(d.HostWall)), StructuralType.NonStructural);
                     Need(fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK), BuildData.DoorMark(d), label, "Mark", report);
                     doc.Regenerate();      // each opening cut into its wall as it is placed (HouseDraw's lesson)
                     if (fi.Host?.Id != host.Id)
@@ -299,11 +323,18 @@ internal static class ModelBuild
             {
                 bool swingOpp = madeHere ? MadeSwingOppositeFacing : request.SwingOppositeFacing;
                 bool hingeOpp = madeHere ? MadeHingeOppositeHand : request.HingeOppositeHand;
+                if (d.SwingDir is not { } swing)
+                {
+                    // the source doesn't say which way it swings: left as Revit placed it, never flipped on a guess
+                    report.Doors.Add($"{BuildData.DoorMark(d)} ({(madeHere ? "Gordium's family" : "the template's family")}): no swing in the data, " +
+                                     $"left as Revit placed it (facing {Xy(fi.FacingOrientation)}, hand {Xy(fi.HandOrientation)})");
+                    continue;
+                }
                 var words = new StringBuilder($"{BuildData.DoorMark(d)} ({(madeHere ? "Gordium's family" : "the template's family")}, " +
-                                              $"swing {Xy(d.SwingDir)}): facing {Xy(fi.FacingOrientation)}");
+                                              $"swing {Xy(swing)}): facing {Xy(fi.FacingOrientation)}");
                 try
                 {
-                    if (BuildData.FlipFacing(P(fi.FacingOrientation), d.SwingDir, swingOpp))
+                    if (BuildData.FlipFacing(P(fi.FacingOrientation), swing, swingOpp))
                     {
                         if (!fi.CanFlipFacing || !fi.flipFacing())
                             throw new InvalidOperationException("Revit wouldn't flip its facing");
@@ -328,7 +359,7 @@ internal static class ModelBuild
                     else
                         words.Append("; no hinge in the data (a double door): hand kept");
                     // the door as it now stands, read the same way: it swings (and hinges) as the data says
-                    var swings = !BuildData.FlipFacing(P(fi.FacingOrientation), d.SwingDir, swingOpp);
+                    var swings = !BuildData.FlipFacing(P(fi.FacingOrientation), swing, swingOpp);
                     var hinged = d.Hinge is not { } h2 || !BuildData.FlipHand(P(fi.HandOrientation), d.Center, h2, hingeOpp);
                     words.Append(swings && hinged ? "; swings as the data" : "; NOT as the data");
                     if (madeHere)
@@ -366,7 +397,7 @@ internal static class ModelBuild
                 }
                 try
                 {
-                    var fi = doc.Create.NewFamilyInstance(At(w.Center, w.SillIn / 12), t.Symbol, host, level, StructuralType.NonStructural);
+                    var fi = doc.Create.NewFamilyInstance(At(w.Center, WallLevel(w.HostWall), w.SillIn / 12), t.Symbol, host, LevelOf(WallLevel(w.HostWall)), StructuralType.NonStructural);
                     Need(fi.get_Parameter(BuiltInParameter.INSTANCE_SILL_HEIGHT_PARAM), w.SillIn / 12, label, "Sill Height", report);
                     Need(fi.get_Parameter(BuiltInParameter.ALL_MODEL_MARK), BuildData.WindowMark(w), label, "Mark", report);
                     doc.Regenerate();
@@ -383,29 +414,139 @@ internal static class ModelBuild
         });
         report.Counts["windows"] = new { data = model.Windows.Count, placed = windows.Count(x => x.IsValidObject) };
 
-        // ---- the floor ----
+        // ---- the floor (the script's: under the footprint), or the data's floor slabs ----
         made.Clear();
-        Floor? floor = null;
-        Step(doc, "Gordium: the floor", report, made, _ =>
+        var floors = new List<Floor>();
+        CurveLoop Loop(IReadOnlyList<PlanPoint> outline, double z)
         {
-            try
+            var loop = new CurveLoop();
+            for (var i = 0; i < outline.Count; i++)
+                loop.Append(Line.CreateBound(new XYZ(outline[i].X, outline[i].Y, z), new XYZ(outline[(i + 1) % outline.Count].X, outline[(i + 1) % outline.Count].Y, z)));
+            return loop;
+        }
+        Step(doc, model.Floors.Count == 0 ? "Gordium: the floor" : "Gordium: the floor slabs", report, made, _ =>
+        {
+            var basic = new FilteredElementCollector(doc).OfClass(typeof(FloorType)).Cast<FloorType>().FirstOrDefault(f => !f.IsFoundationSlab);
+            if (basic is null)
             {
-                var outline = BuildData.FloorOutline(model.Footprint);
-                var loop = new CurveLoop();
-                for (var i = 0; i < outline.Count; i++)
-                    loop.Append(Line.CreateBound(At(outline[i]), At(outline[(i + 1) % outline.Count])));
-                var type = new FilteredElementCollector(doc).OfClass(typeof(FloorType)).Cast<FloorType>().FirstOrDefault(f => !f.IsFoundationSlab)
-                           ?? throw new InvalidOperationException("the template has no floor type");
-                floor = Floor.Create(doc, [loop], type.Id, level.Id);
-                made[floor.Id] = "the floor";
-                report.Notes.Add(I($"floor: type \"{type.Name}\", {outline.Count} corners, {BuildData.Area(outline):0} sq ft inside its outline"));
+                report.Failed.Add("the floor: not drawn: the template has no floor type");
+                return;
             }
-            catch (Exception x)
+            if (model.Floors.Count == 0)
             {
-                report.Failed.Add($"the floor: not drawn: {x.Message}");
+                try
+                {
+                    var outline = BuildData.FloorOutline(model.Footprint);
+                    var floor = Floor.Create(doc, [Loop(outline, model.LevelElevation)], basic.Id, LevelOf(null).Id);
+                    floors.Add(floor);
+                    made[floor.Id] = "the floor";
+                    report.Notes.Add(I($"floor: type \"{basic.Name}\", {outline.Count} corners, {BuildData.Area(outline):0} sq ft inside its outline"));
+                }
+                catch (Exception x)
+                {
+                    report.Failed.Add($"the floor: not drawn: {x.Message}");
+                }
+                return;
+            }
+            foreach (var (f, k) in model.Floors.Select((f, k) => (f, k + 1)))
+            {
+                var label = I($"floor slab {k} on {f.Level} ({f.ThicknessIn:0.###} in, top {f.TopOffsetFt:0.###} ft above it)");
+                try
+                {
+                    // a type of its thickness, one layer (HouseDraw's: the slab's underside is where the data puts it)
+                    var type = HouseDraw.FloorTypeOf(doc, basic, f.ThicknessIn / 12);
+                    var floor = Floor.Create(doc, [Loop(f.Outline, model.LevelOf(f.Level).ElevationFt)], type.Id, LevelOf(f.Level).Id);
+                    if (Math.Abs(f.TopOffsetFt) > 1e-12)
+                        Need(floor.get_Parameter(BuiltInParameter.FLOOR_HEIGHTABOVELEVEL_PARAM), f.TopOffsetFt, label, "Height Offset From Level", report);
+                    floors.Add(floor);
+                    made[floor.Id] = label;
+                    report.Notes.Add(I($"{label}: type \"{type.Name}\", {f.Outline.Count} corners, {BuildData.Area(f.Outline):0.#} sq ft"));
+                }
+                catch (Exception x)
+                {
+                    report.Failed.Add($"{label}: not drawn: {x.Message}");
+                }
             }
         });
-        report.Counts["floor"] = new { data = 1, drawn = floor is { IsValidObject: true } ? 1 : 0 };
+        report.Counts["floors"] = new { data = Math.Max(1, model.Floors.Count), drawn = floors.Count(f => f.IsValidObject) };
+
+        // ---- the rooms' ceilings (thin solids in Ceilings, as HouseDraw draws them), the room separation lines ----
+        if (model.Ceilings.Count > 0 || model.Separations.Count > 0)
+        {
+            var drawnCeilings = 0;
+            made.Clear();
+            Step(doc, "Gordium: ceilings and room separation lines", report, made, _ =>
+            {
+                var category = new ElementId(DirectShape.IsValidCategoryId(new ElementId(BuiltInCategory.OST_Ceilings), doc)
+                    ? BuiltInCategory.OST_Ceilings : BuiltInCategory.OST_GenericModel);
+                foreach (var c in model.Ceilings)
+                {
+                    var label = $"ceiling {c.Name}";
+                    try
+                    {
+                        var shape = DirectShape.CreateElement(doc, category);
+                        // Revit refuses \ : { } [ ] | ; < > ? ` ~ in an element's name
+                        shape.Name = new string(label.Select(ch => @"\:{}[]|;<>?`~".Contains(ch) ? '-' : ch).ToArray());
+                        shape.SetShape([GeometryCreationUtilities.CreateExtrusionGeometry([Loop(c.Outline, c.UndersideFt)], XYZ.BasisZ, c.ThicknessIn / 12)]);
+                        made[shape.Id] = label;
+                        drawnCeilings++;
+                    }
+                    catch (Exception x)
+                    {
+                        report.Failed.Add($"{label}: not drawn: {x.Message}");
+                    }
+                }
+                foreach (var group in model.Separations.GroupBy(s => s.Level))
+                {
+                    var curves = new CurveArray();
+                    var z = model.LevelOf(group.Key).ElevationFt;
+                    foreach (var s in group)
+                        curves.Append(Line.CreateBound(new XYZ(s.Start.X, s.Start.Y, z), new XYZ(s.End.X, s.End.Y, z)));
+                    try
+                    {
+                        doc.Create.NewRoomBoundaryLines(SketchPlane.Create(doc, LevelOf(group.Key).Id), curves, PlanOf(group.Key));
+                    }
+                    catch (Exception x)
+                    {
+                        report.Failed.Add($"the room separation lines on {group.Key}: not drawn: {x.Message}");
+                    }
+                }
+            });
+            report.Counts["ceilings"] = new { data = model.Ceilings.Count, drawn = drawnCeilings };
+            report.Counts["separations"] = model.Separations.Count;
+        }
+
+        // ---- the lot (a property line) and the ground (Gordium's spot-grade markers) ----
+        if (model.Lot is not null || model.SpotGrades.Count > 0)
+        {
+            made.Clear();
+            Step(doc, "Gordium: the lot and the ground", report, made, _ =>
+            {
+                if (model.Lot is { } ring)
+                {
+                    try
+                    {
+                        var line = PropertyLine.Create(doc, [Loop(ring, 0)]);
+                        made[line.Id] = "the lot";
+                        report.Notes.Add(I($"the lot: a property line of {ring.Count} sides, {BuildData.Area(ring):0.#} sq ft inside it"));
+                    }
+                    catch (Exception x)
+                    {
+                        report.Failed.Add($"the lot: not drawn: {x.Message}");
+                    }
+                }
+                foreach (var (s, k) in model.SpotGrades.Select((s, k) => (s, k + 1)))
+                {
+                    var ds = DirectShape.CreateElement(doc, new ElementId(BuiltInCategory.OST_GenericModel));
+                    ds.ApplicationId = RevitRead.MarkApplication;
+                    ds.ApplicationDataId = RevitRead.SpotMark;
+                    ds.SetShape(new List<GeometryObject> { Autodesk.Revit.DB.Point.Create(new XYZ(s.X, s.Y, s.Z)) });
+                    made[ds.Id] = I($"spot grade {k} at ({s.X:0.###}, {s.Y:0.###}, {s.Z:0.###})");
+                }
+            });
+            report.Counts["lot"] = model.Lot is null ? 0 : 1;
+            report.Counts["spot_grades"] = model.SpotGrades.Count;
+        }
 
         // ---- rooms ----
         var rooms = new List<(BuildRoom R, Room Room)>();
@@ -419,18 +560,18 @@ internal static class ModelBuild
                 try
                 {
                     var uv = new UV(r.TagPoint.X, r.TagPoint.Y);
-                    var room = doc.Create.NewRoom(level, uv) ?? throw new InvalidOperationException("Revit placed no room");
+                    var room = doc.Create.NewRoom(LevelOf(r.Level), uv) ?? throw new InvalidOperationException("Revit placed no room");
                     room.Name = r.Name.ToUpperInvariant();
                     room.Number = r.Number;
                     rooms.Add((r, room));
                     made[room.Id] = label;
                     try
                     {
-                        doc.Create.NewRoomTag(new LinkElementId(room.Id), uv, plan.Id);
+                        doc.Create.NewRoomTag(new LinkElementId(room.Id), uv, PlanOf(r.Level).Id);
                     }
                     catch (Exception x)
                     {
-                        report.Notes.Add($"{label}: placed, but not tagged in {plan.Name}: {x.Message}");
+                        report.Notes.Add($"{label}: placed, but not tagged in {PlanOf(r.Level).Name}: {x.Message}");
                     }
                 }
                 catch (Exception x)
@@ -440,9 +581,10 @@ internal static class ModelBuild
             }
         });
         // the walls Revit drew (a wall of the data not drawn leaves its rooms open, and is named so)
-        var drawnWalls = model.Walls.Where(w => walls.ContainsKey(w.Id)).ToList();
         foreach (var (r, room) in rooms.Where(x => x.Room.IsValidObject))
         {
+            // the walls on the room's own level (a wall of another level, over or under it, bounds nothing here)
+            var drawnWalls = model.Walls.Where(w => walls.ContainsKey(w.Id) && model.LevelOf(w.Level) == model.LevelOf(r.Level)).ToList();
             var inside = BuildData.Area(r.Boundary);
             var line = I($"{room.Number} {room.Name}: Revit's area {room.Area:0.#} sq ft, the sheet's {(r.AreaSf is { } a ? a.ToString("0.#", CultureInfo.InvariantCulture) : "none")}, ") +
                        I($"inside its boundary {inside:0.#}");
@@ -543,7 +685,7 @@ internal static class ModelBuild
             {
                 if (stock is null)
                     return null;
-                var name = BuildData.OpeningTypeName(tag, w, h);
+                var name = BuildData.OpeningTypeName(tag, w, h, model.TypeSuffix);
                 var s = Symbols(stock.Category.BuiltInCategory).FirstOrDefault(x => x.Name == name && x.FamilyName == stock.FamilyName)
                         ?? (FamilySymbol)stock.Duplicate(name);
                 bool Set(BuiltInParameter[] ps, double v) =>
@@ -578,14 +720,14 @@ internal static class ModelBuild
         {
             try
             {
-                var family = $"Gordium {(kind == "window" ? "window" : kind + " door")} {BuildData.G(w)} x {BuildData.G(h)} in (LS1.0)";
+                var family = $"Gordium {(kind == "window" ? "window" : kind + " door")} {BuildData.G(w)} x {BuildData.G(h)} in ({model.TypeSuffix})";
                 var symbol = kind == "window"
                     ? HouseDraw.WindowFamily(app, doc, new JsonObject { ["id"] = key, ["width"] = w / 12, ["height"] = h / 12 }, family)
                     : DoorFamily(app, doc, kind == "double", w / 12, h / 12, family);
                 using (var t = new Transaction(doc, "Gordium: name a made type"))
                 {
                     t.Start();
-                    symbol.Name = BuildData.OpeningTypeName(kind == "window" ? "Window" : "Door", w, h);
+                    symbol.Name = BuildData.OpeningTypeName(kind == "window" ? "Window" : "Door", w, h, model.TypeSuffix);
                     if (!symbol.IsActive)
                         symbol.Activate();
                     t.Commit();

@@ -505,10 +505,22 @@ LS1.0: 122 walls, 52 doors, 67 windows, 25 rooms, a floor; feet, origin at the S
    The log line `build_model` gives the counts drawn beside the data's, **every element not built with Revit's
    reason** (the script dropped them quietly), each door's flips and each room's area beside the sheet's.
 
+3. **Data with several levels** (the New York eval, `tools/evals/make_ny_build_data.py`, from the repository's own
+   description files, each element citing its source field): `levels` in place of `level`, each wall and room naming
+   its level (a door or window is on its wall's); `floors` (each slab's level, outline, thickness and top offset) in
+   place of the footprint; `ceilings` (thin solids in Ceilings whose undersides are the rooms' ceilings, as Record
+   houses draws them); `separations` (room separation lines); `lot` (a property line) and `spot_grades` (Gordium's
+   spot-grade markers); `type_suffix` (what the door and window types are named after). A door with no `swing_dir` is
+   left as Revit places it, never flipped on a guess. The template's levels the data doesn't have are deleted. The
+   steps of the eval: [the runbook, section 8](../../docs/revit/windows_trial_runbook.md#8-the-new-york-eval).
+
 How we know: `test_extract_build_data.py` (a made-up script that raises if run is read whole; every malformed part
 named; Ben's script, when `GORDIUM_MOCK_REVIT_SCRIPT` names it, gives 122/52/67/25) and `BuildDataTests` (the
 extractor's output read whole by the add-in; the script's names, marks, keyword picks and door flips; the floor
-outline; the request). The model itself is checked in Revit.
+outline; the request; the two New York buildings read whole on their levels, each Orangetown room closed by its own
+level's walls, and each malformed part of data with levels refused in words), `test_make_ny_build_data.py` (the
+committed data is a fresh build, every element names its source, and what is drawn equals the sources' numbers) and
+`test_ny_eval.py` (the marks, the requests and the comparison). The model itself is checked in Revit.
 
 ## Running it
 

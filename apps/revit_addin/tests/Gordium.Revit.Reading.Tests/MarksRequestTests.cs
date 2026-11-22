@@ -108,4 +108,34 @@ public sealed class MarksRequestTests
             floor.Model(), By, "2026-11-21");
         Assert.DoesNotContain(two.Writes, w => w.Mark == Marks.ClearWidth);
     }
+
+    [Fact]
+    public void A_window_is_found_by_its_Mark_and_its_type_marked_once()
+    {
+        // the New York eval (test_data/real_houses/orangetown_ny_80_south_william/eval_marks.yaml): each window's escape
+        // mark and its type's operation, by the window's Mark (WN01...), as a door is found by its Mark
+        var floor = new FakeFloor();
+        foreach (var id in new[] { "WN01", "WN02" })
+            floor.Marked.Add(new MarkedElement
+            {
+                UniqueId = FakeFloor.Uid(id), BuiltInCategory = Marks.Windows, Name = "36 x 54", Number = id, Family = "Fixed",
+                TypeUniqueId = "type-3046", PhaseCreated = FakeFloor.Phase,
+            });
+        var plan = MarksRequest.Plan(Entries(
+            new JsonObject { ["window"] = "WN01", ["mark"] = "Gordium: Escape opening", ["value"] = true },
+            new JsonObject { ["window"] = "WN01", ["mark"] = "Gordium: Operation", ["value"] = "Double hung" },
+            new JsonObject { ["window"] = "WN02", ["mark"] = "Gordium: Operation", ["value"] = "Double hung" },
+            new JsonObject { ["window"] = "WN03", ["mark"] = "Gordium: Escape opening", ["value"] = true },         // no such window
+            new JsonObject { ["window"] = "dA", ["mark"] = "Gordium: Escape opening", ["value"] = true },           // a door's Mark
+            new JsonObject { ["window"] = "WN02", ["mark"] = "Gordium: Exit door", ["value"] = true }),             // not bound to windows
+            floor.Model(), By, "2026-11-21");
+        Assert.Contains(plan.Writes, w => w.Element == FakeFloor.Uid("WN01") && w.Mark == Marks.EscapeOpening && w.Value.Integer == 1);
+        // the two windows share a type: its operation written once, on the type
+        Assert.Single(plan.Writes, w => w.Mark == Marks.Operation && w.OnType && w.Element == "type-3046" && w.Value.Text == "Double hung");
+        Assert.Equal(2, plan.Writes.Count);
+        Assert.Contains(plan.Refused, r => r.Contains("no window Mark WN03"));
+        Assert.Contains(plan.Refused, r => r.Contains("no window Mark dA"));
+        Assert.Contains(plan.Refused, r => r.Contains("Gordium: Exit door isn't bound to OST_Windows"));
+        Assert.Equal(3, plan.Refused.Count);
+    }
 }

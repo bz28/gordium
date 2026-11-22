@@ -9,32 +9,85 @@ public readonly record struct PlanPoint(double X, double Y);
 /// <summary>A wall of the data: its centre line from <see cref="Start"/> to <see cref="End"/> on the level.
 /// <see cref="NoJoinStart"/> and <see cref="NoJoinEnd"/>: Revit is not to join the wall at that end (a trimmed end, a
 /// fill's ends: a join there with a wall it overlaps made Revit delete both, "Can't keep elements joined", the Children's
-/// Odyssey build, 2026-11-21).</summary>
+/// Odyssey build, 2026-11-21). <see cref="Level"/>: the level it stands on (a name in <see cref="BuildModel.Levels"/>;
+/// null: the data's one level).</summary>
 public sealed record BuildWall(int Id, PlanPoint Start, PlanPoint End, double ThicknessIn, string Status, bool SmokePartition,
-                               string? FireRating, double HeightFt, bool Exterior, bool NoJoinStart = false, bool NoJoinEnd = false);
+                               string? FireRating, double HeightFt, bool Exterior, bool NoJoinStart = false, bool NoJoinEnd = false,
+                               string? Level = null);
 
 /// <summary>A door of the data (<see cref="Number"/> its place in the list from 1, as the script's marks D01...): its
-/// centre on its host wall, <see cref="SwingDir"/> the side its leaf opens to, <see cref="Hinge"/> its hinge jamb (a
-/// single door's; none on a double).</summary>
+/// centre on its host wall, <see cref="SwingDir"/> the side its leaf opens to (none when the source doesn't say: the
+/// door is left as Revit places it, never flipped on a guess), <see cref="Hinge"/> its hinge jamb (a single door's; none
+/// on a double, or when the source doesn't say).</summary>
 public sealed record BuildDoor(int Number, PlanPoint Center, double WidthIn, double HeightIn, string Kind, int HostWall,
-                               PlanPoint SwingDir, PlanPoint? Hinge)
+                               PlanPoint? SwingDir, PlanPoint? Hinge)
 {
     public bool IsDouble => Kind == "double";
 }
 
-/// <summary>A window of the data (<see cref="Number"/> from 1, as the script's marks WN01...).</summary>
+/// <summary>A window of the data (<see cref="Number"/> from 1, as the script's marks WN01...), its sill above its
+/// host wall's level.</summary>
 public sealed record BuildWindow(int Number, PlanPoint Center, double WidthIn, double HeightIn, double SillIn, int HostWall);
 
-/// <summary>A room of the data: Revit places it at <see cref="TagPoint"/> and finds its outline from the walls;
-/// <see cref="Boundary"/> and <see cref="AreaSf"/> (the sheet's) are kept to compare with what Revit finds.</summary>
-public sealed record BuildRoom(string Number, string Name, PlanPoint TagPoint, IReadOnlyList<PlanPoint> Boundary, double? AreaSf);
+/// <summary>A room of the data: Revit places it at <see cref="TagPoint"/> on its <see cref="Level"/> (null: the data's
+/// one level) and finds its outline from the walls; <see cref="Boundary"/> and <see cref="AreaSf"/> (the sheet's) are
+/// kept to compare with what Revit finds.</summary>
+public sealed record BuildRoom(string Number, string Name, PlanPoint TagPoint, IReadOnlyList<PlanPoint> Boundary, double? AreaSf,
+                               string? Level = null);
+
+/// <summary>A level of the data (<c>levels</c>): its name and elevation, feet.</summary>
+public sealed record BuildLevel(string Name, double ElevationFt);
+
+/// <summary>A floor slab of the data (<c>floors</c>): on its level, its top <see cref="TopOffsetFt"/> above the level,
+/// its outline (no closing point) and its thickness.</summary>
+public sealed record BuildFloor(string Level, IReadOnlyList<PlanPoint> Outline, double ThicknessIn, double TopOffsetFt);
+
+/// <summary>A room's ceiling of the data (<c>ceilings</c>): a thin solid (a DirectShape in Ceilings, as HouseDraw draws
+/// one) whose underside, at <see cref="UndersideFt"/> (an elevation, feet), covers its outline (no closing point).</summary>
+public sealed record BuildCeiling(string Name, IReadOnlyList<PlanPoint> Outline, double UndersideFt, double ThicknessIn);
+
+/// <summary>A room separation line of the data (<c>separations</c>), on its level.</summary>
+public sealed record BuildSeparation(string Level, PlanPoint Start, PlanPoint End);
+
+/// <summary>A point of the ground (<c>spot_grades</c>), drawn as Gordium's spot-grade marker (read when
+/// <c>Gordium: Ground from</c> says "Spot grades").</summary>
+public sealed record BuildSpot(double X, double Y, double Z);
 
 /// <summary>A building to draw in a new Revit project (apps/revit_addin/tools/extract_build_data.py writes it from a
 /// drawing script's DATA): one level, its walls, the doors and windows in them, its rooms and the floor under its
-/// footprint (a closed ring: its last point its first).</summary>
+/// footprint (a closed ring: its last point its first). Data with <c>levels</c> in place of <c>level</c>
+/// (apps/revit_addin/tools/evals/make_ny_build_data.py) has several, each wall and room on one by name (a door or window on
+/// its wall's), and may give its own floor slabs (<c>floors</c>, in place of the footprint), rooms' ceilings, room
+/// separation lines, the lot (a property line) and spot grades.</summary>
 public sealed record BuildModel(string Project, string LevelName, double LevelElevation, IReadOnlyList<BuildWall> Walls,
                                 IReadOnlyList<BuildDoor> Doors, IReadOnlyList<BuildWindow> Windows, IReadOnlyList<BuildRoom> Rooms,
-                                IReadOnlyList<PlanPoint> Footprint, string? SourceFile, string? SourceSha256);
+                                IReadOnlyList<PlanPoint> Footprint, string? SourceFile, string? SourceSha256)
+{
+    /// <summary>Every level, as the data lists them (the one level when it gives <c>level</c>).</summary>
+    public IReadOnlyList<BuildLevel> Levels { get; init; } = [new(LevelName, LevelElevation)];
+
+    /// <summary>The floor slabs (<c>floors</c>); empty: the one floor under <see cref="Footprint"/>.</summary>
+    public IReadOnlyList<BuildFloor> Floors { get; init; } = [];
+
+    /// <summary>The rooms' ceilings (<c>ceilings</c>).</summary>
+    public IReadOnlyList<BuildCeiling> Ceilings { get; init; } = [];
+
+    /// <summary>The room separation lines (<c>separations</c>).</summary>
+    public IReadOnlyList<BuildSeparation> Separations { get; init; } = [];
+
+    /// <summary>The lot's outline (no closing point), drawn as a property line at elevation 0; null: no lot.</summary>
+    public IReadOnlyList<PlanPoint>? Lot { get; init; }
+
+    /// <summary>The spot grades (<c>spot_grades</c>).</summary>
+    public IReadOnlyList<BuildSpot> SpotGrades { get; init; } = [];
+
+    /// <summary>What the door and window types are named after (<c>Door 36" x 84" (LS1.0)</c>): the data's
+    /// <c>type_suffix</c>, or the life-safety sheet LS1.0 the first data came from.</summary>
+    public string TypeSuffix { get; init; } = "LS1.0";
+
+    /// <summary>The level a wall or room stands on: its own (by name), or the one level.</summary>
+    public BuildLevel LevelOf(string? name) => Levels.First(l => l.Name == (name ?? LevelName));
+}
 
 /// <summary>A correction the request makes to the data before drawing: wall W<see cref="Wall"/>'s end moved to
 /// <see cref="ExtendEndTo"/> (along its own line, at most <see cref="BuildData.MaxCorrection"/> ft), and why. Applied
@@ -299,10 +352,71 @@ public static class BuildData
             p.Add($"data: units is {data["units"]?.ToJsonString() ?? "missing"}, not \"feet\"");
         string levelName = "";
         double elevation = 0;
-        if (data["level"] is not JsonObject level || Str(level["name"]) is not { } ln || ln.Trim() == "" || !Num(level["elevation_ft"], out elevation))
+        // one level (`level`, the script's), or several (`levels`), never both: each wall and room then names its own
+        var levels = new List<BuildLevel>();
+        var several = data.ContainsKey("levels");
+        if (several && data.ContainsKey("level"))
+            p.Add("data: gives both level and levels: one or the other");
+        else if (several)
+        {
+            if (data["levels"] is not JsonArray given || given.Count == 0)
+                p.Add("data: levels isn't a list of levels");
+            else
+                foreach (var (n, k) in given.Select((n, k) => (n, k)))
+                {
+                    if (n is not JsonObject lo || Str(lo["name"]) is not { } name || name.Trim() == "" || !Num(lo["elevation_ft"], out var z))
+                        p.Add($"level {k}: not a level with a name and elevation_ft");
+                    else if (levels.Any(l => l.Name == name))
+                        p.Add($"level {k}: a second level named {name}");
+                    else if (levels.Any(l => Math.Abs(l.ElevationFt - z) < 1e-6))
+                        p.Add(I($"level {k}: a second level at {z} ft"));
+                    else
+                        levels.Add(new BuildLevel(name, z));
+                }
+            if (levels.Count > 0)
+                (levelName, elevation) = (levels[0].Name, levels[0].ElevationFt);
+        }
+        else if (data["level"] is not JsonObject level || Str(level["name"]) is not { } ln || ln.Trim() == "" || !Num(level["elevation_ft"], out elevation))
             p.Add("data: level isn't a level with a name and elevation_ft");
         else
+        {
             levelName = ln;
+            levels.Add(new BuildLevel(ln, elevation));
+        }
+        // an element's level: with several, required and one of them; with one, not given (or that one)
+        string? LevelKey(JsonObject o, string where)
+        {
+            if (!o.ContainsKey("level"))
+            {
+                if (several)
+                    p.Add($"{where}: no level (the data has several)");
+                return null;
+            }
+            var name = Str(o["level"]);
+            if (name is null || levels.All(l => l.Name != name))
+            {
+                p.Add($"{where}: level is {o["level"]?.ToJsonString() ?? "null"}, not one of the data's levels");
+                return null;
+            }
+            return name;
+        }
+        // a closed ring of points, given with its last point its first: returned without it
+        List<PlanPoint>? Ring(JsonNode? n, string where, int least = 3)
+        {
+            if (n is not JsonArray a || a.Count < least + 1 || !a.All(x => Pt(x, out _)))
+            {
+                p.Add($"{where}: not a closed ring of {least} or more points [x, y]");
+                return null;
+            }
+            var pts = a.Select(x => { Pt(x, out var q); return q; }).ToList();
+            if (Distance(pts[0], pts[^1]) > 1e-9)
+            {
+                p.Add($"{where}: its last point isn't its first");
+                return null;
+            }
+            pts.RemoveAt(pts.Count - 1);
+            return pts;
+        }
 
         var walls = new List<BuildWall>();
         var ids = new HashSet<int>();
@@ -345,7 +459,8 @@ public static class BuildData
             var exterior = Bool(w["exterior"]);
             if (exterior is null)
                 p.Add($"{where}: exterior isn't true or false");
-            walls.Add(new BuildWall(id, start, end, thick, status ?? "", smoke ?? false, rating, height, exterior ?? false));
+            walls.Add(new BuildWall(id, start, end, thick, status ?? "", smoke ?? false, rating, height, exterior ?? false,
+                                    Level: LevelKey(w, where)));
         }
 
         int Host(JsonObject o, string where)
@@ -366,9 +481,18 @@ public static class BuildData
             if (kind is not ("single" or "double"))
                 p.Add($"{where}: kind is {d["kind"]?.ToJsonString() ?? "missing"}, not \"single\" or \"double\"");
             var host = Host(d, where);
-            var swing = NeedPt(d, where, "swing_dir");
-            if (d["swing_dir"] is not null && Pt(d["swing_dir"], out _) && Math.Abs(Math.Sqrt(swing.X * swing.X + swing.Y * swing.Y) - 1) >= 0.01)
-                p.Add($"{where}: swing_dir is {d["swing_dir"]!.ToJsonString()}, not a unit vector [x, y]");
+            // the script's data always gives a swing; data whose source doesn't say leaves it out (several levels only:
+            // the script's own data keeps its check that every door has one)
+            PlanPoint? swing = null;
+            if (several && !d.ContainsKey("swing_dir"))
+                swing = null;
+            else
+            {
+                var sw = NeedPt(d, where, "swing_dir");
+                if (d["swing_dir"] is not null && Pt(d["swing_dir"], out _) && Math.Abs(Math.Sqrt(sw.X * sw.X + sw.Y * sw.Y) - 1) >= 0.01)
+                    p.Add($"{where}: swing_dir is {d["swing_dir"]!.ToJsonString()}, not a unit vector [x, y]");
+                swing = sw;
+            }
             PlanPoint? hinge = null;
             if (d.ContainsKey("hinge"))
             {
@@ -412,10 +536,73 @@ public static class BuildData
                 else
                     p.Add($"{where}: area_sf is {r["area_sf"]?.ToJsonString() ?? "null"}, not a number");
             }
-            rooms.Add(new BuildRoom(number ?? "", name ?? "", tag, boundary, area));
+            rooms.Add(new BuildRoom(number ?? "", name ?? "", tag, boundary, area, LevelKey(r, where)));
         }
+        if (rooms.GroupBy(r => r.Number).FirstOrDefault(g => g.Count() > 1) is { } twice && several)
+            p.Add($"room number {twice.Key}: given to {twice.Count()} rooms (marks find a room by its number)");
+
+        // ---- what data with several levels may give besides: its floors, ceilings, separation lines, lot, ground ----
+        List<JsonObject> Optional(string key) => data.ContainsKey(key) ? List(key) : [];
+        var floors = new List<BuildFloor>();
+        foreach (var (f, k) in Optional("floors").Select((f, k) => (f, k)))
+        {
+            var where = $"floor {k + 1}";
+            var lv = LevelKey(f, where);
+            var outline = Ring(f["outline"], $"{where}: outline");
+            var thick = Need(f, where, "thickness_in", v => v > 0, "a thickness over 0");
+            var top = f.ContainsKey("top_offset_ft") ? Need(f, where, "top_offset_ft", _ => true, "a number") : 0;
+            if (lv is not null && outline is not null)
+                floors.Add(new BuildFloor(lv, outline, thick, top));
+        }
+        var ceilings = new List<BuildCeiling>();
+        foreach (var (c, k) in Optional("ceilings").Select((c, k) => (c, k)))
+        {
+            var where = $"ceiling {k + 1}";
+            var name = Str(c["name"]);
+            if (name is null || name.Trim() == "")
+                p.Add($"{where}: name isn't text");
+            var outline = Ring(c["outline"], $"{where}: outline");
+            var under = Need(c, where, "underside_ft", _ => true, "an elevation");
+            var thick = Need(c, where, "thickness_in", v => v > 0, "a thickness over 0");
+            if (name is not null && outline is not null)
+                ceilings.Add(new BuildCeiling(name, outline, under, thick));
+        }
+        var separations = new List<BuildSeparation>();
+        foreach (var (s, k) in Optional("separations").Select((s, k) => (s, k)))
+        {
+            var where = $"separation {k + 1}";
+            var lv = LevelKey(s, where);
+            var (a, b) = (NeedPt(s, where, "start"), NeedPt(s, where, "end"));
+            if (Distance(a, b) < 0.01)
+                p.Add($"{where}: its start and end are the same point");
+            if (lv is not null)
+                separations.Add(new BuildSeparation(lv, a, b));
+        }
+        List<PlanPoint>? lot = null;
+        if (data.ContainsKey("lot"))
+        {
+            if (data["lot"] is not JsonObject lo)
+                p.Add("data: lot isn't an object with an outline");
+            else
+                lot = Ring(lo["outline"], "lot: outline");
+        }
+        var spots = new List<BuildSpot>();
+        foreach (var (s, k) in Optional("spot_grades").Select((s, k) => (s, k)))
+        {
+            if (s["at"] is JsonArray { Count: 3 } at && Num(at[0], out var x) && Num(at[1], out var y) && Num(at[2], out var z))
+                spots.Add(new BuildSpot(x, y, z));
+            else
+                p.Add($"spot grade {k + 1}: at isn't a point [x, y, z]");
+        }
+        if (!several && (floors.Count > 0 || ceilings.Count > 0 || separations.Count > 0 || lot is not null || spots.Count > 0))
+            p.Add("data: floors, ceilings, separations, a lot and spot grades are read only with levels");
         var footprint = new List<PlanPoint>();
-        if (data["footprint"] is JsonArray fp && fp.Count >= 4 && fp.All(n => Pt(n, out _)))
+        if (several && !data.ContainsKey("footprint"))
+        {
+            if (floors.Count == 0)
+                p.Add("data: no floors and no footprint (with levels, give the floors)");
+        }
+        else if (data["footprint"] is JsonArray fp && fp.Count >= 4 && fp.All(n => Pt(n, out _)))
         {
             footprint.AddRange(fp.Select(n => { Pt(n, out var q); return q; }));
             if (Distance(footprint[0], footprint[^1]) > 1e-9)
@@ -423,6 +610,11 @@ public static class BuildData
         }
         else
             p.Add("footprint: not a list of 4 or more points [x, y]");
+        if (several && floors.Count > 0 && footprint.Count > 0)
+            p.Add("data: gives both floors and a footprint: one or the other");
+        var suffix = data.ContainsKey("type_suffix") ? Str(data["type_suffix"]) : "LS1.0";
+        if (suffix is null || suffix.Trim() == "")
+            p.Add($"data: type_suffix is {data["type_suffix"]?.ToJsonString()}, not text");
         // as the extractor: no stats (or null) is no check; stats not an object is refused; each count given must be a
         // number equal to the data's (2.0 for 2 is equal; null, text or true is not)
         if (data["stats"] is JsonObject stats)
@@ -437,7 +629,11 @@ public static class BuildData
             throw new BuildDataException(p);
         var source = data["extracted_from"] as JsonObject;
         return new BuildModel(project!, levelName, elevation, walls, doors, windows, rooms, footprint,
-                              Str(source?["file"]), Str(source?["sha256"]));
+                              Str(source?["file"]), Str(source?["sha256"]))
+        {
+            Levels = levels, Floors = floors, Ceilings = ceilings, Separations = separations, Lot = lot, SpotGrades = spots,
+            TypeSuffix = suffix!,
+        };
     }
 
     // ---- names and marks, as the script gives them -------------------------------------------------------------
@@ -461,7 +657,8 @@ public static class BuildData
     public static string WindowMark(BuildWindow w) => $"WN{w.Number:00}";
 
     /// <summary>The door or window type of a size: <c>Door 36" x 84" (LS1.0)</c>, <c>Window 45" x 48" (LS1.0)</c>.</summary>
-    public static string OpeningTypeName(string tag, double widthIn, double heightIn) => $"{tag} {G(widthIn)}\" x {G(heightIn)}\" (LS1.0)";
+    public static string OpeningTypeName(string tag, double widthIn, double heightIn, string suffix = "LS1.0") =>
+        $"{tag} {G(widthIn)}\" x {G(heightIn)}\" ({suffix})";
 
     /// <summary>The family to take a type from, as the script picks it: the first of <paramref name="labels"/> (each a
     /// family's name and its type's) holding the first keyword that any holds (ignoring case), else the first; none
