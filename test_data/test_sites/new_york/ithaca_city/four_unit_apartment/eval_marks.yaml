@@ -1,0 +1,48 @@
+# The Building Code eval's marks for the four-unit building (apartment.yaml), built in Revit from revit_build_data.json
+# (apps/revit_addin/tools/evals/make_ny_build_data.py) by the add-in's build_model_request, then marked by its
+# set_marks_request and checked by its check_project_request (apps/revit_addin/tools/eval_marks_request.py writes
+# them; the steps: docs/revit/windows_trial_runbook.md, "The Building Code eval"). Every mark is apartment.yaml's own
+# value, so the model checked says exactly what the eval's interior description says (make_ny_build_data.interior_of)
+# and the check can be held to expected.yaml. Gordium's own eval building, not a real project.
+#
+# Not a rulebook: no `rules:` key.
+
+model: four_unit_apartment_built.rvt
+by: eval assumption (Gordium, not the architect)
+date: "2026-11-22"
+
+# Every Room the build places (revit_build_data.json rooms, numbered in its order: Level 1's five, then Level 2's),
+# with the route marks apartment.yaml gives each (Gordium: Use, Can be locked, Pass through)
+room_defaults: {sleeping: false}
+rooms:
+  - {number: "1", name: Apartment South L1, use: Other, lockable: true, pass_through: false, why: "apartment.yaml rooms[S]: a dwelling unit, locked against people passing through"}
+  - {number: "2", name: Stair West L1, use: Other, lockable: false, pass_through: false, why: "apartment.yaml rooms[SW]: the west exit stair enclosure"}
+  - {number: "3", name: Corridor L1, use: Corridor, lockable: false, pass_through: true, why: "apartment.yaml rooms[C]: the corridor the apartments open onto"}
+  - {number: "4", name: Stair East L1, use: Other, lockable: false, pass_through: false, why: "apartment.yaml rooms[SE]: the east exit stair enclosure"}
+  - {number: "5", name: Apartment North L1, use: Other, lockable: true, pass_through: false, why: "apartment.yaml rooms[N]"}
+  - {number: "6", name: Apartment South L2, use: Other, lockable: true, pass_through: false, why: "apartment.yaml rooms[S]"}
+  - {number: "7", name: Stair West L2, use: Other, lockable: false, pass_through: false, why: "apartment.yaml rooms[SW]"}
+  - {number: "8", name: Corridor L2, use: Corridor, lockable: false, pass_through: true, why: "apartment.yaml rooms[C]"}
+  - {number: "9", name: Stair East L2, use: Other, lockable: false, pass_through: false, why: "apartment.yaml rooms[SE]"}
+  - {number: "10", name: Apartment North L2, use: Other, lockable: true, pass_through: false, why: "apartment.yaml rooms[N]"}
+
+# The doors into the stair enclosures (D01, D02 on Level 1; D07, D08 on Level 2: revit_build_data.json doors in order),
+# each Gordium: Exit "Exit stair enclosure" (apartment.yaml doors[W], doors[E]). The stairs' outside doors on Level 1
+# (D05, D06) are the exits' discharge, not marked (apartment.yaml discharge_doors)
+exits:
+  - {door: D01, exit: Exit stair enclosure, why: "apartment.yaml doors[W] on Level 1"}
+  - {door: D02, exit: Exit stair enclosure, why: "apartment.yaml doors[E] on Level 1"}
+  - {door: D07, exit: Exit stair enclosure, why: "apartment.yaml doors[W] on Level 2"}
+  - {door: D08, exit: Exit stair enclosure, why: "apartment.yaml doors[E] on Level 2"}
+
+# Project Information: the lot facts Check my project needs (a stand-in lot), and the building's statements
+project_information:
+  - {mark: "Gordium: Zone", value: R-3a, why: "STAND-IN: Check my project sends nothing without a zone; R-3a lists multiple family dwellings. Zoning rows are not part of this eval"}
+  - {mark: "Gordium: Use", value: multiple_family, why: "four dwelling units in one building (apartment.yaml)"}
+  - {mark: "Gordium: Lot surveyed", value: false, why: "the stand-in lot is no survey (the cautious word)"}
+  - {mark: "Gordium: Corner lot", value: false, why: "the stand-in lot has one street, on its south edge"}
+  - {mark: "Gordium: Street edge", value: "-20 -30 80 -30", why: "apartment.yaml lot's south edge, in Revit's internal feet (a new project's shared coordinates)"}
+  - {mark: "Gordium: Ground from", value: Spot grades, why: "apartment.yaml ground 0, drawn as four spot grades"}
+  - {mark: "Gordium: Stories", value: 2, why: "apartment.yaml levels: two stories"}
+  - {mark: "Gordium: Occupancy groups", value: R-2, why: "apartment.yaml building.occupancy_groups (BCNYS 310.3: more than two dwelling units, permanent occupants)"}
+  - {mark: "Gordium: Sprinkler system", value: None, why: "apartment.yaml building.sprinkler_system none"}

@@ -301,7 +301,13 @@ def test_the_orangetown_reading_checked_by_the_real_worker_compares_as_predicted
     site = json.loads((REPO / "test_data/host_conformance/expected/01_box_house.site.json").read_text(encoding="utf-8"))
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-1b",
              "use": "one_family_detached", "lot_surveyed": False, "street_line": [[[0, 0], [60, 0]]]}
-    got = _answer(site, facts, as_read(recordings.drawing(compare.HOUSE.name)))
+    interior = as_read(recordings.drawing(compare.HOUSE.name))
+    # the building block the add-in reads from the marks file's Gordium: Stories above grade plane (BuildingFacts):
+    # without it the check can't tell which New York code governs (code_scope.py) and runs both
+    stated = {e["mark"]: e["value"] for e in load(HOUSE, "eval_marks.yaml")["project_information"]}
+    interior["building"] = {"stories_above_grade_plane": stated["Gordium: Stories above grade plane"]}
+    got = _answer(site, facts, interior)
+    assert got["result"]["which_code"]["code"] == "residential_code"
     (tmp_path / "a.json").write_text(json.dumps(got), encoding="utf-8")
     made = compare.compare_orangetown(compare.result_of(tmp_path / "a.json"))
     assert made["ok"], made["summary"]

@@ -34,21 +34,21 @@ partitions:
   - {name: west stair wall, start: [9.25, 12], end: [9.25, 18]}
   - {name: east stair wall, start: [50.75, 12], end: [50.75, 18]}
 
-# doors on every story: centre, the wall's direction (along), the rooms either side; an exit's kind and which exit
+# doors on every story: centre, the wall's direction (along), the rooms either side, and an exit's kind (Gordium:
+# Exit); which exit a door into a stair enclosure enters is the enclosure's room on that story, as the Revit reader
+# reads it (RouteReader.ExitId: every door into one stair is one exit)
 doors:
   - {id: W, name: Stair West door, at: [9.25, 15], along: [0, 1], sides: [C, SW], wall: west stair wall,
-     exit: Exit stair enclosure, exit_id: stair_west}
+     exit: Exit stair enclosure}
   - {id: E, name: Stair East door, at: [50.75, 15], along: [0, 1], sides: [C, SE], wall: east stair wall,
-     exit: Exit stair enclosure, exit_id: stair_east}
+     exit: Exit stair enclosure}
   - {id: DS, name: Apartment South door, at: [30, 11.75], along: [1, 0], sides: [S, C], wall: south corridor wall}
   - {id: DN, name: Apartment North door, at: [30, 18.25], along: [1, 0], sides: [N, C], wall: north corridor wall}
-# Level 1 only: each stair enclosure's door straight outside (the same exit as its enclosure: 1016.1 counts the
-# enclosure once)
+# Level 1 only: each stair enclosure's door straight outside: the exit's discharge, not an exit of its own (the exit
+# is entered at the enclosure's door, 1016.1: "an entrance to a vertical exit enclosure"), so not marked
 discharge_doors:
-  - {id: WO, name: Stair West outside door, at: [-0.25, 15], along: [0, 1], sides: [SW, outside], wall: west,
-     exit: Exterior door at discharge, exit_id: stair_west}
-  - {id: EO, name: Stair East outside door, at: [60.25, 15], along: [0, 1], sides: [SE, outside], wall: east,
-     exit: Exterior door at discharge, exit_id: stair_east}
+  - {id: WO, name: Stair West outside door, at: [-0.25, 15], along: [0, 1], sides: [SW, outside], wall: west}
+  - {id: EO, name: Stair East outside door, at: [60.25, 15], along: [0, 1], sides: [SE, outside], wall: east}
 
 # the lot (a stand-in: no survey; Check project needs one), the street on its south edge, flat ground at 0
 lot: [-20, -30, 80, 60]

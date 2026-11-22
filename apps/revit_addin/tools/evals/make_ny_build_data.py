@@ -419,7 +419,8 @@ def interior_of() -> dict:
                              "wall_thickness": t},
                     "sides": [s if s == "outside" else f"{L}{s}" for s in d["sides"]]}
             if "exit" in d:
-                door["exit_kind"], door["exit_id"] = words[d["exit"]], d["exit_id"]
+                # the enclosure's room on this story (RouteReader.ExitId: the room every door of which is the exit's)
+                door["exit_kind"], door["exit_id"] = words[d["exit"]], f"{L}{d['sides'][1]}"
             doors.append(door)
     return {"format": "gordium.interior/1", "units": "ft",
             "levels": [{"id": lv["id"], "name": lv["name"], "elevation": lv["elevation"]} for lv in a["levels"]],

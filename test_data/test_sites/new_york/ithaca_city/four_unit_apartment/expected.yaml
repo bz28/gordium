@@ -1,0 +1,73 @@
+# Hand-worked expected results for the four-unit eval building (apartment.yaml) under the 2025 Building Code of New
+# York State (regulations/jurisdictions/new_york/new_york_state_building/5_building_code_rules/drafted/general.yaml),
+# worked by hand from the plan before the check was run, 2026-11-22. Checked by
+# packages/design_checker/tests/test_four_unit_apartment.py (the interior description the Revit reader gives) and by
+# apps/revit_addin/tools/evals/compare_check_result.py's `which_code` and egress rows once built in Revit.
+#
+# The building as stated on Project Information: Group R-2 (BCNYS 310.3), no sprinkler system.
+
+which_code:
+  code: building_code
+  title: 2025 Building Code of New York State
+  # 310.3: "Residential Group R-2 occupancies containing sleeping units or more than two dwelling units where the
+  # occupants are primarily permanent in nature, including: Apartment houses"; RCNYS R101.2 lists only one- and
+  # two-family dwellings, townhouses and the like; BCNYS 101.2: "every building or structure"
+  why: "a building of Group R-2, none of the dwellings R101.2 lists (101.2)"
+
+# Each story (Level 1, Level 2), worked from the plan:
+stories:
+  story_exit_count: 2              # the two stair enclosures (each entered by one door on the story)
+  # 1007.1.1: the two exits' doors measured in a straight line, nearest points of their clear openings: the west door
+  # in the wall x 9 to 9.5, the east in x 50.5 to 51, so 50.5 - 9.5 = 41.0 ft; the story's diagonal over the outside
+  # faces (x -0.5 to 60.5, y -0.5 to 30.5): sqrt(61^2 + 31^2) = sqrt(4682) = 68.4251 ft; 41.0 / 68.4251 = 0.5992
+  exit_remoteness_ratio: 0.5992
+  # 1007.1.1: "not less than one-half of the length of the maximum overall diagonal dimension"; one-third only with a
+  # 903.3.1.1 or 903.3.1.2 system (none here): 0.5992 >= 0.5, complies on each story
+  remoteness: pass
+
+# Each apartment (and each stair enclosure, a room the routes count as a space): one exit access doorway
+spaces:
+  space_exit_count: 1
+
+# Every rule's one answer (the check's `results`), with why. Pass only where the measured figures settle it; a figure
+# Gordium can't measure yet (occupant loads: no mark yet) needs review, saying so.
+results:
+  general.bc_1007_1_1_remoteness: pass                 # 0.5992 >= 1/2 on both stories (above)
+  general.bc_1007_1_1_space_remoteness: pass           # "space_exit_count < 2 or ...": every space has one doorway
+  general.bc_1007_1_2_space_three_or_more: pass        # "space_exit_count < 3 or ...": none has three
+  general.bc_1006_2_1_1_three_or_more_exits: needs_review   # reads space_occupant_load: not measured (no mark yet)
+  general.bc_1006_3_3_story_exits: needs_review        # reads story_occupant_load and story_first_above_or_below_grade: not measured
+  general.bc_508_2_3_accessory_area: needs_review      # no accessory rooms (0 sf both readings), but the story's net and gross floor areas aren't measured
+  # Group I-4 rules: applies_when occupancy_group_i4, stated no (Group R-2)
+  general.bc_1006_2_1_two_exits: not_applicable
+  general.bc_1016_2_intervening_spaces: not_applicable
+  general.bc_1017_2_travel_distance: not_applicable
+  general.bc_1020_5_dead_end: not_applicable
+  # the 23 flags: a person's check, each its own line (other_occupancy_present is yes: Group R-2 is not I-4; the
+  # balcony and atrium flags' facts aren't stated, so they show)
+  general.bc_308_5_classification: needs_review
+  general.bc_308_5_1_group_e: needs_review
+  general.bc_308_5_2_religious_worship: needs_review
+  general.bc_308_5_3_five_or_fewer: needs_review
+  general.bc_308_5_4_dwelling_unit: needs_review
+  general.bc_508_2_1_classification: needs_review
+  general.bc_508_2_2_height: needs_review
+  general.bc_508_2_3_tabular_values: needs_review
+  general.bc_508_2_4_separation: needs_review
+  general.bc_table_1006_2_1_other_occupancies: needs_review
+  general.bc_1006_3_4_1_mixed_occupancies: needs_review
+  general.bc_table_1006_3_4_2__other_occupancies: needs_review
+  general.bc_1007_1_2_three_or_more_exits: needs_review
+  general.bc_1007_1_3_exit_access_stairways: needs_review
+  general.bc_1007_1_3_1_three_or_more_stairways: needs_review
+  general.bc_1016_2_other_occupancies: needs_review
+  general.bc_1016_2_1_multiple_tenants: needs_review
+  general.bc_table_1017_2_other_occupancies: needs_review
+  general.bc_1017_2_1_balcony_increase: needs_review
+  general.bc_1017_2_2_f1_s1_increase: needs_review
+  general.bc_1017_2_3_h5_increase: needs_review
+  general.bc_1017_3_2_3_atrium: needs_review
+  general.bc_1020_5_other_occupancies: needs_review
+
+# The section's state: needs review (never complies while occupant loads aren't read and the flags stand)
+state: needs_review
