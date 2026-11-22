@@ -44,16 +44,17 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
     drawn = travel["sheet_line_as_drawn"]
     rules = ("general.ibc_1016_1_travel_distance", "general.nfpa_16_2_6_2_point_in_room_to_exit")
     assert travel["agreement"]["no_longer"] == (ours <= drawn + max(0.02 * drawn, 2.0))
-    own = round(math.dist(travel["gordium"]["from"], travel["gordium"]["to_no_clearance"]), 3)
-    assert travel["agreement"]["own_ends_straight"] == own
+    own = travel["gordium"]["own_ends_straight_exact"]
+    assert abs(own - math.dist(travel["gordium"]["from"], travel["gordium"]["to_no_clearance"])) < 0.002
+    assert travel["agreement"]["own_ends_straight"] == round(own, 3)
     assert travel["agreement"]["no_shorter_than_own_straight"] == (ours >= own - 1e-6)
     assert travel["agreement"]["end"]["sheet"] == travel["sheet_line_in_model"][-1]
     common = got["figures"]["common_path"]
-    assert common["agreement"]["own_ends_straight"] == round(
-        math.dist(common["gordium"]["from"], common["gordium"]["split_no_clearance"]), 3)
+    assert common["agreement"]["own_ends_straight"] == round(common["gordium"]["own_ends_straight_exact"], 3)
     assert travel["agreement"]["verdicts_same"] == {r: got["verdicts"]["rules"][r]["same"] for r in rules}
     assert travel["agreement"]["within_tolerance"] == (travel["agreement"]["no_longer"]
                                                        and travel["agreement"]["no_shorter_than_own_straight"]
+                                                       and travel["agreement"]["end"]["within_tolerance"]
                                                        and all(travel["agreement"]["verdicts_same"].values()))
     for name in ("travel_distance", "common_path", "dead_end", "remoteness", "diagonal"):
         assert "within_tolerance" in got["figures"][name]["agreement"] and got["figures"][name]["agreement"]["tolerance"]
@@ -118,6 +119,94 @@ def test_a_routes_point_at_a_length_is_on_its_pieces():
     assert make._point_at(pieces, 12 + 3 * math.pi) == pytest.approx((12 + 12 * math.sin(math.pi / 4),
                                                                       12 - 12 * math.cos(math.pi / 4)))
     assert make._point_at(pieces, 12 + 6 * math.pi) == pytest.approx((24.0, 12.0))
+
+
+def _fake(name, ours, start, end, straight):
+    """One figure as _judge_all reads it: the sheet's own (the committed eval's, the sheet's line and its ends), and
+    Gordium's figure, start and end; both its rules' verdicts the sheet's."""
+    sheet = {"travel_distance": (130.325, [[138.907, 84.49], [189.54, 42.277]]),
+             "common_path": (48.404, [[139.32, 84.31], [117.42, 49.563]])}[name]
+    key = "to_the_sheets_exit_no_clearance" if name == "travel_distance" else "no_clearance"
+    where = "to_no_clearance" if name == "travel_distance" else "split_no_clearance"
+    return {"sheet_stated": sheet[0], "sheet_line_as_drawn": sheet[0], "sheet_line_in_model": sheet[1],
+            "gordium": {"from": start, key: ours, where: end, "own_ends_straight_exact": straight}}
+
+
+def _judged(fig, name):
+    out = {"figures": {name: fig}, "verdicts": {"rules": {"r1": {"same": True}, "r2": {"same": True}},
+                                                "by_figure": {k: ["r1", "r2"] for k in ("travel_distance", "common_path")}}}
+    for f in ("travel_distance", "common_path"):
+        out["figures"].setdefault(f, _fake(f, 1.0, [0, 0], [0, 0], 0.0))
+    out["figures"].update({k: {"sheet_stated": 1.0, "sheet_line_in_model": [[0, 0]], "gordium": {}}
+                           for k in ("dead_end", "remoteness", "diagonal")})
+    out["figures"]["remoteness"]["gordium"] = {"farthest_pair_nearest_edges": 1.0, "farthest_pair_door_centres": 1.0}
+    out["figures"]["diagonal"]["gordium"] = {"corner_to_corner": 1.0}
+    out["storage"] = {"sheet_stated_sf": 1.0, "gordium_inside_sf": 1.0, "gordium_story_sf": [1.0]}
+    make._judge_all(out)
+    return out["figures"][name]["agreement"]
+
+
+def test_review_round_3_a_common_path_measured_too_short_never_agrees():
+    """Routes that really part about 41 ft from the start, a figure wrongly measured at 10 ft, both verdicts the
+    sheet's: the split point read at 10 ft along is some 31 ft short of the sheet line's end, so the end item, part
+    of the verdict, fails. (The floor alone passes: 10 ft along, the straight line is at most 10.)"""
+    start = [138.9, 84.483]
+    split = [start[0] - 10 * 21.9 / 41.07, start[1] - 10 * 34.747 / 41.07]        # 10 ft toward the sheet's end
+    got = _judged(_fake("common_path", 10.0, start, split, 10.0), "common_path")
+    assert got["no_longer"] and got["no_shorter_than_own_straight"] and got["end"]["apart"] > 30
+    assert got["end_within_tolerance"] is False and got["within_tolerance"] is False
+    right = _judged(_fake("common_path", 41.066, start, [116.921, 51.3], 39.802), "common_path")
+    assert right["within_tolerance"] is True                     # the committed figure, its verdicts made the same
+
+
+def test_review_round_3_a_travel_shorter_than_its_corner_to_exit_door_line_never_agrees():
+    """The travel's end is the sheet's exit's door centre, taken apart from the route: a figure shorter than the
+    straight line from the corner to it (65.568 ft) is a route measured too short."""
+    start, door = [138.9, 84.483], [189.533, 42.824]
+    got = _judged(_fake("travel_distance", 60.0, start, door, 65.568), "travel_distance")
+    assert got["no_longer"] and got["end"]["within_tolerance"]
+    assert got["no_shorter_than_own_straight"] is False and got["within_tolerance"] is False
+    assert _judged(_fake("travel_distance", 116.034, start, door, 65.568), "travel_distance")["within_tolerance"]
+
+
+def test_review_round_3_a_straight_route_is_never_too_short_by_rounding():
+    """The floor is the exact straight line, never one from coordinates rounded to 0.001 ft: a route that is the
+    straight line itself agrees."""
+    verdicts = {"a": {"same": True}}
+    exact = math.dist((0.0, 0.0), (30.0004, 40.0004))
+    assert make._no_longer(60.0, exact, verdicts, ["a"], "w", exact)["no_shorter_than_own_straight"] is True
+
+
+def test_review_round_3_the_floor_is_worked_from_exact_points_never_rounded_ones():
+    """_judge_all takes the exact straight line, not one from the eval file's coordinates rounded to 0.001 ft: here
+    the end (117.42, 49.5636) is written 49.564, which would make the straight line 0.0004 ft longer than the exact
+    route along it and call it too short."""
+    start, end = [87.42, 9.563], (117.42, 49.5636)
+    exact = math.dist(start, end)
+    got = _judged(_fake("common_path", exact, start, [117.42, 49.564], exact), "common_path")
+    assert got["no_shorter_than_own_straight"] is True and got["within_tolerance"] is True
+
+
+def test_review_round_3_the_travels_end_is_the_exit_door_never_a_point_read_off_the_route(tmp_path, monkeypatch):
+    """The travel's floor ends at the sheet's exit's door centre, taken apart from the route: a route whose length
+    is wrongly halved is caught (read off the route at its own length, the end would follow the error and the floor
+    could never fail)."""
+    from model_measurement.routes import paths
+    real = paths.StoryRoutes.route
+
+    def halved(self, point, exit_ids=None):
+        got = real(self, point, exit_ids)
+        return paths.Route(got.length / 2, got.pieces, got.doors, got.exit_id) if exit_ids else got
+
+    monkeypatch.setattr(paths.StoryRoutes, "route", halved)
+    src = tmp_path / "d.json"
+    src.write_text(json.dumps(day_care(branch=26)), encoding="utf-8")
+    got = make.main(src, tmp_path / "out.yaml",
+                    {"start_room": "k1", "sheet_exit": "B", "same_pair": ((-0.25, 15), (72.25, 15))})
+    travel = got["figures"]["travel_distance"]
+    assert travel["gordium"]["to_no_clearance"] == [72.25, 15.0]          # exit B's door centre, as day_care places it
+    assert travel["agreement"]["no_shorter_than_own_straight"] is False
+    assert travel["agreement"]["within_tolerance"] is False
 
 
 @pytest.mark.skipif(not os.environ.get("GORDIUM_CO_DESCRIPTION"),
