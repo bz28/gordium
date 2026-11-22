@@ -238,8 +238,9 @@ def ithaca_rd() -> dict:
               "exterior": True,
               "source": f"the house's {sides[k]} wall: its outer face on the spreadsheet's outline, x {x0:g} to {x1:g}, "
                         f"y {y0:g} to {y1:g} (left offset {cell['side_yard_smaller']}, front offset "
-                        f"{cell['front_yard']}, width {cell['lot_width']} - {cell['side_yard_smaller']} - "
-                        f"{cell['side_yard_larger']}, depth {cell['rear_yard']}); height {cell['building_height']}; "
+                        f"{cell['front_yard']}; width {house_w:g} and depth {house_d:g}, Inputs!B6 and B7, as "
+                        f"spreadsheet_design.yaml works them into side_yard_larger ({cell['side_yard_larger']}) and "
+                        f"rear_yard ({cell['rear_yard']})); height {cell['building_height']}; "
                         "thickness ASSUMED (assumptions)"} for k in range(4)]
     outer = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
     spots = [((x0 + x1) / 2, y0 - 1), (x1 + 1, (y0 + y1) / 2), ((x0 + x1) / 2, y1 + 1), (x0 - 1, (y0 + y1) / 2)]

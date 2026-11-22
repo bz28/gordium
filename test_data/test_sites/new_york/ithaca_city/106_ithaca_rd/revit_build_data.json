@@ -32,7 +32,7 @@
    "fire_rating": null,
    "height_ft": 35,
    "exterior": true,
-   "source": "the house's south (on the street side) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+   "source": "the house's south (on the street side) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9; width 53 and depth 35, Inputs!B6 and B7, as spreadsheet_design.yaml works them into side_yard_larger (Inputs!B3 - Inputs!B8 - Inputs!B6) and rear_yard (Inputs!B4 - Inputs!B9 - Inputs!B7)); height Inputs!B12; thickness ASSUMED (assumptions)"
   },
   {
    "id": 2,
@@ -51,7 +51,7 @@
    "fire_rating": null,
    "height_ft": 35,
    "exterior": true,
-   "source": "the house's east (right) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+   "source": "the house's east (right) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9; width 53 and depth 35, Inputs!B6 and B7, as spreadsheet_design.yaml works them into side_yard_larger (Inputs!B3 - Inputs!B8 - Inputs!B6) and rear_yard (Inputs!B4 - Inputs!B9 - Inputs!B7)); height Inputs!B12; thickness ASSUMED (assumptions)"
   },
   {
    "id": 3,
@@ -70,7 +70,7 @@
    "fire_rating": null,
    "height_ft": 35,
    "exterior": true,
-   "source": "the house's north (rear) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+   "source": "the house's north (rear) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9; width 53 and depth 35, Inputs!B6 and B7, as spreadsheet_design.yaml works them into side_yard_larger (Inputs!B3 - Inputs!B8 - Inputs!B6) and rear_yard (Inputs!B4 - Inputs!B9 - Inputs!B7)); height Inputs!B12; thickness ASSUMED (assumptions)"
   },
   {
    "id": 4,
@@ -89,7 +89,7 @@
    "fire_rating": null,
    "height_ft": 35,
    "exterior": true,
-   "source": "the house's west (left) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+   "source": "the house's west (left) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9; width 53 and depth 35, Inputs!B6 and B7, as spreadsheet_design.yaml works them into side_yard_larger (Inputs!B3 - Inputs!B8 - Inputs!B6) and rear_yard (Inputs!B4 - Inputs!B9 - Inputs!B7)); height Inputs!B12; thickness ASSUMED (assumptions)"
   }
  ],
  "doors": [],
