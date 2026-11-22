@@ -612,7 +612,8 @@ def test_25f_a_step_passing_a_third_place_or_a_place_reached_by_steps_alone_need
 
 
 def test_25g_a_floors_checks_look_at_its_own_places_only():
-    # an earlier floor's place on the shared graph joined by a step alone (built by hand: no real layout was found to
+    # pins the place-reached-by-steps-alone check's scoping only (the step-passing-a-third-place check's scoping is
+    # unpinned: no step of the branch lies near the leftover). An earlier floor's place on the shared graph joined by a step alone (built by hand: no real layout was found to
     # leave one, see test 25d), far off; then test 3's branch, a healthy floor, on the same graph: its checks look at
     # its own places only, so it is worked out (20 ft). Looking at every place of the graph, it would need review
     # ("a step of its centre lines ends on none")
