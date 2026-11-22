@@ -1,0 +1,1889 @@
+# A second, independent reading of every number in the brought-in pieces of the 2025 Building Code of New York State,
+# from the page images (rule_format/state_law.py says what is checked), as for the house code (sibling folder
+# new_york_state/) and Maine's NFPA 101.
+# Status of every piece: verified against the Public.Resource.Org copy only; check against a copy bought from ICC.
+document: gov.ny.building.2025.pdf
+copy_checked: 'The Public.Resource.Org copy on the Internet Archive (sha256 in 1_source_documents/sources.yaml):
+  ICC''s own PDF edition, real text in its fonts (no OCR). Verified against this copy only; check against a copy
+  bought from ICC.'
+second_reading:
+  by: claude_code/claude-opus-5-5 (two helper agents that never saw the extracted text, one for pp.32-53 and one
+    for pp.54-344, and a third helper for the comparison words)
+  'on': 2026-11-21
+  how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
+    labeled by its id (45 pages, 150 boxes); two helpers that never saw the extracted text transcribed every line
+    of every box from the images alone (tables row by row, raised characters written as sealed marks); the transcript
+    went through document_extraction/numbers.py: 148 pieces, 296 numbers, every piece agrees. The two tables were
+    also read a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, p.315
+    and p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into
+    its cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so
+    read. A third helper that saw only each piece''s transcribed text and its numbers'' values (and, for a table,
+    the sentence that uses it) marked each number''s comparison from the whole sentence (second_reading_comparisons);
+    where it differs from the recorded words, a flag says which is right. The transcript, the page images and the
+    comparison files are kept in the code cache (second_reading/step_1_*), outside the repo, since they hold the
+    book''s words.'
+pieces:
+  '202':
+    piece_sha256: d517861fa9698a910e750045fb415f0e7138ffa3e3a1ef2fd689171fda2f98b3
+    numbers:
+    - '202'
+    second_reading: agrees
+    second_reading_numbers:
+    - '202'
+    second_reading_comparisons:
+    - none
+  202:aggregate:
+    piece_sha256: eec9a8499f90c13f08aafd20ba719709b279b84538a5e3fcf3794e5d5a1a122e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:aisle:
+    piece_sha256: 1c9d4afb83000e62ce00aeea7586d1a63fdce836ef28d65c377e3996a3415f8c
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:approved:
+    piece_sha256: 72b7228fca4ede5244d1106a557d79570bec094fb5dbd50ade1be00f65ed7b58
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:area_for_masonry:
+    piece_sha256: 49a8e7872fff1138c3a7d2826201c44eb9dce3259647ecfeeefb54877458d080
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:area_building:
+    piece_sha256: 4c2fb086831f5dfedf68a651750722e1a70becc862564d98c24e347f0498f191
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:atrium:
+    piece_sha256: 090002320b9abb7f7175a132d5badf3d33b72fc2206f69a74a40c8ff2566deed
+    numbers:
+    - two or more
+    - '505'
+    second_reading: agrees
+    second_reading_numbers:
+    - two or more
+    - '505'
+    second_reading_comparisons:
+    - '>='
+    - none
+  202:automatic:
+    piece_sha256: d4a09578ec9aa29d640e81df267daa1a209a9dee6ac4ac76fc7358f405c78e9e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:automatic_sprinkler_system:
+    piece_sha256: 89aac7169d32c3a7900eb907bf184a3a4014edc235d60d095ab99964147411b6
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:basement:
+    piece_sha256: ccec38fa898298ee56cfe0079811a88dea1f5a8bf8a7f22f08813cf9475bec2b
+    numbers:
+    - '1612'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1612'
+    second_reading_comparisons:
+    - none
+  202:basement_for_flood_loads:
+    piece_sha256: c6371e0d6a5f2ad6aa55bc3d8c5b06c0d0b9d39b38c1ea81ce0d423046a50617
+    numbers:
+    - '1612'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1612'
+    second_reading_comparisons:
+    - none
+  202:boiling_point:
+    piece_sha256: 112ea86f91c3dfec7a5c3c7d54724214ed4181cc24594183535e45161d04ae22
+    numbers:
+    - 14.7 pound
+    - '101'
+    - 760 mm
+    - 20 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - 14.7 pound
+    - '101'
+    - 760 mm
+    - 20 percent
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+  202:brick:
+    piece_sha256: ace737611a111800c2bdec0be1bcdb84c474e991b0023a2b20ac660ff1125304
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:building:
+    piece_sha256: 924a33202ba3bbd7fd11d8f423e68fcb12cf05279ee44a2f45ce77ae23312f72
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:building_area:
+    piece_sha256: 95c90bd544a7ef4bb72323c7b22e145b04de56a797adbca95f4e5d3081b30817
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:building_height:
+    piece_sha256: 58510809e175b09667875e7ad704953c9fc6ec7d0f08343bee8f6c6e895fe840
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:building_official:
+    piece_sha256: 29a68de3f2890d12ec5406cf1abebc3fc00c1d194e19183b27c3c9990f5a5f5b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:care_suite:
+    piece_sha256: b4b6b0fbdbc1cdf335bad44bed232fb8db39f6db64f491fc2b9f9d409f4ca498
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:combustible_liquid:
+    piece_sha256: bfd1dc89f9575a4a5091b93817bb7c10957bbf107e48cdf4602a18c1c632d252
+    numbers:
+    - '100'
+    - '38'
+    - '100'
+    - '38'
+    - '140'
+    - '60'
+    - '140'
+    - '60'
+    - '200'
+    - '93'
+    - '200'
+    - '93'
+    second_reading: agrees
+    second_reading_numbers:
+    - '100'
+    - '38'
+    - '100'
+    - '38'
+    - '140'
+    - '60'
+    - '140'
+    - '60'
+    - '200'
+    - '93'
+    - '200'
+    - '93'
+    second_reading_comparisons:
+    - '>='
+    - none
+    - '>='
+    - none
+    - <
+    - none
+    - '>='
+    - none
+    - <
+    - none
+    - '>='
+    - none
+    flags:
+    - '''100'' (>=), ''140'' (< then >=) and ''200'' (< then >=): ''at or above 100°F'', ''below 140°F'', ''at or
+      above 140°F'', ''below 200°F'', ''at or above 200°F''; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right. A Fire Code class, used
+      by no rule.'
+  202:common_path_of_egress_travel:
+    piece_sha256: 6f30a9e55e3491cabc607b0e4f176710d41936eba3429f2387a03e7b7738200a
+    numbers:
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    second_reading_comparisons:
+    - none
+  202:compressed_gas:
+    piece_sha256: 5cf836c15a38a41c19c77481c0d1ccdc5ecd00c985d20d8531ee5a879c42e9be
+    numbers:
+    - '68'
+    - '20'
+    - 14.7 pound
+    - '101'
+    - '68'
+    - '20'
+    - '14.7'
+    - '101'
+    - '41'
+    - '282'
+    - '68'
+    - '20'
+    - '68'
+    - '20'
+    - '68'
+    - '20'
+    - two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - '68'
+    - '20'
+    - 14.7 pound
+    - '101'
+    - '68'
+    - '20'
+    - '14.7'
+    - '101'
+    - '41'
+    - '282'
+    - '68'
+    - '20'
+    - '68'
+    - '20'
+    - '68'
+    - '20'
+    - two or more
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - none
+    - '>'
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>='
+    flags:
+    - '''68'' (<=) where printed ''68°F (20°C) or less'', none where ''at a temperature of 68°F''; ''41'' (>): ''exceeds
+      41 psia''. the recorded words miss it (numbers.py reads comparison words only directly before a number or
+      after its unit) (°F is no unit it knows). The second reading is right. Used by no rule.'
+  202:corridor:
+    piece_sha256: 915ca255184e969aa7953e98413317521565bba1e9ae6ae7e8c3e6ed867b78ab
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:court:
+    piece_sha256: 630e2e8b75ef5ce1f7a85b29abe33c3ef3404133ba7277f7d4223b80b68f9b83
+    numbers:
+    - three or more
+    second_reading: agrees
+    second_reading_numbers:
+    - three or more
+    second_reading_comparisons:
+    - '>='
+  202:cryogenic_fluid:
+    piece_sha256: 4cd2c7fd8ae16464a12e6b677e54f3d18fa4976f5d48b8d25ce81d2e1876b06f
+    numbers:
+    - 14.7 pound
+    - '101'
+    second_reading: agrees
+    second_reading_numbers:
+    - 14.7 pound
+    - '101'
+    second_reading_comparisons:
+    - none
+    - none
+  202:custodial_care:
+    piece_sha256: 44133a2ce27f0e8a43479860532e14a23db315684f953b34ebe75ba63ffe579a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:dead_load:
+    piece_sha256: c1d0f23943936da7451df4031cad13545ee0ae7fc68a82022e9547f8ec906dbe
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:dimensions:
+    piece_sha256: f7223e51b653935b4b08f62bc970712550336dd20847cdf4ede2123d8ed7be79
+    numbers:
+    - '21'
+    second_reading: agrees
+    second_reading_numbers:
+    - '21'
+    second_reading_comparisons:
+    - none
+  202:direct_access:
+    piece_sha256: 02dac78ea38bd502c7ab3345cd9a66aae210c77018a7754d3b77e1303816f038
+    numbers:
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    second_reading_comparisons:
+    - none
+  202:doorway_exit_access:
+    piece_sha256: 09fa36f30663686224fc2d11d1970e5dc52a58c43a7e2a2f6f84d14812387cff
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:dwelling:
+    piece_sha256: 06a06e15f89b13a6b38855bc6f25c5eb35d3efe187b8278b8826b36f29d18e89
+    numbers:
+    - one
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - two
+    second_reading_comparisons:
+    - between
+    - between
+    flags:
+    - '''one'' and ''two'' (between): ''contains one or two dwelling units'', a range; the recorded words miss it
+      (numbers.py reads comparison words only directly before a number or after its unit). The second reading is
+      right. Used by no rule.'
+  202:dwelling_unit:
+    piece_sha256: 7ca57b0329845f8839c9ccef07d4cec122cae092de4c120631e22a237ec44857
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:exit:
+    piece_sha256: 6f4c6a822f8c6d6adda671ed50e7453bb47a9e1f6137adb4070c0ab424429474
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_horizontal:
+    piece_sha256: e290e698db92d4ee5454d7aa30f5b59dfe8b15dd74f8b245a4670f33855b3410
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_access:
+    piece_sha256: 387efb1deeb52338db7ca73907542cbba265d180380842646cdd6ae3a130c41a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_access_doorway:
+    piece_sha256: 032809cc008c48d4f5ba7acc7662841427150748914ed9e8335a3561e0390ba2
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_access_ramp:
+    piece_sha256: 0cfcbac83a6a7e9ca0af8883f9a65a146bc0418528a69ec760a8431892934acc
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_access_stairway:
+    piece_sha256: 118223e259a461520a2044b47bd3f36296f9a65948c0d64a78f616ecf73d4054
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_discharge:
+    piece_sha256: e3918ad47eafaeec1218168d0d0c33c96bacf22fc21cd4d3cd07642392798a8c
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_discharge_level_of:
+    piece_sha256: 47c9e49eda2468dfd6af678ece8c576f2dc83e3992a9574ac7484aecabca783e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exit_passageway:
+    piece_sha256: 13b0cd4d9827097c4115d8238eceae2fc825593c0ce675d3afc536203df6b5f1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:exterior_exit_stairway:
+    piece_sha256: e42b9a3defe05d681c1edc0c898fb09bd760a5b3d83d349b78d61cace419bd05
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:exterior_wall:
+    piece_sha256: b86835d328fd2c2f302ba95d23eba0a29262c7e2630b15e72ff3a2fd1400eaea
+    numbers:
+    - 60 degree or greater
+    - 1.05 rad or greater
+    second_reading: agrees
+    second_reading_numbers:
+    - 60 degree or greater
+    - 1.05 rad or greater
+    second_reading_comparisons:
+    - '>='
+    - none
+    flags:
+    - '''1.05 rad or greater'': the ''or greater'' is the 60 degrees'' (recorded ''>='' with it); the radians in
+      brackets are a conversion and set no limit, so the second reading (none) is right.'
+  202:fabrication_area:
+    piece_sha256: 5def6fb651f93a9181dbbff9cb5a69f80e2dba964d1ad7b6fdbe74f4c8f7ee3b
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:facility:
+    piece_sha256: d3218b5b4796d1c3140a4374dece0a2c36cfffc347e0330d47c51983c7993e69
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:fire_wall:
+    piece_sha256: 13baefb78e6958cd35ec518f1244fe88b8fbe0602fd3fbdd92e3a81e3875ceee
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:fixed_seating:
+    piece_sha256: 3e3d2ae59ab13e901863b2d9102e112ea7d832682b91eb676155fae34764b3aa
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:flash_point:
+    piece_sha256: 32bed69d4e64143f0bde7cbb4907870a1c571c105223b213ca7656f8704a7ba9
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:flight:
+    piece_sha256: 8d61491c11ba69152ab37ae8bf232d8521f270746fe220b013a54adaeaccdb24
+    numbers:
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    second_reading_comparisons:
+    - none
+  202:grade_lumber:
+    piece_sha256: 2664b231c2bb59c53a4fbe34447fcdff7fdba8446c9b6662a35226c44eb9ca11
+    numbers:
+    - '20'
+    second_reading: agrees
+    second_reading_numbers:
+    - '20'
+    second_reading_comparisons:
+    - none
+  202:grade_plane:
+    piece_sha256: a666575276956c440fa9765dc6d3c0e32da20e0f5edae390abe54269ec49bafb
+    numbers:
+    - more than 6 foot
+    - 1829 mm
+    - 6 foot
+    - 1829 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 6 foot
+    - 1829 mm
+    - 6 foot
+    - 1829 mm
+    second_reading_comparisons:
+    - '>'
+    - none
+    - none
+    - none
+  202:grade_plane_story_above:
+    piece_sha256: 964adf4b35d5ce5f34695a25cce9967a521fd36ed4b7c32245094866f3af161d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:handling:
+    piece_sha256: a14796dfd3d49bf8d4c89810fc19623624e0505548e9f046bb2781ab94097890
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:head_joint:
+    piece_sha256: 865d3aa1162a42bbab42198ce0a0bfb964a6440c1a0c88378eedf7a13f0e905d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:height_building:
+    piece_sha256: 1edfc2f24ab1b41fbaba521427a50871fcd94945c4be4c4eb46c3d26ac844ae2
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:horizontal_exit:
+    piece_sha256: 8fc7ca31651bf9c8156e635c8956075f018c2be5c8cdc5868f41fe560f1f8bf1
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:interior_exit_stairway:
+    piece_sha256: 2be880b0a7eb99fd81ad1e230c4a51440430c6aa25844fd832849219058f1e6f
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:joint:
+    piece_sha256: a690bdf6ce7fa7db83da15e50daf3893ae2cbbb5b1f9665c6a1fbeb99f2529af
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:level_of_exit_discharge:
+    piece_sha256: 3367a22223f62a58a98a623bd944d236693a61669fc4a5804e2bc40a62f8afc4
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:limited_verbal_or_physical_assistance:
+    piece_sha256: 108af115596fbcbe73690ffe8c412e6fca40e3f66bc053e08e77cb7aa56b1f1d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:liquid:
+    piece_sha256: 4952e6c4ac329cd0c85c4428937c2c646d14ed4d5f986ac209dcb301d4468a6a
+    numbers:
+    - less than 68
+    - '20'
+    - greater than 68
+    - '20'
+    - 14.7 pound
+    - '101'
+    second_reading: agrees
+    second_reading_numbers:
+    - less than 68
+    - '20'
+    - greater than 68
+    - '20'
+    - 14.7 pound
+    - '101'
+    second_reading_comparisons:
+    - <=
+    - none
+    - '>'
+    - none
+    - none
+    - none
+    flags:
+    - '''less than 68'' (<=): the book prints ''equal to or less than 68°F''; the recorded words drop ''equal to
+      or''. The second reading is right. Used by no rule.'
+  202:listed:
+    piece_sha256: 3db02dfd97f3db0efc7185037d7e2ade74cfa5eeabb667cef3b693ac20a7575a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:loads:
+    piece_sha256: 32e871ba7dbbabbdc13ee10d99cc891220807f111245480f4272669b49825a5f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:lot:
+    piece_sha256: 3878c11e1290ff14909d679911e8daa283b5fb0fe2afd103b44c5e3eb669fcfd
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:lot_line:
+    piece_sha256: d8118795be50a61488486b590e42edf64a9f064f470011689b9cbe1e0920a9c1
+    numbers:
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    second_reading_comparisons:
+    - none
+  202:masonry:
+    piece_sha256: 224c9460f16ddec741ce1b8aa4b00f10a088ee0ef4b8f0dc8266b0fbc8d61d78
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:masonry_unit:
+    piece_sha256: 02bb29e2e460d9b35937b2146bec4d91ed7ed2058f7a3d3187d631a1388afb60
+    numbers:
+    - '2103'
+    - less than 75 percent
+    - 75 percent or more
+    second_reading: agrees
+    second_reading_numbers:
+    - '2103'
+    - less than 75 percent
+    - 75 percent or more
+    second_reading_comparisons:
+    - none
+    - <
+    - '>='
+  202:means_of_egress:
+    piece_sha256: 468a50726da06ee3f07c5dbd5bd1443baeba3c3141f1d99594040948ea4dd790
+    numbers:
+    - three
+    second_reading: agrees
+    second_reading_numbers:
+    - three
+    second_reading_comparisons:
+    - none
+  202:mezzanine:
+    piece_sha256: 7338800c595e1e5e9ee91e41a3a46cfa487058f44fe7f0b0b6a8279db163ed22
+    numbers:
+    - '505'
+    second_reading: agrees
+    second_reading_numbers:
+    - '505'
+    second_reading_comparisons:
+    - none
+  202:mortar:
+    piece_sha256: 0382576ba785c588e851ba3bd94956257a22402cc633bf47fe38c93d1523748d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:nominal_loads:
+    piece_sha256: 733f4e17e658a76826670f3aef98e59263808433eb9d791339b42163cdc7ea8c
+    numbers:
+    - '16'
+    second_reading: agrees
+    second_reading_numbers:
+    - '16'
+    second_reading_comparisons:
+    - none
+  202:nosing:
+    piece_sha256: 1f05d4bcf46c58cdc238a7105cb64f06b0f9dceef3865d9f3f2a2332175052cf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:occupant_load:
+    piece_sha256: 34acc708103436bec61308e893be03c30850fa95033e704b590fb2544f2235dc
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:open_parking_garage:
+    piece_sha256: f881941d5a794815da4c1a08475ca52babd939dc81526ca457dd9d75c9d70ce6
+    numbers:
+    - two or more
+    second_reading: agrees
+    second_reading_numbers:
+    - two or more
+    second_reading_comparisons:
+    - '>='
+  202:open_air_assembly_seating:
+    piece_sha256: 805eb9d0d5f671bc66c022e9bc6b4341b3c1a78dde101d1c9a03e2b8896d79ca
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:penthouse:
+    piece_sha256: fc5256d01cd9ee53d90c31802d6855c67f03f6585f624353f2a6f1146beda4ed
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:person:
+    piece_sha256: bbcff593e1603747f83a21aef9d7fc87f08ff971fe211899a8a1731254a57ef5
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:place_of_religious_worship:
+    piece_sha256: 6563679c6b68f1f9611222d63ac30e3594fa21111365261ee999cf206647b446
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:public_way:
+    piece_sha256: 9c30bb288f4686d66c6762dfcbf3145b9a1416cc78180b76405f8335b44d63f6
+    numbers:
+    - not less than 10 foot
+    - 3048 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not less than 10 foot
+    - 3048 mm
+    second_reading_comparisons:
+    - '>='
+    - none
+  202:ramp:
+    piece_sha256: 8233b4ef33f6224c8bc692d20216616b03aa4b388aea0db139bac5c27a648e7b
+    numbers:
+    - steeper than 1 unit vertical
+    - 20 unit horizontal
+    - 5 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - steeper than 1 unit vertical
+    - 20 unit horizontal
+    - 5 percent
+    second_reading_comparisons:
+    - '>'
+    - '>'
+    - '>'
+    flags:
+    - '''20 unit horizontal'' (>) and ''5 percent'' (>): ''a running slope steeper than 1 unit vertical in 20 units
+      horizontal (5-percent slope)'': the bound is on the slope; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right. Used by no rule.'
+  202:ramp_exit_access:
+    piece_sha256: d3b9fb986b4eae178b16864c3627b09635a4d26a344227fdeaef024cc7ce9f5e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:religious_worship_place_of:
+    piece_sha256: d5da82230e1dbc082510d11001d2a109f1631cbf3e50a45ae824632a32e76edd
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:residential_code_of_new_york_state:
+    piece_sha256: 9426f839175b3e6054bad415690f7ba6b208ccb1b42f150ed46782990a12044a
+    numbers:
+    - '2025'
+    - '2025'
+    second_reading: agrees
+    second_reading_numbers:
+    - '2025'
+    - '2025'
+    second_reading_comparisons:
+    - none
+    - none
+  202:roof_assembly_for_application_to_chapter_15_only:
+    piece_sha256: 173789464433579bfcaf554221be2d326740cf2f462d22762df34ab6940a7599
+    numbers:
+    - '15'
+    second_reading: agrees
+    second_reading_numbers:
+    - '15'
+    second_reading_comparisons:
+    - none
+  202:roof_covering:
+    piece_sha256: 6bc4c271a5708994b86862f805ec84bb566e3b5dacb0edb680e504ce81b79c31
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:roof_deck:
+    piece_sha256: ef2e3f546bb2922fff24ca5da91880a53fb6528c3c913a9f4fbd12f8d3d2d623
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:rooftop_structure:
+    piece_sha256: be67b94692de1746b9088ba91a5e33b9426877ba8d6b503e3ed1d16fab608b7a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:scissor_stairway:
+    piece_sha256: ba51df7c75ab5d4beeab2d1e96a310ccf75079e7ff33a98df72805c98975b2d5
+    numbers:
+    - two
+    - two
+    - within one
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - two
+    - within one
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    flags:
+    - '''within one'': ''located within one exit enclosure'' counts the enclosure, no limit: the second reading
+      (none) is right.'
+  202:shaft:
+    piece_sha256: e71439843471aa2ff123ab5ce97601fda6d8516eac49321eca77972a76bd8d60
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:site:
+    piece_sha256: 920170e75cc3b8b0be60c3232b2cd76c652dafb3d8013af8d97cb6b4e88359fe
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:sleeping_unit:
+    piece_sha256: 335f0aad19104c19a345963fb8108c42c8d02c90dc78d65deaebb4ba01012205
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:solid:
+    piece_sha256: 2e0d9d2c5eca10b9fc5e6e668fbaeaa1fb6e9d4729fdaf08859c017a55724a9c
+    numbers:
+    - greater than 68
+    - '20'
+    second_reading: agrees
+    second_reading_numbers:
+    - greater than 68
+    - '20'
+    second_reading_comparisons:
+    - '>'
+    - none
+  202:special_amusement_area:
+    piece_sha256: b05b0895e9e405fd584b379211af9d7686d2942d20155a4fff2d6111ab504bf8
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:stair:
+    piece_sha256: 374a0feb8b74c749c79f3f5028d0957a48d1de5bc758b0a699d7bad7ac3a54f3
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:stairway:
+    piece_sha256: 987660187935e5bf117d4ecb97872085a9b04e4810e9618897d5ce0ee0985666
+    numbers:
+    - one or more
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    - one
+    second_reading_comparisons:
+    - '>='
+    - none
+  202:stairway_exit_access:
+    piece_sha256: e5400ec98bf44430e0cf8fdf18a591654a9a686269c1913f5a1a4ebf0e2a712f
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:stairway_exterior_exit:
+    piece_sha256: b9cb579812574e7f1ddb7307fbd4747459c16f26c9129dea0842c71937e99cb6
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:stairway_interior_exit:
+    piece_sha256: f019abf4525240263befb9f49b81c5b0065ab4c2f529f47b297d7b7577e53830
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:stairway_scissor:
+    piece_sha256: bdf42d56d067276a4e60faa8e1fc7daf2224e07af80a4186b44211ffd293104e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:steep_slope:
+    piece_sha256: 50c969202b1359cfe09f233ac9ad454f815333adc004deed2c318c3f9c8abd4a
+    numbers:
+    - 2 unit vertical
+    - 12 unit horizontal or greater
+    - 17 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - 2 unit vertical
+    - 12 unit horizontal or greater
+    - 17 percent
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - '>='
+    flags:
+    - '''2 unit vertical'' (>=) and ''17 percent'' (>=): ''2 units vertical in 12 units horizontal (17-percent slope)
+      or greater'': the ''or greater'' is the whole slope''s; the recorded words miss it (numbers.py reads comparison
+      words only directly before a number or after its unit). The second reading is right. Used by no rule.'
+  202:story:
+    piece_sha256: b79e0b5ca3af4bca4e4d3604a5a88908f928488988f886978b72e8132158375c
+    numbers:
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    second_reading_comparisons:
+    - none
+  202:story_above_grade_plane:
+    piece_sha256: f853582ba810f91b14ff8efce7077975c513251df3c871f6d9f8a24157a967ea
+    numbers:
+    - more than 6 foot
+    - 1829 mm
+    - more than 12 foot
+    - 3658 mm
+    - more than 6 foot
+    - 1829 mm
+    - more than 50 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - more than 6 foot
+    - 1829 mm
+    - more than 12 foot
+    - 3658 mm
+    - more than 6 foot
+    - 1829 mm
+    - more than 50 percent
+    second_reading_comparisons:
+    - '>'
+    - none
+    - '>'
+    - none
+    - '>'
+    - none
+    - '>'
+  202:structure:
+    piece_sha256: 0a2ea45a577f48e5194c0496c4f735fc362db3d2b90086fee6f0b93e26d412cf
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:temporary_structure:
+    piece_sha256: deabf4124bca2397eb9764e2c48f42ee7861372fa300b2aabad982562a5859de
+    numbers:
+    - '180'
+    second_reading: agrees
+    second_reading_numbers:
+    - '180'
+    second_reading_comparisons:
+    - <=
+    flags:
+    - '''180'' (<=): ''for a period of 180 days or less''; days is no unit numbers.py knows, so its ''or less''
+      is missed. The second reading is right. Used by no rule.'
+  202:underlayment:
+    piece_sha256: 7e463705ab56e892161d1acfe3e92a1f3cd5e96759854afa8695eb38eb405eb5
+    numbers:
+    - one or more
+    second_reading: agrees
+    second_reading_numbers:
+    - one or more
+    second_reading_comparisons:
+    - '>='
+  202:use_material:
+    piece_sha256: f92786d44959ec4e7f944bfc9b049cfd1a418c6194ac93b45ac3bf734c05ccae
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:ventilation:
+    piece_sha256: e90259e72dedad027a91ffefaa1800d9a2fb557142b0d724abbeed97da60822c
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:walkway_pedestrian:
+    piece_sha256: 8103770ded2e1544e060fb0bd6289d5dc31da480cebf25b14ea3fd7a89d85137
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:wall:
+    piece_sha256: 73cc15edcea595ba0fe40c4b6515d8449a9ebd5109f400cd832d9e898e0ef17e
+    numbers:
+    - '21'
+    - greater than three
+    second_reading: agrees
+    second_reading_numbers:
+    - '21'
+    - greater than three
+    second_reading_comparisons:
+    - none
+    - '>'
+  202:winder:
+    piece_sha256: 6c2a73c23141a431fa6a7f0ee067cb9b191980de777733c6f301f0db55216fed
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:wythe:
+    piece_sha256: bace0893e4f0902bb613d77ccd82a877035b83cf666b5df6b0e06bef6a47ad4d
+    numbers:
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    second_reading_comparisons:
+    - none
+  202:yard:
+    piece_sha256: 4f1b03f56eebaaa50fa8feb21365fd7b2c16ab8f671c67a76d3b5e036490caaa
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  '308.5':
+    piece_sha256: 20124dd85b8bec534581dc24f9624d4582d8fe58991b6072fd1d2f7654eaedd7
+    numbers:
+    - '308.5'
+    - by more than five
+    - '24'
+    second_reading: agrees
+    second_reading_numbers:
+    - '308.5'
+    - by more than five
+    - '24'
+    second_reading_comparisons:
+    - none
+    - '>'
+    - <
+    flags:
+    - '''24'' (<): ''for fewer than 24 hours per day''; numbers.py has no ''fewer than'' before a number. The second
+      reading is right. The group is the architect''s statement (a flag).'
+  308.5.1:
+    piece_sha256: efaf2fc73a9197a627a9b52289aa3098d4857a3d311ec408325e85c2bb80beeb
+    numbers:
+    - more than five
+    - not more than 100
+    - 2 1/2
+    second_reading: agrees
+    second_reading_numbers:
+    - more than five
+    - not more than 100
+    - 2 1/2
+    second_reading_comparisons:
+    - '>'
+    - <=
+    - <=
+    flags:
+    - '''2 1/2'' (<=): ''children 2 1/2 years or less of age''; years is no unit numbers.py knows. The second reading
+      is right.'
+  308.5.2:
+    piece_sha256: 154c4a601a59af9d846b56d2cc8bc1fe49c0033d4e6b3e6867106122a7d52f3a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  308.5.3:
+    piece_sha256: 438e08b24a3906f322f8dbbcf7331f8632ae37f710cb8d2ab18ed14e1ea88ff9
+    numbers:
+    - five or fewer
+    - five or fewer
+    second_reading: agrees
+    second_reading_numbers:
+    - five or fewer
+    - five or fewer
+    second_reading_comparisons:
+    - <=
+    - <=
+  308.5.4:
+    piece_sha256: 76778ee93e69c35f48c823ddc26813a8f267a92142356f9534322fc99821c796
+    numbers:
+    - five or fewer
+    - five or fewer
+    second_reading: agrees
+    second_reading_numbers:
+    - five or fewer
+    - five or fewer
+    second_reading_comparisons:
+    - <=
+    - <=
+  '508.2':
+    piece_sha256: b3d3bcc549435f8bf8b974d632b91b0a4324f3dea57ab83761ccbc91d5b77c79
+    numbers:
+    - '508.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '508.2'
+    second_reading_comparisons:
+    - none
+  508.2.1:
+    piece_sha256: 49c138c9e911a1c541bedffcd72318bf98b28c465b39f7d413cc0664673457ea
+    numbers:
+    - '302.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '302.1'
+    second_reading_comparisons:
+    - none
+  508.2.2:
+    piece_sha256: 7fb047798f153b8d1feacaaefe8029c3b4c8df0fbfe90f096e9c76b20e286e70
+    numbers:
+    - '504'
+    second_reading: agrees
+    second_reading_numbers:
+    - '504'
+    second_reading_comparisons:
+    - none
+  508.2.3:
+    piece_sha256: 85937b21359a41577622ea6310137e4ac75d51ae41fa06681a74c47cae765546
+    numbers:
+    - '506'
+    - not occupy more than 10 percent
+    - '506.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '506'
+    - not occupy more than 10 percent
+    - '506.2'
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+  508.2.4:
+    piece_sha256: b4b8646fbf04ad73870b73efa44ecb16e378d09aa6cae962efef8fb83232610b
+    numbers:
+    - '508.4'
+    - '420'
+    second_reading: agrees
+    second_reading_numbers:
+    - '508.4'
+    - '420'
+    second_reading_comparisons:
+    - none
+    - none
+  903.3.1.1:
+    piece_sha256: b2ed6da4feae996d8ce7e2e0979fec1d12c8011679f5a6831bddaa5b05892775
+    numbers:
+    - '13'
+    - '13'
+    second_reading: agrees
+    second_reading_numbers:
+    - '13'
+    - '13'
+    second_reading_comparisons:
+    - none
+    - none
+  903.3.1.2:
+    piece_sha256: 6875f3b979acb6459c3661f539a488c29bc14cb5573cf9d26df5cc44eca86663
+    numbers:
+    - four
+    - 30 foot or less
+    - 9144 mm or less
+    - less than 45 foot
+    - 13 mm
+    - 716 mm
+    - 30 foot or less
+    - 9144 mm or less
+    - '510.2'
+    - and 510.4
+    second_reading: agrees
+    second_reading_numbers:
+    - four
+    - 30 foot or less
+    - 9144 mm or less
+    - less than 45 foot
+    - 13 mm
+    - 716 mm
+    - 30 foot or less
+    - 9144 mm or less
+    - '510.2'
+    - and 510.4
+    second_reading_comparisons:
+    - <=
+    - <=
+    - none
+    - <
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - none
+    flags:
+    - '''four'' (<=): ''Four stories or fewer above grade plane''; the recorded words miss it (numbers.py reads
+      comparison words only directly before a number or after its unit). The second reading is right.'
+    - '''9144 mm or less'': the ''or less'' is the 30 feet''s (recorded ''<='' with it); the millimetres in brackets
+      are a conversion and set no limit, so the second reading (none) is right.'
+  1006.2.1:
+    piece_sha256: 85d4a9fd1b8484c8228e3888e992cbee10ca81d48325c328420fb78e8fa1c65d
+    numbers:
+    - two
+    - '1004.2'
+    - '407.4'
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - '1004.2'
+    - '407.4'
+    second_reading_comparisons:
+    - '>='
+    - none
+    - none
+    flags:
+    - '''two'' (>=): ''Two exits or exit access doorways from any space shall be provided where ...'': at least
+      two; the recorded words miss it (numbers.py reads comparison words only directly before a number or after
+      its unit). The second reading is right.'
+  Table 1006.2.1:
+    piece_sha256: fba0a41d1cd8e2f28d4599ba8633c3393b77f4a89a4ac090dab801a5f4b1d100
+    numbers:
+    - one
+    - '30'
+    - '30'
+    - '49'
+    - '75'
+    - '75'
+    - '75'
+    - '49'
+    - '100'
+    - '75'
+    - '100'
+    - '49'
+    - '75'
+    - '75'
+    - '100'
+    - '3'
+    - '25'
+    - '10'
+    - '75'
+    - '10'
+    - '75'
+    - '10'
+    - '100'
+    - '10'
+    - '75'
+    - '20'
+    - '125'
+    - '20'
+    - '125'
+    - '20'
+    - '125'
+    - '29'
+    - '100'
+    - '75'
+    - '100'
+    - '49'
+    - '100'
+    - '75'
+    - '75'
+    - 1 foot
+    - 304.8 mm
+    - '903'
+    - '1030.8'
+    - '407.4'
+    - not more than 100 foot
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - '30'
+    - '30'
+    - '49'
+    - '75'
+    - '75'
+    - '75'
+    - '49'
+    - '100'
+    - '75'
+    - '100'
+    - '49'
+    - '75'
+    - '75'
+    - '100'
+    - '3'
+    - '25'
+    - '10'
+    - '75'
+    - '10'
+    - '75'
+    - '10'
+    - '100'
+    - '10'
+    - '75'
+    - '20'
+    - '125'
+    - '20'
+    - '125'
+    - '20'
+    - '125'
+    - '29'
+    - '100'
+    - '75'
+    - '100'
+    - '49'
+    - '100'
+    - '75'
+    - '75'
+    - 1 foot
+    - 304.8 mm
+    - '903'
+    - '1030.8'
+    - '407.4'
+    - not more than 100 foot
+    second_reading_comparisons:
+    - none
+    - <=
+    - '>'
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - none
+    - none
+    - none
+    - none
+    - none
+    - <=
+    flags:
+    - 'Common path cells: ''25'', ''75'', ''100'', ''125'' (<=), each a length in feet (the table prints ''(feet)''
+      in its column headings, never beside the number; read cell by cell by position, each cell''s characters and
+      x positions on p.315, and on the page image). The table prints no comparison words, so each is recorded ''none'';
+      1006.2.1 requires two exits where the common path ''exceeds the values listed in Table 1006.2.1'', so each
+      is the most a space with one exit may have: the second reading is right.'
+    - 'Occupant load cells: ''3'', ''10'', ''20'', ''29'', ''49'' (<=), counts of occupants (the column MAXIMUM
+      OCCUPANT LOAD OF SPACE), recorded ''none''; 1006.2.1 requires two exits where the design occupant load ''exceeds
+      the values listed'', so each is the most a space with one exit may have; the headings ''OL ≤ 30'' and ''OL
+      > 30'' read as printed: ''30'' (<=) then ''30'' (>). The second reading is right.'
+  1006.2.1.1:
+    piece_sha256: 6f99daba63cd22d6c6b869777291d20039e0d258954f3ac6ed5b12627f802bb7
+    numbers:
+    - three or more
+    - three
+    - '501'
+    - 1,000
+    - four
+    - greater than 1,000
+    second_reading: agrees
+    second_reading_numbers:
+    - three or more
+    - three
+    - '501'
+    - 1,000
+    - four
+    - greater than 1,000
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - between
+    - between
+    - '>='
+    - '>'
+    flags:
+    - '''three'' (>=) and ''four'' (>=): exits that ''shall be provided''; ''501'' and ''1,000'' (between): ''an
+      occupant load of 501 to 1,000'', then ''1,000'' (>): ''greater than 1,000'' (recorded with its words). the
+      recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit).
+      The second reading is right.'
+  '1007.1':
+    piece_sha256: b1b81f60ecaffaae9e69c0be44962f767c2651b14313a6419e68e616da2581f7
+    numbers:
+    - '1007.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1007.1'
+    second_reading_comparisons:
+    - none
+  1007.1.1:
+    piece_sha256: b512c04ed427044e1f25349197ac000a78bab0edf648362779ac26a07ad55990
+    numbers:
+    - two
+    - two
+    - not less than one
+    - half
+    - one
+    - '1'
+    - '1020'
+    - not less than one-third
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    - two
+    - not less than one
+    - half
+    - one
+    - '1'
+    - '1020'
+    - not less than one-third
+    second_reading_comparisons:
+    - none
+    - none
+    - '>='
+    - '>='
+    - none
+    - none
+    - none
+    - '>='
+    flags:
+    - '''half'' (>=): ''not less than one-'' / ''half'' is printed across two lines (p.318, lines 7-8); numbers.py
+      reads ''not less than one'' and ''half'' apart, and the ''not less than'' is the whole one-half''s. The second
+      reading is right: at least one-half (1/2).'
+  1007.1.1.1:
+    piece_sha256: ffd658081321544bcddb6102633be220bd367a89ab2a4817b233082c9df3665d
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1007.1.2:
+    piece_sha256: e87d80661ddc9f8896e5827a113945ebcdad724d5064686e0bf5a5794d0e8fcf
+    numbers:
+    - three or more
+    - three or more
+    - not less than two
+    - one
+    second_reading: agrees
+    second_reading_numbers:
+    - three or more
+    - three or more
+    - not less than two
+    - one
+    second_reading_comparisons:
+    - '>='
+    - '>='
+    - '>='
+    - none
+  1007.1.3:
+    piece_sha256: 319833e360ff64e0eaf029c87928568962835ca537dab3a631731757b3ba2fcb
+    numbers:
+    - two
+    second_reading: agrees
+    second_reading_numbers:
+    - two
+    second_reading_comparisons:
+    - none
+  1007.1.3.1:
+    piece_sha256: 95666aa8d19504985ae889a9bcbcdf0c1685f7465ee3ad784ab548c7c4e310c2
+    numbers:
+    - three or more
+    - more than two
+    - not less than two
+    second_reading: agrees
+    second_reading_numbers:
+    - three or more
+    - more than two
+    - not less than two
+    second_reading_comparisons:
+    - '>='
+    - '>'
+    - '>='
+  '1016.2':
+    piece_sha256: 75ce5120ce02dba41247b79ce0300db00da2a96dfe6066836bd5c20e9e0df752
+    numbers:
+    - '1016.2'
+    - two or more
+    - not less than one
+    - '3006'
+    - one
+    - not more than 50 percent
+    - minimum 44 inch
+    - 1118 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1016.2'
+    - two or more
+    - not less than one
+    - '3006'
+    - one
+    - not more than 50 percent
+    - minimum 44 inch
+    - 1118 mm
+    second_reading_comparisons:
+    - none
+    - '>='
+    - '>='
+    - none
+    - none
+    - <=
+    - '>='
+    - none
+  1016.2.1:
+    piece_sha256: 475b35da3af59b1446ea08383a777b028d6548bfc1fb0999a4b9719f1a73a4c8
+    numbers:
+    - more than one
+    - one
+    - less than 10 percent
+    second_reading: agrees
+    second_reading_numbers:
+    - more than one
+    - one
+    - less than 10 percent
+    second_reading_comparisons:
+    - '>'
+    - none
+    - <
+  '1017':
+    piece_sha256: ab4ca057ddd55aa718e93f56b7b58cd78252d3c365b326db7b3228d122f5a31a
+    numbers:
+    - '1017'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017'
+    second_reading_comparisons:
+    - none
+  '1017.1':
+    piece_sha256: fb51c054ef4b512d62e43614e491832aef9b6714c6f3e966bf4ca3dbb8d19cf4
+    numbers:
+    - '1017.1'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.1'
+    second_reading_comparisons:
+    - none
+  '1017.2':
+    piece_sha256: 1ad3b8fb0e51df77490bcd108f5497064f8879c1f56272b9ae2079cc6c540b2a
+    numbers:
+    - '1017.2'
+    - '1017.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.2'
+    - '1017.2'
+    second_reading_comparisons:
+    - none
+    - none
+  Table 1017.2:
+    piece_sha256: 936bcabb432c6f1c138737c68d5030dc72e67de8ca6413069f4926eb4382c6c5
+    numbers:
+    - '1017.2'
+    - '200'
+    - '250'
+    - '250'
+    - '200'
+    - '300'
+    - '300'
+    - '400'
+    - '75'
+    - '100'
+    - '150'
+    - '175'
+    - '200'
+    - '200'
+    - '150'
+    - '200'
+    - 1 foot
+    - 304.8 mm
+    - '402.8'
+    - '407.4'
+    - '411.2'
+    - '412.6'
+    - one
+    - '1030.7'
+    - '3103.4'
+    - '3104.9'
+    - '903'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.2'
+    - '200'
+    - '250'
+    - '250'
+    - '200'
+    - '300'
+    - '300'
+    - '400'
+    - '75'
+    - '100'
+    - '150'
+    - '175'
+    - '200'
+    - '200'
+    - '150'
+    - '200'
+    - 1 foot
+    - 304.8 mm
+    - '402.8'
+    - '407.4'
+    - '411.2'
+    - '412.6'
+    - one
+    - '1030.7'
+    - '3103.4'
+    - '3104.9'
+    - '903'
+    second_reading_comparisons:
+    - none
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    - none
+    flags:
+    - 'Distance cells: ''75'', ''100'', ''150'', ''175'', ''200'', ''250'', ''300'', ''400'' (<=), each a length
+      in feet (the table prints ''(feet)'' in its column headings, never beside the number; read cell by cell by
+      position, each cell''s characters and x positions on p.341, and on the page image). The table prints no comparison
+      words, so each is recorded ''none''; 1017.2 says exit access travel distance ''shall not exceed the values
+      given in Table 1017.2'', so each is a maximum: the second reading is right.'
+  1017.2.1:
+    piece_sha256: b5dd9704c503cfbb5e260bfce83415150af264a7644c4a4d4d05fff3c4bff294
+    numbers:
+    - '1017.2'
+    - 100 foot
+    - 30 mm
+    - 480 mm
+    - '1021'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.2'
+    - 100 foot
+    - 30 mm
+    - 480 mm
+    - '1021'
+    second_reading_comparisons:
+    - none
+    - <=
+    - none
+    - none
+    - none
+    flags:
+    - '''100 foot'' (<=): ''increased up to an additional 100 feet'': at most 100 feet more; numbers.py does not
+      read ''up to an additional''. The second reading is right.'
+  1017.2.2:
+    piece_sha256: 35a7b6b4d2631647766d91182c9292e3a31ae76f5fbdd942f1c298c2c2d2d89a
+    numbers:
+    - 400 foot
+    - 122 m
+    - one
+    - 24 foot
+    - 7315 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - 400 foot
+    - 122 m
+    - one
+    - 24 foot
+    - 7315 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - <=
+    - '>='
+    - none
+    flags:
+    - '''400 foot'' (<=): ''The maximum exit access travel distance shall be 400 feet''; ''one'' (<=): ''limited
+      to one story in height''; ''24 foot'' (>=): ''The minimum height ... is 24 feet''. the recorded words miss
+      it (numbers.py reads comparison words only directly before a number or after its unit). The second reading
+      is right. For Groups F-1 and S-1 (a flag).'
+  1017.2.3:
+    piece_sha256: 0d010862b1e57235b8c41a9f6b1c19ba46d63cc56bd998acbdb003e2d9928ef7
+    numbers:
+    - 300 foot
+    - 91 m
+    - 300 foot or greater
+    - 91 m or greater
+    - 220,000 square foot or greater
+    - 18 m
+    - 600 m or greater
+    - 16 foot or greater
+    - 48 mm
+    - 768 mm or greater
+    - 20 cubic foot
+    - 0.556 m
+    second_reading: agrees
+    second_reading_numbers:
+    - 300 foot
+    - 91 m
+    - 300 foot or greater
+    - 91 m or greater
+    - 220,000 square foot or greater
+    - 18 m
+    - 600 m or greater
+    - 16 foot or greater
+    - 48 mm
+    - 768 mm or greater
+    - 20 cubic foot
+    - 0.556 m
+    second_reading_comparisons:
+    - <=
+    - none
+    - '>='
+    - none
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    - none
+    - '>='
+    - none
+    flags:
+    - '''300 foot'' (<=): ''The maximum exit access travel distance shall be 300 feet''; ''20 cubic foot'' (>=):
+      ''20 cubic feet per minute per square foot (...) or greater''. the recorded words miss it (numbers.py reads
+      comparison words only directly before a number or after its unit). The second reading is right.'
+    - '''91 m or greater'', ''600 m or greater'' and ''768 mm or greater'': each ''or greater'' is the US number''s
+      before the brackets (recorded ''>='' with them); the metric numbers are conversions and set no limit, so the
+      second reading (none) is right.'
+  '1017.3':
+    piece_sha256: 3669787150434ef3b976b175994e5b12a9e9d67477c937610c63c05425332c4a
+    numbers:
+    - '1017.3'
+    - more than one
+    - '1030.7'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.3'
+    - more than one
+    - '1030.7'
+    second_reading_comparisons:
+    - none
+    - '>'
+    - none
+  1017.3.1:
+    piece_sha256: 4b3a70cdd7f59c2dcd6c706f07f0d29c6d1ac5f7dbfaaa43f2b8b0720946117a
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1017.3.2:
+    piece_sha256: 7b5edb8ba1406a1487be693f0f7224e2be94380072a0addc908a31f9d96a6682
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  1017.3.2.1:
+    piece_sha256: 2f2260597cb9e7ed4ef9b1c67ca16704850938d0e111d7d3223a72d600c5353e
+    numbers:
+    - '1017.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.2'
+    second_reading_comparisons:
+    - none
+  1017.3.2.2:
+    piece_sha256: a2e171db62c4ada04db7d4199fa503255a4352c16de5ec07d8b0c87ba354dcfd
+    numbers:
+    - '1017.2'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1017.2'
+    second_reading_comparisons:
+    - none
+  1017.3.2.3:
+    piece_sha256: ed67c676d7c895dc1b696877946d0754d49530c7b734890456c32eedd35b6897
+    numbers:
+    - not greater than 200 foot
+    - 60 mm
+    - 960 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - not greater than 200 foot
+    - 60 mm
+    - 960 mm
+    second_reading_comparisons:
+    - <=
+    - none
+    - none
+  '1020.5':
+    piece_sha256: 3a8020bc52c9e2bd47f823c3c37f59c86f78c5c113ec84325a82e8dacdf2d3cc
+    numbers:
+    - '1020.5'
+    - more than one
+    - not exceed 20 foot
+    - 6096 mm
+    - '2'
+    - '3'
+    - '4'
+    - not exceed 50 foot
+    - 15 mm
+    - 240 mm
+    - not exceed 50 foot
+    - 15 mm
+    - 240 mm
+    - less than 2.5
+    - '2'
+    - not exceed 30 foot
+    - 9144 mm
+    second_reading: agrees
+    second_reading_numbers:
+    - '1020.5'
+    - more than one
+    - not exceed 20 foot
+    - 6096 mm
+    - '2'
+    - '3'
+    - '4'
+    - not exceed 50 foot
+    - 15 mm
+    - 240 mm
+    - not exceed 50 foot
+    - 15 mm
+    - 240 mm
+    - less than 2.5
+    - '2'
+    - not exceed 30 foot
+    - 9144 mm
+    second_reading_comparisons:
+    - none
+    - '>'
+    - <=
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - <=
+    - none
+    - none
+    - <
+    - none
+    - <=
+    - none
