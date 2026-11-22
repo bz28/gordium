@@ -7,13 +7,11 @@ using S = System.Windows.Shapes;
 namespace Gordium.Revit.Addin;
 
 /// <summary>What a list entry asks of the panel that shows it (the ResultsView): fold a place, zoom to a row's
-/// elements, open a row's detail, an element's label, and a fold after the rows opened or closed.</summary>
+/// elements, and a fold after the rows opened or closed. (A row's detail is its own view: DetailView.)</summary>
 internal interface IListHost
 {
     void Toggle(ListSection section);
     void ShowRow(RowItem row);
-    void ToggleOpen(RowItem row);
-    string Label(string uid);
     void FoldChanged(FoldItem fold);
 }
 
@@ -35,22 +33,10 @@ internal sealed class SubItem(IListHost host, ListSubheading sub) : ListItem(hos
     internal ListSubheading Sub { get; } = sub;
 }
 
-/// <summary>A row; <see cref="Open"/> shows its detail (the law's words), and <see cref="Changed"/> redraws it.</summary>
-internal sealed class RowItem(IListHost host, ListRow row, bool open) : ListItem(host)
+/// <summary>A row (Enter or a double click opens its detail, DetailView, in place of the list).</summary>
+internal sealed class RowItem(IListHost host, ListRow row) : ListItem(host)
 {
     internal ListRow Row { get; } = row;
-
-    internal bool Open { get; private set; } = open;
-
-    internal event Action? Changed;
-
-    internal void SetOpen(bool open)
-    {
-        if (open == Open)
-            return;
-        Open = open;
-        Changed?.Invoke();
-    }
 }
 
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
@@ -85,8 +71,6 @@ internal sealed class EntryStyles : C.StyleSelector
 /// </summary>
 public sealed class EntryView : C.Border
 {
-    private RowItem? _row;
-
     public EntryView() => DataContextChanged += (_, _) => Draw();
 
     /// <summary>The list's one item template: an EntryView, which draws whatever item it is given.</summary>
@@ -99,11 +83,6 @@ public sealed class EntryView : C.Border
 
     private void Draw()
     {
-        if (_row is not null)
-            _row.Changed -= Draw;
-        _row = DataContext as RowItem;
-        if (_row is not null)
-            _row.Changed += Draw;
         Child = DataContext switch
         {
             HeadingItem h => Heading(h),
@@ -233,9 +212,6 @@ public sealed class EntryView : C.Border
             text.Children.Add(third);
         }
 
-        if (item.Open)
-            text.Children.Add(Detail(item));
-
         // the bar: the status colour, or muted stripes once stale (never a verdict's colour on a stale row)
         var bar = new S.Rectangle { Width = 4 };
         bar.SetResourceReference(S.Shape.FillProperty, p.Status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(p.Status));
@@ -245,40 +221,6 @@ public sealed class EntryView : C.Border
         dock.Children.Add(text);
         W.Automation.AutomationProperties.SetName(dock, $"{StatusLook.Word(p.Status)}: {r.Name}");
         return dock;
-    }
-
-    /// <summary>The row's detail, as the panel showed it before the list (the full detail view is PR 4): its verdict,
-    /// figures and reason in full, its section, its elements by name and the law's exact words.</summary>
-    private static W.UIElement Detail(RowItem item)
-    {
-        var r = item.Row.Row;
-        var d = new C.StackPanel { Margin = new W.Thickness(20, 6, 0, 2) };
-        d.Children.Add(Typed(new C.TextBlock { Text = r.VerdictWords.ToUpperInvariant(), TextWrapping = W.TextWrapping.Wrap }, "type.overline"));
-        if (r.Figures is not null)
-            d.Children.Add(Typed(new C.TextBlock { Text = r.Figures + (r.HowFar is null ? "" : " · " + r.HowFar), TextWrapping = W.TextWrapping.Wrap }, "type.figure"));
-        else if (r.HowFar is not null)
-            d.Children.Add(Typed(new C.TextBlock { Text = r.HowFar, TextWrapping = W.TextWrapping.Wrap }, "type.figure"));
-        if (r.Reason is not null && !r.ReasonIsFigures)
-            d.Children.Add(Typed(new C.TextBlock { Text = r.Reason, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 2, 0, 0) }, Body));
-        if (r.Section is not null)
-            d.Children.Add(Muted(r.Section, top: 4));
-        if (r.Elements.Count > 0)
-        {
-            var labels = r.Elements.Select(item.Host.Label).ToList();
-            d.Children.Add(Muted("Elements: " + string.Join(", ", labels.Take(20)) + (labels.Count > 20 ? $", {labels.Count - 20} more" : ""), top: 4));
-        }
-        var law = Typed(new C.TextBlock { Text = "The law's words", Margin = new W.Thickness(0, 8, 0, 2) }, "type.overline");
-        d.Children.Add(law);
-        if (r.Quotes.Count == 0)
-            d.Children.Add(Muted("The checker gave no quote with this row" + (r.Section is null ? "." : $": see {r.Section}.")));
-        foreach (var quote in r.Quotes)
-        {
-            d.Children.Add(Typed(new C.TextBlock { Text = "“" + quote.Text + "”", TextWrapping = W.TextWrapping.Wrap }, "type.quote"));
-            if (quote.Where is not null)
-                d.Children.Add(Muted(quote.Where, bottom: 6));
-        }
-        d.Children.Add(Muted("Enter or double-click folds this; Ctrl+C copies the row.", top: 4));
-        return d;
     }
 
     private static W.UIElement Summary(SummaryItem item)

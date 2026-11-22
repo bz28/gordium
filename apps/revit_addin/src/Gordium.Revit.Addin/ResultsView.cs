@@ -27,13 +27,15 @@ internal sealed record PanelContent(string Project, DateTime When, ResultModel? 
 /// chips and the search, then the results list: a virtualized ListBox (an entry is made only when it scrolls into
 /// view), worst first (<see cref="ResultList"/>: does not comply, needs review, check by hand or not checked, then what
 /// complies, folded), every row in exactly one place. A click selects a row and its elements in Revit without moving
-/// the view; Show (or Space) zooms; Enter or a double click opens its detail (its law's words); Up/Down move; Ctrl+C
+/// the view; Show (or Space) zooms; Enter or a double click opens its detail in place of the list (DetailView: why,
+/// what to do, the figures, the law's words with Open the law, the elements by name; Back returns to the same row and
+/// scroll position); Up/Down move; Ctrl+C
 /// copies the row as the text file says it; Ctrl+F searches and Esc clears the search. Plain WPF: every Revit call
 /// goes through the callbacks, which queue it for Revit's thread (<see cref="PanelActions"/>). Every colour is a
 /// token of the theme's dictionary (<see cref="PanelLook"/>), named with SetResourceReference so it follows Revit's
 /// theme; every status is drawn as its glyph and said in words, never by colour alone (<see cref="StatusLook"/>).
 /// </summary>
-internal sealed class ResultsView : C.UserControl, IListHost
+internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
 {
     private readonly Action<ResultRow> _zoom;
     private readonly Action<ResultRow> _select;
@@ -60,10 +62,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
     private List<ListItem> _items = [];
     private ListFilter _filter = ListFilter.All;
     private readonly HashSet<ListSection> _opened = [];
-    private readonly HashSet<string> _openRows = new(StringComparer.Ordinal);
     private readonly HashSet<string> _openCounts = new(StringComparer.Ordinal);   // laws whose "+N more" is open
     private readonly HashSet<string> _openFolds = new(StringComparer.Ordinal);
     private string? _selectedId;
+    private string? _detailId;                                // the row whose detail is shown, or null for the list
+    private double _listOffset;                               // where the list was scrolled when the detail opened
     private bool _quiet;                                      // a selection the panel makes itself: never sent to Revit
 
     internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation, PanelTheme theme)
@@ -127,7 +130,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
             if (Within<C.Button>(e.OriginalSource) is not null || Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is not RowItem row)
                 return;
             e.Handled = true;
-            ToggleOpen(row);
+            OpenDetail(row.Row.Row.Id);
         };
         W.Automation.AutomationProperties.SetName(_list, "Results");
         C.Grid.SetRow(_list, 1);
@@ -221,6 +224,8 @@ internal sealed class ResultsView : C.UserControl, IListHost
         Chips(stale);
         _bodyHost.Child = _results;
         Relayout();
+        if (_detailId is { } open)                               // a detail open: shown again from this answer if its
+            OpenDetail(open, keepOffset: true);                  // row is still listed (stale: saying so), else the list
     }
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
@@ -321,6 +326,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
     internal void Failed(string words)
     {
         _content = null;
+        _detailId = null;
         _placed = [];
         _summary = null;
         _missing.Children.Clear();
@@ -431,7 +437,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
                     items.Add(new SubItem(this, s));
                     break;
                 case ListRowEntry r:
-                    var row = new RowItem(this, r.Row, _openRows.Contains(r.Row.Row.Id));
+                    var row = new RowItem(this, r.Row);
                     if (r.Row.Row.Id == _selectedId)
                         selected = row;
                     items.Add(row);
@@ -503,7 +509,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
                 e.Handled = true;
                 break;
             case I.Key.Enter when SelectedRow is { } row:
-                ToggleOpen(row);
+                OpenDetail(row.Row.Row.Id);
                 e.Handled = true;
                 break;
             case I.Key.Space when SelectedRow is { } row:
@@ -536,6 +542,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
 
     private void PanelKeys(object sender, I.KeyEventArgs e)
     {
+        if (_detail is not null && ReferenceEquals(_bodyHost.Child, _detail) && DetailKey(e))
+        {
+            e.Handled = true;
+            return;
+        }
         if (e.Key == I.Key.F && (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0 && ReferenceEquals(_bodyHost.Child, _results))
         {
             _search.Focus();
@@ -545,9 +556,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
     }
 
     /// <summary>Ctrl+C: the row as the text file writes it (stale: when it was checked), on the clipboard.</summary>
-    private void Copy(RowItem row)
+    private void Copy(RowItem row) => Copy(row.Row);
+
+    private void Copy(ListRow row)
     {
-        var text = ResultList.CopyText(row.Row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When);
+        var text = ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When);
         try
         {
             W.Clipboard.SetText(text);
@@ -593,19 +606,141 @@ internal sealed class ResultsView : C.UserControl, IListHost
         _zoom(row.Row.Row);
     }
 
-    /// <summary>Enter or a double click: the row's detail (its law's words) opened or folded, kept across redraws.</summary>
-    public void ToggleOpen(RowItem row)
+    // ---- the detail (IDetailHost) ---------------------------------------------------------------------------
+
+    private W.FrameworkElement? _detail;
+
+    /// <summary>The detail's keys: Backspace, Esc or Alt+Left back; Alt+Up / Alt+Down the previous or next row; Space
+    /// shows the elements (not on a button: Space presses it); Ctrl+C copies the row. Any other is the control's own.</summary>
+    private bool DetailKey(I.KeyEventArgs e)
     {
-        var open = !row.Open;
-        if (open)
-            _openRows.Add(row.Row.Row.Id);
-        else
-            _openRows.Remove(row.Row.Row.Id);
-        row.SetOpen(open);
+        var mods = I.Keyboard.Modifiers;
+        var key = e.Key == I.Key.System ? e.SystemKey : e.Key;
+        switch (key)
+        {
+            case I.Key.Back or I.Key.Escape when mods == I.ModifierKeys.None:
+            case I.Key.Left when mods == I.ModifierKeys.Alt:
+                Back();
+                return true;
+            case I.Key.Up or I.Key.Down when mods == I.ModifierKeys.Alt:
+                Step(key == I.Key.Down ? 1 : -1);
+                return true;
+            case I.Key.Space when mods == I.ModifierKeys.None && e.OriginalSource is not C.Primitives.ButtonBase:
+                ShowElements(null);
+                return true;
+            case I.Key.C when mods == I.ModifierKeys.Control && DetailRow() is { } row:
+                Copy(row);
+                return true;
+        }
+        return false;
     }
 
-    /// <summary>An element as the project labels it ("Windows id 341207"), or that it isn't in the model now.</summary>
-    public string Label(string uid) => _content?.Labels.GetValueOrDefault(uid) ?? "not in this model now";
+    /// <summary>The row whose detail is open, as the list shows it now, or null.</summary>
+    private ListRow? DetailRow() =>
+        _detailId is { } id ? _entries.OfType<ListRowEntry>().Select(e => e.Row).FirstOrDefault(r => r.Row.Id == id) : null;
+
+    /// <summary>Enter or a double click: row <paramref name="id"/>'s detail in place of the list (the list kept as it
+    /// is, its scroll position remembered); a row the list no longer shows (a new check without it) leaves the list.</summary>
+    private void OpenDetail(string id, bool keepOffset = false)
+    {
+        var (rows, index) = Details.Among(_entries, id);
+        if (index < 0)
+        {
+            _detailId = null;
+            _bodyHost.Child = _content?.Model is null ? _missingScroll : _results;
+            return;
+        }
+        if (!keepOffset && _detailId is null && Find<C.ScrollViewer>(_list) is { } sv)
+            _listOffset = sv.VerticalOffset;
+        _detailId = id;
+        _selectedId = id;
+        var stale = _content?.Model?.Stale is not null ? _content.When : (DateTime?)null;
+        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale);
+        _detail = DetailView.Build(detail, this, canStepBack: index > 0, canStepOn: index < rows.Count - 1);
+        _bodyHost.Child = _detail;
+        _detail.Focus();
+    }
+
+    /// <summary>Back to the list, at the same row, selected and focused, and the same scroll position.</summary>
+    public void Back()
+    {
+        if (_detailId is not { } id)
+            return;
+        _detailId = null;
+        _bodyHost.Child = _results;
+        _results.UpdateLayout();
+        if (Find<C.ScrollViewer>(_list) is { } sv)
+            sv.ScrollToVerticalOffset(_listOffset);
+        var at = _items.FindIndex(i => i is RowItem r && r.Row.Row.Id == id);
+        if (at < 0)
+            return;
+        _quiet = true;                                            // already selected in Revit
+        try
+        {
+            _list.SelectedIndex = at;
+        }
+        finally
+        {
+            _quiet = false;
+        }
+        _list.UpdateLayout();
+        (_list.ItemContainerGenerator.ContainerFromIndex(at) as C.ListBoxItem)?.Focus();
+    }
+
+    /// <summary>The previous or next row's detail, its elements selected in Revit (the view unmoved).</summary>
+    public void Step(int step)
+    {
+        if (_detailId is not { } id)
+            return;
+        var (rows, index) = Details.Among(_entries, id);
+        var to = index + step;
+        if (index < 0 || to < 0 || to >= rows.Count)
+            return;
+        OpenDetail(rows[to].Row.Id, keepOffset: true);
+        _select(rows[to].Row);
+    }
+
+    /// <summary>Show: zoom to the row's elements, or to one of them.</summary>
+    public void ShowElements(string? uid)
+    {
+        if (DetailRow() is not { } row)
+            return;
+        if (row.Row.Elements.Count == 0)
+        {
+            Say($"{row.Row.Name} names no element in the model to show.");
+            return;
+        }
+        _zoom(uid is null ? row.Row : row.Row with { Elements = [uid] });
+    }
+
+    /// <summary>Open the law: the worker's link, in the architect's browser or PDF reader.</summary>
+    public void OpenLaw(LawLink link)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(link.Url) { UseShellExecute = true });
+            Say($"Opened {link.Citation}.");
+        }
+        catch (Exception x) when (x is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            Say($"Couldn't open {link.Citation} ({x.Message}): its address is {link.Url}");
+        }
+    }
+
+    public void CheckAgain() => _checkAgain();
+
+    private static T? Find<T>(W.DependencyObject root) where T : W.DependencyObject
+    {
+        for (var i = 0; i < M.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var c = M.VisualTreeHelper.GetChild(root, i);
+            if (c is T t)
+                return t;
+            if (Find<T>(c) is { } d)
+                return d;
+        }
+        return null;
+    }
 
     /// <summary>A fold after the rows opened or closed: kept across redraws.</summary>
     public void FoldChanged(FoldItem fold)
