@@ -955,7 +955,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICaus
         switch (action)
         {
             case CardAction.Show or CardAction.ShowAndProperties:
-                _card(new CardRequest(card, action, card.Elements, Short(card.Words)));
+                _card(new CardRequest(card, action, CauseCards.ShowIds(card, Labels), Short(card.Words)));
                 break;
             case CardAction.ProjectInformation:
                 _projectInformation();

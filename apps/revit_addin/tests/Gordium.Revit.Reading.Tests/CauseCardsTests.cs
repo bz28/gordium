@@ -124,6 +124,13 @@ public sealed class CauseCardsTests
         Assert.Equal(CardAction.ByHand, CauseCards.Action(cards.Values.Last(), labels));
         Assert.Equal("Check by hand", CauseCards.ButtonWords(CardAction.ByHand));
         Assert.Equal(CardAction.Decide, CauseCards.Action(cards["flag"], labels));
+
+        // Show sends exactly what its button promised: the corridor card's one real element, never its dead ends'
+        // measured-part ids ("<corridor> (dead end 2)"), which Revit would report as "not in this model now"
+        var corridor = cards["mark:corridor:corridor_occupant_load"];
+        var real = corridor.Elements.Single(e => !e.Contains(' ', StringComparison.Ordinal));
+        Assert.True(corridor.Elements.Count > 1);
+        Assert.Equal([real], CauseCards.ShowIds(corridor, new Dictionary<string, string> { [real] = "CORRIDOR (26)" }));
         Assert.Equal("Decide", CauseCards.ButtonWords(CardAction.Decide));
     }
 
@@ -379,6 +386,8 @@ public sealed class CauseCardsTests
                         "            ui.GetDockablePane(DockablePanes.BuiltInDockablePanes.PropertiesPalette).Show();\n" +
                         "            Say(CauseCards.AfterProperties(request.Card, selected));", pane, StringComparison.Ordinal);
         var view = Addin("ResultsView.cs");
+        Assert.Contains("_card(new CardRequest(card, action, CauseCards.ShowIds(card, Labels), Short(card.Words)));", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("new CardRequest(card, action, card.Elements", view, StringComparison.Ordinal);
         Assert.Contains("    public void TickRow(ListRow row, bool ticked)\n    {\n        _looked.SetRow(row, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
         Assert.Contains("    public void TickCard(CauseCard card, bool ticked)\n    {\n        _looked.SetCard(card.Key, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
         Assert.Contains("    internal void Show(PanelContent content)\n    {\n        NewCheck(content);", view, StringComparison.Ordinal);

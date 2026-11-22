@@ -137,6 +137,12 @@ public static class CauseCards
         return card.Elements.Distinct(StringComparer.Ordinal).Where(uid => labels?.ContainsKey(uid) == true).ToList();
     }
 
+    /// <summary>The elements a card's Show (or Show and open Properties) sends to Revit: exactly the ones its button
+    /// promised (<see cref="InModel"/>: named when the check read the project), never the worker's raw list, which can
+    /// hold a measured part's own id ("&lt;corridor&gt; (dead end 2)") that is no element: those would be said "not in this
+    /// model now", as if deleted. An element deleted since the check still has its name, so a real deletion is still said.</summary>
+    public static IReadOnlyList<string> ShowIds(CauseCard card, IReadOnlyDictionary<string, string>? labels) => InModel(card, labels);
+
     /// <summary>What the card's button does: fix the model, Show its elements (select and zoom); a mark, bring up
     /// Properties on its elements with the mark named, or Project Information when that is where every mark it names
     /// is (a project fact), or Show alone when the card names no mark to set (nothing to set in Properties); measure by
