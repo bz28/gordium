@@ -361,10 +361,13 @@ agreed). A Revit dockable pane, *Gordium* (titled *Gordium: Check my project* un
 makes every row's words, and both the panel and `check_project_result.txt` (`ResultText`) read it, so the two
 never say a row differently.
 
-- **One scrolling list**, header included, so rows are never out of reach (Revit trial: at the docked size, about
-  420 by 340 px, a fixed header hid every row). Top to bottom (`ResultRows.Layout`): the stale notice when there is
-  one, the state, the count chips (one compact line per law), then straight away the groups; what wasn't read and
-  a folded *Details* (phase, options, street line, files) after the rows.
+- **The results list** (PR 3 of `ui_design_pass.md`, `ResultsList.cs`; its decisions in `ResultList.cs`, tested
+  without Revit). Top to bottom (`ResultRows.Layout`): the stale notice when there is one, the state and the count
+  chips (one compact line per law) stay at the top with the filter chips and the search; under them the list, a
+  virtualized `ListBox` (only the rows on screen are made, so 1,000 rows stay instant), its own scrolling; what
+  wasn't read and a folded *Details* (phase, options, street line, files) after the rows. Earlier the whole panel was
+  one scrolling column because a fixed header hid every row at the docked size (about 420 by 340 px); the fixed top
+  is now short (header, state, counts, chips, search) and the list fills the rest.
 - **Never a stale pass.** Revit's `DocumentChanged` on the project checked, for any change but the check's own
   committed transactions (adding the marks, keeping the street edge), and for every undo or redo whatever its
   names (the event's `Operation`: `ResultRows.ChangesTheCheck`), greys everything
@@ -377,10 +380,19 @@ never say a row differently.
   the whole summary. A chip is red only for "N do(es) not comply" and green only for exactly "N comply"/"N
   complies"; anything else is amber, so no chip is ever kinder than its words. Then the phase, design options and
   street line checked.
-- **Groups**, the worker's, in its order, with its titles and counts and its folding (a group or line holding a
-  failure, or a row read more cautiously than the worker said, is never folded: `CheckResult`). A law's group shows
-  its lines (a part's rules), each folded as the worker says. **No row is ever cut**: the list scrolls; a folded
-  group is built when first opened. A reason repeated per building is said once with its count ("(x12)").
+- **Worst first** (`ResultList.Place`): every row in exactly one of four places, by its own verdict as the add-in
+  reads it (wherever the worker grouped it): *does not comply* (largest how far off first, read from the worker's
+  words only when they state a shortfall or excess as a length; the rest in the worker's order), *needs review*
+  (the worker's tier 2, in its order), *check by hand or not checked* (the worker's tier 3, `<law>:by_hand`, and
+  zoning's not checked), then *complies* / *not applicable* (titled by what it holds, folded). Only that last place
+  is ever folded, and never while a filter or a search is on (a match is never hidden). Within a place a run of
+  rows of one worker line has that line's title over it (a line of one row is that row). **No row is ever cut.** A
+  reason repeated per building is said once with its count ("(x12)").
+- **Filters and search** (`ResultList.Layout`): chips all / does not comply / needs review (with check by hand and
+  not checked) / complies; the search matches every word in a row's name, its section or its elements' labels
+  (never a UniqueId). "Showing N of M rows" when narrowed. The chips have no numbers: the worker's counts (the count
+  bar) count what an architect counts (a window's 14 rules as one line), the list counts rows, so a number on a
+  chip would read as a recount.
 - **Each row**: its verdict (a status word the add-in doesn't know is "needs review (the checker said ...)", amber),
   its name, its **figures** and **how far off**, its reason, the law's **section**, and a **Law** expander with the
   rule's exact quotes and where each is (the answer's `detail.quotes`, else `code.quote`: the check_site answer
@@ -389,8 +401,11 @@ never say a row differently.
   overstated), or its `margin` from a worker that sends no delta; an empty delta says nothing. An egress row carries
   neither, so it shows the figures its reason states ("net clear height 20 in, needs ≥ 24 in") and **no margin is
   worked out**: the figures are the worker's rounded numbers, and their difference could misstate the law.
-- **Click a row** (or *Show in model*): its elements (a zoning row's `objects`, an egress row's `part.id`: Revit
-  UniqueIds) are selected and zoomed to (`Selection.SetElementIds`, `ShowElements`) in the project checked. It says
+- **Click a row** (or Up/Down): it is selected, and its elements (a zoning row's `objects`, an egress row's
+  `part.id`: Revit UniqueIds) are selected in Revit **without moving the view** (`Selection.SetElementIds`), so
+  Properties follows the panel; a row naming no element clears Revit's selection. **Show** (or Space) also zooms
+  (`ShowElements`). Enter or a double click opens the row's figures, reason, elements and the law's words; Ctrl+C
+  copies the row as `check_project_result.txt` writes it (once stale, with when it was checked). It says
   plainly when it can't: that project closed or not the active one, or an element not in the model now (deleted, in
   a linked model, or an area Gordium read from the walls).
 - **Fixes in place, v1.** Nothing sent because a Project Information fact is missing: the panel lists each, with
