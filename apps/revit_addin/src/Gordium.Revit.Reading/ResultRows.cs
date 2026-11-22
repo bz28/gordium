@@ -64,6 +64,9 @@ public sealed record ResultRow(string Id, string Name, Verdict Verdict, string V
     /// <summary>The figures, each set against its limit, as <see cref="Figures"/> says them (the same words, split).</summary>
     public IReadOnlyList<FigureLine> FigureLines { get; init; } = [];
 
+    /// <summary>The measured-vs-limit bar, from the worker's <c>limit_length</c> (two lengths in one unit), or null.</summary>
+    public MeasureBar? Bar { get; init; }
+
     /// <summary>Whether the reason already says the figures (an egress row's figures are read from its reason): the
     /// text file then says them once, in the reason; the panel shows the reason only when it says more.</summary>
     public bool FiguresInReason => Reason is not null && Figures is not null && Reason.Contains(Figures, StringComparison.Ordinal);
@@ -130,6 +133,9 @@ public sealed record ResultModel(Verdict State, string Headline, string Checked,
     /// the answer doesn't say (then no line is shown).</summary>
     public WhichCode? Code { get; init; }
 
+    /// <summary>The worker's cause cards, in its order (<see cref="CauseCards.Read"/>): "Fix these first".</summary>
+    public IReadOnlyList<CauseCard> Causes { get; init; } = [];
+
     /// <summary>The state's colour: green only for a check that complies and still stands; red for one that
     /// doesn't; amber otherwise; grey once the model changed.</summary>
     public Tone StateTone => Stale is not null ? Tone.Neutral : State switch
@@ -179,7 +185,10 @@ public static class ResultRows
             g.Lines.Select(l => new ResultLine(l.Title, ToneOf(l.Status, l.StatusWord), l.Folded,
                                                l.Items.Select(id => rows[id]).ToList())).ToList())).ToList();
         return new ResultModel(result.State, ResultText.Headline(result), ResultText.CheckedWords(phase, options, street),
-                               Counts(result), groups, ResultText.InsideWords(inside)) { Code = WhichCode.Read(result.Raw) };
+                               Counts(result), groups, ResultText.InsideWords(inside))
+        {
+            Code = WhichCode.Read(result.Raw), Causes = CauseCards.Read(result),
+        };
     }
 
     /// <summary>The panel's parts in the order it shows them: the stale notice (when stale), which code it was checked
@@ -310,7 +319,7 @@ public static class ResultRows
         return new ResultRow(row.Id, row.Name, row.Status, ResultText.RowWords(row), ToneOf(row.Status, row.StatusWord),
                              figures, howFar, reason, Section(raw), Quotes(raw), ResultText.Elements(raw))
         {
-            Hint = Text(raw, "hint"), Links = Links(raw), FigureLines = lines,
+            Hint = Text(raw, "hint"), Links = Links(raw), FigureLines = lines, Bar = MeasureBar.Of(raw),
         };
     }
 
