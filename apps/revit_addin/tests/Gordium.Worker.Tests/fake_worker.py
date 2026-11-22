@@ -6,6 +6,7 @@ give...) is tested on purpose. The real worker is tested in RealWorkerTests.cs.
 """
 
 import json
+import os
 import sys
 import time
 
@@ -13,7 +14,8 @@ import time
 # too big for a number
 VERSIONS = {"hello_version_newline": "1.2\n", "hello_version_other_digit": "1.\u0662",
             "hello_version_overflow": "1.99999999999"}
-ABOUT = {"protocol": "1.0", "site_schema": "gordium.site/1", "worker_fingerprint": "f" * 64,
+# the protocol said in hello: 1.0, or GORDIUM_FAKE_PROTOCOL (the add-in's check tests send an interior, which needs 1.2)
+ABOUT = {"protocol": os.environ.get("GORDIUM_FAKE_PROTOCOL", "1.0"), "site_schema": "gordium.site/1", "worker_fingerprint": "f" * 64,
          "rulebook": {"new_york/ithaca_city": "a" * 64}}
 ITEM = {"id": "R-1b.height", "name": "Height", "group": "building", "status": "complies", "reason": None}
 CHECK = {"view": {"items": [ITEM], "summary": "1 complies", "state": "complies"}, "report_error": None}
