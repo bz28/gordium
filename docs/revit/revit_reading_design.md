@@ -235,6 +235,28 @@ Found on running: a house drawn as parts with no floor marks, 20 ft tall, has st
 allows 1 or 2, `measure._stories_whole`), where the same house as Gordium's floor blocks complies. A native Revit
 house will need its stories entered (or its floors marked) before that row can comply.
 
+**Stories of a building drawn as parts (2026-11-21, the New York eval's Revit run).** Revit draws each floor and roof
+as its own element, its top at its level and its thickness below, so an upper floor or a roof is a thin part that
+starts above the ground, inside the walls in plan and often inside their height (106 Ithaca Rd: 35 ft walls, the roof
+a 12 in slab at 34 to 35 ft). The measuring took it as a part that "may be another story" (`part_raised`), or as one
+sunk into another (`parts_overlap`), so stories needed review for the wrong reason, one a stated count could never
+clear. The law: "STORY — The portion of a building which is between one floor level and the next higher floor level
+or the roof" (Chapter 325, §325-3B, p.19); the State's house code words it the same way ("STORY. That portion of a building included between the upper
+surface of a floor and the upper surface of the floor or roof next above", 2025 Residential Code of NYS R202,
+regulations/jurisdictions/new_york/new_york_state/4_term_definitions/definitions.yaml). A slab is a floor level or the roof that bounds a story, never the portion between,
+and a part under 7 ft can hold no story (the lowest habitable ceiling, R305.1 as the measuring cites it, its STORY_ROOM). So, **Gordium's reading** (`measure._slabs_within`): a part that starts above the ground, is under 7 ft
+tall, and lies in plan within the outer outline of the parts standing on the ground at least a story tall, its bottom
+no higher than their top, is a floor or roof slab: left out of the raised-part and overlap tests and of the count's
+bounds (it held none). What it can't do: lower the most the building could hold (under 7 ft it held none), or clear a
+part a story tall over the roof, a thin part reaching past the walls (a balcony), or one floating over them: each
+stays a part that may be another story. The count is still read from the walls (1 to floor(height / 7 ft), "draw its
+floors or enter the count"), so a native Revit model's stories still need review until the count is stated; a
+Stories mark on Project Information (as Rhino's lot facts state `stories`) is the step left, for Ben. Walls drawn per
+level (an upper story's walls starting at its level, a story tall) still read as a part that may be another story:
+Revit's own Levels ("Building Story") would tell those apart, and are not read yet. Pinned by
+`packages/model_measurement/tests/test_stories_slabs.py` and the eval's Revit-parts reading
+(`apps/revit_addin/tools/tests/test_ny_eval.py`).
+
 ## 8. Left for the trial
 
 Every "to check" above, plus: which category type Revit gives a linked model and a CAD import (the reader looks at

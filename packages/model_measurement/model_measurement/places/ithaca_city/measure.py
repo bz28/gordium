@@ -1178,6 +1178,34 @@ def _refused(code: str, reason: str) -> dict:
     return dict(_missing("stories", reason), stories_refused=code)
 
 
+def _slabs_within(plain: list[dict], grade) -> list[dict]:
+    """The plain parts that are a slab resting in the building, not a part that may hold a story of its own: each
+    starts above the ground, is too thin to hold a story (under 7 ft, R305.1: it could hold none), and lies, in plan,
+    within the outline of the parts standing on the ground at least a story tall (their outer outline, its courtyards
+    filled), with its bottom no higher than their top: a floor slab or a roof slab between or over the walls, as a
+    Revit model draws each floor and roof as its own element (docs/revit/revit_reading_design.md, section 7, "Stories
+    of a building drawn as parts"). STORY is "the portion of a building which is between one floor level and the next
+    higher floor level or the roof" (§325-3B): such a slab is one of those levels, never the portion between. Anything
+    else starting above the ground (a block over the roof, a part floating over a gap, an upper part a story tall)
+    stays a part that may be another story. Taking a slab out never lowers the most the building could hold: under
+    7 ft, it held none."""
+    standing = [b for b in plain if _extent(b)[0] is not None and abs(_extent(b)[0] - grade) <= TOL
+                and _rise(b) >= STORY_ROOM - TOL]
+    if not standing:
+        return []
+    union = ops.unary_union([_projection(b) for b in standing])
+    outline = ops.unary_union([Polygon(g.exterior) for g in getattr(union, "geoms", [union]) if not g.is_empty])
+    top = max(_extent(b)[1] for b in standing)
+    out = []
+    for b in plain:
+        lo, hi = _extent(b)
+        if lo is None or lo <= grade + TOL or hi - lo >= STORY_ROOM - TOL or lo > top + TOL:
+            continue
+        if _projection(b).difference(outline.buffer(TOL)).area <= 1e-6:
+            out.append(b)
+    return out
+
+
 def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | None = None) -> dict:
     """STORY of one building made of parts (the main building first; with #18, the parts touching it, §325-18A),
     read from the drawing as far as it allows. Gordium's floor blocks are counted; a part drawn as a plain solid (or
@@ -1193,6 +1221,11 @@ def _stories_whole(parts: list[dict], grade, why_grade, stated, called: str | No
     if why_grade:
         return _missing("stories", why_grade)
     plain = [b for b in parts if not (b.get("parts") and any(b.get("floor") or []))]
+    # a slab resting in the building (a floor or the roof drawn as its own element: Revit's floors and roofs) is a
+    # floor level or the roof of the STORY definition, never another story, nor a part sunk into another
+    slabs = _slabs_within(plain, grade)
+    plain = [b for b in plain if not any(b is s for s in slabs)]
+    parts = [b for b in parts if not any(b is s for s in slabs)]
     low = [b for b in plain if _extent(b)[0] is not None and _extent(b)[0] < grade - TOL]
     if low:
         return _missing("stories", stop("basement_part", what=", ".join(b["id"] for b in low)))
