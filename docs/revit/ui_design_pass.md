@@ -205,15 +205,19 @@ rules it affects, the first action as a button. For the Odyssey:
 2. *The corridor's shape isn't measured yet*: 2 rules, check by hand. [How to check]
 3. *Figures meet the limit; a person decides*: 2 flag rules. [Review]
 
-**The results list.** Each row is two lines at the docked width (about 340 px):
+**The results list.** Each row at the docked width (about 340 px):
 
 ```
-[? ] Exit access travel distance                     IBC 1016.1
+[? ] Exit access travel distance
      5 rooms not measured · longest found 110.2 ft of 200 ft
+     IBC 1016.1                                        [Show]
 ```
 
-A status glyph (shape, not just colour), the rule's plain name, the section right-aligned, and one line of
-figures or the short cause. Single click **selects the row** (highlight, and the row's elements are selected in
+A status glyph (shape, not just colour), the rule's plain name with the row's whole width, its figures in full
+(wrapped, never cut) or the short cause, then the section on its own line. (Built in PR 3: a section right-aligned
+beside the name squeezed it to a word a line in the Revit trial, and figures beside Show were cut.) Only the filter
+chips and the search stay pinned; the summary (state and count bar) is the list's first entry and scrolls away with
+it, so the list gets the docked pane's height. Single click **selects the row** (highlight, and the row's elements are selected in
 Revit with no zoom); double click or Enter opens its detail; the **Show** button (or Space) zooms. Up/Down move,
 Ctrl+C copies the row as the text file says it. Search matches rule names, sections and element names; filter
 chips match the count bar.

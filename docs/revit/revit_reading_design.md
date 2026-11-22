@@ -362,10 +362,17 @@ agreed). A Revit dockable pane, *Gordium* (titled *Gordium: Check my project* un
 makes every row's words, and both the panel and `check_project_result.txt` (`ResultText`) read it, so the two
 never say a row differently.
 
-- **One scrolling list**, header included, so rows are never out of reach (Revit trial: at the docked size, about
-  420 by 340 px, a fixed header hid every row). Top to bottom (`ResultRows.Layout`): the stale notice when there is
-  one, the state, the count chips (one compact line per law), then straight away the groups; what wasn't read and
-  a folded *Details* (phase, options, street line, files) after the rows.
+- **The results list** (PR 3 of `ui_design_pass.md`, `ResultsList.cs`; its decisions in `ResultList.cs`, tested
+  without Revit). Pinned at the top: the header (title, *Check again*, when and which project, one status line) and a
+  compact toolbar (the filter chips, the search, "Showing N of M"). Under it the list, a virtualized `ListBox` (only
+  the rows on screen are made, so 1,000 rows stay instant), its own scrolling, whose first entry is the summary
+  (`ResultList.WithSummary`, in `ResultRows.Layout`'s order: the stale notice when there is one, the state, the count
+  chips one wrap line per law), never selected or moved to; what wasn't read and a folded *Details* (phase, options,
+  street line, files) after the rows. The Revit trial (106 Ithaca Rd, pane docked at about 340 by 430 px) showed a
+  pinned summary filling the whole pane, the list getting nothing; it now scrolls away with the rows. Each row: its
+  glyph and name with the row's whole width (a section beside it squeezed the name to a word a line), its figures in
+  full, wrapped (never cut: the limit and how far off are a failure's most important words) or its short cause (two
+  lines at most), then its section on its own line (trimmed, the whole on hover) with *Show*.
 - **Never a stale pass.** Revit's `DocumentChanged` on the project checked, for any change but the check's own
   committed transactions (adding the marks, keeping the street edge), and for every undo or redo whatever its
   names (the event's `Operation`: `ResultRows.ChangesTheCheck`), greys everything
@@ -378,10 +385,24 @@ never say a row differently.
   the whole summary. A chip is red only for "N do(es) not comply" and green only for exactly "N comply"/"N
   complies"; anything else is amber, so no chip is ever kinder than its words. Then the phase, design options and
   street line checked.
-- **Groups**, the worker's, in its order, with its titles and counts and its folding (a group or line holding a
-  failure, or a row read more cautiously than the worker said, is never folded: `CheckResult`). A law's group shows
-  its lines (a part's rules), each folded as the worker says. **No row is ever cut**: the list scrolls; a folded
-  group is built when first opened. A reason repeated per building is said once with its count ("(x12)").
+- **Worst first** (`ResultList.Place`): every row in exactly one of four places, by its own verdict as the add-in
+  reads it (wherever the worker grouped it): *does not comply* (largest how far off first, read from the worker's
+  words only when they state a shortfall or excess as a length; the rest in the worker's order), *needs review*
+  (the worker's tier 2, in its order), *check by hand or not checked* (the worker's tier 3, `<law>:by_hand`, and
+  zoning's not checked), then *complies* / *not applicable* (titled by what it holds, folded). Only that last place
+  is ever folded, and never while a filter or a search is on (a match is never hidden). Within a place a run of
+  rows of one worker line or group always has its own sub-heading, so no run reads as more of the one before: the
+  line's own title (which may count its rows) only in the place the worker's tier puts the line and only when all
+  its rows are there; otherwise a name that claims no count or status (the part, "Window 2"; the law, "Egress";
+  "Zoning"; a law still waiting for rooms, its law's name). A row the add-in reads more cautiously than its line
+  moves to its own place under its part's name, never the line's words. The list's keys act only on a row (Space on the *Details*
+  fold's header opens it, never zooms). **No row is ever cut.** A
+  reason repeated per building is said once with its count ("(x12)").
+- **Filters and search** (`ResultList.Layout`): chips all / does not comply / needs review (with check by hand and
+  not checked) / complies; the search matches every word in a row's name, its section or its elements' labels
+  (never a UniqueId). "Showing N of M rows" when narrowed. The chips have no numbers: the worker's counts (the count
+  bar) count what an architect counts (a window's 14 rules as one line), the list counts rows, so a number on a
+  chip would read as a recount.
 - **Each row**: its verdict (a status word the add-in doesn't know is "needs review (the checker said ...)", amber),
   its name, its **figures** and **how far off**, its reason, the law's **section**, and a **Law** expander with the
   rule's exact quotes and where each is (the answer's `detail.quotes`, else `code.quote`: the check_site answer
@@ -390,8 +411,11 @@ never say a row differently.
   overstated), or its `margin` from a worker that sends no delta; an empty delta says nothing. An egress row carries
   neither, so it shows the figures its reason states ("net clear height 20 in, needs ≥ 24 in") and **no margin is
   worked out**: the figures are the worker's rounded numbers, and their difference could misstate the law.
-- **Click a row** (or *Show in model*): its elements (a zoning row's `objects`, an egress row's `part.id`: Revit
-  UniqueIds) are selected and zoomed to (`Selection.SetElementIds`, `ShowElements`) in the project checked. It says
+- **Click a row** (or Up/Down): it is selected, and its elements (a zoning row's `objects`, an egress row's
+  `part.id`: Revit UniqueIds) are selected in Revit **without moving the view** (`Selection.SetElementIds`), so
+  Properties follows the panel; a row naming no element clears Revit's selection. **Show** (or Space) also zooms
+  (`ShowElements`). Enter or a double click opens the row's figures, reason, elements and the law's words; Ctrl+C
+  copies the row as `check_project_result.txt` writes it (once stale, with when it was checked). It says
   plainly when it can't: that project closed or not the active one, or an element not in the model now (deleted, in
   a linked model, or an area Gordium read from the walls).
 - **Fixes in place, v1.** Nothing sent because a Project Information fact is missing: the panel lists each, with

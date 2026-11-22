@@ -453,12 +453,20 @@ the jurisdiction is the City of Ithaca). Why each choice:
   (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks and never uses the panel.
 - **The results panel** (`ResultsPane.cs`, `ResultsView.cs`, `PanelActions.cs`): a dockable pane, *Gordium: Check
   my project*, tabbed behind Properties the first time. Header with *Check again*; the worker's state and count
-  chips; its groups in its order (does not comply first, complies folded), every row in a scrolling list; each row
-  with its figures, how far off, reason, section and a *Law* expander with the law's words. Click a row (or *Show
-  in model*) to select and zoom to its elements. Nothing sent for a missing Project Information fact: the panel
+  chips; filter chips (all, does not comply, needs review, complies) and a search (rule names, sections, element
+  names); then the **results list** (`ResultsList.cs`, its decisions in `Gordium.Revit.Reading/ResultList.cs`): a
+  virtualized list, worst first (does not comply, largest how far off first where the worker's figure is a length;
+  needs review, the worker's tier 2; check by hand or not checked; complies and not applicable, folded), every row in
+  exactly one place, each row: glyph and name (the row's whole width, wrapped), its figures in full or short cause,
+  then its section (trimmed, the whole on hover) with *Show*. A click selects the row
+  and its elements in Revit without moving the view; *Show* (or Space) zooms; Enter or a double click opens its
+  figures, reason, elements and the law's words; Up/Down move; Ctrl+C copies the row as the result file says it;
+  Ctrl+F searches, Esc clears the search. Nothing sent for a missing Project Information fact: the panel
   lists each, with *Open Project Information*. Element marks are still set in Properties (the click selects the
   element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread (`ActionQueue`: a
-  refused request is dropped). One scrolling list, rows straight after the counts, *Details* folded after them. An
+  refused request is dropped). Only the filter chips, the search and "Showing N of M" stay pinned; the state and the
+  counts are the list's first entry and scroll away with the rows (Revit trial, 106 Ithaca Rd: pinned, they filled
+  the whole docked pane), with what wasn't read and *Details* folded after the rows (shown when no filter or search narrows the list). An
   edit to the checked project greys everything (no green) and says to check again; closing it takes the rows
   down. The street edge is asked for only when it is the last fact and the view is a plan showing a property line.
   Its look follows Revit's light or dark theme (`UIThemeManager.CurrentTheme` at startup, `ThemeChanged` after):
