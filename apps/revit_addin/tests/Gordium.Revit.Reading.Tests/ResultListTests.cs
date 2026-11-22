@@ -235,7 +235,7 @@ public sealed class ResultListTests
     }
 
     [Fact]
-    public void Sub_headings_are_the_workers_lines_and_a_line_of_one_row_is_that_row()
+    public void Sub_headings_are_the_workers_lines_and_a_line_of_one_row_is_named_by_its_part()
     {
         var layout = ResultList.Layout(ResultList.Place(Mixed()), ListFilter.All, null, null, false, opened: Everything);
         var subs = layout.OfType<ListSubheading>().Select(s => s.Title).ToList();
