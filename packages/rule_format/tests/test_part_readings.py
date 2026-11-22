@@ -123,8 +123,8 @@ def test_a_fail_on_a_reading_to_confirm_keeps_its_reason_and_says_the_reading_in
     line keeps its comparison)."""
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
-    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=140.0), SPRINKLERED_NEW,
-                 allowed)
+    row = row_of(rule, story_with({"common_path_of_travel_occupied": WORDS}, common_path_of_travel_occupied=140.0),
+                 SPRINKLERED_NEW, allowed)
     assert (row["outcome"], row["reason"], row["confirm"]) == ("fail", None, [WORDS])
 
 
@@ -133,8 +133,8 @@ def test_a_pass_on_a_reading_to_confirm_is_never_a_pass(maine):
     reading is confirmed, said so, as the checker does for a has-none reading (each_part.check_parts)."""
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
-    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0), SPRINKLERED_NEW,
-                 allowed)
+    row = row_of(rule, story_with({"common_path_of_travel_occupied": WORDS}, common_path_of_travel_occupied=40.0),
+                 SPRINKLERED_NEW, allowed)
     assert row["outcome"] == "needs_review"
     assert row["reason"] == "complies only if this reading is confirmed: " + WORDS
     assert parts.rule_result([row]) == "needs_review"
@@ -144,19 +144,46 @@ def test_a_reading_to_confirm_is_said_only_for_the_measures_a_rule_reads_and_has
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
     # the words are for another measure: not said here
-    row = row_of(rule, story_with({"egress_travel_distance": WORDS}, common_path_of_travel=40.0), SPRINKLERED_NEW,
+    row = row_of(rule, story_with({"egress_travel_distance": WORDS}, common_path_of_travel_occupied=40.0),
+                 SPRINKLERED_NEW,
                  allowed)
     assert row["outcome"] == "pass" and "confirm" not in row
     # the measure isn't given: the row needs review for that, and no reading stands behind a value
-    row = row_of(rule, story_with({"common_path_of_travel": WORDS}), SPRINKLERED_NEW, allowed)
+    row = row_of(rule, story_with({"common_path_of_travel_occupied": WORDS}), SPRINKLERED_NEW, allowed)
     assert row["outcome"] == "needs_review" and "confirm" not in row
     # no `confirm`: as before
-    row = row_of(rule, story_with(None, common_path_of_travel=40.0), SPRINKLERED_NEW, allowed)
+    row = row_of(rule, story_with(None, common_path_of_travel_occupied=40.0), SPRINKLERED_NEW, allowed)
     assert (row["outcome"], row["reason"]) == ("pass", None) and "confirm" not in row
 
 
 def test_a_rule_that_doesnt_apply_says_no_reading(maine):
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
-    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0), NEW_DAY_CARE, allowed)
+    row = row_of(rule, story_with({"common_path_of_travel_occupied": WORDS}, common_path_of_travel_occupied=40.0),
+                 NEW_DAY_CARE, allowed)
     assert row["outcome"] == "not_applicable" and "confirm" not in row   # unsprinklered: the 100-ft rule doesn't apply
+
+
+# --- a figure standing on the architect's statement (route note decision 1b: `architect_stated`) ----------------
+
+LEFT_OUT = "measured leaving out 1 space marked not occupied by the architect: abandoned"
+
+
+def test_the_architects_statement_is_said_beside_the_row_and_never_holds_a_pass(maine):
+    """Unlike Gordium's reading (`confirm`), the rooms the architect marks not occupied that a figure leaves out are
+    the architect's own statement: a pass stays a pass, a fail a fail, each with the words beside it."""
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    for value, outcome in ((40.0, "pass"), (140.0, "fail")):
+        part = {"id": "L1", "measures": {"common_path_of_travel_occupied": value},
+                "architect_stated": {"common_path_of_travel_occupied": LEFT_OUT}}
+        row = row_of(rule, {"story": [part]}, SPRINKLERED_NEW, allowed)
+        assert (row["outcome"], row["architect_stated"]) == (outcome, [LEFT_OUT])
+        assert "confirm" not in row
+    # words for a measure the rule doesn't read, or with no value behind them: not said
+    part = {"id": "L1", "measures": {"common_path_of_travel_occupied": 40.0},
+            "architect_stated": {"egress_travel_distance_occupied": LEFT_OUT}}
+    assert "architect_stated" not in row_of(rule, {"story": [part]}, SPRINKLERED_NEW, allowed)
+    part = {"id": "L1", "measures": {}, "architect_stated": {"common_path_of_travel_occupied": LEFT_OUT}}
+    row = row_of(rule, {"story": [part]}, SPRINKLERED_NEW, allowed)
+    assert row["outcome"] == "needs_review" and "architect_stated" not in row

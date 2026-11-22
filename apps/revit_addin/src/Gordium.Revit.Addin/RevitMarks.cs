@@ -177,7 +177,8 @@ internal static class RevitMarks
             var dataType = def.GetDataType();
             MarkValueKind? kind = dataType == SpecTypeId.Boolean.YesNo ? MarkValueKind.YesNo
                 : dataType == SpecTypeId.String.Text ? MarkValueKind.Text
-                : dataType == SpecTypeId.Length ? MarkValueKind.Length : null;
+                : dataType == SpecTypeId.Length ? MarkValueKind.Length
+                : dataType == SpecTypeId.Int.Integer ? MarkValueKind.Integer : null;
             bound.Add(new BoundParameter(def.Name, guid, kind, dataType.TypeId, binding is InstanceBinding,
                                          binding.Categories.Cast<Category>().Select(c => c.BuiltInCategory.ToString()).ToList()));
         }
@@ -189,6 +190,7 @@ internal static class RevitMarks
         MarkValueKind.YesNo => SpecTypeId.Boolean.YesNo,
         MarkValueKind.Text => SpecTypeId.String.Text,
         MarkValueKind.Length => SpecTypeId.Length,
+        MarkValueKind.Integer => SpecTypeId.Int.Integer,
         _ => throw new ArgumentOutOfRangeException(nameof(kind)),
     };
 

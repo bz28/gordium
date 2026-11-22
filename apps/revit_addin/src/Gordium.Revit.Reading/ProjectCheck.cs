@@ -83,16 +83,16 @@ public static class ProjectCheck
 }
 
 /// <summary>The lot facts as Gordium's marks on Project Information give them.</summary>
-/// <param name="Facts">The facts to send (jurisdiction, zone, use, lot_surveyed, and corner_lot and grade_from when
-/// set); street_line is added once the lot is read (<c>StreetEdges.Match</c>).</param>
+/// <param name="Facts">The facts to send (jurisdiction, zone, use, lot_surveyed, and corner_lot, grade_from and
+/// stories when set); street_line is added once the lot is read (<c>StreetEdges.Match</c>).</param>
 /// <param name="StreetEdges">The street edges picked (Revit's internal coordinates), or null when not set.</param>
 /// <param name="Missing">What to fill in; empty when every required fact is stated.</param>
 public sealed record ProjectFactsRead(JsonObject Facts, IReadOnlyList<KeptEdge>? StreetEdges, IReadOnlyList<string> Missing);
 
 /// <summary>The lot facts from the marks. Gordium checks the City of Ithaca only (CLAUDE.md: first city), so the
 /// jurisdiction is fixed. Every required fact (the checker's own list, host_core.facts.REQUIRED: zone, use,
-/// street_line, lot_surveyed) unset, and it is listed as missing; an unset optional one (corner lot, the ground) is
-/// not sent, so the rows it decides need review.</summary>
+/// street_line, lot_surveyed) unset, and it is listed as missing; an unset optional one (corner lot, the ground, the
+/// stories) is not sent, so the rows it decides need review.</summary>
 public static class ProjectFacts
 {
     public const string Jurisdiction = "regulations/jurisdictions/new_york/ithaca_city";
@@ -134,6 +134,16 @@ public static class ProjectFacts
             else
                 facts["grade_from"] = word.GradeFrom;
         }
+        // the architect's count of stories (optional): sent as their statement, which the measuring keeps only within
+        // what the drawing allows; a count under 1 is no count of stories, and is asked again, never sent
+        if (Marks.Count(Get(Marks.Stories)) is { } stories)
+        {
+            if (stories < 1)
+                missing.Add($"{Marks.Stories.Name} is {stories.ToString(CultureInfo.InvariantCulture)}: type the number " +
+                            $"of stories, 1 or more, or leave it blank{Where}.");
+            else
+                facts["stories"] = stories;
+        }
         IReadOnlyList<KeptEdge>? edges = null;
         var street = Marks.Text(Get(Marks.StreetEdge));
         if (street is null)
@@ -156,7 +166,8 @@ public static class ProjectFacts
     }
 
     /// <summary>A mark's value in a request file (check_project_request.json's "marks"), as Revit's Parameter.Set
-    /// takes it: a Yes/No mark needs true or false (1 or 0), a text mark text. Anything else is refused naming the
+    /// takes it: a Yes/No mark needs true or false (1 or 0), a whole-number mark a whole number (the Integer it is
+    /// set to, returned where a Yes/No's 1 or 0 is), a text mark text. Anything else is refused naming the
     /// mark, never set as something near it: a check made on a mark the request didn't mean.</summary>
     public static (int? YesNo, string? Text) RequestValue(MarkDefinition mark, JsonNode? value)
     {
@@ -166,11 +177,15 @@ public static class ProjectFacts
         {
             case MarkValueKind.YesNo when v is not null && v.TryGetValue<bool>(out var yes):
                 return (yes ? 1 : 0, null);
+            // a whole number given as a JSON number (never true, "3" or 3.5), set as Revit's Integer is set: AsInteger
+            case MarkValueKind.Integer when v is not null && v.GetValueKind() == System.Text.Json.JsonValueKind.Number &&
+                                            v.TryGetValue<int>(out var count):
+                return (count, null);
             case MarkValueKind.Text when v is not null && v.TryGetValue<string>(out var text):
                 return (null, text);
             default:
                 throw new InvalidOperationException(
-                    $"{mark.Name} is a {(mark.Kind == MarkValueKind.YesNo ? "Yes/No mark: give true or false" : mark.Kind == MarkValueKind.Text ? "text mark: give text" : "length mark, which a request can't set")}, " +
+                    $"{mark.Name} is a {mark.Kind switch { MarkValueKind.YesNo => "Yes/No mark: give true or false", MarkValueKind.Text => "text mark: give text", MarkValueKind.Integer => "whole-number mark: give a whole number", _ => "length mark, which a request can't set" }}, " +
                     $"not {value?.ToJsonString() ?? "null"}: nothing was checked");
         }
     }

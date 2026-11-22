@@ -223,6 +223,17 @@ def _confirm(part, mine, shown) -> list[str]:
     return [str(given[m]) for m in sorted(shown) if m in mine and m in given]
 
 
+def _architect_stated(part, mine, shown) -> list[str]:
+    """The words a part gives (`architect_stated`: {measure: words}) for the measures this row reads that it has a
+    value for: what the architect stated that the figure stands on (the rooms marked not occupied that a travel
+    figure leaves out: route note decision 1b). Shown with the row, never hidden; unlike `confirm` it is the
+    architect's own statement, not a reading of Gordium's, so it never holds a pass."""
+    given = part.get("architect_stated")
+    if not isinstance(given, dict):
+        return []
+    return [str(given[m]) for m in sorted(shown) if m in mine and m in given]
+
+
 def _row(rule, result, part=None, within=None, reason=None, values=None, none=False, unknown=None) -> dict:
     """One row. `none`: the row is the rule's when_none answer (nothing to check). `unknown`: the part's measures
     that weren't given, for a part that fails whatever they are (the 2026-10-21 proof)."""
@@ -319,6 +330,9 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
             row["reason"] = "complies only if this reading is confirmed: " + "; ".join(confirm)
         elif confirm:                            # a fail (or a needs review) keeps its own reason and comparison,
             row["confirm"] = confirm             # the reading said beside it
+        said = list(dict.fromkeys(_architect_stated(part, mine, shown))) if result != "not_applicable" else []
+        if said:                                 # the architect's statement the figure stands on, said beside it
+            row["architect_stated"] = said
         return row
 
     if not parent:

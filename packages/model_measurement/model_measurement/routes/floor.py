@@ -50,6 +50,7 @@ class Room:
     end_only_why: str = ""           # why it isn't crossable (shown with the routes)
     use: str | None = None           # the room's `use`, as given (None: not given)
     lockable: bool | None = None     # as given (None: not given)
+    not_occupied: bool = False       # decision 1b: the architect states nobody occupies it (left out or false: occupied)
 
 
 @dataclass
@@ -319,6 +320,7 @@ def _room(item, reader, level) -> Room:
         if use is not None:
             choice(use, USES, "the room's `use`")
         lockable, through = _flag(item, "lockable"), _flag(item, "pass_through")
+        not_occupied = _flag(item, "not_occupied") is True       # decision 1b: only true leaves it out
         holes = _outlines_of(item, "holes", reader, "a hole")
         obstructions = []
         got = item.get("obstructions")
@@ -335,6 +337,10 @@ def _room(item, reader, level) -> Room:
                 raise InteriorStop("missing", what=f"obstruction #{n}'s `fixed` (true or false)")
     except InteriorStop as s:
         raise Stop("room_not_read", name=name, reason=s.reason) from None
+    # decision 1b: a room whose own use is occupancy (sleeping, the day care's rooms) is never one nobody occupies
+    occupied_by_use = "a sleeping room" if sleeping else "a day_care room" if use == "day_care" else ""
+    if not_occupied and occupied_by_use:
+        raise Stop("not_occupied_refused", name=name, why=occupied_by_use)
     # decision 1a: end-only always wins
     end_only = ("a sleeping room" if sleeping else f"a {use} room" if use in END_ONLY_USES
                 else "it can be locked (`lockable: true`)" if lockable is True else "")
@@ -347,7 +353,7 @@ def _room(item, reader, level) -> Room:
                         "it isn't a corridor, nor marked `pass_through: true`" if not (use == "corridor" or through)
                         else ""))
     return Room(item["id"], name, level, outline, holes, obstructions, crossable=not why, end_only_why=why, use=use,
-                lockable=lockable)
+                lockable=lockable, not_occupied=not_occupied)
 
 
 def _outlines_of(item, key, reader, what) -> list:

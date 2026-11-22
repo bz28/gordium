@@ -28,6 +28,7 @@ public sealed class RouteTests
             got = floor.read(d)
             out = {"stops": got.stops, "stories": {k: s.stops for k, s in got.stories.items()}, "routes": {},
                    "crossable": {k: r.crossable for s in got.stories.values() for k, r in s.rooms.items() if r is not None},
+                   "not_occupied": {k: r.not_occupied for s in got.stories.values() for k, r in s.rooms.items() if r is not None},
                    "outlines": {k: {"stop": s.outline_stop, "outer": s.outer.area if s.outer is not None else None,
                                     "inner": s.inner.area if s.inner is not None else None} for k, s in got.stories.items()}}
             for k, s in got.stories.items():
@@ -109,7 +110,7 @@ public sealed class RouteTests
         Assert.Equal(
         [
             "levels: 1 (Level 1)",
-            "rooms: 5; with a level 5, a floor 5, holes 5 (1 in all), obstructions 5 (1 footprints); use 5, can be locked 5, pass through 5",
+            "rooms: 5; with a level 5, a floor 5, holes 5 (1 in all), obstructions 5 (1 footprints); use 5, can be locked 5, pass through 5, marked not occupied 0",
             "doors: 5; with a level 5, a place in its wall 5 (its wall read 5), sides 5 (2 to outside), exits 2 (2 exits by id)",
             "passages: 1",
             "unknown spaces: 0",
@@ -154,6 +155,28 @@ public sealed class RouteTests
         var routes = Routes(read, new() { ["office B"] = (35, 2) });
         Assert.False(routes["crossable"]![U("C")]!.GetValue<bool>());
         Assert.NotNull(routes["routes"]!["office B"]!["stop"]);
+    }
+
+    /// <summary>The architect's "nobody occupies this room" (Gordium: Not occupied, route note decision 1b): sent as
+    /// marked, Yes as true and No as false; never set (Revit reads 0) is left out, so the room is occupied and
+    /// measured, never left out on a blank. The route code reads it: NFPA's figures leave that room's points out.</summary>
+    [Fact]
+    public void A_rooms_not_occupied_mark_is_sent_only_as_marked()
+    {
+        var floor = new FakeFloor();
+        floor.SetMark("A", Marks.NotOccupied, new(true, 1));
+        floor.SetMark("B", Marks.NotOccupied, new(true, 0));
+        floor.SetMark("C", Marks.NotOccupied, new(false, 0));                  // never set (Revit reads 0)
+        var read = InteriorReader.Read(floor.Model());
+        Assert.True(Room(read, "A")["not_occupied"]!.GetValue<bool>());
+        Assert.False(Room(read, "B")["not_occupied"]!.GetValue<bool>());
+        Assert.Null(Room(read, "C")["not_occupied"]);
+        Assert.Null(Room(read, "L")["not_occupied"]);                         // no mark at all: left out
+        Assert.Contains("marked not occupied 1", string.Join(" | ", RouteReader.Summary(read)), StringComparison.Ordinal);
+        var json = Routes(read)["not_occupied"]!;
+        Assert.True(json[U("A")]!.GetValue<bool>());
+        Assert.False(json[U("B")]!.GetValue<bool>());
+        Assert.False(json[U("C")]!.GetValue<bool>());
     }
 
     [Fact]

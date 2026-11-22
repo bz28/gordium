@@ -292,7 +292,7 @@ nfpa_common_path_of_travel:
     - 51
     quote: 3.3.47* Common Path of Travel. The portion of exit access that must be traversed before two separate and distinct
       paths of travel to two exits are available.
-  notes: Measured by common_path_of_travel (parts.yaml).
+  notes: Measured by common_path_of_travel_occupied (parts.yaml; route note decision 1b), from points subject to occupancy.
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 nfpa_occupant_load:

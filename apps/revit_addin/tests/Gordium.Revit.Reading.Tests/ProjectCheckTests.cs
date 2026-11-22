@@ -164,6 +164,54 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
                      prepared.Missing.Select(w => w[..w.IndexOf(':', "Gordium: ".Length)]));
     }
 
+    /// <summary>The architect's count of stories (Gordium: Stories, optional): sent as <c>facts.stories</c> only when
+    /// stated; blank (Revit's unset Integer reads 0 with HasValue false) is never sent as 0; a count under 1 is asked
+    /// again, never sent.</summary>
+    [Fact]
+    public void A_stories_count_is_sent_only_when_stated_and_one_or_more()
+    {
+        var (house, _) = Project("1_ranch_compliant");
+        Assert.False(ProjectFacts.Read(house.Model()).Facts.ContainsKey("stories"));      // never marked: not sent
+        Mark(house, Marks.Stories, new(false, 0));                                          // unset: AsInteger() 0
+        var unset = ProjectFacts.Read(house.Model());
+        Assert.False(unset.Facts.ContainsKey("stories"));
+        Assert.DoesNotContain(unset.Missing, w => w.StartsWith(Marks.Stories.Name, StringComparison.Ordinal));  // never required
+        Mark(house, Marks.Stories, new(true, 3));
+        var three = ProjectFacts.Read(house.Model());
+        Assert.Equal(3, three.Facts["stories"]!.GetValue<int>());
+        Assert.DoesNotContain(three.Missing, w => w.StartsWith(Marks.Stories.Name, StringComparison.Ordinal));
+        foreach (var n in new[] { 0, -2 })
+        {
+            Mark(house, Marks.Stories, new(true, n));
+            var bad = ProjectFacts.Read(house.Model());
+            Assert.False(bad.Facts.ContainsKey("stories"));
+            Assert.Contains($"{Marks.Stories.Name} is {n}: type the number of stories, 1 or more, or leave it blank",
+                            Assert.Single(bad.Missing, w => w.StartsWith(Marks.Stories.Name, StringComparison.Ordinal)),
+                            StringComparison.Ordinal);
+        }
+    }
+
+    /// <summary>The count reaches the check as the architect's statement, kept only within what the drawing allows:
+    /// the box house is drawn as two floor blocks (its stories read, 2: complies with R-1b's 3), so a count of 2 agrees
+    /// and still complies, and a count of 1, fewer than the floors drawn, is refused by the measuring ("the stories
+    /// typed (1) are fewer than the floor blocks drawn (2)"), never a pass on it.</summary>
+    [Fact]
+    public async Task A_stated_stories_count_reaches_the_check_and_is_kept_only_within_the_drawing()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        var (_, before) = await Check(house, outside);
+        Assert.Equal(Verdict.Complies, Assert.Single(before.Items, i => i.Id == "R-1b.stories").Status);
+        Mark(house, Marks.Stories, new(true, 2));
+        var (prepared, agrees) = await Check(house, outside);
+        Assert.Equal(2, prepared.Request!.Facts["stories"]!.GetValue<int>());
+        Assert.Equal(Verdict.Complies, Assert.Single(agrees.Items, i => i.Id == "R-1b.stories").Status);
+        Mark(house, Marks.Stories, new(true, 1));
+        var (_, refused) = await Check(house, outside);
+        var row = Assert.Single(refused.Items, i => i.Id == "R-1b.stories");
+        Assert.Equal(Verdict.NeedsReview, row.Status);
+        Assert.Contains("the stories typed (1) are fewer than the floor blocks drawn (2)", row.Reason, StringComparison.Ordinal);
+    }
+
     [Fact]
     public async Task A_ground_word_not_known_is_asked_never_read_as_no_ground()
     {
@@ -340,8 +388,10 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         Assert.Equal((1, null), ProjectFacts.RequestValue(Marks.LotSurveyed, JsonValue.Create(true)));
         Assert.Equal((0, null), ProjectFacts.RequestValue(Marks.CornerLot, JsonNode.Parse("false")));
         Assert.Equal((null, "R-1b"), ProjectFacts.RequestValue(Marks.Zone, JsonNode.Parse("\"R-1b\"")));
+        Assert.Equal((3, null), ProjectFacts.RequestValue(Marks.Stories, JsonNode.Parse("3")));      // set as Revit's Integer
         foreach (var (m, v) in new (MarkDefinition, string)[] { (Marks.LotSurveyed, "\"yes\""), (Marks.LotSurveyed, "1"), (Marks.Zone, "true"),
-                                                                 (Marks.Use, "null"), (Marks.ClearWidth, "3.0") })
+                                                                 (Marks.Use, "null"), (Marks.ClearWidth, "3.0"),
+                                                                 (Marks.Stories, "\"3\""), (Marks.Stories, "true"), (Marks.Stories, "3.5") })
         {
             var e = Assert.Throws<InvalidOperationException>(() => ProjectFacts.RequestValue(m, JsonNode.Parse(v)));
             Assert.StartsWith(m.Name + " is a ", e.Message, StringComparison.Ordinal);
