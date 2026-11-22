@@ -471,8 +471,18 @@ the jurisdiction is the City of Ithaca). Why each choice:
     worker is stopped (the client kills it on a cancel; the next check starts a new one) and its answer, or its
     stopped worker's error, is ignored if it still comes. The panel goes back to what it showed before: the earlier
     results **marked stale** ("These results are from 14:32, before the check you cancelled"), never shown as the new
-    ones; or the empty, the "fill these in first" or the error state. Clicked during the read, it takes effect when
-    the read ends (Revit's thread is busy until then) and nothing is sent.
+    ones; or the empty, the "fill these in first" or the error state; its words say which was restored (never "the
+    results below" with none below). Clicked during the read, it is handled when the read ends (Revit's thread is
+    busy until then) but before anything is sent: the read's end keeps the edit count at once, and the send is
+    queued behind the input Revit queued during the read (WPF runs Background work only once no input is pending),
+    so the click comes first; nothing is sent, the worker keeps running (never killed and restarted), and the log
+    line says `cancelled_before_send`.
+  - **The street edge is clicked only in the project being checked**, while it is the active one: the read is
+    queued after the click, and if the architect switched projects meanwhile, no pick is asked for (a pick, and the
+    Street edge mark it writes, would land in the other project); the panel lists "switch to it ... and click Check
+    again" (`StreetAsk.NotActive`). The rest of the read is of the project clicked, whichever is active.
+  - **One worker per session**: every start and stop goes through `Trial.WorkerAsync` and `Trial.StopWorker`, under
+    one lock (the box house's trial command too); a start still running when Revit closes stops its worker.
   - **One check at a time.** A second Check while one runs is refused, with a dialog saying to wait or Cancel (the
     panel's own button is Cancel meanwhile): the read is the part that freezes Revit, and a check started on top
     would read the model twice; an edit meanwhile already makes the coming answer stale.
