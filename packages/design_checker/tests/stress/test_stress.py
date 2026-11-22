@@ -242,7 +242,8 @@ def test_the_kept_copies_read_the_state_rules_as_the_real_readers_do():
         found = egress.laws("regulations/jurisdictions/new_york/ithaca_city")
     finally:
         harness.slow_reads()
-    assert [law["problems"] for law in found["laws"]] == [[]] and found["laws"][0]["rules"]
+    # both of New York's books (the Residential Code, and since 2026-11-22 the Building Code), each read whole
+    assert [law["problems"] for law in found["laws"]] == [[], []] and all(law["rules"] for law in found["laws"])
 
 
 @pytest.mark.parametrize("designs", [pytest.param(DESIGNS, id="ci"), pytest.param(FULL, id="full", marks=pytest.mark.slow)])
