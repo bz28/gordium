@@ -32,7 +32,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         };
     }
 
-    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, _theme);
+    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, SetUp, _theme);
 
     /// <summary>Revit's theme as the panel last read it (light until read).</summary>
     private static PanelTheme _theme = PanelTheme.Light;
@@ -69,6 +69,22 @@ internal sealed class ResultsPane : IDockablePaneProvider
         View().Show(content);
         ui.GetDockablePane(Id).Show();
     }
+
+    /// <summary>Shows the Setup form for <paramref name="doc"/> in the pane and brings the pane up (Revit's thread).</summary>
+    internal static void ShowSetup(UIApplication ui, Document doc, SetupScreen screen, SetupDraft draft, SetupHandlers handlers,
+                                   string? notice, HashSet<string> open)
+    {
+        _checked = doc;
+        if (!CheckRun.Flow.Running)
+            View().EndProgress();
+        View().ShowSetup(doc.Title, screen, draft, handlers, notice, open);
+        ui.GetDockablePane(Id).Show();
+    }
+
+    /// <summary>The Setup form drawn again (the panel's thread): after a choice, or when the place's options arrive;
+    /// only while the pane shows it.</summary>
+    internal static void RedrawSetup(SetupScreen screen, SetupDraft draft, SetupHandlers handlers, string? notice, HashSet<string> open) =>
+        _view?.RedrawSetup(screen, draft, handlers, notice, open);
 
     /// <summary>A check that failed: the last check's rows taken down (never shown as this one's), and why. From any
     /// thread (put on the panel's).</summary>
@@ -204,13 +220,22 @@ internal sealed class ResultsPane : IDockablePaneProvider
         }
     }
 
-    private static void OpenProjectInformation() => Post("Open Project Information", ui =>
+    internal static void OpenProjectInformation() => Post("Open Project Information", ui =>
     {
         var id = RevitCommandId.LookupPostableCommandId(PostableCommand.ProjectInformation);
         if (id is null || !ui.CanPostCommand(id))
             Say("Open Manage > Project Information to fill in Gordium's marks.");
         else
             ui.PostCommand(id);
+    });
+
+    /// <summary>The results' "Set up the facts" (a check sent anyway): the Setup form for the project checked.</summary>
+    private static void SetUp() => Post("Set up the facts", ui =>
+    {
+        if (_checked is { IsValidObject: true } doc)
+            SetupRun.Show(ui, doc);
+        else
+            Say("The project checked is closed: open it and click Check project.");
     });
 
     private static void Zoom(ResultRow row) => Post("Show in model", ui => ShowElements(ui, row, zoom: true));

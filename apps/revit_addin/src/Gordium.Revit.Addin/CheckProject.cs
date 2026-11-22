@@ -93,9 +93,26 @@ public sealed class CheckProjectCommand : IExternalCommand
             // and only in the project being checked while it is the active one (the read is queued after the click: the
             // architect may have switched projects since; a pick, and the mark it writes, would land in another one)
             bool Active() => ui.ActiveUIDocument?.Document.Equals(doc) == true;
+            // the Setup form (docs/decisions/2026-11-22_setup_form.md): a fact the check needs missing, and the form
+            // shows instead of a check (unless the architect chose Check now anyway for exactly these): nothing sent
+            if (!check.Anyway && SetupRun.Needs(doc) is { } setup)
+            {
+                log["setup"] = setup.Needed;
+                var shown = CheckRun.Flow.NothingSent(check.Ticket);
+                if (shown)
+                {
+                    if (clear.Length > 0)
+                        ResultsPane.Say(clear.Trim());
+                    SetupRun.Show(ui, doc, setup);
+                }
+                Blocked();
+                check.End(shown ? "setup" : "cancelled");
+                return;
+            }
             var read = ProjectFacts.Read(RevitMarks.Model(doc));
             var view = Active() && ShowsPropertyLine(ui.ActiveUIDocument!);
-            var ask = StreetEdges.Ask(read, read.StreetEdges is null, view, Active());
+            // checked anyway: never a pick first (the form's Pick on plan is the way to give it)
+            var ask = check.Anyway ? StreetAsk.NotNeeded : StreetEdges.Ask(read, read.StreetEdges is null, view, Active());
             log["street_ask"] = ask.ToString();
             if (ask == StreetAsk.Pick && Active())
                 check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log));
@@ -105,7 +122,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                 check.End("cancelled");                   // cancelled during the pick (Revit answers then): not read
                 return;
             }
-            var prepared = ReadModel(doc, ui.Application, log, check.Worker);
+            var prepared = ReadModel(doc, ui.Application, log, check.Worker, check.Anyway);
             // the edge kept can't be sent (no longer a lot edge, or matching two): asked for again at once, as its
             // message says, and checked once more (the typed reason, never its words); in a view that can show it
             if (StreetEdges.NeedsNewPick(prepared))
@@ -122,8 +139,10 @@ public sealed class CheckProjectCommand : IExternalCommand
             {
                 // nothing sent: what to fill in, shown now (Done), unless the check was cancelled during a pick
                 var shown = CheckRun.Flow.NothingSent(check.Ticket);
+                // the Setup form, saying why nothing was sent (the zone missing on Check now anyway, a street edge
+                // no longer on the lot): every way to give the fact is there
                 if (shown)
-                    Show(ui, doc, new Ran(prepared, null, null, null), added.Count, ask, clear, DateTime.Now, stale: false);
+                    SetupRun.Show(ui, doc, notice: "Nothing was checked: " + string.Join(" ", StreetEdges.MissingAsShown(prepared.Missing, ask)));
                 Blocked();
                 check.End(shown ? "nothing_sent" : "cancelled");
                 return;
@@ -226,13 +245,14 @@ public sealed class CheckProjectCommand : IExternalCommand
     /// read_steps, README "The results log"; kept on this thread for this read only, never in a record or the request;
     /// logged with whatever was read, a failure's too). <paramref name="worker"/> is the worker being started: waited
     /// for here only when the read asks it which objects are left out.</summary>
-    internal static ProjectPrepared ReadModel(Document doc, RevitApplication app, Dictionary<string, object?> log, Task<WorkerClient> worker)
+    internal static ProjectPrepared ReadModel(Document doc, RevitApplication app, Dictionary<string, object?> log, Task<WorkerClient> worker,
+                                              bool anyway = false)
     {
         var steps = new ReadSteps();
         using var keep = ReadSteps.Begin(steps);
         try
         {
-            return ReadModel(doc, app, log, worker, steps);
+            return ReadModel(doc, app, log, worker, steps, anyway);
         }
         catch
         {
@@ -242,16 +262,17 @@ public sealed class CheckProjectCommand : IExternalCommand
     }
 
     private static ProjectPrepared ReadModel(Document doc, RevitApplication app, Dictionary<string, object?> log, Task<WorkerClient> worker,
-                                             ReadSteps steps)
+                                             ReadSteps steps, bool anyway)
     {
         var sw = Stopwatch.StartNew();
         // both reads on Revit's thread, one after the other, of the same document: the same phases and options
         var outside = ReadSteps.Time("outside", () => RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance));
         var inside = ReadSteps.Time("inside", () => RevitInterior.Model(doc));
         // the lot's lines are read on this thread before anything is awaited (a lot line's points call into Revit)
-        var prepared = ReadSteps.Time("prepare", () => ProjectCheck.PrepareAsync(outside, inside, new StartedLeftOut(worker)).GetAwaiter().GetResult());
+        var prepared = ReadSteps.Time("prepare", () => ProjectCheck.PrepareAsync(outside, inside, new StartedLeftOut(worker), anyway: anyway).GetAwaiter().GetResult());
         log["read_s"] = sw.Elapsed.TotalSeconds;
         log["missing"] = prepared.Missing;
+        log["not_stated"] = prepared.NotStated.Select(m => m.Name).ToList();
         // in Revit's internal coordinates, as the Street edge mark keeps them (the request's site is in shared ones)
         log["lot_edges_internal"] = outside.LotLines.Where(l => l.IsPropertyLine).Select(l => new Dictionary<string, object?>
         {
@@ -331,12 +352,14 @@ public sealed class CheckProjectCommand : IExternalCommand
             files = $"Logged to {Trial.LogPath()}";
         ResultsPane.Show(ui, doc, new PanelContent(doc.Title, when, model,
                                                    StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
-                                                   ClearWords: clear, Ids: ids));
+                                                   ClearWords: clear, Ids: ids,
+                                                   NotStated: run.Prepared.NotStated.Select(m => SetupWords.SentWithout(m, SetupWords.Noun(
+                                                       run.Prepared.Request?.Facts["use"]?.GetValue<string>()))).ToList()));
     }
 
     /// <summary>Whether the active view is a plan (a site plan or floor plan) with a property line visible in it:
     /// the only view a street-edge click can land in.</summary>
-    private static bool ShowsPropertyLine(UIDocument ui) =>
+    internal static bool ShowsPropertyLine(UIDocument ui) =>
         ui.ActiveView is ViewPlan { IsTemplate: false } plan
         && new FilteredElementCollector(ui.Document, plan.Id).OfClass(typeof(PropertyLine)).Any();
 

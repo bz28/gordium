@@ -1,6 +1,7 @@
 <!-- The results panel's controls, restyled so no default WPF chrome shows (docs/revit/ui_design_pass.md section 2.5):
      Button (and the primary "button.primary"), ToggleButton, Expander, ScrollBar, ToolTip, the results list
-     (ListBox "list", its rows "list.row" and headings "list.heading") and the search TextBox. Every colour is a
+     (ListBox "list", its rows "list.row" and headings "list.heading"), the search TextBox and the Setup form's
+     ComboBox (a dropdown: its button, its list in a Popup). Every colour is a
      DynamicResource naming a token of the theme's dictionary (PanelLook, from Gordium.Revit.Reading's PanelTokens),
      so swapping that dictionary when Revit's theme changes recolours them all; every font is a type token's family
      and size (PanelLook.Shared: "type.body.family", "type.body.size"). No colour or font is written here
@@ -380,6 +381,87 @@
                   CornerRadius="4" Padding="8,4">
             <ContentPresenter />
           </Border>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+  <!-- the Setup form's dropdowns: the value shown on the surface with a chevron; the list in a Popup on the surface -->
+  <Style TargetType="ComboBox">
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="Background" Value="{DynamicResource bg.surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource line}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="6,3" />
+    <Setter Property="FontFamily" Value="{DynamicResource type.body.family}" />
+    <Setter Property="FontSize" Value="{DynamicResource type.body.size}" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="SnapsToDevicePixels" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ComboBox">
+          <Grid>
+            <ToggleButton x:Name="Toggle" Focusable="False" ClickMode="Press"
+                          IsChecked="{Binding IsDropDownOpen, Mode=TwoWay, RelativeSource={RelativeSource TemplatedParent}}">
+              <ToggleButton.Template>
+                <ControlTemplate TargetType="ToggleButton">
+                  <Border x:Name="Frame" Background="{DynamicResource bg.surface}" BorderBrush="{DynamicResource line}"
+                          BorderThickness="1" CornerRadius="4">
+                    <Path HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" Data="M 0 0 L 4 4 L 8 0"
+                          Stroke="{DynamicResource text.muted}" StrokeThickness="1.5" />
+                  </Border>
+                  <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                      <Setter TargetName="Frame" Property="Background" Value="{DynamicResource bg.hover}" />
+                    </Trigger>
+                    <Trigger Property="IsChecked" Value="True">
+                      <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource accent}" />
+                    </Trigger>
+                  </ControlTemplate.Triggers>
+                </ControlTemplate>
+              </ToggleButton.Template>
+            </ToggleButton>
+            <ContentPresenter IsHitTestVisible="False" Margin="{TemplateBinding Padding}" Content="{TemplateBinding SelectionBoxItem}"
+                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" HorizontalAlignment="Left"
+                              VerticalAlignment="Center" />
+            <Popup x:Name="PART_Popup" Placement="Bottom" AllowsTransparency="True" Focusable="False" PopupAnimation="None"
+                   IsOpen="{TemplateBinding IsDropDownOpen}">
+              <Border Background="{DynamicResource bg.surface}" BorderBrush="{DynamicResource line}" BorderThickness="1"
+                      CornerRadius="4" MinWidth="{Binding ActualWidth, RelativeSource={RelativeSource TemplatedParent}}"
+                      MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                  <ItemsPresenter />
+                </ScrollViewer>
+              </Border>
+            </Popup>
+          </Grid>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocusWithin" Value="True">
+              <Setter TargetName="Toggle" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style TargetType="ComboBoxItem">
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="Padding" Value="8,4" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ComboBoxItem">
+          <Border x:Name="Row" Background="Transparent" Padding="{TemplateBinding Padding}">
+            <ContentPresenter />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsHighlighted" Value="True">
+              <Setter TargetName="Row" Property="Background" Value="{DynamicResource bg.hover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Row" Property="Background" Value="{DynamicResource bg.selected}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
         </ControlTemplate>
       </Setter.Value>
     </Setter>

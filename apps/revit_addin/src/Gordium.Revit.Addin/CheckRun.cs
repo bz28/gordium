@@ -63,16 +63,22 @@ internal sealed class CheckRun
     /// <summary>Whether <paramref name="doc"/> is the one the running check reads (its edits are counted).</summary>
     internal static bool Reads(Document doc) => _last is { } r && Flow.IsCurrent(r.Ticket) && r.Doc.Equals(doc);
 
-    /// <summary>Begins a check of <paramref name="doc"/>; <see cref="CheckWords.Refused"/> while one runs.</summary>
-    internal static string? Start(UIApplication ui, Document doc)
+    /// <summary>The architect's "Check now anyway" (the Setup form): sent with the facts that are set, each one
+    /// missing making its rules need review; no Setup form and no street pick first.</summary>
+    internal bool Anyway { get; private init; }
+
+    /// <summary>Begins a check of <paramref name="doc"/>; <see cref="CheckWords.Refused"/> while one runs.
+    /// <paramref name="anyway"/>: the Setup form's "Check now anyway".</summary>
+    internal static string? Start(UIApplication ui, Document doc, bool anyway = false)
     {
         var started = Stopwatch.GetTimestamp();
         if (Flow.TryStart(ResultsPane.Had()) is not { } ticket)
             return CheckWords.Refused;
-        var check = new CheckRun(ticket, doc);
+        var check = new CheckRun(ticket, doc) { Anyway = anyway };
         _last = check;
         check.Log["document"] = doc.Title;
         check.Log["check"] = ticket;
+        check.Log["anyway"] = anyway;
         // Python started now, on a pool thread, while Revit reads (a start that fails is said when the worker is needed)
         check.Worker = StartWorker();
         ResultsPane.Reading(ui);

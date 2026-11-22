@@ -89,25 +89,11 @@ internal static class SetMarks
             log["rooms_placed"] = placed;
             log["rooms_refused"] = notPlaced;
             var plan = MarksRequest.Plan(marks, RevitMarks.Model(doc), by, MarksRequest.Date(request["date"]));
-            var applied = new List<string>();
+            // the one writer (RevitMarks.Write): one transaction, every write or refusal listed
+            var (applied, refusedNow, status) = RevitMarks.Write(doc, "Gordium: the eval's marks (standing in for the architect)", plan.Writes);
             var refused = new List<string>(plan.Refused);
-            using (var t = new Transaction(doc, "Gordium: the eval's marks (standing in for the architect)"))
-            {
-                t.Start();
-                foreach (var w in plan.Writes)
-                {
-                    var p = doc.GetElement(w.Element)?.get_Parameter(w.Mark.Guid);
-                    var done = p is { IsReadOnly: false } && (w.Mark.Kind switch
-                    {
-                        MarkValueKind.YesNo or MarkValueKind.Integer => p.Set(w.Value.Integer!.Value),
-                        MarkValueKind.Length => p.Set(w.Value.Number!.Value),
-                        _ => p.Set(w.Value.Text!),
-                    });
-                    (done ? applied : refused).Add($"{w.Label}: {w.Mark.Name} = {w.Value.Text ?? w.Value.Integer?.ToString() ?? w.Value.Number?.ToString()}" +
-                                                   (done ? "" : p is null ? " (the element has no such parameter)" : " (Revit refused it)"));
-                }
-                log["commit"] = t.Commit().ToString();
-            }
+            refused.AddRange(refusedNow);
+            log["commit"] = status;
             log["applied"] = applied;
             log["refused"] = refused;
             doc.SaveAs(saveAs, new SaveAsOptions { OverwriteExistingFile = true });

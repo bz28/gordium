@@ -18,9 +18,12 @@ namespace Gordium.Revit.Addin;
 /// <param name="ClearWords">What happened to the makers' clear openings this run (<c>ClearPrefills.Head</c>: filled as
 /// drafts, or why they couldn't be written), "" when nothing.</param>
 /// <param name="Ids">Each element's Revit id by UniqueId (a result's detail shows it in Show's tooltip, for Select by ID).</param>
+/// <param name="NotStated">A check sent anyway (the Setup form's "Check now anyway"): each fact left out, in words
+/// (SetupWords.SentWithout), shown first, with Set up the facts.</param>
 internal sealed record PanelContent(string Project, DateTime When, ResultModel? Model, IReadOnlyList<string> Missing,
                                     int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files,
-                                    string ClearWords, IReadOnlyDictionary<string, long>? Ids = null);
+                                    string ClearWords, IReadOnlyDictionary<string, long>? Ids = null,
+                                    IReadOnlyList<string>? NotStated = null);
 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup
@@ -41,7 +44,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     private readonly Action<ResultRow> _zoom;
     private readonly Action<ResultRow> _select;
     private readonly Action _checkAgain;
-    private readonly Action _projectInformation;
+    private readonly Action _setUp;
     private readonly C.TextBlock _sub = Small("");
     private readonly C.Button _again;
     private readonly C.TextBlock _status = Small("");
@@ -70,12 +73,12 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     private double _listOffset;                               // where the list was scrolled when the detail opened
     private bool _quiet;                                      // a selection the panel makes itself: never sent to Revit
 
-    internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation, PanelTheme theme)
+    internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action setUp, PanelTheme theme)
     {
         _zoom = zoom;
         _select = select;
         _checkAgain = checkAgain;
-        _projectInformation = projectInformation;
+        _setUp = setUp;
         PanelLook.Apply(this, theme);
         SetResourceReference(BackgroundProperty, PanelTokens.BgPane);
         SetResourceReference(ForegroundProperty, PanelTokens.Text);
@@ -235,6 +238,20 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     private W.UIElement Summary(ResultModel model, IReadOnlyList<PanelPart> parts, bool stale)
     {
         var summary = new C.StackPanel { Margin = new W.Thickness(0, 2, 0, 2) };
+        if (_content?.NotStated is { Count: > 0 } notStated)
+        {
+            // checked anyway: what was left out first, each making its rules need review, and the way back to Setup
+            var words = new C.StackPanel();
+            words.Children.Add(Typed(new C.TextBlock
+            {
+                Text = $"Checked without {notStated.Count} {(notStated.Count == 1 ? "fact" : "facts")}: the rules they decide need review",
+                FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap,
+            }, Body));
+            foreach (var n in notStated)
+                words.Children.Add(Small("• " + n, top: 2));
+            words.Children.Add(SetUpButton());
+            summary.Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, words, bottom: 6));
+        }
         foreach (var part in parts)
             switch (part)
             {
@@ -467,14 +484,57 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
                                            "type.title"), bottom: 6));
         foreach (var m in missing)
             _missing.Children.Add(new C.TextBlock { Text = "• " + m, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 0, 0, 6) });
+        _missing.Children.Add(SetUpButton());
+    }
+
+    /// <summary>"Set up the facts": the Setup form for the project shown.</summary>
+    private C.Button SetUpButton()
+    {
         var open = new C.Button
         {
-            Content = "Open Project Information", Padding = new W.Thickness(10, 3, 10, 3), Margin = new W.Thickness(0, 4, 0, 4),
+            Content = "Set up the facts", Padding = new W.Thickness(10, 3, 10, 3), Margin = new W.Thickness(0, 4, 0, 4),
             HorizontalAlignment = W.HorizontalAlignment.Left,
         };
-        open.Click += (_, _) => _projectInformation();
-        _missing.Children.Add(open);
-        _missing.Children.Add(Small("Fill in the Gordium marks there, then click Check again (a street edge is asked for by a click when you do)."));
+        open.Click += (_, _) => _setUp();
+        return open;
+    }
+
+    // ---- the Setup form (SetupView; docs/decisions/2026-11-22_setup_form.md) ---------------------------------
+
+    private SetupView? _setup;
+    private C.ScrollViewer? _setupScroll;
+
+    /// <summary>The Setup form in place of the results: "what to fill in" for a cancelled check to go back to (its
+    /// content has no rows, as the missing state's: CheckFlow.Had says Missing).</summary>
+    internal void ShowSetup(string project, SetupScreen screen, SetupDraft draft, SetupHandlers handlers, string? notice, HashSet<string> open)
+    {
+        _content = new PanelContent(project, DateTime.Now, null, [], 0, new Dictionary<string, string>(), "", "");
+        _failed = false;
+        _detailId = null;
+        _placed = [];
+        _summary = null;
+        _again.Visibility = W.Visibility.Visible;
+        _again.IsEnabled = _checkAgainState.Enabled;
+        _sub.Text = $"Setup · {project}";
+        Say(_checkAgainState.Status(""));
+        _setupScroll = new C.ScrollViewer
+        {
+            VerticalScrollBarVisibility = C.ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = C.ScrollBarVisibility.Disabled,
+        };
+        RedrawSetup(screen, draft, handlers, notice, open, force: true);
+        _bodyHost.Child = _setupScroll;
+        Relayout();
+    }
+
+    /// <summary>The form drawn again at the same scroll position; only while it is shown (never over results).</summary>
+    internal void RedrawSetup(SetupScreen screen, SetupDraft draft, SetupHandlers handlers, string? notice, HashSet<string> open, bool force = false)
+    {
+        if (_setupScroll is null || !force && !ReferenceEquals(_bodyHost.Child, _setupScroll))
+            return;
+        var offset = _setupScroll.VerticalOffset;
+        _setup = new SetupView(screen, draft, handlers, notice, open);
+        _setupScroll.Content = _setup;
+        _setupScroll.ScrollToVerticalOffset(offset);
     }
 
     // ---- the list ------------------------------------------------------------------------------------------
