@@ -88,6 +88,8 @@ tab's **Trial** panel. `apps/revit_addin/install_trial_addin.ps1` installs a tri
 build an architect gets (`-Architect`) shows only Check project, Mark facts, Panel and About, and the Trial panel only
 with `GORDIUM_TRIAL=1` set in the environment Revit starts in. The request files (`run_request.json`,
 `check_project_request.json` and the others, read while Revit is idle) need no button: they work in either build.
+Mark facts (was Mark for egress), About, Read inside and Record houses moved panels, so a Quick Access Toolbar copy or
+keyboard shortcut made for them before is lost once: add it again.
 
 | Day | Do | Done when |
 |---|---|---|

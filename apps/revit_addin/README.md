@@ -309,7 +309,7 @@ change).
 
 **Makers' clear openings, filled as drafts** (`MakerClearOpenings.cs`, data in
 [`data/maker_clear_openings.json`](data/maker_clear_openings.json), embedded in the library; design note, section
-5a). Mark for egress and Check my project fill an empty window type's `Clear width`, `Clear height` and `Clear
+5a). Mark facts and Check project fill an empty window type's `Clear width`, `Clear height` and `Clear
 source` from its maker's published formula when its Manufacturer and a call-number Model (Marvin's "UCA3648") match an
 entry, its Gordium: Operation is the entry's or unset, its Width and Height are surely the maker's frame size, and the family's own Vent Area, when it has
 one, agrees; never `Clear confirmed`, so nothing is sent until that type is confirmed. The
@@ -328,12 +328,12 @@ component stair as one flight of `stairs`, by the [design note](../../docs/revit
 section 4 ("As built in step 4"):
 
 - **Only on the architect's tick and with nothing hidden.** `stairs` is sent only when `Gordium: These are all the
-  stairs` on Project Information says Yes (a mark added by Mark for egress; unset or No: not read) and nothing could
+  stairs` on Project Information says Yes (a mark added by Mark facts; unset or No: not read) and nothing could
   be a stair the reader doesn't walk: a stair not made of components, a multistory stair, anything else in Stairs,
   Railings or Generic Models (an in-place or loadable family, a DirectShape), a closed workset, an unloaded link, a
   link holding stairs, a coordination model. Each is listed first in the marking list (`MarkingListResult.StairBlockers`),
   with a summary line for the tick. With no stair found, `stairs` is left out, never `[]`. An element the architect
-  marks `Gordium: Not a stair` Yes (Generic Models, Stairs, Railings; added by Mark for egress) is cleared, and listed
+  marks `Gordium: Not a stair` Yes (Generic Models, Stairs, Railings; added by Mark facts) is cleared, and listed
   as cleared ("Not a stair (architect): ... x N, ids in the log": `MarkingListResult.NotAStair`,
   `InteriorReadResult.NotAStair`); on a Revit Stair or Railing the mark is a conflict, listed first, and doesn't count.
 - **Each flight from what is drawn.** `bottom_elevation`: the floor or landing in front of the first riser, as drawn
@@ -374,7 +374,7 @@ By the [design note](../../docs/revit/revit_interior_reading_design.md)'s sectio
   only when the type's `Gordium: Clear confirmed` stamp, made for a door, confirms every value now (the type itself,
   its size and operation, the clear width and height, the source, a mapped maker's parameter: exactly as windows'),
   and it fits inside the door as placed. `Clear width`, `Clear height`, `Clear source` and `Clear confirmed` are now
-  bound to Doors too (Mark for egress extends an existing project's binding); a door has no `Clear offset`. Nothing
+  bound to Doors too (Mark facts extends an existing project's binding); a door has no `Clear offset`. Nothing
   drawn is sent (stops, hinge pin, leaf, threshold): door families don't model them consistently.
 - **Handrails** (`StairReader`): a railing on the stair beside a wall, read exactly, between the wall face and the
   flight's middle and no higher than 38 in over the nosings, with nothing of it but its handrails standing farther in
@@ -547,7 +547,9 @@ icon at 16 and 32 px in Revit's light and dark themes: simple strokes drawn to P
 colour tokens (the outline in `text`, the mark in `accent`), swapped on `ThemeChanged` (Revit doesn't switch an
 add-in's images by theme itself). No Settings button: there is nothing to set yet. `install_trial_addin.ps1` builds
 a trial build (`-p:GordiumTrial=true`, the Trial panel always there); `-Architect` installs the build an architect
-gets. The request files the trial runs by (read in `App`'s Idling handler) never use a button, so they work in both.
+gets. Revit names an add-in button's Quick Access Toolbar copy and keyboard shortcut by tab, panel and name, so the
+four buttons that moved panels in this pass (Mark facts, About, Read inside, Record houses) lose an existing copy or
+shortcut once: add them again. The request files the trial runs by (read in `App`'s Idling handler) never use a button, so they work in both.
 How we know: `RibbonTests.cs` (which buttons exist with the switch off and on, the tooltips' length, every icon a
 valid PNG at both sizes in both themes, never the pass green).
 
