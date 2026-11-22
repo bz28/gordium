@@ -16,6 +16,7 @@ import yaml
 TOOLS = Path(__file__).resolve().parents[1]
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(TOOLS))
+sys.path.insert(0, str(TOOLS / "evals"))
 
 import compare_check_result as compare  # noqa: E402
 import eval_marks_request as marks_tool  # noqa: E402

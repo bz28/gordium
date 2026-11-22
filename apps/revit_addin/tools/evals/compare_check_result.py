@@ -33,11 +33,11 @@ from pathlib import Path
 
 import yaml
 
-REPO = Path(__file__).resolve().parents[3]
+REPO = Path(__file__).resolve().parents[4]
 HOUSE = REPO / "test_data/real_houses/orangetown_ny_80_south_william"
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 FOLDERS = {"orangetown": HOUSE, "106_ithaca_rd": SITE}
-TOOL = "apps/revit_addin/tools/compare_check_result.py"
+TOOL = "apps/revit_addin/tools/evals/compare_check_result.py"
 
 # one word per verdict, whoever gives it: the checker's rows (pass...), its statuses (complies...), the hand-check,
 # the architects' spreadsheet (PASS, FAIL)

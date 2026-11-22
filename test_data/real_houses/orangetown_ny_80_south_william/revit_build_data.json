@@ -2353,7 +2353,7 @@
  },
  "plan": "x east from the house's west outer face, y north from its south-most face (the garage front), feet (layout.yaml's x, and d turned: y = (508 in - d) / 12); z 0 the second floor's finished floor",
  "made_from": {
-  "tool": "apps/revit_addin/tools/make_ny_build_data.py",
+  "tool": "apps/revit_addin/tools/evals/make_ny_build_data.py",
   "sources": [
    {
     "file": "test_data/real_houses/orangetown_ny_80_south_william/layout.yaml",

@@ -26,7 +26,7 @@ namespace Gordium.Revit.Addin;
 /// from Revit's Door.rft), each door in its wall (Mark D01...), its facing and hand flipped to swing and hinge as the data
 /// says; a window type per size (Mark WN01..., at its sill); the floor under the footprint; and a Room at each tag point
 /// with its Name (in capitals, as the script) and Number, tagged in the plan. Then saved as the request's .rvt and closed.</para>
-/// <para>Data with several levels (apps/revit_addin/tools/make_ny_build_data.py: the New York eval's buildings): each
+/// <para>Data with several levels (apps/revit_addin/tools/evals/make_ny_build_data.py: the New York eval's buildings): each
 /// level and its plan (the template's levels the data doesn't have deleted), each wall and room on its own level and
 /// each door and window on its wall's, the data's floor slabs (a type per thickness, its top at its offset) in place of
 /// the footprint's floor, each room's ceiling a thin solid in Ceilings (as HouseDraw draws one), its room separation

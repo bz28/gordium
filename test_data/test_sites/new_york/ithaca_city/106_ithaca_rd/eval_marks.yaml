@@ -1,6 +1,6 @@
 # The New York Revit eval's marks for 106 Ithaca Rd: the architects' spreadsheet design (spreadsheet_design.yaml, the
 # cells of test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx), built in Revit from
-# revit_build_data.json (apps/revit_addin/tools/make_ny_build_data.py) by the add-in's build_model_request and checked
+# revit_build_data.json (apps/revit_addin/tools/evals/make_ny_build_data.py) by the add-in's build_model_request and checked
 # by its check_project_request (apps/revit_addin/tools/eval_marks_request.py writes it; the steps:
 # docs/revit/windows_trial_runbook.md, "The New York eval"). The check is compared with the architects' PASS and FAIL
 # on their 11 rows (compare_check_result.py).

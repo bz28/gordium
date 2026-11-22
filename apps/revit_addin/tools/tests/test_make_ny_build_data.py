@@ -13,6 +13,7 @@ import yaml
 TOOLS = Path(__file__).resolve().parents[1]
 REPO = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(TOOLS))
+sys.path.insert(0, str(TOOLS / "evals"))
 
 import make_ny_build_data as tool  # noqa: E402
 

@@ -25,12 +25,12 @@ from pathlib import Path
 
 import yaml
 
-REPO = Path(__file__).resolve().parents[3]
+REPO = Path(__file__).resolve().parents[4]
 ORANGETOWN = "orangetown_ny_80_south_william"
 HOUSE_DIR = REPO / "test_data/real_houses" / ORANGETOWN
 SITE_DIR = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
 OUT = {"orangetown": HOUSE_DIR / "revit_build_data.json", "106_ithaca_rd": SITE_DIR / "revit_build_data.json"}
-TOOL = "apps/revit_addin/tools/make_ny_build_data.py"
+TOOL = "apps/revit_addin/tools/evals/make_ny_build_data.py"
 LEVEL_NAMES = {"second_floor": "Second floor", "main_floor": "Main floor", "basement": "Basement"}
 
 

@@ -56,7 +56,7 @@ public sealed record BuildSpot(double X, double Y, double Z);
 /// <summary>A building to draw in a new Revit project (apps/revit_addin/tools/extract_build_data.py writes it from a
 /// drawing script's DATA): one level, its walls, the doors and windows in them, its rooms and the floor under its
 /// footprint (a closed ring: its last point its first). Data with <c>levels</c> in place of <c>level</c>
-/// (apps/revit_addin/tools/make_ny_build_data.py) has several, each wall and room on one by name (a door or window on
+/// (apps/revit_addin/tools/evals/make_ny_build_data.py) has several, each wall and room on one by name (a door or window on
 /// its wall's), and may give its own floor slabs (<c>floors</c>, in place of the footprint), rooms' ceilings, room
 /// separation lines, the lot (a property line) and spot grades.</summary>
 public sealed record BuildModel(string Project, string LevelName, double LevelElevation, IReadOnlyList<BuildWall> Walls,

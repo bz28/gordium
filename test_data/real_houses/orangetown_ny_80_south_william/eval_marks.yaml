@@ -1,5 +1,5 @@
 # The New York Revit eval's marks for the Orangetown house (80 South William Street, Lot 2), built in Revit from
-# revit_build_data.json (apps/revit_addin/tools/make_ny_build_data.py) by the add-in's build_model_request, then
+# revit_build_data.json (apps/revit_addin/tools/evals/make_ny_build_data.py) by the add-in's build_model_request, then
 # marked by its set_marks_request and checked by its check_project_request (apps/revit_addin/tools/eval_marks_request.py
 # writes both; the steps: docs/revit/windows_trial_runbook.md, "The New York eval").
 #

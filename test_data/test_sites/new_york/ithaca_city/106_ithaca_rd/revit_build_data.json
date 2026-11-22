@@ -185,7 +185,7 @@
  ],
  "plan": "x east along the street from the lot's left (west) corner, y north from the street, feet",
  "made_from": {
-  "tool": "apps/revit_addin/tools/make_ny_build_data.py",
+  "tool": "apps/revit_addin/tools/evals/make_ny_build_data.py",
   "sources": [
    {
     "file": "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design.yaml",
