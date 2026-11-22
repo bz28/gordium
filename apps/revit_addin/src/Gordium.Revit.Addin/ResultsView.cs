@@ -64,7 +64,7 @@ internal sealed class ResultsView : C.UserControl
         var titleLine = new C.DockPanel();
         C.DockPanel.SetDock(_again, C.Dock.Right);
         titleLine.Children.Add(_again);
-        titleLine.Children.Add(Typed(new C.TextBlock { Text = "Gordium: Check my project", VerticalAlignment = W.VerticalAlignment.Center,
+        titleLine.Children.Add(Typed(new C.TextBlock { Text = RibbonPlan.PaneTitle, VerticalAlignment = W.VerticalAlignment.Center,
                                                        TextTrimming = W.TextTrimming.CharacterEllipsis }, "type.title"));
         head.Children.Add(titleLine);
         head.Children.Add(_sub);

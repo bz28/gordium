@@ -30,7 +30,8 @@ public sealed class RibbonTests
         Assert.Equal(["Check", "Results", "Help", "Trial"], panels.Select(p => p.Name));
         Assert.Equal(TestTools, panels[3].Buttons.Select(b => b.Name));
         Assert.Equal([.. Architect, .. TestTools], RibbonPlan.Buttons(true).Select(b => b.Name));
-        // the ids stay the ones Revit already knows (a Quick Access Toolbar copy keeps working)
+        // the ids stay stable (Revit names a Quick Access Toolbar copy or shortcut by tab, panel and name, so a button
+        // that moves panel loses those once: The_panel_of_every_button_is_pinned)
         Assert.Equal(["gordium_check_project", "gordium_mark_for_egress", "gordium_results_panel", "gordium_about",
                       "gordium_check_box_house", "gordium_record_scenes", "gordium_read_interior", "gordium_record_houses"],
                      RibbonPlan.Buttons(true).Select(b => b.Id));
@@ -78,6 +79,49 @@ public sealed class RibbonTests
         Assert.Contains("Reads", check.LongDescription[0], StringComparison.Ordinal);
         Assert.Contains("Gordium panel", check.LongDescription[1], StringComparison.Ordinal);
         Assert.Contains("nothing is sent", check.LongDescription[2], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_panel_of_every_button_is_pinned()
+    {
+        // review round 1: a Quick Access Toolbar copy or a keyboard shortcut follows tab + panel + name, so moving a
+        // button loses them; Mark facts, About, Read inside and Record houses moved once in the ribbon pass. A future
+        // move must show up here (and be said in the README and the trial runbook)
+        var panelOf = RibbonPlan.Panels(trial: true).SelectMany(p => p.Buttons.Select(b => (b.Id, p.Name))).ToDictionary(x => x.Id, x => x.Name);
+        Assert.Equal(new Dictionary<string, string>
+        {
+            ["gordium_check_project"] = "Check", ["gordium_mark_for_egress"] = "Check", ["gordium_results_panel"] = "Results",
+            ["gordium_about"] = "Help", ["gordium_check_box_house"] = "Trial", ["gordium_record_scenes"] = "Trial",
+            ["gordium_read_interior"] = "Trial", ["gordium_record_houses"] = "Trial",
+        }, panelOf);
+    }
+
+    [Fact]
+    public void Mark_facts_says_what_its_list_holds_and_where_marks_are_set()
+    {
+        // review round 1: the list is the egress marks only (MarkingList.Build), never the lot facts Check project asks
+        // for, and some marks are on types or Project Information, not in Properties
+        var mark = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.MarkFacts);
+        Assert.Equal("List the rooms, windows and doors to mark for egress, anything not set first", mark.ToolTip);
+        var all = mark.ToolTip + " " + mark.LongDescriptionText;
+        Assert.DoesNotContain("facts Gordium needs", all, StringComparison.Ordinal);
+        Assert.Contains("Type Properties", all, StringComparison.Ordinal);
+        Assert.Contains("Project Information", all, StringComparison.Ordinal);
+        Assert.Contains("lot facts (zone, use, street edge) are asked for by Check project", all, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_results_pane_is_titled_gordium()
+    {
+        // design pass section 2.3: one pane, "Gordium" (the pane and its header both read this; never the old button name)
+        Assert.Equal("Gordium", RibbonPlan.PaneTitle);
+        // and the add-in (Revit-only, not built here) takes both from it, with no copy of the old name left
+        var addin = Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin");
+        var pane = File.ReadAllText(Path.Combine(addin, "ResultsPane.cs"));
+        var view = File.ReadAllText(Path.Combine(addin, "ResultsView.cs"));
+        Assert.Contains("app.RegisterDockablePane(Id, RibbonPlan.PaneTitle, new ResultsPane());", pane, StringComparison.Ordinal);
+        Assert.Contains("new C.TextBlock { Text = RibbonPlan.PaneTitle,", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("Gordium: Check my project", pane + view, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -139,14 +183,19 @@ public sealed class RibbonTests
     }
 
     [Fact]
-    public void Every_stroke_stays_on_the_grid_with_a_margin_and_the_same_weight()
+    public void Every_stroke_stays_on_the_grid_with_a_margin_outlines_at_one_weight_ticks_and_dots_half_again()
     {
         foreach (var shape in RibbonIcons.Shapes.Values)
             foreach (var stroke in shape.Strokes)
             {
                 Assert.NotEmpty(stroke.Points);
                 Assert.All(stroke.Points, p => { Assert.InRange(p.X, 1.5, 14.5); Assert.InRange(p.Y, 1.5, 14.5); });
-                Assert.InRange(stroke.Weight, 1, 1.5);                        // a dot a touch heavier, nothing thinner
+                // review round 1: outlines and lines exactly 1; only a tick (the accent check of Check project and Mark
+                // facts) or a dot is 1.5
+                var tick = stroke.Ink == PanelTokens.Accent && stroke.Points.Count == 3 &&
+                           (shape.Name == RibbonIcons.CheckProject || shape.Name == RibbonIcons.MarkFacts);
+                var dot = stroke.Points.Count == 1;
+                Assert.True(stroke.Weight == (tick || dot ? 1.5 : 1), $"{shape.Name}: a {(tick ? "tick" : dot ? "dot" : "line")} of weight {stroke.Weight}");
             }
         Assert.Equal(1, RibbonIcons.StrokePx(16));
         Assert.Equal(2, RibbonIcons.StrokePx(32));

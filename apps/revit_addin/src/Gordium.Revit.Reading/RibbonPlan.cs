@@ -1,7 +1,9 @@
 namespace Gordium.Revit.Reading;
 
 /// <summary>One button on the Gordium tab (docs/revit/ui_design_pass.md section 2.2).</summary>
-/// <param name="Id">Revit's name for the button, never changed (Revit keeps a Quick Access Toolbar copy under it).</param>
+/// <param name="Id">Revit's name for the button, kept stable. Revit names an add-in's Quick Access Toolbar copy and
+/// keyboard shortcut by tab, panel and name, so moving a button to another panel loses them once: Mark facts, About,
+/// Read inside and Record houses moved panels in the ribbon pass (PR 2), and are re-added once.</param>
 /// <param name="Text">The words under the icon; a line break where Revit should wrap a large button's words.</param>
 /// <param name="ToolTip">One line, shown on hover.</param>
 /// <param name="LongDescription">Up to three short lines, shown on a longer hover (Revit's LongDescription).</param>
@@ -32,6 +34,10 @@ public static class RibbonPlan
 {
     public const string Tab = "Gordium";
 
+    /// <summary>The results pane's title, and its header's (design pass section 2.3: one pane, "Gordium"; the pane id
+    /// stays the same, so Revit keeps where it is docked).</summary>
+    public const string PaneTitle = "Gordium";
+
     /// <summary>The environment variable that adds the Trial panel to any build: exactly "1" (spaces around it allowed).</summary>
     public const string TrialVariable = "GORDIUM_TRIAL";
 
@@ -55,10 +61,10 @@ public static class RibbonPlan
              "The results open in the Gordium panel, beside Properties.",
              "If a fact is missing, nothing is sent: the panel lists what to fill in."],
             RibbonIcons.CheckProject),
-        new(MarkFacts, "Mark\nfacts", "List the facts Gordium needs from you, anything not set first",
-            ["Adds Gordium's marks to this project if they aren't there, then lists every room, window and door.",
-             "The list opens in a window, anything not set first; each mark is set in Properties.",
-             "Nothing is checked or sent: set what is listed, then Check project."],
+        new(MarkFacts, "Mark\nfacts", "List the rooms, windows and doors to mark for egress, anything not set first",
+            ["Adds Gordium's egress marks to this project if they aren't there, then lists them in a window.",
+             "Each mark is set in Properties, Type Properties or Manage > Project Information.",
+             "Nothing is checked or sent; the lot facts (zone, use, street edge) are asked for by Check project."],
             RibbonIcons.MarkFacts),
     ]);
 

@@ -17,7 +17,8 @@ public sealed record IconShape(string Name, IReadOnlyList<IconStroke> Strokes);
 /// The Gordium tab's icons (docs/revit/ui_design_pass.md section 2.2): simple strokes on one 16-unit grid, drawn here
 /// to PNG at the two sizes Revit's ribbon uses (16 px small, 32 px large) in Revit's light and dark themes, from the
 /// panel's colour tokens (the outline in <c>text</c>, the mark in <c>accent</c>; never the pass green, which is only
-/// for what complies). Every stroke has the same weight at a size (<see cref="StrokePx"/>). No icon font, no
+/// for what complies). Every outline and line has the same weight at a size (<see cref="StrokePx"/>); a tick and a dot are half again as heavy,
+/// so the mark reads first and stays solid at 16 px. No icon font, no
 /// downloaded image: the add-in draws these when Revit loads it, and swaps them when Revit's theme changes.
 /// </summary>
 public static class RibbonIcons
