@@ -461,7 +461,7 @@ public sealed class ResultListTests
         Assert.DoesNotContain("_results.Children.Add(_summary)", view, StringComparison.Ordinal);
         Assert.Contains("C.Grid.SetRow(tools, 0);", view, StringComparison.Ordinal);
         // the stale banner and the grey state are in the summary (never green: StatusLook.Of(model.StateTone, stale))
-        var summary = Between(view, "    private static W.UIElement Summary(ResultModel model", "\n    }\n");
+        var summary = Between(view, "    private W.UIElement Summary(ResultModel model", "\n    }\n");
         Assert.Contains("case PanelPart.Stale:", summary, StringComparison.Ordinal);
         Assert.Contains("var state = StatusLook.Of(model.StateTone, stale);", summary, StringComparison.Ordinal);
         // review round 6: the status line (problems and what to do, the action last) wraps, capped at three lines so

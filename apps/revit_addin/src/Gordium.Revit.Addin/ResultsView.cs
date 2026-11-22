@@ -61,6 +61,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
     private ListFilter _filter = ListFilter.All;
     private readonly HashSet<ListSection> _opened = [];
     private readonly HashSet<string> _openRows = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _openCounts = new(StringComparer.Ordinal);   // laws whose "+N more" is open
     private readonly HashSet<string> _openFolds = new(StringComparer.Ordinal);
     private string? _selectedId;
     private bool _quiet;                                      // a selection the panel makes itself: never sent to Revit
@@ -224,7 +225,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
     /// green) and its counts, one wrap line per law. It scrolls away with the rows.</summary>
-    private static W.UIElement Summary(ResultModel model, IReadOnlyList<PanelPart> parts, bool stale)
+    private W.UIElement Summary(ResultModel model, IReadOnlyList<PanelPart> parts, bool stale)
     {
         var summary = new C.StackPanel { Margin = new W.Thickness(0, 2, 0, 2) };
         foreach (var part in parts)
@@ -241,33 +242,72 @@ internal sealed class ResultsView : C.UserControl, IListHost
                     {
                         Text = ResultText.StateWords(model.State) + (model.Stale is null ? "" : " (before the model changed)"),
                         TextWrapping = W.TextWrapping.Wrap,
-                    }, "type.state"), StatusLook.Colour(state)), size: 18));
+                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(before the model changed)" on one line
                     break;
                 case PanelPart.Counts:
-                    // one wrap line per law, its short name first: as few lines as the width allows
+                    // the compact count bar (CountBar): one line per law, its short name and its most important
+                    // counts (every failure), the rest behind "+N more" (opened in place), all of them in the tooltip
                     foreach (var line in model.Counts)
-                    {
-                        var chips = new C.WrapPanel { Margin = new W.Thickness(0, 4, 0, 0) };
-                        if (line.Title is not null)
-                            chips.Children.Add(Ink(Typed(new C.TextBlock
-                            {
-                                Text = Short(line.Title), FontWeight = W.FontWeights.SemiBold,
-                                Margin = new W.Thickness(0, 3, 6, 0), VerticalAlignment = W.VerticalAlignment.Center, ToolTip = line.Title,
-                            }, Caption), PanelTokens.TextMuted));
-                        foreach (var chip in line.Chips)
-                            chips.Children.Add(Chip(chip, stale));
-                        summary.Children.Add(chips);
-                    }
+                        summary.Children.Add(CountLineView(line, stale, CountBar.Keep));
                     break;
             }
         return summary;
     }
 
+    /// <summary>A law's line of the count bar (CountBar.Row): its short name, the counts kept, "+N" (opens every
+    /// count in place; all of them in the tooltip). A line that wraps at the pane's width is made again keeping one
+    /// count fewer (CountBar.Row still shows every failure), so each law stays one line at the docked width.</summary>
+    private C.WrapPanel CountLineView(CountLine line, bool stale, int keep)
+    {
+        var key = line.Title ?? "";
+        var opened = _openCounts.Contains(key);
+        var row = CountBar.Row(line, open: opened, keep: keep);
+        var chips = new C.WrapPanel { Margin = new W.Thickness(0, 4, 0, 0), ToolTip = row.Tooltip };
+        if (row.Title is not null)
+            chips.Children.Add(Ink(Typed(new C.TextBlock
+            {
+                Text = row.Title, FontWeight = W.FontWeights.SemiBold,
+                Margin = new W.Thickness(0, 3, 4, 0), VerticalAlignment = W.VerticalAlignment.Center,
+            }, Caption), PanelTokens.TextMuted));
+        foreach (var chip in row.Shown)
+            chips.Children.Add(Chip(chip, stale));
+        if (row.More is not null || opened)
+        {
+            var toggle = new C.Button
+            {
+                Content = Typed(new C.TextBlock { Text = opened ? "fewer" : row.More }, Caption),
+                Padding = new W.Thickness(4, 0, 4, 0), Margin = new W.Thickness(0, 2, 0, 0), Focusable = false,
+                ToolTip = opened ? "Show only the most important counts" : row.Tooltip,
+            };
+            W.Automation.AutomationProperties.SetName(toggle, opened ? $"Fewer {row.Title} counts" : $"{row.MoreWords}: {row.Title}");
+            toggle.Click += (_, e) =>
+            {
+                e.Handled = true;
+                if (!_openCounts.Remove(key))
+                    _openCounts.Add(key);
+                Relayout();
+            };
+            chips.Children.Add(toggle);
+        }
+        if (!opened && keep > 0)
+            chips.SizeChanged += (_, _) =>
+            {
+                // wrapped: the first and last child on different lines; made again with one count fewer
+                if (chips.Children.Count < 2 || chips.Parent is not C.Panel parent)
+                    return;
+                var first = chips.Children[0].TranslatePoint(new W.Point(0, 0), chips).Y;
+                var last = chips.Children[^1].TranslatePoint(new W.Point(0, 0), chips).Y;
+                if (last - first < 8)
+                    return;
+                var at = parent.Children.IndexOf(chips);
+                parent.Children.RemoveAt(at);
+                parent.Children.Insert(at, CountLineView(line, stale, keep - 1));
+            };
+        return chips;
+    }
+
     /// <summary>The folds after the rows (what wasn't read, the details), shown when the list shows every row.</summary>
     private List<FoldItem> _folds = [];
-
-    /// <summary>A law's short name for its count line: "Zoning" from "Zoning (City of Ithaca)" (the whole on hover).</summary>
-    private static string Short(string title) => title.IndexOf(" (", StringComparison.Ordinal) is var i and > 0 ? title[..i] : title;
 
     /// <summary>The model changed since the check: everything shown greyed (ResultRows.Stale), with why, once.</summary>
     internal void MarkStale()
@@ -596,10 +636,10 @@ internal sealed class ResultsView : C.UserControl, IListHost
     private static C.TextBlock Ink(C.TextBlock t, string token) => EntryView.Ink(t, token);
 
     /// <summary>The status's glyph, then the words that say it: shape and word together, never colour alone.</summary>
-    private static C.DockPanel WithGlyph(PanelStatus status, W.UIElement words, double size)
+    private static C.DockPanel WithGlyph(PanelStatus status, W.UIElement words, double size, double gap = 6)
     {
         var glyph = PanelLook.Glyph(status, size);
-        glyph.Margin = new W.Thickness(0, 0, 6, 0);
+        glyph.Margin = new W.Thickness(0, 0, gap, 0);
         var line = new C.DockPanel { LastChildFill = true };
         C.DockPanel.SetDock(glyph, C.Dock.Left);
         line.Children.Add(glyph);
@@ -613,7 +653,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
         var b = new C.Border
         {
             Child = WithGlyph(status, words, size: 16), BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
-            Padding = new W.Thickness(10, 8, 10, 8), Margin = new W.Thickness(0, 0, 0, bottom),
+            Padding = new W.Thickness(8, 5, 8, 5), Margin = new W.Thickness(0, 0, 0, bottom),
         };
         b.SetResourceReference(C.Border.BackgroundProperty, fill);
         b.SetResourceReference(C.Border.BorderBrushProperty, outline);
@@ -626,9 +666,9 @@ internal sealed class ResultsView : C.UserControl, IListHost
         var status = StatusLook.Of(chip.Tone, stale);
         var b = new C.Border
         {
-            Child = WithGlyph(status, Typed(new C.TextBlock { Text = chip.Words }, Caption), size: 11),
-            BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(6, 1, 7, 1),
-            Margin = new W.Thickness(0, 2, 4, 0),
+            Child = WithGlyph(status, Typed(new C.TextBlock { Text = chip.Words }, Caption), size: 10, gap: 4),
+            BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(5, 1, 6, 1),
+            Margin = new W.Thickness(0, 2, 3, 0),
         };
         b.SetResourceReference(C.Border.BackgroundProperty, StatusLook.ChipBackground(status));
         b.SetResourceReference(C.Border.BorderBrushProperty, StatusLook.Colour(status));
