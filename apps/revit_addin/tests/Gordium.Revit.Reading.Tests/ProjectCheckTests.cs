@@ -16,7 +16,7 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
     /// <summary>Scene 01 as the project's outside, with Gordium spot-grade markers at the middle of each wall at 0 (the
     /// scene states its ground flat at 0 instead, which no mark sends: the spots give the same ground), in the
     /// inside's phases (one document: both reads see the same phases).</summary>
-    private static RevitModel Outside(RevitModel inside)
+    internal static RevitModel Outside(RevitModel inside)
     {
         var model = Scene.Model(Scene.Steps[0]);
         var f = new FakeRevit(model.InternalToShared);
@@ -29,7 +29,7 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
     }
 
     /// <summary>The south lot edge (the scene's street) as Gordium writes it when the architect clicks it.</summary>
-    private static string SouthEdge(RevitModel outside)
+    internal static string SouthEdge(RevitModel outside)
     {
         var c = outside.LotLines[0].Curves.Single(c => Math.Abs(c.Start.Y - c.End.Y) < 1e-9 && Math.Min(c.Start.Y, c.End.Y) < 1);
         return StreetEdges.Format([(c.Start, c.End)]);

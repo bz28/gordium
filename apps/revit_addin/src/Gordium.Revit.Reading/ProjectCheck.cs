@@ -43,12 +43,15 @@ public static class ProjectCheck
             throw new ReadRefusedException("the outside and the inside weren't read in the same design (" + differs +
                                            "): nothing is sent; click Check project again");
         var read = ProjectFacts.Read(inside);
-        if (read.Missing.Count > 0)
-            return new ProjectPrepared(null, read.Missing, null, [], null);
+        var building = BuildingFacts.Read(inside);
+        if (read.Missing.Count > 0 || building.Missing.Count > 0)
+            return new ProjectPrepared(null, [.. read.Missing, .. building.Missing], null, [], null);
 
         // everything read from the records before the first await, on the caller's thread (Revit's: a lot line's
         // points call back into the API; SiteReader reads the lot before it asks the worker anything)
         var interior = InteriorReader.Read(inside);
+        if (building.Building is { } said)       // which New York code governs: the architect's statements, as given
+            interior.Interior["building"] = said;
         var site = await SiteReader.DescribeAsync(outside, read.Facts, asker, cancel).ConfigureAwait(false);
         var match = StreetEdges.Match(read.StreetEdges!, site.Site["lot"] as JsonObject, outside.InternalToShared);
         if (match.StreetLine is not { } street)
@@ -79,6 +82,57 @@ public static class ProjectCheck
             .Select(s => s.Id + ":" + string.Join(",", s.Options.OrderBy(o => o.Id, StringComparer.Ordinal)
                 .Select(o => o.Id + (o.IsPrimary ? "*" : "")))));
         return Sets(a) == Sets(b) ? null : "their design option sets differ";
+    }
+}
+
+/// <summary>The interior description's <c>building</c> block, from the marks on Project Information that say which
+/// New York code governs the building and what the Building Code's egress rules read (design_checker/code_scope.py
+/// FACTS): each only when set, so an unset one is not stated. <see cref="Building"/> is null when none is set (the
+/// description is then exactly as before). A word that isn't one of a mark's words, or a count under 1, is listed in
+/// <see cref="Missing"/> and nothing is sent: never sent as something near it.</summary>
+public sealed record BuildingFactsRead(JsonObject? Building, IReadOnlyList<string> Missing);
+
+/// <summary>Reads <see cref="BuildingFactsRead"/> from the marks.</summary>
+public static class BuildingFacts
+{
+    private const string Where = " on Project Information (Manage > Project Information)";
+
+    public static BuildingFactsRead Read(RevitModel model)
+    {
+        ArgumentNullException.ThrowIfNull(model);
+        var missing = new List<string>();
+        var b = new JsonObject();
+        MarkValue? Get(MarkDefinition m) => model.ProjectMarks.TryGetValue(m.Guid, out var v) ? v : null;
+        foreach (var (mark, key) in new[] { (Marks.FollowsBuildingCode, "follows_building_code"),
+                     (Marks.SeparateMeansOfEgress, "separate_means_of_egress"), (Marks.TownhouseUnits, "townhouse_units"),
+                     (Marks.CareFacility, "care_facility") })
+            if (Marks.YesNo(Get(mark)) is { } yes)
+                b[key] = yes;
+        if (Marks.Count(Get(Marks.StoriesAboveGradePlane)) is { } stories)
+        {
+            if (stories < 1)
+                missing.Add($"{Marks.StoriesAboveGradePlane.Name} is {stories.ToString(CultureInfo.InvariantCulture)}: type " +
+                            $"the stories above grade plane, 1 or more, or leave it blank{Where}.");
+            else
+                b["stories_above_grade_plane"] = stories;
+        }
+        if (Marks.Text(Get(Marks.OccupancyGroups)) is { } groups)
+        {
+            if (OccupancyGroupWords.Parse(groups) is { } parsed)
+                b["occupancy_groups"] = new JsonArray([.. parsed.Select(g => (JsonNode)g)]);
+            else
+                missing.Add($"{Marks.OccupancyGroups.Name} is \"{groups}\": type the Building Code's groups separated by " +
+                            $"commas ({OccupancyGroupWords.Listed}), or leave it blank{Where}.");
+        }
+        if (Marks.Text(Get(Marks.SprinklerSystem)) is { } system)
+        {
+            if (SprinklerWords.Table.Of(system) is { } word)
+                b["sprinkler_system"] = word;
+            else
+                missing.Add($"{Marks.SprinklerSystem.Name} is \"{system}\": type one of {SprinklerWords.Table.Listed}, or " +
+                            $"leave it blank{Where}.");
+        }
+        return new BuildingFactsRead(b.Count > 0 ? b : null, missing);
     }
 }
 
