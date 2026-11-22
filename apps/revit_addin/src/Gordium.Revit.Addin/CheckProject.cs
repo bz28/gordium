@@ -168,6 +168,7 @@ public sealed class CheckProjectCommand : IExternalCommand
     private static void Show(UIApplication ui, Document doc, Ran run, int marksAdded, StreetAsk ask, string clear)
     {
         var labels = new Dictionary<string, string>(StringComparer.Ordinal);
+        var ids = new Dictionary<string, long>(StringComparer.Ordinal);
         string files;
         if (run.Model is { } model)
         {
@@ -175,14 +176,17 @@ public sealed class CheckProjectCommand : IExternalCommand
             File.WriteAllText(file, clear + run.FullText + "\n", new UTF8Encoding(false));
             foreach (var uid in model.Groups.SelectMany(g => g.AllRows).SelectMany(r => r.Elements).Distinct(StringComparer.Ordinal))
                 if (Label(doc, uid) is { } label)
+                {
                     labels[uid] = label;
+                    ids[uid] = doc.GetElement(uid).Id.Value;
+                }
             files = $"Every row: {file}. The request and the answer: {Trial.LogPath()}";
         }
         else
             files = $"Logged to {Trial.LogPath()}";
         ResultsPane.Show(ui, doc, new PanelContent(doc.Title, DateTime.Now, run.Model,
                                                    StreetEdges.MissingAsShown(run.Prepared.Missing, ask), marksAdded, labels, files,
-                                                   ClearWords: clear));
+                                                   ClearWords: clear, Ids: ids));
     }
 
     /// <summary>Whether the active view is a plan (a site plan or floor plan) with a property line visible in it:

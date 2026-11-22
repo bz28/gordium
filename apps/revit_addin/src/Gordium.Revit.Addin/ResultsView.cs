@@ -17,9 +17,10 @@ namespace Gordium.Revit.Addin;
 /// <param name="Files">Where every row and the request and the answer are kept.</param>
 /// <param name="ClearWords">What happened to the makers' clear openings this run (<c>ClearPrefills.Head</c>: filled as
 /// drafts, or why they couldn't be written), "" when nothing.</param>
+/// <param name="Ids">Each element's Revit id by UniqueId (a result's detail shows it in Show's tooltip, for Select by ID).</param>
 internal sealed record PanelContent(string Project, DateTime When, ResultModel? Model, IReadOnlyList<string> Missing,
                                     int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files,
-                                    string ClearWords);
+                                    string ClearWords, IReadOnlyDictionary<string, long>? Ids = null);
 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup
@@ -674,7 +675,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
         _detailId = id;
         _selectedId = id;
         var stale = _content?.Model?.Stale is not null ? _content.When : (DateTime?)null;
-        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale);
+        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids);
         _detail = DetailView.Build(detail, this, canStepBack: index > 0, canStepOn: index < rows.Count - 1);
         _bodyHost.Child = _detail;
         _detail.Focus();

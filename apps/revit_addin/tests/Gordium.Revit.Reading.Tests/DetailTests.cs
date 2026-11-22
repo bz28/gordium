@@ -206,6 +206,23 @@ public sealed class DetailTests(RealWorker worker) : IClassFixture<RealWorker>
         Assert.DoesNotContain(d.Elements, e => e.Name.Contains("gone", StringComparison.Ordinal));     // never the UniqueId
     }
 
+    /// <summary>Review round 1: Revit's id goes with each element apart from its name, and Show's tooltip says it.</summary>
+    [Fact]
+    public void Each_elements_show_tooltip_gives_its_revit_id_for_select_by_id()
+    {
+        var d = Details.Of(Placed(Row(Verdict.NeedsReview, elements: ["a", "b", "gone"])), 0, 1,
+                           new Dictionary<string, string> { ["a"] = "CLOSET (40)", ["b"] = "Door D06" }, null,
+                           new Dictionary<string, long> { ["a"] = 341207, ["gone"] = 9 });
+        Assert.Equal([341207L, null, null], d.Elements.Select(e => e.RevitId));            // one not in the model: none
+        Assert.Equal("Zoom to CLOSET (40) in the model. Revit id 341207, for Select by ID", d.Elements[0].ShowTip);
+        Assert.Equal("Zoom to Door D06 in the model", d.Elements[1].ShowTip);
+        Assert.DoesNotContain("341207", d.Elements[0].Name, StringComparison.Ordinal);
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "DetailView.cs"));
+        Assert.Contains("var show = Button(\"Show\", e.ShowTip, () => host.ShowElements(e.Uid));", view, StringComparison.Ordinal);
+        var results = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
+        Assert.Contains("Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids);", results, StringComparison.Ordinal);
+    }
+
     [Fact]
     public void No_show_step_when_no_element_is_in_the_model_and_no_open_law_step_without_a_link()
     {

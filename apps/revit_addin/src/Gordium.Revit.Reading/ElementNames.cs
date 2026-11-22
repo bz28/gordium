@@ -6,7 +6,9 @@ namespace Gordium.Revit.Reading;
 /// An element as an architect names it in the results (docs/revit/ui_design_pass.md section 2.4, a result's detail:
 /// "CLOSET (40)", "Door D06", never "Rooms id 341207"): a room by its name and number as the room tag shows them, a
 /// door or a window by its category and Mark as the door schedule does, anything else by its category and name. Revit's
-/// element id goes with it apart (<see cref="Id"/>), for Select by ID and the tooltip, never in the name.
+/// element id is kept apart, never in the name: the panel carries it beside the name (PanelContent.Ids) and shows it in
+/// each element's Show tooltip in a result's detail ("Revit id 341207, for Select by ID"); <see cref="Id"/> names an
+/// element by it only when nothing else names it.
 /// </summary>
 public static class ElementNames
 {
@@ -25,7 +27,7 @@ public static class ElementNames
         if (category == "Rooms" || category == "Spaces" || category == "Areas")
             return (name, number) switch
             {
-                ({ } n, { } k) when !n.EndsWith(k, StringComparison.Ordinal) => $"{n} ({k})",
+                ({ } n, { } k) when !EndsWithWord(n, k) => $"{n} ({k})",
                 ({ } n, _) => n,
                 (null, { } k) => $"{one} {k}",
                 _ => Id(one, id),
@@ -58,6 +60,11 @@ public static class ElementNames
         "Mass" => "Mass",
         { } c => c,
     };
+
+    /// <summary>Whether <paramref name="name"/> already ends with the number as a word of its own ("BEDROOM 2" and
+    /// "2", "STORAGE-13" and "13"), never as the end of a longer number ("OFFICE 112" and "12" is not).</summary>
+    private static bool EndsWithWord(string name, string number) =>
+        name == number || name.EndsWith(number, StringComparison.Ordinal) && !char.IsLetterOrDigit(name[^(number.Length + 1)]);
 
     private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 }

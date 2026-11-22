@@ -163,7 +163,7 @@ internal static class DetailView
                 var line = new C.DockPanel { Margin = new W.Thickness(0, 0, 0, 4) };
                 if (e.InModel)
                 {
-                    var show = Button("Show", $"Zoom to {e.Name} in the model", () => host.ShowElements(e.Uid));
+                    var show = Button("Show", e.ShowTip, () => host.ShowElements(e.Uid));
                     C.DockPanel.SetDock(show, C.Dock.Right);
                     line.Children.Add(show);
                 }

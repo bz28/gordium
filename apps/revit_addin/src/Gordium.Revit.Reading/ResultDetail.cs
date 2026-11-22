@@ -22,7 +22,13 @@ public sealed record DetailStep(string Words, DetailAction Action);
 /// <param name="Uid">Its UniqueId (what Show selects).</param>
 /// <param name="Name">"CLOSET (40)", "Door D06"; "not in this model now" for one the project no longer has.</param>
 /// <param name="InModel">Whether the project has it (else Show can't select it).</param>
-public sealed record DetailElement(string Uid, string Name, bool InModel);
+/// <param name="RevitId">Revit's element id, for Select by ID, when the project has it.</param>
+public sealed record DetailElement(string Uid, string Name, bool InModel, long? RevitId = null)
+{
+    /// <summary>Its Show button's tooltip: "Zoom to CLOSET (40) in the model. Revit id 341207, for Select by ID".</summary>
+    public string ShowTip => $"Zoom to {Name} in the model" +
+        (RevitId is { } id ? $". Revit id {id.ToString(CultureInfo.InvariantCulture)}, for Select by ID" : "");
+}
 
 /// <summary>
 /// A result's detail (docs/revit/ui_design_pass.md section 2.4, PR 4): everything the panel shows for one row, every
@@ -89,8 +95,10 @@ public static class Details
 
     /// <summary>The detail of <paramref name="row"/>, the <paramref name="index"/>-th (from 0) of <paramref name="count"/>
     /// rows the list shows; <paramref name="labels"/>: each element's name by UniqueId (absent: not in the model now);
-    /// <paramref name="staleSince"/>: when the check was made, once the model changed after it.</summary>
-    public static ResultDetail Of(ListRow row, int index, int count, IReadOnlyDictionary<string, string>? labels, DateTime? staleSince)
+    /// <paramref name="staleSince"/>: when the check was made, once the model changed after it; <paramref name="ids"/>:
+    /// each element's Revit id by UniqueId (its Show tooltip says it, for Select by ID).</summary>
+    public static ResultDetail Of(ListRow row, int index, int count, IReadOnlyDictionary<string, string>? labels, DateTime? staleSince,
+                                  IReadOnlyDictionary<string, long>? ids = null)
     {
         ArgumentNullException.ThrowIfNull(row);
         var r = row.Row;
@@ -98,7 +106,8 @@ public static class Details
             ? $"The model changed after this check ({at:HH:mm}): this verdict may no longer hold. Check again before acting on it."
             : null;
         var elements = r.Elements.Select(uid => labels?.GetValueOrDefault(uid) is { } name
-            ? new DetailElement(uid, name, true) : new DetailElement(uid, NotInModel, false)).ToList();
+            ? new DetailElement(uid, name, true, ids is not null && ids.TryGetValue(uid, out var id) ? id : null)
+            : new DetailElement(uid, NotInModel, false)).ToList();
         var why = r.Reason is null || r.ReasonIsFigures || r.Reason == r.Hint ? null : r.Reason;
         return new ResultDetail(
             string.Create(CultureInfo.InvariantCulture, $"{index + 1} of {count}"), row.Status, r.VerdictWords, r.Name, r.Section,
