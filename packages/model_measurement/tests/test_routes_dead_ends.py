@@ -486,3 +486,31 @@ def test_23f_an_island_needs_review_a_column_doesnt():
     d["rooms"][0]["holes"] = [[list(p) for p in rect(29.5, 5.5, 30.5, 6.5)]]      # a column 1 ft square
     c = measure(d)["c"]
     assert c.stop is None and c.dead_ends == [] and ft(c.width) == 11.0        # it narrows the width: 12 - 1
+
+
+# --- test 24: one corridor, one centre line at each place (review round 1, 2026-11-22) -----------------------------
+
+def test_24a_a_narrower_stretch_never_runs_its_centre_line_inside_a_wider_one():
+    # a branch x 20 to 32 from the corridor's wall (y 8) to y 30, narrowing to x 20 to 26 up to y 46: from (23, 46),
+    # 16 down to the narrowing, a step 3 ft east to the wide stretch's centre line x 26, 26 down to y 4: 45 ft
+    # (|23 - 26| + |46 - 4|). The narrow stretch's line run on inside the wide one made a loop of two parallel lines,
+    # whose two sides were read as two ways: 16 ft
+    c = measure(corridor_with([(32, 8), (32, 30), (26, 30), (26, 46), (20, 46), (20, 8)]))["c"]
+    assert c.stop is None
+    (d,) = c.dead_ends
+    assert [ft(v) for v in d.start] == [23.0, 46.0] and ft(d.length[WITHOUT]) == 45.0
+
+
+def test_24b_a_corridor_narrowing_toward_its_closed_end_is_one_line_past_an_unrelated_branch():
+    # 12 ft wide for x 0 to 40, 6 ft for x 40 to 60 (closed at x 60), a branch x 10 to 18 to y 30; exit A in the west
+    # wall (centre y 6), exit B in the south wall at x 30. From (60, 3): 20 west to the narrowing, a step 3 ft to the
+    # wide stretch's centre line y 6, 10 on to exit B's door: 33 ft, the branch or no branch (it was 20.0 with it)
+    poly = [(0, 0), (60, 0), (60, 6), (40, 6), (40, 12), (18, 12), (18, 30), (10, 30), (10, 12), (0, 12)]
+    doors = [door("a", (-0.25, 6), (0, 1), ("c", "outside"), exit_id="A"),
+             door("b", (30, -0.25), (1, 0), ("c", "outside"), exit_id="B")]
+    for shape in (poly, [(0, 0), (60, 0), (60, 6), (40, 6), (40, 12), (0, 12)]):
+        c = measure(description([room("c", shape)], doors))["c"]
+        assert c.stop is None
+        east = [d for d in c.dead_ends if ft(d.start[0]) == 60.0]
+        assert [ft(d.length[WITHOUT]) for d in east] == [33.0]
+        assert [ft(v) for v in east[0].start] == [60.0, 3.0]
