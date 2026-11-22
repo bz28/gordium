@@ -57,7 +57,7 @@ def record(saved=None):
         sys.exit("no durations found in the pytest output")
     out = {i: round(s, 1) for i, s in sorted(seconds.items()) if s >= 1.0}
     path = Path(__file__).resolve().parent / "test_durations.json"
-    path.write_text(json.dumps(out, indent=0, sort_keys=True) + "\n", encoding="utf-8")
+    path.write_text(json.dumps(out, indent=0, sort_keys=True) + "\n", encoding="utf-8", newline="\n")
     print(f"{len(out)} tests of a second or more, {sum(out.values()):.0f} s in all, written to {path}")
 
 
