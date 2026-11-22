@@ -116,19 +116,22 @@ def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_fro
     assert f"{limit:,} sf" in log
     _tie_rooms_held_to_their_reason(log, reasons)
     # the guard rejects both wrong shapes the log once had (review rounds 12 to 14)
-    p4 = "**6** rooms aren't measured: the 5 of P5 have no route to the exit `...0005bc94`, and CORRIDOR (26) stops on a tie"
+    p4 = "**6** rooms aren't measured. The 5 of P5 have no route to the exit `...0005bc94`. CORRIDOR (26) stops on a tie."
     assert p4 in log
     for wrong in ("**6** rooms have no route to one of the two exits: the 5 of P5 plus CORRIDOR (26) (which stops on a tie)",
-                  "**6** rooms aren't measured, CORRIDOR (26) stops on a tie. CORRIDOR (26) does reach both exits"):
+                  "**6** rooms have no route to the exit: SPRINKLERED ABANDONED SPACE (32), and CORRIDOR (26) (which stops on a tie)",
+                  "**6** rooms aren't measured, CORRIDOR (26) stops on a tie. CORRIDOR (26) does reach both exits",
+                  "**6** rooms aren't measured. The 5 of P5 have no route; so has CORRIDOR (26), on a tie."):
         with pytest.raises(AssertionError):
             _tie_rooms_held_to_their_reason(log.replace(p4, wrong), reasons)
 
 
 def _tie_rooms_held_to_their_reason(log, reasons):
-    """A room stopped for a reason other than "has no route" (a tie) is held to its own reason: no clause naming it
-    says it has no route or reaches both exits, and one says it stops on a tie. A clause runs to a full stop, a
-    semicolon, a comma or a table bar, never a colon, so a list's head ("N rooms have no route: ...") stays with it."""
-    clauses = re.split(r"[.;,|]", log)
+    """A room stopped for a reason other than "has no route" (a tie) is held to its own reason: no sentence naming it
+    says "no route" or "both exits" at all, and one says it stops on a tie. Checked by whole sentences (to a full stop
+    or a table bar), never by clause, so no list or punctuation can separate a "no route" from the room it is about:
+    the log gives such a room a sentence of its own."""
+    clauses = re.split(r"(?<!\.)\.(?=\s|$)|\|", log)
     for room, why in reasons.items():
         if "has no route" in why:
             continue
