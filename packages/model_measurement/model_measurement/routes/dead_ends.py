@@ -56,6 +56,7 @@ Lengths in inches.
 """
 
 import heapq
+import logging
 import math
 from dataclasses import dataclass, field, replace
 
@@ -246,6 +247,7 @@ class _LegShape:
     kept: tuple = (0.0, 0.0)   # the along range its centre line keeps
     family: int = -1           # legs joined by steps (one corridor widening, narrowing or jogging) share it
     members: int = 1           # how many rectangles it was made of (walls stepping by under 12 in)
+    running: list = field(default_factory=list)   # along intervals where its centre line runs
     gone: list = field(default_factory=list)   # along intervals where its centre line doesn't run (a wider leg's)
     frame: object = None
 
@@ -751,6 +753,23 @@ class _Floor:
 
 
 def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
+    """Every corridor room on the story (a room marked `corridor`, read): its width and dead ends, or why not. Never
+    raises out of the story: anything unexpected becomes each corridor's needs-review reason (and is logged)."""
+    try:
+        return _corridors(story, uses, routes)
+    except Stop:
+        raise
+    except Exception as e:                                 # never a crash of the whole story
+        logging.getLogger(__name__).exception("dead ends not worked out")
+        why = Stop("corridor_not_legs", why=f"working them out failed: {type(e).__name__}: {e}").reason
+        out = {}
+        for k, r in story.rooms.items():
+            if r is not None and uses.get(k) == "corridor":
+                out[k] = Corridor(k, stop=why, width_stop=why)
+        return out
+
+
+def _corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
     """Every corridor room on the story (a room marked `corridor`, read): its width and dead ends, or why not.
     `routes` (the story's StoryRoutes) is needed for the dead ends; without it, only the widths."""
     rooms = {k: r for k, r in story.rooms.items() if r is not None and uses.get(k) == "corridor"}
@@ -829,6 +848,15 @@ def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
     owner = {n: _owner(g, n, floor_of) for n in range(len(g.xy))}
     for leaf, got in found[WITHOUT].items():
         key = owner[leaf]
+        if key is None:                                    # a closed end on no leg: never a guess
+            why = Stop("corridor_not_legs", why="a closed end of its centre lines lies on no stretch").reason
+            for n in g.component(leaf):
+                for m in (floors[owner[n]].rooms if owner[n] is not None else []):
+                    out[m].stop = out[m].stop or why
+            for m in in_floor:
+                if in_floor[m] in {owner[n] for n in g.component(leaf)}:
+                    out[m].stop = out[m].stop or why
+            continue
         floor = floors[key]
         start = g.xy[leaf]
         # the room holding the closed end (a point on the leg's axis, which may lie off the floor beside a recess
@@ -1105,6 +1133,7 @@ def _group(story, members, g, legs_all) -> _Floor:
             if any(min(b, d) - max(a, c) > SAME for c, d in pieces):
                 raise Stop("corridor_not_legs", why="two of its centre lines run side by side in one stretch")
         runs += [(leg.horizontal, leg.line, leg.across, a, b) for a, b in pieces]
+        leg.running = pieces                               # where its centre line runs (gone and doubled taken away)
         for a, b in pieces:
             marks = sorted({a, b, *[c for c in cuts if a <= c <= b]})
             nodes = [g.node(frame.back(leg.point(u))) for u in marks]
@@ -1116,15 +1145,21 @@ def _group(story, members, g, legs_all) -> _Floor:
             if not (legs[i].kept[0] - SAME <= u <= legs[i].kept[1] + SAME and
                     legs[j].kept[0] - SAME <= u <= legs[j].kept[1] + SAME):
                 continue
-            if any(a + SAME < u < b - SAME for k in (i, j) for a, b in legs[k].gone):
-                continue                                   # a centre line that doesn't run there
+            if not all(any(a - SAME <= u <= b + SAME for a, b in legs[k].running) for k in (i, j)):
+                continue                                   # a step only between two centre lines that run there
             a, b = g.node(frame.back(legs[i].point(u))), g.node(frame.back(legs[j].point(u)))
+            seg = LineString([g.xy[a], g.xy[b]])
+            if any(n not in (a, b) and seg.distance(Point(q)) <= SAME for n, q in enumerate(g.xy)):
+                raise Stop("corridor_not_legs", why="a step between two of its centre lines passes a third")
             k = len(g.edges)
             if g.edge(a, b, None, (0.0, 0.0)):
                 g.steps[k] = (base + i, base + j, u)
             plain = False
     if mine and not set(mine) <= g.component(mine[0]):
         raise Stop("corridor_not_legs", why="its legs' centre lines don't all meet")
+    for n in range(len(g.xy)):                             # every place on the graph lies on a centre line
+        if g.adj[n] and not any(g.edges[k][3] is not None for k in g.adj[n]):
+            raise Stop("corridor_not_legs", why="a step of its centre lines ends on none")
     # a loop of centre lines round floor alone (no wall inside it) would be read as two ways: never one corridor's
     mine_edges = [LineString([g.xy[u], g.xy[v]]) for u, v, _, li, _ in g.edges
                   if u != v and (u in mine or v in mine)]

@@ -514,3 +514,41 @@ def test_24b_a_corridor_narrowing_toward_its_closed_end_is_one_line_past_an_unre
         east = [d for d in c.dead_ends if ft(d.start[0]) == 60.0]
         assert [ft(d.length[WITHOUT]) for d in east] == [33.0]
         assert [ft(v) for v in east[0].start] == [60.0, 3.0]
+
+
+# --- test 25: a step only between two centre lines that run there (review round 2, 2026-11-22) --------------------
+
+def test_25a_a_staircase_branch_never_ends_its_dead_end_at_a_step_that_lands_on_no_line():
+    # a corridor 0 to 60 by 0 to 6, exits at both ends (centre line y 3); a branch whose walls step one side at a time:
+    # x 25 to 40 from y 6 to 10, 25 to 38 to y 16, 24 to 38 to y 30, 23 to 37 to y 40, closed. From (30, 40): 10 down
+    # to y 30, a step 1 east, 14 down to y 16, a step 0.5, 6 down to y 10, a step 1, 7 down to the corridor's centre
+    # line: 39.5 ft (|30 - 32.5| + |40 - 3| = 39.5). A step drawn at the end of a stretch where a centre line no
+    # longer runs ended on no line, made a triangle of no area with others there, and the dead end stopped at 10 ft
+    poly = [[60, 0], [0, 0], [0, 6], [25, 6], [25, 16], [24, 16], [24, 30], [23, 30], [23, 40], [37, 40], [37, 30],
+            [38, 30], [38, 10], [40, 10], [40, 6], [60, 6]]
+    c = measure(description([room("c", poly)], [door("a", (-0.25, 3), (0, 1), ("c", "outside"), exit_id="A"),
+                                                door("b", (60.25, 3), (0, 1), ("c", "outside"), exit_id="B")]))["c"]
+    assert c.stop is None
+    (d,) = c.dead_ends
+    assert [ft(v) for v in d.start] == [30.0, 40.0] and ft(d.length[WITHOUT]) == 39.5
+
+
+def test_25b_anything_unexpected_is_the_corridors_needs_review_never_a_crash(monkeypatch):
+    def boom(*a, **k):
+        raise KeyError(None)
+    monkeypatch.setattr(dead_ends, "_dead_ends", boom)
+    got = measure(branch())["c"]
+    assert got.dead_ends == [] and "failed" in got.stop and "KeyError" in got.stop and got.stop == got.width_stop
+
+
+def test_25c_the_fuzzs_seed_14_is_measured_never_a_crash():
+    # a corridor with one-sided steps in both walls, a staircase branch north (x 3 to 13, widening to 3 to 14.5 and
+    # 6 to 14.5) and a short one (x 44.5 to 50.5), exits in its east end and its south wall: before the fix a node
+    # joined by a step alone looked like a closed end and the story failed with KeyError(None). Now each dead end is
+    # measured and none is shorter than the brute-force bound (test_routes_dead_end_cross_check.py, fuzz seed 14)
+    poly = [[35.0, -4.5], [35.0, -1.5], [20.0, -1.5], [20.0, 0.0], [0.0, 0.0], [0.0, 6.0], [3.0, 6.0], [3.0, 24.0],
+            [6.0, 24.0], [6.0, 32.0], [14.5, 32.0], [14.5, 12.0], [13.0, 12.0], [13.0, 6.0], [44.5, 6.0], [44.5, 14.0],
+            [49.5, 14.0], [49.5, 10.0], [50.5, 10.0], [50.5, 6.0], [60.0, 6.0], [60.0, -4.5]]
+    c = measure(description([room("c", poly)], [door("b", (60.25, 0.75), (0, 1), ("c", "outside"), exit_id="B"),
+                                                door("m", (26.5, -1.75), (1, 0), ("c", "outside"), exit_id="M")]))["c"]
+    assert c.stop is None and len(c.dead_ends) == 3
