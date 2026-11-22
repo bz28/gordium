@@ -10,7 +10,10 @@
 #
 # Plan, feet: x east, y north from the inside face of the south wall; every wall 6 in thick, so the inside of the
 # exterior walls is x 0 to 60, y 0 to 30 and their outside faces x -0.5 to 60.5, y -0.5 to 30.5. The same plan on both
-# stories; Level 2's floor is 10 ft above Level 1's. Doors are 36 in clear, 84 in high, single swing.
+# stories; Level 2's floor is 10 ft above Level 1's. Every door is one type: a 36 in by 84 in single swing leaf, 34 in
+# clear by 80 in high open (`door`: the type's clear opening, as the Maine eval's 36 in leaves; no maker is named, so
+# an eval assumption). The routes pass a door only through its type's confirmed clear width (the Revit reader sends a
+# door's plan only then), so the marks file stamps it on the type (eval_marks.yaml door_types).
 
 levels:
   - {id: L1, name: Level 1, elevation: 0}
@@ -18,6 +21,7 @@ levels:
 story_height: 10                  # ft: each story's walls, floor to floor
 inside: [0, 0, 60, 30]            # x0 y0 x1 y1, the inside faces of the exterior walls
 wall: 0.5                         # ft, every wall
+door: {leaf_in: 36, height_in: 84, clear_width_in: 34, clear_height_in: 80}   # every door's type
 
 # each room on every story (its id prefixed with the level's: L1S, L2S...), inside its walls
 rooms:

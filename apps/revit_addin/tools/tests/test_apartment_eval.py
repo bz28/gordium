@@ -84,3 +84,21 @@ def test_the_real_workers_answer_compares_as_worked_out(tmp_path):
     (tmp_path / "b.json").write_text(json.dumps(got), encoding="utf-8")
     worse = compare.compare_apartment(compare.result_of(tmp_path / "b.json"))
     assert not worse["ok"] and worse["summary"]["false_passes"] == ["general.bc_1006_3_3_story_exits"]
+
+
+def test_every_door_has_its_types_clear_opening_stamped_as_the_description_reads_it():
+    """The first Revit run (2026-11-22): no door type's clear opening was stamped, so the reader sent no door's plan
+    (RouteReader: a route passes a door only through its type's confirmed clear width) and no story's routes were
+    measured. Every door the build places is in a door_types entry, with the width the description reads."""
+    marks, data = load("eval_marks.yaml"), json.loads((FOLDER / "revit_build_data.json").read_text("utf-8"))
+    stamped = {d: t for t in marks["door_types"] for d in t["doors"]}
+    assert set(stamped) == {f"D{k:02d}" for k in range(1, len(data["doors"]) + 1)}
+    door = load("apartment.yaml")["door"]
+    for k, d in enumerate(data["doors"], start=1):
+        t = stamped[f"D{k:02d}"]
+        assert (t["leaf_in"], t["clear_width_in"], t["clear_height_in"]) == \
+            (d["width_in"], door["clear_width_in"], door["clear_height_in"])
+    made = marks_tool.request(marks, "built.rvt", "marked.rvt")
+    assert sum("clear" in e for e in made["marks"]) == len(data["doors"])
+    assert all(d["plan"]["clear_width"] == d["stated_clear"]["width"] == door["clear_width_in"] / 12
+               for d in build.interior_of()["doors"])

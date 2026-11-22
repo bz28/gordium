@@ -26,6 +26,15 @@ rooms:
   - {number: "9", name: Stair East L2, use: Other, lockable: false, pass_through: false, why: "apartment.yaml rooms[SE]"}
   - {number: "10", name: Apartment North L2, use: Other, lockable: true, pass_through: false, why: "apartment.yaml rooms[N]"}
 
+# Every door's type (the build makes one, "Door 36\" x 84\"", for all ten): its maker's clear opening, stamped on the
+# type (Gordium: Clear width, Clear height, Clear source, Clear confirmed) with its operation. The Revit reader sends a
+# door's plan (where a route passes it) only from this confirmed width (RouteReader: "its maker's clear width isn't
+# confirmed"), never from the leaf: without it no story's routes are measured (the first Revit run, 2026-11-22)
+door_types:
+  - {leaf_in: 36, doors: [D01, D02, D03, D04, D05, D06, D07, D08, D09, D10], clear_width_in: 34, clear_height_in: 80,
+     operation: Side-hinged door,
+     source: "eval assumption: apartment.yaml door, a 36-in leaf at 34 in clear, 80 in high (typical; no maker's figure)"}
+
 # The doors into the stair enclosures (D01, D02 on Level 1; D07, D08 on Level 2: revit_build_data.json doors in order),
 # each Gordium: Exit "Exit stair enclosure" (apartment.yaml doors[W], doors[E]). The stairs' outside doors on Level 1
 # (D05, D06) are the exits' discharge, not marked (apartment.yaml discharge_doors)

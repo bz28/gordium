@@ -346,10 +346,11 @@ def apartment() -> dict:
                           "smoke_partition": False, "fire_rating": None, "height_ft": _r(h), "exterior": False,
                           "source": f"apartment.yaml partitions[{w['name']}]"})
         for d in a["doors"] + (a["discharge_doors"] if lv["elevation"] == a["levels"][0]["elevation"] else []):
-            doors.append({"center": [_r(v) for v in d["at"]], "width_in": 36.0, "height_in": 84.0, "kind": "single",
+            doors.append({"center": [_r(v) for v in d["at"]], "width_in": _r(a["door"]["leaf_in"]),
+                          "height_in": _r(a["door"]["height_in"]), "kind": "single",
                           "host_wall": ids[d["wall"]], "house_id": f"{lv['id']}{d['id']}", "exit": False,
                           "operation": "side_hinged",
-                          "source": f"apartment.yaml doors[{d['id']}] on {name} (36 in clear, 84 in high: its header)"})
+                          "source": f"apartment.yaml doors[{d['id']}] on {name}, its leaf apartment.yaml door"})
         for r in a["rooms"]:
             rx0, ry0, rx1, ry1 = r["rect"]
             rooms.append({"number": str(len(rooms) + 1), "name": f"{r['name']} {lv['id']}", "level": name,
@@ -387,9 +388,11 @@ def apartment() -> dict:
         "assumptions": [
             {"what": "The slabs and the roof 12 in thick", "why": "the eval building has none given",
              "effect": "none: no rule reads a slab's thickness"},
-            {"what": "Doors 36 in clear, 84 in high, single swing, no swing side", "why": "the eval building's doors",
-             "effect": "none on the verdicts: the routes start at a door's clear opening (36 in, over the 24 in the "
-                       "routes need)"}],
+            {"what": "Every door a 36 x 84 in single leaf, 34 in clear, 80 in high, no swing side",
+             "why": "the eval building's doors (apartment.yaml door; no maker named)",
+             "effect": "none on the verdicts: the routes pass each door's 34 in clear opening (over the 24 in they need), "
+                       "and the exits' separation is measured between the openings' nearest points across the corridor's "
+                       "length, which the opening's width along its wall doesn't change"}],
         "stats": {"walls": len(walls), "doors": len(doors), "windows": 0, "rooms": len(rooms)},
     }
 
@@ -415,8 +418,12 @@ def interior_of() -> dict:
                           "pass_through": r["pass_through"], "holes": [], "obstructions": []})
         for d in a["doors"] + (a["discharge_doors"] if lv is a["levels"][0] else []):
             door = {"id": f"{L}{d['id']}", "name": f"{d['name']} {L}", "exit": False, "level": L,
-                    "plan": {"centre": list(d["at"]), "along": list(d["along"]), "clear_width": 3.0,
-                             "wall_thickness": t},
+                    # the type's clear opening as eval_marks.yaml door_types stamps it: the reader sends a door's
+                    # plan (its clear opening) only from that confirmed width, never the leaf's
+                    "stated_clear": {"width": a["door"]["clear_width_in"] / 12, "height": a["door"]["clear_height_in"] / 12,
+                                     "source": "eval_marks.yaml door_types (an eval assumption: no maker named)"},
+                    "plan": {"centre": list(d["at"]), "along": list(d["along"]),
+                             "clear_width": a["door"]["clear_width_in"] / 12, "wall_thickness": t},
                     "sides": [s if s == "outside" else f"{L}{s}" for s in d["sides"]]}
             if "exit" in d:
                 # the enclosure's room on this story (RouteReader.ExitId: the room every door of which is the exit's)

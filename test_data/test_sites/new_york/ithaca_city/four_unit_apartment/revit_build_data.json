@@ -326,140 +326,140 @@
     9.25,
     15
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 7,
    "house_id": "L1W",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[W] on Level 1 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[W] on Level 1, its leaf apartment.yaml door"
   },
   {
    "center": [
     50.75,
     15
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 8,
    "house_id": "L1E",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[E] on Level 1 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[E] on Level 1, its leaf apartment.yaml door"
   },
   {
    "center": [
     30,
     11.75
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 5,
    "house_id": "L1DS",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[DS] on Level 1 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[DS] on Level 1, its leaf apartment.yaml door"
   },
   {
    "center": [
     30,
     18.25
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 6,
    "house_id": "L1DN",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[DN] on Level 1 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[DN] on Level 1, its leaf apartment.yaml door"
   },
   {
    "center": [
     -0.25,
     15
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 4,
    "house_id": "L1WO",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[WO] on Level 1 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[WO] on Level 1, its leaf apartment.yaml door"
   },
   {
    "center": [
     60.25,
     15
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 2,
    "house_id": "L1EO",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[EO] on Level 1 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[EO] on Level 1, its leaf apartment.yaml door"
   },
   {
    "center": [
     9.25,
     15
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 15,
    "house_id": "L2W",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[W] on Level 2 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[W] on Level 2, its leaf apartment.yaml door"
   },
   {
    "center": [
     50.75,
     15
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 16,
    "house_id": "L2E",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[E] on Level 2 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[E] on Level 2, its leaf apartment.yaml door"
   },
   {
    "center": [
     30,
     11.75
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 13,
    "house_id": "L2DS",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[DS] on Level 2 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[DS] on Level 2, its leaf apartment.yaml door"
   },
   {
    "center": [
     30,
     18.25
    ],
-   "width_in": 36.0,
-   "height_in": 84.0,
+   "width_in": 36,
+   "height_in": 84,
    "kind": "single",
    "host_wall": 14,
    "house_id": "L2DN",
    "exit": false,
    "operation": "side_hinged",
-   "source": "apartment.yaml doors[DN] on Level 2 (36 in clear, 84 in high: its header)"
+   "source": "apartment.yaml doors[DN] on Level 2, its leaf apartment.yaml door"
   }
  ],
  "windows": [],
@@ -964,7 +964,7 @@
   "sources": [
    {
     "file": "test_data/test_sites/new_york/ithaca_city/four_unit_apartment/apartment.yaml",
-    "sha256": "dad2401f9388c8bcbcccb444e75fd286c3ca0cf9673924ba9d9b6c2715d9f04a"
+    "sha256": "ac5cbb7ae6377c89b53f8b1457625a1dfaba2acc114e134207e15c886053dce0"
    }
   ]
  },
@@ -980,9 +980,9 @@
    "effect": "none: no rule reads a slab's thickness"
   },
   {
-   "what": "Doors 36 in clear, 84 in high, single swing, no swing side",
-   "why": "the eval building's doors",
-   "effect": "none on the verdicts: the routes start at a door's clear opening (36 in, over the 24 in the routes need)"
+   "what": "Every door a 36 x 84 in single leaf, 34 in clear, 80 in high, no swing side",
+   "why": "the eval building's doors (apartment.yaml door; no maker named)",
+   "effect": "none on the verdicts: the routes pass each door's 34 in clear opening (over the 24 in they need), and the exits' separation is measured between the openings' nearest points across the corridor's length, which the opening's width along its wall doesn't change"
   }
  ],
  "stats": {

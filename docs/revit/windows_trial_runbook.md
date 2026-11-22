@@ -392,7 +392,10 @@ powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps
 
 Then steps 1 to 4 above with `$n = "four_unit_apartment"`. **What to expect:** the build: walls 16, doors 10, rooms 10
 placed and enclosed (5 on each level), floors 3, the lot, 4 spot grades. Marks: 44 applied (each room's sleeping,
-use, can be locked and pass through; the four stair-enclosure doors' Gordium: Exit). The check: `which_code` is
+use, can be locked and pass through; the four stair-enclosure doors' Gordium: Exit) and the one door type's clear
+opening stamped (34 in by 80 in, its operation; `eval_marks.yaml` door_types): without that stamp the reader sends no
+door's `plan` and no story's routes are measured (the first Revit run, 2026-11-22: three rules needed review for it).
+The check's `route_notes` should list no `doors.plan` line. The check: `which_code` is
 `building_code`, "a building of Group R-2, none of the dwellings R101.2 lists (101.2)"; only the Building Code's egress
 section (no Residential Code section); each story's exits 2, their remoteness 41.0 / 68.425 = 0.599 (complies,
 1007.1.1); every rule's verdict as `expected.yaml` (3 comply, 26 need review, 4 not applicable). The comparison exits 0.
