@@ -36,7 +36,8 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
 3. A number the verification file flags (a flag quoting it) counts only if the flag resolves it: it gives the
    comparison the second reading has ("(>=)", "the second reading (none) is right") or says the number is part of
    one length ("one length"). Otherwise the rule is refused: such a number is for a person (make it a flag, which
-   always needs review).
+   always needs review). A table cell whose unit is printed only in its column's heading ("(feet)") is a length in
+   feet where such a flag says so ("a length in feet": _column_feet); otherwise it is a count.
 
 Plain code, no AI. Used by rulebook validation (every rule citing such a book) and by the drafter's number binding.
 """
@@ -201,6 +202,8 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
             if book.get("not_verified"):          # a flag's drafted check: no second reading says more than this
                 lengths = [_unverified(length) for length in lengths]
             lengths = [_in_feet(length, s["quote"]) for length in lengths]
+            if not book.get("not_verified"):
+                lengths = [_column_feet(length) for length in lengths]
             # a value the piece reads more than one way (R320.2: "not less than 34" and, for ship's ladders, "not
             # more than 34"): a reading counts only where the quote states it with the same words before it
             ways: dict = {}
@@ -226,6 +229,22 @@ def _in_feet(length: dict, quote: str) -> dict:
     printed = re.findall(r"(?<![\w.,/])(\d[\d,]*(?:\.\d+)?)\s*ft\b", quote.lower())
     if not any(value_of(n) == value for n in printed):
         return length
+    return dict(length, values=dict(length["values"], ft=value, **{"in": value * 12}))
+
+
+COLUMN_FEET = "a length in feet"     # a verification flag's words for a table cell whose column heading prints "(feet)"
+
+
+def _column_feet(length: dict) -> dict:
+    """A table cell prints its unit in its column's heading ("(feet)": Tables 1006.2.1 and 1017.2 of the 2025 Building
+    Code of New York State), never beside the number, so numbers.py reads it with no unit. A flag of the second
+    reading quoting the number that says it is "a length in feet" (its column read by position and on the page
+    image: text_verification.yaml) makes it one. Only a number with no unit of its own, and only by such a flag:
+    another table's cells (an occupant load) stay counts. Its comparison stays the second reading's."""
+    if not set(length["values"]) <= {"count", "any"} or len(length["statements"]) != 1 \
+            or not any(COLUMN_FEET in f for f in length["flags"]):
+        return length
+    value = length["statements"][0][0]
     return dict(length, values=dict(length["values"], ft=value, **{"in": value * 12}))
 
 
