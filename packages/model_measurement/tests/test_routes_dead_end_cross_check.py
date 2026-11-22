@@ -130,37 +130,58 @@ def bound(floor, end, exits, widest) -> float:
                 dist[a, b] = nd
                 heapq.heappush(heap, (nd, a, b))
     door_cells = [np.nonzero(inside & (shapely.distance(shapely.points(gx, gy), e) <= H * 0.75)) for e in exits]
+    door_cells = [c for c in door_cells if len(c[0])]
+    t = _split(inside, dist, door_cells)
+    return 0.0 if t is None else t / SLACK - 2 * H - widest / 2
 
-    def split(t) -> bool:
-        ahead = inside & (dist >= t)
-        reached = [bool((dist[c] < t).any()) for c in door_cells]
-        left = [bool(ahead[c].any()) for c in door_cells]
-        if all(reached) or any(r and any(l for k, l in enumerate(left) if k != n) for n, r in enumerate(reached)):
-            return True                                  # an exit's door reached, another still ahead (or both)
-        seen, comp = {}, 0
-        for n, c in enumerate(door_cells):
-            for i, j in zip(*c):
-                if ahead[i, j] and (i, j) not in seen:
-                    comp += 1
-                    todo = deque([(i, j)])
-                    seen[(i, j)] = comp
-                    while todo:
-                        a, b = todo.popleft()
-                        for dx, dy in ((1, 0), (-1, 0), (0, 1), (0, -1)):
-                            q = (a + dx, b + dy)
-                            if 0 <= q[0] < nx and 0 <= q[1] < ny and ahead[q] and q not in seen:
-                                seen[q] = comp
-                                todo.append(q)
-        owners = [{seen[(i, j)] for i, j in zip(*c) if (i, j) in seen} for c in door_cells]
-        return len(owners) == 2 and all(owners) and not (owners[0] & owners[1])
 
-    lo, hi = 0.0, float(np.nanmax(np.where(np.isfinite(dist), dist, 0))) + H
-    if not split(hi):
-        return 0.0
-    for _ in range(30):
-        mid = (lo + hi) / 2
-        lo, hi = (lo, mid) if split(mid) else (mid, hi)
-    return hi / SLACK - 2 * H - widest / 2
+def _split(inside, dist, door_cells):
+    """The least t at which the walk has a choice (t_split), or None: the floor not yet walked (dist >= t) holds
+    exits' doors in two pieces, or one exit's door is walked (dist < t) while another's is still ahead. Worked in one
+    sweep, adding the floor's cells from the farthest in (the part not yet walked growing as t falls), pieces joined
+    as they meet."""
+    owner = {}
+    for e, c in enumerate(door_cells):
+        for i, j in zip(*c):
+            owner.setdefault((i, j), set()).add(e)
+    # an exit's door reached while another's is still ahead: from just past the nearest door cell
+    reach = [float(dist[c].min()) for c in door_cells]
+    far = [float(dist[c].max()) for c in door_cells]
+    best = None
+    for e, r in enumerate(reach):
+        if math.isfinite(r) and any(far[k] > r for k in range(len(door_cells)) if k != e):
+            best = r if best is None else min(best, r)
+    cells = [(dist[i, j], i, j) for i, j in zip(*np.nonzero(inside & np.isfinite(dist)))]
+    cells.sort(reverse=True)
+    top, exits_of, present = {}, {}, set()
+
+    def find(x):
+        while top[x] != x:
+            top[x] = top[top[x]]
+            x = top[x]
+        return x
+
+    pieces = 0                                       # pieces of the unwalked floor holding an exit's door
+    for d, i, j in cells:
+        x = (i, j)
+        top[x] = x
+        exits_of[x] = set(owner.get(x, ()))
+        if exits_of[x]:
+            pieces += 1
+        for q in ((i + 1, j), (i - 1, j), (i, j + 1), (i, j - 1)):
+            if q in top:
+                a, b = find(x), find(q)
+                if a != b:
+                    if exits_of[a] and exits_of[b]:
+                        pieces -= 1
+                    top[a] = b
+                    exits_of[b] |= exits_of[a]
+        # at t = d (this cell and all farther not yet walked): a choice if two pieces hold doors of distinct exits
+        if pieces >= 2:
+            held = [exits_of[r] for r in {find(c) for c in owner if c in top} if exits_of[r]]
+            if len(held) >= 2 and len(set().union(*held)) >= 2:
+                best = d if best is None else min(best, d)
+    return best
 
 
 SEEDS = range(150)
@@ -191,3 +212,106 @@ def test_the_bound_catches_the_round_1_loop():
     exits = [LineString([(0, 2.5), (0, 5.5)]), LineString([(60, 2.5), (60, 5.5)])]
     low = bound(floor, shapely.Point(23, 46), exits, 12.0)
     assert 16.0 < low <= 45.0                            # 45: the dead end, measured (test 24a)
+
+
+# --- the fuzz (review round 2): staircases, one-sided steps of every size, many branches and exits ------------------
+
+STEP_SIZES = [0.5, 0.5, 1.0, 1.5, 2.0, 3.0]          # ft: under 12 in, and 1 to 3 ft
+
+
+def fuzz_layout(seed):
+    """A corridor along x, its two walls each stepping in or out at random places by a random size (one-sided); one to
+    three branches north or south at random places and widths, each a staircase of one to four stretches whose two
+    walls step independently (a narrowing, a widening, a jog), maybe ending in a T; two or three exits (the ends, or a
+    door in the corridor's wall). Half-foot grid. Returns what `layout` does, or None (not one floor)."""
+    rnd = random.Random(10_000 + seed)
+    length = rnd.choice([50.0, 60.0, 70.0])
+    w = rnd.choice([5.0, 6.0, 8.0, 10.0])
+    rects, widest = [], w
+    cuts = sorted(rnd.sample([x * 5.0 for x in range(1, int(length / 5))], rnd.choice([0, 1, 2, 3])))
+    xs = [0.0] + cuts + [length]
+    south, north = 0.0, w
+    pieces = []
+    for x0, x1 in zip(xs, xs[1:]):
+        rects.append((x0, south, x1, north))
+        pieces.append((x0, x1, south, north))
+        widest = max(widest, north - south)
+        side = rnd.choice(["south", "north"])
+        d = rnd.choice(STEP_SIZES) * rnd.choice([-1, 1])
+        if side == "north":
+            north = max(south + 4.0, north + d)
+        else:
+            south = min(north - 4.0, south + d)
+    branches = []
+    for _ in range(rnd.choice([1, 1, 2, 3])):
+        x0, x1, s0, n0 = rnd.choice(pieces)
+        if x1 - x0 < 6:
+            continue
+        bw = rnd.choice([4.0, 5.0, 6.0, 8.0, 10.0])
+        left = rnd.choice([v * 0.5 for v in range(int(x0 * 2), int((x1 - min(bw, x1 - x0)) * 2) + 1)])
+        right = min(left + bw, x1)
+        up = rnd.random() < 0.6
+        y = n0 if up else s0
+        for k in range(rnd.choice([1, 2, 3, 4])):
+            if k:
+                for _side in range(rnd.choice([1, 1, 2])):
+                    d = rnd.choice(STEP_SIZES) * rnd.choice([-1, 1])
+                    if rnd.random() < 0.5:
+                        left = min(right - 3.0, left + d)
+                    else:
+                        right = max(left + 3.0, right + d)
+            run = rnd.choice([4.0, 6.0, 8.0, 12.0])
+            top = y + run if up else y - run
+            rects.append((left, min(y, top), right, max(y, top)))
+            widest = max(widest, right - left)
+            y = top
+        if rnd.random() < 0.25:
+            arm, t = rnd.choice([6.0, 10.0]), right - left
+            rects.append((left - arm, min(y, y + (t if up else -t)), right + arm, max(y, y + (t if up else -t))))
+            widest = max(widest, t)
+        branches.append(rects[-1])
+    floor = unary_union([box(*r) for r in rects])
+    if floor.geom_type != "Polygon" or floor.interiors:
+        return None
+    poly = [list(c) for c in floor.exterior.coords[:-1]]
+    doors, exits = [], []
+    a0, a1 = pieces[0][2], pieces[0][3]
+    b0, b1 = pieces[-1][2], pieces[-1][3]
+    choices = [("a", (-0.25, (a0 + a1) / 2), (0, 1), LineString([(0, (a0 + a1) / 2 - 1.5), (0, (a0 + a1) / 2 + 1.5)])),
+               ("b", (length + 0.25, (b0 + b1) / 2), (0, 1),
+                LineString([(length, (b0 + b1) / 2 - 1.5), (length, (b0 + b1) / 2 + 1.5)]))]
+    x0, x1, s0, n0 = rnd.choice(pieces)
+    if x1 - x0 >= 5:
+        xm = rnd.choice([v * 0.5 for v in range(int((x0 + 2) * 2), int((x1 - 2) * 2) + 1)])
+        choices.append(("m", (xm, s0 - 0.25), (1, 0), LineString([(xm - 1.5, s0), (xm + 1.5, s0)])))
+    picked = rnd.sample(choices, rnd.choice([2, 2, 3])) if len(choices) == 3 else choices
+    for did, centre, along, opening in picked:
+        if not floor.boundary.buffer(1e-6).covers(opening) or min(a1 - a0, b1 - b0) < 3.5:
+            continue
+        doors.append(door(did, centre, along, ("c", "outside"), exit_id=did.upper()))
+        exits.append(opening)
+    if len(doors) < 2:
+        return None
+    return description([room("c", poly)], doors), floor, [], exits, widest
+
+
+FUZZ = range(int(__import__("os").environ.get("GORDIUM_FUZZ_SEEDS", "150")))
+
+
+@pytest.mark.parametrize("seed", FUZZ)
+def test_the_fuzz_never_crashes_and_no_dead_end_is_shorter_than_the_bound(seed):
+    got = fuzz_layout(seed)
+    if got is None:
+        pytest.skip("not one floor, or no two exits")
+    desc, floor, _, exits, widest = got
+    s = story(desc)
+    if s.stops:
+        pytest.skip("the story itself needs review: " + "; ".join(s.stops))
+    c = corridors(s, {"c": "corridor"}, StoryRoutes(s))["c"]
+    if c.stop is not None:
+        assert "failed" not in c.stop, c.stop                    # an unexpected error: a crash caught, still a bug
+        return
+    for d in c.dead_ends:
+        start = shapely.Point(d.start[0] / FT, d.start[1] / FT)
+        low = bound(floor, start, exits, widest)
+        assert d.length[WITHOUT] / FT >= low - 1e-6, (seed, start.coords[0], d.length[WITHOUT] / FT, low)
