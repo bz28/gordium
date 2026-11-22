@@ -362,9 +362,13 @@ area need review.
      39.5, test 25); a step passing a third place on its line, a place reached by steps alone, or a closed end on no
      stretch: needs review; and anything unexpected in working the dead ends out (a stop raised inside included) is
      each corridor's needs-review reason, never a crash of the story. A floor of corridors that can't be worked out
-     leaves nothing on the graph the story's corridors share, and these checks look only at a floor's own places
-     (review round 3, test 25d to 25f: a failed floor's leftovers once cost a healthy corridor its figure); with that,
-     a closed end on no stretch can no longer arise, and its check stays as a guard.
+     leaves nothing on the graph the story's corridors share (test 25e), and a floor's checks look only at its own
+     places (test 25g). Two guards keep a failed floor's leftovers from a healthy corridor: the clean-up, and a
+     closed end on no corridor's stretch never being measured; with neither, a corridor worked after a failed one
+     lost its figure to KeyError: None (test 25d, a real layout, fails only with both removed). Whether a real floor
+     can leave a place reached by steps alone, or a step passing a third place, was searched for (review round 4:
+     40,000 generated corridors, none): not found, so those checks, and the scoping that keeps another floor's such
+     place out of them, are pinned on a graph built by hand (tests 25f, 25g) and kept as guards.
    - **Ends.** A centre line runs past its last crossing or step only with its own stretch there (as before). An end
      at its rectangle's end with nothing joined there is a closed end only if walled across the stretch's whole
      width (then run to the real floor's end, as before); floor beyond such an end that no centre line reaches:
