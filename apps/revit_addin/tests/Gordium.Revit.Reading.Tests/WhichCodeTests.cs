@@ -75,6 +75,43 @@ public sealed class WhichCodeTests(RealWorker worker) : IClassFixture<RealWorker
                         Marks.FollowsBuildingCode.Description, StringComparison.Ordinal);   // R101.2's exception, quoted
     }
 
+    /// <summary>Review round 1 (F5): the dwelling's own facts an ask names are marks, sent as the lot facts of the same
+    /// names only when set; a count under its least is asked again.</summary>
+    [Fact]
+    public void The_dwelling_facts_are_marks_sent_as_lot_facts()
+    {
+        var (house, _) = Project("1_ranch_compliant");
+        var before = ProjectFacts.Read(house.Model()).Facts;
+        Assert.False(before.ContainsKey("dwelling_units") || before.ContainsKey("accessory_dwelling_unit"));
+        Mark(house, Marks.DwellingUnits, new(true, 2));
+        Mark(house, Marks.UnitsInAttachedBuilding, new(true, 4));
+        Mark(house, Marks.RoomsLetForProfit, new(true, 0));
+        Mark(house, Marks.HomeOccupation, new(true, 0));
+        Mark(house, Marks.AccessoryDwellingUnit, new(true, 1));
+        Mark(house, Marks.AduDetached, new(true, 0));
+        var read = ProjectFacts.Read(house.Model());
+        Assert.Empty(read.Missing);
+        Assert.Equal((2, 4, 0), (read.Facts["dwelling_units"]!.GetValue<int>(), read.Facts["attached_units_in_building"]!.GetValue<int>(),
+                                 read.Facts["rooms_let_for_profit"]!.GetValue<int>()));
+        Assert.Equal((false, true, false), (read.Facts["home_occupation"]!.GetValue<bool>(),
+                                            read.Facts["accessory_dwelling_unit"]!.GetValue<bool>(), read.Facts["adu_detached"]!.GetValue<bool>()));
+        Mark(house, Marks.DwellingUnits, new(true, 0));
+        Assert.StartsWith("Gordium: Dwelling units is 0", Assert.Single(ProjectFacts.Read(house.Model()).Missing), StringComparison.Ordinal);
+    }
+
+    /// <summary>An attached accessory dwelling unit, stated by its marks, reaches the decision: the house is then a
+    /// two-family dwelling, which needs each unit's separate means of egress (R101.2 item 2).</summary>
+    [Fact]
+    public async Task An_attached_adu_stated_by_marks_makes_the_house_a_two_family_dwelling()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        Mark(house, Marks.AccessoryDwellingUnit, new(true, 1));
+        Mark(house, Marks.AduDetached, new(true, 0));
+        var undecided = await WhichCode(house, outside);
+        Assert.Equal(JsonValueKind.Null, undecided.GetProperty("code").ValueKind);
+        Assert.Contains("Gordium: Separate means of egress", undecided.GetProperty("ask").GetString(), StringComparison.Ordinal);
+    }
+
     private static (FakeHouse, RevitModel) Project(string house)
     {
         var h = FakeHouse.Draw(house);

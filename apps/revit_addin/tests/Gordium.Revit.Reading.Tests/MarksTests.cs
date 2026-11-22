@@ -80,6 +80,13 @@ public sealed class MarksTests
             ("Gordium: Care facility", "58d76f42-7618-4c1c-8765-3af6c45b31d2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Occupancy groups", "ea50d05c-05a2-46b3-aafc-6cbb22bf19ac", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Sprinkler system", "4b542577-d04e-463a-87fa-019dbc102374", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
+            ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Home occupation", "c6a7cf3a-28b8-4c18-98f2-cf34215901bf", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Rooms let for profit", "2f038e8d-2d26-4e46-b92a-1c51d08bca87", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Accessory dwelling unit", "6fcbf10d-a1c2-406a-b6c7-e726b4a695f2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: ADU detached", "ebd07d28-ce47-4e7d-95e7-6e164d7d7bc8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

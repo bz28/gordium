@@ -152,6 +152,12 @@ exactly:
 | `Gordium: Care facility` | Project Information (instance) | Yes / No / unset | `building.care_facility` (BCNYS 308.2.4, 310.4.1): Yes puts which code governs at needs review |
 | `Gordium: Occupancy groups` | Project Information (instance) | BCNYS Chapter 3 groups, comma separated (A-1 ... U) / unset | `building.occupancy_groups`: the code decision and the Building Code's rules (Group I-4's limits). A word not a group is asked again, nothing sent |
 | `Gordium: Sprinkler system` | Project Information (instance) | None, NFPA 13, NFPA 13R, NFPA 13D / unset | `building.sprinkler_system` (903.3.1.1, 903.3.1.2, 903.3.1.3): the Building Code limits that change with a sprinkler system. Another word is asked again |
+| `Gordium: Dwelling units` | Project Information (instance) | a whole number 1 or more / unset | `facts.dwelling_units`: this lot's units, an ADU included; checked against the use for which code governs (R202 DWELLING) and read by Ithaca's zoning |
+| `Gordium: Units in the attached building` | Project Information (instance) | a whole number 1 or more / unset | `facts.attached_units_in_building`: a townhouse needs three or more (R202 TOWNHOUSE) |
+| `Gordium: Home occupation` | Project Information (instance) | Yes / No / unset | `facts.home_occupation`: Yes puts which code governs at a person's check (live/work, BCNYS 508.5); unset is assumed none, said as a reading |
+| `Gordium: Rooms let for profit` | Project Information (instance) | a whole number 0 or more / unset | `facts.rooms_let_for_profit`: any puts which code governs at a person's check (R101.2 item 6); unset is assumed none, said as a reading |
+| `Gordium: Accessory dwelling unit` | Project Information (instance) | Yes / No / unset | `facts.accessory_dwelling_unit`: Yes asks whether it is detached; unset is assumed none, said as a reading |
+| `Gordium: ADU detached` | Project Information (instance) | Yes / No / unset | `facts.adu_detached`: No makes the ADU one more of the building's units (R202 DWELLING) |
 | `Gordium: Exit` | Doors (instance) | Exterior door at discharge, Exit stair enclosure, Exit passageway, Horizontal exit, Exterior exit stair or ramp / unset | `doors[].exit_kind`, and from it `exit_id` (section 10). Unset: not an exit (exits are marked, never guessed) |
 
 Why shared parameters: architects already fill parameters, in bulk, in schedules ("select all bedroom windows, tick

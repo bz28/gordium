@@ -246,6 +246,45 @@ public static class Marks
         "The automatic sprinkler system the building is equipped with throughout, one of: " + SprinklerWords.Table.Listed +
         " (BCNYS 903.3.1.1 NFPA 13, 903.3.1.2 NFPA 13R, 903.3.1.3 NFPA 13D). Blank: the limits that change with a sprinkler system need review.");
 
+    // ---- the dwelling's own facts which New York code needs (code_scope.py) and Ithaca's zoning reads too: sent as
+    // the lot facts of the same names (host_core.facts.STATED_FACTS), each only when set (unset is not stated)
+
+    /// <summary>The dwelling units on this lot (<c>facts.dwelling_units</c>), 1 or more.</summary>
+    public static readonly MarkDefinition DwellingUnits = new(
+        "Gordium: Dwelling units", new("aa32131a-e757-47a3-abf8-9deb81d7a09a"), MarkValueKind.Integer, MarkBinding.Instance,
+        [ProjectInformation], "facts.dwelling_units",
+        "The dwelling units on this lot (a building split along its party walls onto several lots: this lot's units only), an accessory dwelling unit included. A whole number, 1 or more. Blank: the use's own count (one for a detached one-family dwelling).");
+
+    /// <summary>The dwelling units in the whole attached building, every lot it stands on (<c>facts.attached_units_in_building</c>).</summary>
+    public static readonly MarkDefinition UnitsInAttachedBuilding = new(
+        "Gordium: Units in the attached building", new("bccb088a-c087-475f-9ff9-53fd10133d0e"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.attached_units_in_building",
+        "For an attached one-family dwelling (one_family_attached): the dwelling units in the whole attached building, every lot it stands on (§325-3B: three to six), 1 or more. It decides whether the building is a townhouse (RCNYS R202: three or more townhouse units). Blank: which code governs needs review.");
+
+    /// <summary>Whether a home occupation is planned (<c>facts.home_occupation</c>).</summary>
+    public static readonly MarkDefinition HomeOccupation = new(
+        "Gordium: Home occupation", new("c6a7cf3a-28b8-4c18-98f2-cf34215901bf"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [ProjectInformation], "facts.home_occupation",
+        "Yes when a home occupation is planned (§325-3B: a business, studio or office run by a resident in the dwelling unit); then which code governs needs a person's check (a live/work unit, BCNYS 508.5). No: none. Blank: Gordium assumes none and says so.");
+
+    /// <summary>The rooms let for profit (<c>facts.rooms_let_for_profit</c>), 0 or more.</summary>
+    public static readonly MarkDefinition RoomsLetForProfit = new(
+        "Gordium: Rooms let for profit", new("2f038e8d-2d26-4e46-b92a-1c51d08bca87"), MarkValueKind.Integer,
+        MarkBinding.Instance, [ProjectInformation], "facts.rooms_let_for_profit",
+        "The rooms let for profit (to roomers) in the building, 0 or more; any makes it a lodging house, under the Residential Code only when owner-occupied with five or fewer guestrooms and sprinklered (RCNYS R101.2 item 6). Blank: Gordium assumes none and says so.");
+
+    /// <summary>Whether an accessory dwelling unit is on the lot (<c>facts.accessory_dwelling_unit</c>).</summary>
+    public static readonly MarkDefinition AccessoryDwellingUnit = new(
+        "Gordium: Accessory dwelling unit", new("6fcbf10d-a1c2-406a-b6c7-e726b4a695f2"), MarkValueKind.YesNo,
+        MarkBinding.Instance, [ProjectInformation], "facts.accessory_dwelling_unit",
+        "Yes when an accessory dwelling unit (§325-3B, §325-28) is on the lot, attached or detached; then say whether it is detached (Gordium: ADU detached). No: none. Blank: Gordium assumes none and says so.");
+
+    /// <summary>Whether the accessory dwelling unit is detached (<c>facts.adu_detached</c>).</summary>
+    public static readonly MarkDefinition AduDetached = new(
+        "Gordium: ADU detached", new("ebd07d28-ce47-4e7d-95e7-6e164d7d7bc8"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [ProjectInformation], "facts.adu_detached",
+        "Yes when the accessory dwelling unit is in its own building; No when it is in or on the main building, where it is one more of the building's dwelling units (RCNYS R202 DWELLING: one or two). Blank, with an ADU on the lot: which code governs needs review.");
+
     /// <summary>The <see cref="GroundFrom"/> words and the <c>grade_from</c> each sends.</summary>
     public static IReadOnlyList<(string Word, string GradeFrom)> GroundWords => [("Spot grades", "spot"), ("Finished spot grades", "finished_spots")];
     /// <summary>A level the architect says has no rooms at all (a roof, a turret's top: Revit finds enclosed areas
@@ -360,7 +399,8 @@ public static class Marks
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
-        SprinklerSystem,
+        SprinklerSystem, DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
+        AduDetached,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

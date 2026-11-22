@@ -198,6 +198,21 @@ public static class ProjectFacts
             else
                 facts["stories"] = stories;
         }
+        // the dwelling's own facts (optional; which New York code governs reads them, and Ithaca's zoning): each sent
+        // as stated, a count under its least asked again, never sent
+        foreach (var (mark, key, least) in new[] { (Marks.DwellingUnits, "dwelling_units", 1),
+                     (Marks.UnitsInAttachedBuilding, "attached_units_in_building", 1), (Marks.RoomsLetForProfit, "rooms_let_for_profit", 0) })
+            if (Marks.Count(Get(mark)) is { } n)
+            {
+                if (n < least)
+                    missing.Add($"{mark.Name} is {n.ToString(CultureInfo.InvariantCulture)}: type {least} or more, or leave it blank{Where}.");
+                else
+                    facts[key] = n;
+            }
+        foreach (var (mark, key) in new[] { (Marks.HomeOccupation, "home_occupation"),
+                     (Marks.AccessoryDwellingUnit, "accessory_dwelling_unit"), (Marks.AduDetached, "adu_detached") })
+            if (Marks.YesNo(Get(mark)) is { } yes)
+                facts[key] = yes;
         IReadOnlyList<KeptEdge>? edges = null;
         var street = Marks.Text(Get(Marks.StreetEdge));
         if (street is null)
