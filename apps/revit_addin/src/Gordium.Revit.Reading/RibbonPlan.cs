@@ -3,7 +3,8 @@ namespace Gordium.Revit.Reading;
 /// <summary>One button on the Gordium tab (docs/revit/ui_design_pass.md section 2.2).</summary>
 /// <param name="Id">Revit's name for the button, kept stable. Revit names an add-in's Quick Access Toolbar copy and
 /// keyboard shortcut by tab, panel and name, so moving a button to another panel loses them once: Mark facts, About,
-/// Read inside and Record houses moved panels in the ribbon pass (PR 2), and are re-added once.</param>
+/// Read inside and Record houses moved panels in the ribbon pass (PR 2): a copy or shortcut made before must be added
+/// again by the architect, once (nothing restores it).</param>
 /// <param name="Text">The words under the icon; a line break where Revit should wrap a large button's words.</param>
 /// <param name="ToolTip">One line, shown on hover.</param>
 /// <param name="LongDescription">Up to three short lines, shown on a longer hover (Revit's LongDescription).</param>
@@ -61,10 +62,10 @@ public static class RibbonPlan
              "The results open in the Gordium panel, beside Properties.",
              "If a fact is missing, nothing is sent: the panel lists what to fill in."],
             RibbonIcons.CheckProject),
-        new(MarkFacts, "Mark\nfacts", "List the rooms, windows and doors to mark for egress, anything not set first",
-            ["Adds Gordium's egress marks to this project if they aren't there, then lists them in a window.",
+        new(MarkFacts, "Mark\nfacts", "List what to mark: rooms, windows, doors, floors outside the house; unset first",
+            ["Adds Gordium's marks to this project if missing, and fills a window's maker's clear opening as a draft.",
              "Each mark is set in Properties, Type Properties or Manage > Project Information.",
-             "Nothing is checked or sent; the lot facts (zone, use, street edge) are asked for by Check project."],
+             "Nothing is checked or sent; Check project asks for any lot fact not set (zone, use, street edge)."],
             RibbonIcons.MarkFacts),
     ]);
 

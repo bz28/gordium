@@ -99,15 +99,19 @@ public sealed class RibbonTests
     [Fact]
     public void Mark_facts_says_what_its_list_holds_and_where_marks_are_set()
     {
-        // review round 1: the list is the egress marks only (MarkingList.Build), never the lot facts Check project asks
-        // for, and some marks are on types or Project Information, not in Properties
+        // review rounds 1-2: MarkingList.Build lists the rooms, windows, doors and the floors outside the house (lot
+        // coverage and the yards), never the lot facts Check project asks for; the command adds every Gordium mark and
+        // fills a window's maker's clear opening as a draft (TryPrefill); some marks are on types or Project Information
         var mark = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.MarkFacts);
-        Assert.Equal("List the rooms, windows and doors to mark for egress, anything not set first", mark.ToolTip);
         var all = mark.ToolTip + " " + mark.LongDescriptionText;
+        foreach (var listed in new[] { "rooms", "windows", "doors", "floors outside the house" })
+            Assert.Contains(listed, all, StringComparison.Ordinal);
+        Assert.DoesNotContain("egress marks", all, StringComparison.Ordinal);
         Assert.DoesNotContain("facts Gordium needs", all, StringComparison.Ordinal);
+        Assert.Contains("clear opening as a draft", all, StringComparison.Ordinal);
         Assert.Contains("Type Properties", all, StringComparison.Ordinal);
         Assert.Contains("Project Information", all, StringComparison.Ordinal);
-        Assert.Contains("lot facts (zone, use, street edge) are asked for by Check project", all, StringComparison.Ordinal);
+        Assert.Contains("Check project asks for any lot fact not set", all, StringComparison.Ordinal);
     }
 
     [Fact]
