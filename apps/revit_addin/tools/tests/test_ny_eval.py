@@ -389,3 +389,11 @@ def test_the_command_line_writes_the_comparison_and_says_whether_it_is_ok(tmp_pa
     path.write_text(json.dumps(bad), encoding="utf-8")
     assert compare.main(["orangetown", str(path), "--out", str(out)]) == 1
     assert "NOT OK" in capsys.readouterr().out
+
+
+def test_a_reason_has_written_as_one_string_never_matches():
+    # review round 4: a plain string would be read letter by letter and match almost any reason
+    reason = "a 35 ft solid (wall_s) could hold up to 5 stories: draw its floors or enter the count"
+    assert not compare.reason_as_expected({"reason_has": "nothing like it"}, reason)
+    assert not compare.reason_as_expected({"reason_has": "could hold up to 5 stories"}, reason)
+    assert compare.reason_as_expected({"reason_has": ["could hold up to 5 stories"]}, reason)

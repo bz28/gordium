@@ -47,3 +47,12 @@ def test_a_part_that_may_be_a_story_stays_one():
                   box(10, 25, 35, 65, 36, 37, id="slab floating over the walls")):
         got = stories(walls(10, 25, 35, 65) + [extra], {**FACTS, "stories": 3})
         assert got["value"] is None, extra["id"]
+
+
+def test_a_thin_part_rising_above_the_walls_is_never_a_slab():
+    # review round 4: a 6.9 ft part from 26 to 32.9 ft on 27 ft walls carries the building above the walls; taken as a
+    # slab, the most it could hold fell from 4 to 3 and a correct count of 4 was refused
+    parts = walls(10, 25, 35, 65, z1=27) + [box(10, 25, 35, 65, 26, 32.9, id="cap above the walls")]
+    got = stories(parts, {**FACTS, "stories": 4})
+    assert got.get("stories_refused") != "above_drawn" and "at most 3" not in (got.get("reason") or "")
+    assert "could hold up to 3" not in (stories(parts)["reason"] or "")

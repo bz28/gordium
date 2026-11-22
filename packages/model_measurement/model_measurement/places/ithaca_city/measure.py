@@ -1199,7 +1199,7 @@ def _slabs_within(plain: list[dict], grade) -> list[dict]:
     out = []
     for b in plain:
         lo, hi = _extent(b)
-        if lo is None or lo <= grade + TOL or hi - lo >= STORY_ROOM - TOL or lo > top + TOL:
+        if lo is None or lo <= grade + TOL or hi - lo >= STORY_ROOM - TOL or lo > top + TOL or hi > top + TOL:
             continue
         if _projection(b).difference(outline.buffer(TOL)).area <= 1e-6:
             out.append(b)
