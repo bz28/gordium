@@ -6,6 +6,10 @@ using I = System.Windows.Input;
 
 namespace Gordium.Revit.Addin;
 
+/// <summary>What a cause card asks Revit (on its thread, through PanelActions): select its elements and zoom to
+/// them, and, for a mark, bring up Properties; What names them in the panel's line.</summary>
+internal sealed record CardRequest(CauseCard Card, CardAction Action, IReadOnlyList<string> Elements, string What);
+
 /// <summary>What one check put in the panel: the rows (or what to fill in first), with the project's labels for each
 /// element, made on Revit's thread when the check ran (the panel never asks Revit anything itself).</summary>
 /// <param name="Project">The project checked (its title).</param>
@@ -39,11 +43,13 @@ internal sealed record PanelContent(string Project, DateTime When, ResultModel? 
 /// token of the theme's dictionary (<see cref="PanelLook"/>), named with SetResourceReference so it follows Revit's
 /// theme; every status is drawn as its glyph and said in words, never by colour alone (<see cref="StatusLook"/>).
 /// </summary>
-internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
+internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost, ICauseHost
 {
     private readonly Action<ResultRow> _zoom;
+    private readonly Action<CardRequest> _card;
     private readonly Action<ResultRow> _select;
     private readonly Action _checkAgain;
+    private readonly Action _projectInformation;
     private readonly Action _setUp;
     private readonly C.TextBlock _sub = Small("");
     private readonly C.Button _again;
@@ -73,11 +79,24 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     private double _listOffset;                               // where the list was scrolled when the detail opened
     private bool _quiet;                                      // a selection the panel makes itself: never sent to Revit
 
-    internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action setUp, PanelTheme theme)
+    // PR 6: the cause cards, the "looked at" ticks, and what changed since the check before
+    private bool _allCards;                                   // "+N more causes" opened
+    private readonly HashSet<string> _openCards = new(StringComparer.Ordinal);
+    private LookedAt _looked = new();
+    private CheckChange? _change;
+    private (string Project, DateTime When)? _shownCheck;     // the check shown (a stale redraw is the same check)
+    // per project: the last check that arrived current (what the next is compared with), and the last check's ticks
+    private readonly Dictionary<string, (DateTime When, ResultModel Model)> _compared = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, (ResultModel Model, LookedAt Looked)> _ticked = new(StringComparer.Ordinal);
+
+    internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation,
+                         Action<CardRequest> card, Action setUp, PanelTheme theme)
     {
         _zoom = zoom;
+        _card = card;
         _select = select;
         _checkAgain = checkAgain;
+        _projectInformation = projectInformation;
         _setUp = setUp;
         PanelLook.Apply(this, theme);
         SetResourceReference(BackgroundProperty, PanelTokens.BgPane);
@@ -184,6 +203,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
 
     internal void Show(PanelContent content)
     {
+        NewCheck(content);
         _content = content;
         _failed = false;
         _again.Visibility = W.Visibility.Visible;
@@ -231,6 +251,31 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
         Relayout();
         if (_detailId is { } open)                               // a detail open: shown again from this answer if its
             OpenDetail(open, keepOffset: true);                  // row is still listed (stale: saying so), else the list
+    }
+
+    /// <summary>A check of <paramref name="content"/>'s project that isn't the one shown (a stale redraw or a cancelled
+    /// check's restore is the same check): what changed since the project's check before (CheckChanges: not compared
+    /// when this answer arrived stale, nor is it then what the next one is compared with), and the ticks carried over
+    /// (LookedAt.Carry: only to what is still the same). A check with no rows (a fact missing) has neither.</summary>
+    private void NewCheck(PanelContent content)
+    {
+        if (_shownCheck == (content.Project, content.When))
+            return;
+        _shownCheck = (content.Project, content.When);
+        _openCards.Clear();
+        _allCards = false;
+        if (content.Model is not { } model)
+        {
+            _change = null;
+            _looked = new LookedAt();
+            return;
+        }
+        var key = content.Project;
+        _change = _compared.TryGetValue(key, out var before) ? CheckChanges.Between(before.Model, before.When, model) : null;
+        if (model.Stale is null)
+            _compared[key] = (content.When, model);
+        _looked = _ticked.TryGetValue(key, out var t) ? LookedAt.Carry(t.Looked, t.Model, model) : new LookedAt();
+        _ticked[key] = (model, _looked);
     }
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
@@ -292,9 +337,31 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
                     // counts (every failure), the rest behind "+N more" (opened in place), all of them in the tooltip
                     foreach (var line in model.Counts)
                         summary.Children.Add(CountLineView(line, stale, CountBar.Keep));
+                    if (_change is { } change)
+                        summary.Children.Add(ChangeLine(change));
                     break;
             }
         return summary;
+    }
+
+    /// <summary>What changed since the check before (CheckChanges), one line under the counts: the worker's verdicts
+    /// only, by row id; plain (never a status colour: it says what changed, not whether it passes), the whole on hover.</summary>
+    private static C.Border ChangeLine(CheckChange change)
+    {
+        var words = Typed(new C.TextBlock
+        {
+            Text = change.Words, TextWrapping = W.TextWrapping.Wrap, TextTrimming = W.TextTrimming.CharacterEllipsis,
+            MaxHeight = 4 * 1.4 * PanelTokens.TypeOf(Caption).Size, ToolTip = change.Words,
+        }, Caption);
+        var b = new C.Border
+        {
+            Child = words, BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
+            Padding = new W.Thickness(8, 4, 8, 4), Margin = new W.Thickness(0, 6, 0, 0),
+        };
+        b.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgSurface);
+        b.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
+        W.Automation.AutomationProperties.SetName(b, change.Words);
+        return b;
     }
 
     /// <summary>A law's line of the count bar (CountBar.Row): its short name, the counts kept, "+N" (opens every
@@ -580,7 +647,8 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     {
         var labels = _content?.Labels;
         var stale = _content?.Model?.Stale is not null;
-        var layout = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);
+        var layout = ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),
+                                           _summary is not null && AllCards.Count > 0, _filter, _search.Text);
         _entries = _summary is null ? layout : ResultList.WithSummary(layout);
         var items = new List<ListItem>(_entries.Count + 2);
         RowItem? selected = null;
@@ -589,6 +657,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
             {
                 case ListSummary:
                     items.Add(new SummaryItem(this, _summary!));
+                    break;
+                case ListCauses:
+                    items.Add(new CausesItem(this, () => CauseCardsView.Build(this)));
                     break;
                 case ListHeading h:
                     items.Add(new HeadingItem(this, h));
@@ -918,6 +989,118 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
                 return t;
         return null;
     }
+
+    // ---- the cause cards and the looked-at ticks (ICauseHost, PR 6) ----------------------------------------
+
+    public IReadOnlyList<CauseCard> AllCards => _content?.Model?.Causes ?? [];
+
+    public bool AllShown => _allCards;
+
+    public void ShowAllCards(bool all)
+    {
+        _allCards = all;
+        Relayout();
+    }
+
+    public bool IsOpen(CauseCard card) => _openCards.Contains(card.Key);
+
+    public void SetOpen(CauseCard card, bool open)
+    {
+        if (open)
+            _openCards.Add(card.Key);
+        else
+            _openCards.Remove(card.Key);
+        Relayout();
+    }
+
+    /// <summary>A card's button: Show, Show and open Properties (both on Revit's thread), Open Project Information
+    /// (the mark named in the line), or the card opened on its rows (check by hand, decide).</summary>
+    public void Act(CauseCard card, CardAction action)
+    {
+        switch (action)
+        {
+            case CardAction.Show or CardAction.ShowAndProperties:
+                _card(new CardRequest(card, action, CauseCards.ShowIds(card, Labels), Short(card.Words)));
+                break;
+            case CardAction.ProjectInformation:
+                _projectInformation();
+                Say(CauseCards.Note(card, Labels) ?? "");
+                break;
+            case CardAction.ByHand or CardAction.Decide:
+                if (!IsOpen(card))
+                    SetOpen(card, true);
+                Say(CauseCards.Note(card, Labels) ?? "");
+                break;
+        }
+    }
+
+    public void ShowRoom(CauseCard card, CauseRoom room) => _card(new CardRequest(card, CardAction.Show, [room.Id], room.Name));
+
+    public void OpenRow(string id) => OpenDetail(id);
+
+    public IReadOnlyDictionary<string, string>? Labels => _content?.Labels;
+
+    public IReadOnlyList<ListRow> Placed => _placed;
+
+    public bool Stale => _content?.Model?.Stale is not null;
+
+    public LookedAt Looked => _looked;
+
+    public void TickCard(CauseCard card, bool ticked)
+    {
+        _looked.SetCard(card.Key, ticked);
+        RefreshTicks();
+    }
+
+    public void TickRow(ListRow row, bool ticked)
+    {
+        _looked.SetRow(row, ticked);
+        RefreshTicks();
+    }
+
+    public bool IsLooked(string id) => _looked.Row(id);
+
+    /// <summary>The open detail's row's tick.</summary>
+    public bool DetailLooked => DetailRow() is { } r && _looked.Row(r.Row.Id);
+
+    public void TickDetail(bool ticked)
+    {
+        if (DetailRow() is { } r)
+            TickRow(r, ticked);
+    }
+
+    /// <summary>Every tick and progress line on screen shown as the ticks are now (a tick in a card's rows, in the list
+    /// and in the detail is one tick), without making the list again (its scroll and selection stay).</summary>
+    private void RefreshTicks()
+    {
+        foreach (var root in new W.DependencyObject?[] { _list, _detail })
+            if (root is not null)
+                foreach (var e in Descendants(root))
+                    switch (e)
+                    {
+                        case C.CheckBox { Tag: CauseCardsView.TickTag t } box:
+                            box.IsChecked = t.Card ? _looked.Card(t.Key) : _looked.Row(t.Key);
+                            break;
+                        case C.TextBlock { Tag: CauseCardsView.ProgressTag } line:
+                            line.Text = _looked.Progress(AllCards, _placed);
+                            break;
+                    }
+    }
+
+    private static IEnumerable<W.DependencyObject> Descendants(W.DependencyObject root)
+    {
+        for (var i = 0; i < M.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var c = M.VisualTreeHelper.GetChild(root, i);
+            yield return c;
+            foreach (var d in Descendants(c))
+                yield return d;
+        }
+    }
+
+    /// <summary>A cause's words up to its first ": " (the names after it are on the card), for the panel's line.</summary>
+    private static string Short(string words) =>
+        words.IndexOf(": ", StringComparison.Ordinal) is var at and > 0 ? words[..at] : words;
 
     // ---- small pieces --------------------------------------------------------------------------------------
 

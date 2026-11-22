@@ -13,6 +13,12 @@ internal interface IListHost
     void Toggle(ListSection section);
     void ShowRow(RowItem row);
     void FoldChanged(FoldItem fold);
+
+    /// <summary>Whether a row is ticked "looked at" (the architect's note, never a verdict).</summary>
+    bool IsLooked(string id);
+
+    /// <summary>A row's "looked at" tick changed.</summary>
+    void TickRow(ListRow row, bool ticked);
 }
 
 /// <summary>One item of the list's ItemsSource: what <see cref="EntryView"/> draws.</summary>
@@ -41,6 +47,12 @@ internal sealed class RowItem(IListHost host, ListRow row) : ListItem(host)
 
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
 internal sealed class SummaryItem(IListHost host, Func<W.UIElement> build) : ListItem(host)
+{
+    internal Func<W.UIElement> Build { get; } = build;
+}
+
+/// <summary>The "Fix these first" cause cards (CauseCardsView), made afresh each time they scroll into view.</summary>
+internal sealed class CausesItem(IListHost host, Func<W.UIElement> build) : ListItem(host)
 {
     internal Func<W.UIElement> Build { get; } = build;
 }
@@ -90,6 +102,7 @@ public sealed class EntryView : C.Border
             RowItem r => Row(r),
             FoldItem f => Fold(f),
             SummaryItem m => Summary(m),
+            CausesItem c => Causes(c),
             _ => null,
         };
     }
@@ -183,8 +196,10 @@ public sealed class EntryView : C.Border
             text.Children.Add(cause);
         }
 
-        // line 3: the section on its own line (muted, trimmed, the whole on hover), Show at its right
-        if (r.Section is not null || r.Elements.Count > 0)
+        // line 3: the section on its own line (muted, trimmed, the whole on hover), Show at its right, and before it
+        // the "looked at" tick of a row in review or to check by hand (the architect's note: never a verdict)
+        var tickable = LookedAt.Tickable(p);
+        if (r.Section is not null || r.Elements.Count > 0 || tickable)
         {
             var third = new C.DockPanel { Margin = new W.Thickness(20, 3, 0, 0) };
             if (r.Elements.Count > 0)
@@ -202,6 +217,15 @@ public sealed class EntryView : C.Border
                 };
                 C.DockPanel.SetDock(show, C.Dock.Right);
                 third.Children.Add(show);
+            }
+            if (tickable)
+            {
+                var tick = CauseCardsView.Tick(new CauseCardsView.TickTag(false, r.Id), item.Host.IsLooked(r.Id), t => item.Host.TickRow(p, t));
+                tick.Margin = new W.Thickness(8, 0, 0, 0);
+                tick.Focusable = false;                                            // the row's keys stay the list's
+                W.Automation.AutomationProperties.SetName(tick, "Looked at: " + r.Name);
+                C.DockPanel.SetDock(tick, C.Dock.Right);
+                third.Children.Add(tick);
             }
             var sec = Muted(r.Section ?? "");
             sec.TextWrapping = W.TextWrapping.NoWrap;
@@ -224,6 +248,14 @@ public sealed class EntryView : C.Border
     }
 
     private static W.UIElement Summary(SummaryItem item)
+    {
+        var box = new C.Border { Child = item.Build() };
+        box.SetResourceReference(BackgroundProperty, PanelTokens.BgPane);
+        box.MouseLeftButtonDown += (_, e) => e.Handled = true;              // never selected
+        return box;
+    }
+
+    private static W.UIElement Causes(CausesItem item)
     {
         var box = new C.Border { Child = item.Build() };
         box.SetResourceReference(BackgroundProperty, PanelTokens.BgPane);

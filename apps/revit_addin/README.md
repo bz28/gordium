@@ -563,6 +563,35 @@ the jurisdiction is the City of Ithaca). Why each choice:
   by colour alone; green only for the worker's "complies", never once stale.
   Why each choice: the reading design note, section 9, and the UI design pass (`docs/revit/ui_design_pass.md`,
   section 2.5).
+- **Fix these first** (UI PR 6; `CauseCardsView.cs`, its decisions in `Gordium.Revit.Reading/CauseCards.cs`,
+  `LookedAt.cs`, `CheckChanges.cs`, `MeasureBar.cs`). Right under the needs-review heading (or check by hand's, when
+  nothing is in review), with the filter on all or needs review and no search: at most three of the worker's
+  **cause cards** (each review and by-hand group's `causes`), in the worker's order, the rest behind "+N more
+  causes". Each card: the worker's words (three lines, the whole on hover), how many rows it holds ("11 rows · 7
+  rules", the worker's rule count), what to set where when it names a mark, and one button by its kind: *fix the
+  model* → **Show** (selects its elements and zooms to them; no button when the project has none of them, such as an
+  interior-drawing cause with no element id); *mark* → **Show and open Properties** when it names a Gordium mark set
+  on its elements (selected, zoomed, Properties brought up, and the line names the mark: the API can't scroll
+  Properties to a field), **Open Project Information** when every mark it names is a project fact's ("Set Gordium:
+  Stories on Project Information"), **Show** alone when it names no mark (the Odyssey's occupant loads: "the
+  description has no mark for it yet"), saying it names none, never a mark guessed (`CauseCards.MarksOf`: a mark
+  named in its words, the one mark an interior field in back-quotes feeds, or the Project Information mark each fact
+  of a `fact:`/`facts:` key is fed by); *measure by hand* → **Check by hand** and *decide* → **Decide**, which open
+  the card on its rows with what that means. **Rows (N)** opens a card: the rooms it names (the 5 rooms with no
+  route, each with the worker's why and Show) and its rows, each opening its detail. **Looked at** ticks, on each
+  card, each row in review or to check by hand (in the list, in a card's rows, in the detail) and "Looked at: 2 of 15
+  causes · 5 of 183 rows": the architect's own note, never a verdict (the tooltip says so; nothing reads it but the
+  progress line); kept per project for the Revit session; a new check of the project carries a tick only to a card
+  of the same key, words and rows and to a row with the same verdict, reason, figures and how far, still to look at
+  (`LookedAt.Carry`); a stale redraw keeps them. **What changed**, under the counts after a new check of the same
+  project: "9 rows changed since 09:10: Lot coverage: needs review → does not comply; Building height now complies;
+  Front yard now complies; and 6 more. 2 more say something new with the same verdict." (`CheckChanges`: rows matched
+  by id, the worker's verdicts only, worst now first; new and gone rows said as such; an answer that arrives stale
+  isn't compared, nor is it what the next is compared with). The detail's **measured-vs-limit bar** is drawn only
+  from the worker's `limit_length` (two numbers in one unit: the remoteness row's 187.16 ft apart against 71 ft),
+  the row's status colour (never green for a row in review, hatched once stale), the worker's words under it; no
+  other row has one (zoning's figures and egress reasons are words, never read as numbers). Failures sort by the
+  worker's `how_far` lengths, decimal feet and inches too ("2.5 ft short", "4 in over").
 
 How we know: `ProjectCheckTests` (scene 01 as fake Revit records with interior houses 1 and 5, checked by the real
 worker: the scene's hand-worked zoning verdicts, the houses' egress verdicts, a project with no lot never complies,
@@ -583,7 +612,12 @@ ignored; a second check refused while one runs and a late answer never the new c
 unreadable answer or a worker that won't start the error state; the send returns at once while the stand-in worker
 hangs, and Cancel kills it; the real worker's answer fresh, and stale after an edit made while it worked; the words,
 the button, the redraw while a check runs; the blocked time; and the add-in's wiring of each, in its source),
-`ElementNamesTests` and `PanelThemeTests`
+`CauseCardsTests` (PR 6: the Odyssey's 15 cards are the worker's in its order, the 5 rooms first with their names;
+each card's button by its kind and what the project has; a mark's Properties or Project Information by where its
+mark is, never a mark guessed; only the answer's own rows; the cards under the needs-review heading only, never with
+a search; a tick never changes a verdict and is carried only where nothing changed; what changed by row id in the
+worker's verdicts, a stale answer not compared, an unknown word never "now complies"; the bar only from two numbers
+in one unit; failures by decimal how-far lengths), `ElementNamesTests` and `PanelThemeTests`
 (every text colour at least 4.5:1 on every background it sits on in both themes, every status mark at least 3:1,
 every status its own glyph and word, green only for complies and never stale, no fixed colour in the view). The WPF
 panel itself is checked in Revit (it needs Revit to run). The Children's Odyssey's answer

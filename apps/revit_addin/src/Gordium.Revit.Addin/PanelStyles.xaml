@@ -114,6 +114,44 @@
     </Setter>
   </Style>
 
+  <!-- a "looked at" tick (PR 6): a 14 px box, its tick in the marked token (a fact the architect set, never green),
+       the words beside it; keyboard focus outlines the box in the accent -->
+  <Style TargetType="CheckBox">
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="FontFamily" Value="{DynamicResource type.caption.family}" />
+    <Setter Property="FontSize" Value="{DynamicResource type.caption.size}" />
+    <Setter Property="SnapsToDevicePixels" Value="True" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Cursor" Value="Hand" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="CheckBox">
+          <StackPanel Orientation="Horizontal" Background="Transparent">
+            <Border x:Name="Box" Width="14" Height="14" CornerRadius="3" BorderThickness="1" VerticalAlignment="Center"
+                    Background="{DynamicResource bg.surface}" BorderBrush="{DynamicResource text.muted}">
+              <Path x:Name="Tick" Data="M 2.5,7 L 5.5,10 L 11,3.5" StrokeThickness="2" Stroke="{DynamicResource marked}"
+                    StrokeStartLineCap="Round" StrokeEndLineCap="Round" Visibility="Collapsed" />
+            </Border>
+            <ContentPresenter Margin="5,0,0,0" VerticalAlignment="Center" RecognizesAccessKey="True" />
+          </StackPanel>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsChecked" Value="True">
+              <Setter TargetName="Tick" Property="Visibility" Value="Visible" />
+              <Setter TargetName="Box" Property="Background" Value="{DynamicResource marked.fill}" />
+              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource marked}" />
+            </Trigger>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Box" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
   <!-- an Expander's header: a chevron (right when folded, down when open) and the header, no button chrome -->
   <Style x:Key="expander.header" TargetType="ToggleButton">
     <Setter Property="Foreground" Value="{DynamicResource text}" />
