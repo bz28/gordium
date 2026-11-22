@@ -8,7 +8,13 @@ The sheet stays outside the repo (open question 5), so its drawn lines are liter
 sheet's vector drawing (pdfplumber, 2026-11-21): the sheet is 1/8 in = 1 ft, 9 pt a foot. Its points are put in
 the model's coordinates (feet) by two walls both show: the west outer face (sheet x 302.58 pt, model x 0) and the
 north outer face (sheet y 539.10 pt, model y 85.4833); the two exits' inner faces then fall within 0.01 ft of the
-model's (5.494 and 189.200), a check on the match. Gordium's figures are worked by the route code from the model."""
+model's (5.494 and 189.200), a check on the match. Gordium's figures are worked by the route code from the model.
+
+Travel distance and common path are judged one-sided (the route note's eval, changed 2026-11-21): the sheet draws its
+lines orthogonally, never shorter than the natural path the books measure (IBC 1016.1, NFPA 7.6.1), so Gordium's
+figure from the sheet's start to the sheet's exit agrees when it is no longer than the sheet's line as drawn plus
+2 percent of it or 2 ft, and every one of that figure's rules gives the sheet's verdict. The first test (within
+2 percent or 2 ft of the stated figure) is still worked and reported beside it (`before_2026_11_21`)."""
 
 import json
 import math
@@ -127,8 +133,8 @@ def main(path, out_path=OUT, co=CO):
                       "gordium_story_sf": [round(x.value / FT / FT, 1) for x in areas.building_area(story)],
                       "rooms": {r.name: round(r.outline.area / FT / FT, 1) for r in story.rooms.values()
                                 if r is not None and uses.get(r.id) == "accessory_storage"}}
-    _judge_all(out)
     out["verdicts"] = _verdicts(measured)
+    _judge_all(out)
     out["storage"]["under_all_four_readings"] = _storage_readings(measured)
     out["by_hand"] = BY_HAND
     out_path.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8", newline="\n")
@@ -151,12 +157,14 @@ def _verdicts(measured) -> dict:
     rules = {r["id"]: r for r in load(maine / "5_building_code_rules/drafted/general.yaml")["rules"]}
     allowed = Context.for_jurisdiction(maine).allowed()
     key = yaml.safe_load(HAND_CHECK.read_text(encoding="utf-8"))
-    out = {}
-    for check in key["checks"][:5]:                 # travel, common path, dead end, remoteness, storage
+    out, by_figure = {}, {}
+    for figure, check in zip(("travel_distance", "common_path", "dead_end", "remoteness", "storage"),
+                             key["checks"][:5]):    # travel, common path, dead end, remoteness, storage
+        by_figure[figure] = list(check["gordium_rules"])
         for rid in check["gordium_rules"]:
             got = part_rules.rule_result(part_rules.rows(rules[rid], measured["parts"], SHEET_VALUES, allowed))
             out[rid] = {"gordium": got, "sheet": check["result"], "same": got == check["result"]}
-    return {"rules": out, "every_verdict_the_same": all(v["same"] for v in out.values())}
+    return {"rules": out, "every_verdict_the_same": all(v["same"] for v in out.values()), "by_figure": by_figure}
 
 
 def _storage_readings(measured) -> dict:
@@ -179,14 +187,38 @@ def _storage_readings(measured) -> dict:
 
 
 TOLERANCES = {   # the decision's "Agreement asked" (docs/decisions/2026-11-20_route_measurement.md, "The eval")
-    "travel_distance": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
-    "common_path": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+    "travel_distance": "Gordium's no-clearance figure, from the sheet's start to the sheet's exit, no longer than the "
+                       "sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger, and every rule of "
+                       "this figure giving the sheet's verdict (changed 2026-11-21: the sheet's line is orthogonal, "
+                       "never shorter than the natural path IBC 1016.1 and NFPA 7.6.1 measure)",
+    "common_path": "Gordium's no-clearance figure from the sheet's start no longer than the sheet's line as drawn "
+                   "plus 2 percent of it or 2 ft, whichever is larger, and every rule of this figure giving the "
+                   "sheet's verdict (changed 2026-11-21, as for the travel distance)",
     "dead_end": "length within 1 ft, width within 1 in",
     "remoteness": "within 1 ft of Gordium's nearest-edge figure or of its door-centre figure",
     "diagonal": "within 6 in",
     "storage_inside": "the inside-walls figure within 1 percent",
     "story_area": "the outer-faces story area within 1 percent of 16,539 sf (the sheet's 16,509 is a recorded error)",
 }
+
+
+BEFORE = {   # the first test, until 2026-11-21: still worked and reported, so nothing it found is hidden
+    "travel_distance": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+    "common_path": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+}
+
+
+def _no_longer(drawn, ours, verdicts, rules, words) -> dict:
+    """The one-sided test: Gordium's figure no longer than the sheet's line as drawn plus the tolerance, and each of
+    the figure's rules giving the sheet's verdict."""
+    allowed = round(max(0.02 * drawn, 2.0), 3)
+    same = {rid: verdicts[rid]["same"] for rid in rules}
+    if ours is None:
+        return {"tolerance": words, "within_tolerance": None, "why": "Gordium gives no figure", "verdicts_same": same}
+    short = ours <= drawn + allowed + 1e-9
+    return {"tolerance": words, "sheet_line_as_drawn": drawn, "gordium": ours, "longer_than_drawn_by": round(ours - drawn, 3),
+            "allowed": allowed, "no_longer": short, "verdicts_same": same,
+            "within_tolerance": bool(short and all(same.values()))}
 
 
 def _verdict(sheet, ours, allowed, words) -> dict:
@@ -215,7 +247,9 @@ def _judge_all(out) -> None:
         sheet = f[name]["sheet_stated"]
         g = f[name]["gordium"]
         ours = g.get("to_the_sheets_exit_no_clearance", g.get("no_clearance"))
-        f[name]["agreement"] = _verdict(sheet, ours, max(0.02 * sheet, 2.0), TOLERANCES[name])
+        f[name]["agreement"] = _no_longer(f[name]["sheet_line_as_drawn"], ours, out["verdicts"]["rules"],
+                                          out["verdicts"]["by_figure"][name], TOLERANCES[name])
+        f[name]["agreement"]["before_2026_11_21"] = _verdict(sheet, ours, max(0.02 * sheet, 2.0), BEFORE[name])
     # the dead end the sheet's line runs along: the one whose closed end is nearest the line's start (within 3 ft)
     start = f["dead_end"]["sheet_line_in_model"][0]
     ends = [d for c in f["dead_end"]["gordium"].values() for d in c.get("dead_ends", [])
