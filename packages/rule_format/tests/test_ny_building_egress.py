@@ -185,15 +185,17 @@ def test_each_space_with_two_or_more_doorways_has_their_separation_checked(ctx, 
     is checked, not only its story; an unmeasured room needs review, never a pass."""
     r = rules["general.bc_1007_1_1_space_remoteness"]
     assert r["for_each"] == "space"
+    i4_only = I4 | {"other_occupancy_present": False}
     room = {"space_exit_count": 2, "space_occupant_load": 30, "space_common_path": 40}
-    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.2}, I4, ctx) == ["fail"]
-    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.4}, I4, ctx) == ["pass"]
-    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.4}, I4 | {"sprinklered_903_3_1_1": False}, ctx) \
-        == ["fail"]                                                          # unsprinklered: one-half
-    assert _rows(r, "space", room, I4, ctx) == ["needs_review"]              # not measured
+    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.2}, i4_only, ctx) == ["fail"]
+    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.4}, i4_only, ctx) == ["pass"]
+    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.4}, i4_only | {"sprinklered_903_3_1_1": False},
+                 ctx) == ["fail"]                                            # unsprinklered: one-half
+    assert _rows(r, "space", room, i4_only, ctx) == ["needs_review"]         # not measured
     three = rules["general.bc_1007_1_2_space_three_or_more"]
     assert three["for_each"] == "space"
-    assert _rows(three, "space", {"space_exit_count": 3, "space_exit_remoteness_ratio": 0.2}, I4, ctx) == ["fail"]
+    assert _rows(three, "space", {"space_exit_count": 3, "space_occupant_load": 600, "space_exit_remoteness_ratio": 0.2},
+                 I4, ctx) == ["fail"]
     got = yaml.safe_load((NY / "6_coverage_report/gov.ny.building.2025.rules.yaml").read_text(encoding="utf-8"))
     assert "general.bc_1007_1_1_space_remoteness" in got["pieces"]["1007.1.1"]["rules"]
     assert "general.bc_1007_1_2_space_three_or_more" in got["pieces"]["1007.1.2"]["rules"]
@@ -212,3 +214,40 @@ def test_only_a_lobby_taking_item_4s_exception_escapes_the_locked_room_fail(ctx,
                                       "space_egress_through_electrically_locked_lobby": 1}, I4, ctx) == ["fail"]
     meaning = parts.load_registry()["space"]["measures"]["space_egress_through_locked_room"]["meaning"]
     assert "enclosed elevator lobbies included" in meaning and "electrically locked" in meaning
+
+
+# ---- review round 2 (2026-11-22) ------------------------------------------------------------------------------------
+
+def test_three_or_more_doorways_fail_1007_1_2_only_where_three_are_required(ctx, rules):
+    """1007.1.2 applies 'Where access to three or more exits is required' (a space: 1006.2.1.1, from 501 occupants),
+    not wherever three doors are drawn: a small room with three close doors needs review, never fail."""
+    r = rules["general.bc_1007_1_2_space_three_or_more"]
+    small = {"space_exit_count": 3, "space_occupant_load": 6, "space_common_path": 20, "space_exit_remoteness_ratio": 0.2}
+    assert _rows(r, "space", small, I4, ctx) == ["needs_review"]
+    assert _rows(r, "space", small | {"space_occupant_load": 501}, I4, ctx) == ["fail"]
+    assert _rows(r, "space", {k: v for k, v in small.items() if k != "space_occupant_load"}, I4, ctx) == ["needs_review"]
+    assert _rows(rules["general.bc_1007_1_1_space_remoteness"], "space", small, I4 | {"other_occupancy_present": False},
+                 ctx) == ["needs_review"]                                   # the two rules agree on that room
+    assert any(e["expect"] == "needs_review" and e["parts"]["space"][0]["measures"].get("space_occupant_load") == 6
+               for e in r["examples"])
+    story = rules["general.bc_1007_1_2_three_or_more_exits"]      # a story's three: Table 1006.3.3, not brought in
+    assert story["kind"] == "flag"
+
+
+def test_a_close_pair_outside_group_i4_needs_review_never_fails(ctx, rules):
+    """Only Table 1006.2.1's I-4 row is encoded: a Group B office of 30 (its row allows 49 with one exit) with two close
+    doors may not need two, so it needs review; so does a space whose occupancy isn't stated."""
+    r = rules["general.bc_1007_1_1_space_remoteness"]
+    office = {"space_exit_count": 2, "space_exit_remoteness_ratio": 0.2, "space_occupant_load": 30, "space_common_path": 40}
+    group_b = {"occupancy_group_i4": False, "other_occupancy_present": True, "sprinklered_903_3_1_1": True,
+               "sprinklered_903_3_1_2": False}
+    assert _rows(r, "space", office, group_b, ctx) == ["needs_review"]
+    assert _rows(r, "space", office, I4 | {"other_occupancy_present": True}, ctx) == ["needs_review"]
+    assert _rows(r, "space", office, {"sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}, ctx) == ["needs_review"]
+    assert _rows(r, "space", office, I4 | {"other_occupancy_present": False}, ctx) == ["fail"]
+
+
+def test_the_floor_area_question_cites_no_forum_as_support(rules):
+    research = rules["general.bc_508_2_3_accessory_area"]["research"][0]
+    text = " ".join(g["reading"] for g in research["readings"]) + " ".join(s["cite"] for s in research["sources"])
+    assert "forum" not in text.lower()

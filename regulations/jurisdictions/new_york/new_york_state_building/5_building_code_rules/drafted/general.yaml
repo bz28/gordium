@@ -277,17 +277,16 @@ rules:
       url: https://www3.iccsafe.org/cs/committeeArea/pdf_file/BU_09_27_12.pdf
     readings:
     - id: gross_floor_area
-      reading: 'The story''s gross floor area (202 FLOOR AREA, GROSS), as the earlier editions'' ''building area of the story''
-        measured it and as practitioners read it (a public code forum, thebuildingcodeforum.com, read 2026-11-22: gross; net
-        only for occupant load).'
+      reading: The story's gross floor area (202 FLOOR AREA, GROSS), as the earlier editions' 'building area of the story'
+        measured it.
     - id: net_floor_area
       reading: 'The story''s net floor area (202 FLOOR AREA, NET): the book''s other defined measure of floor area.'
     why_open: 'The 2025 text prints ''floor area'' in roman (201.4: not a defined term, so its ordinary meaning or a referenced
       meaning), and the book defines floor area two ways; the earlier editions and practitioners point to gross, but ICC''s
       commentary on the change of words (which may not be read by a script) and any New York interpretation were not found
-      (searched 2026-11-22: ICC interpretations, Clark County NV code interpretations (unreachable), practitioners'' forums).
-      Gordium''s reading is gross; until the architects or the Department of State confirm it, a story between the two readings
-      needs review.'
+      (searched 2026-11-22: ICC interpretations; Clark County NV code interpretations, unreachable; practitioners'' discussion,
+      which is no authority and is not relied on). Gordium''s reading is gross; until the architects or the Department of
+      State confirm it, a story between the two readings needs review.'
   notes: Passes only within 10 percent of the smaller reading (the net floor area), fails only over 10 percent of the larger
     (the gross), and needs review between them, or where either is not given. The second test (Table 506.2's tabular values,
     Section 506, not brought in) is general.bc_508_2_3_tabular_values, which always needs review. Hand-drafted in a Claude
@@ -725,17 +724,9 @@ rules:
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_three_or_more_exits
-  kind: rule
+  kind: flag
   topic: means_of_egress
-  title: 'Three or more exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)'
-  check: story_exit_count < 3 or exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1
-    / 2)
-  review_when:
-  - when: story_exit_count >= 3 and exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else
-      1 / 2)
-    reason: Two exits are far enough apart; whether the others are a reasonable distance apart is a person's judgment.
-  for_each: story
-  when_none: needs_review
+  title: A story with three or more exits (BCNYS 1007.1.2)
   sources:
   - file: gov.ny.building.2025.pdf
     page: 318
@@ -746,85 +737,12 @@ rules:
       than two exit or exit access doorways shall be arranged in accordance with the provisions of Section 1007.1.1. Additional
       required exit or exit access doorways shall be arranged a reasonable distance apart so that if one becomes blocked,
       the others will be available.
-  - file: gov.ny.building.2025.pdf
-    page: 318
-    lines:
-    - 6
-    - 8
-    quote: 1007.1.1 Two exits or exit access doorways. Where two exits, exit access doorways, exit access stairways or ramps,
-      or any combi- nation thereof, are required from any portion of the exit access, they shall be placed a distance apart
-      equal to not less than one- half of the length of the maximum overall diagonal dimension of the building or area to
-      be served measured in a straight line
-  - file: gov.ny.building.2025.pdf
-    page: 318
-    lines:
-    - 14
-    - 16
-    quote: 2. Where a building is equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1
-      or 903.3.1.2, the separation distance shall be not less than one-third of the length of the maximum overall diagonal
-      dimension of the area served.
   examples:
-  - given:
-      occupancy_group_i4: true
-      sprinklered_903_3_1_1: true
-      sprinklered_903_3_1_2: false
-    parts:
-      story:
-      - id: p1
-        name: Three exits, far apart
-        measures:
-          exit_remoteness_ratio: 0.6
-          story_exit_count: 3
-    rows:
-    - part: p1
-      outcome: needs_review
+  - given: {}
     expect: needs_review
-    note: The best pair is far enough apart; whether the third is a reasonable distance from them is a person's judgment.
-  - given:
-      occupancy_group_i4: true
-      sprinklered_903_3_1_1: true
-      sprinklered_903_3_1_2: false
-    parts:
-      story:
-      - id: p2
-        name: Three exits, close
-        measures:
-          exit_remoteness_ratio: 0.2
-          story_exit_count: 3
-    rows:
-    - part: p2
-      outcome: fail
-    expect: fail
-    note: Even the farthest pair is under one-third.
-  - given:
-      occupancy_group_i4: true
-      sprinklered_903_3_1_1: true
-      sprinklered_903_3_1_2: false
-    parts:
-      story:
-      - id: p3
-        name: Two exits
-        measures:
-          exit_remoteness_ratio: 0.6
-          story_exit_count: 2
-    rows:
-    - part: p3
-      outcome: pass
-    expect: pass
-    note: 'Two exits: nothing for this part to ask (1007.1.1''s rule checks them).'
-  - given:
-      occupancy_group_i4: true
-      sprinklered_903_3_1_1: true
-      sprinklered_903_3_1_2: false
-    parts:
-      story: []
-    rows:
-    - outcome: needs_review
-    expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
-  notes: Its second sentence (additional exits 'a reasonable distance apart so that if one becomes blocked, the others will
-    be available') is a person's judgment, so a story with three or more exits never passes on this rule; it fails when even
-    its two farthest-apart exits are too close. For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).
+    note: 'Whether a story needs three exits is Table 1006.3.3''s (an occupant load of 501 or more; not brought in) and whether
+      the others are a reasonable distance apart is a person''s judgment: a person checks. Each space''s own are general.bc_1007_1_2_space_three_or_more.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_1_space_remoteness
@@ -834,10 +752,13 @@ rules:
   check: space_exit_count < 2 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else
     1 / 2)
   review_when:
-  - when: space_exit_count >= 2 and space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path
-      <= 75 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2))
-    reason: 'The space''s doorways are close together, but the space may not need two (1006.2.1: 10 or fewer occupants, sprinklered,
-      a common path of 75 ft or less): whether 1007.1.1 applies to it is a person''s check.'
+  - when: space_exit_count >= 2 and not (space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      else 1 / 2)) and (other_occupancy_present or not occupancy_group_i4 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2) and space_common_path <= 75))
+    reason: 'The space''s doorways are close together, but it may not need two: Table 1006.2.1''s I-4 row (10 or fewer occupants,
+      sprinklered, a common path of 75 ft or less) lets it have one, or the space is in another occupancy (or its occupancy
+      isn''t stated), whose row is a flag (general.bc_table_1006_2_1_other_occupancies). Whether 1007.1.1 applies to it is
+      a person''s check.'
   for_each: space
   when_none: needs_review
   sources:
@@ -892,6 +813,7 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       space:
       - id: p1
@@ -910,6 +832,7 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       space:
       - id: p2
@@ -928,6 +851,7 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       space:
       - id: p3
@@ -947,6 +871,7 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       space:
       - id: p4
@@ -961,6 +886,26 @@ rules:
     expect: needs_review
     note: 'The doorways'' remoteness is not given (not measured yet): needs review.'
   - given:
+      occupancy_group_i4: false
+      other_occupancy_present: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p5
+        name: Group B office, doors together
+        measures:
+          space_exit_count: 2
+          space_exit_remoteness_ratio: 0.2
+          space_occupant_load: 30
+          space_common_path: 40
+    rows:
+    - part: p5
+      outcome: needs_review
+    expect: needs_review
+    note: 'A Group B office of 30: Table 1006.2.1''s B row (not encoded here, a flag) allows 49 with one exit, so its second
+      door may not be required: needs review, never fail.'
+  - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
@@ -972,21 +917,25 @@ rules:
     note: 'No space: the rule''s when_none (needs_review).'
   notes: '1007.1 separates exits and exit access doorways ''serving spaces, including individual building stories'', so each
     space with two or more is checked, not only each story (general.bc_1007_1_1_remoteness). Measured to any point along each
-    doorway''s width (1007.1.1.1). Where a space doesn''t need two (1006.2.1: 10 or fewer occupants, sprinklered, a common
-    path of 75 ft or less) a close pair needs review rather than fail. A space whose ratio isn''t measured needs review. For
-    every occupancy. Hand-drafted in a Claude Code session (2026-11-21).'
+    doorway''s width (1007.1.1.1). 1007.1.1 applies where two are required (1006.2.1), and this rulebook encodes only Table
+    1006.2.1''s I-4 row: a close pair fails only in a Group I-4 building with no other occupancy where that row requires two
+    (more than 10 occupants, a common path over 75 ft, or not sprinklered); anywhere else (a space that may have one, another
+    occupancy, or an occupancy not stated) it needs review. A space whose ratio isn''t measured needs review. Hand-drafted
+    in a Claude Code session (2026-11-21).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_space_three_or_more
   kind: rule
   topic: means_of_egress
-  title: 'A space with three or more: two arranged per 1007.1.1 (BCNYS 1007.1.2)'
-  check: space_exit_count < 3 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else
-    1 / 2)
+  title: 'A space needing three exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)'
+  check: space_exit_count < 3 or space_occupant_load < 501 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
+    or sprinklered_903_3_1_2 else 1 / 2)
   review_when:
-  - when: space_exit_count >= 3 and space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
-      else 1 / 2)
-    reason: Two doorways are far enough apart; whether the others are a reasonable distance apart is a person's judgment.
+  - when: space_exit_count >= 3 and (space_occupant_load < 501 or space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1
+      or sprinklered_903_3_1_2 else 1 / 2))
+    reason: 'Three or more doorways: three aren''t required here (1006.2.1.1: fewer than 501 occupants), so whether two must
+      be apart is 1007.1.1''s question; or two are far enough apart and whether the others are a reasonable distance apart
+      is a person''s judgment.'
   for_each: space
   when_none: needs_review
   sources:
@@ -1016,6 +965,14 @@ rules:
     quote: 2. Where a building is equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1
       or 903.3.1.2, the separation distance shall be not less than one-third of the length of the maximum overall diagonal
       dimension of the area served.
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 45
+    - 47
+    quote: 1006.2.1.1 Three or more exits or exit access doorways. Three exits or exit access doorways shall be provided from
+      any space with an occupant load of 501 to 1,000. Four exits or exit access doorways shall be provided from any space
+      with an occu- pant load greater than 1,000.
   examples:
   - given:
       occupancy_group_i4: true
@@ -1024,12 +981,30 @@ rules:
     parts:
       space:
       - id: p1
-        name: Hall, three doors
+        name: Hall, 600, doors together
         measures:
           space_exit_count: 3
-          space_exit_remoteness_ratio: 0.6
+          space_occupant_load: 600
+          space_exit_remoteness_ratio: 0.2
     rows:
     - part: p1
+      outcome: fail
+    expect: fail
+    note: '600 occupants: three exits required (1006.2.1.1), and even the farthest pair is under one-third.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p2
+        name: Hall, 600, three doors
+        measures:
+          space_exit_count: 3
+          space_occupant_load: 600
+          space_exit_remoteness_ratio: 0.6
+    rows:
+    - part: p2
       outcome: needs_review
     expect: needs_review
     note: The farthest pair is far enough apart; whether the third is a reasonable distance away is a person's judgment.
@@ -1039,32 +1014,36 @@ rules:
       sprinklered_903_3_1_2: false
     parts:
       space:
-      - id: p2
-        name: Hall, three doors together
+      - id: p3
+        name: Office, 6, three doors
         measures:
           space_exit_count: 3
+          space_occupant_load: 6
+          space_common_path: 20
           space_exit_remoteness_ratio: 0.2
     rows:
-    - part: p2
-      outcome: fail
-    expect: fail
-    note: Even the farthest pair is under one-third.
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    note: 'Three doors drawn, but six occupants: three are not required, so 1007.1.2 doesn''t apply; general.bc_1007_1_1_space_remoteness
+      decides whether two must be apart.'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
     parts:
       space:
-      - id: p3
+      - id: p4
         name: Two doors
         measures:
           space_exit_count: 2
+          space_occupant_load: 600
           space_exit_remoteness_ratio: 0.6
     rows:
-    - part: p3
+    - part: p4
       outcome: pass
     expect: pass
-    note: 'Two doors: general.bc_1007_1_1_space_remoteness checks them.'
+    note: 'Two doors: nothing for this part (general.bc_1006_2_1_1_three_or_more_exits fails the missing third).'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
@@ -1075,8 +1054,10 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No space: the rule''s when_none (needs_review).'
-  notes: 'As general.bc_1007_1_2_three_or_more_exits, for each space (1007.1: ''serving spaces, including individual building
-    stories''). For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).'
+  notes: '1007.1.2 applies ''Where access to three or more exits is required'': for a space, 1006.2.1.1 requires three from
+    an occupant load of 501 (to 1,000; four above). So it fails only where three are required and even the two farthest-apart
+    are too close; where three or more are drawn but three aren''t required, or the occupant load isn''t given, it needs review,
+    never fail. For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_3_exit_access_stairways
