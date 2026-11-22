@@ -558,7 +558,12 @@ seconds include its own links; its elements are its own). The names:
   `inside.railing.near.*` (the same names, no band). The band's boolean cuts:
   `inside.boolean_op`, counted `inside.boolean_ops`; open shells skipped `inside.open_shells`. Faces read
   (`inside.faces`), of them curved and triangulated (`inside.faces_triangulated`, time `inside.triangulate`).
-  Windows and doors: `inside.opening.faces`, `inside.opening.cut`. The transactions: `inside.enclosed_areas.topology`,
+  Windows and doors: `inside.opening.faces`, `inside.opening.cut`. Each element's geometry is worked out once per
+  read (`ReadMemo`, kept by element and geometry options for the rooms, openings, stairs and railings, let go before
+  the enclosed areas change the model): its faces, counted `inside.cache.faces.hits` (asks answered from what was
+  kept) and `.misses` (worked out), and its geometry walked for the band, `inside.cache.band_pieces.hits|misses`
+  (the band's cuts are still made per room). So `inside.faces`, `inside.faces_triangulated` and `inside.triangulate`
+  count each element's own faces once (the band's cut faces still once per room), and `.faces` and `.band` keep one call per element per box. The transactions: `inside.enclosed_areas.topology`,
   `.outline` (a Room placed in an area with none, rolled back), `.rollback`; per level of the outer outlines
   (`inside.gross_areas.levels`) `inside.gross_areas.ring`, `.lines_commit`, `.topology`, `.room_commit`, `.rollback`.
 
