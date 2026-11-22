@@ -68,6 +68,10 @@ public sealed class MarksTests
             ("Gordium: Can be locked", "5b0d7c3e-2f41-4a8e-9c63-1e7a4f2b9d05", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
             ("Gordium: Pass through", "c2e94a61-7d3b-4f5e-8a10-6b9d3e2f4c87", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
             ("Gordium: Exit", "e7a3c519-04d2-4b86-b1f5-93c8d6a2e470", MarkValueKind.Text, MarkBinding.Instance, ["OST_Doors"]),
+            // the architect's count of stories (optional; reading design note, section 9)
+            ("Gordium: Stories", "bf758947-8ee4-490c-a499-dee706a6f1e7", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // a space nobody occupies (route note decision 1b)
+            ("Gordium: Not occupied", "306bccbe-b2f7-4a73-9169-6be76fb46202", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
@@ -90,6 +94,25 @@ public sealed class MarksTests
             Assert.Contains(m.Name.Replace("Gordium: ", ""), note);
     }
 
+    [Fact]
+    public void The_stories_tooltip_cites_each_words_own_section()
+    {
+        // review round 1 (2026-11-22): "main entrance side" is 325-8A Column 8's (p.24), never 325-3B STORY's (p.19)
+        var d = Marks.Stories.Description;
+        var story = d.Substring(d.IndexOf("§325-3B", StringComparison.Ordinal));
+        story = story.Substring(0, story.IndexOf(';'));
+        Assert.DoesNotContain("main entrance", story, StringComparison.Ordinal);
+        Assert.Contains("main entrance side, §325-8A", d, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void No_mark_description_runs_two_sentences_together()
+    {
+        // review round 2 (2026-11-22): literals joined with + and no space read "Column 8).A basement"
+        foreach (var m in Marks.All)
+            Assert.False(System.Text.RegularExpressions.Regex.IsMatch(m.Description, @"[.;:)][A-Z]"), m.Name);
+    }
+
     // ---- reading a mark: unset is not stated -------------------------------------------------------------------
 
     [Fact]
@@ -102,6 +125,16 @@ public sealed class MarksTests
         Assert.Null(Marks.YesNo(new MarkValue(true, Text: "Yes")));
         Assert.True(Marks.YesNo(new MarkValue(true, Integer: 1)));
         Assert.False(Marks.YesNo(new MarkValue(true, Integer: 0)));
+    }
+
+    [Fact]
+    public void An_unset_whole_number_is_not_stated_never_zero()
+    {
+        Assert.Null(Marks.Count(null));
+        Assert.Null(Marks.Count(new MarkValue(false, Integer: 0)));       // never set: Revit's AsInteger() gives 0
+        Assert.Null(Marks.Count(new MarkValue(true, Text: "3")));         // another storage: not stated
+        Assert.Equal(0, Marks.Count(new MarkValue(true, Integer: 0)));    // a 0 typed is a 0 (ProjectFacts asks again)
+        Assert.Equal(3, Marks.Count(new MarkValue(true, Integer: 3)));
     }
 
     [Fact]

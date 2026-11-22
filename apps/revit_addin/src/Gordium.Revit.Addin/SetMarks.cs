@@ -99,7 +99,7 @@ internal static class SetMarks
                     var p = doc.GetElement(w.Element)?.get_Parameter(w.Mark.Guid);
                     var done = p is { IsReadOnly: false } && (w.Mark.Kind switch
                     {
-                        MarkValueKind.YesNo => p.Set(w.Value.Integer!.Value),
+                        MarkValueKind.YesNo or MarkValueKind.Integer => p.Set(w.Value.Integer!.Value),
                         MarkValueKind.Length => p.Set(w.Value.Number!.Value),
                         _ => p.Set(w.Value.Text!),
                     });

@@ -1,6 +1,6 @@
 """Turns an eval's marks (a YAML file such as test_data/answer_keys/portland_me_19_libby_st/eval_marks.yaml) into the
 Revit add-in's set_marks_request.json (apps/revit_addin/src/Gordium.Revit.Reading/MarksRequest.cs): every room's
-sleeping mark (and a commercial story's use, lockable and pass_through), each window's escape mark and its type's
+sleeping mark (and a commercial story's use, lockable and pass_through, and not_occupied where the file states it), each window's escape mark and its type's
 operation, each door's exit door and escape marks and its type's operation, every exit's Gordium: Exit, and each door
 type's clear opening (written on the type with its stamp, signed by the file's `by`); and, with --check-out, the
 check_project_request.json that checks the marked copy with the file's Project Information marks. Nothing is guessed
@@ -42,6 +42,9 @@ def entries(marks: dict) -> list[dict]:
         if not number:
             raise BadMarks(f"{where}: needs a `number`")
         out.append({"room": number, "mark": "Gordium: Sleeping room", "value": _flag(room, "sleeping", defaults, where)})
+        # a space nobody occupies (route note decision 1b): written only where the file states it, never defaulted
+        if "not_occupied" in room:
+            out.append({"room": number, "mark": "Gordium: Not occupied", "value": _flag(room, "not_occupied", {}, where)})
         # a commercial story's rooms carry the route marks (all three); a house's carry none (its egress reads no routes)
         if "use" not in room and not ({"lockable", "pass_through"} & set(room)):
             continue
@@ -104,9 +107,11 @@ def check_request(marks: dict, model: str) -> dict:
     facts: dict = {}
     for entry in marks.get("project_information") or []:
         name, value = entry.get("mark"), entry.get("value")
-        if not isinstance(name, str) or not name.startswith("Gordium: ") or not isinstance(value, (bool, str)):
+        # a whole number for a whole-number mark (Gordium: Stories); the add-in sets each by the mark's own kind and
+        # refuses another (ProjectFacts.RequestValue), so a number is never sent as text nor text as a number
+        if not isinstance(name, str) or not name.startswith("Gordium: ") or not isinstance(value, (bool, str, int)):
             raise BadMarks(f"project information {entry!r}: needs a `mark` (a Gordium mark's name) and a `value` "
-                           "(true, false or text)")
+                           "(true, false, a whole number or text)")
         if not isinstance(entry.get("why"), str):
             raise BadMarks(f"project information {name}: needs a `why`")
         if name in facts:

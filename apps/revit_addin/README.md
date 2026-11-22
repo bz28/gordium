@@ -425,7 +425,7 @@ Anything not read exactly is left out with its reason. **How we know:** `RouteTe
 
 (The **Check project** button; the command is `CheckProjectCommand`.) The first button for an architect's own model: one click reads the open project outside (zoning) and inside
 (egress) and sends **one** `check_site`, with the lot facts the architect states as Gordium marks on Project
-Information (`Gordium: Zone`, `Use`, `Lot surveyed`, `Street edge`, and optionally `Corner lot` and `Ground from`;
+Information (`Gordium: Zone`, `Use`, `Lot surveyed`, `Street edge`, and optionally `Corner lot`, `Ground from` and `Stories`;
 the jurisdiction is the City of Ithaca). Why each choice:
 [reading design note, section 9](../../docs/revit/revit_reading_design.md#9-check-my-project-the-architects-own-model-one-check).
 

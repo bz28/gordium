@@ -124,8 +124,11 @@ public static class Verdicts
 /// <param name="Reason">Why it needs review, isn't checked or doesn't apply, when the checker says (else null).</param>
 /// <param name="Raw">The whole item as the worker sent it (its detail, its quotes, the objects to show red).</param>
 /// <param name="StatusWord">The status word exactly as the worker sent it.</param>
+/// <param name="Stated">Whether the value the row compares is one the architect stated, not one measured: the
+/// worker's own record of the row's measure (<c>result.measurements[measure].how</c>) begins "stated by the
+/// architect" (the stories count from Gordium: Stories). The panel then calls the figure stated, never measured.</param>
 public sealed record CheckItem(string Id, string Name, string Group, Verdict Status, string? Reason, JsonElement Raw,
-                               string StatusWord);
+                               string StatusWord, bool Stated = false);
 
 /// <summary>One line of a law's group (design_checker/grouping.py, PR #111): a part's rules, or one cause Gordium
 /// can't read yet, shown as one line that opens to its rows.</summary>
@@ -338,6 +341,9 @@ public sealed class CheckResult
         };
     }
 
+    /// <summary>The measuring's words for a value the architect states (model_measurement places' measure.py).</summary>
+    public const string StatedHow = "stated by the architect";
+
     internal static CheckResult Parse(WorkerAnswer answer)
     {
         var result = answer.Result;
@@ -347,6 +353,15 @@ public sealed class CheckResult
             throw new WorkerProtocolException($"result.view.items is {StrictJson.Kind(list)}, not a list");
         var items = new List<CheckItem>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
+        // the worker's record of each measure (how it was found): a value the architect stated says so
+        var measurements = result.ValueKind == JsonValueKind.Object && result.TryGetProperty("measurements", out var ms) &&
+                           ms.ValueKind == JsonValueKind.Object ? ms : (JsonElement?)null;
+        bool StatedBy(JsonElement e) =>
+            measurements is { } all && e.TryGetProperty("measure", out var m) && m.ValueKind == JsonValueKind.String &&
+            all.TryGetProperty(m.GetString()!, out var rec) && rec.ValueKind == JsonValueKind.Object &&
+            rec.TryGetProperty("how", out var how) && how.ValueKind == JsonValueKind.String &&
+            how.GetString()!.StartsWith(StatedHow, StringComparison.Ordinal) &&
+            rec.TryGetProperty("value", out var v) && v.ValueKind != JsonValueKind.Null;
         var n = 0;
         foreach (var e in list.EnumerateArray())
         {
@@ -358,7 +373,7 @@ public sealed class CheckResult
             var group = StrictJson.String(e, "group", where);
             var word = StrictJson.String(e, "status", where);
             var reason = StrictJson.StringOrNull(e, "reason", where);
-            items.Add(new CheckItem(id, name, group, Verdicts.OfRow(word, reason), reason, e, word));
+            items.Add(new CheckItem(id, name, group, Verdicts.OfRow(word, reason), reason, e, word, StatedBy(e)));
         }
         // a check with no rows checked nothing: never shown as a result (the worker's own state would say "complies")
         if (items.Count == 0)
