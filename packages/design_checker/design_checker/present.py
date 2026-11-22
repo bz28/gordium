@@ -2342,13 +2342,20 @@ def law_causes(item: dict) -> list[dict]:
     if not elements and isinstance(part.get("id"), str):
         elements = [part["id"]]
     tail = iid[len(short) + 1:] if short and iid.startswith(short + ".") else iid
-    if tail.startswith(("interior#", "skipped#")) or item.get("waiting"):
-        asks = "say whether" in reason or "true or false" in reason or "mark" in reason.lower()
+    twin = "#" + str(item.get("law_key") or "")
+    if item.get("law_key") and tail.endswith(twin):   # egress.check's rename of an id two laws share
+        tail = tail[:-len(twin)]
+    if tail.startswith("interior#") or item.get("waiting"):
+        # the drawing's problem: a mark when it asks the architect to state something (say whether…, `x`: true or
+        # false), else the model is the architect's to fix; classed by the row's id, never by a word like "marked"
+        asks = "say whether" in reason or re.search(r"`[^`]+`: true or false", reason) is not None
         return [{"kind": panel_data.MARK if asks else panel_data.FIX_MODEL, "key": f"drawing:{reason}",
                  "words": reason, "elements": elements}]
     if tail.startswith(egress.HAS_NONE_ID):
         return [{"kind": panel_data.DECIDE, "key": f"has_none:{tail}", "words": reason, "elements": elements}]
-    if reason == egress.NOT_PER_PART or tail == egress.NOT_YET_ID or tail == "rules"             or (item.get("open") or {}).get("gordium") == egress.SECTIONS:
+    if tail.startswith("skipped#") or tail in (egress.NOT_YET_ID, "rules", "nothing_applied")             or reason == egress.NOT_PER_PART or (item.get("open") or {}).get("gordium") == egress.SECTIONS:
+        # Gordium doesn't check it (an escape opening it skipped, rules it can't use, nothing that applied, a rule
+        # not written for each part, the sections it has no rules for): check it by hand
         return [{"kind": panel_data.BY_HAND, "key": f"by_hand:{reason}", "words": reason, "elements": elements}]
     return [{"kind": panel_data.DECIDE, "key": f"reason:{iid}", "words": reason or "needs review", "elements": elements}]
 
