@@ -7,7 +7,7 @@
     "egress": "eafd243e8387ac585d50da19d55209174983a66900b15dd563af645ed4800de2",
     "envelope": "2806fd477316cd92f1f0f23349614d682b264a34b025120700808ade18fcbfbb",
     "interior": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "measurements": "d46f7017de2a5c5cf72e9c8b3ff12e0d21350d36dab75cf8009f370df3375d20",
+    "measurements": "15a2883a904f4d01f9cbb2721786f81372c0cbdad47531e5700cbc2a751cd7b8",
     "not_applicable": "6b985fe229379874b10c16d2b25eef9246ba37b808ff32b21542fa2e07f4fcef",
     "notice": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
     "plan": "f2e20392e07b4498205d583e578b56f2baa1144235a4f946f302776b9b5ff0fd",
@@ -21,7 +21,7 @@
     "view": "1c57a3ba63c7efbc333aa953325baf5ae5dde540419e8fa3a7277d2e385153f2",
     "which_code": "7b5274e786269585e241cbda7e24b1c456b18ffee9e6ea9087e85c2c887ce1a9"
    },
-   "sha256": "ad672f6b81f60dd98f367f72a771cfedae69c4b866093629a2a697c3afe7224a"
+   "sha256": "618bddf18946c0f3b83cf307c24385bdb9e22f5dbaa7685e681b92a7c60c6d8b"
   },
   "106_ithaca_rd/model/facts": {
    "parts": {
@@ -107,7 +107,7 @@
     "egress": "eafd243e8387ac585d50da19d55209174983a66900b15dd563af645ed4800de2",
     "envelope": "f8ccdc0d241176c28284433689bb92a2e023faf750eddb9df83bd10c16c07bef",
     "interior": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
-    "measurements": "28f34ef69918fb71c1585df19a963689396964e8ad42896735ba6ac21464256b",
+    "measurements": "57a70730fc605bc4067109528f763f5fa27aac62e540d34004593789606ed0f4",
     "not_applicable": "1b1f3d9f2b99ebeeeb6c01b549e7517e8288bc7e573206153522bf79494e5cc0",
     "notice": "74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b",
     "plan": "94b38c67ca29e8aaed30a075ea5da808e6738e7ee9b1faca7bccbee06c2ea8d8",
@@ -121,7 +121,7 @@
     "view": "9a7749942b8323ab79cb8855a9351aafed722ea722ca8c9cb62966442fab6abd",
     "which_code": "7b5274e786269585e241cbda7e24b1c456b18ffee9e6ea9087e85c2c887ce1a9"
    },
-   "sha256": "7e0a04003e7419d4763afcf71dc24b508a7384fa8fcc660861c89c9d288a3237"
+   "sha256": "ebe30b6ab1ea1be71002ffa72f3fdc516aa3314e51ceb727821b7eaed09347b5"
   },
   "106_ithaca_rd/spreadsheet_design_model/facts": {
    "parts": {
@@ -933,11 +933,11 @@
   },
   "stress/design_008": {
    "parts": {
-    "check": "9f14be40af5a207da1c25a304a89b4e51acf6c49a86678b265341986dd229e81",
+    "check": "975aaff063ced8a5f01e02006ad6ccde93fa39b6f9cfbd9c73f27c588f40bd94",
     "edits": "68b36cfc5e8a61b9944d7d9a61eabc9d73590dcd0f99a612b509ef1925d9bd39",
     "lot": "af32b93870085b2bd194e0821679b97b0711da0ddef6415372653ea8a026e267"
    },
-   "sha256": "74139e033ab9affcebfe0b818d8cc6f5a654457c99355c8980813b6e61069bad"
+   "sha256": "625eac4eb7a86115d817a4fa0e1b80934b18a47fa0dda8eceb1be1b876d75881"
   },
   "stress/design_009": {
    "parts": {
@@ -1133,11 +1133,11 @@
   },
   "stress/design_033": {
    "parts": {
-    "check": "c631435a0899e76121e9062a100251af511643f1417d3a44b30da029fc4ba951",
+    "check": "0398fbdd97409b2a104602649cf0606cbc06bba1d868bf4ada48ded6ad9f7520",
     "edits": "25df55e7a759ca232c7f2b4b6cc7206cb42168f58c4bc729885496f0302d9273",
     "lot": "84ab7c2dc5ed259ca225d95c28ae76b7014396a564a633325184bf2b32e56633"
    },
-   "sha256": "9d663bc6c00fb7ee55a4e03bb959d51bb54d7d5befaca02fb7bb5f51e5cd9d02"
+   "sha256": "b5850b7b8b84537df9a4531059efdcabbbd51060c3dfea6259ecb61b6688c9f7"
   },
   "stress/design_034": {
    "parts": {
@@ -1269,11 +1269,11 @@
   },
   "stress/design_050": {
    "parts": {
-    "check": "e95f62db6dcd5d1bad29f42060265896375b7f629e9b408abd74ce4c64028474",
+    "check": "6209a942d6ed57d2d308794db05f1e73f39b93d58d468c19333da53e4554dffc",
     "edits": "7e5d89bcd2e057d581ce0f5e434d30ab528cca71d17d8f1c3114d560a3674622",
     "lot": "af32b93870085b2bd194e0821679b97b0711da0ddef6415372653ea8a026e267"
    },
-   "sha256": "412d7fd288db17777cff7f2fbf4bc71f3d2c9baf012bc27b4814e0ff3f12eecd"
+   "sha256": "e4f50c92c822ea350f91329a9a24358c8fc5455a84bac3e1a97f3e202b1c8a59"
   },
   "stress/design_051": {
    "parts": {
@@ -1349,11 +1349,11 @@
   },
   "stress/design_060": {
    "parts": {
-    "check": "f91292db140a05d578140c6c9e3211c155051d2e5b5455acd08a35454ca4babe",
+    "check": "340b4b85ce6aca0a699b9abdf314b9b898f27358689f082c127a285d71fe4ba5",
     "edits": "34f8359c1d8ade7d71cf0e916bf13c591dd9f027a191d87b5049b9e38fe69f16",
     "lot": "84ab7c2dc5ed259ca225d95c28ae76b7014396a564a633325184bf2b32e56633"
    },
-   "sha256": "4165197891211ef291b3af668a9f593540bd02afbcbc41e9bc30d40168f0cea6"
+   "sha256": "cb11994c59bdd701dd5a8cd06b536389021a81153e3e6a79e711578c59fd03f6"
   },
   "stress/design_061": {
    "parts": {
@@ -1821,11 +1821,11 @@
   },
   "stress/design_119": {
    "parts": {
-    "check": "435ac9d7ec64db772f00a3864a65d8b01584521bff7d1aa530c233b74a3b39c4",
+    "check": "39b26bd21969ac91fadc8784c3b5278e477d896badd19b5453642cd58e2b093a",
     "edits": "9b19b7ece8af59cfd376cfa6c26a0abd74051b1ab7b9672f63efd9ce9a154e12",
     "lot": "84ab7c2dc5ed259ca225d95c28ae76b7014396a564a633325184bf2b32e56633"
    },
-   "sha256": "294c5bfb7475624dfbc6a3959dd6d54d307748aa34bf52af25d50d03fc74fd6b"
+   "sha256": "a1e28575dd68ddb36a68d62fc4b0621816727aa4fd83553c246f0579fbbdfed9"
   },
   "stress/design_120": {
    "parts": {
@@ -2125,11 +2125,11 @@
   },
   "stress/design_157": {
    "parts": {
-    "check": "4be9e371a636338a59925cf9876c7babba0cc7becdb0bf95422579aafcc7bec2",
+    "check": "13e441c29dc40cb01153fc73efd42d82cc696cf9b6111a6fffd1b04daf74d3b2",
     "edits": "13e165afe495c483023b5b0bae7c71d8178b23fc59288c4658b54cd44d0e9344",
     "lot": "21c611fee24e23cfd05270e2e658c67d24e2cc2ea8b9ded303a2c787e846c9bb"
    },
-   "sha256": "18b55bd399bc5278fa2bf22dfa63360a36b28363aa53899b0a283c867a09dd84"
+   "sha256": "08b4506143150b297f9a54b4bafe72043ffc5eb7f547ed1bc295e3710fb8306e"
   },
   "stress/design_158": {
    "parts": {
