@@ -454,14 +454,16 @@ the jurisdiction is the City of Ithaca). Why each choice:
   names); then the **results list** (`ResultsList.cs`, its decisions in `Gordium.Revit.Reading/ResultList.cs`): a
   virtualized list, worst first (does not comply, largest how far off first where the worker's figure is a length;
   needs review, the worker's tier 2; check by hand or not checked; complies and not applicable, folded), every row in
-  exactly one place, each row two lines (glyph, name, section; its figures or short cause). A click selects the row
+  exactly one place, each row: glyph and name (the row's whole width, wrapped), its figures in full or short cause,
+  then its section (trimmed, the whole on hover) with *Show*. A click selects the row
   and its elements in Revit without moving the view; *Show* (or Space) zooms; Enter or a double click opens its
   figures, reason, elements and the law's words; Up/Down move; Ctrl+C copies the row as the result file says it;
   Ctrl+F searches, Esc clears the search. Nothing sent for a missing Project Information fact: the panel
   lists each, with *Open Project Information*. Element marks are still set in Properties (the click selects the
   element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread (`ActionQueue`: a
-  refused request is dropped). The state, counts, chips and search stay at the top and the list scrolls under them,
-  with what wasn't read and *Details* folded after the rows (shown when no filter or search narrows the list). An
+  refused request is dropped). Only the filter chips, the search and "Showing N of M" stay pinned; the state and the
+  counts are the list's first entry and scroll away with the rows (Revit trial, 106 Ithaca Rd: pinned, they filled
+  the whole docked pane), with what wasn't read and *Details* folded after the rows (shown when no filter or search narrows the list). An
   edit to the checked project greys everything (no green) and says to check again; closing it takes the rows
   down. The street edge is asked for only when it is the last fact and the view is a plan showing a property line.
   Its look follows Revit's light or dark theme (`UIThemeManager.CurrentTheme` at startup, `ThemeChanged` after):

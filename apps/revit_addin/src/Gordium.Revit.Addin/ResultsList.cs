@@ -55,6 +55,12 @@ internal sealed class RowItem(IListHost host, ListRow row, bool open) : ListItem
 
 /// <summary>A fold after the rows (what wasn't read from the model, the details), its open state kept here so a
 /// virtualized container made again shows it as the architect left it.</summary>
+/// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
+internal sealed class SummaryItem(IListHost host, Func<W.UIElement> build) : ListItem(host)
+{
+    internal Func<W.UIElement> Build { get; } = build;
+}
+
 internal sealed class FoldItem(IListHost host, string title, Func<W.UIElement> build) : ListItem(host)
 {
     internal string Title { get; } = title;
@@ -104,6 +110,7 @@ public sealed class EntryView : C.Border
             SubItem s => Sub(s),
             RowItem r => Row(r),
             FoldItem f => Fold(f),
+            SummaryItem m => Summary(m),
             _ => null,
         };
     }
@@ -168,55 +175,63 @@ public sealed class EntryView : C.Border
         var r = p.Row;
         var text = new C.StackPanel { Margin = new W.Thickness(8, 6, 8, 6) };
 
-        // line 1: the glyph, the rule's name, its section on the right
+        // line 1: the glyph and the rule's name, the name with the row's whole width (nothing beside it: Revit trial,
+        // a section in a column beside it squeezed the name to a word a line)
         var first = new C.DockPanel();
         var glyph = PanelLook.Glyph(p.Status, 14);
         glyph.Margin = new W.Thickness(0, 1, 6, 0);
         glyph.VerticalAlignment = W.VerticalAlignment.Top;
         C.DockPanel.SetDock(glyph, C.Dock.Left);
         first.Children.Add(glyph);
-        if (r.Section is not null)
-        {
-            var sec = Muted(r.Section);
-            sec.TextWrapping = W.TextWrapping.NoWrap;
-            sec.TextTrimming = W.TextTrimming.CharacterEllipsis;
-            sec.MaxWidth = 120;
-            sec.Margin = new W.Thickness(8, 1, 0, 0);
-            sec.ToolTip = r.Section;
-            C.DockPanel.SetDock(sec, C.Dock.Right);
-            first.Children.Add(sec);
-        }
         first.Children.Add(Typed(new C.TextBlock { Text = r.Name, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap }, Body));
         text.Children.Add(first);
 
-        // line 2: what the heading doesn't say, the figures or the short cause; Show when it has elements
-        var second = new C.DockPanel { Margin = new W.Thickness(20, 2, 0, 0) };
-        if (r.Elements.Count > 0)
-        {
-            var show = new C.Button
-            {
-                Content = "Show", Padding = new W.Thickness(8, 0, 8, 0), Margin = new W.Thickness(8, 0, 0, 0),
-                VerticalAlignment = W.VerticalAlignment.Center, Focusable = false,
-                ToolTip = "Zoom to " + (r.Elements.Count == 1 ? "it" : $"its {r.Elements.Count} elements") + " in the model (Space)",
-            };
-            show.Click += (_, e) =>
-            {
-                e.Handled = true;
-                item.Host.ShowRow(item);
-            };
-            C.DockPanel.SetDock(show, C.Dock.Right);
-            second.Children.Add(show);
-        }
+        // line 2: what the heading doesn't say, then the figures in full (never cut: the limit and how far off are a
+        // failure's most important words), wrapped; a cause alone at most two lines (the whole in its detail)
         var words = ResultList.SecondLine(r);
-        var cause = Typed(new C.TextBlock
+        if (words.Length > 0)
         {
-            Text = words, TextTrimming = W.TextTrimming.CharacterEllipsis, VerticalAlignment = W.VerticalAlignment.Center,
-            ToolTip = words.Length > 0 ? words : null,
-        }, r.Figures is not null || r.HowFar is not null ? "type.figure" : Caption);
-        if (r.Figures is null && r.HowFar is null)
-            Ink(cause, PanelTokens.TextMuted);
-        second.Children.Add(cause);
-        text.Children.Add(second);
+            var figures = r.Figures is not null || r.HowFar is not null;
+            var cause = Typed(new C.TextBlock { Text = words, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(20, 2, 0, 0) },
+                              figures ? "type.figure" : Caption);
+            if (!figures)
+            {
+                Ink(cause, PanelTokens.TextMuted);
+                cause.TextTrimming = W.TextTrimming.CharacterEllipsis;
+                cause.MaxHeight = 2 * 1.4 * PanelTokens.TypeOf(Caption).Size;
+                cause.ToolTip = words;
+            }
+            text.Children.Add(cause);
+        }
+
+        // line 3: the section on its own line (muted, trimmed, the whole on hover), Show at its right
+        if (r.Section is not null || r.Elements.Count > 0)
+        {
+            var third = new C.DockPanel { Margin = new W.Thickness(20, 3, 0, 0) };
+            if (r.Elements.Count > 0)
+            {
+                var show = new C.Button
+                {
+                    Content = "Show", Padding = new W.Thickness(8, 0, 8, 0), Margin = new W.Thickness(8, 0, 0, 0),
+                    VerticalAlignment = W.VerticalAlignment.Center, Focusable = false,
+                    ToolTip = "Zoom to " + (r.Elements.Count == 1 ? "it" : $"its {r.Elements.Count} elements") + " in the model (Space)",
+                };
+                show.Click += (_, e) =>
+                {
+                    e.Handled = true;
+                    item.Host.ShowRow(item);
+                };
+                C.DockPanel.SetDock(show, C.Dock.Right);
+                third.Children.Add(show);
+            }
+            var sec = Muted(r.Section ?? "");
+            sec.TextWrapping = W.TextWrapping.NoWrap;
+            sec.TextTrimming = W.TextTrimming.CharacterEllipsis;
+            sec.VerticalAlignment = W.VerticalAlignment.Center;
+            sec.ToolTip = r.Section;
+            third.Children.Add(sec);
+            text.Children.Add(third);
+        }
 
         if (item.Open)
             text.Children.Add(Detail(item));
@@ -264,6 +279,14 @@ public sealed class EntryView : C.Border
         }
         d.Children.Add(Muted("Enter or double-click folds this; Ctrl+C copies the row.", top: 4));
         return d;
+    }
+
+    private static W.UIElement Summary(SummaryItem item)
+    {
+        var box = new C.Border { Child = item.Build() };
+        box.SetResourceReference(BackgroundProperty, PanelTokens.BgPane);
+        box.MouseLeftButtonDown += (_, e) => e.Handled = true;              // never selected
+        return box;
     }
 
     private static W.UIElement Fold(FoldItem item)

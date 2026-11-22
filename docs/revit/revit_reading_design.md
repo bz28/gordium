@@ -362,12 +362,16 @@ makes every row's words, and both the panel and `check_project_result.txt` (`Res
 never say a row differently.
 
 - **The results list** (PR 3 of `ui_design_pass.md`, `ResultsList.cs`; its decisions in `ResultList.cs`, tested
-  without Revit). Top to bottom (`ResultRows.Layout`): the stale notice when there is one, the state and the count
-  chips (one compact line per law) stay at the top with the filter chips and the search; under them the list, a
-  virtualized `ListBox` (only the rows on screen are made, so 1,000 rows stay instant), its own scrolling; what
-  wasn't read and a folded *Details* (phase, options, street line, files) after the rows. Earlier the whole panel was
-  one scrolling column because a fixed header hid every row at the docked size (about 420 by 340 px); the fixed top
-  is now short (header, state, counts, chips, search) and the list fills the rest.
+  without Revit). Pinned at the top: the header (title, *Check again*, when and which project, one status line) and a
+  compact toolbar (the filter chips, the search, "Showing N of M"). Under it the list, a virtualized `ListBox` (only
+  the rows on screen are made, so 1,000 rows stay instant), its own scrolling, whose first entry is the summary
+  (`ResultList.WithSummary`, in `ResultRows.Layout`'s order: the stale notice when there is one, the state, the count
+  chips one wrap line per law), never selected or moved to; what wasn't read and a folded *Details* (phase, options,
+  street line, files) after the rows. The Revit trial (106 Ithaca Rd, pane docked at about 340 by 430 px) showed a
+  pinned summary filling the whole pane, the list getting nothing; it now scrolls away with the rows. Each row: its
+  glyph and name with the row's whole width (a section beside it squeezed the name to a word a line), its figures in
+  full, wrapped (never cut: the limit and how far off are a failure's most important words) or its short cause (two
+  lines at most), then its section on its own line (trimmed, the whole on hover) with *Show*.
 - **Never a stale pass.** Revit's `DocumentChanged` on the project checked, for any change but the check's own
   committed transactions (adding the marks, keeping the street edge), and for every undo or redo whatever its
   names (the event's `Operation`: `ResultRows.ChangesTheCheck`), greys everything

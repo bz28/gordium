@@ -46,8 +46,8 @@ internal sealed class ResultsView : C.UserControl, IListHost
     private readonly C.StackPanel _missing = new() { Margin = new W.Thickness(12, 4, 12, 12) };
     private readonly C.ScrollViewer _missingScroll;
     private readonly C.Grid _results = new();
-    private readonly C.StackPanel _summary = new() { Margin = new W.Thickness(12, 4, 12, 0) };
-    private readonly C.WrapPanel _chips = new() { Margin = new W.Thickness(0, 8, 0, 0) };
+    private Func<W.UIElement>? _summary;                     // the state and the counts: the list's first entry
+    private readonly C.WrapPanel _chips = new() { Margin = new W.Thickness(0, 4, 0, 0) };
     private readonly C.TextBox _search = new() { MinWidth = 120, Margin = new W.Thickness(0, 6, 0, 0) };
     private readonly C.TextBlock _searchHint = Small("Search rules, sections, elements (Ctrl+F)");
     private readonly C.TextBlock _shown = Small("");
@@ -92,6 +92,8 @@ internal sealed class ResultsView : C.UserControl, IListHost
         head.Children.Add(_sub);
         _status.Visibility = W.Visibility.Collapsed;
         _status.FontStyle = W.FontStyles.Italic;
+        _status.TextWrapping = W.TextWrapping.NoWrap;           // one line (its whole on hover): never pushes the list down
+        _status.TextTrimming = W.TextTrimming.CharacterEllipsis;
         head.Children.Add(_status);
 
         // what to fill in first (nothing checked): one scrolling column
@@ -101,14 +103,14 @@ internal sealed class ResultsView : C.UserControl, IListHost
             Content = _missing,
         };
 
-        // the results: the summary and the tools at the top, the list under them (its own scrolling: a list inside a
-        // ScrollViewer is measured at full height and builds every row, so it is in a Grid's star row instead)
-        _results.RowDefinitions.Add(new C.RowDefinition { Height = W.GridLength.Auto });
+        // the results: only the compact toolbar (filter chips, search, what they show) pinned at the top; the state
+        // and the counts are the list's first entry and scroll away with the rows (Revit trial, 106 Ithaca Rd: pinned,
+        // they filled the whole docked pane, ~340 by 430 px, and the list got nothing). The list is in the Grid's star
+        // row (a list inside a ScrollViewer is measured at full height and builds every row).
         _results.RowDefinitions.Add(new C.RowDefinition { Height = W.GridLength.Auto });
         _results.RowDefinitions.Add(new C.RowDefinition { Height = new W.GridLength(1, W.GridUnitType.Star) });
-        _results.Children.Add(_summary);
         var tools = Tools();
-        C.Grid.SetRow(tools, 1);
+        C.Grid.SetRow(tools, 0);
         _results.Children.Add(tools);
         _list.SetResourceReference(StyleProperty, "list");
         _list.Margin = new W.Thickness(12, 4, 12, 8);
@@ -124,7 +126,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
             ToggleOpen(row);
         };
         W.Automation.AutomationProperties.SetName(_list, "Results");
-        C.Grid.SetRow(_list, 2);
+        C.Grid.SetRow(_list, 1);
         _results.Children.Add(_list);
         PreviewKeyDown += PanelKeys;
 
@@ -176,7 +178,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
         Say(_checkAgainState.Status(ClearPrefills.PanelStatus(content.MarksAdded, content.ClearWords, stale: content.Model?.Stale is not null)));
-        _summary.Children.Clear();
+        _summary = null;
         _missing.Children.Clear();
         if (content.Model is not { } model)
         {
@@ -189,17 +191,50 @@ internal sealed class ResultsView : C.UserControl, IListHost
         }
         var stale = model.Stale is not null;                     // stale: every status the clock, never a verdict's colour
         var folds = new List<FoldItem>();
-        foreach (var part in ResultRows.Layout(model))
+        var parts = ResultRows.Layout(model);
+        foreach (var part in parts)
+            switch (part)
+            {
+                case PanelPart.Groups:
+                    _placed = ResultList.Place(model);
+                    break;
+                case PanelPart.Inside:
+                    folds.Add(new FoldItem(this, "What wasn't read from the model", () => Small(model.Inside)));
+                    break;
+                case PanelPart.Details:
+                    folds.Add(new FoldItem(this, "Details", () =>
+                    {
+                        var d = new C.StackPanel();
+                        d.Children.Add(Small(model.Checked, top: 2));
+                        d.Children.Add(Small(content.Files, top: 4));
+                        return d;
+                    }));
+                    break;
+            }
+        // made afresh each time its entry scrolls into view (a virtualized container is made again; an element has one parent)
+        _summary = () => Summary(model, parts, stale);
+        _folds = folds;
+        Chips(stale);
+        _bodyHost.Child = _results;
+        Relayout();
+    }
+
+    /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
+    /// green) and its counts, one wrap line per law. It scrolls away with the rows.</summary>
+    private static W.UIElement Summary(ResultModel model, IReadOnlyList<PanelPart> parts, bool stale)
+    {
+        var summary = new C.StackPanel { Margin = new W.Thickness(0, 2, 0, 2) };
+        foreach (var part in parts)
             switch (part)
             {
                 case PanelPart.Stale:
-                    _summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview,
-                                                 Typed(new C.TextBlock { Text = model.Stale, FontWeight = W.FontWeights.SemiBold,
-                                                                         TextWrapping = W.TextWrapping.Wrap }, Body), bottom: 6));
+                    summary.Children.Add(Banner(PanelStatus.Stale, PanelTokens.StatusReviewFill, PanelTokens.StatusReview,
+                                                Typed(new C.TextBlock { Text = model.Stale, FontWeight = W.FontWeights.SemiBold,
+                                                                        TextWrapping = W.TextWrapping.Wrap }, Body), bottom: 6));
                     break;
                 case PanelPart.State:
                     var state = StatusLook.Of(model.StateTone, stale);
-                    _summary.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock
+                    summary.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock
                     {
                         Text = ResultText.StateWords(model.State) + (model.Stale is null ? "" : " (before the model changed)"),
                         TextWrapping = W.TextWrapping.Wrap,
@@ -218,29 +253,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
                             }, Caption), PanelTokens.TextMuted));
                         foreach (var chip in line.Chips)
                             chips.Children.Add(Chip(chip, stale));
-                        _summary.Children.Add(chips);
+                        summary.Children.Add(chips);
                     }
                     break;
-                case PanelPart.Groups:
-                    _placed = ResultList.Place(model);
-                    break;
-                case PanelPart.Inside:
-                    folds.Add(new FoldItem(this, "What wasn't read from the model", () => Small(model.Inside)));
-                    break;
-                case PanelPart.Details:
-                    folds.Add(new FoldItem(this, "Details", () =>
-                    {
-                        var d = new C.StackPanel();
-                        d.Children.Add(Small(model.Checked, top: 2));
-                        d.Children.Add(Small(content.Files, top: 4));
-                        return d;
-                    }));
-                    break;
             }
-        _folds = folds;
-        Chips(stale);
-        _bodyHost.Child = _results;
-        Relayout();
+        return summary;
     }
 
     /// <summary>The folds after the rows (what wasn't read, the details), shown when the list shows every row.</summary>
@@ -262,7 +279,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
     {
         _content = null;
         _placed = [];
-        _summary.Children.Clear();
+        _summary = null;
         _missing.Children.Clear();
         _bodyHost.Child = _missingScroll;
         Relayout();
@@ -274,6 +291,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
     internal void Say(string words)
     {
         _status.Text = words;
+        _status.ToolTip = words.Length == 0 ? null : words;
         _status.Visibility = words.Length == 0 ? W.Visibility.Collapsed : W.Visibility.Visible;
     }
 
@@ -353,12 +371,16 @@ internal sealed class ResultsView : C.UserControl, IListHost
     {
         var labels = _content?.Labels;
         var stale = _content?.Model?.Stale is not null;
-        _entries = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);
+        var layout = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);
+        _entries = _summary is null ? layout : ResultList.WithSummary(layout);
         var items = new List<ListItem>(_entries.Count + 2);
         RowItem? selected = null;
         foreach (var e in _entries)
             switch (e)
             {
+                case ListSummary:
+                    items.Add(new SummaryItem(this, _summary!));
+                    break;
                 case ListHeading h:
                     items.Add(new HeadingItem(this, h));
                     break;

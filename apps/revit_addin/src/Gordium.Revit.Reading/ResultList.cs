@@ -45,6 +45,10 @@ public sealed record ListSubheading(string Key, string Title, PanelStatus Status
 /// <summary>A row of the list.</summary>
 public sealed record ListRowEntry(ListRow Row) : ListEntry;
 
+/// <summary>The list's first entry: the worker's state and counts (and the stale notice), scrolling away with the rows
+/// so the docked pane's height goes to the list; never selected or moved to (<see cref="ResultList.Next"/>).</summary>
+public sealed record ListSummary : ListEntry;
+
 /// <summary>A filter chip: its filter, its words and its glyph (stale once the model changed; none for All).</summary>
 public sealed record ListChip(ListFilter Filter, string Words, PanelStatus? Status);
 
@@ -253,13 +257,14 @@ public static class ResultList
                 continue;
             var here = all.GroupBy(p => p.SourceKey, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
             var status = StatusOf(section, all, stale);
+            var place = Title(section, all);
             string? run = null;
             foreach (var r in shown)
             {
                 if (section != ListSection.Fails && r.SourceKey != run)
                 {
                     run = r.SourceKey;
-                    entries.Add(new ListSubheading(r.SourceKey, RunTitle(r, section, here[r.SourceKey]), status));
+                    entries.Add(new ListSubheading(r.SourceKey, RunTitle(r, section, here[r.SourceKey], place), status));
                 }
                 entries.Add(new ListRowEntry(r));
             }
@@ -273,18 +278,33 @@ public static class ResultList
     /// is the place its worker tier gives it (or the key names no tier, as a law still waiting for rooms: its title is
     /// its law's name); a line of one row is named, not counted. Otherwise a name that claims no count or status: a
     /// line's part ("Window 2" from "Window 2: 2 comply · 1 doesn't apply"), a law group's law ("Egress" from "Egress ·
-    /// Complies"), or "Zoning" for zoning's groups by status.</summary>
-    public static string RunTitle(ListRow r, ListSection section, int hereCount)
+    /// Complies"), or "Zoning" for zoning's groups by status. A title that only restates its place's heading
+    /// (<paramref name="placeTitle"/>: zoning's "Needs review" group under NEEDS REVIEW) is that name instead.</summary>
+    public static string RunTitle(ListRow r, ListSection section, int hereCount, string? placeTitle = null)
     {
         ArgumentNullException.ThrowIfNull(r);
         var whole = hereCount == r.SourceRows && r.SourcePlace == section;          // a key with no tier: its name, below
-        if (whole && (!r.FromLine || r.SourceRows > 1))
-            return r.Source;
+        var title = whole && (!r.FromLine || r.SourceRows > 1) ? r.Source : Neutral(r);
+        return placeTitle is not null && string.Equals(title, placeTitle, StringComparison.OrdinalIgnoreCase) ? Neutral(r) : title;
+    }
+
+    /// <summary>A run's name that claims no count or status: a line's part, a law group's law, or "Zoning".</summary>
+    private static string Neutral(ListRow r)
+    {
         if (r.FromLine)
             return r.Source.IndexOf(": ", StringComparison.Ordinal) is var c and > 0 ? r.Source[..c] : r.Source;
         if (r.Source.IndexOf(" · ", StringComparison.Ordinal) is var d and > 0)
             return r.Source[..d];
         return r.SourcePlace is not null ? "Zoning" : r.Source;
+    }
+
+    /// <summary>The list with the summary (the state and the counts) as its first entry, above every place: it scrolls
+    /// with the rows, and only the filter chips and the search stay pinned (Revit trial, 106 Ithaca Rd: pinned, the
+    /// summary filled the whole docked pane).</summary>
+    public static IReadOnlyList<ListEntry> WithSummary(IReadOnlyList<ListEntry> entries)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        return [new ListSummary(), .. entries];
     }
 
     /// <summary>Where Up (<paramref name="step"/> −1) or Down (+1) moves from entry <paramref name="from"/>: the

@@ -423,7 +423,8 @@ public sealed class ResultListTests
         var styles = Addin("PanelStyles.xaml");
         // the rows, their order, filters, search, keys and copy are ResultList's (tested here), never the view's own
         Assert.Contains("_placed = ResultList.Place(model);", view, StringComparison.Ordinal);
-        Assert.Contains("_entries = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);", view, StringComparison.Ordinal);
+        Assert.Contains("var layout = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);\n" +
+                        "        _entries = _summary is null ? layout : ResultList.WithSummary(layout);", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
         Assert.Contains("ResultList.CopyText(row.Row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When)", view, StringComparison.Ordinal);
         // each row's glyph and bar are its placed status (stale: the clock and the hatch), never a tone of the view's
@@ -432,12 +433,91 @@ public sealed class ResultListTests
         Assert.DoesNotContain("StatusLook.Of(", entries, StringComparison.Ordinal);
         // virtualized: the list in the Grid's star row (a list in a ScrollViewer builds every row), its panel virtualizing
         Assert.Contains("_results.RowDefinitions.Add(new C.RowDefinition { Height = new W.GridLength(1, W.GridUnitType.Star) });", view, StringComparison.Ordinal);
-        Assert.Contains("C.Grid.SetRow(_list, 2);", view, StringComparison.Ordinal);
+        Assert.Contains("C.Grid.SetRow(_list, 1);", view, StringComparison.Ordinal);
         Assert.Contains("_list.SetResourceReference(StyleProperty, \"list\");", view, StringComparison.Ordinal);
         Assert.Contains("<VirtualizingStackPanel IsVirtualizing=\"True\" VirtualizationMode=\"Recycling\" />", styles, StringComparison.Ordinal);
         Assert.Contains("<Setter Property=\"ScrollViewer.CanContentScroll\" Value=\"True\" />", styles, StringComparison.Ordinal);
         // a heading is never selected or focused
         Assert.Contains("<Setter Property=\"Focusable\" Value=\"False\" />", styles[styles.IndexOf("x:Key=\"list.heading\"", StringComparison.Ordinal)..], StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_summary_scrolls_with_the_list_and_only_the_toolbar_is_pinned()
+    {
+        // Revit trial (106 Ithaca Rd, pane ~340 by 430 px): pinned, the state and the count bar filled the whole pane and
+        // the list got 0 px. The summary is now the list's first entry, never moved to or selected
+        var layout = ResultList.Layout(ResultList.Place(Mixed()), ListFilter.All, null, null, false, opened: Everything);
+        var with = ResultList.WithSummary(layout);
+        Assert.IsType<ListSummary>(with[0]);
+        Assert.Equal(layout, with.Skip(1));
+        Assert.Single(with.OfType<ListSummary>());
+        Assert.Equal(with.ToList().FindIndex(e => e is ListRowEntry), ResultList.Next(with, -1, 1));       // Down: the first row
+        Assert.Equal(with.ToList().FindIndex(e => e is ListRowEntry), ResultList.Next(with, ResultList.Next(with, -1, 1), -1));   // Up: stays
+        // the view: two Grid rows (the toolbar, the list), the summary built into the list's first entry, not the pinned area
+        var view = Addin("ResultsView.cs");
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(view, @"_results\.RowDefinitions\.Add\(").Count);
+        Assert.Contains("_summary = () => Summary(model, parts, stale);", view, StringComparison.Ordinal);
+        Assert.Contains("                case ListSummary:\n                    items.Add(new SummaryItem(this, _summary!));", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("_results.Children.Add(_summary)", view, StringComparison.Ordinal);
+        Assert.Contains("C.Grid.SetRow(tools, 0);", view, StringComparison.Ordinal);
+        // the stale banner and the grey state are in the summary (never green: StatusLook.Of(model.StateTone, stale))
+        var summary = Between(view, "    private static W.UIElement Summary(ResultModel model", "\n    }\n");
+        Assert.Contains("case PanelPart.Stale:", summary, StringComparison.Ordinal);
+        Assert.Contains("var state = StatusLook.Of(model.StateTone, stale);", summary, StringComparison.Ordinal);
+        // the status line under the header is one line, never pushing the list down
+        Assert.Contains("_status.TextWrapping = W.TextWrapping.NoWrap;", view, StringComparison.Ordinal);
+        // the summary's entry is never selected
+        var entries = Addin("ResultsList.cs");
+        Assert.Contains("box.MouseLeftButtonDown += (_, e) => e.Handled = true;", Between(entries, "    private static W.UIElement Summary(SummaryItem item)", "\n    }\n"), StringComparison.Ordinal);
+    }
+
+    private static string Between(string text, string start, string end)
+    {
+        var from = text.IndexOf(start, StringComparison.Ordinal);
+        Assert.True(from >= 0, "no " + start);
+        var to = text.IndexOf(end, from, StringComparison.Ordinal);
+        return text[from..to];
+    }
+
+    [Fact]
+    public void A_rows_name_has_its_whole_width_and_its_figures_are_never_cut()
+    {
+        // Revit trial: the section in a column beside the name squeezed it to a word a line, and the figures beside Show
+        // were cut ("28.3% measured, \u2264 25..."). The name's line holds only the glyph and the name; the figures wrap,
+        // never trimmed; the section has its own line, trimmed with the whole on hover, Show at its right
+        var entries = Addin("ResultsList.cs");
+        var row = Between(entries, "    private static W.UIElement Row(RowItem item)", "\n    }\n");
+        var first = Between(row, "        // line 1:", "        // line 2:");
+        Assert.DoesNotContain("Section", first, StringComparison.Ordinal);
+        Assert.DoesNotContain("C.Dock.Right", first, StringComparison.Ordinal);
+        Assert.Contains("Text = r.Name, FontWeight = W.FontWeights.SemiBold, TextWrapping = W.TextWrapping.Wrap", first, StringComparison.Ordinal);
+        var second = Between(row, "        // line 2:", "        // line 3:");
+        Assert.Contains("var cause = Typed(new C.TextBlock { Text = words, TextWrapping = W.TextWrapping.Wrap,", second, StringComparison.Ordinal);
+        Assert.DoesNotContain("Show", second, StringComparison.Ordinal);
+        var trimmed = Between(second, "            if (!figures)", "            text.Children.Add(cause);");
+        Assert.Contains("cause.TextTrimming = W.TextTrimming.CharacterEllipsis;", trimmed, StringComparison.Ordinal);   // a cause alone
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(second, @"\.TextTrimming ="));                          // never the figures
+        var third = row[row.IndexOf("        // line 3:", StringComparison.Ordinal)..];
+        Assert.Contains("var sec = Muted(r.Section ?? \"\");", third, StringComparison.Ordinal);
+        Assert.Contains("sec.TextTrimming = W.TextTrimming.CharacterEllipsis;", third, StringComparison.Ordinal);
+        Assert.Contains("sec.ToolTip = r.Section;", third, StringComparison.Ordinal);
+        Assert.Contains("C.DockPanel.SetDock(show, C.Dock.Right);", third, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void A_run_title_that_restates_its_place_is_its_laws_name()
+    {
+        // Revit trial: NEEDS REVIEW · 77 rows, then a sub-heading "Needs review" (zoning's group's own title)
+        var model = Model(new ResultGroup("review", "Needs review", 2, false, Tone.Review, [Row("z.a", Verdict.NeedsReview), Row("z.b", Verdict.NeedsReview)], []),
+                          new ResultGroup("complies", "Complies", 1, true, Tone.Complies, [Row("z.c", Verdict.Complies)], []),
+                          new ResultGroup("not_checked", "Not checked", 1, false, Tone.Review, [Row("z.n", Verdict.NotChecked)], []));
+        var layout = ResultList.Layout(ResultList.Place(model), ListFilter.All, null, null, false, opened: Everything);
+        Assert.Equal(["Zoning", "Not checked", "Zoning"], layout.OfType<ListSubheading>().Select(s => s.Title));
+        EveryRunHeadedByItsOwnSource(layout);
+        // the round-2 rule holds: every run headed, a worker line's counted words only in its own place
+        var line = new ListRow(Row("x", Verdict.NeedsReview), ListSection.Review, PanelStatus.Review, "Front door: 2 need review", "l:egress:review/f", 2, true, ListSection.Review);
+        Assert.Equal("Front door: 2 need review", ResultList.RunTitle(line, ListSection.Review, 2, "Needs review"));
+        Assert.Equal("Egress", ResultList.RunTitle(line with { Source = "Egress · Needs review", FromLine = false }, ListSection.Review, 2, "Egress · needs review"));
     }
 
     [Fact]
