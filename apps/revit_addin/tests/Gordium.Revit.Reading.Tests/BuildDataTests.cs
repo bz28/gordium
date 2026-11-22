@@ -176,7 +176,7 @@ public sealed class BuildDataTests
         Assert.Equal(4, BuildData.FloorOutline(m.Footprint).Count);
     }
 
-    // ---- data with several levels: the New York eval's (apps/revit_addin/tools/make_ny_build_data.py) ----
+    // ---- data with several levels: the New York eval's (apps/revit_addin/tools/evals/make_ny_build_data.py) ----
 
     private static JsonObject NewYork(string folder) =>
         JsonNode.Parse(File.ReadAllText(Path.Combine(Env.Repo, folder, "revit_build_data.json")))!.AsObject();

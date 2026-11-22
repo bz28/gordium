@@ -88,6 +88,16 @@ def layout_headers(text: str) -> dict:
     return out
 
 
+def on_outline(rect, outline) -> bool:
+    """Whether a wall (its plan rectangle's two corners, feet) has a face on the level's outer outline: an exterior
+    wall, decided from where it stands, never from its comment's wording."""
+    from shapely.geometry import Polygon, box
+
+    (x0, y0), (x1, y1) = rect
+    shared = box(min(x0, x1), min(y0, y1), max(x0, x1), max(y0, y1)).boundary.intersection(Polygon(outline).exterior)
+    return shared.length > 1e-6
+
+
 def orangetown() -> dict:
     from model_measurement.interior import recordings
 
@@ -121,9 +131,10 @@ def orangetown() -> dict:
             walls.append({"id": wid, "level": name, "start": [_r(v) for v in start], "end": [_r(v) for v in end],
                           "thickness_in": _r((y1 - y0 if along_x else x1 - x0) * 12), "status": "New",
                           "smoke_partition": False, "fire_rating": None, "height_ft": _r(lv["wall_height"]),
-                          "exterior": bool(comment) and comment.startswith("exterior"),
+                          "exterior": on_outline(((x0, y0), (x1, y1)), lv["outline"]),
                           "source": f"layout.yaml levels[{src['id']}].walls.{wall_name} {src['walls'][wall_name]} (in): "
-                                    f"{cited}; its height to the top of the level's ceilings (placed_drawing)"})
+                                    f"{cited}; its height to the top of the level's ceilings (placed_drawing); "
+                                    "exterior when a face of it lies on the level's outline (its walls and rooms together)"})
         floors.append({"level": name, "outline": _ring(lv["outline"]), "thickness_in": _r(lv["slab"] * 12),
                        "source": f"layout.yaml levels[{src['id']}]: the level's walls and rooms together; its thickness "
                                  + (f"layout.yaml levels[{src['id']}].slab: {src['cite']['slab']}" if "slab" in src else

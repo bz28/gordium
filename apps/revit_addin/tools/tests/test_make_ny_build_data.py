@@ -66,6 +66,19 @@ def test_every_orangetown_wall_carries_its_own_layout_comment(fresh):
             assert abs(ex - sx) + abs(ey - sy) == pytest.approx(max(x1 - x0, d1 - d0) / 12)
 
 
+def test_a_wall_is_exterior_by_where_it_stands(fresh):
+    # review round 1: the basement's four foundation walls have no "exterior" comment, yet stand on its outline
+    walls = {(w["level"], w["source"].split("walls.")[1].split(" ")[0]): w for w in fresh["orangetown"]["walls"]}
+    for name in ("north", "west", "east", "south"):
+        assert walls[("Basement", name)]["exterior"] is True, name
+    # the walls against the unexcavated areas bound the basement too (its outline leaves those areas out)
+    assert walls[("Basement", "unexcavated_west")]["exterior"] is True
+    assert walls[("Main floor", "garage_north")]["exterior"] is False         # between the garage and the house
+    assert walls[("Second floor", "master_east")]["exterior"] is False
+    assert walls[("Main floor", "garage_south")]["exterior"] is True
+    assert all("lies on the level's outline" in w["source"] for w in walls.values())
+
+
 def test_the_orangetown_house_is_house_yamls(fresh):
     house, data = load(HOUSE, "house.yaml"), fresh["orangetown"]
     rooms = {r["house_id"]: r for r in data["rooms"]}

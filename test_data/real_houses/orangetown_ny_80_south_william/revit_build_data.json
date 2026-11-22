@@ -37,7 +37,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[second_floor].walls.north [0, 0, 504, 6] (in): exterior, 6\": A-3 '6\"' at each end of the north chain; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.north [0, 0, 504, 6] (in): exterior, 6\": A-3 '6\"' at each end of the north chain; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 2,
@@ -56,7 +56,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[second_floor].walls.west [0, 6, 6, 482] (in): exterior: A-3 left overall 40'-2\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.west [0, 6, 6, 482] (in): exterior: A-3 left overall 40'-2\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 3,
@@ -75,7 +75,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[second_floor].walls.east [498, 6, 504, 466] (in): exterior: A-3 right overall 39'-4\" (to d 472, with the south wall); its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.east [498, 6, 504, 466] (in): exterior: A-3 right overall 39'-4\" (to d 472, with the south wall); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 4,
@@ -94,7 +94,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[second_floor].walls.south_bonus [6, 476, 166, 482] (in): exterior: the bonus room's south wall; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.south_bonus [6, 476, 166, 482] (in): exterior: the bonus room's south wall; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 5,
@@ -112,8 +112,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bonus_east [166, 314, 172, 482] (in): 6\": A-3 '6\"' east of the bonus room's 13'-4\"; exterior south of d 428; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.bonus_east [166, 314, 172, 482] (in): 6\": A-3 '6\"' east of the bonus room's 13'-4\"; exterior south of d 428; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 6,
@@ -132,7 +132,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[second_floor].walls.south_open [172, 428, 252, 434] (in): exterior over the entry: A-3 'F.G. SEE ELEVATION'; d from A-2's 4'-0\" porch; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.south_open [172, 428, 252, 434] (in): exterior over the entry: A-3 'F.G. SEE ELEVATION'; d from A-2's 4'-0\" porch; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 7,
@@ -150,8 +150,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.wic4_west [252, 362, 258, 472] (in): 6\": A-3 '6\"' west of the closet's 3'-4\"; exterior south of d 434; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[second_floor].walls.wic4_west [252, 362, 258, 472] (in): 6\": A-3 '6\"' west of the closet's 3'-4\"; exterior south of d 434; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 8,
@@ -170,7 +170,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[second_floor].walls.south [258, 466, 504, 472] (in): exterior: bedroom 4's south wall (its recess left out); its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.south [258, 466, 504, 472] (in): exterior: bedroom 4's south wall (its recess left out); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 9,
@@ -189,7 +189,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.master_east [168, 6, 172, 210] (in): 4\": A-3 '4\"' after the master's 13'-6\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.master_east [168, 6, 172, 210] (in): 4\": A-3 '4\"' after the master's 13'-6\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 10,
@@ -208,7 +208,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.master_south [6, 210, 172, 214] (in): 4\": A-3 '4\"' after the master's 17'-0\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.master_south [6, 210, 172, 214] (in): 4\": A-3 '4\"' after the master's 17'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 11,
@@ -227,7 +227,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.wic_divider [85, 214, 89, 310] (in): 4\": A-3 6'-7\" | 4\" | 6'-7\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.wic_divider [85, 214, 89, 310] (in): 4\": A-3 6'-7\" | 4\" | 6'-7\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 12,
@@ -246,7 +246,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.wic_east [168, 214, 172, 310] (in): 4\": A-3 '4\"' after the second 6'-7\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.wic_east [168, 214, 172, 310] (in): 4\": A-3 '4\"' after the second 6'-7\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 13,
@@ -265,7 +265,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bonus_north [6, 310, 172, 314] (in): 4\": A-3 '4\"' after the closets' 8'-0\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bonus_north [6, 310, 172, 314] (in): 4\": A-3 '4\"' after the closets' 8'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 14,
@@ -284,7 +284,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bath_south [172, 130, 362, 134] (in): 4\": A-3 5'-0\" | 4\" | 5'-0\" | 4\" (the baths' south wall); its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bath_south [172, 130, 362, 134] (in): 4\": A-3 5'-0\" | 4\" | 5'-0\" | 4\" (the baths' south wall); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 15,
@@ -303,7 +303,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bath_divider [290, 6, 294, 130] (in): 4\": A-3 '4\"' after the shower's 3'-4\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bath_divider [290, 6, 294, 130] (in): 4\": A-3 '4\"' after the shower's 3'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 16,
@@ -322,7 +322,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.hall_bath_east [362, 6, 366, 174] (in): 4\": A-3 '4\"' after the hall bath's 5'-8\"; on down past bedroom 2's alcove; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.hall_bath_east [362, 6, 366, 174] (in): 4\": A-3 '4\"' after the hall bath's 5'-8\"; on down past bedroom 2's alcove; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 17,
@@ -341,7 +341,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bed2_south [410, 146, 498, 150] (in): 4\": A-3 '4\"' after bedroom 2's 11'-8\" (the closet's north wall); its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bed2_south [410, 146, 498, 150] (in): 4\": A-3 '4\"' after bedroom 2's 11'-8\" (the closet's north wall); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 18,
@@ -360,7 +360,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.closet2_west [410, 150, 414, 174] (in): 4\": the closet's 7'-0\" from the east wall (A-3 '7'-0\"'); its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.closet2_west [410, 150, 414, 174] (in): 4\": the closet's 7'-0\" from the east wall (A-3 '7'-0\"'); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 19,
@@ -379,7 +379,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bed3_north [298, 174, 498, 178] (in): 4\": A-3 '4\"' after the closet's 2'-0\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bed3_north [298, 174, 498, 178] (in): 4\": A-3 '4\"' after the closet's 2'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 20,
@@ -398,7 +398,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.linen_west [298, 178, 302, 314] (in): 4\": A-3 3'-10\" | 4\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.linen_west [298, 178, 302, 314] (in): 4\": A-3 3'-10\" | 4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 21,
@@ -417,7 +417,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bed3_west [326, 178, 330, 314] (in): 4\": A-3 2'-0\" | 4\" | 14'-0\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bed3_west [326, 178, 330, 314] (in): 4\": A-3 2'-0\" | 4\" | 14'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 22,
@@ -436,7 +436,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bed3_south [298, 314, 498, 318] (in): 4\": A-3 'LOAD BEARING WALL', '4\"' after bedroom 3's 11'-4\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bed3_south [298, 314, 498, 318] (in): 4\": A-3 'LOAD BEARING WALL', '4\"' after bedroom 3's 11'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 23,
@@ -455,7 +455,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.bed4_west [298, 318, 302, 466] (in): 4\": A-3 3'-4\" | 4\" | 16'-4\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.bed4_west [298, 318, 302, 466] (in): 4\": A-3 3'-4\" | 4\" | 16'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 24,
@@ -474,7 +474,7 @@
    "fire_rating": null,
    "height_ft": 8.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[second_floor].walls.wic4_north [252, 358, 298, 362] (in): 4\": A-3 bridge 4'-0\" | 4\" | 8'-8\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[second_floor].walls.wic4_north [252, 358, 298, 362] (in): 4\": A-3 bridge 4'-0\" | 4\" | 8'-8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 25,
@@ -493,7 +493,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[main_floor].walls.north [0, 0, 504, 6] (in): exterior: A-2 42'-0\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.north [0, 0, 504, 6] (in): exterior: A-2 42'-0\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 26,
@@ -512,7 +512,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[main_floor].walls.west [0, 6, 6, 482] (in): exterior: A-2 left overall 40'-2\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.west [0, 6, 6, 482] (in): exterior: A-2 left overall 40'-2\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 27,
@@ -531,7 +531,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[main_floor].walls.east [498, 6, 504, 508] (in): exterior: A-2 right overall 42'-4\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.east [498, 6, 504, 508] (in): exterior: A-2 right overall 42'-4\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 28,
@@ -550,7 +550,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[main_floor].walls.south_living [6, 476, 166, 482] (in): exterior: the living room's front (its bay left out: see assumptions); its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.south_living [6, 476, 166, 482] (in): exterior: the living room's front (its bay left out: see assumptions); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 29,
@@ -569,7 +569,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[main_floor].walls.porch_west [166, 428, 172, 482] (in): exterior: A-2 '6\"' west of the porch's 6'-8\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.porch_west [166, 428, 172, 482] (in): exterior: A-2 '6\"' west of the porch's 6'-8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 30,
@@ -588,7 +588,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[main_floor].walls.entry_front [172, 428, 252, 434] (in): exterior: the entry's front wall, A-2 porch 4'-0\" deep to the house front; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.entry_front [172, 428, 252, 434] (in): exterior: the entry's front wall, A-2 porch 4'-0\" deep to the house front; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 31,
@@ -606,8 +606,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 9.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[main_floor].walls.garage_west [252, 238, 258, 508] (in): A-2 garage 20'-0\" between 6\" walls (south chain 14'-4\" | 6'-8\" | 21'-0\"); its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[main_floor].walls.garage_west [252, 238, 258, 508] (in): A-2 garage 20'-0\" between 6\" walls (south chain 14'-4\" | 6'-8\" | 21'-0\"); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 32,
@@ -626,7 +626,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": false,
-   "source": "layout.yaml levels[main_floor].walls.garage_north [258, 238, 498, 244] (in): A-2 laundry 5'-8\" | 6\" | garage 21'-6\"; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.garage_north [258, 238, 498, 244] (in): A-2 laundry 5'-8\" | 6\" | garage 21'-6\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 33,
@@ -645,7 +645,7 @@
    "fire_rating": null,
    "height_ft": 9.083333333,
    "exterior": true,
-   "source": "layout.yaml levels[main_floor].walls.garage_south [258, 502, 498, 508] (in): exterior: the garage front; its height to the top of the level's ceilings (placed_drawing)"
+   "source": "layout.yaml levels[main_floor].walls.garage_south [258, 502, 498, 508] (in): exterior: the garage front; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 34,
@@ -663,8 +663,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.north [0, 0, 504, 8] (in): 8\" poured concrete (A-2 wall legend, basement plan); its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.north [0, 0, 504, 8] (in): 8\" poured concrete (A-2 wall legend, basement plan); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 35,
@@ -682,8 +682,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.west [0, 8, 8, 482] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.west [0, 8, 8, 482] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 36,
@@ -701,8 +701,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.east [496, 8, 504, 246] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.east [496, 8, 504, 246] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 37,
@@ -720,8 +720,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.south [8, 474, 164, 482] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.south [8, 474, 164, 482] (in): no comment of its own; the level's chains (layout.yaml header): A-2 basement: 8\" concrete walls; south chain 13'-8\" | 8 | 6'-8\" | 8 | 20'-4\" = 504; west side inside faces d 8 and 474 (chain 13'-4\" | 11'-10\" | 9'-10\" | 3'-10\" between them, 466 = 482 - 16); east part: 13'-4\" + 5'-10\" from the inside north face to the unexcavated area's wall (d 238).; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 38,
@@ -739,8 +739,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.unexcavated_north [252, 238, 496, 246] (in): A-2 13'-4\" + 5'-10\" from the inside north face; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.unexcavated_north [252, 238, 496, 246] (in): A-2 13'-4\" + 5'-10\" from the inside north face; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 39,
@@ -758,8 +758,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.unexcavated_west [252, 246, 260, 482] (in): A-2 south chain 13'-8\" | 8\" | 6'-8\" | 8\"; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.unexcavated_west [252, 246, 260, 482] (in): A-2 south chain 13'-8\" | 8\" | 6'-8\" | 8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 40,
@@ -777,8 +777,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.small_unexcavated_north [172, 430, 252, 438] (in): A-2 'UNEXCAVATED' 6'-8\" x 3'-0\" (to the inside south face, d 474); its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.small_unexcavated_north [172, 430, 252, 438] (in): A-2 'UNEXCAVATED' 6'-8\" x 3'-0\" (to the inside south face, d 474); its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   },
   {
    "id": 41,
@@ -796,8 +796,8 @@
    "smoke_partition": false,
    "fire_rating": null,
    "height_ft": 8.083333333,
-   "exterior": false,
-   "source": "layout.yaml levels[basement].walls.small_unexcavated_west [164, 430, 172, 482] (in): A-2 south chain 13'-8\" | 8\"; its height to the top of the level's ceilings (placed_drawing)"
+   "exterior": true,
+   "source": "layout.yaml levels[basement].walls.small_unexcavated_west [164, 430, 172, 482] (in): A-2 south chain 13'-8\" | 8\"; its height to the top of the level's ceilings (placed_drawing); exterior when a face of it lies on the level's outline (its walls and rooms together)"
   }
  ],
  "doors": [
