@@ -328,7 +328,11 @@ def _over_rooms_measured(story, by_room: dict) -> dict:
     names = ", ".join(story.rooms[rid].name for rid in sorted(stopped)) or "none"
     out = {"label": f"greatest over the rooms measured; not a verdict, since {names} isn't measured (each room's "
                     f"reason in rooms_not_measured)",
-           "rooms_not_measured": {story.rooms[rid].name: why for rid, why in sorted(stopped.items())}}
+           "rooms_not_measured": {story.rooms[rid].name: why for rid, why in sorted(stopped.items())},
+           # the same rooms by id (two rooms may share a name), each with its stop's key ("no_route", …): what the
+           # panel selects and groups by (design_checker.panel_data), never a figure
+           "room_ids_not_measured": {rid: {"name": story.rooms[rid].name, "why": by_room[rid].reason,
+                                           "stop": by_room[rid].key} for rid in sorted(stopped)}}
     if good:
         rid, best = max(good.items(), key=lambda x: x[1].figure)
         out.update(figure=_feet(best.figure), room=story.rooms[rid].name, room_id=rid, at=_xy(best.at),
