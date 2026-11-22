@@ -103,9 +103,9 @@ area need review.
    room's own doors and passages, never across any other end-only room). The room served must state its `use` and
    `lockable: false`: one that can be locked, or whose locking isn't given, still blocks (1014.2 item 2, 7.5.2.1
    "subject to locking"), and the inner room keeps no route, the reason named. It chains: a closet that opens only
-   into a storeroom that opens only into another is part of both (its openings into a room it serves don't count as
+   into a storeroom that opens only into another is part of both (its doors into rooms that open only into it don't count as
    ways out). A room with a passage, a room of any other use (a classroom, a kitchen, an electrical room marked
-   `other`) and a room with two rooms beyond it are not covered: they keep decision 1a's rule. A door from such a room
+   `other`) and a room with two rooms beyond it (not counting rooms that open only into it) are not covered: they keep decision 1a's rule. A door from such a room
    into the room it serves is an exit access door (decision 11). Every figure this reading reaches says so beside it
    ("Gordium's reading · confirm with the architects"), the part's `confirm`, and the checker puts it in each row that
    reads that figure. It only adds routes where none were (never shortens a route that existed): a room it covers had
@@ -459,9 +459,11 @@ these hand figures as written in the test file, never taken from the code under 
     clear of every ring), then straight across the corridor to the exit, 6.5: **18.670 ft**. Fails on revert (no
     route). And: the kitchen `lockable: true` (or
     not given): no route, the reason naming the kitchen; a classroom (`day_care`, not crossable) between the closet
-    and the kitchen: still no route (the classroom isn't the closet's only way out into a crossable room, and nothing
-    crosses the kitchen); a storeroom whose only door opens into another storeroom whose own door opens on the
-    corridor: a route, through both (and a closet off the inner one: a route through all three); a closet with a
+    and the kitchen: still no route (the closet is part of the classroom, but the classroom's only way out crosses the
+    kitchen, and a classroom is never taken as part of a kitchen); a storeroom whose only door opens into another
+    storeroom whose own door opens on the corridor: a route, through both (and a closet off the inner one: a route
+    through all three; with the inner storeroom `lockable: true`, it keeps its own route and the closet has none); the
+    common path of a blocked room stops for the same reason as its travel; a closet with a
     second door, into the corridor: its own route, never through the kitchen; a room `other` (the electrical room)
     off the kitchen: no route. The door from the closet is its exit access door, and the story's figure carries the
     reading's `confirm`.
