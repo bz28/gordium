@@ -241,7 +241,7 @@ public sealed class ResultListTests
         var subs = layout.OfType<ListSubheading>().Select(s => s.Title).ToList();
         Assert.Contains("Front door: 2 need review", subs);
         Assert.Contains("Not read from the model yet: handrails (2 rules)", subs);
-        Assert.DoesNotContain("Not checked yet by Gordium: 86 code sections", subs);    // one row: no heading over it
+        Assert.DoesNotContain("Not checked yet by Gordium: 86 code sections", subs);    // one row: named by its part, never counted
         Assert.DoesNotContain("Bedroom 3 › Window 5", subs);                            // the failures: one run, no lines
         // each sub-heading is right above the rows of its line
         var at = layout.ToList().FindIndex(e => e is ListSubheading { Title: "Front door: 2 need review" });

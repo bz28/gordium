@@ -24,8 +24,9 @@ public enum ListFilter { All, Fails, Review, Complies }
 /// <param name="SourceRows">How many rows that line or group holds.</param>
 /// <param name="FromLine">Whether the source is a worker line (else a group listed row by row).</param>
 /// <param name="SourcePlace">The place the worker's own tier or group puts that source in (<see cref="ResultList.PlaceOf"/>),
-/// or null when its key names none: a sub-heading is shown only in that place, so a row the add-in reads more
-/// cautiously than its worker line is never shown under the line's words ("2 comply · 1 doesn't apply").</param>
+/// or null when its key names none: the source's own (possibly counted) title heads its rows only there, and only
+/// when all its rows are there (<see cref="ResultList.RunTitle"/>); elsewhere its run is headed by a name that counts
+/// nothing, so a row the add-in reads more cautiously is never shown under the line's words ("2 comply · 1 doesn't apply").</param>
 public sealed record ListRow(ResultRow Row, ListSection Section, PanelStatus Status, string Source, string SourceKey,
                              int SourceRows, bool FromLine, ListSection? SourcePlace = null);
 
