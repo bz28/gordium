@@ -2,8 +2,8 @@ building: '106 Ithaca Rd (City of Ithaca, R-1b): the architects'' spreadsheet de
 made_by: apps/revit_addin/tools/evals/compare_check_result.py (run it on the add-in's result to reproduce this file)
 result:
   log: results.jsonl
-  line: 528
-  at: '2026-11-21T23:41:57.0195480-05:00'
+  line: 536
+  at: '2026-11-22T01:29:55.2130657-05:00'
   model: 106_ithaca_rd_marked.rvt
 answer_key: test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx (Output, column G), mapped by
   spreadsheet_design.yaml compare
@@ -47,15 +47,16 @@ rows:
   architects: complies
   gordium: needs_review
   architects_proposed: 3
-  gordium_reason: 'part of the building (efc2f87d-5dc9-44df-8b19-ae96e261ff19-0005b778) starts above the ground: it may be
-    another story: draw its stories as floor blocks, or check the count'
+  gordium_reason: 'At worst 5 against 3: does not comply under that reading. A 35 ft solid (3ef989d1-c009-4774-bc39-b64fb4b8d68f-0005b770)
+    could hold up to 5 stories: draw its floors or enter the count.'
   gordium_measured: null
-  difference: 'expected: Revit sends no stories: Project Information has no Stories mark (ProjectFacts sends zone, use, lot
-    surveyed, corner lot, ground and street only), and native Revit floors are not counted as stories (only Gordium''s floor
-    blocks or a stated count). A plain 35 ft wall could hold up to 5 stories at 7 ft a story (R305.1), so ''at worst 5 against
-    3''. The spreadsheet''s 3 (Inputs!B13) needs a Stories mark or floor blocks (apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs
-    ProjectFacts.Read; packages/model_measurement/model_measurement/places/ithaca_city/measure.py _stories (''draw its floors
-    or enter the count''))'
+  difference: 'expected: the drawing allows 1 to 5 stories and nothing states the count: the four 35 ft walls (Inputs!B12)
+    could hold up to 5 at 7 ft a story (R305.1), and every building has at least one (§325-3B STORY). The roof, a slab resting
+    in the walls, is the roof of the STORY definition, not another story (measure._slabs_within). Revit''s Project Information
+    has no Stories mark (ProjectFacts sends zone, use, lot surveyed, corner lot, ground and street only), so the spreadsheet''s
+    3 (Inputs!B13) isn''t sent; a count stated would stand within 1 to 5 (packages/model_measurement/model_measurement/places/ithaca_city/measure.py
+    _stories_whole (''draw its floors or enter the count''), _slabs_within; apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs
+    ProjectFacts.Read; docs/revit/revit_reading_design.md section 7, ''Stories of a building drawn as parts'')'
 - row: Maximum height
   rule: R-1b.height
   architects: complies
