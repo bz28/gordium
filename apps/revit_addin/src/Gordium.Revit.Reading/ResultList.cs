@@ -49,6 +49,10 @@ public sealed record ListRowEntry(ListRow Row) : ListEntry;
 /// so the docked pane's height goes to the list; never selected or moved to (<see cref="ResultList.Next"/>).</summary>
 public sealed record ListSummary : ListEntry;
 
+/// <summary>The "Fix these first" cause cards (CauseCards), shown at the top of the needs-review part, under its
+/// heading; never selected or moved to (<see cref="ResultList.Next"/>).</summary>
+public sealed record ListCauses : ListEntry;
+
 /// <summary>A filter chip: its filter, its words and its glyph (stale once the model changed; none for All).</summary>
 public sealed record ListChip(ListFilter Filter, string Words, PanelStatus? Status);
 
@@ -124,11 +128,14 @@ public static class ResultList
     private static readonly Regex Length = new(@"(?<ft>[0-9][0-9,]*)'-(?<in>[0-9]+)(?: (?<n>[0-9]+)/(?<d>[0-9]+))?""",
                                                RegexOptions.CultureInvariant);
 
-    /// <summary>How far off a failing row is, in feet, read from the worker's own words (<see cref="ResultRow.HowFar"/>)
-    /// only to order the failures: when they say a shortfall or an excess ("2'-6\" short", "−2'-6\"", "at least
-    /// 0'-11 1/4\" short", "1'-6\" over") as a length, its first length; else null (room to spare, "at limit", an area
-    /// or a ratio, which can't be set against a length, or no figure). Never shown: the row shows the worker's
-    /// words.</summary>
+    // a length as the worker's how_far writes it for egress: "2.5 ft short", "4 in short", "at least 0.5 ft over"
+    private static readonly Regex Decimal = new(@"(?<![0-9.,'])(?<n>[0-9][0-9,]*(?:\.[0-9]+)?) (?<u>ft|in)\b", RegexOptions.CultureInvariant);
+
+    /// <summary>How far off a failing row is, in feet, read from the worker's own words (<see cref="ResultRow.HowFar"/>:
+    /// its <c>how_far</c>, else its delta) only to order the failures: when they say a shortfall or an excess as a
+    /// length ("2'-6\" short", "−2'-6\"", "at least 0'-11 1/4\" short", "1'-6\" over", "2.5 ft short", "4 in over",
+    /// "at least 1.2 ft short"), its first length; else null (room to spare, "at limit", an area or a ratio, which
+    /// can't be set against a length, or no figure). Never shown: the row shows the worker's words.</summary>
     public static double? HowFarOff(ResultRow row)
     {
         ArgumentNullException.ThrowIfNull(row);
@@ -139,12 +146,18 @@ public static class ResultList
         if (!off || t.StartsWith('+') || t.StartsWith("≥", StringComparison.Ordinal))
             return null;
         var m = Length.Match(t);
+        var d = Decimal.Match(t);
+        if (d.Success && (!m.Success || d.Index < m.Index))
+        {
+            var n = double.Parse(d.Groups["n"].Value.Replace(",", "", StringComparison.Ordinal), CultureInfo.InvariantCulture);
+            return d.Groups["u"].Value == "in" ? n / 12 : n;
+        }
         if (!m.Success)
             return null;
         var feet = double.Parse(m.Groups["ft"].Value.Replace(",", "", StringComparison.Ordinal), CultureInfo.InvariantCulture);
         var inches = double.Parse(m.Groups["in"].Value, CultureInfo.InvariantCulture);
-        if (m.Groups["n"].Success && double.Parse(m.Groups["d"].Value, CultureInfo.InvariantCulture) is var d and > 0)
-            inches += double.Parse(m.Groups["n"].Value, CultureInfo.InvariantCulture) / d;
+        if (m.Groups["n"].Success && double.Parse(m.Groups["d"].Value, CultureInfo.InvariantCulture) is var den and > 0)
+            inches += double.Parse(m.Groups["n"].Value, CultureInfo.InvariantCulture) / den;
         return feet + inches / 12;
     }
 
@@ -305,6 +318,21 @@ public static class ResultList
     {
         ArgumentNullException.ThrowIfNull(entries);
         return [new ListSummary(), .. entries];
+    }
+
+    /// <summary>The list with the cause cards (<see cref="ListCauses"/>) at the top of the needs-review part: right under
+    /// the first heading of the review or check-by-hand place shown, when the answer has cards
+    /// (<paramref name="cards"/>), the filter shows those places (all, or needs review) and nothing is searched for (a
+    /// search shows only the rows it matches). Otherwise the list as it is.</summary>
+    public static IReadOnlyList<ListEntry> WithCauses(IReadOnlyList<ListEntry> entries, bool cards, ListFilter filter, string? query)
+    {
+        ArgumentNullException.ThrowIfNull(entries);
+        if (!cards || filter is not (ListFilter.All or ListFilter.Review) || Terms(query).Count > 0)
+            return entries;
+        var at = entries.ToList().FindIndex(e => e is ListHeading { Section: ListSection.Review or ListSection.ByHand });
+        if (at < 0)
+            return entries;
+        return [.. entries.Take(at + 1), new ListCauses(), .. entries.Skip(at + 1)];
     }
 
     /// <summary>Where Up (<paramref name="step"/> −1) or Down (+1) moves from entry <paramref name="from"/>: the
