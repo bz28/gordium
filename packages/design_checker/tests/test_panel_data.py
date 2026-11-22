@@ -78,6 +78,8 @@ def test_a_how_far_is_never_larger_than_the_margin_under_any_reading():
     (present.REVIEW, [-3.0, 4.0], True, "up to 3 ft over under some reading; see why"),
     (present.COMPLIES, [0.004], True, "at the limit"),                         # rounds to nothing: no "0 ft"
     (present.FAILS, [6.0], True, "6 ft room here; see why"),                  # room on a row failing another way
+    (present.FAILS, [-0.005, -5.0], True, "over under every reading"),         # review round 1: never "less than
+    (present.FAILS, [-0.004], True, "0.01 ft over"),                           # 0.01 over" beside a 5 ft one
 ])
 def test_how_far_words(status, margins, maximum, want):
     assert panel_data.how_far_words(status, margins, "ft", maximum) == want
@@ -354,3 +356,107 @@ def test_a_zoning_row_waiting_on_facts_names_them_in_the_architects_words():
     got = present.zoning_causes({"needs": ["accessory_dwelling_unit"], "status": present.REVIEW})
     assert got == [{"kind": "mark", "key": "facts:accessory_dwelling_unit", "words": "Enter whether an ADU is on the lot",
                     "elements": [], "needs": ["accessory_dwelling_unit"]}]
+
+
+# ---- review round 1 (2026-11-22) -----------------------------------------------------------------------------------
+
+def test_several_readings_short_whose_least_rounds_to_nothing_never_say_less_than():
+    words = panel_data.how_far_words(present.FAILS, [-0.005, -5.0], True, True)
+    assert not words.startswith("less than") and words == "over under every reading"
+
+
+def _odyssey_view():
+    return json.loads(ANSWER.read_text(encoding="utf-8"))["result"]["view"]
+
+
+def test_every_cause_naming_a_room_with_no_route_is_on_the_one_rooms_card():
+    """The 5 rooms were on 7 cards: the room-door travel and each room's own common path had their own, keyed by
+    their words, and the room-door one named the story. Now each names its rooms by id and every one is on the rooms
+    card, keyed by all of them."""
+    view = _odyssey_view()
+    eval_rooms = _eval_rooms()["travel_distance"]
+    items = {i["id"]: i for i in view["items"]}
+    ids = {r["id"] for i in view["items"] for c in i.get("causes") or [] for r in c.get("rooms") or []
+           if r.get("name") in eval_rooms}
+    assert len(ids) == 5
+    door, = [i for i in view["items"] if i["rule"] == "general.nfpa_16_2_6_2_room_door_to_exit"
+             and i["status"] == present.REVIEW]
+    assert set(door["causes"][0]["elements"]) <= ids and door["causes"][0]["elements"]
+    assert door["part"]["id"] not in door["causes"][0]["elements"]          # the rooms, never the story
+    for g in view["groups"]:
+        if not g["key"].endswith(":review"):
+            continue
+        rooms_cards = [c for c in g["causes"] if c["key"].startswith("rooms:")]
+        assert len(rooms_cards) == 1 and set(rooms_cards[0]["elements"]) == ids
+        for c in g["causes"]:
+            if c is rooms_cards[0] or c["kind"] != "fix_model":
+                continue
+            for x in c["items"]:
+                first = items[x]["causes"][0]
+                assert not set(first.get("elements") or []) & ids, (c["key"], x)
+                assert not any(r.get("id") in ids for r in first.get("rooms") or []), (c["key"], x)
+
+
+def test_every_law_row_in_review_is_on_one_card():
+    """37 of the law's own rows (the interior drawing's, the rules not written for each part, the sections not
+    checked yet) had no cause and were on no card. Now every row in review has one, and each group's cards hold
+    exactly its rows in review."""
+    view = _odyssey_view()
+    items = {i["id"]: i for i in view["items"]}
+    for g in view["groups"]:
+        if not g["key"].endswith((":review", ":by_hand")):
+            continue
+        review = {x for x in g["items"] if items[x]["status"] == present.REVIEW}
+        assert all(items[x].get("causes") for x in review), g["key"]
+        on_cards = [x for c in g["causes"] for x in c["items"]]
+        assert set(on_cards) == review and len(on_cards) == len(set(on_cards)), g["key"]
+
+
+@pytest.mark.parametrize("item,kind", [
+    ({"id": "egress.interior#1", "law_short": "Egress", "reason": "The interior drawing: opening W1: say whether it is "
+      "an emergency escape and rescue opening (`escape`: true or false)", "objects": ["w1"]}, "mark"),
+    ({"id": "egress.interior#2", "law_short": "Egress",
+      "reason": "The interior drawing: the stairs weren't read (no `stairs` in the description)"}, "fix_model"),
+    ({"id": "egress.general.ibc_308_5", "law_short": "Egress", "reason": None}, "decide"),
+    ({"id": "egress.not_checked_yet", "law_short": "Egress", "reason": "x"}, "measure_by_hand"),
+    ({"id": "egress.has_none.stair", "law_short": "Egress", "reason": "Confirm: no stairs"}, "decide"),
+])
+def test_a_laws_own_row_has_a_cause_by_what_it_is(item, kind):
+    from design_checker import egress
+    if item["id"] == "egress.general.ibc_308_5":
+        item = dict(item, reason=egress.NOT_PER_PART)
+        kind = "measure_by_hand"
+    got, = present.law_causes(item)
+    assert got["kind"] == kind and got["words"] == (item["reason"] or "needs review")
+    assert got["elements"] == (item.get("objects") or [])
+
+
+def test_the_measuring_names_the_room_it_stops_at_by_id_for_the_room_door_travel_and_a_rooms_common_path():
+    from model_measurement.routes import measure
+    got = measure(storage_in_storage())["parts"]
+    story, = got["story"]
+    door = story["more"]["egress_travel_from_room_door"]["room_ids_not_measured"]
+    assert set(door) == {"s2"} and door["s2"]["stop"] == "no_exit_access" and door["s2"]["name"] == "s2"
+    s2, = [p for p in got["space"] if p["id"] == "s2"]
+    own = s2["more"]["space_common_path"]["room_ids_not_measured"]
+    assert set(own) == {"s2"} and own["s2"]["why"] == s2["not_measured"]["space_common_path"]
+
+
+def test_room_causes_sharing_a_room_are_one_card_keyed_and_named_by_all_its_rooms(maine):
+    """storage_in_storage: s2 stops the story's travel, its room-door travel and its own common path: one card."""
+    items = [i for i in _items(maine, storage_in_storage()) if i["status"] == present.REVIEW]
+    cards = [c for c in grouping.cause_cards(items) if c["key"].startswith("rooms:")]
+    assert len(cards) == 1 and cards[0]["key"] == "rooms:s2" and cards[0]["elements"] == ["s2"]
+    door, = _of(items, "general.nfpa_16_2_6_2_room_door_to_exit")
+    space = [i for i in items if (i.get("part") or {}).get("id") == "s2" and i["causes"][0]["key"] == "rooms:s2"]
+    assert door["causes"][0]["elements"] == ["s2"] and space
+    assert {door["id"]} | {i["id"] for i in space} <= set(cards[0]["items"])
+    # two cards sharing a room are one, keyed by every room, words from every room
+    a = {"kind": "fix_model", "key": "rooms:a,b", "words": "2", "elements": ["a", "b"],
+         "rooms": [{"id": "a", "name": "A", "stop": "no_route"}, {"id": "b", "name": "B", "stop": "no_route"}]}
+    b = {"kind": "fix_model", "key": "rooms:b,c", "words": "2", "elements": ["b", "c"],
+         "rooms": [{"id": "b", "name": "B", "stop": "no_route"}, {"id": "c", "name": "C", "stop": "no_exit_access"}]}
+    got = grouping.cause_cards([{"id": "1", "status": present.REVIEW, "causes": [a]},
+                                {"id": "2", "status": present.REVIEW, "causes": [b]}])
+    assert [(c["key"], c["elements"], c["items"]) for c in got] == [("rooms:a,b,c", ["a", "b", "c"], ["1", "2"])]
+    assert got[0]["words"] == "3 rooms have no route to an exit: A, B, C"
