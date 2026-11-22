@@ -253,7 +253,7 @@ public static class Marks
     public static readonly MarkDefinition DwellingUnits = new(
         "Gordium: Dwelling units", new("aa32131a-e757-47a3-abf8-9deb81d7a09a"), MarkValueKind.Integer, MarkBinding.Instance,
         [ProjectInformation], "facts.dwelling_units",
-        "The dwelling units on this lot (a building split along its party walls onto several lots: this lot's units only), an accessory dwelling unit included. A whole number, 1 or more. Blank: the use's own count (one for a detached one-family dwelling).");
+        "The dwelling units on this lot (a building split along its party walls onto several lots: this lot's units only), an accessory dwelling unit not counted (Gordium: Accessory dwelling unit says it). A whole number, 1 or more. Blank: the use's own count (one for a detached one-family dwelling).");
 
     /// <summary>The dwelling units in the whole attached building, every lot it stands on (<c>facts.attached_units_in_building</c>).</summary>
     public static readonly MarkDefinition UnitsInAttachedBuilding = new(

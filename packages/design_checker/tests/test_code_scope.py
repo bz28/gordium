@@ -321,3 +321,51 @@ def test_every_mark_an_ask_names_is_one_the_add_in_defines():
     marks = set(re.findall(r'"(Gordium: [^"]+)", new\("[0-9a-f-]+"\)',
                            (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")))
     assert set(code_scope.MARK.values()) <= marks, set(code_scope.MARK.values()) - marks
+
+
+# ---- review round 2 (2026-11-22) --------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("values", [
+    {"use": "two_family", "stories": 2, "adu_detached": False},                   # an attached ADU, the ADU blank
+    {"use": "one_family_semi_detached", "stories": 2, "adu_detached": False},
+    {"use": "one_family_detached", "stories": 2, "adu_detached": True},
+    {"use": "two_family", "stories": 2, "accessory_dwelling_unit": False, "adu_detached": False}])   # contradiction
+def test_an_adus_kind_stated_is_never_read_as_no_adu(values):
+    c, _, got = code(values, {"separate_means_of_egress": True})
+    assert c is None and "Gordium: Accessory dwelling unit" in got["ask"]
+
+
+def test_facts_the_measuring_set_aside_are_never_read_as_unstated():
+    # three units and ten occupants with at most one in a unit can't all be so (measure.py fact_conflicts): the units
+    # and the ADU answer are set aside, so the use's own count never decides
+    site = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]),
+            "buildings": [box(10, 25, 40, 75, 0, 30)], "problems": []}
+    facts = dict(FACTS, use="one_family_detached", dwelling_units=3, occupants=10, occupants_most_in_one_unit=1,
+                 accessory_dwelling_unit=False)
+    interior = {"format": "gordium.interior/1", "units": "ft", "rooms": [], "building": {"stories_above_grade_plane": 2}}
+    which = check_site(site, facts, interior=interior)["which_code"]
+    assert which["code"] is None and "set aside" in which["why"] and "dwelling units" in which["why"]
+    assert "no accessory dwelling unit" not in which["assumes"]
+
+
+def test_a_detached_adu_counted_in_the_lots_units_agrees_with_the_use():
+    c, _, got = code({"use": "one_family_detached", "dwelling_units": 2, "accessory_dwelling_unit": True,
+                      "adu_detached": True}, {"stories_above_grade_plane": 2})
+    assert c == code_scope.RESIDENTIAL and got["facts"]["building_units"] == 1     # the ADU in its own building
+    assert code({"use": "one_family_detached", "dwelling_units": 1, "accessory_dwelling_unit": True,
+                 "adu_detached": True}, {"stories_above_grade_plane": 2})[0] == code_scope.RESIDENTIAL
+    assert code({"use": "one_family_detached", "dwelling_units": 2}, {"stories_above_grade_plane": 2})[0] is None
+
+
+def test_a_typed_count_checked_against_the_drawing_is_said_so_unlike_a_count_read_from_floors():
+    typed = code({"use": "one_family_detached", "stories": 3, code_scope.STORIES_HOW: "typed"})[2]["why"]
+    read = code({"use": "one_family_detached", "stories": 3, code_scope.STORIES_HOW: "read"})[2]["why"]
+    assert "Ithaca's count as the architect states it, checked against the drawing: nothing drawn below the ground, " \
+           "so at most 3 above grade plane" in typed
+    assert "Ithaca's count read from the drawn floors, nothing drawn below the ground, so at most 3" in read
+    from design_checker.check import _with_stories_bound
+    rec = {"value": 3, "objects": ["b1"], "readings": [],
+           "how": "stated by the architect for the whole building, within what the drawing allows (1 to 5: ...)"}
+    assert _with_stories_bound({"stories": 3}, {"stories": rec})[code_scope.STORIES_HOW] == "typed"
+    rec["how"] = "read from the drawing: ..."
+    assert _with_stories_bound({"stories": 3}, {"stories": rec})[code_scope.STORIES_HOW] == "read"

@@ -120,6 +120,15 @@ ASSUMED = (("care_facility", "no one outside the household receives care here"),
            ("accessory_dwelling_unit", "no accessory dwelling unit"))
 # where check.py found Ithaca's stories count read from the drawing with nothing drawn below the ground
 STORIES_DRAWN = "stories_from_drawing"
+# how that count came: "read" (counted from Gordium's floor blocks or a drawing that allows one count) or "typed"
+# (the architect's Gordium: Stories, kept because it lies within what the drawing allows), for the words only
+STORIES_HOW = "stories_how"
+# the stated facts the measuring set aside because they contradict each other ({name: why}: measure.py
+# _set_aside_conflicts), from check.py: a fact the decision reads that is set aside needs review, never "unstated"
+SET_ASIDE = "facts_set_aside"
+# the facts of the lot the decision reads (its use, units, ADU, uses beyond the dwelling, stories)
+READS = ("use", "dwelling_units", "attached_units_in_building", "accessory_dwelling_unit", "adu_detached",
+         "home_occupation", "rooms_let_for_profit", "stories")
 
 # Ithaca's use words (4_term_definitions/uses.yaml) that name a dwelling R101.2 lists: its words, R101.2's item, units
 HOUSES = {"one_family_detached": ("a detached one-family dwelling", "R101.2 item 1", 1),
@@ -206,12 +215,14 @@ def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
     # where Ithaca's count is an open question, the most the drawing allows (its readings' greatest: STORIES_AT_MOST,
     # given by check.py) bounds it the same way
     if s is None and type(values.get(STORIES_AT_MOST)) in (int, float) and values[STORIES_AT_MOST] >= 1:
-        return int(math.ceil(values[STORIES_AT_MOST])), ("the most Ithaca's count could be, read from the drawing "
-                                                         "with nothing drawn below the ground: every story the State "
-                                                         "counts above grade plane Ithaca counts too")
+        return int(math.ceil(values[STORIES_AT_MOST])), ("the most Ithaca's count could be as drawn, nothing drawn "
+                                                         "below the ground, so at most that many above grade plane")
     if type(s) in (int, float) and s >= 1 and float(s).is_integer():
-        return int(s), ("Ithaca's count, read from the drawing with nothing drawn below the ground: every story the "
-                        "State counts above grade plane Ithaca counts too")
+        if values.get(STORIES_HOW) == "typed":
+            return int(s), ("Ithaca's count as the architect states it, checked against the drawing: nothing drawn "
+                            f"below the ground, so at most {int(s)} above grade plane")
+        return int(s), ("Ithaca's count read from the drawn floors, nothing drawn below the ground, so at most "
+                        f"{int(s)} above grade plane")
     return None, "not known"
 
 
@@ -229,6 +240,14 @@ def decide(values: dict, building: dict | None) -> dict:
     if facts.get("follows_building_code") is True:
         return _answer(BUILDING, "the architect applies the Building Code to it, as R101.2's exception permits",
                        ["R101.2 exception"], used)
+    # a fact the decision reads that the measuring set aside (stated, but contradicting another): never read as
+    # unstated, so never the use's own count or an assumed "none" in its place
+    aside = values.get(SET_ASIDE) if isinstance(values.get(SET_ASIDE), dict) else {}
+    conflicted = [k for k in READS if k in aside]
+    if conflicted:
+        return _answer(None, "the facts stated contradict each other, so the ones this reads are set aside ("
+                       + "; ".join(f"{k.replace('_', ' ')}: {aside[k]}" for k in conflicted) + ")",
+                       ["R202 DWELLING", "R101.2"], used, "correct the facts that disagree")
     use = values.get("use")
     used["use"] = use
     if not isinstance(use, str) or not use:
@@ -268,7 +287,13 @@ def decide(values: dict, building: dict | None) -> dict:
                        "owner-occupied with five or fewer guestrooms and a P2904 sprinkler system (R101.2 item 6)",
                        ["R101.2 item 6", "310.4.2"], used, by_hand)
     # an accessory dwelling unit on the lot: in or on the building it is one more of the building's dwelling units
-    adu = values.get("accessory_dwelling_unit")
+    adu, detached = values.get("accessory_dwelling_unit"), values.get("adu_detached")
+    if detached is not None and adu is not True:     # an ADU's kind said: never read as "no ADU" (review round 2)
+        return _answer(None, "whether the accessory dwelling unit is detached is stated, but "
+                       + ("not that there is one" if adu is None else "so is that there is none") +
+                       ": in or on the building it would be one more of its dwelling units (R202 DWELLING: one or two)",
+                       ["R202 DWELLING", "R101.2 item 2"], used,
+                       f"say whether an accessory dwelling unit is on the lot ({MARK['accessory_dwelling_unit']})")
     if adu is True and values.get("adu_detached") is None:
         return _answer(None, "an accessory dwelling unit is on the lot and whether it is detached isn't stated: in or "
                        "on the building it is one more of its dwelling units (R202 DWELLING: one or two)",
@@ -292,9 +317,11 @@ def decide(values: dict, building: dict | None) -> dict:
         what, item, n = HOUSES[use]
         lot_units = 2 if use == "two_family" else 1
         building_units = n + (1 if attached_adu else 0)
-    # the dwelling units stated for the lot agree with the use (and an attached ADU), whatever the use word
+    # the dwelling units stated for the lot agree with the use, whatever the use word: Ithaca's dwelling_units leaves
+    # an ADU out (its own fact, as the occupant counts read it: measure.py fact_conflicts), so the use's own count;
+    # one more is read as the ADU counted in (either way, detached or attached: the use word leaves no other reading)
     stated = values.get("dwelling_units")
-    if type(stated) in (int, float) and stated not in (lot_units, lot_units + (1 if attached_adu else 0)):
+    if type(stated) in (int, float) and stated not in (lot_units, lot_units + (1 if adu is True else 0)):
         used["dwelling_units"] = stated
         return _answer(None, f"the use is {use} ({lot_units} dwelling unit{'s' if lot_units > 1 else ''} on the lot"
                        f"{' and its accessory dwelling unit' if attached_adu else ''}) but {stated:g} dwelling units are "
