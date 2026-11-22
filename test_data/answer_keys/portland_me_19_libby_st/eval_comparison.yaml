@@ -119,7 +119,7 @@ figures:
       with_12_in: 42.604
       no_clearance: 41.066
       exits:
-      - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
+      - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc97
       - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bcac
       split_no_clearance:
       - 116.921
@@ -134,8 +134,6 @@ figures:
             its room CLOSET (40) opens only into KITCHEN (10), which can be locked
             (`lockable: true`), so a route never passes through it (IBC 1014.2 item
             2, NFPA 7.5.2.1)'
-          CORRIDOR (26): 'more than 64 routes from (63.232, 37.844) are equally short
-            (within 1e-6 ft): which to take isn''t worked out'
           ELEC. (21): the point (5.171, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
             (a path 12 in clear of every corner, through door centres and rooms it
             may cross)
@@ -204,24 +202,87 @@ figures:
       - 53.177
     gordium:
       90a6a430-1684-4046-81c7-ffbf1c99b587-0005be10:
-        not_measured: 'the corridor isn''t made of straight legs meeting at right
-          angles (a part of it has no walls on its two long sides): its dead ends
-          and width aren''t measured in this first version (decision 6)'
+        dead_ends:
+        - from:
+          - 165.719
+          - 33.038
+          length: 12.468
+          least_width: 3.998
+        - from:
+          - 33.294
+          - 35.178
+          length: 55.15
+          least_width: 4.156
+        - from:
+          - 18.656
+          - 35.178
+          length: 69.789
+          least_width: 3.333
+        - from:
+          - 84.606
+          - 35.253
+          length: 7.586
+          least_width: 4.156
+        - from:
+          - 110.256
+          - 35.253
+          length: 7.586
+          least_width: 4.167
+        - from:
+          - 135.906
+          - 35.253
+          length: 7.586
+          least_width: 4.156
+        - from:
+          - 58.289
+          - 35.253
+          length: 30.081
+          least_width: 3.333
+        - from:
+          - 13.656
+          - 42.839
+          length: 67.128
+          least_width: 9.326
+        - from:
+          - 104.597
+          - 51.092
+          length: 8.253
+          least_width: 4.497
+        - from:
+          - 115.256
+          - 51.092
+          length: 8.253
+          least_width: 6.667
+        - from:
+          - 53.66
+          - 73.825
+          length: 58.11
+          least_width: 5.327
+        - from:
+          - 152.553
+          - 74.851
+          length: 32.013
+          least_width: 9.327
     agreement:
       tolerance: length within 1 ft, width within 1 in
       length:
         tolerance: length within 1 ft
-        within_tolerance: null
-        why: Gordium gives no figure
+        sheet: 21.5
+        gordium: 32.013
+        difference: 10.513
+        allowed: 1.0
+        within_tolerance: false
       least_width:
         tolerance: width within 1 in
-        within_tolerance: null
-        why: Gordium gives no figure
-      dead_end: 'Gordium measured no dead end on this corridor: the corridor isn''t
-        made of straight legs meeting at right angles (a part of it has no walls on
-        its two long sides): its dead ends and width aren''t measured in this first
-        version (decision 6)'
-      within_tolerance: null
+        sheet: 10.0
+        gordium: 9.327
+        difference: -0.673
+        allowed: 0.083
+        within_tolerance: false
+      dead_end:
+      - 152.553
+      - 74.851
+      within_tolerance: false
   remoteness:
     sheet_stated: 183.833
     sheet_words: 'PROVIDED REMOTENESS: 183''-10" (between its ticks)'
@@ -366,7 +427,8 @@ by_hand:
     figure: 32.011
     working: 'the stub''s closed end, y 74.85 (the corridor outline), to the main
       corridor''s centre line, (37.844 + 47.833) / 2 = 42.839: 74.85 - 42.839 = 32.011
-      ft; the sheet ends at the widening''s near edge, y 53.17 (open question 2)'
+      ft; the sheet ends at the widening''s near edge, y 53.17 (open question 2: NFPA
+      101 A.7.5.1.5 measures to the centre line)'
   remoteness: the sheet measures the west and east corridor exits; decision 7 takes
     the farthest-apart pair
   diagonal: 'the sheet''s ticks are not at the traced outer outline''s corners (its

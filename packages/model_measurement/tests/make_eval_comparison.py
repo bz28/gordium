@@ -325,7 +325,7 @@ def _judge_all(out) -> None:
     length = _verdict(f["dead_end"]["sheet_stated"], mine["length"] if mine else None, 1.0, "length within 1 ft")
     width = _verdict(SHEET_DEAD_END_WIDTH, mine["least_width"] if mine else None, 1 / 12, "width within 1 in")
     f["dead_end"]["agreement"] = {"tolerance": TOLERANCES["dead_end"], "length": length, "least_width": width,
-                                  "dead_end": mine["from"] if mine else _no_dead_end(f["dead_end"]["gordium"]),
+                                  "dead_end": list(mine["from"]) if mine else _no_dead_end(f["dead_end"]["gordium"]),
                                   "within_tolerance": None if mine is None else
                                   bool(length["within_tolerance"] and width["within_tolerance"])}
     g = f["remoteness"]["gordium"]
