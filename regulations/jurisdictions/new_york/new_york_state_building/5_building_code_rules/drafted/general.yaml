@@ -1,0 +1,1333 @@
+# Commercial egress rules under the 2025 Building Code of New York State (README.md), for a Group I-4 day-care centre
+# first: the limits Gordium's route measures feed, as the Maine rulebook drafted them from the 2009 IBC
+# (regulations/jurisdictions/maine/maine_state/). Hand-drafted in a Claude Code session (claude-opus-5-5, 2026-11-21),
+# checked by code (python -m rule_format). Every number a rule uses is the second reading's
+# (text_verification.yaml: every piece read again from the page images by a reader who never saw the extracted
+# text; the two tables also by each cell's position). Graded against the Maine architect's hand check of a day care
+# (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml) as if the same building were in New York
+# (rule_format/tests/test_ny_building_egress.py). No New York place inherits this folder yet, so no check runs these
+# rules today. Drafts: approval is deferred.
+district: general
+rules:
+- id: general.bc_308_5_classification
+  kind: flag
+  topic: uses
+  title: Group I-4, day care facilities (BCNYS 308.5)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 79
+    lines:
+    - 29
+    - 31
+    quote: 308.5 Institutional Group I-4, day care facilities. Institutional Group I-4 occupancy shall include buildings and
+      structures occupied by more than five persons of any age who receive custodial care for fewer than 24 hours per day
+      by persons other than parents or guardians; relatives by blood, marriage or adoption; and in a place other than the
+      home of the person cared for. This group shall
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Which group the building is in decides every limit below; the architect states it (occupancy_group_i4), a person
+      confirms.
+  notes: The rules of this rulebook are drafted for Group I-4 only (their applies_when); a building in another group needs
+    its own rules, so this flag always shows. Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_308_5_1_group_e
+  kind: flag
+  topic: uses
+  title: Child day care classified Group E (BCNYS 308.5.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 79
+    lines:
+    - 35
+    - 37
+    quote: 308.5.1 Classification as Group E. A child day care facility that provides care for more than five but not more
+      than 100 children 2 1/2 years or less of age, where the rooms in which the children are cared for are located on a level
+      of exit discharge serving such rooms and each of these child care rooms has an exit door directly to the exterior, shall
+      be classified as Group E.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'More than five but not more than 100 children 2 1/2 or younger, in rooms on a level of exit discharge each with
+      an exit door directly outside: Group E, not I-4; the architect states it.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_308_5_2_religious_worship
+  kind: flag
+  topic: uses
+  title: Care during religious functions (BCNYS 308.5.2)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 79
+    lines:
+    - 38
+    - 39
+    quote: 308.5.2 Within a place of religious worship. Rooms and spaces within places of religious worship providing such
+      care during reli- gious functions shall be classified as part of the primary occupancy.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Part of the primary occupancy: the architect states it.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_308_5_3_five_or_fewer
+  kind: flag
+  topic: uses
+  title: Five or fewer persons receiving care (BCNYS 308.5.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 79
+    lines:
+    - 40
+    - 41
+    quote: 308.5.3 Five or fewer persons receiving care. A facility having five or fewer persons receiving custodial care
+      shall be classified as part of the primary occupancy.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Part of the primary occupancy, not I-4: the architect states it.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_308_5_4_dwelling_unit
+  kind: flag
+  topic: uses
+  title: Five or fewer persons in a dwelling unit (BCNYS 308.5.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 79
+    lines:
+    - 42
+    - 44
+    quote: 308.5.4 Five or fewer persons receiving care in a dwelling unit. A facility such as the above within a dwelling
+      unit and having five or fewer persons receiving custodial care shall be classified as a Group R-3 occupancy or shall
+      comply with the Residential Code of New York State.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Group R-3 or the Residential Code of New York State (the sibling folder new_york_state/): the architect states
+      it.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_508_2_1_classification
+  kind: flag
+  topic: uses
+  title: Each accessory occupancy classified on its own (BCNYS 508.2.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 147
+    lines:
+    - 13
+    - 14
+    quote: 508.2.1 Occupancy classification. Accessory occupancies shall be individually classified in accordance with Section
+      302.1. The requirements of this code shall apply to each portion of the building based on the occupancy classification
+      of that space.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Each accessory occupancy's classification (Section 302.1, not brought in) is the architect's statement.
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_508_2_2_height
+  kind: flag
+  topic: dimensions
+  title: 'Accessory occupancies: allowable height (BCNYS 508.2.2)'
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 147
+    lines:
+    - 15
+    - 16
+    quote: 508.2.2 Allowable building height. The allowable height and number of stories of the building containing accessory
+      occupancies shall be in accordance with Section 504 for the main occupancy of the building.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Section 504 is not brought in: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_508_2_3_accessory_area
+  kind: rule
+  topic: dimensions
+  title: Accessory occupancies at most 10% of the story (BCNYS 508.2.3)
+  check: story_accessory_area <= 0.10 * story_gross_floor_area
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 147
+    lines:
+    - 18
+    - 20
+    quote: for the main occupancy of the building. Aggregate accessory occupancies shall not occupy more than 10 percent of
+      the floor area of the story in which they are located and shall not exceed the tabular values for nonsprinklered buildings
+      in Table 506.2 for each such accessory occupancy.
+  examples:
+  - given: {}
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          story_accessory_area: 1428
+          story_gross_floor_area: 16509
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 1,428 sf is within 10% of 16,509
+      sf (1,650.9 sf): passes (the sheet''s story area, taken as its gross floor area). The second test, Table 506.2, is general.bc_508_2_3_tabular_values
+      (needs review).'
+  - given: {}
+    parts:
+      story:
+      - id: p2
+        name: Storage over 10%
+        measures:
+          story_accessory_area: 1700
+          story_gross_floor_area: 16509
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: '1,700 sf is more than 10% of the story''s gross floor area (1,650.9 sf): fails under every reading of ''floor area''.'
+  - given: {}
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Gordium''s reading, for the architects to confirm: ''floor area'' is printed in roman, so it is not a defined term
+    here (201.4: its ordinary meaning), and the floor area of a story is read as its gross floor area (measured inside the
+    exterior walls, nothing deducted), as the allowable-area sections it sits in measure area; the 2009 IBC (the Maine sheet''s
+    code) read ''the building area of the story'' (508.2.1 there). The second test (Table 506.2''s tabular values, Section
+    506, not brought in) is general.bc_508_2_3_tabular_values, which always needs review, so the story is never passed on
+    this rule alone. Hand-drafted in a Claude Code session (2026-11-21).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_508_2_3_tabular_values
+  kind: flag
+  topic: dimensions
+  title: Accessory occupancies within Table 506.2's values (BCNYS 508.2.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 147
+    lines:
+    - 18
+    - 20
+    quote: for the main occupancy of the building. Aggregate accessory occupancies shall not occupy more than 10 percent of
+      the floor area of the story in which they are located and shall not exceed the tabular values for nonsprinklered buildings
+      in Table 506.2 for each such accessory occupancy.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Table 506.2''s tabular values for nonsprinklered buildings, for each accessory occupancy (Section 506, not brought
+      in): a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_508_2_4_separation
+  kind: flag
+  topic: fire_separation
+  title: No separation from the main occupancy, with exceptions (BCNYS 508.2.4)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 147
+    lines:
+    - 21
+    - 21
+    quote: 508.2.4 Separation of occupancies. No separation is required between accessory occupancies and the main occupancy.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Whether exception 1 (Group H-2 to H-5) or 2 (dwelling and sleeping units of I-1, R-1, R-2, R-3) applies is the architect's
+      statement; 508.4 and Section 420 are not brought in.
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1006_2_1_two_exits
+  kind: rule
+  topic: means_of_egress
+  title: Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)
+  applies_when: occupancy_group_i4
+  check: space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path
+    <= 75)
+  review_when:
+  - when: space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2))
+    reason: 'Two exits or more, and a common path over 75 ft (or a building not sprinklered throughout, where the table gives
+      Group I-4 no common path): whether Table 1006.2.1 caps the common path or only decides when a second exit is needed
+      is open (open_questions); a person checks.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 3
+    - 5
+    quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+      from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+      the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+      in accordance
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 26
+    - 26
+    quote: I-1, I-2[fnd], I-4 10 NP NP 75[fna]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 36
+    - 36
+    quote: a.Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2.
+      See Section 903 for occupancies where automatic sprin-
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Classroom, 30 occupants, two doors
+        measures:
+          space_exit_count: 2
+          space_occupant_load: 30
+          space_common_path: 48.5
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key''s common path (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 48''-6" within 75
+      ft (I-4, sprinklered), taken as a two-door space''s: passes, as the sheet found under the 2009 IBC''s 1014.3.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p6
+        name: Two doors, long common path
+        measures:
+          space_exit_count: 2
+          space_occupant_load: 30
+          space_common_path: 80
+    rows:
+    - part: p6
+      outcome: needs_review
+    expect: needs_review
+    note: 'Two doors, but a common path over 75 ft: fails if the table caps the common path, passes if it only decides when
+      a second door is needed (the open question).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p2
+        name: Classroom, 30 occupants, one door
+        measures:
+          space_exit_count: 1
+          space_occupant_load: 30
+          space_common_path: 40
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 'Over 10 occupants: two needed.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p3
+        name: Office, 4 occupants, one door
+        measures:
+          space_exit_count: 1
+          space_occupant_load: 4
+          space_common_path: 30
+    rows:
+    - part: p3
+      outcome: pass
+    expect: pass
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p4
+        name: Office, long common path
+        measures:
+          space_exit_count: 1
+          space_occupant_load: 4
+          space_common_path: 80
+    rows:
+    - part: p4
+      outcome: fail
+    expect: fail
+    note: 'Its common path is over 75 ft: two needed.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p5
+        name: Unsprinklered office
+        measures:
+          space_exit_count: 1
+          space_occupant_load: 4
+          space_common_path: 30
+    rows:
+    - part: p5
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: Table 1006.2.1 does not permit an I-4 space with one exit (NP).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  open_questions:
+  - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
+    a space needs a second exit or exit access doorway?
+  research:
+  - question: Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only
+      decide when a space needs a second exit or exit access doorway?
+    searched:
+    - 1006.2.1
+    - Table 1006.2.1
+    - '1017.3'
+    - 202:common_path_of_egress_travel
+    sources:
+    - rank: 4
+      cite: '2009 IBC 1014.3, as Maine adopted it (regulations/jurisdictions/maine/maine_state/; the architect''s sheet for
+        19 Libby Street, Portland): ''the common path of egress travel shall not exceed 75 feet'' in occupancies other than
+        H-1, H-2 and H-3, a cap; the 2025 BCNYS prints no such sentence: 1006.2.1 asks for two exits ''where the design occupant
+        load or the common path of egress travel distance exceeds the values listed in Table 1006.2.1'', a table titled ''SPACES
+        WITH ONE EXIT OR EXIT ACCESS DOORWAY'' (p.315)'
+    why_open: The 2025 text reads as a trigger for a second exit, its predecessor as a cap; ICC's commentary (which would
+      say which was meant) may not be read by any script, and no New York interpretation was found (2026-11-21). For the architects
+      or the Department of State.
+  notes: 'Table 1006.2.1''s I-4 row (I-1, I-2, I-4): 10 occupants, NP and NP without a sprinkler system, 75 ft with one (note
+    a: 903.3.1.1 or 903.3.1.2). The 2009 IBC''s 1014.3 (the Maine sheet''s code) capped every common path at 75 ft; the 2025
+    book prints the limit only in this table, titled ''spaces with one exit or exit access doorway'', and 1006.2.1 asks for
+    two exits where the common path exceeds it, so a space with two exits and a common path over 75 ft (or any, unsprinklered)
+    needs review (the open question), never a pass. Exception 1 (foyers and lobbies counted without the loads discharging
+    through them) and exception 3 (unoccupied mechanical rooms and penthouses need not meet the common path) only loosen the
+    test: a person''s check where they apply. The cumulative occupant load (1004.2, not brought in) is in the architect''s
+    space_occupant_load. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the same 10 for
+    day care. Hand-drafted in a Claude Code session (2026-11-21).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_2_1_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Table 1006.2.1's rows for other occupancies (BCNYS)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 21
+    - 25
+    quote: A[fnc], E, M 49 75 75 75[fna] B 49 100 75 100[fna] F 49 75 75 100[fna] H-1, H-2, H-3 3 NP NP 25[fnb] H-4, H-5 10
+      NP NP 75[fnb]
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 27
+    - 33
+    quote: I-3 10 NP NP 100[fna] R-1 10 NP NP 75[fna] R-2 20 NP NP 125[fna] R-3[fne] 20 NP NP 125[fna,] [fng] R-4[fne] 20
+      NP NP 125[fna,] [fng] S[fnf] 29 100 75 100[fna] U 49 100 75 75[fna]
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1006_2_1_1_three_or_more_exits
+  kind: rule
+  topic: means_of_egress
+  title: Three exits from 501-1,000 occupants, four above (BCNYS 1006.2.1.1)
+  check: (space_occupant_load < 501 or space_exit_count >= 3) and (space_occupant_load <= 1000 or space_exit_count >= 4)
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 315
+    lines:
+    - 45
+    - 47
+    quote: 1006.2.1.1 Three or more exits or exit access doorways. Three exits or exit access doorways shall be provided from
+      any space with an occupant load of 501 to 1,000. Four exits or exit access doorways shall be provided from any space
+      with an occu- pant load greater than 1,000.
+  examples:
+  - given: {}
+    parts:
+      space:
+      - id: p1
+        name: Hall, 600 occupants, three doors
+        measures:
+          space_occupant_load: 600
+          space_exit_count: 3
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+  - given: {}
+    parts:
+      space:
+      - id: p2
+        name: Hall, 600 occupants, two doors
+        measures:
+          space_occupant_load: 600
+          space_exit_count: 2
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+  - given: {}
+    parts:
+      space:
+      - id: p3
+        name: Hall, 1,200 occupants, three doors
+        measures:
+          space_occupant_load: 1200
+          space_exit_count: 3
+    rows:
+    - part: p3
+      outcome: fail
+    expect: fail
+    note: 'Over 1,000: four needed.'
+  - given: {}
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  notes: For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1007_1_1_remoteness
+  kind: rule
+  topic: means_of_egress
+  title: Two exits at least 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)
+  check: exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2)
+  review_when:
+  - when: story_exit_count < 2
+    reason: 'Fewer than two exits on the story: this applies where two are required (1006.2.1, 1006.3); a person checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 6
+    - 8
+    quote: 1007.1.1 Two exits or exit access doorways. Where two exits, exit access doorways, exit access stairways or ramps,
+      or any combi- nation thereof, are required from any portion of the exit access, they shall be placed a distance apart
+      equal to not less than one- half of the length of the maximum overall diagonal dimension of the building or area to
+      be served measured in a straight line
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 14
+    - 16
+    quote: 2. Where a building is equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1
+      or 903.3.1.2, the separation distance shall be not less than one-third of the length of the maximum overall diagonal
+      dimension of the area served.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          exit_remoteness_ratio: 0.8745
+          story_exit_count: 2
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 183''-10" apart over a 210''-2
+      1/2" diagonal = 0.8745, at least one-third (sprinklered): passes.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p2
+        name: Exits close together
+        measures:
+          exit_remoteness_ratio: 0.3
+          story_exit_count: 2
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 0.30 is under one-third.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          exit_remoteness_ratio: 0.4
+          story_exit_count: 2
+    rows:
+    - part: p1
+      outcome: fail
+    expect: fail
+    note: 'Not sprinklered: one-half applies, and 0.4 is under it.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p3
+        name: One exit
+        measures:
+          exit_remoteness_ratio: 0.8
+          story_exit_count: 1
+    rows:
+    - part: p3
+      outcome: needs_review
+    expect: needs_review
+    note: 'One exit: whether two are required is 1006''s question; a person checks.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Exception 1 (exit stairways or ramps joined by a 1-hour corridor complying with Section 1020: measured along the
+    corridor) only loosens the test: a person''s check. exit_remoteness_ratio is of the two farthest-apart exits or exit access
+    doorways, measured to any point of a doorway''s width (1007.1.1.1), so it is the best pair. For every occupancy. Hand-drafted
+    in a Claude Code session (2026-11-21).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1007_1_2_three_or_more_exits
+  kind: rule
+  topic: means_of_egress
+  title: 'Three or more exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)'
+  check: story_exit_count < 3 or exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1
+    / 2)
+  review_when:
+  - when: story_exit_count >= 3 and exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else
+      1 / 2)
+    reason: Two exits are far enough apart; whether the others are a reasonable distance apart is a person's judgment.
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 22
+    - 24
+    quote: 1007.1.2 Three or more exits or exit access doorways. Where access to three or more exits is required, not less
+      than two exit or exit access doorways shall be arranged in accordance with the provisions of Section 1007.1.1. Additional
+      required exit or exit access doorways shall be arranged a reasonable distance apart so that if one becomes blocked,
+      the others will be available.
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 6
+    - 8
+    quote: 1007.1.1 Two exits or exit access doorways. Where two exits, exit access doorways, exit access stairways or ramps,
+      or any combi- nation thereof, are required from any portion of the exit access, they shall be placed a distance apart
+      equal to not less than one- half of the length of the maximum overall diagonal dimension of the building or area to
+      be served measured in a straight line
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 14
+    - 16
+    quote: 2. Where a building is equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1
+      or 903.3.1.2, the separation distance shall be not less than one-third of the length of the maximum overall diagonal
+      dimension of the area served.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Three exits, far apart
+        measures:
+          exit_remoteness_ratio: 0.6
+          story_exit_count: 3
+    rows:
+    - part: p1
+      outcome: needs_review
+    expect: needs_review
+    note: The best pair is far enough apart; whether the third is a reasonable distance from them is a person's judgment.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p2
+        name: Three exits, close
+        measures:
+          exit_remoteness_ratio: 0.2
+          story_exit_count: 3
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: Even the farthest pair is under one-third.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p3
+        name: Two exits
+        measures:
+          exit_remoteness_ratio: 0.6
+          story_exit_count: 2
+    rows:
+    - part: p3
+      outcome: pass
+    expect: pass
+    note: 'Two exits: nothing for this part to ask (1007.1.1''s rule checks them).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: Its second sentence (additional exits 'a reasonable distance apart so that if one becomes blocked, the others will
+    be available') is a person's judgment, so a story with three or more exits never passes on this rule; it fails when even
+    its two farthest-apart exits are too close. For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1007_1_3_exit_access_stairways
+  kind: flag
+  topic: means_of_egress
+  title: Exit access stairways keep their separation (BCNYS 1007.1.3)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 25
+    - 27
+    quote: 1007.1.3 Remoteness of exit access stairways or ramps. Where two exit access stairways or ramps provide the required
+      means of egress to exits at another story, the required separation distance shall be maintained for all portions of
+      such exit access stair- ways or ramps.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Whether two exit access stairways or ramps keep the separation for all their length is not measured from the drawing
+      yet: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1007_1_3_1_three_or_more_stairways
+  kind: flag
+  topic: means_of_egress
+  title: Three or more exit access stairways (BCNYS 1007.1.3.1)
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 318
+    lines:
+    - 28
+    - 29
+    quote: 1007.1.3.1 Three or more exit access stairways or ramps. Where more than two exit access stairways or ramps provide
+      the required means of egress, not less than two shall be arranged in accordance with Section 1007.1.3.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: 'Not measured from the drawing yet: a person checks.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1016_2_intervening_spaces
+  kind: rule
+  topic: means_of_egress
+  title: Egress not through locked rooms, kitchens, storage or closets (BCNYS 1016.2)
+  applies_when: occupancy_group_i4
+  check: space_egress_through_locked_room == 0 and space_egress_through_kitchen_storage == 0 and space_egress_sleeping_through_sleeping_or_toilet
+    == 0
+  review_when:
+  - when: space_egress_through_other_room > 0 and space_egress_through_locked_room == 0 and space_egress_through_kitchen_storage
+      == 0 and space_egress_sleeping_through_sleeping_or_toilet == 0
+    reason: 'Egress passes through an adjoining or intervening room: allowed only where the rooms are accessory to one another
+      and give a discernible path of egress travel to an exit (item 2): a person''s judgment.'
+  for_each: space
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 340
+    lines:
+    - 54
+    - 54
+    quote: 4. An exit access shall not pass through a room that can be locked to prevent egress.
+  - file: gov.ny.building.2025.pdf
+    page: 340
+    lines:
+    - 57
+    - 59
+    quote: 5. Means of egress from dwelling units or sleeping areas shall not lead through other sleeping areas, toilet rooms
+      or bathrooms. 6. Egress shall not pass through kitchens, storage rooms, closets or spaces used for similar purposes.
+  - file: gov.ny.building.2025.pdf
+    page: 340
+    lines:
+    - 48
+    - 50
+    quote: 2. In other than Group H occupancies, egress from a room or space is allowed to pass through adjoining or intervening
+      rooms or areas provided that such adjoining rooms or areas and the area served are accessory to one or the other and
+      provide a discernible path of egress travel to an exit.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p1
+        name: Classroom
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: Straight to a corridor.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p2
+        name: Room behind the storage room
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 1
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 0
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: Through a storage room (item 6).
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p3
+        name: Inner office
+        measures:
+          space_egress_through_locked_room: 1
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 1
+    rows:
+    - part: p3
+      outcome: fail
+    expect: fail
+    note: 'Through a room that can be locked (item 4): fails, whatever the other room is.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space:
+      - id: p4
+        name: Inner classroom
+        measures:
+          space_egress_through_locked_room: 0
+          space_egress_through_kitchen_storage: 0
+          space_egress_sleeping_through_sleeping_or_toilet: 0
+          space_egress_through_other_room: 1
+    rows:
+    - part: p4
+      outcome: needs_review
+    expect: needs_review
+    note: 'Through an adjoining classroom: allowed only where they are accessory to one another with a discernible path (item
+      2), a person''s judgment.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      space: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No space: the rule''s when_none (needs_review).'
+  notes: Items 4, 5 and 6 are measurable from the path; item 1 (enclosed elevator lobbies, Section 3006, not brought in) and
+    items 2 and 3 (adjoining rooms accessory to one another with a discernible path; Group H's hazard) are a person's. Item
+    6's exceptions (a kitchen within the same dwelling or sleeping unit; a Group M stockroom) are not Group I-4's; item 4's
+    exception (an elevator lobby's electrically locked door) is left out of the measure (space_egress_through_locked_room
+    counts no enclosed elevator lobby). Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1016_2_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Intervening spaces in other occupancies (BCNYS 1016.2)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 340
+    lines:
+    - 51
+    - 53
+    quote: 3. In Group H occupancies, egress from a room or space is allowed to pass through adjoining or intervening rooms
+      or areas provided that such adjoining rooms or areas are the same or lesser hazard occupancy group and provide a discernible
+      path of egress travel to an exit.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 4
+    - 6
+    quote: '1. Means of egress are not prohibited through a kitchen area serving adjoining rooms constituting part of the
+      same dwelling unit or sleeping unit. 2. Means of egress are not prohibited through stockrooms in Group M occupancies
+      where all of the following are met:'
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person. Item 3 (Group H) and item 6''s exceptions (dwelling-unit
+      kitchens, Group M stockrooms) are for them.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1016_2_1_multiple_tenants
+  kind: flag
+  topic: means_of_egress
+  title: 'Multiple tenants: no egress through another tenant (BCNYS 1016.2.1)'
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 13
+    - 15
+    quote: 1016.2.1 Multiple tenants. Where more than one tenant occupies any one floor of a building or structure, each tenant
+      space, dwelling unit and sleeping unit shall be provided with access to the required exits without passing through adjacent
+      tenant spaces, dwelling units and sleeping units.
+  examples:
+  - given: {}
+    expect: needs_review
+    note: Which spaces are separate tenants is the architect's statement; a person checks the paths and the exception.
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1017_2_travel_distance
+  kind: rule
+  topic: means_of_egress
+  title: Exit access travel 150 ft, 200 ft sprinklered (NFPA 13), I-4 (BCNYS 1017.2)
+  applies_when: occupancy_group_i4
+  check: egress_travel_distance <= (200 if sprinklered_903_3_1_1 else 150)
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 23
+    - 23
+    quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 38
+    - 38
+    quote: I-4 150 200[fnc]
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 56
+    - 56
+    quote: c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: First floor (the sheet)
+        measures:
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 130''-8" within 200 ft (I-4, sprinklered
+      per 903.3.1.1): passes.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p2
+        name: Long travel
+        measures:
+          egress_travel_distance: 210
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 210 ft is over 200 ft.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p1
+        name: Unsprinklered
+        measures:
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Not sprinklered: 150 ft (the 2009 IBC did not permit I-4 without one; this book does).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: false
+      sprinklered_903_3_1_2: true
+    parts:
+      story:
+      - id: p3
+        name: NFPA 13R only
+        measures:
+          egress_travel_distance: 180
+    rows:
+    - part: p3
+      outcome: fail
+    expect: fail
+    note: 'An NFPA 13R system (903.3.1.2) only: note c gives the 200 ft to 903.3.1.1 systems alone, so 150 ft applies.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1017.2''s I-4 row: 150 ft without an automatic sprinkler system, 200 ft with one per 903.3.1.1 (note c). An
+    I-4 building sprinklered only per 903.3.1.2 (NFPA 13R) does not meet note c, so 150 ft applies (the stricter reading).
+    Measured as 1017.3 says (from the most remote point of each room, area or space, along the natural and unobstructed path,
+    to the entrance to the nearest exit; stairways along their nosings, 1017.3.1): egress_travel_distance. Allowances that
+    loosen it (1017.2.1''s exterior balcony; note a''s other sections) are their own flags or not brought in. Hand-drafted
+    in a Claude Code session (2026-11-21).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1017_2_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Table 1017.2's rows for other occupancies (BCNYS)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 28
+    - 37
+    quote: A, E, F-1, M, R, S-1 200[fne] 250[fnb] I-1 Not Permitted 250[fnb] B 200 300[fnc] F-2, S-2, U 300 400[fnc] H-1 Not
+      Permitted 75[fnd] H-2 Not Permitted 100[fnd] H-3 Not Permitted 150[fnd] H-4 Not Permitted 175[fnd] H-5 Not Permitted
+      200[fnc] I-2, I-3 Not Permitted 200[fnc]
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1017_2_1_balcony_increase
+  kind: flag
+  topic: means_of_egress
+  title: Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)
+  applies_when: egress_balcony_increase_taken
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 341
+    lines:
+    - 60
+    - 61
+    quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+      up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+      on an exterior egress
+  examples:
+  - given:
+      egress_balcony_increase_taken: true
+    expect: needs_review
+    note: 'The design takes the increase: the balcony (Section 1021, not brought in) and its length are a person''s check.'
+  - given:
+      egress_balcony_increase_taken: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1017_2_2_f1_s1_increase
+  kind: flag
+  topic: means_of_egress
+  title: Groups F-1 and S-1 increase to 400 ft (BCNYS 1017.2.2)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 342
+    lines:
+    - 5
+    - 6
+    quote: '1017.2.2 Groups F-1 and S-1 increase. The maximum exit access travel distance shall be 400 feet (122 m) in Group
+      F-1 or S-1 occupancies where all of the following conditions are met:'
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1017_2_3_h5_increase
+  kind: flag
+  topic: means_of_egress
+  title: Group H-5 increase to 300 ft (BCNYS 1017.2.3)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 342
+    lines:
+    - 10
+    - 11
+    quote: '1017.2.3 Group H-5 increase. The maximum exit access travel distance shall be 300 feet (91 m) in the fabrication
+      areas of Group H-5 occupancies where all of the following conditions are met:'
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1017_3_2_3_atrium
+  kind: flag
+  topic: means_of_egress
+  title: Travel within an atrium at most 200 ft (BCNYS 1017.3.2.3)
+  applies_when: building_has_atrium
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 342
+    lines:
+    - 36
+    - 38
+    quote: 1017.3.2.3 Exit access travel distance at other than the level of exit discharge. Where the path of egress travel
+      is not at the level of exit discharge from the atrium, that portion of the total permitted exit access travel distance
+      that occurs within the atrium shall be not greater than 200 feet (60 960 mm).
+  examples:
+  - given:
+      building_has_atrium: true
+    expect: needs_review
+    note: 'Which part of a path is within an atrium, above or below the level of exit discharge, is not measured from the
+      drawing yet: a person checks.'
+  - given:
+      building_has_atrium: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_5_dead_end
+  kind: rule
+  topic: means_of_egress
+  title: Dead end at most 20 ft, or under 2.5 x its width, I-4 (BCNYS 1020.5)
+  applies_when: occupancy_group_i4
+  check: corridor_dead_end_length <= 20 or corridor_dead_end_length < 2.5 * corridor_dead_end_least_width
+  for_each: corridor
+  when_none: not_applicable
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 37
+    - 38
+    quote: 1020.5 Dead ends. Where more than one exit or exit access doorway is required, the exit access shall be arranged
+      such that dead-end corridors do not exceed 20 feet (6096 mm) in length.
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 44
+    - 45
+    quote: 3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5
+      times the least width of the dead-end corridor.
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p1
+        name: Corridor (the sheet)
+        measures:
+          corridor_dead_end_length: 21.5
+          corridor_dead_end_least_width: 10
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'The answer key (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml): 21''-6" is over 20 ft, but less
+      than 2.5 x 10 ft = 25 ft: exception 3, passes.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p2
+        name: Long dead end
+        measures:
+          corridor_dead_end_length: 26
+          corridor_dead_end_least_width: 10
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 26 ft is over 20 ft and not under 25 ft.
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor:
+      - id: p3
+        name: Short dead end
+        measures:
+          corridor_dead_end_length: 15
+          corridor_dead_end_least_width: 5
+    rows:
+    - part: p3
+      outcome: pass
+    expect: pass
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      corridor: []
+    rows:
+    - outcome: not_applicable
+    expect: not_applicable
+    note: 'No corridor: the rule''s when_none (not_applicable).'
+  notes: 'Exception 2''s 50 ft (sprinklered per 903.3.1.1) lists Groups B, E, F, I-1, M, R-1, R-2, S and U, not I-4; exceptions
+    1 and 4 are I-3 and I-2. It applies where more than one exit or exit access doorway is required (1006.2.1): with one,
+    there is no limit, so this rule may only be stricter there. The 2009 IBC (1018.4, the Maine sheet''s code) set the same.
+    Hand-drafted in a Claude Code session (2026-11-21).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1020_5_other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Dead ends in other occupancies (BCNYS 1020.5)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 40
+    - 43
+    quote: 1. In Group I-3, Condition 2, 3 or 4, occupancies, the dead end in a corridor shall not exceed 50 feet (15 240
+      mm). 2. In occupancies in Groups B, E, F, I-1, M, R-1, R-2, S and U, where the building is equipped throughout with
+      an automatic sprinkler system in accordance with Section 903.3.1.1, the length of the dead-end corridors shall not exceed
+      50 feet (15 240 mm).
+  - file: gov.ny.building.2025.pdf
+    page: 344
+    lines:
+    - 46
+    - 47
+    quote: 4. In Group I-2, Condition 2 occupancies, the length of dead-end corridors that do not serve patient rooms or patient
+      treat- ment spaces shall not exceed 30 feet (9144 mm).
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person. Exceptions 1, 2 and 4 (50 ft, 50 ft sprinklered, 30
+      ft) are for them.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft

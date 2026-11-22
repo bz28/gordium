@@ -1,0 +1,147 @@
+"""New York's commercial egress rules (the 2025 Building Code of New York State) against the Maine architect's hand
+check of a day-care centre, as if the same building were in New York
+(test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml), and the rules' shape: every number a rule uses
+stands on the second reading (text_verification.yaml), a table cell is a length in feet only where its verification
+flag says so, and what the law leaves open never passes. Needs no code cache (the rules' numbers come from the repo's
+verification file); the quotes are checked word for word by `python -m rule_format` where the cache is. Decided:
+docs/decisions/2026-11-21_ny_building_code.md."""
+
+import copy
+
+import pytest
+import yaml
+
+from rule_format import code_numbers, parts
+from rule_format.place import places
+from rule_format.rulebook import REPO, Context, load, rulebook_file_problems
+
+NY = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
+RULEBOOK = NY / "5_building_code_rules/drafted/general.yaml"
+KEY = REPO / "test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml"
+I4 = {"occupancy_group_i4": True, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}
+
+
+@pytest.fixture(scope="module")
+def ctx():
+    return Context.for_jurisdiction(NY)
+
+
+@pytest.fixture(scope="module")
+def rules():
+    return {r["id"]: r for r in load(RULEBOOK)["rules"]}
+
+
+def _rows(rule, kind, measures, given, ctx):
+    return [r["outcome"] for r in parts.rows(rule, {kind: [{"id": "p1", "measures": measures}]}, given, ctx.allowed())]
+
+
+def test_the_rulebook_is_valid(ctx):
+    assert rulebook_file_problems(RULEBOOK, ctx) == []
+
+
+def test_no_place_inherits_it_yet_so_no_check_runs_it():
+    """Not wired into a check (a later PR): Ithaca inherits the house code only."""
+    assert all(NY not in p.inherits for p in places())
+
+
+# What the sheet measured, the measure Gordium reads it as, and the rule that decides it here
+SHEET = {
+    "Exit access travel distance (the most remote point to an exit)":
+        ("general.bc_1017_2_travel_distance", "story", {"egress_travel_distance": 130.667}),
+    "Common path of egress travel":
+        ("general.bc_1006_2_1_two_exits", "space", {"space_common_path": 48.5, "space_exit_count": 2,
+                                                     "space_occupant_load": 30}),
+    "Dead-end corridor":
+        ("general.bc_1020_5_dead_end", "corridor", {"corridor_dead_end_length": 21.5,
+                                                    "corridor_dead_end_least_width": 10}),
+    "Exit (or exit access doorway) remoteness":
+        ("general.bc_1007_1_1_remoteness", "story", {"exit_remoteness_ratio": 0.8745, "story_exit_count": 2}),
+    "Accessory storage area on the story":
+        ("general.bc_508_2_3_accessory_area", "story", {"story_accessory_area": 1428, "story_gross_floor_area": 16509}),
+}
+
+
+def test_the_sheets_building_passes_each_new_york_limit_as_it_passed_maines(ctx, rules):
+    """The sheet's own numbers, under New York's 2025 limits for the same I-4, sprinklered (NFPA 13) building: the same
+    result as the sheet, pass, for each check; each rule has a worked example on those numbers."""
+    key = yaml.safe_load(KEY.read_text(encoding="utf-8"))
+    checks = {c["what"]: c for c in key["checks"]}
+    for what, (rid, kind, measures) in SHEET.items():
+        assert checks[what]["result"] == "pass"
+        assert _rows(rules[rid], kind, measures, I4, ctx) == ["pass"], rid
+        assert any("The answer key" in (e.get("note") or "") and e["expect"] == "pass" for e in rules[rid]["examples"]), rid
+
+
+def test_the_limits_are_new_yorks(rules):
+    """2025 BCNYS: travel 200 ft with NFPA 13 (note c), 150 ft without; one-exit space 10 occupants and 75 ft; dead end
+    20 ft or 2.5 x its width; one-third of the diagonal sprinklered, one-half not; 10 percent of the story."""
+    has = {rid: r.get("check") for rid, r in rules.items()}
+    assert has["general.bc_1017_2_travel_distance"] == "egress_travel_distance <= (200 if sprinklered_903_3_1_1 else 150)"
+    assert "space_occupant_load <= 10" in has["general.bc_1006_2_1_two_exits"]
+    assert "space_common_path <= 75" in has["general.bc_1006_2_1_two_exits"]
+    assert has["general.bc_1020_5_dead_end"] == ("corridor_dead_end_length <= 20 or corridor_dead_end_length < 2.5 * "
+                                                 "corridor_dead_end_least_width")
+    assert "1 / 3 if" in has["general.bc_1007_1_1_remoteness"] and "else 1 / 2" in has["general.bc_1007_1_1_remoteness"]
+    assert has["general.bc_508_2_3_accessory_area"] == "story_accessory_area <= 0.10 * story_gross_floor_area"
+
+
+def test_travel_with_an_nfpa_13r_system_only_is_held_to_150_ft(ctx, rules):
+    r = rules["general.bc_1017_2_travel_distance"]
+    nfpa_13r = I4 | {"sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True}
+    assert _rows(r, "story", {"egress_travel_distance": 180}, I4, ctx) == ["pass"]
+    assert _rows(r, "story", {"egress_travel_distance": 180}, nfpa_13r, ctx) == ["fail"]
+    assert _rows(r, "story", {"egress_travel_distance": 180}, {"occupancy_group_i4": True}, ctx) == ["needs_review"]
+
+
+def test_a_two_exit_space_over_75_ft_needs_review_while_the_tables_reading_is_open(ctx, rules):
+    """Table 1006.2.1 may cap the common path (as the 2009 IBC's 1014.3 did) or only call for a second exit: a space with
+    two exits and a common path over 75 ft is never passed, and never failed, until the question is answered."""
+    r = rules["general.bc_1006_2_1_two_exits"]
+    two = {"space_exit_count": 2, "space_occupant_load": 30}
+    assert _rows(r, "space", two | {"space_common_path": 75}, I4, ctx) == ["pass"]
+    assert _rows(r, "space", two | {"space_common_path": 80}, I4, ctx) == ["needs_review"]
+    one = {"space_exit_count": 1, "space_occupant_load": 8}
+    assert _rows(r, "space", one | {"space_common_path": 80}, I4, ctx) == ["fail"]
+    assert _rows(r, "space", one | {"space_common_path": 30}, I4 | {"sprinklered_903_3_1_1": False}, ctx) == ["fail"]
+    assert r["open_questions"] and r["research"][0]["why_open"]
+
+
+def test_a_path_through_a_locked_room_fails_even_when_it_also_crosses_another_room(ctx, rules):
+    r = rules["general.bc_1016_2_intervening_spaces"]
+    m = {"space_egress_through_locked_room": 1, "space_egress_through_kitchen_storage": 0,
+         "space_egress_sleeping_through_sleeping_or_toilet": 0, "space_egress_through_other_room": 1}
+    assert _rows(r, "space", m, I4, ctx) == ["fail"]
+    assert _rows(r, "space", m | {"space_egress_through_locked_room": 0}, I4, ctx) == ["needs_review"]
+
+
+def test_every_piece_labeled_rule_or_flag_has_a_rule_and_every_table_one_named_for_it():
+    got = yaml.safe_load((NY / "6_coverage_report/gov.ny.building.2025.rules.yaml").read_text(encoding="utf-8"))
+    assert got["not_checked_yet"] == []
+    for pid, e in got["pieces"].items():
+        if pid.startswith("Table "):
+            assert e["rules"] and all("_table_" in r for r in e["rules"]), (pid, e["rules"])
+
+
+def test_every_rule_number_stands_on_the_second_reading(ctx, rules):
+    for rid, r in rules.items():
+        if r["kind"] == "rule":
+            assert code_numbers.cites_book(r["sources"], ctx), rid
+            assert code_numbers.problems(r, r["sources"], ctx) == [], rid
+
+
+def test_a_table_cell_is_a_length_in_feet_only_where_its_flag_says_so(ctx, rules, monkeypatch):
+    """Table 1017.2 prints "(feet)" in its column headings, never beside a number, so its cells are read with no unit;
+    the verification flag naming them "a length in feet" makes them one (code_numbers._column_feet). Without it the
+    cell is a count and backs no travel distance; and an occupant-load cell of Table 1006.2.1 never backs a length."""
+    r = rules["general.bc_1017_2_travel_distance"]
+    assert code_numbers.problems(r, r["sources"], ctx) == []
+    entry = ctx.verification["gov.ny.building.2025.pdf"]["pieces"]["Table 1017.2"]
+    stripped = copy.deepcopy(ctx.verification)
+    stripped["gov.ny.building.2025.pdf"]["pieces"]["Table 1017.2"] = dict(
+        entry, flags=[f.replace(code_numbers.COLUMN_FEET, "a number") for f in entry["flags"]])
+    monkeypatch.setattr(ctx, "verification", stripped)
+    assert any("isn't one of" in p and "200" in p for p in code_numbers.problems(r, r["sources"], ctx))
+    monkeypatch.undo()
+    space = rules["general.bc_1006_2_1_two_exits"]
+    as_feet = dict(space, check="space_exit_count >= 2 or space_common_path <= 10")     # 10 is an occupant load
+    assert any("isn't one of" in p for p in code_numbers.problems(as_feet, space["sources"], ctx))

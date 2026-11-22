@@ -1,0 +1,56 @@
+# Facts about the whole building that the 2025 Building Code of New York State's egress rules read (2026-11-21),
+# stated by the architect: not in measures.yaml (Ithaca's zoning measures), so listed here for engineers, never used
+# silently, and a rule using one can't be approved until an engineer adds it to measures.yaml (rulebook.py:
+# PROPOSED_MEASURES). Each is a yes or no, worded as the book words the condition, so a rule reads the book's own
+# test. Written by hand in a Claude Code session; needed_by: the rules that read each one.
+
+occupancy_group_i4:
+  meaning: The building (or the part of it checked) is classified in Group I-4, day care facilities (2025 BCNYS 308.5), as
+    the architect states it; not Group E by 308.5.1, nor part of the primary occupancy or Group R-3 by 308.5.2 to 308.5.4
+  unit: yes_no
+  needed_by:
+  - general.bc_1006_2_1_two_exits
+  - general.bc_1016_2_intervening_spaces
+  - general.bc_1017_2_travel_distance
+  - general.bc_1020_5_dead_end
+sprinklered_903_3_1_1:
+  meaning: The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.1
+    (NFPA 13), as the architect states it
+  unit: yes_no
+  needed_by:
+  - general.bc_1006_2_1_two_exits
+  - general.bc_1007_1_1_remoteness
+  - general.bc_1007_1_2_three_or_more_exits
+  - general.bc_1017_2_travel_distance
+sprinklered_903_3_1_2:
+  meaning: The building is equipped throughout with an automatic sprinkler system in accordance with 2025 BCNYS Section 903.3.1.2
+    (NFPA 13R, permitted in some Group R occupancies), as the architect states it
+  unit: yes_no
+  needed_by:
+  - general.bc_1006_2_1_two_exits
+  - general.bc_1007_1_1_remoteness
+  - general.bc_1007_1_2_three_or_more_exits
+other_occupancy_present:
+  meaning: 'The building holds an occupancy other than Group I-4 (a mixed building: another tenant, or an accessory or separated
+    occupancy, 2025 BCNYS 508), as the architect states it; left unstated, the rows and allowances for other occupancies need
+    review'
+  unit: yes_no
+  needed_by:
+  - general.bc_1016_2_other_occupancies
+  - general.bc_1017_2_2_f1_s1_increase
+  - general.bc_1017_2_3_h5_increase
+  - general.bc_1020_5_other_occupancies
+  - general.bc_table_1006_2_1_other_occupancies
+  - general.bc_table_1017_2_other_occupancies
+egress_balcony_increase_taken:
+  meaning: The design takes 2025 BCNYS 1017.2.1's exterior egress balcony increase (up to 100 ft more travel where the last
+    part of the exit access is on an exterior egress balcony), as the architect states it
+  unit: yes_no
+  needed_by:
+  - general.bc_1017_2_1_balcony_increase
+building_has_atrium:
+  meaning: 'The building has an atrium (2025 BCNYS 202 ATRIUM: an opening connecting two or more stories, closed at the top)
+    that a path of egress travel passes through or that areas open to, as the architect states it'
+  unit: yes_no
+  needed_by:
+  - general.bc_1017_3_2_3_atrium
