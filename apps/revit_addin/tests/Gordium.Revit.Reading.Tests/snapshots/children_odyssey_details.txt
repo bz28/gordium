@@ -40,6 +40,7 @@ WHAT TO DO:
   2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 HOW FAR: 116.16 ft to spare if confirmed
+BAR: exits 187.16 ft apart, needs ≥ 71 ft (1/3 of the 212.99 ft diagonal) (the bar's marks: 187.1643328131042 and limit 70.99510361186105 ft, the worker's numbers)
 THE LAW'S WORDS:
   "Where two exits or exit access doorways are required from any portion of the exit access," (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
   "the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line between exit doors or exit access doorways." (1015.2.1, 2009 International Building Code (IBC), PDF p.266)

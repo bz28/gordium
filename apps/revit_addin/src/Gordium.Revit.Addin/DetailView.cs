@@ -21,6 +21,11 @@ internal interface IDetailHost
 
     /// <summary>Check the project again.</summary>
     void CheckAgain();
+
+    /// <summary>Whether the row is ticked "looked at" (the architect's note, never a verdict), and the tick changed.</summary>
+    bool DetailLooked { get; }
+
+    void TickDetail(bool ticked);
 }
 
 /// <summary>
@@ -76,6 +81,14 @@ internal static class DetailView
         page.Children.Add(EntryView.Typed(new C.TextBlock { Text = d.Name, TextWrapping = W.TextWrapping.Wrap }, "type.title"));
         if (d.Section is not null)
             page.Children.Add(EntryView.Muted(d.Section, top: 2));
+        if (d.Tickable)
+        {
+            // the architect's own "looked at" (LookedAt): never a verdict, and it says so on hover
+            var tick = CauseCardsView.Tick(new CauseCardsView.TickTag(false, d.Id), host.DetailLooked, host.TickDetail);
+            tick.HorizontalAlignment = W.HorizontalAlignment.Left;
+            tick.Margin = new W.Thickness(0, 6, 0, 0);
+            page.Children.Add(tick);
+        }
 
         if (d.Why is not null)
         {
@@ -115,6 +128,12 @@ internal static class DetailView
                 page.Children.Add(Figure(f));
             if (d.HowFar is not null)
                 page.Children.Add(Pair("How far", d.HowFar, null));
+        }
+        if (d.Bar is { } bar)
+        {
+            if (d.Figures.Count == 0 && d.HowFar is null)
+                page.Children.Add(Heading("Measured against the limit"));
+            page.Children.Add(Bar(bar, d.Status));
         }
 
         page.Children.Add(Heading("The law's words"));
@@ -193,6 +212,45 @@ internal static class DetailView
         DetailAction.CheckAgain => Primary(Button("Check again", "Check this project again: only the check changes a verdict", host.CheckAgain)),
         _ => null,
     };
+
+    /// <summary>The measured-vs-limit bar (MeasureBar): a track the longer of the two lengths spans, filled to the length
+    /// found, a mark at the limit, in the row's status colour (amber for a row in review; the clock's hatching once
+    /// stale: never green unless the worker said it complies); the worker's words for both under it. The numbers only
+    /// place the marks: no figure is shown that isn't the worker's.</summary>
+    private static W.UIElement Bar(MeasureBar bar, PanelStatus status)
+    {
+        var box = new C.StackPanel { Margin = new W.Thickness(0, 4, 0, 6) };
+        var track = new C.Grid { Height = 12, Margin = new W.Thickness(0, 0, 0, 3) };
+        var back = new C.Border { BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(2) };
+        back.SetResourceReference(C.Border.BackgroundProperty, PanelTokens.BgHover);
+        back.SetResourceReference(C.Border.BorderBrushProperty, PanelTokens.Line);
+        track.Children.Add(back);
+        var fill = new C.Grid { Margin = new W.Thickness(1) };
+        fill.ColumnDefinitions.Add(new C.ColumnDefinition { Width = new W.GridLength(bar.MeasuredAt, W.GridUnitType.Star) });
+        fill.ColumnDefinitions.Add(new C.ColumnDefinition { Width = new W.GridLength(Math.Max(0, 1 - bar.MeasuredAt), W.GridUnitType.Star) });
+        var found = new System.Windows.Shapes.Rectangle();
+        found.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(status));
+        fill.Children.Add(found);
+        track.Children.Add(fill);
+        var limit = new C.Grid();
+        limit.ColumnDefinitions.Add(new C.ColumnDefinition { Width = new W.GridLength(bar.LimitAt, W.GridUnitType.Star) });
+        limit.ColumnDefinitions.Add(new C.ColumnDefinition { Width = new W.GridLength(Math.Max(0, 1 - bar.LimitAt), W.GridUnitType.Star) });
+        var mark = new System.Windows.Shapes.Rectangle { Width = 3, HorizontalAlignment = W.HorizontalAlignment.Right, Margin = new W.Thickness(0, -2, -1, -2) };
+        mark.SetResourceReference(System.Windows.Shapes.Shape.FillProperty, PanelTokens.Text);
+        limit.Children.Add(mark);
+        track.Children.Add(limit);
+        box.Children.Add(track);
+        var side = bar.Side switch
+        {
+            LimitSide.AtLeast => "the limit: the length must reach it",
+            LimitSide.AtMost => "the limit: the length must stay within it",
+            _ => "the limit",
+        };
+        box.Children.Add(EntryView.Muted($"Bar: the length found; the dark mark is {side}."));
+        box.Children.Add(EntryView.Typed(new C.TextBlock { Text = bar.Words, TextWrapping = W.TextWrapping.Wrap, Margin = new W.Thickness(0, 2, 0, 0) }, "type.figure"));
+        W.Automation.AutomationProperties.SetName(box, "Measured against the limit: " + bar.Words);
+        return box;
+    }
 
     private static W.UIElement Figure(FigureLine f)
     {

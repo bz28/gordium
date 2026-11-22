@@ -32,7 +32,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         };
     }
 
-    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, _theme);
+    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, _theme);
 
     /// <summary>Revit's theme as the panel last read it (light until read).</summary>
     private static PanelTheme _theme = PanelTheme.Light;
@@ -215,6 +215,19 @@ internal sealed class ResultsPane : IDockablePaneProvider
 
     private static void Zoom(ResultRow row) => Post("Show in model", ui => ShowElements(ui, row, zoom: true));
 
+    /// <summary>A cause card's Show (its elements, or one room it names: selected and zoomed to), or Show and open
+    /// Properties (selected and zoomed to, then Revit's Properties palette brought up, the mark to set named:
+    /// CauseCards.AfterProperties). The API can't scroll Properties to a field, so the panel names it.</summary>
+    private static void Card(CardRequest request) => Post(
+        request.Action == CardAction.ShowAndProperties ? "Show and open Properties" : "Show the cause's elements", ui =>
+        {
+            var selected = ShowElements(ui, request.Elements, request.What, zoom: true);
+            if (request.Action != CardAction.ShowAndProperties || selected == 0)
+                return;
+            ui.GetDockablePane(DockablePanes.BuiltInDockablePanes.PropertiesPalette).Show();
+            Say(CauseCards.AfterProperties(request.Card, selected));
+        });
+
     /// <summary>A row selected in the list (a click, Up or Down): its elements selected in Revit, the view not moved
     /// (design pass section 2.7: zoom is only an explicit Show), so Properties follows the panel.</summary>
     private static void Select(ResultRow row) => Post("Select in model", ui => ShowElements(ui, row, zoom: false));
@@ -223,41 +236,48 @@ internal sealed class ResultsPane : IDockablePaneProvider
     /// checked, by their UniqueIds; says plainly when it can't (the project closed or not the active one, an element
     /// gone or not in this model). A row selected that names no element clears Revit's selection (what is selected is
     /// always the row's), quietly.</summary>
-    private static void ShowElements(UIApplication ui, ResultRow row, bool zoom)
+    private static void ShowElements(UIApplication ui, ResultRow row, bool zoom) => ShowElements(ui, row.Elements, row.Name, zoom);
+
+    /// <summary>Selects <paramref name="uids"/> (each once) and, with <paramref name="zoom"/>, zooms to them, as
+    /// the row's ShowElements does; <paramref name="what"/> names them in
+    /// the panel's line. Gives how many were selected (0 when none could be).</summary>
+    private static int ShowElements(UIApplication ui, IReadOnlyList<string> uids, string what, bool zoom)
     {
         var doc = _checked;
         if (doc is null || !doc.IsValidObject)
         {
             Say("The project checked is closed: open it and click Check again.");
-            return;
+            return 0;
         }
         var uidoc = ui.ActiveUIDocument;
-        if (!zoom && row.Elements.Count == 0)
+        if (!zoom && uids.Count == 0)
         {
             if (uidoc is not null && uidoc.Document.Equals(doc))
                 uidoc.Selection.SetElementIds(new List<ElementId>());
-            return;
+            return 0;
         }
         if (uidoc is null || !uidoc.Document.Equals(doc))
         {
             Say($"Switch to {doc.Title} to show it: the check was of that project.");
-            return;
+            return 0;
         }
         var found = new List<ElementId>();
-        foreach (var uid in row.Elements)
-            if (doc.GetElement(uid) is { } e)
+        var asked = uids.Distinct(StringComparer.Ordinal).ToList();
+        foreach (var uid in asked)
+            if (doc.GetElement(uid) is { } e && !found.Contains(e.Id))
                 found.Add(e.Id);
-        var gone = row.Elements.Count - found.Count;
+        var gone = asked.Count - found.Count;
         if (found.Count == 0)
         {
             Say("Its elements aren't in this model now (deleted since the check, in a linked model, or an area Gordium " +
                 "read from the walls): click Check again.");
-            return;
+            return 0;
         }
         uidoc.Selection.SetElementIds(found);
         if (zoom)
             uidoc.ShowElements(found);
-        Say($"Selected {found.Count} element{(found.Count == 1 ? "" : "s")} for {row.Name}" +
+        Say($"Selected {found.Count} element{(found.Count == 1 ? "" : "s")} for {what}" +
             (gone > 0 ? $"; {gone} not in this model now" : "") + (zoom ? "." : " (Show or Space zooms to them)."));
+        return found.Count;
     }
 }

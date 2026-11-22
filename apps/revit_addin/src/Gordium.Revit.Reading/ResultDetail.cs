@@ -53,6 +53,15 @@ public sealed record ResultDetail(string Position, PanelStatus Status, string Ve
                                   IReadOnlyList<FigureLine> Figures, string? HowFar, IReadOnlyList<LawQuote> Quotes,
                                   string? NoQuote, IReadOnlyList<LawLink> Links, IReadOnlyList<DetailElement> Elements)
 {
+    /// <summary>The measured-vs-limit bar (the row's, from the worker's two lengths), or null.</summary>
+    public MeasureBar? Bar { get; init; }
+
+    /// <summary>Whether the row takes a "looked at" tick (<see cref="LookedAt.Tickable"/>).</summary>
+    public bool Tickable { get; init; }
+
+    /// <summary>The worker's row id (what its tick is kept by).</summary>
+    public string Id { get; init; } = "";
+
     /// <summary>The detail as plain text, top to bottom (the snapshot tests' form, and what a screen reader reads).</summary>
     public string Text()
     {
@@ -69,6 +78,9 @@ public sealed record ResultDetail(string Position, PanelStatus Status, string Ve
         s.AddRange(Figures.Select(f => $"  {f.What ?? "figure"}: {f.Measured ?? "—"} ({f.How}) | limit {f.Limit}"));
         if (HowFar is not null)
             s.Add("HOW FAR: " + HowFar);
+        if (Bar is not null)
+            s.Add($"BAR: {Bar.Words} (the bar's marks: {Bar.Measured.ToString("R", CultureInfo.InvariantCulture)} and limit " +
+                  $"{Bar.Limit.ToString("R", CultureInfo.InvariantCulture)} {Bar.Unit}, the worker's numbers)");
         s.Add("THE LAW'S WORDS:");
         if (NoQuote is not null)
             s.Add("  " + NoQuote);
@@ -113,7 +125,10 @@ public static class Details
             string.Create(CultureInfo.InvariantCulture, $"{index + 1} of {count}"), row.Status, r.VerdictWords, r.Name, r.Section,
             stale, why, Steps(row, elements, stale is not null), r.FigureLines, r.HowFar, r.Quotes,
             r.Quotes.Count == 0 ? "The checker sent no quote with this row" + (r.Section is null ? "." : $": see {r.Section}.") : null,
-            r.Links, elements);
+            r.Links, elements)
+        {
+            Bar = r.Bar, Tickable = LookedAt.Tickable(row), Id = r.Id,
+        };
     }
 
     /// <summary>What to do, from the worker's own advice and the row's place (never a figure of the add-in's): a
