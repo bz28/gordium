@@ -445,7 +445,7 @@ lot the tax map allows:
 - side yard, southwest 12'-0 1/2" (needs 10'-0"); northeast, 12'-0 3/8";
 - coverage 21.7% (the limit is 25%).
 
-Thirteen rows need review from the start, and that is Gordium being honest, not a mistake:
+Fifteen rows need review from the start, and that is Gordium being honest, not a mistake:
 - **New structures at least 20 ft from an inlet wall or stream bank**: the start box's stream question was left
   Not answered, so this row waits on it ("say whether any inlet wall or stream bank … is within 20 ft of the lot").
   Answer it with the row's **Answer 2 questions…** button and the row is decided.
@@ -464,6 +464,11 @@ Thirteen rows need review from the start, and that is Gordium being honest, not 
   14.2 ft across the lot, but Gordium assumes it flat: height is measured from the average ground level at the
   walls (the grade plane, §325-3), which Gordium can't set yet: check height and stories against your survey". The
   header's Ground line says the same. On a lot the lookup finds level, both comply.
+- **Which code governs this building: can't tell yet**, one at the head of each egress section (the NY Residential
+  Code's and the NY Building Code's): with the stories undecided, Gordium can't tell whether the house is within the
+  Residential Code's three stories above grade plane (R101.2), so both books wait and neither is the answer
+  ("To settle it, state the building's stories above grade plane"). On a lot the lookup finds level, the stories
+  comply and only the Residential Code's section shows.
 - **Private garage: not more than three cars**: the start box's garage question was left Not answered, so this row
   waits on it ("enter how many cars the lot's private garages hold, all together …"). Answer it with the row's
   **Enter the cars the private garages hold…** button: three or fewer complies; over three, the row then asks how

@@ -134,12 +134,15 @@ def test_the_starting_house_on_the_sample_lot(house):
         assert (row["proposed"], row["status"], row["note"]) == (at, present.REVIEW, "assuming flat ground")
     why, = said(r'neither can be decided: "(the ground falls .+? against your survey)"')
     assert " ".join(why.split()) in height["reason"] and " ".join(why.split()) in items["Stories"]["reason"]
-    said("Thirteen rows need review from the start")
+    said("Fifteen rows need review from the start")
     stream = "New structures at least 20 ft from an inlet wall or stream bank"
     said(r"\*\*" + stream + r"\*\*: the start box's stream question was left Not answered")
     assert [i["name"] for i in items.values() if i["status"] == present.REVIEW and not i.get("use_detail")] == [
         stream, "Stories", "Building height", "Rear yard", "Eaves into front yard", "One-family occupancy",
-        "Private garage: not more than three cars", *ADU_ROWS]
+        "Private garage: not more than three cars", *ADU_ROWS, "Which code governs this building: can't tell yet"]
+    said(r"\*\*Which code governs this building: can't tell yet\*\*, one at the head of each egress section")
+    assert sum(i["name"] == "Which code governs this building: can't tell yet"
+               for i in check_site(_site(got["floors"]), facts)["view"]["items"]) == 2
     assert items[stream]["reason"].startswith("say whether any inlet wall or stream bank") and \
         set(items[stream]["needs"]) == {"stream_near_lot", "stream_distance"}       # waits on the question, nothing else
     button, = said(r"Answer it with the row's \*\*(.+?)…\*\* button")
