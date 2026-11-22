@@ -2257,6 +2257,11 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
                       "hint": None, "reason": NOT_YET_WHY.format(g["section"]),
                       "detail": {"line": "", "quotes": [], "citation": g["section"], "links": [], "calc": None,
                                  "scope": "", "precision": "", "at_limit": None}})
+    for i in items:                                  # how far off in words, and why each row in review needs it (PR 5)
+        if "how_far" not in i and (words := how_far_of(i)):
+            i["how_far"] = words
+        if i["status"] == REVIEW and not i.get("causes"):
+            i["causes"] = zoning_causes(i)
     for i in items:                                  # the use details still to answer: their own group (never a pass)
         i["use_detail"] = rhino_logic.is_use_detail(i, facts)
         if i["use_detail"]:                          # when to answer, in the row (the group's title is short)
@@ -2269,6 +2274,84 @@ def view(rows, interior, rules_by_id, measured, facts, extras=None, jurisdiction
             "groups": grouped(items)}
 
 
+# ---- what the panel needs beyond the words (docs/revit/ui_design_pass.md section 4, PR 5; panel_data) ----------
+
+_AMOUNT = r"""(?:\d+'-\d+(?: \d+/\d+)?"|[\d,]+(?:\.\d+)? sf|[\d.]+%|[\d.]+)"""
+
+
+def how_far_of(item: dict) -> str | None:
+    """A zoning row's how far off in words that always carry their direction, from its Delta (delta_words,
+    tax_delta: the same amounts, never re-worked): a room's "+2'-0"" is "2'-0" to spare", "≥ +3'-0"" "at least
+    3'-0" to spare", a shortfall's sign dropped beside its word ("−1'-4" short" is "1'-4" short"). A row with no
+    Delta but a margin (a host's own item): its margin in words, "past the limit" for a shortfall, never the bare
+    signed number. None when it gives neither."""
+    delta = (item.get("delta") or "").strip()
+    if delta:
+        words = re.sub(r"≥ \+(" + _AMOUNT + ")", r"at least \1 to spare", delta)
+        words = re.sub(r"\+(" + _AMOUNT + ")", r"\1 to spare", words)
+        words = re.sub(r"−(" + _AMOUNT + r") (short|over)", r"\1 \2", words)
+        words = re.sub(r"−(" + _AMOUNT + ")", r"\1 past the limit", words)
+        return words
+    margin = (item.get("margin") or "").strip()
+    if not margin or margin == "—":
+        return None
+    if margin == "at limit":
+        return "at the limit"
+    if m := re.fullmatch(r"\+(" + _AMOUNT + ")", margin):
+        return f"{m.group(1)} to spare"
+    if m := re.fullmatch(r"[−-](" + _AMOUNT + ")", margin):
+        return f"{m.group(1)} past the limit"
+    return None                                       # never a bare number with no direction
+
+
+def zoning_causes(item: dict) -> list[dict]:
+    """A zoning (or the view's own) row in review: its cause as panel_data says causes, from what the row asks for:
+    facts to enter (its `needs`) or a building to pick are the architect's to state ("mark"); the lot lines to pick
+    from a survey likewise; anything else a person decides from its reason."""
+    from design_checker import panel_data
+    objects = [o for o in item.get("objects") or [] if isinstance(o, str)]
+    needs = [n for n in item.get("needs") or [] if isinstance(n, str)]
+    if needs:
+        return [{"kind": panel_data.MARK, "key": "facts:" + ",".join(sorted(needs)),
+                 "words": item.get("hint") or ("Enter " + ", ".join(needs)), "elements": [], "needs": needs}]
+    if item.get("hint") in (PICK_MAIN, PICK_ADU):
+        return [{"kind": panel_data.MARK, "key": "pick:" + item["hint"], "words": item["hint"], "elements": objects}]
+    reason = (item.get("reason") or "").strip()
+    if "Pick survey lot lines" in reason:
+        return [{"kind": panel_data.MARK, "key": "survey_lot_lines", "words": "Pick survey lot lines…",
+                 "elements": objects}]
+    return [{"kind": panel_data.DECIDE, "key": f"reason:{item.get('id')}", "words": reason or "needs review",
+             "elements": objects}]
+
+
+def law_quote_sources(items: list[dict]) -> None:
+    """Each quote of an inherited law's row with its source: the file, PDF page and lines its words are on, and the
+    document's own address (`url`, its publisher's page, from the law's sources.yaml), from the rule's sources
+    (each_part puts them in `detail.sources`, in the order egress quotes them). Only where the two lists match one
+    for one (never a source put beside another's words); a quote that has them is left as it is."""
+    docs = {}
+    for i in items:
+        d = i.get("detail") or {}
+        srcs, quotes = d.get("sources"), d.get("quotes")
+        if i.get("group") != LAW_GROUP or not isinstance(srcs, list) or not isinstance(quotes, list) \
+                or len(srcs) != len(quotes) or not srcs:
+            continue
+        key = i.get("law_key")
+        if key not in docs:
+            path = REPO / "regulations/jurisdictions" / str(key) / "1_source_documents/sources.yaml"
+            try:
+                docs[key] = {x["file"]: x for x in load(path)["documents"]} if key and path.exists() else {}
+            except Exception:
+                docs[key] = {}
+        for q, s in zip(quotes, srcs):
+            if not isinstance(q, dict) or not isinstance(s, dict) or "file" in q:
+                continue
+            entry = docs[key].get(s.get("file")) or {}
+            q.update(file=s.get("file"), page=s.get("page"), lines=s.get("lines"),
+                     document=entry.get("title"), url=entry.get("url"),
+                     in_repo=entry.get("kept_outside_repo") is not True)
+
+
 def grouped(items: list[dict]) -> list[dict]:
     """The panel's groups in order (empty ones left out); site items carry "Site · " in their group label.
 
@@ -2279,6 +2362,7 @@ def grouped(items: list[dict]) -> list[dict]:
     each with its items) and `count` (what the headline counts). A law still waiting for rooms is one group titled
     by its law ("Egress (NY State Residential Code 2025)"), as before (#106)."""
     from design_checker import grouping
+    law_quote_sources(items)                          # each law quote's file, page and lines (PR 5): words only
     by = {"fails": [], "review": [], "complies": [], "use_details": [], "not_checked": [], "not_covered": []}
     laws = {}                                        # an inherited law's items, by law, in the order given
     for i in items:
@@ -2293,6 +2377,10 @@ def grouped(items: list[dict]) -> list[dict]:
                {FAILS: "fails", REVIEW: "review", COMPLIES: "complies"}[i["status"]])
         by[key].append(i["id"])
     zoning = [{"key": k, "title": t, "items": by[k]} for k, t in GROUPS if by[k]]
+    by_id = {i["id"]: i for i in items}
+    for g in zoning:                                  # "Fix these first": the rows to review, by their first cause
+        if g["key"] == "review":
+            g["causes"] = grouping.cause_cards([by_id[x] for x in g["items"]])
     after = {grouping.FAILS_T: "fails", grouping.REVIEW_T: "review", grouping.BY_HAND_T: "review",
              grouping.COMPLIES_T: "complies"}       # each law tier goes after this zoning group (or where it would be)
     place = {k: n for n, (k, _) in enumerate(GROUPS)}
@@ -2317,7 +2405,9 @@ def grouped(items: list[dict]) -> list[dict]:
                     "key": f"{law['key']}:{t}", "title": f"{law['short']} · {heading}",
                     "items": [x for ln in lines[t] for x in ln["items"]], "lines": lines[t], "count": count[t],
                     "folded": t in grouping.FOLDED, "law": law["title"],
-                    "name": law["short"]}))       # its heading without its result, while the list is out of date
+                    "name": law["short"],          # its heading without its result, while the list is out of date
+                    **({"causes": grouping.cause_cards([by_id[x] for ln in lines[t] for x in ln["items"]])}
+                       if t in (grouping.REVIEW_T, grouping.BY_HAND_T) else {})}))
     out = [((place[g["key"]], -1), g) for g in zoning] + placed       # zoning's group first, then the law's
     return [g for _, g in sorted(out, key=lambda x: x[0])] + tail
 

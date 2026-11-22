@@ -341,3 +341,32 @@ def summary(items: list[dict]) -> str:
     if parts and present.state(items) != present.COMPLIES and not c["fails"] and not c["review"]:
         parts.insert(0, present.WORDS[present.REVIEW][0])
     return " · ".join(parts) or "nothing checked"
+
+
+CARD_ORDER = {"fix_model": 0, "mark": 1, "measure_by_hand": 2, "decide": 3}   # what the architect can change first
+
+
+def cause_cards(items: list[dict]) -> list[dict]:
+    """The "Fix these first" cards (docs/revit/ui_design_pass.md section 2.3): the needs-review items grouped by their
+    first cause (panel_data's `causes`, the one to act on first), each card {key, kind, words, elements, items,
+    rules}: one job however many rows it clears. Words and ids only: every item keeps its status, every item with a
+    cause is on exactly one card, an item with none on none. Cards in the order the architect can act on them (the
+    model and its marks first, then what is measured by hand, then what a person decides), then by how many rows each
+    clears, then as first met."""
+    cards, at = [], {}
+    for i in items:
+        cs = i.get("causes") if i.get("status") == present.REVIEW else None
+        if not cs or not isinstance(cs[0], dict) or not cs[0].get("key"):
+            continue
+        c = cs[0]
+        if c["key"] not in at:
+            at[c["key"]] = {"key": c["key"], "kind": c.get("kind"), "words": c.get("words"), "elements": [],
+                            "items": [], "rules": 0}
+            cards.append(at[c["key"]])
+        card = at[c["key"]]
+        card["items"].append(i["id"])
+        card["elements"] += [e for e in c.get("elements") or [] if e not in card["elements"]]
+    for card in cards:
+        card["rules"] = len({next((i.get("rule") or i["id"] for i in items if i["id"] == x), x) for x in card["items"]})
+    order = {c["key"]: n for n, c in enumerate(cards)}
+    return sorted(cards, key=lambda c: (CARD_ORDER.get(c["kind"], len(CARD_ORDER)), -len(c["items"]), order[c["key"]]))

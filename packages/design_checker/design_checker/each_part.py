@@ -50,6 +50,7 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
     home = _homes(given)
     claims = has_none if isinstance(has_none, dict) else {}
     out, results, open_, set_aside = [], {}, {}, {k: [] for k in claims}
+    panel = {}                   # what the results panel needs beyond the words (panel_data): words and data only
     for n, rule in enumerate(rules, 1):
         got = parts.rows(rule, given, values, allowed)
         for row in got:
@@ -71,6 +72,7 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
             row["line"] = line(row, rule, values, allowed, why_not.get((row["part"], row["id"])))
             open_[id(row)] = unsettled(row, rule, given, values, allowed, why_not.get((row["part"], row["id"])),
                                        more.get((row["part"], row["id"])))
+            panel[id(row)] = _panel(rule, row, open_[id(row)], given, values, allowed, more, why_not)
         out += got
         key = _key(rule, n)          # two rules with one id (never validated so): one answer from both, never kinder
         results[key] = parts.rule_result(got + [{"outcome": results[key]}] if key in results else got)
@@ -81,7 +83,32 @@ def check_parts(rules: list[dict], given, values: dict, allowed: dict, has_none:
             items[-1]["element"] = items[-1]["name"]     # the part, as named: its line in the grouped results
             if open_.get(id(r)):     # why it needs review, for grouping the panel's lines (words only: never a status)
                 items[-1]["open"] = open_[id(r)]
+            got = panel.get(id(r)) or {}
+            items[-1].update({k: v for k, v in got.items() if k != "sources"})
+            items[-1]["detail"]["sources"] = got.get("sources") or []
     return {"rows": out, "results": results, "items": items, "set_aside": set_aside}
+
+
+def _panel(rule, row, open_, given, values, allowed, more, why_not) -> dict:
+    """A row's causes, how far off and limit as a length, and its rule's sources (panel_data): never a status, never
+    a crash (a problem here leaves the row as it was, its words whole)."""
+    from design_checker import panel_data
+    key = (row["part"], row["id"])
+    part = _part(given, row["part"], row["id"]) if isinstance(given, dict) else None
+    out = {"sources": panel_data.sources(rule)}
+    try:
+        cs = panel_data.causes(rule, row, open_, part, more.get(key), why_not.get(key), values, allowed, GORDIUM_GAPS)
+        if cs:
+            out["causes"] = cs
+    except Exception:
+        if row.get("outcome") == "needs_review":
+            out["causes"] = [{"kind": panel_data.DECIDE, "key": f"reason:{row.get('reason') or rule.get('id')}",
+                              "words": row.get("reason") or "needs review", "elements": []}]
+    try:
+        out.update(panel_data.figures(rule, row, part, values, allowed, more.get(key)))
+    except Exception:
+        pass
+    return out
 
 
 def _stated(given) -> dict:
