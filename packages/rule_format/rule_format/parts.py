@@ -311,9 +311,11 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
         why = _maybe(part) or maybe
         if why and result != "not_applicable":   # it, or the part it sits in, may not be of its kind at all
             return _row(rule, "needs_review", part, within, reason=why, values=shown)
-        if result != "not_applicable":           # a measure standing on a reading to confirm: always said
-            reason = "; ".join(dict.fromkeys(x for x in [reason] + _confirm(part, mine, shown) if x)) or None
-        return _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
+        row = _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
+        confirm = _confirm(part, mine, shown) if result != "not_applicable" else []
+        if confirm:                              # a measure standing on a reading to confirm: always said, in its own
+            row["confirm"] = list(dict.fromkeys(confirm))   # field, so the row's own reason and comparison stay
+        return row
 
     if not parent:
         out += [checked(p) for p in children]

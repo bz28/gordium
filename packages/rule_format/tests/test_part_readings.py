@@ -114,30 +114,38 @@ def story_with(confirm, **measures):
     return {"story": [part]}
 
 
-def test_a_measure_on_a_reading_to_confirm_says_so_in_every_row_that_reads_it(maine):
+def row_of(rule, given, values, allowed):
+    return parts.rows(rule, given, values, allowed)[0]
+
+
+def test_a_measure_on_a_reading_to_confirm_is_said_in_its_own_field_of_every_row_that_reads_it(maine):
+    """Review round 1: the words go in the row's `confirm`, never in its `reason` (a pass or fail row's reason
+    stays empty, so the line keeps its comparison and the rule's title)."""
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
     for value, result in ((40.0, "pass"), (140.0, "fail")):
-        got = outcome(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=value),
-                      SPRINKLERED_NEW, allowed)
-        assert got == (result, WORDS)                                   # the outcome itself is unchanged
+        row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=value),
+                     SPRINKLERED_NEW, allowed)
+        assert (row["outcome"], row["reason"], row["confirm"]) == (result, None, [WORDS])
 
 
 def test_a_reading_to_confirm_is_said_only_for_the_measures_a_rule_reads_and_has(maine):
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
     # the words are for another measure: not said here
-    assert outcome(rule, story_with({"egress_travel_distance": WORDS}, common_path_of_travel=40.0),
-                   SPRINKLERED_NEW, allowed) == ("pass", None)
+    row = row_of(rule, story_with({"egress_travel_distance": WORDS}, common_path_of_travel=40.0), SPRINKLERED_NEW,
+                 allowed)
+    assert row["outcome"] == "pass" and "confirm" not in row
     # the measure isn't given: the row needs review for that, and no reading stands behind a value
-    result, why = outcome(rule, story_with({"common_path_of_travel": WORDS}), SPRINKLERED_NEW, allowed)
-    assert result == "needs_review" and WORDS not in (why or "")
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}), SPRINKLERED_NEW, allowed)
+    assert row["outcome"] == "needs_review" and "confirm" not in row
     # no `confirm`: as before
-    assert outcome(rule, story_with(None, common_path_of_travel=40.0), SPRINKLERED_NEW, allowed) == ("pass", None)
+    row = row_of(rule, story_with(None, common_path_of_travel=40.0), SPRINKLERED_NEW, allowed)
+    assert (row["outcome"], row["reason"]) == ("pass", None) and "confirm" not in row
 
 
 def test_a_rule_that_doesnt_apply_says_no_reading(maine):
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
-    assert outcome(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0),
-                   NEW_DAY_CARE, allowed) == ("not_applicable", None)    # unsprinklered: the 100-ft rule doesn't apply
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0), NEW_DAY_CARE, allowed)
+    assert row["outcome"] == "not_applicable" and "confirm" not in row   # unsprinklered: the 100-ft rule doesn't apply
