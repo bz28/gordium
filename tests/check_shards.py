@@ -3,10 +3,19 @@ exactly one `--shard K/N` part, and no part has a test the whole suite lacks. CI
 parts' results (.github/workflows/ci.yml).
 
     python tests/check_shards.py N
+
+`record` re-measures the slow tests the parts are balanced by (tests/test_durations.json; conftest.py): it runs the
+whole suite on every CPU and keeps each test of a second or more (setup + run + teardown), or reads a saved
+`pytest --durations=0 --durations-min=1.0` output instead:
+
+    python tests/check_shards.py record [pytest_output.txt]
 """
+import json
+import re
 import subprocess
 import sys
 from collections import Counter
+from pathlib import Path
 
 
 def collected(*extra):
@@ -34,5 +43,23 @@ def main(n):
     print("every test is in exactly one part")
 
 
+def record(saved=None):
+    if saved:
+        text = open(saved, encoding="utf-8").read()
+    else:
+        text = subprocess.run([sys.executable, "-m", "pytest", "-n", "auto", "-q", "-p", "no:cacheprovider",
+                               "--durations=0", "--durations-min=1.0"], capture_output=True, text=True,
+                              encoding="utf-8").stdout
+    seconds = {}
+    for m in re.finditer(r"^([\d.]+)s (?:setup|call|teardown) +(\S+)$", text, re.M):
+        seconds[m[2]] = seconds.get(m[2], 0) + float(m[1])
+    if not seconds:
+        sys.exit("no durations found in the pytest output")
+    out = {i: round(s, 1) for i, s in sorted(seconds.items()) if s >= 1.0}
+    path = Path(__file__).resolve().parent / "test_durations.json"
+    path.write_text(json.dumps(out, indent=0, sort_keys=True) + "\n", encoding="utf-8")
+    print(f"{len(out)} tests of a second or more, {sum(out.values()):.0f} s in all, written to {path}")
+
+
 if __name__ == "__main__":
-    main(int(sys.argv[1]))
+    record(*sys.argv[2:3]) if sys.argv[1] == "record" else main(int(sys.argv[1]))
