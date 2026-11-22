@@ -72,6 +72,14 @@ public sealed class MarksTests
             ("Gordium: Stories", "bf758947-8ee4-490c-a499-dee706a6f1e7", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a space nobody occupies (route note decision 1b)
             ("Gordium: Not occupied", "306bccbe-b2f7-4a73-9169-6be76fb46202", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
+            // which New York code governs, and what the Building Code's rules read (docs/decisions/2026-11-22_which_ny_code.md)
+            ("Gordium: Follows the Building Code", "01405f95-7061-47e2-b2a3-7706747c0817", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Stories above grade plane", "3f5ba80f-f877-49d9-bc47-a86de4a87a19", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Separate means of egress", "489999a0-b6a0-4d36-a186-a7874e8e78ff", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Townhouse units", "81480188-21b7-4786-b2b3-c3da847439c2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Care facility", "58d76f42-7618-4c1c-8765-3af6c45b31d2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Occupancy groups", "ea50d05c-05a2-46b3-aafc-6cbb22bf19ac", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Sprinkler system", "4b542577-d04e-463a-87fa-019dbc102374", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
