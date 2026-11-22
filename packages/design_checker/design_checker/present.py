@@ -2328,6 +2328,31 @@ def zoning_causes(item: dict) -> list[dict]:
              "elements": objects}]
 
 
+def law_causes(item: dict) -> list[dict]:
+    """An inherited law's own row in review that is no part's (egress._own_item's: the interior drawing's problems,
+    an escape opening not checked, a rule not written for each part, the sections not checked yet, a has-none
+    reading, rules refused, nothing applied, waiting for rooms), with its cause as panel_data says causes, from what
+    the row is: the drawing's to give (a mark it asks the architect to set, or the model), Gordium's gap (check it by
+    hand), or a person's decision. Words only: never a status."""
+    from design_checker import egress, panel_data
+    short = (item.get("law_short") or "").lower()
+    iid, reason = str(item.get("id") or ""), (item.get("reason") or "").strip()
+    elements = [o for o in item.get("objects") or [] if isinstance(o, str)]
+    part = item.get("part") if isinstance(item.get("part"), dict) else {}
+    if not elements and isinstance(part.get("id"), str):
+        elements = [part["id"]]
+    tail = iid[len(short) + 1:] if short and iid.startswith(short + ".") else iid
+    if tail.startswith(("interior#", "skipped#")) or item.get("waiting"):
+        asks = "say whether" in reason or "true or false" in reason or "mark" in reason.lower()
+        return [{"kind": panel_data.MARK if asks else panel_data.FIX_MODEL, "key": f"drawing:{reason}",
+                 "words": reason, "elements": elements}]
+    if tail.startswith(egress.HAS_NONE_ID):
+        return [{"kind": panel_data.DECIDE, "key": f"has_none:{tail}", "words": reason, "elements": elements}]
+    if reason == egress.NOT_PER_PART or tail == egress.NOT_YET_ID or tail == "rules"             or (item.get("open") or {}).get("gordium") == egress.SECTIONS:
+        return [{"kind": panel_data.BY_HAND, "key": f"by_hand:{reason}", "words": reason, "elements": elements}]
+    return [{"kind": panel_data.DECIDE, "key": f"reason:{iid}", "words": reason or "needs review", "elements": elements}]
+
+
 def law_quote_sources(items: list[dict]) -> None:
     """Each quote of an inherited law's row with its source: the file, PDF page and lines its words are on, and the
     document's own address (`url`, its publisher's page, from the law's sources.yaml), from the rule's sources
@@ -2367,6 +2392,9 @@ def grouped(items: list[dict]) -> list[dict]:
     by its law ("Egress (NY State Residential Code 2025)"), as before (#106)."""
     from design_checker import grouping
     law_quote_sources(items)                          # each law quote's file, page and lines (PR 5): words only
+    for i in items:                                   # a law's own rows in review (no part's): their causes too
+        if i.get("group") == LAW_GROUP and i.get("status") == REVIEW and not i.get("causes"):
+            i["causes"] = law_causes(i)
     by = {"fails": [], "review": [], "complies": [], "use_details": [], "not_checked": [], "not_covered": []}
     laws = {}                                        # an inherited law's items, by law, in the order given
     for i in items:
