@@ -35,8 +35,13 @@ internal static class RevitRead
     {
         var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
         var elements = new List<RevitElement>();
-        foreach (var e in new FilteredElementCollector(doc).WhereElementIsNotElementType().ToList())
+        // how long each step took and how much it read (the log's read_steps; never part of the model read)
+        var all = ReadSteps.Time("outside.collect", () => new FilteredElementCollector(doc).WhereElementIsNotElementType().ToList());
+        if (depth == 0)
+            ReadSteps.Count("outside.elements", all.Count);
+        foreach (var e in all)
             elements.Add(Element(doc, e, options, version, vertexTolerance, depth));
+        using var rest = ReadSteps.Step("outside.model_rest");
         return new RevitModel
         {
             Document = doc.Title,
@@ -52,7 +57,7 @@ internal static class RevitRead
                     .Select(w => new WorksetRecord(w.Id.IntegerValue.ToString(System.Globalization.CultureInfo.InvariantCulture), w.Name, w.IsOpen)).ToList()
                 : [],
             Elements = elements,
-            LotLines = LotLines(doc),
+            LotLines = ReadSteps.Time("outside.lot_lines", () => LotLines(doc)),
         };
     }
 
@@ -89,14 +94,23 @@ internal static class RevitRead
         var failed = false;
         try
         {
-            var g = e.get_Geometry(options);
-            geometry = g is null ? null : Items(g);
+            var g = ReadSteps.Time("outside.get_geometry.fine", () => e.get_Geometry(options));
+            geometry = g is null ? null : ReadSteps.Time("outside.copy_geometry.fine", () => Items(g));
+            ReadSteps.CountGeometry("outside.fine", geometry);
             if (e is FamilyInstance)
             {
+                ReadSteps.Count("outside.family_instances");
                 var more = new List<GeometryItem>();
                 foreach (var level in new[] { ViewDetailLevel.Medium, ViewDetailLevel.Coarse })
-                    if (e.get_Geometry(new Options { DetailLevel = level, IncludeNonVisibleObjects = false }) is { } other)
-                        more.AddRange(Items(other));
+                {
+                    var at = level == ViewDetailLevel.Medium ? "medium" : "coarse";
+                    if (ReadSteps.Time("outside.get_geometry." + at, () => e.get_Geometry(new Options { DetailLevel = level, IncludeNonVisibleObjects = false })) is { } other)
+                    {
+                        var items = ReadSteps.Time("outside.copy_geometry." + at, () => Items(other));
+                        ReadSteps.CountGeometry("outside." + at, items);
+                        more.AddRange(items);
+                    }
+                }
                 coarser = more.Count > 0 ? more : null;
             }
         }
@@ -112,9 +126,13 @@ internal static class RevitRead
         {
             var type = doc.GetElement(li.GetTypeId()) as RevitLinkType;
             var linked = li.GetLinkDocument();
+            var started = System.Diagnostics.Stopwatch.GetTimestamp();
             link = new RevitLink(type?.GetLinkedFileStatus().ToString() ?? "Unknown", T(li.GetTotalTransform()),
                                  linked is null || depth >= LinkDepth ? null : Model(linked, version, tolerance, depth + 1));
+            if (link.Document is { } read)
+                ReadSteps.Link(li.Name, depth + 1, System.Diagnostics.Stopwatch.GetElapsedTime(started).TotalSeconds, read.Elements.Count);
         }
+        using var rest = ReadSteps.Step("outside.element_rest");
         return new RevitElement
         {
             UniqueId = e.UniqueId,

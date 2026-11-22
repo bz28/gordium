@@ -65,6 +65,34 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         return (prepared, await ProjectCheck.SendAsync(client, prepared.Request!));
     }
 
+    /// <summary>The read's timings (the log's <c>read_steps</c>) never reach the worker: the same project prepared with
+    /// the steps kept, as Check project keeps them (begun on this thread, the prepare waited for on it), and without,
+    /// gives the same request, byte for byte, and no step's name is in it.</summary>
+    [Fact]
+    public async Task The_request_is_byte_for_byte_the_same_with_the_read_steps_kept_or_not()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        var client = await worker.RunningAsync();
+        static string Sent(ProjectRequest r) => new JsonObject
+        {
+            ["site"] = r.Site.DeepClone(), ["facts"] = r.Facts.DeepClone(), ["interior"] = r.Interior.DeepClone(),
+        }.ToJsonString();
+        var plain = Sent((await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client))).Request!);
+        var steps = new ReadSteps();
+        string kept;
+        using (ReadSteps.Begin(steps))
+        {
+            ReadSteps.Count("outside.elements", 7);
+            ReadSteps.Link("Structure.rvt", 1, 0.5, 3);
+            kept = ReadSteps.Time("prepare", () => Sent(ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client))
+                                                      .GetAwaiter().GetResult().Request!));
+        }
+        Assert.Equal(plain, kept);
+        foreach (var name in new[] { "read_steps", "outside.elements", "Structure.rvt", "\"seconds\"", "\"calls\"" })
+            Assert.DoesNotContain(name, kept, StringComparison.Ordinal);
+        Assert.Contains("prepare", Assert.IsType<Dictionary<string, object>>(steps.ToLog()["steps"]).Keys);
+    }
+
     [Fact]
     public async Task The_box_house_with_a_compliant_ranch_inside_gives_the_scenes_verdicts_and_egress_rows()
     {
