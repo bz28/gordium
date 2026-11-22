@@ -539,6 +539,11 @@ def test_25b_anything_unexpected_is_the_corridors_needs_review_never_a_crash(mon
     monkeypatch.setattr(dead_ends, "_dead_ends", boom)
     got = measure(branch())["c"]
     assert got.dead_ends == [] and "failed" in got.stop and "KeyError" in got.stop and got.stop == got.width_stop
+    # a Stop raised inside is the corridor's reason too, never out of the story (review round 3)
+    monkeypatch.setattr(dead_ends, "_dead_ends", lambda *a, **k: (_ for _ in ()).throw(
+        dead_ends.Stop("corridor_not_legs", why="x")))
+    got = measure(branch())["c"]
+    assert got.dead_ends == [] and "(x)" in got.stop and got.stop == got.width_stop
 
 
 def test_25c_the_fuzzs_seed_14_is_measured_never_a_crash():
@@ -552,3 +557,51 @@ def test_25c_the_fuzzs_seed_14_is_measured_never_a_crash():
     c = measure(description([room("c", poly)], [door("b", (60.25, 0.75), (0, 1), ("c", "outside"), exit_id="B"),
                                                 door("m", (26.5, -1.75), (1, 0), ("c", "outside"), exit_id="M")]))["c"]
     assert c.stop is None and len(c.dead_ends) == 3
+
+
+
+def two_corridors():
+    """Review round 3: c1, a corridor 0 to 60 by 0 to 6 with a branch x 28 to 34 to y 30 (exits at its ends); c2, far
+    off (y 100 to 111), whose centre lines can't be worked out (a notch 5 ft wide, 2 to 3 ft deep in its north
+    wall)."""
+    return description([room("c1", [[0, 0], [60, 0], [60, 6], [34, 6], [34, 30], [28, 30], [28, 6], [0, 6]]),
+                        room("c2", [[0, 100], [0, 110], [20, 110], [20, 113], [25, 113], [25, 111], [60, 111],
+                                    [60, 100], [25, 100], [20, 100]])],
+                       [door("a", (-0.25, 3), (0, 1), ("c1", "outside"), exit_id="A"),
+                        door("b", (60.25, 3), (0, 1), ("c1", "outside"), exit_id="B"),
+                        door("c", (-0.25, 105), (0, 1), ("c2", "outside"), exit_id="C"),
+                        door("e", (60.25, 105.5), (0, 1), ("c2", "outside"), exit_id="E")])
+
+
+def test_25d_one_corridor_that_cant_be_worked_out_never_takes_anothers_figure():
+    # c1's branch: 30 - 3 = 27 ft; c2 needs review for its own reason, and leaves nothing on the graph they share
+    # (before: its leftover nodes gave c1 "working them out failed: KeyError: None", or a closed end on no stretch)
+    got = measure(two_corridors())
+    assert got["c1"].stop is None and [ft(d.length[WITHOUT]) for d in got["c1"].dead_ends] == [27.0]
+    assert "don't all meet" in got["c2"].stop and "failed" not in got["c2"].stop
+
+
+def test_25e_a_floor_that_fails_leaves_nothing_on_the_shared_graph():
+    s = story(two_corridors())
+    g, legs = dead_ends._Graph(), []
+    with pytest.raises(dead_ends.Stop):
+        dead_ends._group(s, [s.rooms["c2"]], g, legs)
+    assert g.xy == [] and g.edges == [] and g.adj == [] and g.steps == {} and legs == []
+
+
+def test_25f_a_step_passing_a_third_place_or_a_place_reached_by_steps_alone_needs_review():
+    # the guards, on a graph built by hand: a step from (0, 0) to (0, 10) passing the place (0, 5); a place joined
+    # only by a step. Each is checked over the floor's own places only
+    g = dead_ends._Graph()
+    a, m, b = g.node((0.0, 0.0)), g.node((0.0, 60.0)), g.node((0.0, 120.0))
+    with pytest.raises(dead_ends.Stop) as stop:
+        dead_ends._step_passes_none(g, a, b, range(3))
+    assert "passes a third" in stop.value.reason
+    dead_ends._step_passes_none(g, a, b, [a, b])                     # another floor's place is never looked at
+    c = g.node((120.0, 0.0))
+    g.edge(a, c, 0, (0.0, 120.0))                                    # a centre line
+    g.edge(c, b, None, (0.0, 0.0))                                   # a step alone to b
+    with pytest.raises(dead_ends.Stop) as stop:
+        dead_ends._every_place_on_a_line(g, range(4))
+    assert "ends on none" in stop.value.reason
+    dead_ends._every_place_on_a_line(g, [a, c])
