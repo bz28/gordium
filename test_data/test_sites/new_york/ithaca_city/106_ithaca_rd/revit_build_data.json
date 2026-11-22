@@ -1,0 +1,227 @@
+{
+ "project": "106 Ithaca Rd: the architects' spreadsheet design (R-1b), the NY Revit eval",
+ "units": "feet",
+ "type_suffix": "106 Ithaca Rd spreadsheet",
+ "levels": [
+  {
+   "name": "Level 1",
+   "elevation_ft": 0,
+   "source": "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design_model_facts.yaml lot_facts.grade_elevation (0: the house sits on the flat ground)"
+  },
+  {
+   "name": "Roof",
+   "elevation_ft": 35,
+   "source": "the roof's top: building_height Inputs!B12"
+  }
+ ],
+ "walls": [
+  {
+   "id": 1,
+   "level": "Level 1",
+   "start": [
+    10.25,
+    30.25
+   ],
+   "end": [
+    62.75,
+    30.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 35,
+   "exterior": true,
+   "source": "the house's south (on the street side) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+  },
+  {
+   "id": 2,
+   "level": "Level 1",
+   "start": [
+    62.75,
+    30.25
+   ],
+   "end": [
+    62.75,
+    64.75
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 35,
+   "exterior": true,
+   "source": "the house's east (right) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+  },
+  {
+   "id": 3,
+   "level": "Level 1",
+   "start": [
+    62.75,
+    64.75
+   ],
+   "end": [
+    10.25,
+    64.75
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 35,
+   "exterior": true,
+   "source": "the house's north (rear) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+  },
+  {
+   "id": 4,
+   "level": "Level 1",
+   "start": [
+    10.25,
+    64.75
+   ],
+   "end": [
+    10.25,
+    30.25
+   ],
+   "thickness_in": 6.0,
+   "status": "New",
+   "smoke_partition": false,
+   "fire_rating": null,
+   "height_ft": 35,
+   "exterior": true,
+   "source": "the house's west (left) wall: its outer face on the spreadsheet's outline, x 10 to 63, y 30 to 65 (left offset Inputs!B8, front offset Inputs!B9, width Inputs!B3 - Inputs!B8 - Inputs!B3 - Inputs!B8 - Inputs!B6, depth Inputs!B4 - Inputs!B9 - Inputs!B7); height Inputs!B12; thickness ASSUMED (assumptions)"
+  }
+ ],
+ "doors": [],
+ "windows": [],
+ "rooms": [],
+ "floors": [
+  {
+   "level": "Roof",
+   "outline": [
+    [
+     10,
+     30
+    ],
+    [
+     63,
+     30
+    ],
+    [
+     63,
+     65
+    ],
+    [
+     10,
+     65
+    ],
+    [
+     10,
+     30
+    ]
+   ],
+   "thickness_in": 12.0,
+   "source": "the flat roof (spreadsheet_design.yaml: 'The spreadsheet's house is a box with no eaves'), its top at Inputs!B12, over the house's outline; thickness ASSUMED (assumptions)"
+  }
+ ],
+ "lot": {
+  "outline": [
+   [
+    0,
+    0
+   ],
+   [
+    73,
+    0
+   ],
+   [
+    73,
+    90
+   ],
+   [
+    0,
+    90
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "source": "a 73 x 90 ft rectangle: lot_width Inputs!B3, lot_depth Inputs!B4 (Inputs!B3 says 'rectangular'); its edge y = 0 is the street (test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design_model_facts.yaml street_line [[[0, 0], [73, 0]]]). Its area is 6,570 sf, not the spreadsheet's typed 6674 (Inputs!B5): docs/discrepancies_with_architects.md 2.5"
+ },
+ "spot_grades": [
+  {
+   "at": [
+    36.5,
+    29,
+    0
+   ],
+   "source": "the flat ground at 0 (test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design_model_facts.yaml lot_facts.ground_is_flat, grade_elevation), marked 1 ft outside the middle of each wall (the reader takes a wall's spot grade within 2 ft of it)"
+  },
+  {
+   "at": [
+    64,
+    47.5,
+    0
+   ],
+   "source": "the flat ground at 0 (test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design_model_facts.yaml lot_facts.ground_is_flat, grade_elevation), marked 1 ft outside the middle of each wall (the reader takes a wall's spot grade within 2 ft of it)"
+  },
+  {
+   "at": [
+    36.5,
+    66,
+    0
+   ],
+   "source": "the flat ground at 0 (test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design_model_facts.yaml lot_facts.ground_is_flat, grade_elevation), marked 1 ft outside the middle of each wall (the reader takes a wall's spot grade within 2 ft of it)"
+  },
+  {
+   "at": [
+    9,
+    47.5,
+    0
+   ],
+   "source": "the flat ground at 0 (test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design_model_facts.yaml lot_facts.ground_is_flat, grade_elevation), marked 1 ft outside the middle of each wall (the reader takes a wall's spot grade within 2 ft of it)"
+  }
+ ],
+ "plan": "x east along the street from the lot's left (west) corner, y north from the street, feet",
+ "made_from": {
+  "tool": "apps/revit_addin/tools/make_ny_build_data.py",
+  "sources": [
+   {
+    "file": "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design.yaml",
+    "sha256": "741da3986406be24e39d508df8b97759a57f47bd1564bfda8bf993c61d498efe"
+   },
+   {
+    "file": "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/spreadsheet_design_model_facts.yaml",
+    "sha256": "c5ad0d1beea6a69aa085e63d3b025595850dabea47a76c4999fe9e97be4a5776"
+   }
+  ]
+ },
+ "not_drawn": {
+  "rooms, doors and windows": "the spreadsheet describes the house as a box (its footprint, height and stories): no interior, so egress waits ('no rooms drawn yet') and is not part of this eval",
+  "floors between the stories": "the spreadsheet gives 3 stories (Inputs!B13) but no floor heights; Revit's Check my project doesn't count native floors as stories (only Gordium's floor blocks or a stated count, places/ithaca_city/measure.py _stories), so drawing them would invent heights and change nothing"
+ },
+ "assumptions": [
+  {
+   "what": "The walls 6 in thick, their outer faces on the spreadsheet's 53 x 35 ft outline",
+   "why": "the spreadsheet gives the house's outside size only",
+   "effect": "none: coverage, the yards and the height are measured to the outer faces and the top"
+  },
+  {
+   "what": "The roof a 12 in flat slab (a Revit floor) whose top is the 35 ft height",
+   "why": "the spreadsheet's house is a box; a roof's thickness isn't given",
+   "effect": "none: the height is measured to the top"
+  },
+  {
+   "what": "The flat ground drawn as four spot grades at 0, 1 ft outside each wall",
+   "why": "the Revit reader reads the ground only from spot-grade markers (Gordium: Ground from); spreadsheet_design_model_facts.yaml states the ground flat at 0",
+   "effect": "none: every marker is at 0"
+  }
+ ],
+ "stats": {
+  "walls": 4,
+  "doors": 0,
+  "windows": 0,
+  "rooms": 0
+ }
+}

@@ -176,6 +176,114 @@ public sealed class BuildDataTests
         Assert.Equal(4, BuildData.FloorOutline(m.Footprint).Count);
     }
 
+    // ---- data with several levels: the New York eval's (apps/revit_addin/tools/make_ny_build_data.py) ----
+
+    private static JsonObject NewYork(string folder) =>
+        JsonNode.Parse(File.ReadAllText(Path.Combine(Env.Repo, folder, "revit_build_data.json")))!.AsObject();
+
+    private const string Orangetown = "test_data/real_houses/orangetown_ny_80_south_william";
+    private const string IthacaRd = "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd";
+
+    [Fact]
+    public void The_orangetown_house_is_read_whole_on_its_three_levels()
+    {
+        var m = BuildData.Parse(NewYork(Orangetown));
+        Assert.Equal((41, 1, 14, 17), (m.Walls.Count, m.Doors.Count, m.Windows.Count, m.Rooms.Count));
+        Assert.Equal([("Second floor", 0.0), ("Main floor", -9.875), ("Basement", -18.875)], m.Levels.Select(l => (l.Name, l.ElevationFt)));
+        Assert.Equal((3, 17, 1), (m.Floors.Count, m.Ceilings.Count, m.Separations.Count));
+        Assert.Empty(m.Footprint);
+        Assert.Equal(4, m.Lot!.Count);
+        // every wall and room on a level of the data, each window on a second-floor or basement wall, the door on the main floor
+        Assert.Equal(24, m.Walls.Count(w => w.Level == "Second floor"));
+        Assert.Equal([("Second floor", 14), ("Main floor", 2), ("Basement", 1)],
+                     m.Rooms.GroupBy(r => r.Level!).Select(g => (g.Key, g.Count())));
+        Assert.Equal("Main floor", m.LevelOf(m.Walls.First(w => w.Id == m.Doors[0].HostWall).Level).Name);
+        Assert.Equal(12, m.Windows.Count(w => m.Walls.First(x => x.Id == w.HostWall).Level == "Second floor"));
+        // the door's swing isn't in the source: none, so it is never flipped on a guess
+        Assert.Null(m.Doors[0].SwingDir);
+        Assert.Null(m.Doors[0].Hinge);
+        Assert.Equal((36.0, 54.0, 27.0), (m.Windows[0].WidthIn, m.Windows[0].HeightIn, m.Windows[0].SillIn));
+        Assert.Equal(("1", 229.5), (m.Rooms[0].Number, m.Rooms[0].AreaSf));
+        Assert.Equal(8.0, m.Ceilings[0].UndersideFt);
+        Assert.Equal("Door 36\" x 96\" (Orangetown A-1 to A-5)", BuildData.OpeningTypeName("Door", 36, 96, m.TypeSuffix));
+    }
+
+    [Fact]
+    public void The_orangetown_rooms_are_closed_by_their_own_levels_walls()
+    {
+        // each room's boundary runs on walls of its own level, but where bedroom 2 meets its alcove: the separation line
+        var m = BuildData.Parse(NewYork(Orangetown));
+        var sep = m.Separations.Single();
+        foreach (var r in m.Rooms)
+        {
+            var gaps = BuildData.BoundaryGaps(r, m.Walls.Where(w => m.LevelOf(w.Level) == m.LevelOf(r.Level)).ToList());
+            if (r.Number is "2" or "8")
+                Assert.All(gaps, g => Assert.True(Math.Abs(g.From.Y - sep.Start.Y) < 1e-6 && Math.Abs(g.To.Y - sep.Start.Y) < 1e-6, g.Words));
+            else
+                Assert.Empty(gaps);
+        }
+    }
+
+    [Fact]
+    public void The_106_ithaca_rd_box_its_lot_and_ground_are_read_whole()
+    {
+        var m = BuildData.Parse(NewYork(IthacaRd));
+        Assert.Equal((4, 0, 0, 0), (m.Walls.Count, m.Doors.Count, m.Windows.Count, m.Rooms.Count));
+        Assert.Equal([("Level 1", 0.0), ("Roof", 35.0)], m.Levels.Select(l => (l.Name, l.ElevationFt)));
+        Assert.Equal(6570, BuildData.Area(m.Lot!), 9);                                   // 73 x 90 (Inputs!B3, B4)
+        var roof = Assert.Single(m.Floors);
+        Assert.Equal(("Roof", 0.0), (roof.Level, roof.TopOffsetFt));
+        Assert.Equal(1855, BuildData.Area(roof.Outline), 9);                             // Inputs!B10
+        Assert.All(m.Walls, w => Assert.Equal((35.0, "Level 1"), (w.HeightFt, w.Level)));
+        Assert.Equal(4, m.SpotGrades.Count);
+        Assert.All(m.SpotGrades, s => Assert.Equal(0, s.Z));
+    }
+
+    [Theory]
+    [InlineData("both", "data: gives both level and levels: one or the other")]
+    [InlineData("no level", "wall 1: no level (the data has several)")]
+    [InlineData("unknown level", "room 1: level is \"Attic\", not one of the data's levels")]
+    [InlineData("twin level", "level 1: a second level at 0 ft")]
+    [InlineData("open floor", "floor 1: outline: its last point isn't its first")]
+    [InlineData("floors and footprint", "data: gives both floors and a footprint: one or the other")]
+    [InlineData("no floors", "data: no floors and no footprint (with levels, give the floors)")]
+    [InlineData("spot", "spot grade 1: at isn't a point [x, y, z]")]
+    [InlineData("room twice", "room number 1: given to 2 rooms (marks find a room by its number)")]
+    [InlineData("swing", "door 1: swing_dir is [1,1], not a unit vector [x, y]")]
+    public void Each_bad_part_of_data_with_levels_is_refused_in_words(string what, string words)
+    {
+        var d = NewYork(Orangetown);
+        switch (what)
+        {
+            case "both": d["level"] = new JsonObject { ["name"] = "Level 1", ["elevation_ft"] = 0 }; break;
+            case "no level": d["walls"]![0]!.AsObject().Remove("level"); break;
+            case "unknown level": d["rooms"]![0]!["level"] = "Attic"; break;
+            case "twin level": d["levels"]![1]!["elevation_ft"] = 0; break;
+            case "open floor": d["floors"]![0]!["outline"]!.AsArray().RemoveAt(d["floors"]![0]!["outline"]!.AsArray().Count - 1); break;
+            case "floors and footprint": d["footprint"] = d["floors"]![0]!["outline"]!.DeepClone(); break;
+            case "no floors": d.Remove("floors"); break;
+            case "spot": d["spot_grades"] = new JsonArray(new JsonObject { ["at"] = new JsonArray(1, 2) }); break;
+            case "room twice": d["rooms"]![1]!["number"] = "1"; break;
+            case "swing": d["doors"]![0]!["swing_dir"] = new JsonArray(1, 1); break;
+        }
+        Assert.Contains(words, Assert.Throws<BuildDataException>(() => BuildData.Parse(d)).Problems);
+    }
+
+    [Fact]
+    public void The_scripts_one_level_data_still_needs_a_swing_and_takes_no_levels_keys()
+    {
+        // a door of the script's data with no swing is refused, as before: only data with levels may leave it out
+        Assert.Contains("door 1: no swing_dir", Refused(d => d["doors"]![0]!.AsObject().Remove("swing_dir")).Problems);
+        Assert.Contains("data: floors, ceilings, separations, a lot and spot grades are read only with levels",
+                        Refused(d => d["lot"] = new JsonObject { ["outline"] = new JsonArray(new JsonArray(0, 0), new JsonArray(1, 0), new JsonArray(1, 1), new JsonArray(0, 0)) }).Problems);
+        Assert.Contains("wall 0: level is \"Second floor\", not one of the data's levels",
+                        Refused(d => d["walls"]![0]!["level"] = "Second floor").Problems);
+        var m = BuildData.Parse(Extracted());
+        Assert.Equal([("Level 1", 0.0)], m.Levels.Select(l => (l.Name, l.ElevationFt)));
+        Assert.Equal("LS1.0", m.TypeSuffix);
+        Assert.Null(m.Lot);
+    }
+
     /// <summary>Ben's childcare centre as extracted (not in the repository): read whole when GORDIUM_BUILD_DATA names
     /// its JSON; with it unset there is nothing to read and the test does nothing.</summary>
     [Fact]
