@@ -53,14 +53,14 @@ internal sealed class RowItem(IListHost host, ListRow row, bool open) : ListItem
     }
 }
 
-/// <summary>A fold after the rows (what wasn't read from the model, the details), its open state kept here so a
-/// virtualized container made again shows it as the architect left it.</summary>
 /// <summary>The list's first entry: the worker's state and counts, made afresh each time it scrolls into view.</summary>
 internal sealed class SummaryItem(IListHost host, Func<W.UIElement> build) : ListItem(host)
 {
     internal Func<W.UIElement> Build { get; } = build;
 }
 
+/// <summary>A fold after the rows (what wasn't read from the model, the details), its open state kept here so a
+/// virtualized container made again shows it as the architect left it.</summary>
 internal sealed class FoldItem(IListHost host, string title, Func<W.UIElement> build) : ListItem(host)
 {
     internal string Title { get; } = title;

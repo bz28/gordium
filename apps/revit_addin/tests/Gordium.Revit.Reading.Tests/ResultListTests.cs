@@ -464,10 +464,21 @@ public sealed class ResultListTests
         var summary = Between(view, "    private static W.UIElement Summary(ResultModel model", "\n    }\n");
         Assert.Contains("case PanelPart.Stale:", summary, StringComparison.Ordinal);
         Assert.Contains("var state = StatusLook.Of(model.StateTone, stale);", summary, StringComparison.Ordinal);
-        // the status line under the header is one line, never pushing the list down
-        Assert.Contains("_status.TextWrapping = W.TextWrapping.NoWrap;", view, StringComparison.Ordinal);
+        // review round 6: the status line (problems and what to do, the action last) wraps, capped at three lines so
+        // it never pushes the list off, the last trimmed, the whole on hover
+        Assert.Contains("_status.TextWrapping = W.TextWrapping.Wrap;", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("_status.TextWrapping = W.TextWrapping.NoWrap;", view, StringComparison.Ordinal);
+        Assert.Contains("_status.MaxHeight = 3 * 1.4 * PanelTokens.TypeOf(Caption).Size;", view, StringComparison.Ordinal);
+        Assert.Contains("_status.TextTrimming = W.TextTrimming.CharacterEllipsis;", view, StringComparison.Ordinal);
+        Assert.Contains("_status.ToolTip = words.Length == 0 ? null : words;", view, StringComparison.Ordinal);
         // the summary's entry is never selected
         var entries = Addin("ResultsList.cs");
+        // review round 6: each item's doc comment above its own class
+        var beforeFold = entries[..entries.IndexOf("internal sealed class FoldItem(", StringComparison.Ordinal)].TrimEnd();
+        Assert.EndsWith("shows it as the architect left it.</summary>", beforeFold, StringComparison.Ordinal);
+        var summaryItem = entries[..entries.IndexOf("internal sealed class SummaryItem(", StringComparison.Ordinal)];
+        summaryItem = summaryItem[summaryItem.LastIndexOf("\n}\n", StringComparison.Ordinal)..];      // from the class before it
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(summaryItem, "<summary>"));
         Assert.Contains("box.MouseLeftButtonDown += (_, e) => e.Handled = true;", Between(entries, "    private static W.UIElement Summary(SummaryItem item)", "\n    }\n"), StringComparison.Ordinal);
     }
 

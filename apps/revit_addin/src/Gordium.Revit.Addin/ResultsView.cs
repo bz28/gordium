@@ -92,8 +92,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
         head.Children.Add(_sub);
         _status.Visibility = W.Visibility.Collapsed;
         _status.FontStyle = W.FontStyles.Italic;
-        _status.TextWrapping = W.TextWrapping.NoWrap;           // one line (its whole on hover): never pushes the list down
+        // the panel's one channel for problems and what to do about them, which comes last ("...: click Check again"):
+        // wrapped, at most three lines (so it never pushes the list off), the last trimmed, the whole on hover
+        _status.TextWrapping = W.TextWrapping.Wrap;
         _status.TextTrimming = W.TextTrimming.CharacterEllipsis;
+        _status.MaxHeight = 3 * 1.4 * PanelTokens.TypeOf(Caption).Size;
         head.Children.Add(_status);
 
         // what to fill in first (nothing checked): one scrolling column
