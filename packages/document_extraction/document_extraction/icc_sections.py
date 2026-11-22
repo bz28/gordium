@@ -1,6 +1,10 @@
 """Cut the brought-in parts of an ICC code book (layout: icc in sources.yaml) into pieces at the book's own headings,
-so each piece can be labeled. Written for the 2025 Residential Code of New York State; another ICC book (the
-Building Code of New York State) prints the same way.
+so each piece can be labeled. Written for the 2025 Residential Code of New York State; the 2025 Building Code of New
+York State prints the same way, with its own `style` (sources.yaml; STYLES below): sections without letters (1017),
+tags of one letter ([F]), "CHAPTER" alone opening each chapter, and tables printed where they fit, each a piece of its
+own with its lines named in sources.yaml (`tables`), as in columns_sections.py. Lines that look like a fraction left
+apart but are a subscript or a unit's powers are named with why (`not_fractions`), and so are two terms the text reads
+alike because a subscript fell onto a line of its own (`subscript_terms`).
 
 Plain code, no AI: the same extracted text and the same sources.yaml `brought_in` always give the same pieces.
 
@@ -49,6 +53,7 @@ book can prove the committed pieces were cut from this text; the words themselve
 import hashlib
 import json
 import re
+from dataclasses import dataclass
 
 SPLITTER = "document_extraction.icc_sections v9"   # bump when the cutting rules change
 STAMP = re.compile(r"^\d{9}$")                      # the number stamped at the top of every page of this copy
@@ -58,6 +63,35 @@ DOT = "."                                           # a lone "." printed under t
 SECTION = re.compile(r"^(?:\[[A-Z]{2}\] )?SECTION ([A-Z]{1,2}\d{3})\s*[—–-]\s*(\S.*)$")
 NUMBERED = re.compile(r"^(?:\[[A-Z]{2}\] )?([A-Z]{1,2}\d{3}(?:\.\d+)+) (\S.*)$")
 TERM = re.compile(r"^(?:\[[A-Z]{2}\] )?([A-Z0-9](?:[^.(]|\([^)]*\))*?)\.(?: |$)")   # "(d.f.u.)" inside
+
+
+@dataclass(frozen=True)
+class Style:
+    """How one ICC book prints its pages: its footer, its headings (section numbers with letters, R318, or without,
+    1017), and the title line of a table. sources.yaml `style` picks one; none is the house code's (rcnys_2025)."""
+    footer: re.Pattern
+    section: re.Pattern
+    numbered: re.Pattern
+    term: re.Pattern
+    table: re.Pattern | None = None     # a table's title line, in bold: its lines must be named (brought_in.tables)
+    openings_never_heads: bool = False  # a chapter's opening line ("CHAPTER") is never a running head
+    chapter_2: str = "Section R202"     # where the book's definitions are, as a problem names it
+
+
+STYLES = {
+    # The 2025 Residential Code of New York State: sections R318, BO105; tags of two letters ([NY], [RB])
+    "rcnys_2025": Style(FOOTER, SECTION, NUMBERED, TERM),
+    # The 2025 Building Code of New York State (docs/decisions/2026-11-21_ny_building_code.md): the same ICC print,
+    # with sections numbered without letters (1017, 202) and tags of one or two letters ([F] the fire code official's,
+    # [BE] means of egress, [A] administration...), and tables printed where they fit
+    "bcnys_2025": Style(
+        footer=re.compile(r"^(?:\d+ )?2025 BUILDING CODE OF NEW YORK STATE(?: \d+)?$"),
+        section=re.compile(r"^(?:\[[A-Z]{1,2}\] )?SECTION (\d{3,4})\s*[—–-]\s*(\S.*)$"),
+        numbered=re.compile(r"^(?:\[[A-Z]{1,2}\] )?(\d{3,4}(?:\.\d+)+) (\S.*)$"),
+        term=re.compile(r"^(?:\[[A-Z]{1,2}\] )?([A-Z0-9](?:[^.(]|\([^)]*\))*?)\.(?: |$)"),
+        table=re.compile(r"^(?:\[[A-Z]{1,2}\] )?TABLE \d{3,4}(?:\.\d+)+"),
+        openings_never_heads=True, chapter_2="Section 202"),
+}
 CHAPTER_OPENING = re.compile(r"^(?:Part [IVXLC]+\s*—.*|CHAPTER|APPENDIX)$")   # a chapter's or appendix's first page
 # Words that join defined terms inside one italic phrase ("dwelling(s) or townhouse(s)": the "s" of a bracketed
 # plural too): never an undefined italic word themselves.
@@ -95,20 +129,23 @@ def _bold_start(r: dict) -> str | None:
     return r["text"][runs[0][0]:runs[0][1]] if runs and runs[0][0] == 0 else None
 
 
-def furniture(rows_on_page: list[dict], heads: set[str]) -> set[int]:
+def furniture(rows_on_page: list[dict], heads: set[str], footer: re.Pattern = FOOTER) -> set[int]:
     """Line numbers on one page that are page furniture, not law. `heads`: the running heads (the chapter's title,
-    printed as the second line of most pages)."""
+    printed as the second line of most pages); `footer`: the book's footer (its Style's)."""
     out = set()
     for r in rows_on_page:
         if r["line"] == 1 and STAMP.match(r["text"]) or r["line"] == 2 and r["text"] in heads \
-                or FOOTER.match(r["text"]) or r["text"] == DOT and r is rows_on_page[-1]:
+                or footer.match(r["text"]) or r["text"] == DOT and r is rows_on_page[-1]:
             out.add(r["line"])
     return out
 
 
-def split(rows: list[dict], brought_in: dict) -> dict:
-    """rows: the extracted text (header row first) of the pages read. brought_in: sources.yaml's.
+def split(rows: list[dict], brought_in: dict, style: str | None = None) -> dict:
+    """rows: the extracted text (header row first) of the pages read. brought_in: sources.yaml's. style: its
+    `style` (STYLES; none is the house code's).
     Returns {"pieces", "furniture", "outside", "line_counts", "problems"}."""
+    # the house code's patterns read when called, so a test can change one (a cutter that reads no term)
+    st = Style(FOOTER, SECTION, NUMBERED, TERM) if style in (None, "rcnys_2025") else STYLES[style]
     pages: dict[int, list[dict]] = {}
     for r in rows[1:]:
         pages.setdefault(r["page"], []).append(r)
@@ -121,9 +158,14 @@ def split(rows: list[dict], brought_in: dict) -> dict:
         second = next((r["text"] for r in p if r["line"] == 2), None)
         seconds[second] = seconds.get(second, 0) + 1
     heads = {t for t, n in seconds.items() if t and n >= 2 and t.isupper()}   # on two pages or more
+    if st.openings_never_heads:
+        # The Building Code prints "CHAPTER" alone as the second line of every chapter's first page (pp.32, 68): a
+        # chapter's opening, never a running head, or the next chapter's title and user notes would join the last
+        # definition before it
+        heads = {t for t in heads if not CHAPTER_OPENING.match(t)}
     furn, body = [], []
     for page in sorted(pages):
-        skip = furniture(pages[page], heads)
+        skip = furniture(pages[page], heads, st.footer)
         furn += [[page, n] for n in sorted(skip)]
         body += [r for r in pages[page] if r["line"] not in skip]
 
@@ -137,32 +179,66 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     defining_part = None                 # the numbered part titled "Definition(s)" (BF106.2) the terms are under, if any
     out_of_order = brought_in.get("printed_out_of_order") or {}   # "p.973 line 54": why the book prints it so
     amended = brought_in.get("amended_by_law") or {}               # "p.966 line 38": {term, why}
+    # Two terms the text reads alike because the book prints a subscript the text puts on a line of its own
+    # ("GROUND SNOW LOAD, p" twice: p with g, then with g and asd, p.48): cut under the term named, as an amended one
+    renamed = brought_in.get("subscript_terms") or {}               # "p.48 line 49": {printed, term, why}
+    amended = {**amended, **renamed}
+    # Lines that look like a fraction left apart but are not, each checked on the page image (a subscript printed
+    # under its line: the 50 of LD50, the 2 of CO2; a unit's raised powers: m3/min/m2), each with why
+    not_fractions = brought_in.get("not_fractions") or {}           # "p.49 line 42": why
     used_names: set[str] = set()
     before_gap: list[tuple[int, int]] = []   # (the unit a gap in the pages read follows, the page before the gap)
+    # A table's lines, named in sources.yaml (`tables`: "Table 1017.2": "p.341 lines 24-59", each checked on the page
+    # image), as columns_sections.py does: the text doesn't say where a table ends, and the book prints a table where
+    # it fits, with the text around it running on past it. So a table is a piece of its own, its lines exactly those
+    # named, and the lines after it go on with the part the table interrupts. (The house code names none.)
+    in_table: dict[tuple[int, int], str] = {}
+    for tid, spec in (brought_in.get("tables") or {}).items():
+        parts = [re.fullmatch(r"p\.(\d+) lines (\d+(?:-\d+)?(?:, \d+(?:-\d+)?)*)", s.strip())
+                 for s in str(spec).split(";")]
+        if not all(parts) or not str(tid).startswith("Table "):
+            problems.append(f"brought_in.tables: {tid}: {spec!r} must read 'p.<page> lines <first>-<last>'")
+            continue
+        for m in parts:
+            for k in parse_pages(m[2]):
+                in_table[(int(m[1]), k)] = str(tid)
+    current = -1                         # the unit body lines go to: never a table
     for r in body:
+        if (r["page"], r["line"]) in in_table:
+            tid = in_table[(r["page"], r["line"])]
+            table = next((u for u in units if u["id"] == tid and u["kind"] == "table"), None)
+            if table is None:                  # (a table's lines named in two runs are one piece)
+                table = {"id": tid, "title": _table_title(r["text"]), "kind": "table", "members": []}
+                units.append(table)
+            table["members"].append(r)
+            continue
+        if st.table and st.table.match(r["text"]) and _bold_start(r):
+            problems.append(f"p.{r['page']} line {r['line']}: a table's title, but brought_in.tables names no lines "
+                            "for it")
         if page_before is not None and any(n not in pages for n in range(page_before + 1, r["page"])):
             # A page after a gap in the pages read: what it starts with continues a part on a page not read.
-            before_gap.append((len(units) - 1, page_before))
+            before_gap.append((current, page_before))
             section, last, last_letter, defining_part = None, (), "", None
             units.append({"id": f"before the first heading on p.{r['page']}", "title": "", "kind": "before",
                           "members": []})
+            current = len(units) - 1
         page_before = r["page"]
         bold = _bold_start(r)
         head = None
         opening = f"chapter opening on p.{r['page']}"
         where = f"p.{r['page']} line {r['line']}"
         if CHAPTER_OPENING.match(r["text"]) and (bold or r["text"] in ("CHAPTER", "APPENDIX")) \
-                and not (units and units[-1]["id"] == opening):
+                and not (current >= 0 and units[current]["id"] == opening):
             # A new chapter: its title and ICC's user notes are not law, and end the section before (never part
             # of the last definition, nor of the first section after).
             section, last, last_letter, defining_part = None, (), "", None
             head = {"id": opening, "title": "", "kind": "before"}
-        elif bold and (m := SECTION.match(r["text"])):
+        elif bold and (m := st.section.match(r["text"])):
             section, last, last_letter = m[1], (), ""
             head = {"id": m[1], "title": m[2].strip(), "kind": "section_heading"}
             if m[2].strip() in ("DEFINITIONS", "DEFINITION"):   # Appendix BF prints the singular (BF102)
                 definitions.add(m[1])
-        elif bold and (m := NUMBERED.match(bold)):
+        elif bold and (m := st.numbered.match(bold)):
             code = m[1]
             n = number(code)
             if section is not None and code.split(".")[0] != section:
@@ -187,10 +263,11 @@ def split(rows: list[dict], brought_in: dict) -> dict:
             else:
                 last = n
                 head = {"id": code, "title": m[2].strip().rstrip("."), "kind": "section"}
-        elif bold and (section in definitions or defining_part) and (m := TERM.match(bold)) and _is_term(m[1]):
+        elif bold and (section in definitions or defining_part) and (m := st.term.match(bold)) and _is_term(m[1]):
             term = m[1].strip()
             if _printed(amended, where, term, problems):
-                # New York's rules amend the term the book prints here (19 NYCRR Part 1220): cut under the law's term
+                # New York's rules amend the term the book prints here (19 NYCRR Part 1220), or the text reads it as
+                # another term (a subscript on a line of its own: subscript_terms): cut under the term named
                 used_names.add(where)
                 term = str(amended[where]["term"])
             if term[0] < last_letter:
@@ -215,18 +292,25 @@ def split(rows: list[dict], brought_in: dict) -> dict:
                 last_letter = ""
         if head:
             units.append(head | {"members": []})
-        elif not units:
+            current = len(units) - 1
+        elif current < 0:
             units.append({"id": f"before the first heading on p.{r['page']}", "title": "", "kind": "before",
                           "members": []})
-        units[-1]["members"].append(r)
-        if LOOSE_FRACTION.search(r["text"]) and units[-1]["kind"] != "before":
+            current = len(units) - 1
+        units[current]["members"].append(r)
+        if LOOSE_FRACTION.search(r["text"]) and where in not_fractions and str(not_fractions[where] or "").strip():
+            used_names.add(where)              # named, with why: a subscript or a unit's powers, not a fraction
+        elif LOOSE_FRACTION.search(r["text"]) and units[current]["kind"] != "before":
             problems.append(f"p.{r['page']} line {r['line']}: a fraction may not have been put back together: "
                             f"{_numbers_only(r['text'])!r}")
+    problems += [f"brought_in.tables names {tid}, whose lines are not on the pages read" for tid in
+                 sorted(set(in_table.values())) if tid not in {u["id"] for u in units}]
 
     ids = [u["id"] for u in units]
     problems += [f"{i} is cut twice" for i in sorted({i for i in ids if ids.count(i) > 1})]
     problems += [f"brought_in names {w} ({kind}), where the book prints no such heading" for kind, named in
-                 (("printed_out_of_order", out_of_order), ("amended_by_law", amended)) for w in named if w not in used_names]
+                 (("printed_out_of_order", out_of_order), ("amended_by_law", amended), ("not_fractions", not_fractions))
+                 for w in named if w not in used_names]
     sections = list(brought_in.get("sections") or [])
     alone = list(brought_in.get("alone") or [])      # parts brought in without the parts under them
     for code in sections + alone:
@@ -268,7 +352,7 @@ def split(rows: list[dict], brought_in: dict) -> dict:
         keep |= {u["id"] for u in units if u["kind"] != "definition" and (u["id"] == s or u["id"].startswith(s + "."))}
     # A brought-in part that is the last before a gap in the pages read, or the last of all, may run on onto a
     # page not read (a page left out of `pages` would silently drop the law on it): never cut short silently.
-    for i, page in before_gap + [(len(units) - 1, body[-1]["page"] if body else 0)]:
+    for i, page in before_gap + [(current, body[-1]["page"] if body else 0)]:
         if i >= 0 and units[i]["id"] in keep:
             problems.append(f"{units[i]['id']}: the last part on p.{page} before a page not read; it may run on "
                             "there (read the next page)")
@@ -278,8 +362,8 @@ def split(rows: list[dict], brought_in: dict) -> dict:
     known = brought_in.get("italic_not_defined") or {}
     for u in units:
         if u["id"] in keep:
-            problems += [f"{u['id']}: italic {w!r} is not defined in Section R202"
-                         f"{'' if letters(u['id']) == 'R' else ' or its appendix'}; name it in brought_in."
+            problems += [f"{u['id']}: italic {w!r} is not defined in {st.chapter_2}"
+                         f"{'' if letters(u['id']) in ('R', '') else ' or its appendix'}; name it in brought_in."
                          f"italic_not_defined under {u['id']}, with why" for w in sorted(undefined[u["id"]])
                          if w not in (known.get(u["id"]) or {})]
     problems += [f"brought_in.italic_not_defined names {w!r} under {pid}, which has no such italic word"
@@ -315,7 +399,7 @@ def _in_scope(uid: str, terms: dict[str, dict]) -> dict[str, dict]:
     """The definitions that apply in a unit: Chapter 2's everywhere; an appendix's own (BO103's) only in that appendix
     (R201.1: "the meanings indicated in this chapter or as defined within the chapter or appendix where the word or
     term is found"; BO103.1: "The terms used in this appendix")."""
-    mine = letters(uid)
+    mine = letters(uid.removeprefix("Table "))         # a table's own number ("Table 1017.2": none)
     return {pid: t for pid, t in terms.items() if letters(pid) in ("R", mine)}
 
 
@@ -471,6 +555,13 @@ def _lookup(words: list[str], by_slug: dict[str, list[str]]) -> list[str] | None
                 if key in by_slug:
                     return by_slug[key]
     return None
+
+
+def _table_title(text: str) -> str:
+    """A table's title from its first line: "TABLE 1017.2—EXIT ACCESS TRAVEL DISTANCE[fna]" -> "EXIT ACCESS TRAVEL
+    DISTANCE" (its footnote marker left out); a first line that is no title gives no title."""
+    m = re.match(r"^(?:\[[A-Z]{1,2}\] )?TABLE \d{3,4}(?:\.\d+)+(?:\(\d+\))?\s*[—–-]\s*(.*?)(?:\[fn[^\]]*\])*$", text)
+    return m[1].strip() if m else ""
 
 
 def _numbers_only(text: str) -> str:

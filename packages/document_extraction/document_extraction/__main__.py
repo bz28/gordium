@@ -88,12 +88,14 @@ def _kept_outside(jurisdiction: Path, doc: dict, check: bool) -> bool:
     rows = extract_columns(pdf, pages) if two_column else extract_icc(pdf, pages)
     cut = jurisdiction / "2_extracted_text" / f"{Path(doc['file']).stem}.sections.jsonl"
     ok = _same_as_cached(pdf, text, pages, rows, check, read_columns if two_column else read_book)
-    if two_column:              # a scan's OCR misreads put right, as every check reads them (book_text.as_printed)
-        printed, misread = book_text.as_printed(rows, (doc["brought_in"].get("misread") or {}))
+    # The text's misreads put right, as every check reads them (book_text.as_printed): a scan's OCR misreads, or, in
+    # ICC's own PDF, a raised footnote letter the text runs into the number before it ("200c" for 200 with note c)
+    printed, misread = book_text.as_printed(rows, (doc["brought_in"].get("misread") or {}))
+    if two_column:
         result = columns_sections.split(printed, doc["brought_in"], doc["style"])
-        result["problems"] = misread + result["problems"]
     else:
-        result = icc_sections.split(rows, doc["brought_in"])
+        result = icc_sections.split(printed, doc["brought_in"], doc.get("style"))
+    result["problems"] = misread + result["problems"]
     cut_jsonl = columns_sections.to_jsonl if two_column else icc_sections.to_jsonl
     return all([ok, _write_or_check(cut, cut_jsonl(result, rows[0]), check)])
 
