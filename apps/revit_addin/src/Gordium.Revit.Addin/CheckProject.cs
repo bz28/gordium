@@ -109,7 +109,9 @@ public sealed class CheckProjectCommand : IExternalCommand
             {
                 ask = StreetEdges.Ask(ProjectFacts.Read(RevitMarks.Model(doc)), needed: true, view);
                 log["street_ask_again"] = ask.ToString();
-                if (ask == StreetAsk.Pick && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log)))
+                // (not read again once cancelled during that pick: Send then sends nothing)
+                if (ask == StreetAsk.Pick && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log))
+                    && CheckRun.Flow.IsCurrent(check.Ticket))
                     prepared = ReadModel(doc, ui.Application, log, check.Worker);
             }
             check.Read(prepared, added.Count, ask, clear);
