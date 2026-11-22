@@ -692,6 +692,55 @@ public sealed class ReaderTests(RealWorker worker) : IClassFixture<RealWorker>
         Assert.Equal("pl-lot", (await Site(Lots(Lot, Open("pl-open"))))["lot"]!["id"]!.GetValue<string>());
     }
 
+    // Snowdon Towers (Revit 2027): a full-circle model line has no ends (Curve.IsBound false), and reading it failed
+    // the whole check. The Revit layer now only counts such a curve (LotLineElement.Unbound); here is what it means.
+    private static readonly LotLineElement Circle = new("pl-circle", true, [], Unbound: 1);
+
+    private static List<string> Words(JsonObject site) =>
+        site["problems"]!.AsArray().Select(p => p!["code"]!.GetValue<string>() == "tool_words"
+            ? p["args"]!["words"]!.GetValue<string>() : p["code"]!.GetValue<string>()).ToList();
+
+    [Fact]
+    public async Task A_lot_line_with_a_curve_with_no_ends_leaves_the_lot_unread_never_read_without_it()
+    {
+        // alone, nothing picked: it may be the lot (a circle is closed), so the lot needs review, saying why
+        var alone = await Site(Lots(Circle));
+        Assert.Null(alone["lot"]);
+        Assert.Equal([LotReader.UnboundPropertyLine], Words(alone));
+        // beside one closed property line: never dropped, so the other is never taken as "the one"
+        var beside = await Site(Lots(Lot, Circle));
+        Assert.Null(beside["lot"]);
+        Assert.Equal([LotReader.UnboundPropertyLine], Words(beside));
+        // its other curves closing by themselves: never read as the lot without the curve left out
+        var part = await Site(Lots(Lot with { UniqueId = "pl-part", Unbound = 1 }));
+        Assert.Null(part["lot"]);
+        Assert.Equal([LotReader.UnboundPropertyLine], Words(part));
+        // the architect picked the other lot: that one is read (the pick says which lot it is)
+        var picked = await Site(Lots(Lot, Circle), With("pl-lot"));
+        Assert.Equal("pl-lot", picked["lot"]!["id"]!.GetValue<string>());
+        Assert.Empty(Problems(picked));
+        // picked itself, or a full-circle model line picked: the lot needs review, saying why (not "lot_not_found")
+        Assert.Equal([LotReader.UnboundPicked], Words(await Site(Lots(Lot, Circle), With("pl-circle"))));
+        var ml = new LotLineElement("ml-circle", false, [], Unbound: 1);
+        var withModelLine = await Site(House() with { LotLines = [Lot, ml] }, With("ml-circle"));
+        Assert.Null(withModelLine["lot"]);
+        Assert.Equal([LotReader.UnboundPicked], Words(withModelLine));
+        // a full-circle model line nobody picked is no lot line at all: the one property line is the lot
+        Assert.Equal("pl-lot", (await Site(House() with { LotLines = [Lot, ml] }))["lot"]!["id"]!.GetValue<string>());
+    }
+
+    [Fact]
+    public void The_Revit_layer_reads_a_lot_curve_s_ends_only_when_it_has_ends()
+    {
+        // only Revit can say IsBound, so the guard lives in RevitRead (pinned by its text): every property line's and
+        // model line's curve goes through LotLine, which reads the bound ones and counts the rest
+        var src = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "RevitRead.cs"));
+        Assert.Contains("curves.Where(c => c.IsBound).Select(Curve).ToList(), curves.Count(c => !c.IsBound)", src, StringComparison.Ordinal);
+        Assert.Contains("lines.Add(LotLine(pl.UniqueId, true, pl.GetBoundary().SelectMany(loop => loop).ToList()));", src, StringComparison.Ordinal);
+        Assert.Contains("lines.Add(LotLine(ce.UniqueId, false, [c]));", src, StringComparison.Ordinal);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(src, @"Select\(Curve\)|Curve\(c\)"));
+    }
+
     [Fact]
     public async Task No_lot_and_a_lot_no_longer_there()
     {

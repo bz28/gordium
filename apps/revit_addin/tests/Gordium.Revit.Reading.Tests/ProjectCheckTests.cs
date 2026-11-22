@@ -270,6 +270,11 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         // said back to the architect before it is kept
         Assert.Equal("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)", StreetEdges.Describe(edge, Transform3.Identity));
         Assert.Contains("wasn't on an edge", StreetEdges.Nearest(line, new Xyz(30, 60, 0)).Why, StringComparison.Ordinal);
+        // a property line holding a curve with no ends (a full circle): its lot is never read, so no edge of it is
+        // kept, even a click right on one of its straight edges
+        var (none, noEnds) = StreetEdges.Nearest(line with { Unbound = 1 }, new Xyz(20, 0.2, 0));
+        Assert.Null(none);
+        Assert.Contains("a curve with no ends", noEnds, StringComparison.Ordinal);
     }
 
     /// <summary>Review round 2: a curved street edge is said by its length along the curve (47.1 ft), never its
