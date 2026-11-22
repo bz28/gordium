@@ -102,11 +102,24 @@ CITES = {
     "310.4.2": (BCNYS, 80, "Owner-occupied lodging houses with five or fewer guest rooms shall be constructed in "
                 "accordance with this code or the Residential Code of New York State"),
 }
-# the marks the architect answers with (apps/revit_addin: Marks.cs), named in each `ask`
+# the marks the architect answers with on Project Information (apps/revit_addin: Marks.cs; every one is a mark there,
+# test_code_scope.py), named in each `ask`; Rhino asks the same facts in its start box and rows
 MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane",
         "separate_means_of_egress": "Gordium: Separate means of egress", "townhouse_units": "Gordium: Townhouse units",
         "follows_building_code": "Gordium: Follows the Building Code", "occupancy_groups": "Gordium: Occupancy groups",
-        "use": "Gordium: Use", "attached_units_in_building": "Gordium: Units in the attached building"}
+        "use": "Gordium: Use", "attached_units_in_building": "Gordium: Units in the attached building",
+        "dwelling_units": "Gordium: Dwelling units", "care_facility": "Gordium: Care facility",
+        "home_occupation": "Gordium: Home occupation", "rooms_let_for_profit": "Gordium: Rooms let for profit",
+        "accessory_dwelling_unit": "Gordium: Accessory dwelling unit", "adu_detached": "Gordium: ADU detached"}
+# Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
+# docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
+# what is assumed, and how the architect says otherwise
+ASSUMED = (("care_facility", "no one outside the household receives care here"),
+           ("home_occupation", "no home occupation"),
+           ("rooms_let_for_profit", "no rooms let for profit"),
+           ("accessory_dwelling_unit", "no accessory dwelling unit"))
+# where check.py found Ithaca's stories count read from the drawing with nothing drawn below the ground
+STORIES_DRAWN = "stories_from_drawing"
 
 # Ithaca's use words (4_term_definitions/uses.yaml) that name a dwelling R101.2 lists: its words, R101.2's item, units
 HOUSES = {"one_family_detached": ("a detached one-family dwelling", "R101.2 item 1", 1),
@@ -120,17 +133,25 @@ ATTACHED = "one_family_attached"                  # three to six units in a row 
 ASK_BY_HAND = "check which code governs by hand, then tick {mark} Yes if it is the Building Code"
 
 
-def _given(building: dict | None) -> tuple[dict, list[str]]:
-    """The `building` block's facts of the right kind, and what is wrong with the others (each said, never used)."""
+def _given(building) -> tuple[dict, list[str]]:
+    """The `building` block's facts of the right kind, and what is wrong with the rest, each said and never used: a
+    block that isn't a mapping, a key that isn't one of FACTS (a misspelled fact is never read as "not stated"), a
+    value of the wrong kind."""
+    if building is None:
+        return {}, []
+    if not isinstance(building, dict):
+        return {}, [f"the building block is {type(building).__name__}, not a mapping of facts, so none is read"]
     out, bad = {}, []
-    for k, v in (building or {}).items() if isinstance(building, dict) else []:
+    for k, v in building.items():
         kind = FACTS.get(k)
         ok = (kind == "count" and type(v) is int and v >= 1) or (kind == "yes_no" and type(v) is bool) or \
              (kind == "groups" and isinstance(v, list) and v and all(g in GROUPS for g in v)) or \
              (kind == "sprinkler" and v in SPRINKLERS)
-        if ok:
+        if kind is None:
+            bad.append(f"the building block's {k!r} is no fact Gordium reads ({', '.join(FACTS)})")
+        elif ok:
             out[k] = v
-        elif kind is not None:
+        else:
             bad.append(f"the building's {k.replace('_', ' ')} is {v!r}, which Gordium can't read")
     return out, bad
 
@@ -153,39 +174,44 @@ def building_measures(building: dict | None) -> dict:
     return out
 
 
-def _answer(code, why, cites, used, ask=None):
+def _answer(code, why, cites, used, ask=None, assumes=()):
     """The decision: `code` (None: needs review), `title` (the book's name, None when undecided), `why` in plain
     words, `cites` ({section, document, page, quote} each: the book's own words), `ask` (what the architect states
-    to settle it, only when undecided), `facts` (what it was decided from)."""
+    to settle it, only when undecided), `assumes` (Gordium's reading of what wasn't stated, each a reading to
+    confirm: shown with the decision, never hidden), `facts` (what it was decided from)."""
     return {"code": code, "title": TITLES.get(code), "why": why,
             "cites": [{"section": ("RCNYS " if CITES[k][0] == RCNYS else "BCNYS ") + k, "document": CITES[k][0],
                        "page": CITES[k][1], "quote": CITES[k][2]} for k in dict.fromkeys(cites)],
-            "ask": ask if code is None else None, "facts": used}
+            "ask": ask if code is None else None, "assumes": list(assumes), "facts": used}
 
 
 def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
     """The most stories above grade plane the building can have (RCNYS R202), and where that comes from.
 
-    The architect's count where stated. Else Ithaca's own count (`stories`), which can only be as many or more: the
-    measuring gives it only when nothing drawn is below the ground (a part below it is the basement question, and
-    the count needs review: places/ithaca_city/measure.py _stories_whole), so no basement or cellar R202 could count
-    and Ithaca doesn't (R202 item 3, 6 ft for more than half the perimeter, is the State's alone); and what Ithaca
+    The architect's count where stated. Else Ithaca's own count (`stories`), only where check.py found it read from
+    the drawing (STORIES_DRAWN: a count over drawn parts, no geometry error; never a typed count kept because nothing
+    countable is drawn), which can only be as many or more: read from the drawing, it comes only when nothing drawn
+    is below the ground (a part below it is the basement question, and the count needs review:
+    places/ithaca_city/measure.py _stories_whole), so no basement or cellar R202 could count and Ithaca doesn't
+    (R202 item 3, 6 ft for more than half the perimeter, is the State's alone); and what Ithaca
     leaves out the State does too: a mezzanine (both: "an intermediate level ... between the floor and ceiling of any
     story", R202 MEZZANINE), an attic "unfinished and without human occupancy" (R202 ATTIC is the space between the
     ceiling assembly and the roof assembly, inside the top STORY, which runs to "the floor or roof next above"; only
     a habitable attic is a story above grade plane, R316.3, and Ithaca counts that one, having human occupancy)."""
     if "stories_above_grade_plane" in facts:
         return facts["stories_above_grade_plane"], "stated by the architect"
+    if values.get(STORIES_DRAWN) is not True:       # a typed count alone, or no drawing to read: Ithaca's count
+        return None, "not known"                    # misses R202's item 3 (a walk-out basement), so it can't stand in
     s = values.get("stories")
     # where Ithaca's count is an open question, the most the drawing allows (its readings' greatest: STORIES_AT_MOST,
     # given by check.py) bounds it the same way
     if s is None and type(values.get(STORIES_AT_MOST)) in (int, float) and values[STORIES_AT_MOST] >= 1:
-        return int(math.ceil(values[STORIES_AT_MOST])), ("the most Ithaca's count could be as drawn, nothing drawn "
-                                                         "below the ground: every story the State counts above grade "
-                                                         "plane Ithaca counts too")
+        return int(math.ceil(values[STORIES_AT_MOST])), ("the most Ithaca's count could be, read from the drawing "
+                                                         "with nothing drawn below the ground: every story the State "
+                                                         "counts above grade plane Ithaca counts too")
     if type(s) in (int, float) and s >= 1 and float(s).is_integer():
-        return int(s), ("Ithaca's count, nothing drawn below the ground: every story the State counts above "
-                        "grade plane Ithaca counts too")
+        return int(s), ("Ithaca's count, read from the drawing with nothing drawn below the ground: every story the "
+                        "State counts above grade plane Ithaca counts too")
     return None, "not known"
 
 
@@ -195,7 +221,7 @@ def decide(values: dict, building: dict | None) -> dict:
     # the building block's facts, and any the check's values carry (a host with no interior description may state
     # them as facts); the building block's own stand where both give one
     given = {k: values[k] for k in FACTS if k in values}
-    facts, bad = _given({**given, **(building if isinstance(building, dict) else {})})
+    facts, bad = _given({**given, **building} if isinstance(building, dict) else given if building is None else building)
     used = dict(facts)
     by_hand = ASK_BY_HAND.format(mark=MARK["follows_building_code"])
     if bad:
@@ -224,7 +250,7 @@ def decide(values: dict, building: dict | None) -> dict:
     if use not in HOUSES and use != ATTACHED:
         return _answer(BUILDING, f"its use ({use}) is none of the dwellings R101.2 lists (101.2: every other building)",
                        ["R101.2", "101.2"], used)
-    # a dwelling R101.2 can cover: each condition it sets
+    # a dwelling R101.2 can cover: each condition it sets, and how many dwelling units the building holds
     if values.get("care_facility") is True or facts.get("care_facility") is True:
         used["care_facility"] = True
         return _answer(None, "people outside the household receive care here: five or fewer may stay under the "
@@ -241,6 +267,15 @@ def decide(values: dict, building: dict | None) -> dict:
         return _answer(None, f"{rooms:g} rooms let for profit: a lodging house is under the Residential Code only "
                        "owner-occupied with five or fewer guestrooms and a P2904 sprinkler system (R101.2 item 6)",
                        ["R101.2 item 6", "310.4.2"], used, by_hand)
+    # an accessory dwelling unit on the lot: in or on the building it is one more of the building's dwelling units
+    adu = values.get("accessory_dwelling_unit")
+    if adu is True and values.get("adu_detached") is None:
+        return _answer(None, "an accessory dwelling unit is on the lot and whether it is detached isn't stated: in or "
+                       "on the building it is one more of its dwelling units (R202 DWELLING: one or two)",
+                       ["R202 DWELLING", "R101.2 item 2"], used,
+                       f"say whether the accessory dwelling unit is detached ({MARK['adu_detached']})")
+    attached_adu = adu is True and values.get("adu_detached") is False
+    used["attached_adu"] = attached_adu
     if use == ATTACHED:
         units = values.get("attached_units_in_building")
         used["attached_units_in_building"] = units
@@ -248,32 +283,52 @@ def decide(values: dict, building: dict | None) -> dict:
             return _answer(None, "an attached one-family dwelling, the units of the whole attached building not stated",
                            ["R101.2 item 3", "R202 TOWNHOUSE"], used,
                            f"state the units in the whole attached building ({MARK['attached_units_in_building']})")
-        if units < 3:
-            what, item, n = "a two-family dwelling (two attached units in one building)", "R101.2 item 2", 2
-        elif facts.get("townhouse_units") is None:
+        if units < 2:
+            return _answer(None, f"an attached one-family dwelling, but {units} unit in the whole attached building is "
+                           "stated", ["R101.2 item 3", "R202 TOWNHOUSE"], used,
+                           f"correct the use ({MARK['use']}) or the units ({MARK['attached_units_in_building']})")
+        lot_units, building_units = 1, units + (1 if attached_adu else 0)
+    else:
+        what, item, n = HOUSES[use]
+        lot_units = 2 if use == "two_family" else 1
+        building_units = n + (1 if attached_adu else 0)
+    # the dwelling units stated for the lot agree with the use (and an attached ADU), whatever the use word
+    stated = values.get("dwelling_units")
+    if type(stated) in (int, float) and stated not in (lot_units, lot_units + (1 if attached_adu else 0)):
+        used["dwelling_units"] = stated
+        return _answer(None, f"the use is {use} ({lot_units} dwelling unit{'s' if lot_units > 1 else ''} on the lot"
+                       f"{' and its accessory dwelling unit' if attached_adu else ''}) but {stated:g} dwelling units are "
+                       "stated", ["R202 DWELLING", "R101.2"], used,
+                       f"correct the use ({MARK['use']}) or the dwelling units ({MARK['dwelling_units']})")
+    used["building_units"] = building_units
+    if use == ATTACHED and units >= 3:
+        if attached_adu:
+            return _answer(None, f"{units} attached units, one with an accessory dwelling unit: a townhouse unit is "
+                           "\"a single-family dwelling unit\" (R202), and whether one holding an accessory dwelling unit "
+                           "is one is a person's check", ["R101.2 item 3", "R202 TOWNHOUSE UNIT"], used, by_hand)
+        if facts.get("townhouse_units") is None:
             return _answer(None, f"{units} attached units: a townhouse only if each is a townhouse unit (R202: from "
                            "foundation to roof, a yard or public way on two sides, a separate means of egress)",
                            ["R101.2 item 3", "R202 TOWNHOUSE UNIT"], used,
                            f"say whether every unit is a townhouse unit ({MARK['townhouse_units']})")
-        elif facts["townhouse_units"] is False:
+        if facts["townhouse_units"] is False:
             return _answer(BUILDING, f"{units} attached units that are not townhouse units (R202), so none of the "
                            "dwellings R101.2 lists", ["R101.2 item 3", "R202 TOWNHOUSE UNIT", "101.2"], used)
-        else:
-            what, item, n = f"a townhouse of {units} townhouse units", "R101.2 item 3", None
-    else:
-        what, item, n = HOUSES[use]
-        units = values.get("dwelling_units")
-        if type(units) in (int, float) and n == 1 and units != 1:
-            used["dwelling_units"] = units
-            return _answer(None, f"the use is a one-family dwelling but {units:g} dwelling units are stated",
-                           ["R101.2 item 1"], used, "correct the use or the dwelling units")
-        if values.get("accessory_dwelling_unit") is True and values.get("adu_detached") is not True and n == 1:
-            if values.get("adu_detached") is None:
-                return _answer(None, "an accessory dwelling unit is on the lot and whether it is detached isn't "
-                               "stated: inside the house it makes it a two-family dwelling", ["R101.2 item 2"], used,
-                               "say whether the accessory dwelling unit is detached")
-            what, item, n = ("a two-family dwelling (the house and its attached accessory dwelling unit)",
-                             "R101.2 item 2", 2)
+        what, item, n = f"a townhouse of {units} townhouse units", "R101.2 item 3", None
+    elif building_units >= 3:
+        return _answer(BUILDING, f"{building_units} dwelling units in one building"
+                       f"{' (an accessory dwelling unit among them)' if attached_adu else ''}: more than the one or two "
+                       "of a dwelling (R202) and not a townhouse, so a Group R-2 building (310.3)",
+                       ["R202 DWELLING", "310.3"], used)
+    elif building_units == 2:
+        what, item, n = ("a two-family dwelling" + (" (the house and its attached accessory dwelling unit)" if
+                                                    attached_adu and use != "two_family" else
+                                                    " (two attached units in one building)" if use == ATTACHED else
+                                                    "" if use == "two_family" else
+                                                    " (two semi-detached units in one building)"),
+                         "R101.2 item 2", 2)
+    # Gordium's reading of what wasn't stated (decision 2a): none of these, each said as a reading to confirm
+    assumes = [words for key, words in ASSUMED if values.get(key) is None and facts.get(key) is None]
     cites = [item]
     if n == 2:
         egress = facts.get("separate_means_of_egress")
@@ -297,5 +352,11 @@ def decide(values: dict, building: dict | None) -> dict:
                            cites + ["R101.2", "101.2"], used)
         return _answer(None, f"{what}: Ithaca's count could be {most} stories, and a habitable attic Ithaca counts may not be a "
                        "story above grade plane (R316.3's exceptions)", cites + ["R101.2", "R316.3"], used, ask)
-    return _answer(RESIDENTIAL, f"{what}, {most} stories above grade plane at most ({where}) ({item})",
-                   cites + ["R101.2", "R202 STORY ABOVE GRADE PLANE"], used)
+    said = (f"; Gordium assumes {_joined(assumes)} (not stated): if any is so, say it "
+            f"({', '.join(MARK[k] for k, w in ASSUMED if w in assumes)})" if assumes else "")
+    return _answer(RESIDENTIAL, f"{what}, {most} stories above grade plane at most ({where}) ({item}){said}",
+                   cites + ["R101.2", "R202 STORY ABOVE GRADE PLANE"], used, assumes=assumes)
+
+
+def _joined(words: list[str]) -> str:
+    return words[0] if len(words) == 1 else ", ".join(words[:-1]) + " and " + words[-1]

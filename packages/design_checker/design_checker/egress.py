@@ -272,10 +272,10 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
 
 def which_code(got: dict) -> dict | None:
     """The code decision as a host shows it at the top of the results (Ben, 2026-11-22: chosen for the architect,
-    shown, never a choice offered): {code, title, why, cites: [{section, document, page, quote}], ask}, the very
-    words of code_scope.decide; None where the place's laws don't split buildings between books."""
+    shown, never a choice offered): {code, title, why, cites: [{section, document, page, quote}], ask, assumes:
+    [words]}, the very words of code_scope.decide; None where the place's laws don't split buildings between books."""
     scope = got.get("code_scope")
-    return None if scope is None else {k: scope[k] for k in ("code", "title", "why", "cites", "ask")}
+    return None if scope is None else {k: scope[k] for k in ("code", "title", "why", "cites", "ask", "assumes")}
 
 
 ROUTES = "routes"

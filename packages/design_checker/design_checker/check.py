@@ -1093,13 +1093,19 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
 
 
 def _with_stories_bound(values: dict, measured: dict) -> dict:
-    """The values egress reads, with the most stories the drawing allows (code_scope.STORIES_AT_MOST) where the
-    stories count is an open question between readings: which New York code governs needs only that bound."""
+    """The values egress reads, with what the stories measuring established for which New York code governs:
+    code_scope.STORIES_DRAWN where the count was read from the drawn parts (the measuring then checked nothing drawn
+    is below the ground: places/ithaca_city/measure.py _stories_whole), never where it is a typed count kept because
+    nothing countable is drawn (no parts named) or any measurement hit a geometry error; and the most stories the
+    drawing allows (code_scope.STORIES_AT_MOST) where the count is an open question between readings."""
     record = measured.get("stories") or {}
+    drawn = bool(record.get("objects")) and not any(isinstance(r, dict) and r.get("geometry_error")
+                                                   for r in measured.values())
+    out = {**values, code_scope.STORIES_DRAWN: drawn}
     most = [r.get("value") for r in record.get("readings") or [] if isinstance(r, dict)]
     if values.get("stories") is not None or not most or not all(type(v) in (int, float) for v in most):
-        return values
-    return {**values, code_scope.STORIES_AT_MOST: max(most)}
+        return out
+    return {**out, code_scope.STORIES_AT_MOST: max(most)}
 
 
 def _envelope_facts(site: dict, facts: dict) -> dict:

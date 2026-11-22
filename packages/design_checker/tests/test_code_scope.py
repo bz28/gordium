@@ -27,8 +27,11 @@ SITE = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]),
         "buildings": [box(10, 25, 40, 75, 0, 30)], "problems": []}
 
 
+DRAWN = {code_scope.STORIES_DRAWN: True}       # Ithaca's stories count read from the drawing (check.py)
+
+
 def code(values, building=None):
-    got = code_scope.decide(values, building)
+    got = code_scope.decide({**DRAWN, **values}, building)
     return got["code"], [c["section"] for c in got["cites"]], got
 
 
@@ -138,7 +141,7 @@ def test_a_house_is_checked_exactly_as_it_was_before_the_building_code_was_inher
     before["laws"] = [law for law in before["laws"] if law["key"] == "new_york/new_york_state"]
     for law in before["laws"]:
         law["scope"] = None                                   # as the folder was: no scope, always run
-    values = {"use": "one_family_detached", "stories": 1, "dwelling_units": 1}
+    values = {"use": "one_family_detached", "stories": 1, "dwelling_units": 1, **DRAWN}
     for interior in (ranch(), None, dict(ranch(), rooms=[])):
         old = egress.check(before, interior, values, {"use": set()})
         new = egress.check(found, interior, values, {"use": set()})
@@ -169,10 +172,11 @@ def test_where_it_cant_tell_both_run_each_held_at_needs_review_never_the_calm_wa
 def test_the_answer_carries_which_code_in_the_deciders_own_words():
     result = check_site(SITE, dict(FACTS), interior=ranch())
     which = result["which_code"]
-    assert set(which) == {"code", "title", "why", "cites", "ask"}
-    assert which == {k: code_scope.decide(result["measurements"] and {k2: m["value"] for k2, m in
-                                                                     result["measurements"].items()},
-                                          None)[k] for k in which}
+    assert set(which) == {"code", "title", "why", "cites", "ask", "assumes"}
+    from design_checker.check import _with_stories_bound
+    values = _with_stories_bound({k: m["value"] for k, m in result["measurements"].items()}, result["measurements"])
+    assert values[code_scope.STORIES_DRAWN] is True                 # the box house: its stories read from the drawing
+    assert which == {k: code_scope.decide(values, None)[k] for k in which}
     assert all(set(c) == {"section", "document", "page", "quote"} for c in which["cites"])
 
 
@@ -219,8 +223,101 @@ def test_an_open_stories_count_still_settles_the_code_when_every_reading_is_thre
     assert code({**house, code_scope.STORIES_AT_MOST: 2})[0] == code_scope.RESIDENTIAL
     assert code({**house, code_scope.STORIES_AT_MOST: 5})[0] is None
     from design_checker.check import _with_stories_bound
-    measured = {"stories": {"value": None, "readings": [{"reading": "at least", "value": 1},
-                                                         {"reading": "at most", "value": 2}]}}
-    assert _with_stories_bound({"stories": None}, measured)[code_scope.STORIES_AT_MOST] == 2
-    assert _with_stories_bound({"stories": 2}, measured) == {"stories": 2}          # a count needs no bound
-    assert _with_stories_bound({"stories": None}, {"stories": {"value": None}}) == {"stories": None}
+    measured = {"stories": {"value": None, "objects": ["b1"], "readings": [{"reading": "at least", "value": 1},
+                                                                           {"reading": "at most", "value": 2}]}}
+    got = _with_stories_bound({"stories": None}, measured)
+    assert (got[code_scope.STORIES_AT_MOST], got[code_scope.STORIES_DRAWN]) == (2, True)
+    assert code_scope.STORIES_AT_MOST not in _with_stories_bound({"stories": 2}, measured)   # a count needs no bound
+    assert code_scope.STORIES_AT_MOST not in _with_stories_bound({"stories": None}, {"stories": {"value": None}})
+
+
+# ---- review round 1 (2026-11-22) --------------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("values, why", [
+    # F1: a building's units counted for every use word, an attached ADU one more of them (R202 DWELLING: one or two)
+    ({"use": "two_family", "stories": 2, "accessory_dwelling_unit": True, "adu_detached": False}, "3 dwelling units"),
+    ({"use": "one_family_semi_detached", "stories": 2, "accessory_dwelling_unit": True, "adu_detached": False},
+     "3 dwelling units"),
+    ({"use": "one_family_attached", "attached_units_in_building": 2, "stories": 2, "accessory_dwelling_unit": True,
+      "adu_detached": False}, "3 dwelling units")])
+def test_three_units_in_one_building_are_never_the_residential_codes(values, why):
+    c, cites, got = code(values, {"separate_means_of_egress": True})
+    assert c == code_scope.BUILDING and why in got["why"] and "BCNYS 310.3" in cites
+
+
+def test_dwelling_units_that_disagree_with_any_use_word_need_review():
+    c, _, got = code({"use": "two_family", "dwelling_units": 3, "stories": 2}, {"separate_means_of_egress": True})
+    assert c is None and "Gordium: Dwelling units" in got["ask"]
+    assert code({"use": "two_family", "dwelling_units": 2, "stories": 2},
+                {"separate_means_of_egress": True})[0] == code_scope.RESIDENTIAL
+
+
+def test_a_townhouse_unit_with_an_accessory_dwelling_unit_needs_review():
+    c, cites, _ = code({"use": "one_family_attached", "attached_units_in_building": 4, "accessory_dwelling_unit": True,
+                        "adu_detached": False}, {"townhouse_units": True, "stories_above_grade_plane": 3})
+    assert c is None and "RCNYS R202 TOWNHOUSE UNIT" in cites
+
+
+def test_a_house_with_an_attached_adu_is_a_two_family_dwelling_and_an_unknown_adu_needs_review():
+    house = {"use": "one_family_detached", "stories": 2, "accessory_dwelling_unit": True}
+    assert code({**house, "adu_detached": False})[0] is None                          # separate means of egress?
+    assert code({**house, "adu_detached": False}, {"separate_means_of_egress": True})[0] == code_scope.RESIDENTIAL
+    assert code({**house, "adu_detached": True})[0] == code_scope.RESIDENTIAL
+    c, _, got = code(house)
+    assert c is None and "Gordium: ADU detached" in got["ask"]
+
+
+@pytest.mark.parametrize("values", [
+    {"use": "one_family_detached", "stories": 3},                                  # F2: a typed count, nothing drawn
+    {"use": "one_family_detached", "stories": 3, code_scope.STORIES_DRAWN: False}])
+def test_a_typed_ithaca_count_alone_never_stands_in_for_the_states(values):
+    got = code_scope.decide(values, None)
+    assert got["code"] is None and "Gordium: Stories above grade plane" in got["ask"]
+
+
+def test_check_passes_the_drawn_count_only_from_drawn_parts_without_a_geometry_error():
+    from design_checker.check import _with_stories_bound
+    drawn = {"stories": {"value": 3, "objects": ["b1"], "readings": []}}
+    assert _with_stories_bound({"stories": 3}, drawn)[code_scope.STORIES_DRAWN] is True
+    typed = {"stories": {"value": 3, "objects": [], "readings": [], "how": "stated by the architect"}}
+    assert _with_stories_bound({"stories": 3}, typed)[code_scope.STORIES_DRAWN] is False
+    broken = {**drawn, "lot_area": {"value": None, "geometry_error": "the drawing's geometry couldn't be worked out"}}
+    assert _with_stories_bound({"stories": 3}, broken)[code_scope.STORIES_DRAWN] is False
+
+
+def test_with_no_buildings_drawn_a_typed_count_asks_for_the_states_count():
+    site = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]), "buildings": [], "problems": []}
+    which = check_site(site, dict(FACTS, stories=3))["which_code"]
+    assert which["code"] is None and "Gordium: Stories above grade plane" in which["ask"]
+
+
+def test_what_isnt_stated_about_a_house_is_assumed_out_loud_and_a_stated_one_decided_by_the_law():
+    # F3: Gordium's reading (decision 2a), listed in the answer and said in its words
+    c, _, got = code({"use": "one_family_detached", "stories": 2})
+    assert c == code_scope.RESIDENTIAL
+    assert got["assumes"] == ["no one outside the household receives care here", "no home occupation",
+                              "no rooms let for profit", "no accessory dwelling unit"]
+    assert "Gordium assumes no one outside the household receives care here" in got["why"]
+    assert "Gordium: Care facility" in got["why"] and "Gordium: Accessory dwelling unit" in got["why"]
+    stated = {"use": "one_family_detached", "stories": 2, "home_occupation": False, "rooms_let_for_profit": 0,
+              "accessory_dwelling_unit": False}
+    _, _, got = code(stated, {"care_facility": False})
+    assert got["assumes"] == [] and "assumes" not in got["why"]
+    for more, building in (({"home_occupation": True}, None), ({"rooms_let_for_profit": 1}, None),
+                           ({}, {"care_facility": True})):
+        assert code({**stated, **more}, {"care_facility": False, **(building or {})})[0] is None
+
+
+@pytest.mark.parametrize("building, said", [(["stories_above_grade_plane", 2], "not a mapping"),
+                                            ({"stories_above_gradeplane": 2}, "is no fact Gordium reads")])
+def test_a_building_block_gordium_cant_read_is_said_never_dropped(building, said):
+    # F4: a block that isn't a mapping, or a misspelled fact, needs review naming it
+    got = code_scope.decide({"use": "one_family_detached", "stories": 2, **DRAWN}, building)
+    assert got["code"] is None and said in got["why"]
+
+
+def test_every_mark_an_ask_names_is_one_the_add_in_defines():
+    # F5: an ask never names a mark the architect can't find
+    marks = set(re.findall(r'"(Gordium: [^"]+)", new\("[0-9a-f-]+"\)',
+                           (REPO / "apps/revit_addin/src/Gordium.Revit.Reading/Marks.cs").read_text(encoding="utf-8")))
+    assert set(code_scope.MARK.values()) <= marks, set(code_scope.MARK.values()) - marks
