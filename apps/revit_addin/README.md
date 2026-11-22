@@ -450,17 +450,72 @@ the jurisdiction is the City of Ithaca). Why each choice:
 - **The button** (`CheckProject.cs`): adds the marks on first use, asks the architect to click the street edge
   when it isn't set, reads both on Revit's thread, sends off it, opens the **results panel** and writes every row to
   `check_project_result.txt` and the request and answer to the log. `check_project_request.json`
-  (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks and never uses the panel.
+  (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks and never uses the panel (and waits on Revit's
+  thread: no one is working in Revit then).
+- **A check that doesn't freeze Revit** (`CheckRun.cs`; every decision in `Gordium.Revit.Reading/CheckFlow.cs`;
+  design pass PR 8). Revit's API can be called only on Revit's own thread, so the read stays there and Revit waits
+  for it; everything after it doesn't. In order: the panel comes up saying *Reading the model... Revit waits until
+  the read ends.* and its button becomes **Cancel** (the read is queued for after the panel has drawn that line: the
+  read blocks Revit's thread, so nothing is drawn during it); the worker's Python is started on a pool thread at the
+  same moment, so it starts while Revit reads (Revit's thread waits for it only if the read asks it which objects
+  are left out: the step `worker_wait`); after the read the request is sent and waited for on a pool thread
+  (`CheckFlow.Send`), the panel says *Checking (Gordium's checker, 12 s)... You can keep working: an edit now makes
+  this answer stale.*, and Revit is free; the answer comes back to Revit's thread through the panel's ExternalEvent
+  and is shown. The stages are `CheckStage`: idle → reading → checking → done, cancelled or failed. The rules:
+  - **An answer is shown fresh only for the model it read.** Every committed change to the project being checked
+    that isn't the check's own (`ResultRows.ChangesTheCheck`, as for the panel's stale) is counted from Revit's
+    DocumentChanged (`CheckFlow.Edited`); the count is kept when the read ends; an answer handled after a later edit
+    is shown **stale** ("The model changed while this check ran (read at 14:32): these results may not hold"),
+    greyed, never green. Its "Checked HH:mm" is when the model was read.
+  - **Cancel** (the header button while a check runs, or the project being checked closing) cancels the wait: the
+    worker is stopped (the client kills it on a cancel; the next check starts a new one) and its answer, or its
+    stopped worker's error, is ignored if it still comes. The panel goes back to what it showed before: the earlier
+    results **marked stale** ("These results are from 14:32, before the check you cancelled"), never shown as the new
+    ones; or the empty, the "fill these in first" or the error state; its words say which was restored (never "the
+    results below" with none below). Clicked during the read, it is handled when the read ends (Revit's thread is
+    busy until then) but before anything is sent: the read's end keeps the edit count at once, and the send is
+    queued behind the input Revit queued during the read (WPF runs Background work only once no input is pending),
+    so the click comes first; nothing is sent, the worker keeps running (never killed and restarted), and the log
+    line says `cancelled_before_send`.
+  - **The street edge is clicked only in the project being checked**, while it is the active one: the read is
+    queued after the click, and if the architect switched projects meanwhile, no pick is asked for (a pick, and the
+    Street edge mark it writes, would land in the other project); the panel lists "switch to it ... and click Check
+    again" (`StreetAsk.NotActive`). The rest of the read is of the project clicked, whichever is active.
+  - **One worker per session**: every start and stop goes through `Trial.WorkerAsync` and `Trial.StopWorker`, under
+    one lock (the box house's trial command too); a start still running when Revit closes stops its worker.
+  - **One check at a time.** A second Check while one runs is refused, with a dialog saying to wait or Cancel (the
+    panel's own button is Cancel meanwhile): the read is the part that freezes Revit, and a check started on top
+    would read the model twice; an edit meanwhile already makes the coming answer stale.
+  - **A crash, a timeout (60 s), an unreadable answer, a worker that won't start** is the error state ("Gordium's
+    checker stopped before answering (...): nothing was checked"): every row of the last check taken down, never part
+    of an answer shown. The earlier results stay on screen during the check (stale-styled if the model changed),
+    not dimmed: dimming would break the 4.5:1 contrast PR 1 tests; the progress line and the header's time say they
+    are the earlier check's.
 - **The results panel** (`ResultsPane.cs`, `ResultsView.cs`, `PanelActions.cs`): a dockable pane, *Gordium: Check
-  my project*, tabbed behind Properties the first time. Header with *Check again*; the worker's state and count
-  chips; filter chips (all, does not comply, needs review, complies) and a search (rule names, sections, element
+  my project*, tabbed behind Properties the first time. Header with *Check again*; which code the building was
+  checked against and why (`WhichCode`: the worker's `which_code`, its words only, the law's quoted words on hover;
+  "Which code: needs review" with the worker's ask when it couldn't decide; never green; no line at all when the
+  answer doesn't say); the worker's state and the **compact count bar** (`CountBar`: one line per law, its most
+  important counts with every "does not comply" always shown, the rest behind "+N", which opens them in place, and
+  every count in the line's tooltip; a line that would wrap keeps one count fewer; the worker's words, never
+  recounted: Revit trial, 106 Ithaca Rd, 2026-11-22, the 9 counts took 6 lines at the docked pane); filter chips (all, does not comply, needs review, complies) and a search (rule names, sections, element
   names); then the **results list** (`ResultsList.cs`, its decisions in `Gordium.Revit.Reading/ResultList.cs`): a
   virtualized list, worst first (does not comply, largest how far off first where the worker's figure is a length;
   needs review, the worker's tier 2; check by hand or not checked; complies and not applicable, folded), every row in
   exactly one place, each row: glyph and name (the row's whole width, wrapped), its figures in full or short cause,
   then its section (trimmed, the whole on hover) with *Show*. A click selects the row
   and its elements in Revit without moving the view; *Show* (or Space) zooms; Enter or a double click opens its
-  figures, reason, elements and the law's words; Up/Down move; Ctrl+C copies the row as the result file says it;
+  **detail** in place of the list (`DetailView.cs`, its decisions in `Gordium.Revit.Reading/ResultDetail.cs`):
+  *Back* and "3 of 8" with previous and next (Alt+Up/Down); the verdict, rule and section; *Why* (the worker's
+  reason in full); *What to do* (the worker's own advice first, its `hint`; then by the row's place: change the
+  design, resolve what the reason says or decide it by hand, check it by hand; *Show*, *Open the law* and *Check
+  again* as buttons; nothing to do for a row that complies, and only *Check again* once stale); *Measured against
+  the limit* (each figure, its limit and how far off, the worker's words split, never a number of the add-in's);
+  *The law's words* (each quote with where it is, and *Open the law* for each of the worker's `detail.cited` links,
+  opened in the browser at its page; egress rows have no link yet, and the detail says so); *Elements* by the names
+  architects use (`ElementNames`: "CLOSET (40)", "Door D06"; one no longer in the model said so, never its
+  UniqueId), each with *Show*, and *Show all*. Backspace or Esc returns to the same row and scroll position; a stale
+  detail says so first and is never green. Up/Down move; Ctrl+C copies the row as the result file says it;
   Ctrl+F searches, Esc clears the search. Nothing sent for a missing Project Information fact: the panel
   lists each, with *Open Project Information*. Element marks are still set in Properties (the click selects the
   element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread (`ActionQueue`: a
@@ -484,10 +539,47 @@ doesn't know and a "not applicable" with no reason: nothing shown as a pass that
 `ResultRowsTests` (the panel's rows: 200 rows all shown once in the worker's groups with its counts, never
 recounted; the worker's delta and never a margin it didn't give; egress figures from the reason with no margin
 worked out; sections and quotes; count chips coloured only by their words; every text-file row word for word the
-panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote) and `PanelThemeTests`
+panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote), `DetailTests` (a
+snapshot of every row's detail of the box house's real answer and of the Children's Odyssey's,
+`tests/.../snapshots/`; every number a detail shows is in the worker's item for its row, or an element's name; what
+to do never says a row will comply, ends with Check again, and a stale detail is never green; links only the
+worker's web or file addresses), `CountBarTests` (every count reachable in the worker's order, a failure never
+hidden), `WhichCodeTests` (the line in the worker's words, absent without the field, never green, greyed when
+stale), `CheckFlowTests` (PR 8: the stages; an edit after the read makes the answer stale, one before it doesn't;
+Cancel goes back to what the panel had, the earlier results stale, its token cancelled and its late answer or error
+ignored; a second check refused while one runs and a late answer never the new check's; a crash, a timeout, an
+unreadable answer or a worker that won't start the error state; the send returns at once while the stand-in worker
+hangs, and Cancel kills it; the real worker's answer fresh, and stale after an edit made while it worked; the words,
+the button, the redraw while a check runs; the blocked time; and the add-in's wiring of each, in its source),
+`ElementNamesTests` and `PanelThemeTests`
 (every text colour at least 4.5:1 on every background it sits on in both themes, every status mark at least 3:1,
 every status its own glyph and word, green only for complies and never stale, no fixed colour in the view). The WPF
-panel itself is checked in Revit (it needs Revit to run).
+panel itself is checked in Revit (it needs Revit to run). The Children's Odyssey's answer
+(`tests/Gordium.Revit.Reading.Tests/answers/children_odyssey_check_answer.json`) is made by
+`tools/evals/make_odyssey_answer.py` from the add-in's read of the marked model (the worker's egress code with Maine's
+law and the eval's building facts; the route parts as the eval measures them); the read stays outside the repo with
+the sheet it was built from. `GORDIUM_UPDATE_SNAPSHOTS=1` rewrites the snapshots (read the diff before committing).
+
+**Where Revit's thread went: `ui_thread`** (PR 8). Each `check_project` line from the button or the panel ends
+with `ended` (`shown`, `shown_stale`, `nothing_sent`, `cancelled`, `failed`), `answer_use`, `cancelled` (the stage
+and time, when cancelled) and `ui_thread`, kept by `UiThreadTime` (`Gordium.Revit.Reading`):
+
+```json
+"ui_thread": {
+  "blocked_s": 49.31,
+  "blocked":    { "start": {"seconds": 0.004, "calls": 1}, "read": {"seconds": 49.1, "calls": 1}, "show": {"seconds": 0.21, "calls": 1} },
+  "architect":  { "street_pick": {"seconds": 6.2, "calls": 1} },
+  "off_thread": { "check": {"seconds": 3.1, "calls": 1} }
+}
+```
+
+(made-up numbers). `blocked_s` is the time Revit's thread ran the add-in's code for this check, Revit frozen: `start`
+(the click to the panel's line), `read` (marks, the drafts, the read, `prepare` and the request; the architect's
+picks taken out) and `show` (the answer made into the panel's rows and labels, on Revit's thread). `architect` is
+Revit's thread waiting for the architect's street pick (Revit answers then: never counted as blocked);
+`off_thread.check` (also `check_s`) the wait for the worker, Revit free. Before PR 8 all of `read_s`, `check_s` and the
+showing were blocked; now only `blocked_s` is. A check asked for by file logs no `ui_thread` (it waits on Revit's
+thread, as before). How we know: `CheckFlowTests`.
 
 **Where a slow read spends its time: `read_steps`.** The `check_project`, `read_interior` and `record_house` lines
 in `results.jsonl` carry a `read_steps` object beside `read_s` (added after Snowdon Towers froze Revit for 408 s,
@@ -510,9 +602,11 @@ ran, summed over the run; a step's time includes the steps inside it (`outside` 
 `counts` are summed, `max` is the largest one room (or call) gave, `links` one entry per linked model read (its
 seconds include its own links; its elements are its own). The names:
 
-- **Check project's run:** `outside` (the outside read, `RevitRead`), `inside` (`RevitInterior`), `worker_start`,
+- **Check project's run:** `outside` (the outside read, `RevitRead`), `inside` (`RevitInterior`),
   `prepare` (the marks read as facts, the lot, `SiteReader`, `InteriorReader` and the request made:
-  `ProjectCheck.PrepareAsync`), `log_request` (the request written for the log). Read inside and Record houses log
+  `ProjectCheck.PrepareAsync`), in it `worker_wait` (the worker, started on a pool thread before the read, waited for
+  when the read asks it which objects are left out; PR 8: it was `worker_start`, all of Python's start on Revit's
+  thread), `log_request` (the request written for the log). Read inside and Record houses log
   `inside` and `interior_reader`.
 - **The outside read** (`RevitRead`; totals include linked models' elements): `outside.collect` (listing every
   element), `outside.get_geometry.fine|medium|coarse` (Revit's `get_Geometry`; medium and coarse are read for
@@ -533,7 +627,12 @@ seconds include its own links; its elements are its own). The names:
   `inside.railing.near.*` (the same names, no band). The band's boolean cuts:
   `inside.boolean_op`, counted `inside.boolean_ops`; open shells skipped `inside.open_shells`. Faces read
   (`inside.faces`), of them curved and triangulated (`inside.faces_triangulated`, time `inside.triangulate`).
-  Windows and doors: `inside.opening.faces`, `inside.opening.cut`. The transactions: `inside.enclosed_areas.topology`,
+  Windows and doors: `inside.opening.faces`, `inside.opening.cut`. Each element's geometry is worked out once per
+  read (`ReadMemo`, kept by element and geometry options for the rooms, openings, stairs and railings, let go before
+  the enclosed areas change the model): its faces, counted `inside.cache.faces.hits` (asks answered from what was
+  kept) and `.misses` (worked out), and its geometry walked for the band, `inside.cache.band_pieces.hits|misses`
+  (the band's cuts are still made per room). So `inside.faces`, `inside.faces_triangulated` and `inside.triangulate`
+  count each element's own faces once (the band's cut faces still once per room), and `.faces` and `.band` keep one call per element per box. The transactions: `inside.enclosed_areas.topology`,
   `.outline` (a Room placed in an area with none, rolled back), `.rollback`; per level of the outer outlines
   (`inside.gross_areas.levels`) `inside.gross_areas.ring`, `.lines_commit`, `.topology`, `.room_commit`, `.rollback`.
 

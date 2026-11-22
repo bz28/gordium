@@ -59,22 +59,77 @@ internal sealed class ResultsPane : IDockablePaneProvider
     /// <summary>Revit's ThemeChanged: the UI theme or the canvas theme changed; the panel follows the UI theme.</summary>
     internal static void OnThemeChanged(object? sender, Autodesk.Revit.UI.Events.ThemeChangedEventArgs e) => FollowTheme();
 
-    /// <summary>Shows a check in the pane and brings the pane up (on Revit's thread: a command or a panel action).</summary>
+    /// <summary>Shows a check in the pane and brings the pane up (on Revit's thread: a command or a panel action).
+    /// The check's progress ends first, unless a check is still running (an earlier one's redraw).</summary>
     internal static void Show(UIApplication ui, Document doc, PanelContent content)
     {
         _checked = doc;
+        if (!CheckRun.Flow.Running)
+            View().EndProgress();
         View().Show(content);
         ui.GetDockablePane(Id).Show();
     }
 
-    /// <summary>A check that failed: the last check's rows taken down (never shown as this one's), and why.</summary>
-    internal static void Failed(string words) => _view?.Failed(words);
+    /// <summary>A check that failed: the last check's rows taken down (never shown as this one's), and why. From any
+    /// thread (put on the panel's).</summary>
+    internal static void Failed(string words) => Ui(() =>
+    {
+        if (_view is null)
+            return;
+        if (!CheckRun.Flow.Running)
+            _view.EndProgress();
+        _view.Failed(words);
+    });
 
-    /// <summary>A line in the panel (a click's result, a problem), when the panel exists.</summary>
-    internal static void Say(string words) => _view?.Say(words);
+    /// <summary>A line in the panel (a click's result, a problem), when the panel exists. From any thread.</summary>
+    internal static void Say(string words) => Ui(() => _view?.Say(words));
 
-    /// <summary>Queues a Revit action; on a refusal (or no queue) <paramref name="refused"/> runs and the panel says so.</summary>
-    private static void Post(string what, Action<UIApplication> act, Action? refused = null)
+    /// <summary>Runs <paramref name="act"/> on the panel's thread (Revit's: WPF and Revit share it): now when called
+    /// there, else queued to it (a pool thread's refusal). Never calls Revit's API.</summary>
+    internal static void Ui(Action act)
+    {
+        var dispatcher = _view?.Dispatcher ?? System.Windows.Application.Current?.Dispatcher;
+        if (dispatcher is null || dispatcher.CheckAccess())
+            act();
+        else
+            dispatcher.BeginInvoke(act);
+    }
+
+    /// <summary>What the panel shows now, for a check's Cancel to go back to.</summary>
+    internal static PanelHad Had() => _view?.Had ?? PanelHad.Nothing;
+
+    /// <summary>A check began (Revit's thread, in an API context): the pane brought up, saying "Reading the
+    /// model...", its button Cancel.</summary>
+    internal static void Reading(UIApplication ui)
+    {
+        View().Progress(CheckStage.Reading, DateTime.Now);
+        ui.GetDockablePane(Id).Show();
+    }
+
+    /// <summary>The read ended and the checker works: "Checking (... s)...", Cancel; Revit is free.</summary>
+    internal static void Checking(DateTime since) => View().Progress(CheckStage.Checking, since);
+
+    /// <summary>Runs <paramref name="act"/> once the panel has drawn what it was just given (WPF lays out and draws at
+    /// Loaded and Render priority, before Background): the read that follows blocks Revit's thread, so its line must
+    /// be on screen first.</summary>
+    internal static void AfterDrawn(Action act) =>
+        View().Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, act);
+
+    /// <summary>Runs <paramref name="act"/> after the input Revit queued meanwhile (WPF runs Background work only once
+    /// no input is pending): a click made while Revit's thread was busy (Cancel during the read) is handled first.</summary>
+    internal static void AfterInput(Action act) =>
+        View().Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, act);
+
+    /// <summary>A check cancelled: the panel back to what it showed before it (<see cref="ResultsView.Restore"/>).</summary>
+    internal static void Cancelled(PanelHad had, string? why)
+    {
+        View().EndProgress();
+        View().Restore(had, why);
+    }
+
+    /// <summary>Queues a Revit action; on a refusal (or no queue) <paramref name="refused"/> runs and the panel says so.
+    /// From any thread (ExternalEvent.Raise may be called from any).</summary>
+    internal static void Post(string what, Action<UIApplication> act, Action? refused = null)
     {
         if (PanelActions.Current is not { } actions)
         {
@@ -86,8 +141,15 @@ internal sealed class ResultsPane : IDockablePaneProvider
             Say($"Revit didn't take \"{what}\" ({said}): finish what Revit is doing, then click again.");
     }
 
+    /// <summary>The header button: Cancel while a check runs (CheckWords.Button), else Check again, queued for Revit's
+    /// thread (greyed until Revit takes it, so a double click never queues two).</summary>
     private static void CheckAgain()
     {
+        if (CheckRun.Flow.Running)
+        {
+            CheckRun.Cancel();
+            return;
+        }
         View().Busy(true);
         Post("Check again", ui =>
         {
@@ -97,20 +159,25 @@ internal sealed class ResultsPane : IDockablePaneProvider
             }
             finally
             {
-                View().Busy(false);
+                if (!CheckRun.Flow.Running)                // not begun (no project): usable again; begun: its end ends it
+                    View().EndProgress();
             }
-        }, refused: () => View().Busy(false));            // refused: Check again usable again, as the words say
+        }, refused: () => Ui(() => View().EndProgress()));  // refused: Check again usable again, as the words say
     }
 
-    /// <summary>Revit's DocumentChanged: a change to the project checked, other than the check's own, greys the
-    /// results and says the model changed since the check (ResultRows.Stale).</summary>
+    /// <summary>Revit's DocumentChanged: a change other than the check's own (ResultRows.ChangesTheCheck), to the
+    /// project being checked, is counted (CheckFlow.Edited: an answer read before it arrives stale); to the project
+    /// whose results are shown, greys them and says the model changed since the check (ResultRows.Stale).</summary>
     internal static void OnDocumentChanged(object? sender, Autodesk.Revit.DB.Events.DocumentChangedEventArgs e)
     {
         try
         {
-            if (_checked is null || _view is null || !e.GetDocument().Equals(_checked))
+            var doc = e.GetDocument();
+            if (!ResultRows.ChangesTheCheck(e.GetTransactionNames().ToList(), committed: e.Operation == Autodesk.Revit.DB.Events.UndoOperation.TransactionCommitted))
                 return;
-            if (ResultRows.ChangesTheCheck(e.GetTransactionNames().ToList(), committed: e.Operation == Autodesk.Revit.DB.Events.UndoOperation.TransactionCommitted))
+            if (CheckRun.Reads(doc))
+                CheckRun.Flow.Edited();
+            if (_checked is not null && _view is not null && doc.Equals(_checked))
                 _view.MarkStale();
         }
         catch (Exception x)       // never out of Revit's event
@@ -124,6 +191,8 @@ internal sealed class ResultsPane : IDockablePaneProvider
     {
         try
         {
+            if (CheckRun.Reads(e.Document))
+                CheckRun.Cancel(CheckWords.Closed);           // the answer would be for a project no longer open
             if (_checked is null || !e.Document.Equals(_checked))
                 return;
             _checked = null;

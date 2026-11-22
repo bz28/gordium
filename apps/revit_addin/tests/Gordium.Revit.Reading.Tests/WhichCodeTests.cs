@@ -1,159 +1,110 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
 using Gordium.Worker;
 using Xunit;
 
 namespace Gordium.Revit.Reading.Tests;
 
-/// <summary>Which New York code governs the building (design_checker/code_scope.py; decision
-/// docs/decisions/2026-11-22_which_ny_code.md): the marks on Project Information are read into the interior
-/// description's <c>building</c> block (<see cref="BuildingFacts"/>), only those set, a bad word asked again (nothing
-/// sent), and the real worker's answer carries the decision as <c>which_code</c> for the panel to show first. R101.2's
-/// exception, the architect's one real choice, reaches the decision: Gordium: Follows the Building Code Yes puts a
-/// house the Residential Code covers under the Building Code.</summary>
-public sealed class WhichCodeTests(RealWorker worker) : IClassFixture<RealWorker>
+/// <summary>Which code the building was checked against (the worker's <c>which_code</c>, Ben 2026-11-22): the line at
+/// the top of the summary in the worker's words exactly, absent without the field, never green, needs review when the
+/// code wasn't decided, greyed when stale, and read tolerantly.</summary>
+public sealed class WhichCodeTests
 {
-    private static void Mark(FakeHouse house, MarkDefinition m, MarkValue v) => house.ProjectMarks[m.Guid] = v;
+    private static readonly WorkerAbout About = new("1.2", "gordium.site/1", new string('f', 64),
+                                                    new Dictionary<string, string> { ["new_york/ithaca_city"] = new('a', 64) });
 
-    [Fact]
-    public void No_building_mark_set_sends_no_building_block()
+    private static ResultModel Build(JsonNode? whichCode, bool sent = false)
     {
-        var house = FakeHouse.Draw("1_ranch_compliant");
-        var read = BuildingFacts.Read(house.Model());
-        Assert.Null(read.Building);              // the interior description is exactly as before
-        Assert.Empty(read.Missing);
-        Mark(house, Marks.FollowsBuildingCode, new(false, 0));           // never set: not stated
-        Assert.Null(BuildingFacts.Read(house.Model()).Building);
-    }
-
-    [Fact]
-    public void Each_mark_set_is_sent_under_its_own_key_as_the_architect_gave_it()
-    {
-        var house = FakeHouse.Draw("1_ranch_compliant");
-        Mark(house, Marks.FollowsBuildingCode, new(true, 1));
-        Mark(house, Marks.StoriesAboveGradePlane, new(true, 2));
-        Mark(house, Marks.SeparateMeansOfEgress, new(true, 0));
-        Mark(house, Marks.TownhouseUnits, new(true, 1));
-        Mark(house, Marks.CareFacility, new(true, 0));
-        Mark(house, Marks.OccupancyGroups, new(true, Text: " r-2, S-2 ,R-2"));
-        Mark(house, Marks.SprinklerSystem, new(true, Text: "nfpa 13r"));
-        var read = BuildingFacts.Read(house.Model());
-        Assert.Empty(read.Missing);
-        Assert.Equal("{\"follows_building_code\":true,\"separate_means_of_egress\":false,\"townhouse_units\":true," +
-                     "\"care_facility\":false,\"stories_above_grade_plane\":2,\"occupancy_groups\":[\"R-2\",\"S-2\"]," +
-                     "\"sprinkler_system\":\"nfpa_13r\"}", read.Building!.ToJsonString());
-    }
-
-    [Theory]
-    [InlineData("groups", "R-2, office")]
-    [InlineData("sprinkler", "wet pipe")]
-    [InlineData("stories", "0")]
-    public void A_word_that_isnt_one_of_the_marks_words_is_asked_again_never_sent(string which, string value)
-    {
-        var house = FakeHouse.Draw("1_ranch_compliant");
-        var (mark, v) = which switch
+        var result = new JsonObject
         {
-            "groups" => (Marks.OccupancyGroups, new MarkValue(true, Text: value)),
-            "sprinkler" => (Marks.SprinklerSystem, new MarkValue(true, Text: value)),
-            _ => (Marks.StoriesAboveGradePlane, new MarkValue(true, int.Parse(value, System.Globalization.CultureInfo.InvariantCulture))),
+            ["view"] = new JsonObject
+            {
+                ["items"] = new JsonArray(new JsonObject { ["id"] = "r", ["name"] = "Front yard", ["group"] = "building", ["status"] = "needs_review", ["reason"] = "why" }),
+                ["groups"] = new JsonArray(new JsonObject { ["key"] = "review", ["title"] = "Needs review", ["items"] = new JsonArray("r") }),
+                ["summary"] = "1 needs review", ["state"] = "needs_review",
+            },
+            ["report_error"] = null,
         };
-        Mark(house, mark, v);
-        var read = BuildingFacts.Read(house.Model());
-        Assert.Null(read.Building);
-        Assert.StartsWith(mark.Name + " is ", Assert.Single(read.Missing), StringComparison.Ordinal);
+        if (whichCode is not null || sent)
+            result["which_code"] = whichCode;
+        var check = CheckResult.Parse(new WorkerAnswer(JsonDocument.Parse(result.ToJsonString()).RootElement, About));
+        return ResultRows.Build(check, null, [], null);
     }
 
-    [Fact]
-    public void The_new_marks_are_project_information_marks_the_add_in_adds()
+    private static JsonObject Residential() => new()
     {
-        foreach (var m in new[] { Marks.FollowsBuildingCode, Marks.StoriesAboveGradePlane, Marks.SeparateMeansOfEgress,
-                     Marks.TownhouseUnits, Marks.CareFacility, Marks.OccupancyGroups, Marks.SprinklerSystem })
+        ["code"] = "residential_code", ["title"] = "2025 Residential Code of NYS",
+        ["why"] = "a detached one-family dwelling, 3 stories above grade plane (R101.2)",
+        ["cites"] = new JsonArray(new JsonObject
         {
-            Assert.Contains(m, Marks.All);                                     // MarkSetup adds every one of Marks.All
-            Assert.Equal([Marks.ProjectInformation], m.Categories);
-        }
-        Assert.Contains("is permitted, provided that all applicable provisions of the Building Code of New York State are applied",
-                        Marks.FollowsBuildingCode.Description, StringComparison.Ordinal);   // R101.2's exception, quoted
-    }
+            ["section"] = "RCNYS R101.2", ["document"] = "2025 Residential Code of New York State", ["page"] = 21,
+            ["quote"] = "The provisions of this code shall apply to ... detached one- and two-family dwellings ... not more than three stories above grade plane",
+        }),
+        ["later_field"] = "ignored",
+    };
 
-    /// <summary>Review round 1 (F5): the dwelling's own facts an ask names are marks, sent as the lot facts of the same
-    /// names only when set; a count under its least is asked again.</summary>
     [Fact]
-    public void The_dwelling_facts_are_marks_sent_as_lot_facts()
+    public void A_decided_code_is_one_line_in_the_workers_words_at_the_top_of_the_summary_never_green()
     {
-        var (house, _) = Project("1_ranch_compliant");
-        var before = ProjectFacts.Read(house.Model()).Facts;
-        Assert.False(before.ContainsKey("dwelling_units") || before.ContainsKey("accessory_dwelling_unit"));
-        Mark(house, Marks.DwellingUnits, new(true, 2));
-        Mark(house, Marks.UnitsInAttachedBuilding, new(true, 4));
-        Mark(house, Marks.RoomsLetForProfit, new(true, 0));
-        Mark(house, Marks.HomeOccupation, new(true, 0));
-        Mark(house, Marks.AccessoryDwellingUnit, new(true, 1));
-        Mark(house, Marks.AduDetached, new(true, 0));
-        var read = ProjectFacts.Read(house.Model());
-        Assert.Empty(read.Missing);
-        Assert.Equal((2, 4, 0), (read.Facts["dwelling_units"]!.GetValue<int>(), read.Facts["attached_units_in_building"]!.GetValue<int>(),
-                                 read.Facts["rooms_let_for_profit"]!.GetValue<int>()));
-        Assert.Equal((false, true, false), (read.Facts["home_occupation"]!.GetValue<bool>(),
-                                            read.Facts["accessory_dwelling_unit"]!.GetValue<bool>(), read.Facts["adu_detached"]!.GetValue<bool>()));
-        Mark(house, Marks.DwellingUnits, new(true, 0));
-        Assert.StartsWith("Gordium: Dwelling units is 0", Assert.Single(ProjectFacts.Read(house.Model()).Missing), StringComparison.Ordinal);
+        var model = Build(Residential());
+        Assert.Equal("Checked against: 2025 Residential Code of NYS — a detached one-family dwelling, 3 stories above grade plane (R101.2)",
+                     model.Code!.Words);
+        Assert.Equal([PanelPart.Code, PanelPart.State, PanelPart.Counts, PanelPart.Groups, PanelPart.Details], ResultRows.Layout(model));
+        Assert.Null(model.Code.Status(stale: false));                                    // plain words: no status, no green
+        Assert.Equal("RCNYS R101.2, 2025 Residential Code of New York State, p.21: “The provisions of this code shall apply to ... detached one- and two-family dwellings ... not more than three stories above grade plane”",
+                     model.Code.Tooltip);
     }
 
-    /// <summary>An attached accessory dwelling unit, stated by its marks, reaches the decision: the house is then a
-    /// two-family dwelling, which needs each unit's separate means of egress (R101.2 item 2).</summary>
     [Fact]
-    public async Task An_attached_adu_stated_by_marks_makes_the_house_a_two_family_dwelling()
+    public void Without_the_field_no_line_is_shown()
     {
-        var (house, outside) = Project("1_ranch_compliant");
-        Mark(house, Marks.AccessoryDwellingUnit, new(true, 1));
-        Mark(house, Marks.AduDetached, new(true, 0));
-        var undecided = await WhichCode(house, outside);
-        Assert.Equal(JsonValueKind.Null, undecided.GetProperty("code").ValueKind);
-        Assert.Contains("Gordium: Separate means of egress", undecided.GetProperty("ask").GetString(), StringComparison.Ordinal);
+        var model = Build(null);
+        Assert.Null(model.Code);
+        Assert.DoesNotContain(PanelPart.Code, ResultRows.Layout(model));
+        Assert.Null(Build(JsonValue.Create("residential_code")).Code);                   // not an object: as if not sent
+        Assert.Null(Build(null, sent: true).Code);                                       // the worker's None: no line
     }
 
-    private static (FakeHouse, RevitModel) Project(string house)
-    {
-        var h = FakeHouse.Draw(house);
-        var outside = ProjectCheckTests.Outside(h.Model());
-        Mark(h, Marks.Zone, new(true, Text: "R-1b"));
-        Mark(h, Marks.Use, new(true, Text: "one_family_detached"));
-        Mark(h, Marks.LotSurveyed, new(true, 1));
-        Mark(h, Marks.CornerLot, new(true, 0));
-        Mark(h, Marks.GroundFrom, new(true, Text: "Spot grades"));
-        Mark(h, Marks.StreetEdge, new(true, Text: ProjectCheckTests.SouthEdge(outside)));
-        return (h, outside);
-    }
-
-    private async Task<JsonElement> WhichCode(FakeHouse house, RevitModel outside)
-    {
-        var client = await worker.RunningAsync();
-        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client));
-        Assert.Empty(prepared.Missing);
-        var result = await ProjectCheck.SendAsync(client, prepared.Request!);
-        return result.Raw.GetProperty("which_code");
-    }
-
-    /// <summary>The ranch (one story, scene 01's box: two floor blocks, nothing below the ground) is a detached one-family
-    /// dwelling the Residential Code covers; with Gordium: Follows the Building Code Yes it is under the Building Code
-    /// (R101.2 exception), the words and sections the worker's own.</summary>
     [Fact]
-    public async Task The_answer_carries_which_code_and_the_exception_mark_reaches_it()
+    public void A_code_not_decided_is_needs_review_with_the_workers_ask()
     {
-        var (house, outside) = Project("1_ranch_compliant");
-        var house_code = await WhichCode(house, outside);
-        Assert.Equal("residential_code", house_code.GetProperty("code").GetString());
-        Assert.Equal("2025 Residential Code of New York State", house_code.GetProperty("title").GetString());
-        Assert.Equal(JsonValueKind.Null, house_code.GetProperty("ask").ValueKind);
-        var first = house_code.GetProperty("cites")[0];
-        Assert.Equal("RCNYS R101.2 item 1", first.GetProperty("section").GetString());
-        Assert.Equal(24, first.GetProperty("page").GetInt32());
-        Assert.Equal("1. Detached one-family dwellings.", first.GetProperty("quote").GetString());
+        var code = Build(new JsonObject { ["code"] = null, ["ask"] = "how many stories above grade plane: enter Gordium: Stories" }).Code!;
+        Assert.False(code.Decided);
+        Assert.Equal("Which code: needs review — how many stories above grade plane: enter Gordium: Stories", code.Words);
+        Assert.Equal(PanelStatus.Review, code.Status(stale: false));
+        Assert.Equal("Which code: needs review", Build(new JsonObject()).Code!.Words);   // nothing said: no guess
+        // a code word with no title isn't shown as decided (never a default)
+        Assert.Equal(PanelStatus.Review, Build(new JsonObject { ["code"] = "building_code" }).Code!.Status(false));
+    }
 
-        Mark(house, Marks.FollowsBuildingCode, new(true, 1));
-        var chosen = await WhichCode(house, outside);
-        Assert.Equal("building_code", chosen.GetProperty("code").GetString());
-        Assert.Equal("2025 Building Code of New York State", chosen.GetProperty("title").GetString());
-        Assert.Equal("RCNYS R101.2 exception", chosen.GetProperty("cites")[0].GetProperty("section").GetString());
+    [Fact]
+    public void A_stale_result_greys_the_line_and_keeps_its_words()
+    {
+        var model = ResultRows.Stale(Build(Residential()), new DateTime(2026, 11, 22, 14, 32, 0));
+        Assert.Contains(PanelPart.Code, ResultRows.Layout(model));
+        Assert.Equal(PanelStatus.Stale, model.Code!.Status(stale: model.Stale is not null));
+        Assert.Equal(PanelStatus.Stale, Build(new JsonObject { ["code"] = null }).Code!.Status(stale: true));
+    }
+
+    [Fact]
+    public void The_line_is_never_green_whatever_the_worker_sends()
+    {
+        foreach (var w in new JsonNode?[] { Residential(), new JsonObject { ["code"] = "complies", ["title"] = "complies" }, new JsonObject() })
+            foreach (var stale in new[] { false, true })
+                Assert.NotEqual(PanelStatus.Complies, Build(w!.DeepClone()).Code!.Status(stale));
+    }
+
+    /// <summary>The view draws the line from WhichCode alone: its words, its status (never green), its tooltip.</summary>
+    [Fact]
+    public void The_view_draws_the_line_from_its_words_and_status_only()
+    {
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "ResultsView.cs"));
+        var at = view.IndexOf("case PanelPart.Code when model.Code is { } code:", StringComparison.Ordinal);
+        Assert.True(at > 0);
+        var block = view[at..view.IndexOf("case PanelPart.State:", at, StringComparison.Ordinal)];
+        Assert.Contains("var codeStatus = code.Status(stale);", block, StringComparison.Ordinal);
+        Assert.Contains("Text = code.Words,", block, StringComparison.Ordinal);
+        Assert.Contains("codeStatus is { } cs ? StatusLook.Colour(cs) : PanelTokens.TextMuted", block, StringComparison.Ordinal);
+        Assert.DoesNotContain("StatusPass", block, StringComparison.Ordinal);
     }
 }

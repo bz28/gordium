@@ -111,15 +111,29 @@ public sealed class ResultRowsTests(RealWorker worker) : IClassFixture<RealWorke
 
     /// <summary>A delta the worker left empty (settle: a row with no reading set) says nothing of how far, even with a
     /// margin as drawn beside it: the margin alone could be kinder than the readings. A worker that sends no delta
-    /// at all: its margin.</summary>
+    /// shows no how far: a bare signed margin ("−2'-6\"") says no direction (review of PR 4).</summary>
     [Fact]
-    public void An_empty_delta_says_nothing_and_only_a_worker_with_no_delta_has_its_margin_shown()
+    public void An_empty_delta_says_nothing_and_a_bare_margin_is_never_shown()
     {
         Assert.Null(One(Zoning("y", "needs_review", "", margin: "+1'-0\"")).HowFar);
         var old = Zoning("y", "does_not_comply", null);
         old.Remove("delta");
-        Assert.Equal("−2'-6\"", One(old).HowFar);
-        Assert.Equal("−2'-6\"", One(Zoning("y", "does_not_comply", null)).HowFar);   // delta null: as absent
+        Assert.Null(One(old).HowFar);
+        Assert.Null(One(Zoning("y", "does_not_comply", null)).HowFar);   // delta null: as absent
+    }
+
+    /// <summary>The worker's how far in words (its <c>how_far</c>, design_checker/panel_data.py) is what the panel
+    /// shows, before its delta: on an egress row too, where the worker now says it.</summary>
+    [Fact]
+    public void The_workers_how_far_words_come_first()
+    {
+        var zoning = Zoning("y", "complies", "+1'-0\"", margin: "+1'-0\"");
+        zoning["how_far"] = "1'-0\" to spare";
+        Assert.Equal("1'-0\" to spare", One(zoning).HowFar);
+        var egress = Egress("e", "does_not_comply", "net clear height 20 in, needs ≥ 24 in");
+        egress["how_far"] = "4 in short";
+        Assert.Equal("4 in short", One(egress).HowFar);
+        Assert.Null(One(Egress("e", "does_not_comply", "net clear height 20 in, needs ≥ 24 in")).HowFar);
     }
 
     [Fact]
@@ -344,12 +358,13 @@ public sealed class ResultRowsTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal(result.Items.Count, model.Groups.SelectMany(g => g.AllRows).Count());
         var height = model.Groups.SelectMany(g => g.AllRows).Single(r => r.Id.Contains("r319_2_2", StringComparison.Ordinal) && r.Verdict == Verdict.DoesNotComply);
         Assert.Equal("net clear height 20 in, needs ≥ 24 in", height.Figures);
-        Assert.Null(height.HowFar);
+        Assert.Equal("4 in short", height.HowFar);                        // the worker's words (panel_data)
         Assert.Equal("R319.2.2", height.Section);
         Assert.Contains(height.Quotes, q => q.Text.Contains("24 inches", StringComparison.Ordinal) && q.Where!.StartsWith("R319.2.2", StringComparison.Ordinal));
         Assert.NotEmpty(height.Elements);
         foreach (var item in result.Items.Where(i => i.Raw.TryGetProperty("delta", out var d) && d.ValueKind == JsonValueKind.String && d.GetString()!.Length > 0))
-            Assert.Equal(item.Raw.GetProperty("delta").GetString(), ResultRows.Row(item).HowFar);
+            Assert.Equal(item.Raw.TryGetProperty("how_far", out var w) ? w.GetString() : item.Raw.GetProperty("delta").GetString(),
+                         ResultRows.Row(item).HowFar);
         Assert.Equal(2, model.Counts.Count);
         var text = ResultText.Format(result, "phase 2", prepared.OptionsChecked, prepared.Inside, maxOtherRows: int.MaxValue, street: prepared.Street);
         foreach (var r in model.Groups.SelectMany(g => g.AllRows))

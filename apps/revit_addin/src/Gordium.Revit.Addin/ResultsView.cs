@@ -17,9 +17,10 @@ namespace Gordium.Revit.Addin;
 /// <param name="Files">Where every row and the request and the answer are kept.</param>
 /// <param name="ClearWords">What happened to the makers' clear openings this run (<c>ClearPrefills.Head</c>: filled as
 /// drafts, or why they couldn't be written), "" when nothing.</param>
+/// <param name="Ids">Each element's Revit id by UniqueId (a result's detail shows it in Show's tooltip, for Select by ID).</param>
 internal sealed record PanelContent(string Project, DateTime When, ResultModel? Model, IReadOnlyList<string> Missing,
                                     int MarksAdded, IReadOnlyDictionary<string, string> Labels, string Files,
-                                    string ClearWords);
+                                    string ClearWords, IReadOnlyDictionary<string, long>? Ids = null);
 
 /// <summary>
 /// The results panel itself (a WPF view in Revit's dockable pane, beside Properties), matching the agreed mockup
@@ -27,13 +28,15 @@ internal sealed record PanelContent(string Project, DateTime When, ResultModel? 
 /// chips and the search, then the results list: a virtualized ListBox (an entry is made only when it scrolls into
 /// view), worst first (<see cref="ResultList"/>: does not comply, needs review, check by hand or not checked, then what
 /// complies, folded), every row in exactly one place. A click selects a row and its elements in Revit without moving
-/// the view; Show (or Space) zooms; Enter or a double click opens its detail (its law's words); Up/Down move; Ctrl+C
+/// the view; Show (or Space) zooms; Enter or a double click opens its detail in place of the list (DetailView: why,
+/// what to do, the figures, the law's words with Open the law, the elements by name; Back returns to the same row and
+/// scroll position); Up/Down move; Ctrl+C
 /// copies the row as the text file says it; Ctrl+F searches and Esc clears the search. Plain WPF: every Revit call
 /// goes through the callbacks, which queue it for Revit's thread (<see cref="PanelActions"/>). Every colour is a
 /// token of the theme's dictionary (<see cref="PanelLook"/>), named with SetResourceReference so it follows Revit's
 /// theme; every status is drawn as its glyph and said in words, never by colour alone (<see cref="StatusLook"/>).
 /// </summary>
-internal sealed class ResultsView : C.UserControl, IListHost
+internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
 {
     private readonly Action<ResultRow> _zoom;
     private readonly Action<ResultRow> _select;
@@ -60,9 +63,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
     private List<ListItem> _items = [];
     private ListFilter _filter = ListFilter.All;
     private readonly HashSet<ListSection> _opened = [];
-    private readonly HashSet<string> _openRows = new(StringComparer.Ordinal);
+    private readonly HashSet<string> _openCounts = new(StringComparer.Ordinal);   // laws whose "+N more" is open
     private readonly HashSet<string> _openFolds = new(StringComparer.Ordinal);
     private string? _selectedId;
+    private string? _detailId;                                // the row whose detail is shown, or null for the list
+    private double _listOffset;                               // where the list was scrolled when the detail opened
     private bool _quiet;                                      // a selection the panel makes itself: never sent to Revit
 
     internal ResultsView(Action<ResultRow> zoom, Action<ResultRow> select, Action checkAgain, Action projectInformation, PanelTheme theme)
@@ -126,7 +131,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
             if (Within<C.Button>(e.OriginalSource) is not null || Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is not RowItem row)
                 return;
             e.Handled = true;
-            ToggleOpen(row);
+            OpenDetail(row.Row.Row.Id);
         };
         W.Automation.AutomationProperties.SetName(_list, "Results");
         C.Grid.SetRow(_list, 1);
@@ -177,6 +182,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
     internal void Show(PanelContent content)
     {
         _content = content;
+        _failed = false;
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
@@ -220,11 +226,13 @@ internal sealed class ResultsView : C.UserControl, IListHost
         Chips(stale);
         _bodyHost.Child = _results;
         Relayout();
+        if (_detailId is { } open)                               // a detail open: shown again from this answer if its
+            OpenDetail(open, keepOffset: true);                  // row is still listed (stale: saying so), else the list
     }
 
     /// <summary>The list's first entry: the stale notice (when stale), the worker's state (grey once stale, never
     /// green) and its counts, one wrap line per law. It scrolls away with the rows.</summary>
-    private static W.UIElement Summary(ResultModel model, IReadOnlyList<PanelPart> parts, bool stale)
+    private W.UIElement Summary(ResultModel model, IReadOnlyList<PanelPart> parts, bool stale)
     {
         var summary = new C.StackPanel { Margin = new W.Thickness(0, 2, 0, 2) };
         foreach (var part in parts)
@@ -235,39 +243,97 @@ internal sealed class ResultsView : C.UserControl, IListHost
                                                 Typed(new C.TextBlock { Text = model.Stale, FontWeight = W.FontWeights.SemiBold,
                                                                         TextWrapping = W.TextWrapping.Wrap }, Body), bottom: 6));
                     break;
+                case PanelPart.Code when model.Code is { } code:
+                    // which code and why, the worker's words: plain when decided (never green), needs review when not,
+                    // the clock once stale; the law's quoted words on hover; at most two lines (the whole on hover)
+                    var codeStatus = code.Status(stale);
+                    var codeWords = Typed(new C.TextBlock
+                    {
+                        Text = code.Words, TextWrapping = W.TextWrapping.Wrap, TextTrimming = W.TextTrimming.CharacterEllipsis,
+                        MaxHeight = 2 * 1.4 * PanelTokens.TypeOf(Caption).Size, VerticalAlignment = W.VerticalAlignment.Center,
+                    }, Caption);
+                    Ink(codeWords, codeStatus is { } cs ? StatusLook.Colour(cs) : PanelTokens.TextMuted);
+                    W.UIElement codeLine = codeStatus is { } s2 ? WithGlyph(s2, codeWords, size: 12) : codeWords;
+                    var codeBox = new C.Border
+                    {
+                        Child = codeLine, Margin = new W.Thickness(0, 0, 0, 4),
+                        ToolTip = string.Join("\n\n", new[] { code.Words, code.Tooltip }.Where(t => t is not null)),
+                    };
+                    W.Automation.AutomationProperties.SetName(codeBox, code.Words);
+                    summary.Children.Add(codeBox);
+                    break;
                 case PanelPart.State:
                     var state = StatusLook.Of(model.StateTone, stale);
                     summary.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock
                     {
                         Text = ResultText.StateWords(model.State) + (model.Stale is null ? "" : " (before the model changed)"),
                         TextWrapping = W.TextWrapping.Wrap,
-                    }, "type.state"), StatusLook.Colour(state)), size: 18));
+                    }, stale ? "type.title" : "type.state"), StatusLook.Colour(state)), size: stale ? 16 : 18));   // stale: smaller, its "(before the model changed)" on one line
                     break;
                 case PanelPart.Counts:
-                    // one wrap line per law, its short name first: as few lines as the width allows
+                    // the compact count bar (CountBar): one line per law, its short name and its most important
+                    // counts (every failure), the rest behind "+N more" (opened in place), all of them in the tooltip
                     foreach (var line in model.Counts)
-                    {
-                        var chips = new C.WrapPanel { Margin = new W.Thickness(0, 4, 0, 0) };
-                        if (line.Title is not null)
-                            chips.Children.Add(Ink(Typed(new C.TextBlock
-                            {
-                                Text = Short(line.Title), FontWeight = W.FontWeights.SemiBold,
-                                Margin = new W.Thickness(0, 3, 6, 0), VerticalAlignment = W.VerticalAlignment.Center, ToolTip = line.Title,
-                            }, Caption), PanelTokens.TextMuted));
-                        foreach (var chip in line.Chips)
-                            chips.Children.Add(Chip(chip, stale));
-                        summary.Children.Add(chips);
-                    }
+                        summary.Children.Add(CountLineView(line, stale, CountBar.Keep));
                     break;
             }
         return summary;
     }
 
+    /// <summary>A law's line of the count bar (CountBar.Row): its short name, the counts kept, "+N" (opens every
+    /// count in place; all of them in the tooltip). A line that wraps at the pane's width is made again keeping one
+    /// count fewer (CountBar.Row still shows every failure), so each law stays one line at the docked width.</summary>
+    private C.WrapPanel CountLineView(CountLine line, bool stale, int keep)
+    {
+        var key = line.Title ?? "";
+        var opened = _openCounts.Contains(key);
+        var row = CountBar.Row(line, open: opened, keep: keep);
+        var chips = new C.WrapPanel { Margin = new W.Thickness(0, 4, 0, 0), ToolTip = row.Tooltip };
+        if (row.Title is not null)
+            chips.Children.Add(Ink(Typed(new C.TextBlock
+            {
+                Text = row.Title, FontWeight = W.FontWeights.SemiBold,
+                Margin = new W.Thickness(0, 3, 4, 0), VerticalAlignment = W.VerticalAlignment.Center,
+            }, Caption), PanelTokens.TextMuted));
+        foreach (var chip in row.Shown)
+            chips.Children.Add(Chip(chip, stale));
+        if (row.More is not null || opened)
+        {
+            var toggle = new C.Button
+            {
+                Content = Typed(new C.TextBlock { Text = opened ? "fewer" : row.More }, Caption),
+                Padding = new W.Thickness(4, 0, 4, 0), Margin = new W.Thickness(0, 2, 0, 0), Focusable = false,
+                ToolTip = opened ? "Show only the most important counts" : row.Tooltip,
+            };
+            W.Automation.AutomationProperties.SetName(toggle, opened ? $"Fewer {row.Title} counts" : $"{row.MoreWords}: {row.Title}");
+            toggle.Click += (_, e) =>
+            {
+                e.Handled = true;
+                if (!_openCounts.Remove(key))
+                    _openCounts.Add(key);
+                Relayout();
+            };
+            chips.Children.Add(toggle);
+        }
+        if (!opened && keep > 0)
+            chips.SizeChanged += (_, _) =>
+            {
+                // wrapped: the first and last child on different lines; made again with one count fewer
+                if (chips.Children.Count < 2 || chips.Parent is not C.Panel parent)
+                    return;
+                var first = chips.Children[0].TranslatePoint(new W.Point(0, 0), chips).Y;
+                var last = chips.Children[^1].TranslatePoint(new W.Point(0, 0), chips).Y;
+                if (last - first < 8)
+                    return;
+                var at = parent.Children.IndexOf(chips);
+                parent.Children.RemoveAt(at);
+                parent.Children.Insert(at, CountLineView(line, stale, keep - 1));
+            };
+        return chips;
+    }
+
     /// <summary>The folds after the rows (what wasn't read, the details), shown when the list shows every row.</summary>
     private List<FoldItem> _folds = [];
-
-    /// <summary>A law's short name for its count line: "Zoning" from "Zoning (City of Ithaca)" (the whole on hover).</summary>
-    private static string Short(string title) => title.IndexOf(" (", StringComparison.Ordinal) is var i and > 0 ? title[..i] : title;
 
     /// <summary>The model changed since the check: everything shown greyed (ResultRows.Stale), with why, once.</summary>
     internal void MarkStale()
@@ -277,18 +343,27 @@ internal sealed class ResultsView : C.UserControl, IListHost
         Show(content with { Model = ResultRows.Stale(model, content.When), MarksAdded = 0, ClearWords = "" });
     }
 
-    /// <summary>A check that failed: every row of the last check taken down, and why.</summary>
+    /// <summary>A check that failed: every row of the last check taken down, and why (held while a check runs: its
+    /// progress line stays).</summary>
     internal void Failed(string words)
     {
+        _failed = true;
         _content = null;
+        _detailId = null;
         _placed = [];
         _summary = null;
         _missing.Children.Clear();
         _bodyHost.Child = _missingScroll;
         Relayout();
         _sub.Text = "Not checked";
-        Say(words);
+        Say(_checkAgainState.Status(words));
     }
+
+    /// <summary>Whether the last thing shown was a failure (the error state).</summary>
+    private bool _failed;
+
+    /// <summary>What the panel shows now (CheckFlow.Had): what a cancelled check goes back to.</summary>
+    internal PanelHad Had => CheckFlow.Had(_content is not null, _content?.Model is not null, _failed);
 
     /// <summary>A line under the header (a click's result, a problem); empty hides it.</summary>
     internal void Say(string words)
@@ -303,18 +378,86 @@ internal sealed class ResultsView : C.UserControl, IListHost
     /// <summary>Whether a Check again waits or runs: kept across every redraw (a greyed redraw after an edit).</summary>
     private readonly CheckAgainState _checkAgainState = new();
 
-    /// <summary>While a check runs: Check again greyed, and why. The rows stay as they are (stale ones stale) until
-    /// the new answer is shown.</summary>
+    /// <summary>Ticks the checking line's seconds while the checker works (Revit's thread is free then).</summary>
+    private W.Threading.DispatcherTimer? _ticks;
+
+    /// <summary>A click on Check again, queued for Revit's thread: greyed and "Checking..." until Revit takes it
+    /// (a double click never queues two). The rows stay as they are (stale ones stale).</summary>
     internal void Busy(bool busy)
     {
-        if (busy)
+        if (!busy)
         {
-            _checkAgainState.Start();
-            Say(Checking);
+            EndProgress();
+            return;
         }
-        else
-            Say(_checkAgainState.Stop(_status.Text));        // what the check's redraw had to say, or a failure's words
+        _checkAgainState.Start();
+        Say(Checking);
         _again.IsEnabled = _checkAgainState.Enabled;
+    }
+
+    /// <summary>A check at <paramref name="stage"/> (CheckFlow), begun at <paramref name="since"/>: its progress line
+    /// (CheckWords.Progress), the button Cancel. The earlier results stay as they are until the answer (stale ones
+    /// stale, never green; an edit greys them as ever); with none, the header says no results yet. While the checker
+    /// works the line counts its seconds (Revit's thread is free then; during the read nothing is drawn).</summary>
+    internal void Progress(CheckStage stage, DateTime since)
+    {
+        _checkAgainState.Running(CheckWords.Progress(stage, DateTime.Now - since) ?? Checking);
+        Say(_checkAgainState.Line);
+        _again.Content = CheckWords.Button(stage);
+        _again.Visibility = W.Visibility.Visible;
+        _again.IsEnabled = _checkAgainState.Enabled;
+        if (_content is null)
+            _sub.Text = "Checking this project: no results yet";
+        _ticks?.Stop();
+        if (stage != CheckStage.Checking)
+            return;
+        _ticks = new W.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _ticks.Tick += (_, _) =>
+        {
+            if (!_checkAgainState.IsRunning)
+                return;
+            var showing = _status.Text == _checkAgainState.Line;
+            _checkAgainState.Running(CheckWords.Checking(DateTime.Now - since));
+            if (showing)
+                Say(_checkAgainState.Line);
+        };
+        _ticks.Start();
+    }
+
+    /// <summary>The check ended (shown, failed, cancelled) or never began: the button Check again, usable, and the
+    /// line a redraw held meanwhile (or a failure's words) shown.</summary>
+    internal void EndProgress()
+    {
+        _ticks?.Stop();
+        _ticks = null;
+        Say(_checkAgainState.Stop(_status.Text));        // what the check's redraw had to say, or a failure's words
+        _again.Content = CheckWords.CheckAgain;
+        _again.IsEnabled = _checkAgainState.Enabled;
+        if (_content is null && _sub.Text == "Checking this project: no results yet")
+            _sub.Text = _failed ? "Not checked" : "Click Check project on the Gordium tab to check this project.";
+    }
+
+    /// <summary>A cancelled check: back to what the panel showed before it (CheckFlow.Cancel's <paramref name="had"/>):
+    /// the earlier results, marked stale (never shown as the new ones: CheckWords.CancelledStale), the earlier list of
+    /// what to fill in, or the empty or error state; then why (<paramref name="why"/>, or CheckWords.Cancelled).</summary>
+    internal void Restore(PanelHad had, string? why)
+    {
+        // what is actually restored (CheckFlow.Restored), and its words: never "the results below" with none below
+        var restored = CheckFlow.Restored(had, Had);
+        switch (restored)
+        {
+            case PanelHad.Results when _content is { Model: { } model } content:
+                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When)), MarksAdded = 0, ClearWords = "" });
+                break;
+            case PanelHad.Missing:
+                break;                                      // what to fill in, as it was
+            default:
+                Failed("");                                 // the empty or error state: no rows
+                if (restored == PanelHad.Nothing)
+                    _failed = false;
+                break;
+        }
+        Say(why ?? CheckWords.Cancelled(restored));
     }
 
     private void ShowMissing(IReadOnlyList<string> missing)
@@ -391,7 +534,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
                     items.Add(new SubItem(this, s));
                     break;
                 case ListRowEntry r:
-                    var row = new RowItem(this, r.Row, _openRows.Contains(r.Row.Row.Id));
+                    var row = new RowItem(this, r.Row);
                     if (r.Row.Row.Id == _selectedId)
                         selected = row;
                     items.Add(row);
@@ -463,7 +606,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
                 e.Handled = true;
                 break;
             case I.Key.Enter when SelectedRow is { } row:
-                ToggleOpen(row);
+                OpenDetail(row.Row.Row.Id);
                 e.Handled = true;
                 break;
             case I.Key.Space when SelectedRow is { } row:
@@ -496,6 +639,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
 
     private void PanelKeys(object sender, I.KeyEventArgs e)
     {
+        if (_detail is not null && ReferenceEquals(_bodyHost.Child, _detail) && DetailKey(e))
+        {
+            e.Handled = true;
+            return;
+        }
         if (e.Key == I.Key.F && (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0 && ReferenceEquals(_bodyHost.Child, _results))
         {
             _search.Focus();
@@ -505,9 +653,11 @@ internal sealed class ResultsView : C.UserControl, IListHost
     }
 
     /// <summary>Ctrl+C: the row as the text file writes it (stale: when it was checked), on the clipboard.</summary>
-    private void Copy(RowItem row)
+    private void Copy(RowItem row) => Copy(row.Row);
+
+    private void Copy(ListRow row)
     {
-        var text = ResultList.CopyText(row.Row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When);
+        var text = ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When);
         try
         {
             W.Clipboard.SetText(text);
@@ -553,19 +703,141 @@ internal sealed class ResultsView : C.UserControl, IListHost
         _zoom(row.Row.Row);
     }
 
-    /// <summary>Enter or a double click: the row's detail (its law's words) opened or folded, kept across redraws.</summary>
-    public void ToggleOpen(RowItem row)
+    // ---- the detail (IDetailHost) ---------------------------------------------------------------------------
+
+    private W.FrameworkElement? _detail;
+
+    /// <summary>The detail's keys: Backspace, Esc or Alt+Left back; Alt+Up / Alt+Down the previous or next row; Space
+    /// shows the elements (not on a button: Space presses it); Ctrl+C copies the row. Any other is the control's own.</summary>
+    private bool DetailKey(I.KeyEventArgs e)
     {
-        var open = !row.Open;
-        if (open)
-            _openRows.Add(row.Row.Row.Id);
-        else
-            _openRows.Remove(row.Row.Row.Id);
-        row.SetOpen(open);
+        var mods = I.Keyboard.Modifiers;
+        var key = e.Key == I.Key.System ? e.SystemKey : e.Key;
+        switch (key)
+        {
+            case I.Key.Back or I.Key.Escape when mods == I.ModifierKeys.None:
+            case I.Key.Left when mods == I.ModifierKeys.Alt:
+                Back();
+                return true;
+            case I.Key.Up or I.Key.Down when mods == I.ModifierKeys.Alt:
+                Step(key == I.Key.Down ? 1 : -1);
+                return true;
+            case I.Key.Space when mods == I.ModifierKeys.None && e.OriginalSource is not C.Primitives.ButtonBase:
+                ShowElements(null);
+                return true;
+            case I.Key.C when mods == I.ModifierKeys.Control && DetailRow() is { } row:
+                Copy(row);
+                return true;
+        }
+        return false;
     }
 
-    /// <summary>An element as the project labels it ("Windows id 341207"), or that it isn't in the model now.</summary>
-    public string Label(string uid) => _content?.Labels.GetValueOrDefault(uid) ?? "not in this model now";
+    /// <summary>The row whose detail is open, as the list shows it now, or null.</summary>
+    private ListRow? DetailRow() =>
+        _detailId is { } id ? _entries.OfType<ListRowEntry>().Select(e => e.Row).FirstOrDefault(r => r.Row.Id == id) : null;
+
+    /// <summary>Enter or a double click: row <paramref name="id"/>'s detail in place of the list (the list kept as it
+    /// is, its scroll position remembered); a row the list no longer shows (a new check without it) leaves the list.</summary>
+    private void OpenDetail(string id, bool keepOffset = false)
+    {
+        var (rows, index) = Details.Among(_entries, id);
+        if (index < 0)
+        {
+            _detailId = null;
+            _bodyHost.Child = _content?.Model is null ? _missingScroll : _results;
+            return;
+        }
+        if (!keepOffset && _detailId is null && Find<C.ScrollViewer>(_list) is { } sv)
+            _listOffset = sv.VerticalOffset;
+        _detailId = id;
+        _selectedId = id;
+        var stale = _content?.Model?.Stale is not null ? _content.When : (DateTime?)null;
+        var detail = Details.Of(rows[index], index, rows.Count, _content?.Labels, stale, _content?.Ids);
+        _detail = DetailView.Build(detail, this, canStepBack: index > 0, canStepOn: index < rows.Count - 1);
+        _bodyHost.Child = _detail;
+        _detail.Focus();
+    }
+
+    /// <summary>Back to the list, at the same row, selected and focused, and the same scroll position.</summary>
+    public void Back()
+    {
+        if (_detailId is not { } id)
+            return;
+        _detailId = null;
+        _bodyHost.Child = _results;
+        _results.UpdateLayout();
+        if (Find<C.ScrollViewer>(_list) is { } sv)
+            sv.ScrollToVerticalOffset(_listOffset);
+        var at = _items.FindIndex(i => i is RowItem r && r.Row.Row.Id == id);
+        if (at < 0)
+            return;
+        _quiet = true;                                            // already selected in Revit
+        try
+        {
+            _list.SelectedIndex = at;
+        }
+        finally
+        {
+            _quiet = false;
+        }
+        _list.UpdateLayout();
+        (_list.ItemContainerGenerator.ContainerFromIndex(at) as C.ListBoxItem)?.Focus();
+    }
+
+    /// <summary>The previous or next row's detail, its elements selected in Revit (the view unmoved).</summary>
+    public void Step(int step)
+    {
+        if (_detailId is not { } id)
+            return;
+        var (rows, index) = Details.Among(_entries, id);
+        var to = index + step;
+        if (index < 0 || to < 0 || to >= rows.Count)
+            return;
+        OpenDetail(rows[to].Row.Id, keepOffset: true);
+        _select(rows[to].Row);
+    }
+
+    /// <summary>Show: zoom to the row's elements, or to one of them.</summary>
+    public void ShowElements(string? uid)
+    {
+        if (DetailRow() is not { } row)
+            return;
+        if (row.Row.Elements.Count == 0)
+        {
+            Say($"{row.Row.Name} names no element in the model to show.");
+            return;
+        }
+        _zoom(uid is null ? row.Row : row.Row with { Elements = [uid] });
+    }
+
+    /// <summary>Open the law: the worker's link, in the architect's browser or PDF reader.</summary>
+    public void OpenLaw(LawLink link)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo(link.Url) { UseShellExecute = true });
+            Say($"Opened {link.Citation}.");
+        }
+        catch (Exception x) when (x is System.ComponentModel.Win32Exception or InvalidOperationException)
+        {
+            Say($"Couldn't open {link.Citation} ({x.Message}): its address is {link.Url}");
+        }
+    }
+
+    public void CheckAgain() => _checkAgain();
+
+    private static T? Find<T>(W.DependencyObject root) where T : W.DependencyObject
+    {
+        for (var i = 0; i < M.VisualTreeHelper.GetChildrenCount(root); i++)
+        {
+            var c = M.VisualTreeHelper.GetChild(root, i);
+            if (c is T t)
+                return t;
+            if (Find<T>(c) is { } d)
+                return d;
+        }
+        return null;
+    }
 
     /// <summary>A fold after the rows opened or closed: kept across redraws.</summary>
     public void FoldChanged(FoldItem fold)
@@ -596,10 +868,10 @@ internal sealed class ResultsView : C.UserControl, IListHost
     private static C.TextBlock Ink(C.TextBlock t, string token) => EntryView.Ink(t, token);
 
     /// <summary>The status's glyph, then the words that say it: shape and word together, never colour alone.</summary>
-    private static C.DockPanel WithGlyph(PanelStatus status, W.UIElement words, double size)
+    private static C.DockPanel WithGlyph(PanelStatus status, W.UIElement words, double size, double gap = 6)
     {
         var glyph = PanelLook.Glyph(status, size);
-        glyph.Margin = new W.Thickness(0, 0, 6, 0);
+        glyph.Margin = new W.Thickness(0, 0, gap, 0);
         var line = new C.DockPanel { LastChildFill = true };
         C.DockPanel.SetDock(glyph, C.Dock.Left);
         line.Children.Add(glyph);
@@ -613,7 +885,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
         var b = new C.Border
         {
             Child = WithGlyph(status, words, size: 16), BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(4),
-            Padding = new W.Thickness(10, 8, 10, 8), Margin = new W.Thickness(0, 0, 0, bottom),
+            Padding = new W.Thickness(8, 5, 8, 5), Margin = new W.Thickness(0, 0, 0, bottom),
         };
         b.SetResourceReference(C.Border.BackgroundProperty, fill);
         b.SetResourceReference(C.Border.BorderBrushProperty, outline);
@@ -626,9 +898,9 @@ internal sealed class ResultsView : C.UserControl, IListHost
         var status = StatusLook.Of(chip.Tone, stale);
         var b = new C.Border
         {
-            Child = WithGlyph(status, Typed(new C.TextBlock { Text = chip.Words }, Caption), size: 11),
-            BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(6, 1, 7, 1),
-            Margin = new W.Thickness(0, 2, 4, 0),
+            Child = WithGlyph(status, Typed(new C.TextBlock { Text = chip.Words }, Caption), size: 10, gap: 4),
+            BorderThickness = new W.Thickness(1), CornerRadius = new W.CornerRadius(8), Padding = new W.Thickness(5, 1, 6, 1),
+            Margin = new W.Thickness(0, 2, 3, 0),
         };
         b.SetResourceReference(C.Border.BackgroundProperty, StatusLook.ChipBackground(status));
         b.SetResourceReference(C.Border.BorderBrushProperty, StatusLook.Colour(status));

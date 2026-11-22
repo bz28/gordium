@@ -83,13 +83,13 @@ public sealed class PanelSupportTests
     public void The_street_edge_is_asked_for_only_last_and_only_in_a_view_showing_the_property_line()
     {
         var none = Facts();
-        Assert.Equal(StreetAsk.OtherFactsFirst, StreetEdges.Ask(none, needed: true, viewShowsPropertyLine: true));
-        Assert.Equal(StreetAsk.OtherFactsFirst, StreetEdges.Ask(none, needed: true, viewShowsPropertyLine: false));
+        Assert.Equal(StreetAsk.OtherFactsFirst, StreetEdges.Ask(none, needed: true, viewShowsPropertyLine: true, active: true));
+        Assert.Equal(StreetAsk.OtherFactsFirst, StreetEdges.Ask(none, needed: true, viewShowsPropertyLine: false, active: true));
         var rest = Facts(Marks.Zone, Marks.Use, Marks.LotSurveyed);
         Assert.Equal([ProjectFacts.StreetNotSet], rest.Missing);
-        Assert.Equal(StreetAsk.Pick, StreetEdges.Ask(rest, needed: true, viewShowsPropertyLine: true));
-        Assert.Equal(StreetAsk.OpenAPlan, StreetEdges.Ask(rest, needed: true, viewShowsPropertyLine: false));
-        Assert.Equal(StreetAsk.NotNeeded, StreetEdges.Ask(rest, needed: false, viewShowsPropertyLine: false));
+        Assert.Equal(StreetAsk.Pick, StreetEdges.Ask(rest, needed: true, viewShowsPropertyLine: true, active: true));
+        Assert.Equal(StreetAsk.OpenAPlan, StreetEdges.Ask(rest, needed: true, viewShowsPropertyLine: false, active: true));
+        Assert.Equal(StreetAsk.NotNeeded, StreetEdges.Ask(rest, needed: false, viewShowsPropertyLine: false, active: true));
 
         // in a view that can't show it, the panel says to open a site plan, never "when Check project asks"
         Assert.Equal([StreetEdges.OpenAPlan], StreetEdges.MissingAsShown(rest.Missing, StreetAsk.OpenAPlan));

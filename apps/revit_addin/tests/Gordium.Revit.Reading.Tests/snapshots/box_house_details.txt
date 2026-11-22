@@ -1,0 +1,1782 @@
+[1 of 167] DOES NOT COMPLY · Gordium test door: 36 x 80 (Patio door) · Egress door shall be side-hinged (R318.2) · R318.2
+WHY: Egress door shall be side-hinged (R318.2)
+WHAT TO DO:
+  1. Change the design so it meets the limit (the figures below).
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad)." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+ELEMENTS:
+  Element 1
+
+[2 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear area (R319.2.1) · R319.2.1
+WHY: Escape opening minimum net clear area (R319.2.1): does not comply whatever the at grade (not measured: the finished ground level outside the opening isn't given)
+WHAT TO DO:
+  1. Change the design so it meets the limit (the figures below).
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Emergency escape and rescue openings shall have a net clear opening of not less than 5.7 square feet" (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall be 5 square feet (0.465 m[fn2])." (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 2
+
+[3 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear height (R319.2.2) · R319.2.2
+WHAT TO DO:
+  1. Change the design so it meets the limit (the figures below).
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  net clear height: 20 in (measured) | limit ≥ 24 in
+HOW FAR: 4 in short
+THE LAW'S WORDS:
+  "The minimum net clear opening height dimension shall be 24 inches (610 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 2
+
+[4 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening bottom of clear opening max height (R319.2.3) · R319.2.3
+WHAT TO DO:
+  1. Change the design so it meets the limit (the figures below).
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  sill height: 46 in (measured) | limit ≤ 44 in
+HOW FAR: 2 in over
+THE LAW'S WORDS:
+  "Emergency escape and rescue openings shall have the bottom of the clear opening not greater than 44 inches (1118 mm) above the floor." (R319.2.3, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 2
+
+[5 of 167] needs review · New structures at least 20 ft from an inlet wall or stream bank · §325-26, p.67; §325-3B, p.19
+WHY: say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if so, how far the nearest new structure is from it (§325-26)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-26, p.67. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 20'-0"
+THE LAW'S WORDS:
+  "No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream, measured at an average water level, except for those structures directly connected with marine or public or commercial recreation activities. (See illustration below.) Properties located within the Cherry Street District, the Market District, the Newman District, and the West End/Waterfront District are exempt from this requirement." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-26, p.67, lines 15–19)
+  "STRUCTURE — Anything constructed or erected on the ground or which is attached to another structure or building. Structures shall not include patios or terraces." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (STRUCTURE), p.19, lines 19–20)
+  OPEN THE LAW: §325-26, p.67 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=67&search=%22No%20new%20structure%20shall%20be%22>
+  OPEN THE LAW: §325-3B, p.19 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=19&search=%22STRUCTURE%20%E2%80%94%20Anything%20constructed%20or%22>
+
+[6 of 167] needs review · Lot width · §325-8, District Regulations Chart, R-1b, Lot width column
+WHY: say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, Lot width column. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 50'-0"
+THE LAW'S WORDS:
+  "Minimum Lot Width · One-family dwelling, detached · R-1B: 50 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 21)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Lot width column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22One-family%20dwelling%2C%20detached%2075%20ft%22>
+
+[7 of 167] needs review · Stories · §325-8, District Regulations Chart, R-1b, Stories column; §325-16C, p.47
+WHY: the ground level isn't given: enter it (the grade plane)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, Stories column. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 3
+THE LAW'S WORDS:
+  "Maximum Building Height · Number of stories · R-1B: 3" (City of Ithaca Zoning Charts (April 2026), p.3, line 30)
+  "(2) In all districts, the number of stories permitted may not be exceeded." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-16C, p.47, line 10)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Stories column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Number%20of%20stories%203%203%22>
+  OPEN THE LAW: §325-16C, p.47 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47&search=%22In%20all%20districts%2C%20the%20number%22>
+
+[8 of 167] needs review · Building height · §325-8, District Regulations Chart, R-1b, Building height column, note 10, note 16; §325-8, District Regulations Chart, R-1b, Front yard column; §325-8, District Regulations Chart, R-1b, Side yard, one side column; §325-8, District Regulations Chart, R-1b, Side yard, other side column; §325-8, District Regulations Chart, R-1b, Rear yard column; §325-16C, p.47
+WHY: the ground level isn't given: enter it (the grade plane); say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, Building height column. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 35'-0"
+THE LAW'S WORDS:
+  "Maximum Building Height · Height in feet · R-1B: 35 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 31)
+  "Maximum Building Height [fn10]" (City of Ithaca Zoning Charts (April 2026), p.3, line 29)
+  "(10) See §325-16." (City of Ithaca Zoning Charts (April 2026), p.3, line 56)
+  "Yard Dimensions · Front (minimum) · R-1B: 25 ft" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Front (minimum) · R-1B)
+  "Yard Dimensions · Side (one side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Side (one side minimum) · R-1B)
+  "Yard Dimensions · Side (other side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Side (other side minimum) · R-1B)
+  "Yard Dimensions · Rear (minimum, % of depth or feet, whichever is less) · R-1B: 25%/ 50 ft [fn16]" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Rear (minimum, % of depth or feet, whichever is less) · R-1B)
+  "(16) But not less than 20 ft." (City of Ithaca Zoning Charts (April 2026), p.3, line 66)
+  "In any district, any main building may be erected to a height in excess of that specified for the district, provided that:" (City of Ithaca Code, Chapter 325 Zoning (full text), §325-16C, p.47, lines 6–7)
+  "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-16C, p.47, lines 8–9)
+  "(3) In each district, the number of additional feet may not exceed 10% of the maximum building height allowed in that district." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-16C, p.47, lines 11–12)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Building height column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Height%20in%20feet%2035%20ft%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Building height column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Maximum%20Building%20Height%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 10 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22See%20%C2%A7325-16.%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Front yard column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Front%20%28minimum%29%2025%20ft%2025%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, one side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28one%20side%20minimum%29%2010%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, other side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28other%20side%20minimum%29%2010%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Rear yard column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Rear%20%28minimum%2C%20%25%20of%20depth%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 16 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22But%20not%20less%20than%2020%22>
+  OPEN THE LAW: §325-16C, p.47 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47&search=%22In%20any%20district%2C%20any%20main%22>
+  OPEN THE LAW: §325-16C, p.47 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47&search=%22Each%20required%20front%2C%20side%20and%22>
+  OPEN THE LAW: §325-16C, p.47 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47&search=%22In%20each%20district%2C%20the%20number%22>
+
+[9 of 167] needs review · Front yard · §325-8, District Regulations Chart, R-1b, Front yard column; §325-19C, p.50
+WHY: say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, Front yard column. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 25'-0"
+THE LAW'S WORDS:
+  "Yard Dimensions · Front (minimum) · R-1B: 25 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 37)
+  "C. Corner lot transition. On corner lots in residential districts; buildings must be erected so that yards facing public streets shall conform to the minimum front yard requirements of said residential district. Such lots shall be deemed to have two adjoining front yards." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-19C, p.50, lines 7–9)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Front yard column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Front%20%28minimum%29%2025%20ft%2025%22>
+  OPEN THE LAW: §325-19C, p.50 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=50&search=%22C.%20Corner%20lot%20transition.%20On%22>
+
+[10 of 167] needs review · Side yard, narrower · §325-8, District Regulations Chart, R-1b, Side yard, one side column; §325-8, District Regulations Chart, R-1b, Side yard, other side column
+WHY: say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, Side yard, one side column. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 10'-0"
+THE LAW'S WORDS:
+  "Yard Dimensions · Side (one side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 38)
+  "Yard Dimensions · Side (other side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 40)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, one side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28one%20side%20minimum%29%2010%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, other side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28other%20side%20minimum%29%2010%22>
+
+[11 of 167] needs review · Side yard, wider · §325-8, District Regulations Chart, R-1b, Side yard, one side column; §325-8, District Regulations Chart, R-1b, Side yard, other side column
+WHY: say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, Side yard, one side column. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 10'-0"
+THE LAW'S WORDS:
+  "Yard Dimensions · Side (one side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 38)
+  "Yard Dimensions · Side (other side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 40)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, one side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28one%20side%20minimum%29%2010%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, other side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28other%20side%20minimum%29%2010%22>
+
+[12 of 167] needs review · Rear yard · §325-8, District Regulations Chart, R-1b, Rear yard column, note 16; §325-8A, p.25
+WHY: say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, Rear yard column. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Yard Dimensions · Rear (minimum, % of depth or feet, whichever is less) · R-1B: 25%/ 50 ft [fn16]" (City of Ithaca Zoning Charts (April 2026), p.3, lines 42–43)
+  "(16) But not less than 20 ft." (City of Ithaca Zoning Charts (April 2026), p.3, line 66)
+  "If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of the average of the two lengths." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.25, lines 24–26)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Rear yard column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Rear%20%28minimum%2C%20%25%20of%20depth%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 16 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22But%20not%20less%20than%2020%22>
+  OPEN THE LAW: §325-8A, p.25 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25&search=%22If%20the%20two%20side%20lot%22>
+
+[13 of 167] needs review · Eaves into front yard · §325-18B, p.49; §325-8, District Regulations Chart, R-1b, Front yard column, note 16; §325-8, District Regulations Chart, R-1b, Side yard, one side column; §325-8, District Regulations Chart, R-1b, Side yard, other side column; §325-8, District Regulations Chart, R-1b, Rear yard column; §325-16C, p.47; §325-8, District Regulations Chart, R-1b, Building height column
+WHY: the ground level isn't given: enter it (the grade plane); say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no (more if the §325-16C height bonus applies; the height isn't measured yet)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-18B, p.49. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 23'-0"
+THE LAW'S WORDS:
+  "B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that such features shall not project more than two feet into any required yard." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-18B, p.49, lines 13–16)
+  "Yard Dimensions · Front (minimum) · R-1B: 25 ft" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Front (minimum) · R-1B)
+  "Yard Dimensions · Side (one side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Side (one side minimum) · R-1B)
+  "Yard Dimensions · Side (other side minimum) · R-1B: 10 ft" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Side (other side minimum) · R-1B)
+  "Yard Dimensions · Rear (minimum, % of depth or feet, whichever is less) · R-1B: 25%/ 50 ft [fn16]" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Rear (minimum, % of depth or feet, whichever is less) · R-1B)
+  "(16) But not less than 20 ft." (City of Ithaca Zoning Charts (April 2026), p.3, line 66)
+  "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-16C, p.47, lines 8–9)
+  "Maximum Building Height · Height in feet · R-1B: 35 ft" (City of Ithaca Zoning Charts (April 2026), p.3, line 31)
+  OPEN THE LAW: §325-18B, p.49 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=49&search=%22B.%20Projecting%20architectural%20features.%20The%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Front yard column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Front%20%28minimum%29%2025%20ft%2025%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, one side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28one%20side%20minimum%29%2010%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Side yard, other side column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Side%20%28other%20side%20minimum%29%2010%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Rear yard column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Rear%20%28minimum%2C%20%25%20of%20depth%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 16 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22But%20not%20less%20than%2020%22>
+  OPEN THE LAW: §325-16C, p.47 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47&search=%22Each%20required%20front%2C%20side%20and%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Building height column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Height%20in%20feet%2035%20ft%22>
+
+[14 of 167] needs review · One-family occupancy · §325-3B, p.7; §325-3B, p.9; §325-3B, p.10; §325-8B, p.26; §325-8B, p.27; §325-3B, p.16; §325-3B, p.4; District Regulations Chart, note 1; District Regulations Chart, note 4
+WHY: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28); enter who lives in the dwelling: the unrelated people in each unit, whether the owner lives there, whether the household is a functional family unit (§325-3B)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-3B, p.7. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 1
+THE LAW'S WORDS:
+  "DWELLING, ONE-FAMILY — A dwelling unit occupied exclusively for residential purposes by an individual or family and not more than one unrelated individual or a functional family unit." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (DWELLING, ONE-FAMILY), p.7, lines 36–37)
+  "In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted if the dwelling is owner-occupied." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (DWELLING, ONE-FAMILY), p.7, lines 37–39)
+  "FAMILY — One or more persons occupying a dwelling unit, all of whom are related by blood, marriage or adoption." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (FAMILY), p.9, lines 27–28)
+  "FUNCTIONAL FAMILY UNIT — A group of individuals living together in a single dwelling unit and functioning as a family with respect to those characteristics that are consistent with the purposes of zoning restrictions in residential neighborhoods." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (FUNCTIONAL FAMILY UNIT), p.10, lines 11–13)
+  "(6) [fn3]In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall be" (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8B, p.26, line 28)
+  "excluded in determining the number of unrelated occupants in a dwelling unit." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8B, p.27, line 3)
+  "NOTES: (1) In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall be excluded in determining the number of unrelated occupants." (City of Ithaca Zoning Charts (April 2026), p.2, line 41)
+  "(4) See §325-3 for occupancy restrictions." (City of Ithaca Zoning Charts (April 2026), p.2, line 45)
+  "OWNER — In instances where owner-occupancy is required, "owner" shall be defined as follows: A person who maintains his/her principal residence in property for more than six months of each calendar year and who is:" (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (OWNER), p.16, lines 37–39)
+  "ACCESSORY DWELLING UNIT (ADU) — A smaller, secondary dwelling unit located on the same lot as a primary residential, commercial, or mixed-use structure." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (ACCESSORY DWELLING UNIT), p.4, lines 7–8)
+  OPEN THE LAW: §325-3B, p.7 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=7&search=%22DWELLING%2C%20ONE-FAMILY%20%E2%80%94%20A%20dwelling%22>
+  OPEN THE LAW: §325-3B, p.7 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=7&search=%22In%20the%20R-1%20Zones%2C%20occupancy%22>
+  OPEN THE LAW: §325-3B, p.9 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=9&search=%22FAMILY%20%E2%80%94%20One%20or%20more%22>
+  OPEN THE LAW: §325-3B, p.10 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=10&search=%22FUNCTIONAL%20FAMILY%20UNIT%20%E2%80%94%20A%22>
+  OPEN THE LAW: §325-8B, p.26 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=26&search=%22In%20R-1%20and%20R-2%20Districts%2C%22>
+  OPEN THE LAW: §325-8B, p.27 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=27&search=%22excluded%20in%20determining%20the%20number%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 1 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22NOTES%3A%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 4 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22See%20%C2%A7325-3%20for%20occupancy%20restrictions.%22>
+  OPEN THE LAW: §325-3B, p.16 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=16&search=%22OWNER%20%E2%80%94%20In%20instances%20where%22>
+  OPEN THE LAW: §325-3B, p.4 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4&search=%22ACCESSORY%20DWELLING%20UNIT%20%28ADU%29%20%E2%80%94%22>
+
+[15 of 167] needs review · Private garage: not more than three cars · §325-8, District Regulations Chart, R-1b, Use column, note 6; §325-3B, p.11; §325-8A, p.24
+WHY: enter how many cars the lot's private garages hold, all together: every enclosed garage, attached or detached (0 if there is none; a carport isn't enclosed) (chart p.2 notes 6 and 7)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-8, District Regulations Chart, R-1b, note 6. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 3
+THE LAW'S WORDS:
+  "(6) For not more than three cars." (City of Ithaca Zoning Charts (April 2026), p.2, line 47)
+  "Accessory Uses · Private garage · R-1B: •[fn6]" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Private garage · R-1B)
+  "GARAGE, PRIVATE — An enclosed space for the storage of one or more motor vehicles, provided that no business, occupation or service is conducted for profit therein." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (GARAGE, PRIVATE), p.11, lines 16–17)
+  "(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the premises are listed, subject to the further regulations of Article V." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.24, lines 17–18)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 6 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22For%20not%20more%20than%20three%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Private%20garage%20%E2%80%A2%22>
+  OPEN THE LAW: §325-3B, p.11 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=11&search=%22GARAGE%2C%20PRIVATE%20%E2%80%94%20An%20enclosed%22>
+  OPEN THE LAW: §325-8A, p.24 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=24&search=%22Column%203%3A%20Permitted%20Accessory%20Uses.%22>
+
+[16 of 167] needs review · Accessory dwelling unit: at most one per parcel · §325-28C, p.72; §325-8, District Regulations Chart, R-1b, Use column; §325-3B, p.4
+WHY: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28); enter how many accessory dwelling units are on the parcel (§325-28C(1): one at most)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-28C, p.72. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 1
+THE LAW'S WORDS:
+  "(1) A maximum of one ADU is allowed per parcel." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, line 8)
+  "Accessory Uses · Accessory Dwelling Unit · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Accessory Dwelling Unit · R-1B)
+  "ACCESSORY DWELLING UNIT (ADU) — A smaller, secondary dwelling unit located on the same lot as a primary residential, commercial, or mixed-use structure. An ADU must have a separate entrance from the outside of the building or through a common hall and must provide living, cooking, sanitary, and sleeping facilities. All ADUs must adhere to building code regulations for residential use." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (ACCESSORY DWELLING UNIT), p.4, lines 7–11)
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22A%20maximum%20of%20one%20ADU%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Accessory%20Dwelling%20Unit%20%E2%80%A2%20%E2%80%A2%22>
+  OPEN THE LAW: §325-3B, p.4 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4&search=%22ACCESSORY%20DWELLING%20UNIT%20%28ADU%29%20%E2%80%94%22>
+
+[17 of 167] needs review · Accessory dwelling unit: at most two bedrooms · §325-28C, p.72; §325-8, District Regulations Chart, R-1b, Use column
+WHY: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28); enter the accessory dwelling unit's bedrooms (§325-28C(3): two at most)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-28C, p.72. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 2
+THE LAW'S WORDS:
+  "(3) An ADU may have a maximum of two bedrooms." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, line 10)
+  "Accessory Uses · Accessory Dwelling Unit · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Accessory Dwelling Unit · R-1B)
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22An%20ADU%20may%20have%20a%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Accessory%20Dwelling%20Unit%20%E2%80%A2%20%E2%80%A2%22>
+
+[18 of 167] needs review · Detached ADU: not in the primary front yard nor a required one · §325-28C, p.72; §325-8, District Regulations Chart, R-1b, Use column; §325-8, District Regulations Chart, R-1b, Front yard column; §325-3B, p.20; §325-25A, p.66; §325-3B, p.4
+WHY: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28); say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7)); say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-28C, p.72. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 25'-0"
+THE LAW'S WORDS:
+  "(4) ADUs may not be located in the primary front yard." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, line 11)
+  "Accessory Uses · Accessory Dwelling Unit · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Accessory Dwelling Unit · R-1B)
+  "[1] An existing accessory building may be altered or expanded, provided that it does not further encroach upon any setback requirement for new construction." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, lines 26–27)
+  "[b] Front setback, secondary front yard: same as primary structure." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, line 31)
+  "Yard Dimensions · Front (minimum) · R-1B: 25 ft" (City of Ithaca Zoning Charts (April 2026), p.3, Yard Dimensions · Front (minimum) · R-1B)
+  "(1) FRONT YARD — An open space extending the full width of the lot between a main building and the front lot line, unoccupied and unobstructed by buildings or structures from the ground upward, the depth of which shall be the least distance between the front lot line and the front of such main building." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (FRONT YARD), p.20, lines 31–34)
+  "A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further provisions of this section. Corner lots shall be considered to have two front yards." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-25A, p.66, lines 37–40)
+  "ACCESSORY DWELLING UNIT, DETACHED — An accessory dwelling unit (ADU) located within an existing or newly constructed accessory structure such as a detached garage, carriage house, or other freestanding building." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (ACCESSORY DWELLING UNIT, DETACHED), p.4, lines 15–17)
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22ADUs%20may%20not%20be%20located%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Accessory%20Dwelling%20Unit%20%E2%80%A2%20%E2%80%A2%22>
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22%5B1%5D%20An%20existing%20accessory%20building%20may%20be%20altered%20or%20expanded%2C%20provided%20that%20it%20does%20not%20further%22>
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22%5Bb%5D%20Front%20setback%2C%20secondary%20front%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Front yard column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Front%20%28minimum%29%2025%20ft%2025%22>
+  OPEN THE LAW: §325-3B, p.20 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=20&search=%22FRONT%20YARD%20%E2%80%94%20An%20open%22>
+  OPEN THE LAW: §325-25A, p.66 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=66&search=%22A.%20Accessory%20structures%20wholly%20or%22>
+  OPEN THE LAW: §325-3B, p.4 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4&search=%22ACCESSORY%20DWELLING%20UNIT%2C%20DETACHED%20%E2%80%94%22>
+
+[19 of 167] needs review · Attached ADU: at most 40% of the primary structure's floor area · §325-28C, p.72; §325-8, District Regulations Chart, R-1b, Use column; §325-3B, p.4
+WHY: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28); say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7)); enter the attached accessory dwelling unit's floor area and the main building's, the ADU included (§325-28C(7)(a): 40% at most)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-28C, p.72. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "(a) Attached ADU: The ADU shall not exceed 40% of the floor area of the primary structure." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, line 16)
+  "Accessory Uses · Accessory Dwelling Unit · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Accessory Dwelling Unit · R-1B)
+  "ACCESSORY DWELLING UNIT, ATTACHED — An accessory dwelling unit (ADU) that is connected to or contained within the primary structure, such as a basement, building addition, or attached garage." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (ACCESSORY DWELLING UNIT, ATTACHED), p.4, lines 12–14)
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22Attached%20ADU%3A%20The%20ADU%20shall%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Accessory%20Dwelling%20Unit%20%E2%80%A2%20%E2%80%A2%22>
+  OPEN THE LAW: §325-3B, p.4 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4&search=%22ACCESSORY%20DWELLING%20UNIT%2C%20ATTACHED%20%E2%80%94%22>
+
+[20 of 167] needs review · Detached ADU: 800 sf footprint; two stories and 20 ft · §325-28C, p.72; §325-8, District Regulations Chart, R-1b, Use column; §325-3B, p.4
+WHY: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28); say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7)); pick the detached accessory dwelling unit's building (the solid it is in) with Pick the ADU's building…
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-28C, p.72. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 800 sf
+THE LAW'S WORDS:
+  "(c) Detached ADU, new construction: [1] 800 SF maximum building footprint. [2] Maximum height of two stories and 20'." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, lines 20–22)
+  "Accessory Uses · Accessory Dwelling Unit · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Accessory Dwelling Unit · R-1B)
+  "(b) Detached ADU, existing accessory building: none. [1] An existing accessory building may be altered or expanded, provided that it does not exceed the size limitations for new construction." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, lines 17–19)
+  "ACCESSORY DWELLING UNIT, DETACHED — An accessory dwelling unit (ADU) located within an existing or newly constructed accessory structure such as a detached garage, carriage house, or other freestanding building." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (ACCESSORY DWELLING UNIT, DETACHED), p.4, lines 15–17)
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22Detached%20ADU%2C%20new%20construction%3A%20%5B1%5D%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Accessory%20Dwelling%20Unit%20%E2%80%A2%20%E2%80%A2%22>
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22Detached%20ADU%2C%20existing%20accessory%20building%3A%20none.%20%5B1%5D%22>
+  OPEN THE LAW: §325-3B, p.4 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4&search=%22ACCESSORY%20DWELLING%20UNIT%2C%20DETACHED%20%E2%80%94%22>
+
+[21 of 167] needs review · Detached ADU: 5 ft from the side and rear lot lines · §325-28C, p.72; §325-8, District Regulations Chart, R-1b, Use column, note 16; §325-25C, p.67; §325-3B, p.4
+WHY: say whether an accessory dwelling unit (ADU), attached or detached, is on the lot (§325-3B, §325-28); say whether the accessory dwelling unit is attached (in or on the main building) or detached (its own building) and, if detached, whether it is in an existing accessory building or new construction (§325-3B, §325-28C(7)); say whether this is a corner lot (two streets meet at it, §325-19C): enter corner lot yes or no
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-28C, p.72. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≥ 5'-0"
+THE LAW'S WORDS:
+  "[2] Detached ADU, new construction: [a] Side and rear setback: 5' or setback required for primary structure, whichever is less." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, lines 28–30)
+  "Accessory Uses · Accessory Dwelling Unit · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Accessory Dwelling Unit · R-1B)
+  "[1] An existing accessory building may be altered or expanded, provided that it does not further encroach upon any setback requirement for new construction." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-28C, p.72, lines 26–27)
+  "(16) But not less than 20 ft." (City of Ithaca Zoning Charts (April 2026), p.3, line 66)
+  "C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-25C, p.67, lines 6–9)
+  "ACCESSORY DWELLING UNIT, DETACHED — An accessory dwelling unit (ADU) located within an existing or newly constructed accessory structure such as a detached garage, carriage house, or other freestanding building." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (ACCESSORY DWELLING UNIT, DETACHED), p.4, lines 15–17)
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22%5B2%5D%20Detached%20ADU%2C%20new%20construction%3A%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Accessory%20Dwelling%20Unit%20%E2%80%A2%20%E2%80%A2%22>
+  OPEN THE LAW: §325-28C, p.72 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=72&search=%22%5B1%5D%20An%20existing%20accessory%20building%20may%20be%20altered%20or%20expanded%2C%20provided%20that%20it%20does%20not%20further%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, note 16 <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22But%20not%20less%20than%2020%22>
+  OPEN THE LAW: §325-25C, p.67 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=67&search=%22C.%20Frame%20accessory%20buildings.%20Frame%22>
+  OPEN THE LAW: §325-3B, p.4 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4&search=%22ACCESSORY%20DWELLING%20UNIT%2C%20DETACHED%20%E2%80%94%22>
+
+[22 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · One egress door for each dwelling unit (R318.2) · R318.2
+WHY: clear height not measured: the top of the threshold isn't given; clear width not measured: R318.2 measures a side-hinged door open 90 degrees; this door is sliding; dwelling units not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Not less than one egress door shall be provided for each dwelling unit." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+  "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad)." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+  "The clear height of the door opening shall be not less than 78 inches (1981 mm) in height measured from the top of the threshold to the bottom of the stop." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+ELEMENTS:
+  Element 1
+
+[23 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress door clear width at least 32 in (R318.2) · R318.2
+WHY: clear width not measured: R318.2 measures a side-hinged door open 90 degrees; this door is sliding
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad)." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+ELEMENTS:
+  Element 1
+
+[24 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress door clear height at least 78 in (R318.2) · R318.2
+WHY: clear height not measured: the top of the threshold isn't given
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The clear height of the door opening shall be not less than 78 inches (1981 mm) in height measured from the top of the threshold to the bottom of the stop." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+ELEMENTS:
+  Element 1
+
+[25 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress doors readily openable without key (R318.2) · R318.2
+WHY: Egress doors readily openable without key (R318.2): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Egress doors shall be readily openable from inside the dwelling unit without the use of a key or special knowledge or effort." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+ELEMENTS:
+  Element 1
+
+[26 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Exit into a patio cover not unenclosed: exits per R318 (BF103.2) · BF103.2
+WHY: Exit into a patio cover not unenclosed: exits per R318 (BF103.2): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where such exterior openings serve as an exit from the dwelling unit, the patio structure, unless unenclosed, shall be provided with exits conforming to the provisions of Section R318." (BF103.2, 2025 Residential Code of New York State (RCNYS), PDF p.898)
+ELEMENTS:
+  Element 1
+
+[27 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress door not given as an exterior door: its landings unchecked (R318.3.1) · R318.3.1
+WHY: egress given as exterior door not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold." (R318.3.1, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+ELEMENTS:
+  Element 1
+
+[28 of 167] needs review · Stairs · Handrail on one side of flights with four or more risers (R318.7.8) · R318.7.8
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails shall be provided on not less than one side of each flight of stairs with four or more risers." (R318.7.8, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[29 of 167] needs review · Stairs · Sleeping loft stair riser height, 7 to 12 in (R315.5.2.2) · R315.5.2.2
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Risers for stairs providing egress from a sleeping loft shall be not less than 7 inches (178 mm) and not more than 12 inches (305 mm) in height." (R315.5.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+  "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3." (R315.5.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+  "The riser height shall be not more than 8 1/4 inches (209 mm)." (R318.7.5.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "The tread depth shall be not less than 9 inches (229 mm)." (R318.7.5.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[30 of 167] needs review · Stairs · Sleeping loft stair tread/riser formula (R315.5.2.2) · R315.5.2.2
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Tread depth and riser height shall be calculated in accordance with one of the following formulas:" (R315.5.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+  "The tread depth shall be 20 inches (508 mm) minus four-thirds of the riser height." (R315.5.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+  "The riser height shall be 15 inches (381 mm) minus three-fourths of the tread depth." (R315.5.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[31 of 167] needs review · Stairs · Sleeping loft stairway clear width at or above handrail (R315.5.2.1) · R315.5.2.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Stairways providing egress from a sleeping loft shall not be less than 17 inches (432 mm) in clear width at or above the handrail." (R315.5.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[32 of 167] needs review · Stairs · Sleeping loft stairway width below handrail (R315.5.2.1) · R315.5.2.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Stairways providing egress from a sleeping loft shall not be less than 17 inches (432 mm) in clear width at or above the handrail." (R315.5.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+  "The width below the handrail shall be not less than 20 inches (610 mm)." (R315.5.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[33 of 167] needs review · Stairs · Stairway clear width above handrail height (R318.7.1) · R318.7.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Stairways shall be not less than 36 inches (914 mm) in clear width at all points above the permitted handrail" (R318.7.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3." (R315.5.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[34 of 167] needs review · Stairs · Stairway clear width at and below handrail (R318.7.1) · R318.7.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The clear width of stairways at and below the handrail height, including treads" (R318.7.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "and landings, shall be not less than 31 1/2 inches (787 mm) where a handrail is installed on one side and 27 inches (698 mm) where" (R318.7.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "Stairways providing egress from sleeping lofts shall be permitted to comply with Sections R315.5.2.1 through R315.5.2.3." (R315.5.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[35 of 167] needs review · Stairs · Minimum stairway headroom, 6 ft 8 in (R318.7.2) · R318.7.2
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The headroom in stairways shall be not less than 6 feet 8 inches (2032 mm) measured vertically from the sloped line adjoining the tread nosing or from the floor surface of the landing or platform on that portion of the stairway." (R318.7.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "The headroom for spiral stairways shall be in accordance with Section R318.7.11.1." (R318.7.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[36 of 167] needs review · Stairs · Floor opening projection into stair headroom (R318.7.2 exc. 1) · R318.7.2
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where the nosings of treads at the side of a flight extend under the edge of a floor opening through which the stair passes, the floor opening shall not project horizontally into the required headroom more than 4 3/4 inches (121 mm)." (R318.7.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[37 of 167] needs review · Stairs · Maximum vertical rise of a flight of stairs (R318.7.3) · R318.7.3
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "A flight of stairs shall not have a vertical rise greater than 12 feet 7 inches (3835 mm) between floor levels or landings." (R318.7.3, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "Stairways serving bulkhead enclosures, not part of the required building egress, providing access from the outside grade level to the basement shall be exempt from the requirements of Sections R318.3 and R318.7 where the height from the basement finished floor level to grade adjacent to the stairway is not more than 8 feet (2438 mm) and the grade level opening to the stairway is covered by a bulkhead enclosure with hinged doors or other approved means." (R318.7.11.2, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[38 of 167] needs review · Stairs · Maximum stair riser height (R318.7.5.1) · R318.7.5.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The riser height shall be not more than 8 1/4 inches (209 mm)." (R318.7.5.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "2. The riser height of spiral stairways shall be in accordance with Section R318.7.11.1." (R318.7.5.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[39 of 167] needs review · Stairs · Riser height variation within a flight (R318.7.5.1) · R318.7.5.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The greatest riser height within any flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm)." (R318.7.5.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[40 of 167] needs review · Stairs · Riser slope from the vertical (R318.7.5.1) · R318.7.5.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Risers shall be vertical or sloped from the underside of the nosing of the tread above at an angle not more than 30 degrees (0.51 rad) from the vertical." (R318.7.5.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[41 of 167] needs review · Stairs · Open risers: 4-inch sphere limit (R318.7.5.1) · R318.7.5.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "At open risers, openings located more than 30 inches (762 mm), as measured vertically, to the floor or grade below shall not permit the passage of a 4-inch-diameter (102 mm) sphere." (R318.7.5.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "1. The opening between adjacent treads is not limited on spiral stairways." (R318.7.5.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[42 of 167] needs review · Stairs · Minimum stair tread depth (R318.7.5.2) · R318.7.5.2
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The tread depth shall be not less than 9 inches (229 mm)." (R318.7.5.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[43 of 167] needs review · Stairs · Tread depth variation within a flight (R318.7.5.2) · R318.7.5.2
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The greatest tread depth within any flight of stairs shall not exceed the smallest by more than 3/8 inch (9.5 mm)." (R318.7.5.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[44 of 167] needs review · Stairs · Floor or landing at the top of each flight (R318.7.6) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "There shall be a floor or landing at the top and bottom of each flight of stairs." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+  "The top landing of an interior stairway, including those in an enclosed garage, shall be permitted to be on the other side of a door located at the top of the stairway, provided that the door does not swing over the stairs." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+  "At exterior doors, a top landing is not required for an exterior stairway of not more than two risers, provided that the door does not swing over the stairway." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[45 of 167] needs review · Stairs · Floor or landing at the bottom of each flight (R318.7.6) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "There shall be a floor or landing at the top and bottom of each flight of stairs." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[46 of 167] needs review · Stairs · Top landing at enclosed garage stair, drop below threshold (R318.7.6 exc. 2) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "At an enclosed garage, the top landing at the stair shall be permitted to be not more than 8 1/4 inches (209 mm) below the top of the threshold." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[47 of 167] needs review · Stairs · Top landing width not less than flight width (R318.7.6) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The width perpendicular to the direction of travel shall be not less than the width of the flight served." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[48 of 167] needs review · Stairs · Bottom landing width not less than flight width (R318.7.6) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The width perpendicular to the direction of travel shall be not less than the width of the flight served." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+  "Exterior stairways to grade with three or fewer risers serving a deck, porch or patio shall have a bottom landing width of not less than 36 inches (914 mm), provided that the stairway is not the required access to grade serving the required egress door." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[49 of 167] needs review · Stairs · Bottom landing width, exterior stair to grade serving deck (R318.7.6 exc. 4) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Exterior stairways to grade with three or fewer risers serving a deck, porch or patio shall have a bottom landing width of not less than 36 inches (914 mm), provided that the stairway is not the required access to grade serving the required egress door." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[50 of 167] needs review · Stairs · Landing depth at a straight run (R318.7.6) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where the stairway has a straight run, the depth in the direction of travel shall be not less than 36 inches (914 mm)." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+  "Landings at stairways providing egress from sleeping lofts shall comply with Section R318.7.6, except that the depth of landings in the direction of travel shall be not less than 24 inches (610 mm)." (R315.5.2.3, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[51 of 167] needs review · Stairs · Landings other than square or rectangular (R318.7.6) · R318.7.6
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "For landings of shapes other than square or rectangular, the depth at the walk line and the total area shall be not less than that of a quarter circle with a radius equal to the required landing width." (R318.7.6, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[52 of 167] needs review · Stairs · Spiral stairway clear width at handrails (R318.7.11.1) · R318.7.11.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The clear width at and below the handrails at spiral stairways shall be not less than 26 inches (660 mm) and the walkline radius shall be not greater than 24 1/2 inches (622 mm)." (R318.7.11.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[53 of 167] needs review · Stairs · Spiral stairway walkline radius (R318.7.11.1) · R318.7.11.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The clear width at and below the handrails at spiral stairways shall be not less than 26 inches (660 mm) and the walkline radius shall be not greater than 24 1/2 inches (622 mm)." (R318.7.11.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[54 of 167] needs review · Stairs · Spiral stairway tread depth at walkline (R318.7.11.1) · R318.7.11.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Each tread shall have a depth of not less than 6 3/4 inches (171 mm) at the walkline." (R318.7.11.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[55 of 167] needs review · Stairs · Spiral stairway treads identical (R318.7.11.1) · R318.7.11.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Treads shall be identical, and the rise shall be not more than 9 1/2 inches (241 mm)." (R318.7.11.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[56 of 167] needs review · Stairs · Spiral stairway rise (R318.7.11.1) · R318.7.11.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Treads shall be identical, and the rise shall be not more than 9 1/2 inches (241 mm)." (R318.7.11.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[57 of 167] needs review · Stairs · Spiral stairway headroom (R318.7.11.1) · R318.7.11.1
+WHY: the stairs aren't read yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Head- room shall be not less than 6 feet 6 inches (1982 mm)." (R318.7.11.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[58 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening minimum net clear area (R319.2.1) · R319.2.1
+WHY: at grade not measured: the finished ground level outside the opening isn't given
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Emergency escape and rescue openings shall have a net clear opening of not less than 5.7 square feet" (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall be 5 square feet (0.465 m[fn2])." (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 3
+
+[59 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape openings under decks, porches, cantilevers (R319.2.4) · R319.2.4
+WHY: fully openable not measured: Gordium doesn't measure this yet; path height not measured: Gordium doesn't measure this yet; path width not measured: Gordium doesn't measure this yet; under projection not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Emergency escape and rescue open- ings installed under decks, porches and cantilevers shall be fully openable and provide a path not less than 36 inches (914 mm) in height and 36 inches (914 mm) in width to a yard or court." (R319.2.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[60 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well where opening is below grade (R319.4) · R319.4
+WHY: area well area not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade" (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "shall be provided with an area well in accordance with Sections R319.4.1 through R319.4.4." (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[61 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well deeper than 44 in: ladder or steps (R319.4.2) · R319.4.2
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "The ladder or steps shall not be obstructed by the emergency escape and rescue opening where the window or door is in the open position." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade" (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[62 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening into a patio cover: unenclosed (BF103.2) · BF103.2
+WHY: into patio cover not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Exterior openings required for light and ventilation into a patio structure conforming to Section BF101 shall be unenclosed where such openings serve as emergency egress or rescue openings from sleeping rooms." (BF103.2, 2025 Residential Code of New York State (RCNYS), PDF p.898)
+ELEMENTS:
+  Element 3
+
+[63 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well horizontal area at least 9 sf (R319.4.1) · R319.4.1
+WHY: area well area not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]), with a horizontal projec-" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[64 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well horizontal projection at least 36 in (R319.4.1) · R319.4.1
+WHY: area well ladder not measured: Gordium doesn't measure this yet; area well projection not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[65 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well width at least 36 in (R319.4.1) · R319.4.1
+WHY: area well ladder not measured: Gordium doesn't measure this yet; area well width not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[66 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well size allows opening to fully open (R319.4.1) · R319.4.1
+WHY: below grade not measured: Gordium doesn't measure this yet; fully openable not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The size of the area well shall allow the emergency escape and rescue opening" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[67 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Every sleeping room: operable escape opening (R319.1) · R319.1
+WHY: operable not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 3
+
+[68 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape openings open to a public way, yard or court (R319.1) · R319.1
+WHY: opens to yard not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Emergency escape and rescue openings shall open directly into a public way, or to a yard or court that opens to a public way." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "A yard shall not be required to open directly into a public way where the yard opens to an unobstructed path from the yard to the public way." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Such path shall have a width of not less than 36 inches (914 mm)." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 3
+
+[69 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder inside width (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[70 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder projection from wall (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder projection not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[71 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder rung spacing (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well rung spacing not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[72 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well ladder rungs for full height (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[73 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Area well steps: width, tread, riser (R319.4.2.2) · R319.4.2.2
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well step riser not measured: Gordium doesn't measure this yet; area well step tread not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Steps shall have an inside width of not less than 12 inches (305 mm), a minimum tread depth of 5 inches" (R319.4.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "(127 mm) and a maximum riser height of 18 inches (457 mm) for the full height of the area well." (R319.4.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[74 of 167] needs review · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening in each new sleeping room of an addition (R319.6) · R319.6
+WHY: operable not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening shall be provided in each new sleeping room." (R319.6, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 3
+
+[75 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape openings under decks, porches, cantilevers (R319.2.4) · R319.2.4
+WHY: fully openable not measured: Gordium doesn't measure this yet; path height not measured: Gordium doesn't measure this yet; path width not measured: Gordium doesn't measure this yet; under projection not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Emergency escape and rescue open- ings installed under decks, porches and cantilevers shall be fully openable and provide a path not less than 36 inches (914 mm) in height and 36 inches (914 mm) in width to a yard or court." (R319.2.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[76 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well where opening is below grade (R319.4) · R319.4
+WHY: area well area not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade" (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "shall be provided with an area well in accordance with Sections R319.4.1 through R319.4.4." (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[77 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well deeper than 44 in: ladder or steps (R319.4.2) · R319.4.2
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "The ladder or steps shall not be obstructed by the emergency escape and rescue opening where the window or door is in the open position." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade" (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[78 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening into a patio cover: unenclosed (BF103.2) · BF103.2
+WHY: into patio cover not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Exterior openings required for light and ventilation into a patio structure conforming to Section BF101 shall be unenclosed where such openings serve as emergency egress or rescue openings from sleeping rooms." (BF103.2, 2025 Residential Code of New York State (RCNYS), PDF p.898)
+ELEMENTS:
+  Element 2
+
+[79 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well horizontal area at least 9 sf (R319.4.1) · R319.4.1
+WHY: area well area not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]), with a horizontal projec-" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[80 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well horizontal projection at least 36 in (R319.4.1) · R319.4.1
+WHY: area well ladder not measured: Gordium doesn't measure this yet; area well projection not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[81 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well width at least 36 in (R319.4.1) · R319.4.1
+WHY: area well ladder not measured: Gordium doesn't measure this yet; area well width not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[82 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well size allows opening to fully open (R319.4.1) · R319.4.1
+WHY: below grade not measured: Gordium doesn't measure this yet; fully openable not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The size of the area well shall allow the emergency escape and rescue opening" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[83 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Every sleeping room: operable escape opening (R319.1) · R319.1
+WHY: operable not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 2
+
+[84 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape openings open to a public way, yard or court (R319.1) · R319.1
+WHY: opens to yard not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Emergency escape and rescue openings shall open directly into a public way, or to a yard or court that opens to a public way." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "A yard shall not be required to open directly into a public way where the yard opens to an unobstructed path from the yard to the public way." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Such path shall have a width of not less than 36 inches (914 mm)." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 2
+
+[85 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder inside width (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[86 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder projection from wall (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder projection not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[87 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder rung spacing (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well rung spacing not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[88 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder rungs for full height (R319.4.2.1) · R319.4.2.1
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[89 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well steps: width, tread, riser (R319.4.2.2) · R319.4.2.2
+WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well step riser not measured: Gordium doesn't measure this yet; area well step tread not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Steps shall have an inside width of not less than 12 inches (305 mm), a minimum tread depth of 5 inches" (R319.4.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "(127 mm) and a maximum riser height of 18 inches (457 mm) for the full height of the area well." (R319.4.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[90 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening in each new sleeping room of an addition (R319.6) · R319.6
+WHY: operable not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening shall be provided in each new sleeping room." (R319.6, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+ELEMENTS:
+  Element 2
+
+[91 of 167] needs review · Interior drawing
+WHY: The interior drawing: the stairs weren't read (no `stairs` in the description)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row.
+
+[92 of 167] needs review · Home occupation size · §325-3B, p.12; §325-3B, p.13
+WHY: Answer when you plan the interior: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (§325-3B HOME OCCUPATION)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-3B, p.12. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+MEASURED VS LIMIT:
+  figure: — (not measured) | limit ≤ 500 sf
+THE LAW'S WORDS:
+  "HOME OCCUPATION — (1) A subordinate use of a nonresidential nature which is conducted within a dwelling unit or a building accessory thereto by a resident of the dwelling unit," (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (HOME OCCUPATION), p.12, lines 26–28)
+  "(f) The occupation occupies no more than 25% of the dwelling unit and no more than a total of 500 indoor square feet, including accessory structures." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (HOME OCCUPATION), p.13, lines 18–19)
+  OPEN THE LAW: §325-3B, p.12 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=12&search=%22HOME%20OCCUPATION%20%E2%80%94%22>
+  OPEN THE LAW: §325-3B, p.13 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=13&search=%22The%20occupation%20occupies%20no%20more%22>
+
+[93 of 167] needs review · Home occupation · §325-3B, p.12; §325-8, District Regulations Chart, R-1b, Use column; §325-9B, p.30
+WHY: Answer when you plan the interior: say whether a home occupation is planned and, if so, its floor area and its dwelling unit's (§325-3B HOME OCCUPATION)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Open the law at §325-3B, p.12. [OpenLaw]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "HOME OCCUPATION — (1) A subordinate use of a nonresidential nature which is conducted within a dwelling unit or a building accessory thereto by a resident of the dwelling unit," (City of Ithaca Code, Chapter 325 Zoning (full text), §325-3B (HOME OCCUPATION), p.12, lines 26–28)
+  "Accessory Uses · Home occupation · R-1B: SP" (City of Ithaca Zoning Charts (April 2026), p.2, Accessory Uses · Home occupation · R-1B)
+  "(i) Home occupations in all residential districts, unless the home occupation meets all of the following criteria:" (City of Ithaca Code, Chapter 325 Zoning (full text), §325-9B, p.30, lines 37–38)
+  OPEN THE LAW: §325-3B, p.12 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=12&search=%22HOME%20OCCUPATION%20%E2%80%94%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Home%20occupation%20SP%20SP%20SP%22>
+  OPEN THE LAW: §325-9B, p.30 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=30&search=%22Home%20occupations%20in%20all%20residential%22>
+
+[94 of 167] needs review · Handrails · Handrail height 34 to 38 in (R320.2) · R320.2
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface of ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)." (R320.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Where handrail fittings or bendings are used to provide continuous transition between flights, transitions at winder treads, the transition from handrail to guard, or used at the start of a flight, the handrail height at the fittings or bendings shall be permitted to exceed 38 inches (965 mm)." (R320.2, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[95 of 167] needs review · Handrails · Handrail clearance from wall (R320.4) · R320.4
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "R320.4 Handrail clearance. Handrails adjacent to a wall shall have a space of not less than 1 1/2 inches (38 mm) between the wall and" (R320.4, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[96 of 167] needs review · Handrails · Handrail projection, 4 1/2 in (6 1/2 in at nosings) (R320.3) · R320.3
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails shall not project more than 4 1/2 inches (114 mm) on either side of the stairway or ramp." (R320.3, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "rails, handrails shall project not more than 6 1/2 inches (165 mm) into the stairway, provided that the stair width and handrail" (R320.3, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[97 of 167] needs review · Handrails · Handrail continuous full length of flight or ramp (R320.5) · R320.5
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails shall be continuous for the full length of the flight, from a point directly above the nosing of the landing at the top of the flight to a point directly above the lowest nosing of the flight." (R320.5, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Handrails where required for ramps shall be continuous for the full length of the ramp." (R320.5, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Handrail continuity shall be permitted to be interrupted by a newel post at a turn in a flight with winders, at a landing, or over the lowest tread." (R320.5, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "A volute, turnout or starting easing shall be allowed to terminate over the lowest tread." (R320.5, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[98 of 167] needs review · Handrails · Handrail end returned (R320.5) · R320.5
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "A handrail end shall be returned continuous to itself or toward a wall, guard or walking surface." (R320.5, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "A volute, turnout or starting easing shall be allowed to terminate over the lowest tread." (R320.5, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[99 of 167] needs review · Handrails · Handrail return gap from wall at most 1/4 inch (R320.5) · R320.5
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "rail returns shall not form a gap more than 1/4 inch (6.4 mm) from the adjacent wall." (R320.5, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[100 of 167] needs review · Handrails · Handrail edge radius (R320.6) · R320.6
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "If the handrail is not circular, it shall have a perimeter of not less than 4 inches (102 mm) and not greater than 6 1/4 inches (160 mm) and a cross section of not more than 2 1/4 inches (57 mm). Edges shall have a radius of not less than 0.01 inch (0.25 mm)." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Required handrails shall be of one of the following types or provide equivalent graspability." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[101 of 167] needs review · Handrails · Circular handrail outside diameter, Type I (R320.6) · R320.6
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails with a circular cross section shall have an outside diameter of not less than 1 1/4 inches (32 mm) and not greater than 2 inches (51 mm)." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Required handrails shall be of one of the following types or provide equivalent graspability." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[102 of 167] needs review · Handrails · Non-circular handrail perimeter and cross section, Type I (R320.6) · R320.6
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "If the handrail is not circular, it shall have a perimeter of not less than 4 inches (102 mm) and not greater than 6 1/4 inches (160 mm) and a cross section of not more than 2 1/4 inches (57 mm). Edges shall have a radius of not less than 0.01 inch (0.25 mm)." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Required handrails shall be of one of the following types or provide equivalent graspability." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[103 of 167] needs review · Handrails · Handrail with perimeter over 6 1/4 in: finger recess, Type II (R320.6) · R320.6
+WHY: the handrails aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails with a perimeter greater than 6 1/4 inches (160 mm) shall have a graspable finger recess area on both sides of the profile." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "The finger recess shall begin within 3/4 inch (19 mm) measured vertically from the tallest portion of the profile and have a depth of not less than 5/16 inch (8 mm) within 7/8 inch (22 mm) below the widest portion of the profile." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "This required depth shall continue for not less than 3/8 inch (10 mm) to a level that is not less than 1 3/4 inches (45 mm) below the tallest portion of the profile." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "The width of the handrail above the recess shall be not less than 1 1/4 inches (32 mm) and not more than 2 3/4 inches (70 mm). Edges shall have a radius of not less than 0.01 inch (0.25 mm)." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Required handrails shall be of one of the following types or provide equivalent graspability." (R320.6, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[104 of 167] needs review · Open sides · Guard height, open sides other than stairs (R321.1.2) · R321.1.2
+WHY: the open sides aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Required guards at open-sided walking surfaces, including stairs, porches, balconies or landings, shall be not less than 36 inches (914 mm) in height as measured vertically above the adjacent walking surface or the line connecting the nosings." (R321.1.2, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs, ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade below at any point within 36 inches (914 mm) horizontally to the edge of the open side." (R321.1.1, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[105 of 167] needs review · Open sides · Guard height, open sides of stairs (R321.1.2 Exc. 1) · R321.1.2
+WHY: the open sides aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Guards on the open sides of stairs shall have a height of not less than 34 inches (864 mm) measured vertically from a line connecting the nosings." (R321.1.2, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs, ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade below at any point within 36 inches (914 mm) horizontally to the edge of the open side." (R321.1.1, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[106 of 167] needs review · Open sides · Guard top serving as stair handrail, 34 to 38 in (R321.1.2 Exc. 2) · R321.1.2
+WHY: the open sides aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where the top of the guard serves as a handrail on the open sides of stairs, the top of the guard shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm) as measured vertically from a line connecting the nosings." (R321.1.2, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Handrail height, measured vertically from the sloped plane adjoining the tread nosing, or finish surface of ramp slope, shall be not less than 34 inches (864 mm) and not more than 38 inches (965 mm)." (R320.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+  "Where handrail fittings or bendings are used to provide continuous transition between flights, transitions at winder treads, the transition from handrail to guard, or used at the start of a flight, the handrail height at the fittings or bendings shall be permitted to exceed 38 inches (965 mm)." (R320.2, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[107 of 167] needs review · Open sides · Guard openings stop a 4 inch sphere (R321.1.3) · R321.1.3
+WHY: the open sides aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "R321.1.3 Opening limitations. Required guards shall not have openings from the walking surface to the required guard height that allow passage of a sphere 4 inches (102 mm) in diameter." (R321.1.3, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs, ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade below at any point within 36 inches (914 mm) horizontally to the edge of the open side." (R321.1.1, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[108 of 167] needs review · Open sides · Stair guard triangle stops a 6 inch sphere (R321.1.3 Exc. 1) · R321.1.3
+WHY: the open sides aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "1. The triangular openings at the open side of stair, formed by the riser, tread and bottom rail of a guard, shall not allow passage of a sphere 6 inches (153 mm) in diameter." (R321.1.3, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs, ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade below at any point within 36 inches (914 mm) horizontally to the edge of the open side." (R321.1.1, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[109 of 167] needs review · Open sides · Stair guard openings stop a 4 3/8 inch sphere (R321.1.3 Exc. 2) · R321.1.3
+WHY: the open sides aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "2. Guards on the open side of stairs shall not have openings that allow passage of a sphere 4 3/8 inches (111 mm) in diameter." (R321.1.3, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+  "Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs, ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade below at any point within 36 inches (914 mm) horizontally to the edge of the open side." (R321.1.1, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[110 of 167] needs review · Open sides · Guard required at open sides over 30 in. drop (R321.1.1) · R321.1.1
+WHY: the open sides aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Guards shall be provided for those portions of open-sided walking surfaces, including floors, stairs, ramps and landings that are located more than 30 inches (762 mm) measured vertically to the floor or grade below at any point within 36 inches (914 mm) horizontally to the edge of the open side." (R321.1.1, 2025 Residential Code of New York State (RCNYS), PDF p.104)
+
+[111 of 167] needs review · Sleeping lofts · Sleeping loft floor area less than 70 sf (R315.2 item 1) · R315.2
+WHY: the sleeping lofts aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The sleeping loft floor area shall be less than 70 square feet (6.5 m[fn2])." (R315.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[112 of 167] needs review · Sleeping lofts · Sleeping loft ceiling over 7 ft on at most half the floor area (R315.2 item 2) · R315.2
+WHY: the sleeping lofts aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The sleeping loft ceiling height shall not exceed 7 feet (2134 mm) for more than one-half of the sleeping loft floor area." (R315.2, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[113 of 167] needs review · Sleeping lofts · Sleeping loft: clear height below floor construction (R315.3) · R315.3
+WHY: the sleeping lofts aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The clear height below the sleeping loft floor construction shall not be less than 7 feet (2134 mm)." (R315.3, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[114 of 167] needs review · Sleeping lofts · Sleeping loft: ceiling height above finished floor (R315.3) · R315.3
+WHY: the sleeping lofts aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The ceiling height above the finished floor of the sleeping loft shall not be less than 3 feet (914 mm)." (R315.3, 2025 Residential Code of New York State (RCNYS), PDF p.98)
+
+[115 of 167] needs review · Sleeping lofts · The room a sleeping loft is open to has an escape opening (R319.1) · R319.1
+WHY: the sleeping lofts aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "SLEEPING LOFT. A space designated for sleeping on an intermediate level or levels between the floor and ceiling of a story, open on one or more sides to the room in which the space is located, and in accordance with Section R315." (R202, 2025 Residential Code of New York State (RCNYS), PDF p.51)
+
+[116 of 167] needs review · Emergency escape openings · Every basement: operable escape opening (R319.1) · R319.1
+WHY: the basements aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[117 of 167] needs review · Basements · Escape opening in the new basement of an addition (R319.6) · R319.6
+WHY: the basements aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where dwelling unit additions have basements, an emergency escape and rescue opening shall be provided in the new basement." (R319.6, 2025 Residential Code of New York State (RCNYS), PDF p.103)
+
+[118 of 167] needs review · Emergency escape openings · Every habitable attic: operable escape opening (R319.1) · R319.1
+WHY: the habitable attics aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[119 of 167] needs review · Emergency escape openings · Room a sleeping loft is open to: operable escape opening (R319.1) · R319.1
+WHY: the loft rooms aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[120 of 167] needs review · Exterior doors · Landing or floor on each side of each exterior door (R318.3) · R318.3
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "There shall be a landing or floor on each side of each exterior door." (R318.3, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+  "Exterior doors other than the required egress door shall be provided with landings or floors not more than 8 1/4 inches (209 mm) below the top of the threshold." (R318.3.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "Exception: An exterior landing or floor is not required at the exterior doorway where a stairway of not more than two risers is located on the exterior side of the door, provided that the door does not swing over the stairway." (R318.3.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[121 of 167] needs review · Exterior doors · Landing width not less than the door served (R318.3) · R318.3
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The width of each landing shall be not less than the door served." (R318.3, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+
+[122 of 167] needs review · Exterior doors · Landing dimension at least 36 in. in direction of travel (R318.3) · R318.3
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Landings shall have a dimension of not less than 36 inches (914 mm) measured in the direction of travel." (R318.3, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+  "Exception: Exterior balconies less than 60 square feet (5.6 m[fn2]) and only accessed from a door are permitted to have a landing that is less than 36 inches (914 mm) measured in the direction of travel." (R318.3, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+
+[123 of 167] needs review · Exterior doors · Slope at exterior landings not over 1/4 in 12 (R318.3) · R318.3
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The slope at exterior landings shall not exceed 1/4 unit vertical in 12 units horizontal (2 percent)." (R318.3, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+
+[124 of 167] needs review · Exterior doors · Inside floor at required egress door at most 1 1/2 in below threshold · R318.3.1
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold." (R318.3.1, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+
+[125 of 167] needs review · Exterior doors · Outside landing drop at required egress door (1 1/2 or 8 1/4 in) · R318.3.1
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold." (R318.3.1, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+  "Exception: The landing or floor on the exterior side shall be not more than 8 1/4 inches (209 mm) below the top of the threshold provided that the door does not swing over the landing or floor." (R318.3.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[126 of 167] needs review · Exterior doors · Exterior landing not at grade: ramp or stairway to grade · R318.3.1
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where exterior landings or floors serving the required egress door are not at grade, they shall be provided with access to grade by means of a ramp in accordance with Section R318.8 or a stairway in accordance with Section R318.7." (R318.3.1, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[127 of 167] needs review · Exterior doors · Floor elevation at exterior doors other than the egress door (R318.3.2) · R318.3.2
+WHY: the exterior doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Exterior doors other than the required egress door shall be provided with landings or floors not more than 8 1/4 inches (209 mm) below the top of the threshold." (R318.3.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+  "Exception: An exterior landing or floor is not required at the exterior doorway where a stairway of not more than two risers is located on the exterior side of the door, provided that the door does not swing over the stairway." (R318.3.2, 2025 Residential Code of New York State (RCNYS), PDF p.100)
+
+[128 of 167] needs review · Alternating tread devices · Alternating tread device clear width at handrails (R318.7.12) · R318.7.12
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "ing level or where a means of egress is not required. The clear width at and below the handrails shall be not less than 20 inches" (R318.7.12, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[129 of 167] needs review · Alternating tread devices · Alternating tread devices not an element of a means of egress (R318.7.12) · R318.7.12
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Alternating tread devices shall not be used as an element of a means of egress." (R318.7.12, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+  "Alternating tread devices shall be permitted provided that a required means of egress stairway or ramp serves the same space at each adjoin-ing level or where a means of egress is not required." (R318.7.12, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+  "Exception: Alternating tread devices are allowed to be used as an element of a means of egress for lofts, mezzanines and simi-lar areas of 200 gross square feet (18.6 m[fn2]) or less where such devices do not provide exclusive access to a kitchen or bathroom." (R318.7.12, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[130 of 167] needs review · Alternating tread devices · ATD tread depth at least 5 in (R318.7.12.1) · R318.7.12.1
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser height of not more than 9 1/2 inches (241 mm)." (R318.7.12.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[131 of 167] needs review · Alternating tread devices · ATD projected tread depth at least 8 1/2 in (R318.7.12.1) · R318.7.12.1
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser height of not more than 9 1/2 inches (241 mm)." (R318.7.12.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[132 of 167] needs review · Alternating tread devices · ATD tread width at least 7 in (R318.7.12.1) · R318.7.12.1
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser height of not more than 9 1/2 inches (241 mm)." (R318.7.12.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[133 of 167] needs review · Alternating tread devices · ATD riser height at most 9 1/2 in (R318.7.12.1) · R318.7.12.1
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Alternating tread devices shall have a tread depth of not less than 5 inches (127 mm), a projected tread depth of not less than 8 1/2 inches (216 mm), a tread width of not less than 7 inches (178 mm) and a riser height of not more than 9 1/2 inches (241 mm)." (R318.7.12.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[134 of 167] needs review · Alternating tread devices · ATD angle of ascent between 50 and 70 degrees (R318.7.12.1) · R318.7.12.1
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The riser height and tread depth provided shall result in an angle of ascent from the horizontal of between 50 and 70 degrees (0.87 and 1.22 rad)." (R318.7.12.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[135 of 167] needs review · Alternating tread devices · ATD initial tread at platform elevation (R318.7.12.1) · R318.7.12.1
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The initial tread of the device shall begin at the same elevation as the platform, landing or floor surface." (R318.7.12.1, 2025 Residential Code of New York State (RCNYS), PDF p.101)
+
+[136 of 167] needs review · Alternating tread devices · Handrails on both sides of alternating tread devices (R318.7.12.2) · R318.7.12.2
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails shall be provided on both sides of alternating tread devices and shall comply with Section R320." (R318.7.12.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[137 of 167] needs review · Alternating tread devices · Handrails of alternating tread devices comply with R320 (R318.7.12.2) · R318.7.12.2
+WHY: the alternating tread devices aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails shall be provided on both sides of alternating tread devices and shall comply with Section R320." (R318.7.12.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[138 of 167] needs review · Ships ladders · Ship's ladder clear width at handrails (R318.7.13) · R318.7.13
+WHY: the ships ladders aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The clear width at and below the handrails shall be not less than 20 inches (508 mm)." (R318.7.13, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[139 of 167] needs review · Ships ladders · Ship's ladders not an element of a means of egress (R318.7.13) · R318.7.13
+WHY: the ships ladders aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ship’s ladders shall not be used as an element of a means of egress." (R318.7.13, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Ship’s ladders shall be permitted provided that a required means of egress stairway or ramp serves the same space at each adjoining level or where a means of egress is not required." (R318.7.13, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Exception: Ship’s ladders are allowed to be used as an element of a means of egress for lofts, mezzanines and similar areas of 200 gross square feet (18.6 m[fn2]) or less that do not provide exclusive access to a kitchen or bathroom." (R318.7.13, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[140 of 167] needs review · Ships ladders · Ship's ladder tread depth at least 5 in (R318.7.13.1) · R318.7.13.1
+WHY: the ships ladders aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Treads shall have a depth of not less than 5 inches (127 mm)." (R318.7.13.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[141 of 167] needs review · Ships ladders · Ship's ladder tread plus nosing at least 8 1/2 in (R318.7.13.1) · R318.7.13.1
+WHY: the ships ladders aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The tread shall be projected such that the total of the tread depth plus the nosing projection is not less than 8 1/2 inches (216 mm)." (R318.7.13.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[142 of 167] needs review · Ships ladders · Ship's ladder riser height at most 9 1/2 in (R318.7.13.1) · R318.7.13.1
+WHY: the ships ladders aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The riser height shall be not more than 9 1/2 inches (241 mm)." (R318.7.13.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[143 of 167] needs review · Ships ladders · Handrails on both sides of ship's ladders (R318.7.13.2) · R318.7.13.2
+WHY: the ships ladders aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails shall be provided on both sides of ship’s ladders and shall comply with Section R320." (R318.7.13.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[144 of 167] needs review · Ramps · Maximum slope of ramp serving the required egress door (R318.8.1) · R318.8.1
+WHY: the ramps aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Ramps serving the egress door required by Section R318.2 shall have a slope of not more than 1 unit vertical in 12 units horizontal (8.3-percent slope)." (R318.8.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[145 of 167] needs review · Ramps · Maximum slope of other ramps (R318.8.1) · R318.8.1
+WHY: the ramps aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Other ramps shall have a slope of not more than 1 unit vertical in 8 units horizontal (12.5 percent)." (R318.8.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[146 of 167] needs review · Ramps · Maximum slope where technically infeasible due to site constraints (R318.8.1) · R318.8.1
+WHY: the ramps aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Exception: Where it is technically infeasible to comply because of site constraints, ramps shall have a slope of not more than 1 unit vertical in 8 units horizontal (12.5 percent)." (R318.8.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Ramps serving the egress door required by Section R318.2 shall have a slope of not more than 1 unit vertical in 12 units horizontal (8.3-percent slope)." (R318.8.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[147 of 167] needs review · Ramps · Floor or landing at top and bottom of each ramp (R318.8.2) · R318.8.2
+WHY: the ramps aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "There shall be a floor or landing at the top and bottom of each ramp, where doors open onto ramps, and where ramps change directions." (R318.8.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[148 of 167] needs review · Ramps · Ramp landing width not less than ramp width (R318.8.2) · R318.8.2
+WHY: the ramps aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The width of the landing perpendicular to the ramp slope shall be not less than the width of the ramp." (R318.8.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[149 of 167] needs review · Ramps · Ramp landing depth at least 36 inches (R318.8.2) · R318.8.2
+WHY: the ramps aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The depth of the landing in the direction of the ramp slope shall be not less than 36 inches (914 mm)." (R318.8.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[150 of 167] needs review · Ramps · Handrail on at least one side of ramps steeper than 1 in 12 (R318.8.3) · R318.8.3
+WHY: the ramps aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Handrails shall be provided on not less than one side of ramps exceeding a slope of 1 unit vertical in 12 units horizontal (8.33-percent slope) and shall comply with Section R320." (R318.8.3, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+
+[151 of 167] needs review · Not checked yet by Gordium: window fall protection (R321.2.1), hallway width (R318.6) and 84 more: check these by hand · R321.2.1, R318.6, R318.1, R319.1.1, R321.2.2, R318.7.5.3, R318.7.5.2.1, R318.7.7, R325.6, R325.7, R318.4, R318.7.11.2, R316.3, R314.2, R314.3, R314.5, R315.1, R315.4, R315.5, R315.5.1, R315.5.2.3, R315.5.3.1, R315.5.3.2, BO102.6.3, BO105.10.5, BO105.10.6, BO105.10.7, BO105.11, BO108.2, BO108.3, R102.6, R102.6.1, R102.6.2, R316.2, R318.5, R318.7.5.4, R318.7.9, R319.4.3, R319.4.4, R319.5, R319.5.1, R319.7, R320.7, R321.1.4, R507.10, R507.10.1, R507.10.1.1, R507.10.1.2, R507.10.2, R507.10.3, R507.10.4, BF101.1, BF101.2, BF103.1, BO101.1, BO102.1, BO102.1.2, BO102.6, BO104.1, BO104.1.1, BO105.1, BO105.1.1, BO105.1.2, BO105.1.3, BO105.2.2, BO105.2.3, BO105.3, BO105.8, BO105.10.1, BO105.10.2, BO105.10.3, BO105.10.4, BO105.13, BO106.1, BO106.1.1, BO106.1.2, BO106.7, BO107.1, BO107.2, BO107.2.1, BO107.2.2, BO108.4, BO109.1, BO109.8.1, BO109.8.5, BO109.8.6
+WHY: Gordium doesn't check these sections of the NY State Residential Code 2025 yet, so it never says egress complies while any is left. Check each by hand: window fall protection (R321.2.1); hallway width (R318.6); a clear egress path to the egress door (R318.1); escape openings opening from inside without keys or tools (R319.1.1); window opening control devices on escape openings (R321.2.2); stair nosings (R318.7.5.3); winder treads (R318.7.5.2.1); slope of stair treads and landings (R318.7.7); interior stair lighting (R325.6); exterior stair lighting (R325.7); a stair or ramp from each level without an egress door (R318.4); bulkhead enclosure stairs (R318.7.11.2); a habitable attic counted as a story (R316.3); mezzanine headroom (R314.2); mezzanine area (R314.3); mezzanine openness (R314.5); which sleeping lofts the loft rules apply to (R315.1); sleeping loft area (R315.4); a sleeping loft's means of egress (R315.5); headroom over a sleeping loft's means of egress (R315.5.1); sleeping loft stair landings (R315.5.2.3); sleeping loft ladder rungs (R315.5.3.1); sleeping loft ladder slope (R315.5.3.2); existing buildings: fall protection at replacement windows (BO102.6.3); existing buildings: stair lighting in altered areas (BO105.10.5); existing buildings: handrails and guards on altered stairs (BO105.10.6); existing buildings: guards in altered areas (BO105.10.7); existing buildings: escape openings in a reworked basement (BO105.11); existing buildings: bed and breakfast occupancy (BO108.2); existing buildings: bed and breakfast conversions (BO108.3). Sections that call for a judgment Gordium doesn't raise yet: existing buildings: which code applies (R102.6); existing buildings: additions, alterations and repairs go to Appendix BO (R102.6.1); existing buildings: change of use (R102.6.2); habitable attic floor area and ceiling height (R316.2); anchoring of exterior landings, decks, balconies and stairs (R318.5); plastic composite stair treads (material) (R318.7.5.4); altering stairs in existing buildings (R318.7.9); area well drainage (R319.4.3); bars, grilles, covers and screens over escape openings (R319.4.4); replacement windows in existing escape openings (R319.5); control and fall protection device height on replacement windows (R319.5.1); alterations or repairs of existing basements (R319.7); plastic composite handrails (material) (R320.7); plastic composite guards (material) (R321.1.4); deck guards: loads (R507.10); deck guards: load path to the deck framing (R507.10.1); deck guards: fastened to the side of deck framing (R507.10.1.1); deck guards: fastened on top of deck framing (R507.10.1.2); deck guards: wood posts not notched (R507.10.2); deck guards: plastic composite (material) (R507.10.3); deck guards: other kinds, per the manufacturer (R507.10.4); patio covers: what Appendix BF covers (BF101.1); patio covers: permitted uses (BF101.2); patio covers: enclosure walls (BF103.1); existing buildings: purpose of Appendix BO (BO101.1); existing buildings: work must not make the building unsafe or less compliant (BO102.1); existing buildings: nonconforming features (BO102.1.2); existing buildings: replacement windows (BO102.6); existing buildings: repairs, general (BO104.1); existing buildings: repairs keep fire and life safety (BO104.1.1); existing buildings: alteration levels, general (BO105.1); existing buildings: Level 1 alterations (BO105.1.1); existing buildings: Level 2 alterations (BO105.1.2); existing buildings: alterations keep fire and life safety (BO105.1.3); existing buildings: replacement door and window sizes (BO105.2.2); existing buildings: replacement escape windows (BO105.2.3); existing buildings: nonconformities in alterations (BO105.3); existing buildings: means of egress in alterations (BO105.8); existing buildings: existing stair width (BO105.10.1); existing buildings: existing stair headroom (BO105.10.2); existing buildings: existing stair landings (BO105.10.3); existing buildings: existing stair treads and risers (BO105.10.4); existing buildings: habitable attics above the second story (BO105.13); existing buildings: additions, general (BO106.1); existing buildings: additions creating or extending a nonconformity (BO106.1.1); existing buildings: other work in additions (BO106.1.2); existing buildings: sprinklers in additions (BO106.7); existing buildings: change of occupancy, general (BO107.1); existing buildings: change of occupancy, compliance (BO107.2); existing buildings: existing escape openings after a change of occupancy (BO107.2.1); existing buildings: existing stairs after a change of occupancy (BO107.2.2); existing buildings: bed and breakfast means of egress (BO108.4); existing buildings: historic buildings, general (BO109.1); existing buildings: historic buildings' means of egress (BO109.8.1); existing buildings: historic stair railings (BO109.8.5); existing buildings: historic guard openings (BO109.8.6). (The list: new_york_state/6_coverage_report/gov.ny.residential.2025.rules.yaml.)
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see R321.2.1, R318.6, R318.1, R319.1.1, R321.2.2, R318.7.5.3, R318.7.5.2.1, R318.7.7, R325.6, R325.7, R318.4, R318.7.11.2, R316.3, R314.2, R314.3, R314.5, R315.1, R315.4, R315.5, R315.5.1, R315.5.2.3, R315.5.3.1, R315.5.3.2, BO102.6.3, BO105.10.5, BO105.10.6, BO105.10.7, BO105.11, BO108.2, BO108.3, R102.6, R102.6.1, R102.6.2, R316.2, R318.5, R318.7.5.4, R318.7.9, R319.4.3, R319.4.4, R319.5, R319.5.1, R319.7, R320.7, R321.1.4, R507.10, R507.10.1, R507.10.1.1, R507.10.1.2, R507.10.2, R507.10.3, R507.10.4, BF101.1, BF101.2, BF103.1, BO101.1, BO102.1, BO102.1.2, BO102.6, BO104.1, BO104.1.1, BO105.1, BO105.1.1, BO105.1.2, BO105.1.3, BO105.2.2, BO105.2.3, BO105.3, BO105.8, BO105.10.1, BO105.10.2, BO105.10.3, BO105.10.4, BO105.13, BO106.1, BO106.1.1, BO106.1.2, BO106.7, BO107.1, BO107.2, BO107.2.1, BO107.2.2, BO108.4, BO109.1, BO109.8.1, BO109.8.5, BO109.8.6.
+
+[152 of 167] not checked · Parking · needs input
+WHY: Needs bedrooms and parking spaces, which the model doesn't show
+WHAT TO DO:
+  1. Enter bedrooms and parking spaces
+  2. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "First three bed or sleeping rooms per dwelling 1 space per dwelling unit" (City of Ithaca Zoning Charts (April 2026), p.14, lines 9–10)
+  "4-5 bed or sleeping rooms per dwelling unit 2 spaces per dwelling unit" (City of Ithaca Zoning Charts (April 2026), p.14, line 12)
+  "Each additional bed or sleeping room + 1 space per room" (City of Ithaca Zoning Charts (April 2026), p.14, line 13)
+
+[153 of 167] not checked · Overlays · not in this release
+WHY: Overlays (historic, gorge, flood): Overlay districts change which rules apply; the start box's lookup shows the ones it finds (used live, not kept), but this release doesn't check their rules (check them by hand).
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row.
+
+[154 of 167] not checked · §325-16A, §325-16B Height exceptions (chimneys, spires, parapets) · §325-16A, §325-16B
+WHY: Not in Gordium yet — coming in a later version. Check this by hand for now: §325-16A, §325-16B
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see §325-16A, §325-16B.
+
+[155 of 167] not checked · §325-18B Windowsills, belt courses and cornices in yards (a massing model shows eaves only) · §325-18B
+WHY: Not in Gordium yet — coming in a later version. Check this by hand for now: §325-18B
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see §325-18B.
+
+[156 of 167] not checked · §325-17B Corner lots, the clear triangle at the street corner · §325-17B
+WHY: Not in Gordium yet — coming in a later version. Check this by hand for now: §325-17B
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see §325-17B.
+
+[157 of 167] not checked · §325-25B, §325-25D Accessory structures below grade or across a common lot line · §325-25B, §325-25D
+WHY: Not in Gordium yet — coming in a later version. Check this by hand for now: §325-25B, §325-25D
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see §325-25B, §325-25D.
+
+[158 of 167] not checked · §325-28C(5), §325-28C(6) An accessory dwelling unit may not be sold separately from the house, nor the lot subdivided to separate it · §325-28C(5), §325-28C(6)
+WHY: Not in Gordium yet — coming in a later version. Check this by hand for now: §325-28C(5), §325-28C(6)
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see §325-28C(5), §325-28C(6).
+
+[159 of 167] not checked · §325-20E Parking in front yards (lots over 50 ft wide, up to 25% of the front yard; narrower lots, a driveway up to 12 ft wide; cars square to the street) · §325-20E
+WHY: Not in Gordium yet — coming in a later version. Check this by hand for now: §325-20E
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see §325-20E.
+
+[160 of 167] not checked · §325-20D(2), §325-20F Driveways and parking areas (every driveway at least 8 ft wide; parking for 3 or more cars, its share of the side and rear yards) · §325-20D(2), §325-20F
+WHY: Not in Gordium yet — coming in a later version. Check this by hand for now: §325-20D(2), §325-20F
+WHAT TO DO:
+  1. Give what the check needs (the reason above says what), or check it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row: see §325-20D(2), §325-20F.
+
+[161 of 167] complies · Use · §325-8, District Regulations Chart, R-1b, Use column; §325-8A, p.24; §325-9B, p.30; §325-9B, p.31; §325-10C, p.35
+MEASURED VS LIMIT:
+  figure: One-family dwelling, detached (measured) | limit permitted
+THE LAW'S WORDS:
+  "(2) Column 2: Permitted Primary Uses. Uses which are permitted in each use district are listed, subject to the further regulations in this section and of Article V." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.24, lines 15–16)
+  "Primary Uses · One-family dwelling, detached · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, line 9)
+  "Primary Uses · Two-family dwelling · R-1B: -" (City of Ithaca Zoning Charts (April 2026), p.2, line 13)
+  "Primary Uses · Church or related building · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, line 17)
+  "Primary Uses · Public park or playground · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, line 18)
+  "Primary Uses · Library or fire station · R-1B: •" (City of Ithaca Zoning Charts (April 2026), p.2, line 19)
+  "Primary Uses · Cemetery or related building · R-1B: SP" (City of Ithaca Zoning Charts (April 2026), p.2, line 20)
+  "Primary Uses · Public utility structure except office · R-1B: SP" (City of Ithaca Zoning Charts (April 2026), p.2, line 21)
+  "Primary Uses · School and related buildings · R-1B: SP" (City of Ithaca Zoning Charts (April 2026), p.2, line 22)
+  "(1) The uses listed under the district regulations in § 325-8, District regulations, which require a special permit from the Planning and Development Board, are as follows:" (City of Ithaca Code, Chapter 325 Zoning (full text), §325-9B, p.30, lines 22–23)
+  "(b) Cemeteries in all districts." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-9B, p.30, line 25)
+  "(c) Public utility facilities in all districts." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-9B, p.30, line 26)
+  "(d) Schools and related uses in all residential districts." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-9B, p.30, line 27)
+  "Primary Uses · Bed-and-breakfast inn · R-1B: -" (City of Ithaca Zoning Charts (April 2026), p.2, Primary Uses · Bed-and-breakfast inn · R-1B)
+  "(p) Bed-and-breakfast inns in all districts." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-9B, p.31, line 36)
+  "(2) Bed-and-breakfast inns in all districts." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-10C, p.35, line 5)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22R-1A%20R-1B%20R-2A%20R-2B%20R-2C%22>
+  OPEN THE LAW: §325-8A, p.24 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=24&search=%22Column%202%3A%20Permitted%20Primary%20Uses.%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22One-family%20dwelling%2C%20detached%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Two-family%20dwelling%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Church%20or%20related%20building%20%E2%80%A2%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Public%20park%20or%20playground%20%E2%80%A2%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Library%20or%20fire%20station%20%E2%80%A2%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Cemetery%20or%20related%20building%20SP%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Public%20utility%20structure%20except%20office%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22School%20and%20related%20buildings%20SP%22>
+  OPEN THE LAW: §325-9B, p.30 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=30&search=%22The%20uses%20listed%20under%20the%22>
+  OPEN THE LAW: §325-9B, p.30 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=30&search=%22Cemeteries%20in%20all%20districts.%22>
+  OPEN THE LAW: §325-9B, p.30 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=30&search=%22Public%20utility%20facilities%20in%20all%22>
+  OPEN THE LAW: §325-9B, p.30 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=30&search=%22Schools%20and%20related%20uses%20in%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Use column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=2&search=%22Bed-and-breakfast%20inn%20-%20-%20-%22>
+  OPEN THE LAW: §325-9B, p.31 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=31&search=%22Bed-and-breakfast%20inns%20in%20all%20districts.%22>
+  OPEN THE LAW: §325-10C, p.35 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=35&search=%22Bed-and-breakfast%20inns%20in%20all%20districts.%22>
+
+[162 of 167] complies · Lot area · §325-8, District Regulations Chart, R-1b, Lot area column
+MEASURED VS LIMIT:
+  figure: 7,200 sf (measured) | limit ≥ 6,000 sf
+HOW FAR: 1,200 sf to spare
+THE LAW'S WORDS:
+  "Minimum Lot Size · One-family dwelling, detached · R-1B: 6,000 sf" (City of Ithaca Zoning Charts (April 2026), p.3, line 10)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Lot area column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22One-family%20dwelling%2C%20detached%2010%2C000%20sf%22>
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Lot area column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22R-1A%20R-1B%20R-2A%20R-2B%20R-2C%22>
+ELEMENTS:
+  Element 4
+
+[163 of 167] complies · Lot coverage · §325-8, District Regulations Chart, R-1b, Lot coverage column; §325-8A, p.25
+WHY: Gordium's reading · confirm with the City zoning office: Coverage is the outline, seen from above, of everything above ground: walls, cantilevered upper floors, roofed porches, decks, balconies projecting more than 2 ft, ramps and landings
+MEASURED VS LIMIT:
+  figure: 20.9% (measured) | limit ≤ 25%
+HOW FAR: 4.16% to spare
+THE LAW'S WORDS:
+  "Maximum lot coverage by buildings · Percent of lot area · R-1B: 25%" (City of Ithaca Zoning Charts (April 2026), p.3, line 34)
+  "On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings above ground." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.25, lines 5–7)
+  "For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.25, lines 7–9)
+  "This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in this column." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.25, lines 9–10)
+  OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Lot coverage column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22Percent%20of%20lot%20area%2020%25%22>
+  OPEN THE LAW: §325-8A, p.25 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25&search=%22On%20a%20lot%20hereafter%20used%2C%22>
+  OPEN THE LAW: §325-8A, p.25 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25&search=%22For%20this%20purpose%2C%20the%20area%22>
+  OPEN THE LAW: §325-8A, p.25 <https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=25&search=%22This%20sum%2C%20divided%20by%20the%22>
+ELEMENTS:
+  Element 5
+  not in this model now (not in this model now)
+
+[164 of 167] complies · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening minimum net clear height (R319.2.2) · R319.2.2
+WHY: Escape opening minimum net clear height (R319.2.2): complies
+HOW FAR: 12 in to spare
+THE LAW'S WORDS:
+  "The minimum net clear opening height dimension shall be 24 inches (610 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 3
+
+[165 of 167] complies · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening minimum net clear width (R319.2.2) · R319.2.2
+WHY: Escape opening minimum net clear width (R319.2.2): complies
+HOW FAR: 8.5 in to spare
+THE LAW'S WORDS:
+  "The minimum net clear opening width dimension shall be 20 inches (508 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 3
+
+[166 of 167] complies · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening bottom of clear opening max height (R319.2.3) · R319.2.3
+WHY: Escape opening bottom of clear opening max height (R319.2.3): complies
+HOW FAR: 8 in to spare
+THE LAW'S WORDS:
+  "Emergency escape and rescue openings shall have the bottom of the clear opening not greater than 44 inches (1118 mm) above the floor." (R319.2.3, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 3
+
+[167 of 167] complies · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear width (R319.2.2) · R319.2.2
+WHY: Escape opening minimum net clear width (R319.2.2): complies
+HOW FAR: 4 in to spare
+THE LAW'S WORDS:
+  "The minimum net clear opening width dimension shall be 20 inches (508 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 2

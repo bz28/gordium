@@ -58,16 +58,56 @@ internal static class Trial
     internal static WorkerOptions Options(string clone) =>
         new() { PythonPath = Python(clone), WorkingDirectory = clone, Environment = PythonEnvironment(clone) };
 
-    /// <summary>The worker this Revit session uses, started (off Revit's thread) if it isn't running.</summary>
-    internal static WorkerClient Worker()
+    /// <summary>The worker this Revit session uses, started (off Revit's thread) if it isn't running, and waited for.</summary>
+    internal static WorkerClient Worker() => WorkerAsync().GetAwaiter().GetResult();
+
+    private static readonly object WorkerLock = new();
+    private static Task<WorkerClient>? _starting;
+    private static bool _closing;
+
+    /// <summary>Takes the session's worker away (Revit closing), under the same lock: the caller disposes it.</summary>
+    internal static WorkerClient? StopWorker()
     {
-        if (App.Worker is null || App.Worker.IsStopped)
+        lock (WorkerLock)
         {
-            App.Worker?.Dispose();
-            var clone = Clone();
-            App.Worker = Task.Run(() => WorkerClient.StartAsync(Options(clone))).GetAwaiter().GetResult();
+            var worker = App.Worker;
+            App.Worker = null;
+            _closing = true;                                  // a start still running stops its worker when it ends
+            return worker;
         }
-        return App.Worker;
+    }
+
+    /// <summary>The worker this Revit session uses, without waiting: the running one, the one being started, or one
+    /// started now on a pool thread (Check project starts it before its read, so Python starts while Revit reads; PR
+    /// 8). A start that failed is tried again by the next call. One at a time (the lock): a check's start and a
+    /// trial tool's never make two.</summary>
+    internal static Task<WorkerClient> WorkerAsync()
+    {
+        lock (WorkerLock)
+        {
+            if (App.Worker is { IsStopped: false } running)
+                return Task.FromResult(running);
+            if (_starting is { IsCompleted: false } starting)
+                return starting;
+            App.Worker?.Dispose();
+            App.Worker = null;
+            var clone = Clone();                              // on the caller's thread: a missing clone throws here
+            _starting = Task.Run(async () =>
+            {
+                var started = await WorkerClient.StartAsync(Options(clone)).ConfigureAwait(false);
+                lock (WorkerLock)
+                {
+                    if (_closing)
+                    {
+                        started.Dispose();                    // Revit closed while it started: never left running
+                        throw new InvalidOperationException("Revit is closing: the worker was stopped");
+                    }
+                    App.Worker = started;
+                }
+                return started;
+            });
+            return _starting;
+        }
     }
 
     /// <summary>The target framework this build was made for (<c>.NETCoreApp,Version=v10.0</c>).</summary>
