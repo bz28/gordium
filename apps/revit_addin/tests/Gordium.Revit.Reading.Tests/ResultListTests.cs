@@ -1,0 +1,310 @@
+using System.Diagnostics;
+using Gordium.Worker;
+using Xunit;
+
+namespace Gordium.Revit.Reading.Tests;
+
+/// <summary>The results list's decisions (ResultList, PR 3 of docs/revit/ui_design_pass.md section 4 row 3): every row
+/// in exactly one place, a failure never below a needs review, a stale list with no green, filters and the search
+/// showing exactly the matching rows, Up/Down over rows only, Ctrl+C as the text file says it, and 1,000 rows placed
+/// and filtered in under 100 ms.</summary>
+public sealed class ResultListTests
+{
+    private static ResultRow Row(string id, Verdict v, string? howFar = null, string name = "Front yard", string? section = "§325-8",
+                                 string[]? elements = null, string? words = null) =>
+        new(id, name, v, words ?? v switch
+        {
+            Verdict.DoesNotComply => "DOES NOT COMPLY",
+            Verdict.Complies => "complies",
+            Verdict.NotChecked => "not checked",
+            Verdict.NotApplicable => "not applicable",
+            _ => "needs review",
+        }, ResultRows.ToneOf(v, Verdicts.Word(v)), null, howFar, null, section, [], elements ?? []);
+
+    private static ResultGroup Group(string key, params ResultRow[] rows) => new(key, key, rows.Length, false, Tone.Review, rows, []);
+
+    private static ResultGroup Lines(string key, params (string Title, ResultRow[] Rows)[] lines) =>
+        new(key, key, lines.Length, false, Tone.Review, [], lines.Select(l => new ResultLine(l.Title, Tone.Review, false, l.Rows)).ToList());
+
+    private static ResultModel Model(params ResultGroup[] groups) => new(Verdict.NeedsReview, "h", "c", [], groups, "");
+
+    /// <summary>The worker's shape: zoning's groups by status, then egress's tiers as lines; and some rows the worker
+    /// grouped where their own verdict doesn't belong (a failure in "complies", a needs review in "complies"): the
+    /// list places each by its own verdict.</summary>
+    private static ResultModel Mixed() => Model(
+        Group("fails", Row("z.front", Verdict.DoesNotComply, "0'-6\" short"), Row("z.side", Verdict.DoesNotComply, "2'-6\" short")),
+        Group("review", Row("z.height", Verdict.NeedsReview), Row("z.odd", Verdict.NeedsReview, words: "needs review (the checker said \"maybe\")")),
+        Group("complies", Row("z.lot", Verdict.Complies), Row("z.lost_fail", Verdict.DoesNotComply, "+570 sf"), Row("z.lost_review", Verdict.NeedsReview)),
+        Group("not_checked", Row("z.parking", Verdict.NotChecked)),
+        Lines("egress:fails", ("Bedroom 3 › Window 5", [Row("e.w5", Verdict.DoesNotComply, name: "Bedroom 3 › Window 5 · Escape opening (R319.2.1)", section: "R319.2.1")])),
+        Lines("egress:review", ("Front door: 2 need review", [Row("e.d1", Verdict.NeedsReview, name: "Front door · One egress door", section: "R318.2", elements: ["uid-door"]),
+                                                             Row("e.d2", Verdict.NeedsReview, name: "Front door · Side-hinged", section: "R318.2", elements: ["uid-door"])])),
+        Lines("egress:by_hand", ("Not read from the model yet: handrails (2 rules)", [Row("e.h1", Verdict.NeedsReview, name: "Handrail height", section: "R320.2"),
+                                                                                       Row("e.h2", Verdict.NeedsReview, name: "Handrail grip", section: "R320.4")]),
+                                ("Not checked yet by Gordium: 86 code sections", [Row("e.sections", Verdict.NeedsReview, name: "Not checked yet", section: null)])),
+        Lines("egress:complies", ("Bedroom 1 › Window 2", [Row("e.w2a", Verdict.Complies, name: "Window 2 · Sill height", section: "R319.2.3"),
+                                                          Row("e.w2b", Verdict.NotApplicable, name: "Window 2 · Area well", section: "R319.3")])));
+
+    private static List<ResultRow> AllRows(ResultModel m) => m.Groups.SelectMany(g => g.AllRows).ToList();
+
+    private static List<string> Ids(IEnumerable<ListEntry> entries) => entries.OfType<ListRowEntry>().Select(e => e.Row.Row.Id).ToList();
+
+    private static readonly HashSet<ListSection> Everything = [.. Enum.GetValues<ListSection>()];
+
+    [Fact]
+    public void Every_row_is_in_exactly_one_place_and_shown_exactly_once()
+    {
+        var model = Mixed();
+        var placed = ResultList.Place(model);
+        Assert.Equal(AllRows(model).Select(r => r.Id).Order(), placed.Select(p => p.Row.Id).Order());     // each once, none made
+        Assert.Equal(placed.Count, placed.Select(p => p.Row.Id).Distinct().Count());
+        // the whole list, every place open: each row exactly once
+        var shown = Ids(ResultList.Layout(placed, ListFilter.All, null, null, stale: false, opened: Everything));
+        Assert.Equal(placed.Select(p => p.Row.Id), shown);
+        // the three filters split the rows between them: each row under exactly one
+        var byFilter = new[] { ListFilter.Fails, ListFilter.Review, ListFilter.Complies }
+            .SelectMany(f => Ids(ResultList.Layout(placed, f, null, null, stale: false))).ToList();
+        Assert.Equal(shown.Order(), byFilter.Order());
+    }
+
+    [Fact]
+    public void A_failure_is_never_below_a_needs_review_and_only_a_pass_or_not_applicable_is_folded()
+    {
+        var placed = ResultList.Place(Mixed());
+        var lastFail = placed.ToList().FindLastIndex(p => p.Row.Verdict == Verdict.DoesNotComply);
+        var firstOther = placed.ToList().FindIndex(p => p.Row.Verdict != Verdict.DoesNotComply);
+        Assert.True(lastFail < firstOther);
+        // the failure the worker grouped under "complies" is with the failures; the review grouped there is a review
+        Assert.Equal(ListSection.Fails, placed.Single(p => p.Row.Id == "z.lost_fail").Section);
+        Assert.Equal(ListSection.Review, placed.Single(p => p.Row.Id == "z.lost_review").Section);
+        Assert.Equal(ListSection.Review, placed.Single(p => p.Row.Id == "z.odd").Section);       // a word not known: never folded
+        // places come in order, and every needs review or not checked is above every pass
+        Assert.Equal(placed.Select(p => p.Section).Order(), placed.Select(p => p.Section));
+        var lastOpen = placed.ToList().FindLastIndex(p => p.Row.Verdict is Verdict.NeedsReview or Verdict.NotChecked);
+        var firstPass = placed.ToList().FindIndex(p => p.Row.Verdict is Verdict.Complies or Verdict.NotApplicable);
+        Assert.True(lastOpen < firstPass);
+        // folded by default: the complies place alone, and it holds nothing but passes and not applicable
+        var layout = ResultList.Layout(placed, ListFilter.All, null, null, stale: false);
+        var folded = Assert.Single(layout.OfType<ListHeading>(), h => h.Folded);
+        Assert.Equal(ListSection.Complies, folded.Section);
+        Assert.All(placed.Where(p => p.Section == ListSection.Complies), p => Assert.Contains(p.Row.Verdict, new[] { Verdict.Complies, Verdict.NotApplicable }));
+        // the failures can't be folded, even if asked
+        var closed = ResultList.Layout(placed, ListFilter.All, null, null, false, closed: Everything);
+        Assert.False(closed.OfType<ListHeading>().Single(h => h.Section == ListSection.Fails).Folded);
+        Assert.False(closed.OfType<ListHeading>().Single(h => h.Section == ListSection.Fails).Foldable);
+        Assert.Equal(4, Ids(closed).Count);                                     // the four failures still shown
+    }
+
+    [Fact]
+    public void Every_verdict_has_one_place()
+    {
+        foreach (var v in Enum.GetValues<Verdict>())
+            foreach (var byHand in new[] { false, true })
+            {
+                var s = ResultList.SectionOf(v, byHand);
+                Assert.Equal(v switch
+                {
+                    Verdict.DoesNotComply => ListSection.Fails,
+                    Verdict.Complies or Verdict.NotApplicable => ListSection.Complies,
+                    Verdict.NotChecked => ListSection.ByHand,
+                    _ => byHand ? ListSection.ByHand : ListSection.Review,
+                }, s);
+            }
+        // the worker's tier 3 (egress:by_hand) is check by hand; zoning's review is review
+        var placed = ResultList.Place(Mixed());
+        Assert.Equal(ListSection.ByHand, placed.Single(p => p.Row.Id == "e.h1").Section);
+        Assert.Equal(ListSection.ByHand, placed.Single(p => p.Row.Id == "z.parking").Section);
+        Assert.Equal(ListSection.Review, placed.Single(p => p.Row.Id == "e.d1").Section);
+        // and the review place, the worker's tier 2, comes before check by hand
+        Assert.True(placed.ToList().FindLastIndex(p => p.Section == ListSection.Review) < placed.ToList().FindIndex(p => p.Section == ListSection.ByHand));
+    }
+
+    [Fact]
+    public void Failures_are_largest_how_far_off_first_where_the_worker_gives_a_length()
+    {
+        var placed = ResultList.Place(Mixed());
+        // 2'-6" short, then 0'-6" short, then those with no length (room here "+570 sf", none) in the worker's order
+        Assert.Equal(["z.side", "z.front", "z.lost_fail", "e.w5"],
+                     placed.Where(p => p.Section == ListSection.Fails).Select(p => p.Row.Id));
+        Assert.Equal(2.5, ResultList.HowFarOff(Row("a", Verdict.DoesNotComply, "2'-6\" short")));
+        Assert.Equal(2.5, ResultList.HowFarOff(Row("a", Verdict.DoesNotComply, "−2'-6\"")));
+        Assert.Equal(11.25 / 12, ResultList.HowFarOff(Row("a", Verdict.DoesNotComply, "at least 0'-11 1/4\" short")));
+        Assert.Equal(1.5, ResultList.HowFarOff(Row("a", Verdict.DoesNotComply, "1'-6\" over")));
+        Assert.Equal(2 + 11.5 / 12, ResultList.HowFarOff(Row("a", Verdict.DoesNotComply, "2'-11 1/2\" short (still 0'-11 3/8\" short if the tax-map lines are 2 ft off the other way)")));
+        Assert.Equal(1012.0, ResultList.HowFarOff(Row("a", Verdict.DoesNotComply, "1,012'-0\" short")));
+        // room to spare, at the limit, an area, a ratio, nothing: no size (never compared with a length)
+        foreach (var words in new[] { "+2'-0 5/8\"", "≥ +5'-0 5/8\"", "at limit", "+570 sf", "−1,033 sf", "+3.34%", "−1.04%",
+                                      "+1'-11 3/4\" (0'-0 1/4\" short if the tax-map lines are 2 ft off)", "" })
+            Assert.Null(ResultList.HowFarOff(Row("a", Verdict.DoesNotComply, words)));
+        Assert.Null(ResultList.HowFarOff(Row("a", Verdict.DoesNotComply)));
+    }
+
+    [Fact]
+    public void A_stale_list_has_no_green()
+    {
+        var model = Mixed();
+        var stale = ResultRows.Stale(model, new DateTime(2026, 11, 22, 14, 32, 0));
+        var placed = ResultList.Place(stale);
+        Assert.All(placed, p => Assert.Equal(PanelStatus.Stale, p.Status));
+        var layout = ResultList.Layout(placed, ListFilter.All, null, null, stale: true, opened: Everything);
+        foreach (var e in layout)
+            Assert.Equal(PanelStatus.Stale, e switch
+            {
+                ListHeading h => h.Status,
+                ListSubheading s => s.Status,
+                ListRowEntry r => r.Row.Status,
+                _ => throw new InvalidOperationException(),
+            });
+        Assert.All(ResultList.Chips(placed, stale: true), c => Assert.True(c.Status is null or PanelStatus.Stale));
+        // stale changes only the colour: every row is in the same place as before the model changed
+        Assert.Equal(ResultList.Place(model).Select(p => (p.Row.Id, p.Section)), placed.Select(p => (p.Row.Id, p.Section)));
+        // and fresh, green is only on a row the worker said complies, and on the complies place only when all comply
+        var fresh = ResultList.Place(model);
+        Assert.All(fresh.Where(p => p.Status == PanelStatus.Complies), p => Assert.Equal(Verdict.Complies, p.Row.Verdict));
+        Assert.Equal(PanelStatus.NotApplicable, ResultList.StatusOf(ListSection.Complies, fresh.Where(p => p.Section == ListSection.Complies).ToList(), false));
+        Assert.Equal("Complies or not applicable", ResultList.Title(ListSection.Complies, fresh.Where(p => p.Section == ListSection.Complies)));
+    }
+
+    [Fact]
+    public void A_row_shows_only_its_own_verdict()
+    {
+        // the glyph is the row's own tone's (never its group's, its line's or its place's), and its words the worker's
+        var model = Mixed();
+        var rows = AllRows(model).ToDictionary(r => r.Id);
+        foreach (var p in ResultList.Place(model))
+        {
+            Assert.Same(rows[p.Row.Id], p.Row);
+            Assert.Equal(StatusLook.Of(rows[p.Row.Id].Tone, stale: false), p.Status);
+        }
+    }
+
+    [Fact]
+    public void Each_filter_shows_exactly_its_rows()
+    {
+        var placed = ResultList.Place(Mixed());
+        foreach (var f in Enum.GetValues<ListFilter>())
+        {
+            var expect = placed.Where(p => f switch
+            {
+                ListFilter.All => true,
+                ListFilter.Fails => p.Row.Verdict == Verdict.DoesNotComply,
+                ListFilter.Review => p.Row.Verdict is Verdict.NeedsReview or Verdict.NotChecked,
+                ListFilter.Complies => p.Row.Verdict is Verdict.Complies or Verdict.NotApplicable,
+                _ => false,
+            }).Select(p => p.Row.Id).ToList();
+            var layout = ResultList.Layout(placed, f, null, null, false, opened: f == ListFilter.All ? Everything : null);
+            Assert.Equal(expect, Ids(layout));
+            if (f != ListFilter.All)
+                Assert.All(layout.OfType<ListHeading>(), h => Assert.False(h.Folded || h.Foldable));   // a match never folded away
+        }
+        // the complies filter shows what complies though its place is folded with no filter
+        Assert.Equal(["z.lot", "e.w2a", "e.w2b"], Ids(ResultList.Layout(placed, ListFilter.Complies, null, null, false)));
+    }
+
+    [Fact]
+    public void The_search_matches_rule_names_sections_and_element_names_and_nothing_else()
+    {
+        var placed = ResultList.Place(Mixed());
+        var labels = new Dictionary<string, string> { ["uid-door"] = "Door D06" };
+        List<string> Find(string q, ListFilter f = ListFilter.All) => Ids(ResultList.Layout(placed, f, q, labels, false));
+        Assert.Equal(["e.h1", "e.h2"], Find("handrail"));                            // the name, any case
+        Assert.Equal(["e.d1", "e.d2"], Find("r318.2"));                              // the section
+        Assert.Equal(["e.d1", "e.d2"], Find("d06"));                                 // an element's label
+        Assert.Equal(["e.d1"], Find("door  egress"));                                // every word, any order
+        Assert.Empty(Find("uid-door"));                                              // never a UniqueId
+        Assert.Empty(Find("short"));                                                 // never the figures or how far
+        Assert.Equal(["z.lot"], Find("front yard", ListFilter.Complies));            // with a filter: both
+        Assert.Equal(placed.Select(p => p.Row.Id), Ids(ResultList.Layout(placed, ListFilter.All, "   ", labels, false, opened: Everything)));
+        // a match in the folded place is shown, never hidden by the fold
+        Assert.Equal(["e.w2a"], Find("sill"));
+        // brute force: for every term the list shows exactly the rows whose name, section or labels hold it
+        foreach (var q in new[] { "window", "yard", "r3", "front", "x", "not", "§" })
+            Assert.Equal(placed.Where(p => new[] { p.Row.Name, p.Row.Section ?? "" }.Concat(p.Row.Elements.Select(e => labels.GetValueOrDefault(e) ?? ""))
+                                           .Any(s => s.Contains(q, StringComparison.OrdinalIgnoreCase))).Select(p => p.Row.Id),
+                         Find(q));
+    }
+
+    [Fact]
+    public void Sub_headings_are_the_workers_lines_and_a_line_of_one_row_is_that_row()
+    {
+        var layout = ResultList.Layout(ResultList.Place(Mixed()), ListFilter.All, null, null, false, opened: Everything);
+        var subs = layout.OfType<ListSubheading>().Select(s => s.Title).ToList();
+        Assert.Contains("Front door: 2 need review", subs);
+        Assert.Contains("Not read from the model yet: handrails (2 rules)", subs);
+        Assert.DoesNotContain("Not checked yet by Gordium: 86 code sections", subs);    // one row: no heading over it
+        Assert.DoesNotContain("Bedroom 3 › Window 5", subs);                            // the failures: one run, no lines
+        // each sub-heading is right above the rows of its line
+        var at = layout.ToList().FindIndex(e => e is ListSubheading { Title: "Front door: 2 need review" });
+        Assert.Equal(["e.d1", "e.d2"], Ids(layout.Skip(at + 1).TakeWhile(e => e is ListRowEntry)));
+        // headings say how many rows they show
+        Assert.Equal(4, layout.OfType<ListHeading>().Single(h => h.Section == ListSection.Fails).Rows);
+    }
+
+    [Fact]
+    public void Up_and_down_move_over_rows_only()
+    {
+        var layout = ResultList.Layout(ResultList.Place(Mixed()), ListFilter.All, null, null, false, opened: Everything);
+        var rows = Enumerable.Range(0, layout.Count).Where(i => layout[i] is ListRowEntry).ToList();
+        Assert.Equal(rows[0], ResultList.Next(layout, -1, 1));                     // nothing selected: Down is the first row
+        Assert.Equal(rows[^1], ResultList.Next(layout, -1, -1));                   // Up the last
+        for (var n = 0; n + 1 < rows.Count; n++)
+        {
+            Assert.Equal(rows[n + 1], ResultList.Next(layout, rows[n], 1));        // a heading between is skipped
+            Assert.Equal(rows[n], ResultList.Next(layout, rows[n + 1], -1));
+        }
+        Assert.Equal(rows[^1], ResultList.Next(layout, rows[^1], 1));              // the ends stay
+        Assert.Equal(rows[0], ResultList.Next(layout, rows[0], -1));
+        Assert.Equal(-1, ResultList.Next([new ListHeading(ListSection.Fails, "t", 0, false, false, PanelStatus.Fails)], -1, 1));
+        Assert.Throws<ArgumentOutOfRangeException>(() => ResultList.Next(layout, 0, 2));
+    }
+
+    [Fact]
+    public void Copy_is_the_row_as_the_text_file_writes_it()
+    {
+        var row = Row("z.front", Verdict.DoesNotComply, "2'-6\" short", elements: ["uid-house", "uid-gone"]);
+        var labels = new Dictionary<string, string> { ["uid-house"] = "Walls id 341207" };
+        // ResultText.Row writes row.Line(uid => Label(doc, uid)); a uid with no label is the uid, as there
+        Assert.Equal(row.Line(uid => labels.GetValueOrDefault(uid)), ResultList.CopyText(row, labels, staleSince: null));
+        Assert.Equal("[DOES NOT COMPLY] Front yard [Walls id 341207, uid-gone]", ResultList.CopyText(row, labels, null));
+        // stale: said, so a copied verdict is never read as the model's now
+        Assert.Equal("[DOES NOT COMPLY] Front yard [Walls id 341207, uid-gone] (checked 14:32, before the model changed)",
+                     ResultList.CopyText(row, labels, new DateTime(2026, 11, 22, 14, 32, 0)));
+    }
+
+    [Fact]
+    public void A_thousand_rows_place_filter_and_search_in_under_100_ms()
+    {
+        var rng = new Random(7);
+        var verdicts = Enum.GetValues<Verdict>();
+        var groups = Enumerable.Range(0, 10).Select(g => g % 2 == 0
+            ? Group("zoning" + g, Enumerable.Range(0, 100).Select(n => Row($"z{g}.{n}", verdicts[rng.Next(verdicts.Length)],
+                    rng.Next(3) == 0 ? $"{rng.Next(20)}'-{rng.Next(12)}\" short" : null, name: $"Rule {g}.{n}", section: $"§325-{n}",
+                    elements: [$"uid{n}"])).ToArray())
+            : Lines($"egress{g}:{(g % 4 == 1 ? "review" : "by_hand")}", Enumerable.Range(0, 10).Select(l => ($"Line {g}.{l}",
+                    Enumerable.Range(0, 10).Select(n => Row($"e{g}.{l}.{n}", verdicts[rng.Next(verdicts.Length)], name: $"Window {l} · rule {n}",
+                                                            section: $"R319.{n}", elements: [$"uid{n}"])).ToArray())).ToArray())).ToArray();
+        var model = Model(groups);
+        var labels = Enumerable.Range(0, 100).ToDictionary(n => $"uid{n}", n => $"Room {n}");
+        Assert.Equal(1000, AllRows(model).Count);
+        void Once()
+        {
+            var placed = ResultList.Place(model);
+            foreach (var f in Enum.GetValues<ListFilter>())
+                _ = ResultList.Layout(placed, f, null, labels, false, opened: Everything);
+            _ = ResultList.Layout(placed, ListFilter.All, "room 4", labels, false);
+            _ = ResultList.Layout(placed, ListFilter.Review, "window rule", labels, false);
+        }
+        Once();                                                                // warmed (the JIT is not the list's)
+        var times = new List<double>();
+        for (var n = 0; n < 5; n++)
+        {
+            var sw = Stopwatch.StartNew();
+            Once();
+            times.Add(sw.Elapsed.TotalMilliseconds);
+        }
+        var median = times.Order().ElementAt(2);                              // one slow run (a GC, the machine busy) is not the list's
+        Assert.True(median < 100, $"placing and filtering 1,000 rows took {median:F1} ms (runs: {string.Join(", ", times.Select(t => t.ToString("F1")))})");
+        // and every one of the 1,000 is shown exactly once
+        Assert.Equal(1000, Ids(ResultList.Layout(ResultList.Place(model), ListFilter.All, null, null, false, opened: Everything)).Distinct().Count());
+    }
+}
