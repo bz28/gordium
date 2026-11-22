@@ -963,7 +963,7 @@ internal static class HouseDraw
 
     /// <summary>A floor type one layer <paramref name="thickness"/> thick (its top the level), made once per thickness
     /// from the project's own.</summary>
-    private static FloorType FloorTypeOf(Document doc, FloorType basic, double thickness)
+    internal static FloorType FloorTypeOf(Document doc, FloorType basic, double thickness)
     {
         var name = $"Gordium test floor {thickness * 12:0.###} in";
         if (new FilteredElementCollector(doc).OfClass(typeof(FloorType)).Cast<FloorType>().FirstOrDefault(x => x.Name == name) is { } found)
