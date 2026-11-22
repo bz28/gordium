@@ -82,7 +82,8 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
 
 def test_a_figure_longer_than_the_sheets_line_or_a_verdict_apart_never_agrees():
     """The test since 2026-11-21 (route note, the eval): no longer than the line as drawn plus 2 percent or 2 ft,
-    no shorter than the straight line between its ends less the same, and every verdict the same; the old two-sided
+    no shorter than the exact straight line from Gordium's start to its end (no tolerance), its end within the
+    tolerance of the sheet line's end, and every verdict the same; the old two-sided
     test would call a figure shorter than the orthogonal line a miss."""
     verdicts = {"a": {"same": True}, "b": {"same": True}, "c": {"same": False}}
     ok = make._no_longer(130.325, 116.034, verdicts, ["a", "b"], "w", 65.92)

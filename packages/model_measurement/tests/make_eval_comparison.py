@@ -12,8 +12,11 @@ model's (5.494 and 189.200), a check on the match. Gordium's figures are worked 
 
 Travel distance and common path are judged one-sided (the route note's eval, changed 2026-11-21): the sheet draws its
 lines orthogonally, never shorter than the natural path the books measure (IBC 1016.1, NFPA 7.6.1), so Gordium's
-figure from the sheet's start to the sheet's exit agrees when it is no longer than the sheet's line as drawn plus
-2 percent of it or 2 ft, and every one of that figure's rules gives the sheet's verdict. The first test (within
+figure agrees only when all of these hold: it is no longer than the sheet's line as drawn plus 2 percent of it or
+2 ft; it is no shorter than the exact straight line from Gordium's start to an end taken apart from the route (the
+travel: the sheet's exit's nearest door centre, no tolerance); its end is within the same tolerance of where the
+sheet's line ends (the common path, which has no end apart from its routes, rests on this check); and every one of
+that figure's rules gives the sheet's verdict. The first test (within
 2 percent or 2 ft of the stated figure) is still worked and reported beside it (`before_2026_11_21`)."""
 
 import json
