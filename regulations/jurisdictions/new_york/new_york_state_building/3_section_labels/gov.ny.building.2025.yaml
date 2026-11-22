@@ -2097,7 +2097,8 @@ labels:
     label: reference
     topic: means_of_egress
     reason: 'The three counts 1006.3.3 uses, by occupant load, for every occupancy: all of them are applied by general.bc_1006_3_3_story_exits
-      (no row left for a flag).'
+      (no row left for a flag); its printed two-exit band ''1-500'' is also used, by analogy, for a space by general.bc_1006_2_1_1_three_or_more_exits
+      and general.bc_1007_1_2_space_three_or_more (their finding space_over_500_needs_three).'
     sources:
     - file: gov.ny.building.2025.pdf
       page: 316

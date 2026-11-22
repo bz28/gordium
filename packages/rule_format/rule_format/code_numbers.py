@@ -38,6 +38,10 @@ wrong ("8 1/4" read as "8", a dropped "not"). Egress step 3 (2026-11-13). For ea
    one length ("one length"). Otherwise the rule is refused: such a number is for a person (make it a flag, which
    always needs review). A table cell whose unit is printed only in its column's heading ("(feet)") is a length in
    feet where such a flag says so ("a length in feet": _column_feet); otherwise it is a count.
+4. A range a table prints joined by a hyphen ("1-500", Table 1006.3.3 of the 2025 Building Code of New York State)
+   counts only where a verification flag of its piece names it as "printed range 'A-B'" and the cited quote prints
+   it: numbers.py reads no number after a hyphen (so "R-2" is never a number), so without that its upper end is lost.
+   Its lower end is read >= and its upper <=, both as counts (_printed_ranges).
 
 Plain code, no AI. Used by rulebook validation (every rule citing such a book) and by the drafter's number binding.
 """
@@ -229,7 +233,6 @@ def _printed_ranges(entry: dict, quote: str) -> list[dict]:
     upper end. A flag of the second reading that names it ("printed range '1-500'", read on the page image and by
     position) makes both ends numbers a rule may use, where the cited quote prints that range: the lower an at-least
     (>=), the upper an at-most (<=), counts with no unit."""
-    from document_extraction.numbers import statements
     out = []
     flags = [str(f) for f in (entry.get("flags") or [])] if isinstance(entry, dict) else []
     for f in flags:

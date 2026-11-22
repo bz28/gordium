@@ -616,9 +616,50 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No space: the rule''s when_none (needs_review).'
-  notes: For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).
+  notes: For every occupancy. The 500 is Table 1006.3.3's printed two-exit band ('1-500', a story's), used for a space by
+    analogy; a fractional load over 500 needs three (finding space_over_500_needs_three). Hand-drafted in a Claude Code session
+    (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  findings:
+  - id: space_over_500_needs_three
+    question: 'A space''s occupant load just over 500 (a computed 500.5): does it need three exits or exit access doorways?
+      1006.2.1.1 prints three for ''501 to 1,000'' and says nothing of a space of 500 or fewer, or of a fraction.'
+    kind: reading
+    answer: 'Yes: a space needs three from any occupant load over 500. The rules write the two-exit band as Table 1006.3.3
+      prints it for a story (''1-500''), used for a space by analogy, so a fractional load over 500 needs three: an occupant
+      load is a number of persons (202 OCCUPANT LOAD), and for an area without fixed seating it is ''not less than'' the area
+      divided by its factor (1004.5), so a computed 500.5 is at least 501 persons, which 1006.2.1.1''s ''501 to 1,000'' covers.
+      Gordium''s reading, for the architects to confirm.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 45
+      - 47
+      quote: 1006.2.1.1 Three or more exits or exit access doorways. Three exits or exit access doorways shall be provided
+        from any space with an occupant load of 501 to 1,000. Four exits or exit access doorways shall be provided from any
+        space with an occu- pant load greater than 1,000.
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 55
+      - 57
+      quote: 1-500 2 501-1,000 3 More than 1,000 4
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 22
+      - 22
+      quote: '[BE] OCCUPANT LOAD. The number of persons for which the means of egress of a building or portion thereof is
+        designed.'
+    - rank: 3
+      cite: '2025 Building Code of New York State 1004.5 (p.311, not brought in): ''For areas without fixed seating, the occupant
+        load shall be not less than that number determined by dividing the floor area under consideration by the occupant
+        load factor''; 1004.1: ''the number of occupants for whom means of egress facilities are provided''. No rounding rule
+        is printed; read 2026-11-22'
+    strength: strong
+    confirm_with: the architects
 - id: general.bc_1006_3_3_story_exits
   kind: rule
   topic: means_of_egress
@@ -1414,9 +1455,50 @@ rules:
   notes: '1007.1.2 applies ''Where access to three or more exits is required'': for a space, 1006.2.1.1 requires three from
     an occupant load of 501 (to 1,000; four above). So it fails only where three are required and even the two farthest-apart
     are too close; where three or more are drawn but three aren''t required, or the occupant load isn''t given, it needs review,
-    never fail. For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).'
+    never fail. For every occupancy. The 500 is Table 1006.3.3''s printed two-exit band (''1-500'', a story''s), used for
+    a space by analogy; a fractional load over 500 needs three (finding space_over_500_needs_three). Hand-drafted in a Claude
+    Code session (2026-11-21).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  findings:
+  - id: space_over_500_needs_three
+    question: 'A space''s occupant load just over 500 (a computed 500.5): does it need three exits or exit access doorways?
+      1006.2.1.1 prints three for ''501 to 1,000'' and says nothing of a space of 500 or fewer, or of a fraction.'
+    kind: reading
+    answer: 'Yes: a space needs three from any occupant load over 500. The rules write the two-exit band as Table 1006.3.3
+      prints it for a story (''1-500''), used for a space by analogy, so a fractional load over 500 needs three: an occupant
+      load is a number of persons (202 OCCUPANT LOAD), and for an area without fixed seating it is ''not less than'' the area
+      divided by its factor (1004.5), so a computed 500.5 is at least 501 persons, which 1006.2.1.1''s ''501 to 1,000'' covers.
+      Gordium''s reading, for the architects to confirm.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 45
+      - 47
+      quote: 1006.2.1.1 Three or more exits or exit access doorways. Three exits or exit access doorways shall be provided
+        from any space with an occupant load of 501 to 1,000. Four exits or exit access doorways shall be provided from any
+        space with an occu- pant load greater than 1,000.
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 55
+      - 57
+      quote: 1-500 2 501-1,000 3 More than 1,000 4
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 22
+      - 22
+      quote: '[BE] OCCUPANT LOAD. The number of persons for which the means of egress of a building or portion thereof is
+        designed.'
+    - rank: 3
+      cite: '2025 Building Code of New York State 1004.5 (p.311, not brought in): ''For areas without fixed seating, the occupant
+        load shall be not less than that number determined by dividing the floor area under consideration by the occupant
+        load factor''; 1004.1: ''the number of occupants for whom means of egress facilities are provided''. No rounding rule
+        is printed; read 2026-11-22'
+    strength: strong
+    confirm_with: the architects
 - id: general.bc_1007_1_3_exit_access_stairways
   kind: flag
   topic: means_of_egress

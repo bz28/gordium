@@ -325,3 +325,21 @@ def test_a_printed_range_backs_its_upper_end_only_where_its_flag_names_it(ctx, r
         entry, flags=[f.replace("printed range", "range") for f in entry["flags"]])
     monkeypatch.setattr(ctx, "verification", stripped)
     assert any("500" in p for p in code_numbers.problems(r, r["sources"], ctx))
+
+
+def test_both_space_rules_record_the_over_500_reading_with_its_sources(rules):
+    """The 500 of a space's two-exit band is Table 1006.3.3's printed '1-500', used for a space by analogy, and a
+    fractional load over 500 needs three: Gordium's reading (a finding), with 1006.2.1.1, Table 1006.3.3, OCCUPANT
+    LOAD and 1004.5 as its sources, for the architects to confirm."""
+    for rid in ("general.bc_1006_2_1_1_three_or_more_exits", "general.bc_1007_1_2_space_three_or_more"):
+        r = rules[rid]
+        found = [f for f in r.get("findings") or [] if f.get("id") == "space_over_500_needs_three"]
+        assert len(found) == 1, rid
+        f = found[0]
+        assert f["kind"] == "reading" and f["confirm_with"] == "the architects", rid
+        quoted = " ".join(s.get("quote", "") for s in f["sources"] if "file" in s)
+        assert "501 to 1,000" in quoted and "1-500" in quoted and "OCCUPANT LOAD" in quoted, rid
+        assert any(s.get("rank") == 3 and "1004.5" in s["cite"] for s in f["sources"]), rid
+        assert "by analogy" in r["notes"] and "space_over_500_needs_three" in r["notes"], rid
+    label = load(NY / "3_section_labels/gov.ny.building.2025.yaml")["labels"]["Table 1006.3.3"]["reason"]
+    assert "general.bc_1006_2_1_1_three_or_more_exits" in label and "general.bc_1007_1_2_space_three_or_more" in label
