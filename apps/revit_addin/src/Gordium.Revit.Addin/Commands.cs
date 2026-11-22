@@ -62,13 +62,9 @@ public sealed class CheckBoxHouseCommand : IExternalCommand
     {
         var clone = Trial.Clone();
         var sw = Stopwatch.StartNew();
-        if (App.Worker is null || App.Worker.IsStopped)
-        {
-            App.Worker?.Dispose();
-            App.Worker = await WorkerClient.StartAsync(Trial.Options(clone)).ConfigureAwait(false);
-            log["start_and_hello_s"] = sw.Elapsed.TotalSeconds;
-        }
-        var worker = App.Worker;
+        // the session's one worker, started through Trial's lock (never two, never one left running unseen)
+        var worker = await Trial.WorkerAsync().ConfigureAwait(false);
+        log["start_and_hello_s"] = sw.Elapsed.TotalSeconds;
         log["worker_pid"] = worker.ProcessId;
 
         sw.Restart();

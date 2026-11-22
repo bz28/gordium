@@ -389,7 +389,10 @@ public sealed class MakerClearOpeningsTests
         // the results panel (PR #136): the words go to the panel's status line and first into check_project_result.txt,
         // and the fill runs before the street ask
         Assert.Contains("            clear = ClearPrefills.Head(filled.Count, failed);", check);
-        Assert.Contains("Show(ui, doc, run, added.Count, ask, clear);", check);
+        // (PR 8: what to fill in shown from the read; the answer's run, with the read's clear words, when it arrives)
+        Assert.Contains("Show(ui, doc, new Ran(prepared, null, null, null), added.Count, ask, clear, DateTime.Now, stale: false);", check);
+        Assert.Contains("check.Read(prepared, added.Count, ask, clear);", check);
+        Assert.Contains("Show(ui, doc, run, check.MarksAdded, check.Ask, check.Clear, check.ReadAt, stale: use == AnswerUse.ShowStale);", check);
         Assert.Contains("File.WriteAllText(file, clear + run.FullText + \"\\n\"", check);
         Assert.Contains("ClearWords: clear", check);
         Assert.True(check.IndexOf("RevitMarks.TryPrefill(", StringComparison.Ordinal) < check.IndexOf("StreetEdges.Ask(", StringComparison.Ordinal));

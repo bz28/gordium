@@ -211,6 +211,9 @@ public enum StreetAsk
     OtherFactsFirst,
     /// <summary>Not asked: the active view can't show the property line (the panel says to open a site plan).</summary>
     OpenAPlan,
+    /// <summary>Not asked: the project being checked isn't the active one (the architect switched projects after
+    /// clicking Check): a click would land in another project, so none is asked for (the panel says to switch).</summary>
+    NotActive,
 }
 
 /// <summary>Why a kept street edge wasn't sent as a lot edge.</summary>
@@ -297,16 +300,26 @@ public static class StreetEdges
     /// waited with no prompt where no property line could be clicked). Only when the street edge is the one fact
     /// still to give (<paramref name="needed"/>: not set, or kept but no longer a lot edge) and every other fact is
     /// set, and only in a view that shows a property line (<paramref name="viewShowsPropertyLine"/>: a plan view
-    /// with one visible). <see cref="StreetAsk.OpenAPlan"/>: the panel lists <see cref="OpenAPlan"/> instead.</summary>
-    public static StreetAsk Ask(ProjectFactsRead read, bool needed, bool viewShowsPropertyLine)
+    /// with one visible). <see cref="StreetAsk.OpenAPlan"/>: the panel lists <see cref="OpenAPlan"/> instead.
+    /// <paramref name="active"/>: whether the project being checked is the active one; when it isn't, never
+    /// <see cref="StreetAsk.Pick"/> (<see cref="StreetAsk.NotActive"/>: a pick, and the mark it writes, would be in
+    /// another project).</summary>
+    public static StreetAsk Ask(ProjectFactsRead read, bool needed, bool viewShowsPropertyLine, bool active)
     {
         ArgumentNullException.ThrowIfNull(read);
         if (!needed)
             return StreetAsk.NotNeeded;
         if (read.Missing.Any(m => !m.StartsWith(Marks.StreetEdge.Name, StringComparison.Ordinal)))
             return StreetAsk.OtherFactsFirst;
+        if (!active)
+            return StreetAsk.NotActive;
         return viewShowsPropertyLine ? StreetAsk.Pick : StreetAsk.OpenAPlan;
     }
+
+    /// <summary>What the panel lists for the street edge when the project checked wasn't the active one.</summary>
+    public static readonly string SwitchToIt = $"{Marks.StreetEdge.Name}: this project wasn't the active one when " +
+        "Gordium asked for its street edge (a click would have landed in another project): switch to it, open a site " +
+        "plan that shows the property line, and click Check again.";
 
     /// <summary>What to fill in, as the panel lists it: when the view couldn't show the property line, the street
     /// edge's "click when Check project asks" replaced by <see cref="OpenAPlan"/> (a kept edge's own reason kept,
@@ -314,11 +327,12 @@ public static class StreetEdges
     public static IReadOnlyList<string> MissingAsShown(IReadOnlyList<string> missing, StreetAsk ask)
     {
         ArgumentNullException.ThrowIfNull(missing);
-        if (ask != StreetAsk.OpenAPlan)
+        if (ask is not (StreetAsk.OpenAPlan or StreetAsk.NotActive))
             return missing;
+        var words = ask == StreetAsk.OpenAPlan ? OpenAPlan : SwitchToIt;     // NotActive: switch to it
         var shown = missing.Where(m => m != ProjectFacts.StreetNotSet).ToList();
-        if (!shown.Contains(OpenAPlan))
-            shown.Add(OpenAPlan);
+        if (!shown.Contains(words))
+            shown.Add(words);
         return shown;
     }
 

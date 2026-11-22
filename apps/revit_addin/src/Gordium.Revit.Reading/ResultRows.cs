@@ -228,14 +228,15 @@ public static class ResultRows
     /// <summary>The results as shown once the model changed after the check (made at <paramref name="checkedAt"/>):
     /// every colour grey (the state, the counts, the groups, the lines, the rows: never a green "complies" for a
     /// model that may no longer comply), the words kept, and why said ("The model changed since this check (14:32):
-    /// click Check again").</summary>
-    public static ResultModel Stale(ResultModel model, DateTime checkedAt)
+    /// click Check again"), or <paramref name="why"/> when given (CheckWords: an answer whose model changed while
+    /// the checker worked, or the earlier results after a cancelled check).</summary>
+    public static ResultModel Stale(ResultModel model, DateTime checkedAt, string? why = null)
     {
         ArgumentNullException.ThrowIfNull(model);
         static ResultRow Grey(ResultRow r) => r with { Tone = Tone.Neutral };
         return model with
         {
-            Stale = $"The model changed since this check ({checkedAt:HH:mm}): click Check again",
+            Stale = why ?? $"The model changed since this check ({checkedAt:HH:mm}): click Check again",
             Counts = model.Counts.Select(c => c with { Chips = c.Chips.Select(x => x with { Tone = Tone.Neutral }).ToList() }).ToList(),
             Groups = model.Groups.Select(g => g with
             {

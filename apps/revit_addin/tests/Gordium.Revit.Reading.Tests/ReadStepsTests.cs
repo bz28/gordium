@@ -173,14 +173,19 @@ public sealed class ReadStepsTests
         Assert.Contains("using var keep = ReadSteps.Begin(steps);", source);
         Assert.Contains("ReadSteps.Time(\"outside\", () => RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance))", source);
         Assert.Contains("ReadSteps.Time(\"inside\", () => RevitInterior.Model(doc))", source);
-        Assert.Contains("ReadSteps.Time(\"worker_start\", Trial.Worker)", source);
-        Assert.Contains("ReadSteps.Time(\"prepare\", () => ProjectCheck.PrepareAsync(outside, inside, new WorkerLeftOut(worker)).GetAwaiter().GetResult())", source);
+        // PR 8: the worker is started on a pool thread before the read, and waited for on Revit's thread only when
+        // the read asks it which objects are left out (the step worker_wait, inside prepare)
+        Assert.DoesNotContain("worker_start", source);
+        Assert.Contains("new WorkerLeftOut(ReadSteps.Time(\"worker_wait\", () => worker.GetAwaiter().GetResult()))", source);
+        Assert.Contains("ReadSteps.Time(\"prepare\", () => ProjectCheck.PrepareAsync(outside, inside, new StartedLeftOut(worker)).GetAwaiter().GetResult())", source);
         Assert.Contains("using (ReadSteps.Step(\"log_request\"))", source);
         // logged when nothing is sent, when it is, and on a failure (then rethrown)
         Assert.Equal(3, Count(source, "log[\"read_steps\"] = steps.ToLog();"));
         Assert.Contains("log[\"read_steps\"] = steps.ToLog();\n            throw;", source.Replace("\r\n", "\n"));
         // the request sent is the one prepared, as before: never with the steps
-        Assert.Contains("ProjectCheck.SendAsync(worker, request)", source);
+        // (sent off Revit's thread by CheckFlow.Send for the panel; on this thread for a check asked for by file)
+        Assert.Contains("ProjectCheck.SendAsync(await Trial.WorkerAsync().ConfigureAwait(false), request)", source);
+        Assert.Contains("ResultsPane.AfterInput(() => check.Send(request));", source);
         Assert.Contains("[\"site\"] = request.Site.DeepClone(), [\"facts\"] = request.Facts.DeepClone(), [\"interior\"] = request.Interior.DeepClone(),", source);
     }
 
