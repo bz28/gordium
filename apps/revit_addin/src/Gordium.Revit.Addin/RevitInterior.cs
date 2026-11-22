@@ -19,24 +19,28 @@ internal static class RevitInterior
     private const double Sixteenth = 1.0 / 16 / 12;
 
     /// <summary>The model with its marks (RevitMarks.Model) and its inside, ready for <see cref="InteriorReader.Read"/>.</summary>
-    internal static RevitModel Model(Document doc) => RevitMarks.Model(doc) with
+    internal static RevitModel Model(Document doc) => ReadSteps.Time("inside.marks_model", () => RevitMarks.Model(doc)) with
     {
-        InternalToShared = RevitRead.InternalToShared(doc),        // the one place the turn is settled (the outside reader's)
+        // the one place the turn is settled (the outside reader's)
+        InternalToShared = ReadSteps.Time("inside.internal_to_shared", () => RevitRead.InternalToShared(doc)),
         UserWorksets = doc.IsWorkshared
             ? new FilteredWorksetCollector(doc).OfKind(WorksetKind.UserWorkset)
                 .Select(w => new WorksetRecord(w.Id.IntegerValue.ToString(CultureInfo.InvariantCulture), w.Name, w.IsOpen)).ToList()
             : [],
-        Interior = Read(doc),
+        Interior = ReadSteps.Time("inside.read", () => Read(doc)),
     };
 
     internal static InteriorRecords Read(Document doc)
     {
         var phase = doc.Phases.Cast<Phase>().LastOrDefault();
-        var rooms = new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms).WhereElementIsNotElementType()
-            .OfType<Room>().Select(r => RoomOf(doc, r)).ToList();
-        var openings = new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors }
+        // each step timed and counted for the log's read_steps (never part of the records)
+        var rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
+            .WhereElementIsNotElementType().OfType<Room>().Select(r => RoomOf(doc, r)).ToList());
+        ReadSteps.Count("inside.rooms", rooms.Count);
+        var openings = ReadSteps.Time("inside.openings", () => new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors }
             .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
-            .Select(fi => OpeningOf(doc, fi, phase)).ToList();
+            .Select(fi => OpeningOf(doc, fi, phase)).ToList());
+        ReadSteps.Count("inside.openings", openings.Count);
         var diagnostics = new List<string>();
         // the design options (for the trial's log): what is read is the main model and, of each set, the option being
         // edited or else its primary; Revit's enclosed areas (plan circuits) are the main model's own
@@ -44,8 +48,8 @@ internal static class RevitInterior
         diagnostics.Add("design options: " + string.Join("; ", new FilteredElementCollector(doc).OfClass(typeof(DesignOption)).Cast<DesignOption>()
             .Select(o => $"{doc.GetElement(o.get_Parameter(BuiltInParameter.OPTION_SET_ID)?.AsElementId() ?? ElementId.InvalidElementId)?.Name}: " +
                          $"{o.Name}{(o.IsPrimary ? " (primary)" : "")}{(o.Id == active ? " (being edited)" : "")}")));
-        var (stairs, candidates) = StairsOf(doc, diagnostics);
-        var railings = RailingsOf(doc, diagnostics);
+        var (stairs, candidates) = ReadSteps.Time("inside.stairs", () => StairsOf(doc, diagnostics));
+        var railings = ReadSteps.Time("inside.railings", () => RailingsOf(doc, diagnostics));
         int coordination;
         try
         {
@@ -60,17 +64,17 @@ internal static class RevitInterior
         {
             Rooms = rooms,
             Openings = openings,
-            EnclosedAreas = phase is null ? null : Areas(doc, phase, diagnostics),
-            Links = Links(doc),
+            EnclosedAreas = phase is null ? null : ReadSteps.Time("inside.enclosed_areas", () => Areas(doc, phase, diagnostics)),
+            Links = ReadSteps.Time("inside.links", () => Links(doc)),
             Stairs = stairs,
             StairCandidates = candidates,
             Railings = railings,
-            Ramps = RampsOf(doc, diagnostics),
+            Ramps = ReadSteps.Time("inside.ramps", () => RampsOf(doc, diagnostics)),
             CoordinationModels = coordination,
             Levels = new FilteredElementCollector(doc).OfClass(typeof(Level)).Cast<Level>()
                 .Select(l => new LevelRecord(l.UniqueId, l.Name, l.ProjectElevation)).ToList(),
-            SeparationLines = SeparationLinesOf(doc, diagnostics),
-            GrossAreas = phase is null ? null : GrossAreasOf(doc, phase, diagnostics),
+            SeparationLines = ReadSteps.Time("inside.separation_lines", () => SeparationLinesOf(doc, diagnostics)),
+            GrossAreas = phase is null ? null : ReadSteps.Time("inside.gross_areas", () => GrossAreasOf(doc, phase, diagnostics)),
             Diagnostics = diagnostics,
         };
     }
@@ -120,13 +124,16 @@ internal static class RevitInterior
                 continue;
             using var group = new TransactionGroup(doc, ResultRows.AreasTransaction);
             group.Start();
+            ReadSteps.Count("inside.gross_areas.levels");
             try
             {
-                result[level.UniqueId] = RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(), planType, diagnostics);
+                result[level.UniqueId] = ReadSteps.Time("inside.gross_areas.ring",
+                    () => RingOf(doc, phase, level, walls.Where(w => w.LevelId == level.Id).ToList(), planType, diagnostics));
             }
             finally
             {
-                group.RollBack();                            // every transaction in it taken back: the model as it was
+                using (ReadSteps.Step("inside.gross_areas.rollback"))
+                    group.RollBack();                        // every transaction in it taken back: the model as it was
             }
         }
         return result;
@@ -186,10 +193,11 @@ internal static class RevitInterior
                 for (var i = 0; i < 4; i++)
                     ring.Append(Line.CreateBound(corners[i], corners[(i + 1) % 4]));
                 lines = doc.Create.NewRoomBoundaryLines(sketch, ring, view).Cast<ModelCurve>().Select(c => c.Id).ToHashSet();
-                if (draw.Commit() != TransactionStatus.Committed)
+                if (ReadSteps.Time("inside.gross_areas.lines_commit", draw.Commit) != TransactionStatus.Committed)
                     return No("Revit didn't keep the ring's lines");
             }
-            var circuits = doc.get_PlanTopology(level, phase)?.Circuits?.Cast<PlanCircuit>().ToList() ?? [];
+            var circuits = ReadSteps.Time("inside.gross_areas.topology",
+                () => doc.get_PlanTopology(level, phase)?.Circuits?.Cast<PlanCircuit>().ToList()) ?? [];
             var ringCircuit = circuits.OrderByDescending(c => c.Area).FirstOrDefault();
             var expected = (x1 - x0) * (y1 - y0);
             diagnostics.Add($"outer outline of {level.Name}: {lines.Count} separation lines drawn round ({x0:0.#}, {y0:0.#})-({x1:0.#}, {y1:0.#}), " +
@@ -206,7 +214,7 @@ internal static class RevitInterior
                 }
                 else
                     room = doc.Create.NewRoom(level, new UV(x0 + Beyond / 2, y0 + Beyond / 2));   // the ring's point, 10 ft outside the walls
-                if (place.Commit() != TransactionStatus.Committed)
+                if (ReadSteps.Time("inside.gross_areas.room_commit", place.Commit) != TransactionStatus.Committed)
                     return No("Revit didn't keep the ring's Room");
             }
             diagnostics.Add($"outer outline of {level.Name}: the ring Room {(room.Area > 0 ? "closed" : "not closed")}, {room.Area:0.#} sq ft");
@@ -624,7 +632,7 @@ internal static class RevitInterior
                 PlanTopology topology;
                 try
                 {
-                    topology = doc.get_PlanTopology(level, phase);
+                    topology = ReadSteps.Time("inside.enclosed_areas.topology", () => doc.get_PlanTopology(level, phase));
                 }
                 catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
                 {
@@ -660,7 +668,9 @@ internal static class RevitInterior
                 for (var k = 0; k < listed.Count; k++)
                     if (!areas[before + k].HasRoom)
                     {
-                        areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area, out var by) };
+                        List<string> by;
+                        using (ReadSteps.Step("inside.enclosed_areas.outline"))
+                            areas[before + k] = areas[before + k] with { Outline = OutlineOf(doc, phase, level, k, areas[before + k].Area, out by) };
                         // an area Revit gives no point in (a sliver) is located by what bounds it, for the log
                         if (areas[before + k].PointInside is null)
                             diagnostics.Add($"enclosed area {k} on {level.Name} ({areas[before + k].Area:0.####} sq ft, no point inside): " +
@@ -680,7 +690,8 @@ internal static class RevitInterior
         {
             if (t is not null)
             {
-                t.RollBack();
+                using (ReadSteps.Step("inside.enclosed_areas.rollback"))
+                    t.RollBack();
                 t.Dispose();
             }
         }
@@ -761,6 +772,8 @@ internal static class RevitInterior
         IList<IList<BoundarySegment>>? loops = null;
         try
         {
+            ReadSteps.Count("inside.room.boundary_calls");
+            using var timed = ReadSteps.Step("inside.room.boundary");
             loops = room.GetBoundarySegments(new SpatialElementBoundaryOptions
             {
                 SpatialElementBoundaryLocation = SpatialElementBoundaryLocation.Finish,
@@ -795,11 +808,12 @@ internal static class RevitInterior
         double x0 = xs.Min(p => p.X), y0 = xs.Min(p => p.Y), x1 = xs.Max(p => p.X), y1 = xs.Max(p => p.Y);
         return record with
         {
-            Inside = Inside(doc, room, loops, floor, level!),
-            Under = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor - InteriorReader.SlabBand), new XYZ(x1, y1, floor + InteriorReader.SlabBand)),
-                         [BuiltInCategory.OST_Floors, BuiltInCategory.OST_StructuralFoundation]),
-            Over = Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,
-                        Band(x0, y0, x1, y1, floor)),
+            Inside = ReadSteps.Time("inside.room.inside", () => Inside(doc, room, loops, floor, level!)),
+            Under = ReadSteps.Time("inside.room.under", () => Near(doc, room.Id,
+                new Outline(new XYZ(x0, y0, floor - InteriorReader.SlabBand), new XYZ(x1, y1, floor + InteriorReader.SlabBand)),
+                [BuiltInCategory.OST_Floors, BuiltInCategory.OST_StructuralFoundation])),
+            Over = ReadSteps.Time("inside.room.over", () => Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,
+                ReadSteps.Time("inside.room.band_solid", () => Band(x0, y0, x1, y1, floor)))),
         };
     }
 
@@ -822,12 +836,15 @@ internal static class RevitInterior
                 profile.Add(curveLoop);
             }
             var solid = GeometryCreationUtilities.CreateExtrusionGeometry(profile, XYZ.BasisZ, top - Sixteenth);
-            return new FilteredElementCollector(doc).WhereElementIsNotElementType()
+            var hits = new FilteredElementCollector(doc).WhereElementIsNotElementType()
                 .WherePasses(new ElementIntersectsSolidFilter(solid))
                 .Where(e => e.Id != room.Id)
                 .Select(e => new NearbyElement(e.UniqueId, Category(e), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
                                                PhaseDemolished: Id(e.DemolishedPhaseId), DesignOption: Id(e.DesignOption?.Id)))
                 .ToList();
+            ReadSteps.Count("inside.room.inside_hits", hits.Count);
+            ReadSteps.Max("inside.room.inside_hits_per_room", hits.Count);
+            return hits;
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException
                                        or Autodesk.Revit.Exceptions.InvalidOperationException)
@@ -907,9 +924,13 @@ internal static class RevitInterior
                             || corners.Max(c => c.Z) < bandMin.Z || corners.Min(c => c.Z) > bandMax.Z)
                             break;
                         open++;
+                        ReadSteps.Count("inside.open_shells");
                         break;
                     case Solid s:
-                        var cut = BooleanOperationsUtils.ExecuteBooleanOperation(s, band, BooleanOperationsType.Intersect);
+                        ReadSteps.Count("inside.boolean_ops");
+                        Solid? cut;
+                        using (ReadSteps.Step("inside.boolean_op"))
+                            cut = BooleanOperationsUtils.ExecuteBooleanOperation(s, band, BooleanOperationsType.Intersect);
                         if (cut is null)
                             break;                               // none of it in the band
                         foreach (Face f in cut.Faces)
@@ -955,7 +976,11 @@ internal static class RevitInterior
         try
         {
             var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
-            var found = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box)).ToList();
+            var step = band is null ? "inside.under" : "inside.over";
+            var found = ReadSteps.Time(step + ".collect",
+                () => new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box)).ToList());
+            ReadSteps.Count(step + ".candidates", found.Count);
+            ReadSteps.Max(step + ".candidates_per_room", found.Count);
             var list = new List<NearbyElement>();
             foreach (var e in found)
             {
@@ -963,16 +988,18 @@ internal static class RevitInterior
                     continue;
                 if (categories is not null && !categories.Contains(cat.BuiltInCategory))
                     continue;
-                var (faces, failed) = Faces(e, options);
+                var (faces, failed) = ReadSteps.Time(step + ".faces", () => Faces(e, options));
                 var near = new NearbyElement(e.UniqueId, cat.BuiltInCategory.ToString(), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
                                              faces, failed, BoxOf(e), Id(e.DemolishedPhaseId), Id(e.DesignOption?.Id));
                 if (band is not null)
                 {
-                    var (banded, bandFailed, openShells) = InBand(e, band, options);
+                    var (banded, bandFailed, openShells) = ReadSteps.Time(step + ".band", () => InBand(e, band, options));
                     near = near with { Banded = banded, BandFailed = bandFailed, OpenShells = openShells };
                 }
                 list.Add(near);
             }
+            ReadSteps.Count(step + ".read", list.Count);
+            ReadSteps.Max(step + ".read_per_room", list.Count);
             return list;
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)
@@ -1052,9 +1079,11 @@ internal static class RevitInterior
                 return null;
             var loops = edges
                 .Select(l => (IReadOnlyList<LoopCurve>)l.Select(c => new LoopCurve(P(c.GetEndPoint(0)), c is Line)).ToList()).ToList();
+            ReadSteps.Count("inside.faces");
             if (f is PlanarFace pf)
                 return new SurfaceRecord(true, P(pf.FaceNormal), loops, loops.SelectMany(l => l.Select(c => c.Start)).ToList());
-            if (f.Triangulate() is not { Vertices: { Count: > 0 } vertices })
+            ReadSteps.Count("inside.faces_triangulated");
+            if (ReadSteps.Time("inside.triangulate", () => f.Triangulate()) is not { Vertices: { Count: > 0 } vertices })
                 return null;
             return new SurfaceRecord(false, new Xyz(0, 0, 0), loops, vertices.Select(P).ToList());
         }
@@ -1072,8 +1101,8 @@ internal static class RevitInterior
         var level = doc.GetElement(fi.LevelId) as Level;
         var (width, height) = TypeSize(type);
         var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
-        var (faces, failed) = Faces(fi, options);
-        var cut = fi.Host is Wall wall ? Cut(wall, fi, options) : (null, null, ["its host isn't a wall"], false);
+        var (faces, failed) = ReadSteps.Time("inside.opening.faces", () => Faces(fi, options));
+        var cut = fi.Host is Wall wall ? ReadSteps.Time("inside.opening.cut", () => Cut(wall, fi, options)) : (null, null, ["its host isn't a wall"], false);
         return new OpeningRecord
         {
             UniqueId = fi.UniqueId,
