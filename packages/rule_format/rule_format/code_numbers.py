@@ -215,6 +215,34 @@ def candidates(sources: list[dict], ctx, flag: bool = False) -> list[dict]:
                 if len(ways[tuple(length["statements"])]) > 1 and length["worded"] not in worded:
                     continue
                 out.append(length | {"piece": pid})
+            if not book.get("not_verified"):
+                out += [r | {"piece": pid} for r in _printed_ranges(entry, s["quote"])]
+    return out
+
+
+PRINTED_RANGE = re.compile(r"printed range '(\d[\d,]*)-(\d[\d,]*)'")
+
+
+def _printed_ranges(entry: dict, quote: str) -> list[dict]:
+    """A range a table prints joined by a hyphen ("1-500": Table 1006.3.3 of the 2025 Building Code of New York
+    State): numbers.py reads no number after a hyphen (so "R-2" and "I-4" are never numbers), so it loses the range's
+    upper end. A flag of the second reading that names it ("printed range '1-500'", read on the page image and by
+    position) makes both ends numbers a rule may use, where the cited quote prints that range: the lower an at-least
+    (>=), the upper an at-most (<=), counts with no unit."""
+    from document_extraction.numbers import statements
+    out = []
+    flags = [str(f) for f in (entry.get("flags") or [])] if isinstance(entry, dict) else []
+    for f in flags:
+        for m in PRINTED_RANGE.finditer(f):
+            printed = f"{m[1]}-{m[2]}"
+            if not re.search(rf"(?<![\w.,\-]){re.escape(printed)}(?![\w,\-])", quote):
+                continue
+            for text, comparison in ((m[1], ">="), (m[2], "<=")):
+                v = value_of(text)
+                if v is None:
+                    continue
+                out.append({"shown": text, "values": {"count": v, "any": v}, "comparison": comparison,
+                            "worded": None, "unit": "", "statements": [(v, "")], "flags": [f], "resolved": True})
     return out
 
 

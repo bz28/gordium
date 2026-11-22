@@ -1473,9 +1473,10 @@ pieces:
     flags:
     - 'Exit counts: ''2'', ''3'', ''4'' (>=), the column MINIMUM NUMBER OF EXITS OR ACCESS TO EXITS PER STORY; recorded
       ''none'' (a table prints no comparison words). Occupant-load rows: ''1'' and ''501'' (between), the ranges
-      printed ''1-500'' and ''501-1,000''; numbers.py reads no number joined to a hyphen before it, so it loses
-      500 and reads the ''000'' of ''1,000'' (between) alone; ''more than 1,000'' (>) is recorded with its words.
-      The second reading is right; read cell by cell by position (p.316) and on the page image.'
+      printed: printed range ''1-500'' and printed range ''501-1,000'' (each end a count: the lower at least, the
+      upper at most); numbers.py reads no number joined to a hyphen before it, so it loses 500 and reads the ''000''
+      of ''1,000'' (between) alone; ''more than 1,000'' (>) is recorded with its words. The second reading is right;
+      read cell by cell by position (p.316) and on the page image.'
   1006.3.4:
     piece_sha256: c32fcf403157de323e6a97a6c19a9d6c7f15e91077c2b780696a12e340b94a47
     numbers:

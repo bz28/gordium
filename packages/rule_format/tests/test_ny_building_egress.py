@@ -230,7 +230,7 @@ def test_three_or_more_doorways_fail_1007_1_2_only_where_three_are_required(ctx,
                  ctx) == ["needs_review"]                                   # the two rules agree on that room
     assert any(e["expect"] == "needs_review" and e["parts"]["space"][0]["measures"].get("space_occupant_load") == 6
                for e in r["examples"])
-    story = rules["general.bc_1007_1_2_three_or_more_exits"]      # a story's three: Table 1006.3.3, not brought in
+    story = rules["general.bc_1007_1_2_three_or_more_exits"]      # a story's: only 'a reasonable distance apart' is a person's
     assert story["kind"] == "flag"
 
 
@@ -251,6 +251,9 @@ def test_the_floor_area_question_cites_no_forum_as_support(rules):
     research = rules["general.bc_508_2_3_accessory_area"]["research"][0]
     text = " ".join(g["reading"] for g in research["readings"]) + " ".join(s["cite"] for s in research["sources"])
     assert "forum" not in text.lower()
+    # why_open names practitioners only among what was searched and not relied on, never as support
+    support = research["why_open"].split("(searched")[0].lower()
+    assert "practitioner" not in support and "forum" not in support
 
 
 # ---- review round 3 (2026-11-22) ------------------------------------------------------------------------------------
@@ -270,10 +273,55 @@ def test_a_story_that_may_have_one_exit_is_never_failed_for_two_close_exits(ctx,
     assert _rows(r, "story", small, I4 | {"other_occupancy_present": True}, ctx) == ["needs_review"]
     assert _rows(r, "story", small | {"story_occupant_load": 40, "story_rooms_exit_directly_outside": False}, i4, ctx) \
         == ["fail"]
-    assert _rows(r, "story", close | {"story_first_above_or_below_grade": False}, i4, ctx) == ["fail"]
+    assert _rows(r, "story", close | {"story_first_above_or_below_grade": False, "story_rooms_exit_directly_outside": False},
+                 i4, ctx) == ["fail"]
+    assert _rows(r, "story", close | {"story_first_above_or_below_grade": False}, i4, ctx) == ["needs_review"]  # blank
     exits = rules["general.bc_1006_3_3_story_exits"]
     one = {"story_exit_count": 1, "story_first_above_or_below_grade": True, "story_occupant_load": 8,
            "egress_travel_distance": 60}
     assert _rows(exits, "story", one, i4, ctx) == ["pass"]
     assert _rows(exits, "story", one | {"story_first_above_or_below_grade": False, "story_rooms_exit_directly_outside": False},
                  i4, ctx) == ["fail"]
+
+
+# ---- review round 4 (2026-11-22) ------------------------------------------------------------------------------------
+
+def test_an_upper_story_whose_rooms_exit_directly_outside_needs_review_in_both_story_rules(ctx, rules):
+    """1006.3.4 item 2 sets no story: rooms that exit directly to the exterior at the level of exit discharge may be
+    on an upper story of a sloping site. Stated there, one exit may do: never a fail, never a pass."""
+    i4 = I4 | {"other_occupancy_present": False}
+    upper = {"story_first_above_or_below_grade": False, "story_rooms_exit_directly_outside": True,
+             "story_occupant_load": 40, "egress_travel_distance": 60}
+    assert _rows(rules["general.bc_1006_3_3_story_exits"], "story", upper | {"story_exit_count": 1}, i4, ctx)         == ["needs_review"]
+    assert _rows(rules["general.bc_1007_1_1_remoteness"], "story", upper | {"story_exit_count": 2,
+                                                                            "exit_remoteness_ratio": 0.3}, i4, ctx)         == ["needs_review"]
+
+
+def test_an_occupant_load_just_over_500_never_passes_with_two_exits(ctx, rules):
+    """Table 1006.3.3 prints the two-exit band '1-500': anything over 500 (500.5) needs three, for a story and, on the
+    safe side, for a space (1006.2.1.1: three from 501)."""
+    i4 = I4 | {"other_occupancy_present": False}
+    story = {"story_exit_count": 2, "story_occupant_load": 500.5, "story_first_above_or_below_grade": True,
+             "egress_travel_distance": 100, "story_rooms_exit_directly_outside": False}
+    assert _rows(rules["general.bc_1006_3_3_story_exits"], "story", story, i4, ctx) == ["fail"]
+    assert _rows(rules["general.bc_1006_3_3_story_exits"], "story", story | {"story_occupant_load": 500}, i4, ctx) == ["pass"]
+    space = {"space_exit_count": 2, "space_occupant_load": 500.5}
+    assert _rows(rules["general.bc_1006_2_1_1_three_or_more_exits"], "space", space, i4, ctx) == ["fail"]
+    three = {"space_exit_count": 3, "space_occupant_load": 500.5, "space_exit_remoteness_ratio": 0.2}
+    assert _rows(rules["general.bc_1007_1_2_space_three_or_more"], "space", three, i4, ctx) == ["fail"]
+    for rid in ("general.bc_1006_3_3_story_exits", "general.bc_1006_2_1_1_three_or_more_exits",
+                "general.bc_1007_1_2_space_three_or_more"):
+        assert "< 501" not in str(rules[rid].get("check")) + str(rules[rid].get("review_when")), rid
+
+
+def test_a_printed_range_backs_its_upper_end_only_where_its_flag_names_it(ctx, rules, monkeypatch):
+    """'1-500': numbers.py loses the 500 (no number after a hyphen, so 'R-2' is never a number); the verification flag
+    naming the printed range makes it a number the rule may use (code_numbers._printed_ranges), and only then."""
+    r = rules["general.bc_1006_3_3_story_exits"]
+    assert code_numbers.problems(r, r["sources"], ctx) == []
+    entry = ctx.verification["gov.ny.building.2025.pdf"]["pieces"]["Table 1006.3.3"]
+    stripped = copy.deepcopy(ctx.verification)
+    stripped["gov.ny.building.2025.pdf"]["pieces"]["Table 1006.3.3"] = dict(
+        entry, flags=[f.replace("printed range", "range") for f in entry["flags"]])
+    monkeypatch.setattr(ctx, "verification", stripped)
+    assert any("500" in p for p in code_numbers.problems(r, r["sources"], ctx))
