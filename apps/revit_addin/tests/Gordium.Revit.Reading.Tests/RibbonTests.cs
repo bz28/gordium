@@ -123,7 +123,9 @@ public sealed class RibbonTests
         var all = check.ToolTip + " " + check.LongDescriptionText;
         Assert.Contains("Adds Gordium's marks", all, StringComparison.Ordinal);
         Assert.Contains("clear opening as a draft", all, StringComparison.Ordinal);
-        Assert.Contains("pick the street edge", all, StringComparison.Ordinal);
+        // only when it is the last fact missing and a plan shows a property line (StreetEdges.Ask, review round 4)
+        Assert.Contains("If the street edge is the last fact missing, asks you to pick it in a plan", all,
+            StringComparison.Ordinal);
     }
 
     [Fact]
