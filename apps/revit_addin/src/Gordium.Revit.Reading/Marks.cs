@@ -161,7 +161,7 @@ public static class Marks
     public static readonly MarkDefinition StreetEdge = new(
         "Gordium: Street edge", new("260b3e70-6b9b-45d2-8137-a5c18db9ccf5"), MarkValueKind.Text, MarkBinding.Instance,
         [ProjectInformation], "facts.street_line",
-        "Written by Gordium when you click the lot edge along the street (Check my project asks). Don't type in it: an edge it can't find on the lot is asked for again.");
+        "Written by Gordium when you click the lot edge along the street (Check project asks). Don't type in it: an edge it can't find on the lot is asked for again.");
 
     /// <summary>Which of Gordium's spot-grade markers the ground is read from (<c>grade_from</c>).</summary>
     public static readonly MarkDefinition GroundFrom = new(

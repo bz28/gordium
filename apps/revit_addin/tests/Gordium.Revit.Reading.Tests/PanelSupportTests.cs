@@ -91,7 +91,7 @@ public sealed class PanelSupportTests
         Assert.Equal(StreetAsk.OpenAPlan, StreetEdges.Ask(rest, needed: true, viewShowsPropertyLine: false));
         Assert.Equal(StreetAsk.NotNeeded, StreetEdges.Ask(rest, needed: false, viewShowsPropertyLine: false));
 
-        // in a view that can't show it, the panel says to open a site plan, never "when Check my project asks"
+        // in a view that can't show it, the panel says to open a site plan, never "when Check project asks"
         Assert.Equal([StreetEdges.OpenAPlan], StreetEdges.MissingAsShown(rest.Missing, StreetAsk.OpenAPlan));
         Assert.Equal(none.Missing, StreetEdges.MissingAsShown(none.Missing, StreetAsk.OtherFactsFirst));
         var refused = new[] { "Gordium: Street edge: the street edge picked is no longer an edge of the lot ..." };

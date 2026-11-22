@@ -332,7 +332,7 @@ read at all, the kept edge is sent as it is, named without a length, and the che
 rows need review, so the check never complies.
 
 **The results panel** (replacing the first version's TaskDialog, as the design doc's "Results panel: first mockup"
-agreed). A Revit dockable pane, *Gordium: Check my project*, tabbed behind Properties on first use (`ResultsPane.cs`,
+agreed). A Revit dockable pane, *Gordium* (titled *Gordium: Check my project* until the ribbon pass), tabbed behind Properties on first use (`ResultsPane.cs`,
 `ResultsView.cs`, plain WPF). One Revit-free row model, `ResultRows` (`ResultRows.cs` in `Gordium.Revit.Reading`),
 makes every row's words, and both the panel and `check_project_result.txt` (`ResultText`) read it, so the two
 never say a row differently.
@@ -346,7 +346,7 @@ never say a row differently.
   names (the event's `Operation`: `ResultRows.ChangesTheCheck`), greys everything
   (`ResultRows.Stale`: no green in the state, chips, groups, lines or rows) and says "The model changed since this
   check (14:32): click Check again". `DocumentClosing` of it takes the rows down.
-- **Header and counts.** "Gordium: Check my project", when it was checked and which project, and *Check again*.
+- **Header and counts.** "Gordium", when it was checked and which project, and *Check again*.
   Then the worker's own state, and its counts as **chips in its own words, never recounted**: one line per law
   (`view.sections[]`: "Zoning (City of Ithaca)", "Egress (NY State Residential Code 2025)"), each summary split at
   " · " ("4 do not comply", "5 to review", "4 comply", "10 parts not read yet"); when the sections can't be read,

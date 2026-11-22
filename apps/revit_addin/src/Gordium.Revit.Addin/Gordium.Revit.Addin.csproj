@@ -33,6 +33,11 @@
     <RevitDir>$(ProgramW6432)\Autodesk\Revit $(RevitVersion)</RevitDir>
     <DefineConstants>$(DefineConstants);REVIT$(RevitVersion)</DefineConstants>
   </PropertyGroup>
+  <!-- a trial build (install_trial_addin.ps1 builds one: -p:GordiumTrial=true) always shows the Trial panel's test
+       tools; any other build shows them only with GORDIUM_TRIAL=1 (Ribbon.cs, RibbonPlan) -->
+  <PropertyGroup Condition="'$(GordiumTrial)' == 'true'">
+    <DefineConstants>$(DefineConstants);GORDIUM_TRIAL_BUILD</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <!-- Revit's own assemblies: referenced, never copied (Revit already has them loaded) -->
     <Reference Include="RevitAPI" HintPath="$(RevitDir)\RevitAPI.dll" Private="false" />

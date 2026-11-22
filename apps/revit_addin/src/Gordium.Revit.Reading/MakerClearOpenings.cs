@@ -258,7 +258,7 @@ public static class ClearPrefills
           "then their clear opening needs review.\n\n"
         : filled == 0 ? ""
         : $"Gordium filled the maker's clear opening of {(filled == 1 ? "1 window type" : $"{filled} window types")} " +
-          "as a draft: confirm each (Mark for egress lists them); none is sent before.\n\n";
+          "as a draft: confirm each (Mark facts lists them); none is sent before.\n\n";
 
     /// <summary>The results panel's status line: the marks added, then the makers' clear openings' words
     /// (<see cref="Head"/>, which a failed write must reach: review round 3), "" when neither.</summary>

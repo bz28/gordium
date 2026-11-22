@@ -293,8 +293,8 @@ public sealed class HasNoneTests
         // without the inside read (any other caller), a tick isn't called held back: it says it isn't checked yet
         var bare = MarkingList.Build(house.Model() with { Interior = null });
         Assert.Empty(bare.HasNoneConflicts);
-        Assert.Equal("Gordium: This house has no stairs: Yes on Project Information (not yet checked against the model: run Read " +
-                     "inside to see whether it is read as none).", bare.HasNoneLines[0]);
+        Assert.Equal("Gordium: This house has no stairs: Yes on Project Information (not yet checked against the model: Mark facts " +
+                     "checks it, reading the model's inside).", bare.HasNoneLines[0]);
         Assert.All(bare.HasNoneLines, l => Assert.DoesNotContain("wasn't read", l));
     }
 }

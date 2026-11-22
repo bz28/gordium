@@ -41,7 +41,7 @@ public static class ProjectCheck
         ArgumentNullException.ThrowIfNull(asker);
         if (SameDesign(outside, inside) is { } differs)
             throw new ReadRefusedException("the outside and the inside weren't read in the same design (" + differs +
-                                           "): nothing is sent; run Check my project again");
+                                           "): nothing is sent; click Check project again");
         var read = ProjectFacts.Read(inside);
         if (read.Missing.Count > 0)
             return new ProjectPrepared(null, read.Missing, null, [], null);
@@ -100,7 +100,7 @@ public static class ProjectFacts
     private const string Where = " on Project Information (Manage > Project Information)";
 
     /// <summary>The street edge not set, as the panel lists it.</summary>
-    public static readonly string StreetNotSet = $"{Marks.StreetEdge.Name}: click the lot edge along the street when Check my " +
+    public static readonly string StreetNotSet = $"{Marks.StreetEdge.Name}: click the lot edge along the street when Check " +
                                                  "project asks (in a plan or site view; with no property line drawn, draw it first).";
 
     public static ProjectFactsRead Read(RevitModel model)
@@ -140,7 +140,7 @@ public static class ProjectFacts
             missing.Add(StreetNotSet);
         else if ((edges = StreetEdges.Parse(street)) is null)
             missing.Add($"{Marks.StreetEdge.Name} holds \"{street}\", which isn't an edge Gordium wrote: clear it, then " +
-                        "click the lot edge along the street when Check my project asks.");
+                        "click the lot edge along the street when Check project asks.");
         return new ProjectFactsRead(facts, edges, missing);
     }
 
@@ -294,7 +294,7 @@ public static class StreetEdges
     }
 
     /// <summary>What to fill in, as the panel lists it: when the view couldn't show the property line, the street
-    /// edge's "click when Check my project asks" replaced by <see cref="OpenAPlan"/> (a kept edge's own reason kept,
+    /// edge's "click when Check project asks" replaced by <see cref="OpenAPlan"/> (a kept edge's own reason kept,
     /// <see cref="OpenAPlan"/> after it).</summary>
     public static IReadOnlyList<string> MissingAsShown(IReadOnlyList<string> missing, StreetAsk ask)
     {
@@ -444,7 +444,7 @@ public static class StreetEdges
                 matches++;
             }
             // what will happen is said: the button asks for the edge again at once; a request file has no pick
-            const string again = " Check my project asks you to click the lot edge along the street again (from a request " +
+            const string again = " Check project asks you to click the lot edge along the street again (from a request " +
                                  "file: give the Gordium: Street edge mark again); nothing is checked until then.";
             if (matches > 1)
                 return new(null, $"{Marks.StreetEdge.Name}: the street edge kept matches more than one lot edge (two share its " +

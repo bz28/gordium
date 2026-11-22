@@ -257,7 +257,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
         var doc = commandData.Application.ActiveUIDocument?.Document;
         if (doc is null || doc.IsFamilyDocument)
         {
-            TaskDialog.Show("Gordium: mark for egress", "Open a project (not a family) to mark it for egress.");
+            TaskDialog.Show("Gordium: mark facts", "Open a project (not a family) to mark its facts.");
             return Result.Cancelled;
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
@@ -303,7 +303,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
             }).ToList();
             Trial.Log("mark_for_egress", log);
             var head = (added.Count == 0 ? "" : $"Added {added.Count} Gordium marks to this project.\n\n") + ClearPrefills.Head(filled.Count, failed);
-            var dialog = new TaskDialog("Gordium: mark for egress")
+            var dialog = new TaskDialog("Gordium: mark facts")
             {
                 MainInstruction = list.Headline,
                 MainContent = head + MarkingList.Text(list, maxRows: 25) + $"\n\nLogged to {Trial.LogPath()}",
@@ -315,7 +315,7 @@ public sealed class MarkForEgressCommand : IExternalCommand
         {
             log["error"] = $"{e.GetType().Name}: {e.Message}";
             Trial.Log("mark_for_egress", log);
-            TaskDialog.Show("Gordium: mark for egress", $"Failed: {e.GetType().Name}\n{e.Message}");
+            TaskDialog.Show("Gordium: mark facts", $"Failed: {e.GetType().Name}\n{e.Message}");
             message = e.Message;
             return Result.Failed;
         }

@@ -5,7 +5,7 @@ using Gordium.Revit.Reading;
 namespace Gordium.Revit.Addin;
 
 /// <summary>
-/// Check my project's results as a Revit dockable pane (tabbed with Properties on first use), registered at
+/// Check project's results as a Revit dockable pane, titled "Gordium" (RibbonPlan.PaneTitle) (tabbed with Properties on first use), registered at
 /// startup. It holds the one <see cref="ResultsView"/>, the document last checked, and the panel's Revit actions,
 /// each run on Revit's thread through <see cref="PanelActions"/>: Check again, select and zoom a row's elements, open
 /// Project Information. A check asked for by file (CheckProjectCommand.RunRequest) never uses the pane.
@@ -19,7 +19,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
     private static Document? _checked;
 
     internal static void Register(UIControlledApplication app) =>
-        app.RegisterDockablePane(Id, "Gordium: Check my project", new ResultsPane());
+        app.RegisterDockablePane(Id, RibbonPlan.PaneTitle, new ResultsPane());
 
     public void SetupDockablePane(DockablePaneProviderData data)
     {
@@ -127,7 +127,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
             if (_checked is null || !e.Document.Equals(_checked))
                 return;
             _checked = null;
-            Failed("The project checked was closed: open it and click Check my project.");
+            Failed("The project checked was closed: open it and click Check project.");
         }
         catch (Exception x)       // never out of Revit's event
         {
