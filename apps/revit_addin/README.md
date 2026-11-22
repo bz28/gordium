@@ -478,6 +478,58 @@ panel's; and a real answer's egress failure, R319.2.2, with its figures, section
 every status its own glyph and word, green only for complies and never stale, no fixed colour in the view). The WPF
 panel itself is checked in Revit (it needs Revit to run).
 
+**Where a slow read spends its time: `read_steps`.** The `check_project`, `read_interior` and `record_house` lines
+in `results.jsonl` carry a `read_steps` object beside `read_s` (added after Snowdon Towers froze Revit for 408 s,
+all of it in the read, 2026-11-22). It is only a measurement: kept by `ReadSteps` (`Gordium.Revit.Reading`) on
+Revit's thread for one run, never part of a record, never in the request (the worker gets the same bytes with it
+or without), and logged on a failure too (then the steps read before it). A stopwatch reading per step and a
+counter add; no line per element. Its shape:
+
+```json
+"read_steps": {
+  "steps":  { "outside": {"seconds": 212.4, "calls": 1}, "outside.get_geometry.fine": {"seconds": 96.1, "calls": 48210}, ... },
+  "counts": { "outside.elements": 48210, "outside.family_instances": 9120, "outside.fine.faces": 702311, "inside.rooms": 412, ... },
+  "max":    { "inside.over.candidates_per_room": 3911, ... },
+  "links":  [ {"link": "Snowdon Towers Sample Structural.rvt : 2 : location <Not Shared>", "depth": 1, "seconds": 61.2, "elements": 20114} ]
+}
+```
+
+(the numbers are made up, to show the shape). `steps` are seconds (to the millisecond) and how many times each step
+ran, summed over the run; a step's time includes the steps inside it (`outside` includes every `outside.*`).
+`counts` are summed, `max` is the largest one room (or call) gave, `links` one entry per linked model read (its
+seconds include its own links; its elements are its own). The names:
+
+- **Check project's run:** `outside` (the outside read, `RevitRead`), `inside` (`RevitInterior`), `worker_start`,
+  `prepare` (the marks read as facts, the lot, `SiteReader`, `InteriorReader` and the request made:
+  `ProjectCheck.PrepareAsync`), `log_request` (the request written for the log). Read inside and Record houses log
+  `inside` and `interior_reader`.
+- **The outside read** (`RevitRead`; totals include linked models' elements): `outside.collect` (listing every
+  element), `outside.get_geometry.fine|medium|coarse` (Revit's `get_Geometry`; medium and coarse are read for
+  family instances only) and `outside.copy_geometry.*` (the faces, their 7 × 7 samples and the edges copied),
+  `outside.element_rest` (the rest of each element: box, marks, kind), `outside.model_rest` and `outside.lot_lines`.
+  Counts: `outside.elements` (the project's own), `outside.family_instances`, and per detail level
+  `outside.fine|medium|coarse.solids|faces|edges|meshes`.
+- **The inside read** (`RevitInterior`): `inside.marks_model`, `inside.internal_to_shared`, `inside.read`, and in it
+  `inside.rooms`, `inside.openings`, `inside.stairs`, `inside.railings`, `inside.enclosed_areas`, `inside.links`,
+  `inside.ramps`, `inside.separation_lines`, `inside.gross_areas`. Per room: `inside.room.boundary`
+  (`GetBoundarySegments`, counted as `inside.room.boundary_calls`), `inside.room.inside` (the room's solid against
+  the model; hits `inside.room.inside_hits`, largest `inside.room.inside_hits_per_room`), `inside.room.under` and
+  `inside.room.over` (the box under the floor, and over it to +1000 ft in any category), `inside.room.band_solid`.
+  In each of those two, `inside.under|over.collect` (the box filter), `.faces` (each element's faces), `.band`
+  (over only: each element cut by the room's band), counts `.candidates` (elements the box found) and `.read` (model
+  elements kept), largest `.candidates_per_room` and `.read_per_room`. The band's boolean cuts:
+  `inside.boolean_op`, counted `inside.boolean_ops`; open shells skipped `inside.open_shells`. Faces read
+  (`inside.faces`), of them curved and triangulated (`inside.faces_triangulated`, time `inside.triangulate`).
+  Windows and doors: `inside.opening.faces`, `inside.opening.cut`. The transactions: `inside.enclosed_areas.topology`,
+  `.outline` (a Room placed in an area with none, rolled back), `.rollback`; per level of the outer outlines
+  (`inside.gross_areas.levels`) `inside.gross_areas.ring`, `.lines_commit`, `.topology`, `.room_commit`, `.rollback`.
+
+How we know: `ReadStepsTests` (kept only while a read has begun them, on its own thread; added by name; seconds to
+the millisecond; a step that throws still timed; geometry tallied with instances' items; no record, request or
+reader type holds them and no Revit-free file but their own names them; and every hook in `RevitRead`,
+`RevitInterior`, `CheckProject` and `RecordHouses` pinned in their source, with what they read unchanged) and
+`ProjectCheckTests.The_request_is_byte_for_byte_the_same_with_the_read_steps_kept_or_not`.
+
 ## Build a model from data
 
 A real .rvt built with no click from a drawing script's building data: the C# port of the pyRevit/Dynamo script Ben
