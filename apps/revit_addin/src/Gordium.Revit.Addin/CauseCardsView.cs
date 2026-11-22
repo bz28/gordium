@@ -207,11 +207,12 @@ internal static class CauseCardsView
             var link = new C.Button
             {
                 Content = new C.TextBlock { Text = row.Row.Name, TextWrapping = W.TextWrapping.Wrap },
-                Padding = new W.Thickness(0), BorderThickness = new W.Thickness(0), Background = W.Media.Brushes.Transparent,
+                Padding = new W.Thickness(0), BorderThickness = new W.Thickness(0),
                 HorizontalContentAlignment = W.HorizontalAlignment.Left, HorizontalAlignment = W.HorizontalAlignment.Left,
                 ToolTip = "Open its detail: why, what to do, the law's words", Cursor = W.Input.Cursors.Hand,
             };
             link.SetResourceReference(C.Control.ForegroundProperty, PanelTokens.Accent);
+            link.SetResourceReference(C.Control.BackgroundProperty, PanelTokens.BgSurface);     // on the card's surface
             W.Automation.AutomationProperties.SetName(link, "Open " + row.Row.Name);
             link.Click += (_, e) =>
             {

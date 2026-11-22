@@ -153,7 +153,7 @@ public sealed class PanelThemeTests(ITestOutputHelper output)
     {
         // every colour in the panel comes from the token dictionaries (so it follows Revit's theme): none written
         // into the view itself
-        foreach (var file in new[] { "ResultsView.cs", "ResultsList.cs" })       // the panel, and its list's entries (PR 3)
+        foreach (var file in new[] { "ResultsView.cs", "ResultsList.cs", "DetailView.cs", "CauseCardsView.cs" })   // the panel, its list's entries (PR 3), the detail (PR 4), the cause cards (PR 6)
         {
             var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", file));
             foreach (var fixedColour in new[] { "Color.FromRgb", "Color.FromArgb", "Brushes.", "SystemColors.", "ColorOf", "Opacity =" })

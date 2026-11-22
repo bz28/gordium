@@ -403,7 +403,7 @@ public sealed class ResultListTests
         // the add-in (Revit-only, not built here): a row selected sends Select, which never calls ShowElements; Show
         // (the button, or Space) sends Zoom, which does
         var pane = Addin("ResultsPane.cs");
-        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, _theme)", pane, StringComparison.Ordinal);
+        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, _theme)", pane, StringComparison.Ordinal);
         Assert.Contains("private static void Select(ResultRow row) => Post(\"Select in model\", ui => ShowElements(ui, row, zoom: false));", pane, StringComparison.Ordinal);
         Assert.Contains("private static void Zoom(ResultRow row) => Post(\"Show in model\", ui => ShowElements(ui, row, zoom: true));", pane, StringComparison.Ordinal);
         Assert.Contains("        if (zoom)\n            uidoc.ShowElements(found);", pane, StringComparison.Ordinal);
@@ -425,7 +425,8 @@ public sealed class ResultListTests
         var styles = Addin("PanelStyles.xaml");
         // the rows, their order, filters, search, keys and copy are ResultList's (tested here), never the view's own
         Assert.Contains("_placed = ResultList.Place(model);", view, StringComparison.Ordinal);
-        Assert.Contains("var layout = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);\n" +
+        Assert.Contains("var layout = ResultList.WithCauses(ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened),\n" +
+                        "                                           _summary is not null && AllCards.Count > 0, _filter, _search.Text);\n" +
                         "        _entries = _summary is null ? layout : ResultList.WithSummary(layout);", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
         Assert.Contains("ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When)", view, StringComparison.Ordinal);

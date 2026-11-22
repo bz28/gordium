@@ -1,30 +1,7 @@
-[1 of 167] DOES NOT COMPLY · Gordium test door: 36 x 80 (Patio door) · Egress door shall be side-hinged (R318.2) · R318.2
-WHY: Egress door shall be side-hinged (R318.2)
+[1 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear height (R319.2.2) · R319.2.2
 WHAT TO DO:
   1. Change the design so it meets the limit (the figures below).
   2. Show Element 1 in the model. [ShowElements]
-  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
-THE LAW'S WORDS:
-  "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad)." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
-ELEMENTS:
-  Element 1
-
-[2 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear area (R319.2.1) · R319.2.1
-WHY: Escape opening minimum net clear area (R319.2.1): does not comply whatever the at grade (not measured: the finished ground level outside the opening isn't given)
-WHAT TO DO:
-  1. Change the design so it meets the limit (the figures below).
-  2. Show Element 2 in the model. [ShowElements]
-  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
-THE LAW'S WORDS:
-  "Emergency escape and rescue openings shall have a net clear opening of not less than 5.7 square feet" (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
-  "Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall be 5 square feet (0.465 m[fn2])." (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
-ELEMENTS:
-  Element 2
-
-[3 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear height (R319.2.2) · R319.2.2
-WHAT TO DO:
-  1. Change the design so it meets the limit (the figures below).
-  2. Show Element 2 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 MEASURED VS LIMIT:
   net clear height: 20 in (measured) | limit ≥ 24 in
@@ -32,12 +9,12 @@ HOW FAR: 4 in short
 THE LAW'S WORDS:
   "The minimum net clear opening height dimension shall be 24 inches (610 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
-  Element 2
+  Element 1
 
-[4 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening bottom of clear opening max height (R319.2.3) · R319.2.3
+[2 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening bottom of clear opening max height (R319.2.3) · R319.2.3
 WHAT TO DO:
   1. Change the design so it meets the limit (the figures below).
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 MEASURED VS LIMIT:
   sill height: 46 in (measured) | limit ≤ 44 in
@@ -45,7 +22,30 @@ HOW FAR: 2 in over
 THE LAW'S WORDS:
   "Emergency escape and rescue openings shall have the bottom of the clear opening not greater than 44 inches (1118 mm) above the floor." (R319.2.3, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
+  Element 1
+
+[3 of 167] DOES NOT COMPLY · Gordium test door: 36 x 80 (Patio door) · Egress door shall be side-hinged (R318.2) · R318.2
+WHY: Egress door shall be side-hinged (R318.2)
+WHAT TO DO:
+  1. Change the design so it meets the limit (the figures below).
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad)." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
+ELEMENTS:
   Element 2
+
+[4 of 167] DOES NOT COMPLY · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear area (R319.2.1) · R319.2.1
+WHY: Escape opening minimum net clear area (R319.2.1): does not comply whatever the at grade (not measured: the finished ground level outside the opening isn't given)
+WHAT TO DO:
+  1. Change the design so it meets the limit (the figures below).
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Emergency escape and rescue openings shall have a net clear opening of not less than 5.7 square feet" (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+  "Exception: The minimum net clear opening for grade-floor emergency escape and rescue openings shall be 5 square feet (0.465 m[fn2])." (R319.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
+ELEMENTS:
+  Element 1
 
 [5 of 167] needs review · New structures at least 20 ft from an inlet wall or stream bank · §325-26, p.67; §325-3B, p.19
 WHY: say whether any inlet wall or stream bank (at average water level) is within 20 ft of the lot and, if so, how far the nearest new structure is from it (§325-26)
@@ -363,69 +363,69 @@ THE LAW'S WORDS:
 WHY: clear height not measured: the top of the threshold isn't given; clear width not measured: R318.2 measures a side-hinged door open 90 degrees; this door is sliding; dwelling units not measured (or not usable)
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 1 in the model. [ShowElements]
+  2. Show Element 2 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Not less than one egress door shall be provided for each dwelling unit." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
   "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad)." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
   "The clear height of the door opening shall be not less than 78 inches (1981 mm) in height measured from the top of the threshold to the bottom of the stop." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
 ELEMENTS:
-  Element 1
+  Element 2
 
 [23 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress door clear width at least 32 in (R318.2) · R318.2
 WHY: clear width not measured: R318.2 measures a side-hinged door open 90 degrees; this door is sliding
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 1 in the model. [ShowElements]
+  2. Show Element 2 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "The egress door shall be side-hinged, and shall provide a clear width of not less than 32 inches (813 mm) where measured between the face of the door and the stop, with the door open 90 degrees (1.57 rad)." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
 ELEMENTS:
-  Element 1
+  Element 2
 
 [24 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress door clear height at least 78 in (R318.2) · R318.2
 WHY: clear height not measured: the top of the threshold isn't given
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 1 in the model. [ShowElements]
+  2. Show Element 2 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "The clear height of the door opening shall be not less than 78 inches (1981 mm) in height measured from the top of the threshold to the bottom of the stop." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
 ELEMENTS:
-  Element 1
+  Element 2
 
 [25 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress doors readily openable without key (R318.2) · R318.2
 WHY: Egress doors readily openable without key (R318.2): needs review
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 1 in the model. [ShowElements]
+  2. Show Element 2 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Egress doors shall be readily openable from inside the dwelling unit without the use of a key or special knowledge or effort." (R318.2, 2025 Residential Code of New York State (RCNYS), PDF p.99)
 ELEMENTS:
-  Element 1
+  Element 2
 
 [26 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Exit into a patio cover not unenclosed: exits per R318 (BF103.2) · BF103.2
 WHY: Exit into a patio cover not unenclosed: exits per R318 (BF103.2): needs review
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 1 in the model. [ShowElements]
+  2. Show Element 2 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Where such exterior openings serve as an exit from the dwelling unit, the patio structure, unless unenclosed, shall be provided with exits conforming to the provisions of Section R318." (BF103.2, 2025 Residential Code of New York State (RCNYS), PDF p.898)
 ELEMENTS:
-  Element 1
+  Element 2
 
 [27 of 167] needs review · Gordium test door: 36 x 80 (Patio door) · Egress door not given as an exterior door: its landings unchecked (R318.3.1) · R318.3.1
 WHY: egress given as exterior door not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 1 in the model. [ShowElements]
+  2. Show Element 2 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Landings or finished floors at the required egress door shall be not more than 1 1/2 inches (38 mm) lower than the top of the threshold." (R318.3.1, 2025 Residential Code of New York State (RCNYS), PDF p.99)
 ELEMENTS:
-  Element 1
+  Element 2
 
 [28 of 167] needs review · Stairs · Handrail on one side of flights with four or more risers (R318.7.8) · R318.7.8
 WHY: the stairs aren't read yet
@@ -890,191 +890,191 @@ ELEMENTS:
 WHY: fully openable not measured: Gordium doesn't measure this yet; path height not measured: Gordium doesn't measure this yet; path width not measured: Gordium doesn't measure this yet; under projection not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Emergency escape and rescue open- ings installed under decks, porches and cantilevers shall be fully openable and provide a path not less than 36 inches (914 mm) in height and 36 inches (914 mm) in width to a yard or court." (R319.2.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [76 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well where opening is below grade (R319.4) · R319.4
 WHY: area well area not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade" (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "shall be provided with an area well in accordance with Sections R319.4.1 through R319.4.4." (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [77 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well deeper than 44 in: ladder or steps (R319.4.2) · R319.4.2
 WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "The ladder or steps shall not be obstructed by the emergency escape and rescue opening where the window or door is in the open position." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "R319.4 Area wells. An emergency escape and rescue opening where the bottom of the clear opening is below the adjacent grade" (R319.4, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [78 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening into a patio cover: unenclosed (BF103.2) · BF103.2
 WHY: into patio cover not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Exterior openings required for light and ventilation into a patio structure conforming to Section BF101 shall be unenclosed where such openings serve as emergency egress or rescue openings from sleeping rooms." (BF103.2, 2025 Residential Code of New York State (RCNYS), PDF p.898)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [79 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well horizontal area at least 9 sf (R319.4.1) · R319.4.1
 WHY: area well area not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "The horizontal area of the area well shall be not less than 9 square feet (0.9 m[fn2]), with a horizontal projec-" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [80 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well horizontal projection at least 36 in (R319.4.1) · R319.4.1
 WHY: area well ladder not measured: Gordium doesn't measure this yet; area well projection not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [81 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well width at least 36 in (R319.4.1) · R319.4.1
 WHY: area well ladder not measured: Gordium doesn't measure this yet; area well width not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "tion and width of not less than 36 inches (914 mm)." (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Exception: The ladder or steps required by Section R319.4.2 shall be permitted to encroach not more than 6 inches (152 mm)" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [82 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well size allows opening to fully open (R319.4.1) · R319.4.1
 WHY: below grade not measured: Gordium doesn't measure this yet; fully openable not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "The size of the area well shall allow the emergency escape and rescue opening" (R319.4.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [83 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Every sleeping room: operable escape opening (R319.1) · R319.1
 WHY: operable not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Basements, habitable attics, the room to which a sleeping loft is open, and every sleeping room shall have not less than one operable emergency escape and rescue opening." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [84 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape openings open to a public way, yard or court (R319.1) · R319.1
 WHY: opens to yard not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Emergency escape and rescue openings shall open directly into a public way, or to a yard or court that opens to a public way." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
   "A yard shall not be required to open directly into a public way where the yard opens to an unobstructed path from the yard to the public way." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
   "Such path shall have a width of not less than 36 inches (914 mm)." (R319.1, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [85 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder inside width (R319.4.2.1) · R319.4.2.1
 WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [86 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder projection from wall (R319.4.2.1) · R319.4.2.1
 WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder projection not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [87 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder rung spacing (R319.4.2.1) · R319.4.2.1
 WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well rung spacing not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [88 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well ladder rungs for full height (R319.4.2.1) · R319.4.2.1
 WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Ladders and rungs shall have an inside width of not less than 12 inches (305 mm), shall project not less than 3 inches (76 mm) from the wall and shall be spaced not more than 18 inches (457 mm) on center vertically for the full height of the area well." (R319.4.2.1, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [89 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Area well steps: width, tread, riser (R319.4.2.2) · R319.4.2.2
 WHY: area well depth not measured: Gordium doesn't measure this yet; area well ladder not measured: Gordium doesn't measure this yet; area well ladder full height not measured: Gordium doesn't measure this yet; area well ladder width not measured: Gordium doesn't measure this yet; area well step riser not measured: Gordium doesn't measure this yet; area well step tread not measured: Gordium doesn't measure this yet; area well steps not measured: Gordium doesn't measure this yet; below grade not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Steps shall have an inside width of not less than 12 inches (305 mm), a minimum tread depth of 5 inches" (R319.4.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "(127 mm) and a maximum riser height of 18 inches (457 mm) for the full height of the area well." (R319.4.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
   "Area wells with a vertical depth greater than 44 inches (1118 mm) shall be equipped with an approved, permanently affixed ladder or steps." (R319.4.2, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [90 of 167] needs review · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening in each new sleeping room of an addition (R319.6) · R319.6
 WHY: operable not measured: Gordium doesn't measure this yet
 WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
-  2. Show Element 2 in the model. [ShowElements]
+  2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 THE LAW'S WORDS:
   "Where dwelling unit additions contain sleeping rooms, an emergency escape and rescue opening shall be provided in each new sleeping room." (R319.6, 2025 Residential Code of New York State (RCNYS), PDF p.103)
 ELEMENTS:
-  Element 2
+  Element 1
 
 [91 of 167] needs review · Interior drawing
 WHY: The interior drawing: the stairs weren't read (no `stairs` in the description)
@@ -1779,4 +1779,4 @@ HOW FAR: 4 in to spare
 THE LAW'S WORDS:
   "The minimum net clear opening width dimension shall be 20 inches (508 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
-  Element 2
+  Element 1

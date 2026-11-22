@@ -351,6 +351,33 @@ public sealed class CauseCardsTests
         Assert.Null(MeasureBar.Of(JsonDocument.Parse("""{"id": "x"}""").RootElement));
     }
 
+    // ---- the add-in's wiring (Revit-only, not built here: read in its source) --------------------------------
+
+    private static string Addin(string file) =>
+        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", file)).Replace("\r\n", "\n", StringComparison.Ordinal);
+
+    /// <summary>A card's Show and Show-and-open-Properties run on Revit's thread (Post, the one ExternalEvent);
+    /// Properties comes up only after its elements were selected; a tick only records the tick and redraws the ticks
+    /// (never a selection, a zoom or a check); a new check is compared only with the project's last check that arrived
+    /// current, and an answer stale on arrival is never the one the next is compared with.</summary>
+    [Fact]
+    public void The_addin_runs_card_actions_on_revits_thread_and_a_tick_does_nothing_else()
+    {
+        var pane = Addin("ResultsPane.cs");
+        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, Card, _theme)", pane, StringComparison.Ordinal);
+        Assert.Contains("    private static void Card(CardRequest request) => Post(", pane, StringComparison.Ordinal);
+        Assert.Contains("            var selected = ShowElements(ui, request.Elements, request.What, zoom: true);\n" +
+                        "            if (request.Action != CardAction.ShowAndProperties || selected == 0)\n                return;\n" +
+                        "            ui.GetDockablePane(DockablePanes.BuiltInDockablePanes.PropertiesPalette).Show();\n" +
+                        "            Say(CauseCards.AfterProperties(request.Card, selected));", pane, StringComparison.Ordinal);
+        var view = Addin("ResultsView.cs");
+        Assert.Contains("    public void TickRow(ListRow row, bool ticked)\n    {\n        _looked.SetRow(row, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
+        Assert.Contains("    public void TickCard(CauseCard card, bool ticked)\n    {\n        _looked.SetCard(card.Key, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
+        Assert.Contains("    internal void Show(PanelContent content)\n    {\n        NewCheck(content);", view, StringComparison.Ordinal);
+        Assert.Contains("        if (model.Stale is null)\n            _compared[key] = (content.When, model);", view, StringComparison.Ordinal);
+        Assert.Contains("        if (_shownCheck == (content.Project, content.When))\n            return;", view, StringComparison.Ordinal);
+    }
+
     // ---- failures by how far ----------------------------------------------------------------------------------
 
     /// <summary>The worker's how_far words for egress are decimal feet or inches ("2.5 ft short", "4 in over"):
