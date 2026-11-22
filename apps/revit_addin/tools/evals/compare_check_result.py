@@ -86,10 +86,13 @@ def result_of(path: Path, model: str | None = None) -> dict:
             raise BadResult(f"{path}: no check_project line with an answer" + (f" for {model}" if model else ""))
         n, entry = found
         answer = json.loads(entry["answer"]) if isinstance(entry["answer"], str) else entry["answer"]
-        source = {"log": str(path), "line": n, "at": entry.get("at"), "model": entry.get("file") or entry.get("document")}
+        model_file = entry.get("file") or entry.get("document")
+        # names only, never a local absolute path: the comparison is committed beside the answer key
+        source = {"log": path.name, "line": n, "at": entry.get("at"),
+                  "model": str(model_file).replace("\\", "/").rsplit("/", 1)[-1] if model_file else None}
     else:
         answer = json.loads(text)
-        source = {"file": str(path)}
+        source = {"file": path.name}
     result = answer.get("result", answer) if isinstance(answer, dict) else None
     if not isinstance(result, dict) or not isinstance(result.get("statuses"), dict):
         raise BadResult(f"{path}: not a check_site result (no statuses)")
@@ -171,7 +174,8 @@ def compare_orangetown(result: dict) -> dict:
                     "zoning": "not compared: Ithaca's zoning doesn't apply in Orangetown (the lot is a stand-in)"},
         "has_none_items": claims,
         "rules": rows,
-        "ok": not (false_passes or unpredicted or missing),
+        # a verdict on a rule the hand-check doesn't cover has no truth to be held to: never ok
+        "ok": not (false_passes or unpredicted or missing or extra),
     }
 
 
@@ -222,7 +226,8 @@ def compare_106(result: dict) -> dict:
             row["difference"] = f"UNEXPLAINED: Gordium says {g}, the architects {a}"
             unexplained.append(label)
         if g is not None and false_pass(g, a):
-            row["difference"] = (row.get("difference", "") + "; GORDIUM PASSES WHAT THE ARCHITECTS FAIL").lstrip("; ")
+            row["difference"] = (row.get("difference", "") +
+                                 f"; KINDER THAN THE ARCHITECTS: Gordium {g}, the architects {a}").lstrip("; ")
             false_passes.append(label)
         rows.append(row)
     others = {k: v for k, v in sorted(statuses.items()) if k.startswith("R-1b.") and k.split("#")[0]
@@ -234,7 +239,7 @@ def compare_106(result: dict) -> dict:
         "answer_key": f"{design['spreadsheet']} (Output, column G), mapped by spreadsheet_design.yaml compare",
         "summary": {"rows": len(rows), "same": sum(r["gordium"] == r["architects"] for r in rows),
                     "expected_differences": [r["row"] for r in rows if str(r.get("difference", "")).startswith("expected")],
-                    "unexplained": unexplained, "gordium_passes_what_they_fail": false_passes,
+                    "unexplained": unexplained, "kinder_than_the_architects": false_passes,
                     "zoning_section": next(({"state": s.get("state"), "summary": s.get("summary")}
                                             for s in result.get("sections") or [] if s.get("key") == "zoning"), None),
                     "egress": "not part of this eval: the spreadsheet's house has no interior"},

@@ -184,6 +184,14 @@ def test_a_false_pass_a_rule_not_as_predicted_and_a_missing_rule_are_each_named(
     assert by["general.r318_7_5_1_stair_riser_height_max"]["difference"].startswith("FALSE FAIL")
 
 
+def test_a_verdict_on_a_rule_the_hand_check_doesnt_cover_is_never_ok(tmp_path):
+    # review round 1: it has no truth to be held to, so a pass on it alone fails the comparison
+    result = predicted_result()
+    result["egress"]["results"]["general.made_up_rule"] = "pass"
+    made = run(tmp_path, "orangetown", result)
+    assert made["summary"]["not_in_the_hand_check"] == ["general.made_up_rule"] and not made["ok"]
+
+
 def test_not_applicable_where_the_truth_applies_is_a_false_pass(tmp_path):
     result = predicted_result()
     result["egress"]["results"]["general.r318_2_egress_door_clear_width"] = "not_applicable"
@@ -238,7 +246,13 @@ def test_the_106_rows_compare_with_the_architects_and_name_each_difference(tmp_p
     assert not made["ok"] and made["summary"]["unexplained"] == ["Minimum rear yard (offset)"]
     # a pass where the architects fail is named as such
     made = run(tmp_path, "106_ithaca_rd", spreadsheet_like(**{"R-1b.lot_coverage": "complies"}))
-    assert made["summary"]["gordium_passes_what_they_fail"] == ["Percent of lot area"]
+    assert made["summary"]["kinder_than_the_architects"] == ["Percent of lot area"]
+    # review round 1: set aside where the architects pass is kinder, worded from both answers (never "fail")
+    made = run(tmp_path, "106_ithaca_rd", spreadsheet_like(**{"R-1b.front_yard": "not_applicable"}))
+    assert not made["ok"] and made["summary"]["kinder_than_the_architects"] == ["Minimum front yard (offset)"]
+    row = next(r for r in made["rows"] if r["row"] == "Minimum front yard (offset)")
+    assert "KINDER THAN THE ARCHITECTS: Gordium not_applicable, the architects complies" in row["difference"]
+    assert "FAIL" not in row["difference"]
     # side yards not told apart: the most cautious of them
     result = spreadsheet_like()
     for side in ("west", "east"):
@@ -306,7 +320,18 @@ def test_the_command_line_writes_the_comparison_and_says_whether_it_is_ok(tmp_pa
     path.write_text(json.dumps(predicted_result()), encoding="utf-8")
     out = tmp_path / "c.yaml"
     assert compare.main(["orangetown", str(path), "--out", str(out)]) == 0
-    assert yaml.safe_load(out.read_text(encoding="utf-8"))["summary"]["as_predicted"] == 115
+    written = yaml.safe_load(out.read_text(encoding="utf-8"))
+    assert written["summary"]["as_predicted"] == 115
+    # review round 1: no local absolute path in the committed comparison, from an answer file or the trial log
+    assert written["result"] == {"file": "answer.json"} and str(tmp_path) not in out.read_text(encoding="utf-8")
+    log = tmp_path / "results.jsonl"
+    log.write_text(json.dumps({"what": "check_project", "at": "2026-11-21T10:00:00",
+                               "file": "C:\\t\\ny_eval\\orangetown_marked.rvt",
+                               "answer": json.dumps(predicted_result())}) + "\n", encoding="utf-8")
+    assert compare.main(["orangetown", str(log), "--out", str(out)]) == 0
+    assert yaml.safe_load(out.read_text(encoding="utf-8"))["result"] == \
+        {"log": "results.jsonl", "line": 1, "at": "2026-11-21T10:00:00", "model": "orangetown_marked.rvt"}
+    assert str(tmp_path) not in out.read_text(encoding="utf-8")
     bad = copy.deepcopy(predicted_result())
     bad["egress"]["results"]["general.r319_2_1_escape_opening_min_net_clear_area"] = "pass"
     path.write_text(json.dumps(bad), encoding="utf-8")
