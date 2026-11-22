@@ -259,6 +259,25 @@ public static class ResultList
         return from >= 0 && from < entries.Count && entries[from] is ListRowEntry ? from : -1;
     }
 
+    /// <summary>A row's second line in the list (its first is its glyph, name and section): its verdict's words when its
+    /// place's heading doesn't already say them ("not checked", "not applicable", a word the add-in doesn't know: "needs
+    /// review (the checker said ...)"), then its figures and how far off in the worker's words, else how far off,
+    /// else the worker's reason (the short cause). "" when the row has none of these.</summary>
+    public static string SecondLine(ResultRow row)
+    {
+        ArgumentNullException.ThrowIfNull(row);
+        var said = new List<string>();
+        if (row.VerdictWords is not ("DOES NOT COMPLY" or "needs review" or "complies"))
+            said.Add(row.VerdictWords);
+        if (row.Figures is not null)
+            said.Add(row.Figures + (row.HowFar is null ? "" : " · " + row.HowFar));
+        else if (row.HowFar is not null)
+            said.Add(row.HowFar);
+        else if (row.Reason is not null)
+            said.Add(row.Reason);
+        return string.Join(" · ", said);
+    }
+
     /// <summary>What Ctrl+C copies: the row as the text file writes it (<see cref="ResultText.Row"/>: its verdict, name,
     /// figures, reason and elements, each element by the project's label), and, once the model changed after the
     /// check, when it was checked, so a copied verdict is never read as the model's now.</summary>
