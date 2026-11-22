@@ -337,10 +337,14 @@ public static class StreetEdges
     /// <summary>The edge of the property line nearest the point picked on it (plan distance, internal coordinates):
     /// its two ends, or why none: the pick off every edge; or at a corner (the two nearest edges within half
     /// <see cref="PickReach"/> of each other, or the click within <see cref="CornerReach"/> of an end the edge shares
-    /// with another), where a click meant for one edge can keep the other.</summary>
+    /// with another), where a click meant for one edge can keep the other; or a property line holding a curve with no
+    /// ends, whose lot is never read.</summary>
     public static (PickedEdge? Edge, string? Why) Nearest(LotLineElement line, Xyz picked)
     {
         ArgumentNullException.ThrowIfNull(line);
+        if (line.Unbound > 0)            // its lot is never read (LotReader.UnboundPropertyLine): no edge of it is kept
+            return (null, "this property line has a curve with no ends (a full circle or ellipse drawn as one curve), " +
+                          "which Gordium can't read as lot edges: redraw it as arcs, then pick the street edge");
         var near = line.Curves.Select(c => (Curve: c, D: PlanDistance(LotReader.Points(c), picked)))
                               .OrderBy(x => x.D).ToList();
         if (near.Count == 0 || near[0].D > PickReach)
