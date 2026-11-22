@@ -58,14 +58,18 @@ figures:
     agreement:
       tolerance: 'Gordium''s no-clearance figure, from the sheet''s start to the sheet''s
         exit, no longer than the sheet''s line as drawn plus 2 percent of it or 2
-        ft, whichever is larger, and every rule of this figure giving the sheet''s
-        verdict (changed 2026-11-21: the sheet''s line is orthogonal, never shorter
-        than the natural path IBC 1016.1 and NFPA 7.6.1 measure)'
+        ft, whichever is larger, no shorter than the straight line between that line''s
+        ends less the same, and every rule of this figure giving the sheet''s verdict
+        (changed 2026-11-21: the sheet''s line is orthogonal, never shorter than the
+        natural path IBC 1016.1 and NFPA 7.6.1 measure, itself never shorter than
+        the straight line)'
       sheet_line_as_drawn: 130.325
+      sheet_line_ends_straight: 65.921
       gordium: 116.034
       longer_than_drawn_by: -14.291
       allowed: 2.607
       no_longer: true
+      no_shorter_than_straight: true
       verdicts_same:
         general.ibc_1016_1_travel_distance: false
         general.nfpa_16_2_6_2_point_in_room_to_exit: false
@@ -132,13 +136,16 @@ figures:
     agreement:
       tolerance: Gordium's no-clearance figure from the sheet's start no longer than
         the sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger,
+        no shorter than the straight line between that line's ends less the same,
         and every rule of this figure giving the sheet's verdict (changed 2026-11-21,
         as for the travel distance)
       sheet_line_as_drawn: 48.404
+      sheet_line_ends_straight: 41.073
       gordium: 41.066
       longer_than_drawn_by: -7.338
       allowed: 2.0
       no_longer: true
+      no_shorter_than_straight: true
       verdicts_same:
         general.ibc_1014_3_common_path: false
         general.nfpa_16_2_5_3_1_common_path_sprinklered: false
