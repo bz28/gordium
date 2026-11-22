@@ -133,7 +133,8 @@ def main(path, out_path=OUT, co=CO):
     # the travel's end, taken apart from the route: the sheet's exit's door centre (the nearest, if it has several:
     # the smaller floor); the common path's, where its two routes part (no point stands apart from the routes)
     door = min((d for d in story.exits() if d.exit_id == co["sheet_exit"]), key=lambda d: math.dist(corner, d.centre))
-    split = _point_at(plain_common.routes[0].pieces, plain_common.length)
+    split = plain_common.at if plain_common.at is not None else _point_at(plain_common.routes[0].pieces,
+                                                                           plain_common.length)
     out["figures"]["travel_distance"]["gordium"] = {
         "from": list(start), "from_room": f"{co['start_room']}, its north-east corner (the sheet's start)",
         "to_the_sheets_exit_with_12_in": round(gordium[12.0][0].length / FT, 3),
@@ -347,7 +348,7 @@ BY_HAND = {   # worked by hand from the sheet and the model, not by the route co
     "dead_end_centre_line_reading": {"figure": 32.011, "working": "the stub's closed end, y 74.85 (the corridor "
                                      "outline), to the main corridor's centre line, (37.844 + 47.833) / 2 = 42.839: "
                                      "74.85 - 42.839 = 32.011 ft; the sheet ends at the widening's near edge, y "
-                                     "53.17 (open question 2)"},
+                                     "53.17 (open question 2: NFPA 101 A.7.5.1.5 measures to the centre line)"},
     "remoteness": "the sheet measures the west and east corridor exits; decision 7 takes the farthest-apart pair",
     "diagonal": "the sheet's ticks are not at the traced outer outline's corners (its north-east tick about 3 ft "
                 "north of the traced north face): a trace or drawing difference, not settled",
