@@ -3,6 +3,7 @@ as Gordium's is worked by make_eval_comparison.py running the route code, never 
 under `by_hand` with its working), and the committed file is what the script makes from the model's description."""
 
 import json
+import math
 import os
 import sys
 from pathlib import Path
@@ -43,8 +44,13 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
     drawn = travel["sheet_line_as_drawn"]
     rules = ("general.ibc_1016_1_travel_distance", "general.nfpa_16_2_6_2_point_in_room_to_exit")
     assert travel["agreement"]["no_longer"] == (ours <= drawn + max(0.02 * drawn, 2.0))
+    ends = travel["sheet_line_in_model"]
+    assert travel["agreement"]["sheet_line_ends_straight"] == round(math.dist(ends[0], ends[-1]), 3)
+    assert travel["agreement"]["no_shorter_than_straight"] == (
+        ours >= travel["agreement"]["sheet_line_ends_straight"] - max(0.02 * drawn, 2.0) - 1e-9)
     assert travel["agreement"]["verdicts_same"] == {r: got["verdicts"]["rules"][r]["same"] for r in rules}
     assert travel["agreement"]["within_tolerance"] == (travel["agreement"]["no_longer"]
+                                                       and travel["agreement"]["no_shorter_than_straight"]
                                                        and all(travel["agreement"]["verdicts_same"].values()))
     for name in ("travel_distance", "common_path", "dead_end", "remoteness", "diagonal"):
         assert "within_tolerance" in got["figures"][name]["agreement"] and got["figures"][name]["agreement"]["tolerance"]
@@ -71,18 +77,29 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
 
 
 def test_a_figure_longer_than_the_sheets_line_or_a_verdict_apart_never_agrees():
-    """The one-sided test (route note, the eval, 2026-11-21): no longer than the line as drawn plus 2 percent or 2 ft
-    agrees only with every verdict the same; a figure shorter than the line by any amount is no miss; longer by more
-    than the tolerance is one. The old two-sided test would call the shorter figure a miss."""
+    """The test since 2026-11-21 (route note, the eval): no longer than the line as drawn plus 2 percent or 2 ft,
+    no shorter than the straight line between its ends less the same, and every verdict the same; the old two-sided
+    test would call a figure shorter than the orthogonal line a miss."""
     verdicts = {"a": {"same": True}, "b": {"same": True}, "c": {"same": False}}
-    assert make._no_longer(130.325, 116.034, verdicts, ["a", "b"], "w")["within_tolerance"] is True
-    assert make._no_longer(130.325, 116.034, verdicts, ["a", "c"], "w")["within_tolerance"] is False
-    assert make._no_longer(100.0, 102.0, verdicts, ["a"], "w")["within_tolerance"] is True        # 2 ft allowed
-    assert make._no_longer(100.0, 102.01, verdicts, ["a"], "w")["within_tolerance"] is False
-    assert make._no_longer(200.0, 204.0, verdicts, ["a"], "w")["within_tolerance"] is True        # 2 percent
-    assert make._no_longer(200.0, 204.01, verdicts, ["a"], "w")["within_tolerance"] is False
-    assert make._no_longer(100.0, None, verdicts, ["a"], "w")["within_tolerance"] is None
+    ok = make._no_longer(130.325, 116.034, verdicts, ["a", "b"], "w", 65.92)
+    assert ok["within_tolerance"] is True and ok["no_longer"] and ok["no_shorter_than_straight"]
+    assert make._no_longer(130.325, 116.034, verdicts, ["a", "c"], "w", 65.92)["within_tolerance"] is False
+    assert make._no_longer(100.0, 102.0, verdicts, ["a"], "w", 50.0)["within_tolerance"] is True        # 2 ft allowed
+    assert make._no_longer(100.0, 102.01, verdicts, ["a"], "w", 50.0)["within_tolerance"] is False
+    assert make._no_longer(200.0, 204.0, verdicts, ["a"], "w", 50.0)["within_tolerance"] is True        # 2 percent
+    assert make._no_longer(200.0, 204.01, verdicts, ["a"], "w", 50.0)["within_tolerance"] is False
+    assert make._no_longer(100.0, None, verdicts, ["a"], "w", 50.0)["within_tolerance"] is None
     assert make._verdict(130.667, 116.034, 2.613, "w")["within_tolerance"] is False              # the old test
+
+
+def test_a_figure_shorter_than_the_straight_line_between_the_sheets_ends_never_agrees():
+    """Review round 1: a route measured too short (the false-pass direction) is never agreement. The straight line
+    between the sheet line's ends, less the tolerance, is a floor no route can go under."""
+    verdicts = {"a": {"same": True}}
+    got = make._no_longer(130.325, 10.0, verdicts, ["a"], "w", 65.92)
+    assert got["no_longer"] is True and got["no_shorter_than_straight"] is False and got["within_tolerance"] is False
+    assert make._no_longer(48.404, 39.07, verdicts, ["a"], "w", 41.07)["within_tolerance"] is True     # 41.07 - 2.0
+    assert make._no_longer(48.404, 39.06, verdicts, ["a"], "w", 41.07)["within_tolerance"] is False
 
 
 @pytest.mark.skipif(not os.environ.get("GORDIUM_CO_DESCRIPTION"),

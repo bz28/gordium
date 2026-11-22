@@ -188,12 +188,15 @@ def _storage_readings(measured) -> dict:
 
 TOLERANCES = {   # the decision's "Agreement asked" (docs/decisions/2026-11-20_route_measurement.md, "The eval")
     "travel_distance": "Gordium's no-clearance figure, from the sheet's start to the sheet's exit, no longer than the "
-                       "sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger, and every rule of "
-                       "this figure giving the sheet's verdict (changed 2026-11-21: the sheet's line is orthogonal, "
-                       "never shorter than the natural path IBC 1016.1 and NFPA 7.6.1 measure)",
+                       "sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger, no shorter than the "
+                       "straight line between that line's ends less the same, and every rule of this figure giving "
+                       "the sheet's verdict (changed 2026-11-21: the sheet's line is orthogonal, never shorter than "
+                       "the natural path IBC 1016.1 and NFPA 7.6.1 measure, itself never shorter than the straight "
+                       "line)",
     "common_path": "Gordium's no-clearance figure from the sheet's start no longer than the sheet's line as drawn "
-                   "plus 2 percent of it or 2 ft, whichever is larger, and every rule of this figure giving the "
-                   "sheet's verdict (changed 2026-11-21, as for the travel distance)",
+                   "plus 2 percent of it or 2 ft, whichever is larger, no shorter than the straight line between "
+                   "that line's ends less the same, and every rule of this figure giving the sheet's verdict "
+                   "(changed 2026-11-21, as for the travel distance)",
     "dead_end": "length within 1 ft, width within 1 in",
     "remoteness": "within 1 ft of Gordium's nearest-edge figure or of its door-centre figure",
     "diagonal": "within 6 in",
@@ -208,17 +211,21 @@ BEFORE = {   # the first test, until 2026-11-21: still worked and reported, so n
 }
 
 
-def _no_longer(drawn, ours, verdicts, rules, words) -> dict:
-    """The one-sided test: Gordium's figure no longer than the sheet's line as drawn plus the tolerance, and each of
-    the figure's rules giving the sheet's verdict."""
+def _no_longer(drawn, ours, verdicts, rules, words, straight) -> dict:
+    """The test since 2026-11-21: Gordium's figure no longer than the sheet's line as drawn plus the tolerance, and
+    no shorter than the straight line between that line's own ends less the tolerance (no route between two points
+    is shorter than the straight line: a figure under it is a route measured too short, never agreement), and each
+    of the figure's rules giving the sheet's verdict."""
     allowed = round(max(0.02 * drawn, 2.0), 3)
     same = {rid: verdicts[rid]["same"] for rid in rules}
     if ours is None:
         return {"tolerance": words, "within_tolerance": None, "why": "Gordium gives no figure", "verdicts_same": same}
     short = ours <= drawn + allowed + 1e-9
-    return {"tolerance": words, "sheet_line_as_drawn": drawn, "gordium": ours, "longer_than_drawn_by": round(ours - drawn, 3),
-            "allowed": allowed, "no_longer": short, "verdicts_same": same,
-            "within_tolerance": bool(short and all(same.values()))}
+    long_enough = ours >= straight - allowed - 1e-9
+    return {"tolerance": words, "sheet_line_as_drawn": drawn, "sheet_line_ends_straight": straight, "gordium": ours,
+            "longer_than_drawn_by": round(ours - drawn, 3), "allowed": allowed, "no_longer": short,
+            "no_shorter_than_straight": long_enough, "verdicts_same": same,
+            "within_tolerance": bool(short and long_enough and all(same.values()))}
 
 
 def _verdict(sheet, ours, allowed, words) -> dict:
@@ -247,8 +254,10 @@ def _judge_all(out) -> None:
         sheet = f[name]["sheet_stated"]
         g = f[name]["gordium"]
         ours = g.get("to_the_sheets_exit_no_clearance", g.get("no_clearance"))
+        ends = f[name]["sheet_line_in_model"]
         f[name]["agreement"] = _no_longer(f[name]["sheet_line_as_drawn"], ours, out["verdicts"]["rules"],
-                                          out["verdicts"]["by_figure"][name], TOLERANCES[name])
+                                          out["verdicts"]["by_figure"][name], TOLERANCES[name],
+                                          round(math.dist(ends[0], ends[-1]), 3))
         f[name]["agreement"]["before_2026_11_21"] = _verdict(sheet, ours, max(0.02 * sheet, 2.0), BEFORE[name])
     # the dead end the sheet's line runs along: the one whose closed end is nearest the line's start (within 3 ft)
     start = f["dead_end"]["sheet_line_in_model"][0]
