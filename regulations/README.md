@@ -4,7 +4,7 @@ All rule **data**: the city's documents and the rulebooks built from them. No co
 
 - `document_extraction_guide/` — how we turn any regulation document into rules (shared by every place).
 - `jurisdictions/<state>/<place>/` — one folder per city or town, worked through in numbered steps (below).
-- `jurisdictions/<state>/<state>_state/` — the state's own law that every place in the state inherits (New York's Residential Code: `new_york/new_york_state/`), in the same numbered steps. Its settings file is `state.yaml`, so it is no place; a place lists it under `inherits:` in its `jurisdiction.yaml`. A copyrighted book is kept outside the repo, in the code cache (`docs/decisions/2026-11-12_building_code_text.md`).
+- `jurisdictions/<state>/<state>_state/` — the state's own law that every place in the state inherits (New York's Residential Code: `new_york/new_york_state/`; a state may have more than one, each a book for different buildings: New York's Building Code, `new_york/new_york_state_building/`), in the same numbered steps. Its settings file is `state.yaml`, so it is no place; a place lists it under `inherits:` in its `jurisdiction.yaml`. A copyrighted book is kept outside the repo, in the code cache (`docs/decisions/2026-11-12_building_code_text.md`).
 
 The numbered steps:
 

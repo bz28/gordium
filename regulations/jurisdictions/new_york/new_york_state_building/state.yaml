@@ -1,0 +1,13 @@
+# Gordium's settings for New York State's building code for buildings other than houses: the 2025 Building Code of
+# New York State, which a New York place would inherit for such a building (a place lists this folder in its
+# jurisdiction.yaml `inherits:`; none does yet, so no design check runs it today: README). Kept by hand. This folder
+# is no place (no boundary, no lot lookup), so the place registry and the Rhino plugin never read it as one
+# (rule_format/rulebook.py: state_folders). The house code is the sibling folder new_york_state/.
+# Decided 2026-11-21: docs/decisions/2026-11-21_ny_building_code.md.
+
+name: New York State (Building Code)
+
+results_title: Egress (NY State Building Code 2025)   # how a check's results of this law are headed
+
+law:                                  # the documents in 1_source_documents/sources.yaml, by what they are
+  building_code: gov.ny.building.2025.pdf    # 2025 Building Code of New York State (kept outside the repo)

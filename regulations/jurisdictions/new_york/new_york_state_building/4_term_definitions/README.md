@@ -1,0 +1,3 @@
+# 4_term_definitions
+
+How the 2025 Building Code of New York State defines the words its commercial egress rules depend on (story, means of egress, exit, exit access, exit access doorway, common path of egress travel, corridor, occupant load, automatic sprinkler system, custodial care...). `definitions.yaml`: each term with the book's own whole definition, quoted exactly with page and lines, keyed `bc_`. A word printed in italics has Chapter 2's meaning (201.1); one in roman, or italic but not defined, takes its ordinary meaning (201.4). `python -m rule_format` checks every quote where the code cache has the book. The measures that use these words are defined in `packages/rule_format/rule_format/parts.yaml` and the folder's proposed measures.

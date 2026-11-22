@@ -1,0 +1,3 @@
+# 1_source_documents
+
+`sources.yaml` only: the 2025 Building Code of New York State is copyrighted (ICC), so it is not in this folder. `sources.yaml` records where it came from (link), when it was downloaded, its SHA-256 fingerprint, what kind of copy it is (ICC's own PDF, real text; a per-copy number on every page), its terms, when it is law in New York, which parts are brought in, each table's lines, and where the plain text runs a table's raised note letter into its cell (`misread`, put right by line). It is kept in the code cache outside the repo (`kept_outside_repo: true`; [the decision](../../../../../docs/decisions/2026-11-21_ny_building_code.md)).

@@ -1,0 +1,221 @@
+# How the 2025 Building Code of New York State defines the words its commercial egress rules depend on: whole
+# definitions, quoted exactly (file, page, lines), no paraphrase (drafting_rules.md). A word printed in italics has
+# Chapter 2's meaning (201.1); a word in roman, or in italics but not defined, takes the meaning of the referenced
+# standards, statutes or regulations, or its ordinary meaning (201.4). Keys are bc_ and the term. Quotes are checked
+# against the book's text by python -m rule_format where the code cache exists. Drafted in a Claude Code session
+# (claude-opus-5-5, 2026-11-21); drafts (approval deferred, 2026-10-19).
+
+bc_story:
+  term: STORY
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 63
+    lines:
+    - 8
+    - 11
+    quote: '[BG] STORY. That portion of a building included between the upper surface of a floor and the upper surface of
+      the floor or roof next above (see “Basement,” “Building height,” “Grade plane” and “Mezzanine”). A story is measured
+      as the vertical distance from top to top of two successive tiers of beams or finished floor surfaces and, for the topmost
+      story, from the top of the floor finish to the top of the ceiling joists or, where there is not a ceiling, to the top
+      of the roof rafters.'
+  notes: Measured by the parts.yaml kind story.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_means_of_egress:
+  term: MEANS OF EGRESS
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 53
+    lines:
+    - 40
+    - 42
+    quote: '[BE] MEANS OF EGRESS. A continuous and unobstructed path of vertical and horizontal egress travel from any occupied
+      portion of a building or structure to a public way. A means of egress consists of three separate and distinct parts:
+      the exit access, the exit and the exit discharge.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_exit:
+  term: EXIT
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 42
+    lines:
+    - 53
+    - 55
+    quote: '[BE] EXIT. That portion of a means of egress system between the exit access and the exit discharge or public way.
+      Exit components include exterior exit doors at the level of exit discharge, interior exit stairways and ramps, exit
+      passageways, exterior exit stairways and ramps and horizontal exits.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_exit_access:
+  term: EXIT ACCESS
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 42
+    lines:
+    - 57
+    - 57
+    quote: '[BE] EXIT ACCESS. That portion of a means of egress system that leads from any occupied portion of a building
+      or structure to an exit.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_exit_access_doorway:
+  term: EXIT ACCESS DOORWAY
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 43
+    lines:
+    - 3
+    - 4
+    quote: '[BE] EXIT ACCESS DOORWAY. A door or access point along the path of egress travel from an occupied room, area or
+      space where the path of egress enters an intervening room, corridor, exit access stairway or ramp.'
+  notes: parts.yaml story_exit_count and space_exit_count count exits and exit access doorways.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_exit_discharge:
+  term: EXIT DISCHARGE
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 43
+    lines:
+    - 7
+    - 7
+    quote: '[BE] EXIT DISCHARGE. That portion of a means of egress system between the termination of an exit and a public
+      way.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_level_of_exit_discharge:
+  term: LEVEL OF EXIT DISCHARGE
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 51
+    lines:
+    - 52
+    - 52
+    quote: LEVEL OF EXIT DISCHARGE. See “Exit discharge, level of.”
+  notes: 308.5.1's Group E test (rooms on a level of exit discharge).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_common_path_of_egress_travel:
+  term: COMMON PATH OF EGRESS TRAVEL
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 38
+    lines:
+    - 4
+    - 5
+    quote: '[BE] COMMON PATH OF EGRESS TRAVEL. That portion of exit access travel distance measured from the most remote point
+      of each room, area or space to that point where the occupants have separate and distinct access to two exits or exit
+      access doorways.'
+  notes: Measured as parts.yaml common_path_of_travel (a story) and space_common_path (a space).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_corridor:
+  term: CORRIDOR
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 39
+    lines:
+    - 17
+    - 17
+    quote: '[BE] CORRIDOR. An enclosed exit access component that defines and provides a path of egress travel.'
+  notes: '1020.5''s dead-end corridors: parts.yaml kind corridor.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_occupant_load:
+  term: OCCUPANT LOAD
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 55
+    lines:
+    - 22
+    - 22
+    quote: '[BE] OCCUPANT LOAD. The number of persons for which the means of egress of a building or portion thereof is designed.'
+  notes: '1006.2.1''s design occupant load: parts.yaml space_occupant_load, as the architect states it.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_automatic_sprinkler_system:
+  term: AUTOMATIC SPRINKLER SYSTEM
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 34
+    lines:
+    - 22
+    - 23
+    quote: '[F] AUTOMATIC SPRINKLER SYSTEM. An automatic sprinkler system is an integrated network of piping and fire sprinklers
+      designed in accordance with fire protection standards.'
+  notes: Which standard the system meets (903.3.1.1, NFPA 13; 903.3.1.2, NFPA 13R) is the architect's statement (proposed
+    measures).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_custodial_care:
+  term: CUSTODIAL CARE
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 39
+    lines:
+    - 50
+    - 53
+    quote: '[BG] CUSTODIAL CARE. Describes persons who receive assistance with day-to-day living tasks such as cooking, taking
+      medication, bathing, using toilet facilities and other tasks of daily living. Custodial care includes persons receiving
+      care who have the ability to respond to emergency situations and may receive limited verbal or physical assistance.
+      These care recipients may evacuate at a slower rate and/or who have mental and psychiatric complications.'
+  notes: '308.5''s Group I-4: persons receiving custodial care.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_floor_area_gross:
+  term: FLOOR AREA, GROSS
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 47
+    lines:
+    - 21
+    - 25
+    quote: '[BE] FLOOR AREA, GROSS. The floor area within the inside perimeter of the exterior walls of the building under
+      consideration, exclu- sive of vent shafts and courts, without deduction for corridors, stairways, ramps, closets, the
+      thickness of interior walls, columns or other features. The floor area of a building, or portion thereof, not provided
+      with surrounding exterior walls shall be the usable area under the horizontal projection of the roof or floor above.
+      The gross floor area shall not include shafts with no openings or interior courts.'
+  notes: '508.2.3''s larger reading of the floor area of the story: parts.yaml story_gross_floor_area.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_floor_area_net:
+  term: FLOOR AREA, NET
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 47
+    lines:
+    - 26
+    - 27
+    quote: '[BE] FLOOR AREA, NET. The actual occupied area not including unoccupied accessory areas such as corridors, stairways,
+      ramps, toilet rooms, mechanical rooms and closets.'
+  notes: '508.2.3''s smaller reading of the floor area of the story: parts.yaml story_net_floor_area.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_dwelling_unit:
+  term: DWELLING UNIT
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 41
+    lines:
+    - 54
+    - 55
+    quote: '[A] DWELLING UNIT. A single unit providing complete, independent living facilities for one or more persons, including
+      permanent provisions for living, sleeping, eating, cooking and sanitation.'
+  notes: 1016.2 item 5.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_sleeping_unit:
+  term: SLEEPING UNIT
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 60
+    lines:
+    - 52
+    - 54
+    quote: '[A] SLEEPING UNIT. A single unit that provides rooms or spaces for one or more persons, includes permanent provisions
+      for sleeping and can include provisions for living, eating and either sanitation or kitchen facilities but not both.
+      Such rooms and spaces that are also part of a dwelling unit are not sleeping units.'
+  notes: 1016.2 item 5.
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft

@@ -1,0 +1,188 @@
+# Source documents for New York State's building code for buildings other than houses (README.md): the law a New York
+# place would inherit for such a building (its jurisdiction.yaml `inherits:`; none does yet, so no design check runs
+# it today). The house code, the 2025 Residential Code of New York State, is the sibling folder new_york_state/.
+# The code book is copyrighted (International Code Council), so it is NOT in this folder: kept_outside_repo: true
+# means the book and its extracted text are in the code cache on the machines that have it,
+# <cache>/<sha256>/<file> (rule_format/rulebook.py: code_cache), with the text of every page
+# (document_extraction/book_text.py), the same for every branch; brought_in.pages says which of its pages this branch
+# reads. The repo keeps only short exact quotes, each with its section, page and a link (decided 2026-11-12:
+# docs/decisions/2026-11-12_building_code_text.md; for this book: docs/decisions/2026-11-21_ny_building_code.md).
+# sha256 is the book's fingerprint: if a single byte changes, it changes.
+# Pages are the PDF's own page numbers (1 = the first page of the file), never the book's printed page numbers
+# (the PDF's p.341 prints "320").
+# Everything here is verified against this copy only; check against a copy bought from ICC.
+
+documents:
+
+  - file: gov.ny.building.2025.pdf
+    title: 2025 Building Code of New York State (BCNYS)
+    publisher: International Code Council, for the New York State Department of State (publication date July 2025)
+    edition: 2025   # ISBN 978-1-967590-70-7 (PDF download), as its page 3 prints
+    url: https://archive.org/details/gov.ny.building.2025
+    downloaded_on: 2026-11-21   # https://archive.org/download/gov.ny.building.2025/gov.ny.building.2025.pdf
+    sha256: 729d2db7ca361764cc8ce131f89a42a5fef5b22ce819fa96f428865aaacc4ca9
+    pages: 813
+    kept_outside_repo: true
+    copy: >
+      Posted to the Internet Archive by Public.Resource.Org on 2026-02-02 (item gov.ny.building.2025), as the house
+      code's copy was (sibling folder new_york_state/). It is not a scan: it is ICC's own digital PDF edition, with real
+      text in its fonts (no OCR), an ICC logo, and a per-copy number, 102102166, stamped at the top of every page (the
+      same number the house code's copy carries: likely the download's licence number), so it is one specific licensed
+      copy, posted by Public.Resource.Org. The stamp is page furniture, never in a quote. Gordium reads the PDF's own
+      text; archive.org's OCR files of it are not used. Its numbers are still read a second time, independently
+      (text_verification.yaml). A working copy, chosen by Ben (2026-11-21: Public.Resource.Org copies for now): to be
+      checked against a copy bought from ICC (ICC's digital codes site may not be read by any script or automated
+      browser: its terms forbid automated extraction and commercial use).
+    terms: >
+      Copyright 2025 International Code Council. The code is law in New York (19 NYCRR Part 1221 incorporates it by
+      reference). Gordium keeps only short exact quotes, with section, page and a link, in the repo; the book and its
+      full text stay outside it.
+    in_force: >
+      The building code of the Uniform Code for every building the 2025 Residential Code of New York State does not
+      cover (that code covers one- and two-family dwellings and townhouses not more than three stories above grade
+      plane: sibling folder new_york_state/). Incorporated by 19 NYCRR Part 1221 (the 2025 rule amends Parts 1219 to
+      1229) and in force since 2025-12-31: "The effective date of the 2025 NYS Uniform Code is December 31, 2025." During
+      the transition, from the Notice of Adoption (State Register of 2025-10-01) to that date, "a person shall have the
+      option of complying with either the provisions of the 2025 Uniform Code or the 2020 Uniform Code" (DOS:
+      https://dos.ny.gov/notice-adoption, read 2026-11-21; README).
+    layout: icc          # ICC's own PDF, read line by line (document_extraction/icc.py)
+    style: bcnys_2025    # cut at the book's own headings: sections without letters (1017), tables named below
+                         # (document_extraction/icc_sections.py)
+    brought_in:
+      # Chapter 2 (201, 202 definitions: pp.32-67; p.68 starts Chapter 3, proving the end); 308.5 (Group I-4, p.79,
+      # with SECTION 309 after it); 508.2 (accessory occupancies, p.147, with 508.3 after it); 903.3.1.1 and 903.3.1.2
+      # (the two sprinkler systems the travel, common path and remoteness limits name, pp.273-274, each without the
+      # parts under it: their exempt locations and extent are the architect's statement); 1006.2.1 and Table
+      # 1006.2.1 (common path, spaces with one exit, p.315, with 1006.2.2 after); 1006.3.3, Table 1006.3.3, 1006.3.4
+      # and Table 1006.3.4(2) (a story's number of exits, and when one will do: pp.316-317, so a story is held to two
+      # separated exits only where it needs two; review round 3, 2026-11-22); 1007.1 (exit separation, p.318, with
+      # SECTION 1008 after); 1016.2 (egress through intervening spaces, pp.340-341) and Section 1017 (exit access
+      # travel distance, pp.341-342, with SECTION 1018 after); 1020.5 (dead ends, p.344, with 1020.6 after).
+      pages: 32-68, 79, 147, 273-274, 315-318, 340-342, 344
+      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(2),
+                 '1007.1', '1016.2', '1017', Table 1017.2, '1020.5']
+      alone: ['903.3.1.1', '903.3.1.2']   # brought in without the parts under them (exempt locations, balconies, attics)
+      definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
+        202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
+          the rule measures the story's floor area by both of the book's own measures of floor area (README).
+        202:floor_area_net: As 202:floor_area_gross.
+      tables:      # each table's lines, checked on the page image (the text doesn't say where a table ends); every
+                   # table on the pages read is named, brought in or not
+        Table 903.2.11.6: p.273 lines 14-36
+        Table 1006.2.1: p.315 lines 14-44
+        Table 1006.3.3: p.316 lines 52-57
+        Table 1006.3.4(1): p.317 lines 17-32
+        Table 1006.3.4(2): p.317 lines 33-53
+        Table 1017.2: p.341 lines 24-59
+        Table 1020.2: p.344 lines 3-18
+        Table 1020.3: p.344 lines 25-34
+      misread:     # where the text runs a table's raised footnote letter into the cell before it ("200c" for 200
+                   # with note c): put right by line, as every check reads it (book_text.as_printed), each
+                   # checked by position (character sizes) and on the page image
+        p.315 line 21:
+        - {ocr: '75a', printed: '75[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 22:
+        - {ocr: '100a', printed: '100[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 23:
+        - {ocr: '100a', printed: '100[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 24:
+        - {ocr: '25b', printed: '25[fnb]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 25:
+        - {ocr: '75b', printed: '75[fnb]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 26:
+        - {ocr: 'I-2d', printed: 'I-2[fnd]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        - {ocr: '75a', printed: '75[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 27:
+        - {ocr: '100a', printed: '100[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 28:
+        - {ocr: '75a', printed: '75[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 29:
+        - {ocr: '125a', printed: '125[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 30:
+        - {ocr: 'R-3e', printed: 'R-3[fne]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 31:
+        - {ocr: 'R-4e', printed: 'R-4[fne]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 32:
+        - {ocr: '100a', printed: '100[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.315 line 33:
+        - {ocr: '75a', printed: '75[fna]', why: 'Table 1006.2.1 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point text; the page image)'}
+        p.341 line 28:
+        - {ocr: '200e', printed: '200[fne]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        - {ocr: '250b', printed: '250[fnb]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 29:
+        - {ocr: '250b', printed: '250[fnb]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 30:
+        - {ocr: '300c', printed: '300[fnc]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 31:
+        - {ocr: '400c', printed: '400[fnc]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 32:
+        - {ocr: '75d', printed: '75[fnd]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 33:
+        - {ocr: '100d', printed: '100[fnd]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 34:
+        - {ocr: '150d', printed: '150[fnd]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 35:
+        - {ocr: '175d', printed: '175[fnd]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 36:
+        - {ocr: '200c', printed: '200[fnc]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 37:
+        - {ocr: '200c', printed: '200[fnc]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+        p.341 line 38:
+        - {ocr: '200c', printed: '200[fnc]', why: 'Table 1017.2 prints the footnote letter raised and smaller (position reading: a 5.04-point letter beside 8.4-point digits; the page image)'}
+      subscript_terms:   # two terms the text reads alike: the book prints a subscript the text puts on the next line
+        p.48 line 49:
+          printed: GROUND SNOW LOAD, p
+          term: GROUND SNOW LOAD, p (allowable stress design)
+          why: The book prints GROUND SNOW LOAD, p with the subscript g (line 47, the subscript on line 48) and then
+            with the subscript g(asd) (line 49, the subscript on line 50), checked on the page image; the text holds
+            neither subscript, so both read "GROUND SNOW LOAD, p". A snow-load term, used by no brought-in piece.
+      not_fractions:     # lines that look like a fraction left apart, each checked on the page image: none is one
+        p.35 line 55: The subscript 2 of CO2 in CARBON DIOXIDE EXTINGUISHING SYSTEMS, printed under line 54.
+        p.49 line 42: The subscript 50 of LD50 (median lethal dose) in HIGHLY TOXIC, printed under line 41.
+        p.49 line 45: As line 42 (LD50, under line 44).
+        p.49 line 49: The subscript 50 of LC50 (median lethal concentration), printed under line 48.
+        p.65 line 9: The subscript 50 of LD50 in TOXIC, printed under line 8.
+        p.65 line 12: As line 9 (LD50, under line 11).
+        p.65 line 16: The subscript 50 of LC50, printed under line 15.
+        p.342 line 16: 1017.2.3 item 4 prints a ventilation rate in cubic metres per minute per square metre, "(0.556
+          m3/min/m2)", the 3 and the 2 raised as powers of the unit; the slashes divide units, not a fraction.
+      italic_not_defined:    # by piece: italic words Section 202 doesn't define, each with why (any other is a problem)
+        202:area_for_masonry:
+          specified: The book prints "specified dimensions" in italics across two lines (p.33, lines 48-49) with the
+            first word on line 47's "out-to-out specified"; DIMENSIONS (Specified) is defined under DIMENSIONS, which
+            applies only to Chapter 21 (masonry). A masonry term, used by no brought-in rule.
+        202:basement:
+          flood: '"flood loads": the book points to Section 1612 (flood loads), not brought in; no term FLOOD.'
+        202:brick:
+          clay or shale: The name of one kind of brick under BRICK (its sub-entry "Clay or shale"), printed in italics;
+            no term.
+          prism: '"a rectangular prism": PRISM is not defined in Section 202 (Chapter 21 defines it, not brought in);
+            ordinary meaning (201.4).'
+        202:dimensions:
+          specified dimension: DIMENSIONS' own sub-entry "Specified" (line 24), printed in italics where Nominal uses
+            it; no separate term.
+        202:liquid:
+          flammable: '"flam-" / "mable": FLAMMABLE LIQUID is broken at a line''s end (p.52, lines 18-19), so the
+            word "flammable" alone is left over; FLAMMABLE LIQUID is a Fire Code term, used by no brought-in rule.'
+        202:nominal_loads:
+          flood: '"flood" among the loads of Chapter 16 (dead, live, soil, wind, tornado, snow, rain, flood and
+            earthquake); FLOOD LOADS is not a Section 202 term here. Used by no brought-in rule.'
+        202:roof_assembly_for_application_to_chapter_15_only:
+          vapor retarder: Defined in the Energy Conservation Construction Code of New York State, not this code
+            (201.3); a roofing term, used by no brought-in rule.
+        '1006.2.1':
+          common path of egress: The book prints "common path of egress" in italics and "travel distance" in roman
+            (p.315, line 4, checked on the page image); the term is COMMON PATH OF EGRESS TRAVEL, brought in by this
+            piece's heading and by the roman-type match.
+        '1017.3':
+          smoke protected seating: The book prints "smoke protected seating" in italics; the defined term is
+            SMOKE-PROTECTED ASSEMBLY SEATING, which the phrase does not name whole, so it is not brought in. Exception
+            2 is for assembly seating (Section 1030.7, not brought in), not Group I-4.
+    contents: >
+      Commercial egress step 1 (2026-11-21), the limits Gordium's route measures feed, as the Maine rulebook drafted
+      them for a day-care centre (regulations/jurisdictions/maine/maine_state/): 1017 and Table 1017.2 (exit access
+      travel distance), 1006.2.1 and Table 1006.2.1 (common path of egress travel; spaces with one exit), 1020.5 (dead
+      ends), 1007.1 (exit and exit access doorway separation), 1016.2 (egress through intervening spaces), 508.2
+      (accessory occupancies: 508.2.3's 10 percent of the story), 308.5 (Group I-4, day care), 903.3.1.1 and
+      903.3.1.2 (the sprinkler systems the limits name); 201 (how definitions apply) and every Section 202
+      definition they use, by the book's italics (201.1).

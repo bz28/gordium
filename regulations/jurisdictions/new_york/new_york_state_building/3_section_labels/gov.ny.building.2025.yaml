@@ -1,0 +1,2579 @@
+# What kind of text each brought-in piece of the 2025 Building Code of New York State is (3_section_labels/README.md).
+# Drafted by hand in a Claude Code session (claude-opus-5-5, 2026-11-21), checked by code (python -m rule_format): each
+# quote is the extracted text's exact words where the code cache has the book (it is kept outside the repo), with the
+# raised note letters of Tables 1006.2.1 and 1017.2 put right by line (sources.yaml brought_in.misread). Drafts:
+# approval is deferred.
+document: gov.ny.building.2025.pdf
+labels:
+  '202':
+    label: not_for_checking
+    topic: definitions
+    reason: 'A heading only: its title, with no requirement of its own (the definitions under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 32
+      lines:
+      - 22
+      - 22
+      quote: SECTION 202—DEFINITIONS
+    piece_sha256: d517861fa9698a910e750045fb415f0e7138ffa3e3a1ef2fd689171fda2f98b3
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:aggregate:
+    label: reference
+    topic: definitions
+    reason: 'Defines AGGREGATE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 3
+      - 3
+      quote: '[BS] AGGREGATE. In roofing, crushed stone, crushed slag or water-worn gravel used for surfacing for roof coverings.'
+    piece_sha256: eec9a8499f90c13f08aafd20ba719709b279b84538a5e3fcf3794e5d5a1a122e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:aisle:
+    label: reference
+    topic: definitions
+    reason: 'Defines AISLE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 16
+      - 16
+      quote: '[BE] AISLE. An unenclosed exit access component that defines and provides a path of egress travel.'
+    piece_sha256: 1c9d4afb83000e62ce00aeea7586d1a63fdce836ef28d65c377e3996a3415f8c
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:approved:
+    label: reference
+    topic: definitions
+    reason: 'Defines APPROVED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 39
+      - 39
+      quote: '[A] APPROVED. Acceptable to the building official.'
+    piece_sha256: 72b7228fca4ede5244d1106a557d79570bec094fb5dbd50ade1be00f65ed7b58
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:area_for_masonry:
+    label: reference
+    topic: definitions
+    reason: 'Defines AREA (for masonry), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 46
+      - 46
+      quote: '[BS] AREA (for masonry).'
+    piece_sha256: 49a8e7872fff1138c3a7d2826201c44eb9dce3259647ecfeeefb54877458d080
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:area_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines AREA, BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 33
+      lines:
+      - 50
+      - 50
+      quote: '[BG] AREA, BUILDING. The area included within surrounding exterior walls, or exterior walls and fire walls,
+        exclusive of vent shafts and'
+    piece_sha256: 4c2fb086831f5dfedf68a651750722e1a70becc862564d98c24e347f0498f191
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:atrium:
+    label: reference
+    topic: definitions
+    reason: 'Defines ATRIUM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 5
+      - 5
+      quote: '[NY] ATRIUM. An opening connecting two or more stories other than enclosed stairways, elevators, hoistways,
+        escalators, plumbing,'
+    piece_sha256: 090002320b9abb7f7175a132d5badf3d33b72fc2206f69a74a40c8ff2566deed
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 12
+      - 12
+      quote: '[F] AUTOMATIC. As applied to fire protection devices, a device or system providing an emergency function without
+        the necessity for'
+    piece_sha256: d4a09578ec9aa29d640e81df267daa1a209a9dee6ac4ac76fc7358f405c78e9e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:automatic_sprinkler_system:
+    label: reference
+    topic: definitions
+    reason: 'Defines AUTOMATIC SPRINKLER SYSTEM, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 22
+      - 22
+      quote: '[F] AUTOMATIC SPRINKLER SYSTEM. An automatic sprinkler system is an integrated network of piping and fire sprinklers
+        designed'
+    piece_sha256: 89aac7169d32c3a7900eb907bf184a3a4014edc235d60d095ab99964147411b6
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:basement:
+    label: reference
+    topic: definitions
+    reason: 'Defines BASEMENT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 53
+      - 53
+      quote: '[BG] BASEMENT. A story that is not a story above grade plane (see “Story above grade plane”). This definition
+        of “Basement” does not'
+    piece_sha256: ccec38fa898298ee56cfe0079811a88dea1f5a8bf8a7f22f08813cf9475bec2b
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:basement_for_flood_loads:
+    label: reference
+    topic: definitions
+    reason: 'Defines BASEMENT (for flood loads), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 34
+      lines:
+      - 55
+      - 55
+      quote: '[BS] BASEMENT (for flood loads). The portion of a building having its floor subgrade (below ground level) on
+        all sides. This definition'
+    piece_sha256: c6371e0d6a5f2ad6aa55bc3d8c5b06c0d0b9d39b38c1ea81ce0d423046a50617
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:boiling_point:
+    label: reference
+    topic: definitions
+    reason: 'Defines BOILING POINT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 13
+      - 13
+      quote: '[F] BOILING POINT. The temperature at which the vapor pressure of a liquid equals the atmospheric pressure of
+        14.7 pounds per'
+    piece_sha256: 112ea86f91c3dfec7a5c3c7d54724214ed4181cc24594183535e45161d04ae22
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:brick:
+    label: reference
+    topic: definitions
+    reason: 'Defines BRICK, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 24
+      - 24
+      quote: '[BS] BRICK.'
+    piece_sha256: ace737611a111800c2bdec0be1bcdb84c474e991b0023a2b20ac660ff1125304
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:building:
+    label: reference
+    topic: definitions
+    reason: 'Defines BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 31
+      - 31
+      quote: '[A] BUILDING. Any structure utilized or intended for supporting or sheltering any occupancy.'
+    piece_sha256: 924a33202ba3bbd7fd11d8f423e68fcb12cf05279ee44a2f45ce77ae23312f72
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:building_area:
+    label: reference
+    topic: definitions
+    reason: 'Defines BUILDING AREA, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 32
+      - 32
+      quote: BUILDING AREA. See “Area, building.”
+    piece_sha256: 95c90bd544a7ef4bb72323c7b22e145b04de56a797adbca95f4e5d3081b30817
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:building_height:
+    label: reference
+    topic: definitions
+    reason: 'Defines BUILDING HEIGHT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 35
+      - 35
+      quote: BUILDING HEIGHT. See “Height, building.”
+    piece_sha256: 58510809e175b09667875e7ad704953c9fc6ec7d0f08343bee8f6c6e895fe840
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:building_official:
+    label: reference
+    topic: definitions
+    reason: 'Defines BUILDING OFFICIAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 35
+      lines:
+      - 37
+      - 37
+      quote: '[A] BUILDING OFFICIAL. The officer or other designated authority charged with the administration and enforcement
+        of this code, or'
+    piece_sha256: 29a68de3f2890d12ec5406cf1abebc3fc00c1d194e19183b27c3c9990f5a5f5b
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:care_suite:
+    label: reference
+    topic: definitions
+    reason: 'Defines CARE SUITE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 36
+      lines:
+      - 12
+      - 12
+      quote: '[BG] CARE SUITE. In Group I-2 occupancies, a group of treatment rooms, care recipient sleeping rooms and the
+        support rooms or'
+    piece_sha256: b4b6b0fbdbc1cdf335bad44bed232fb8db39f6db64f491fc2b9f9d409f4ca498
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:combustible_liquid:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMBUSTIBLE LIQUID, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 37
+      lines:
+      - 49
+      - 49
+      quote: '[F] COMBUSTIBLE LIQUID. A liquid having a closed cup flash point at or above 100°F (38°C). Combustible liquids
+        shall be subdivided'
+    piece_sha256: bfd1dc89f9575a4a5091b93817bb7c10957bbf107e48cdf4602a18c1c632d252
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:common_path_of_egress_travel:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMMON PATH OF EGRESS TRAVEL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 4
+      - 4
+      quote: '[BE] COMMON PATH OF EGRESS TRAVEL. That portion of exit access travel distance measured from the most remote
+        point of each'
+    piece_sha256: 6f30a9e55e3491cabc607b0e4f176710d41936eba3429f2387a03e7b7738200a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:compressed_gas:
+    label: reference
+    topic: definitions
+    reason: 'Defines COMPRESSED GAS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 38
+      lines:
+      - 8
+      - 8
+      quote: '[F] COMPRESSED GAS. A material or mixture of materials that meets both of the following:'
+    piece_sha256: 5cf836c15a38a41c19c77481c0d1ccdc5ecd00c985d20d8531ee5a879c42e9be
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:corridor:
+    label: reference
+    topic: definitions
+    reason: 'Defines CORRIDOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 17
+      - 17
+      quote: '[BE] CORRIDOR. An enclosed exit access component that defines and provides a path of egress travel.'
+    piece_sha256: 915ca255184e969aa7953e98413317521565bba1e9ae6ae7e8c3e6ed867b78ab
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:court:
+    label: reference
+    topic: definitions
+    reason: 'Defines COURT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 27
+      - 27
+      quote: '[BG] COURT. An open, uncovered space, unobstructed to the sky, bounded on three or more sides by exterior building
+        walls or other'
+    piece_sha256: 630e2e8b75ef5ce1f7a85b29abe33c3ef3404133ba7277f7d4223b80b68f9b83
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:cryogenic_fluid:
+    label: reference
+    topic: definitions
+    reason: 'Defines CRYOGENIC FLUID, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 48
+      - 48
+      quote: '[F] CRYOGENIC FLUID. A liquid having a boiling point lower than -150°F (-101°C) at 14.7 pounds per square inch
+        atmosphere (psia) (an'
+    piece_sha256: 4cd2c7fd8ae16464a12e6b677e54f3d18fa4976f5d48b8d25ce81d2e1876b06f
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:custodial_care:
+    label: reference
+    topic: definitions
+    reason: 'Defines CUSTODIAL CARE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 39
+      lines:
+      - 50
+      - 50
+      quote: '[BG] CUSTODIAL CARE. Describes persons who receive assistance with day-to-day living tasks such as cooking,
+        taking medication,'
+    piece_sha256: 44133a2ce27f0e8a43479860532e14a23db315684f953b34ebe75ba63ffe579a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dead_load:
+    label: reference
+    topic: definitions
+    reason: 'Defines DEAD LOAD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 40
+      lines:
+      - 16
+      - 16
+      quote: '[BS] DEAD LOAD. The weight of materials of construction incorporated into the building, including but not limited
+        to walls, floors,'
+    piece_sha256: c1d0f23943936da7451df4031cad13545ee0ae7fc68a82022e9547f8ec906dbe
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dimensions:
+    label: reference
+    topic: definitions
+    reason: 'Defines DIMENSIONS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 21
+      - 21
+      quote: '[BS] DIMENSIONS. This definition applies only to Chapter 21.'
+    piece_sha256: f7223e51b653935b4b08f62bc970712550336dd20847cdf4ede2123d8ed7be79
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:direct_access:
+    label: reference
+    topic: definitions
+    reason: 'Defines DIRECT ACCESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 25
+      - 25
+      quote: '[BE] DIRECT ACCESS. A path of travel from a space to an immediately adjacent space through an opening in the
+        common wall'
+    piece_sha256: 02dac78ea38bd502c7ab3345cd9a66aae210c77018a7754d3b77e1303816f038
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:doorway_exit_access:
+    label: reference
+    topic: definitions
+    reason: 'Defines DOORWAY, EXIT ACCESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 33
+      - 33
+      quote: DOORWAY, EXIT ACCESS. See “Exit access doorway.”
+    piece_sha256: 09fa36f30663686224fc2d11d1970e5dc52a58c43a7e2a2f6f84d14812387cff
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dwelling:
+    label: reference
+    topic: definitions
+    reason: 'Defines DWELLING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 52
+      - 52
+      quote: '[A] DWELLING. A building that contains one or two dwelling units used, intended or designed to be used, rented,
+        leased, let or hired'
+    piece_sha256: 06a06e15f89b13a6b38855bc6f25c5eb35d3efe187b8278b8826b36f29d18e89
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:dwelling_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines DWELLING UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 41
+      lines:
+      - 54
+      - 54
+      quote: '[A] DWELLING UNIT. A single unit providing complete, independent living facilities for one or more persons,
+        including permanent'
+    piece_sha256: 7ca57b0329845f8839c9ccef07d4cec122cae092de4c120631e22a237ec44857
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:emergency_escape_and_rescue_opening:
+    label: reference
+    topic: definitions
+    reason: 'Defines EMERGENCY ESCAPE AND RESCUE OPENING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 14
+      - 14
+      quote: '[BE] EMERGENCY ESCAPE AND RESCUE OPENING. An operable exterior window, door or other similar device that provides
+        for a'
+    piece_sha256: 2e3b4be459c83e184ca9490e00d148447e710ffd44d5ad74cb43c97c1522cf0e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 53
+      - 53
+      quote: '[BE] EXIT. That portion of a means of egress system between the exit access and the exit discharge or public
+        way. Exit components'
+    piece_sha256: 6f4c6a822f8c6d6adda671ed50e7453bb47a9e1f6137adb4070c0ab424429474
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_horizontal:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT, HORIZONTAL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 56
+      - 56
+      quote: EXIT, HORIZONTAL. See “Horizontal exit.”
+    piece_sha256: e290e698db92d4ee5454d7aa30f5b59dfe8b15dd74f8b245a4670f33855b3410
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_access:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT ACCESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 57
+      - 57
+      quote: '[BE] EXIT ACCESS. That portion of a means of egress system that leads from any occupied portion of a building
+        or structure to an exit.'
+    piece_sha256: 387efb1deeb52338db7ca73907542cbba265d180380842646cdd6ae3a130c41a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_access_doorway:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT ACCESS DOORWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 3
+      - 3
+      quote: '[BE] EXIT ACCESS DOORWAY. A door or access point along the path of egress travel from an occupied room, area
+        or space where the'
+    piece_sha256: 032809cc008c48d4f5ba7acc7662841427150748914ed9e8335a3561e0390ba2
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_access_ramp:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT ACCESS RAMP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 5
+      - 5
+      quote: '[BE] EXIT ACCESS RAMP. A ramp within the exit access portion of the means of egress system.'
+    piece_sha256: 0cfcbac83a6a7e9ca0af8883f9a65a146bc0418528a69ec760a8431892934acc
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_access_stairway:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT ACCESS STAIRWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 6
+      - 6
+      quote: '[BE] EXIT ACCESS STAIRWAY. A stairway within the exit access portion of the means of egress system.'
+    piece_sha256: 118223e259a461520a2044b47bd3f36296f9a65948c0d64a78f616ecf73d4054
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_discharge:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT DISCHARGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 7
+      - 7
+      quote: '[BE] EXIT DISCHARGE. That portion of a means of egress system between the termination of an exit and a public
+        way.'
+    piece_sha256: e3918ad47eafaeec1218168d0d0c33c96bacf22fc21cd4d3cd07642392798a8c
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_discharge_level_of:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT DISCHARGE, LEVEL OF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 8
+      - 8
+      quote: '[BE] EXIT DISCHARGE, LEVEL OF. The story at the point at which an exit terminates and an exit discharge begins.'
+    piece_sha256: 47c9e49eda2468dfd6af678ece8c576f2dc83e3992a9574ac7484aecabca783e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exit_passageway:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXIT PASSAGEWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 43
+      lines:
+      - 9
+      - 9
+      quote: '[BE] EXIT PASSAGEWAY. An exit component that is separated from other interior spaces of a building or structure
+        by fire-resistance-'
+    piece_sha256: 13b0cd4d9827097c4115d8238eceae2fc825593c0ce675d3afc536203df6b5f1
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exterior_exit_stairway:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXTERIOR EXIT STAIRWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 3
+      - 3
+      quote: '[BE] EXTERIOR EXIT STAIRWAY. An exit component that serves to meet one or more means of egress design requirements,
+        such as'
+    piece_sha256: e42b9a3defe05d681c1edc0c898fb09bd760a5b3d83d349b78d61cace419bd05
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:exterior_wall:
+    label: reference
+    topic: definitions
+    reason: 'Defines EXTERIOR WALL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 11
+      - 11
+      quote: '[BF] EXTERIOR WALL. A wall, bearing or nonbearing, that is used as an enclosing wall for a building, other than
+        a fire wall, and that'
+    piece_sha256: b86835d328fd2c2f302ba95d23eba0a29262c7e2630b15e72ff3a2fd1400eaea
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fabrication_area:
+    label: reference
+    topic: definitions
+    reason: 'Defines FABRICATION AREA, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 29
+      - 29
+      quote: '[F] FABRICATION AREA. An area within a semiconductor fabrication facility and related research and development
+        areas in which'
+    piece_sha256: 5def6fb651f93a9181dbbff9cb5a69f80e2dba964d1ad7b6fdbe74f4c8f7ee3b
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:facility:
+    label: reference
+    topic: definitions
+    reason: 'Defines FACILITY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 44
+      lines:
+      - 32
+      - 32
+      quote: '[A] FACILITY. All or any portion of buildings, structures, site improvements, elements and pedestrian or vehicular
+        routes located on a'
+    piece_sha256: d3218b5b4796d1c3140a4374dece0a2c36cfffc347e0330d47c51983c7993e69
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fire_wall:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIRE WALL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 45
+      lines:
+      - 40
+      - 40
+      quote: '[BF] FIRE WALL. A fire-resistance-rated wall having protected openings, which restricts the spread of fire and
+        extends continuously'
+    piece_sha256: 13baefb78e6958cd35ec518f1244fe88b8fbe0602fd3fbdd92e3a81e3875ceee
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:fixed_seating:
+    label: reference
+    topic: definitions
+    reason: 'Defines FIXED SEATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 46
+      lines:
+      - 20
+      - 20
+      quote: '[BE] FIXED SEATING. Furniture or fixture designed and installed for the use of sitting and secured in place
+        including bench-type seats'
+    piece_sha256: 3e3d2ae59ab13e901863b2d9102e112ea7d832682b91eb676155fae34764b3aa
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:flash_point:
+    label: reference
+    topic: definitions
+    reason: 'Defines FLASH POINT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 46
+      lines:
+      - 55
+      - 55
+      quote: '[F] FLASH POINT. The minimum temperature in degrees Fahrenheit at which a liquid will give off sufficient vapors
+        to form an ignitable'
+    piece_sha256: 32bed69d4e64143f0bde7cbb4907870a1c571c105223b213ca7656f8704a7ba9
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:flight:
+    label: reference
+    topic: definitions
+    reason: 'Defines FLIGHT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 46
+      lines:
+      - 58
+      - 58
+      quote: '[BE] FLIGHT. A continuous run of rectangular treads, winders or combination thereof from one landing to another.'
+    piece_sha256: 8d61491c11ba69152ab37ae8bf232d8521f270746fe220b013a54adaeaccdb24
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:floor_area_gross:
+    label: reference
+    topic: definitions
+    reason: 'Defines FLOOR AREA, GROSS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 47
+      lines:
+      - 21
+      - 21
+      quote: '[BE] FLOOR AREA, GROSS. The floor area within the inside perimeter of the exterior walls of the building under
+        consideration, exclu-'
+    piece_sha256: 0ec1037debb30ee5bd3fd4f383d4abba9c572dda5e5a847377a9619ed01ddd04
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:floor_area_net:
+    label: reference
+    topic: definitions
+    reason: 'Defines FLOOR AREA, NET, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 47
+      lines:
+      - 26
+      - 26
+      quote: '[BE] FLOOR AREA, NET. The actual occupied area not including unoccupied accessory areas such as corridors, stairways,
+        ramps, toilet'
+    piece_sha256: b287c2feffbe54e55f93133bdeec98a30336a7cae1c3e01cd29ee187cf457739
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:grade_lumber:
+    label: reference
+    topic: definitions
+    reason: 'Defines GRADE (LUMBER), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 31
+      - 31
+      quote: '[BS] GRADE (LUMBER). The classification of lumber in regard to strength and utility in accordance with American
+        Softwood Lumber'
+    piece_sha256: 2664b231c2bb59c53a4fbe34447fcdff7fdba8446c9b6662a35226c44eb9ca11
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:grade_plane:
+    label: reference
+    topic: definitions
+    reason: 'Defines GRADE PLANE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 35
+      - 35
+      quote: '[BG] GRADE PLANE. A reference plane representing the average of finished ground level adjoining the building
+        at exterior walls. Where'
+    piece_sha256: a666575276956c440fa9765dc6d3c0e32da20e0f5edae390abe54269ec49bafb
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:grade_plane_story_above:
+    label: reference
+    topic: definitions
+    reason: 'Defines GRADE PLANE, STORY ABOVE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 48
+      lines:
+      - 39
+      - 39
+      quote: GRADE PLANE, STORY ABOVE. See “Story above grade plane.”
+    piece_sha256: 964adf4b35d5ce5f34695a25cce9967a521fd36ed4b7c32245094866f3af161d
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:handling:
+    label: reference
+    topic: definitions
+    reason: 'Defines HANDLING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 14
+      - 14
+      quote: '[F] HANDLING. The deliberate transport by any means to a point of storage or use.'
+    piece_sha256: a14796dfd3d49bf8d4c89810fc19623624e0505548e9f046bb2781ab94097890
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:head_joint:
+    label: reference
+    topic: definitions
+    reason: 'Defines HEAD JOINT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 24
+      - 24
+      quote: '[BS] HEAD JOINT. Vertical mortar joint placed between masonry units within the wythe at the time the masonry
+        units are laid.'
+    piece_sha256: 865d3aa1162a42bbab42198ce0a0bfb964a6440c1a0c88378eedf7a13f0e905d
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:height_building:
+    label: reference
+    topic: definitions
+    reason: 'Defines HEIGHT, BUILDING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 49
+      lines:
+      - 29
+      - 29
+      quote: '[BG] HEIGHT, BUILDING. The vertical distance from grade plane to the average height of the highest roof surface.'
+    piece_sha256: 1edfc2f24ab1b41fbaba521427a50871fcd94945c4be4c4eb46c3d26ac844ae2
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:horizontal_exit:
+    label: reference
+    topic: definitions
+    reason: 'Defines HORIZONTAL EXIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 50
+      lines:
+      - 13
+      - 13
+      quote: '[BE] HORIZONTAL EXIT. An exit component consisting of fire-resistance-rated construction and opening protectives
+        intended to'
+    piece_sha256: 8fc7ca31651bf9c8156e635c8956075f018c2be5c8cdc5868f41fe560f1f8bf1
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:interior_exit_stairway:
+    label: reference
+    topic: definitions
+    reason: 'Defines INTERIOR EXIT STAIRWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 14
+      - 14
+      quote: '[BE] INTERIOR EXIT STAIRWAY. An exit component that serves to meet one or more means of egress design requirements,
+        such as'
+    piece_sha256: 2be880b0a7eb99fd81ad1e230c4a51440430c6aa25844fd832849219058f1e6f
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:joint:
+    label: reference
+    topic: definitions
+    reason: 'Defines JOINT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 34
+      - 34
+      quote: '[BS] JOINT. The opening in or between adjacent assemblies that is created due to building tolerances, or is
+        designed to allow inde-'
+    piece_sha256: a690bdf6ce7fa7db83da15e50daf3893ae2cbbb5b1f9665c6a1fbeb99f2529af
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:level_of_exit_discharge:
+    label: reference
+    topic: definitions
+    reason: 'Defines LEVEL OF EXIT DISCHARGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 51
+      lines:
+      - 52
+      - 52
+      quote: LEVEL OF EXIT DISCHARGE. See “Exit discharge, level of.”
+    piece_sha256: 3367a22223f62a58a98a623bd944d236693a61669fc4a5804e2bc40a62f8afc4
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:limited_verbal_or_physical_assistance:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIMITED VERBAL OR PHYSICAL ASSISTANCE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 13
+      - 13
+      quote: '[BG] LIMITED VERBAL OR PHYSICAL ASSISTANCE. Describes persons who, because of age, physical limitations, cognitive
+        limita-'
+    piece_sha256: 108af115596fbcbe73690ffe8c412e6fca40e3f66bc053e08e77cb7aa56b1f1d
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:liquid:
+    label: reference
+    topic: definitions
+    reason: 'Defines LIQUID, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 17
+      - 17
+      quote: '[F] LIQUID. A material that has a melting point that is equal to or less than 68°F (20°C) and a boiling point
+        that is greater than 68°F'
+    piece_sha256: 4952e6c4ac329cd0c85c4428937c2c646d14ed4d5f986ac209dcb301d4468a6a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:listed:
+    label: reference
+    topic: definitions
+    reason: 'Defines LISTED, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 24
+      - 24
+      quote: '[A] LISTED. Equipment, materials, products or services included in a list published by an organization acceptable
+        to the building offi-'
+    piece_sha256: 3db02dfd97f3db0efc7185037d7e2ade74cfa5eeabb667cef3b693ac20a7575a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:loads:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOADS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 46
+      - 46
+      quote: '[BS] LOADS. Forces or other actions that result from the weight of building materials, occupants and their possessions,
+        environmental'
+    piece_sha256: 32e871ba7dbbabbdc13ee10d99cc891220807f111245480f4272669b49825a5f
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:lot:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 51
+      - 51
+      quote: '[A] LOT. A portion or parcel of land considered as a unit.'
+    piece_sha256: 3878c11e1290ff14909d679911e8daa283b5fb0fe2afd103b44c5e3eb669fcfd
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:lot_line:
+    label: reference
+    topic: definitions
+    reason: 'Defines LOT LINE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 52
+      lines:
+      - 52
+      - 52
+      quote: '[A] LOT LINE. A line dividing one lot from another, or from a street or any public place.'
+    piece_sha256: d8118795be50a61488486b590e42edf64a9f064f470011689b9cbe1e0920a9c1
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:masonry:
+    label: reference
+    topic: definitions
+    reason: 'Defines MASONRY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 24
+      - 24
+      quote: '[BS] MASONRY. A built-up construction or combination of building units or materials of clay, shale, concrete,
+        glass, gypsum, stone or'
+    piece_sha256: 224c9460f16ddec741ce1b8aa4b00f10a088ee0ef4b8f0dc8266b0fbc8d61d78
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:masonry_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines MASONRY UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 33
+      - 33
+      quote: '[BS] MASONRY UNIT. Brick, tile, stone, glass block or concrete block conforming to the requirements specified
+        in Section 2103.'
+    piece_sha256: 02bb29e2e460d9b35937b2146bec4d91ed7ed2058f7a3d3187d631a1388afb60
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:means_of_egress:
+    label: reference
+    topic: definitions
+    reason: 'Defines MEANS OF EGRESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 53
+      lines:
+      - 40
+      - 40
+      quote: '[BE] MEANS OF EGRESS. A continuous and unobstructed path of vertical and horizontal egress travel from any occupied
+        portion of a'
+    piece_sha256: 468a50726da06ee3f07c5dbd5bd1443baeba3c3141f1d99594040948ea4dd790
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:mezzanine:
+    label: reference
+    topic: definitions
+    reason: 'Defines MEZZANINE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 54
+      lines:
+      - 25
+      - 25
+      quote: '[BG] MEZZANINE. An intermediate level or levels between the floor and ceiling of any story and in accordance
+        with Section 505.'
+    piece_sha256: 7338800c595e1e5e9ee91e41a3a46cfa487058f44fe7f0b0b6a8279db163ed22
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:mortar:
+    label: reference
+    topic: definitions
+    reason: 'Defines MORTAR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 54
+      lines:
+      - 35
+      - 35
+      quote: '[BS] MORTAR. A mixture consisting of cementitious materials, fine aggregates, water, with or without admixtures,
+        that is used to'
+    piece_sha256: 0382576ba785c588e851ba3bd94956257a22402cc633bf47fe38c93d1523748d
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:nominal_loads:
+    label: reference
+    topic: definitions
+    reason: 'Defines NOMINAL LOADS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 3
+      - 3
+      quote: '[BS] NOMINAL LOADS. The magnitudes of the loads specified in Chapter 16 (dead, live, soil, wind, tornado, snow,
+        rain, flood and'
+    piece_sha256: 733f4e17e658a76826670f3aef98e59263808433eb9d791339b42163cdc7ea8c
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:nosing:
+    label: reference
+    topic: definitions
+    reason: 'Defines NOSING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 16
+      - 16
+      quote: '[BE] NOSING. The leading edge of treads of stairs and of landings at the top of stairway flights.'
+    piece_sha256: 1f05d4bcf46c58cdc238a7105cb64f06b0f9dceef3865d9f3f2a2332175052cf
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:occupant_load:
+    label: reference
+    topic: definitions
+    reason: 'Defines OCCUPANT LOAD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 22
+      - 22
+      quote: '[BE] OCCUPANT LOAD. The number of persons for which the means of egress of a building or portion thereof is
+        designed.'
+    piece_sha256: 34acc708103436bec61308e893be03c30850fa95033e704b590fb2544f2235dc
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:occupiable_roof:
+    label: reference
+    topic: definitions
+    reason: 'Defines OCCUPIABLE ROOF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 23
+      - 23
+      quote: '[BG] OCCUPIABLE ROOF. An exterior space on a roof that is designed for human occupancy, other than maintenance
+        or repair, and'
+    piece_sha256: 147025df4dc91f66629e0181e397529266df09bf2fb79182e9c5622482bd5cc9
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:open_parking_garage:
+    label: reference
+    topic: definitions
+    reason: 'Defines OPEN PARKING GARAGE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 28
+      - 28
+      quote: '[BG] OPEN PARKING GARAGE. A structure or portion of a structure with the openings as described in Section 406.5.2
+        on two or more'
+    piece_sha256: f881941d5a794815da4c1a08475ca52babd939dc81526ca457dd9d75c9d70ce6
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:open_air_assembly_seating:
+    label: reference
+    topic: definitions
+    reason: 'Defines OPEN-AIR ASSEMBLY SEATING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 34
+      - 34
+      quote: '[BE] OPEN-AIR ASSEMBLY SEATING. Seating served by means of egress that is not subject to smoke accumulation
+        within or under a'
+    piece_sha256: 805eb9d0d5f671bc66c022e9bc6b4341b3c1a78dde101d1c9a03e2b8896d79ca
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:penthouse:
+    label: reference
+    topic: definitions
+    reason: 'Defines PENTHOUSE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 40
+      - 40
+      quote: '[BG] PENTHOUSE. An enclosed, unoccupiable rooftop structure used for sheltering mechanical and electrical equipment,
+        tanks,'
+    piece_sha256: fc5256d01cd9ee53d90c31802d6855c67f03f6585f624353f2a6f1146beda4ed
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:person:
+    label: reference
+    topic: definitions
+    reason: 'Defines PERSON, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 56
+      lines:
+      - 55
+      - 55
+      quote: '[A] PERSON. An individual, heirs, executors, administrators or assigns, and also includes a firm, partnership
+        or corporation, its or their'
+    piece_sha256: bbcff593e1603747f83a21aef9d7fc87f08ff971fe211899a8a1731254a57ef5
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:place_of_religious_worship:
+    label: reference
+    topic: definitions
+    reason: 'Defines PLACE OF RELIGIOUS WORSHIP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 57
+      lines:
+      - 26
+      - 26
+      quote: PLACE OF RELIGIOUS WORSHIP. See “Religious worship, place of.”
+    piece_sha256: 6563679c6b68f1f9611222d63ac30e3594fa21111365261ee999cf206647b446
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:public_way:
+    label: reference
+    topic: definitions
+    reason: 'Defines PUBLIC WAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 15
+      - 15
+      quote: '[A] PUBLIC WAY. A street, alley or other parcel of land open to the outside air leading to a street, that has
+        been deeded, dedicated or'
+    piece_sha256: 9c30bb288f4686d66c6762dfcbf3145b9a1416cc78180b76405f8335b44d63f6
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:ramp:
+    label: reference
+    topic: definitions
+    reason: 'Defines RAMP, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 31
+      - 31
+      quote: '[BE] RAMP. A walking surface that has a running slope steeper than 1 unit vertical in 20 units horizontal (5-percent
+        slope).'
+    piece_sha256: 8233b4ef33f6224c8bc692d20216616b03aa4b388aea0db139bac5c27a648e7b
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:ramp_exit_access:
+    label: reference
+    topic: definitions
+    reason: 'Defines RAMP, EXIT ACCESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 32
+      - 32
+      quote: RAMP, EXIT ACCESS. See “Exit access ramp.”
+    piece_sha256: d3b9fb986b4eae178b16864c3627b09635a4d26a344227fdeaef024cc7ce9f5e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:religious_worship_place_of:
+    label: reference
+    topic: definitions
+    reason: 'Defines RELIGIOUS WORSHIP, PLACE OF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 58
+      lines:
+      - 48
+      - 48
+      quote: '[BG] RELIGIOUS WORSHIP, PLACE OF. A building or portion thereof intended for the performance of religious services.'
+    piece_sha256: d5da82230e1dbc082510d11001d2a109f1631cbf3e50a45ae824632a32e76edd
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:residential_code_of_new_york_state:
+    label: reference
+    topic: definitions
+    reason: 'Defines RESIDENTIAL CODE OF NEW YORK STATE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 6
+      - 6
+      quote: '[NY] RESIDENTIAL CODE OF NEW YORK STATE. The 2025 edition of the publication entitled “Residential Code of New
+        York State”,'
+    piece_sha256: 9426f839175b3e6054bad415690f7ba6b208ccb1b42f150ed46782990a12044a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:roof_assembly_for_application_to_chapter_15_only:
+    label: reference
+    topic: definitions
+    reason: 'Defines ROOF ASSEMBLY (For application to Chapter 15 only), a word the brought-in sections use: a definition,
+      no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 18
+      - 18
+      quote: '[BS] ROOF ASSEMBLY (For application to Chapter 15 only). A system designed to provide weather protection and
+        resistance to'
+    piece_sha256: 173789464433579bfcaf554221be2d326740cf2f462d22762df34ab6940a7599
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:roof_covering:
+    label: reference
+    topic: definitions
+    reason: 'Defines ROOF COVERING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 23
+      - 23
+      quote: '[BS] ROOF COVERING. The covering applied to the roof deck for weather resistance, fire classification or appearance.'
+    piece_sha256: 6bc4c271a5708994b86862f805ec84bb566e3b5dacb0edb680e504ce81b79c31
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:roof_deck:
+    label: reference
+    topic: definitions
+    reason: 'Defines ROOF DECK, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 25
+      - 25
+      quote: '[BS] ROOF DECK. The flat or sloped surface constructed on top of the exterior walls of a building or other supports
+        for the purpose of'
+    piece_sha256: ef2e3f546bb2922fff24ca5da91880a53fb6528c3c913a9f4fbd12f8d3d2d623
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:rooftop_structure:
+    label: reference
+    topic: definitions
+    reason: 'Defines ROOFTOP STRUCTURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 37
+      - 37
+      quote: '[BG] ROOFTOP STRUCTURE. A structure erected on top of the roof deck or on top of any part of a building.'
+    piece_sha256: be67b94692de1746b9088ba91a5e33b9426877ba8d6b503e3ed1d16fab608b7a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:scissor_stairway:
+    label: reference
+    topic: definitions
+    reason: 'Defines SCISSOR STAIRWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 59
+      lines:
+      - 42
+      - 42
+      quote: '[BE] SCISSOR STAIRWAY. Two interlocking stairways providing two separate paths of egress located within one
+        exit enclosure.'
+    piece_sha256: ba51df7c75ab5d4beeab2d1e96a310ccf75079e7ff33a98df72805c98975b2d5
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:shaft:
+    label: reference
+    topic: definitions
+    reason: 'Defines SHAFT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 13
+      - 13
+      quote: '[BF] SHAFT. An enclosed space extending through one or more stories of a building, connecting vertical openings
+        in successive floors,'
+    piece_sha256: e71439843471aa2ff123ab5ce97601fda6d8516eac49321eca77972a76bd8d60
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:site:
+    label: reference
+    topic: definitions
+    reason: 'Defines SITE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 38
+      - 38
+      quote: '[BG] SITE. A parcel of land bounded by a lot line or a designated portion of a public right-of-way.'
+    piece_sha256: 920170e75cc3b8b0be60c3232b2cd76c652dafb3d8013af8d97cb6b4e88359fe
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:sleeping_unit:
+    label: reference
+    topic: definitions
+    reason: 'Defines SLEEPING UNIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 60
+      lines:
+      - 52
+      - 52
+      quote: '[A] SLEEPING UNIT. A single unit that provides rooms or spaces for one or more persons, includes permanent provisions
+        for sleeping'
+    piece_sha256: 335f0aad19104c19a345963fb8108c42c8d02c90dc78d65deaebb4ba01012205
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:solid:
+    label: reference
+    topic: definitions
+    reason: 'Defines SOLID, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 23
+      - 23
+      quote: '[F] SOLID. A material that has a melting point, decomposes or sublimes at a temperature greater than 68°F (20°C).'
+    piece_sha256: 2e0d9d2c5eca10b9fc5e6e668fbaeaa1fb6e9d4729fdaf08859c017a55724a9c
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:special_amusement_area:
+    label: reference
+    topic: definitions
+    reason: 'Defines SPECIAL AMUSEMENT AREA, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 61
+      lines:
+      - 24
+      - 24
+      quote: '[BG] SPECIAL AMUSEMENT AREA. A temporary or permanent building or portion thereof that is occupied for amusement,
+        entertain-'
+    piece_sha256: b05b0895e9e405fd584b379211af9d7686d2942d20155a4fff2d6111ab504bf8
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stair:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 62
+      lines:
+      - 3
+      - 3
+      quote: '[BE] STAIR. A change in elevation, consisting of one or more risers.'
+    piece_sha256: 374a0feb8b74c749c79f3f5028d0957a48d1de5bc758b0a699d7bad7ac3a54f3
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stairway:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIRWAY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 62
+      lines:
+      - 4
+      - 4
+      quote: '[BE] STAIRWAY. One or more flights of stairs, either exterior or interior, with the necessary landings and platforms
+        connecting them,'
+    piece_sha256: 987660187935e5bf117d4ecb97872085a9b04e4810e9618897d5ce0ee0985666
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stairway_exit_access:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIRWAY, EXIT ACCESS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 62
+      lines:
+      - 6
+      - 6
+      quote: STAIRWAY, EXIT ACCESS. See “Exit access stairway.”
+    piece_sha256: e5400ec98bf44430e0cf8fdf18a591654a9a686269c1913f5a1a4ebf0e2a712f
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stairway_exterior_exit:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIRWAY, EXTERIOR EXIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 62
+      lines:
+      - 7
+      - 7
+      quote: STAIRWAY, EXTERIOR EXIT. See “Exterior exit stairway.”
+    piece_sha256: b9cb579812574e7f1ddb7307fbd4747459c16f26c9129dea0842c71937e99cb6
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stairway_interior_exit:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIRWAY, INTERIOR EXIT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 62
+      lines:
+      - 8
+      - 8
+      quote: STAIRWAY, INTERIOR EXIT. See “Interior exit stairway.”
+    piece_sha256: f019abf4525240263befb9f49b81c5b0065ab4c2f529f47b297d7b7577e53830
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:stairway_scissor:
+    label: reference
+    topic: definitions
+    reason: 'Defines STAIRWAY, SCISSOR, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 62
+      lines:
+      - 9
+      - 9
+      quote: STAIRWAY, SCISSOR. See “Scissor stairway.”
+    piece_sha256: bdf42d56d067276a4e60faa8e1fc7daf2224e07af80a4186b44211ffd293104e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:steep_slope:
+    label: reference
+    topic: definitions
+    reason: 'Defines STEEP-SLOPE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 62
+      lines:
+      - 44
+      - 44
+      quote: '[BF] STEEP-SLOPE. A roof slope 2 units vertical in 12 units horizontal (17-percent slope) or greater.'
+    piece_sha256: 50c969202b1359cfe09f233ac9ad454f815333adc004deed2c318c3f9c8abd4a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:story:
+    label: reference
+    topic: definitions
+    reason: 'Defines STORY, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 63
+      lines:
+      - 8
+      - 8
+      quote: '[BG] STORY. That portion of a building included between the upper surface of a floor and the upper surface of
+        the floor or roof next'
+    piece_sha256: b79e0b5ca3af4bca4e4d3604a5a88908f928488988f886978b72e8132158375c
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:story_above_grade_plane:
+    label: reference
+    topic: definitions
+    reason: 'Defines STORY ABOVE GRADE PLANE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 63
+      lines:
+      - 12
+      - 12
+      quote: '[NY] STORY ABOVE GRADE PLANE. Any story having its finished floor surface entirely above grade plane, or in
+        which the finished'
+    piece_sha256: f853582ba810f91b14ff8efce7077975c513251df3c871f6d9f8a24157a967ea
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:structure:
+    label: reference
+    topic: definitions
+    reason: 'Defines STRUCTURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 63
+      lines:
+      - 50
+      - 50
+      quote: '[A] STRUCTURE. That which is built or constructed.'
+    piece_sha256: 0a2ea45a577f48e5194c0496c4f735fc362db3d2b90086fee6f0b93e26d412cf
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:temporary_structure:
+    label: reference
+    topic: definitions
+    reason: 'Defines TEMPORARY STRUCTURE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 64
+      lines:
+      - 33
+      - 33
+      quote: '[BS] TEMPORARY STRUCTURE. Any building or structure erected for a period of 180 days or less to support temporary
+        events. Tempo-'
+    piece_sha256: deabf4124bca2397eb9764e2c48f42ee7861372fa300b2aabad982562a5859de
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:underlayment:
+    label: reference
+    topic: definitions
+    reason: 'Defines UNDERLAYMENT, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 65
+      lines:
+      - 42
+      - 42
+      quote: '[BS] UNDERLAYMENT. One or more layers of a material that is applied to a steep-slope roof covering deck under
+        the roof covering and'
+    piece_sha256: 7e463705ab56e892161d1acfe3e92a1f3cd5e96759854afa8695eb38eb405eb5
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:use_material:
+    label: reference
+    topic: definitions
+    reason: 'Defines USE (MATERIAL), a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 66
+      lines:
+      - 6
+      - 6
+      quote: '[F] USE (MATERIAL). Placing a material into action, including solids, liquids and gases.'
+    piece_sha256: f92786d44959ec4e7f944bfc9b049cfd1a418c6194ac93b45ac3bf734c05ccae
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:ventilation:
+    label: reference
+    topic: definitions
+    reason: 'Defines VENTILATION, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 66
+      lines:
+      - 24
+      - 24
+      quote: '[M] VENTILATION. The natural or mechanical process of supplying conditioned or unconditioned air to, or removing
+        such air from,'
+    piece_sha256: e90259e72dedad027a91ffefaa1800d9a2fb557142b0d724abbeed97da60822c
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:walkway_pedestrian:
+    label: reference
+    topic: definitions
+    reason: 'Defines WALKWAY, PEDESTRIAN, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 66
+      lines:
+      - 30
+      - 30
+      quote: '[BG] WALKWAY, PEDESTRIAN. A walkway used exclusively as a pedestrian trafficway.'
+    piece_sha256: 8103770ded2e1544e060fb0bd6289d5dc31da480cebf25b14ea3fd7a89d85137
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:wall:
+    label: reference
+    topic: definitions
+    reason: 'Defines WALL, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 66
+      lines:
+      - 31
+      - 31
+      quote: '[BS] WALL. This definition applies only to Chapter 21.'
+    piece_sha256: 73cc15edcea595ba0fe40c4b6515d8449a9ebd5109f400cd832d9e898e0ef17e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:winder:
+    label: reference
+    topic: definitions
+    reason: 'Defines WINDER, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 67
+      lines:
+      - 22
+      - 22
+      quote: '[BE] WINDER. A tread with nonparallel edges.'
+    piece_sha256: 6c2a73c23141a431fa6a7f0ee067cb9b191980de777733c6f301f0db55216fed
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:wythe:
+    label: reference
+    topic: definitions
+    reason: 'Defines WYTHE, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 67
+      lines:
+      - 43
+      - 43
+      quote: '[BS] WYTHE. Each continuous, vertical section of a wall, one masonry unit in thickness.'
+    piece_sha256: bace0893e4f0902bb613d77ccd82a877035b83cf666b5df6b0e06bef6a47ad4d
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:yard:
+    label: reference
+    topic: definitions
+    reason: 'Defines YARD, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 67
+      lines:
+      - 44
+      - 44
+      quote: '[BG] YARD. An open space, other than a court, unobstructed from the ground to the sky, except where specifically
+        provided by this'
+    piece_sha256: 4f1b03f56eebaaa50fa8feb21365fd7b2c16ab8f671c67a76d3b5e036490caaa
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '308.5':
+    label: flag
+    topic: uses
+    reason: 'Says which buildings are Group I-4 (more than five persons of any age in custodial care for fewer than 24 hours
+      a day): the group every I-4 limit below turns on, which the architect states and a person confirms.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 79
+      lines:
+      - 29
+      - 30
+      quote: 308.5 Institutional Group I-4, day care facilities. Institutional Group I-4 occupancy shall include buildings
+        and structures occupied by more than five persons of any age who receive custodial care for fewer than 24 hours per
+        day by persons other than parents or
+    piece_sha256: 20124dd85b8bec534581dc24f9624d4582d8fe58991b6072fd1d2f7654eaedd7
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  308.5.1:
+    label: flag
+    topic: uses
+    reason: 'A child day care of more than five but not more than 100 children 2 1/2 years or younger, in rooms on a level
+      of exit discharge each with an exit door directly outside, is Group E, not I-4: the architect''s statement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 79
+      lines:
+      - 35
+      - 37
+      quote: 308.5.1 Classification as Group E. A child day care facility that provides care for more than five but not more
+        than 100 children 2 1/2 years or less of age, where the rooms in which the children are cared for are located on a
+        level of exit discharge serving such rooms and each of these child care rooms has an exit door directly to the exterior,
+        shall be classified as Group E.
+    piece_sha256: efaf2fc73a9197a627a9b52289aa3098d4857a3d311ec408325e85c2bb80beeb
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  308.5.2:
+    label: flag
+    topic: uses
+    reason: 'Care during religious functions within a place of religious worship is part of the primary occupancy: the architect''s
+      statement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 79
+      lines:
+      - 38
+      - 39
+      quote: 308.5.2 Within a place of religious worship. Rooms and spaces within places of religious worship providing such
+        care during reli- gious functions shall be classified as part of the primary occupancy.
+    piece_sha256: 154c4a601a59af9d846b56d2cc8bc1fe49c0033d4e6b3e6867106122a7d52f3a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  308.5.3:
+    label: flag
+    topic: uses
+    reason: 'Five or fewer persons receiving custodial care: part of the primary occupancy, not I-4: the architect''s statement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 79
+      lines:
+      - 40
+      - 41
+      quote: 308.5.3 Five or fewer persons receiving care. A facility having five or fewer persons receiving custodial care
+        shall be classified as part of the primary occupancy.
+    piece_sha256: 438e08b24a3906f322f8dbbcf7331f8632ae37f710cb8d2ab18ed14e1ea88ff9
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  308.5.4:
+    label: flag
+    topic: uses
+    reason: 'Five or fewer persons receiving care within a dwelling unit: Group R-3, or the Residential Code of New York State:
+      the architect''s statement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 79
+      lines:
+      - 42
+      - 44
+      quote: 308.5.4 Five or fewer persons receiving care in a dwelling unit. A facility such as the above within a dwelling
+        unit and having five or fewer persons receiving custodial care shall be classified as a Group R-3 occupancy or shall
+        comply with the Residential Code of New York State.
+    piece_sha256: 76778ee93e69c35f48c823ddc26813a8f267a92142356f9534322fc99821c796
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '508.2':
+    label: reference
+    topic: uses
+    reason: 'Says what accessory occupancies are (ancillary to the main occupancy) and points to 508.2.1 to 508.2.4: no requirement
+      of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 147
+      lines:
+      - 11
+      - 12
+      quote: 508.2 Accessory occupancies. Accessory occupancies are those occupancies that are ancillary to the main occupancy
+        of the build- ing or portion thereof. Accessory occupancies shall comply with the provisions of Sections 508.2.1 through
+        508.2.4.
+    piece_sha256: b3d3bcc549435f8bf8b974d632b91b0a4324f3dea57ab83761ccbc91d5b77c79
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.1:
+    label: flag
+    topic: uses
+    reason: 'Each accessory occupancy is classified on its own (Section 302.1, not brought in) and the code applies to each
+      portion by its classification: the architect''s statement, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 147
+      lines:
+      - 13
+      - 14
+      quote: 508.2.1 Occupancy classification. Accessory occupancies shall be individually classified in accordance with Section
+        302.1. The requirements of this code shall apply to each portion of the building based on the occupancy classification
+        of that space.
+    piece_sha256: 49c138c9e911a1c541bedffcd72318bf98b28c465b39f7d413cc0664673457ea
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.2:
+    label: flag
+    topic: dimensions
+    reason: 'The building''s allowable height and stories follow Section 504 (not brought in) for the main occupancy: a person
+      checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 147
+      lines:
+      - 15
+      - 16
+      quote: 508.2.2 Allowable building height. The allowable height and number of stories of the building containing accessory
+        occupancies shall be in accordance with Section 504 for the main occupancy of the building.
+    piece_sha256: 7fb047798f153b8d1feacaaefe8029c3b4c8df0fbfe90f096e9c76b20e286e70
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.3:
+    label: rule
+    topic: dimensions
+    reason: 'Caps aggregate accessory occupancies at 10 percent of the floor area of the story: measurable. Its second test
+      (Table 506.2''s tabular values, and Section 506) is not brought in: a person checks it.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 147
+      lines:
+      - 18
+      - 20
+      quote: for the main occupancy of the building. Aggregate accessory occupancies shall not occupy more than 10 percent
+        of the floor area of the story in which they are located and shall not exceed the tabular values for nonsprinklered
+        buildings in Table 506.2 for each such accessory occupancy.
+    piece_sha256: 85937b21359a41577622ea6310137e4ac75d51ae41fa06681a74c47cae765546
+    notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. ''floor area'' is printed in
+      roman, not italics, so it is not a defined term here (201.4: its ordinary meaning); the rule fails only above 10 percent
+      of the story''s gross floor area, the largest reading (README).'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  508.2.4:
+    label: flag
+    topic: fire_separation
+    reason: 'No separation is required between accessory occupancies and the main occupancy, except Group H-2 to H-5 (508.4)
+      and dwelling and sleeping units of I-1, R-1, R-2 and R-3 (Section 420), neither brought in: a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 147
+      lines:
+      - 21
+      - 21
+      quote: 508.2.4 Separation of occupancies. No separation is required between accessory occupancies and the main occupancy.
+    piece_sha256: b4b8646fbf04ad73870b73efa44ecb16e378d09aa6cae962efef8fb83232610b
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.3.1.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says what a building equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1
+      is (NFPA 13): the fact Tables 1006.2.1 and 1017.2 and 1007.1.1 turn on, stated by the architect.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 273
+      lines:
+      - 43
+      - 45
+      quote: '[F] 903.3.1.1 NFPA 13 sprinkler systems. Where the provisions of this code require that a building or portion
+        thereof be equipped throughout with an automatic sprinkler system in accordance with this section, sprinklers shall
+        be installed through- out in accordance with NFPA 13 except as provided in Sections 903.3.1.1.1 through 903.3.1.1.3.'
+    piece_sha256: b2ed6da4feae996d8ce7e2e0979fec1d12c8011679f5a6831bddaa5b05892775
+    notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Brought in without its exempt
+      locations (903.3.1.1.1 to 903.3.1.1.3), which say where sprinklers may be left out: part of the architect''s statement.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  903.3.1.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says when a Group R occupancy may use an NFPA 13R system instead: the second sprinkler system Table 1006.2.1''s
+      note a and 1007.1.1''s exception 2 accept, stated by the architect.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 274
+      lines:
+      - 15
+      - 16
+      quote: '[F] 903.3.1.2 NFPA 13R sprinkler systems. Automatic sprinkler systems in Group R occupancies shall be permitted
+        to be installed throughout in accordance with NFPA 13R where the Group R occupancy meets all of the following conditions:'
+    piece_sha256: 6875f3b979acb6459c3661f539a488c29bc14cb5573cf9d26df5cc44eca86663
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Brought in without the parts under
+      it (balconies, corridors, attics).
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Two exits or exit access doorways from any space whose design occupant load or common path of egress travel distance
+      exceeds Table 1006.2.1''s values: measurable per space.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 3
+      - 5
+      quote: 1006.2.1 Egress based on occupant load and common path of egress travel distance. Two exits or exit access doorways
+        from any space shall be provided where the design occupant load or the common path of egress travel distance exceeds
+        the values listed in Table 1006.2.1. The cumulative occupant load from adjacent rooms, areas or spaces shall be determined
+        in accordance
+    piece_sha256: 85d4a9fd1b8484c8228e3888e992cbee10ca81d48325c328420fb78e8fa1c65d
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Exceptions 1 (foyers, lobbies)
+      and 3 (unoccupied mechanical rooms) are a person's check; exception 2 is Group I-2.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1006.2.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'The values 1006.2.1 uses: for Group I-4 a space with one exit may have at most 10 occupants and a common path
+      of at most 75 feet, only in a building sprinklered throughout (903.3.1.1 or 903.3.1.2); not permitted without.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 26
+      - 26
+      quote: I-1, I-2[fnd], I-4 10 NP NP 75[fna]
+    piece_sha256: fba0a41d1cd8e2f28d4599ba8633c3393b77f4a89a4ac090dab801a5f4b1d100
+    notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
+      characters and their x positions) and on the page image: the I-4 row is I-1, I-2 (note d), I-4 | 10 | NP | NP | 75 (note
+      a). The text runs each raised note letter into its cell (''75a''); sources.yaml brought_in.misread puts each right by
+      line. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows have a flag of their own
+      (a section''s rule checks only its own row).'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.2.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Three exits or exit access doorways from a space of 501 to 1,000 occupants, four above 1,000: measurable per
+      space.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 315
+      lines:
+      - 45
+      - 47
+      quote: 1006.2.1.1 Three or more exits or exit access doorways. Three exits or exit access doorways shall be provided
+        from any space with an occupant load of 501 to 1,000. Four exits or exit access doorways shall be provided from any
+        space with an occu- pant load greater than 1,000.
+    piece_sha256: 6f99daba63cd22d6c6b869777291d20039e0d258954f3ac6ed5b12627f802bb7
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.3.3:
+    label: rule
+    topic: means_of_egress
+    reason: 'Each story has at least the number of exits Table 1006.3.3 gives for its occupant load (two up to 500, three
+      from 501 to 1,000, four above), one only where 1006.3.4 permits it: measurable per story.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 48
+      - 50
+      quote: 1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate
+        and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall
+        be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps
+        providing access to exits, from any
+    piece_sha256: ab5929caa236b71491d5c9c1f07057e32c589e8140ffa35b773c94f676c8ebd8
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1006.3.3:
+    label: reference
+    topic: means_of_egress
+    reason: 'The three counts 1006.3.3 uses, by occupant load, for every occupancy: all of them are applied by general.bc_1006_3_3_story_exits
+      (no row left for a flag); its printed two-exit band ''1-500'' is also used, by analogy, for a space by general.bc_1006_2_1_1_three_or_more_exits
+      and general.bc_1007_1_2_space_three_or_more (their finding space_over_500_needs_three).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 55
+      - 57
+      quote: 1-500 2 501-1,000 3 More than 1,000 4
+    piece_sha256: 4130d9a0b41818952db31430570d7fc36e48882a9d5af889636a9a361ed22c71
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell's
+      x position) and on the page image.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.3.4:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says when a story may have a single exit (item 1: Table 1006.3.4(2)''s values; items 2 to 5: rooms that exit
+      directly outside, mechanical parking, Groups R-3 and R-4, dwelling units): a permission the story rules read (general.bc_1006_3_3_story_exits,
+      general.bc_1007_1_1_remoteness); where an item a rule doesn''t measure may apply, they need review, never fail.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 317
+      lines:
+      - 3
+      - 6
+      quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+        roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access
+        travel distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2).'
+    piece_sha256: c32fcf403157de323e6a97a6c19a9d6c7f15e91077c2b780696a12e340b94a47
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1006.3.4(2):
+    label: rule
+    topic: means_of_egress
+    reason: 'The values 1006.3.4 item 1 uses: Group I on the first story above or below grade plane may have one exit with
+      at most 10 occupants and 75 feet of exit access travel; on the second story and above, not at all.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 317
+      lines:
+      - 40
+      - 41
+      quote: First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over the first story above grade plane
+        H-4, H-5, I, R-1, R-2a, c 10 75
+    piece_sha256: 9b63439c3fa895032dde52a5271827c65c4a1563d2fa2f2ef15058a094a51be2
+    notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
+      characters and x positions on p.317) and on the page image: the I row is H-4, H-5, I, R-1, R-2 (notes a, c) | 10 | 75,
+      under ''First story above or below grade plane and occupiable roofs over the first story above grade plane''; Group
+      I is not in the second-story row. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows
+      have a flag of their own (a section''s rule checks only its own row).'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.3.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Mixed occupancies served by single exits: each occupancy within its row, the ratios summed to not more than one:
+      other groups than I-4, a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 317
+      lines:
+      - 54
+      - 56
+      quote: 1006.3.4.1 Mixed occupancies. Where one exit, or exit access stairway or ramp providing access to exits at other
+        stories, is permitted to serve individual stories, mixed occupancies shall be permitted to be served by single exits
+        provided that each indi- vidual occupancy complies with the applicable requirements of Table 1006.3.4(1) or 1006.3.4(2)
+        for that occupancy. Where
+    piece_sha256: 580a41a3d1f1bbe500ce51da960d1605fa761c200d2bdadcc4eadab7ee52f9db
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1007.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says exits, exit access doorways and exit access stairways and ramps are separated as this section says: no requirement
+      of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 318
+      lines:
+      - 4
+      - 5
+      quote: 1007.1 General. Exits, exit access doorways, and exit access stairways and ramps serving spaces, including individual
+        building stories, shall be separated in accordance with the provisions of this section.
+    piece_sha256: b1b81f60ecaffaae9e69c0be44962f767c2651b14313a6419e68e616da2581f7
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1007.1.1:
+    label: rule
+    topic: means_of_egress
+    reason: 'Two required exits or exit access doorways at least one-half of the maximum overall diagonal apart, one-third
+      in a building sprinklered throughout (903.3.1.1 or 903.3.1.2): measurable per story.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 318
+      lines:
+      - 6
+      - 8
+      quote: 1007.1.1 Two exits or exit access doorways. Where two exits, exit access doorways, exit access stairways or ramps,
+        or any combi- nation thereof, are required from any portion of the exit access, they shall be placed a distance apart
+        equal to not less than one- half of the length of the maximum overall diagonal dimension of the building or area to
+        be served measured in a straight line
+    - file: gov.ny.building.2025.pdf
+      page: 318
+      lines:
+      - 14
+      - 16
+      quote: 2. Where a building is equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1
+        or 903.3.1.2, the separation distance shall be not less than one-third of the length of the maximum overall diagonal
+        dimension of the area served.
+    piece_sha256: b512c04ed427044e1f25349197ac000a78bab0edf648362779ac26a07ad55990
+    notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Exception 1 (exit stairways joined
+      by a 1-hour corridor: measured along the corridor) only loosens the test: a person''s check.'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1007.1.1.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says where the separation distance is measured to (any point of a doorway''s width, an exit access stairway''s
+      closest riser, a ramp''s start): how to measure, no limit.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 318
+      lines:
+      - 17
+      - 19
+      quote: '1007.1.1.1 Measurement point. The separation distance required in Section 1007.1.1 shall be measured in accordance
+        with the following: 1. The separation distance to exit or exit access doorways shall be measured to any point along
+        the width of the doorway.'
+    piece_sha256: ffd658081321544bcddb6102633be220bd367a89ab2a4817b233082c9df3665d
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1007.1.2:
+    label: rule
+    topic: means_of_egress
+    reason: Where three or more exits are required, two of them are arranged as 1007.1.1 says (measurable per story); the
+      others a reasonable distance apart (a person's judgment).
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 318
+      lines:
+      - 22
+      - 24
+      quote: 1007.1.2 Three or more exits or exit access doorways. Where access to three or more exits is required, not less
+        than two exit or exit access doorways shall be arranged in accordance with the provisions of Section 1007.1.1. Additional
+        required exit or exit access doorways shall be arranged a reasonable distance apart so that if one becomes blocked,
+        the others will be available.
+    piece_sha256: e87d80661ddc9f8896e5827a113945ebcdad724d5064686e0bf5a5794d0e8fcf
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1007.1.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Two exit access stairways or ramps to another story keep the required separation for all their length: not measured
+      from the drawing yet, a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 318
+      lines:
+      - 25
+      - 27
+      quote: 1007.1.3 Remoteness of exit access stairways or ramps. Where two exit access stairways or ramps provide the required
+        means of egress to exits at another story, the required separation distance shall be maintained for all portions of
+        such exit access stair- ways or ramps.
+    piece_sha256: 319833e360ff64e0eaf029c87928568962835ca537dab3a631731757b3ba2fcb
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1007.1.3.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Of more than two exit access stairways or ramps, two are arranged as 1007.1.3 says: a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 318
+      lines:
+      - 28
+      - 29
+      quote: 1007.1.3.1 Three or more exit access stairways or ramps. Where more than two exit access stairways or ramps provide
+        the required means of egress, not less than two shall be arranged in accordance with Section 1007.1.3.
+    piece_sha256: 95666aa8d19504985ae889a9bcbcdf0c1685f7465ee3ad784ab548c7c4e310c2
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1016.2':
+    label: rule
+    topic: means_of_egress
+    reason: 'Where egress may pass through intervening rooms: never through a room that can be locked (item 4), never through
+      kitchens, storage rooms or closets (item 6, with its exceptions), never from dwelling units or sleeping areas through
+      other sleeping areas or toilet rooms (item 5): measurable from the path; through other adjoining rooms only where accessory
+      with a discernible path (items 2 and 3): a person''s judgment.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 340
+      lines:
+      - 54
+      - 54
+      quote: 4. An exit access shall not pass through a room that can be locked to prevent egress.
+    - file: gov.ny.building.2025.pdf
+      page: 340
+      lines:
+      - 59
+      - 59
+      quote: 6. Egress shall not pass through kitchens, storage rooms, closets or spaces used for similar purposes.
+    piece_sha256: 75ce5120ce02dba41247b79ce0300db00da2a96dfe6066836bd5c20e9e0df752
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Item 1 (enclosed elevator lobbies,
+      Section 3006, not brought in) is a person's check.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1016.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Each tenant space, dwelling unit and sleeping unit reaches the exits without passing through adjacent ones, with
+      its exception: which spaces are tenants is the architect''s statement, a person''s check.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 341
+      lines:
+      - 13
+      - 15
+      quote: 1016.2.1 Multiple tenants. Where more than one tenant occupies any one floor of a building or structure, each
+        tenant space, dwelling unit and sleeping unit shall be provided with access to the required exits without passing
+        through adjacent tenant spaces, dwelling units and sleeping units.
+    piece_sha256: 475b35da3af59b1446ea08383a777b028d6548bfc1fb0999a4b9719f1a73a4c8
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1017':
+    label: not_for_checking
+    topic: means_of_egress
+    reason: 'A heading only: its title, with no requirement of its own (the parts under it are labeled one by one).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 341
+      lines:
+      - 21
+      - 21
+      quote: SECTION 1017—EXIT ACCESS TRAVEL DISTANCE
+    piece_sha256: ab4ca057ddd55aa718e93f56b7b58cd78252d3c365b326db7b3228d122f5a31a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1017.1':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says travel distance in the exit access follows this section: no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 341
+      lines:
+      - 22
+      - 22
+      quote: 1017.1 General. Travel distance within the exit access portion of the means of egress system shall be in accordance
+        with this section.
+    piece_sha256: fb51c054ef4b512d62e43614e491832aef9b6714c6f3e966bf4ca3dbb8d19cf4
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1017.2':
+    label: rule
+    topic: means_of_egress
+    reason: 'Caps exit access travel distance at Table 1017.2''s values: measurable per story.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 341
+      lines:
+      - 23
+      - 23
+      quote: 1017.2 Limitations. Exit access travel distance shall not exceed the values given in Table 1017.2.
+    piece_sha256: 1ad3b8fb0e51df77490bcd108f5497064f8879c1f56272b9ae2079cc6c540b2a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1017.2:
+    label: rule
+    topic: means_of_egress
+    reason: 'The values 1017.2 uses: Group I-4 150 feet without an automatic sprinkler system, 200 feet with one per 903.3.1.1
+      (note c).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 341
+      lines:
+      - 38
+      - 38
+      quote: I-4 150 200[fnc]
+    piece_sha256: 936bcabb432c6f1c138737c68d5030dc72e67de8ca6413069f4926eb4382c6c5
+    notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
+      characters and their x positions) and on the page image: I-4 | 150 | 200 (note c: 903.3.1.1 only). The text runs each
+      raised note letter into its cell (''200c''); sources.yaml brought_in.misread puts each right by line. Note a lists other
+      sections that modify the distance (malls, I-2, I-3, one-exit buildings 1006.3.4, 1017.2.2, 1017.2.3...), none brought
+      in but 1017.2.2 and 1017.2.3. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows have
+      a flag of their own (a section''s rule checks only its own row).'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.2.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Permits up to 100 feet more where the last part of the exit access is on an exterior egress balcony (Section
+      1021, not brought in) at least as long as the increase: an allowance a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 341
+      lines:
+      - 60
+      - 61
+      quote: 1017.2.1 Exterior egress balcony increase. Exit access travel distances specified in Table 1017.2 shall be increased
+        up to an additional 100 feet (30 480 mm) provided that the last portion of the exit access leading to the exit occurs
+        on an exterior egress
+    piece_sha256: b5dd9704c503cfbb5e260bfce83415150af264a7644c4a4d4d05fff3c4bff294
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.2.2:
+    label: flag
+    topic: means_of_egress
+    reason: '400 feet in one-story Group F-1 or S-1 with 24-foot ceilings, sprinklered per 903.3.1.1: an allowance for groups
+      other than I-4, a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 5
+      - 6
+      quote: '1017.2.2 Groups F-1 and S-1 increase. The maximum exit access travel distance shall be 400 feet (122 m) in Group
+        F-1 or S-1 occupancies where all of the following conditions are met:'
+    piece_sha256: 35a7b6b4d2631647766d91182c9292e3a31ae76f5fbdd942f1c298c2c2d2d89a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: '300 feet in Group H-5 fabrication areas meeting four conditions: an allowance for Group H-5, a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 10
+      - 11
+      quote: '1017.2.3 Group H-5 increase. The maximum exit access travel distance shall be 300 feet (91 m) in the fabrication
+        areas of Group H-5 occupancies where all of the following conditions are met:'
+    piece_sha256: 0d010862b1e57235b8c41a9f6b1c19ba46d63cc56bd998acbdb003e2d9928ef7
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1017.3':
+    label: reference
+    topic: means_of_egress
+    reason: 'Says how exit access travel distance is measured (from the most remote point of each room, area or space, along
+      the natural and unobstructed path, to the entrance to the nearest exit): the measure''s definition, no limit.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 18
+      - 20
+      quote: 1017.3 Measurement. Exit access travel distance shall be measured from the most remote point of each room, area
+        or space along the natural and unobstructed path of horizontal and vertical egress travel to the entrance to an exit.
+        Where more than one exit is required, exit access travel distance shall be measured to the nearest exit.
+    piece_sha256: 3669787150434ef3b976b175994e5b12a9e9d67477c937610c63c05425332c4a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.3.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says travel on exit access stairways and ramps counts, measured along the stair''s nosings at its center: how
+      to measure.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 26
+      - 28
+      quote: 1017.3.1 Exit access stairways and ramps. Travel distance on exit access stairways or ramps shall be included
+        in the exit access travel distance measurement. The measurement along stairways shall be made on a plane parallel
+        and tangent to the stair tread nosings in the center of the stair and landings. The measurement along ramps shall
+        be made on the walking surface in the center
+    piece_sha256: 4b3a70cdd7f59c2dcd6c706f07f0d29c6d1ac5f7dbfaaa43f2b8b0720946117a
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.3.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Points areas open to an atrium to 1017.3.2.1 to 1017.3.2.3: no requirement of its own.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 30
+      - 31
+      quote: 1017.3.2 Atriums. Exit access travel distance for areas open to an atrium shall comply with the requirements
+        of Sections 1017.3.2.1 through 1017.3.2.3.
+    piece_sha256: 7b5edb8ba1406a1487be693f0f7224e2be94380072a0addc908a31f9d96a6682
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.3.2.1:
+    label: reference
+    topic: means_of_egress
+    reason: 'Where the exits are not reached through the atrium, travel distance follows 1017.2: a pointer.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 32
+      - 33
+      quote: 1017.3.2.1 Egress not through the atrium. Where required access to the exits is not through the atrium, exit
+        access travel distance shall comply with Section 1017.2.
+    piece_sha256: 2f2260597cb9e7ed4ef9b1c67ca16704850938d0e111d7d3223a72d600c5353e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.3.2.2:
+    label: reference
+    topic: means_of_egress
+    reason: 'Through an atrium at the level of exit discharge, travel distance follows 1017.2: a pointer.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 34
+      - 35
+      quote: 1017.3.2.2 Exit access travel distance at the level of exit discharge. Where the path of egress travel is through
+        an atrium space, exit access travel distance at the level of exit discharge shall be determined in accordance with
+        Section 1017.2.
+    piece_sha256: a2e171db62c4ada04db7d4199fa503255a4352c16de5ec07d8b0c87ba354dcfd
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1017.3.2.3:
+    label: flag
+    topic: means_of_egress
+    reason: 'Above or below the level of exit discharge, travel within the atrium is at most 200 feet: not measured from the
+      drawing yet (which part of a path is in an atrium), a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 342
+      lines:
+      - 36
+      - 38
+      quote: 1017.3.2.3 Exit access travel distance at other than the level of exit discharge. Where the path of egress travel
+        is not at the level of exit discharge from the atrium, that portion of the total permitted exit access travel distance
+        that occurs within the atrium shall be not greater than 200 feet (60 960 mm).
+    piece_sha256: ed67c676d7c895dc1b696877946d0754d49530c7b734890456c32eedd35b6897
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  '1020.5':
+    label: rule
+    topic: means_of_egress
+    reason: 'Caps dead-end corridors at 20 feet where more than one exit or exit access doorway is required, or any length
+      under 2.5 times their least width (exception 3); 50 feet for Groups B, E, F, I-1, M, R-1, R-2, S and U sprinklered per
+      903.3.1.1: measurable per corridor.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 344
+      lines:
+      - 37
+      - 38
+      quote: 1020.5 Dead ends. Where more than one exit or exit access doorway is required, the exit access shall be arranged
+        such that dead-end corridors do not exceed 20 feet (6096 mm) in length.
+    - file: gov.ny.building.2025.pdf
+      page: 344
+      lines:
+      - 44
+      - 45
+      quote: 3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than
+        2.5 times the least width of the dead-end corridor.
+    piece_sha256: 3a8020bc52c9e2bd47f823c3c37f59c86f78c5c113ec84325a82e8dacdf2d3cc
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Exceptions 1 (I-3) and 4 (I-2)
+      are for other groups.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
