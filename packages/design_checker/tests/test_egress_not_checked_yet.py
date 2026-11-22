@@ -24,6 +24,9 @@ import sys
 import yaml
 
 from design_checker import egress, present
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))   # egress_house beside this file
+import egress_house  # noqa: E402
 from design_checker.check import check_site, summary
 from rule_format.labels import load_pieces
 from rule_format.rulebook import REPO, load
@@ -101,7 +104,7 @@ def complying_law():
     """Only the egress rules whose every row on the ranch complies: every checked egress rule complies."""
     found = copy.deepcopy(egress.laws(ITHACA))
     law = found["laws"][0]
-    got = egress.check(found, ranch(), {}, {"use": set()})
+    got = egress.check(found, ranch(), dict(egress_house.HOUSE), {"use": set()})
     bad = {i["rule"] for i in got["items"] if i["status"] != present.COMPLIES}
     law["rules"] = [r for r in law["rules"] if r["id"] not in bad and r["id"] in got["results"]
                     and got["results"][r["id"]] == "pass"]
@@ -113,11 +116,11 @@ def test_egress_never_complies_while_sections_are_not_checked_even_when_every_ch
     found = complying_law()
     everything = copy.deepcopy(found)
     everything["laws"][0]["not_checked_yet"] = []               # the day every section has rules
-    got = egress.check(everything, ranch(), {}, {"use": set()})
+    got = egress.check(everything, ranch(), dict(egress_house.HOUSE), {"use": set()})
     assert {i["status"] for i in got["items"]} == {present.COMPLIES}
     assert got["sections"][0]["state"] == present.COMPLIES      # the case is real: without the list, it complies
 
-    got = egress.check(found, ranch(), {}, {"use": set()})
+    got = egress.check(found, ranch(), dict(egress_house.HOUSE), {"use": set()})
     rules_rows = [i for i in got["items"] if i["rule"]]
     assert rules_rows and {i["status"] for i in rules_rows} == {present.COMPLIES}    # every checked rule complies
     assert [i["id"] for i in got["items"] if i["status"] != present.COMPLIES] == [NOT_YET]
@@ -138,7 +141,7 @@ def test_egress_never_complies_while_sections_are_not_checked_even_when_every_ch
 
 def test_no_rooms_drawn_egress_still_waits_and_its_row_lists_the_sections():
     view = {"items": copy.deepcopy(COMPLYING_ZONING)}
-    got = egress.check(egress.laws(ITHACA), None, {}, {})
+    got = egress.check(egress.laws(ITHACA), None, dict(egress_house.HOUSE), {})
     egress.add_to_view(view, got, "City of Ithaca")
     [row] = egress_items(view["items"])                          # the waiting row alone: no needs-review line
     assert row["id"] == "egress.waiting" and row["status"] == present.NOT_CHECKED
@@ -150,7 +153,7 @@ def test_no_rooms_drawn_egress_still_waits_and_its_row_lists_the_sections():
     for section in uncovered():
         assert f"({section})" in row["reason"]
     # and with rooms that are an empty list (massing only): the same
-    rooms_empty = egress.check(egress.laws(ITHACA), dict(ranch(), rooms=[]), {}, {})
+    rooms_empty = egress.check(egress.laws(ITHACA), dict(ranch(), rooms=[]), dict(egress_house.HOUSE), {})
     assert [i["id"] for i in rooms_empty["items"]] == ["egress.waiting"]
 
 

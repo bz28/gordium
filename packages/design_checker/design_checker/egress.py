@@ -270,11 +270,19 @@ def check(found: dict, interior, values: dict, allowed: dict) -> dict:
             "interior_sha256": fingerprint(interior), **({"code_scope": scope} if scope is not None else {})}
 
 
+def which_code(got: dict) -> dict | None:
+    """The code decision as a host shows it at the top of the results (Ben, 2026-11-22: chosen for the architect,
+    shown, never a choice offered): {code, title, why, cites: [{section, document, page, quote}], ask}, the very
+    words of code_scope.decide; None where the place's laws don't split buildings between books."""
+    scope = got.get("code_scope")
+    return None if scope is None else {k: scope[k] for k in ("code", "title", "why", "cites", "ask")}
+
+
 ROUTES = "routes"
 SCOPE_ID = "code_scope"
 SCOPE_OPEN_NAME = "Which code governs this building: can't tell yet"
 SCOPE_OPEN_WHY = ("Gordium can't tell whether the Residential Code or the Building Code of New York State covers this "
-                  "building: {why} ({cites}). Both are shown; neither is the answer until this is settled")
+                  "building: {why} ({cites}). To settle it, {ask}. Both are shown; neither is the answer until then")
 SCOPE_NAME = "This building is under the {book}"
 SCOPE_WHY = "The {book} covers this building: {why} ({cites})"
 
@@ -300,7 +308,8 @@ def _law_values(law: dict, values: dict, allowed: dict, building) -> tuple[dict,
     measure's kind (the law's drafted/records/proposed_measures.yaml) is added only for one given a value, so a law
     reads exactly what it did where none is given."""
     if law.get("scope") == code_scope.BUILDING:
-        values = {**values, **code_scope.building_measures(building)}
+        given = {k: values[k] for k in code_scope.FACTS if k in values}
+        values = {**values, **code_scope.building_measures({**given, **(building if isinstance(building, dict) else {})})}
     kinds = {k: v for k, v in (law.get("kinds") or {}).items() if k in values and k not in allowed}
     return values, ({**allowed, **kinds} if kinds else allowed)
 
@@ -309,10 +318,10 @@ def _scope_items(law: dict, scope: dict) -> list[dict]:
     """The law's line on which code governs: needs review where code_scope can't tell (first in each candidate's
     section); for the Building Code chosen, a line saying why (counted toward nothing). None for the Residential Code
     chosen: a house's check reads exactly as before, the decision in the result's `code_scope`."""
-    cites = ", ".join(scope["cites"])
+    cites = ", ".join(c["section"] for c in scope["cites"])
     if scope["code"] is None:
         item = _own_item(law, f"{law['short'].lower()}.{SCOPE_ID}", SCOPE_OPEN_NAME, present.REVIEW,
-                         SCOPE_OPEN_WHY.format(why=scope["why"], cites=cites))
+                         SCOPE_OPEN_WHY.format(why=scope["why"], cites=cites, ask=scope["ask"]))
     elif scope["code"] == code_scope.BUILDING:
         book = _book(law)
         item = _own_item(law, f"{law['short'].lower()}.{SCOPE_ID}", SCOPE_NAME.format(book=book),

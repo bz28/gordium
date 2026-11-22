@@ -45,24 +45,76 @@ GROUPS = ("A-1", "A-2", "A-3", "A-4", "A-5", "B", "E", "F-1", "F-2", "H-1", "H-2
           "I-2", "I-3", "I-4", "M", "R-1", "R-2", "R-3", "R-4", "S-1", "S-2", "U")
 SPRINKLERS = ("none", "nfpa_13", "nfpa_13r", "nfpa_13d")
 
-R101 = "RCNYS R101.2"
-B101 = "BCNYS 101.2 exception 1"
-# Ithaca's use words (4_term_definitions/uses.yaml) that name a dwelling R101.2 lists, with its item and units
-HOUSES = {"one_family_detached": ("a detached one-family dwelling", "item 1", 1),
-          "one_family_detached_zero_lot_line": ("a detached one-family dwelling", "item 1", 1),
-          "two_family": ("a detached two-family dwelling", "item 2", 2),
+RCNYS = "2025 Residential Code of New York State"
+BCNYS = "2025 Building Code of New York State"
+TITLES = {RESIDENTIAL: RCNYS, BUILDING: BCNYS}
+# Each section the decision stands on: its book, the PDF page and the book's exact words (copies in the code cache:
+# the RCNYS's sources.yaml entry, sha256 36490d8c..., and the BCNYS's, 729d2db7...; test_code_scope.py reads each
+# quote again from the PDF where the cache has it)
+CITES = {
+    "R101.2": (RCNYS, 24, "provided that such building or structure is not more than three stories above grade plane "
+               "in height with a separate means of egress"),
+    "R101.2 item 1": (RCNYS, 24, "1. Detached one-family dwellings."),
+    "R101.2 item 2": (RCNYS, 24, "2. Detached two-family dwellings in which each dwelling unit has a separate means "
+                      "of egress."),
+    "R101.2 item 3": (RCNYS, 24, "3. Townhouses."),
+    "R101.2 item 4": (RCNYS, 24, "4. Bed and breakfast dwellings."),
+    "R101.2 item 5": (RCNYS, 24, "5. Live/work units located in townhouses and complying with the requirements of "
+                      "Section 508.5 of the Building Code of New York State."),
+    "R101.2 item 6": (RCNYS, 24, "6. Owner-occupied lodging houses that have five or fewer guestrooms and are "
+                      "provided with an automatic sprinkler system complying with Section P2904 of this code."),
+    "R101.2 exception": (RCNYS, 24, "Application of the provisions of the Building Code of New York State to the "
+                         "construction, alteration, movement, enlargement, replacement, repair, equipment, use and "
+                         "occupancy, location, removal and demolition of the buildings and structures listed in Section "
+                         "R101.2 is permitted, provided that all applicable provisions of the Building Code of New York "
+                         "State are applied."),
+    "R202 DWELLING": (RCNYS, 40, "Any building that contains one or two dwelling units"),
+    "R202 STORY ABOVE GRADE PLANE": (RCNYS, 52, "Any story having its finished floor surface entirely above grade "
+                                     "plane, or in which the finished surface of the floor next above is either of the "
+                                     "following:"),
+    "R202 TOWNHOUSE": (RCNYS, 53, "A building that contains three or more attached townhouse units."),
+    "R202 TOWNHOUSE UNIT": (RCNYS, 53, "A single-family dwelling unit in a townhouse that extends from foundation to "
+                            "roof, that has a yard or public way on not less than two sides, and has a separate means "
+                            "of egress."),
+    "R202 BED AND BREAKFAST DWELLING": (RCNYS, 36, "An owner-occupied residence resulting from a conversion of a "
+                                        "one-family dwelling, used for providing overnight accommodations and a morning "
+                                        "meal to not more than ten transient lodgers, and containing not more than five "
+                                        "bedrooms for such lodgers."),
+    "R316.3": (RCNYS, 98, "A habitable attic shall be considered a story above grade plane."),
+    "101.2": (BCNYS, 22, "The provisions of this code shall apply to the construction, alteration, relocation, "
+              "enlargement, replacement, repair, equipment, use and occupancy, location, maintenance, removal and "
+              "demolition of every building or structure"),
+    "101.2 exception 1": (BCNYS, 22, "Application of the provisions of the Residential Code of New York State to"),
+    "202 LIVE/WORK UNIT": (BCNYS, 52, "A dwelling unit or sleeping unit in which a significant portion of the space "
+                           "includes a nonresidential use that is operated by the tenant."),
+    "308.2.4": (BCNYS, 78, "A facility with five or fewer persons receiving custodial care shall be classified as Group "
+                "R-3 or shall comply with the Residential Code of New York State provided an automatic sprinkler "
+                "system is installed"),
+    "310.3": (BCNYS, 80, "Residential Group R-2 occupancies containing sleeping units or more than two dwelling units "
+              "where the occupants are primarily permanent in nature"),
+    "310.4": (BCNYS, 80, "Buildings that do not contain more than two dwelling units"),
+    "310.4.1": (BCNYS, 80, "Care facilities for five or fewer persons receiving care that are within a single-family "
+                "dwelling are permitted to comply with the Residential Code of New York State provided an automatic "
+                "sprinkler system is installed"),
+    "310.4.2": (BCNYS, 80, "Owner-occupied lodging houses with five or fewer guest rooms shall be constructed in "
+                "accordance with this code or the Residential Code of New York State"),
+}
+# the marks the architect answers with (apps/revit_addin: Marks.cs), named in each `ask`
+MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane",
+        "separate_means_of_egress": "Gordium: Separate means of egress", "townhouse_units": "Gordium: Townhouse units",
+        "follows_building_code": "Gordium: Follows the Building Code", "occupancy_groups": "Gordium: Occupancy groups",
+        "use": "Gordium: Use", "attached_units_in_building": "Gordium: Units in the attached building"}
+
+# Ithaca's use words (4_term_definitions/uses.yaml) that name a dwelling R101.2 lists: its words, R101.2's item, units
+HOUSES = {"one_family_detached": ("a detached one-family dwelling", "R101.2 item 1", 1),
+          "one_family_detached_zero_lot_line": ("a detached one-family dwelling", "R101.2 item 1", 1),
+          "two_family": ("a detached two-family dwelling", "R101.2 item 2", 2),
           # one of two one-family dwellings joined by a common wall: R202 DWELLING counts the units of the building
           # ("Any building that contains one or two dwelling units"), lot lines aside, so the pair is a two-family one
-          "one_family_semi_detached": ("a two-family dwelling (two semi-detached units in one building)", "item 2", 2)}
+          "one_family_semi_detached": ("a two-family dwelling (two semi-detached units in one building)",
+                                       "R101.2 item 2", 2)}
 ATTACHED = "one_family_attached"                  # three to six units in a row (§325-3B): a townhouse if R202's
-# uses R101.2 lists only with conditions the use word doesn't settle
-EITHER = {"bed_and_breakfast_inn": ("a bed and breakfast is under the Residential Code only as R202's BED AND "
-                                    "BREAKFAST DWELLING (an owner-occupied conversion of a one-family dwelling, not "
-                                    "more than ten transient lodgers, not more than five bedrooms for them; R101.2 "
-                                    "item 4), else the Building Code (BCNYS 310.2, 310.4)")}
-
-ASK_STORIES = ("state the building's stories above grade plane (Gordium: Stories above grade plane, as RCNYS R202 "
-               "STORY ABOVE GRADE PLANE counts them)")
+ASK_BY_HAND = "check which code governs by hand, then tick {mark} Yes if it is the Building Code"
 
 
 def _given(building: dict | None) -> tuple[dict, list[str]]:
@@ -98,8 +150,14 @@ def building_measures(building: dict | None) -> dict:
     return out
 
 
-def _answer(code, why, cites, used):
-    return {"code": code, "why": why, "cites": list(cites), "facts": used}
+def _answer(code, why, cites, used, ask=None):
+    """The decision: `code` (None: needs review), `title` (the book's name, None when undecided), `why` in plain
+    words, `cites` ({section, document, page, quote} each: the book's own words), `ask` (what the architect states
+    to settle it, only when undecided), `facts` (what it was decided from)."""
+    return {"code": code, "title": TITLES.get(code), "why": why,
+            "cites": [{"section": ("RCNYS " if CITES[k][0] == RCNYS else "BCNYS ") + k, "document": CITES[k][0],
+                       "page": CITES[k][1], "quote": CITES[k][2]} for k in dict.fromkeys(cites)],
+            "ask": ask if code is None else None, "facts": used}
 
 
 def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
@@ -114,119 +172,121 @@ def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
     ceiling assembly and the roof assembly, inside the top STORY, which runs to "the floor or roof next above"; only
     a habitable attic is a story above grade plane, R316.3, and Ithaca counts that one, having human occupancy)."""
     if "stories_above_grade_plane" in facts:
-        return facts["stories_above_grade_plane"], "stated by the architect (stories above grade plane, R202)"
+        return facts["stories_above_grade_plane"], "stated by the architect"
     s = values.get("stories")
     if type(s) in (int, float) and s >= 1 and float(s).is_integer():
-        return int(s), ("at most Ithaca's count of stories, " + f"{int(s)} (§325-3B STORY: nothing is drawn below "
-                        "the ground, so every story the State counts above grade plane Ithaca counts too)")
+        return int(s), ("Ithaca's count, nothing drawn below the ground: every story the State counts above "
+                        "grade plane Ithaca counts too")
     return None, "not known"
 
 
 def decide(values: dict, building: dict | None) -> dict:
     """Which book governs the building's egress (module docstring), with why and the sections behind it."""
     values = values or {}
-    facts, bad = _given(building)
+    # the building block's facts, and any the check's values carry (a host with no interior description may state
+    # them as facts); the building block's own stand where both give one
+    given = {k: values[k] for k in FACTS if k in values}
+    facts, bad = _given({**given, **(building if isinstance(building, dict) else {})})
     used = dict(facts)
+    by_hand = ASK_BY_HAND.format(mark=MARK["follows_building_code"])
     if bad:
-        return _answer(None, "; ".join(bad) + ": which code governs can't be told", [R101], used)
+        return _answer(None, "; ".join(bad), ["R101.2"], used, "correct it on Project Information")
     if facts.get("follows_building_code") is True:
-        return _answer(BUILDING, "the architect applies the Building Code of New York State, as R101.2's exception "
-                       "permits (\"provided that all applicable provisions of the Building Code of New York State are "
-                       "applied\")", [R101 + " exception"], used)
+        return _answer(BUILDING, "the architect applies the Building Code to it, as R101.2's exception permits",
+                       ["R101.2 exception"], used)
     use = values.get("use")
     used["use"] = use
     if not isinstance(use, str) or not use:
-        return _answer(None, "the building's use isn't stated (Gordium: Use), so which code governs can't be told",
-                       [R101, B101], used)
-    if facts.get("occupancy_groups") and any(g != "R-3" for g in facts["occupancy_groups"]):
-        others = ", ".join(g for g in facts["occupancy_groups"] if g != "R-3")
+        return _answer(None, "the building's use isn't stated", ["R101.2", "101.2 exception 1"], used,
+                       f"state the building's use ({MARK['use']})")
+    groups = facts.get("occupancy_groups") or []
+    if any(g != "R-3" for g in groups):
         if use in HOUSES or use == ATTACHED:
             return _answer(None, f"the use is a dwelling the Residential Code can cover, but the occupancy groups "
-                           f"stated include {others}, which only the Building Code classifies (BCNYS Chapter 3): "
-                           "say which is right", [R101, B101], used)
-        return _answer(BUILDING, f"its occupancy groups ({', '.join(facts['occupancy_groups'])}) are the Building "
-                       "Code's; the Residential Code covers only the dwellings R101.2 lists", [R101, "BCNYS 101.2"],
-                       used)
-    if use in EITHER:
-        return _answer(None, EITHER[use] + ": say which it is (Gordium: Follows Building Code)", [R101], used)
+                           f"stated ({', '.join(groups)}) are the Building Code's", ["R101.2", "101.2"], used,
+                           f"correct the use ({MARK['use']}) or the occupancy groups ({MARK['occupancy_groups']})")
+        return _answer(BUILDING, f"a building of Group {', '.join(groups)}, none of the dwellings R101.2 lists (101.2)",
+                       ["R101.2", "101.2"], used)
+    if use == "bed_and_breakfast_inn":
+        return _answer(None, "a bed and breakfast is under the Residential Code only as an R202 bed and breakfast "
+                       "dwelling (an owner-occupied conversion of a one-family dwelling, not more than ten transient "
+                       "lodgers and five bedrooms for them)", ["R101.2 item 4", "R202 BED AND BREAKFAST DWELLING"],
+                       used, by_hand)
     if use not in HOUSES and use != ATTACHED:
-        return _answer(BUILDING, f"its use ({use}) is none of the dwellings R101.2 lists (detached one- "
-                       "and two-family dwellings, townhouses, bed and breakfast dwellings, live/work units in "
-                       "townhouses, small owner-occupied lodging houses, manufactured homes), so the Building Code "
-                       "covers it (101.2: \"every building or structure\")", [R101, "BCNYS 101.2"], used)
+        return _answer(BUILDING, f"its use ({use}) is none of the dwellings R101.2 lists (101.2: every other building)",
+                       ["R101.2", "101.2"], used)
     # a dwelling R101.2 can cover: each condition it sets
-    for key, words, cite in (
-            ("care_facility", "people outside the household receive care or day care here: five or fewer may stay "
-             "under the Residential Code only as BCNYS 305.2.3, 308.2.4, 308.3.2, 308.5.4 or 310.4.1 allow (most with "
-             "a P2904 or 903.3.1.3 sprinkler system), more are a Building Code occupancy (Group E, I or R-4)",
-             "BCNYS 308.2.4, 310.4.1"),
-            ("home_occupation", "a home occupation is planned: if a significant part of the unit is a nonresidential "
-             "use run by the tenant it is a live/work unit (BCNYS 202 LIVE/WORK UNIT), which R101.2 keeps under the "
-             "Residential Code only in a townhouse (item 5; BCNYS 508.5)", "BCNYS 508.5")):
-        if values.get(key) is True or facts.get(key) is True:
-            used[key] = True
-            return _answer(None, words + ": which code governs needs a person's check", [R101, cite], used)
+    if values.get("care_facility") is True or facts.get("care_facility") is True:
+        used["care_facility"] = True
+        return _answer(None, "people outside the household receive care here: five or fewer may stay under the "
+                       "Residential Code only as 308.2.4 or 310.4.1 allow (with a sprinkler system), more are a "
+                       "Building Code occupancy", ["308.2.4", "310.4.1"], used, by_hand)
+    if values.get("home_occupation") is True:
+        used["home_occupation"] = True
+        return _answer(None, "a home occupation is planned: a unit whose significant part is a business run by the "
+                       "tenant is a live/work unit, under the Residential Code only in a townhouse (R101.2 item 5)",
+                       ["R101.2 item 5", "202 LIVE/WORK UNIT"], used, by_hand)
     rooms = values.get("rooms_let_for_profit")
     if type(rooms) in (int, float) and rooms > 0:
         used["rooms_let_for_profit"] = rooms
         return _answer(None, f"{rooms:g} rooms let for profit: a lodging house is under the Residential Code only "
-                       "owner-occupied with five or fewer guestrooms and a P2904 sprinkler system (R101.2 item 6), "
-                       "else the Building Code (310.2, 310.4.2): which code governs needs a person's check",
-                       [R101, "BCNYS 310.4.2"], used)
+                       "owner-occupied with five or fewer guestrooms and a P2904 sprinkler system (R101.2 item 6)",
+                       ["R101.2 item 6", "310.4.2"], used, by_hand)
     if use == ATTACHED:
         units = values.get("attached_units_in_building")
         used["attached_units_in_building"] = units
         if type(units) is not int:
-            return _answer(None, "an attached one-family dwelling: how many units the whole attached building has "
-                           "isn't stated, so whether it is a townhouse (three or more townhouse units, R202) can't be "
-                           "told", [R101], used)
+            return _answer(None, "an attached one-family dwelling, the units of the whole attached building not stated",
+                           ["R101.2 item 3", "R202 TOWNHOUSE"], used,
+                           f"state the units in the whole attached building ({MARK['attached_units_in_building']})")
         if units < 3:
-            what, item, n = "a two-family dwelling (two attached units in one building)", "item 2", 2
+            what, item, n = "a two-family dwelling (two attached units in one building)", "R101.2 item 2", 2
         elif facts.get("townhouse_units") is None:
-            return _answer(None, f"{units} attached units: a townhouse (R101.2 item 3) only if each is a townhouse "
-                           "unit (R202: \"extends from foundation to roof, that has a yard or public way on not less "
-                           "than two sides, and has a separate means of egress\"); say whether they are (Gordium: "
-                           "Townhouse units)", [R101, "RCNYS R202 TOWNHOUSE UNIT"], used)
+            return _answer(None, f"{units} attached units: a townhouse only if each is a townhouse unit (R202: from "
+                           "foundation to roof, a yard or public way on two sides, a separate means of egress)",
+                           ["R101.2 item 3", "R202 TOWNHOUSE UNIT"], used,
+                           f"say whether every unit is a townhouse unit ({MARK['townhouse_units']})")
         elif facts["townhouse_units"] is False:
-            return _answer(BUILDING, f"{units} attached units that are not townhouse units (R202), so not a "
-                           "townhouse: none of R101.2's dwellings, so the Building Code covers it",
-                           [R101, "RCNYS R202 TOWNHOUSE UNIT"], used)
+            return _answer(BUILDING, f"{units} attached units that are not townhouse units (R202), so none of the "
+                           "dwellings R101.2 lists", ["R101.2 item 3", "R202 TOWNHOUSE UNIT", "101.2"], used)
         else:
-            what, item, n = f"a townhouse of {units} townhouse units", "item 3", None
+            what, item, n = f"a townhouse of {units} townhouse units", "R101.2 item 3", None
     else:
         what, item, n = HOUSES[use]
         units = values.get("dwelling_units")
         if type(units) in (int, float) and n == 1 and units != 1:
             used["dwelling_units"] = units
-            return _answer(None, f"the use is a one-family dwelling but {units:g} dwelling units are stated: say "
-                           "which is right", [R101], used)
+            return _answer(None, f"the use is a one-family dwelling but {units:g} dwelling units are stated",
+                           ["R101.2 item 1"], used, "correct the use or the dwelling units")
         if values.get("accessory_dwelling_unit") is True and values.get("adu_detached") is not True and n == 1:
             if values.get("adu_detached") is None:
                 return _answer(None, "an accessory dwelling unit is on the lot and whether it is detached isn't "
-                               "stated: inside the house it makes it a two-family dwelling (R101.2 item 2, which needs "
-                               "a separate means of egress for each unit)", [R101], used)
-            what, item, n = "a two-family dwelling (the house and its attached accessory dwelling unit)", "item 2", 2
-    cites = [f"{R101} {item}"]
+                               "stated: inside the house it makes it a two-family dwelling", ["R101.2 item 2"], used,
+                               "say whether the accessory dwelling unit is detached")
+            what, item, n = ("a two-family dwelling (the house and its attached accessory dwelling unit)",
+                             "R101.2 item 2", 2)
+    cites = [item]
     if n == 2:
         egress = facts.get("separate_means_of_egress")
         if egress is None:
-            return _answer(None, f"{what}: the Residential Code covers it only where each dwelling unit has a separate "
-                           "means of egress (R101.2 item 2), which isn't stated (Gordium: Separate means of egress)",
-                           cites, used)
+            return _answer(None, f"{what}: the Residential Code covers it only where each unit has a separate means of "
+                           f"egress ({item})", cites, used,
+                           f"say whether each unit has a separate means of egress ({MARK['separate_means_of_egress']})")
         if egress is False:
-            return _answer(BUILDING, f"{what} whose units don't each have a separate means of egress: not one R101.2 "
-                           "lists, so the Building Code covers it (Group R-3, 310.4)", cites + ["BCNYS 310.4"], used)
+            return _answer(BUILDING, f"{what} whose units don't each have a separate means of egress ({item}): a "
+                           "Group R-3 building (310.4)", cites + ["310.4"], used)
     most, where = stories_bound(values, facts)
     used["stories_above_grade_plane"] = most
+    ask = (f"state the building's stories above grade plane ({MARK['stories_above_grade_plane']}, as R202 STORY "
+           "ABOVE GRADE PLANE counts them)")
     if most is None:
-        return _answer(None, f"{what}, but how many stories it has above grade plane isn't known (R101.2: \"not more "
-                       f"than three stories above grade plane\"): {ASK_STORIES}", cites + ["RCNYS R202"], used)
+        return _answer(None, f"{what}, its stories above grade plane not known (R101.2: not more than three)",
+                       cites + ["R101.2", "R202 STORY ABOVE GRADE PLANE"], used, ask)
     if most > 3:
         if "stories_above_grade_plane" in facts:
-            return _answer(BUILDING, f"{what} of {most} stories above grade plane (stated): more than R101.2's three, "
-                           "so the Building Code covers it", cites + ["RCNYS R202"], used)
-        return _answer(None, f"{what}; Ithaca counts {most} stories, and a habitable attic Ithaca counts may not be a "
-                       "story above grade plane (R316.3's exceptions), so whether it is over R101.2's three can't be "
-                       f"told: {ASK_STORIES}", cites + ["RCNYS R316.3"], used)
-    return _answer(RESIDENTIAL, f"{what} of not more than three stories above grade plane ({where}): R101.2 {item}",
-                   cites + ["RCNYS R202"], used)
+            return _answer(BUILDING, f"{what} of {most} stories above grade plane, more than R101.2's three",
+                           cites + ["R101.2", "101.2"], used)
+        return _answer(None, f"{what}: Ithaca counts {most} stories, and a habitable attic Ithaca counts may not be a "
+                       "story above grade plane (R316.3's exceptions)", cites + ["R101.2", "R316.3"], used, ask)
+    return _answer(RESIDENTIAL, f"{what}, {most} stories above grade plane at most ({where}) ({item})",
+                   cites + ["R101.2", "R202 STORY ABOVE GRADE PLANE"], used)

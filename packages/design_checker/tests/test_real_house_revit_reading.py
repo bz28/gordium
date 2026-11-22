@@ -20,6 +20,9 @@ import pytest
 import yaml
 
 from design_checker import egress
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))   # egress_house beside this file
+import egress_house  # noqa: E402
 from model_measurement.interior import recordings
 
 REPO = Path(__file__).parents[3]
@@ -63,8 +66,8 @@ def readings() -> list:
 
 def compare(found, interior):
     house, hand = load("house.yaml"), {r["id"]: r for r in load("hand_check.yaml")["rules"]}
-    want = egress.check(found, house, {"dwelling_units": 1}, {"use": set()})
-    got = egress.check(found, interior, {"dwelling_units": 1}, {"use": set()})
+    want = egress.check(found, house, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()})
+    got = egress.check(found, interior, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()})
     set_aside = {k for i in want["items"] for k in (i.get("has_none") or {}).get("rules", [])}
     return want["results"], got["results"], set_aside, hand
 

@@ -20,6 +20,9 @@ import pytest
 import yaml
 
 from design_checker import egress
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))   # egress_house beside this file
+import egress_house  # noqa: E402
 from rule_format.rulebook import load
 
 REPO = Path(__file__).parents[3]
@@ -65,7 +68,7 @@ def load_yaml(name, file):
 
 def run(found, name):
     house, hand = load_yaml(name, "house.yaml"), load_yaml(name, "hand_check.yaml")
-    return egress.check(found, house, {"dwelling_units": 1}, {"use": set()}), hand
+    return egress.check(found, house, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()}), hand
 
 
 def test_the_houses_with_a_hand_check():

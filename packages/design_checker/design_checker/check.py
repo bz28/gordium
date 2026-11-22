@@ -1088,7 +1088,8 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             "report_error": report_error,
             "statuses": statuses, "notice": notice_text,
             "sections": v["sections"],          # zoning's, then each inherited law's, each with its own state
-            "egress": {k: law[k] for k in ("rows", "results", "interior", "interior_sha256")}}
+            "egress": {k: law[k] for k in ("rows", "results", "interior", "interior_sha256")},
+            "which_code": egress.which_code(law)}      # which New York code governs the building (code_scope.py)
 
 
 def _envelope_facts(site: dict, facts: dict) -> dict:
