@@ -182,6 +182,7 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     internal void Show(PanelContent content)
     {
         _content = content;
+        _failed = false;
         _again.Visibility = W.Visibility.Visible;
         _again.IsEnabled = _checkAgainState.Enabled;             // a check still waiting keeps it greyed
         _sub.Text = $"Checked {content.When:HH:mm} · {content.Project}";
@@ -342,9 +343,11 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
         Show(content with { Model = ResultRows.Stale(model, content.When), MarksAdded = 0, ClearWords = "" });
     }
 
-    /// <summary>A check that failed: every row of the last check taken down, and why.</summary>
+    /// <summary>A check that failed: every row of the last check taken down, and why (held while a check runs: its
+    /// progress line stays).</summary>
     internal void Failed(string words)
     {
+        _failed = true;
         _content = null;
         _detailId = null;
         _placed = [];
@@ -353,8 +356,14 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
         _bodyHost.Child = _missingScroll;
         Relayout();
         _sub.Text = "Not checked";
-        Say(words);
+        Say(_checkAgainState.Status(words));
     }
+
+    /// <summary>Whether the last thing shown was a failure (the error state).</summary>
+    private bool _failed;
+
+    /// <summary>What the panel shows now (CheckFlow.Had): what a cancelled check goes back to.</summary>
+    internal PanelHad Had => CheckFlow.Had(_content is not null, _content?.Model is not null, _failed);
 
     /// <summary>A line under the header (a click's result, a problem); empty hides it.</summary>
     internal void Say(string words)
@@ -369,18 +378,84 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     /// <summary>Whether a Check again waits or runs: kept across every redraw (a greyed redraw after an edit).</summary>
     private readonly CheckAgainState _checkAgainState = new();
 
-    /// <summary>While a check runs: Check again greyed, and why. The rows stay as they are (stale ones stale) until
-    /// the new answer is shown.</summary>
+    /// <summary>Ticks the checking line's seconds while the checker works (Revit's thread is free then).</summary>
+    private W.Threading.DispatcherTimer? _ticks;
+
+    /// <summary>A click on Check again, queued for Revit's thread: greyed and "Checking..." until Revit takes it
+    /// (a double click never queues two). The rows stay as they are (stale ones stale).</summary>
     internal void Busy(bool busy)
     {
-        if (busy)
+        if (!busy)
         {
-            _checkAgainState.Start();
-            Say(Checking);
+            EndProgress();
+            return;
         }
-        else
-            Say(_checkAgainState.Stop(_status.Text));        // what the check's redraw had to say, or a failure's words
+        _checkAgainState.Start();
+        Say(Checking);
         _again.IsEnabled = _checkAgainState.Enabled;
+    }
+
+    /// <summary>A check at <paramref name="stage"/> (CheckFlow), begun at <paramref name="since"/>: its progress line
+    /// (CheckWords.Progress), the button Cancel. The earlier results stay as they are until the answer (stale ones
+    /// stale, never green; an edit greys them as ever); with none, the header says no results yet. While the checker
+    /// works the line counts its seconds (Revit's thread is free then; during the read nothing is drawn).</summary>
+    internal void Progress(CheckStage stage, DateTime since)
+    {
+        _checkAgainState.Running(CheckWords.Progress(stage, DateTime.Now - since) ?? Checking);
+        Say(_checkAgainState.Line);
+        _again.Content = CheckWords.Button(stage);
+        _again.Visibility = W.Visibility.Visible;
+        _again.IsEnabled = _checkAgainState.Enabled;
+        if (_content is null)
+            _sub.Text = "Checking this project: no results yet";
+        _ticks?.Stop();
+        if (stage != CheckStage.Checking)
+            return;
+        _ticks = new W.Threading.DispatcherTimer { Interval = TimeSpan.FromSeconds(1) };
+        _ticks.Tick += (_, _) =>
+        {
+            if (!_checkAgainState.IsRunning)
+                return;
+            var showing = _status.Text == _checkAgainState.Line;
+            _checkAgainState.Running(CheckWords.Checking(DateTime.Now - since));
+            if (showing)
+                Say(_checkAgainState.Line);
+        };
+        _ticks.Start();
+    }
+
+    /// <summary>The check ended (shown, failed, cancelled) or never began: the button Check again, usable, and the
+    /// line a redraw held meanwhile (or a failure's words) shown.</summary>
+    internal void EndProgress()
+    {
+        _ticks?.Stop();
+        _ticks = null;
+        Say(_checkAgainState.Stop(_status.Text));        // what the check's redraw had to say, or a failure's words
+        _again.Content = CheckWords.CheckAgain;
+        _again.IsEnabled = _checkAgainState.Enabled;
+        if (_content is null && _sub.Text == "Checking this project: no results yet")
+            _sub.Text = _failed ? "Not checked" : "Click Check project on the Gordium tab to check this project.";
+    }
+
+    /// <summary>A cancelled check: back to what the panel showed before it (CheckFlow.Cancel's <paramref name="had"/>):
+    /// the earlier results, marked stale (never shown as the new ones: CheckWords.CancelledStale), the earlier list of
+    /// what to fill in, or the empty or error state; then why (<paramref name="why"/>, or CheckWords.Cancelled).</summary>
+    internal void Restore(PanelHad had, string? why)
+    {
+        switch (had)
+        {
+            case PanelHad.Results when _content is { Model: { } model } content:
+                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When)), MarksAdded = 0, ClearWords = "" });
+                break;
+            case PanelHad.Missing when _content is { Model: null }:
+                break;                                      // what to fill in, as it was
+            default:
+                Failed("");                                 // the empty or error state: no rows
+                if (had == PanelHad.Nothing)
+                    _failed = false;
+                break;
+        }
+        Say(why ?? CheckWords.Cancelled(had));
     }
 
     private void ShowMissing(IReadOnlyList<string> missing)

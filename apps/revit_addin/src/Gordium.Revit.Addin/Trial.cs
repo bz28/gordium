@@ -58,16 +58,36 @@ internal static class Trial
     internal static WorkerOptions Options(string clone) =>
         new() { PythonPath = Python(clone), WorkingDirectory = clone, Environment = PythonEnvironment(clone) };
 
-    /// <summary>The worker this Revit session uses, started (off Revit's thread) if it isn't running.</summary>
-    internal static WorkerClient Worker()
+    /// <summary>The worker this Revit session uses, started (off Revit's thread) if it isn't running, and waited for.</summary>
+    internal static WorkerClient Worker() => WorkerAsync().GetAwaiter().GetResult();
+
+    private static readonly object WorkerLock = new();
+    private static Task<WorkerClient>? _starting;
+
+    /// <summary>The worker this Revit session uses, without waiting: the running one, the one being started, or one
+    /// started now on a pool thread (Check project starts it before its read, so Python starts while Revit reads; PR
+    /// 8). A start that failed is tried again by the next call. One at a time (the lock): a check's start and a
+    /// trial tool's never make two.</summary>
+    internal static Task<WorkerClient> WorkerAsync()
     {
-        if (App.Worker is null || App.Worker.IsStopped)
+        lock (WorkerLock)
         {
+            if (App.Worker is { IsStopped: false } running)
+                return Task.FromResult(running);
+            if (_starting is { IsCompleted: false } starting)
+                return starting;
             App.Worker?.Dispose();
-            var clone = Clone();
-            App.Worker = Task.Run(() => WorkerClient.StartAsync(Options(clone))).GetAwaiter().GetResult();
+            App.Worker = null;
+            var clone = Clone();                              // on the caller's thread: a missing clone throws here
+            _starting = Task.Run(async () =>
+            {
+                var started = await WorkerClient.StartAsync(Options(clone)).ConfigureAwait(false);
+                lock (WorkerLock)
+                    App.Worker = started;
+                return started;
+            });
+            return _starting;
         }
-        return App.Worker;
     }
 
     /// <summary>The target framework this build was made for (<c>.NETCoreApp,Version=v10.0</c>).</summary>
