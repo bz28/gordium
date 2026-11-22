@@ -303,6 +303,12 @@ public sealed class ReadStepsTests
         Assert.Contains("select box.Transform.OfPoint(new XYZ(x, y, z))", source);
         Assert.Contains("corners.Min(p => p.Z) - pad", source);
         Assert.Contains("corners.Max(p => p.Z) + pad", source);
+        // each method keeps its own doc comment: Inside's directly above Inside, Padded's alone above Padded
+        var inside = source.IndexOf("private static List<NearbyElement>? Inside(", StringComparison.Ordinal);
+        Assert.EndsWith("Null when it can't be looked for.</summary>", source[..inside].TrimEnd());
+        var padded = source.IndexOf("private static Outline Padded(", StringComparison.Ordinal);
+        var before = source[..padded];
+        Assert.Equal(1, Count(before[(before.LastIndexOf('}') + 1)..], "<summary>"));
     }
 
     private static int Count(string text, string what)

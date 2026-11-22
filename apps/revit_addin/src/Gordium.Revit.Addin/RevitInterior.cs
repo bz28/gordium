@@ -817,9 +817,6 @@ internal static class RevitInterior
         };
     }
 
-    /// <summary>What crosses the room's plan from just above its floor to just below its level's room computation
-    /// height (<c>LEVEL_ROOM_COMPUTATION_HEIGHT</c>, where Revit works out room outlines): every outline loop extruded,
-    /// and each element whose solid meets it (<c>ElementIntersectsSolidFilter</c>). Null when it can't be looked for.</summary>
     /// <summary>A solid's bounding box in model coordinates (its 8 corners through the box's own transform), grown by
     /// <paramref name="pad"/> feet on every side.</summary>
     private static Outline Padded(Solid solid, double pad)
@@ -833,6 +830,10 @@ internal static class RevitInterior
                            new XYZ(corners.Max(p => p.X) + pad, corners.Max(p => p.Y) + pad, corners.Max(p => p.Z) + pad));
     }
 
+    /// <summary>What crosses the room's plan from just above its floor to just below its level's room computation
+    /// height (<c>LEVEL_ROOM_COMPUTATION_HEIGHT</c>, where Revit works out room outlines): every outline loop extruded,
+    /// and each element whose solid meets it (<c>ElementIntersectsSolidFilter</c>, after the quick padded-box filter that
+    /// only narrows what it is run on). Null when it can't be looked for.</summary>
     private static List<NearbyElement>? Inside(Document doc, Room room, IList<IList<BoundarySegment>> loops, double floor, Level level)
     {
         try
