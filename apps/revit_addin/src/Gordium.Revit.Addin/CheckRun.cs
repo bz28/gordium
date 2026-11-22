@@ -103,16 +103,30 @@ internal sealed class CheckRun
         Clear = clear;
     }
 
-    /// <summary>Sends the request and waits off Revit's thread (Revit's thread: the read just ended).</summary>
-    internal void Send(ProjectRequest request)
+    /// <summary>The read ended (Revit's thread, at once: the edit count is kept now, CheckFlow.ReadDone): Checking.
+    /// False, and the log line written, when the check was cancelled during the read's picks: nothing is sent.</summary>
+    internal bool ReadEnded()
     {
         if (!Flow.ReadDone(Ticket))
         {
-            End("cancelled");                                  // cancelled during the read's picks: nothing sent
-            return;
+            End("cancelled");
+            return false;
         }
         ReadAt = DateTime.Now;
         ResultsPane.Checking(ReadAt);
+        return true;
+    }
+
+    /// <summary>Sends the request and waits off Revit's thread (queued after <see cref="ReadEnded"/>, behind Revit's
+    /// queued input): nothing sent, and the worker left running, when a Cancel came first.</summary>
+    internal void Send(ProjectRequest request)
+    {
+        if (!Flow.IsCurrent(Ticket))
+        {
+            Log["cancelled_before_send"] = true;
+            End("cancelled");                                  // cancelled during the read: nothing sent
+            return;
+        }
         // off Revit's thread (CheckFlow.Send); the outcome back on it through the panel's ExternalEvent
         _ = Flow.Send(Ticket, Worker, request, (sent, seconds) =>
             ResultsPane.Post("Show the check's answer", app =>

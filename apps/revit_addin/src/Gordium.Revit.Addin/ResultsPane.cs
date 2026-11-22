@@ -115,6 +115,11 @@ internal sealed class ResultsPane : IDockablePaneProvider
     internal static void AfterDrawn(Action act) =>
         View().Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, act);
 
+    /// <summary>Runs <paramref name="act"/> after the input Revit queued meanwhile (WPF runs Background work only once
+    /// no input is pending): a click made while Revit's thread was busy (Cancel during the read) is handled first.</summary>
+    internal static void AfterInput(Action act) =>
+        View().Dispatcher.BeginInvoke(System.Windows.Threading.DispatcherPriority.Background, act);
+
     /// <summary>A check cancelled: the panel back to what it showed before it (<see cref="ResultsView.Restore"/>).</summary>
     internal static void Cancelled(PanelHad had, string? why)
     {

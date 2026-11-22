@@ -185,7 +185,7 @@ public sealed class ReadStepsTests
         // the request sent is the one prepared, as before: never with the steps
         // (sent off Revit's thread by CheckFlow.Send for the panel; on this thread for a check asked for by file)
         Assert.Contains("ProjectCheck.SendAsync(await Trial.WorkerAsync().ConfigureAwait(false), request)", source);
-        Assert.Contains("check.Send(request);", source);
+        Assert.Contains("ResultsPane.AfterInput(() => check.Send(request));", source);
         Assert.Contains("[\"site\"] = request.Site.DeepClone(), [\"facts\"] = request.Facts.DeepClone(), [\"interior\"] = request.Interior.DeepClone(),", source);
     }
 
