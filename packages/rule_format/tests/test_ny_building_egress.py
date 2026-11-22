@@ -57,7 +57,8 @@ SHEET = {
     "Exit (or exit access doorway) remoteness":
         ("general.bc_1007_1_1_remoteness", "story", {"exit_remoteness_ratio": 0.8745, "story_exit_count": 2}),
     "Accessory storage area on the story":
-        ("general.bc_508_2_3_accessory_area", "story", {"story_accessory_area": 1428, "story_gross_floor_area": 16509}),
+        ("general.bc_508_2_3_accessory_area", "story", {"story_accessory_area": 1428, "story_gross_floor_area": 16509,
+                                                        "story_net_floor_area": 15000}),   # net supposed: the sheet has none
 }
 
 
@@ -82,7 +83,8 @@ def test_the_limits_are_new_yorks(rules):
     assert has["general.bc_1020_5_dead_end"] == ("corridor_dead_end_length <= 20 or corridor_dead_end_length < 2.5 * "
                                                  "corridor_dead_end_least_width")
     assert "1 / 3 if" in has["general.bc_1007_1_1_remoteness"] and "else 1 / 2" in has["general.bc_1007_1_1_remoteness"]
-    assert has["general.bc_508_2_3_accessory_area"] == "story_accessory_area <= 0.10 * story_gross_floor_area"
+    assert has["general.bc_508_2_3_accessory_area"] == ("story_accessory_area <= 0.10 * story_net_floor_area and "
+                                                        "story_accessory_area <= 0.10 * story_gross_floor_area")
 
 
 def test_travel_with_an_nfpa_13r_system_only_is_held_to_150_ft(ctx, rules):
@@ -145,3 +147,68 @@ def test_a_table_cell_is_a_length_in_feet_only_where_its_flag_says_so(ctx, rules
     space = rules["general.bc_1006_2_1_two_exits"]
     as_feet = dict(space, check="space_exit_count >= 2 or space_common_path <= 10")     # 10 is an occupant load
     assert any("isn't one of" in p for p in code_numbers.problems(as_feet, space["sources"], ctx))
+
+
+# ---- review round 1 (2026-11-22) ------------------------------------------------------------------------------------
+
+def test_accessory_area_between_the_net_and_gross_readings_never_passes(ctx, rules):
+    """508.2.3's "floor area of the story" is open between 202 FLOOR AREA, GROSS and NET: pass only within 10 percent
+    of the net (the smaller), fail only over 10 percent of the gross, needs review between or where one is missing."""
+    r = rules["general.bc_508_2_3_accessory_area"]
+    both = {"story_gross_floor_area": 16509, "story_net_floor_area": 15000}
+    assert _rows(r, "story", both | {"story_accessory_area": 1600}, {}, ctx) == ["needs_review"]
+    assert _rows(r, "story", {"story_accessory_area": 1600, "story_gross_floor_area": 16509}, {}, ctx) == ["needs_review"]
+    assert _rows(r, "story", both | {"story_accessory_area": 1400}, {}, ctx) == ["pass"]
+    assert _rows(r, "story", both | {"story_accessory_area": 1700}, {}, ctx) == ["fail"]
+    assert _rows(r, "story", {"story_accessory_area": 1700, "story_gross_floor_area": 16509}, {}, ctx) == ["fail"]
+    research = r["research"][0]
+    assert r["open_questions"] and {g["id"] for g in research["readings"]} == {"gross_floor_area", "net_floor_area"}
+    assert {"202:floor_area_gross", "202:floor_area_net"} <= set(research["searched"])
+
+
+def test_floor_area_gross_and_net_are_brought_in_quoted_and_measured_by_their_definitions():
+    pieces = {p["id"] for p in map(__import__("json").loads, (NY / "2_extracted_text/gov.ny.building.2025.sections.jsonl")
+                                   .read_text(encoding="utf-8").splitlines()[1:])}
+    assert {"202:floor_area_gross", "202:floor_area_net"} <= pieces
+    defs = load(NY / "4_term_definitions/definitions.yaml")
+    assert defs["bc_floor_area_gross"]["sources"][0]["quote"].startswith("[BE] FLOOR AREA, GROSS.")
+    assert defs["bc_floor_area_net"]["sources"][0]["quote"].startswith("[BE] FLOOR AREA, NET.")
+    story = parts.load_registry()["story"]["measures"]
+    gross, net = story["story_gross_floor_area"]["meaning"], story["story_net_floor_area"]["meaning"]
+    assert "202 FLOOR AREA, GROSS" in gross and "exclusive of vent shafts and courts" in gross
+    assert "shafts with no openings or interior courts" in gross
+    assert "202 FLOOR AREA, NET" in net and "toilet rooms, mechanical rooms and closets" in net
+
+
+def test_each_space_with_two_or_more_doorways_has_their_separation_checked(ctx, rules):
+    """1007.1 separates exits and exit access doorways 'serving spaces, including individual building stories': a room
+    is checked, not only its story; an unmeasured room needs review, never a pass."""
+    r = rules["general.bc_1007_1_1_space_remoteness"]
+    assert r["for_each"] == "space"
+    room = {"space_exit_count": 2, "space_occupant_load": 30, "space_common_path": 40}
+    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.2}, I4, ctx) == ["fail"]
+    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.4}, I4, ctx) == ["pass"]
+    assert _rows(r, "space", room | {"space_exit_remoteness_ratio": 0.4}, I4 | {"sprinklered_903_3_1_1": False}, ctx) \
+        == ["fail"]                                                          # unsprinklered: one-half
+    assert _rows(r, "space", room, I4, ctx) == ["needs_review"]              # not measured
+    three = rules["general.bc_1007_1_2_space_three_or_more"]
+    assert three["for_each"] == "space"
+    assert _rows(three, "space", {"space_exit_count": 3, "space_exit_remoteness_ratio": 0.2}, I4, ctx) == ["fail"]
+    got = yaml.safe_load((NY / "6_coverage_report/gov.ny.building.2025.rules.yaml").read_text(encoding="utf-8"))
+    assert "general.bc_1007_1_1_space_remoteness" in got["pieces"]["1007.1.1"]["rules"]
+    assert "general.bc_1007_1_2_space_three_or_more" in got["pieces"]["1007.1.2"]["rules"]
+
+
+def test_only_a_lobby_taking_item_4s_exception_escapes_the_locked_room_fail(ctx, rules):
+    """1016.2 item 4's exception is only for an elevator lobby's electrically locked exit access door per 1010.2.14:
+    such a lobby needs review; any other lockable lobby is a locked room and fails."""
+    r = rules["general.bc_1016_2_intervening_spaces"]
+    clear = {"space_egress_through_locked_room": 0, "space_egress_through_kitchen_storage": 0,
+             "space_egress_sleeping_through_sleeping_or_toilet": 0, "space_egress_through_other_room": 0,
+             "space_egress_through_electrically_locked_lobby": 0}
+    assert _rows(r, "space", clear, I4, ctx) == ["pass"]
+    assert _rows(r, "space", clear | {"space_egress_through_electrically_locked_lobby": 1}, I4, ctx) == ["needs_review"]
+    assert _rows(r, "space", clear | {"space_egress_through_locked_room": 1,
+                                      "space_egress_through_electrically_locked_lobby": 1}, I4, ctx) == ["fail"]
+    meaning = parts.load_registry()["space"]["measures"]["space_egress_through_locked_room"]["meaning"]
+    assert "enclosed elevator lobbies included" in meaning and "electrically locked" in meaning

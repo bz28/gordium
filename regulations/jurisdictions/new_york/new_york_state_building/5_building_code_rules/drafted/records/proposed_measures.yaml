@@ -20,6 +20,8 @@ sprinklered_903_3_1_1:
   needed_by:
   - general.bc_1006_2_1_two_exits
   - general.bc_1007_1_1_remoteness
+  - general.bc_1007_1_1_space_remoteness
+  - general.bc_1007_1_2_space_three_or_more
   - general.bc_1007_1_2_three_or_more_exits
   - general.bc_1017_2_travel_distance
 sprinklered_903_3_1_2:
@@ -29,6 +31,8 @@ sprinklered_903_3_1_2:
   needed_by:
   - general.bc_1006_2_1_two_exits
   - general.bc_1007_1_1_remoteness
+  - general.bc_1007_1_1_space_remoteness
+  - general.bc_1007_1_2_space_three_or_more
   - general.bc_1007_1_2_three_or_more_exits
 other_occupancy_present:
   meaning: 'The building holds an occupancy other than Group I-4 (a mixed building: another tenant, or an accessory or separated
