@@ -362,11 +362,53 @@ def cause_cards(items: list[dict]) -> list[dict]:
         if c["key"] not in at:
             at[c["key"]] = {"key": c["key"], "kind": c.get("kind"), "words": c.get("words"), "elements": [],
                             "items": [], "rules": 0}
+            if c.get("rooms"):
+                at[c["key"]]["rooms"] = list(c["rooms"])
             cards.append(at[c["key"]])
         card = at[c["key"]]
         card["items"].append(i["id"])
         card["elements"] += [e for e in c.get("elements") or [] if e not in card["elements"]]
+    cards = _rooms_together(cards)
     for card in cards:
         card["rules"] = len({next((i.get("rule") or i["id"] for i in items if i["id"] == x), x) for x in card["items"]})
     order = {c["key"]: n for n, c in enumerate(cards)}
     return sorted(cards, key=lambda c: (CARD_ORDER.get(c["kind"], len(CARD_ORDER)), -len(c["items"]), order[c["key"]]))
+
+
+def _rooms_together(cards: list[dict]) -> list[dict]:
+    """The rooms cards (key "rooms:…": rooms the measuring couldn't route) that share a room made one card: the 5
+    rooms with no route are one job, whether a row stops at them for the story's travel, its room-door travel or a
+    room's own common path. The card is keyed by every room it names (sorted) and names them as its elements; its
+    words are those of the card naming the most rooms. Any other card is left as it is, in its place."""
+    rooms = [c for c in cards if str(c["key"]).startswith("rooms:")]
+    merged = []
+    for c in rooms:
+        into = [m for m in merged if set(m["elements"]) & set(c["elements"])]
+        for m in into[1:]:                       # two groups this card joins: one
+            into[0]["parts"] += m["parts"]
+            into[0]["elements"] = sorted(set(into[0]["elements"]) | set(m["elements"]))
+            merged.remove(m)
+        if into:
+            into[0]["parts"].append(c)
+            into[0]["elements"] = sorted(set(into[0]["elements"]) | set(c["elements"]))
+        else:
+            merged.append({"parts": [c], "elements": sorted(c["elements"])})
+    from design_checker import panel_data
+    first = {}
+    for m in merged:
+        found = {r["id"]: r for c in m["parts"] for r in c.get("rooms") or [] if isinstance(r, dict) and r.get("id")}
+        items = [x for c in m["parts"] for x in c["items"]]
+        card = {"key": "rooms:" + ",".join(m["elements"]), "kind": m["parts"][0]["kind"],
+                "words": m["parts"][0]["words"], "elements": m["elements"], "items": list(dict.fromkeys(items)),
+                "rules": 0}
+        if set(found) == set(m["elements"]):     # its words from every room it names, as each row's are made
+            card["words"] = panel_data._rooms_cause(found)["words"]
+            card["rooms"] = [found[r] for r in m["elements"]]
+        first[id(m["parts"][0])] = card
+    out, gone = [], {id(c) for m in merged for c in m["parts"]}
+    for c in cards:
+        if id(c) in first:
+            out.append(first[id(c)])
+        elif id(c) not in gone:
+            out.append(c)
+    return out

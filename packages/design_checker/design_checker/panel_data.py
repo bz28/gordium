@@ -36,7 +36,7 @@ RATIO_LENGTHS = {"exit_remoteness_ratio": ("nearest_edges", "diagonal", "exits {
                                            "of the {of} diagonal")}
 FLAG_WORDS = "a flag rule: a person decides, even once it is measured"
 REVIEW_WHEN_WORDS = "the law asks a person to decide here (its review condition holds)"
-NO_ROUTE = ("no_route", "no_route_host_blocked", "no_route_via_host")
+NO_ROUTE = ("no_route", "no_route_host_blocked", "no_route_via_host", "no_exit_access")
 OUTCOME_STATUS = {"pass": present.COMPLIES, "fail": present.FAILS, "needs_review": present.REVIEW}
 STEP = 0.01                      # the step a how-far is shown in, in its unit
 
@@ -82,8 +82,8 @@ def how_far_words(status: str, margins: list[float], unit: str, maximum: bool) -
     if high < 0:
         if one:
             words = _amount(max(_ceil(-high), STEP), unit) + " " + gap
-        elif _floor(-high) <= 0:
-            words = f"less than {_amount(STEP, unit)} {gap}"
+        elif _floor(-high) <= 0:     # the least shortfall rounds to nothing, another may be far more: the
+            words = f"{gap} under every reading"          # direction alone, never "less than 0.01 short"
         else:
             words = "at least " + _amount(_floor(-high), unit) + " " + gap
         return words if status == present.FAILS else words + "; see why"
@@ -205,7 +205,8 @@ def _rooms_cause(found: dict) -> dict:
     words = (_plural(len(ids), "room has", "rooms have") + " no route to an exit" if no_route else
              _plural(len(ids), "room isn't", "rooms aren't") + " measured") + f": {names}"
     return {"kind": FIX_MODEL, "key": "rooms:" + ",".join(ids), "words": words, "elements": ids,
-            "rooms": [{"id": r, "name": found[r].get("name"), "why": found[r].get("why")} for r in ids]}
+            "rooms": [{"id": r, "name": found[r].get("name"), "why": found[r].get("why"), "stop": found[r].get("stop")}
+                      for r in ids]}
 
 
 def needed(rule: dict, known: dict, kinds: dict, depth: int = 3) -> list[str]:

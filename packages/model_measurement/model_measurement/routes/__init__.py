@@ -218,19 +218,22 @@ def _story_routes(sp, story, routes, uses, items, access) -> dict:
                                          "exits": list(far.exits), "doors": list(far.doors),
                                          "diagonal": _feet(across.length), "diagonal_ends": [_xy(p) for p in
                                                                                              across.corners]}
-    worst, why = None, None
+    worst, why, stopped = None, None, {}
     for rid, doors in access.items():
         if rid in left_out:                       # decision 1b: a room nobody occupies is no start (NFPA 7.6.1(1))
             continue
         if isinstance(doors, Stop) or not doors:
-            why = why or (doors.reason if isinstance(doors, Stop) else
-                          Stop("no_exit_access", name=story.rooms[rid].name).reason)
+            stop = doors if isinstance(doors, Stop) else Stop("no_exit_access", name=story.rooms[rid].name)
+            why = why or stop.reason
+            stopped[rid] = {"name": story.rooms[rid].name, "why": stop.reason, "stop": stop.key}
             continue
         for did, d in doors.items():
             if d is not None and (worst is None or d > worst[0]):
                 worst = (d, rid, did)
     if why or worst is None:
         sp["not_measured"]["egress_travel_from_room_door"] = why or Stop("no_room_doors").reason
+        if stopped:                               # every room it stops at, by id, each with its stop's key: the panel's
+            sp["more"]["egress_travel_from_room_door"] = {"room_ids_not_measured": stopped}   # (never a figure)
     else:
         m["egress_travel_from_room_door"] = _feet(worst[0])
         more["egress_travel_from_room_door"] = {"room": worst[1], "door": worst[2]}
@@ -470,6 +473,9 @@ def _space_part(rid, name, story, routes, room, access, figures, why_not) -> dic
     common = figures.get(rid)
     if isinstance(common, Stop) or common is None:
         p["not_measured"]["space_common_path"] = common.reason if common is not None else why_not
+        if isinstance(common, Stop):              # the room it stops at (this one), with its stop's key: the panel's
+            p["more"]["space_common_path"] = {"room_ids_not_measured": {
+                rid: {"name": name, "why": common.reason, "stop": common.key}}}
         common = None
     if common is not None:
         p["measures"]["space_common_path"] = _feet(common.figure)
