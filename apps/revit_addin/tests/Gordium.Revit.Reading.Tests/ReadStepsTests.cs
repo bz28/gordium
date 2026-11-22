@@ -289,6 +289,28 @@ public sealed class ReadStepsTests
         Assert.Equal(4, Count(source, "Near(\"inside."));
     }
 
+    [Fact]
+    public void What_is_inside_a_room_is_found_by_the_quick_box_first_then_the_exact_solid()
+    {
+        // Snowdon Towers: 300 of 408 s went to the solid test run on every element, per room (read_steps, 2026-11-22).
+        // The padded box of the room's solid comes first, and the exact solid test still decides: same list, faster.
+        var source = Addin("RevitInterior.cs");
+        var box = source.IndexOf(".WherePasses(new BoundingBoxIntersectsFilter(Padded(solid, 1.0)))", StringComparison.Ordinal);
+        var exact = source.IndexOf(".WherePasses(new ElementIntersectsSolidFilter(solid))", StringComparison.Ordinal);
+        Assert.True(box >= 0, "the quick box filter is gone");
+        Assert.True(exact > box, "the exact solid test must still run, after the box");
+        // the box is in model coordinates: all 8 corners through the solid box's own transform, padded on every side
+        Assert.Contains("select box.Transform.OfPoint(new XYZ(x, y, z))", source);
+        Assert.Contains("corners.Min(p => p.Z) - pad", source);
+        Assert.Contains("corners.Max(p => p.Z) + pad", source);
+        // each method keeps its own doc comment: Inside's directly above Inside, Padded's alone above Padded
+        var inside = source.IndexOf("private static List<NearbyElement>? Inside(", StringComparison.Ordinal);
+        Assert.EndsWith("Null when it can't be looked for.</summary>", source[..inside].TrimEnd());
+        var padded = source.IndexOf("private static Outline Padded(", StringComparison.Ordinal);
+        var before = source[..padded];
+        Assert.Equal(1, Count(before[(before.LastIndexOf('}') + 1)..], "<summary>"));
+    }
+
     private static int Count(string text, string what)
     {
         var n = 0;
