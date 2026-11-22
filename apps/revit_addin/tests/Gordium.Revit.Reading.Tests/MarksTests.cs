@@ -105,6 +105,14 @@ public sealed class MarksTests
         Assert.Contains("main entrance side, §325-8A", d, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public void No_mark_description_runs_two_sentences_together()
+    {
+        // review round 2 (2026-11-22): literals joined with + and no space read "Column 8).A basement"
+        foreach (var m in Marks.All)
+            Assert.False(System.Text.RegularExpressions.Regex.IsMatch(m.Description, @"[.;:)][A-Z]"), m.Name);
+    }
+
     // ---- reading a mark: unset is not stated -------------------------------------------------------------------
 
     [Fact]
