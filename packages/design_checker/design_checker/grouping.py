@@ -379,7 +379,8 @@ def _rooms_together(cards: list[dict]) -> list[dict]:
     """The rooms cards (key "rooms:…": rooms the measuring couldn't route) that share a room made one card: the 5
     rooms with no route are one job, whether a row stops at them for the story's travel, its room-door travel or a
     room's own common path. The card is keyed by every room it names (sorted) and names them as its elements; its
-    words are those of the card naming the most rooms. Any other card is left as it is, in its place."""
+    words are made again from every room it names (panel_data._rooms_cause), or, when a joined card doesn't list
+    its rooms, are the first joined card's words. Any other card is left as it is, in its place."""
     rooms = [c for c in cards if str(c["key"]).startswith("rooms:")]
     merged = []
     for c in rooms:
