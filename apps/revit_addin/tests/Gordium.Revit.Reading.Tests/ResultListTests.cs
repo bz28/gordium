@@ -212,6 +212,7 @@ public sealed class ResultListTests
         Assert.Equal(["e.d1", "e.d2"], Find("d06"));                                 // an element's label
         Assert.Equal(["e.d1"], Find("door  egress"));                                // every word, any order
         Assert.Empty(Find("uid-door"));                                              // never a UniqueId
+        Assert.Empty(Ids(ResultList.Layout(placed, ListFilter.All, "uid-door", new Dictionary<string, string>(), false)));   // nor one with no label
         Assert.Empty(Find("short"));                                                 // never the figures or how far
         Assert.Equal(["z.lot"], Find("front yard", ListFilter.Complies));            // with a filter: both
         Assert.Equal(placed.Select(p => p.Row.Id), Ids(ResultList.Layout(placed, ListFilter.All, "   ", labels, false, opened: Everything)));
