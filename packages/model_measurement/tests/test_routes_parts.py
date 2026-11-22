@@ -390,5 +390,4 @@ def test_a_room_stopped_by_a_tie_is_not_measured_with_its_own_reason_never_calle
     story = SimpleNamespace(rooms={"c": SimpleNamespace(name="CORRIDOR (26)")})
     shown = _over_rooms_measured(story, {"c": Stop("too_many_ties", most=64, x=63.232, y=37.844)})
     assert "no route" not in shown["label"] and "has none" not in shown["label"]
-    assert shown["rooms_not_measured"] == {"CORRIDOR (26)": "more than 64 routes from (63.232, 37.844) are equally "
-                                           "short (within 1e-6 ft): which to take isn't worked out"}
+    assert shown["rooms_not_measured"] == {"CORRIDOR (26)": Stop("too_many_ties", most=64, x=63.232, y=37.844).reason}

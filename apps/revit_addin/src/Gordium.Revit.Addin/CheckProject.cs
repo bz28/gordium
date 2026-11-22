@@ -97,13 +97,30 @@ public sealed class CheckProjectCommand : IExternalCommand
     /// <summary>Reads, sends and logs one check of the document (everything in the log, whatever happens).</summary>
     internal static Ran Run(Document doc, RevitApplication app, Dictionary<string, object?> log)
     {
+        // where the read's time went (the log's read_steps, README "The results log"): kept on this thread for this
+        // run only, never in a record or the request; logged with whatever was read, a failure's too
+        var steps = new ReadSteps();
+        using var keep = ReadSteps.Begin(steps);
+        try
+        {
+            return Run(doc, app, log, steps);
+        }
+        catch
+        {
+            log["read_steps"] = steps.ToLog();
+            throw;
+        }
+    }
+
+    private static Ran Run(Document doc, RevitApplication app, Dictionary<string, object?> log, ReadSteps steps)
+    {
         var sw = Stopwatch.StartNew();
         // both reads on Revit's thread, one after the other, of the same document: the same phases and options
-        var outside = RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance);
-        var inside = RevitInterior.Model(doc);
-        var worker = Trial.Worker();
+        var outside = ReadSteps.Time("outside", () => RevitRead.Model(doc, app.VersionNumber, app.VertexTolerance));
+        var inside = ReadSteps.Time("inside", () => RevitInterior.Model(doc));
+        var worker = ReadSteps.Time("worker_start", Trial.Worker);
         // the lot's lines are read on this thread before anything is awaited (a lot line's points call into Revit)
-        var prepared = ProjectCheck.PrepareAsync(outside, inside, new WorkerLeftOut(worker)).GetAwaiter().GetResult();
+        var prepared = ReadSteps.Time("prepare", () => ProjectCheck.PrepareAsync(outside, inside, new WorkerLeftOut(worker)).GetAwaiter().GetResult());
         log["read_s"] = sw.Elapsed.TotalSeconds;
         log["missing"] = prepared.Missing;
         // in Revit's internal coordinates, as the Street edge mark keeps them (the request's site is in shared ones)
@@ -114,13 +131,16 @@ public sealed class CheckProjectCommand : IExternalCommand
         }).ToList();
         if (prepared.Request is not { } request)
         {
+            log["read_steps"] = steps.ToLog();
             Trial.Log("check_project", log);
             return new Ran(prepared, null, null, null);
         }
-        log["request"] = new JsonObject
-        {
-            ["site"] = request.Site.DeepClone(), ["facts"] = request.Facts.DeepClone(), ["interior"] = request.Interior.DeepClone(),
-        }.ToJsonString();
+        using (ReadSteps.Step("log_request"))
+            log["request"] = new JsonObject
+            {
+                ["site"] = request.Site.DeepClone(), ["facts"] = request.Facts.DeepClone(), ["interior"] = request.Interior.DeepClone(),
+            }.ToJsonString();
+        log["read_steps"] = steps.ToLog();
         sw.Restart();
         // the worker client is async: off Revit's thread, waited for (as the box house's check)
         var result = Task.Run(() => ProjectCheck.SendAsync(worker, request)).GetAwaiter().GetResult();

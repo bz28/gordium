@@ -58,8 +58,8 @@ STOPS = {
                          "it serves (Gordium's reading, decision 1a), and no route leaves {host} either",
     "route_reenters": "the shortest route found from ({x}, {y}) goes back into a 12-in ring it had left (or into "
                       "the room it started in): the route the definition allows is longer, and isn't measured yet",
-    "too_many_ties": "more than {most} routes from ({x}, {y}) are equally short (within 1e-6 ft): which to take "
-                     "isn't worked out",
+    "too_many_ties": "more than {most} routes from ({x}, {y}) are equally short (within 1e-6 ft): too many to list "
+                     "(only a listing asks: every measure reads the tied routes all together, decision 5)",
     "exit_unknown": "no exit on the story has the exit id {exit_id!r}",
     "inside_ring": "the point ({x}, {y}) is within 12 in of a corner: no route is defined from there (decision 2); "
                    "the story's figure covers it by its ring cluster's bound (decision 3)",
@@ -76,8 +76,10 @@ STOPS = {
     "walk_shut": "the point ({x}, {y}), within 12 in of a corner, has no walk on the floor out to its rings' clear "
                  "edge",
     # dead ends and corridor widths (dead_ends.py)
-    "corridor_not_legs": "the corridor isn't made of straight legs meeting at right angles ({why}): its dead ends and "
-                         "width aren't measured in this first version (decision 6)",
+    "corridor_not_legs": "the corridor's centre lines can't be worked out ({why}): its dead ends and width aren't "
+                         "measured (decision 6)",
+    "corridor_width_stepped": "the corridor's walls step, widen or jog: which of its stretches give its width, rather "
+                              "than its alcoves', isn't worked out (decision 6, amended 2026-11-22)",
     "corridor_end_only": "the corridor {name} can't be crossed ({why}, decision 1a): routes along it never count, so "
                          "its dead ends aren't worked out",
     "door_off_legs": "the door {name} isn't on any of the corridor's legs: where it meets the centre line isn't known",

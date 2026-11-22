@@ -147,8 +147,8 @@ public static class ResultRows
                                Counts(result), groups, ResultText.InsideWords(inside));
     }
 
-    /// <summary>The panel's parts in the order it shows them, all in one scrolling list: the stale notice (when
-    /// stale), the state, the counts, then straight away the groups, so the first failing row is on screen at the
+    /// <summary>The panel's parts in the order it shows them: the stale notice (when stale), the state, the counts,
+    /// then straight away the groups (the results list, ResultList), so the first failing row is on screen at the
     /// pane's docked height (Revit 2027 trial: ~420 px); what was not read and the details (phase, options, street
     /// line, files) after the rows, folded.</summary>
     public static IReadOnlyList<PanelPart> Layout(ResultModel model)

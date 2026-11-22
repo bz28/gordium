@@ -5,7 +5,8 @@ namespace Gordium.Revit.Reading;
 /// <summary>The lot (design note, section 4): the picked lot (<c>lot_id</c> in the facts: one property line, or
 /// several lines' <c>UniqueId</c>s joined by "+", in the order picked), else the one closed property line. Only a
 /// closed outline is ever a lot: lines whose ends don't meet in one loop would have the checker close them with an
-/// edge nobody drew.</summary>
+/// edge nobody drew. A lot line with a curve that has no ends makes the lot unread (<see cref="UnboundPicked"/>,
+/// <see cref="UnboundPropertyLine"/>).</summary>
 internal static class LotReader
 {
     /// <summary>The most a curved lot line's points are apart (ft): <c>read_3dm.ARC_STEP</c>, the conformance
@@ -20,12 +21,30 @@ internal static class LotReader
 
     internal sealed record Lot(JsonObject Json, List<(double X, double Y)> Ring);
 
+    /// <summary>Why the lot isn't read when a lot line holds a curve with no ends (<see cref="LotLineElement.Unbound"/>:
+    /// a full circle or ellipse drawn as one curve). It can't be read as lot lines, and it is never left out: a property
+    /// line without one of its curves could close into a lot that isn't the drawn one, or leave another property line
+    /// read as "the one".</summary>
+    public const string UnboundPicked =
+        "a lot line picked has a curve with no ends (a full circle or ellipse drawn as one curve), which Gordium can't " +
+        "read as lot lines: redraw it as arcs and pick the lot again";
+
+    /// <summary>The same, with nothing picked: such a property line may be the lot, so no other is taken as the one.</summary>
+    public const string UnboundPropertyLine =
+        "a property line has a curve with no ends (a full circle or ellipse drawn as one curve), which Gordium can't " +
+        "read as lot lines, so which property line is the lot can't be told: redraw it as arcs, or pick the lot";
+
     public static Lot? Read(RevitModel model, string? lotId, Transform3 toShared, List<JsonObject> problems)
     {
         var tol = model.VertexTolerance;
         if (!string.IsNullOrEmpty(lotId))
         {
             var lines = lotId.Split('+').Select(id => model.LotLines.FirstOrDefault(l => l.UniqueId == id)).ToList();
+            if (lines.Any(l => l is { Unbound: > 0 }))
+            {
+                problems.Add(SiteReader.Problem("tool_words", ("words", UnboundPicked)));
+                return null;
+            }
             var loop = lines.Any(l => l is null) ? null : Loop(lines.SelectMany(l => l!.Curves).ToList(), tol);
             if (loop is null)
             {
@@ -33,6 +52,11 @@ internal static class LotReader
                 return null;
             }
             return Make(lotId, loop, toShared);
+        }
+        if (model.LotLines.Any(l => l.IsPropertyLine && l.Unbound > 0))
+        {
+            problems.Add(SiteReader.Problem("tool_words", ("words", UnboundPropertyLine)));
+            return null;
         }
         var closed = model.LotLines.Where(l => l.IsPropertyLine)
                                    .Select(l => (Line: l, Loop: Loop(l.Curves.ToList(), tol)))

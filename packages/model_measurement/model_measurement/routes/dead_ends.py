@@ -2,15 +2,27 @@
 
     corridors(story, uses, routes) -> {room id: Corridor(width, dead_ends, readings, stop, width_stop, ...)}
 
-**The legs.** The corridors a route may cross (rooms marked `corridor` with `lockable: false`, decision 1a) joined by
-passages make one floor; it must be made of straight legs meeting at right angles (at any rotation), else its dead
-ends and widths need review in this first version. A recess, or a bump, shallower than 12 in (two equal sides under
-12 in, such as a door's recess) is ignored in finding the legs (a bump still narrows the width). The floor, turned
-square, is cut on every corner's x and y into cells; its legs are its maximal rectangles, each running along its
-longer side between the two walls there, its **centre line** midway between them. A leg's own stretch (`proper`) is
-where both those walls are walls; a centre line runs on past it, into a crossing, to where it crosses another leg's,
-and a leg's end beyond its last crossing is kept only if some of its own stretch is there. Two legs that overlap side
-by side (a widening) or overlap without their centre lines crossing are not straight legs at right angles.
+**The legs** (decision 6, amended 2026-11-22 for corridors that jog, widen, step or have alcoves). The corridors a
+route may cross (rooms marked `corridor` with `lockable: false`, decision 1a) joined by passages make one floor,
+turned square (a wall not at right angles: needs review). A recess, or a bump, shallower than 12 in (two equal sides
+under 12 in, such as a door's recess) is filled to find the legs (a bump still narrows the width). The floor is cut
+on every corner's x and y into cells; each maximal rectangle is looked at both ways: a side of it is a wall where no
+floor lies beyond it, or only floor under 12 in deep; it is a leg along a way where both its sides that way are walls
+for 12 in or more (its own stretch, `proper`) and where its centre line, somewhere along that stretch, is at least
+half its width less 12 in from every wall (else a nearer wall lies between: the side of a wider floor). Both ways:
+its longer side (a square: needs review). Every part of the floor lies in a leg or within 12 in of one. Legs along
+one way that overlap with their walls within 12 in on each side are one leg, its walls the outermost (a wall
+stepping by under 12 in moves no centre line). Legs at right angles cross where their centre lines do, also where
+one ends within 12 in on the other's floor (its centre line runs on across); legs along one way whose walls differ
+by 12 in or more (a widening, a narrowing, a jog) are joined by steps at right angles, at the ends of the stretch
+both run and at each crossing in it (never inside a leg at right angles to both, nor where both end against one
+wall). A centre line runs past its last crossing or step only with its own stretch there; an end with nothing
+joined is a closed end only if walled across the leg's whole width. An island (a hole, or an obstruction clear of
+the walls, longer than its leg is wide): needs review. One corridor has one centre line at each place (review round
+1): a narrower leg's doesn't run inside a wider one it steps to; two side by side, neither inside the other, each
+run to the middle of the stretch both run; two on one line are one; two parallel ones in one stretch, or a loop of
+them round floor alone, need review; two edges between one pair of nodes are one (a loop of no floor, its two sides
+never two ways).
 
 **Where a dead end ends.** The centre lines make a graph. Reaching an exit means reaching, along it, a door of an
 exit (`exit_kind`, by `exit_id`) in a corridor's wall (put on the centre line where it is nearest the door's centre),
@@ -18,8 +30,11 @@ or through a door between two such corridors (a straight line across it); a rout
 corridor a route may not cross, never counts. A dead end runs along the centre lines from a closed end (an end of
 the graph with no exit there) to the nearest point from which routes in two directions each reach a distinct exit
 without coming back: a point of a centre line cut there whose two sides reach two distinct exits, a crossing two of
-whose ways do, or an exit door in the corridor itself. Measured to the crossing's centre line, the longer reading
-(open question 2). No such point from a closed end: its dead end isn't bounded, needs review.
+whose ways do, or an exit door in the corridor itself. Where that point is a crossing, on to point C (NFPA 101 2012
+A.7.5.1.5, "located at the centerline of the corridor"): along its own centre line, still out of its own stretch, to
+the farthest centre line it crosses there of the crossing corridor (that leg and those joined to it by steps: a
+widened corridor has two), never past an exit. No such point from a closed end: its dead end isn't bounded, needs
+review.
 
 **Open question 7.** A door into a room with another way out never ends a dead end. Where one would end it sooner,
 each dead end has two named readings: without such doors (the defined value) and with them (a door into a room
@@ -27,18 +42,21 @@ whose other doors reach an exit, without coming back into these corridors, count
 
 **Widths.** A corridor's width is the narrowest clear width across its own legs' stretches in it: the leg's width
 less what obstructions, columns and bumps block across it (each by its extent across the leg: the less favourable
-side). Each dead end is its own pair,
+side); where its floor needed a step, a leg made of several, or a centre line run on, it needs review (which
+stretches give it, rather than its alcoves, isn't worked out). Each dead end is its own pair,
 its length with its own least width: routes/__init__ gives the corridor one part per dead end until the branch's
 `dead_end` part kind exists. A closed end is the farthest point of the real floor across the leg's whole width
 (a recess filled to find the legs never moves it; walls only, so an obstruction never shortens a dead end). A dead
 end's least width is one figure: the narrowest cross-section of the clear floor (the real floor less every
 obstruction and hole, opened by 1/16 in so a hairline is no floor) across its legs' whole width, over its own
 stretches and any recess at its closed end, cut at both ends of every slice between corner places (so a slanted
-or rotated obstruction is measured at its widest).
+or rotated obstruction is measured at its widest), and at each step it walks, across the widths its two legs share
+there (a jog's throat).
 Lengths in inches.
 """
 
 import heapq
+import logging
 import math
 from dataclasses import dataclass, field, replace
 
@@ -46,7 +64,7 @@ import numpy as np
 import shapely
 from shapely.geometry import LineString, Point, Polygon, box
 from shapely.geometry.polygon import orient
-from shapely.ops import unary_union
+from shapely.ops import polygonize, unary_union
 
 from model_measurement.routes.floor import SAME, Story, region
 from model_measurement.routes.paths import StoryRoutes, _Leg
@@ -227,6 +245,11 @@ class _LegShape:
     horizontal: bool           # runs along x
     proper: list               # along intervals where both its walls are walls
     kept: tuple = (0.0, 0.0)   # the along range its centre line keeps
+    family: int = -1           # legs joined by steps (one corridor widening, narrowing or jogging) share it
+    members: int = 1           # how many rectangles it was made of (walls stepping by under 12 in)
+    running: list = field(default_factory=list)   # along intervals where its centre line runs
+    gone: list = field(default_factory=list)   # along intervals where its centre line doesn't run (a wider leg's)
+    frame: object = None
 
     @property
     def line(self) -> float:   # the centre line's across coordinate
@@ -250,8 +273,46 @@ class _LegShape:
         return p[0] if self.horizontal else p[1]
 
 
+def _own(inside, i0, i1, j0, j1, nx, ny, xs, ys, horizontal) -> list:
+    """The along intervals of the rectangle (cells i0..i1, j0..j1) where both its sides along `horizontal` are walls
+    (its own stretch): a side is a wall where no floor lies beyond it, or only floor less than 12 in deep (a wall
+    stepping back by under 12 in, a door's recess)."""
+    def shallow_beyond(i, j, step):            # the floor beyond cell (i, j), the way `step`, is under 12 in deep
+        k = j
+        while 0 <= k + step < (ny if horizontal else nx) and (inside[i, k + step] if horizontal else
+                                                                inside[k + step, i]):
+            k += step
+        if k == j:
+            return True
+        marks = ys if horizontal else xs
+        edge = marks[j] if step < 0 else marks[j + 1]
+        far = marks[k] if step < 0 else marks[k + 1]
+        return abs(edge - far) < SHALLOW
+
+    if horizontal:
+        ok = [shallow_beyond(i, j0, -1) and shallow_beyond(i, j1 - 1, 1) for i in range(i0, i1)]
+        marks = xs[i0:i1 + 1]
+    else:
+        ok = [shallow_beyond(j, i0, -1) and shallow_beyond(j, i1 - 1, 1) for j in range(j0, j1)]
+        marks = ys[j0:j1 + 1]
+    proper = []
+    for k, good in enumerate(ok):
+        if not good:
+            continue
+        if proper and abs(proper[-1][1] - marks[k]) <= 1e-9:
+            proper[-1] = (proper[-1][0], marks[k + 1])
+        else:
+            proper.append((marks[k], marks[k + 1]))
+    return proper
+
+
 def _legs(poly) -> list[_LegShape]:
-    """The maximal rectangles of a square polygon, each a leg along its longer side (Stop if one isn't a leg)."""
+    """The straight stretches of a square polygon: each maximal rectangle with a stretch where both its long sides are
+    walls (its own stretch), a leg along its longer side; a square one with an own stretch both ways runs neither
+    way (Stop). A maximal rectangle with no own stretch (two walls that never face each other across it) is no leg;
+    every part of the floor must lie in some leg (else Stop). Then legs side by side whose walls differ by less than
+    12 in on each side (a wall stepping in or out by under 12 in) are one leg: its walls the outermost, its own
+    stretches theirs together."""
     xs = sorted({round(x, 9) for ring in [poly.exterior, *poly.interiors] for x, _ in ring.coords})
     ys = sorted({round(y, 9) for ring in [poly.exterior, *poly.interiors] for _, y in ring.coords})
     nx, ny = len(xs) - 1, len(ys) - 1
@@ -259,7 +320,7 @@ def _legs(poly) -> list[_LegShape]:
     cy = np.array([(ys[j] + ys[j + 1]) / 2 for j in range(ny)])
     gx, gy = np.meshgrid(cx, cy, indexing="ij")
     inside = shapely.contains_xy(poly, gx, gy)                  # inside[i, j]
-    legs = []
+    rects = []
     for j0 in range(ny):
         col = np.ones(nx, dtype=bool)
         for j1 in range(j0 + 1, ny + 1):
@@ -278,31 +339,106 @@ def _legs(poly) -> list[_LegShape]:
                 down = j0 > 0 and inside[i0:i1, j0 - 1].all()
                 up = j1 < ny and inside[i0:i1, j1].all()
                 if not (down or up):
-                    legs.append((i0, i1, j0, j1))
-    out = []
-    for i0, i1, j0, j1 in legs:
+                    rects.append((i0, i1, j0, j1))
+    out, covered = [], np.zeros_like(inside)
+    for i0, i1, j0, j1 in rects:
         x0, x1, y0, y1 = xs[i0], xs[i1], ys[j0], ys[j1]
         w, h = x1 - x0, y1 - y0
-        if abs(w - h) <= SAME:
-            raise Stop("corridor_not_legs", why=f"a part of it {_ft(w)} ft square runs neither way")
-        horizontal = w > h
-        if horizontal:
-            ok = [(j0 == 0 or not inside[i, j0 - 1]) and (j1 == ny or not inside[i, j1]) for i in range(i0, i1)]
-            marks = xs[i0:i1 + 1]
-        else:
-            ok = [(i0 == 0 or not inside[i0 - 1, j]) and (i1 == nx or not inside[i1, j]) for j in range(j0, j1)]
-            marks = ys[j0:j1 + 1]
-        proper = []
-        for k, good in enumerate(ok):
-            if not good:
+        # the way(s) its two walls face each other over 12 in or more (less is a door's lip or a wall's end), with no
+        # nearer wall between them
+        got = [_LegShape((x0, x1, y0, y1), hz, own) for hz in (True, False)
+               for own in [_own(inside, i0, i1, j0, j1, nx, ny, xs, ys, hz)] if any(q - p >= SHALLOW for p, q in own)]
+        got = [g for g in got if _faces(poly, g)]
+        if len(got) == 2:
+            if abs(w - h) <= SAME:
+                raise Stop("corridor_not_legs", why=f"a part of it {_ft(w)} ft square runs neither way")
+            got = [g for g in got if g.horizontal == (w > h)]
+        if not got:
+            continue                                        # no two walls face each other across it: no leg
+        leg = got[0]
+        covered[i0:i1, j0:j1] = True
+        out.append(leg)
+    if (inside & ~covered).any():                          # a corner of floor in no leg: within 12 in of one (a lip,
+        near = unary_union([box(m.rect[0], m.rect[2], m.rect[1], m.rect[3]) for m in out]).buffer(
+            SHALLOW, join_style=2)                         # a wall's end), else not worked out
+        for i, j in zip(*np.nonzero(inside & ~covered)):
+            if not near.covers(box(xs[i], ys[j], xs[i + 1], ys[j + 1])):
+                raise Stop("corridor_not_legs", why="a part of it lies between no two walls facing each other")
+    return _bundle(out)
+
+
+def _islands(members, frame, legs) -> None:
+    """A hole, or an obstruction clear of every wall, longer than the leg holding it is wide: the corridor runs round
+    both sides of it, two passages the legs' centre lines don't follow (Stop). A column or a table narrower than
+    that is in the way, never an island: it narrows the width."""
+    for m in members:
+        walls = m.outline.boundary
+        for o in [*m.holes, *[o for o in m.obstructions if o.distance(walls) > SAME]]:
+            x0, y0, x1, y1 = Polygon([frame.to(c) for c in o.exterior.coords]).bounds
+            mid = ((x0 + x1) / 2, (y0 + y1) / 2)
+            held = [leg for leg in legs if _in_rect(leg, mid)]
+            if held and max(x1 - x0, y1 - y0) > min(leg.across[1] - leg.across[0] for leg in held) + SAME:
+                raise Stop("corridor_not_legs", why="it runs round both sides of an island (a hole, or an obstruction "
+                                                    "clear of the walls, longer than the corridor is wide)")
+
+
+def _faces(poly, leg) -> bool:
+    """Whether the leg's two walls face each other across it: somewhere along its own stretch its centre line is at
+    least half its width, less 12 in, from every wall (else a nearer wall lies between them and the rectangle is the
+    side of a wider floor, never a stretch of corridor)."""
+    w0, w1 = leg.across
+    need = (w1 - w0) / 2 - SHALLOW
+    if need <= 0:
+        return True
+    near = poly.boundary.buffer(need, quad_segs=16)
+    for p, q in leg.proper:
+        line = LineString([leg.point(p), leg.point(q)])
+        if line.difference(near).length > SAME:
+            return True
+    return False
+
+
+def _bundle(legs) -> list[_LegShape]:
+    """Legs along one line whose walls differ by less than 12 in on each side, overlapping along: one leg (a step in
+    or out of a wall shallower than 12 in moves no centre line, as a recess under 12 in moves none)."""
+    top = list(range(len(legs)))
+
+    def find(k):
+        while top[k] != k:
+            top[k] = top[top[k]]
+            k = top[k]
+        return k
+
+    for i, a in enumerate(legs):
+        for j in range(i + 1, len(legs)):
+            b = legs[j]
+            if a.horizontal != b.horizontal:
                 continue
-            if proper and abs(proper[-1][1] - marks[k]) <= 1e-9:
-                proper[-1] = (proper[-1][0], marks[k + 1])
+            if min(a.span[1], b.span[1]) - max(a.span[0], b.span[0]) <= SAME:
+                continue
+            if abs(a.across[0] - b.across[0]) < SHALLOW and abs(a.across[1] - b.across[1]) < SHALLOW:
+                top[find(i)] = find(j)
+    groups = {}
+    for k in range(len(legs)):
+        groups.setdefault(find(k), []).append(legs[k])
+    out = []
+    for members in groups.values():
+        if len(members) == 1:
+            out.append(members[0])
+            continue
+        lo, hi = min(m.span[0] for m in members), max(m.span[1] for m in members)
+        w0, w1 = min(m.across[0] for m in members), max(m.across[1] for m in members)
+        if any(m.across[0] - w0 >= SHALLOW or w1 - m.across[1] >= SHALLOW for m in members):
+            raise Stop("corridor_not_legs", why="the walls of one of its stretches step by 12 in or more in all")
+        hz = members[0].horizontal
+        rect = (lo, hi, w0, w1) if hz else (w0, w1, lo, hi)
+        proper = []
+        for p, q in sorted(iv for m in members for iv in m.proper):
+            if proper and p <= proper[-1][1] + 1e-9:
+                proper[-1] = (proper[-1][0], max(proper[-1][1], q))
             else:
-                proper.append((marks[k], marks[k + 1]))
-        if not proper:
-            raise Stop("corridor_not_legs", why="a part of it has no walls on its two long sides")
-        out.append(_LegShape((x0, x1, y0, y1), horizontal, proper))
+                proper.append((p, q))
+        out.append(_LegShape(rect, hz, proper, members=len(members)))
     return out
 
 
@@ -316,22 +452,94 @@ def _overlap(a: _LegShape, b: _LegShape) -> float:
     return max(0.0, min(ax1, bx1) - max(ax0, bx0)) * max(0.0, min(ay1, by1) - max(ay0, by0))
 
 
-def _crossings(legs) -> list:
-    """(i, j, point) for each two legs whose centre lines cross (Stop for two that overlap otherwise)."""
-    out = []
+def _joins(legs, floor) -> tuple:
+    """How the legs' centre lines meet. Crossings: (i, j, point) for two legs at right angles that overlap, their
+    centre lines crossing there (Stop if they don't). Steps: (i, j, lo, hi) for two legs along one way that overlap
+    or meet end to end (a widening, a narrowing or a jog): their centre lines are joined at right angles, at the ends
+    of the stretch [lo, hi] where both run and at every crossing of either inside it."""
+    crossings, steps = [], []
     for i, a in enumerate(legs):
         for j in range(i + 1, len(legs)):
             b = legs[j]
-            if _overlap(a, b) <= SAME * SAME:
-                continue
             if a.horizontal == b.horizontal:
-                raise Stop("corridor_not_legs", why="two of its stretches run side by side (a widening or a step)")
+                lo, hi = max(a.span[0], b.span[0]), min(a.span[1], b.span[1])
+                touch = min(a.across[1], b.across[1]) - max(a.across[0], b.across[0])
+                if hi - lo >= -SAME and touch > SAME and (hi - lo > SAME or touch > SAME):
+                    steps.append((i, j, min(lo, hi), max(lo, hi)))
+                continue
             h, v = (a, b) if a.horizontal else (b, a)
             x, y = v.line, h.line
+            if _overlap(a, b) <= SAME * SAME:
+                # an end opening, within 12 in (past a lip or a wall's end), on the other leg: its centre line runs on
+                # straight across that floor to the other's
+                for k, (p, q) in ((0, (v, h)), (1, (h, v))):
+                    run = _run_on(floor, p, q)
+                    if run is not None:
+                        crossings.append((i, j, (x, y)))
+                        break
+                continue
             if not (h.span[0] - SAME <= x <= h.span[1] + SAME and v.span[0] - SAME <= y <= v.span[1] + SAME):
                 raise Stop("corridor_not_legs", why="two of its stretches meet without their centre lines crossing")
-            out.append((i, j, (x, y)))
-    return out
+            crossings.append((i, j, (x, y)))
+    return crossings, steps
+
+
+def _run_on(floor, p: _LegShape, q: _LegShape):
+    """Where p's centre line, run on straight past an end of p's rectangle, crosses q's (q at right angles to p): only
+    when that end opens on floor reaching q's rectangle within 12 in, q's span holds p's line, and the run lies on the
+    floor; else None."""
+    lo, hi = q.across                     # where q's rectangle lies along p
+    if not (q.span[0] - SAME <= p.line <= q.span[1] + SAME):
+        return None
+    for end, way in ((0, -1), (1, 1)):
+        u = p.span[end]
+        gap = (lo - u) if way > 0 else (u - hi)
+        if not (-SAME <= gap <= SHALLOW + SAME) or _walled(floor, p, u, way):
+            continue
+        target = q.line
+        run = LineString([p.point(u), p.point(target)])
+        if floor.buffer(SAME).covers(run):
+            return target
+    return None
+
+
+def _find(top, k) -> int:
+    while top[k] != k:
+        top[k] = top[top[k]]
+        k = top[k]
+    return k
+
+
+def _step_passes_none(g, a, b, scope) -> None:
+    """A step from node a to node b passing a third place of this floor (within 1/16 in): needs review (it would join
+    centre lines the step doesn't, or close a loop of no area)."""
+    seg = LineString([g.xy[a], g.xy[b]])
+    if any(n not in (a, b) and seg.distance(Point(g.xy[n])) <= SAME for n in scope):
+        raise Stop("corridor_not_legs", why="a step between two of its centre lines passes a third")
+
+
+def _every_place_on_a_line(g, scope) -> None:
+    """Every place of this floor joined to anything lies on a centre line (an edge of some leg); one reached by steps
+    or doors alone: needs review."""
+    for n in scope:
+        if g.adj[n] and not any(g.edges[k][3] is not None for k in g.adj[n]):
+            raise Stop("corridor_not_legs", why="a step of its centre lines ends on none")
+
+
+def _less(intervals, out) -> list:
+    """The intervals with every interval of `out` taken away (pieces under 1/16 in dropped)."""
+    got = []
+    for a, b in intervals:
+        pieces = [(a, b)]
+        for c, d in out:
+            pieces = [q for x, y in pieces for q in ((x, min(y, c)), (max(x, d), y)) if q[1] - q[0] > SAME]
+        got += pieces
+    return got
+
+
+def _in_rect(leg, p) -> bool:
+    x0, x1, y0, y1 = leg.rect
+    return x0 - SAME <= p[0] <= x1 + SAME and y0 - SAME <= p[1] <= y1 + SAME
 
 
 def _proper_in(leg, a, b) -> float:
@@ -343,6 +551,7 @@ def _proper_in(leg, a, b) -> float:
 class _Graph:
     def __init__(self):
         self.xy, self.edges, self.adj = [], [], []     # edges: (u, v, length, leg index or None, (a, b) along)
+        self.steps = {}                                # edge id -> (leg i, leg j, along): a step between two legs
 
     def node(self, p) -> int:
         for k, q in enumerate(self.xy):
@@ -352,13 +561,16 @@ class _Graph:
         self.adj.append([])
         return len(self.xy) - 1
 
-    def edge(self, u, v, leg, along):
-        if u == v:
-            return
+    def edge(self, u, v, leg, along) -> bool:
+        """Join u and v (False, and nothing added, where they are one node or already joined: two edges between one
+        pair of nodes would be a loop of no floor, its two sides read as two ways)."""
+        if u == v or any(v in self.edges[k][:2] for k in self.adj[u]):
+            return False
         k = len(self.edges)
         self.edges.append((u, v, math.dist(self.xy[u], self.xy[v]), leg, along))
         self.adj[u].append(k)
         self.adj[v].append(k)
+        return True
 
     def reach(self, start, att, cut_node=None, cut_edge=None) -> set:
         seen, stack, got = {start}, [start], set()
@@ -521,6 +733,13 @@ def _least_width(legs, g, walked, floors, floor_of, start_floor, start) -> float
     widths = []
     for k in walked:
         _, _, _, li, (a, b) = g.edges[k]
+        if k in g.steps:                                 # a step walked: the part of the two widths they share there
+            i, j, u = g.steps[k]
+            w0, w1 = max(legs[i].across[0], legs[j].across[0]), min(legs[i].across[1], legs[j].across[1])
+            throat = _LegShape(legs[i].rect, legs[i].horizontal, [])
+            throat.rect = (u - SAME, u + SAME, w0, w1) if legs[i].horizontal else (w0, w1, u - SAME, u + SAME)
+            widths.append(_section_width(floors[floor_of[i]].clear, throat, u - SAME, u + SAME))
+            continue
         if li is None:
             continue
         leg, clear = legs[li], floors[floor_of[li]].clear
@@ -546,9 +765,28 @@ class _Floor:
     legs: list                 # indices into the story's legs
     blocks: list               # (x0, y0, x1, y1) in the frame: what narrows its width (the corridor's width)
     clear: object = None       # the real floor less every obstruction and hole, in the frame (the dead ends' width)
+    plain: bool = True         # straight legs at right angles only (no step, no group of legs, no centre line run on)
 
 
 def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
+    """Every corridor room on the story (a room marked `corridor`, read): its width and dead ends, or why not. Never
+    raises out of the story: anything unexpected becomes each corridor's needs-review reason (and is logged)."""
+    try:
+        return _corridors(story, uses, routes)
+    except Exception as e:                                 # never a crash of the whole story
+        if isinstance(e, Stop):
+            why = e.reason
+        else:
+            logging.getLogger(__name__).exception("dead ends not worked out")
+            why = Stop("corridor_not_legs", why=f"working them out failed: {type(e).__name__}: {e}").reason
+        out = {}
+        for k, r in story.rooms.items():
+            if r is not None and uses.get(k) == "corridor":
+                out[k] = Corridor(k, stop=why, width_stop=why)
+        return out
+
+
+def _corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
     """Every corridor room on the story (a room marked `corridor`, read): its width and dead ends, or why not.
     `routes` (the story's StoryRoutes) is needed for the dead ends; without it, only the widths."""
     rooms = {k: r for k, r in story.rooms.items() if r is not None and uses.get(k) == "corridor"}
@@ -627,6 +865,15 @@ def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
     owner = {n: _owner(g, n, floor_of) for n in range(len(g.xy))}
     for leaf, got in found[WITHOUT].items():
         key = owner[leaf]
+        if key is None:                                    # a closed end on no leg: never a guess
+            why = Stop("corridor_not_legs", why="a closed end of its centre lines lies on no stretch").reason
+            for n in g.component(leaf):
+                for m in (floors[owner[n]].rooms if owner[n] is not None else []):
+                    out[m].stop = out[m].stop or why
+            for m in in_floor:
+                if in_floor[m] in {owner[n] for n in g.component(leaf)}:
+                    out[m].stop = out[m].stop or why
+            continue
         floor = floors[key]
         start = g.xy[leaf]
         # the room holding the closed end (a point on the leg's axis, which may lie off the floor beside a recess
@@ -644,11 +891,88 @@ def corridors(story: Story, uses: dict, routes: StoryRoutes | None) -> dict:
         de = DeadEnd(start, room, {}, {}, {})
         for reading in (WITHOUT, WITH):
             length, walked = got if reading == WITHOUT else (found[WITH].get(leaf) or (0.0, []))
+            length, walked = _to_point_c(g, legs, leaf, length, walked, att[reading])
+            length, line = _to_gone_lines(g, legs, leaf, length, walked, _walked_line(g, leaf, walked))
             de.length[reading] = length
             de.width[reading] = _least_width(legs, g, walked, floors, floor_of, key, floor.frame.to(start))
-            de.line[reading] = _walked_line(g, leaf, walked)
+            de.line[reading] = line
         out[room].dead_ends.append(de)
     return out
+
+
+def _to_point_c(g, legs, leaf, length, walked, att) -> tuple:
+    """A dead end that ends where its own centre line crosses another's runs on, along its own centre line and still
+    out of its own stretch (inside the crossing corridor's floor), to the farthest centre line at right angles to it
+    that it crosses there: NFPA 101 A.7.5.1.5 measures to "point C, located at the centerline of the corridor", and
+    where the crossing corridor widens or its walls step, it has more than one; the farthest is the cautious one
+    (open question 2). It never runs past an exit."""
+    if not walked:
+        return length, walked
+    n = leaf
+    for k in walked:
+        u, v = g.edges[k][:2]
+        n = v if u == n else u
+    li = g.edges[walked[-1]][3]
+    if li is None or not _crosses_at(g, legs, n, li):
+        return length, walked
+    families = _crosses_at(g, legs, n, li)             # the crossing corridor: its legs, and those stepping from them
+    best, run, came, extra = (length, list(walked)), list(walked), walked[-1], 0.0
+    while not att.get(n):
+        nxt = [k for k in g.adj[n] if k != came and g.edges[k][3] == li]
+        if not nxt:
+            break
+        k = nxt[0]
+        u, v, w, _, (m0, m1) = g.edges[k]
+        if _proper_in(legs[li], min(m0, m1), max(m0, m1)) > SAME:
+            break                                          # its own walls again: past the crossing corridor
+        n, came, extra = (v if u == n else u), k, extra + w
+        run.append(k)
+        if _crosses_at(g, legs, n, li) & families:
+            best = (length + extra, list(run))
+    return best
+
+
+def _to_gone_lines(g, legs, leaf, length, walked, line) -> tuple:
+    """Point C on a centre line that doesn't run where the dead end crosses it (the crossing corridor's own centre
+    line, running on both sides of a widening in it: one corridor has one centre line at each place, the widened
+    stretch's): the dead end runs on, straight along its own centre line and still out of its own stretch, to the farthest such line of
+    the crossing corridor (its family) that its leg's rectangle reaches. (length, the line walked)."""
+    if not walked:
+        return length, line
+    li = g.edges[walked[-1]][3]
+    if li is None:
+        return length, line
+    d = legs[li]
+    end = d.frame.to(line[-1])
+    u0, before = d.along(end), d.along(d.frame.to(line[-2]))
+    way = 1 if u0 >= before else -1
+    families = _crosses_at(g, legs, _node_at(g, line[-1]), li)
+    best = 0.0
+    for m in legs:
+        if m.family not in families or m.horizontal == d.horizontal or m.frame is not d.frame:
+            continue
+        # a widening in its middle: its centre line runs on both sides (never past its end into a wider stretch)
+        if not any(a - SAME <= d.line <= b + SAME and m.kept[0] < a - SAME and b + SAME < m.kept[1] for a, b in m.gone):
+            continue
+        c = m.line
+        if way * (c - u0) <= SAME or not (d.span[0] - SAME <= c <= d.span[1] + SAME):
+            continue
+        if _proper_in(d, min(u0, c), max(u0, c)) > SAME:
+            continue
+        best = max(best, abs(c - u0))
+    if best <= 0:
+        return length, line
+    return length + best, line + [d.frame.back(d.point(u0 + way * best))]
+
+
+def _node_at(g, p) -> int:
+    return min(range(len(g.xy)), key=lambda k: math.dist(g.xy[k], p))
+
+
+def _crosses_at(g, legs, n, li) -> set:
+    """The families (legs joined by steps) of the legs at right angles to leg li whose centre lines pass through n."""
+    return {legs[g.edges[k][3]].family for k in g.adj[n]
+            if g.edges[k][3] is not None and legs[g.edges[k][3]].horizontal != legs[li].horizontal}
 
 
 def _show(p):
@@ -673,7 +997,16 @@ def _owner(g, n, floor_of):
 
 
 def _width(corridor: Corridor, room, floor: _Floor, legs, g) -> None:
-    """The least clear width over the legs' own stretches in this room, and the centre lines drawn in it."""
+    """The least clear width over the legs' own stretches in this room, and the centre lines drawn in it. Where the
+    corridors' floor isn't plain straight legs at right angles (a wall stepping, a widening, a jog, a centre line run
+    on past a lip): needs review (decision 6, amended 2026-11-22)."""
+    if g is not None:
+        corridor.centre_lines = [(g.xy[u], g.xy[v]) for u, v, _, li, _ in g.edges
+                                 if li in floor.legs and u != v
+                                 and room.outline.buffer(2 * SAME).covers(LineString([g.xy[u], g.xy[v]]).centroid)]
+    if not floor.plain:
+        corridor.width_stop = Stop("corridor_width_stepped").reason
+        return
     widths = []
     for li in floor.legs:
         leg = legs[li]
@@ -688,10 +1021,6 @@ def _width(corridor: Corridor, room, floor: _Floor, legs, g) -> None:
         corridor.width = min(widths)
     else:
         corridor.width_stop = Stop("corridor_not_legs", why="none of its legs' own stretches is in it").reason
-    if g is not None:
-        corridor.centre_lines = [(g.xy[u], g.xy[v]) for u, v, _, li, _ in g.edges
-                                 if li in floor.legs and u != v
-                                 and room.outline.buffer(2 * SAME).covers(LineString([g.xy[u], g.xy[v]]).centroid)]
 
 
 def _rect_back(frame, leg, p, q) -> Polygon:
@@ -707,7 +1036,27 @@ def _along_bounds(frame, leg, piece) -> tuple:
 
 
 def _group(story, members, g, legs_all) -> _Floor:
-    """One floor of corridors joined by passages: its legs (added to legs_all) and centre lines (added to g, in plan)."""
+    """One floor of corridors joined by passages: its legs (added to legs_all) and centre lines (added to g, in plan).
+    One that can't be worked out (Stop) leaves nothing behind on g or legs_all: another corridor's floor, sharing g,
+    is never touched by its leftovers."""
+    mark = (len(g.xy), len(g.edges), len(legs_all))
+    try:
+        return _group_on(story, members, g, legs_all)
+    except Stop:
+        _roll_back(g, legs_all, mark)
+        raise
+
+
+def _roll_back(g, legs_all, mark) -> None:
+    n_xy, n_edges, n_legs = mark
+    del g.xy[n_xy:], g.adj[n_xy:], g.edges[n_edges:], legs_all[n_legs:]
+    for n in range(n_xy):
+        g.adj[n] = [k for k in g.adj[n] if k < n_edges]
+    for k in [k for k in g.steps if k >= n_edges]:
+        del g.steps[k]
+
+
+def _group_on(story, members, g, legs_all) -> _Floor:
     ids = {m.id for m in members}
     lines = [seg for a, b, seg in story.passages if a in ids and b in ids]
     whole = unary_union([m.outline for m in members] + [seg.buffer(SAME, cap_style="flat") for seg in lines])
@@ -723,37 +1072,135 @@ def _group(story, members, g, legs_all) -> _Floor:
         raise Stop("corridor_not_legs", why="its walls don't all meet at right angles")
     filled = _fill_shallow(square)
     legs = _legs(filled)
-    crossings = _crossings(legs)
+    _islands(members, frame, legs)
+    crossings, steps = _joins(legs, filled)
+    # plain: straight legs at right angles, as decision 6 first had them (else the corridor's width needs review)
+    plain = all(leg.members == 1 for leg in legs) and not any(
+        _overlap(legs[i], legs[j]) <= SAME * SAME for i, j, _ in crossings)
     base = len(legs_all)
-    # each leg's centre line, cut at its crossings, its ends past the last crossing kept only with its own stretch
+    # each leg's centre line, cut at its crossings and steps, its ends past the last cut kept only with its own stretch
     at = {i: [] for i in range(len(legs))}
     for i, j, p in crossings:
-        at[i].append(p)
-        at[j].append(p)
-    mine = []
+        at[i].append(legs[i].along(p))
+        at[j].append(legs[j].along(p))
+    step_at, fam = [], list(range(len(legs)))
+    gone = {i: [] for i in range(len(legs))}           # along intervals where a leg's centre line doesn't run
+    for i, j, lo, hi in steps:
+        # an end of the stretch where both legs end against one wall: each a closed end there, never joined
+        ends = {u for u in (lo, hi) if not all(any(abs(u - e) <= SAME and _walled(filled, legs[k], e, way)
+                                                   for e, way in ((legs[k].span[0], -1), (legs[k].span[1], 1)))
+                                               for k in (i, j))}
+        where = ends | {u for u in at[i] + at[j] if lo - SAME <= u <= hi + SAME}
+        if all(any(leg.horizontal != legs[i].horizontal and _in_rect(leg, legs[i].point(u))
+                   and _in_rect(leg, legs[j].point(u)) for leg in legs) for u in (lo, (lo + hi) / 2, hi)):
+            continue                                       # side by side inside a leg at right angles: it joins them
+        if hi - lo > SAME:
+            # one corridor has one centre line at each place: where a narrower leg runs inside a wider one (a
+            # widening, a narrowing), the wider's alone; where two run side by side, neither inside the other (a
+            # jog that overlaps), each to the middle of the stretch both run, joined there
+            (a0, a1), (b0, b1) = legs[i].across, legs[j].across
+            inner = i if a0 >= b0 - SAME and a1 <= b1 + SAME else j if b0 >= a0 - SAME and b1 <= a1 + SAME else None
+            if inner is not None:
+                gone[inner].append((lo, hi))
+                where = ends
+            else:
+                m = (lo + hi) / 2
+                for k in (i, j):
+                    low = legs[k].span[0] < lo - SAME
+                    if low == (legs[k].span[1] > hi + SAME):
+                        raise Stop("corridor_not_legs", why="two of its stretches run side by side")
+                    gone[k].append((m, hi) if low else (lo, m))
+                where = {m}
+        # never inside a leg at right angles to the two: its centre line joins them there
+        where = {u for u in where if not any(leg.horizontal != legs[i].horizontal and _in_rect(leg, legs[i].point(u))
+                                             and _in_rect(leg, legs[j].point(u)) for leg in legs)}
+        step_at.append((i, j, sorted(where)))
+        if where:
+            fam[_find(fam, i)] = _find(fam, j)
+        at[i] += where
+        at[j] += where
+    # a crossing where either centre line doesn't run is no crossing: the cuts made again from the rest
+    at = {i: [] for i in range(len(legs))}
+    for i, j, p in crossings:
+        if not any(any(a + SAME < legs[k].along(p) < b - SAME for a, b in _less(gone[k], legs[k].proper))
+                   for k in (i, j)):
+            at[i].append(legs[i].along(p))
+            at[j].append(legs[j].along(p))
+    for i, j, where in step_at:
+        at[i] += where
+        at[j] += where
+    mine, runs, first = [], [], len(g.xy)
     for i, leg in enumerate(legs):
         lo, hi = leg.span
-        cuts = sorted(leg.along(p) for p in at[i])
+        cuts = sorted(at[i])
         if cuts:
             if _proper_in(leg, lo, cuts[0]) <= SAME:
                 lo = cuts[0]
             if _proper_in(leg, cuts[-1], hi) <= SAME:
                 hi = cuts[-1]
-        # an end kept at its rectangle's end is a closed end: run it on to the real floor's end (a recess under
-        # 12 in was filled to find the legs, never to move a closed end)
-        if lo == leg.span[0]:
-            lo = _to_real_end(square, leg, lo, -1)
-        if hi == leg.span[1]:
-            hi = _to_real_end(square, leg, hi, 1)
+        # an end kept at its rectangle's end with no cut there: a closed end (the floor beyond it walled across the
+        # leg's whole width), run on to the real floor's end (a recess under 12 in was filled to find the legs, never
+        # to move a closed end); floor beyond an end no other centre line reaches: not worked out
+        for end, way in ((0, -1), (1, 1)):
+            u = (lo, hi)[end]
+            if abs(u - leg.span[end]) > 1e-9 or any(abs(c - u) <= SAME for c in cuts):
+                continue
+            if not _walled(filled, leg, u, way):
+                raise Stop("corridor_not_legs", why="one of its stretches ends on floor no other stretch's centre "
+                                                    "line reaches")
+            if end == 0:
+                lo = _to_real_end(square, leg, lo, -1)
+            else:
+                hi = _to_real_end(square, leg, hi, 1)
         leg.kept = (lo, hi)
+        leg.family = base + _find(fam, i)
+        leg.gone = _less(gone[i], leg.proper)
+        leg.frame = frame
         legs_all.append(leg)
-        marks = sorted({lo, hi, *[c for c in cuts if lo <= c <= hi]})
-        nodes = [g.node(frame.back(leg.point(u))) for u in marks]
-        mine += nodes
-        for (u, v), (m0, m1) in zip(zip(nodes, nodes[1:]), zip(marks, marks[1:])):
-            g.edge(u, v, base + i, (m0, m1))
+        # never a second centre line on the same line: what an earlier leg's already runs along is its
+        same = [(a, b) for hz, line, _, a, b in runs if hz == leg.horizontal and abs(line - leg.line) <= SAME]
+        pieces = _less(_less([(lo, hi)], leg.gone), same)
+        # nor one beside another in the same stretch (their widths overlapping): two parallel centre lines in one
+        # corridor make a loop, whose two sides would be read as two ways
+        for hz, line, across, a, b in runs:
+            if hz != leg.horizontal or abs(line - leg.line) <= SAME:
+                continue
+            if min(across[1], leg.across[1]) - max(across[0], leg.across[0]) <= SAME:
+                continue
+            if any(min(b, d) - max(a, c) > SAME for c, d in pieces):
+                raise Stop("corridor_not_legs", why="two of its centre lines run side by side in one stretch")
+        runs += [(leg.horizontal, leg.line, leg.across, a, b) for a, b in pieces]
+        leg.running = pieces                               # where its centre line runs (gone and doubled taken away)
+        for a, b in pieces:
+            marks = sorted({a, b, *[c for c in cuts if a <= c <= b]})
+            nodes = [g.node(frame.back(leg.point(u))) for u in marks]
+            mine += nodes
+            for (u, v), (m0, m1) in zip(zip(nodes, nodes[1:]), zip(marks, marks[1:])):
+                g.edge(u, v, base + i, (m0, m1))
+    for i, j, where in step_at:                            # the steps: straight across, at right angles
+        for u in where:
+            if not (legs[i].kept[0] - SAME <= u <= legs[i].kept[1] + SAME and
+                    legs[j].kept[0] - SAME <= u <= legs[j].kept[1] + SAME):
+                continue
+            if not all(any(a - SAME <= u <= b + SAME for a, b in legs[k].running) for k in (i, j)):
+                continue                                   # a step only between two centre lines that run there
+            a, b = g.node(frame.back(legs[i].point(u))), g.node(frame.back(legs[j].point(u)))
+            _step_passes_none(g, a, b, range(first, len(g.xy)))
+            k = len(g.edges)
+            if g.edge(a, b, None, (0.0, 0.0)):
+                g.steps[k] = (base + i, base + j, u)
+            plain = False
     if mine and not set(mine) <= g.component(mine[0]):
         raise Stop("corridor_not_legs", why="its legs' centre lines don't all meet")
+    _every_place_on_a_line(g, range(first, len(g.xy)))
+    # a loop of centre lines round floor alone (no wall inside it) would be read as two ways: never one corridor's
+    mine_edges = [LineString([g.xy[u], g.xy[v]]) for u, v, _, li, _ in g.edges
+                  if u != v and (u in mine or v in mine)]
+    whole_floor = Polygon([frame.back(c) for c in filled.exterior.coords],
+                          [[frame.back(c) for c in r.coords] for r in filled.interiors]).buffer(SAME)
+    for face in getattr(polygonize(unary_union(mine_edges)), "geoms", []):
+        if face.area > SAME * SAME and whole_floor.covers(face):
+            raise Stop("corridor_not_legs", why="two of its centre lines run round floor with no wall inside")
     # what narrows the width: obstructions, columns, and the bumps filled in finding the legs
     blocks = []
     for m in members:
@@ -768,7 +1215,16 @@ def _group(story, members, g, legs_all) -> _Floor:
     # opened by 1/16 in as the walls were: a hairline between an obstruction and a wall is no floor (opening only
     # removes floor, so a width can only come out narrower)
     clear = clear.buffer(-SAME / 2, join_style=2).buffer(SAME / 2, join_style=2).intersection(square)
-    return _Floor(sorted(ids), frame, list(range(base, base + len(legs))), blocks, clear)
+    return _Floor(sorted(ids), frame, list(range(base, base + len(legs))), blocks, clear, plain)
+
+
+def _walled(filled, leg, u, way) -> bool:
+    """Whether the floor ends at u, the way `way`, across the leg's whole width (no floor in a strip 1/16 in deep
+    beyond it)."""
+    w0, w1 = leg.across
+    lo, hi = sorted((u, u + way * SAME))
+    strip = box(lo, w0 + SAME, hi, w1 - SAME) if leg.horizontal else box(w0 + SAME, lo, w1 - SAME, hi)
+    return filled.intersection(strip).area <= SAME * SAME
 
 
 def _to_real_end(square, leg, u, way) -> float:
@@ -807,6 +1263,8 @@ def _attach(g, legs, floor_of, key, frame, door):
         if not (x0 - reach <= c[0] <= x1 + reach and y0 - reach <= c[1] <= y1 + reach):
             continue
         u = min(max(leg.along(c), leg.kept[0]), leg.kept[1])
+        if any(a + SAME < u < b - SAME for a, b in leg.gone):
+            continue                                       # its centre line doesn't run there: a wider leg's does
         d = math.dist(leg.point(u), c)
         if best is None or d < best[0]:
             best = (d, li, u)
@@ -857,7 +1315,7 @@ def _ways_out(story: Story, routes: StoryRoutes, corridor_ids: set) -> dict:
                         continue
                     reached = ({story.doors[d].exit_id} if story.doors[d].exit_kind else
                                {e for e, dist in chains.items() if math.isfinite(dist.get(d, math.inf))})
-                    if reached and leg.paths(door.centre, story.doors[d].centre):
+                    if reached and leg.tight(door.centre, story.doors[d].centre) is not None:
                         ways |= reached
             out[(door.id, rid)] = ways
     return out

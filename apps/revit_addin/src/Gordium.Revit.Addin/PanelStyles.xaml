@@ -1,5 +1,6 @@
 <!-- The results panel's controls, restyled so no default WPF chrome shows (docs/revit/ui_design_pass.md section 2.5):
-     Button (and the primary "button.primary"), ToggleButton, Expander, ScrollBar, ToolTip. Every colour is a
+     Button (and the primary "button.primary"), ToggleButton, Expander, ScrollBar, ToolTip, the results list
+     (ListBox "list", its rows "list.row" and headings "list.heading") and the search TextBox. Every colour is a
      DynamicResource naming a token of the theme's dictionary (PanelLook, from Gordium.Revit.Reading's PanelTokens),
      so swapping that dictionary when Revit's theme changes recolours them all; every font is a type token's family
      and size (PanelLook.Shared: "type.body.family", "type.body.size"). No colour or font is written here
@@ -255,6 +256,115 @@
         </Setter>
       </Trigger>
     </Style.Triggers>
+  </Style>
+
+  <!-- the results list (PR 3): a virtualized ListBox, no chrome of its own; its rows are cards (list.row), its
+       headings plain and never selected or focused (list.heading) -->
+  <Style x:Key="list" TargetType="ListBox">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="SelectionMode" Value="Single" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Auto" />
+    <Setter Property="ScrollViewer.CanContentScroll" Value="True" />
+    <Setter Property="VirtualizingPanel.IsVirtualizing" Value="True" />
+    <Setter Property="VirtualizingPanel.VirtualizationMode" Value="Recycling" />
+    <Setter Property="VirtualizingPanel.ScrollUnit" Value="Pixel" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBox">
+          <ScrollViewer Focusable="False" Padding="{TemplateBinding Padding}" Background="{TemplateBinding Background}">
+            <ItemsPresenter />
+          </ScrollViewer>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="ItemsPanel">
+      <Setter.Value>
+        <ItemsPanelTemplate>
+          <VirtualizingStackPanel IsVirtualizing="True" VirtualizationMode="Recycling" />
+        </ItemsPanelTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="list.row" TargetType="ListBoxItem">
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="Background" Value="{DynamicResource bg.surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource line}" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Margin" Value="0,0,0,4" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <Border x:Name="Frame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="1" CornerRadius="4" SnapsToDevicePixels="True">
+            <ContentPresenter HorizontalAlignment="Stretch" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+              <Setter TargetName="Frame" Property="Background" Value="{DynamicResource bg.hover}" />
+            </Trigger>
+            <Trigger Property="IsSelected" Value="True">
+              <Setter TargetName="Frame" Property="Background" Value="{DynamicResource bg.selected}" />
+              <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <Style x:Key="list.heading" TargetType="ListBoxItem">
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="Focusable" Value="False" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="ListBoxItem">
+          <ContentPresenter HorizontalAlignment="Stretch" />
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+  </Style>
+
+  <!-- the search box: the surface, a line, the accent when focused -->
+  <Style TargetType="TextBox">
+    <Setter Property="Foreground" Value="{DynamicResource text}" />
+    <Setter Property="Background" Value="{DynamicResource bg.surface}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource line}" />
+    <Setter Property="CaretBrush" Value="{DynamicResource text}" />
+    <Setter Property="SelectionBrush" Value="{DynamicResource accent}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="Padding" Value="4,2" />
+    <Setter Property="FontFamily" Value="{DynamicResource type.body.family}" />
+    <Setter Property="FontSize" Value="{DynamicResource type.body.size}" />
+    <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="TextBox">
+          <Border x:Name="Frame" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                  BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4">
+            <ScrollViewer x:Name="PART_ContentHost" Margin="{TemplateBinding Padding}" Focusable="False"
+                          HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" />
+          </Border>
+          <ControlTemplate.Triggers>
+            <Trigger Property="IsKeyboardFocused" Value="True">
+              <Setter TargetName="Frame" Property="BorderBrush" Value="{DynamicResource accent}" />
+            </Trigger>
+          </ControlTemplate.Triggers>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
   </Style>
 
   <Style TargetType="ToolTip">

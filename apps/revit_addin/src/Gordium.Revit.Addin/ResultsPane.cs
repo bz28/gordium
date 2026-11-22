@@ -7,7 +7,7 @@ namespace Gordium.Revit.Addin;
 /// <summary>
 /// Check project's results as a Revit dockable pane, titled "Gordium" (RibbonPlan.PaneTitle) (tabbed with Properties on first use), registered at
 /// startup. It holds the one <see cref="ResultsView"/>, the document last checked, and the panel's Revit actions,
-/// each run on Revit's thread through <see cref="PanelActions"/>: Check again, select and zoom a row's elements, open
+/// each run on Revit's thread through <see cref="PanelActions"/>: Check again, select a row's elements (and zoom, on Show), open
 /// Project Information. A check asked for by file (CheckProjectCommand.RunRequest) never uses the pane.
 /// </summary>
 internal sealed class ResultsPane : IDockablePaneProvider
@@ -32,7 +32,7 @@ internal sealed class ResultsPane : IDockablePaneProvider
         };
     }
 
-    private static ResultsView View() => _view ??= new ResultsView(Zoom, CheckAgain, OpenProjectInformation, _theme);
+    private static ResultsView View() => _view ??= new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, _theme);
 
     /// <summary>Revit's theme as the panel last read it (light until read).</summary>
     private static PanelTheme _theme = PanelTheme.Light;
@@ -144,11 +144,17 @@ internal sealed class ResultsPane : IDockablePaneProvider
             ui.PostCommand(id);
     });
 
-    private static void Zoom(ResultRow row) => Post("Show in model", ui => ShowElements(ui, row));
+    private static void Zoom(ResultRow row) => Post("Show in model", ui => ShowElements(ui, row, zoom: true));
 
-    /// <summary>Selects the row's elements and zooms to them, in the project that was checked, by their UniqueIds;
-    /// says plainly when it can't (the project closed or not the active one, an element gone or not in this model).</summary>
-    private static void ShowElements(UIApplication ui, ResultRow row)
+    /// <summary>A row selected in the list (a click, Up or Down): its elements selected in Revit, the view not moved
+    /// (design pass section 2.7: zoom is only an explicit Show), so Properties follows the panel.</summary>
+    private static void Select(ResultRow row) => Post("Select in model", ui => ShowElements(ui, row, zoom: false));
+
+    /// <summary>Selects the row's elements and, with <paramref name="zoom"/>, zooms to them, in the project that was
+    /// checked, by their UniqueIds; says plainly when it can't (the project closed or not the active one, an element
+    /// gone or not in this model). A row selected that names no element clears Revit's selection (what is selected is
+    /// always the row's), quietly.</summary>
+    private static void ShowElements(UIApplication ui, ResultRow row, bool zoom)
     {
         var doc = _checked;
         if (doc is null || !doc.IsValidObject)
@@ -157,6 +163,12 @@ internal sealed class ResultsPane : IDockablePaneProvider
             return;
         }
         var uidoc = ui.ActiveUIDocument;
+        if (!zoom && row.Elements.Count == 0)
+        {
+            if (uidoc is not null && uidoc.Document.Equals(doc))
+                uidoc.Selection.SetElementIds(new List<ElementId>());
+            return;
+        }
         if (uidoc is null || !uidoc.Document.Equals(doc))
         {
             Say($"Switch to {doc.Title} to show it: the check was of that project.");
@@ -174,8 +186,9 @@ internal sealed class ResultsPane : IDockablePaneProvider
             return;
         }
         uidoc.Selection.SetElementIds(found);
-        uidoc.ShowElements(found);
+        if (zoom)
+            uidoc.ShowElements(found);
         Say($"Selected {found.Count} element{(found.Count == 1 ? "" : "s")} for {row.Name}" +
-            (gone > 0 ? $"; {gone} not in this model now." : "."));
+            (gone > 0 ? $"; {gone} not in this model now" : "") + (zoom ? "." : " (Show or Space zooms to them)."));
     }
 }

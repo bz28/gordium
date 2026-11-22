@@ -151,7 +151,10 @@ nothing. So the decisions are built and tested here, on the Mac.
    building measure needs review); one not loaded, or a closed workset in the model, means not everything was
    looked at (`inventory_complete: false`).
 5. **The lot:** the lot picked, else the one closed property line; never an open one; arcs followed closely. A
-   property line inside a linked model makes the lot need review (`lot_block`): the lot may be the link's.
+   property line inside a linked model makes the lot need review (`lot_block`): the lot may be the link's. A curve
+   with no ends (`Curve.IsBound` false: a full circle or ellipse drawn as one curve) is never read as a lot line and
+   never left out: a property line holding one makes the lot need review (unless another lot was picked), and so
+   does a picked line holding one; a model line nobody picked is no lot line at all.
 6. **Coordinates:** every point turned once into shared (survey) coordinates; a box turned by all 8 corners.
    Units are always feet (Revit's own).
 
@@ -450,12 +453,20 @@ the jurisdiction is the City of Ithaca). Why each choice:
   (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks and never uses the panel.
 - **The results panel** (`ResultsPane.cs`, `ResultsView.cs`, `PanelActions.cs`): a dockable pane, *Gordium: Check
   my project*, tabbed behind Properties the first time. Header with *Check again*; the worker's state and count
-  chips; its groups in its order (does not comply first, complies folded), every row in a scrolling list; each row
-  with its figures, how far off, reason, section and a *Law* expander with the law's words. Click a row (or *Show
-  in model*) to select and zoom to its elements. Nothing sent for a missing Project Information fact: the panel
+  chips; filter chips (all, does not comply, needs review, complies) and a search (rule names, sections, element
+  names); then the **results list** (`ResultsList.cs`, its decisions in `Gordium.Revit.Reading/ResultList.cs`): a
+  virtualized list, worst first (does not comply, largest how far off first where the worker's figure is a length;
+  needs review, the worker's tier 2; check by hand or not checked; complies and not applicable, folded), every row in
+  exactly one place, each row: glyph and name (the row's whole width, wrapped), its figures in full or short cause,
+  then its section (trimmed, the whole on hover) with *Show*. A click selects the row
+  and its elements in Revit without moving the view; *Show* (or Space) zooms; Enter or a double click opens its
+  figures, reason, elements and the law's words; Up/Down move; Ctrl+C copies the row as the result file says it;
+  Ctrl+F searches, Esc clears the search. Nothing sent for a missing Project Information fact: the panel
   lists each, with *Open Project Information*. Element marks are still set in Properties (the click selects the
   element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread (`ActionQueue`: a
-  refused request is dropped). One scrolling list, rows straight after the counts, *Details* folded after them. An
+  refused request is dropped). Only the filter chips, the search and "Showing N of M" stay pinned; the state and the
+  counts are the list's first entry and scroll away with the rows (Revit trial, 106 Ithaca Rd: pinned, they filled
+  the whole docked pane), with what wasn't read and *Details* folded after the rows (shown when no filter or search narrows the list). An
   edit to the checked project greys everything (no green) and says to check again; closing it takes the rows
   down. The street edge is asked for only when it is the last fact and the view is a plan showing a property line.
   Its look follows Revit's light or dark theme (`UIThemeManager.CurrentTheme` at startup, `ThemeChanged` after):
@@ -477,6 +488,60 @@ panel's; and a real answer's egress failure, R319.2.2, with its figures, section
 (every text colour at least 4.5:1 on every background it sits on in both themes, every status mark at least 3:1,
 every status its own glyph and word, green only for complies and never stale, no fixed colour in the view). The WPF
 panel itself is checked in Revit (it needs Revit to run).
+
+**Where a slow read spends its time: `read_steps`.** The `check_project`, `read_interior` and `record_house` lines
+in `results.jsonl` carry a `read_steps` object beside `read_s` (added after Snowdon Towers froze Revit for 408 s,
+all of it in the read, 2026-11-22). It is only a measurement: kept by `ReadSteps` (`Gordium.Revit.Reading`) on
+Revit's thread for one run, never part of a record, never in the request (the worker gets the same bytes with it
+or without), and logged on a failure too (then the steps read before it). A stopwatch reading per step and a
+counter add; no line per element. Its shape:
+
+```json
+"read_steps": {
+  "steps":  { "outside": {"seconds": 212.4, "calls": 1}, "outside.get_geometry.fine": {"seconds": 96.1, "calls": 48210}, ... },
+  "counts": { "outside.elements": 48210, "outside.family_instances": 9120, "outside.fine.faces": 702311, "inside.rooms": 412, ... },
+  "max":    { "inside.over.candidates_per_call": 3911, ... },
+  "links":  [ {"link": "Snowdon Towers Sample Structural.rvt : 2 : location <Not Shared>", "depth": 1, "seconds": 61.2, "elements": 20114} ]
+}
+```
+
+(the numbers are made up, to show the shape). `steps` are seconds (to the millisecond) and how many times each step
+ran, summed over the run; a step's time includes the steps inside it (`outside` includes every `outside.*`).
+`counts` are summed, `max` is the largest one room (or call) gave, `links` one entry per linked model read (its
+seconds include its own links; its elements are its own). The names:
+
+- **Check project's run:** `outside` (the outside read, `RevitRead`), `inside` (`RevitInterior`), `worker_start`,
+  `prepare` (the marks read as facts, the lot, `SiteReader`, `InteriorReader` and the request made:
+  `ProjectCheck.PrepareAsync`), `log_request` (the request written for the log). Read inside and Record houses log
+  `inside` and `interior_reader`.
+- **The outside read** (`RevitRead`; totals include linked models' elements): `outside.collect` (listing every
+  element), `outside.get_geometry.fine|medium|coarse` (Revit's `get_Geometry`; medium and coarse are read for
+  family instances only) and `outside.copy_geometry.*` (the faces, their 7 × 7 samples and the edges copied),
+  `outside.element_rest` (the rest of each element: box, marks, kind), `outside.model_rest` and `outside.lot_lines`.
+  Counts: `outside.elements` (the project's own), `outside.family_instances`, and per detail level
+  `outside.fine|medium|coarse.solids|faces|edges|meshes`.
+- **The inside read** (`RevitInterior`): `inside.marks_model`, `inside.internal_to_shared`, `inside.read`, and in it
+  `inside.rooms`, `inside.openings`, `inside.stairs`, `inside.railings`, `inside.enclosed_areas`, `inside.links`,
+  `inside.ramps`, `inside.separation_lines`, `inside.gross_areas`. Per room: `inside.room.boundary`
+  (`GetBoundarySegments`, counted as `inside.room.boundary_calls`), `inside.room.inside` (the room's solid against
+  the model; hits `inside.room.inside_hits`, largest `inside.room.inside_hits_per_room`), `inside.room.under` and
+  `inside.room.over` (the box under the floor, and over it to +1000 ft in any category), `inside.room.band_solid`.
+  In each of those two, `inside.under|over.collect` (the box filter), `.faces` (each element's faces), `.band`
+  (over only: each element cut by the room's band), counts `.candidates` (elements the box found) and `.read` (model
+  elements kept), largest `.candidates_per_call` and `.read_per_call` (one call per room). The same box search round
+  each stair run (to +1000 ft, any category) and each railing is logged apart, as `inside.stair_run.near.*` and
+  `inside.railing.near.*` (the same names, no band). The band's boolean cuts:
+  `inside.boolean_op`, counted `inside.boolean_ops`; open shells skipped `inside.open_shells`. Faces read
+  (`inside.faces`), of them curved and triangulated (`inside.faces_triangulated`, time `inside.triangulate`).
+  Windows and doors: `inside.opening.faces`, `inside.opening.cut`. The transactions: `inside.enclosed_areas.topology`,
+  `.outline` (a Room placed in an area with none, rolled back), `.rollback`; per level of the outer outlines
+  (`inside.gross_areas.levels`) `inside.gross_areas.ring`, `.lines_commit`, `.topology`, `.room_commit`, `.rollback`.
+
+How we know: `ReadStepsTests` (kept only while a read has begun them, on its own thread; added by name; seconds to
+the millisecond; a step that throws still timed; geometry tallied with instances' items; no record, request or
+reader type holds them and no Revit-free file but their own names them; and every hook in `RevitRead`,
+`RevitInterior`, `CheckProject` and `RecordHouses` pinned in their source, with what they read unchanged) and
+`ProjectCheckTests.The_request_is_byte_for_byte_the_same_with_the_read_steps_kept_or_not`.
 
 ## Build a model from data
 

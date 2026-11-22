@@ -90,8 +90,22 @@ public sealed class RecordHousesCommand : IExternalCommand
             var ids = HouseDraw.Draw(app, doc, house, drawn);
             log["draw_s"] = sw.Elapsed.TotalSeconds;
             sw.Restart();
-            var model = RevitInterior.Model(doc);
-            var read = InteriorReader.Read(model);
+            // where the read's time went (the log's read_steps; never in the recording)
+            var steps = new ReadSteps();
+            RevitModel model;
+            InteriorReadResult read;
+            using (ReadSteps.Begin(steps))
+            {
+                try
+                {
+                    model = ReadSteps.Time("inside", () => RevitInterior.Model(doc));
+                    read = ReadSteps.Time("interior_reader", () => InteriorReader.Read(model));
+                }
+                finally
+                {
+                    log["read_steps"] = steps.ToLog();
+                }
+            }
             log["read_s"] = sw.Elapsed.TotalSeconds;
             var recording = new JsonObject
             {
@@ -221,8 +235,22 @@ public sealed class ReadInteriorCommand : IExternalCommand
         try
         {
             var sw = Stopwatch.StartNew();
-            var model = RevitInterior.Model(doc);
-            var read = InteriorReader.Read(model);
+            // where the read's time went (the log's read_steps)
+            var steps = new ReadSteps();
+            RevitModel model;
+            InteriorReadResult read;
+            using (ReadSteps.Begin(steps))
+            {
+                try
+                {
+                    model = ReadSteps.Time("inside", () => RevitInterior.Model(doc));
+                    read = ReadSteps.Time("interior_reader", () => InteriorReader.Read(model));
+                }
+                finally
+                {
+                    log["read_steps"] = steps.ToLog();
+                }
+            }
             log["read_s"] = sw.Elapsed.TotalSeconds;
             log["rooms_not_read"] = read.RoomsNotRead;
             log["unknown_spaces"] = read.UnknownSpaces;

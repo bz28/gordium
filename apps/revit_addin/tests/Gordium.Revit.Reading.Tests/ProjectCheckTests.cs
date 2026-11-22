@@ -65,6 +65,34 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         return (prepared, await ProjectCheck.SendAsync(client, prepared.Request!));
     }
 
+    /// <summary>The read's timings (the log's <c>read_steps</c>) never reach the worker: the same project prepared with
+    /// the steps kept, as Check project keeps them (begun on this thread, the prepare waited for on it), and without,
+    /// gives the same request, byte for byte, and no step's name is in it.</summary>
+    [Fact]
+    public async Task The_request_is_byte_for_byte_the_same_with_the_read_steps_kept_or_not()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        var client = await worker.RunningAsync();
+        static string Sent(ProjectRequest r) => new JsonObject
+        {
+            ["site"] = r.Site.DeepClone(), ["facts"] = r.Facts.DeepClone(), ["interior"] = r.Interior.DeepClone(),
+        }.ToJsonString();
+        var plain = Sent((await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client))).Request!);
+        var steps = new ReadSteps();
+        string kept;
+        using (ReadSteps.Begin(steps))
+        {
+            ReadSteps.Count("outside.elements", 7);
+            ReadSteps.Link("Structure.rvt", 1, 0.5, 3);
+            kept = ReadSteps.Time("prepare", () => Sent(ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client))
+                                                      .GetAwaiter().GetResult().Request!));
+        }
+        Assert.Equal(plain, kept);
+        foreach (var name in new[] { "read_steps", "outside.elements", "Structure.rvt", "\"seconds\"", "\"calls\"" })
+            Assert.DoesNotContain(name, kept, StringComparison.Ordinal);
+        Assert.Contains("prepare", Assert.IsType<Dictionary<string, object>>(steps.ToLog()["steps"]).Keys);
+    }
+
     [Fact]
     public async Task The_box_house_with_a_compliant_ranch_inside_gives_the_scenes_verdicts_and_egress_rows()
     {
@@ -270,6 +298,11 @@ public sealed class ProjectCheckTests(RealWorker worker) : IClassFixture<RealWor
         // said back to the architect before it is kept
         Assert.Equal("the 60.0 ft lot edge from (0.0, 0.0) to (60.0, 0.0)", StreetEdges.Describe(edge, Transform3.Identity));
         Assert.Contains("wasn't on an edge", StreetEdges.Nearest(line, new Xyz(30, 60, 0)).Why, StringComparison.Ordinal);
+        // a property line holding a curve with no ends (a full circle): its lot is never read, so no edge of it is
+        // kept, even a click right on one of its straight edges
+        var (none, noEnds) = StreetEdges.Nearest(line with { Unbound = 1 }, new Xyz(20, 0.2, 0));
+        Assert.Null(none);
+        Assert.Contains("a curve with no ends", noEnds, StringComparison.Ordinal);
     }
 
     /// <summary>Review round 2: a curved street edge is said by its length along the curve (47.1 ft), never its
