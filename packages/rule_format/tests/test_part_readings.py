@@ -99,3 +99,45 @@ def test_two_values_under_one_answer_need_review(maine):
     for r in twice["corridor"][0]["readings"]["corridor_dead_end_length"]:
         r["named"] = {Q7: "with_door"}                              # one answer, two values: not worked out
     assert outcome(rules["general.nfpa_16_2_5_2_dead_end"], twice, NEW_DAY_CARE, allowed)[0] == "needs_review"
+
+
+# --- a measure standing on Gordium's reading (route note decision 1a, amended 2026-11-21: `confirm`) -----------------
+
+SPRINKLERED_NEW = {**NEW_DAY_CARE, "sprinklered_9_7": True, "sprinkler_supervised_9_7": True}
+WORDS = "Gordium's reading · confirm with the architects: a closet ... (cl through k; open question 11)"
+
+
+def story_with(confirm, **measures):
+    part = {"id": "L1", "measures": measures}
+    if confirm is not None:
+        part["confirm"] = confirm
+    return {"story": [part]}
+
+
+def test_a_measure_on_a_reading_to_confirm_says_so_in_every_row_that_reads_it(maine):
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    for value, result in ((40.0, "pass"), (140.0, "fail")):
+        got = outcome(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=value),
+                      SPRINKLERED_NEW, allowed)
+        assert got == (result, WORDS)                                   # the outcome itself is unchanged
+
+
+def test_a_reading_to_confirm_is_said_only_for_the_measures_a_rule_reads_and_has(maine):
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    # the words are for another measure: not said here
+    assert outcome(rule, story_with({"egress_travel_distance": WORDS}, common_path_of_travel=40.0),
+                   SPRINKLERED_NEW, allowed) == ("pass", None)
+    # the measure isn't given: the row needs review for that, and no reading stands behind a value
+    result, why = outcome(rule, story_with({"common_path_of_travel": WORDS}), SPRINKLERED_NEW, allowed)
+    assert result == "needs_review" and WORDS not in (why or "")
+    # no `confirm`: as before
+    assert outcome(rule, story_with(None, common_path_of_travel=40.0), SPRINKLERED_NEW, allowed) == ("pass", None)
+
+
+def test_a_rule_that_doesnt_apply_says_no_reading(maine):
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    assert outcome(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0),
+                   NEW_DAY_CARE, allowed) == ("not_applicable", None)    # unsprinklered: the 100-ft rule doesn't apply

@@ -213,6 +213,16 @@ def _ref(part: dict, kind: str) -> dict:
     return {"kind": kind, "id": part["id"], "name": _name(part)}
 
 
+def _confirm(part, mine, shown) -> list[str]:
+    """The words a part gives (`confirm`: {measure: words}) for the measures this row reads that it has a value for:
+    each stands on a reading to confirm (Gordium's reading), shown with the row, never hidden. Words that aren't
+    text are said as given."""
+    given = part.get("confirm")
+    if not isinstance(given, dict):
+        return []
+    return [str(given[m]) for m in sorted(shown) if m in mine and m in given]
+
+
 def _row(rule, result, part=None, within=None, reason=None, values=None, none=False, unknown=None) -> dict:
     """One row. `none`: the row is the rule's when_none answer (nothing to check). `unknown`: the part's measures
     that weren't given, for a part that fails whatever they are (the 2026-10-21 proof)."""
@@ -301,6 +311,8 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
         why = _maybe(part) or maybe
         if why and result != "not_applicable":   # it, or the part it sits in, may not be of its kind at all
             return _row(rule, "needs_review", part, within, reason=why, values=shown)
+        if result != "not_applicable":           # a measure standing on a reading to confirm: always said
+            reason = "; ".join(dict.fromkeys(x for x in [reason] + _confirm(part, mine, shown) if x)) or None
         return _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
 
     if not parent:
