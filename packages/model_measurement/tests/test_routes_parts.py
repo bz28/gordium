@@ -230,8 +230,22 @@ def test_a_story_of_corridors_only_has_no_room_door_to_measure_from():
 
 
 def test_a_closet_with_no_door_out_leaves_the_room_door_travel_unmeasured():
-    story, = measure(sleeping_room())["parts"]["story"]
+    """The sleeping room marked `lockable: true`: its closet, opening only into it, has no way out (decision 1a, as
+    amended 2026-11-21: a room that can be locked is never passed through, even by its own closet's route)."""
+    d = sleeping_room()
+    d["rooms"][0]["lockable"] = True
+    story, = measure(d)["parts"]["story"]
     assert "the room k has no door from which" in story["not_measured"]["egress_travel_from_room_door"]
+
+
+def test_a_closet_off_a_sleeping_room_that_cant_be_locked_leaves_through_it():
+    """Decision 1a as amended 2026-11-21 (Gordium's reading): the closet's door into the sleeping room is its exit
+    access door. By hand: from the closet's door centre (60.25, 10) straight along y = 10 to the corridor door
+    (-0.25, 10), 60.5 (every jamb 1.5 ft off the line), then to the nearer exit, A at (-4.5, -10.25) or B at
+    (-4.5, 30.25), the same by symmetry: at least sqrt(4.25^2 + 20.25^2) = 20.691 more."""
+    story, = measure(sleeping_room())["parts"]["story"]
+    assert story["measures"]["egress_travel_from_room_door"] >= 60.5 + 20.691 - 1e-3
+    assert "Gordium's reading" in story["confirm"]["egress_travel_from_room_door"]
 
 
 def test_a_room_not_read_is_a_space_not_measured():
@@ -277,9 +291,11 @@ def test_a_passage_whose_middle_is_in_a_ring_needs_review(monkeypatch):
 def storage_in_storage():
     """A day-care room 0 to 20 by 0 to 10 (marked pass_through) with its exit (-0.25, 5) and a second exit (20.25, 5); a storeroom 0 to 10 by
     10.5 to 16 off it (door (5, 10.25)), and an inner storeroom 0 to 10 by 16.5 to 20 whose only door (5, 16.25) is
-    into the storeroom: no route crosses a storeroom (IBC 1014.2 item 4), so the inner one has none."""
+    into the storeroom, which can be locked: no route crosses a room that can be locked (IBC 1014.2 item 2), so the
+    inner one has none (with the storeroom `lockable: false` it would leave through it: decision 1a as amended
+    2026-11-21, test_routes_served.py)."""
     return description([room("r", rect(0, 0, 20, 10), use="day_care", pass_through=True),
-                        room("s1", rect(0, 10.5, 10, 16), use="accessory_storage"),
+                        room("s1", rect(0, 10.5, 10, 16), use="accessory_storage", lockable=True),
                         room("s2", rect(0, 16.5, 10, 20), use="accessory_storage")],
                        [door("a", (-0.25, 5), (0, 1), ("r", "outside"), exit_id="A"),
                         door("b", (20.25, 5), (0, 1), ("r", "outside"), exit_id="B"),

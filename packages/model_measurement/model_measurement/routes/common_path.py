@@ -278,7 +278,7 @@ def tied_routes(routes: StoryRoutes, point, exit_id) -> list:
     sits on the line between two rooms, or the clearance is 0)."""
     p = (float(point[0]), float(point[1]))
     rooms = routes.rooms_at(p)
-    if routes.r <= 0 or len(rooms) != 1 or len(routes._starts(rooms[0])) != 1:
+    if routes.r <= 0 or len(rooms) != 1 or not routes.simple(rooms[0]):
         return routes.routes(p, [exit_id])
     room, at = rooms[0], _show(p)
     wanted = routes._wanted([exit_id])
