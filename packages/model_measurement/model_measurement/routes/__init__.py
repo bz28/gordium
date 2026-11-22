@@ -16,7 +16,7 @@ fail, else needs review). `more` holds the
 figures behind each measure: the routes drawn, the bounds, the corridors' centre lines. `confirm`, {measure: words},
 says a measure stands on Gordium's reading (decision 1a, a room that opens only into the room it serves: the story's
 travel and common path, and that room's own exit count and common path), for the checker to show beside each row
-that reads it.
+that reads it; a row that would comply on it needs review until the reading is confirmed (rule_format.parts.rows).
 
 The pieces (decision 11): floor.py reads each story's floor, zones and rings (decisions 1, 1a, 10); paths.py draws
 decision 2's routes; remote.py gives decision 3's travel figure; common_path.py decision 5's; dead_ends.py decision

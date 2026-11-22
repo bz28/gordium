@@ -163,7 +163,8 @@ closets, workrooms, sleeping rooms, a room that can be locked, and a room whose 
 isn't given. `pass_through: true` on an end-only use, a sleeping room or a room with `lockable: true` is refused:
 the room isn't read and its story's routes need review. A closet, accessory storage or toilet whose every opening is
 a door into one end-only room with its `use` given and `lockable: false` is taken as part of that room (Gordium's
-reading, shown with the figures it reaches: route note decision 1a and open question 11): its route leaves through
+reading, shown with the figures it reaches, which never pass until it is confirmed: route note decision 1a and
+open question 11): its route leaves through
 that room, never across another end-only room.
 
 A door's centre sits in the middle of its wall, so each of its rooms is found by geometry: that room's face of the

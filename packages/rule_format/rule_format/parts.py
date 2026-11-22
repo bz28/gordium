@@ -313,8 +313,12 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
             return _row(rule, "needs_review", part, within, reason=why, values=shown)
         row = _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
         confirm = _confirm(part, mine, shown) if result != "not_applicable" else []
-        if confirm:                              # a measure standing on a reading to confirm: always said, in its own
-            row["confirm"] = list(dict.fromkeys(confirm))   # field, so the row's own reason and comparison stay
+        confirm = list(dict.fromkeys(confirm))
+        if confirm and result == "pass":         # a pass that stands on a reading to confirm: never a pass on it
+            row["outcome"] = "needs_review"      # (principle 4; as each_part.check_parts does for a has-none reading)
+            row["reason"] = "complies only if this reading is confirmed: " + "; ".join(confirm)
+        elif confirm:                            # a fail (or a needs review) keeps its own reason and comparison,
+            row["confirm"] = confirm             # the reading said beside it
         return row
 
     if not parent:

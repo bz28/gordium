@@ -118,15 +118,26 @@ def row_of(rule, given, values, allowed):
     return parts.rows(rule, given, values, allowed)[0]
 
 
-def test_a_measure_on_a_reading_to_confirm_is_said_in_its_own_field_of_every_row_that_reads_it(maine):
-    """Review round 1: the words go in the row's `confirm`, never in its `reason` (a pass or fail row's reason
-    stays empty, so the line keeps its comparison and the rule's title)."""
+def test_a_fail_on_a_reading_to_confirm_keeps_its_reason_and_says_the_reading_in_its_own_field(maine):
+    """Review round 1: a fail's words go in the row's `confirm`, never in its `reason` (which stays empty, so the
+    line keeps its comparison)."""
     rules, allowed = maine
     rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
-    for value, result in ((40.0, "pass"), (140.0, "fail")):
-        row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=value),
-                     SPRINKLERED_NEW, allowed)
-        assert (row["outcome"], row["reason"], row["confirm"]) == (result, None, [WORDS])
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=140.0), SPRINKLERED_NEW,
+                 allowed)
+    assert (row["outcome"], row["reason"], row["confirm"]) == ("fail", None, [WORDS])
+
+
+def test_a_pass_on_a_reading_to_confirm_is_never_a_pass(maine):
+    """Review round 2 (principle 4): a figure that complies only under Gordium's reading needs review until the
+    reading is confirmed, said so, as the checker does for a has-none reading (each_part.check_parts)."""
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0), SPRINKLERED_NEW,
+                 allowed)
+    assert row["outcome"] == "needs_review"
+    assert row["reason"] == "complies only if this reading is confirmed: " + WORDS
+    assert parts.rule_result([row]) == "needs_review"
 
 
 def test_a_reading_to_confirm_is_said_only_for_the_measures_a_rule_reads_and_has(maine):

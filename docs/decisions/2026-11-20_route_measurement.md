@@ -108,8 +108,12 @@ area need review.
    `other`) and a room with two rooms beyond it (not counting rooms that open only into it) are not covered: they keep decision 1a's rule. A door from such a room
    into the room it serves is an exit access door (decision 11). Every figure this reading reaches says so beside it
    ("Gordium's reading · confirm with the architects"), the part's `confirm`, and the checker puts it in each row that
-   reads that figure. It only adds routes where none were (never shortens a route that existed): a room it covers had
-   no route before, so its story needed review.
+   reads that figure. **Such a figure never passes until the reading is confirmed** (principle 4; amended 2026-11-21,
+   review round 2: the words forbid it and the strict reading has no figure): a row that would comply needs review,
+   "complies only if this reading is confirmed: ...", as the checker already does for a has-none reading
+   (`each_part.check_parts`); a row that fails still fails, with its comparison and the reading beside it (it fails
+   under the reading, and under the strict one the room has no legal way out at all). It only adds routes where none
+   were (never shortens a route that existed): a room it covers had no route before, so its story needed review.
    *Why (resolved before asking, 2026-11-21).* The whole law: IBC 2009 1014.2 (read from the OCR copy only: not
    verified) item 1 "Egress from a room or space shall not pass through adjoining or intervening rooms or areas,
    except where such adjoining rooms or areas and the area served are accessory to one or the other, are not a Group
@@ -309,7 +313,8 @@ area need review.
     clearance, or a cluster or pocket with no routed clear edge round it (decision 3: shown, never a number); obstructions
     or rooms read from a link; a corridor not made of straight legs (dead end only); and any reading that could
     shorten a route; a room that reaches an exit only through an end-only room (decision 1a; a closet, storeroom or
-    toilet opening only into the room it serves goes through it, the reading said beside the figure); an `exit_kind` with
+    toilet opening only into the room it serves goes through it, the reading said beside the figure, which never
+    passes until it is confirmed); an `exit_kind` with
     no `exit_id`; a door under 24 in clear; any key of the additions left out. Readings that only lengthen one
     (decisions 1, 1a, 3, 5, 6) don't hold a pass: a pass under them is a
     pass under the shorter reading too.

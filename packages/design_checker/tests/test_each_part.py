@@ -199,12 +199,16 @@ def test_a_row_on_a_reading_to_confirm_keeps_its_comparison_and_title_and_says_t
     values = {"nfpa_day_care_occupancy": True, "day_care_existing": False, "sprinklered_9_7": True,
               "sprinkler_supervised_9_7": True}
     words = "Gordium's reading · confirm with the architects: CLOSET through KITCHEN"
-    for value, outcome, wanted in ((140.0, "fail", "100"), (40.0, "pass", ": complies")):
+    for value, outcome, wanted in ((140.0, "fail", "100"),
+                                   (40.0, "needs_review", "complies only if this reading is confirmed: ")):
         given = {"story": [{"id": "L1", "name": "Level 1", "measures": {"common_path_of_travel": value},
                             "confirm": {"common_path_of_travel": words}}]}
-        row, = check_parts([rule], given, values, allowed)["rows"]
+        got = check_parts([rule], given, values, allowed)
+        row, = got["rows"]
         assert row["outcome"] == outcome and words in row["line"] and wanted in row["line"], row["line"]
+        assert row["line"].count(words) == 1
         if outcome == "fail":
             assert "140" in row["line"]
-        else:
-            assert rule["title"] in row["line"]
+        else:                    # review round 2: never a pass, never grouped under Complies
+            assert got["results"][rule["id"]] == "needs_review"
+            assert all(item["status"] != "complies" for item in got["items"])
