@@ -217,9 +217,9 @@ not in the list, or a window's word on a door, is not stated, never a near guess
   is unset or in the way.
 
 In Revit, **Mark facts** (the Gordium tab's Check panel; the command is `MarkForEgressCommand`) adds the marks on first use, in one undoable
-transaction, then shows the list in a dialog and logs every row to `results.jsonl`. That dialog is the minimal
-first view; the dockable list comes with the UI pass. Nothing is sent to the checker yet: the interior reader
-(section 7, step 3) builds the description's flags from `MarkReading` alone.
+transaction, logs every row of the list to `results.jsonl`, and opens the **Setup form** in the Gordium pane (below;
+it replaced the list's dialog). Nothing is sent to the checker: the interior reader (section 7, step 3) builds the
+description's flags from `MarkReading` alone.
 
 How we know: `MarksTests.cs` (both .NET 8 and 10) pins the table (names, GUIDs, kinds, bindings, categories), the
 reading of an unset mark, the operation words against the measuring code's own lists (read from
@@ -424,6 +424,38 @@ Anything not read exactly is left out with its reason. **How we know:** `RouteTe
 (`RouteDrawing.cs`) and hands the description to the real route code, which draws its routes; each trap is pinned.
 **In Revit:** Read inside logs a `routes` line counting what was read, and `evidence.route_doors` each door's place.
 
+## The Setup form
+
+(Design pass pieces 7 and 9, merged and built; [decision](../../docs/decisions/2026-11-22_setup_form.md).) When
+**Check project** finds a fact the check needs missing, the Gordium pane shows the Setup form instead of a check;
+**Mark facts** opens it too. Every decision is in `Gordium.Revit.Reading/Setup.cs`, tested without Revit
+(`SetupTests.cs`); the Revit side is `SetupFlow.cs` (reads, writes, through the panel's one ExternalEvent) and
+`SetupView.cs` (the WPF form, in the panel's theme tokens; the dropdown's style is in `PanelStyles.xaml`).
+
+- **Project facts** (`SetupFacts`): every mark `Marks.All` binds to Project Information is a field (data: a mark
+  added to Marks.cs appears with no change here), under a heading found from what it feeds. Zone and Use are dropdowns
+  of the worker's `options` (`WorkerClient.OptionsAsync`: the districts with a rulebook, the use words with their
+  names, the district's permitted ones first), typed until the worker answers; Yes/No toggles; a number for counts;
+  **Pick on plan** for the street edge (the check's own pick, `CheckProjectCommand.PickStreet`). Each shows the law
+  it answers (the mark's tooltip, "house" said as "building" unless the use is a one- or two-family dwelling).
+- **What a Save writes** (`SetupDraft.Writes`): only the fields the architect chose a value for that differs from the
+  mark, as one transaction "Gordium: project facts" (`RevitMarks.Write`, the one writer, which the request file's
+  `SetMarks` uses too). A field never touched is never written; a value not among its choices is refused, said, and
+  not written.
+- **The checklist** (`SetupChecklist`): a line per fact inside (sleeping room, escape opening, exit door: needed;
+  operation and clear opening per type; for a building that isn't a house, room use, can be locked, pass through and
+  exits), each with its counts, why Gordium asks, what a blank leaves, **Select them** (and Properties brought up), its
+  suggestions with what each is based on (**Accept**, one or all, as one transaction "Gordium: suggestions accepted"),
+  and folded once done. The openings' rooms on each side (`RevitMarks.Sides`: `FromRoom`/`ToRoom` in the last phase)
+  are what the escape-opening and exit-door suggestions read; they are never sent.
+- **When the check runs** (`SetupGate`): the form shows while a needed fact is missing (the four required project
+  facts, a project fact Gordium can't read, the three needed inside lines); after a Save, an accept, a value set in
+  Properties or an undo (the form reads its facts again on Revit's DocumentChanged) the check runs by itself once the
+  form was waiting and nothing needed is left. **Check now anyway** sends what is set (`ProjectCheck.PrepareAsync`'s
+  `anyway`: each fact left out listed in `ProjectPrepared.NotStated`, and said first in the results with **Set up the
+  facts**); never without the zone. For the same facts missing, Check project doesn't show the form again this session.
+- Results go stale after any Save or accept (neither is one of the check's own transactions), as after any edit.
+
 ## Check my project
 
 (The **Check project** button; the command is `CheckProjectCommand`.) The first button for an architect's own model: one click reads the open project outside (zoning) and inside
@@ -447,8 +479,8 @@ the jurisdiction is the City of Ithaca). Why each choice:
 - **`ResultText`** (`ResultText.cs`): the same rows as text (`check_project_result.txt`, the log). The headline is
   the worker's state and summary; groups in the worker's order with its counts; failures, rows that need review and
   rows not checked are never cut, other rows past 30 with "N more (in the log)" (the result file has every row).
-- **The button** (`CheckProject.cs`): adds the marks on first use, asks the architect to click the street edge
-  when it isn't set, reads both on Revit's thread, sends off it, opens the **results panel** and writes every row to
+- **The button** (`CheckProject.cs`): adds the marks on first use, shows the Setup form when a fact the check needs
+  is missing (above), reads both on Revit's thread, sends off it, opens the **results panel** and writes every row to
   `check_project_result.txt` and the request and answer to the log. `check_project_request.json`
   (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks and never uses the panel (and waits on Revit's
   thread: no one is working in Revit then).
@@ -713,7 +745,7 @@ CI restores in locked mode.
 | Panel | Button | What it does |
 |---|---|---|
 | Check | **Check project** | the check above |
-| Check | **Mark facts** | the marking list above (for now in a dialog: the checklist in the panel comes later) |
+| Check | **Mark facts** | the Setup form in the Gordium pane (the project facts and the checklist) |
 | Results | **Panel** | shows the results panel, or hides it when it is showing; usable with no project open |
 | Help | **About** | shows and logs which build Revit loaded and on which .NET runtime; usable with no project open |
 | Trial | **Check box house**, **Record scenes**, **Read inside**, **Record houses** | the trial's test tools, only in a trial build or with `GORDIUM_TRIAL=1` |
