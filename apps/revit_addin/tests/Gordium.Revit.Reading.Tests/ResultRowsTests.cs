@@ -79,6 +79,25 @@ public sealed class ResultRowsTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal("[DOES NOT COMPLY] Front yard: 22'-6\" measured, ≥ 25'-0\" allowed (2'-6\" short) [uid-house]", row.Line());
     }
 
+    /// <summary>A row decided on a value the architect states (the worker's <c>stated</c>: the Gordium: Stories count)
+    /// says "stated by the architect", never "measured"; one with no such flag is measured, as before.</summary>
+    [Fact]
+    public void A_stated_figure_is_shown_as_stated_never_as_measured()
+    {
+        var item = Zoning("R-1b.stories", "complies", "at limit", "at limit",
+                          "3 stated by the architect for the whole building, within what the drawing allows (1 to 5)");
+        item["name"] = "Stories";
+        item["proposed"] = "3";
+        item["required"] = "3";
+        item["sign"] = "≤";
+        item["stated"] = true;
+        var row = One(item);
+        Assert.Equal("3 stated by the architect, ≤ 3 allowed", row.Figures);
+        Assert.Contains("within what the drawing allows (1 to 5)", row.Line(), StringComparison.Ordinal);
+        item["stated"] = false;
+        Assert.Equal("3 measured, ≤ 3 allowed", One(item).Figures);
+    }
+
     /// <summary>A delta the worker left empty (settle: a row with no reading set) says nothing of how far, even with a
     /// margin as drawn beside it: the margin alone could be kinder than the readings. A worker that sends no delta
     /// at all: its margin.</summary>

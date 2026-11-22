@@ -243,7 +243,10 @@ public static class ResultRows
         if (proposed is not null && required is not null)
         {
             var sign = Text(raw, "sign") is { } g && !required.StartsWith(g, StringComparison.Ordinal) ? g + " " : "";
-            figures = $"{proposed} measured, {sign}{required} allowed";
+            // a value the architect states (the stories count, the worker's "stated"): never called measured
+            var how = raw.ValueKind == JsonValueKind.Object && raw.TryGetProperty("stated", out var st) &&
+                      st.ValueKind == JsonValueKind.True ? "stated by the architect" : "measured";
+            figures = $"{proposed} {how}, {sign}{required} allowed";
         }
         else if (required is not null)
             figures = $"allowed {required}";

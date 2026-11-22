@@ -68,6 +68,8 @@ public sealed class MarksTests
             ("Gordium: Can be locked", "5b0d7c3e-2f41-4a8e-9c63-1e7a4f2b9d05", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
             ("Gordium: Pass through", "c2e94a61-7d3b-4f5e-8a10-6b9d3e2f4c87", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
             ("Gordium: Exit", "e7a3c519-04d2-4b86-b1f5-93c8d6a2e470", MarkValueKind.Text, MarkBinding.Instance, ["OST_Doors"]),
+            // the architect's count of stories (optional; reading design note, section 9)
+            ("Gordium: Stories", "bf758947-8ee4-490c-a499-dee706a6f1e7", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
@@ -102,6 +104,16 @@ public sealed class MarksTests
         Assert.Null(Marks.YesNo(new MarkValue(true, Text: "Yes")));
         Assert.True(Marks.YesNo(new MarkValue(true, Integer: 1)));
         Assert.False(Marks.YesNo(new MarkValue(true, Integer: 0)));
+    }
+
+    [Fact]
+    public void An_unset_whole_number_is_not_stated_never_zero()
+    {
+        Assert.Null(Marks.Count(null));
+        Assert.Null(Marks.Count(new MarkValue(false, Integer: 0)));       // never set: Revit's AsInteger() gives 0
+        Assert.Null(Marks.Count(new MarkValue(true, Text: "3")));         // another storage: not stated
+        Assert.Equal(0, Marks.Count(new MarkValue(true, Integer: 0)));    // a 0 typed is a 0 (ProjectFacts asks again)
+        Assert.Equal(3, Marks.Count(new MarkValue(true, Integer: 3)));
     }
 
     [Fact]

@@ -250,8 +250,9 @@ within their height (its top no higher than their top), is a floor or roof slab:
 bounds (it held none). What it can't do: lower the most the building could hold (under 7 ft it held none), or clear a
 part a story tall over the roof, a thin part reaching past the walls (a balcony), or one floating over them: each
 stays a part that may be another story. The count is still read from the walls (1 to floor(height / 7 ft), "draw its
-floors or enter the count"), so a native Revit model's stories still need review until the count is stated; a
-Stories mark on Project Information (as Rhino's lot facts state `stories`) is the step left, for Ben. Walls drawn per
+floors or enter the count"), so a native Revit model's stories still need review until the count is stated: the
+`Gordium: Stories` mark on Project Information (2026-11-22; section 9) states it, as Rhino's lot facts state `stories`,
+and the count stands only within those bounds. Walls drawn per
 level (an upper story's walls starting at its level, a story tall) still read as a part that may be another story:
 Revit's own Levels ("Building Story") would tell those apart, and are not read yet. Pinned by
 `packages/model_measurement/tests/test_stories_slabs.py` and the eval's Revit-parts reading
@@ -326,6 +327,7 @@ read by GUID like every mark; unset is not stated:
 | `Gordium: Street edge` (text, written by Gordium) | `street_line`: the lot's own edges | asked for by a pick; else nothing is sent |
 | `Gordium: Corner lot` (Yes/No) | `corner_lot` | not sent: the yards need review |
 | `Gordium: Ground from` (text: Spot grades / Finished spot grades) | `grade_from`, the ground from Gordium's spot-grade markers (section 5) | not sent: no ground, so height and stories need review. A Toposolid isn't read yet (no terrain code), so a Toposolid ground always needs review |
+| `Gordium: Stories` (whole number, Revit's Integer; added 2026-11-22) | `stories`, the architect's count for the whole building, as Ithaca's STORY counts it (§325-3B: "The portion of a building which is between one floor level and the next higher floor level or the roof"; a basement counts when "the finished surface of the floor next above is 1) more than six feet above grade plane or 2) more than 12 feet above the finished ground level at any point", "A cellar shall not be deemed a story", a mezzanine is not one, nor an attic "if unfinished and without human occupancy"; §325-8A: "computed at the main entrance side"): the mark's tooltip says so. Optional, never required. The measuring keeps it only within what the drawing allows (section 7, "Stories of a building drawn as parts": never fewer than the floors drawn, never more than the walls could hold at 7 ft a story), and the stories row says "stated by the architect"; a count outside that is refused there (needs review, with why). A count under 1 is asked again, nothing sent | not sent: the count is read from the drawing, and where the drawing allows more than one count the stories row needs review ("draw its floors or enter the count") |
 
 `jurisdiction` is fixed to the City of Ithaca (`regulations/jurisdictions/new_york/ithaca_city`). A required fact
 (the checker's own list, `host_core.facts.REQUIRED`) missing and **no request is sent**: the results panel lists

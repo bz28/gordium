@@ -362,7 +362,10 @@ Then, for each building in turn (Revit running and idle; `$n` = `orangetown`, th
 Orangetown, every one of the 115 egress rules as hand_check.yaml predicts (1 complies, 33 not applicable, 81 needs
 review), 18 more cautious than the truth for evaluation.md's reasons, no false pass; its three `has_none` readings
 come back as ticks, so they show not applicable rather than as readings to confirm (named, not a failure).
-106 Ithaca Rd: 9 of the 11 rows the architects' answer, coverage failing as theirs does; stories needs review and
-parking is not checked, because Project Information has no Stories, bedrooms or parking mark (both named in its
-`eval_marks.yaml` with their source). Anything else is a finding: a Revit reading that differs from the description
+106 Ithaca Rd: 10 of the 11 rows the architects' answer, coverage failing as theirs does; the stories row complies on
+the count its `eval_marks.yaml` states in `Gordium: Stories` (3, the spreadsheet's Inputs!B13, an eval assumption
+standing in for the architect: "3 stated by the architect for the whole building, within what the drawing allows (1
+to 5 ...)"; since 2026-11-22, before which it needed review); parking is not checked, because Project Information has
+no bedrooms or parking mark (named in its `eval_marks.yaml` with their source). A stories row that needs review now
+is a finding (the mark not set or not sent). Anything else is a finding: a Revit reading that differs from the description
 (the comparison names the rule), or a build that drew something differently (the `build_model` line says what).

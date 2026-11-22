@@ -5,8 +5,8 @@ namespace Gordium.Revit.Reading;
 // the Revit layer only copies them into Revit, and the tests read the same list.
 
 /// <summary>What a mark holds (the Revit layer maps each to its <c>SpecTypeId</c>: <c>Boolean.YesNo</c>,
-/// <c>String.Text</c>, <c>Length</c>).</summary>
-public enum MarkValueKind { YesNo, Text, Length }
+/// <c>String.Text</c>, <c>Length</c>, <c>Int.Integer</c>).</summary>
+public enum MarkValueKind { YesNo, Text, Length, Integer }
 
 /// <summary>Whether a mark is set on each element (<c>InstanceBinding</c>) or once on its type (<c>TypeBinding</c>).</summary>
 public enum MarkBinding { Instance, Type }
@@ -170,6 +170,20 @@ public static class Marks
         "Which of Gordium's spot-grade markers give the ground: " + string.Join(" or ", GroundWords.Select(w => w.Word)) +
         ". Blank: no ground is sent, so building height and stories need review (a Toposolid isn't read yet).");
 
+    /// <summary>The number of stories the architect states for the whole building (<c>facts.stories</c>): optional,
+    /// never required, a whole number 1 or more, sent as the architect's statement. The measuring keeps it only within
+    /// what the drawing allows (never fewer than the floors drawn, never more than the walls could hold at 7 ft a
+    /// story: places/ithaca_city/measure.py _stories_whole), and the stories row says "stated by the architect". Its
+    /// words are Ithaca's own STORY (§325-3B), so the count is the one the law means. Blank: not stated, the count is
+    /// read from the drawing, and where the drawing allows more than one count the row needs review.</summary>
+    public static readonly MarkDefinition Stories = new(
+        "Gordium: Stories", new("bf758947-8ee4-490c-a499-dee706a6f1e7"), MarkValueKind.Integer, MarkBinding.Instance,
+        [ProjectInformation], "facts.stories",
+        "The building's number of stories as the City of Ithaca counts them (§325-3B STORY: from one floor level to the next floor or the roof, counted at the main entrance side). " +
+        "A basement counts when the floor above it is more than 6 ft above the grade plane or more than 12 ft above the finished ground at any point; a cellar never counts; " +
+        "a mezzanine doesn't; an attic doesn't when unfinished and without human occupancy. A whole number, 1 or more: kept only within what the drawing allows. " +
+        "Blank: the count is read from the drawing, and needs review where the drawing allows more than one.");
+
     /// <summary>The <see cref="GroundFrom"/> words and the <c>grade_from</c> each sends.</summary>
     public static IReadOnlyList<(string Word, string GradeFrom)> GroundWords => [("Spot grades", "spot"), ("Finished spot grades", "finished_spots")];
     /// <summary>A level the architect says has no rooms at all (a roof, a turret's top: Revit finds enclosed areas
@@ -282,7 +296,7 @@ public static class Marks
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
-        CanBeLocked, PassThrough, Exit,
+        CanBeLocked, PassThrough, Exit, Stories,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------
@@ -295,6 +309,10 @@ public static class Marks
     /// <summary>A text mark, trimmed; null when not stated or blank.</summary>
     public static string? Text(MarkValue? v) =>
         v is { HasValue: true, Text: { } t } && !string.IsNullOrWhiteSpace(t) ? t.Trim() : null;
+
+    /// <summary>A whole-number mark (Revit's Integer); null when not stated. Never 0 for blank: an unset Integer
+    /// parameter's AsInteger() is 0 with HasValue false.</summary>
+    public static int? Count(MarkValue? v) => v is { HasValue: true, Integer: { } n } ? n : null;
 
     /// <summary>A length mark (feet); null when not stated or not a finite number. Never 0 for blank.</summary>
     public static double? Length(MarkValue? v) =>

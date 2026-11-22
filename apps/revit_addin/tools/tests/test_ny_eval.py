@@ -103,6 +103,8 @@ def test_the_106_check_request_states_the_repositorys_own_lot_facts():
     assert street(check["Gordium: Street edge"]) == tuple(tuple(p) for p in facts["street_line"][0])
     assert street(check["Gordium: Street edge"]) in lot_edges(data)
     assert check["Gordium: Ground from"] == "Spot grades"
+    # the architect's count, standing in: the spreadsheet's Inputs!B13, the same design's Rhino facts' own count
+    assert check["Gordium: Stories"] == facts["stories"] == 3 and type(check["Gordium: Stories"]) is int
     assert marks_tool.request(marks, "built.rvt", "marked.rvt")["marks"] == []       # nothing but Project Information
     design = load(SITE, "spreadsheet_design.yaml")
     assert {d["row"] for d in marks["expected_differences"]} | {n["row"] for n in marks["notes"]} <= set(design["compare"])
@@ -238,28 +240,28 @@ def test_the_106_rows_compare_with_the_architects_and_name_each_difference(tmp_p
     assert rows["Minimum lot size"]["gordium_measured"] == 6570.0 and rows["Minimum lot size"]["architects_proposed"] == 6674
     assert "coincidence" in rows["Minimum rear yard (offset)"]["note"]
     assert made["other_r1b_rules"] == {"R-1b.stream_setback": "needs_review"}
-    # the two differences worked out before the run are named with their source, verdict and reason; anything else
-    # is unexplained
-    expected = spreadsheet_like(**{"R-1b.stories": "needs_review", "R-1b.parking_one_family": "not_checked"})
+    # the difference worked out before the run is named with its source, verdict and reason; anything else is
+    # unexplained. Since the Stories mark (2026-11-22) the stories row is the architects' PASS: the count stated
+    expected = spreadsheet_like(**{"R-1b.parking_one_family": "not_checked"})
     for i in expected["view"]["items"]:
-        if i["id"] == "R-1b.stories":
-            i["reason"] = "a 35 ft solid (wall_s) could hold up to 5 stories: draw its floors or enter the count."
         if i["id"] == "R-1b.parking_one_family":
             i["reason"] = "Needs bedrooms and parking spaces, which the model doesn't show"
     made = run(tmp_path, "106_ithaca_rd", expected)
-    assert made["ok"] and made["summary"]["expected_differences"] == ["Maximum stories", "Minimum parking"]
-    # review round 3: the expected verdict for another reason (the first Revit run's roof read as a raised part) is
-    # unexplained, never expected
-    raised = spreadsheet_like(**{"R-1b.stories": "needs_review", "R-1b.parking_one_family": "not_checked"})
-    for i in raised["view"]["items"]:
-        if i["id"] == "R-1b.stories":
-            i["reason"] = ("part of the building (roof-0005b778) starts above the ground: it may be another story: "
-                           "draw its stories as floor blocks, or check the count")
-        if i["id"] == "R-1b.parking_one_family":
-            i["reason"] = "Needs bedrooms and parking spaces, which the model doesn't show"
-    made = run(tmp_path, "106_ithaca_rd", raised)
-    assert not made["ok"] and made["summary"]["unexplained"] == ["Maximum stories"]
-    assert made["summary"]["expected_differences"] == ["Minimum parking"]
+    assert made["ok"] and made["summary"]["expected_differences"] == ["Minimum parking"]
+    # the stories row needing review for want of the count (the mark not sent, as before 2026-11-22), or for another
+    # reason (review round 3: the first Revit run's roof read as a raised part), is unexplained, never expected
+    for why in ("a 35 ft solid (wall_s) could hold up to 5 stories: draw its floors or enter the count.",
+                "part of the building (roof-0005b778) starts above the ground: it may be another story: "
+                "draw its stories as floor blocks, or check the count"):
+        raised = spreadsheet_like(**{"R-1b.stories": "needs_review", "R-1b.parking_one_family": "not_checked"})
+        for i in raised["view"]["items"]:
+            if i["id"] == "R-1b.stories":
+                i["reason"] = why
+            if i["id"] == "R-1b.parking_one_family":
+                i["reason"] = "Needs bedrooms and parking spaces, which the model doesn't show"
+        made = run(tmp_path, "106_ithaca_rd", raised)
+        assert not made["ok"] and made["summary"]["unexplained"] == ["Maximum stories"]
+        assert made["summary"]["expected_differences"] == ["Minimum parking"]
     made = run(tmp_path, "106_ithaca_rd", spreadsheet_like(**{"R-1b.rear_yard": "needs_review"}))
     assert not made["ok"] and made["summary"]["unexplained"] == ["Minimum rear yard (offset)"]
     # a pass where the architects fail is named as such
@@ -352,15 +354,26 @@ def test_the_106_design_checked_by_the_real_worker_differs_from_the_architects_o
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": marks["Gordium: Zone"],
              "use": marks["Gordium: Use"], "lot_surveyed": marks["Gordium: Lot surveyed"],
              "corner_lot": marks["Gordium: Corner lot"], "grade_from": "spot",
-             "street_line": [list(map(list, street(marks["Gordium: Street edge"])))]}
+             "street_line": [list(map(list, street(marks["Gordium: Street edge"])))],
+             "stories": marks["Gordium: Stories"]}        # as ProjectFacts.Read sends the Stories mark
     got = _answer(site, facts)
     (tmp_path / "a.json").write_text(json.dumps(got), encoding="utf-8")
     made = compare.compare_106(compare.result_of(tmp_path / "a.json"))
     assert made["ok"], made["summary"]
-    assert made["summary"]["same"] == 9
-    assert made["summary"]["expected_differences"] == ["Maximum stories", "Minimum parking"]
-    # never kinder: the stories row needs review, never a pass on the count the spreadsheet types
-    assert {r["row"]: r["gordium"] for r in made["rows"]}["Maximum stories"] == "needs_review"
+    assert made["summary"]["same"] == 10
+    assert made["summary"]["expected_differences"] == ["Minimum parking"]
+    # the stated 3 stands within the 1 to 5 the walls allow, as the architect's statement, and complies with R-1b's 3
+    assert {r["row"]: r["gordium"] for r in made["rows"]}["Maximum stories"] == "complies"
+    stories = next(i for i in got["result"]["view"]["items"] if i["id"] == "R-1b.stories")
+    assert "stated by the architect" in json.dumps(stories)
+    # never kinder without it: no count stated, the row needs review ("draw its floors or enter the count"), never a
+    # pass on the count the spreadsheet types
+    bare = _answer(site, {k: v for k, v in facts.items() if k != "stories"})
+    (tmp_path / "b.json").write_text(json.dumps(bare), encoding="utf-8")
+    rows = {r["row"]: r for r in compare.compare_106(compare.result_of(tmp_path / "b.json"))["rows"]}
+    assert rows["Maximum stories"]["gordium"] == "needs_review"
+    stories = next(i for i in bare["result"]["view"]["items"] if i["id"] == "R-1b.stories")
+    assert "enter the count" in json.dumps(stories)
     # the design read back off the model: the drawn lot's 6,570 sf, the house's 1,855
     rows = {r["row"]: r for r in made["rows"]}
     assert rows["Minimum lot size"]["gordium_measured"] == 6570.0

@@ -104,9 +104,11 @@ def check_request(marks: dict, model: str) -> dict:
     facts: dict = {}
     for entry in marks.get("project_information") or []:
         name, value = entry.get("mark"), entry.get("value")
-        if not isinstance(name, str) or not name.startswith("Gordium: ") or not isinstance(value, (bool, str)):
+        # a whole number for a whole-number mark (Gordium: Stories); the add-in sets each by the mark's own kind and
+        # refuses another (ProjectFacts.RequestValue), so a number is never sent as text nor text as a number
+        if not isinstance(name, str) or not name.startswith("Gordium: ") or not isinstance(value, (bool, str, int)):
             raise BadMarks(f"project information {entry!r}: needs a `mark` (a Gordium mark's name) and a `value` "
-                           "(true, false or text)")
+                           "(true, false, a whole number or text)")
         if not isinstance(entry.get("why"), str):
             raise BadMarks(f"project information {name}: needs a `why`")
         if name in facts:

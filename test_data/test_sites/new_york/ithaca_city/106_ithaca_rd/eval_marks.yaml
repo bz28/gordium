@@ -26,6 +26,8 @@ project_information:
      why: "spreadsheet_design_model_facts.yaml street_line [[0, 0], [73, 0]]: the lot's 73 ft side (Inputs!B3), in Revit's internal feet, a new project's shared coordinates"}
   - {mark: "Gordium: Ground from", value: Spot grades,
      why: "spreadsheet_design_model_facts.yaml ground_is_flat, grade_elevation 0: drawn as four spot grades at 0 (revit_build_data.json spot_grades), which the Revit reader reads only when this says Spot grades"}
+  - {mark: "Gordium: Stories", value: 3,
+     why: "EVAL ASSUMPTION standing in for the architect's count: the spreadsheet's Inputs!B13 = 3 (spreadsheet_design.yaml measurements.stories; spreadsheet_design_model_facts.yaml lot_facts stories 3, the same design's Rhino facts). The box is drawn as four 35 ft walls and a roof slab with no floors, so the drawing allows 1 to 5 stories (7 ft a story, R305.1) and the count is the architect's to state (§325-3B STORY); 3 is within 1 to 5, so it stands, and the row says 'stated by the architect'. Added 2026-11-22 with the Stories mark"}
 
 # Which compass side each of the spreadsheet's side yards is: the street on the lot's south edge (y = 0), the house
 # 10 ft from the left boundary (Inputs!B8) at x = 0, as make_spreadsheet_model.py draws it: seen from the street, left is
@@ -48,17 +50,15 @@ measures:
 # Where Gordium in Revit can't give the architects' answer, and why: each worked out from the code, with the words its
 # reason must hold (`reason_has`): a row is "expected" only when Gordium's verdict AND its reason are these, so a
 # different mechanism giving the same verdict is UNEXPLAINED (review round 3: the first Revit run's stories row was
-# the roof slab read as a raised part, not the reason written here).
+# the roof slab read as a raised part, not the reason written here). Maximum stories was one until 2026-11-22 (needs
+# review: "could hold up to 5 stories", "draw its floors or enter the count", nothing stating the count); with the
+# Gordium: Stories mark above (3, the spreadsheet's Inputs!B13), the count stands within the 1 to 5 the walls allow
+# and the row complies with R-1b's 3 (R-1b.stories: stories <= 3), the architects' PASS.
 expected_differences:
-  - row: Maximum stories
-    gordium: needs_review
-    reason_has: ["could hold up to 5 stories", "draw its floors or enter the count"]
-    why: "the drawing allows 1 to 5 stories and nothing states the count: the four 35 ft walls (Inputs!B12) could hold up to 5 at 7 ft a story (R305.1), and every building has at least one (§325-3B STORY). The roof, a slab resting in the walls, is the roof of the STORY definition, not another story (measure._slabs_within). Revit's Project Information has no Stories mark (ProjectFacts sends zone, use, lot surveyed, corner lot, ground and street only), so the spreadsheet's 3 (Inputs!B13) isn't sent; a count stated would stand within 1 to 5"
-    source: "packages/model_measurement/model_measurement/places/ithaca_city/measure.py _stories_whole ('draw its floors or enter the count'), _slabs_within; apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs ProjectFacts.Read; docs/revit/revit_reading_design.md section 7, 'Stories of a building drawn as parts'"
   - row: Minimum parking
     gordium: not_checked
     reason_has: ["Needs bedrooms and parking spaces"]
-    why: "Revit sends no parking spaces or bedrooms: Project Information has no mark for either, so the row 'Needs bedrooms and parking spaces, which the model doesn't show' (the spreadsheet's 1 space and 3 bedrooms, Inputs!B15, B14)"
+    why: "Revit sends no parking spaces or bedrooms: Project Information has no mark for either (it has one for the stories, Gordium: Stories, since 2026-11-22), so the row 'Needs bedrooms and parking spaces, which the model doesn't show' (the spreadsheet's 1 space and 3 bedrooms, Inputs!B15, B14)"
     source: "apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs ProjectFacts.Read; places/ithaca_city/measure.py STATED"
 
 # Rows where Gordium and the architects agree but not for the same reason (docs/discrepancies_with_architects.md).
