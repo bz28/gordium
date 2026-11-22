@@ -420,6 +420,15 @@ def test_every_law_row_in_review_is_on_one_card():
     ({"id": "egress.general.ibc_308_5", "law_short": "Egress", "reason": None}, "decide"),
     ({"id": "egress.not_checked_yet", "law_short": "Egress", "reason": "x"}, "measure_by_hand"),
     ({"id": "egress.has_none.stair", "law_short": "Egress", "reason": "Confirm: no stairs"}, "decide"),
+    # review round 2: classed by the row's id, never by its words ("is marked as an escape opening")
+    ({"id": "egress.skipped#1", "law_short": "Egress", "reason": "Window 5 is marked as an escape opening but isn't "
+      "checked: no sill height. Check it by hand"}, "measure_by_hand"),
+    ({"id": "egress.nothing_applied", "law_short": "Egress", "reason": "None of the rules applied: check it by hand"},
+     "measure_by_hand"),
+    ({"id": "egress.rules#maine/maine_state", "law_short": "Egress", "law_key": "maine/maine_state",
+      "reason": "The rules don't pass the rule checks"}, "measure_by_hand"),
+    ({"id": "egress.interior#3", "law_short": "Egress", "reason": "The interior drawing: door D2 is marked twice"},
+     "fix_model"),
 ])
 def test_a_laws_own_row_has_a_cause_by_what_it_is(item, kind):
     from design_checker import egress
