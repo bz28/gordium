@@ -386,9 +386,11 @@ never say a row differently.
   (the worker's tier 2, in its order), *check by hand or not checked* (the worker's tier 3, `<law>:by_hand`, and
   zoning's not checked), then *complies* / *not applicable* (titled by what it holds, folded). Only that last place
   is ever folded, and never while a filter or a search is on (a match is never hidden). Within a place a run of
-  rows of one worker line has that line's title over it (a line of one row is that row), but only in the place the
-  worker's tier puts the line and only when all its rows are there: a row the add-in reads more cautiously than its
-  line moves to its own place under no line's words. The list's keys act only on a row (Space on the *Details*
+  rows of one worker line or group always has its own sub-heading, so no run reads as more of the one before: the
+  line's own title (which may count its rows) only in the place the worker's tier puts the line and only when all
+  its rows are there; otherwise a name that claims no count or status (the part, "Window 2"; the law, "Egress";
+  "Zoning"; a law still waiting for rooms, its law's name). A row the add-in reads more cautiously than its line
+  moves to its own place under its part's name, never the line's words. The list's keys act only on a row (Space on the *Details*
   fold's header opens it, never zooms). **No row is ever cut.** A
   reason repeated per building is said once with its count ("(x12)").
 - **Filters and search** (`ResultList.Layout`): chips all / does not comply / needs review (with check by hand and

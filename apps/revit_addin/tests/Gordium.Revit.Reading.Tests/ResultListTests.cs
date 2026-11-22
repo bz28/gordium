@@ -263,11 +263,12 @@ public sealed class ResultListTests
                                      ("Window 3: 2 comply", [Row("e.w3a", Verdict.Complies), Row("e.w3b", Verdict.Complies)])));
         var layout = ResultList.Layout(ResultList.Place(model), ListFilter.All, null, null, false, opened: Everything);
         var subs = layout.OfType<ListSubheading>().Select(s => s.Title).ToList();
-        Assert.Equal(["Front door: 2 need review", "Window 3: 2 comply"], subs);
-        // the moved row is right after the review line's rows, under no line's words
+        // review round 2: the moved row and its line's other rows each under the part's name, which counts nothing
+        Assert.Equal(["Front door: 2 need review", "Window 2", "Window 2", "Window 3: 2 comply"], subs);
         var at = layout.ToList().FindIndex(e => e is ListRowEntry { Row.Row.Id: "e.w2c" });
-        Assert.IsType<ListRowEntry>(layout[at - 1]);
+        Assert.Equal("Window 2", Assert.IsType<ListSubheading>(layout[at - 1]).Title);         // never under "Front door"
         Assert.Equal(ListSection.Review, ((ListRowEntry)layout[at]).Row.Section);
+        EveryRunHeadedByItsOwnSource(layout);
         // a zoning group's title is never over a row it doesn't place (a review the worker grouped under "complies")
         var zoning = Model(Group("review", Row("z.h", Verdict.NeedsReview)), Group("complies", Row("z.c", Verdict.Complies), Row("z.r", Verdict.NeedsReview)));
         var z = ResultList.Layout(ResultList.Place(zoning), ListFilter.All, null, null, false, opened: Everything);
@@ -276,6 +277,55 @@ public sealed class ResultListTests
         Assert.Equal(ListSection.ByHand, ResultList.PlaceOf("egress:by_hand"));
         Assert.Equal(ListSection.ByHand, ResultList.PlaceOf("not_covered"));
         Assert.Null(ResultList.PlaceOf("egress"));                                   // a law waiting for rooms
+    }
+
+    /// <summary>For every row outside the failures, the nearest sub-heading above it in its place is its own source's
+    /// (a run never reads as more rows of the run before).</summary>
+    private static void EveryRunHeadedByItsOwnSource(IReadOnlyList<ListEntry> layout)
+    {
+        ListSubheading? sub = null;
+        foreach (var e in layout)
+            switch (e)
+            {
+                case ListHeading:
+                    sub = null;
+                    break;
+                case ListSubheading s:
+                    sub = s;
+                    break;
+                case ListRowEntry { Row.Section: not ListSection.Fails } r:
+                    Assert.True(sub?.Key == r.Row.SourceKey, $"{r.Row.Row.Id} is under {sub?.Title ?? "no sub-heading"}, not its own {r.Row.Source}");
+                    break;
+            }
+    }
+
+    [Fact]
+    public void Every_run_has_its_own_sub_heading_and_a_law_waiting_for_rooms_keeps_its_name()
+    {
+        // review round 2: each run headed by its own source, in the mixed model, filtered and searched too
+        var placed = ResultList.Place(Mixed());
+        foreach (var f in Enum.GetValues<ListFilter>())
+            foreach (var q in new[] { null, "window", "front", "handrail" })
+                EveryRunHeadedByItsOwnSource(ResultList.Layout(placed, f, q, null, false, opened: Everything));
+        // a line of one row is named by its part, never counted ("Not checked yet by Gordium", not "...: 86 code sections")
+        var subs = ResultList.Layout(placed, ListFilter.All, null, null, false, opened: Everything).OfType<ListSubheading>().Select(s => s.Title).ToList();
+        Assert.Contains("Not checked yet by Gordium", subs);
+        // a law still waiting for rooms (present.grouped's tail: key "egress", no tier) under its own law's name, not
+        // run on under zoning's group before it
+        var waiting = new ResultGroup("egress", "Egress (NY State Residential Code 2025)", 2, false, Tone.Review,
+                                      [Row("w.1", Verdict.NeedsReview, name: "Waiting 1"), Row("w.2", Verdict.NeedsReview, name: "Waiting 2")], []);
+        var model = Model(Group("review", Row("z.h", Verdict.NeedsReview)), waiting);
+        var layout = ResultList.Layout(ResultList.Place(model), ListFilter.All, null, null, false, opened: Everything);
+        EveryRunHeadedByItsOwnSource(layout);
+        Assert.Equal(["review", "Egress (NY State Residential Code 2025)"], layout.OfType<ListSubheading>().Select(s => s.Title));
+        // split across places it still says only its law's name
+        var split = Model(waiting with { Rows = [Row("w.1", Verdict.NeedsReview), Row("w.2", Verdict.NotChecked)] });
+        Assert.All(ResultList.Layout(ResultList.Place(split), ListFilter.All, null, null, false).OfType<ListSubheading>(),
+                   s => Assert.Equal("Egress (NY State Residential Code 2025)", s.Title));
+        // a law group moved out of its tier says its law alone; zoning's says "Zoning"
+        var lawRow = new ListRow(Row("x", Verdict.NeedsReview), ListSection.Review, PanelStatus.Review, "Egress · Complies", "g:egress:complies", 2, false, ListSection.Complies);
+        Assert.Equal("Egress", ResultList.RunTitle(lawRow, ListSection.Review, 1));
+        Assert.Equal("Zoning", ResultList.RunTitle(lawRow with { Source = "Complies", SourceKey = "g:complies" }, ListSection.Review, 1));
     }
 
     [Fact]

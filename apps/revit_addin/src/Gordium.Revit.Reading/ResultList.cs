@@ -222,10 +222,10 @@ public static class ResultList
 
     /// <summary>The list as shown: each place that has rows to show, its heading, then (unless folded) its rows, a
     /// run of rows of one worker line or group under that line's sub-heading in the review, check-by-hand and complies
-    /// places (a line of one row is that row, no sub-heading; the failures are one run, largest first). A line's or
-    /// group's words head its rows only in the place its worker tier puts it, and only when every one of its rows is
-    /// there: a row the add-in reads more cautiously than its line (moved to another place) is never shown under that
-    /// line's words, nor are the line's other rows (its words count a row no longer with them). With no filter and no
+    /// places (the failures are one run, largest first). Every run has its own sub-heading (<see cref="RunTitle"/>), so
+    /// no run reads as more rows of the one before: the worker's counted words only where they hold, else a name that
+    /// claims no count or status (a row the add-in reads more cautiously than its line is never shown under that
+    /// line's words, nor are the line's other rows: its words count a row no longer with them). With no filter and no
     /// search, the complies place is folded unless <paramref name="opened"/> holds it; no other place is ever folded
     /// (grouping.py: a line that is shown, never a fold); with a filter or a search, only the matching rows, nothing
     /// folded (a match is never hidden).</summary>
@@ -251,7 +251,6 @@ public static class ResultList
             if (folded)
                 continue;
             var here = all.GroupBy(p => p.SourceKey, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
-            var several = here.Count > 1;                                           // more than one line or group here
             var status = StatusOf(section, all, stale);
             string? run = null;
             foreach (var r in shown)
@@ -259,13 +258,32 @@ public static class ResultList
                 if (section != ListSection.Fails && r.SourceKey != run)
                 {
                     run = r.SourceKey;
-                    if (r.SourcePlace == section && here[r.SourceKey] == r.SourceRows && (r.FromLine ? r.SourceRows > 1 : several))
-                        entries.Add(new ListSubheading(r.SourceKey, r.Source, status));
+                    entries.Add(new ListSubheading(r.SourceKey, RunTitle(r, section, here[r.SourceKey]), status));
                 }
                 entries.Add(new ListRowEntry(r));
             }
         }
         return entries;
+    }
+
+    /// <summary>The words over a run of rows of one worker line or group in <paramref name="section"/> (every run has
+    /// its own, so a run never reads as more rows of the one before): the worker's title, which may count its rows
+    /// ("Front door: 2 need review"), only when all <paramref name="hereCount"/> of the source's rows are here and here
+    /// is the place its worker tier gives it (or the key names no tier, as a law still waiting for rooms: its title is
+    /// its law's name); a line of one row is named, not counted. Otherwise a name that claims no count or status: a
+    /// line's part ("Window 2" from "Window 2: 2 comply · 1 doesn't apply"), a law group's law ("Egress" from "Egress ·
+    /// Complies"), or "Zoning" for zoning's groups by status.</summary>
+    public static string RunTitle(ListRow r, ListSection section, int hereCount)
+    {
+        ArgumentNullException.ThrowIfNull(r);
+        var whole = hereCount == r.SourceRows && r.SourcePlace == section;          // a key with no tier: its name, below
+        if (whole && (!r.FromLine || r.SourceRows > 1))
+            return r.Source;
+        if (r.FromLine)
+            return r.Source.IndexOf(": ", StringComparison.Ordinal) is var c and > 0 ? r.Source[..c] : r.Source;
+        if (r.Source.IndexOf(" · ", StringComparison.Ordinal) is var d and > 0)
+            return r.Source[..d];
+        return r.SourcePlace is not null ? "Zoning" : r.Source;
     }
 
     /// <summary>Where Up (<paramref name="step"/> −1) or Down (+1) moves from entry <paramref name="from"/>: the
