@@ -133,12 +133,14 @@ public sealed class CauseCardsTests
     [Fact]
     public void A_mark_card_opens_properties_or_project_information_by_where_its_mark_is()
     {
-        var items = new JsonArray(Item("a"), Item("b"), Item("c"), Item("d"));
-        var r = Parse(Result(items, Group("x:review", ["a", "b", "c", "d"],
+        var items = new JsonArray(Item("a"), Item("b"), Item("c"), Item("d"), Item("e"), Item("f"));
+        var r = Parse(Result(items, Group("x:review", ["a", "b", "c", "d", "e", "f"],
             Card("mark:door:exit", "mark", "door D1: set its Gordium: Exit door mark", ["a"], ["uid-d1"]),
             Card("fact:stories", "mark", "stories: not stated for the project", ["b"]),
             Card("facts:accessory_dwelling_unit", "mark", "Enter whether an ADU is on the lot", ["c"]),
-            Card("facts:stories,zone", "mark", "the stories and the zone", ["d"]))));
+            Card("facts:stories,zone", "mark", "the stories and the zone", ["d"]),
+            Card("fact:use", "mark", "use: not stated for the project", ["e"]),
+            Card("mark:door:exit2", "mark", "door D2: set its Gordium: Exit door mark", ["f"]))));
         var cards = CauseCards.Read(r);
         var labels = new Dictionary<string, string> { ["uid-d1"] = "Door D1" };
         Assert.Equal([Marks.ExitDoor], CauseCards.MarksOf(cards[0]));                                  // not "Gordium: Exit" too
@@ -152,6 +154,12 @@ public sealed class CauseCardsTests
         Assert.Empty(CauseCards.MarksOf(cards[2]));
         Assert.Equal([Marks.Zone, Marks.Stories], CauseCards.MarksOf(cards[3]));
         Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(cards[3], labels));
+        // Gordium: Use is on Project Information and on Rooms: a project fact's is set on Project Information
+        Assert.Equal([Marks.Use], CauseCards.MarksOf(cards[4]));
+        Assert.Equal(CardAction.ProjectInformation, CauseCards.Action(cards[4], labels));
+        Assert.Equal("Set Gordium: Use on Project Information.", CauseCards.Note(cards[4], labels));
+        // an element's mark with no element to select: no button, never Project Information
+        Assert.Equal(CardAction.None, CauseCards.Action(cards[5], labels));
     }
 
     /// <summary>Only the answer's own: a card's row the answer doesn't have is left out, a card with none is left

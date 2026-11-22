@@ -152,8 +152,8 @@ public static class CauseCards
                 return shown ? CardAction.Show : CardAction.None;
             case CauseKind.Mark:
                 var marks = MarksOf(card);
-                if (marks.Count > 0 && marks.All(OnProjectInformationOnly))
-                    return CardAction.ProjectInformation;
+                if (marks.Count > 0 && (marks.All(OnProjectInformationOnly) || FactsFed(card)))
+                    return CardAction.ProjectInformation;      // a project fact's mark is on Project Information
                 if (!shown)
                     return CardAction.None;
                 return marks.Count > 0 ? CardAction.ShowAndProperties : CardAction.Show;
@@ -248,6 +248,11 @@ public static class CauseCards
     }
 
     private static bool OnProjectInformationOnly(MarkDefinition m) => m.Categories is [Marks.ProjectInformation];
+
+    /// <summary>Whether the card is a project fact's (<c>fact:</c>/<c>facts:</c>) whose every fact a mark feeds (as
+    /// <c>facts.use</c> by Gordium: Use, which is on Project Information and on Rooms): set on Project Information.</summary>
+    private static bool FactsFed(CauseCard card) =>
+        Facts(card.Key) is { Count: > 0 } facts && facts.All(f => Marks.All.Any(m => Fields(m).Contains("facts." + f)));
 
     /// <summary>The rooms a card names, from its rows' own causes of its key (<c>rooms[]</c>: id, name, why), each once,
     /// over all its rows (a joined card's rows may each name some).</summary>
