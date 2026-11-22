@@ -12,8 +12,9 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # How the tests are split, so they run side by side (they used to take an hour in one job):
-# - each OS runs the whole suite as 4 parts in 4 jobs at once (`pytest --shard K/4`, conftest.py: test number i is in
-#   part i mod 4 + 1), and each job runs its part on every CPU of its machine (pytest-xdist, `-n auto`);
+# - each OS runs the whole suite as 4 parts in 4 jobs at once (`pytest --shard K/4`, conftest.py parts_of: the
+#   slow tests in tests/test_durations.json go longest first to the part with the least time so far, every other
+#   test likewise at 0.2 s; every test in exactly one part), and each job runs its part on every CPU of its machine (pytest-xdist, `-n auto`);
 # - the generated-file checks run in their own job beside the tests, and first prove the 4 parts add up to the
 #   whole suite with no test left out or run twice (tests/check_shards.py);
 # - `check` and `windows (<python>)` keep their old names: each passes only if every part and the checks passed.

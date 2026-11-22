@@ -23,7 +23,8 @@ def pytest_addoption(parser):
     parser.addoption("--runslow", action="store_true", default=False,
                      help="also run full-size samples marked slow (the architect stress test)")
     parser.addoption("--shard", default=None, metavar="K/N",
-                     help="run only part K of N (1-based): every N-th collected test, starting at the K-th")
+                     help="run only part K of N (1-based), the parts balanced by time (tests/test_durations.json); "
+                          "every collected test in exactly one part")
 
 
 def pytest_configure(config):
