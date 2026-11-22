@@ -29,6 +29,9 @@ figures:
       from_room: STORAGE (11), its north-east corner (the sheet's start)
       to_the_sheets_exit_with_12_in: 118.762
       to_the_sheets_exit_no_clearance: 116.034
+      to_no_clearance:
+      - 189.533
+      - 42.824
       to_the_nearest_exit_with_12_in: 110.141
       nearest_exit: 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
       story:
@@ -58,22 +61,33 @@ figures:
     agreement:
       tolerance: 'Gordium''s no-clearance figure, from the sheet''s start to the sheet''s
         exit, no longer than the sheet''s line as drawn plus 2 percent of it or 2
-        ft, whichever is larger, no shorter than the straight line between that line''s
-        ends less the same, and every rule of this figure giving the sheet''s verdict
+        ft, whichever is larger, no shorter than the straight line from its own start
+        to its own end, and every rule of this figure giving the sheet''s verdict
         (changed 2026-11-21: the sheet''s line is orthogonal, never shorter than the
-        natural path IBC 1016.1 and NFPA 7.6.1 measure, itself never shorter than
-        the straight line)'
+        natural path IBC 1016.1 and NFPA 7.6.1 measure); where it ends beside where
+        the sheet''s line ends, its own item'
       sheet_line_as_drawn: 130.325
-      sheet_line_ends_straight: 65.921
+      own_ends_straight: 65.568
       gordium: 116.034
       longer_than_drawn_by: -14.291
       allowed: 2.607
       no_longer: true
-      no_shorter_than_straight: true
+      no_shorter_than_own_straight: true
       verdicts_same:
         general.ibc_1016_1_travel_distance: false
         general.nfpa_16_2_6_2_point_in_room_to_exit: false
       within_tolerance: false
+      end:
+        what: the exit's door centre
+        sheet:
+        - 189.54
+        - 42.277
+        gordium:
+        - 189.533
+        - 42.824
+        apart: 0.547
+        allowed: 2.607
+        within_tolerance: true
       before_2026_11_21:
         tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
           figure
@@ -104,6 +118,9 @@ figures:
       exits:
       - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
       - 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bcac
+      split_no_clearance:
+      - 116.921
+      - 51.3
       story:
         not_measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
           (a path 12 in clear of every corner, through door centres and rooms it may
@@ -136,20 +153,32 @@ figures:
     agreement:
       tolerance: Gordium's no-clearance figure from the sheet's start no longer than
         the sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger,
-        no shorter than the straight line between that line's ends less the same,
+        no shorter than the straight line from its start to where its two routes part,
         and every rule of this figure giving the sheet's verdict (changed 2026-11-21,
-        as for the travel distance)
+        as for the travel distance); where its routes part beside where the sheet's
+        line ends, its own item
       sheet_line_as_drawn: 48.404
-      sheet_line_ends_straight: 41.073
+      own_ends_straight: 39.802
       gordium: 41.066
       longer_than_drawn_by: -7.338
       allowed: 2.0
       no_longer: true
-      no_shorter_than_straight: true
+      no_shorter_than_own_straight: true
       verdicts_same:
         general.ibc_1014_3_common_path: false
         general.nfpa_16_2_5_3_1_common_path_sprinklered: false
       within_tolerance: false
+      end:
+        what: where Gordium's two routes part
+        sheet:
+        - 117.42
+        - 49.563
+        gordium:
+        - 116.921
+        - 51.3
+        apart: 1.807
+        allowed: 2.0
+        within_tolerance: true
       before_2026_11_21:
         tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
           figure

@@ -480,8 +480,8 @@ unknown space, commit `67dd698f`). Measured on that model:
 
 | Sheet figure | Limit | Agreement asked |
 |---|---|---|
-| Travel distance 130'-8" | 200' | Gordium's no-clearance figure from the sheet's start to the sheet's exit no longer than the sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger, and no shorter than the straight line between that line's ends less the same, and the verdicts the same (changed 2026-11-21, below; the old test, within 2 percent or 2 ft of the stated figure, still reported) |
-| Common path 48'-6" | 75' | the same test (no longer than the line as drawn plus 2 percent or 2 ft, no shorter than the straight line between its ends less the same, verdicts the same; the old one still reported) |
+| Travel distance 130'-8" | 200' | Gordium's no-clearance figure from the sheet's start to the sheet's exit no longer than the sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger, and no shorter than the straight line from Gordium's own start to its own end (the exit's door centre), and the verdicts the same; where it ends beside where the sheet's line ends, its own item within the same tolerance (changed 2026-11-21, below; the old test, within 2 percent or 2 ft of the stated figure, still reported) |
+| Common path 48'-6" | 75' | the same test (no longer than the line as drawn plus 2 percent or 2 ft, no shorter than the straight line from Gordium's start to where its two routes part, verdicts the same; that split point beside the sheet line's end, its own item; the old one still reported) |
 | Dead end 21'-6", least width 10' | 2.5 x 10' = 25' | length within 1 ft, width within 1 in |
 | Remoteness 183'-10" | 70'-1" (diagonal 210'-2 1/2" / 3) | within 1 ft of Gordium's nearest-edge figure or of its door-centre figure (both reported: the sheet may measure either; they differ by up to half the two doors' widths); diagonal within 6 in |
 | Storage 1,428 sf | 1,650 sf (10 percent of the story) | the inside-walls figures within 1 percent; story area against 16,539 sf (the sheet's 16,509 is a recorded error); the rule complies under all four readings (decision 8), or the readings it fails under are a finding |
@@ -505,8 +505,10 @@ own line: Gordium's figure, from the sheet's start to the sheet's exit, must be 
 plus the tolerance (a longer figure is a finding: a farther point or a longer path than the architect found), and
 each of its rules' verdicts must be the sheet's. One-sided is not unbounded below (added 2026-11-21, review round 1): a
 route measured too short is the false-pass direction, so the figure must also be no shorter than the straight line
-between the sheet line's own first and last points less the tolerance, the floor no path between those points can go
-under (`no_shorter_than_straight`). The old two-sided comparison stays in the eval file beside it
+from Gordium's own start to its own end (the exit's door centre; for the common path, the point where its two routes
+part), which no route between those two points can beat (`no_shorter_than_own_straight`; corrected in review round 2:
+the sheet line's ends are not Gordium's two points). Where Gordium's figure ends is set beside where the sheet's line
+ends as an item of its own (`agreement.end`), within the same tolerance. The old two-sided comparison stays in the eval file beside it
 (`agreement.before_2026_11_21`), and a miss under it is still logged, so nothing it found is hidden. **A difference outside tolerance is
 investigated, never tuned away:** Gordium draws each route back on the model, and if it found a farther point or a
 longer dead end than the sheet shows, that is recorded as a finding on the sheet (as its story area is), not a fix

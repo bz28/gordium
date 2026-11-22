@@ -44,13 +44,16 @@ def test_gordiums_entries_come_from_running_the_code(tmp_path):
     drawn = travel["sheet_line_as_drawn"]
     rules = ("general.ibc_1016_1_travel_distance", "general.nfpa_16_2_6_2_point_in_room_to_exit")
     assert travel["agreement"]["no_longer"] == (ours <= drawn + max(0.02 * drawn, 2.0))
-    ends = travel["sheet_line_in_model"]
-    assert travel["agreement"]["sheet_line_ends_straight"] == round(math.dist(ends[0], ends[-1]), 3)
-    assert travel["agreement"]["no_shorter_than_straight"] == (
-        ours >= travel["agreement"]["sheet_line_ends_straight"] - max(0.02 * drawn, 2.0) - 1e-9)
+    own = round(math.dist(travel["gordium"]["from"], travel["gordium"]["to_no_clearance"]), 3)
+    assert travel["agreement"]["own_ends_straight"] == own
+    assert travel["agreement"]["no_shorter_than_own_straight"] == (ours >= own - 1e-6)
+    assert travel["agreement"]["end"]["sheet"] == travel["sheet_line_in_model"][-1]
+    common = got["figures"]["common_path"]
+    assert common["agreement"]["own_ends_straight"] == round(
+        math.dist(common["gordium"]["from"], common["gordium"]["split_no_clearance"]), 3)
     assert travel["agreement"]["verdicts_same"] == {r: got["verdicts"]["rules"][r]["same"] for r in rules}
     assert travel["agreement"]["within_tolerance"] == (travel["agreement"]["no_longer"]
-                                                       and travel["agreement"]["no_shorter_than_straight"]
+                                                       and travel["agreement"]["no_shorter_than_own_straight"]
                                                        and all(travel["agreement"]["verdicts_same"].values()))
     for name in ("travel_distance", "common_path", "dead_end", "remoteness", "diagonal"):
         assert "within_tolerance" in got["figures"][name]["agreement"] and got["figures"][name]["agreement"]["tolerance"]
@@ -82,7 +85,7 @@ def test_a_figure_longer_than_the_sheets_line_or_a_verdict_apart_never_agrees():
     test would call a figure shorter than the orthogonal line a miss."""
     verdicts = {"a": {"same": True}, "b": {"same": True}, "c": {"same": False}}
     ok = make._no_longer(130.325, 116.034, verdicts, ["a", "b"], "w", 65.92)
-    assert ok["within_tolerance"] is True and ok["no_longer"] and ok["no_shorter_than_straight"]
+    assert ok["within_tolerance"] is True and ok["no_longer"] and ok["no_shorter_than_own_straight"]
     assert make._no_longer(130.325, 116.034, verdicts, ["a", "c"], "w", 65.92)["within_tolerance"] is False
     assert make._no_longer(100.0, 102.0, verdicts, ["a"], "w", 50.0)["within_tolerance"] is True        # 2 ft allowed
     assert make._no_longer(100.0, 102.01, verdicts, ["a"], "w", 50.0)["within_tolerance"] is False
@@ -92,14 +95,29 @@ def test_a_figure_longer_than_the_sheets_line_or_a_verdict_apart_never_agrees():
     assert make._verdict(130.667, 116.034, 2.613, "w")["within_tolerance"] is False              # the old test
 
 
-def test_a_figure_shorter_than_the_straight_line_between_the_sheets_ends_never_agrees():
-    """Review round 1: a route measured too short (the false-pass direction) is never agreement. The straight line
-    between the sheet line's ends, less the tolerance, is a floor no route can go under."""
+def test_a_figure_under_its_own_start_to_end_straight_line_never_agrees():
+    """Review rounds 1 and 2: a route measured too short (the false-pass direction) never agrees. The floor is the
+    straight line from Gordium's own start to its own end (no route between them can beat it), not the sheet
+    line's ends, which needn't be the same two points."""
     verdicts = {"a": {"same": True}}
     got = make._no_longer(130.325, 10.0, verdicts, ["a"], "w", 65.92)
-    assert got["no_longer"] is True and got["no_shorter_than_straight"] is False and got["within_tolerance"] is False
-    assert make._no_longer(48.404, 39.07, verdicts, ["a"], "w", 41.07)["within_tolerance"] is True     # 41.07 - 2.0
-    assert make._no_longer(48.404, 39.06, verdicts, ["a"], "w", 41.07)["within_tolerance"] is False
+    assert got["no_longer"] is True and got["no_shorter_than_own_straight"] is False
+    assert got["within_tolerance"] is False
+    assert make._no_longer(48.404, 41.07, verdicts, ["a"], "w", 41.07)["within_tolerance"] is True
+    assert make._no_longer(48.404, 41.06, verdicts, ["a"], "w", 41.07)["within_tolerance"] is False   # no tolerance
+    end = make._end([117.42, 49.563], [117.0, 49.0], 2.0, "where Gordium's two routes part")
+    assert end["within_tolerance"] is True and end["apart"] == 0.702
+    assert make._end([117.42, 49.563], [117.42, 52.0], 2.0, "x")["within_tolerance"] is False
+
+
+def test_a_routes_point_at_a_length_is_on_its_pieces():
+    # by hand: a line (0, 0) to (12, 0) then a quarter arc of radius 12 about (12, 12) from -90 degrees, sweeping +90:
+    # 6 in along is (6, 0); 12 + 12 * pi / 4 along is the arc's middle, (12 + 12 sin 45, 12 - 12 cos 45)
+    pieces = [("line", (0.0, 0.0), (12.0, 0.0)), ("arc", (12.0, 12.0), 12.0, -math.pi / 2, math.pi / 2)]
+    assert make._point_at(pieces, 6.0) == pytest.approx((6.0, 0.0))
+    assert make._point_at(pieces, 12 + 3 * math.pi) == pytest.approx((12 + 12 * math.sin(math.pi / 4),
+                                                                      12 - 12 * math.cos(math.pi / 4)))
+    assert make._point_at(pieces, 12 + 6 * math.pi) == pytest.approx((24.0, 12.0))
 
 
 @pytest.mark.skipif(not os.environ.get("GORDIUM_CO_DESCRIPTION"),
