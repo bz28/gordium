@@ -28,6 +28,7 @@ WHAT TO DO:
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 MEASURED VS LIMIT:
   net clear height: 20 in (measured) | limit ≥ 24 in
+HOW FAR: 4 in short
 THE LAW'S WORDS:
   "The minimum net clear opening height dimension shall be 24 inches (610 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
@@ -40,6 +41,7 @@ WHAT TO DO:
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
 MEASURED VS LIMIT:
   sill height: 46 in (measured) | limit ≤ 44 in
+HOW FAR: 2 in over
 THE LAW'S WORDS:
   "Emergency escape and rescue openings shall have the bottom of the clear opening not greater than 44 inches (1118 mm) above the floor." (R319.2.3, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
@@ -1721,7 +1723,7 @@ THE LAW'S WORDS:
 [162 of 167] complies · Lot area · §325-8, District Regulations Chart, R-1b, Lot area column
 MEASURED VS LIMIT:
   figure: 7,200 sf (measured) | limit ≥ 6,000 sf
-HOW FAR: +1,200 sf
+HOW FAR: 1,200 sf to spare
 THE LAW'S WORDS:
   "Minimum Lot Size · One-family dwelling, detached · R-1B: 6,000 sf" (City of Ithaca Zoning Charts (April 2026), p.3, line 10)
   OPEN THE LAW: §325-8, District Regulations Chart, R-1b, Lot area column <https://www.cityofithacany.gov/DocumentCenter/View/20523/COI-Zoning-Charts_0426#page=3&search=%22One-family%20dwelling%2C%20detached%2010%2C000%20sf%22>
@@ -1733,7 +1735,7 @@ ELEMENTS:
 WHY: Gordium's reading · confirm with the City zoning office: Coverage is the outline, seen from above, of everything above ground: walls, cantilevered upper floors, roofed porches, decks, balconies projecting more than 2 ft, ramps and landings
 MEASURED VS LIMIT:
   figure: 20.9% (measured) | limit ≤ 25%
-HOW FAR: +4.16%
+HOW FAR: 4.16% to spare
 THE LAW'S WORDS:
   "Maximum lot coverage by buildings · Percent of lot area · R-1B: 25%" (City of Ithaca Zoning Charts (April 2026), p.3, line 34)
   "On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings above ground." (City of Ithaca Code, Chapter 325 Zoning (full text), §325-8A, p.25, lines 5–7)
@@ -1749,6 +1751,7 @@ ELEMENTS:
 
 [164 of 167] complies · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening minimum net clear height (R319.2.2) · R319.2.2
 WHY: Escape opening minimum net clear height (R319.2.2): complies
+HOW FAR: 12 in to spare
 THE LAW'S WORDS:
   "The minimum net clear opening height dimension shall be 24 inches (610 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
@@ -1756,6 +1759,7 @@ ELEMENTS:
 
 [165 of 167] complies · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening minimum net clear width (R319.2.2) · R319.2.2
 WHY: Escape opening minimum net clear width (R319.2.2): complies
+HOW FAR: 8.5 in to spare
 THE LAW'S WORDS:
   "The minimum net clear opening width dimension shall be 20 inches (508 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
@@ -1763,6 +1767,7 @@ ELEMENTS:
 
 [166 of 167] complies · Basement bedroom (1) › Gordium test window: 30 x 36 (Window 1) · Escape opening bottom of clear opening max height (R319.2.3) · R319.2.3
 WHY: Escape opening bottom of clear opening max height (R319.2.3): complies
+HOW FAR: 8 in to spare
 THE LAW'S WORDS:
   "Emergency escape and rescue openings shall have the bottom of the clear opening not greater than 44 inches (1118 mm) above the floor." (R319.2.3, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
@@ -1770,6 +1775,7 @@ ELEMENTS:
 
 [167 of 167] complies · Basement bedroom (1) › Gordium test window: 24 x 20 (Window 2) · Escape opening minimum net clear width (R319.2.2) · R319.2.2
 WHY: Escape opening minimum net clear width (R319.2.2): complies
+HOW FAR: 4 in to spare
 THE LAW'S WORDS:
   "The minimum net clear opening width dimension shall be 20 inches (508 mm)." (R319.2.2, 2025 Residential Code of New York State (RCNYS), PDF p.102)
 ELEMENTS:
