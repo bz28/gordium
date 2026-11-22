@@ -274,7 +274,6 @@ def test_one_exit_along_the_corridors_leaves_a_dead_end_unbounded():
 
 @pytest.mark.parametrize("poly, why", [
     ([(0, 0), (60, 0), (60, 8), (10, 8), (0, 4)], "right angles"),                     # a slanted wall
-    ([(0, 0), (60, 0), (60, 10), (30, 10), (30, 8), (0, 8)], "side by side"),            # a widening
     ([(0, 0), (8, 0), (8, 8), (0, 8)], "runs neither way"),                              # a square
 ])
 def test_a_corridor_not_made_of_straight_legs_at_right_angles_needs_review(poly, why):
@@ -401,3 +400,226 @@ def test_a_deep_mouth_with_a_short_slot_still_takes_the_slots_width():
     d = end_wall([(22.5, 25.5, 8 / 12), (23.75, 24.25, 11 / 12)])
     length, width = only(measure(d)).longest(WITHOUT)
     assert ft(length) == pytest.approx(16 + 11 / 12 + 4, abs=1e-9) and ft(width) == pytest.approx(0.5, abs=1e-9)
+
+
+# --- test 23: corridors that jog, widen or step (decision 6, amended 2026-11-22) -----------------------------------
+
+def corridor_with(top, width=8.0):
+    """A corridor 0 to 60 by 0 to `width`, an exit at each end (centre line y = width / 2), its north wall replaced
+    between x 15 and 45 by `top` (the points from (45, width) back to (15, width), west-going)."""
+    poly = [(0, 0), (60, 0), (60, width), *top, (0, width)]
+    return description([room("c", poly)], [door("a", (-0.25, width / 2), (0, 1), ("c", "outside"), exit_id="A"),
+                                           door("b", (60.25, width / 2), (0, 1), ("c", "outside"), exit_id="B")])
+
+
+def test_23a_an_l_runs_along_both_centre_lines():
+    # a stem x 20 to 28 to y 26 turning east into an arm y 18 to 26 closed at x 40: from (40, 22), 16 + 18 = 34 ft
+    # (|40 - 24| + |22 - 4| = 34); least width 8
+    c = only(measure(corridor_with([(28, 8), (28, 18), (40, 18), (40, 26), (20, 26), (20, 8)])))
+    (d,) = c.dead_ends
+    assert [ft(v) for v in d.start] == [40.0, 22.0]
+    assert [ft(v) for v in c.longest(WITHOUT)] == [34.0, 8.0]
+    assert ft(c.width) == 8.0                                         # straight legs at right angles: measured
+
+
+def test_23b_a_jog_steps_across_and_its_throat_is_its_least_width():
+    # a stem x 20 to 28 to y 20, jogging into x 23 to 31 closed at y 32: from (27, 32), 12 + 3 + 16 = 31 ft
+    # (|27 - 24| + |32 - 4|); least width 5 ft, the throat between the jog's corners (23, 20) and (28, 20)
+    c = measure(corridor_with([(28, 8), (28, 20), (31, 20), (31, 32), (23, 32), (23, 20), (20, 20), (20, 8)]))["c"]
+    assert c.stop is None
+    (d,) = c.dead_ends
+    assert [ft(v) for v in d.start] == [27.0, 32.0]
+    assert ft(d.length[WITHOUT]) == 31.0 and ft(d.width[WITHOUT]) == pytest.approx(5.0, abs=1e-9)
+    assert c.width is None and "step, widen or jog" in c.width_stop          # which stretches give it: not worked out
+
+
+def test_23c_a_widened_crossing_corridor_ends_the_dead_end_at_its_farther_centre_line():
+    # the north wall stepped back to y 12 over x 15 to 45, a branch x 26 to 34 from there to y 30: from (30, 30), to
+    # the corridor's own centre line y 4 (point C, the farther of its two): 26 ft; the widened part's y 6: 24; the
+    # near edge: 18
+    c = measure(corridor_with([(45, 8), (45, 12), (34, 12), (34, 30), (26, 30), (26, 12), (15, 12), (15, 8)]))["c"]
+    assert c.stop is None
+    (d,) = c.dead_ends
+    assert [ft(v) for v in d.start] == [30.0, 30.0]
+    assert ft(d.length[WITHOUT]) == 26.0 and ft(d.width[WITHOUT]) == 8.0
+    assert [ft(v) for v in d.line[WITHOUT][-1]] == [30.0, 4.0]
+
+
+def test_23d_a_t_ends_at_the_crossing_corridors_centre_line_never_its_near_edge():
+    # the corridor 10 ft wide (centre line y 5), a branch x 27 to 33 to y 30: 30 - 5 = 25 ft (20 + 5); least width 6.
+    # Over 20 and not under 2.5 x 6 = 15: it fails 1018.4, where the near edge (20) would comply
+    c = only(measure(corridor_with([(33, 10), (33, 30), (27, 30), (27, 10)], width=10.0)))
+    assert [ft(v) for v in c.longest(WITHOUT)] == [25.0, 6.0]
+    assert ft(c.width) == 6.0
+
+
+def test_23e_a_wall_stepping_under_12_in_moves_no_centre_line():
+    # test 3's branch with its east wall stepped out 4 in from y 14 to its end: one centre line, x 24 1/6, midway
+    # between the outermost walls: 24 - 4 = 20 ft, as with no step; least width 8 (at y 8 to 14)
+    d = branch()
+    d["rooms"][0]["floor"] = [list(p) for p in [(0, 0), (60, 0), (60, 8), (28, 8), (28, 14), (28 + 1 / 3, 14),
+                                                (28 + 1 / 3, 24), (20, 24), (20, 8), (0, 8)]]
+    c = measure(d)["c"]
+    assert c.stop is None
+    (de,) = c.dead_ends
+    assert ft(de.start[0]) == pytest.approx(24 + 1 / 6, abs=1e-9) and ft(de.start[1]) == 24.0
+    assert ft(de.length[WITHOUT]) == 20.0 and ft(de.width[WITHOUT]) == pytest.approx(8.0, abs=1e-9)
+    assert c.width is None and "step, widen or jog" in c.width_stop
+
+
+def test_23e_walls_wandering_12_in_or_more_in_all_need_review():
+    # two steps of 8 in each (x 28 2/3 from y 14, 29 1/3 from y 19): 16 in in all
+    d = branch()
+    d["rooms"][0]["floor"] = [list(p) for p in [(0, 0), (60, 0), (60, 8), (28, 8), (28, 14), (28 + 2 / 3, 14),
+                                                (28 + 2 / 3, 19), (29 + 1 / 3, 19), (29 + 1 / 3, 24), (20, 24),
+                                                (20, 8), (0, 8)]]
+    c = measure(d)["c"]
+    assert c.dead_ends == [] and "12 in or more" in c.stop and c.stop == c.width_stop
+
+
+def test_23f_an_island_needs_review_a_column_doesnt():
+    # a corridor 0 to 12 wide round an island 20 by 4 ft (x 20 to 40, y 4 to 8): two passages, not followed
+    d = corridor_with([], width=12.0)
+    d["rooms"][0]["holes"] = [[list(p) for p in rect(20, 4, 40, 8)]]
+    c = measure(d)["c"]
+    assert c.dead_ends == [] and "island" in c.stop and c.stop == c.width_stop
+    d["rooms"][0]["holes"] = [[list(p) for p in rect(29.5, 5.5, 30.5, 6.5)]]      # a column 1 ft square
+    c = measure(d)["c"]
+    assert c.stop is None and c.dead_ends == [] and ft(c.width) == 11.0        # it narrows the width: 12 - 1
+
+
+# --- test 24: one corridor, one centre line at each place (review round 1, 2026-11-22) -----------------------------
+
+def test_24a_a_narrower_stretch_never_runs_its_centre_line_inside_a_wider_one():
+    # a branch x 20 to 32 from the corridor's wall (y 8) to y 30, narrowing to x 20 to 26 up to y 46: from (23, 46),
+    # 16 down to the narrowing, a step 3 ft east to the wide stretch's centre line x 26, 26 down to y 4: 45 ft
+    # (|23 - 26| + |46 - 4|). The narrow stretch's line run on inside the wide one made a loop of two parallel lines,
+    # whose two sides were read as two ways: 16 ft
+    c = measure(corridor_with([(32, 8), (32, 30), (26, 30), (26, 46), (20, 46), (20, 8)]))["c"]
+    assert c.stop is None
+    (d,) = c.dead_ends
+    assert [ft(v) for v in d.start] == [23.0, 46.0] and ft(d.length[WITHOUT]) == 45.0
+
+
+def test_24b_a_corridor_narrowing_toward_its_closed_end_is_one_line_past_an_unrelated_branch():
+    # 12 ft wide for x 0 to 40, 6 ft for x 40 to 60 (closed at x 60), a branch x 10 to 18 to y 30; exit A in the west
+    # wall (centre y 6), exit B in the south wall at x 30. From (60, 3): 20 west to the narrowing, a step 3 ft to the
+    # wide stretch's centre line y 6, 10 on to exit B's door: 33 ft, the branch or no branch (it was 20.0 with it)
+    poly = [(0, 0), (60, 0), (60, 6), (40, 6), (40, 12), (18, 12), (18, 30), (10, 30), (10, 12), (0, 12)]
+    doors = [door("a", (-0.25, 6), (0, 1), ("c", "outside"), exit_id="A"),
+             door("b", (30, -0.25), (1, 0), ("c", "outside"), exit_id="B")]
+    for shape in (poly, [(0, 0), (60, 0), (60, 6), (40, 6), (40, 12), (0, 12)]):
+        c = measure(description([room("c", shape)], doors))["c"]
+        assert c.stop is None
+        east = [d for d in c.dead_ends if ft(d.start[0]) == 60.0]
+        assert [ft(d.length[WITHOUT]) for d in east] == [33.0]
+        assert [ft(v) for v in east[0].start] == [60.0, 3.0]
+
+
+# --- test 25: a step only between two centre lines that run there (review round 2, 2026-11-22) --------------------
+
+def test_25a_a_staircase_branch_never_ends_its_dead_end_at_a_step_that_lands_on_no_line():
+    # a corridor 0 to 60 by 0 to 6, exits at both ends (centre line y 3); a branch whose walls step one side at a time:
+    # x 25 to 40 from y 6 to 10, 25 to 38 to y 16, 24 to 38 to y 30, 23 to 37 to y 40, closed. From (30, 40): 10 down
+    # to y 30, a step 1 east, 14 down to y 16, a step 0.5, 6 down to y 10, a step 1, 7 down to the corridor's centre
+    # line: 39.5 ft (|30 - 32.5| + |40 - 3| = 39.5). A step drawn at the end of a stretch where a centre line no
+    # longer runs ended on no line, made a triangle of no area with others there, and the dead end stopped at 10 ft
+    poly = [[60, 0], [0, 0], [0, 6], [25, 6], [25, 16], [24, 16], [24, 30], [23, 30], [23, 40], [37, 40], [37, 30],
+            [38, 30], [38, 10], [40, 10], [40, 6], [60, 6]]
+    c = measure(description([room("c", poly)], [door("a", (-0.25, 3), (0, 1), ("c", "outside"), exit_id="A"),
+                                                door("b", (60.25, 3), (0, 1), ("c", "outside"), exit_id="B")]))["c"]
+    assert c.stop is None
+    (d,) = c.dead_ends
+    assert [ft(v) for v in d.start] == [30.0, 40.0] and ft(d.length[WITHOUT]) == 39.5
+
+
+def test_25b_anything_unexpected_is_the_corridors_needs_review_never_a_crash(monkeypatch):
+    def boom(*a, **k):
+        raise KeyError(None)
+    monkeypatch.setattr(dead_ends, "_dead_ends", boom)
+    got = measure(branch())["c"]
+    assert got.dead_ends == [] and "failed" in got.stop and "KeyError" in got.stop and got.stop == got.width_stop
+    # a Stop raised inside is the corridor's reason too, never out of the story (review round 3)
+    monkeypatch.setattr(dead_ends, "_dead_ends", lambda *a, **k: (_ for _ in ()).throw(
+        dead_ends.Stop("corridor_not_legs", why="x")))
+    got = measure(branch())["c"]
+    assert got.dead_ends == [] and "(x)" in got.stop and got.stop == got.width_stop
+
+
+def test_25c_the_fuzzs_seed_14_is_measured_never_a_crash():
+    # a corridor with one-sided steps in both walls, a staircase branch north (x 3 to 13, widening to 3 to 14.5 and
+    # 6 to 14.5) and a short one (x 44.5 to 50.5), exits in its east end and its south wall: before the fix a node
+    # joined by a step alone looked like a closed end and the story failed with KeyError(None). Now each dead end is
+    # measured and none is shorter than the brute-force bound (test_routes_dead_end_cross_check.py, fuzz seed 14)
+    poly = [[35.0, -4.5], [35.0, -1.5], [20.0, -1.5], [20.0, 0.0], [0.0, 0.0], [0.0, 6.0], [3.0, 6.0], [3.0, 24.0],
+            [6.0, 24.0], [6.0, 32.0], [14.5, 32.0], [14.5, 12.0], [13.0, 12.0], [13.0, 6.0], [44.5, 6.0], [44.5, 14.0],
+            [49.5, 14.0], [49.5, 10.0], [50.5, 10.0], [50.5, 6.0], [60.0, 6.0], [60.0, -4.5]]
+    c = measure(description([room("c", poly)], [door("b", (60.25, 0.75), (0, 1), ("c", "outside"), exit_id="B"),
+                                                door("m", (26.5, -1.75), (1, 0), ("c", "outside"), exit_id="M")]))["c"]
+    assert c.stop is None and len(c.dead_ends) == 3
+
+
+
+def two_corridors():
+    """Review rounds 3 and 4: "a", a corridor far off (y 100 to 111) whose centre lines can't be worked out (a notch 5
+    ft wide, 2 to 3 ft deep in its north wall: "don't all meet", found only after its centre lines are drawn on the
+    graph the story's corridors share); "c1", a corridor 0 to 60 by 0 to 6 with a branch x 28 to 34 to y 30. Floors
+    are worked in the order of their ids, so "a" goes first and its centre lines are on the graph before c1's."""
+    return description([room("a", [[0, 100], [0, 110], [20, 110], [20, 113], [25, 113], [25, 111], [60, 111],
+                                   [60, 100], [25, 100], [20, 100]]),
+                        room("c1", [[0, 0], [60, 0], [60, 6], [34, 6], [34, 30], [28, 30], [28, 6], [0, 6]])],
+                       [door("a1", (-0.25, 105), (0, 1), ("a", "outside"), exit_id="C"),
+                        door("a2", (60.25, 105.5), (0, 1), ("a", "outside"), exit_id="E"),
+                        door("c", (-0.25, 3), (0, 1), ("c1", "outside"), exit_id="A"),
+                        door("d", (60.25, 3), (0, 1), ("c1", "outside"), exit_id="B")])
+
+
+def test_25d_one_corridor_that_cant_be_worked_out_never_takes_anothers_figure():
+    # c1's branch: 30 - 3 = 27 ft; "a" needs review for its own reason. Two things keep "a"'s leftover centre lines
+    # (left on the shared graph when it stops) from c1: "a" takes them away when it stops (test 25e), and a closed end
+    # on no corridor's stretch is never measured. With neither, a leftover closed end belonged to no floor and the
+    # story failed (KeyError: None), c1's figure lost with it
+    got = measure(two_corridors())
+    assert got["c1"].stop is None and [ft(d.length[WITHOUT]) for d in got["c1"].dead_ends] == [27.0]
+    assert "don't all meet" in got["a"].stop and "failed" not in got["a"].stop
+
+
+def test_25e_a_floor_that_fails_leaves_nothing_on_the_shared_graph():
+    s = story(two_corridors())
+    g, legs = dead_ends._Graph(), []
+    with pytest.raises(dead_ends.Stop):
+        dead_ends._group(s, [s.rooms["a"]], g, legs)
+    assert g.xy == [] and g.edges == [] and g.adj == [] and g.steps == {} and legs == []
+
+
+def test_25f_a_step_passing_a_third_place_or_a_place_reached_by_steps_alone_needs_review():
+    # the guards, on a graph built by hand: a step from (0, 0) to (0, 10) passing the place (0, 5); a place joined
+    # only by a step. Each is checked over the floor's own places only
+    g = dead_ends._Graph()
+    a, m, b = g.node((0.0, 0.0)), g.node((0.0, 60.0)), g.node((0.0, 120.0))
+    with pytest.raises(dead_ends.Stop) as stop:
+        dead_ends._step_passes_none(g, a, b, range(3))
+    assert "passes a third" in stop.value.reason
+    dead_ends._step_passes_none(g, a, b, [a, b])                     # another floor's place is never looked at
+    c = g.node((120.0, 0.0))
+    g.edge(a, c, 0, (0.0, 120.0))                                    # a centre line
+    g.edge(c, b, None, (0.0, 0.0))                                   # a step alone to b
+    with pytest.raises(dead_ends.Stop) as stop:
+        dead_ends._every_place_on_a_line(g, range(4))
+    assert "ends on none" in stop.value.reason
+    dead_ends._every_place_on_a_line(g, [a, c])
+
+
+
+def test_25g_a_floors_checks_look_at_its_own_places_only():
+    # pins the place-reached-by-steps-alone check's scoping only (the step-passing-a-third-place check's scoping is
+    # unpinned: no step of the branch lies near the leftover). An earlier floor's place on the shared graph joined by a step alone (built by hand: no real layout was found to
+    # leave one, see test 25d), far off; then test 3's branch, a healthy floor, on the same graph: its checks look at
+    # its own places only, so it is worked out (20 ft). Looking at every place of the graph, it would need review
+    # ("a step of its centre lines ends on none")
+    s = story(branch())
+    g, legs = dead_ends._Graph(), []
+    a, b = g.node((0.0, 5000.0)), g.node((120.0, 5000.0))
+    g.edge(a, b, None, (0.0, 0.0))
+    floor = dead_ends._group(s, [s.rooms["c"]], g, legs)
+    assert floor.legs and len(g.xy) > 2

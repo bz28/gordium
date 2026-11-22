@@ -214,10 +214,26 @@ def test_a_route_that_goes_back_into_its_end_only_room_isnt_measured():
                        alcove_room, at(30, 9))
 
 
+def test_the_same_check_on_every_tied_route_at_once():
+    """Decision 5 as amended 2026-11-22 holds the tied routes all together: `_leaves_once_all` refuses them when any
+    of their pieces comes back into the room (a piece that starts outside it and meets its inside), and takes them
+    when each piece inside it starts there (the walk out from the start)."""
+    from model_measurement.routes import paths
+    alcove_room = story(alcove()).rooms["al"]
+    out = ("line", at(30, 9), at(30, 5))
+    back = paths.Tight(0.0, [(out, 0.0), (("line", at(30, 5), at(28, 8)), 4 * FT), (("line", at(28, 8), at(26, 5)),
+                                                                                    7.6 * FT)], [])
+    with pytest.raises(Stop) as stop:
+        paths._leaves_once_all(back, alcove_room, at(30, 9))
+    assert stop.value.key == "route_reenters"
+    paths._leaves_once_all(paths.Tight(0.0, [(out, 0.0), (("line", at(30, 5), at(10, 3)), 4 * FT)], []),
+                           alcove_room, at(30, 9))
+
+
 def test_the_end_only_check_is_made_on_every_leg_through_a_passage(monkeypatch):
     from model_measurement.routes import paths
     seen = []
-    monkeypatch.setattr(paths, "_leaves_once", lambda path, room, p: seen.append(room.id))
+    monkeypatch.setattr(paths, "_leaves_once_all", lambda leg, room, p: seen.append(room.id))
     routes(alcove()).route(at(30, 9))
     assert seen and set(seen) == {"al"}
 
@@ -376,6 +392,7 @@ def test_too_many_tied_routes_is_said(monkeypatch):
 PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters", "too_many_ties", "exit_unknown",
              "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last three: test_routes_remote.py
 LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_end_unbounded",   # test_routes_dead_ends.py
+              "corridor_width_stepped",
               "too_few_exits", "outline_needed", "area_room_not_read", "area_no_use", "area_unknown_space",
               "area_rooms_overlap",                                                  # test_routes_straight_areas.py
               "stated_not_given", "not_measured_yet", "readings", "room_not_measured", "maybe_kind",

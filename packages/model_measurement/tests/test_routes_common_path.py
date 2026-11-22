@@ -10,7 +10,7 @@ import pytest
 
 from model_measurement.routes import common_path
 from model_measurement.routes.common_path import at_point, shared, story_figure
-from model_measurement.routes.paths import Route
+from model_measurement.routes.paths import Route, Tied
 from model_measurement.routes.remote import farthest
 from model_measurement.routes.stops import Stop
 
@@ -191,8 +191,10 @@ def test_the_sampler_reads_only_the_rooms_asked_for():
 
 @pytest.mark.parametrize("layout", [lambda: column_room(north_exit=True), l_room, third_exit])
 def test_the_fast_tied_routes_are_the_slow_ones(layout):
-    """common_path.tied_routes reads a route's first leg from each zone's graph built once; on a 2-ft grid of every
-    room it gives the same tied routes (lengths to 1e-6 in) as paths.py's routes(), or the same reason for none."""
+    """common_path.tied reads a route's first leg from each zone's graph built once; on a 2-ft grid of every room it
+    gives the same union of tied routes as paths.py's `tied` (the same length, to 1e-6 in, and the same pieces), and
+    every route paths.py's `routes` lists lies wholly in it (decision 5, amended 2026-11-22), or the same reason for
+    none."""
     got = routes(layout())
     for room_ in got.story.rooms.values():
         x0, y0, x1, y1 = room_.outline.bounds
@@ -201,9 +203,107 @@ def test_the_fast_tied_routes_are_the_slow_ones(layout):
                 p = (x0 + i * FT, y0 + j * FT)
                 for e in got.exits:
                     ways = []
-                    for find in (got.routes, lambda q, ex: common_path.tied_routes(got, q, ex[0])):
+                    for find in (lambda q, ex: got.tied(q, ex), lambda q, ex: common_path.tied(got, q, ex[0])):
                         try:
-                            ways.append(sorted(round(x.length, 6) for x in find(p, [e])))
+                            ways.append(find(p, [e]))
                         except Stop as s:
                             ways.append(s.key)
-                    assert ways[0] == ways[1], (p, e, ways)
+                    if isinstance(ways[0], str) or isinstance(ways[1], str):
+                        assert ways[0] == ways[1], (p, e, ways)
+                        continue
+                    slow, fast = ways
+                    assert fast.length == pytest.approx(slow.length, abs=1e-6), (p, e)
+                    assert _within(fast, slow) and _within(slow, fast), (p, e)     # one union, however split
+                    for listed in got.routes(p, [e]):
+                        whole = Tied(listed.length, [(q, o) for q, o in zip(listed.pieces, _offsets(listed))], listed)
+                        assert common_path.farthest_shared(whole, fast)[0] == pytest.approx(listed.length, abs=1e-6)
+
+
+def _within(a, b) -> bool:
+    """Every piece of the union a lies on the union b (checked at its ends and three points between), at the same
+    travel distance (its offset)."""
+    from model_measurement.routes.common_path import _along
+    from model_measurement.routes.paths import _piece_length
+    for q, o in a.pieces:
+        for f in (0.0, 0.25, 0.5, 0.75, 1.0):
+            x = _point(q, f)
+            if not any((u := _along(r, x)) is not None and abs(o + f * _piece_length(q) - (o2 + u)) <= 1e-6
+                       for r, o2 in b.pieces):
+                return False
+    return True
+
+
+def _point(q, f):
+    if q[0] == "line":
+        return (q[1][0] + (q[2][0] - q[1][0]) * f, q[1][1] + (q[2][1] - q[1][1]) * f)
+    _, c, r, a0, sweep = q
+    return (c[0] + r * math.cos(a0 + sweep * f), c[1] + r * math.sin(a0 + sweep * f))
+
+
+def _offsets(route) -> list:
+    from model_measurement.routes.paths import _piece_length
+    out, s = [], 0.0
+    for q in route.pieces:
+        out.append(s)
+        s += _piece_length(q)
+    return out
+
+
+# --- tests 21 and 22: ties, all together (decision 5, amended 2026-11-22) ------------------------------------------
+
+def row_of_columns():
+    """Test 21: a corridor 0 to 60 by 0 to 10 with ten columns 1 ft square (x 6 + 5m to 7 + 5m, y 6 to 7), exits A
+    (centre (-0.25, 5)) and B (centre (-0.25, 1.5)) in its west wall; a room 60.5 to 70.5 by 0 to 10 east of it, its
+    one door centred at (60.25, 5)."""
+    cols = [rect(6 + 5 * m, 6, 7 + 5 * m, 7) for m in range(10)]
+    return description([room("c", rect(0, 0, 60, 10), holes=cols), room("e", rect(60.5, 0, 70.5, 10), use="day_care")],
+                       [door("a", (-0.25, 5), (0, 1), ("c", "outside"), exit_id="A"),
+                        door("b", (-0.25, 1.5), (0, 1), ("c", "outside"), exit_id="B"),
+                        door("d", (60.25, 5), (0, 1), ("c", "e"))])
+
+
+def test_21_one_route_along_a_row_of_rings_is_one_route():
+    """From (70, 5): 9.75 to the door centre, then along y = 5, exactly 12 in below the columns' 20 south corners
+    (tangent to every ring), 60.5 to A: 70.25; to B straight from the door centre, sqrt(60.5^2 + 3.5^2) = 60.601:
+    70.351. They part at the door centre: the common path is 9.75. From (58, 5) they part at the start: 0. The listing
+    found the one route to A once for each set of the tangent points it could be split at and stopped past 64."""
+    got = routes(row_of_columns())
+    assert ft(got.route(at(70, 5), ["A"]).length) == pytest.approx(70.25, abs=TOL)
+    assert ft(got.route(at(70, 5), ["B"]).length) == pytest.approx(9.75 + math.hypot(60.5, 3.5), abs=TOL)
+    here = at_point(got, at(70, 5))
+    assert ft(here.length) == pytest.approx(9.75, abs=TOL) and here.exits == ("A", "B")
+    assert [round(ft(v), 6) for v in here.at] == [60.25, 5.0]                     # where they part: the door centre
+    assert [round(ft(x.length), 3) for x in here.routes] == [70.25, 70.351]       # the two routes drawn, through it
+    assert at_point(got, at(58, 5)).length == 0.0
+
+
+def diamonds():
+    """Test 22: a room 0 to 10 by 0 to 10; through door centres at x = 10.25 + 6m (m = 0 to 14), fourteen rooms 5.5
+    ft long, then a room 94.5 to 114.5 by 0 to 10 with exits A (114.75, 7.5) and B (114.75, 2.5); at even m one door
+    centred on y = 5, at odd m two, at y 2.5 and 7.5."""
+    xs = [10.25 + 6 * m for m in range(15)]
+    names = ["s"] + [f"r{m}" for m in range(14)] + ["f"]
+    rooms = ([room("s", rect(0, 0, 10, 10), use="day_care")] +
+             [room(f"r{m}", rect(xs[m] + 0.25, 0, xs[m + 1] - 0.25, 10)) for m in range(14)] +
+             [room("f", rect(94.5, 0, 114.5, 10))])
+    doors = [door(f"d{m}_{y}", (xs[m], y), (0, 1), (names[m], names[m + 1]))
+             for m in range(15) for y in ([5] if m % 2 == 0 else [2.5, 7.5])]
+    doors += [door("a", (114.75, 7.5), (0, 1), ("f", "outside"), exit_id="A"),
+              door("b", (114.75, 2.5), (0, 1), ("f", "outside"), exit_id="B")]
+    return description(rooms, doors)
+
+
+def test_22_128_tied_routes_are_never_listed():
+    """From (1, 5): 9.25 to the first door, then seven pairs of rooms each crossed through either middle door, 6.5 ft
+    a leg (sqrt(6^2 + 2.5^2)), 13 a pair: 2^7 = 128 tied routes to each exit, all reaching the last door (94.25, 5)
+    at 100.25 ft, where they part: the common path is 100.25, the travel 100.25 + sqrt(20.5^2 + 2.5^2) = 120.902.
+    Listing them stops past 64; the union never lists one."""
+    got = routes(diamonds())
+    here = at_point(got, at(1, 5))
+    assert ft(here.length) == pytest.approx(100.25, abs=TOL)
+    assert [round(ft(v), 6) for v in here.at] == [94.25, 5.0]
+    for e in ("A", "B"):
+        assert ft(got.route(at(1, 5), [e]).length) == pytest.approx(100.25 + math.hypot(20.5, 2.5), abs=TOL)
+    with pytest.raises(Stop) as stop:
+        got.routes(at(1, 5), ["A"])                                               # listing them: too many
+    assert stop.value.key == "too_many_ties"
