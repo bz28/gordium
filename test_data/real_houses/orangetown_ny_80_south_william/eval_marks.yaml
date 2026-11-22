@@ -1,0 +1,91 @@
+# The New York Revit eval's marks for the Orangetown house (80 South William Street, Lot 2), built in Revit from
+# revit_build_data.json (apps/revit_addin/tools/make_ny_build_data.py) by the add-in's build_model_request, then
+# marked by its set_marks_request and checked by its check_project_request (apps/revit_addin/tools/eval_marks_request.py
+# writes both; the steps: docs/revit/windows_trial_runbook.md, "The New York eval").
+#
+# EVERY MARK HERE IS AN EVAL ASSUMPTION: Gordium standing in for the architect, who has not marked this model. Each
+# one is house.yaml's own value for the same thing (its `cite` the drawings' sheet and callout), so the model checked
+# says exactly what the interior description says, and the check can be held to hand_check.yaml. Where the
+# description says nothing, nothing is marked (the stairs aren't drawn, so "These are all the stairs" is never
+# ticked; no guard is drawn, so "These are all the guards and handrails" isn't either).
+#
+# The lot facts on Project Information are a stand-in: Check my project sends nothing without a zone, a use, the lot
+# surveyed or not and a street edge (ProjectFacts, apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs), and
+# it checks the City of Ithaca only. Ithaca's zoning doesn't apply in Orangetown, so every zoning row is left out of
+# the comparison (compare_check_result.py); no egress rule reads a lot fact (egress.check reads the interior and the
+# dwelling units, evaluation.md "The run").
+#
+# Not a rulebook: no `rules:` key.
+
+model: orangetown_built.rvt
+by: eval assumption (Gordium, not the architect)
+date: "2026-11-21"
+
+# Every Room the build places (revit_build_data.json rooms, numbered in its order): Gordium: Sleeping room, from
+# house.yaml's `sleeping` (layout.yaml's own for a room house.yaml doesn't list). A house has no route marks (use,
+# lockable, pass through: a commercial story's, IBC 1014.2), so none is given.
+rooms:
+  - {number: "1", name: Master bedroom, sleeping: true, why: "house.yaml rooms[master].sleeping: A-3 'MASTER BEDRM'; A-5 schedule 'M. BEDROOM'"}
+  - {number: "2", name: Bedroom 2, sleeping: true, why: "house.yaml rooms[bed2].sleeping: A-3 'BEDRM 2'; A-5 schedule 'BEDROOM 2'"}
+  - {number: "3", name: Bedroom 3, sleeping: true, why: "house.yaml rooms[bed3].sleeping: A-3 'BEDRM 3'; A-5 schedule 'BEDROOM 3'"}
+  - {number: "4", name: Bedroom 4, sleeping: true, why: "house.yaml rooms[bed4].sleeping: A-3 'BEDRM 4'; A-5 schedule 'BEDROOM 4'"}
+  - {number: "5", name: Bonus room, sleeping: false, why: "house.yaml rooms[bonus].sleeping: A-3 'BONUS RM.', not a bedroom label (whether it may be slept in is README question 3)"}
+  - {number: "6", name: Master bath, sleeping: false, why: "layout.yaml rooms[master_bath].sleeping: a bathroom"}
+  - {number: "7", name: Hall bath, sleeping: false, why: "layout.yaml rooms[hall_bath].sleeping: a bathroom"}
+  - {number: "8", name: "Bedroom 2's entry alcove (not dimensioned)", sleeping: false, why: "layout.yaml rooms[bed2_alcove].sleeping: kept out of bedroom 2 as house.yaml keeps it (its area understated, never overstated)"}
+  - {number: "9", name: Bedroom 2 closet, sleeping: false, why: "layout.yaml rooms[bed2_closet].sleeping: a closet"}
+  - {number: "10", name: Walk-in closet 1, sleeping: false, why: "layout.yaml rooms[wic_master_1].sleeping: a closet"}
+  - {number: "11", name: Walk-in closet 2, sleeping: false, why: "layout.yaml rooms[wic_master_2].sleeping: a closet"}
+  - {number: "12", name: Linen and bedroom 3 closet, sleeping: false, why: "layout.yaml rooms[linen].sleeping: a closet"}
+  - {number: "13", name: Bedroom 4 walk-in closet, sleeping: false, why: "layout.yaml rooms[wic4].sleeping: a closet"}
+  - {number: "14", name: "Hallway, stair, bridge and open to below", sleeping: false, why: "layout.yaml rooms[hall].sleeping: the hall"}
+  - {number: "15", name: "Main floor: kitchen, dinette, family, dining, living, hall, entry, powder, laundry (partitions not drawn)", sleeping: false,
+     why: "layout.yaml rooms[main_floor].sleeping: the main floor has no bedroom (A-2)"}
+  - {number: "16", name: Garage, sleeping: false, why: "layout.yaml rooms[garage].sleeping: the garage"}
+  - {number: "17", name: Unfinished basement, sleeping: false, why: "house.yaml rooms[basement].sleeping: A-2 'UNFINISHED BASEMENT'"}
+
+# Every window the build places (WN01... in revit_build_data.json's order): Gordium: Escape opening and its type's
+# Gordium: Operation, house.yaml's `escape` and `operation` for the same opening. No clear opening is marked: house.yaml
+# gives none (no maker or product is named; the schedule is "for design intent only", A-1), so every clear-opening
+# rule needs review, as hand_check.yaml predicts.
+windows:
+  - {window: WN01, id: m1, escape: true, operation: Double hung, why: "house.yaml openings[m1]: A-5 'DOUBLE HUNG' remark 'EGRESS'; A-3 '(2) 3046 DH'"}
+  - {window: WN02, id: m2, escape: true, operation: Double hung, why: "house.yaml openings[m2]: as m1"}
+  - {window: WN03, id: m3, escape: true, operation: Casement, why: "house.yaml openings[m3]: A-4 left side elevation, both C15 casements marked E; A-3 'C15'"}
+  - {window: WN04, id: m4, escape: true, operation: Casement, why: "house.yaml openings[m4]: as m3"}
+  - {window: WN05, id: b2a, escape: true, operation: Double hung, why: "house.yaml openings[b2a]: A-5 'DOUBLE HUNG 3046' remark 'EGRESS'"}
+  - {window: WN06, id: b2b, escape: true, operation: Double hung, why: "house.yaml openings[b2b]: as b2a"}
+  - {window: WN07, id: b3a, escape: true, operation: Double hung, why: "house.yaml openings[b3a]: A-5 'DOUBLE HUNG 3046' remark 'EGRESS'"}
+  - {window: WN08, id: b3b, escape: true, operation: Double hung, why: "house.yaml openings[b3b]: as b3a"}
+  - {window: WN09, id: b4a, escape: true, operation: Double hung, why: "house.yaml openings[b4a]: A-5 'DOUBLE HUNG' remark 'EGRESS'; A-3 '(2) 3052 DH'"}
+  - {window: WN10, id: b4b, escape: true, operation: Double hung, why: "house.yaml openings[b4b]: as b4a"}
+  - {window: WN11, id: x1, escape: true, operation: Double hung, why: "house.yaml openings[x1]: A-4 front elevation, marked E; A-3 '(2) 3052 DH' (the bonus room's)"}
+  - {window: WN12, id: x2, escape: true, operation: Double hung, why: "house.yaml openings[x2]: as x1"}
+  - {window: WN13, id: bsw1, escape: true, operation: Casement, why: "house.yaml openings[bsw1]: A-2 'CW14' in its areaway; A-5 labels the window in the well 'EGRESS'"}
+  - {window: WN14, id: bsw2, escape: true, operation: Casement, why: "house.yaml openings[bsw2]: as bsw1"}
+
+# The one door the build places (D01): Gordium: Exit door and its type's Gordium: Operation, house.yaml's `exit` and
+# `operation`; Gordium: Escape opening No (every window and door needs it set, or no opening is read; the door is the
+# exit, not a bedroom's escape opening). No clear opening: house.yaml gives none ('THERMA-TRU OR EQUAL', A-1).
+doors:
+  - {door: D01, id: front, exit_door: true, escape: false, operation: Side-hinged door,
+     why: "house.yaml doors[front]: the only side-hinged door from the house straight outside (A-2 '3'-0\"x8'-0\"'); 'drawn with a swing arc' (A-2)"}
+
+# Project Information. The seven `has_none` claims of house.yaml, each ticked with its sheet (the Revit tick can't
+# carry house.yaml's `reading: true`: the three readings, habitable attic, ship's ladder and patio cover, come back
+# as the architect's own ticks, so they show not applicable, not as readings to confirm; the comparison names it).
+project_information:
+  - {mark: "Gordium: Zone", value: R-1b,
+     why: "STAND-IN: Check my project checks the City of Ithaca only and sends nothing without a zone; the lot is in the Town of Orangetown, so every zoning row is left out of the comparison"}
+  - {mark: "Gordium: Use", value: one_family_detached, why: "A-1 project data: single-family dwelling (evaluation.md, 'The run')"}
+  - {mark: "Gordium: Lot surveyed", value: false, why: "the stand-in lot is no survey (the cautious word)"}
+  - {mark: "Gordium: Street edge", value: "-20 -30 62 -30",
+     why: "the stand-in lot's south edge (revit_build_data.json lot: the house's front, the porch, faces south on A-2), in Revit's internal feet, a new project's shared coordinates"}
+  - {mark: "Gordium: This house has no sleeping lofts", value: true, why: "house.yaml has_none sleeping_loft: none drawn (A-2, A-3, A-5)"}
+  - {mark: "Gordium: This house has no habitable attics", value: true, why: "house.yaml has_none habitable_attic (reading: true): the A-5 'ATTIC' is unfinished roof space"}
+  - {mark: "Gordium: This house has no ramps", value: true, why: "house.yaml has_none ramp: none drawn (A-2, A-4)"}
+  - {mark: "Gordium: This house has no alternating tread devices", value: true, why: "house.yaml has_none alternating_tread_device: none drawn (A-2, A-3)"}
+  - {mark: "Gordium: This house has no ship ladders", value: true, why: "house.yaml has_none ships_ladder (reading: true): the pull-down attic stair is attic access"}
+  - {mark: "Gordium: This house has no patio covers", value: true, why: "house.yaml has_none patio_cover (reading: true): the porch is the covered entry under the main roof"}
+  - {mark: "Gordium: This house has no deck or porch or cantilever over an escape opening", value: true,
+     why: "house.yaml has_none deck_porch_or_cantilever_over_escape_opening: every bedroom's escape window has only the roof above it (A-3, A-4)"}

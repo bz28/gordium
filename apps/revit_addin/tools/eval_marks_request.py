@@ -1,10 +1,14 @@
 """Turns an eval's marks (a YAML file such as test_data/answer_keys/portland_me_19_libby_st/eval_marks.yaml) into the
 Revit add-in's set_marks_request.json (apps/revit_addin/src/Gordium.Revit.Reading/MarksRequest.cs): every room's
-sleeping, use, lockable and pass_through marks, every exit's Gordium: Exit, and each door type's clear opening (written
-on the type with its stamp, signed by the file's `by`). Nothing is guessed here: a room or exit missing a value, or a
-value of the wrong kind, stops the tool with why, and nothing is written. The add-in refuses what it can't write.
+sleeping mark (and a commercial story's use, lockable and pass_through), each window's escape mark and its type's
+operation, each door's exit door and escape marks and its type's operation, every exit's Gordium: Exit, and each door
+type's clear opening (written on the type with its stamp, signed by the file's `by`); and, with --check-out, the
+check_project_request.json that checks the marked copy with the file's Project Information marks. Nothing is guessed
+here: a room, window, door or exit missing a value, or a value of the wrong kind, stops the tool with why, and nothing
+is written. The add-in refuses what it can't write.
 
     python eval_marks_request.py <eval_marks.yaml> --model <model.rvt> --save-as <copy.rvt> --out <set_marks_request.json>
+        [--build-data <data.json> --build-out <build_model_request.json>] [--check-out <check_project_request.json>]
 """
 
 from __future__ import annotations
@@ -35,12 +39,30 @@ def entries(marks: dict) -> list[dict]:
     for room in (marks.get("rooms") or []) + (marks.get("rooms_to_place") or []):
         number = str(room.get("number", "")).strip()
         where = f"room {number or '?'}"
-        if not number or not isinstance(room.get("use"), str):
-            raise BadMarks(f"{where}: needs a `number` and a `use`")
+        if not number:
+            raise BadMarks(f"{where}: needs a `number`")
         out.append({"room": number, "mark": "Gordium: Sleeping room", "value": _flag(room, "sleeping", defaults, where)})
+        # a commercial story's rooms carry the route marks (all three); a house's carry none (its egress reads no routes)
+        if "use" not in room and not ({"lockable", "pass_through"} & set(room)):
+            continue
+        if not isinstance(room.get("use"), str):
+            raise BadMarks(f"{where}: needs a `use` with its lockable and pass_through")
         out.append({"room": number, "mark": "Gordium: Use", "value": room["use"]})
         out.append({"room": number, "mark": "Gordium: Can be locked", "value": _flag(room, "lockable", defaults, where)})
         out.append({"room": number, "mark": "Gordium: Pass through", "value": _flag(room, "pass_through", defaults, where)})
+    for window in marks.get("windows") or []:
+        mark, where = window.get("window"), f"window {window.get('window')!r}"
+        if not isinstance(mark, str) or not isinstance(window.get("operation"), str):
+            raise BadMarks(f"{where}: needs a `window` (its Mark) and an `operation` (Gordium: Operation's word)")
+        out.append({"window": mark, "mark": "Gordium: Escape opening", "value": _flag(window, "escape", {}, where)})
+        out.append({"window": mark, "mark": "Gordium: Operation", "value": window["operation"]})
+    for door in marks.get("doors") or []:
+        mark, where = door.get("door"), f"door {door.get('door')!r}"
+        if not isinstance(mark, str) or not isinstance(door.get("operation"), str):
+            raise BadMarks(f"{where}: needs a `door` (its Mark) and an `operation` (Gordium: Operation's word)")
+        out.append({"door": mark, "mark": "Gordium: Exit door", "value": _flag(door, "exit_door", {}, where)})
+        out.append({"door": mark, "mark": "Gordium: Escape opening", "value": _flag(door, "escape", {}, where)})
+        out.append({"door": mark, "mark": "Gordium: Operation", "value": door["operation"]})
     for kind in marks.get("door_types") or []:
         doors = kind.get("doors")
         if not isinstance(doors, list) or not doors:
@@ -76,6 +98,23 @@ def request(marks: dict, model: str, save_as: str, level: str = "Level 1") -> di
             "place_rooms": place_rooms(marks, level), "marks": entries(marks)}
 
 
+def check_request(marks: dict, model: str) -> dict:
+    """The check_project_request.json that checks the marked copy with no clicks (CheckProject.RunRequest): the file's
+    Project Information marks (`project_information`), each a mark's name and its value."""
+    facts: dict = {}
+    for entry in marks.get("project_information") or []:
+        name, value = entry.get("mark"), entry.get("value")
+        if not isinstance(name, str) or not name.startswith("Gordium: ") or not isinstance(value, (bool, str)):
+            raise BadMarks(f"project information {entry!r}: needs a `mark` (a Gordium mark's name) and a `value` "
+                           "(true, false or text)")
+        if not isinstance(entry.get("why"), str):
+            raise BadMarks(f"project information {name}: needs a `why`")
+        if name in facts:
+            raise BadMarks(f"project information {name}: given twice")
+        facts[name] = value
+    return {"model": model, "marks": facts}
+
+
 def build_request(marks: dict, data: str, save_as: str) -> dict:
     """The build request that rebuilds the model with the file's model_corrections (ModelBuild, BuildData.Correct)."""
     corrections = marks.get("model_corrections") or []
@@ -92,11 +131,14 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--out", required=True)
     parser.add_argument("--build-data", help="the traced data: also write the build request with model_corrections")
     parser.add_argument("--build-out", help="where to write that build request (its save_as is --model)")
+    parser.add_argument("--check-out", help="also write the check_project_request.json that checks the marked copy "
+                                            "(--save-as) with the file's project_information marks")
     args = parser.parse_args(argv)
     try:
         marks = yaml.safe_load(Path(args.marks).read_text(encoding="utf-8"))
         made = request(marks, args.model, args.save_as)
         build = build_request(marks, args.build_data, args.model) if args.build_data and args.build_out else None
+        check = check_request(marks, args.save_as) if args.check_out else None
     except (BadMarks, yaml.YAMLError) as e:
         print(f"not written: {e}", file=sys.stderr)
         return 1
@@ -105,6 +147,9 @@ def main(argv: list[str] | None = None) -> int:
     if build is not None:
         Path(args.build_out).write_text(json.dumps(build, indent=2), encoding="utf-8")
         print(f"{len(build['corrections'])} model corrections written to {args.build_out}")
+    if check is not None:
+        Path(args.check_out).write_text(json.dumps(check, indent=2), encoding="utf-8")
+        print(f"{len(check['marks'])} Project Information marks written to {args.check_out}")
     return 0
 
 

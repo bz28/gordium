@@ -1,0 +1,67 @@
+# The New York Revit eval's marks for 106 Ithaca Rd: the architects' spreadsheet design (spreadsheet_design.yaml, the
+# cells of test_data/answer_keys/new_york/ithaca_city/Gordium_Single_Family_Simple_v1.xlsx), built in Revit from
+# revit_build_data.json (apps/revit_addin/tools/make_ny_build_data.py) by the add-in's build_model_request and checked
+# by its check_project_request (apps/revit_addin/tools/eval_marks_request.py writes it; the steps:
+# docs/revit/windows_trial_runbook.md, "The New York eval"). The check is compared with the architects' PASS and FAIL
+# on their 11 rows (compare_check_result.py).
+#
+# EVERY MARK HERE IS AN EVAL ASSUMPTION: Gordium standing in for the architect, each the value the repository already
+# states for this design (spreadsheet_design_model_facts.yaml, the lot facts of the same design drawn in Rhino), with
+# its reason. The model has no rooms, windows or doors (the spreadsheet's house is a box), so only Project Information
+# is marked.
+#
+# Not a rulebook: no `rules:` key.
+
+model: 106_ithaca_rd_built.rvt
+by: eval assumption (Gordium, not the architect)
+date: "2026-11-21"
+
+project_information:
+  - {mark: "Gordium: Zone", value: R-1b, why: "the spreadsheet's Output tab checks R-1b; README: R-1b confirmed by the City's GIS (tax parcel 84.-2-6, 2026-10-19)"}
+  - {mark: "Gordium: Use", value: one_family_detached, why: "spreadsheet Output!C3 'Detached one-family' (spreadsheet_design.yaml measurements.use)"}
+  - {mark: "Gordium: Lot surveyed", value: true,
+     why: "spreadsheet_design_model_facts.yaml lot_surveyed true: 'the spreadsheet gives these lot dimensions as the lot's (Inputs!B3, B4); this checks the measuring chain against their numbers'. (Inputs!B5 calls the area 'derived, not surveyed'; No would give the lot's measures the tax map's 2 ft accuracy)"}
+  - {mark: "Gordium: Corner lot", value: false, why: "spreadsheet_design_model_facts.yaml corner_lot false: one street (Ithaca Rd)"}
+  - {mark: "Gordium: Street edge", value: "0 0 73 0",
+     why: "spreadsheet_design_model_facts.yaml street_line [[0, 0], [73, 0]]: the lot's 73 ft side (Inputs!B3), in Revit's internal feet, a new project's shared coordinates"}
+  - {mark: "Gordium: Ground from", value: Spot grades,
+     why: "spreadsheet_design_model_facts.yaml ground_is_flat, grade_elevation 0: drawn as four spot grades at 0 (revit_build_data.json spot_grades), which the Revit reader reads only when this says Spot grades"}
+
+# Which compass side each of the spreadsheet's side yards is: the street on the lot's south edge (y = 0), the house
+# 10 ft from the left boundary (Inputs!B8) at x = 0, as make_spreadsheet_model.py draws it: seen from the street, left is
+# west and right is east.
+sides: {left: west, right: east}
+
+# The measure the check gives for each row's "Proposed" (their column C), shown beside it.
+measures:
+  Minimum lot size: lot_area
+  Minimum lot width: lot_width
+  Maximum stories: stories
+  Maximum height: building_height
+  Percent of lot area: building_area
+  Minimum front yard (offset): front_yard
+  Minimum left side yard (offset): side_yard_smaller
+  Minimum right side yard (offset): side_yard_larger
+  Minimum rear yard (offset): rear_yard
+  Minimum parking: parking_spaces
+
+# Where Gordium in Revit can't give the architects' answer, and why: each worked out before the Revit run, from the
+# add-in's own code (never from a run). A row whose difference isn't here is UNEXPLAINED in the comparison.
+expected_differences:
+  - row: Maximum stories
+    gordium: needs_review
+    why: "Revit sends no stories: Project Information has no Stories mark (ProjectFacts sends zone, use, lot surveyed, corner lot, ground and street only), and native Revit floors are not counted as stories (only Gordium's floor blocks or a stated count). A plain 35 ft wall could hold up to 5 stories at 7 ft a story (R305.1), so 'at worst 5 against 3'. The spreadsheet's 3 (Inputs!B13) needs a Stories mark or floor blocks"
+    source: "apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs ProjectFacts.Read; packages/model_measurement/model_measurement/places/ithaca_city/measure.py _stories ('draw its floors or enter the count')"
+  - row: Minimum parking
+    gordium: not_checked
+    why: "Revit sends no parking spaces or bedrooms: Project Information has no mark for either, so the row 'Needs bedrooms and parking spaces, which the model doesn't show' (the spreadsheet's 1 space and 3 bedrooms, Inputs!B15, B14)"
+    source: "apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs ProjectFacts.Read; places/ithaca_city/measure.py STATED"
+
+# Rows where Gordium and the architects agree but not for the same reason (docs/discrepancies_with_architects.md).
+notes:
+  - row: Minimum rear yard (offset)
+    note: "the spreadsheet compares the required rear yard (22.5 ft) with the 20 ft minimum instead of the house's own 25 ft: it passes by coincidence (discrepancies 2.2); Gordium measures 90 - 30 - 35 = 25 ft"
+  - row: Percent of lot area
+    note: "the spreadsheet's comparison column says 'Within table limit' but its PASS/FAIL says FAIL: 53 x 35 = 1,855 sf is 27.8% of their 6,674 sf (discrepancies 2.1); Gordium's lot is the drawn 73 x 90 = 6,570 sf (28.2%)"
+  - row: Minimum lot size
+    note: "their 6,674 sf is typed, not 73 x 90 = 6,570 sf (discrepancies 2.5); both are over 6,000"
