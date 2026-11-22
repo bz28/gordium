@@ -613,6 +613,231 @@ rules:
   notes: For every occupancy. Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+- id: general.bc_1006_3_3_story_exits
+  kind: rule
+  topic: means_of_egress
+  title: Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)
+  check: story_exit_count >= (2 if story_occupant_load < 501 else 3 if story_occupant_load <= 1000 else 4) or (story_exit_count
+    > 0 and occupancy_group_i4 and not other_occupancy_present and story_first_above_or_below_grade and story_occupant_load
+    <= 10 and egress_travel_distance <= 75)
+  review_when:
+  - when: story_exit_count < (2 if story_occupant_load < 501 else 3 if story_occupant_load <= 1000 else 4) and (other_occupancy_present
+      or not occupancy_group_i4 or (story_first_above_or_below_grade and story_rooms_exit_directly_outside) or (story_first_above_or_below_grade
+      and story_occupant_load <= 10 and egress_travel_distance <= 75)) and not (occupancy_group_i4 and not other_occupancy_present
+      and story_first_above_or_below_grade and story_occupant_load <= 10 and egress_travel_distance <= 75)
+    reason: 'Fewer exits than Table 1006.3.3 gives, but 1006.3.4 may allow one: the building is in another occupancy (or its
+      occupancy isn''t stated), whose row of Table 1006.3.4(2) is a flag, or the story''s rooms exit directly outside at the
+      level of exit discharge (item 2): a person checks.'
+  for_each: story
+  when_none: needs_review
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 48
+    - 50
+    quote: 1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate
+      and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall
+      be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps
+      providing access to exits, from any
+  - file: gov.ny.building.2025.pdf
+    page: 316
+    lines:
+    - 55
+    - 57
+    quote: 1-500 2 501-1,000 3 More than 1,000 4
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 3
+    - 6
+    quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+      roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access travel
+      distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2).'
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 40
+    - 41
+    quote: First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over the first story above grade plane
+      H-4, H-5, I, R-1, R-2a, c 10 75
+  examples:
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+    parts:
+      story:
+      - id: p1
+        name: First floor, 120
+        measures:
+          story_exit_count: 2
+          story_occupant_load: 120
+          story_first_above_or_below_grade: true
+          egress_travel_distance: 130.667
+    rows:
+    - part: p1
+      outcome: pass
+    expect: pass
+    note: 'Two exits for 120 occupants (Table 1006.3.3: two up to 500).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+    parts:
+      story:
+      - id: p2
+        name: Second floor, one exit
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 120
+          story_first_above_or_below_grade: false
+          egress_travel_distance: 60
+          story_rooms_exit_directly_outside: false
+    rows:
+    - part: p2
+      outcome: fail
+    expect: fail
+    note: 'One exit for 120 occupants on a second story: Group I may not have one there (Table 1006.3.4(2)).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+    parts:
+      story:
+      - id: p3
+        name: Small first floor, one exit
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 8
+          story_first_above_or_below_grade: true
+          egress_travel_distance: 60
+    rows:
+    - part: p3
+      outcome: pass
+    expect: pass
+    note: 'Eight occupants and 60 ft on the first story: one exit will do (1006.3.4 item 1, Table 1006.3.4(2)''s I row: 10
+      and 75 ft).'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+    parts:
+      story:
+      - id: p4
+        name: Hall floor, 600
+        measures:
+          story_exit_count: 2
+          story_occupant_load: 600
+          story_first_above_or_below_grade: true
+          egress_travel_distance: 100
+          story_rooms_exit_directly_outside: false
+    rows:
+    - part: p4
+      outcome: fail
+    expect: fail
+    note: '600 occupants: three exits (Table 1006.3.3: 501 to 1,000).'
+  - given:
+      occupancy_group_i4: false
+      other_occupancy_present: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story:
+      - id: p5
+        name: Group B floor, one exit
+        measures:
+          story_exit_count: 1
+          story_occupant_load: 30
+          story_first_above_or_below_grade: true
+          egress_travel_distance: 60
+    rows:
+    - part: p5
+      outcome: needs_review
+    expect: needs_review
+    note: 'Another occupancy: its row of Table 1006.3.4(2) (a flag) may allow one exit: needs review.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+    parts:
+      story: []
+    rows:
+    - outcome: needs_review
+    expect: needs_review
+    note: 'No story: the rule''s when_none (needs_review).'
+  notes: 'Table 1006.3.3: two exits up to 500 occupants, three from 501 to 1,000, four above, for every occupancy. One exit
+    is enough only where 1006.3.4 allows it: this rule reads item 1 for Group I-4 (Table 1006.3.4(2)''s I row: the first story
+    above or below grade plane, at most 10 occupants and 75 ft of exit access travel; Group I is not in the second-story row,
+    and the third story and higher are NP), and gives needs review, never fail, where item 2 is stated (rooms that exit directly
+    outside at the level of exit discharge) or the building is in another occupancy (its rows are general.bc_table_1006_3_4_2__other_occupancies).
+    Items 3 to 5 (mechanical parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted in a Claude Code
+    session (2026-11-21).'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_1006_3_4_1_mixed_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Single exits in mixed occupancies (BCNYS 1006.3.4.1)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 54
+    - 56
+    quote: 1006.3.4.1 Mixed occupancies. Where one exit, or exit access stairway or ramp providing access to exits at other
+      stories, is permitted to serve individual stories, mixed occupancies shall be permitted to be served by single exits
+      provided that each indi- vidual occupancy complies with the applicable requirements of Table 1006.3.4(1) or 1006.3.4(2)
+      for that occupancy. Where
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+- id: general.bc_table_1006_3_4_2__other_occupancies
+  kind: flag
+  topic: means_of_egress
+  title: Table 1006.3.4(2)'s rows for other occupancies (BCNYS)
+  applies_when: other_occupancy_present
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 39
+    - 39
+    quote: A, B[fnb], E, F[fnb], M, U 49 75
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 42
+    - 43
+    quote: S[fnb,] [fnd] 29 75 Second story above grade plane B, F, M, S[fnd] 29 75
+  examples:
+  - given:
+      other_occupancy_present: true
+    expect: needs_review
+    note: 'The building holds another occupancy (other_occupancy_present): this rulebook''s rules are drafted for Group I-4
+      only, so the rows and allowances for other groups need a person.'
+  - given:
+      other_occupancy_present: false
+    expect: not_applicable
+    note: 'The architect states it doesn''t apply: not applicable.'
+  notes: Hand-drafted in a Claude Code session (2026-11-21).
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 - id: general.bc_1007_1_1_remoteness
   kind: rule
   topic: means_of_egress
@@ -620,7 +845,14 @@ rules:
   check: exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2)
   review_when:
   - when: story_exit_count < 2
-    reason: 'Fewer than two exits on the story: this applies where two are required (1006.2.1, 1006.3); a person checks.'
+    reason: 'Fewer than two exits on the story: whether two are required is general.bc_1006_3_3_story_exits''s question; a
+      person checks.'
+  - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
+      else 1 / 2)) and (other_occupancy_present or not occupancy_group_i4 or (story_first_above_or_below_grade and story_rooms_exit_directly_outside)
+      or (story_first_above_or_below_grade and story_occupant_load <= 10 and egress_travel_distance <= 75))
+    reason: 'The story''s exits are close together, but it may not need two: one exit may do here (1006.3.4: Table 1006.3.4(2)''s
+      row, or rooms that exit directly outside), or the building is in another occupancy (or its occupancy isn''t stated).
+      Whether 1007.1.1 applies to it is a person''s check.'
   for_each: story
   when_none: needs_review
   sources:
@@ -641,11 +873,27 @@ rules:
     quote: 2. Where a building is equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1
       or 903.3.1.2, the separation distance shall be not less than one-third of the length of the maximum overall diagonal
       dimension of the area served.
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 3
+    - 6
+    quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+      roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access travel
+      distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2).'
+  - file: gov.ny.building.2025.pdf
+    page: 317
+    lines:
+    - 40
+    - 41
+    quote: First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over the first story above grade plane
+      H-4, H-5, I, R-1, R-2a, c 10 75
   examples:
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       story:
       - id: p1
@@ -663,6 +911,7 @@ rules:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       story:
       - id: p2
@@ -670,31 +919,59 @@ rules:
         measures:
           exit_remoteness_ratio: 0.3
           story_exit_count: 2
+          story_first_above_or_below_grade: true
+          story_occupant_load: 120
+          egress_travel_distance: 130
+          story_rooms_exit_directly_outside: false
     rows:
     - part: p2
       outcome: fail
     expect: fail
-    note: 0.30 is under one-third.
+    note: 0.30 is under one-third, on a story of 120 that needs two exits.
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: false
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       story:
       - id: p1
-        name: Unsprinklered
+        name: Unsprinklered upper floor
         measures:
           exit_remoteness_ratio: 0.4
           story_exit_count: 2
+          story_first_above_or_below_grade: false
     rows:
     - part: p1
       outcome: fail
     expect: fail
-    note: 'Not sprinklered: one-half applies, and 0.4 is under it.'
+    note: 'Not sprinklered: one-half applies, and 0.4 is under it; a second story of Group I needs two exits (Table 1006.3.4(2)).'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
       sprinklered_903_3_1_2: false
+      other_occupancy_present: false
+    parts:
+      story:
+      - id: p4
+        name: Small first floor, two close exits
+        measures:
+          exit_remoteness_ratio: 0.3
+          story_exit_count: 2
+          story_first_above_or_below_grade: true
+          story_occupant_load: 8
+          egress_travel_distance: 60
+    rows:
+    - part: p4
+      outcome: needs_review
+    expect: needs_review
+    note: 'Eight occupants and 60 ft on the first story: one exit would do (1006.3.4, Table 1006.3.4(2)), so whether its two
+      must be apart is a person''s check, never a fail.'
+  - given:
+      occupancy_group_i4: true
+      sprinklered_903_3_1_1: true
+      sprinklered_903_3_1_2: false
+      other_occupancy_present: false
     parts:
       story:
       - id: p3
@@ -706,7 +983,7 @@ rules:
     - part: p3
       outcome: needs_review
     expect: needs_review
-    note: 'One exit: whether two are required is 1006''s question; a person checks.'
+    note: 'One exit: whether two are required is general.bc_1006_3_3_story_exits''s question.'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
@@ -717,10 +994,15 @@ rules:
     - outcome: needs_review
     expect: needs_review
     note: 'No story: the rule''s when_none (needs_review).'
-  notes: 'Exception 1 (exit stairways or ramps joined by a 1-hour corridor complying with Section 1020: measured along the
-    corridor) only loosens the test: a person''s check. exit_remoteness_ratio is of the two farthest-apart exits or exit access
-    doorways, measured to any point of a doorway''s width (1007.1.1.1), so it is the best pair. For every occupancy. Hand-drafted
-    in a Claude Code session (2026-11-21).'
+  notes: '1007.1.1 applies where two exits are required. A story''s required number is 1006.3.3''s (Table 1006.3.3), and one
+    will do where 1006.3.4 allows it: for Group I-4, Table 1006.3.4(2)''s I row (the first story above or below grade plane,
+    at most 10 occupants and 75 ft of exit access travel), or item 2 (rooms that exit directly outside). So a close pair fails
+    only on a Group I-4 story with no other occupancy that needs two (an upper story, more than 10 occupants or more than
+    75 ft, item 2 not stated); where one may do, or the building is in another occupancy (or its occupancy isn''t stated),
+    it needs review. Exception 1 (exit stairways or ramps joined by a 1-hour corridor complying with Section 1020: measured
+    along the corridor) only loosens the test: a person''s check. exit_remoteness_ratio is of the two farthest-apart exits
+    or exit access doorways, measured to any point of a doorway''s width (1007.1.1.1), so it is the best pair. Each space''s
+    own are general.bc_1007_1_1_space_remoteness. Hand-drafted in a Claude Code session (2026-11-21).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_three_or_more_exits

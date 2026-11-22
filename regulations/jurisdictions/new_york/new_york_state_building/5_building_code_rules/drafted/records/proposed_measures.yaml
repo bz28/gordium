@@ -10,6 +10,8 @@ occupancy_group_i4:
   unit: yes_no
   needed_by:
   - general.bc_1006_2_1_two_exits
+  - general.bc_1006_3_3_story_exits
+  - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1016_2_intervening_spaces
   - general.bc_1017_2_travel_distance
@@ -39,12 +41,16 @@ other_occupancy_present:
     review'
   unit: yes_no
   needed_by:
+  - general.bc_1006_3_3_story_exits
+  - general.bc_1006_3_4_1_mixed_occupancies
+  - general.bc_1007_1_1_remoteness
   - general.bc_1007_1_1_space_remoteness
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
   - general.bc_1017_2_3_h5_increase
   - general.bc_1020_5_other_occupancies
   - general.bc_table_1006_2_1_other_occupancies
+  - general.bc_table_1006_3_4_2__other_occupancies
   - general.bc_table_1017_2_other_occupancies
 egress_balcony_increase_taken:
   meaning: The design takes 2025 BCNYS 1017.2.1's exterior egress balcony increase (up to 100 ft more travel where the last

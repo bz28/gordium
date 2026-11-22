@@ -66,6 +66,21 @@ pieces:
       doorways
     rules:
     - general.bc_1006_2_1_1_three_or_more_exits
+  1006.3.3:
+    label: rule
+    heading: Egress based on occupant load
+    rules:
+    - general.bc_1006_3_3_story_exits
+  Table 1006.3.4(2):
+    label: rule
+    heading: Stories and occupiable roofs with one exit or access to one exit for other occupancies
+    rules:
+    - general.bc_table_1006_3_4_2__other_occupancies
+  1006.3.4.1:
+    label: flag
+    heading: Single exits › Mixed occupancies
+    rules:
+    - general.bc_1006_3_4_1_mixed_occupancies
   1007.1.1:
     label: rule
     heading: General › Two exits or exit access doorways

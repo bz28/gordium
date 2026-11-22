@@ -251,3 +251,29 @@ def test_the_floor_area_question_cites_no_forum_as_support(rules):
     research = rules["general.bc_508_2_3_accessory_area"]["research"][0]
     text = " ".join(g["reading"] for g in research["readings"]) + " ".join(s["cite"] for s in research["sources"])
     assert "forum" not in text.lower()
+
+
+# ---- review round 3 (2026-11-22) ------------------------------------------------------------------------------------
+
+def test_a_story_that_may_have_one_exit_is_never_failed_for_two_close_exits(ctx, rules):
+    """A story needs two exits only where 1006.3.3 and 1006.3.4 say so: Group I on the first story with at most 10
+    occupants and 75 ft (Table 1006.3.4(2)) may have one, so its two close exits need review, never fail; so do a
+    story whose rooms exit directly outside (1006.3.4 item 2) and a story in another occupancy. An upper story of
+    Group I, or one over 10 occupants, needs two, and there a close pair fails."""
+    r = rules["general.bc_1007_1_1_remoteness"]
+    i4 = I4 | {"other_occupancy_present": False}
+    close = {"exit_remoteness_ratio": 0.2, "story_exit_count": 2}
+    small = close | {"story_first_above_or_below_grade": True, "story_occupant_load": 8, "egress_travel_distance": 60}
+    assert _rows(r, "story", small, i4, ctx) == ["needs_review"]
+    assert _rows(r, "story", small | {"story_occupant_load": 40, "story_rooms_exit_directly_outside": True}, i4, ctx) \
+        == ["needs_review"]
+    assert _rows(r, "story", small, I4 | {"other_occupancy_present": True}, ctx) == ["needs_review"]
+    assert _rows(r, "story", small | {"story_occupant_load": 40, "story_rooms_exit_directly_outside": False}, i4, ctx) \
+        == ["fail"]
+    assert _rows(r, "story", close | {"story_first_above_or_below_grade": False}, i4, ctx) == ["fail"]
+    exits = rules["general.bc_1006_3_3_story_exits"]
+    one = {"story_exit_count": 1, "story_first_above_or_below_grade": True, "story_occupant_load": 8,
+           "egress_travel_distance": 60}
+    assert _rows(exits, "story", one, i4, ctx) == ["pass"]
+    assert _rows(exits, "story", one | {"story_first_above_or_below_grade": False, "story_rooms_exit_directly_outside": False},
+                 i4, ctx) == ["fail"]
