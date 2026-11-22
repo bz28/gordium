@@ -434,7 +434,7 @@ internal static class RevitInterior
         var box = run.get_BoundingBox(null);
         List<NearbyElement>? near = null;
         if (box is not null)
-            near = Near(doc, run.Id, new Outline(new XYZ(box.Min.X - 2, box.Min.Y - 2, box.Min.Z - 2),
+            near = Near("inside.stair_run.near", doc, run.Id, new Outline(new XYZ(box.Min.X - 2, box.Min.Y - 2, box.Min.Z - 2),
                                                   new XYZ(box.Max.X + 2, box.Max.Y + 2, box.Max.Z + 1000)), null);
         var up = faces?.Count(f => f.Planar && f.Normal.Z > 1 - 1e-6) ?? -1;
         words.Add($"run {run.Id.Value} {run.StairsRunStyle}: base {run.BaseElevation:0.######}, top {run.TopElevation:0.######} (relative), " +
@@ -536,7 +536,7 @@ internal static class RevitInterior
         List<NearbyElement>? near = null;
         if (boxes.Count > 0)
         {
-            near = Near(doc, r.Id, new Outline(new XYZ(boxes.Min(b => b.Min.X) - 2, boxes.Min(b => b.Min.Y) - 2, boxes.Min(b => b.Min.Z) - 2),
+            near = Near("inside.railing.near", doc, r.Id, new Outline(new XYZ(boxes.Min(b => b.Min.X) - 2, boxes.Min(b => b.Min.Y) - 2, boxes.Min(b => b.Min.Z) - 2),
                                                 new XYZ(boxes.Max(b => b.Max.X) + 2, boxes.Max(b => b.Max.Y) + 2, boxes.Max(b => b.Max.Z) + 2)), null)
                 ?.Where(e => !elements.Any(x => x.E.UniqueId == e.UniqueId)).ToList();
         }
@@ -809,10 +809,10 @@ internal static class RevitInterior
         return record with
         {
             Inside = ReadSteps.Time("inside.room.inside", () => Inside(doc, room, loops, floor, level!)),
-            Under = ReadSteps.Time("inside.room.under", () => Near(doc, room.Id,
+            Under = ReadSteps.Time("inside.room.under", () => Near("inside.under", doc, room.Id,
                 new Outline(new XYZ(x0, y0, floor - InteriorReader.SlabBand), new XYZ(x1, y1, floor + InteriorReader.SlabBand)),
                 [BuiltInCategory.OST_Floors, BuiltInCategory.OST_StructuralFoundation])),
-            Over = ReadSteps.Time("inside.room.over", () => Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,
+            Over = ReadSteps.Time("inside.room.over", () => Near("inside.over", doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,
                 ReadSteps.Time("inside.room.band_solid", () => Band(x0, y0, x1, y1, floor)))),
         };
     }
@@ -970,17 +970,17 @@ internal static class RevitInterior
     }
 
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
-    /// (any for null), with their faces; with <paramref name="band"/>, also what of each lies in it.</summary>
-    private static List<NearbyElement>? Near(Document doc, ElementId skip, Outline box, BuiltInCategory[]? categories, Solid? band = null)
+    /// (any for null), with their faces; with <paramref name="band"/>, also what of each lies in it. <paramref name="step"/>
+    /// names the caller's steps in the log's read_steps (a room's under or over box, a stair run's, a railing's).</summary>
+    private static List<NearbyElement>? Near(string step, Document doc, ElementId skip, Outline box, BuiltInCategory[]? categories, Solid? band = null)
     {
         try
         {
             var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
-            var step = band is null ? "inside.under" : "inside.over";
             var found = ReadSteps.Time(step + ".collect",
                 () => new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box)).ToList());
             ReadSteps.Count(step + ".candidates", found.Count);
-            ReadSteps.Max(step + ".candidates_per_room", found.Count);
+            ReadSteps.Max(step + ".candidates_per_call", found.Count);
             var list = new List<NearbyElement>();
             foreach (var e in found)
             {
@@ -999,7 +999,7 @@ internal static class RevitInterior
                 list.Add(near);
             }
             ReadSteps.Count(step + ".read", list.Count);
-            ReadSteps.Max(step + ".read_per_room", list.Count);
+            ReadSteps.Max(step + ".read_per_call", list.Count);
             return list;
         }
         catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.ArgumentException)

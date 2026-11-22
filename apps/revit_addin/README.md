@@ -489,7 +489,7 @@ counter add; no line per element. Its shape:
 "read_steps": {
   "steps":  { "outside": {"seconds": 212.4, "calls": 1}, "outside.get_geometry.fine": {"seconds": 96.1, "calls": 48210}, ... },
   "counts": { "outside.elements": 48210, "outside.family_instances": 9120, "outside.fine.faces": 702311, "inside.rooms": 412, ... },
-  "max":    { "inside.over.candidates_per_room": 3911, ... },
+  "max":    { "inside.over.candidates_per_call": 3911, ... },
   "links":  [ {"link": "Snowdon Towers Sample Structural.rvt : 2 : location <Not Shared>", "depth": 1, "seconds": 61.2, "elements": 20114} ]
 }
 ```
@@ -517,7 +517,9 @@ seconds include its own links; its elements are its own). The names:
   `inside.room.over` (the box under the floor, and over it to +1000 ft in any category), `inside.room.band_solid`.
   In each of those two, `inside.under|over.collect` (the box filter), `.faces` (each element's faces), `.band`
   (over only: each element cut by the room's band), counts `.candidates` (elements the box found) and `.read` (model
-  elements kept), largest `.candidates_per_room` and `.read_per_room`. The band's boolean cuts:
+  elements kept), largest `.candidates_per_call` and `.read_per_call` (one call per room). The same box search round
+  each stair run (to +1000 ft, any category) and each railing is logged apart, as `inside.stair_run.near.*` and
+  `inside.railing.near.*` (the same names, no band). The band's boolean cuts:
   `inside.boolean_op`, counted `inside.boolean_ops`; open shells skipped `inside.open_shells`. Faces read
   (`inside.faces`), of them curved and triangulated (`inside.faces_triangulated`, time `inside.triangulate`).
   Windows and doors: `inside.opening.faces`, `inside.opening.cut`. The transactions: `inside.enclosed_areas.topology`,

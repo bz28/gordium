@@ -254,19 +254,23 @@ public sealed class ReadStepsTests
                      "ReadSteps.Count(\"inside.room.boundary_calls\");",
                      "using var timed = ReadSteps.Step(\"inside.room.boundary\");",
                      "ReadSteps.Time(\"inside.room.inside\", () => Inside(doc, room, loops, floor, level!))",
-                     "ReadSteps.Time(\"inside.room.under\", () => Near(doc, room.Id,",
-                     "ReadSteps.Time(\"inside.room.over\", () => Near(doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,",
+                     "ReadSteps.Time(\"inside.room.over\", () => Near(\"inside.over\", doc, room.Id, new Outline(new XYZ(x0, y0, floor), new XYZ(x1, y1, floor + 1000)), null,",
                      "ReadSteps.Time(\"inside.room.band_solid\", () => Band(x0, y0, x1, y1, floor))",
                      "ReadSteps.Count(\"inside.room.inside_hits\", hits.Count);",
                      "ReadSteps.Max(\"inside.room.inside_hits_per_room\", hits.Count);",
-                     "var step = band is null ? \"inside.under\" : \"inside.over\";",
+                     // each caller names its own steps (a stair run's and a railing's box never counted as a room's)
+                     "ReadSteps.Time(\"inside.room.under\", () => Near(\"inside.under\", doc, room.Id,",
+                     "ReadSteps.Time(\"inside.room.over\", () => Near(\"inside.over\", doc, room.Id,",
+                     "near = Near(\"inside.stair_run.near\", doc, run.Id, new Outline(",
+                     "near = Near(\"inside.railing.near\", doc, r.Id, new Outline(",
+                     "private static List<NearbyElement>? Near(string step, Document doc, ElementId skip,",
                      "ReadSteps.Time(step + \".collect\",",
                      "ReadSteps.Count(step + \".candidates\", found.Count);",
-                     "ReadSteps.Max(step + \".candidates_per_room\", found.Count);",
+                     "ReadSteps.Max(step + \".candidates_per_call\", found.Count);",
                      "ReadSteps.Time(step + \".faces\", () => Faces(e, options))",
                      "ReadSteps.Time(step + \".band\", () => InBand(e, band, options))",
                      "ReadSteps.Count(step + \".read\", list.Count);",
-                     "ReadSteps.Max(step + \".read_per_room\", list.Count);",
+                     "ReadSteps.Max(step + \".read_per_call\", list.Count);",
                      "ReadSteps.Count(\"inside.boolean_ops\");",
                      "using (ReadSteps.Step(\"inside.boolean_op\"))\n                            cut = BooleanOperationsUtils.ExecuteBooleanOperation(s, band, BooleanOperationsType.Intersect);",
                      "ReadSteps.Count(\"inside.open_shells\");",
@@ -279,6 +283,10 @@ public sealed class ReadStepsTests
                      "new XYZ(x1, y1, floor + 1000)), null,",
                  })
             Assert.Contains(hook, source.Replace("\r\n", "\n"));
+        // the step never guessed from the band (a stair run's or railing's box, with none, was a room's under box)
+        Assert.DoesNotContain("band is null ? \"inside.under\"", source);
+        Assert.DoesNotContain("_per_room\", found.Count)", source);
+        Assert.Equal(4, Count(source, "Near(\"inside."));
     }
 
     private static int Count(string text, string what)
