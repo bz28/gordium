@@ -259,6 +259,21 @@ public sealed class ResultListTests
     }
 
     [Fact]
+    public void A_rows_second_line_says_its_verdict_when_its_heading_doesnt_then_its_figures_or_cause()
+    {
+        var fails = new ResultRow("a", "Front yard", Verdict.DoesNotComply, "DOES NOT COMPLY", Tone.Fails, "22'-6\" measured, ≥ 25'-0\" allowed",
+                                  "2'-6\" short", "r", "§325-8", [], []);
+        Assert.Equal("22'-6\" measured, ≥ 25'-0\" allowed · 2'-6\" short", ResultList.SecondLine(fails));
+        Assert.Equal("2'-6\" short", ResultList.SecondLine(fails with { Figures = null }));
+        Assert.Equal("r", ResultList.SecondLine(fails with { Figures = null, HowFar = null }));
+        Assert.Equal("", ResultList.SecondLine(fails with { Figures = null, HowFar = null, Reason = null }));
+        // a verdict its place's heading doesn't say is said: not checked, not applicable, a word not known
+        Assert.Equal("not checked · waiting on the lot", ResultList.SecondLine(Row("b", Verdict.NotChecked) with { Reason = "waiting on the lot" }));
+        Assert.Equal("not applicable", ResultList.SecondLine(Row("c", Verdict.NotApplicable)));
+        Assert.Equal("needs review (the checker said \"maybe\")", ResultList.SecondLine(Row("d", Verdict.NeedsReview, words: "needs review (the checker said \"maybe\")")));
+    }
+
+    [Fact]
     public void Copy_is_the_row_as_the_text_file_writes_it()
     {
         var row = Row("z.front", Verdict.DoesNotComply, "2'-6\" short", elements: ["uid-house", "uid-gone"]);
@@ -269,6 +284,52 @@ public sealed class ResultListTests
         // stale: said, so a copied verdict is never read as the model's now
         Assert.Equal("[DOES NOT COMPLY] Front yard [Walls id 341207, uid-gone] (checked 14:32, before the model changed)",
                      ResultList.CopyText(row, labels, new DateTime(2026, 11, 22, 14, 32, 0)));
+    }
+
+    private static string Addin(string file) =>
+        File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", file)).Replace("\r\n", "\n", StringComparison.Ordinal);
+
+    [Fact]
+    public void A_click_selects_without_zooming_and_only_show_zooms()
+    {
+        // the add-in (Revit-only, not built here): a row selected sends Select, which never calls ShowElements; Show
+        // (the button, or Space) sends Zoom, which does
+        var pane = Addin("ResultsPane.cs");
+        Assert.Contains("new ResultsView(Zoom, Select, CheckAgain, OpenProjectInformation, _theme)", pane, StringComparison.Ordinal);
+        Assert.Contains("private static void Select(ResultRow row) => Post(\"Select in model\", ui => ShowElements(ui, row, zoom: false));", pane, StringComparison.Ordinal);
+        Assert.Contains("private static void Zoom(ResultRow row) => Post(\"Show in model\", ui => ShowElements(ui, row, zoom: true));", pane, StringComparison.Ordinal);
+        Assert.Contains("        if (zoom)\n            uidoc.ShowElements(found);", pane, StringComparison.Ordinal);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(pane, @"\.ShowElements\("));
+        var view = Addin("ResultsView.cs");
+        Assert.Contains("        if (!_quiet)\n            _select(row.Row.Row);", view, StringComparison.Ordinal);     // the click and Up/Down
+        Assert.Contains("_list.SelectionChanged += (_, _) => Selected();", view, StringComparison.Ordinal);
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(view, @"_zoom\("));                     // Show alone zooms
+        Assert.Contains("            case I.Key.Space when SelectedRow is { } row:\n                ShowRow(row);", view, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void The_view_draws_the_lists_decisions_and_stays_virtualized()
+    {
+        var view = Addin("ResultsView.cs");
+        var entries = Addin("ResultsList.cs");
+        var styles = Addin("PanelStyles.xaml");
+        // the rows, their order, filters, search, keys and copy are ResultList's (tested here), never the view's own
+        Assert.Contains("_placed = ResultList.Place(model);", view, StringComparison.Ordinal);
+        Assert.Contains("_entries = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened, _closed);", view, StringComparison.Ordinal);
+        Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
+        Assert.Contains("ResultList.CopyText(row.Row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When)", view, StringComparison.Ordinal);
+        // each row's glyph and bar are its placed status (stale: the clock and the hatch), never a tone of the view's
+        Assert.Contains("var glyph = PanelLook.Glyph(p.Status, 14);", entries, StringComparison.Ordinal);
+        Assert.Contains("p.Status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(p.Status)", entries, StringComparison.Ordinal);
+        Assert.DoesNotContain("StatusLook.Of(", entries, StringComparison.Ordinal);
+        // virtualized: the list in the Grid's star row (a list in a ScrollViewer builds every row), its panel virtualizing
+        Assert.Contains("_results.RowDefinitions.Add(new C.RowDefinition { Height = new W.GridLength(1, W.GridUnitType.Star) });", view, StringComparison.Ordinal);
+        Assert.Contains("C.Grid.SetRow(_list, 2);", view, StringComparison.Ordinal);
+        Assert.Contains("_list.SetResourceReference(StyleProperty, \"list\");", view, StringComparison.Ordinal);
+        Assert.Contains("<VirtualizingStackPanel IsVirtualizing=\"True\" VirtualizationMode=\"Recycling\" />", styles, StringComparison.Ordinal);
+        Assert.Contains("<Setter Property=\"ScrollViewer.CanContentScroll\" Value=\"True\" />", styles, StringComparison.Ordinal);
+        // a heading is never selected or focused
+        Assert.Contains("<Setter Property=\"Focusable\" Value=\"False\" />", styles[styles.IndexOf("x:Key=\"list.heading\"", StringComparison.Ordinal)..], StringComparison.Ordinal);
     }
 
     [Fact]
