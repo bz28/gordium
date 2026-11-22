@@ -101,6 +101,13 @@ public sealed class CheckFlow
     public static PanelHad Had(bool shown, bool rows, bool failed) =>
         shown ? (rows ? PanelHad.Results : PanelHad.Missing) : failed ? PanelHad.Error : PanelHad.Nothing;
 
+    /// <summary>What Cancel can go back to: what the panel had when the check began (<paramref name="had"/>), when it
+    /// still shows it (<paramref name="now"/>: the earlier results or the list of what to fill in); else no rows (the
+    /// earlier project closed meanwhile, say): the error state when either was one, else nothing. Cancel's words
+    /// (<see cref="CheckWords.Cancelled"/>) are this one's, never "the results below" with none below.</summary>
+    public static PanelHad Restored(PanelHad had, PanelHad now) =>
+        had == now ? had : had == PanelHad.Error || now == PanelHad.Error ? PanelHad.Error : PanelHad.Nothing;
+
     /// <summary>Begins a check: its ticket, its stage Reading; null (and nothing changes) when one is running.
     /// <paramref name="had"/> is what the panel showed, for Cancel.</summary>
     public long? TryStart(PanelHad had)

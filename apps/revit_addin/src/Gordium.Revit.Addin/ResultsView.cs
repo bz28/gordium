@@ -442,20 +442,22 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     /// what to fill in, or the empty or error state; then why (<paramref name="why"/>, or CheckWords.Cancelled).</summary>
     internal void Restore(PanelHad had, string? why)
     {
-        switch (had)
+        // what is actually restored (CheckFlow.Restored), and its words: never "the results below" with none below
+        var restored = CheckFlow.Restored(had, Had);
+        switch (restored)
         {
             case PanelHad.Results when _content is { Model: { } model } content:
                 Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When)), MarksAdded = 0, ClearWords = "" });
                 break;
-            case PanelHad.Missing when _content is { Model: null }:
+            case PanelHad.Missing:
                 break;                                      // what to fill in, as it was
             default:
                 Failed("");                                 // the empty or error state: no rows
-                if (had == PanelHad.Nothing)
+                if (restored == PanelHad.Nothing)
                     _failed = false;
                 break;
         }
-        Say(why ?? CheckWords.Cancelled(had));
+        Say(why ?? CheckWords.Cancelled(restored));
     }
 
     private void ShowMissing(IReadOnlyList<string> missing)
