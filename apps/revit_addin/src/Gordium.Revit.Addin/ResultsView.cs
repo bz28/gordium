@@ -504,6 +504,9 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
     private SetupView? _setup;
     private C.ScrollViewer? _setupScroll;
 
+    /// <summary>Whether the Setup form is what the pane shows.</summary>
+    internal bool ShowsSetup => _setupScroll is not null && ReferenceEquals(_bodyHost.Child, _setupScroll);
+
     /// <summary>The Setup form in place of the results: "what to fill in" for a cancelled check to go back to (its
     /// content has no rows, as the missing state's: CheckFlow.Had says Missing).</summary>
     internal void ShowSetup(string project, SetupScreen screen, SetupDraft draft, SetupHandlers handlers, string? notice, HashSet<string> open)

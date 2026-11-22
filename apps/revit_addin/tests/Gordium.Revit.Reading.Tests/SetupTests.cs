@@ -245,7 +245,7 @@ public sealed class SetupTests
         var s = Screen(Model());
         Assert.Equal([Marks.Zone.Name, Marks.Use.Name, Marks.LotSurveyed.Name, Marks.StreetEdge.Name, "sleeping_room", "escape_opening", "exit_door"], s.Needed);
         Assert.True(SetupGate.ShowSetup(s.Needed, null));
-        Assert.False(SetupGate.RunsByItself(s));
+        Assert.False(SetupGate.RunsByItself(s, s));
         // everything needed set: the form doesn't show, the check runs
         var marked = House.Select(e => e with
         {
@@ -253,7 +253,8 @@ public sealed class SetupTests
         }).ToArray();
         var ready = Screen(Model(AllStated(), marked));
         Assert.Empty(ready.Needed);
-        Assert.True(SetupGate.RunsByItself(ready));
+        Assert.True(SetupGate.RunsByItself(s, ready));                 // the form was waiting: the check runs
+        Assert.False(SetupGate.RunsByItself(ready, ready));            // nothing was waiting (Mark facts, all set): an edit runs nothing
         Assert.False(SetupGate.ShowSetup(ready.Needed, null));
         // an optional fact (the operations, the corner lot) never holds the check back
         Assert.False(Line(ready, "operation").Done);

@@ -405,8 +405,15 @@ public static class SetupGate
     public static bool ShowSetup(IReadOnlyCollection<string> needed, IReadOnlyCollection<string>? anywayFor) =>
         needed.Count > 0 && !(anywayFor is not null && needed.All(anywayFor.Contains));
 
-    /// <summary>After a write: the check runs by itself only when the form was waiting and now nothing needed is missing.</summary>
-    public static bool RunsByItself(SetupScreen after) => after.Ready;
+    /// <summary>After a write or an edit (a Save, an accept, a value set in Properties, an undo): the check runs by
+    /// itself only when the form was waiting for something needed and now nothing needed is missing; never on an edit
+    /// to a form that had nothing to wait for (Mark facts opened on a project already set).</summary>
+    public static bool RunsByItself(SetupScreen before, SetupScreen after)
+    {
+        ArgumentNullException.ThrowIfNull(before);
+        ArgumentNullException.ThrowIfNull(after);
+        return !before.Ready && after.Ready;
+    }
 }
 
 /// <summary>The form's words by building type.</summary>

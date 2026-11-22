@@ -81,6 +81,9 @@ internal sealed class ResultsPane : IDockablePaneProvider
         ui.GetDockablePane(Id).Show();
     }
 
+    /// <summary>Whether the pane shows the Setup form now.</summary>
+    internal static bool ShowsSetup() => _view?.ShowsSetup == true;
+
     /// <summary>The Setup form drawn again (the panel's thread): after a choice, or when the place's options arrive;
     /// only while the pane shows it.</summary>
     internal static void RedrawSetup(SetupScreen screen, SetupDraft draft, SetupHandlers handlers, string? notice, HashSet<string> open) =>
@@ -194,7 +197,10 @@ internal sealed class ResultsPane : IDockablePaneProvider
             if (CheckRun.Reads(doc))
                 CheckRun.Flow.Edited();
             if (_checked is not null && _view is not null && doc.Equals(_checked))
+            {
                 _view.MarkStale();
+                SetupRun.Changed(doc);                       // the Setup form shown: its facts read again
+            }
         }
         catch (Exception x)       // never out of Revit's event
         {

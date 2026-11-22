@@ -21,6 +21,8 @@ internal static class SetupRun
     private static PlaceOptions? _options;
     private static Task? _asking;
     private static string? _notice;
+    private static SetupScreen? _shown;
+    private static bool _reading;
     private static readonly SetupDraft Draft = new();
     private static readonly HashSet<string> Open = new(StringComparer.Ordinal);
 
@@ -42,7 +44,7 @@ internal static class SetupRun
             Open.Clear();
         }
         _model = RevitMarks.Model(doc);
-        _sides ??= RevitMarks.Sides(doc);
+        _sides = RevitMarks.Sides(doc);                      // read again each time: a window added since has its rooms
         return Screen();
     }
 
@@ -62,6 +64,7 @@ internal static class SetupRun
     {
         screen ??= Read(doc);
         _notice = notice;
+        _shown = screen;
         AskOptions();
         ResultsPane.ShowSetup(ui, doc, screen, Draft, Handlers, notice, Open);
     }
@@ -72,7 +75,23 @@ internal static class SetupRun
     {
         if (_model is null || _doc is null || !_doc.IsValidObject)
             return;
-        ResultsPane.RedrawSetup(Screen(), Draft, Handlers, _notice, Open);
+        ResultsPane.RedrawSetup(_shown = Screen(), Draft, Handlers, _notice, Open);
+    }
+
+    /// <summary>The project shown in the form changed (Revit's DocumentChanged: a value set in Properties after Select
+    /// them, an undo): its marks read again through the panel's ExternalEvent, once however many changes came, and the
+    /// check run by itself when that set the last fact needed.</summary>
+    internal static void Changed(Document doc)
+    {
+        if (_doc is null || !_doc.Equals(doc) || _shown is null || !ResultsPane.ShowsSetup() || _reading)
+            return;
+        _reading = true;
+        ResultsPane.Post("Read the facts again", ui =>
+        {
+            _reading = false;
+            if (_doc is { IsValidObject: true } d && ResultsPane.ShowsSetup())
+                Refreshed(ui, d, "");
+        }, refused: () => _reading = false);
     }
 
     /// <summary>The place's districts and uses, asked of the worker once (off Revit's thread); until they come the
@@ -157,9 +176,11 @@ internal static class SetupRun
     /// <summary>After a write or a pick: the form read again; the check runs by itself when nothing needed is left.</summary>
     private static void Refreshed(UIApplication ui, Document doc, string said)
     {
+        var before = _shown;
         var screen = Read(doc);
-        if (SetupGate.RunsByItself(screen))
+        if (before is not null && SetupGate.RunsByItself(before, screen))
         {
+            _shown = null;
             ResultsPane.Say(said);
             CheckProjectCommand.Check(ui);
             return;

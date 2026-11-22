@@ -141,7 +141,15 @@ internal sealed class SetupView : C.StackPanel
                     if (combo.SelectedItem is C.ComboBoxItem { Tag: string value })
                         _do.Choose(f.Mark, value);
                 };
-                box.Children.Add(combo);
+                // nothing chosen: says so in the box (never a value shown that isn't the mark's or the architect's)
+                var hint = Muted(f.Mark == Marks.Zone ? "Choose the district" : f.Mark == Marks.Use ? "Choose the use" : "Choose one");
+                hint.IsHitTestVisible = false;
+                hint.Margin = new W.Thickness(7, 6, 24, 0);
+                hint.Visibility = at < 0 ? W.Visibility.Visible : W.Visibility.Collapsed;
+                var grid = new C.Grid();
+                grid.Children.Add(combo);
+                grid.Children.Add(hint);
+                box.Children.Add(grid);
                 break;
             }
             case FieldKind.YesNo:
