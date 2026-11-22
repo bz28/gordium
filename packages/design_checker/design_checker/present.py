@@ -1550,28 +1550,7 @@ def _items_for(row, rule, measured, values, facts, extras, cite, documents, j, u
             }})
         if node is not None and node.left.id == "building_height":
             out[-1]["detail"].update(_height_detail(j, facts, values, node, numbers))
-        _say_stated(out[-1], node, measured, proposed)
     return out
-
-
-STATED_HOW = "stated by the architect"      # the measuring's own words for a value the architect states (measure.py)
-
-
-def _say_stated(item: dict, node, measured: dict, proposed) -> None:
-    """A row decided on a value the architect states rather than one measured (the stories count a Revit
-    Project Information mark or the Lot facts box gives: the measuring's `how` starts "stated by the architect") says
-    so: `stated` true (a host shows the figure as stated, never as measured) and its reason names the statement and
-    its bounds, on a row of any verdict, never hidden."""
-    how = str((measured.get(node.left.id) or {}).get("how") or "") if node is not None else ""
-    if not how.startswith(STATED_HOW) or (measured.get(node.left.id) or {}).get("value") is None:
-        return
-    item["stated"] = True
-    said = f"{proposed} {how}" if proposed not in (None, "", "—") else how
-    why = item.get("reason")
-    if not why:
-        item["reason"] = said[0].upper() + said[1:]
-    elif STATED_HOW not in why:
-        item["reason"] = f"{why} · {said}"
 
 
 def _applied(names: set, measured: dict) -> dict:

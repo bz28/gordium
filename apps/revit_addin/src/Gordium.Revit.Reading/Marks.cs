@@ -184,7 +184,7 @@ public static class Marks
     /// <summary>The number of stories the architect states for the whole building (<c>facts.stories</c>): optional,
     /// never required, a whole number 1 or more, sent as the architect's statement. The measuring keeps it only within
     /// what the drawing allows (never fewer than the floors drawn, never more than the walls could hold at 7 ft a
-    /// story: places/ithaca_city/measure.py _stories_whole), and the stories row says "stated by the architect". Its
+    /// story: places/ithaca_city/measure.py _stories_whole), and the panel shows it as "stated by the architect" (CheckItem.Stated). Its
     /// words are Ithaca's own STORY (§325-3B), so the count is the one the law means. Blank: not stated, the count is
     /// read from the drawing, and where the drawing allows more than one count the row needs review.</summary>
     public static readonly MarkDefinition Stories = new(

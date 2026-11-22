@@ -27,7 +27,7 @@ project_information:
   - {mark: "Gordium: Ground from", value: Spot grades,
      why: "spreadsheet_design_model_facts.yaml ground_is_flat, grade_elevation 0: drawn as four spot grades at 0 (revit_build_data.json spot_grades), which the Revit reader reads only when this says Spot grades"}
   - {mark: "Gordium: Stories", value: 3,
-     why: "EVAL ASSUMPTION standing in for the architect's count: the spreadsheet's Inputs!B13 = 3 (spreadsheet_design.yaml measurements.stories; spreadsheet_design_model_facts.yaml lot_facts stories 3, the same design's Rhino facts). The box is drawn as four 35 ft walls and a roof slab with no floors, so the drawing allows 1 to 5 stories (7 ft a story, R305.1) and the count is the architect's to state (§325-3B STORY); 3 is within 1 to 5, so it stands, and the row says 'stated by the architect'. Added 2026-11-22 with the Stories mark"}
+     why: "EVAL ASSUMPTION standing in for the architect's count: the spreadsheet's Inputs!B13 = 3 (spreadsheet_design.yaml measurements.stories; spreadsheet_design_model_facts.yaml lot_facts stories 3, the same design's Rhino facts). The box is drawn as four 35 ft walls and a roof slab with no floors, so the drawing allows 1 to 5 stories (7 ft a story, R305.1) and the count is the architect's to state (§325-3B STORY); 3 is within 1 to 5, so it stands, recorded as 'stated by the architect' (the panel says '3 stated by the architect'). Added 2026-11-22 with the Stories mark"}
 
 # Which compass side each of the spreadsheet's side yards is: the street on the lot's south edge (y = 0), the house
 # 10 ft from the left boundary (Inputs!B8) at x = 0, as make_spreadsheet_model.py draws it: seen from the street, left is

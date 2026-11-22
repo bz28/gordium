@@ -79,23 +79,34 @@ public sealed class ResultRowsTests(RealWorker worker) : IClassFixture<RealWorke
         Assert.Equal("[DOES NOT COMPLY] Front yard: 22'-6\" measured, ≥ 25'-0\" allowed (2'-6\" short) [uid-house]", row.Line());
     }
 
-    /// <summary>A row decided on a value the architect states (the worker's <c>stated</c>: the Gordium: Stories count)
-    /// says "stated by the architect", never "measured"; one with no such flag is measured, as before.</summary>
+    /// <summary>A row decided on a value the architect states (the Gordium: Stories count: the worker's own record of
+    /// the row's measure, <c>result.measurements.stories.how</c>, begins "stated by the architect") says "stated by the
+    /// architect", never "measured"; a measured one, or a record with no value, is measured, as before.</summary>
     [Fact]
     public void A_stated_figure_is_shown_as_stated_never_as_measured()
     {
-        var item = Zoning("R-1b.stories", "complies", "at limit", "at limit",
-                          "3 stated by the architect for the whole building, within what the drawing allows (1 to 5)");
-        item["name"] = "Stories";
-        item["proposed"] = "3";
-        item["required"] = "3";
-        item["sign"] = "≤";
-        item["stated"] = true;
-        var row = One(item);
-        Assert.Equal("3 stated by the architect, ≤ 3 allowed", row.Figures);
-        Assert.Contains("within what the drawing allows (1 to 5)", row.Line(), StringComparison.Ordinal);
-        item["stated"] = false;
-        Assert.Equal("3 measured, ≤ 3 allowed", One(item).Figures);
+        static ResultRow Stories(string how, int? value)
+        {
+            var item = Zoning("R-1b.stories", "complies", "at limit", "at limit");
+            item["name"] = "Stories";
+            item["proposed"] = "3";
+            item["required"] = "3";
+            item["sign"] = "≤";
+            item["measure"] = "stories";
+            var result = new JsonObject
+            {
+                ["view"] = View(new JsonArray(item), new JsonArray(Group("g", "G", "R-1b.stories"))),
+                ["report_error"] = null,
+                ["measurements"] = new JsonObject { ["stories"] = new JsonObject { ["how"] = how, ["value"] = value } },
+            };
+            var answer = new WorkerAnswer(JsonDocument.Parse(result.ToJsonString()).RootElement, About);
+            return ResultRows.Row(CheckResult.Parse(answer).Items[0]);
+        }
+        Assert.Equal("3 stated by the architect, ≤ 3 allowed",
+                     Stories("stated by the architect for the whole building, within what the drawing allows (1 to 5)", 3).Figures);
+        Assert.Equal("3 measured, ≤ 3 allowed", Stories("read from the drawing: the building, 21 ft tall, could hold up to 3 stories", 3).Figures);
+        Assert.Equal("3 measured, ≤ 3 allowed", Stories("stated by the architect", null).Figures);       // no value: not a statement used
+        Assert.Equal("22'-6\" measured, ≥ 25'-0\" allowed", One(Zoning("y", "does_not_comply", "2'-6\" short")).Figures);   // no record
     }
 
     /// <summary>A delta the worker left empty (settle: a row with no reading set) says nothing of how far, even with a

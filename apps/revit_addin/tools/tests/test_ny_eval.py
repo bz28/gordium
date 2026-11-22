@@ -364,8 +364,10 @@ def test_the_106_design_checked_by_the_real_worker_differs_from_the_architects_o
     assert made["summary"]["expected_differences"] == ["Minimum parking"]
     # the stated 3 stands within the 1 to 5 the walls allow, as the architect's statement, and complies with R-1b's 3
     assert {r["row"]: r["gordium"] for r in made["rows"]}["Maximum stories"] == "complies"
-    stories = next(i for i in got["result"]["view"]["items"] if i["id"] == "R-1b.stories")
-    assert "stated by the architect" in json.dumps(stories)
+    # the architect's statement, as the worker records it (the Revit panel shows "3 stated by the architect": its
+    # CheckItem.Stated reads this record)
+    assert got["result"]["measurements"]["stories"]["how"].startswith("stated by the architect for the whole building")
+    assert got["result"]["measurements"]["stories"]["value"] == 3
     # never kinder without it: no count stated, the row needs review ("draw its floors or enter the count"), never a
     # pass on the count the spreadsheet types
     bare = _answer(site, {k: v for k, v in facts.items() if k != "stories"})
