@@ -4,6 +4,7 @@ the add-in logs) and the answer files; it never works a verdict out itself.
 
     python compare_check_result.py orangetown    <results.jsonl or answer.json> [--model <.rvt name>] [--out <.yaml>]
     python compare_check_result.py 106_ithaca_rd <results.jsonl or answer.json> [--model <.rvt name>] [--out <.yaml>]
+    python compare_check_result.py four_unit_apartment <results.jsonl or answer.json> [--model ...] [--out ...]
 
 The result: the add-in's trial log (`results.jsonl`: its last `check_project` line with an answer, for the model
 named when --model is given) or a file holding the worker's answer (`{"result": {...}}`) or its result alone.
@@ -18,6 +19,10 @@ named when --model is given) or a file holding the worker's answer (`{"result": 
     verdict (`result.statuses`) for the rule spreadsheet_design.yaml maps it to, the architects' proposed value beside
     Gordium's measured one, and each difference named by the eval's `expected_differences` (with its source) or, when
     none says why, UNEXPLAINED.
+  - four_unit_apartment: the Building Code eval (test_data/test_sites/new_york/ithaca_city/four_unit_apartment): the
+    answer's `which_code` beside expected.yaml's, and each Building Code rule's verdict (`result.egress.results`)
+    beside its hand-worked one; a false pass, a verdict not as worked out, a rule missing and a section other than
+    the Building Code's are each named.
 
 Writes the comparison as YAML (--out; default: revit_eval_comparison.yaml in the building's folder) and prints its
 summary. Exit 0 when no false pass and no unexplained or unpredicted difference, else 1.
@@ -36,7 +41,8 @@ import yaml
 REPO = Path(__file__).resolve().parents[4]
 HOUSE = REPO / "test_data/real_houses/orangetown_ny_80_south_william"
 SITE = REPO / "test_data/test_sites/new_york/ithaca_city/106_ithaca_rd"
-FOLDERS = {"orangetown": HOUSE, "106_ithaca_rd": SITE}
+APARTMENT = REPO / "test_data/test_sites/new_york/ithaca_city/four_unit_apartment"
+FOLDERS = {"orangetown": HOUSE, "106_ithaca_rd": SITE, "four_unit_apartment": APARTMENT}
 TOOL = "apps/revit_addin/tools/evals/compare_check_result.py"
 
 # one word per verdict, whoever gives it: the checker's rows (pass...), its statuses (complies...), the hand-check,
@@ -260,7 +266,43 @@ def compare_106(result: dict) -> dict:
     }
 
 
-COMPARE = {"orangetown": compare_orangetown, "106_ithaca_rd": compare_106}
+def compare_apartment(result: dict) -> dict:
+    expected = _load(APARTMENT, "expected.yaml")
+    which = result.get("which_code") or {}
+    which_diff = {k: {"gordium": which.get(k), "expected": v} for k, v in expected["which_code"].items()
+                  if which.get(k) != v}
+    got = {k: word(v) for k, v in ((result.get("egress") or {}).get("results") or {}).items()}
+    rows, false_passes, unpredicted, missing = [], [], [], []
+    for rid, want in expected["results"].items():
+        g, want = got.get(rid), word(want)
+        row = {"rule": rid, "gordium": g, "expected": want}
+        if g is None:
+            row["difference"] = "NOT IN THE RESULT: the check gave this rule no verdict"
+            missing.append(rid)
+        elif false_pass(g, want):
+            row["difference"] = f"FALSE PASS: Gordium says {g}, worked out by hand {want}"
+            false_passes.append(rid)
+        elif g != want:
+            row["difference"] = f"NOT AS WORKED OUT: Gordium says {g}, expected.yaml {want}"
+            unpredicted.append(rid)
+        rows.append(row)
+    extra = sorted(set(got) - set(expected["results"]))
+    sections = [s.get("key") for s in result.get("sections") or [] if s.get("key") != "zoning"]
+    return {
+        "building": "Four-unit apartment building (Gordium's Building Code eval, not a real project): egress only",
+        "made_by": f"{TOOL} (run it on the add-in's result to reproduce this file)",
+        "result": result["_source"], "answer_key": "test_data/test_sites/new_york/ithaca_city/four_unit_apartment/expected.yaml",
+        "summary": {"rules": len(rows), "as_worked_out": sum(r["gordium"] == r["expected"] for r in rows),
+                    "false_passes": false_passes, "not_as_worked_out": unpredicted, "not_in_the_result": missing,
+                    "not_in_expected": extra, "which_code": which_diff or "as expected", "egress_sections": sections,
+                    "zoning": "not compared: the lot is a stand-in"},
+        "rules": rows,
+        "ok": not (false_passes or unpredicted or missing or extra or which_diff)
+              and sections == ["new_york/new_york_state_building"],
+    }
+
+
+COMPARE = {"orangetown": compare_orangetown, "106_ithaca_rd": compare_106, "four_unit_apartment": compare_apartment}
 
 
 def main(argv: list[str] | None = None) -> int:

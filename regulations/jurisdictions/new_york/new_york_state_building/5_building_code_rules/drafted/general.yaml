@@ -5,8 +5,8 @@
 # (text_verification.yaml: every piece read again from the page images by a reader who never saw the extracted
 # text; the two tables also by each cell's position). Graded against the Maine architect's hand check of a day care
 # (test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml) as if the same building were in New York
-# (rule_format/tests/test_ny_building_egress.py). No New York place inherits this folder yet, so no check runs these
-# rules today. Drafts: approval is deferred.
+# (rule_format/tests/test_ny_building_egress.py). Ithaca's checks run them for buildings the Building Code governs
+# (2026-11-22: design_checker/code_scope.py). Drafts: approval is deferred.
 district: general
 rules:
 - id: general.bc_308_5_classification

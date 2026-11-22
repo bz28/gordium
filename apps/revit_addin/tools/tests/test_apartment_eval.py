@@ -61,3 +61,26 @@ def test_the_project_marks_are_the_add_ins_and_state_the_building_block():
         load("apartment.yaml")["building"]["occupancy_groups"]
     assert given["Gordium: Sprinkler system"].lower() == load("apartment.yaml")["building"]["sprinkler_system"]
     assert marks_tool.check_request(marks, "m.rvt")["marks"]["Gordium: Stories"] == 2
+
+
+def test_the_real_workers_answer_compares_as_worked_out(tmp_path):
+    """The eval building's interior as the Revit reader reads it, sent as Check my project sends it (a stand-in site:
+    no egress rule reads the outside), compared with expected.yaml by the comparison Ben runs on the Revit result."""
+    import compare_check_result as compare
+    from design_checker.__main__ import answer
+
+    site = json.loads((REPO / "test_data/host_conformance/expected/01_box_house.site.json").read_text(encoding="utf-8"))
+    facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": "R-3a",
+             "use": "multiple_family", "lot_surveyed": False, "street_line": [[[0, 0], [60, 0]]]}
+    got = answer({"id": 1, "cmd": "check_site", "protocol": "1.3", "site": site, "facts": facts,
+                  "interior": build.interior_of()})
+    assert got["ok"], got.get("error")
+    (tmp_path / "a.json").write_text(json.dumps(got), encoding="utf-8")
+    made = compare.compare_apartment(compare.result_of(tmp_path / "a.json"))
+    assert made["ok"], made["summary"]
+    assert made["summary"]["as_worked_out"] == 33
+    # and a kinder verdict than the hand-work is named a false pass, never ok
+    got["result"]["egress"]["results"]["general.bc_1006_3_3_story_exits"] = "pass"
+    (tmp_path / "b.json").write_text(json.dumps(got), encoding="utf-8")
+    worse = compare.compare_apartment(compare.result_of(tmp_path / "b.json"))
+    assert not worse["ok"] and worse["summary"]["false_passes"] == ["general.bc_1006_3_3_story_exits"]
