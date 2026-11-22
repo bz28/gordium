@@ -215,3 +215,48 @@ def test_the_common_path_gives_a_blocked_room_the_same_reason_as_the_travel():
     with pytest.raises(Stop) as stop:
         tied_routes(r, at(12, 18), "A")
     assert stop.value.key == "no_route_host_blocked" and "opens only into k, which can be locked" in stop.value.reason
+
+
+# --- review round 1: the reasons a served room's point has no route ----------------------------------------------------
+
+def test_a_pocket_in_a_served_closet_is_shut_in_never_a_room_with_no_way_out():
+    """A niche 19.2 in wide and 2 ft deep in the closet's north wall (x 11.2 to 12.8, y 20 to 22): its back,
+    (12, 21.5), is 1.70 ft from each mouth corner (clear of both rings) and shut in by them, with a route only with no
+    clearance. The no-clearance retry comes first: too narrow (a pocket, which decision 3 bounds), never "no route
+    leaves the kitchen", which would stop the whole figure."""
+    d = kitchen_closet()
+    for r in d["rooms"]:
+        if r["id"] == "cl":
+            r["floor"] = [[10, 17], [14, 17], [14, 20], [12.8, 20], [12.8, 22], [11.2, 22], [11.2, 20], [10, 20]]
+    with pytest.raises(Stop) as stop:
+        routes(d).route(at(12, 21.5))
+    assert stop.value.key == "too_narrow"
+
+
+def test_a_served_closets_point_cut_off_in_its_own_floor_is_no_route_not_the_kitchens_fault():
+    """Fixed casework right across the closet (y 18.5 to 19): (12, 19.5) has no way to the closet's door even with
+    no clearance, while the kitchen has a route on: plain "no route", never "no route leaves k either"."""
+    d = kitchen_closet()
+    for r in d["rooms"]:
+        if r["id"] == "cl":
+            r["obstructions"] = [{"outline": [list(p) for p in rect(10, 18.5, 14, 19)], "kind": "casework",
+                                  "fixed": True}]
+    r = routes(d)
+    assert r.route(at(12, 17.75)).feet > 0                     # below the casework, a route through the kitchen
+    with pytest.raises(Stop) as stop:
+        r.route(at(12, 19.5))
+    assert stop.value.key == "no_route" and "no route leaves" not in stop.value.reason
+
+
+def test_a_served_closets_common_path_tolerates_an_exit_it_cant_reach():
+    """A second exit B out of a corridor of its own (30 to 40 by 10 to 16, no door to the rest): from the closet,
+    no route to B (none leaves the kitchen to it either), so the common path is taken over the exits it reaches (one
+    here: the travel to A, 18.670 ft by hand), never a stop for the whole point."""
+    from model_measurement.routes.common_path import at_point
+    d = kitchen_closet(more_rooms=[room("c2", rect(30, 10, 40, 16))],
+                       more_doors=[door("y", (40.25, 13), (0, 1), ("c2", "outside"), exit_id="B")])
+    r = routes(d)
+    with pytest.raises(Stop) as stop:
+        r.route(at(12, 18), ["B"])
+    assert stop.value.key == "no_route_via_host"
+    assert at_point(r, at(12, 18)).length / FT == pytest.approx(18.670, abs=TOL)

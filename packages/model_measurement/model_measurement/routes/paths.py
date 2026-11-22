@@ -542,16 +542,11 @@ class StoryRoutes:
 
     def _no_route(self, p, at, exit_ids, wanted, room=None):
         """No route: say so, and say it is an opening too narrow for the clearance when one with none exists; for a
-        room that opens only into one end-only room, say why its route can't go through it, or that the room it
-        serves has none either."""
+        room that opens only into one end-only room, say why its route can't go through it, or (only when the room
+        it serves has no route on from any of its doors) that the room it serves has none either. The no-clearance
+        retry comes first: a point with a route only with no clearance is shut in (a pocket, decision 3)."""
         exits = "any exit" if exit_ids is None else "the exit " + ", ".join(sorted(wanted))
         story = self.story
-        if room is not None and room.id in story.not_served:
-            return Stop("no_route_host_blocked", x=at[0], y=at[1], exits=exits, name=room.name,
-                        why=story.not_served[room.id])
-        if room is not None and room.id in story.served_by:
-            return Stop("no_route_via_host", x=at[0], y=at[1], exits=exits, name=room.name,
-                        host=story.rooms[story.served_by[room.id]].name)
         if self.r > 0:
             if self._plain is None:
                 self._plain = StoryRoutes(self.story, 0.0)
@@ -561,6 +556,13 @@ class StoryRoutes:
                 pass
             else:
                 return Stop("too_narrow", x=at[0], y=at[1])
+        if room is not None and room.id in story.not_served:
+            return Stop("no_route_host_blocked", x=at[0], y=at[1], exits=exits, name=room.name,
+                        why=story.not_served[room.id])
+        if room is not None and room.id in story.served_by and not any(
+                self._onward(room, d, wanted, at, frozenset()) for d in self._region([room.id]).doors):
+            return Stop("no_route_via_host", x=at[0], y=at[1], exits=exits, name=room.name,
+                        host=story.rooms[story.served_by[room.id]].name)
         return Stop("no_route", x=at[0], y=at[1], exits=exits)
 
     def routes(self, point, exit_ids=None) -> list[Route]:

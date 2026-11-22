@@ -30,7 +30,8 @@ from model_measurement.routes.remote import Remote, farthest
 from model_measurement.routes.stops import Stop
 
 TOL = EPS                      # in: two routes this close share the point (their pieces come from the same formulas)
-UNREACHED = ("no_route", "too_narrow")      # a point with no route to this exit (it may still have one to others)
+UNREACHED = ("no_route", "too_narrow", "no_route_host_blocked", "no_route_via_host")   # a point with no route to
+                                                                                   # this exit (it may have to others)
 
 
 @dataclass
