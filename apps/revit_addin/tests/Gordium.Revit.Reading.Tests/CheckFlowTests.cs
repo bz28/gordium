@@ -323,6 +323,93 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         }
     }
 
+    /// <summary>Review round 1 (P3): a Cancel clicked during the read is handled before the send (which waits behind
+    /// Revit's queued input): with the check's token already cancelled, nothing reaches the worker and it keeps
+    /// running (it isn't killed and restarted), and the outcome is ignored.</summary>
+    [Fact]
+    public async Task A_cancel_before_the_send_sends_nothing_and_keeps_the_worker()
+    {
+        using var worker = await Fake("hang");
+        var flow = new CheckFlow();
+        var t = flow.TryStart(PanelHad.Results)!.Value;
+        Assert.True(flow.ReadDone(t));                                         // the read ended: its edits counted
+        Assert.Equal(PanelHad.Results, flow.Cancel());                          // the click queued during the read
+        Assert.False(flow.IsCurrent(t));                                       // CheckRun.Send: nothing sent
+        var (_, arrived) = Send(flow, t, Task.FromResult(worker));             // even if it were sent: token cancelled
+        var (outcome, _) = await arrived.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Assert.Equal(TaskStatus.Canceled, outcome.Status);
+        Assert.False(worker.IsStopped);                                        // never asked anything, never killed
+        Assert.Equal(AnswerUse.Ignore, flow.Arrived(t, outcome));
+    }
+
+    /// <summary>Review round 1 (P3): Cancel's words are what was restored, never "the results below" with none
+    /// below (the earlier project closed during the check, say).</summary>
+    [Theory]
+    [InlineData(PanelHad.Results, PanelHad.Results, PanelHad.Results)]
+    [InlineData(PanelHad.Results, PanelHad.Nothing, PanelHad.Nothing)]
+    [InlineData(PanelHad.Results, PanelHad.Error, PanelHad.Error)]
+    [InlineData(PanelHad.Missing, PanelHad.Missing, PanelHad.Missing)]
+    [InlineData(PanelHad.Missing, PanelHad.Error, PanelHad.Error)]
+    [InlineData(PanelHad.Error, PanelHad.Nothing, PanelHad.Error)]
+    [InlineData(PanelHad.Nothing, PanelHad.Nothing, PanelHad.Nothing)]
+    public void Cancel_says_what_was_restored(PanelHad had, PanelHad now, PanelHad restored)
+    {
+        Assert.Equal(restored, CheckFlow.Restored(had, now));
+        if (restored != PanelHad.Results)
+            Assert.DoesNotContain("results below", CheckWords.Cancelled(restored), StringComparison.Ordinal);
+    }
+
+    /// <summary>Review round 1 (P2): the street edge is never picked in a project that isn't the one being checked
+    /// (the architect switched projects after clicking Check): not asked, and the panel says to switch.</summary>
+    [Fact]
+    public void The_street_edge_is_never_picked_in_another_project()
+    {
+        var h = FakeHouse.Draw("5_basement_window_well");
+        foreach (var m in new[] { Marks.StreetEdge })
+            h.ProjectMarks.Remove(m.Guid);
+        h.ProjectMarks[Marks.Zone.Guid] = new(true, Text: "R-1b");
+        h.ProjectMarks[Marks.Use.Guid] = new(true, Text: "one_family_detached");
+        h.ProjectMarks[Marks.LotSurveyed.Guid] = new(true, 1);
+        var read = ProjectFacts.Read(h.Model());
+        Assert.Equal([ProjectFacts.StreetNotSet], read.Missing);
+        Assert.Equal(StreetAsk.Pick, StreetEdges.Ask(read, needed: true, viewShowsPropertyLine: true, active: true));
+        foreach (var view in new[] { true, false })
+            Assert.Equal(StreetAsk.NotActive, StreetEdges.Ask(read, needed: true, viewShowsPropertyLine: view, active: false));
+        Assert.Equal([StreetEdges.SwitchToIt], StreetEdges.MissingAsShown(read.Missing, StreetAsk.NotActive));
+        Assert.Contains("switch to it", StreetEdges.SwitchToIt, StringComparison.Ordinal);
+        // the add-in: every pick behind the guard, the view read only in the active project
+        var check = Addin("CheckProject.cs");
+        var readAndSend = Between(check, "    internal static void ReadAndSend(", "\n    }\n");
+        Assert.Contains("bool Active() => ui.ActiveUIDocument?.Document.Equals(doc) == true;", readAndSend, StringComparison.Ordinal);
+        Assert.Contains("var view = Active() && ShowsPropertyLine(ui.ActiveUIDocument!);", readAndSend, StringComparison.Ordinal);
+        Assert.Contains("if (ask == StreetAsk.Pick && Active())\n                check.Clock.Architect(\"street_pick\", () => PickStreet(", readAndSend, StringComparison.Ordinal);
+        Assert.Contains("if (ask == StreetAsk.Pick && Active() && check.Clock.Architect(\"street_pick\", () => PickStreet(", readAndSend, StringComparison.Ordinal);
+        Assert.Equal(2, readAndSend.Split("PickStreet(").Length - 1);
+        Assert.Equal(2, readAndSend.Split(", Active());").Length - 1);            // both asks told whether it is active
+    }
+
+    /// <summary>Review round 1 (P3): every worker start and stop goes through Trial's lock; no other file sets the
+    /// session's worker (a check's background start and the box house's own could make two, one left running).</summary>
+    [Fact]
+    public void Only_trial_sets_the_sessions_worker()
+    {
+        var dir = Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin");
+        foreach (var file in Directory.GetFiles(dir, "*.cs"))
+        {
+            var text = File.ReadAllText(file);
+            var name = Path.GetFileName(file);
+            var sets = System.Text.RegularExpressions.Regex.Matches(text, @"App\.Worker\s*=(?!=)").Count;
+            Assert.True(name == "Trial.cs" || sets == 0, $"{name} sets App.Worker");
+            Assert.DoesNotContain("WorkerClient.StartAsync(", name == "Trial.cs" ? "" : text, StringComparison.Ordinal);
+        }
+        var app = File.ReadAllText(Path.Combine(dir, "App.cs"));
+        Assert.DoesNotContain("Worker = null", app, StringComparison.Ordinal);
+        Assert.Contains("var worker = Trial.StopWorker();", app, StringComparison.Ordinal);
+        var trial = File.ReadAllText(Path.Combine(dir, "Trial.cs"));
+        Assert.Equal(3, System.Text.RegularExpressions.Regex.Matches(trial, @"App\.Worker\s*=(?!=)").Count);
+        Assert.Equal(3, System.Text.RegularExpressions.Regex.Matches(trial, @"lock \(WorkerLock\)").Count);
+    }
+
     // ---- the words, the button, the stale notice ----------------------------------------------------------------
 
     [Fact]
@@ -461,9 +548,12 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         // the read queued after the panel has drawn "Reading the model...", through the ExternalEvent (Revit's thread)
         Assert.Contains("ResultsPane.AfterDrawn(() => ResultsPane.Post(\"Read the model\", app => CheckProjectCommand.ReadAndSend(app, doc, check),", start, StringComparison.Ordinal);
         Assert.Contains("System.Windows.Threading.DispatcherPriority.Background, act", Addin("ResultsPane.cs"), StringComparison.Ordinal);
-        // the send: only after ReadDone (a cancelled check sends nothing), off Revit's thread, the answer back on it
+        // the read's end keeps the edit count at once (ReadDone); the send, queued behind Revit's input, sends nothing
+        // once cancelled; off Revit's thread, the answer back on it
+        var ended = Between(run, "    internal bool ReadEnded()", "\n    }\n");
+        Assert.Contains("if (!Flow.ReadDone(Ticket))", ended, StringComparison.Ordinal);
         var send = Between(run, "    internal void Send(ProjectRequest request)", "\n    }\n");
-        Assert.True(send.IndexOf("if (!Flow.ReadDone(Ticket))", StringComparison.Ordinal) < send.IndexOf("Flow.Send(Ticket, Worker, request,", StringComparison.Ordinal));
+        Assert.True(send.IndexOf("if (!Flow.IsCurrent(Ticket))", StringComparison.Ordinal) < send.IndexOf("Flow.Send(Ticket, Worker, request,", StringComparison.Ordinal));
         Assert.Contains("ResultsPane.Post(\"Show the check's answer\", app =>", send, StringComparison.Ordinal);
         Assert.Contains("CheckProjectCommand.Answered(app, Doc, this, sent);", send, StringComparison.Ordinal);
         Assert.DoesNotContain("GetResult()", run, StringComparison.Ordinal);
@@ -476,7 +566,7 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         var check = Addin("CheckProject.cs");
         var readAndSend = Between(check, "    internal static void ReadAndSend(", "\n    }\n");
         Assert.DoesNotContain("SendAsync", readAndSend, StringComparison.Ordinal);
-        Assert.Contains("check.Send(request);", readAndSend, StringComparison.Ordinal);
+        Assert.Contains("if (check.ReadEnded())\n                ResultsPane.AfterInput(() => check.Send(request));", readAndSend, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -515,6 +605,9 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         Assert.Contains("if (CheckRun.Flow.Running)\n        {\n            CheckRun.Cancel();\n            return;\n        }", again, StringComparison.Ordinal);
         var view = Addin("ResultsView.cs");
         var restore = Between(view, "    internal void Restore(PanelHad had, string? why)", "\n    }\n");
+        Assert.Contains("var restored = CheckFlow.Restored(had, Had);", restore, StringComparison.Ordinal);
+        Assert.Contains("switch (restored)", restore, StringComparison.Ordinal);
+        Assert.Contains("Say(why ?? CheckWords.Cancelled(restored));", restore, StringComparison.Ordinal);
         Assert.Contains("case PanelHad.Results when _content is { Model: { } model } content:\n                Show(content with { Model = ResultRows.Stale(model, content.When, CheckWords.CancelledStale(content.When)),", restore, StringComparison.Ordinal);
         Assert.Contains("Failed(\"\");", restore, StringComparison.Ordinal);
         Assert.Contains("_again.Content = CheckWords.Button(stage);", view, StringComparison.Ordinal);
