@@ -210,3 +210,17 @@ def test_every_quote_is_on_its_page_in_the_book(key):
     with pdfplumber.open(pdf) as doc:
         text = _flat(doc.pages[page - 1].extract_text() or "")
     assert " ".join(quote.split()) in text
+
+
+def test_an_open_stories_count_still_settles_the_code_when_every_reading_is_three_or_fewer():
+    """Scenes 18 and 20: a 20 ft solid with no floor marks holds 1 or 2 stories, an open question for Ithaca's
+    count, but either way not more than three above grade plane: the Residential Code (check.py passes the most)."""
+    house = {"use": "one_family_detached", "stories": None}
+    assert code({**house, code_scope.STORIES_AT_MOST: 2})[0] == code_scope.RESIDENTIAL
+    assert code({**house, code_scope.STORIES_AT_MOST: 5})[0] is None
+    from design_checker.check import _with_stories_bound
+    measured = {"stories": {"value": None, "readings": [{"reading": "at least", "value": 1},
+                                                         {"reading": "at most", "value": 2}]}}
+    assert _with_stories_bound({"stories": None}, measured)[code_scope.STORIES_AT_MOST] == 2
+    assert _with_stories_bound({"stories": 2}, measured) == {"stories": 2}          # a count needs no bound
+    assert _with_stories_bound({"stories": None}, {"stories": {"value": None}}) == {"stories": None}

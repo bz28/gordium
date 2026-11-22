@@ -26,7 +26,7 @@ from pathlib import Path
 import shapely
 import yaml
 
-from design_checker import egress, present, reading_set, site_json
+from design_checker import code_scope, egress, present, reading_set, site_json
 from design_checker import rhino_logic as logic
 from design_checker.rhino_logic import COLUMN_DELTA
 from envelope_builder import start as generator
@@ -1056,7 +1056,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     v = present.view(rows, waiting, by_id, measured, facts, extras)
     confirm_advice(v["items"], by_id, measured, allowed, facts, site)   # each "To comply" the checker's, or none
     found = egress.laws(facts["jurisdiction"])        # by place: the state law it inherits, its rules checked
-    law = egress.check(found, interior, values, allowed)
+    law = egress.check(found, interior, _with_stories_bound(values, measured), allowed)
     egress.add_to_view(v, law, found["place"])
     report_error = None
     if report_path is not None:      # a report that can't be written never takes the check's result with it
@@ -1090,6 +1090,16 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
             "sections": v["sections"],          # zoning's, then each inherited law's, each with its own state
             "egress": {k: law[k] for k in ("rows", "results", "interior", "interior_sha256")},
             "which_code": egress.which_code(law)}      # which New York code governs the building (code_scope.py)
+
+
+def _with_stories_bound(values: dict, measured: dict) -> dict:
+    """The values egress reads, with the most stories the drawing allows (code_scope.STORIES_AT_MOST) where the
+    stories count is an open question between readings: which New York code governs needs only that bound."""
+    record = measured.get("stories") or {}
+    most = [r.get("value") for r in record.get("readings") or [] if isinstance(r, dict)]
+    if values.get("stories") is not None or not most or not all(type(v) in (int, float) for v in most):
+        return values
+    return {**values, code_scope.STORIES_AT_MOST: max(most)}
 
 
 def _envelope_facts(site: dict, facts: dict) -> dict:

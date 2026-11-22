@@ -25,9 +25,12 @@ which, in plain words. Never a guess for the Residential Code (principle 4).
 `building` the interior description's `building` block (the architect's statements for the state's code: FACTS).
 """
 
+import math
+
 RESIDENTIAL = "residential_code"
 BUILDING = "building_code"
 CODES = (RESIDENTIAL, BUILDING)
+STORIES_AT_MOST = "stories_at_most"       # the check's value: the greatest of Ithaca's stories readings (check.py)
 
 # The interior description's `building` block (docs/interior/interior_description_format.md), each with its kind
 FACTS = {
@@ -174,6 +177,12 @@ def stories_bound(values: dict, facts: dict) -> tuple[int | None, str]:
     if "stories_above_grade_plane" in facts:
         return facts["stories_above_grade_plane"], "stated by the architect"
     s = values.get("stories")
+    # where Ithaca's count is an open question, the most the drawing allows (its readings' greatest: STORIES_AT_MOST,
+    # given by check.py) bounds it the same way
+    if s is None and type(values.get(STORIES_AT_MOST)) in (int, float) and values[STORIES_AT_MOST] >= 1:
+        return int(math.ceil(values[STORIES_AT_MOST])), ("the most Ithaca's count could be as drawn, nothing drawn "
+                                                         "below the ground: every story the State counts above grade "
+                                                         "plane Ithaca counts too")
     if type(s) in (int, float) and s >= 1 and float(s).is_integer():
         return int(s), ("Ithaca's count, nothing drawn below the ground: every story the State counts above "
                         "grade plane Ithaca counts too")
@@ -286,7 +295,7 @@ def decide(values: dict, building: dict | None) -> dict:
         if "stories_above_grade_plane" in facts:
             return _answer(BUILDING, f"{what} of {most} stories above grade plane, more than R101.2's three",
                            cites + ["R101.2", "101.2"], used)
-        return _answer(None, f"{what}: Ithaca counts {most} stories, and a habitable attic Ithaca counts may not be a "
+        return _answer(None, f"{what}: Ithaca's count could be {most} stories, and a habitable attic Ithaca counts may not be a "
                        "story above grade plane (R316.3's exceptions)", cites + ["R101.2", "R316.3"], used, ask)
     return _answer(RESIDENTIAL, f"{what}, {most} stories above grade plane at most ({where}) ({item})",
                    cites + ["R101.2", "R202 STORY ABOVE GRADE PLANE"], used)
