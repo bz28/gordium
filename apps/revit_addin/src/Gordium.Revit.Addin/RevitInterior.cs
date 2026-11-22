@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Runtime.ExceptionServices;
 using Autodesk.Revit.DB;
 using Autodesk.Revit.DB.Architecture;
 using Gordium.Revit.Reading;
@@ -33,23 +34,36 @@ internal static class RevitInterior
     internal static InteriorRecords Read(Document doc)
     {
         var phase = doc.Phases.Cast<Phase>().LastOrDefault();
-        // each step timed and counted for the log's read_steps (never part of the records)
-        var rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
-            .WhereElementIsNotElementType().OfType<Room>().Select(r => RoomOf(doc, r)).ToList());
-        ReadSteps.Count("inside.rooms", rooms.Count);
-        var openings = ReadSteps.Time("inside.openings", () => new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors }
-            .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
-            .Select(fi => OpeningOf(doc, fi, phase)).ToList());
-        ReadSteps.Count("inside.openings", openings.Count);
+        List<RoomRecord> rooms;
+        List<OpeningRecord> openings;
         var diagnostics = new List<string>();
-        // the design options (for the trial's log): what is read is the main model and, of each set, the option being
-        // edited or else its primary; Revit's enclosed areas (plan circuits) are the main model's own
-        var active = DesignOption.GetActiveDesignOptionId(doc);
-        diagnostics.Add("design options: " + string.Join("; ", new FilteredElementCollector(doc).OfClass(typeof(DesignOption)).Cast<DesignOption>()
-            .Select(o => $"{doc.GetElement(o.get_Parameter(BuiltInParameter.OPTION_SET_ID)?.AsElementId() ?? ElementId.InvalidElementId)?.Name}: " +
-                         $"{o.Name}{(o.IsPrimary ? " (primary)" : "")}{(o.Id == active ? " (being edited)" : "")}")));
-        var (stairs, candidates) = ReadSteps.Time("inside.stairs", () => StairsOf(doc, diagnostics));
-        var railings = ReadSteps.Time("inside.railings", () => RailingsOf(doc, diagnostics));
+        List<StairRecord>? stairs;
+        List<StairCandidate> candidates;
+        List<RailingRecord>? railings;
+        // each element's geometry worked out once for the rooms, openings, stairs and railings (the same element over
+        // many rooms was read again for each): kept only until the enclosed areas below, the first step that changes
+        // the model (a Room placed for the moment, rolled back); nothing before it changes anything, so what is kept
+        // is what would be read again
+        using (FacesKept.Open(Hits("inside.cache.faces")))
+        using (BandPiecesKept.Open(Hits("inside.cache.band_pieces")))
+        {
+            // each step timed and counted for the log's read_steps (never part of the records)
+            rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
+                .WhereElementIsNotElementType().OfType<Room>().Select(r => RoomOf(doc, r)).ToList());
+            ReadSteps.Count("inside.rooms", rooms.Count);
+            openings = ReadSteps.Time("inside.openings", () => new[] { BuiltInCategory.OST_Windows, BuiltInCategory.OST_Doors }
+                .SelectMany(c => new FilteredElementCollector(doc).OfCategory(c).WhereElementIsNotElementType().OfType<FamilyInstance>())
+                .Select(fi => OpeningOf(doc, fi, phase)).ToList());
+            ReadSteps.Count("inside.openings", openings.Count);
+            // the design options (for the trial's log): what is read is the main model and, of each set, the option being
+            // edited or else its primary; Revit's enclosed areas (plan circuits) are the main model's own
+            var active = DesignOption.GetActiveDesignOptionId(doc);
+            diagnostics.Add("design options: " + string.Join("; ", new FilteredElementCollector(doc).OfClass(typeof(DesignOption)).Cast<DesignOption>()
+                .Select(o => $"{doc.GetElement(o.get_Parameter(BuiltInParameter.OPTION_SET_ID)?.AsElementId() ?? ElementId.InvalidElementId)?.Name}: " +
+                             $"{o.Name}{(o.IsPrimary ? " (primary)" : "")}{(o.Id == active ? " (being edited)" : "")}")));
+            (stairs, candidates) = ReadSteps.Time("inside.stairs", () => StairsOf(doc, diagnostics));
+            railings = ReadSteps.Time("inside.railings", () => RailingsOf(doc, diagnostics));
+        }   // the geometry kept is let go here, before anything changes the model
         int coordination;
         try
         {
@@ -78,6 +92,14 @@ internal static class RevitInterior
             Diagnostics = diagnostics,
         };
     }
+
+    /// <summary>A memo's hits and misses, added to the log's read_steps as <c>&lt;name&gt;.hits</c> and
+    /// <c>&lt;name&gt;.misses</c> when its scope ends.</summary>
+    private static Action<long, long> Hits(string name) => (hits, misses) =>
+    {
+        ReadSteps.Count(name + ".hits", hits);
+        ReadSteps.Count(name + ".misses", misses);
+    };
 
     /// <summary>Every room separation line (escape routes, section 10: where two rooms meet with no wall), by
     /// <c>UniqueId</c>; null when they couldn't be listed (then no passage is sent).</summary>
@@ -915,7 +937,10 @@ internal static class RevitInterior
     /// <summary>What of the element lies in the band: each of its solids (a family's instance geometry included)
     /// intersected with it, the result's faces; failed when Revit refuses, the element holds a mesh, an instance with no
     /// geometry or a kind not read, or a face of the result can't be read; and how many open shells (see
-    /// <see cref="Open"/>: no volume, or an edge with one face) reach the band.</summary>
+    /// <see cref="Open"/>: no volume, or an edge with one face) reach the band. The element's geometry is walked once per
+    /// read (<see cref="BandPieces"/>, kept by <see cref="BandPiecesKept"/>); only what depends on the band (each solid's
+    /// intersection, each open shell's box against the band's) is worked out per band, piece by piece in the walk's
+    /// order, so the result, its counts and where a throw stops it are the walk's own.</summary>
     private static (List<SurfaceRecord> Faces, bool Failed, int OpenShells) InBand(Element e, Solid band, Options options)
     {
         var faces = new List<SurfaceRecord>();
@@ -923,21 +948,15 @@ internal static class RevitInterior
         var open = 0;
         var bandBox = band.GetBoundingBox();
         XYZ bandMin = bandBox.Transform.OfPoint(bandBox.Min), bandMax = bandBox.Transform.OfPoint(bandBox.Max);
-        // every kind of geometry has its own branch: nothing is dropped by default (review round 4)
-        void Walk(GeometryElement g)
+        var pieces = BandPiecesKept.Get(GeometryKey.Of(e, options), () => BandPieces(e, options));
+        try
         {
-            foreach (var o in g)
+            foreach (var piece in pieces)
             {
-                switch (o)
+                switch (piece)
                 {
-                    case Solid { Faces.Size: 0 }:
-                        break;                                   // an empty solid: nothing drawn
-                    case Solid s when Open(s):
-                        // an open shell (imported surfaces, a DirectShape from an open Brep: no volume, or an edge with
-                        // one face), which can't be cut; counted unless its box lies wholly outside the band
-                        var sb = s.GetBoundingBox();
-                        var corners = new[] { sb.Min, sb.Max, new XYZ(sb.Min.X, sb.Max.Y, sb.Min.Z), new XYZ(sb.Max.X, sb.Min.Y, sb.Max.Z) }
-                            .Select(sb.Transform.OfPoint).ToList();
+                    case BandPiece.OpenShell { Corners: var corners }:
+                        // an open shell, which can't be cut: counted unless its box lies wholly outside the band
                         if (corners.Max(c => c.X) < bandMin.X || corners.Min(c => c.X) > bandMax.X
                             || corners.Max(c => c.Y) < bandMin.Y || corners.Min(c => c.Y) > bandMax.Y
                             || corners.Max(c => c.Z) < bandMin.Z || corners.Min(c => c.Z) > bandMax.Z)
@@ -945,7 +964,7 @@ internal static class RevitInterior
                         open++;
                         ReadSteps.Count("inside.open_shells");
                         break;
-                    case Solid s:
+                    case BandPiece.Body { Solid: var s }:
                         ReadSteps.Count("inside.boolean_ops");
                         Solid? cut;
                         using (ReadSteps.Step("inside.boolean_op"))
@@ -958,11 +977,70 @@ internal static class RevitInterior
                             else
                                 failed = true;
                         break;
+                    case BandPiece.Unread:
+                        failed = true;                           // a mesh, an instance with no geometry, or a kind not read
+                        break;
+                    case BandPiece.Threw { Exception: var x }:
+                        x.Throw();                               // where the walk threw: thrown here, as it was
+                        break;
+                }
+            }
+        }
+        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
+                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        {
+            return ([], true, 0);
+        }
+        return (faces, failed, open);
+    }
+
+    /// <summary>A piece of an element's geometry as <see cref="InBand"/> uses it, in its walk's order: an open shell's
+    /// box corners, a closed solid to cut, something that can't be read, or where the walk threw.</summary>
+    private abstract record BandPiece
+    {
+        internal sealed record OpenShell(IReadOnlyList<XYZ> Corners) : BandPiece;
+
+        internal sealed record Body(Solid Solid) : BandPiece;
+
+        internal sealed record Unread : BandPiece;
+
+        internal sealed record Threw(ExceptionDispatchInfo Exception) : BandPiece;
+    }
+
+    /// <summary>The element's geometry walked for <see cref="InBand"/> (none of it depends on the band), kept by
+    /// element and geometry options while <see cref="Read"/>'s scope is open, as <see cref="FacesKept"/>.</summary>
+    private static readonly ReadMemo<GeometryKey, List<BandPiece>> BandPiecesKept = new();
+
+    /// <summary>The element's geometry walked once, every kind of geometry with its own branch (nothing dropped by
+    /// default, review round 4), each piece in order; a throw anywhere (<c>get_Geometry</c>, a solid's box, an
+    /// instance's geometry) ends the walk with that throw as its last piece, thrown again where <see cref="InBand"/>
+    /// reaches it, as the walk itself would have thrown there.</summary>
+    private static List<BandPiece> BandPieces(Element e, Options options)
+    {
+        var pieces = new List<BandPiece>();
+        void Walk(GeometryElement g)
+        {
+            foreach (var o in g)
+            {
+                switch (o)
+                {
+                    case Solid { Faces.Size: 0 }:
+                        break;                                   // an empty solid: nothing drawn
+                    case Solid s when Open(s):
+                        // an open shell (imported surfaces, a DirectShape from an open Brep: no volume, or an edge with
+                        // one face), which can't be cut: its box's corners, for each band
+                        var sb = s.GetBoundingBox();
+                        pieces.Add(new BandPiece.OpenShell(new[] { sb.Min, sb.Max, new XYZ(sb.Min.X, sb.Max.Y, sb.Min.Z), new XYZ(sb.Max.X, sb.Min.Y, sb.Max.Z) }
+                            .Select(sb.Transform.OfPoint).ToList()));
+                        break;
+                    case Solid s:
+                        pieces.Add(new BandPiece.Body(s));
+                        break;
                     case GeometryInstance gi:
                         if (gi.GetInstanceGeometry() is { } inner)
                             Walk(inner);
                         else
-                            failed = true;
+                            pieces.Add(new BandPiece.Unread());  // an instance with no geometry to read
                         break;
                     case GeometryElement nested:
                         Walk(nested);
@@ -970,7 +1048,7 @@ internal static class RevitInterior
                     case Curve or PolyLine or Autodesk.Revit.DB.Point:
                         break;                                   // lines and points: no body to stand in the way
                     default:
-                        failed = true;                           // a mesh, or a kind not read
+                        pieces.Add(new BandPiece.Unread());      // a mesh, or a kind not read
                         break;
                 }
             }
@@ -980,12 +1058,13 @@ internal static class RevitInterior
             if (e.get_Geometry(options) is { } g)
                 Walk(g);
         }
-        catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException
-                                       or Autodesk.Revit.Exceptions.ArgumentException)
+        catch (Exception x)
         {
-            return ([], true, 0);
+            // any throw, of any kind, kept where the walk reached it: InBand throws it there (Revit's refusals then
+            // read as failed, anything else thrown on, as the walk itself did)
+            pieces.Add(new BandPiece.Threw(ExceptionDispatchInfo.Capture(x)));
         }
-        return (faces, failed, open);
+        return pieces;
     }
 
     /// <summary>The model elements (not view-specific) whose box meets <paramref name="box"/>, of the categories given
@@ -1035,7 +1114,25 @@ internal static class RevitInterior
     /// <summary>Every face of the element's solids (a family's instance geometry included), and whether anything in its
     /// geometry couldn't be read as faces (a mesh, <c>get_Geometry</c> throwing, an instance with no geometry, a kind
     /// not read, or a face Revit gives no edges or triangles for: then no faces at all).</summary>
-    private static (List<SurfaceRecord>? Faces, bool Failed) Faces(Element e, Options options)
+    private static (List<SurfaceRecord>? Faces, bool Failed) Faces(Element e, Options options) =>
+        FacesKept.Get(GeometryKey.Of(e, options), () => FacesRead(e, options));
+
+    /// <summary>The inside read's <see cref="Faces"/>, kept by element and geometry options while
+    /// <see cref="Read"/>'s scope is open: an element over 60 rooms read once, not 60 times. Kept only before the
+    /// model changes, so what is kept is what would be read again; the list kept is handed to every record that
+    /// asks, and nothing changes it (the records hold it as read-only).</summary>
+    private static readonly ReadMemo<GeometryKey, (List<SurfaceRecord>? Faces, bool Failed)> FacesKept = new();
+
+    /// <summary>An element and the geometry options it is read with: what its <c>get_Geometry</c> depends on, the
+    /// document left unchanged.</summary>
+    private readonly record struct GeometryKey(long Element, ViewDetailLevel Detail, bool NonVisible, bool References, long View)
+    {
+        internal static GeometryKey Of(Element e, Options o) =>
+            new(e.Id.Value, o.DetailLevel, o.IncludeNonVisibleObjects, o.ComputeReferences, o.View?.Id.Value ?? -1);
+    }
+
+    /// <summary><see cref="Faces"/> worked out.</summary>
+    private static (List<SurfaceRecord>? Faces, bool Failed) FacesRead(Element e, Options options)
     {
         var faces = new List<SurfaceRecord>();
         var failed = false;

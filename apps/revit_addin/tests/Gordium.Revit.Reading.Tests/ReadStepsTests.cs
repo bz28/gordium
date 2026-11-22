@@ -311,6 +311,60 @@ public sealed class ReadStepsTests
         Assert.Equal(1, Count(before[(before.LastIndexOf('}') + 1)..], "<summary>"));
     }
 
+    [Fact]
+    public void Each_elements_geometry_is_worked_out_once_per_read_and_only_before_the_model_changes()
+    {
+        // Snowdon Towers: an element over many rooms was read, triangulated and walked again for each (64,198 reads
+        // of faces and of the band, read_steps 2026-11-22). Its faces and its walked geometry are kept by element and
+        // geometry options for the rooms, openings, stairs and railings, and let go before the first step that
+        // changes the model (a Room placed for the moment in the enclosed areas and the outer outlines).
+        var source = Addin("RevitInterior.cs").Replace("\r\n", "\n");
+        foreach (var hook in new[]
+                 {
+                     "private static (List<SurfaceRecord>? Faces, bool Failed) Faces(Element e, Options options) =>\n" +
+                     "        FacesKept.Get(GeometryKey.Of(e, options), () => FacesRead(e, options));",
+                     "ReadMemo<GeometryKey, (List<SurfaceRecord>? Faces, bool Failed)> FacesKept = new();",
+                     "ReadMemo<GeometryKey, List<BandPiece>> BandPiecesKept = new();",
+                     // each memo's hits and misses in the log
+                     "ReadSteps.Count(name + \".hits\", hits);",
+                     "ReadSteps.Count(name + \".misses\", misses);",
+                     // every option get_Geometry reads is in the key, and the element
+                     "new(e.Id.Value, o.DetailLevel, o.IncludeNonVisibleObjects, o.ComputeReferences, o.View?.Id.Value ?? -1)",
+                     "var pieces = BandPiecesKept.Get(GeometryKey.Of(e, options), () => BandPieces(e, options));",
+                     // a throw in the walk kept where it happened, thrown there again inside InBand's own catch
+                     "pieces.Add(new BandPiece.Threw(ExceptionDispatchInfo.Capture(x)));",
+                     "x.Throw();                               // where the walk threw: thrown here, as it was",
+                     // what depends on the band is still worked out per band, as before
+                     "cut = BooleanOperationsUtils.ExecuteBooleanOperation(s, band, BooleanOperationsType.Intersect);",
+                     "corners.Max(c => c.Z) < bandMin.Z || corners.Min(c => c.Z) > bandMax.Z",
+                 })
+            Assert.Contains(hook, source);
+        // FacesRead only through the memo; one walk of the geometry for the band, never in InBand itself
+        Assert.Equal(1, Count(source, "() => FacesRead(e, options)"));
+        Assert.Equal(1, Count(source, "() => BandPieces(e, options)"));
+        var inBand = source.IndexOf("InBand(Element e, Solid band, Options options)", StringComparison.Ordinal);
+        var pieces = source.IndexOf("private abstract record BandPiece", StringComparison.Ordinal);
+        Assert.DoesNotContain("get_Geometry", source[inBand..pieces]);
+        // the band's catch is the walk's own (Revit's three refusals), and the walk keeps every throw for it
+        Assert.Contains("catch (Exception x) when (x is Autodesk.Revit.Exceptions.ApplicationException or Autodesk.Revit.Exceptions.InvalidOperationException\n" +
+                        "                                       or Autodesk.Revit.Exceptions.ArgumentException)\n        {\n            return ([], true, 0);",
+                        source[inBand..pieces]);
+        // the scope: opened before the rooms, closed after the railings, before anything that changes the model
+        Assert.Equal(2, Count(source, "Kept.Open("));
+        var open = source.IndexOf("using (FacesKept.Open(Hits(\"inside.cache.faces\")))\n        using (BandPiecesKept.Open(Hits(\"inside.cache.band_pieces\")))\n        {", StringComparison.Ordinal);
+        var rooms = source.IndexOf("ReadSteps.Time(\"inside.rooms\", ", StringComparison.Ordinal);
+        var railings = source.IndexOf("ReadSteps.Time(\"inside.railings\", ", StringComparison.Ordinal);
+        var close = source.IndexOf("}   // the geometry kept is let go here, before anything changes the model", StringComparison.Ordinal);
+        Assert.True(open >= 0 && open < rooms && rooms < railings && railings < close, "the scope must hold the rooms to the railings");
+        foreach (var changes in new[] { "() => Areas(doc, phase, diagnostics)", "() => GrossAreasOf(doc, phase, diagnostics)" })
+        {
+            Assert.Equal(1, Count(source, changes));
+            Assert.True(source.IndexOf(changes, StringComparison.Ordinal) > close, $"{changes} changes the model: after the scope");
+        }
+        // nothing inside the scope starts a transaction (the methods that do are called only after it)
+        Assert.DoesNotContain("Transaction", source[open..close]);
+    }
+
     private static int Count(string text, string what)
     {
         var n = 0;
