@@ -110,7 +110,7 @@ def reason_as_expected(expected: dict, reason) -> bool:
     """Whether Gordium's reason is the one the expected difference predicts: every one of its `reason_has` words in
     it. An expectation with none matches nothing (a verdict alone never explains a difference)."""
     words = expected.get("reason_has")
-    if not (isinstance(words, list) and words and all(isinstance(w, str) for w in words)):
+    if not (isinstance(words, list) and words and all(isinstance(w, str) and w.strip() for w in words)):
         return False                      # a reason_has written as one string would match it letter by letter
     return isinstance(reason, str) and all(w in reason for w in words)
 

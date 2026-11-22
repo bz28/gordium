@@ -397,3 +397,6 @@ def test_a_reason_has_written_as_one_string_never_matches():
     assert not compare.reason_as_expected({"reason_has": "nothing like it"}, reason)
     assert not compare.reason_as_expected({"reason_has": "could hold up to 5 stories"}, reason)
     assert compare.reason_as_expected({"reason_has": ["could hold up to 5 stories"]}, reason)
+    # review round 5: a blank word matches nothing
+    assert not compare.reason_as_expected({"reason_has": [""]}, reason)
+    assert not compare.reason_as_expected({"reason_has": ["could hold", "  "]}, reason)

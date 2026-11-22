@@ -245,8 +245,8 @@ or the roof" (Chapter 325, §325-3B, p.19); the State's house code words it the 
 surface of a floor and the upper surface of the floor or roof next above", 2025 Residential Code of NYS R202,
 regulations/jurisdictions/new_york/new_york_state/4_term_definitions/definitions.yaml). A slab is a floor level or the roof that bounds a story, never the portion between,
 and a part under 7 ft can hold no story (the lowest habitable ceiling, R305.1 as the measuring cites it, its STORY_ROOM). So, **Gordium's reading** (`measure._slabs_within`): a part that starts above the ground, is under 7 ft
-tall, and lies in plan within the outer outline of the parts standing on the ground at least a story tall, its bottom
-no higher than their top, is a floor or roof slab: left out of the raised-part and overlap tests and of the count's
+tall, and lies in plan within the outer outline of the parts standing on the ground at least a story tall, lying wholly
+within their height (its top no higher than their top), is a floor or roof slab: left out of the raised-part and overlap tests and of the count's
 bounds (it held none). What it can't do: lower the most the building could hold (under 7 ft it held none), or clear a
 part a story tall over the roof, a thin part reaching past the walls (a balcony), or one floating over them: each
 stays a part that may be another story. The count is still read from the walls (1 to floor(height / 7 ft), "draw its
