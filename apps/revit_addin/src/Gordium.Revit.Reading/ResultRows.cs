@@ -39,10 +39,10 @@ public sealed record FigureLine(string? What, string? Measured, string How, stri
 /// row's <c>proposed</c>, <c>sign</c> and <c>required</c> ("20'-0\" measured, ≥ 25'-0\" allowed", or "allowed 25'-0\""
 /// when nothing was measured); an egress row's figures as its reason states them ("net clear height 20 in, needs ≥
 /// 24 in"). Never a number the worker didn't give.</param>
-/// <param name="HowFar">How far off (or the room to spare), in the worker's own words: its <c>delta</c> (over every
-/// reading of the lot lines and the open questions, never overstated), or its <c>margin</c> from a worker that
-/// gives no delta; null when it gives neither. Never worked out here: an egress row gives neither, so its
-/// <see cref="Figures"/> alone say it.</param>
+/// <param name="HowFar">How far off (or the room to spare), in the worker's own words with their direction: its
+/// <c>how_far</c> ("2'-6\" short", "116.16 ft to spare if confirmed": over every reading, never overstated), or its
+/// <c>delta</c> from a worker that sends no how_far; null when it gives neither, never its bare signed <c>margin</c>.
+/// Never worked out here.</param>
 /// <param name="Reason">The worker's reason, each repeated part said once with its count, without the part the name
 /// already says; null when none.</param>
 /// <param name="Section">The law's section the row is decided on (an egress row's <c>code.section</c>, else the
@@ -301,9 +301,10 @@ public static class ResultRows
                     lines.Add(new FigureLine(x.Groups["what"].Value, x.Groups["got"].Value, "measured", x.Groups["need"].Value));
         }
 
-        // the worker's delta when it gives one (an empty delta: it says nothing of how far); else its margin
-        var howFar = raw.ValueKind == JsonValueKind.Object && raw.TryGetProperty("delta", out var d) && d.ValueKind != JsonValueKind.Null
-            ? Text(raw, "delta") : Text(raw, "margin");
+        // the worker's how far in words with their direction (its how_far: "2'-6\" short", "116.16 ft to spare if
+        // confirmed"); from a worker that sends none, its delta (an empty delta: it says nothing of how far); never
+        // its bare signed margin ("−2'-6\"" says no direction: review of PR 4)
+        var howFar = Text(raw, "how_far") ?? Text(raw, "delta");
 
         return new ResultRow(row.Id, row.Name, row.Status, ResultText.RowWords(row), ToneOf(row.Status, row.StatusWord),
                              figures, howFar, reason, Section(raw), Quotes(raw), ResultText.Elements(raw))
