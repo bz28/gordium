@@ -14,6 +14,8 @@ import hashlib
 import json
 import math
 import re
+
+import pytest
 from collections import Counter
 
 from openpyxl import load_workbook
@@ -108,9 +110,25 @@ def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_fro
                 assert named, (point, owners, sentence)
                 nearest = max(named, key=before.rindex)          # the room named last before the point
                 assert nearest in owners, (point, nearest, owners)
-    # a room stopped for a reason other than "has no route" (a tie) is held to its own reason: no clause naming it
-    # says it has no route or reaches both exits, and one says it stops on a tie
-    clauses = re.split(r"[.;:,|]", log)
+    # the accessory area complies under all four readings: the largest accessory area against 10% of the smallest
+    # story area (decision 8), stated in the log with that limit
+    limit = round(0.1 * min(data["storage"]["gordium_story_sf"]))
+    assert f"{limit:,} sf" in log
+    _tie_rooms_held_to_their_reason(log, reasons)
+    # the guard rejects both wrong shapes the log once had (review rounds 12 to 14)
+    p4 = "**6** rooms aren't measured: the 5 of P5 have no route to the exit `...0005bc94`, and CORRIDOR (26) stops on a tie"
+    assert p4 in log
+    for wrong in ("**6** rooms have no route to one of the two exits: the 5 of P5 plus CORRIDOR (26) (which stops on a tie)",
+                  "**6** rooms aren't measured, CORRIDOR (26) stops on a tie. CORRIDOR (26) does reach both exits"):
+        with pytest.raises(AssertionError):
+            _tie_rooms_held_to_their_reason(log.replace(p4, wrong), reasons)
+
+
+def _tie_rooms_held_to_their_reason(log, reasons):
+    """A room stopped for a reason other than "has no route" (a tie) is held to its own reason: no clause naming it
+    says it has no route or reaches both exits, and one says it stops on a tie. A clause runs to a full stop, a
+    semicolon, a comma or a table bar, never a colon, so a list's head ("N rooms have no route: ...") stays with it."""
+    clauses = re.split(r"[.;,|]", log)
     for room, why in reasons.items():
         if "has no route" in why:
             continue
@@ -118,10 +136,6 @@ def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_fro
         assert mine and not [c for c in mine if "no route" in c or "both exits" in c], (room, mine)
         if "equally short" in why:
             assert any("tie" in c or "equally short" in c for c in mine), (room, mine)
-    # the accessory area complies under all four readings: the largest accessory area against 10% of the smallest
-    # story area (decision 8), stated in the log with that limit
-    limit = round(0.1 * min(data["storage"]["gordium_story_sf"]))
-    assert f"{limit:,} sf" in log
 
 
 def test_every_needs_review_claim_is_true_of_the_code():
