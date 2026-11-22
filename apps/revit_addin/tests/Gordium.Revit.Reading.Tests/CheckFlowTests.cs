@@ -553,7 +553,8 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
         var ended = Between(run, "    internal bool ReadEnded()", "\n    }\n");
         Assert.Contains("if (!Flow.ReadDone(Ticket))", ended, StringComparison.Ordinal);
         var send = Between(run, "    internal void Send(ProjectRequest request)", "\n    }\n");
-        Assert.True(send.IndexOf("if (!Flow.IsCurrent(Ticket))", StringComparison.Ordinal) < send.IndexOf("Flow.Send(Ticket, Worker, request,", StringComparison.Ordinal));
+        var guard = send.IndexOf("if (!Flow.IsCurrent(Ticket))\n        {\n            Log[\"cancelled_before_send\"] = true;\n            End(\"cancelled\");", StringComparison.Ordinal);
+        Assert.True(guard >= 0 && guard < send.IndexOf("Flow.Send(Ticket, Worker, request,", StringComparison.Ordinal), "a cancelled check is sent");
         Assert.Contains("ResultsPane.Post(\"Show the check's answer\", app =>", send, StringComparison.Ordinal);
         Assert.Contains("CheckProjectCommand.Answered(app, Doc, this, sent);", send, StringComparison.Ordinal);
         Assert.DoesNotContain("GetResult()", run, StringComparison.Ordinal);
