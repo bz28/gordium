@@ -184,3 +184,31 @@ def test_one_proof_for_parts_and_zoning_rows(monkeypatch):
     monkeypatch.setattr(check, "unknown_settings", rulebook.unknown_settings)
     assert each_part.check_parts([synthetic.HEADROOM], stair, ZONING, ALLOWED)["rows"][0]["outcome"] == "needs_review"
     assert check.fails_whatever(zoning, measured, ALLOWED) is None
+
+
+
+def test_a_row_on_a_reading_to_confirm_keeps_its_comparison_and_title_and_says_the_reading():
+    """Review round 1 of feat/route-readings: a story part's measure standing on Gordium's reading (`confirm`, the
+    route code's served rooms) is said after the line; a fail keeps its comparison, a pass "<title>: complies"."""
+    from rule_format.rulebook import REPO, Context, load
+    from design_checker.each_part import check_parts
+    maine = REPO / "regulations/jurisdictions/maine/maine_state"
+    rule = next(r for r in load(maine / "5_building_code_rules/drafted/general.yaml")["rules"]
+                if r["id"] == "general.nfpa_16_2_5_3_1_common_path_sprinklered")
+    allowed = Context.for_jurisdiction(maine).allowed()
+    values = {"nfpa_day_care_occupancy": True, "day_care_existing": False, "sprinklered_9_7": True,
+              "sprinkler_supervised_9_7": True}
+    words = "Gordium's reading · confirm with the architects: CLOSET through KITCHEN"
+    for value, outcome, wanted in ((140.0, "fail", "100"),
+                                   (40.0, "needs_review", "complies only if this reading is confirmed: ")):
+        given = {"story": [{"id": "L1", "name": "Level 1", "measures": {"common_path_of_travel": value},
+                            "confirm": {"common_path_of_travel": words}}]}
+        got = check_parts([rule], given, values, allowed)
+        row, = got["rows"]
+        assert row["outcome"] == outcome and words in row["line"] and wanted in row["line"], row["line"]
+        assert row["line"].count(words) == 1
+        if outcome == "fail":
+            assert "140" in row["line"]
+        else:                    # review round 2: never a pass, never grouped under Complies
+            assert got["results"][rule["id"]] == "needs_review"
+            assert all(item["status"] != "complies" for item in got["items"])

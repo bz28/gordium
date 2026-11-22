@@ -99,3 +99,64 @@ def test_two_values_under_one_answer_need_review(maine):
     for r in twice["corridor"][0]["readings"]["corridor_dead_end_length"]:
         r["named"] = {Q7: "with_door"}                              # one answer, two values: not worked out
     assert outcome(rules["general.nfpa_16_2_5_2_dead_end"], twice, NEW_DAY_CARE, allowed)[0] == "needs_review"
+
+
+# --- a measure standing on Gordium's reading (route note decision 1a, amended 2026-11-21: `confirm`) -----------------
+
+SPRINKLERED_NEW = {**NEW_DAY_CARE, "sprinklered_9_7": True, "sprinkler_supervised_9_7": True}
+WORDS = "Gordium's reading · confirm with the architects: a closet ... (cl through k; open question 11)"
+
+
+def story_with(confirm, **measures):
+    part = {"id": "L1", "measures": measures}
+    if confirm is not None:
+        part["confirm"] = confirm
+    return {"story": [part]}
+
+
+def row_of(rule, given, values, allowed):
+    return parts.rows(rule, given, values, allowed)[0]
+
+
+def test_a_fail_on_a_reading_to_confirm_keeps_its_reason_and_says_the_reading_in_its_own_field(maine):
+    """Review round 1: a fail's words go in the row's `confirm`, never in its `reason` (which stays empty, so the
+    line keeps its comparison)."""
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=140.0), SPRINKLERED_NEW,
+                 allowed)
+    assert (row["outcome"], row["reason"], row["confirm"]) == ("fail", None, [WORDS])
+
+
+def test_a_pass_on_a_reading_to_confirm_is_never_a_pass(maine):
+    """Review round 2 (principle 4): a figure that complies only under Gordium's reading needs review until the
+    reading is confirmed, said so, as the checker does for a has-none reading (each_part.check_parts)."""
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0), SPRINKLERED_NEW,
+                 allowed)
+    assert row["outcome"] == "needs_review"
+    assert row["reason"] == "complies only if this reading is confirmed: " + WORDS
+    assert parts.rule_result([row]) == "needs_review"
+
+
+def test_a_reading_to_confirm_is_said_only_for_the_measures_a_rule_reads_and_has(maine):
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    # the words are for another measure: not said here
+    row = row_of(rule, story_with({"egress_travel_distance": WORDS}, common_path_of_travel=40.0), SPRINKLERED_NEW,
+                 allowed)
+    assert row["outcome"] == "pass" and "confirm" not in row
+    # the measure isn't given: the row needs review for that, and no reading stands behind a value
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}), SPRINKLERED_NEW, allowed)
+    assert row["outcome"] == "needs_review" and "confirm" not in row
+    # no `confirm`: as before
+    row = row_of(rule, story_with(None, common_path_of_travel=40.0), SPRINKLERED_NEW, allowed)
+    assert (row["outcome"], row["reason"]) == ("pass", None) and "confirm" not in row
+
+
+def test_a_rule_that_doesnt_apply_says_no_reading(maine):
+    rules, allowed = maine
+    rule = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
+    row = row_of(rule, story_with({"common_path_of_travel": WORDS}, common_path_of_travel=40.0), NEW_DAY_CARE, allowed)
+    assert row["outcome"] == "not_applicable" and "confirm" not in row   # unsprinklered: the 100-ft rule doesn't apply

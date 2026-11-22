@@ -8,7 +8,16 @@ The sheet stays outside the repo (open question 5), so its drawn lines are liter
 sheet's vector drawing (pdfplumber, 2026-11-21): the sheet is 1/8 in = 1 ft, 9 pt a foot. Its points are put in
 the model's coordinates (feet) by two walls both show: the west outer face (sheet x 302.58 pt, model x 0) and the
 north outer face (sheet y 539.10 pt, model y 85.4833); the two exits' inner faces then fall within 0.01 ft of the
-model's (5.494 and 189.200), a check on the match. Gordium's figures are worked by the route code from the model."""
+model's (5.494 and 189.200), a check on the match. Gordium's figures are worked by the route code from the model.
+
+Travel distance and common path are judged one-sided (the route note's eval, changed 2026-11-21): the sheet draws its
+lines orthogonally, never shorter than the natural path the books measure (IBC 1016.1, NFPA 7.6.1), so Gordium's
+figure agrees only when all of these hold: it is no longer than the sheet's line as drawn plus 2 percent of it or
+2 ft; it is no shorter than the exact straight line from Gordium's start to an end taken apart from the route (the
+travel: the sheet's exit's nearest door centre, no tolerance); its end is within the same tolerance of where the
+sheet's line ends (the common path, which has no end apart from its routes, rests on this check); and every one of
+that figure's rules gives the sheet's verdict. The first test (within
+2 percent or 2 ft of the stated figure) is still worked and reported beside it (`before_2026_11_21`)."""
 
 import json
 import math
@@ -31,6 +40,34 @@ def model(p):
 
 def drawn(points):
     return round(sum(math.dist(a, b) for a, b in zip(points, points[1:])) / PT_PER_FT, 3)
+
+
+def _point_at(pieces, length):
+    """The point a route's pieces reach after `length` (inches) along them: its end, or where its routes part."""
+    left = length
+    for q in pieces:
+        if q[0] == "line":
+            a, b = q[1], q[2]
+            d = math.dist(a, b)
+            if left <= d + 1e-9:
+                t = left / d if d else 0.0
+                return (a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t)
+        else:
+            _, c, r, a0, sweep = q
+            d = abs(sweep) * r
+            if left <= d + 1e-9:
+                ang = a0 + math.copysign(left / r, sweep)
+                return (c[0] + r * math.cos(ang), c[1] + r * math.sin(ang))
+        left -= d
+    last = pieces[-1]
+    if last[0] == "line":
+        return last[2]
+    _, c, r, a0, sweep = last
+    return (c[0] + r * math.cos(a0 + sweep), c[1] + r * math.sin(a0 + sweep))
+
+
+def _ft(p) -> list:
+    return [round(p[0] / FT, 3), round(p[1] / FT, 3)]
 
 
 SHEET = {   # the sheet's stated figure, and the line it draws for it (vertices in sheet points)
@@ -89,19 +126,26 @@ def main(path, out_path=OUT, co=CO):
     gordium = {}
     for r in (12.0, 0.0):
         routes = StoryRoutes(story, r)
-        gordium[r] = (routes.route(corner, [co["sheet_exit"]]).length / FT, routes.route(corner),
-                      at_point(routes, corner))
+        gordium[r] = (routes.route(corner, [co["sheet_exit"]]), routes.route(corner), at_point(routes, corner))
     nearest = gordium[12.0][1]
+    plain_route, plain_common = gordium[0.0][0], gordium[0.0][2]
     start = [round(corner[0] / FT, 3), round(corner[1] / FT, 3)]
+    # the travel's end, taken apart from the route: the sheet's exit's door centre (the nearest, if it has several:
+    # the smaller floor); the common path's, where its two routes part (no point stands apart from the routes)
+    door = min((d for d in story.exits() if d.exit_id == co["sheet_exit"]), key=lambda d: math.dist(corner, d.centre))
+    split = _point_at(plain_common.routes[0].pieces, plain_common.length)
     out["figures"]["travel_distance"]["gordium"] = {
         "from": list(start), "from_room": f"{co['start_room']}, its north-east corner (the sheet's start)",
-        "to_the_sheets_exit_with_12_in": round(gordium[12.0][0], 3),
-        "to_the_sheets_exit_no_clearance": round(gordium[0.0][0], 3),
+        "to_the_sheets_exit_with_12_in": round(gordium[12.0][0].length / FT, 3),
+        "to_the_sheets_exit_no_clearance": round(plain_route.length / FT, 3),
+        "to_no_clearance": _ft(door.centre), "to_door": door.id,
+        "own_ends_straight_exact": math.dist(corner, door.centre) / FT,
         "to_the_nearest_exit_with_12_in": round(nearest.length / FT, 3), "nearest_exit": nearest.exit_id,
         "story": _why(story, measured, "egress_travel_distance")}
     out["figures"]["common_path"]["gordium"] = {
         "from": list(start), "with_12_in": round(gordium[12.0][2].length / FT, 3),
-        "no_clearance": round(gordium[0.0][2].length / FT, 3), "exits": list(gordium[12.0][2].exits),
+        "no_clearance": round(plain_common.length / FT, 3), "exits": list(gordium[12.0][2].exits),
+        "split_no_clearance": _ft(split), "own_ends_straight_exact": math.dist(corner, split) / FT,
         "story": _why(story, measured, "common_path_of_travel")}
     near = [next(d for d in story.exits() if math.dist((d.centre[0] / FT, d.centre[1] / FT), q) < 0.05)
             for q in co["same_pair"]]
@@ -127,8 +171,8 @@ def main(path, out_path=OUT, co=CO):
                       "gordium_story_sf": [round(x.value / FT / FT, 1) for x in areas.building_area(story)],
                       "rooms": {r.name: round(r.outline.area / FT / FT, 1) for r in story.rooms.values()
                                 if r is not None and uses.get(r.id) == "accessory_storage"}}
-    _judge_all(out)
     out["verdicts"] = _verdicts(measured)
+    _judge_all(out)
     out["storage"]["under_all_four_readings"] = _storage_readings(measured)
     out["by_hand"] = BY_HAND
     out_path.write_text(yaml.safe_dump(out, sort_keys=False, allow_unicode=True), encoding="utf-8", newline="\n")
@@ -151,12 +195,14 @@ def _verdicts(measured) -> dict:
     rules = {r["id"]: r for r in load(maine / "5_building_code_rules/drafted/general.yaml")["rules"]}
     allowed = Context.for_jurisdiction(maine).allowed()
     key = yaml.safe_load(HAND_CHECK.read_text(encoding="utf-8"))
-    out = {}
-    for check in key["checks"][:5]:                 # travel, common path, dead end, remoteness, storage
+    out, by_figure = {}, {}
+    for figure, check in zip(("travel_distance", "common_path", "dead_end", "remoteness", "storage"),
+                             key["checks"][:5]):    # travel, common path, dead end, remoteness, storage
+        by_figure[figure] = list(check["gordium_rules"])
         for rid in check["gordium_rules"]:
             got = part_rules.rule_result(part_rules.rows(rules[rid], measured["parts"], SHEET_VALUES, allowed))
             out[rid] = {"gordium": got, "sheet": check["result"], "same": got == check["result"]}
-    return {"rules": out, "every_verdict_the_same": all(v["same"] for v in out.values())}
+    return {"rules": out, "every_verdict_the_same": all(v["same"] for v in out.values()), "by_figure": by_figure}
 
 
 def _storage_readings(measured) -> dict:
@@ -179,14 +225,59 @@ def _storage_readings(measured) -> dict:
 
 
 TOLERANCES = {   # the decision's "Agreement asked" (docs/decisions/2026-11-20_route_measurement.md, "The eval")
-    "travel_distance": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
-    "common_path": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+    "travel_distance": "Gordium's no-clearance figure, from the sheet's start to the sheet's exit, no longer than the "
+                       "sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger, no shorter than the "
+                       "straight line from its start to the sheet's exit's door centre, that door centre within the "
+                       "same of where the sheet's line ends, and every rule of this figure giving the sheet's verdict "
+                       "(changed 2026-11-21: the sheet's line is orthogonal, never shorter than the natural path IBC "
+                       "1016.1 and NFPA 7.6.1 measure)",
+    "common_path": "Gordium's no-clearance figure from the sheet's start no longer than the sheet's line as drawn "
+                   "plus 2 percent of it or 2 ft, whichever is larger, where its two routes part within the same of "
+                   "where the sheet's line ends (the check that catches a figure measured too short: the straight "
+                   "line to that point is shown too, but can't catch it, the point being read off the routes), and "
+                   "every rule of this figure giving the sheet's verdict (changed 2026-11-21, as for the travel "
+                   "distance)",
     "dead_end": "length within 1 ft, width within 1 in",
     "remoteness": "within 1 ft of Gordium's nearest-edge figure or of its door-centre figure",
     "diagonal": "within 6 in",
     "storage_inside": "the inside-walls figure within 1 percent",
     "story_area": "the outer-faces story area within 1 percent of 16,539 sf (the sheet's 16,509 is a recorded error)",
 }
+
+
+BEFORE = {   # the first test, until 2026-11-21: still worked and reported, so nothing it found is hidden
+    "travel_distance": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+    "common_path": "within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance figure",
+}
+
+
+def _no_longer(drawn, ours, verdicts, rules, words, straight, end_ok=True) -> dict:
+    """The test since 2026-11-21: Gordium's figure no longer than the sheet's line as drawn plus the tolerance; no
+    shorter than the straight line from Gordium's start to its end (`straight`, exact, never from rounded
+    coordinates); where it ends within the tolerance of where the sheet's line ends (`end_ok`, the `end` item); and
+    each of the figure's rules giving the sheet's verdict. For the travel the end is the sheet's exit's door centre,
+    taken apart from the route, so the floor catches a route measured too short. For the common path the end is
+    where Gordium's two routes part, read off the routes at the figure's own length, so the floor alone can't catch
+    a too-short figure (the straight line to a point the route reaches is never longer than the way there): the end
+    item does, a split point short of the sheet's is outside it (review round 3)."""
+    allowed = round(max(0.02 * drawn, 2.0), 3)
+    same = {rid: verdicts[rid]["same"] for rid in rules}
+    if ours is None:
+        return {"tolerance": words, "within_tolerance": None, "why": "Gordium gives no figure", "verdicts_same": same}
+    short = ours <= drawn + allowed + 1e-9
+    long_enough = ours >= straight - 1e-6
+    return {"tolerance": words, "sheet_line_as_drawn": drawn, "own_ends_straight": straight, "gordium": ours,
+            "longer_than_drawn_by": round(ours - drawn, 3), "allowed": allowed, "no_longer": short,
+            "no_shorter_than_own_straight": long_enough, "end_within_tolerance": bool(end_ok), "verdicts_same": same,
+            "within_tolerance": bool(short and long_enough and end_ok and all(same.values()))}
+
+
+def _end(sheet_end, ours, allowed, what) -> dict:
+    """Where Gordium's figure ends (its exit's door centre, or where its two routes part) beside where the sheet's
+    line ends: its own agreement item, within the figure's tolerance."""
+    apart = round(math.dist(sheet_end, ours), 3)
+    return {"what": what, "sheet": list(sheet_end), "gordium": list(ours), "apart": apart, "allowed": allowed,
+            "within_tolerance": apart <= allowed + 1e-9}
 
 
 def _verdict(sheet, ours, allowed, words) -> dict:
@@ -215,7 +306,16 @@ def _judge_all(out) -> None:
         sheet = f[name]["sheet_stated"]
         g = f[name]["gordium"]
         ours = g.get("to_the_sheets_exit_no_clearance", g.get("no_clearance"))
-        f[name]["agreement"] = _verdict(sheet, ours, max(0.02 * sheet, 2.0), TOLERANCES[name])
+        end = g.get("to_no_clearance", g.get("split_no_clearance"))
+        allowed = round(max(0.02 * f[name]["sheet_line_as_drawn"], 2.0), 3)
+        item = _end(f[name]["sheet_line_in_model"][-1], end, allowed,
+                    "the sheet's exit's door centre" if name == "travel_distance" else "where Gordium's two routes part")
+        f[name]["agreement"] = _no_longer(f[name]["sheet_line_as_drawn"], ours, out["verdicts"]["rules"],
+                                          out["verdicts"]["by_figure"][name], TOLERANCES[name],
+                                          g["own_ends_straight_exact"], item["within_tolerance"])
+        f[name]["agreement"]["own_ends_straight"] = round(g["own_ends_straight_exact"], 3)
+        f[name]["agreement"]["end"] = item
+        f[name]["agreement"]["before_2026_11_21"] = _verdict(sheet, ours, max(0.02 * sheet, 2.0), BEFORE[name])
     # the dead end the sheet's line runs along: the one whose closed end is nearest the line's start (within 3 ft)
     start = f["dead_end"]["sheet_line_in_model"][0]
     ends = [d for c in f["dead_end"]["gordium"].values() for d in c.get("dead_ends", [])

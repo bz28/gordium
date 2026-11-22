@@ -373,7 +373,14 @@ def label(row: dict) -> str:
 def line(row: dict, rule: dict, values: dict, allowed: dict, why_not: dict | None = None) -> str:
     """One line naming the part and why: "Bedroom 2 › Window 5: net clear area 5.1 sq ft, needs ≥ 5.7 sq ft".
     `why_not`: the part's measuring's reason for each measure it has no value for (its `not_measured`), said
-    wherever the line names that measure as not measured."""
+    wherever the line names that measure as not measured. A row whose measures stand on a reading to confirm
+    (`confirm`, parts.rows) says it after the line, never in place of its comparison."""
+    text = _line(row, rule, values, allowed, why_not)
+    confirm = [str(c) for c in row.get("confirm") or []]
+    return f"{text} ({'; '.join(confirm)})" if confirm else text
+
+
+def _line(row: dict, rule: dict, values: dict, allowed: dict, why_not: dict | None = None) -> str:
     head = label(row)
     why_not = why_not or {}
 

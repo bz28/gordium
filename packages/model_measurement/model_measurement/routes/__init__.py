@@ -13,7 +13,10 @@ readings (decisions 6 and 8: open questions 3 and 7) is left out too, its readin
 named: {question: answer}}]}, the shape the checker's readings take (design_checker/check.py readings_of);
 rule_format.parts.rows decides such a rule under every combination of them (pass only if all pass, fail only if all
 fail, else needs review). `more` holds the
-figures behind each measure: the routes drawn, the bounds, the corridors' centre lines.
+figures behind each measure: the routes drawn, the bounds, the corridors' centre lines. `confirm`, {measure: words},
+says a measure stands on Gordium's reading (decision 1a, a room that opens only into the room it serves: the story's
+travel and common path, and that room's own exit count and common path), for the checker to show beside each row
+that reads it; a row that would comply on it needs review until the reading is confirmed (rule_format.parts.rows).
 
 The pieces (decision 11): floor.py reads each story's floor, zones and rings (decisions 1, 1a, 10); paths.py draws
 decision 2's routes; remote.py gives decision 3's travel figure; common_path.py decision 5's; dead_ends.py decision
@@ -32,7 +35,7 @@ import math
 from model_measurement.interior.read import name_of
 from model_measurement.routes import areas, dead_ends, straight
 from model_measurement.routes.common_path import _TravelOnly, at_point, story_figure
-from model_measurement.routes.floor import CLEARANCE, read, region
+from model_measurement.routes.floor import CLEARANCE, READING, read, region
 from model_measurement.routes.paths import FOOT, StoryRoutes, _Leg
 from model_measurement.routes.remote import farthest
 from model_measurement.routes.stops import Stop
@@ -40,6 +43,7 @@ from model_measurement.routes.stops import Stop
 MEASURED_FORMAT = "gordium.routes_measured/1"
 KINDS = ("story", "space", "corridor")
 SF = FOOT * FOOT
+READ_THROUGH = ("egress_travel_distance", "egress_travel_from_room_door", "common_path_of_travel")
 ROUTE_MEASURES = ("story_exit_count", "egress_travel_distance", "egress_travel_from_room_door",
                   "egress_travel_in_sleeping_room", "common_path_of_travel", "exit_remoteness_ratio")
 STATED = {"story_occupant_load": "the story's design occupant load", "space_occupant_load": "the space's occupant load",
@@ -103,6 +107,10 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
         routes = StoryRoutes(story, r)
         access = _exit_access(story, routes, uses)
         figures = _story_routes(sp, story, routes, uses, items, access)
+        if story.served_by:                                  # Gordium's reading reaches these figures: said so
+            words = READING.format(rooms="; ".join(
+                f"{story.rooms[k].name} through {story.rooms[h].name}" for k, h in sorted(story.served_by.items())))
+            sp["confirm"] = {m: words for m in READ_THROUGH}
     _story_areas(sp, story, uses, [name_of(u) for u in unknown])
     for m in ("story_occupant_load",):
         sp["not_measured"][m] = Stop("stated_not_given", what=STATED[m]).reason
@@ -115,6 +123,9 @@ def _story_parts(story, uses, items, unknown, parts, r) -> None:
             continue
         parts["space"].append(_space_part(rid, name, story, routes, room, access.get(rid), figures,
                                           sp["not_measured"].get("common_path_of_travel")))
+        if routes is not None and rid in story.served_by:
+            words = READING.format(rooms=f"{name} through {story.rooms[story.served_by[rid]].name}")
+            parts["space"][-1]["confirm"] = {m: words for m in ("space_exit_count", "space_common_path")}
         if use is None:                                   # it may be a corridor: never "no corridors" on its say
             cp = _part(f"{rid} (as a corridor)", name, story.level)
             cp["maybe"] = Stop("area_no_use", name=name).reason
@@ -320,6 +331,10 @@ def _room_access(story, routes, room, chain) -> dict:
             got[d.id] = 0.0
         elif math.isfinite(chain.get(d.id, math.inf)):
             got[d.id] = chain[d.id]
+        elif room.id in story.served_by:                     # on through the room it serves (decision 1a)
+            onward = routes._onward(room, d.id, frozenset(routes.exits), _xy(d.centre), frozenset())
+            if onward:
+                got[d.id] = onward[0].length
     if zone is None:                                         # an end-only room: its passages into the floor beyond
         for n, (a, b, seg) in enumerate(story.passages):
             if room.id not in (a, b):

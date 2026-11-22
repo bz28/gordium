@@ -90,6 +90,13 @@ def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_fro
     log = DISCREPANCIES.split("# Children's Odyssey", 1)[1]
     apart = [f"figures.{name}" for name, fig in data["figures"].items()
              if (fig.get("agreement") or {}).get("within_tolerance") is False]
+    # the first test, still reported beside the one-sided test since 2026-11-21: a miss under it is logged too
+    apart += [f"figures.{name}.agreement.before_2026_11_21" for name, fig in data["figures"].items()
+              if ((fig.get("agreement") or {}).get("before_2026_11_21") or {}).get("within_tolerance") is False]
+    assert any(".before_2026_11_21" in key for key in apart), "the eval file's format changed; update this test"
+    # where Gordium's figure ends beside where the sheet's line ends: its own item, a miss logged too
+    apart += [f"figures.{name}.agreement.end" for name, fig in data["figures"].items()
+              if ((fig.get("agreement") or {}).get("end") or {}).get("within_tolerance") is False]
     apart += [f"storage.{key}" for key, value in data["storage"].items()
               if isinstance(value, dict) and value.get("within_tolerance") is False]
     apart += [rule.split(".", 1)[1] for rule, v in data["verdicts"]["rules"].items() if v["same"] is False]

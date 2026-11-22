@@ -213,6 +213,16 @@ def _ref(part: dict, kind: str) -> dict:
     return {"kind": kind, "id": part["id"], "name": _name(part)}
 
 
+def _confirm(part, mine, shown) -> list[str]:
+    """The words a part gives (`confirm`: {measure: words}) for the measures this row reads that it has a value for:
+    each stands on a reading to confirm (Gordium's reading), shown with the row, never hidden. Words that aren't
+    text are said as given."""
+    given = part.get("confirm")
+    if not isinstance(given, dict):
+        return []
+    return [str(given[m]) for m in sorted(shown) if m in mine and m in given]
+
+
 def _row(rule, result, part=None, within=None, reason=None, values=None, none=False, unknown=None) -> dict:
     """One row. `none`: the row is the rule's when_none answer (nothing to check). `unknown`: the part's measures
     that weren't given, for a part that fails whatever they are (the 2026-10-21 proof)."""
@@ -301,7 +311,15 @@ def rows(rule: dict, parts, values: dict, allowed: dict) -> list[dict]:
         why = _maybe(part) or maybe
         if why and result != "not_applicable":   # it, or the part it sits in, may not be of its kind at all
             return _row(rule, "needs_review", part, within, reason=why, values=shown)
-        return _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
+        row = _row(rule, result, part, within, reason=reason, values=shown, unknown=unknown)
+        confirm = _confirm(part, mine, shown) if result != "not_applicable" else []
+        confirm = list(dict.fromkeys(confirm))
+        if confirm and result == "pass":         # a pass that stands on a reading to confirm: never a pass on it
+            row["outcome"] = "needs_review"      # (principle 4; as each_part.check_parts does for a has-none reading)
+            row["reason"] = "complies only if this reading is confirmed: " + "; ".join(confirm)
+        elif confirm:                            # a fail (or a needs review) keeps its own reason and comparison,
+            row["confirm"] = confirm             # the reading said beside it
+        return row
 
     if not parent:
         out += [checked(p) for p in children]

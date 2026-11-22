@@ -49,6 +49,9 @@ STOPS = {
     "not_on_floor": "the point ({x}, {y}) isn't on the story's floor (in no room, or in a hole or an obstruction)",
     "no_route": "the point ({x}, {y}) has no route to {exits} (a path 12 in clear of every corner, through door "
                 "centres and rooms it may cross)",
+    "no_route_host_blocked": "the point ({x}, {y}) has no route to {exits}: its room {name} {why}",
+    "no_route_via_host": "the point ({x}, {y}) has no route to {exits}: its room {name} opens only into {host}, which "
+                         "it serves (Gordium's reading, decision 1a), and no route leaves {host} either",
     "route_reenters": "the shortest route found from ({x}, {y}) goes back into a 12-in ring it had left (or into "
                       "the room it started in): the route the definition allows is longer, and isn't measured yet",
     "too_many_ties": "more than {most} routes from ({x}, {y}) are equally short (within 1e-6 ft): which to take "

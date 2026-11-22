@@ -19,6 +19,9 @@ ring. Dijkstra on it gives the leg, and Dijkstra over the door centres, from the
 shares more (decision 5). `travel` gives the length alone, from the same graph built once per zone, for sampling.
 
 A route from an end-only room into the floor beyond its passage that comes back into the room stops (needs review).
+A route from a room that opens only into the room it serves (floor.py's `served_by`, decision 1a as amended
+2026-11-21, Gordium's reading) goes from the point to one of its doors in its own floor, then on as a route from that
+door centre in the room it serves (its own doors and passages; a chain, in turn).
 
 Lengths are inches; `Route.feet` gives feet.
 """
@@ -427,7 +430,7 @@ class StoryRoutes:
             raise Stop("story_not_measured", reasons="; ".join(story.stops))
         self.story, self.r = story, clearance
         self._engines, self._legs, self._chains, self._regions = {}, {}, {}, {}
-        self._start_cache, self._plain = {}, None
+        self._start_cache, self._plain, self._onward_cache = {}, None, {}
         self.exits = {}
         for d in story.exits():
             self.exits.setdefault(d.exit_id, []).append(d.id)
@@ -537,8 +540,13 @@ class StoryRoutes:
         if self.r > 0 and any(self._engine(zone).inside(p) for zone, _ in self._starts(room)):
             raise Stop("inside_ring", x=at[0], y=at[1])
 
-    def _no_route(self, p, at, exit_ids, wanted):
-        """No route: say so, and say it is an opening too narrow for the clearance when one with none exists."""
+    def _no_route(self, p, at, exit_ids, wanted, room=None):
+        """No route: say so, and say it is an opening too narrow for the clearance when one with none exists; for a
+        room that opens only into one end-only room, say why its route can't go through it, or (only when the room
+        it serves has no route on from any of its doors) that the room it serves has none either. The no-clearance
+        retry comes first: a point with a route only with no clearance is shut in (a pocket, decision 3)."""
+        exits = "any exit" if exit_ids is None else "the exit " + ", ".join(sorted(wanted))
+        story = self.story
         if self.r > 0:
             if self._plain is None:
                 self._plain = StoryRoutes(self.story, 0.0)
@@ -548,8 +556,14 @@ class StoryRoutes:
                 pass
             else:
                 return Stop("too_narrow", x=at[0], y=at[1])
-        return Stop("no_route", x=at[0], y=at[1], exits="any exit" if exit_ids is None else
-                    "the exit " + ", ".join(sorted(wanted)))
+        if room is not None and room.id in story.not_served:
+            return Stop("no_route_host_blocked", x=at[0], y=at[1], exits=exits, name=room.name,
+                        why=story.not_served[room.id])
+        if room is not None and room.id in story.served_by and not any(
+                self._onward(room, d, wanted, at, frozenset()) for d in self._region([room.id]).doors):
+            return Stop("no_route_via_host", x=at[0], y=at[1], exits=exits, name=room.name,
+                        host=story.rooms[story.served_by[room.id]].name)
+        return Stop("no_route", x=at[0], y=at[1], exits=exits)
 
     def routes(self, point, exit_ids=None) -> list[Route]:
         """Every shortest route (ties within 1e-6 ft) from a point (inches), clear of every ring, to the nearest of
@@ -566,7 +580,7 @@ class StoryRoutes:
             self._check_start(room, p, at)
             found = self._from_room(room, p, wanted, dist, at)
             if found is None:
-                raise self._no_route(p, at, exit_ids, wanted)    # a start in either room may need it
+                raise self._no_route(p, at, exit_ids, wanted, room)    # a start in either room may need it
             if best_of_rooms is None or found[0].length > best_of_rooms[0].length + TIE:
                 best_of_rooms = found                       # a point on two rooms' line: the longer (cautious)
         return best_of_rooms
@@ -588,6 +602,9 @@ class StoryRoutes:
         for room in rooms:
             self._check_start(room, p, at)
             starts = self._starts(room)
+            if room.id in self.story.served_by:              # through the room it serves (decision 1a)
+                worst = max(worst, self._served_travel(room, p, wanted, at, exit_ids))
+                continue
             if len(starts) > 1:                              # an end-only room joined beyond its passages
                 worst = max(worst, self.route(p, exit_ids).length)
                 continue
@@ -599,9 +616,74 @@ class StoryRoutes:
             engine.prepare([self.story.doors[d].centre for d in zone.doors])
             best = min((engine.dist(p, self.story.doors[d].centre) + dist[d] for d in doors), default=math.inf)
             if not math.isfinite(best):
-                raise self._no_route(p, at, exit_ids, wanted)
+                raise self._no_route(p, at, exit_ids, wanted, room)
             worst = max(worst, best)
         return worst
+
+    def simple(self, room) -> bool:
+        """Whether a route from this room is found in one floor alone (no passage joined, no room it serves): the
+        fast ways (`travel`, common_path.tied_routes) read that floor's graph built once."""
+        return len(self._starts(room)) == 1 and room.id not in self.story.served_by
+
+    def _onward(self, room, door_id, wanted, at, seen) -> list:
+        """The routes on from a door centre of a room that opens only into the room it serves: those from that
+        centre as a start in the room it serves (worked once per door and set of exits). A door into a room this one
+        serves in turn (a closet off it) leads no way out: none."""
+        key = (room.id, door_id, wanted)
+        if key not in self._onward_cache:
+            host = self.story.rooms[self.story.served_by[room.id]]
+            if host.id not in self.story.doors[door_id].sides:
+                self._onward_cache[key] = []
+                return []
+            dist, _, _ = self._chain(wanted)
+            self._onward_cache[key] = self._from_room(host, tuple(self.story.doors[door_id].centre), wanted, dist, at,
+                                                      seen | {room.id}) or []
+        return self._onward_cache[key]
+
+    def _served_travel(self, room, p, wanted, at, exit_ids) -> float:
+        """`travel` from a room that opens only into the room it serves, from its own floor's graph built once."""
+        own = self._region([room.id])
+        engine = self._engine(own)
+        if not engine.covers(p):
+            raise Stop("not_on_floor", x=at[0], y=at[1])
+        engine.prepare([self.story.doors[d].centre for d in own.doors])
+        best = math.inf
+        for d in own.doors:
+            onward = self._onward(room, d, wanted, at, frozenset())
+            if onward:
+                best = min(best, engine.dist(p, self.story.doors[d].centre) + onward[0].length)
+        if not math.isfinite(best):
+            raise self._no_route(p, at, exit_ids, wanted, room)
+        return best
+
+    def _through_host(self, room, p, wanted, at, seen):
+        """The shortest routes from p in a room that opens only into the room it serves: to one of its doors in its
+        own floor, then on from that door centre (`_onward`)."""
+        own = self._region([room.id])
+        if not self._engine(own).covers(p):
+            raise Stop("not_on_floor", x=at[0], y=at[1])
+        legs = []
+        for d in own.doors:
+            onward = self._onward(room, d, wanted, at, seen)
+            if not onward:
+                continue
+            for path in self._leg(own, p, self.story.doors[d].centre):
+                legs.append((path.length + onward[0].length, path, d, onward))
+        if not legs:
+            return None
+        best = min(x[0] for x in legs)
+        out = []
+        for total, path, d, onward in sorted(legs, key=lambda x: x[0]):
+            if total > best + TIE:
+                break
+            for rest in onward:
+                if path.length + rest.length > best + TIE:
+                    continue
+                pieces = _tidy(path.pieces + rest.pieces)
+                out.append(Route(sum(_piece_length(q) for q in pieces), pieces, (d,) + rest.doors, rest.exit_id))
+                if len(out) > MOST_TIES:
+                    raise Stop("too_many_ties", most=MOST_TIES, x=at[0], y=at[1])
+        return out
 
     def _region(self, room_ids) -> Zone:
         key = tuple(sorted(room_ids))
@@ -627,11 +709,14 @@ class StoryRoutes:
         self._start_cache[room.id] = starts
         return starts
 
-    def _from_room(self, room, p, wanted, dist, at):
+    def _from_room(self, room, p, wanted, dist, at, seen=frozenset()):
         """The shortest routes from p, a point in this room: in its zone; or, in an end-only room, in the room
         alone to its own doors, and joined to each crossable zone beyond its passages to that zone's doors (a
-        route may leave it that way, never come back in: decision 1)."""
+        route may leave it that way, never come back in: decision 1); or, in a room that opens only into the room
+        it serves, through that room (decision 1a). `seen`: the rooms a route has come through (never twice)."""
         story = self.story
+        if room.id in story.served_by:
+            return None if room.id in seen else self._through_host(room, p, wanted, at, seen)
         starts = self._starts(room)
         if not any(self._engine(zone).covers(p) for zone, _ in starts):
             raise Stop("not_on_floor", x=at[0], y=at[1])
@@ -672,7 +757,10 @@ def _leaves_once(path: Path, room, p) -> None:
         return
     got = line.intersection(inside)
     parts = [g for g in getattr(got, "geoms", [got]) if not g.is_empty and g.length > EPS]
-    if len(parts) > 1 or (parts and line.project(Point(parts[0].coords[0])) > 2 * SAME):
+    # a start in the room must leave it at once; a start at a door centre in its wall (a route on from a room it
+    # serves, decision 1a) comes in through that door first, and must never come back once it has left
+    starts_in = room.outline.buffer(SAME).covers(Point(p))
+    if len(parts) > 1 or (parts and starts_in and line.project(Point(parts[0].coords[0])) > 2 * SAME):
         raise Stop("route_reenters", x=_show(p)[0], y=_show(p)[1])
 
 

@@ -28,6 +28,10 @@ SAME = 1 / 16           # in: points this close are the same point (decision 9)
 NARROWEST = 24.0        # in: a door under this puts its centre inside its jambs' rings (decision 1)
 USES = ("corridor", "lobby", "day_care", "accessory_storage", "kitchen", "toilet", "closet", "workroom", "other")
 END_ONLY_USES = ("accessory_storage", "kitchen", "toilet", "closet", "workroom")     # IBC 1014.2 item 4, NFPA 7.5.2.1
+SERVING_USES = ("closet", "accessory_storage", "toilet")   # decision 1a: may be part of the one room it opens into
+READING = ("Gordium's reading · confirm with the architects: a closet, storeroom or toilet that opens only into the "
+           "room it serves is part of that room, so its route leaves through it ({rooms}; route note decision 1a, "
+           "open question 11)")
 EXIT_KINDS = ("exterior_at_discharge", "exit_enclosure", "exit_passageway", "horizontal_exit",
               "exterior_stair_or_ramp")                                             # IBC 2009 1016.1's own list
 OBSTRUCTION_KINDS = ("casework", "furniture", "equipment", "fixture")
@@ -44,6 +48,8 @@ class Room:
     obstructions: list               # Polygons: casework, furniture, equipment, fixtures (every one counts)
     crossable: bool                  # decision 1a: a route may pass through it
     end_only_why: str = ""           # why it isn't crossable (shown with the routes)
+    use: str | None = None           # the room's `use`, as given (None: not given)
+    lockable: bool | None = None     # as given (None: not given)
 
 
 @dataclass
@@ -100,6 +106,8 @@ class Story:
     passages: list = field(default_factory=list)     # (room id, room id, LineString)
     zones: list = field(default_factory=list)
     zone_of: dict = field(default_factory=dict)      # crossable room id -> its Zone
+    served_by: dict = field(default_factory=dict)    # room id -> the one room it opens into and serves (decision 1a)
+    not_served: dict = field(default_factory=dict)   # room id -> why it isn't taken as part of the room it opens into
     stops: list = field(default_factory=list)        # reasons the story's route measures need review
     outer: Polygon | None = None                     # the exterior walls' outside faces
     inner: Polygon | None = None                     # and their inside faces
@@ -199,6 +207,7 @@ def read(description) -> Floor:
     for story in stories.values():
         _coincident_doors(story)
         _zones(story)
+        _served(story)
         if not story.exits():
             story.stops.append(Stop("no_exit").reason)
     return _finish(stops, stories)
@@ -337,7 +346,8 @@ def _room(item, reader, level) -> Room:
                         "`pass_through` isn't given" if through is None else
                         "it isn't a corridor, nor marked `pass_through: true`" if not (use == "corridor" or through)
                         else ""))
-    return Room(item["id"], name, level, outline, holes, obstructions, crossable=not why, end_only_why=why)
+    return Room(item["id"], name, level, outline, holes, obstructions, crossable=not why, end_only_why=why, use=use,
+                lockable=lockable)
 
 
 def _outlines_of(item, key, reader, what) -> list:
@@ -515,6 +525,46 @@ def _zones(story: Story) -> None:
         story.zones.append(zone)
         for k in members:
             story.zone_of[k] = zone
+
+
+def _served(story: Story) -> None:
+    """Decision 1a, amended 2026-11-21 (Gordium's reading, open question 11): a closet, storeroom or toilet that
+    isn't crossable, whose every opening is a door (none an exit) into one end-only room, is part of that room, the
+    room it serves, when that room gives its `use` and `lockable: false`. A door into a room behind it (one whose
+    every opening is a door into this room alone: a closet off it) is no way out of it, so a chain is found (a closet
+    off a storeroom off a storeroom). A room with a passage keeps decision 1a's rule. Fills `served_by`, and
+    `not_served` with why a room that opens only into one end-only room isn't taken so."""
+    rooms = {k: r for k, r in story.rooms.items() if r is not None}
+    passages = {k for a, b, _ in story.passages for k in (a, b)}
+    doors_of = {k: [d for d in story.doors.values() if k in d.sides] for k in story.rooms}
+
+    def beyond(rid) -> set:
+        return {s for d in doors_of[rid] for s in d.sides if s != rid}
+
+    def behind(rid) -> set:
+        """The rooms whose every opening is a door into this room alone (none an exit, no passage)."""
+        return {k for k in beyond(rid) - {OUTSIDE} if k in doors_of and k not in passages and doors_of[k]
+                and not any(d.exit_kind for d in doors_of[k]) and beyond(k) == {rid}}
+
+    for rid, room in sorted(rooms.items()):
+        if room.crossable or room.use not in SERVING_USES or rid in passages:
+            continue
+        if not doors_of[rid] or any(d.exit_kind for d in doors_of[rid]):
+            continue
+        ways = beyond(rid) - behind(rid)
+        if len(ways) != 1:
+            continue
+        host = rooms.get(next(iter(ways)))
+        if host is None or host.crossable:
+            continue
+        if host.use is None or host.lockable is not False:
+            story.not_served[rid] = (f"opens only into {host.name}, which "
+                                     + ("doesn't give its `use`" if host.use is None else
+                                        "can be locked (`lockable: true`)" if host.lockable else
+                                        "doesn't say whether it can be locked (`lockable`)")
+                                     + ", so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)")
+            continue
+        story.served_by[rid] = host.id
 
 
 def region(story: Story, room_ids, crossable: bool = False, joined=()) -> Zone:

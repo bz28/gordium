@@ -30,7 +30,8 @@ from model_measurement.routes.remote import Remote, farthest
 from model_measurement.routes.stops import Stop
 
 TOL = EPS                      # in: two routes this close share the point (their pieces come from the same formulas)
-UNREACHED = ("no_route", "too_narrow")      # a point with no route to this exit (it may still have one to others)
+UNREACHED = ("no_route", "too_narrow", "no_route_host_blocked", "no_route_via_host")   # a point with no route to
+                                                                                   # this exit (it may have to others)
 
 
 @dataclass
@@ -278,7 +279,7 @@ def tied_routes(routes: StoryRoutes, point, exit_id) -> list:
     sits on the line between two rooms, or the clearance is 0)."""
     p = (float(point[0]), float(point[1]))
     rooms = routes.rooms_at(p)
-    if routes.r <= 0 or len(rooms) != 1 or len(routes._starts(rooms[0])) != 1:
+    if routes.r <= 0 or len(rooms) != 1 or not routes.simple(rooms[0]):
         return routes.routes(p, [exit_id])
     room, at = rooms[0], _show(p)
     wanted = routes._wanted([exit_id])
@@ -299,7 +300,7 @@ def tied_routes(routes: StoryRoutes, point, exit_id) -> list:
         t = tuple(map(float, routes.story.doors[d].centre))
         legs += [(length + dist[d], pieces, d) for length, pieces in prepared.legs(p, t)]
     if not legs:
-        raise routes._no_route(p, at, [exit_id], wanted)
+        raise routes._no_route(p, at, [exit_id], wanted, room)
     best = min(x[0] for x in legs)
     out = []
     for total, pieces, d in sorted(legs, key=lambda x: x[0]):
