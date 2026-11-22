@@ -2,16 +2,21 @@
 themselves (paths.py), until those to two distinct exits part for good.
 
     shared(a, b)                          -> the travel distance from the start to the last point two routes share
-    at_point(story_routes, p)             -> CommonPath(length, exits, routes)
+    farthest_shared(tied_a, tied_b)       -> the same over every pair of tied routes, from their unions
+    tied(story_routes, p, exit_id)        -> paths.Tied: every tied route to one exit, all together (fast)
+    at_point(story_routes, p)             -> CommonPath(length, exits, routes, at)
     story_figure(story_routes, rooms=None) -> remote.Remote: decision 3's bound, with the common path as the value
 
 IBC 2009 1002.1: "Paths that merge are common paths of travel." From a point clear of every ring, Gordium takes its
 shortest route to each distinct exit (by `exit_id`, never by door). For two routes the common path is the travel
 distance from the point to the **last point the two routes share** (a door centre, a ring, a stretch walked
 together), so a stretch where they meet again after parting counts, and two routes that share only the start give 0.
-Where two routes to one exit are equally short (within 1e-6 ft: paths.py keeps every tied route), the one that shares
-more is taken (the cautious side). The point's common path is the least over the pairs of distinct exits it has
-routes to. One exit on the story (or one the point reaches): the common path is the travel distance.
+Where routes to one exit are equally short (within 1e-6 ft), the pair that shares most is taken (the cautious side),
+worked without listing them (decision 5, amended 2026-11-22): for each exit the union of its tied routes (paths.py's
+`Tied`, every piece on some tied route with its travel distance), and the farthest point the two unions share
+(`farthest_shared`): every pair passing that point shares the walk to it, and a pair's last shared point is such a
+point. The point's common path is the least over the pairs of distinct exits it has routes to. One exit on the story
+(or one the point reaches): the common path is the travel distance.
 
 The story's figure is worked exactly as decision 3's (remote.farthest, the same samples, triangles and cluster
 margins): the law's figure changes no faster than you walk, and Gordium's routes are one pair a person could take, so
@@ -24,8 +29,8 @@ import math
 from dataclasses import dataclass, field
 from itertools import combinations
 
-from model_measurement.routes.paths import (EPS, MOST_TIES, TIE, Route, StoryRoutes, _piece_length, _show,
-                                            _signature, _tidy)
+from model_measurement.routes.paths import (EPS, TIE, Route, StoryRoutes, Tied, Tight, _down, _piece_length, _show,
+                                            _tidy)
 from model_measurement.routes.remote import Remote, farthest
 from model_measurement.routes.stops import Stop
 
@@ -38,7 +43,8 @@ UNREACHED = ("no_route", "too_narrow", "no_route_host_blocked", "no_route_via_ho
 class CommonPath:
     length: float              # in
     exits: tuple               # the pair of exit ids that gave it (one, when the point reaches one exit)
-    routes: list = field(default_factory=list)      # the two routes taken (the tie that shares more)
+    routes: list = field(default_factory=list)      # the two routes taken (tied ones through `at`)
+    at: tuple | None = None    # where they part: the farthest point the two exits' tied routes share (None: one exit)
 
 
 # --- where two routes meet -------------------------------------------------------------------------------------------
@@ -177,6 +183,56 @@ def shared(a, b) -> float:
     return best
 
 
+def farthest_shared(a: Tied, b: Tied) -> tuple:
+    """The farthest point both unions of tied routes pass (decision 5, amended 2026-11-22): (its travel distance, the
+    point, a's piece and offset there, b's). Every pair of a tied route to one exit and a tied route to the other
+    shares the walk to such a point, and a pair's last shared point is one, so this is the greatest shared walk over
+    every pair, found without listing a route. The start itself is shared (0). Of the two travel distances to the
+    point (equal, within float, both routes being shortest there) the greater is taken (the cautious side)."""
+    best = (0.0, None, None, None)
+    boxes = [_box(q) for q, _ in b.pieces]
+    for p, op in a.pieces:
+        bp = _box(p)
+        for (q, oq), bq in zip(b.pieces, boxes):
+            if bp[0] > bq[2] + TOL or bq[0] > bp[2] + TOL or bp[1] > bq[3] + TOL or bq[1] > bp[3] + TOL:
+                continue                                 # pieces apart: nothing shared
+            for x in _meetings(p, q):
+                u, v = _along(p, x), _along(q, x)
+                if u is not None and v is not None and max(op + u, oq + v) > best[0]:
+                    best = (max(op + u, oq + v), x, (p, op), (q, oq))
+    return best
+
+
+SLACK = 1e-4                   # in: how far apart two pieces' meeting ends, and their offsets, may be (float error)
+
+
+def _through(t: Tied, piece, offset, start) -> Route:
+    """One tied route through this piece of the union (to draw the two routes the common path took): walked back to
+    the start and on to the end, piece by piece, each joined end to end with offsets adding up. Where none is found
+    (never, as every piece of the union lies on a tied route): the union's own `one`."""
+    ends = [(_ends(q), q, o) for q, o in t.pieces if _piece_length(q) > EPS * 1e-3]
+    back, (s, _), o = [], _ends(piece), offset
+    while o > SLACK:
+        got = next(((q, oq) for (a, e), q, oq in ends if math.dist(e, s) <= SLACK and
+                    abs(oq + _piece_length(q) - o) <= SLACK and oq < o - EPS * 1e-3), None)
+        if got is None:
+            return t.one
+        back.append(got[0])
+        s, o = _ends(got[0])[0], got[1]
+    if math.dist(s, start) > SLACK:
+        return t.one
+    on, e, o = [], _ends(piece)[1], offset + _piece_length(piece)
+    while o < t.length - SLACK:
+        got = next(((q, oq) for (a, _e), q, oq in ends if math.dist(a, e) <= SLACK and abs(oq - o) <= SLACK
+                    and _piece_length(q) > 0), None)
+        if got is None:
+            return t.one
+        on.append(got[0])
+        e, o = _ends(got[0])[1], got[1] + _piece_length(got[0])
+    whole = _tidy(list(reversed(back)) + [piece] + on)
+    return Route(sum(_piece_length(q) for q in whole), whole, (), t.one.exit_id)
+
+
 # --- every tied route, fast -----------------------------------------------------------------------------------------
 
 class _Prepared:
@@ -188,27 +244,6 @@ class _Prepared:
         engine.prepare(centres)                          # the zone's one graph (paths.py builds it for the chain)
         self.targets, self.on, self.dist, _, self.xy, self.adj, self.ids = engine._base
         self._last = None
-
-    def _onward(self, n, t, out, at):
-        """Every tied walk on the graph from node n to target t (each within 1e-6 ft of the shortest, as paths.py's
-        `_tied` keeps them)."""
-        goal, D = self.ids[t], self.dist[t]
-        top = D[n] + TIE
-
-        def walk(v, so_far, pieces, seen):
-            if len(out) > MOST_TIES:
-                raise Stop("too_many_ties", most=MOST_TIES, x=at[0], y=at[1])
-            if v == goal:
-                out.append(list(pieces))
-                return
-            for u, w, piece in self.adj[v]:
-                if u in seen or so_far + w + D[u] > top:
-                    continue
-                pieces.append(piece)
-                walk(u, so_far + w, pieces, seen | {u})
-                pieces.pop()
-
-        walk(n, 0.0, [], {n})
 
     def firsts(self, p) -> list:
         """Every way a curve from p (clear of every ring) can reach the graph: by a tangent to a ring and round it to
@@ -235,52 +270,63 @@ class _Prepared:
         self._last = (p, out)
         return out
 
-    def legs(self, p, t) -> list:
-        """(length, pieces) of every tied shortest curve from p (clear of every ring) to the target t, as
-        `_Leg.dist` measures it: straight to t, or by a tangent to a ring and round it to the first node there."""
-        D = self.dist[t]
-        cands = [(lead_len + D[n], lead, n) for lead_len, lead, n in self.firsts(p) if math.isfinite(D[n])]
-        if self.engine.clear(p, t):
-            cands.append((math.dist(p, t), [("line", p, t)], None))
-        if not cands:
-            return []
-        best = min(f[0] for f in cands)
-        out = []
-        for total, lead, n in cands:
-            if total > best + TIE:
+    def tight(self, p, t) -> Tight | None:
+        """Every tied shortest curve from p (clear of every ring) to the target t, all together, as `_Leg.dist`
+        measures it: straight to t, or by a tangent to a ring and round it to the first node there and on along the
+        graph. Only the nodes on a tied curve are walked (each node's distance from p plus its distance to t, known
+        for every node, adds up to the shortest), so a point costs what its tied curves hold, never the graph."""
+        D, goal = self.dist[t], self.ids[t]
+        cands = [(lead_len + D[n], lead_len, lead, n) for lead_len, lead, n in self.firsts(p) if math.isfinite(D[n])]
+        straight = math.dist(p, t) if self.engine.clear(p, t) else math.inf
+        length = min([c[0] for c in cands] + [straight])
+        if not math.isfinite(length):
+            return None
+        top = length + TIE
+        pieces, seeds = [], {}
+        if straight <= top and straight > EPS * 1e-3:
+            pieces.append((("line", p, t), 0.0))
+        for total, lead_len, lead, n in cands:
+            if total > top:
                 continue
-            if n is None:
-                out.append((total, lead))
+            off = 0.0
+            for q in lead:
+                if _piece_length(q) > EPS * 1e-3:
+                    pieces.append((q, off))
+                off += _piece_length(q)
+            seeds[n] = min(seeds.get(n, math.inf), lead_len)
+        best, done = dict(seeds), set()
+        heap = [(d, n) for n, d in seeds.items()]
+        heapq.heapify(heap)
+        while heap:
+            d, u = heapq.heappop(heap)
+            if u in done or d > best[u]:
                 continue
-            walks = []
-            self._onward(n, t, walks, _show(p))
-            out += [(total, lead + w) for w in walks]
-        return out
+            done.add(u)
+            for v, w, piece in self.adj[u]:
+                if d + w + D[v] > top:
+                    continue
+                if w > EPS * 1e-3:
+                    pieces.append((piece, d))
+                if d + w < best.get(v, math.inf):
+                    best[v] = d + w
+                    heapq.heappush(heap, (d + w, v))
+        if straight <= min((c[0] for c in cands), default=math.inf):
+            one = [("line", p, t)] if straight > EPS * 1e-3 else []
+        else:
+            _, _, lead, n = min(cands, key=lambda c: c[0])
+            one = _tidy(lead + _down(self.adj, n, goal, D))
+        return Tight(length, pieces, one)
 
 
-def _dijkstra(adj, source) -> list:
-    dist = [math.inf] * len(adj)
-    dist[source] = 0.0
-    heap = [(0.0, source)]
-    while heap:
-        d, v = heapq.heappop(heap)
-        if d > dist[v]:
-            continue
-        for u, w, _ in adj[v]:
-            if d + w < dist[u]:
-                dist[u] = d + w
-                heapq.heappush(heap, (d + w, u))
-    return dist
-
-
-def tied_routes(routes: StoryRoutes, point, exit_id) -> list:
-    """Every tied shortest route from a point to one exit, as `routes.routes(point, [exit_id])` gives them, its
-    first leg read from the zone's graph built once (the slow way where a start is joined beyond its passages, or
-    sits on the line between two rooms, or the clearance is 0)."""
+def tied(routes: StoryRoutes, point, exit_id) -> Tied:
+    """Every tied shortest route from a point to one exit, all together, as `routes.tied(point, [exit_id])` gives
+    them, its first leg read from the zone's graph built once (the slow way where a start is joined beyond its
+    passages, or sits on the line between two rooms, or opens only into the room it serves, or the clearance is
+    0)."""
     p = (float(point[0]), float(point[1]))
     rooms = routes.rooms_at(p)
     if routes.r <= 0 or len(rooms) != 1 or not routes.simple(rooms[0]):
-        return routes.routes(p, [exit_id])
+        return routes.tied(p, [exit_id])
     room, at = rooms[0], _show(p)
     wanted = routes._wanted([exit_id])
     dist, _, _ = routes._chain(wanted)
@@ -297,52 +343,44 @@ def tied_routes(routes: StoryRoutes, point, exit_id) -> list:
     for d in zone.doors:
         if not math.isfinite(dist.get(d, math.inf)):
             continue
-        t = tuple(map(float, routes.story.doors[d].centre))
-        legs += [(length + dist[d], pieces, d) for length, pieces in prepared.legs(p, t)]
-    if not legs:
+        leg = prepared.tight(p, tuple(map(float, routes.story.doors[d].centre)))
+        if leg is not None:
+            legs.append((leg.length + dist[d], leg, d))
+    got = routes.join(legs, wanted)
+    if got is None:
         raise routes._no_route(p, at, [exit_id], wanted, room)
-    best = min(x[0] for x in legs)
-    out = []
-    for total, pieces, d in sorted(legs, key=lambda x: x[0]):
-        if total > best + TIE:
-            break
-        for rest, passed, eid in routes._chains_from(d, wanted, at):
-            whole = _tidy(pieces + rest)
-            out.append(Route(sum(_piece_length(q) for q in whole), whole, passed, eid))
-            if len(out) > MOST_TIES:
-                raise Stop("too_many_ties", most=MOST_TIES, x=at[0], y=at[1])
-    seen, unique = set(), []
-    for x in out:
-        key = _signature(x.pieces)
-        if key not in seen:
-            seen.add(key)
-            unique.append(x)
-    return unique
+    return got
 
 
 # --- a point ---------------------------------------------------------------------------------------------------------
 
 def at_point(routes: StoryRoutes, point) -> CommonPath:
-    """The common path from a point clear of every ring (decision 5)."""
-    tied, first = {}, None
+    """The common path from a point clear of every ring (decision 5): for each pair of distinct exits, the farthest
+    point the unions of their tied routes share; the least over the pairs."""
+    p = (float(point[0]), float(point[1]))
+    unions, first = {}, None
     for e in sorted(routes.exits):
         try:
-            tied[e] = tied_routes(routes, point, e)
+            unions[e] = tied(routes, p, e)
         except Stop as s:
             if s.key not in UNREACHED:
                 raise
             first = first or s
-    if not tied:
-        raise first if first is not None else Stop("no_route", x=_show(point)[0], y=_show(point)[1], exits="any exit")
-    if len(tied) == 1:                                   # one exit: the common path is the travel distance
-        (e, got), = tied.items()
-        return CommonPath(got[0].length, (e,), [got[0]])
+    if not unions:
+        raise first if first is not None else Stop("no_route", x=_show(p)[0], y=_show(p)[1], exits="any exit")
+    if len(unions) == 1:                                 # one exit: the common path is the travel distance
+        (e, got), = unions.items()
+        return CommonPath(got.one.length, (e,), [got.one], None)
     best = None
-    for e1, e2 in combinations(sorted(tied), 2):
-        most = max(((shared(x, y), x, y) for x in tied[e1] for y in tied[e2]), key=lambda t: t[0])
-        if best is None or most[0] < best.length:
-            best = CommonPath(most[0], (e1, e2), [most[1], most[2]])
-    return best
+    for e1, e2 in combinations(sorted(unions), 2):
+        length, x, a, b = farthest_shared(unions[e1], unions[e2])
+        if best is None or length < best[0]:
+            best = (length, (e1, e2), x, a, b)
+    length, pair, x, a, b = best
+    if x is None:                                        # they share only the start
+        return CommonPath(0.0, pair, [unions[pair[0]].one, unions[pair[1]].one], p)
+    return CommonPath(length, pair, [_through(unions[pair[0]], a[0], a[1], p),
+                                     _through(unions[pair[1]], b[0], b[1], p)], x)
 
 
 # --- the story's figure ----------------------------------------------------------------------------------------------

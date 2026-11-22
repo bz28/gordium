@@ -332,9 +332,9 @@ def _room_access(story, routes, room, chain) -> dict:
         elif math.isfinite(chain.get(d.id, math.inf)):
             got[d.id] = chain[d.id]
         elif room.id in story.served_by:                     # on through the room it serves (decision 1a)
-            onward = routes._onward(room, d.id, frozenset(routes.exits), _xy(d.centre), frozenset())
-            if onward:
-                got[d.id] = onward[0].length
+            onward = routes.tied_onward(room, d.id, frozenset(routes.exits), _xy(d.centre), frozenset())
+            if onward is not None:
+                got[d.id] = onward.length
     if zone is None:                                         # an end-only room: its passages into the floor beyond
         for n, (a, b, seg) in enumerate(story.passages):
             if room.id not in (a, b):

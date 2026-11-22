@@ -15,8 +15,10 @@ So each leg is found exactly on a graph: its ends; the tangent points of every l
 the four lines common to each pair of rings; each line kept only if it stays in the floor and out of every ring; and
 the arcs between neighbouring tangent points on each ring, kept only if they stay in the floor and out of every other
 ring. Dijkstra on it gives the leg, and Dijkstra over the door centres, from the exits, the chain. Two lengths within
-1e-6 ft are a tie (decision 2): every tied route is kept, so the common path (a later step) can take the one that
-shares more (decision 5). `travel` gives the length alone, from the same graph built once per zone, for sampling.
+1e-6 ft are a tie (decision 2): every tied route is kept, all together and never listed (`tied`: their union, each
+piece on some tied route found from the distances to and from it, decision 5 as amended 2026-11-22), so the common
+path can take the pair that shares most; `routes` lists them (for drawing and tests only: it stops past 64), and
+`route` is any one. `travel` gives the length alone, from the same graph built once per zone, for sampling.
 
 A route from an end-only room into the floor beyond its passage that comes back into the room stops (needs review).
 A route from a room that opens only into the room it serves (floor.py's `served_by`, decision 1a as amended
@@ -60,6 +62,74 @@ class Route:
     @property
     def feet(self) -> float:
         return self.length / FOOT
+
+
+@dataclass
+class Tight:
+    """Every tied shortest curve between two places, held all together, never listed (decision 5, amended
+    2026-11-22): `pieces`, each piece on some tied curve with its offset (the length from the start to the piece's
+    start); `one`, the pieces of one of them; `length`, theirs."""
+    length: float
+    pieces: list
+    one: list
+
+
+@dataclass
+class Tied:
+    """Every tied shortest route from a point to an exit (or the nearest of several), as their union: `pieces`, each
+    piece on some tied route with its offset (the travel distance from the point to the piece's start); `one`, one
+    of the routes. Travel reads `length` (the same for every one); the common path the union."""
+    length: float
+    pieces: list
+    one: Route
+
+
+def _shift(pieces, by) -> list:
+    return [(q, o + by) for q, o in pieces]
+
+
+def _tight(adj, P, T, dT=None, dP=None) -> Tight | None:
+    """The tied shortest walks on a graph from node P to node T, all together: a piece from u to v is on one when the
+    distance to u, the piece and the distance from v add up to the shortest (within TIE)."""
+    dT = _dijkstra(adj, T) if dT is None else dT
+    if not math.isfinite(dT[P]):
+        return None
+    dP = _dijkstra(adj, P) if dP is None else dP
+    length = dT[P]
+    top = length + TIE
+    pieces = []
+    for u in range(len(adj)):
+        if not dP[u] + dT[u] <= top:
+            continue
+        for v, w, piece in adj[u]:
+            if dP[u] + w + dT[v] <= top and w > EPS * 1e-3:
+                pieces.append((piece, dP[u]))
+    return Tight(length, pieces, _down(adj, P, T, dT))
+
+
+def _down(adj, n, T, dT) -> list:
+    """One shortest walk from n to T (dT, the distances to T): each step one that keeps to the least, the node the
+    Dijkstra from T reached n from among them (dT[n] is that node's distance plus the step, exactly), searched depth
+    first so that two nodes at one place, joined by a step of no length, can't turn it round."""
+    stack, came = [n], {n: None}
+    while stack:
+        u = stack.pop()
+        if u == T:
+            out = []
+            while came[u] is not None:
+                u, piece = came[u]
+                out.append(piece)
+            return _tidy(list(reversed(out)))
+        for v, w, piece in adj[u]:
+            if v not in came and w + dT[v] <= dT[u] + 1e-9 * max(1.0, dT[u]):
+                came[v] = (u, piece)
+                stack.append(v)
+    raise RuntimeError("no shortest walk down")              # never: every node with a finite dT has its step
+
+
+def _reverse_tight(t: Tight) -> Tight:
+    return Tight(t.length, [(_reverse(q), t.length - o - _piece_length(q)) for q, o in t.pieces],
+                 [_reverse(q) for q in reversed(t.one)])
 
 
 def _show(p) -> tuple:
@@ -213,6 +283,23 @@ class _Leg:
                 seen.add(key)
                 out.append(Path(sum(_piece_length(q) for q in pieces), pieces))
         return out
+
+    def tight(self, p, t) -> Tight | None:
+        """Every tied shortest curve from p to t on a graph of their own, all together (None: no curve)."""
+        if math.dist(p, t) <= EPS:
+            return Tight(0.0, [], [])
+        bends = [b for b in self.bends if math.dist(b, p) > EPS and math.dist(b, t) > EPS]
+        _, adj, _, ids = self._graph([p, t] + bends)
+        return _tight(adj, ids[0], ids[1])
+
+    def between_tight(self, a, b) -> Tight | None:
+        """`between`, all together: every tied shortest curve from the target a to the target b on the graph built
+        once (`prepare`), never listed."""
+        a, b = tuple(map(float, a)), tuple(map(float, b))
+        if math.dist(a, b) <= EPS:
+            return Tight(0.0, [], [])
+        _, _, dists, _, _, adj, ids = self._base
+        return _tight(adj, ids[a], ids[b], dT=dists[b], dP=dists[a])
 
     def prepare(self, targets) -> None:
         """The graph among the rings and these targets (door centres), with each target's distance to every node:
@@ -461,12 +548,10 @@ class StoryRoutes:
             engine.prepare([doors[d].centre for d in zone.doors])     # one graph per zone, every door centre on it
             for i, a in enumerate(zone.doors):
                 for b in zone.doors[i + 1:]:
-                    paths = engine.between(doors[a].centre, doors[b].centre)
-                    if paths:
-                        edges.setdefault(a, []).append((b, zone, paths))
-                        edges.setdefault(b, []).append((a, zone, [Path(q.length, [_reverse(x) for x in
-                                                                                  reversed(q.pieces)])
-                                                                  for q in paths]))
+                    leg = engine.between_tight(doors[a].centre, doors[b].centre)    # all together, never listed
+                    if leg is not None:
+                        edges.setdefault(a, []).append((b, zone, leg))
+                        edges.setdefault(b, []).append((a, zone, _reverse_tight(leg)))
         dist = {d: math.inf for d in doors}
         heap = []
         for d in doors.values():
@@ -478,10 +563,10 @@ class StoryRoutes:
             dv, v = heapq.heappop(heap)
             if dv > dist[v]:
                 continue
-            for u, _, paths in edges.get(v, []):
+            for u, _, leg in edges.get(v, []):
                 if doors[u].exit_kind:
                     continue                                 # another exit: an end, never passed through
-                w = paths[0].length
+                w = leg.length
                 if dv + w < dist[u]:
                     dist[u] = dv + w
                     heapq.heappush(heap, (dv + w, u))
@@ -489,8 +574,8 @@ class StoryRoutes:
         for v in doors:
             if not math.isfinite(dist[v]) or doors[v].exit_kind:
                 continue
-            steps[v] = [(u, paths) for u, _, paths in edges.get(v, [])
-                        if paths[0].length + dist[u] <= dist[v] + TIE]
+            steps[v] = [(u, zone, leg) for u, zone, leg in edges.get(v, [])
+                        if leg.length + dist[u] <= dist[v] + TIE]
         self._chains[wanted] = (dist, steps, edges)
         return self._chains[wanted]
 
@@ -502,9 +587,11 @@ class StoryRoutes:
         if door.exit_kind and door.exit_id in wanted:
             return [([], (door_id,), door.exit_id)]
         out = []
-        for u, paths in steps.get(door_id, []):
+        for u, zone, _ in steps.get(door_id, []):
             if u in passed_by or u == door_id:
                 continue
+            engine = self._engine(zone)
+            paths = engine.between(self.story.doors[door_id].centre, self.story.doors[u].centre)
             for rest, passed, exit_id in self._chains_from(u, wanted, at, passed_by | {door_id}):
                 for q in paths:
                     out.append((q.pieces + rest, (door_id,) + passed, exit_id))
@@ -559,8 +646,8 @@ class StoryRoutes:
         if room is not None and room.id in story.not_served:
             return Stop("no_route_host_blocked", x=at[0], y=at[1], exits=exits, name=room.name,
                         why=story.not_served[room.id])
-        if room is not None and room.id in story.served_by and not any(
-                self._onward(room, d, wanted, at, frozenset()) for d in self._region([room.id]).doors):
+        if room is not None and room.id in story.served_by and all(
+                self.tied_onward(room, d, wanted, at, frozenset()) is None for d in self._region([room.id]).doors):
             return Stop("no_route_via_host", x=at[0], y=at[1], exits=exits, name=room.name,
                         host=story.rooms[story.served_by[room.id]].name)
         return Stop("no_route", x=at[0], y=at[1], exits=exits)
@@ -586,7 +673,155 @@ class StoryRoutes:
         return best_of_rooms
 
     def route(self, point, exit_ids=None) -> Route:
-        return self.routes(point, exit_ids)[0]
+        """One shortest route (any of the tied ones: their length is the same), never listing them."""
+        return self.tied(point, exit_ids).one
+
+    # --- every tied route, all together, never listed (decision 5, amended 2026-11-22) ---------------------------
+
+    def tied(self, point, exit_ids=None) -> Tied:
+        """Every shortest route (ties within 1e-6 ft) from a point (inches), clear of every ring, to the nearest of
+        the exits named, as their union (`Tied`), worked as `routes` works them but never listing one."""
+        p = (float(point[0]), float(point[1]))
+        at = _show(p)
+        wanted = self._wanted(exit_ids)
+        dist, _, _ = self._chain(wanted)
+        rooms = self.rooms_at(p)
+        if not rooms:
+            raise Stop("not_on_floor", x=at[0], y=at[1])
+        best = None
+        for room in rooms:
+            self._check_start(room, p, at)
+            found = self._tied_from_room(room, p, wanted, dist, at)
+            if found is None:
+                raise self._no_route(p, at, exit_ids, wanted, room)
+            if best is None or found.length > best.length + TIE:
+                best = found                                 # a point on two rooms' line: the longer (cautious)
+        return best
+
+    def _tight_leg(self, zone: Zone, a, b) -> Tight | None:
+        key = ("tight", zone.rooms, a, b)
+        if key not in self._legs:
+            self._legs[key] = self._engine(zone).tight(a, b)
+        return self._legs[key]
+
+    def chain_union(self, door_id, wanted) -> tuple:
+        """Every tied chain from a door centre to the nearest exit in `wanted`, all together: (pieces with offsets
+        from the door centre, one chain's pieces, its doors, its exit id). The doors on some tied chain are those
+        whose distance from this door and to the exit add up (the chain's Dijkstra, `_chain`); each step between two
+        of them adds its tied curves (`between_tight`). Worked once per door and set of exits."""
+        key = (door_id, wanted)
+        cache = self.__dict__.setdefault("_union_cache", {})
+        if key in cache:
+            return cache[key]
+        dist, steps, _ = self._chain(wanted)
+        doors = self.story.doors
+        door = doors[door_id]
+        if door.exit_kind and door.exit_id in wanted:
+            cache[key] = ([], [], (door_id,), door.exit_id)
+            return cache[key]
+        pieces, seen, todo = [], {door_id}, [door_id]
+        while todo:
+            v = todo.pop()
+            if doors[v].exit_kind:
+                continue                                     # an exit: an end, never passed through
+            for u, _, leg in steps.get(v, []):
+                if u == v:
+                    continue
+                pieces += _shift(leg.pieces, dist[door_id] - dist[v])
+                if u not in seen:
+                    seen.add(u)
+                    todo.append(u)
+        one, passed, v = [], (door_id,), door_id
+        while not (doors[v].exit_kind and doors[v].exit_id in wanted):
+            u, _, leg = next(x for x in steps[v] if x[0] not in passed)
+            one += leg.one
+            passed += (u,)
+            v = u
+        cache[key] = (pieces, one, passed, doors[v].exit_id)
+        return cache[key]
+
+    def _tied_from_room(self, room, p, wanted, dist, at, seen=frozenset()) -> Tied | None:
+        """`_from_room`, all together: the union of every tied route from p, a point in this room."""
+        story = self.story
+        if room.id in story.served_by:
+            return None if room.id in seen else self._tied_through_host(room, p, wanted, at, seen)
+        starts = self._starts(room)
+        if not any(self._engine(zone).covers(p) for zone, _ in starts):
+            raise Stop("not_on_floor", x=at[0], y=at[1])
+        own = set(starts[0][0].doors)
+        legs = []
+        for zone, leaving in starts:
+            if not self._engine(zone).covers(p):
+                continue
+            for d in zone.doors:
+                if leaving is not None and d in own:
+                    continue                                 # its own doors: by its own floor alone
+                if not math.isfinite(dist.get(d, math.inf)):
+                    continue
+                leg = self._tight_leg(zone, p, story.doors[d].centre)
+                if leg is None:
+                    continue
+                if leaving is not None:
+                    _leaves_once_all(leg, leaving, p)
+                legs.append((leg.length + dist[d], leg, d))
+        return self.join(legs, wanted)
+
+    def join(self, legs, wanted) -> Tied | None:
+        """The tied routes made of a first leg to a door ((length in all, leg, door) each) and the chains on from
+        it, all together."""
+        if not legs:
+            return None
+        best = min(x[0] for x in legs)
+        pieces, one = [], None
+        for total, leg, d in sorted(legs, key=lambda x: x[0]):
+            if total > best + TIE:
+                break
+            rest, rest_one, passed, exit_id = self.chain_union(d, wanted)
+            pieces += leg.pieces + _shift(rest, leg.length)
+            if one is None:
+                whole = _tidy(leg.one + rest_one)
+                one = Route(sum(_piece_length(q) for q in whole), whole, passed, exit_id)
+        return Tied(best, pieces, one)
+
+    def tied_onward(self, room, door_id, wanted, at, seen) -> Tied | None:
+        """`_onward`, all together: the tied routes on from a door centre of a room that opens only into the room it
+        serves, as a start in that room (worked once per door and set of exits); None where there are none."""
+        key = ("tied", room.id, door_id, wanted)
+        if key not in self._onward_cache:
+            host = self.story.rooms[self.story.served_by[room.id]]
+            if host.id not in self.story.doors[door_id].sides:
+                self._onward_cache[key] = None
+                return None
+            dist, _, _ = self._chain(wanted)
+            self._onward_cache[key] = self._tied_from_room(host, tuple(self.story.doors[door_id].centre), wanted,
+                                                           dist, at, seen | {room.id})
+        return self._onward_cache[key]
+
+    def _tied_through_host(self, room, p, wanted, at, seen) -> Tied | None:
+        """`_through_host`, all together."""
+        own = self._region([room.id])
+        if not self._engine(own).covers(p):
+            raise Stop("not_on_floor", x=at[0], y=at[1])
+        legs = []
+        for d in own.doors:
+            onward = self.tied_onward(room, d, wanted, at, seen)
+            if onward is None:
+                continue
+            leg = self._tight_leg(own, p, self.story.doors[d].centre)
+            if leg is not None:
+                legs.append((leg.length + onward.length, leg, d, onward))
+        if not legs:
+            return None
+        best = min(x[0] for x in legs)
+        pieces, one = [], None
+        for total, leg, d, onward in sorted(legs, key=lambda x: x[0]):
+            if total > best + TIE:
+                break
+            pieces += leg.pieces + _shift(onward.pieces, leg.length)
+            if one is None:
+                whole = _tidy(leg.one + onward.one.pieces)
+                one = Route(sum(_piece_length(q) for q in whole), whole, (d,) + onward.one.doors, onward.one.exit_id)
+        return Tied(best, pieces, one)
 
     def travel(self, point, exit_ids=None) -> float:
         """The length (inches) of the shortest route from a point clear of every ring to the nearest exit named,
@@ -606,7 +841,7 @@ class StoryRoutes:
                 worst = max(worst, self._served_travel(room, p, wanted, at, exit_ids))
                 continue
             if len(starts) > 1:                              # an end-only room joined beyond its passages
-                worst = max(worst, self.route(p, exit_ids).length)
+                worst = max(worst, self.tied(p, exit_ids).length)
                 continue
             zone = starts[0][0]
             engine = self._engine(zone)
@@ -622,7 +857,7 @@ class StoryRoutes:
 
     def simple(self, room) -> bool:
         """Whether a route from this room is found in one floor alone (no passage joined, no room it serves): the
-        fast ways (`travel`, common_path.tied_routes) read that floor's graph built once."""
+        fast ways (`travel`, common_path.tied) read that floor's graph built once."""
         return len(self._starts(room)) == 1 and room.id not in self.story.served_by
 
     def _onward(self, room, door_id, wanted, at, seen) -> list:
@@ -649,9 +884,9 @@ class StoryRoutes:
         engine.prepare([self.story.doors[d].centre for d in own.doors])
         best = math.inf
         for d in own.doors:
-            onward = self._onward(room, d, wanted, at, frozenset())
-            if onward:
-                best = min(best, engine.dist(p, self.story.doors[d].centre) + onward[0].length)
+            onward = self.tied_onward(room, d, wanted, at, frozenset())
+            if onward is not None:
+                best = min(best, engine.dist(p, self.story.doors[d].centre) + onward.length)
         if not math.isfinite(best):
             raise self._no_route(p, at, exit_ids, wanted, room)
         return best
@@ -762,6 +997,30 @@ def _leaves_once(path: Path, room, p) -> None:
     starts_in = room.outline.buffer(SAME).covers(Point(p))
     if len(parts) > 1 or (parts and starts_in and line.project(Point(parts[0].coords[0])) > 2 * SAME):
         raise Stop("route_reenters", x=_show(p)[0], y=_show(p)[1])
+
+
+def _leaves_once_all(leg: Tight, room, p) -> None:
+    """`_leaves_once` for every tied curve at once: a curve from a start in an end-only room into the floor beyond its
+    passage never comes back into the room. Walked piece by piece in the order of their offsets, each place on the
+    curves knows whether a curve reaching it has already been inside the room (a start in the room has); a piece that
+    comes into the room (meets its inside in a part not starting at its own start, or starting outside it) where a
+    curve reaching its start has been inside, or that meets it twice, is a curve coming back in."""
+    inside = room.outline.buffer(-SAME)
+    grown = inside.buffer(2 * SAME)
+    been = [(tuple(p), 0.0, room.outline.buffer(SAME).covers(Point(p)))]     # (place, offset, been inside there)
+    for piece, offset in sorted(leg.pieces, key=lambda x: x[1]):
+        start, end = _ends(piece)
+        before = [f for q, o, f in been if math.dist(q, start) <= 1e-4 and abs(o - offset) <= 1e-4]
+        was_in = any(before) if before else True             # a place no curve is seen reaching: the cautious side
+        line = _polyline([piece])
+        parts = []
+        if line is not None:
+            got = line.intersection(inside)
+            parts = [g for g in getattr(got, "geoms", [got]) if not g.is_empty and g.length > EPS]
+        enters = bool(parts) and (not grown.covers(Point(start)) or line.project(Point(parts[0].coords[0])) > 2 * SAME)
+        if len(parts) > 1 or (enters and was_in):
+            raise Stop("route_reenters", x=_show(p)[0], y=_show(p)[1])
+        been.append((end, offset + _piece_length(piece), was_in or bool(parts)))
 
 
 def _polyline(pieces):

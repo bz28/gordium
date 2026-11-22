@@ -210,10 +210,10 @@ def test_the_floor_reads_use_and_lockable_onto_each_room():
 def test_the_common_path_gives_a_blocked_room_the_same_reason_as_the_travel():
     """A closet off a kitchen that can be locked: its common path stops for the reason its travel does (the
     kitchen can be locked), never a bare "no route", so the eval's rooms are held to one reason."""
-    from model_measurement.routes.common_path import tied_routes
+    from model_measurement.routes.common_path import tied
     r = routes(kitchen_closet({"lockable": True}))
     with pytest.raises(Stop) as stop:
-        tied_routes(r, at(12, 18), "A")
+        tied(r, at(12, 18), "A")
     assert stop.value.key == "no_route_host_blocked" and "opens only into k, which can be locked" in stop.value.reason
 
 
