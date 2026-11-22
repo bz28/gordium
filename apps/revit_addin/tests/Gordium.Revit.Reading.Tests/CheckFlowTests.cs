@@ -402,6 +402,13 @@ public sealed class CheckFlowTests(RealWorker real) : IClassFixture<RealWorker>
             Assert.True(name == "Trial.cs" || sets == 0, $"{name} sets App.Worker");
             Assert.DoesNotContain("WorkerClient.StartAsync(", name == "Trial.cs" ? "" : text, StringComparison.Ordinal);
         }
+        // each of Trial's two worker methods keeps its own doc comment (review round 2)
+        var t = File.ReadAllText(Path.Combine(dir, "Trial.cs")).Replace("\r\n", "\n");
+        var beforeStart = t[..t.IndexOf("    internal static Task<WorkerClient> WorkerAsync()", StringComparison.Ordinal)].TrimEnd();
+        Assert.EndsWith("trial tool's never make two.</summary>", beforeStart);
+        var beforeStop = t[..t.IndexOf("    internal static WorkerClient? StopWorker()", StringComparison.Ordinal)].TrimEnd();
+        var lastLines = beforeStop[(beforeStop.LastIndexOf(";", StringComparison.Ordinal) + 1)..];
+        Assert.Single(System.Text.RegularExpressions.Regex.Matches(lastLines, "<summary>"));
         var app = File.ReadAllText(Path.Combine(dir, "App.cs"));
         Assert.DoesNotContain("Worker = null", app, StringComparison.Ordinal);
         Assert.Contains("var worker = Trial.StopWorker();", app, StringComparison.Ordinal);
