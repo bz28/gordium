@@ -1,0 +1,345 @@
+"""What the results panel needs beyond a row's words (docs/revit/ui_design_pass.md section 4, PR 5;
+design_checker/panel_data.py): each needs-review row's causes as data, how far off in words with their direction,
+a ratio rule's limit as a length, each quote's source. Never a status: every verdict here is the checker's.
+
+The eval: the Children's Odyssey day care (test_data/answer_keys/portland_me_19_libby_st/, read-only): its route rows
+come out grouped by cause, the rooms with no route as the 5 rooms of eval_comparison.yaml, by their element ids.
+"""
+
+import ast
+import json
+import os
+import random
+import re
+import sys
+from pathlib import Path
+
+import pytest
+import yaml
+
+from design_checker import each_part, grouping, panel_data, present
+from rule_format.rulebook import REPO, Context, load
+
+sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+from test_routes_parts import MAINE, NEW_DAY_CARE, RULES, day_care, storage_in_storage  # noqa: E402
+
+ANSWER = REPO / "apps/revit_addin/tests/Gordium.Revit.Reading.Tests/answers/children_odyssey_check_answer.json"
+EVAL = REPO / "test_data/answer_keys/portland_me_19_libby_st/eval_comparison.yaml"
+ROUTE_RULES = ("general.ibc_1016_1_travel_distance", "general.nfpa_16_2_6_2_point_in_room_to_exit",
+               "general.ibc_1014_3_common_path", "general.nfpa_16_2_5_3_1_common_path_sprinklered",
+               "general.ibc_1018_4_dead_end", "general.nfpa_16_2_5_2_dead_end",
+               "general.ibc_1015_2_1_remoteness", "general.ibc_508_2_1_accessory_area")
+DIRECTION = re.compile(r"to spare|short|over|at the limit|past the limit|at limit|room here")
+
+
+@pytest.fixture(scope="module")
+def maine():
+    return load(RULES)["rules"], Context.for_jurisdiction(MAINE).allowed()
+
+
+def _items(maine, description, values=None):
+    from model_measurement.routes import measure
+    rules, allowed = maine
+    return each_part.check_parts(rules, measure(description)["parts"], dict(values or NEW_DAY_CARE), allowed)["items"]
+
+
+def _of(items, rule):
+    return [i for i in items if i["rule"] == rule]
+
+
+# ---- how far off ------------------------------------------------------------------------------------------------
+
+def test_a_how_far_is_never_larger_than_the_margin_under_any_reading():
+    """Room to spare is the least over the readings, rounded down; a certain shortfall ("at least") is the least,
+    rounded down; "up to" is the worst reading's own, rounded up. Each always says its direction."""
+    rng = random.Random(5)
+    for _ in range(3000):
+        margins = [round(rng.uniform(-40, 40), rng.choice((0, 2, 4, 6))) for _ in range(rng.randint(1, 4))]
+        for status in (present.COMPLIES, present.REVIEW, present.FAILS):
+            words = panel_data.how_far_words(status, margins, "ft", rng.random() < 0.5)
+            assert DIRECTION.search(words), (margins, words)
+            assert not re.search(r"(^|\s)[+−-]\d", words), words           # never a bare signed number
+            amount = float(re.search(r"[\d,]+(?:\.\d+)?", words.replace(",", "")).group()) \
+                if re.search(r"\d", words) else 0.0
+            if min(margins) >= 0:
+                assert amount <= min(margins) + 1e-9, (margins, words)
+            elif max(margins) < 0 and "at least" in words:
+                assert amount <= -max(margins) + 1e-9, (margins, words)
+            elif min(margins) < 0 <= max(margins):
+                assert words.startswith("up to") and amount >= -min(margins) - 1e-9, (margins, words)
+
+
+@pytest.mark.parametrize("status,margins,maximum,want", [
+    (present.COMPLIES, [50.0], True, "50 ft to spare"),
+    (present.REVIEW, [116.169], False, "116.16 ft to spare if confirmed"),     # rounded down, never kinder
+    (present.FAILS, [-10.0], True, "10 ft over"),
+    (present.FAILS, [-2.501], False, "2.51 ft short"),                         # one reading's shortfall: up
+    (present.REVIEW, [-3.0, -5.0], True, "at least 3 ft over; see why"),
+    (present.REVIEW, [-3.0, 4.0], True, "up to 3 ft over under some reading; see why"),
+    (present.COMPLIES, [0.004], True, "at the limit"),                         # rounds to nothing: no "0 ft"
+    (present.FAILS, [6.0], True, "6 ft room here; see why"),                  # room on a row failing another way
+])
+def test_how_far_words(status, margins, maximum, want):
+    assert panel_data.how_far_words(status, margins, "ft", maximum) == want
+
+
+def test_a_dead_end_that_fails_says_how_far_over_and_one_that_complies_its_room(maine):
+    """day_care(branch=26): the branch's dead end is 26 + 11 - 11 = 30 ft... measured by the route code; NFPA 101
+    16.2.5.2 allows 20 ft unsprinklered: 10 ft over. Its common path complies with room the worker's figures give."""
+    items = _items(maine, day_care(branch=26))
+    dead, = _of(items, "general.nfpa_16_2_5_2_dead_end")
+    assert dead["status"] == present.FAILS and dead["how_far"] == "10 ft over"
+    common, = _of(items, "general.nfpa_16_2_5_3_2_common_path_not_sprinklered")
+    assert common["status"] == present.COMPLIES and common["how_far"].endswith(" ft to spare")
+
+
+def test_the_remoteness_limit_is_said_as_a_length(maine):
+    """IBC 1015.2.1: exits at least 1/2 the diagonal apart (unsprinklered). day_care(branch=26) measures the exits 72
+    ft apart (nearest edges) against a 79.31 ft diagonal: the limit is 39.66 ft (79.31 / 2, rounded up), the room
+    72 - 39.655 = 32.345, said 32.34 (rounded down). A flag rule: never "complies", the room "if confirmed"."""
+    items = _items(maine, day_care(branch=26))
+    row, = _of(items, "general.ibc_1015_2_1_remoteness")
+    got = row["limit_length"]
+    assert row["status"] == present.REVIEW
+    assert got["measured"] / got["of"] == pytest.approx(got["measured"] / got["of"])
+    assert got["limit"] == pytest.approx(got["of"] / 2) and got["ratio"] == 0.5 and got["unit"] == "ft"
+    assert got["words"] == "exits 72 ft apart, needs ≥ 39.66 ft (1/2 of the 79.31 ft diagonal)"
+    assert row["how_far"] == "32.34 ft to spare if confirmed"
+
+
+def test_no_length_is_made_from_a_ratio_its_lengths_dont_give():
+    """Only where the ratio is exactly the two lengths' quotient: else no length, never a guess."""
+    more = {"nearest_edges": 72.0, "diagonal": 79.31}
+    assert panel_data._ratio_lengths("exit_remoteness_ratio", [72.0 / 79.31], [0.5], more) is not None
+    assert panel_data._ratio_lengths("exit_remoteness_ratio", [0.9], [0.5], more) is None
+    assert panel_data._ratio_lengths("exit_remoteness_ratio", [0.9, 0.8], [0.5, 0.5], more) is None
+
+
+# ---- causes -----------------------------------------------------------------------------------------------------
+
+def test_a_room_with_no_route_is_a_cause_naming_its_room_by_id(maine):
+    """storage_in_storage: s2 opens only into s1, which can be locked: no route. Each travel and common-path row
+    names s2 by id (what Show selects), the same key on each so they make one card."""
+    items = _items(maine, storage_in_storage())
+    rows = [i for r in ("general.ibc_1016_1_travel_distance", "general.ibc_1014_3_common_path",
+                        "general.nfpa_16_2_6_2_point_in_room_to_exit") for i in _of(items, r)]
+    assert rows and all(i["status"] == present.REVIEW for i in rows)
+    for i in rows:
+        first = i["causes"][0]
+        assert first["kind"] == panel_data.FIX_MODEL and first["elements"] == ["s2"] and first["key"] == "rooms:s2"
+        assert first["words"] == "1 room has no route to an exit: s2"
+        assert first["rooms"][0]["why"].startswith("the point")
+    cards = grouping.cause_cards(rows)
+    assert len(cards) == 1 and cards[0]["items"] == [i["id"] for i in rows] and cards[0]["elements"] == ["s2"]
+
+
+def test_a_flag_rule_is_a_person_decides_after_what_the_model_must_give(maine):
+    items = _items(maine, storage_in_storage())
+    travel, = _of(items, "general.ibc_1016_1_travel_distance")
+    assert [c["kind"] for c in travel["causes"]] == [panel_data.FIX_MODEL, panel_data.DECIDE]
+    assert travel["causes"][1] == {"kind": "decide", "key": "flag", "words": panel_data.FLAG_WORDS,
+                                   "elements": [travel["part"]["id"]]}
+
+
+def test_a_measure_the_formula_never_reaches_is_no_cause():
+    """NFPA's `not day_care_existing or existing_change_of_use`: a new day care never needs the change of use, so it
+    is no cause (each_part.unsettled lists every name the rule reads, for its words)."""
+    rule = {"applies_when": "nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)",
+            "check": "egress_travel_distance_occupied <= 150", "review_when": []}
+    kinds = {"nfpa_day_care_occupancy": "boolean", "day_care_existing": "boolean",
+             "existing_change_of_use": "boolean", "egress_travel_distance_occupied": "number"}
+    new = {"nfpa_day_care_occupancy": True, "day_care_existing": False}
+    assert panel_data.needed(rule, new, kinds) == ["egress_travel_distance_occupied"]
+    assert panel_data.needed(rule, {**new, "day_care_existing": True}, kinds) == [
+        "existing_change_of_use", "egress_travel_distance_occupied"]
+
+
+def test_a_fact_the_project_states_is_a_mark(maine):
+    rule = {"id": "r", "kind": "rule", "for_each": "story", "check": "egress_travel_distance_occupied <= 150",
+            "applies_when": "not day_care_existing or existing_change_of_use"}
+    row = {"outcome": "needs_review", "id": "L1", "values": {"egress_travel_distance_occupied": 20.0}, "reason": None}
+    got = panel_data.causes(rule, row, {}, None, {}, {}, {"day_care_existing": True}, maine[1], ())
+    assert got == [{"kind": "mark", "key": "fact:existing_change_of_use",
+                    "words": "existing change of use: not stated for the project", "elements": [],
+                    "measure": "existing_change_of_use"}]
+
+
+def test_every_row_in_review_has_a_cause_and_no_other_row_has_one(maine):
+    for d in (storage_in_storage(), day_care(branch=26)):
+        for i in _items(maine, d):
+            assert bool(i.get("causes")) == (i["status"] == present.REVIEW), i["id"]
+            for c in i.get("causes") or []:
+                assert c["kind"] in panel_data.KINDS and c["key"] and c["words"]
+
+
+def test_cards_hold_each_row_once_in_the_order_the_architect_can_act():
+    items = [{"id": f"i{n}", "rule": f"r{n}", "status": present.REVIEW, "causes": [c]} for n, c in enumerate([
+        {"kind": "decide", "key": "flag", "words": "f", "elements": ["L1"]},
+        {"kind": "fix_model", "key": "rooms:a", "words": "1 room", "elements": ["a"]},
+        {"kind": "decide", "key": "flag", "words": "f", "elements": ["L1"]},
+        {"kind": "mark", "key": "fact:x", "words": "x", "elements": []}])]
+    items.append({"id": "ok", "status": present.COMPLIES, "causes": [{"kind": "decide", "key": "flag"}]})
+    cards = grouping.cause_cards(items)
+    assert [c["key"] for c in cards] == ["rooms:a", "fact:x", "flag"]
+    assert cards[2]["items"] == ["i0", "i2"] and cards[2]["rules"] == 2 and cards[2]["elements"] == ["L1"]
+    assert sorted(x for c in cards for x in c["items"]) == ["i0", "i1", "i2", "i3"]
+
+
+# ---- zoning's how far, in words -----------------------------------------------------------------------------------
+
+@pytest.mark.parametrize("delta,want", [
+    ("+2'-0\"", "2'-0\" to spare"),
+    ("≥ +3'-0\" if confirmed", "at least 3'-0\" to spare if confirmed"),
+    ("−1'-4\" short", "1'-4\" short"),
+    ("1'-6\" over", "1'-6\" over"),
+    ("at least 1'-0\" short; see why", "at least 1'-0\" short; see why"),
+    ("+213 sf", "213 sf to spare"),
+    ("+2'-0 1/2\" (+0'-0 1/2\" if the tax-map lines are 2 ft off)",
+     "2'-0 1/2\" to spare (0'-0 1/2\" to spare if the tax-map lines are 2 ft off)"),
+    ("at limit", "at limit"),
+])
+def test_a_zoning_delta_said_with_its_direction(delta, want):
+    assert present.how_far_of({"delta": delta, "margin": "+9'-9\""}) == want
+
+
+def test_a_bare_signed_margin_is_never_sent_without_its_words():
+    """Review of PR 4: with no Delta, a margin's sign alone said its direction; the words now say it, or nothing."""
+    assert present.how_far_of({"delta": "", "margin": "+2'-0\""}) == "2'-0\" to spare"
+    assert present.how_far_of({"delta": "", "margin": "−1'-4\""}) == "1'-4\" past the limit"
+    assert present.how_far_of({"delta": "", "margin": "at limit"}) == "at the limit"
+    assert present.how_far_of({"delta": "", "margin": "3"}) is None
+    assert present.how_far_of({"margin": ""}) is None
+
+
+def test_every_zoning_row_with_a_delta_says_its_direction():
+    from design_checker.check import check_site
+    sys.path.insert(0, str(REPO / "packages/model_measurement/tests"))
+    from test_measure import FACTS, box, lot
+    site = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]),
+            "buildings": [box(5, 25, 58, 75, 0, 30)], "problems": []}
+    view = check_site(site, dict(FACTS))["view"]
+    shown = [i for i in view["items"] if i.get("delta")]
+    assert shown
+    for i in shown:
+        assert DIRECTION.search(i["how_far"]) and not re.search(r"(^|[\s(])[+−]\d", i["how_far"]), i["how_far"]
+    review = [i for i in view["items"] if i["status"] == present.REVIEW]
+    assert all(i.get("causes") for i in review)
+
+
+# ---- each quote's source ------------------------------------------------------------------------------------------
+
+def test_each_law_quote_carries_its_file_page_and_lines():
+    item = {"id": "x", "group": present.LAW_GROUP, "law_key": "maine/maine_state",
+            "detail": {"quotes": [{"text": "a", "where": "1014.3"}, {"text": "b", "where": "1014.3"}],
+                       "sources": [{"file": "icc.ibc.2009.pdf", "page": 265, "lines": [76, 78]},
+                                   {"file": "gov.law.nfpa.101.2012.pdf", "page": 174, "lines": [66, 69]}]}}
+    present.law_quote_sources([item])
+    first, second = item["detail"]["quotes"]
+    assert (first["file"], first["page"], first["lines"]) == ("icc.ibc.2009.pdf", 265, [76, 78])
+    assert first["document"] == "2009 International Building Code (IBC)" and first["in_repo"] is False
+    assert first["url"] == "https://archive.org/details/gov.law.icc.ibc.2009"
+    assert second["page"] == 174 and second["file"] == "gov.law.nfpa.101.2012.pdf"
+    off = {"id": "y", "group": present.LAW_GROUP, "law_key": "maine/maine_state",
+           "detail": {"quotes": [{"text": "a"}], "sources": []}}
+    present.law_quote_sources([off])
+    assert "file" not in off["detail"]["quotes"][0]          # lists that don't match: never another's source
+
+
+def test_a_part_row_carries_its_rules_sources_in_its_quotes_order(maine):
+    rules, _ = maine
+    items = _items(maine, day_care(branch=26))
+    row, = _of(items, "general.ibc_1015_2_1_remoteness")
+    rule = next(r for r in rules if r["id"] == "general.ibc_1015_2_1_remoteness")
+    assert row["detail"]["sources"] == [{"file": s["file"], "page": s["page"], "lines": s["lines"]}
+                                        for s in rule["sources"]]
+
+
+# ---- the eval: the Children's Odyssey day care ---------------------------------------------------------------------
+
+def _eval_rooms():
+    e = yaml.safe_load(EVAL.read_text(encoding="utf-8"))
+    return {f: set(e["figures"][f]["gordium"]["story"]["rooms_not_measured"])
+            for f in ("travel_distance", "common_path")}
+
+
+def _odyssey_route_rows(view):
+    return [i for i in view["items"] if i["rule"] in ROUTE_RULES and i["status"] == present.REVIEW]
+
+
+def _check_odyssey(view):
+    """The route rows of the eval's 8 rules (eval_comparison.yaml verdicts) by first cause: the 4 travel and common
+    path rows on one card, the 5 rooms with no route by id; every IBC flag (the dead ends, remoteness, storage) a
+    person decides; NFPA's dead ends turn on the open question of where a dead end with a door is measured; and
+    NFPA 16.2.5.2's dead end 5 needs review because its own review condition holds (over 20 ft, at most 50 ft
+    sprinklered: open question 2 of the Maine README). Returns {first cause key: [rules]}."""
+    rows = _odyssey_route_rows(view)
+    assert {i["rule"] for i in rows} == set(ROUTE_RULES)
+    by = {}
+    for i in rows:
+        by.setdefault(i["causes"][0]["key"], []).append(i)
+    rooms = [k for k in by if k.startswith("rooms:")]
+    assert len(rooms) == 1, rooms
+    card = by[rooms[0]]
+    assert sorted(i["rule"] for i in card) == sorted(ROUTE_RULES[:4])
+    want = _eval_rooms()
+    assert want["travel_distance"] == want["common_path"]
+    names = {r["id"]: r["name"] for r in card[0]["causes"][0]["rooms"]}
+    assert set(names.values()) == want["travel_distance"] and len(names) == 5
+    assert card[0]["causes"][0]["elements"] == sorted(names)
+    # each id is that room's own: the answer's space rows name each room by the same id
+    spaces = {i["part"]["id"]: i["part"]["name"] for i in view["items"]
+              if isinstance(i.get("part"), dict) and i["part"].get("part") == "space"}
+    assert all(spaces[rid] == name for rid, name in names.items())
+    flags = by["flag"]
+    assert {i["rule"] for i in flags} == {"general.ibc_1018_4_dead_end", "general.ibc_1015_2_1_remoteness",
+                                          "general.ibc_508_2_1_accessory_area"}
+    question = [k for k in by if k.startswith("question:")]
+    assert question == ["question:door_ends_dead_end"]
+    assert {i["rule"] for i in by[question[0]]} == {"general.nfpa_16_2_5_2_dead_end"}
+    rest = set(by) - {rooms[0], "flag", question[0]}
+    assert all(k.startswith("review_when:") for k in rest) and len(rest) == 1
+    assert {i["rule"] for k in rest for i in by[k]} == {"general.nfpa_16_2_5_2_dead_end"}
+    # the remoteness limit as a length: 1/3 of the 212.985 ft diagonal (sprinklered), 71.0 ft
+    remote, = [i for i in rows if i["rule"] == "general.ibc_1015_2_1_remoteness"]
+    assert remote["limit_length"]["words"] == "exits 187.16 ft apart, needs ≥ 71 ft (1/3 of the 212.99 ft diagonal)"
+    assert remote["how_far"] == "116.16 ft to spare if confirmed"
+    # the cards: one per first cause, every route row on one
+    groups = [g for g in view["groups"] if g.get("causes") is not None and g["key"].endswith(":review")]
+    cards = {c["key"]: c for g in groups for c in g["causes"]}
+    assert set(cards[rooms[0]]["items"]) == {i["id"] for i in card}
+    return {k: sorted({i["rule"] for i in v}) for k, v in by.items()}
+
+
+def test_the_odyssey_route_rows_come_out_by_cause_in_the_committed_answer():
+    """The committed answer (made by apps/revit_addin/tools/evals/make_odyssey_answer.py from the model's
+    description, which stays outside the repo)."""
+    view = json.loads(ANSWER.read_text(encoding="utf-8"))["result"]["view"]
+    _check_odyssey(view)
+
+
+@pytest.mark.skipif(not os.environ.get("GORDIUM_CO_DESCRIPTION"),
+                    reason="the Children's Odyssey model's description stays outside the repo (open question 5): "
+                           "set GORDIUM_CO_DESCRIPTION to its path to make the answer again (about 11 minutes)")
+def test_the_committed_odyssey_answer_is_what_the_worker_makes():
+    sys.path.insert(0, str(REPO / "apps/revit_addin/tools/evals"))
+    import make_odyssey_answer
+    got = make_odyssey_answer.answer(json.loads(Path(os.environ["GORDIUM_CO_DESCRIPTION"]).read_text(encoding="utf-8")))
+    committed = json.loads(ANSWER.read_text(encoding="utf-8"))
+    for a in (got, committed):
+        a["about"].pop("worker_fingerprint", None)
+    assert got == committed
+    _check_odyssey(got["result"]["view"])
+
+
+def test_a_row_with_no_reason_on_a_part_with_readings_has_its_own_causes(maine):
+    """The Odyssey's NFPA travel rows (round 1 of the eval): a story part with readings (its areas) and a row with no
+    reason once fell to the catch-all ("reason: <rule id>") from a crash on the missing reason; they name the rooms
+    with no route."""
+    rules, allowed = maine
+    rule = next(r for r in rules if r["id"] == "general.nfpa_16_2_6_2_point_in_room_to_exit")
+    part = {"id": "L1", "readings": {"story_building_area": [{"value": 1.0, "named": {"q": "a"}}]}}
+    row = {"outcome": "needs_review", "id": "L1", "values": {}, "reason": None}
+    more = {"egress_travel_distance_occupied": {"room_ids_not_measured": {
+        "r9": {"name": "CLOSET (40)", "why": "the point (1, 2) has no route to any exit", "stop": "no_route"}}}}
+    got = panel_data.causes(rule, row, {}, part, more, {}, dict(NEW_DAY_CARE), allowed, ())
+    assert [c["key"] for c in got] == ["rooms:r9"] and got[0]["words"] == "1 room has no route to an exit: CLOSET (40)"
