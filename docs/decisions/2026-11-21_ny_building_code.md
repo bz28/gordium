@@ -1,0 +1,33 @@
+# New York's Building Code: which copy, what is in, what is next (2026-11-21)
+
+**Purpose:** why Gordium's New York commercial egress law is the 2025 Building Code of New York State (BCNYS), where it sits, how it is read and verified, and what wiring it into a check still needs.\
+**For:** engineers bringing in more of the book or wiring it into Check project; Ben (copies, open questions).\
+**Kept current by:** the engineer who brings in more of the BCNYS or wires it into a check, in that PR.
+
+Follows the house code ([building code text](2026-11-12_building_code_text.md)) and Maine ([commercial egress](2026-11-20_commercial_egress_maine.md)): code cache outside the repo, short quotes only, a sections file, every number read twice and comparison words a third way, definitions by the book's italics.
+
+## Decisions
+
+1. **The book: the 2025 BCNYS**, New York's building code for every building the 2025 Residential Code doesn't cover (that code: one- and two-family dwellings and townhouses up to three stories above grade plane). In force since 2025-12-31 (19 NYCRR Part 1221); between the Notice of Adoption (State Register of 2025-10-01) and that date, either the 2025 or the 2020 Uniform Code could be followed (https://dos.ny.gov/notice-adoption, read 2026-11-21).
+2. **The copy: Public.Resource.Org's** (`gov.ny.building.2025` on the Internet Archive, posted 2026-02-02; Ben, 2026-11-21: such copies for now). It is ICC's own PDF (ISBN 978-1-967590-70-7, PDF download), real text in its fonts, not a scan; an ICC logo and a per-copy number, 102102166, on every page (the house code's copy has the same number), kept as page furniture, never quoted. Verified against this copy only; **check against a copy bought from ICC.**
+3. **Its own state law folder, `new_york/new_york_state_building/`, beside `new_york_state/`** (the house code), not a second book in that folder. The two books cover different buildings, and a check runs every rule of every folder a place inherits: a second book in `new_york_state/` would put commercial limits, and their "not checked yet" list, into every Ithaca house check (`design_checker/egress.py` reads one rulebook and every `*.rules.yaml` of a folder). A sibling folder changes nothing for Ithaca; the registry already allows two state folders per state (a place must list at least one).
+4. **Scope: the limits Gordium's route measures feed**, the set the Maine rulebook drafted for the day-care eval, in their 2025 sections: 1017 and Table 1017.2 (travel distance), 1006.2.1 and Table 1006.2.1 (common path; spaces with one exit), 1020.5 (dead ends), 1007.1 (exit separation), 1016.2 (intervening spaces), 508.2 (accessory occupancies), with 308.5 (Group I-4), 903.3.1.1 and 903.3.1.2 (sprinkler systems) and the definitions they use. Rules for Group I-4 first; the tables' other rows and other groups' allowances are flags.
+5. **Reading the book: ICC's layout (`layout: icc`) with a style of its own (`style: bcnys_2025`)**, `document_extraction/icc_sections.py`: sections without letters (1017), tags of one letter ([F]), "CHAPTER" alone opening each chapter (never a running head), a tag's bracket printed in roman ("[BG" bold, "] " roman) not ending a term, tables as pieces of their own with their lines named in `sources.yaml`, and named exceptions for subscripts that look like loose fractions (`not_fractions`) and two terms the text reads alike (`subscript_terms`). The house code's cutting is unchanged (its style is the default, and its patterns are the same).
+6. **Tables read by position.** The plain text runs a raised note letter into its cell ("200c" for 200 with note c), so numbers.py would lose the number. Each such line is put right by line in `sources.yaml` (`brought_in.misread`, the mechanism kept "for a book whose page images can confirm one"), now applied to `layout: icc` too, after checking each cell by position (character sizes and x positions: the letter is 5.04 points beside 8.4-point digits) and on the page image.
+7. **Verification: rules, not flags.** Every piece read again from page images rendered at 170 dpi by helpers that never saw the extracted text: 148 pieces, 296 numbers, all agree; comparisons read a third way, with a flag wherever the recorded words miss one. A table cell's unit is printed only in its column heading ("(feet)"): `code_numbers._column_feet` makes a cell a length in feet only where its verification flag says "a length in feet" (the distance columns), so an occupant-load cell never backs a length.
+
+## Worked example
+
+Table 1017.2's I-4 row is p.341, line 38. The plain text reads "I-4 150 200c"; the position reading shows "200" in 8.4 points and a 5.04-point raised "c", and the page image shows 200 with note c. `sources.yaml` names `p.341 line 38: 200c -> 200[fnc]`, so every check reads "I-4 150 200[fnc]" and numbers.py finds 150 and 200. The image helper wrote the same row; the comparisons helper, given 1017.2's sentence ("shall not exceed the values given in Table 1017.2"), read both as "<="; the flag on Table 1017.2 says they are lengths in feet. So `general.bc_1017_2_travel_distance`, `egress_travel_distance <= (200 if sprinklered_903_3_1_1 else 150)`, passes `python -m rule_format`; on the Maine sheet's 130'-8" in an NFPA 13 building it passes, as the sheet did.
+
+## What is next
+
+- **Wire it into Check project** (a later PR, not trivial): the check must know which book a building is under (a house: `new_york_state`; anything else: this folder), from the architect's statement or the model; then a place lists both folders and `design_checker/egress.py` picks one per building. Its proposed measures (occupancy group, sprinkler system, other occupancies) become facts the add-in asks for, and the route measures must give each space's common path and the rooms its path crosses (1016.2), not only the story's figures.
+- **Open questions** (README): whether Table 1006.2.1 caps a common path or only calls for a second exit; 508.2.3's "floor area of the story" read as gross.
+- **Buy ICC's 2025 BCNYS** to confirm this copy.
+
+## Alternatives rejected
+
+- **The second book in `new_york_state/`:** every Ithaca house check would run (and list as not checked) commercial rules; separating them needs the check to pick a book per building first.
+- **Fixing the superscripts in `icc.py`:** it would change the cached text's key and the house code's text, which this machine can't re-read (its cache is on Ben's Mac).
+- **A second extraction library as the second reading:** both read the same text layer; page images read by a helper who never saw the text are independent, as the house code's and NFPA's were.

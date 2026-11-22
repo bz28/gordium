@@ -40,9 +40,11 @@ documents:
     in_force: >
       The building code of the Uniform Code for every building the 2025 Residential Code of New York State does not
       cover (that code covers one- and two-family dwellings and townhouses not more than three stories above grade
-      plane: sibling folder new_york_state/). Incorporated by 19 NYCRR Part 1221 and in force since 2025-12-31, with a
-      transition period during which the 2020 code could still be chosen (DOS: https://dos.ny.gov/notice-adoption,
-      read 2026-11-21; README).
+      plane: sibling folder new_york_state/). Incorporated by 19 NYCRR Part 1221 (the 2025 rule amends Parts 1219 to
+      1229) and in force since 2025-12-31: "The effective date of the 2025 NYS Uniform Code is December 31, 2025." During
+      the transition, from the Notice of Adoption (State Register of 2025-10-01) to that date, "a person shall have the
+      option of complying with either the provisions of the 2025 Uniform Code or the 2020 Uniform Code" (DOS:
+      https://dos.ny.gov/notice-adoption, read 2026-11-21; README).
     layout: icc          # ICC's own PDF, read line by line (document_extraction/icc.py)
     style: bcnys_2025    # cut at the book's own headings: sections without letters (1017), tables named below
                          # (document_extraction/icc_sections.py)
