@@ -1,0 +1,58 @@
+# A small non-house New York test case for Check project (2026-11-22): a two-story building of four apartments, two on
+# each story either side of a corridor, with an exit stair enclosure at each end of the corridor. NOT A REAL PROJECT:
+# Gordium's own eval building, drawn so every Building Code figure it gives can be worked by hand
+# (expected.yaml). It is the source of the Revit build data (revit_build_data.json, written by
+# apps/revit_addin/tools/evals/make_ny_build_data.py) and of the interior description the Python eval reads as the
+# Revit reader would (packages/design_checker/tests/test_four_unit_apartment.py).
+#
+# Which code: four dwelling units in one building, Group R-2 (BCNYS 310.3: "more than two dwelling units"), none of
+# the dwellings RCNYS R101.2 lists, so the 2025 Building Code of New York State governs (code_scope.py).
+#
+# Plan, feet: x east, y north from the inside face of the south wall; every wall 6 in thick, so the inside of the
+# exterior walls is x 0 to 60, y 0 to 30 and their outside faces x -0.5 to 60.5, y -0.5 to 30.5. The same plan on both
+# stories; Level 2's floor is 10 ft above Level 1's. Doors are 36 in clear, 84 in high, single swing.
+
+levels:
+  - {id: L1, name: Level 1, elevation: 0}
+  - {id: L2, name: Level 2, elevation: 10}
+story_height: 10                  # ft: each story's walls, floor to floor
+inside: [0, 0, 60, 30]            # x0 y0 x1 y1, the inside faces of the exterior walls
+wall: 0.5                         # ft, every wall
+
+# each room on every story (its id prefixed with the level's: L1S, L2S...), inside its walls
+rooms:
+  - {id: S, name: Apartment South, rect: [0, 0, 60, 11.5], use: Other, lockable: true, pass_through: false}
+  - {id: SW, name: Stair West, rect: [0, 12, 9, 18], use: Other, lockable: false, pass_through: false}
+  - {id: C, name: Corridor, rect: [9.5, 12, 50.5, 18], use: Corridor, lockable: false, pass_through: true}
+  - {id: SE, name: Stair East, rect: [51, 12, 60, 18], use: Other, lockable: false, pass_through: false}
+  - {id: N, name: Apartment North, rect: [0, 18.5, 60, 30], use: Other, lockable: true, pass_through: false}
+
+# interior walls (centre lines), on every story
+partitions:
+  - {name: south corridor wall, start: [0, 11.75], end: [60, 11.75]}
+  - {name: north corridor wall, start: [0, 18.25], end: [60, 18.25]}
+  - {name: west stair wall, start: [9.25, 12], end: [9.25, 18]}
+  - {name: east stair wall, start: [50.75, 12], end: [50.75, 18]}
+
+# doors on every story: centre, the wall's direction (along), the rooms either side; an exit's kind and which exit
+doors:
+  - {id: W, name: Stair West door, at: [9.25, 15], along: [0, 1], sides: [C, SW], wall: west stair wall,
+     exit: Exit stair enclosure, exit_id: stair_west}
+  - {id: E, name: Stair East door, at: [50.75, 15], along: [0, 1], sides: [C, SE], wall: east stair wall,
+     exit: Exit stair enclosure, exit_id: stair_east}
+  - {id: DS, name: Apartment South door, at: [30, 11.75], along: [1, 0], sides: [S, C], wall: south corridor wall}
+  - {id: DN, name: Apartment North door, at: [30, 18.25], along: [1, 0], sides: [N, C], wall: north corridor wall}
+# Level 1 only: each stair enclosure's door straight outside (the same exit as its enclosure: 1016.1 counts the
+# enclosure once)
+discharge_doors:
+  - {id: WO, name: Stair West outside door, at: [-0.25, 15], along: [0, 1], sides: [SW, outside], wall: west,
+     exit: Exterior door at discharge, exit_id: stair_west}
+  - {id: EO, name: Stair East outside door, at: [60.25, 15], along: [0, 1], sides: [SE, outside], wall: east,
+     exit: Exterior door at discharge, exit_id: stair_east}
+
+# the lot (a stand-in: no survey; Check project needs one), the street on its south edge, flat ground at 0
+lot: [-20, -30, 80, 60]
+ground: 0
+
+# the architect's statements on Project Information (eval_marks.yaml marks them)
+building: {occupancy_groups: [R-2], sprinkler_system: none}
