@@ -347,9 +347,17 @@ area need review.
      ends, within 12 in, on the other's floor (past a lip or the end of a wall): its centre line runs on straight
      across that floor, if the floor holds it, to the other's. Two stretches along one way whose walls differ by
      12 in or more (a **widening**, a narrowing, a **jog**), overlapping or meeting end to end: joined by a **step**,
-     straight across at right angles, at each end of the stretch where both run and at every crossing of either
-     inside it; never inside a stretch at right angles to both (its centre line joins them there), and never where
-     both end against one wall (each a closed end).
+     straight across at right angles; never inside a stretch at right angles to both (its centre line joins them
+     there), and never where both end against one wall (each a closed end). **One corridor has one centre line at
+     each place** (corrected 2026-11-22, review round 1): where a narrower stretch runs inside a wider one (its
+     width within the other's), the narrower's centre line doesn't run there, only the wider's, the two joined by a
+     step at each end of that stretch; where two overlap side by side, neither inside the other (a jog whose two
+     stretches overlap), each runs to the middle of the stretch both run and they are joined there. Two centre lines
+     on one line are one; two parallel centre lines whose stretches' widths overlap, both running along one stretch:
+     needs review; and a loop of centre lines round floor alone (no wall inside it): needs review. Two edges between
+     the same two places are one. *Why:* the build first let a narrower stretch's centre line run on inside a wider
+     one; the two parallel lines, joined by steps, made a loop, and the dead end ended where the loop's two sides
+     were read as two directions (16 ft where it is 45: test 24).
    - **Ends.** A centre line runs past its last crossing or step only with its own stretch there (as before). An end
      at its rectangle's end with nothing joined there is a closed end only if walled across the stretch's whole
      width (then run to the real floor's end, as before); floor beyond such an end that no centre line reaches:
@@ -357,9 +365,11 @@ area need review.
    - **Length.** Along the centre lines: their straight runs and the steps between them. Then **point C**: where the
      first point with two ways (above) is a crossing, the dead end runs on along its own centre line, still out of
      its own stretch (inside the crossing corridor's floor), to the farthest centre line it crosses there of that
-     crossing corridor (the stretch it crossed and those joined to it by steps), never past an exit: a widened
-     crossing corridor has two centre lines, its narrow one and its widened part's, and the farther is the cautious
-     one. *Rejected:* the nearer (the widened part's middle; 24 ft in test 23(c), the farther 26 ft): defensible as
+     crossing corridor (the stretch it crossed and those joined to it by steps), never past an exit: a crossing
+     corridor widened in its middle has two centre lines there, the widened part's (drawn) and its own narrower one
+     running on both sides (taken as running straight through the widening, for point C only), and the farther is
+     the cautious one. Where a corridor only widens toward its end (its narrower part never resumes), the widened
+     part's is its only centre line there. *Rejected:* the nearer (the widened part's middle; 24 ft in test 23(c), the farther 26 ft): defensible as
      "the centerline", but the shorter; the near edge: A.7.5.1.5 rules it out.
    - **Least width:** as before (the narrowest cross-section of the clear floor across the walked stretches' whole
      width, over their own stretches), and at each step walked, the cross-section across the part of the two
@@ -612,6 +622,21 @@ these hand figures as written in the test file, never taken from the code under 
     y 19): 16 in in all, needs review.
     (f) **What needs review:** a corridor 0 to 12 wide round an island 20 by 4 ft (x 20 to 40, y 4 to 8): needs
     review, named; with a column 1 ft square instead, measured as before.
+24. **One centre line at each place** (review round 1, 2026-11-22). (a) The corridor 0 to 8 wide, a branch x 20 to 32
+    from its wall to y 30, narrowing to x 20 to 26 up to y 46: from (23, 46), 16 down to the narrowing, a step 3 ft
+    to the wide stretch's centre line x 26, 26 down to y 4: **45 ft** (|23 - 26| + |46 - 4|). Before: 16 ft (the
+    loop). (b) A corridor 12 wide for x 0 to 40 and 6 wide for x 40 to 60, closed at x 60, a branch x 10 to 18 to y
+    30, exit A in the west wall (centre y 6), exit B in the south wall at x 30: from (60, 3), 20 to the narrowing, a
+    step 3 to y 6, 10 to B's door: **33 ft**, with the branch or without it (before: 20.0 with it). **And a
+    brute-force check** (`tests/test_routes_dead_end_cross_check.py`, independent of the centre lines): on 150
+    generated corridors (narrowings, widenings, jogs, T's, extra branches; 400 run once), every dead end Gordium gives
+    is at least a lower bound worked on a half-foot grid of the floor: walking out from the dead end's start, the
+    floor walked growing with the walk, t_split is the first distance at which the floor not yet walked parts into
+    pieces holding distinct exits (or an exit's door is reached); the cross-section through point C lies within half
+    its corridor's width w of C, so t_split <= the dead end + w/2, and the dead end >= t_split / 1.027 - 1 ft - w/2
+    (w the layout's widest; 1.027 the most a 16-neighbour grid walk exceeds the floor's, a cell at each end). Every
+    closed end the generator made has a dead end, or the corridor needs review. It found a second fault in the first
+    fix (two edges between one pair of places, read as two ways) before it was committed.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
