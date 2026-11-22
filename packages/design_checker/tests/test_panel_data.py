@@ -306,7 +306,10 @@ def _check_odyssey(view):
     # the cards: one per first cause, every route row on one
     groups = [g for g in view["groups"] if g.get("causes") is not None and g["key"].endswith(":review")]
     cards = {c["key"]: c for g in groups for c in g["causes"]}
-    assert set(cards[rooms[0]]["items"]) == {i["id"] for i in card}
+    # the card holds every row with that first cause: the 4 route rows, and any other rule reading those figures
+    # (NFPA 16.2.6.3's sprinkler increase reads the travel too)
+    assert set(cards[rooms[0]]["items"]) >= {i["id"] for i in card} and cards[rooms[0]]["kind"] == "fix_model"
+    assert cards[rooms[0]]["elements"] == card[0]["causes"][0]["elements"]
     return {k: sorted({i["rule"] for i in v}) for k, v in by.items()}
 
 
