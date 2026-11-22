@@ -318,15 +318,18 @@ def decide(values: dict, building: dict | None) -> dict:
         lot_units = 2 if use == "two_family" else 1
         building_units = n + (1 if attached_adu else 0)
     # the dwelling units stated for the lot agree with the use, whatever the use word: Ithaca's dwelling_units leaves
-    # an ADU out (its own fact, as the occupant counts read it: measure.py fact_conflicts), so the use's own count;
-    # one more is read as the ADU counted in (either way, detached or attached: the use word leaves no other reading)
+    # an ADU out (its own fact, as the occupant counts read it: measure.py fact_conflicts; the mark's tooltip says so),
+    # so only the use's own count agrees; one more beside a stated ADU may or may not count it in: needs review
     stated = values.get("dwelling_units")
-    if type(stated) in (int, float) and stated not in (lot_units, lot_units + (1 if adu is True else 0)):
+    if type(stated) in (int, float) and stated != lot_units:
         used["dwelling_units"] = stated
-        return _answer(None, f"the use is {use} ({lot_units} dwelling unit{'s' if lot_units > 1 else ''} on the lot"
-                       f"{' and its accessory dwelling unit' if attached_adu else ''}) but {stated:g} dwelling units are "
-                       "stated", ["R202 DWELLING", "R101.2"], used,
-                       f"correct the use ({MARK['use']}) or the dwelling units ({MARK['dwelling_units']})")
+        return _answer(None, f"the use is {use} ({lot_units} dwelling unit{'s' if lot_units > 1 else ''} on the lot) "
+                       f"but {stated:g} dwelling units are stated" + (
+                           ", which may or may not count the accessory dwelling unit in (Gordium: Dwelling units leaves "
+                           "it out)" if adu is True and stated == lot_units + 1 else ""),
+                       ["R202 DWELLING", "R101.2"], used,
+                       f"correct the use ({MARK['use']}) or the dwelling units ({MARK['dwelling_units']}, an accessory "
+                       "dwelling unit not counted)")
     used["building_units"] = building_units
     if use == ATTACHED and units >= 3:
         if attached_adu:

@@ -348,12 +348,15 @@ def test_facts_the_measuring_set_aside_are_never_read_as_unstated():
     assert "no accessory dwelling unit" not in which["assumes"]
 
 
-def test_a_detached_adu_counted_in_the_lots_units_agrees_with_the_use():
-    c, _, got = code({"use": "one_family_detached", "dwelling_units": 2, "accessory_dwelling_unit": True,
+def test_dwelling_units_leave_the_adu_out_and_one_more_beside_an_adu_needs_review():
+    # review round 3: one definition, the mark's and Ithaca's: the lot's dwelling units leave an ADU out
+    for detached, building in ((True, {}), (False, {"separate_means_of_egress": True})):
+        c, _, got = code({"use": "one_family_detached", "dwelling_units": 2, "accessory_dwelling_unit": True,
+                          "adu_detached": detached}, {"stories_above_grade_plane": 2, **building})
+        assert c is None and "Gordium: Dwelling units" in got["ask"] and "may or may not count" in got["why"]
+    c, _, got = code({"use": "one_family_detached", "dwelling_units": 1, "accessory_dwelling_unit": True,
                       "adu_detached": True}, {"stories_above_grade_plane": 2})
     assert c == code_scope.RESIDENTIAL and got["facts"]["building_units"] == 1     # the ADU in its own building
-    assert code({"use": "one_family_detached", "dwelling_units": 1, "accessory_dwelling_unit": True,
-                 "adu_detached": True}, {"stories_above_grade_plane": 2})[0] == code_scope.RESIDENTIAL
     assert code({"use": "one_family_detached", "dwelling_units": 2}, {"stories_above_grade_plane": 2})[0] is None
 
 
@@ -364,8 +367,19 @@ def test_a_typed_count_checked_against_the_drawing_is_said_so_unlike_a_count_rea
            "so at most 3 above grade plane" in typed
     assert "Ithaca's count read from the drawn floors, nothing drawn below the ground, so at most 3" in read
     from design_checker.check import _with_stories_bound
-    rec = {"value": 3, "objects": ["b1"], "readings": [],
-           "how": "stated by the architect for the whole building, within what the drawing allows (1 to 5: ...)"}
-    assert _with_stories_bound({"stories": 3}, {"stories": rec})[code_scope.STORIES_HOW] == "typed"
-    rec["how"] = "read from the drawing: ..."
+    rec = {"value": 3, "objects": ["b1"], "readings": [], "how": "the stories of the building, ...", "stated": True}
+    assert _with_stories_bound({"stories": 3}, {"stories": rec})[code_scope.STORIES_HOW] == "typed"   # the flag
+    rec.pop("stated")
+    rec["how"] = "stated by the architect for the whole building, ..."                            # never the words
     assert _with_stories_bound({"stories": 3}, {"stories": rec})[code_scope.STORIES_HOW] == "read"
+
+
+def test_a_typed_count_over_a_house_and_a_garage_is_still_said_to_be_the_architects():
+    # review round 3: the merged record over candidate buildings lost the words; the measuring's flag says it
+    site = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]),
+            "buildings": [box(10, 25, 40, 75, 0, 30), box(45, 80, 57, 100, 0, 12, id="garage")], "problems": []}
+    got = check_site(site, dict(FACTS, stories=3, main_building="house"))
+    record = got["measurements"]["stories"]
+    assert record.get("stated") is True and record["how"] == "the stories of the building, read over its candidate buildings"
+    why = got["which_code"]["why"]
+    assert "as the architect states it" in why and "read from the drawn floors" not in why
