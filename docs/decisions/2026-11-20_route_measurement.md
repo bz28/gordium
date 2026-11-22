@@ -357,7 +357,11 @@ area need review.
      needs review; and a loop of centre lines round floor alone (no wall inside it): needs review. Two edges between
      the same two places are one. *Why:* the build first let a narrower stretch's centre line run on inside a wider
      one; the two parallel lines, joined by steps, made a loop, and the dead end ended where the loop's two sides
-     were read as two directions (16 ft where it is 45: test 24).
+     were read as two directions (16 ft where it is 45: test 24). A step is drawn only where both its centre lines run (review round 2: one drawn at the end of a stretch where a
+     centre line no longer ran ended on no line, and with others there made a loop of no area: 10 ft where it is
+     39.5, test 25); a step passing a third place on its line, a place reached by steps alone, or a closed end on no
+     stretch: needs review; and anything unexpected in working the dead ends out is each corridor's needs-review
+     reason, never a crash of the story.
    - **Ends.** A centre line runs past its last crossing or step only with its own stretch there (as before). An end
      at its rectangle's end with nothing joined there is a closed end only if walled across the stretch's whole
      width (then run to the real floor's end, as before); floor beyond such an end that no centre line reaches:
@@ -637,6 +641,16 @@ these hand figures as written in the test file, never taken from the code under 
     (w the layout's widest; 1.027 the most a 16-neighbour grid walk exceeds the floor's, a cell at each end). Every
     closed end the generator made has a dead end, or the corridor needs review. It found a second fault in the first
     fix (two edges between one pair of places, read as two ways) before it was committed.
+    **Review round 2 widened it** (the fuzz, `fuzz_layout`): corridors whose two walls step in or out one side at a
+    time by 6 in to 3 ft, staircase branches of one to four stretches north or south at random places and widths
+    (walls stepping independently: narrowings, widenings, asymmetric jogs), T's, two or three exits (the ends, or a
+    door in the wall). 150 run in CI; 3,000 run once (2026-11-22): 1,861 measured (3,639 dead ends, none under the
+    bound), 925 needing review (the reasons named, the commonest "two of its stretches run side by side", 314, and
+    "the walls of one of its stretches step by 12 in or more in all", 222), 214 not one floor; no crash.
+25. **A step only between two centre lines that run there** (review round 2). A corridor 0 to 60 by 0 to 6, exits at
+    both ends; a branch x 25 to 40 to y 10, 25 to 38 to y 16, 24 to 38 to y 30, 23 to 37 to y 40, closed: from (30,
+    40), 10 + 1 + 14 + 0.5 + 6 + 1 + 7 = **39.5 ft** (|30 - 32.5| + |40 - 3|). Before: 10 ft. And an error inside the
+    dead ends' working is the corridor's needs review, never a crash.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
