@@ -177,7 +177,7 @@ public sealed class ReadStepsTests
         // the read asks it which objects are left out (the step worker_wait, inside prepare)
         Assert.DoesNotContain("worker_start", source);
         Assert.Contains("new WorkerLeftOut(ReadSteps.Time(\"worker_wait\", () => worker.GetAwaiter().GetResult()))", source);
-        Assert.Contains("ReadSteps.Time(\"prepare\", () => ProjectCheck.PrepareAsync(outside, inside, new StartedLeftOut(worker)).GetAwaiter().GetResult())", source);
+        Assert.Contains("ReadSteps.Time(\"prepare\", () => ProjectCheck.PrepareAsync(outside, inside, new StartedLeftOut(worker), anyway: anyway).GetAwaiter().GetResult())", source);
         Assert.Contains("using (ReadSteps.Step(\"log_request\"))", source);
         // logged when nothing is sent, when it is, and on a failure (then rethrown)
         Assert.Equal(3, Count(source, "log[\"read_steps\"] = steps.ToLog();"));

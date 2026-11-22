@@ -220,8 +220,14 @@ internal sealed class SetupView : C.StackPanel
         Children.Add(Overline($"INSIDE THE {_screen.Noun.ToUpperInvariant()}", top: 16));
         foreach (var p in _screen.FixFirst)
             Children.Add(Banner(PanelStatus.Review, PanelTokens.StatusReviewFill, PanelTokens.StatusReview, Words(p, Caption, wrap: true), bottom: 4));
-        var todo = _screen.Lines.Where(l => !l.Done).OrderByDescending(l => l.Needed).ToList();
-        var done = _screen.Lines.Where(l => l.Done).ToList();
+        // a fact with nothing of its kind drawn is nothing to set, never "done": said once, plainly
+        bool Nothing(ChecklistLine l) => l.Total == 0 && l.DoneWhen is null;
+        var nothing = _screen.Lines.Where(Nothing).ToList();
+        if (nothing.Count > 0)
+            Children.Add(Muted("Nothing to set yet for " + string.Join(", ", nothing.Select(l => l.Title.ToLowerInvariant())) +
+                               $": nothing of the kind is drawn yet. Egress waits until the {_screen.Noun}'s rooms, windows and doors are drawn.", top: 4));
+        var todo = _screen.Lines.Where(l => !Nothing(l) && !l.Done).OrderByDescending(l => l.Needed).ToList();
+        var done = _screen.Lines.Where(l => !Nothing(l) && l.Done).ToList();
         foreach (var l in todo)
             Children.Add(Line(l));
         if (done.Count > 0)

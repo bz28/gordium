@@ -142,7 +142,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                 // the Setup form, saying why nothing was sent (the zone missing on Check now anyway, a street edge
                 // no longer on the lot): every way to give the fact is there
                 if (shown)
-                    SetupRun.Show(ui, doc, notice: "Nothing was checked: " + string.Join(" ", StreetEdges.MissingAsShown(prepared.Missing, ask)));
+                    SetupRun.Show(ui, doc, notice: clear + "Nothing was checked: " + string.Join(" ", StreetEdges.MissingAsShown(prepared.Missing, ask)));
                 Blocked();
                 check.End(shown ? "nothing_sent" : "cancelled");
                 return;
