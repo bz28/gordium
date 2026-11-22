@@ -561,31 +561,34 @@ def test_25c_the_fuzzs_seed_14_is_measured_never_a_crash():
 
 
 def two_corridors():
-    """Review round 3: c1, a corridor 0 to 60 by 0 to 6 with a branch x 28 to 34 to y 30 (exits at its ends); c2, far
-    off (y 100 to 111), whose centre lines can't be worked out (a notch 5 ft wide, 2 to 3 ft deep in its north
-    wall)."""
-    return description([room("c1", [[0, 0], [60, 0], [60, 6], [34, 6], [34, 30], [28, 30], [28, 6], [0, 6]]),
-                        room("c2", [[0, 100], [0, 110], [20, 110], [20, 113], [25, 113], [25, 111], [60, 111],
-                                    [60, 100], [25, 100], [20, 100]])],
-                       [door("a", (-0.25, 3), (0, 1), ("c1", "outside"), exit_id="A"),
-                        door("b", (60.25, 3), (0, 1), ("c1", "outside"), exit_id="B"),
-                        door("c", (-0.25, 105), (0, 1), ("c2", "outside"), exit_id="C"),
-                        door("e", (60.25, 105.5), (0, 1), ("c2", "outside"), exit_id="E")])
+    """Review rounds 3 and 4: "a", a corridor far off (y 100 to 111) whose centre lines can't be worked out (a notch 5
+    ft wide, 2 to 3 ft deep in its north wall: "don't all meet", found only after its centre lines are drawn on the
+    graph the story's corridors share); "c1", a corridor 0 to 60 by 0 to 6 with a branch x 28 to 34 to y 30. Floors
+    are worked in the order of their ids, so "a" goes first and its centre lines are on the graph before c1's."""
+    return description([room("a", [[0, 100], [0, 110], [20, 110], [20, 113], [25, 113], [25, 111], [60, 111],
+                                   [60, 100], [25, 100], [20, 100]]),
+                        room("c1", [[0, 0], [60, 0], [60, 6], [34, 6], [34, 30], [28, 30], [28, 6], [0, 6]])],
+                       [door("a1", (-0.25, 105), (0, 1), ("a", "outside"), exit_id="C"),
+                        door("a2", (60.25, 105.5), (0, 1), ("a", "outside"), exit_id="E"),
+                        door("c", (-0.25, 3), (0, 1), ("c1", "outside"), exit_id="A"),
+                        door("d", (60.25, 3), (0, 1), ("c1", "outside"), exit_id="B")])
 
 
 def test_25d_one_corridor_that_cant_be_worked_out_never_takes_anothers_figure():
-    # c1's branch: 30 - 3 = 27 ft; c2 needs review for its own reason, and leaves nothing on the graph they share
-    # (before: its leftover nodes gave c1 "working them out failed: KeyError: None", or a closed end on no stretch)
+    # c1's branch: 30 - 3 = 27 ft; "a" needs review for its own reason. Two things keep "a"'s leftover centre lines
+    # (left on the shared graph when it stops) from c1: "a" takes them away when it stops (test 25e), and a closed end
+    # on no corridor's stretch is never measured. With neither, a leftover closed end belonged to no floor and the
+    # story failed (KeyError: None), c1's figure lost with it
     got = measure(two_corridors())
     assert got["c1"].stop is None and [ft(d.length[WITHOUT]) for d in got["c1"].dead_ends] == [27.0]
-    assert "don't all meet" in got["c2"].stop and "failed" not in got["c2"].stop
+    assert "don't all meet" in got["a"].stop and "failed" not in got["a"].stop
 
 
 def test_25e_a_floor_that_fails_leaves_nothing_on_the_shared_graph():
     s = story(two_corridors())
     g, legs = dead_ends._Graph(), []
     with pytest.raises(dead_ends.Stop):
-        dead_ends._group(s, [s.rooms["c2"]], g, legs)
+        dead_ends._group(s, [s.rooms["a"]], g, legs)
     assert g.xy == [] and g.edges == [] and g.adj == [] and g.steps == {} and legs == []
 
 
@@ -605,3 +608,17 @@ def test_25f_a_step_passing_a_third_place_or_a_place_reached_by_steps_alone_need
         dead_ends._every_place_on_a_line(g, range(4))
     assert "ends on none" in stop.value.reason
     dead_ends._every_place_on_a_line(g, [a, c])
+
+
+
+def test_25g_a_floors_checks_look_at_its_own_places_only():
+    # an earlier floor's place on the shared graph joined by a step alone (built by hand: no real layout was found to
+    # leave one, see test 25d), far off; then test 3's branch, a healthy floor, on the same graph: its checks look at
+    # its own places only, so it is worked out (20 ft). Looking at every place of the graph, it would need review
+    # ("a step of its centre lines ends on none")
+    s = story(branch())
+    g, legs = dead_ends._Graph(), []
+    a, b = g.node((0.0, 5000.0)), g.node((120.0, 5000.0))
+    g.edge(a, b, None, (0.0, 0.0))
+    floor = dead_ends._group(s, [s.rooms["c"]], g, legs)
+    assert floor.legs and len(g.xy) > 2
