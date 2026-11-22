@@ -820,6 +820,19 @@ internal static class RevitInterior
     /// <summary>What crosses the room's plan from just above its floor to just below its level's room computation
     /// height (<c>LEVEL_ROOM_COMPUTATION_HEIGHT</c>, where Revit works out room outlines): every outline loop extruded,
     /// and each element whose solid meets it (<c>ElementIntersectsSolidFilter</c>). Null when it can't be looked for.</summary>
+    /// <summary>A solid's bounding box in model coordinates (its 8 corners through the box's own transform), grown by
+    /// <paramref name="pad"/> feet on every side.</summary>
+    private static Outline Padded(Solid solid, double pad)
+    {
+        var box = solid.GetBoundingBox();
+        var corners = (from x in new[] { box.Min.X, box.Max.X }
+                       from y in new[] { box.Min.Y, box.Max.Y }
+                       from z in new[] { box.Min.Z, box.Max.Z }
+                       select box.Transform.OfPoint(new XYZ(x, y, z))).ToList();
+        return new Outline(new XYZ(corners.Min(p => p.X) - pad, corners.Min(p => p.Y) - pad, corners.Min(p => p.Z) - pad),
+                           new XYZ(corners.Max(p => p.X) + pad, corners.Max(p => p.Y) + pad, corners.Max(p => p.Z) + pad));
+    }
+
     private static List<NearbyElement>? Inside(Document doc, Room room, IList<IList<BoundarySegment>> loops, double floor, Level level)
     {
         try
@@ -836,7 +849,12 @@ internal static class RevitInterior
                 profile.Add(curveLoop);
             }
             var solid = GeometryCreationUtilities.CreateExtrusionGeometry(profile, XYZ.BasisZ, top - Sixteenth);
+            // Revit's quick box filter first, then the exact solid test: an element whose solid meets the room's solid
+            // has a bounding box that meets the solid's box, so the box (padded by a foot) only passes extra candidates
+            // the solid test then drops. The list is the same; the slow test runs on a room's neighbours, not on every
+            // element of the model (Snowdon Towers: 300 of its 408 s of reading went here, read_steps 2026-11-22).
             var hits = new FilteredElementCollector(doc).WhereElementIsNotElementType()
+                .WherePasses(new BoundingBoxIntersectsFilter(Padded(solid, 1.0)))
                 .WherePasses(new ElementIntersectsSolidFilter(solid))
                 .Where(e => e.Id != room.Id)
                 .Select(e => new NearbyElement(e.UniqueId, Category(e), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
