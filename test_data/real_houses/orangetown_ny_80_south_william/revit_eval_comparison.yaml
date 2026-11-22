@@ -1,0 +1,555 @@
+building: '80 South William Street (Lot 2), Orangetown NY: egress only'
+made_by: apps/revit_addin/tools/evals/compare_check_result.py (run it on the add-in's result to reproduce this file)
+result:
+  log: results.jsonl
+  line: 525
+  at: '2026-11-21T23:33:16.8456737-05:00'
+  model: orangetown_marked.rvt
+marks: orangetown_built.rvt
+answer_key: test_data/real_houses/orangetown_ny_80_south_william/hand_check.yaml (truth, predicted); evaluation.md (the reason
+  class)
+summary:
+  rules: 115
+  same_as_truth: 97
+  as_predicted: 115
+  false_passes: []
+  not_as_predicted: []
+  not_in_the_result: []
+  not_in_the_hand_check: []
+  by_verdict:
+    complies (truth complies): 1
+    needs_review (truth complies): 4
+    needs_review (truth needs_review): 63
+    needs_review (truth not_applicable): 14
+    not_applicable (truth not_applicable): 33
+  egress_section:
+    state: needs_review
+    summary: 18 to review · 1 complies · 4 parts not read yet · 86 sections not checked yet
+  zoning: 'not compared: Ithaca''s zoning doesn''t apply in Orangetown (the lot is a stand-in)'
+has_none_items:
+- item: egress.has_none.habitable_attic
+  status: not_applicable
+  name: 'Habitable attics: not applicable'
+  difference: 'ticked on Project Information (an eval assumption standing in for the architect), so shown not applicable;
+    house.yaml gives it as Gordium''s reading, which the description path shows as one to confirm (evaluation.md: ''Three
+    rest on a reading'')'
+- item: egress.has_none.sleeping_loft
+  status: not_applicable
+  name: 'Sleeping lofts: not applicable'
+- item: egress.has_none.ramp
+  status: not_applicable
+  name: 'Ramps: not applicable'
+- item: egress.has_none.alternating_tread_device
+  status: not_applicable
+  name: 'Alternating tread devices: not applicable'
+- item: egress.has_none.ships_ladder
+  status: not_applicable
+  name: 'Ship''s ladders: not applicable'
+  difference: 'ticked on Project Information (an eval assumption standing in for the architect), so shown not applicable;
+    house.yaml gives it as Gordium''s reading, which the description path shows as one to confirm (evaluation.md: ''Three
+    rest on a reading'')'
+- item: egress.has_none.patio_cover
+  status: not_applicable
+  name: 'Patio covers: not applicable'
+  difference: 'ticked on Project Information (an eval assumption standing in for the architect), so shown not applicable;
+    house.yaml gives it as Gordium''s reading, which the description path shows as one to confirm (evaluation.md: ''Three
+    rest on a reading'')'
+- item: egress.has_none.deck_porch_or_cantilever_over_escape_opening
+  status: not_applicable
+  name: 'Decks, porches or cantilevers over an escape opening: not applicable'
+rules:
+- rule: general.r318_2_egress_door_per_dwelling_unit
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_2_egress_door_side_hinged
+  gordium: complies
+  truth: complies
+  predicted: complies
+- rule: general.r318_2_egress_door_clear_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_2_egress_door_clear_height
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_2_egress_door_readily_openable
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.bf103_2_exit_into_patio_cover_r318_exits
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: a rule-drafting point, on the cautious side (evaluation.md, R)'
+- rule: general.r318_3_1_egress_door_given_as_exterior_door
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_exterior_door_landing_each_side
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_exterior_door_landing_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_exterior_door_landing_depth
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_exterior_door_landing_slope
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_1_egress_door_inside_floor_drop
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_1_egress_door_outside_floor_drop
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_1_egress_door_exterior_landing_access_to_grade
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_3_2_other_exterior_door_floor_elevation
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_2_1_escape_opening_min_net_clear_area
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_2_2_escape_opening_min_net_clear_height
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_2_2_escape_opening_min_net_clear_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_2_3_escape_opening_max_sill_height
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_2_4_under_projection_openable_path
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r319_3_escape_door_side_hinged_or_sliding
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r319_4_area_well_required
+  gordium: needs_review
+  truth: complies
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: a fact the description holds that the measuring doesn''t turn into
+    the rule''s measure yet (evaluation.md, M)'
+- rule: general.r319_4_2_area_well_ladder_over_44
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.bf103_2_escape_opening_into_patio_cover_unenclosed
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r319_4_1_area_well_min_area
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_1_area_well_min_projection
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_1_area_well_min_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_1_area_well_allows_full_opening
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_1_sleeping_room_escape_opening_operable
+  gordium: needs_review
+  truth: complies
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: a fact the description holds that the measuring doesn''t turn into
+    the rule''s measure yet (evaluation.md, M)'
+- rule: general.r319_1_basement_escape_opening_operable
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_1_habitable_attic_escape_opening_operable
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r319_1_loft_room_escape_opening_operable
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r319_1_escape_opening_opens_to_public_way_or_yard
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_2_1_area_well_ladder_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_2_1_area_well_ladder_projection
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_2_1_area_well_ladder_rung_spacing
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_2_1_area_well_ladder_full_height
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_4_2_2_area_well_steps_requirements
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r319_6_addition_sleeping_room_escape_opening
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: a rule-drafting point, on the cautious side (evaluation.md, R)'
+- rule: general.r319_6_addition_basement_escape_opening
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the format can''t yet say the house has a basement (evaluation.md,
+    F)'
+- rule: general.r318_7_8_stair_handrail_one_side
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r315_5_2_2_sleeping_loft_stair_riser_height
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r315_5_2_2_sleeping_loft_stair_tread_riser_formula
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r315_5_2_1_sleeping_loft_stair_clear_width_at_or_above_handrail
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r315_5_2_1_sleeping_loft_stair_clear_width_below_handrail
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_1_stair_clear_width_above_handrail
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_1_stair_clear_width_at_handrail
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_2_stair_headroom
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_2_stair_floor_opening_headroom
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_3_stair_vertical_rise_max
+  gordium: needs_review
+  truth: complies
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_5_1_stair_riser_height_max
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_5_1_stair_riser_variation_max
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_5_1_stair_riser_slope
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_5_1_stair_open_riser_sphere
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_5_2_stair_tread_depth_min
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_5_2_stair_tread_variation_max
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_stair_top_landing
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_stair_bottom_landing
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_garage_top_landing_drop
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_top_landing_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_bottom_landing_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_deck_stair_bottom_landing_width
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_straight_run_landing_depth
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r318_7_6_nonrectangular_landing
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_11_1_spiral_stair_clear_width
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_11_1_spiral_stair_walkline_radius
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_11_1_spiral_stair_tread_depth
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_11_1_spiral_stair_identical_treads
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_11_1_spiral_stair_rise
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r318_7_11_1_spiral_stair_headroom
+  gordium: needs_review
+  truth: not_applicable
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the drawings give no stair geometry, so the description has no
+    stairs (evaluation.md, D)'
+- rule: general.r320_2_handrail_height_34_38
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_4_handrail_wall_clearance
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_3_handrail_projection
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_5_handrail_continuity
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_5_handrail_end_returned
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_5_handrail_return_gap
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_6_handrail_edge_radius
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_6_handrail_circular_diameter
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_6_handrail_type_i_noncircular
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r320_6_handrail_type_ii_recess
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r321_1_1_guard_required_open_side
+  gordium: needs_review
+  truth: complies
+  predicted: needs_review
+  difference: 'more cautious than the truth, as predicted: the guard rules read open sides, which nothing produces yet (evaluation.md,
+    G)'
+- rule: general.r321_1_2_guard_height_open_side_not_stair
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r321_1_2_guard_height_stair_open_side
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r321_1_2_guard_height_stair_guard_as_handrail
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r321_1_3_guard_opening_4_inch_sphere
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r321_1_3_guard_stair_triangle_6_inch_sphere
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r321_1_3_guard_stair_opening_4_3_8_sphere
+  gordium: needs_review
+  truth: needs_review
+  predicted: needs_review
+- rule: general.r315_2_sleeping_loft_floor_area_limit
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r315_2_sleeping_loft_ceiling_height_limit
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r315_3_sleeping_loft_clear_height_below
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r315_3_sleeping_loft_ceiling_height
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r319_1_room_a_sleeping_loft_is_open_to
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_8_1_ramp_max_slope_egress_door
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_8_1_ramp_max_slope_other
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_8_1_ramp_max_slope_infeasible
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_8_2_ramp_landings_present
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_8_2_ramp_landing_width
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_8_2_ramp_landing_depth
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_8_3_ramp_handrail_one_side
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_atd_clear_width
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_atd_not_in_means_of_egress
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_1_atd_tread_depth
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_1_atd_projected_tread_depth
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_1_atd_tread_width
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_1_atd_riser_height
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_1_atd_angle
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_1_atd_first_tread_at_floor
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_2_atd_handrails_both_sides
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_12_2_atd_handrails_comply_r320
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_13_ship_ladder_clear_width
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_13_ship_ladder_egress_use
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_13_1_ships_ladder_tread_depth
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_13_1_ships_ladder_tread_plus_nosing
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_13_1_ships_ladder_riser_height
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+- rule: general.r318_7_13_2_ships_ladder_handrails_both_sides
+  gordium: not_applicable
+  truth: not_applicable
+  predicted: not_applicable
+ok: true
