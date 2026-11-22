@@ -1,0 +1,21 @@
+<script>
+window.addEventListener('load',()=>{ const out=[]; const fin=()=>{const d=document.createElement('pre'); d.id='PIN'; d.textContent=out.join(' '); document.body.appendChild(d);};
+ try {
+ const sel=document.getElementById('stateSel'), body=document.getElementById('body');
+ const opts=[...sel.options].map(o=>o.value);
+ // H: selector to Checking from Results keeps dimmed results; Cancel lands on a real state
+ sel.value='checking'; sel.dispatchEvent(new Event('change'));
+ out.push('H_dimmed_rows='+(body.querySelectorAll('.row').length>0));
+ document.querySelector('[data-act="cancel"]').click();
+ out.push('H_after_cancel_valid='+(opts.includes(S.panel) && sel.value!==''));
+ // F: a full check from Results ends drawn: no spinner, no Cancel, rows back, selector Results
+ sel.value='results'; sel.dispatchEvent(new Event('change'));
+ recheck();
+ setTimeout(()=>{
+   out.push('F_done_drawn='+(!body.querySelector('.spin') && !document.querySelector('[data-act="cancel"]') && sel.value==='results' && body.querySelectorAll('.row').length>0));
+   // G: a check with an edit during it ends drawn stale
+   recheck(); S.tab='marks'; S.ckOpen.exits=true; render(); document.querySelector('[data-d33]').click(); S.tab='results';
+   setTimeout(()=>{ out.push('G_stale_drawn='+(!body.querySelector('.spin') && body.classList.contains('stale') && sel.value==='stale')); fin(); },2500);
+ },2500);
+ } catch(e){ out.push('ERR '+e); fin(); } });
+</script>

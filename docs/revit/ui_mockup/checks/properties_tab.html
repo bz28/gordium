@@ -1,0 +1,19 @@
+<script>
+window.addEventListener('load',()=>{ const out=[]; const fin=()=>{const d=document.createElement('pre'); d.id='PIN'; d.textContent=out.join(' '); document.body.appendChild(d);};
+ try {
+ const body=document.getElementById('body'), props=document.getElementById('tabProps');
+ // K: a check that lands while Properties is showing never draws Gordium's results under the Properties tab
+ document.getElementById('rbCheck').click(); props.click();
+ setTimeout(()=>{
+   out.push('K_props_consistent='+(props.getAttribute('aria-selected')==='true' && body.querySelectorAll('.row').length===0));
+   // the keys move nothing while Properties shows
+   document.getElementById('tabGordium').click(); S.view='list'; props.click();
+   const before=[S.sel,S.view,document.getElementById('sbSel').textContent].join('|');
+   body.focus(); body.dispatchEvent(new KeyboardEvent('keydown',{key:'ArrowDown',bubbles:true})); body.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+   out.push('K_keys_inert='+(before===[S.sel,S.view,document.getElementById('sbSel').textContent].join('|') && !!body.querySelector('.props')));
+   document.getElementById('tabGordium').click();
+   out.push('K_back_to_results='+(body.querySelectorAll('.row').length>0 && !body.querySelector('.spin')));
+   fin();
+ },2500);
+ } catch(e){ out.push('ERR '+e); fin(); } });
+</script>

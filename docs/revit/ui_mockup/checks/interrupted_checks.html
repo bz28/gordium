@@ -1,0 +1,16 @@
+<script>
+window.addEventListener('load',()=>{ const out=[]; const fin=()=>{const d=document.createElement('pre'); d.id='PIN'; d.textContent=out.join(' '); document.body.appendChild(d);};
+ try {
+ const sel=document.getElementById('stateSel'), body=document.getElementById('body');
+ // I: check, then selector Stale, then selector Checking: the first check's answer never lands as current
+ recheck(); sel.value='stale'; sel.dispatchEvent(new Event('change')); sel.value='checking'; sel.dispatchEvent(new Event('change'));
+ setTimeout(()=>{
+   out.push('I_not_current='+!(sel.value==='results' && !body.classList.contains('stale')));
+   // J: from Results: check, ribbon Check again mid-check, Cancel: earlier results back, marked stale
+   sel.value='results'; sel.dispatchEvent(new Event('change'));
+   recheck(); document.getElementById('rbCheck').click(); document.querySelector('[data-act="cancel"]').click();
+   out.push('J_cancel_keeps_results='+(sel.value==='stale' && body.classList.contains('stale') && body.querySelectorAll('.row').length>0));
+   fin();
+ },2500);
+ } catch(e){ out.push('ERR '+e); fin(); } });
+</script>
