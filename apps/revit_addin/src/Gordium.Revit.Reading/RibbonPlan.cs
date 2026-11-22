@@ -58,9 +58,9 @@ public static class RibbonPlan
     private static readonly RibbonPanel Check = new("Check",
     [
         new(CheckProject, "Check\nproject", "Check this project against its zoning and egress rules",
-            ["Reads the lot facts on Project Information, the site outside and the rooms, windows and doors inside.",
-             "The results open in the Gordium panel, beside Properties.",
-             "If a fact is missing, nothing is sent: the panel lists what to fill in."],
+            ["Adds Gordium's marks if missing and fills a window's maker's clear opening as a draft, then reads the project.",
+             "Asks you to pick the street edge if it isn't set; the results open in the Gordium panel, beside Properties.",
+             "If another fact is missing, nothing is sent: the panel lists what to fill in."],
             RibbonIcons.CheckProject),
         new(MarkFacts, "Mark\nfacts", "List what to mark: rooms, windows, doors, floors outside the house; unset first",
             ["Adds Gordium's marks to this project if missing, and fills a window's maker's clear opening as a draft.",

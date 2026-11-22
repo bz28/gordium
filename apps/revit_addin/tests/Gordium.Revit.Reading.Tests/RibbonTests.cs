@@ -76,7 +76,7 @@ public sealed class RibbonTests
     {
         var check = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.CheckProject);
         Assert.Equal("Check this project against its zoning and egress rules", check.ToolTip);
-        Assert.Contains("Reads", check.LongDescription[0], StringComparison.Ordinal);
+        Assert.Contains("reads the project", check.LongDescription[0], StringComparison.Ordinal);
         Assert.Contains("Gordium panel", check.LongDescription[1], StringComparison.Ordinal);
         Assert.Contains("nothing is sent", check.LongDescription[2], StringComparison.Ordinal);
     }
@@ -112,6 +112,18 @@ public sealed class RibbonTests
         Assert.Contains("Type Properties", all, StringComparison.Ordinal);
         Assert.Contains("Project Information", all, StringComparison.Ordinal);
         Assert.Contains("Check project asks for any lot fact not set", all, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Check_project_says_what_it_writes_and_asks()
+    {
+        // review round 3: CheckProjectCommand adds the marks (AddMarks) and fills drafts (TryPrefill) before it reads,
+        // and asks for a missing street edge by a pick in the view (PickStreet)
+        var check = RibbonPlan.Buttons(false).Single(b => b.Id == RibbonPlan.CheckProject);
+        var all = check.ToolTip + " " + check.LongDescriptionText;
+        Assert.Contains("Adds Gordium's marks", all, StringComparison.Ordinal);
+        Assert.Contains("clear opening as a draft", all, StringComparison.Ordinal);
+        Assert.Contains("pick the street edge", all, StringComparison.Ordinal);
     }
 
     [Fact]
