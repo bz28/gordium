@@ -94,18 +94,20 @@ def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_fro
     assert apart, "the eval file's format changed; update this test"
     assert [key for key in apart if f"`{key}`" not in log] == []
     unrouted = {room for fig in data["figures"].values()
-                for room in (((fig.get("gordium") or {}).get("story") or {}).get("rooms_without_route") or [])}
+                for room in (((fig.get("gordium") or {}).get("story") or {}).get("rooms_not_measured") or [])}
     assert unrouted and sorted(room for room in unrouted if room not in log) == []
     # a point the log names comes from the room it names it with (each room's own reason, as the eval file gives it)
     reasons = {room: why for fig in data["figures"].values()
-               for room, why in (((fig.get("gordium") or {}).get("story") or {}).get("rooms_without_route") or {}).items()}
+               for room, why in (((fig.get("gordium") or {}).get("story") or {}).get("rooms_not_measured") or {}).items()}
     for sentence in re.split(r"(?<=[.;:])\s", log):
         for point in re.findall(r"\(\d+\.\d+, \d+\.\d+\)", sentence):
             owners = {room for room, why in reasons.items() if point in why}
             if owners:
-                assert any(room in sentence for room in owners), (point, owners, sentence)
-                others = {room for room in reasons if room in sentence} - owners
-                assert not others or any(room in sentence for room in owners), (point, others)
+                before = sentence[:sentence.index(point)]
+                named = [room for room in reasons if room in before]
+                assert named, (point, owners, sentence)
+                nearest = max(named, key=before.rindex)          # the room named last before the point
+                assert nearest in owners, (point, nearest, owners)
     # the accessory area complies under all four readings: the largest accessory area against 10% of the smallest
     # story area (decision 8), stated in the log with that limit
     limit = round(0.1 * min(data["storage"]["gordium_story_sf"]))

@@ -34,7 +34,7 @@ figures:
       story:
         not_measured: the point (165.625, 70.156) has no route to any exit (a path
           12 in clear of every corner, through door centres and rooms it may cross)
-        rooms_without_route:
+        rooms_not_measured:
           CLOSET (40): the point (25.978, 35.841) has no route to any exit (a path
             12 in clear of every corner, through door centres and rooms it may cross)
           ELEC. (21): the point (5.171, 25.183) has no route to any exit (a path 12
@@ -47,7 +47,7 @@ figures:
             and rooms it may cross)
           STORAGE (13): the point (165.625, 70.156) has no route to any exit (a path
             12 in clear of every corner, through door centres and rooms it may cross)
-        over_rooms_with_a_route: 110.247
+        over_rooms_measured: 110.247
         from_room: STORAGE (11)
         at:
         - 138.9
@@ -86,7 +86,7 @@ figures:
         not_measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
           (a path 12 in clear of every corner, through door centres and rooms it may
           cross)
-        rooms_without_route:
+        rooms_not_measured:
           CLOSET (40): the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
             (a path 12 in clear of every corner, through door centres and rooms it
             may cross)
@@ -104,7 +104,7 @@ figures:
           STORAGE (13): the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
             (a path 12 in clear of every corner, through door centres and rooms it
             may cross)
-        over_rooms_with_a_route: 43.45
+        over_rooms_measured: 43.45
         from_room: MOUNTAIN CLASSROOM (3)
         at:
         - 194.0778

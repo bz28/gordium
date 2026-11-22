@@ -291,8 +291,10 @@ def test_a_room_with_no_route_keeps_the_verdict_needs_review_with_the_figure_ove
     for m in ("egress_travel_distance", "common_path_of_travel"):
         assert m not in story["measures"] and "has no route" in story["not_measured"][m]
         shown = story["more"][m]
-        assert shown["label"] == "greatest over the rooms with a route; not a verdict, since s2 has none"
-        assert set(shown["rooms_without_route"]) == {"s2"} and shown["rooms"] == 2
+        assert shown["label"] == ("greatest over the rooms measured; not a verdict, since s2 isn't measured (each "
+                                  "room's reason in rooms_not_measured)")
+        assert set(shown["rooms_not_measured"]) == {"s2"} and shown["rooms"] == 2
+        assert "has no route" in shown["rooms_not_measured"]["s2"]
     # the travel's: the storeroom's far corner (10, 16) to its door (5, 10.25), then on to the nearest exit:
     # at least sqrt(5^2 + 5.75^2) = 7.620 + ...; well under the room's diagonal sum
     assert story["more"]["egress_travel_distance"]["figure"] > 7.620
@@ -360,3 +362,17 @@ def test_end_to_end_an_off_centre_alcove_at_a_dead_ends_end_never_passes_at_20_f
                                                 (23.5, 24 + 11 / 12), (20.5, 24 + 11 / 12), (20.5, 24), (20, 24),
                                                 (20, 8), (0, 8)]]
     assert result(maine, "general.nfpa_16_2_5_2_dead_end", measure(d)) == "fail"
+
+
+
+def test_a_room_stopped_by_a_tie_is_not_measured_with_its_own_reason_never_called_no_route():
+    # review round 12: a room whose figure stops on a tie (or any stop) is "not measured", each with its own reason;
+    # the label never says it has no route
+    from types import SimpleNamespace
+    from model_measurement.routes import _over_rooms_measured
+    from model_measurement.routes.stops import Stop
+    story = SimpleNamespace(rooms={"c": SimpleNamespace(name="CORRIDOR (26)")})
+    shown = _over_rooms_measured(story, {"c": Stop("too_many_ties", most=64, x=63.232, y=37.844)})
+    assert "no route" not in shown["label"] and "has none" not in shown["label"]
+    assert shown["rooms_not_measured"] == {"CORRIDOR (26)": "more than 64 routes from (63.232, 37.844) are equally "
+                                           "short (within 1e-6 ft): which to take isn't worked out"}
