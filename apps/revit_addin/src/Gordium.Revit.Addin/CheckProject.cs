@@ -89,12 +89,15 @@ public sealed class CheckProjectCommand : IExternalCommand
             // (a failure is shown and the check goes on: the types stay empty, so their clear opening needs review)
             var (filled, failed) = RevitMarks.TryPrefill(doc, RevitMarks.Model(doc), log);
             clear = ClearPrefills.Head(filled.Count, failed);
-            // the street edge asked for only when it is the one fact left and the view shows a property line to click
+            // the street edge asked for only when it is the one fact left and the view shows a property line to click,
+            // and only in the project being checked while it is the active one (the read is queued after the click: the
+            // architect may have switched projects since; a pick, and the mark it writes, would land in another one)
+            bool Active() => ui.ActiveUIDocument?.Document.Equals(doc) == true;
             var read = ProjectFacts.Read(RevitMarks.Model(doc));
-            var view = ShowsPropertyLine(ui.ActiveUIDocument!);
-            var ask = StreetEdges.Ask(read, read.StreetEdges is null, view);
+            var view = Active() && ShowsPropertyLine(ui.ActiveUIDocument!);
+            var ask = StreetEdges.Ask(read, read.StreetEdges is null, view, Active());
             log["street_ask"] = ask.ToString();
-            if (ask == StreetAsk.Pick)
+            if (ask == StreetAsk.Pick && Active())
                 check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log));
             if (!CheckRun.Flow.IsCurrent(check.Ticket))
             {
@@ -107,10 +110,10 @@ public sealed class CheckProjectCommand : IExternalCommand
             // message says, and checked once more (the typed reason, never its words); in a view that can show it
             if (StreetEdges.NeedsNewPick(prepared))
             {
-                ask = StreetEdges.Ask(ProjectFacts.Read(RevitMarks.Model(doc)), needed: true, view);
+                ask = StreetEdges.Ask(ProjectFacts.Read(RevitMarks.Model(doc)), needed: true, view && Active(), Active());
                 log["street_ask_again"] = ask.ToString();
                 // (not read again once cancelled during that pick: Send then sends nothing)
-                if (ask == StreetAsk.Pick && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log))
+                if (ask == StreetAsk.Pick && Active() && check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log))
                     && CheckRun.Flow.IsCurrent(check.Ticket))
                     prepared = ReadModel(doc, ui.Application, log, check.Worker);
             }
@@ -126,7 +129,11 @@ public sealed class CheckProjectCommand : IExternalCommand
                 return;
             }
             Blocked();
-            check.Send(request);
+            // the read's end (its edit count kept now: an edit made after it makes the answer stale), then the send,
+            // queued behind the input Revit queued during the read (WPF runs Background work after pending input): a
+            // Cancel clicked during the read is handled first, and then nothing is sent and the worker keeps running
+            if (check.ReadEnded())
+                ResultsPane.AfterInput(() => check.Send(request));
         }
         catch (Exception e)
         {
