@@ -108,6 +108,16 @@ def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_fro
                 assert named, (point, owners, sentence)
                 nearest = max(named, key=before.rindex)          # the room named last before the point
                 assert nearest in owners, (point, nearest, owners)
+    # a room stopped for a reason other than "has no route" (a tie) is held to its own reason: no clause naming it
+    # says it has no route or reaches both exits, and one says it stops on a tie
+    clauses = re.split(r"[.;:,|]", log)
+    for room, why in reasons.items():
+        if "has no route" in why:
+            continue
+        mine = [c for c in clauses if room in c]
+        assert mine and not [c for c in mine if "no route" in c or "both exits" in c], (room, mine)
+        if "equally short" in why:
+            assert any("tie" in c or "equally short" in c for c in mine), (room, mine)
     # the accessory area complies under all four readings: the largest accessory area against 10% of the smallest
     # story area (decision 8), stated in the log with that limit
     limit = round(0.1 * min(data["storage"]["gordium_story_sf"]))
