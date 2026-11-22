@@ -196,7 +196,12 @@ already makes the tiers; the cause grouping needs it to say which rows share a c
 
 ### 2.4 The main screens
 
-**Project summary (top of Results).** One sentence first, in the worker's state: "Needs review: nothing fails; 8
+**Project summary (top of Results).** (PR 4: first, when the worker sends its `which_code`, one line saying which
+code the building was checked against and why, "Checked against: 2025 Residential Code of NYS — ...", the law's words
+on hover, or "Which code: needs review — <what to state>"; never green, no line without the field (Ben, 2026-11-22).
+The count bar is compact: one line per law, its most important counts with every failure, the rest behind "+N" and
+in the tooltip; the Revit trial showed the 9 counts on 6 lines at the docked pane, the first result below it.)
+One sentence first, in the worker's state: "Needs review: nothing fails; 8
 route rules need review". A count bar under it, segments in status colours with their numbers written on them
 (never colour alone). Then "Fix these first" with up to three cause cards, each: the cause in plain words, how many
 rules it affects, the first action as a button. For the Odyssey:
@@ -222,7 +227,12 @@ Revit with no zoom); double click or Enter opens its detail; the **Show** button
 Ctrl+C copies the row as the text file says it. Search matches rule names, sections and element names; filter
 chips match the count bar.
 
-**A result's detail.** Back arrow and the row's position ("3 of 8"), then:
+**A result's detail.** (Built in PR 4, in place of the list; Back returns to the same row and scroll position.
+Changed, and why: the measured-vs-limit **bar** isn't drawn: its length would be a ratio the add-in works out, and the
+worker sends none yet (PR 5); the figures and the limit are shown in the worker's words. *What to do* is the worker's
+own advice where it gives one (its `hint`, zoning's "To comply: reduce the footprint by at least 213 sf."), then a
+step by the row's place, until PR 5 sends each cause as data. *Open the law* opens each of the worker's `detail.cited`
+links; the egress rows have none yet, and the detail says so.) Back arrow and the row's position ("3 of 8"), then:
 
 - *Verdict and rule*: "Needs review · Exit access travel distance · IBC 2009 1016.1 · 1st floor".
 - *Why*: the worker's reason in a sentence, the jargon kept out ("5 rooms have no route to any exit: a walk 12 in
@@ -368,7 +378,7 @@ text file's).
 | 1 | **Tokens and theme**: the two token dictionaries, restyled controls, status glyphs, theme following | a unit test computes every text token's contrast on its surfaces (at least 4.5:1); screenshots of the Odyssey results in both themes on Revit 2025 and 2027; the screenshots run through a deuteranopia and protanopia simulation and every status is still told apart |
 | 2 | **Ribbon**: two large buttons with icons, short tooltips and long descriptions, Panel toggle; test tools behind a trial switch | screenshot in both themes; the trial runbook's steps still work with `GORDIUM_TRIAL=1`; a release build shows no test tool |
 | 3 | **Results list**: virtualized list, worst-first sort, filter chips, search, single click selects (no zoom), Show, keyboard | the sort and filter in `Gordium.Revit.Reading` (Revit-free) with tests: every row in exactly one place, a failure never below a needs review, a stale list has no green; 1,000 fake rows scroll and filter in under 100 ms; a keyboard-only walkthrough in the trial |
-| 4 | **Detail view**: why / what to do, measured vs limit, the law's words with Open the law, elements with names architects use | snapshot tests of the detail model for every row of the box house and the Odyssey answer; a test that every figure shown is one the worker sent (no figure made in the add-in) |
+| 4 | **Detail view** (built): why / what to do, measured vs limit, the law's words with Open the law, elements with names architects use; with it, the compact count bar and the "Checked against" line (below) | snapshot tests of the detail model for every row of the box house and the Odyssey answer; a test that every figure shown is one the worker sent (no figure made in the add-in) |
 | 5 | **Worker: what the panel needs** (Python, `design_checker`): each needs-review row's cause as data (a kind: mark, fix the model, measure by hand, a person decides; and the element ids it names, such as the rooms with no route), the limit as a length where the rule's is a ratio, how far off for egress rows, each quote's source file and page | pytest: on the Odyssey description the 8 route rows come out as 3 causes (5 rooms, the corridor shape, 2 flag rules), the room ids are the 5 rooms of `eval_comparison.yaml`; a how far off is never larger than the margin under any reading (as zoning's delta) |
 | 6 | **Cause cards and guided fixes v1**: selecting the elements, opening Properties at the named mark, the "looked at" checklist, Check again with what changed ("2 rows changed: travel distance now complies") | an architect task test on the Odyssey model (unmarked copy): time from first check to every needs-review row having a decided next step (fixed and rechecked, checked by hand, or decided), today's panel against this one; target half the time and no row left unvisited |
 | 7 | **Facts to mark**: the checklist in the pane, replacing the TaskDialog; Select the N unset; suggestions shown | a task test: mark the unmarked Odyssey model from scratch (39 rooms, 4 exits, 3 door types), clicks and minutes against today's dialog plus a schedule; a test that the checklist's done/to-do counts equal `MarkingListResult`'s for every interior house |

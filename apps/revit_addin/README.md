@@ -452,15 +452,30 @@ the jurisdiction is the City of Ithaca). Why each choice:
   `check_project_result.txt` and the request and answer to the log. `check_project_request.json`
   (`{"model": "<.rvt>", "marks": {...}}`) runs it with no clicks and never uses the panel.
 - **The results panel** (`ResultsPane.cs`, `ResultsView.cs`, `PanelActions.cs`): a dockable pane, *Gordium: Check
-  my project*, tabbed behind Properties the first time. Header with *Check again*; the worker's state and count
-  chips; filter chips (all, does not comply, needs review, complies) and a search (rule names, sections, element
+  my project*, tabbed behind Properties the first time. Header with *Check again*; which code the building was
+  checked against and why (`WhichCode`: the worker's `which_code`, its words only, the law's quoted words on hover;
+  "Which code: needs review" with the worker's ask when it couldn't decide; never green; no line at all when the
+  answer doesn't say); the worker's state and the **compact count bar** (`CountBar`: one line per law, its most
+  important counts with every "does not comply" always shown, the rest behind "+N", which opens them in place, and
+  every count in the line's tooltip; a line that would wrap keeps one count fewer; the worker's words, never
+  recounted: Revit trial, 106 Ithaca Rd, 2026-11-22, the 9 counts took 6 lines at the docked pane); filter chips (all, does not comply, needs review, complies) and a search (rule names, sections, element
   names); then the **results list** (`ResultsList.cs`, its decisions in `Gordium.Revit.Reading/ResultList.cs`): a
   virtualized list, worst first (does not comply, largest how far off first where the worker's figure is a length;
   needs review, the worker's tier 2; check by hand or not checked; complies and not applicable, folded), every row in
   exactly one place, each row: glyph and name (the row's whole width, wrapped), its figures in full or short cause,
   then its section (trimmed, the whole on hover) with *Show*. A click selects the row
   and its elements in Revit without moving the view; *Show* (or Space) zooms; Enter or a double click opens its
-  figures, reason, elements and the law's words; Up/Down move; Ctrl+C copies the row as the result file says it;
+  **detail** in place of the list (`DetailView.cs`, its decisions in `Gordium.Revit.Reading/ResultDetail.cs`):
+  *Back* and "3 of 8" with previous and next (Alt+Up/Down); the verdict, rule and section; *Why* (the worker's
+  reason in full); *What to do* (the worker's own advice first, its `hint`; then by the row's place: change the
+  design, resolve what the reason says or decide it by hand, check it by hand; *Show*, *Open the law* and *Check
+  again* as buttons; nothing to do for a row that complies, and only *Check again* once stale); *Measured against
+  the limit* (each figure, its limit and how far off, the worker's words split, never a number of the add-in's);
+  *The law's words* (each quote with where it is, and *Open the law* for each of the worker's `detail.cited` links,
+  opened in the browser at its page; egress rows have no link yet, and the detail says so); *Elements* by the names
+  architects use (`ElementNames`: "CLOSET (40)", "Door D06"; one no longer in the model said so, never its
+  UniqueId), each with *Show*, and *Show all*. Backspace or Esc returns to the same row and scroll position; a stale
+  detail says so first and is never green. Up/Down move; Ctrl+C copies the row as the result file says it;
   Ctrl+F searches, Esc clears the search. Nothing sent for a missing Project Information fact: the panel
   lists each, with *Open Project Information*. Element marks are still set in Properties (the click selects the
   element). Every Revit call from the panel runs through one ExternalEvent on Revit's thread (`ActionQueue`: a
@@ -484,10 +499,20 @@ doesn't know and a "not applicable" with no reason: nothing shown as a pass that
 `ResultRowsTests` (the panel's rows: 200 rows all shown once in the worker's groups with its counts, never
 recounted; the worker's delta and never a margin it didn't give; egress figures from the reason with no margin
 worked out; sections and quotes; count chips coloured only by their words; every text-file row word for word the
-panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote) and `PanelThemeTests`
+panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote), `DetailTests` (a
+snapshot of every row's detail of the box house's real answer and of the Children's Odyssey's,
+`tests/.../snapshots/`; every number a detail shows is in the worker's item for its row, or an element's name; what
+to do never says a row will comply, ends with Check again, and a stale detail is never green; links only the
+worker's web or file addresses), `CountBarTests` (every count reachable in the worker's order, a failure never
+hidden), `WhichCodeTests` (the line in the worker's words, absent without the field, never green, greyed when
+stale), `ElementNamesTests` and `PanelThemeTests`
 (every text colour at least 4.5:1 on every background it sits on in both themes, every status mark at least 3:1,
 every status its own glyph and word, green only for complies and never stale, no fixed colour in the view). The WPF
-panel itself is checked in Revit (it needs Revit to run).
+panel itself is checked in Revit (it needs Revit to run). The Children's Odyssey's answer
+(`tests/Gordium.Revit.Reading.Tests/answers/children_odyssey_check_answer.json`) is made by
+`tools/evals/make_odyssey_answer.py` from the add-in's read of the marked model (the worker's egress code with Maine's
+law and the eval's building facts; the route parts as the eval measures them); the read stays outside the repo with
+the sheet it was built from. `GORDIUM_UPDATE_SNAPSHOTS=1` rewrites the snapshots (read the diff before committing).
 
 **Where a slow read spends its time: `read_steps`.** The `check_project`, `read_interior` and `record_house` lines
 in `results.jsonl` carry a `read_steps` object beside `read_s` (added after Snowdon Towers froze Revit for 408 s,

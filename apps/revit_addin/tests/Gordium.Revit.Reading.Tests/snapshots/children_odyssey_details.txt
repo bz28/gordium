@@ -1,0 +1,2157 @@
+[1 of 190] needs review · Level 1 · Accessory occupancies at most 10% of the story (IBC 508.2.1) · 508.2.1
+WHY: does not comply (or can't be told) if the open question is answered accessory_area_face = inside, story_area_face = inside or accessory_area_face = inside, story_area_face = outer_faces or accessory_area_face = outer_faces, story_area_face = inside or accessory_area_face = outer_faces, story_area_face = outer_faces; complies if none
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Aggregate accessory occupan cies shall not occupy more than 10 percent of the building area of the story in which they are located and shall not exceed the tabular values in Table 503," (508.2.1, 2009 International Building Code (IBC), PDF p.111)
+ELEMENTS:
+  Element 1
+
+[2 of 190] needs review · Level 1 · Occupant load at least net area / 35 (IBC 1004.1.1) · 1004.1.1
+WHY: story occupant load not measured: stated by the architect (the story's design occupant load), and the description has no mark for it yet; story other use area not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "For areas with out fixed seating, the occupant load shall not be less than that number determined by dividing the floor area under" (1004.1.1, 2009 International Building Code (IBC), PDF p.246)
+  "Day care 35 net" (Table 1004.1.1, 2009 International Building Code (IBC), PDF p.247)
+ELEMENTS:
+  Element 1
+
+[3 of 190] needs review · Level 1 · Common path of egress travel at most 75 ft (IBC 1014.3) · 1014.3
+WHY: common path of travel not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 1
+
+[4 of 190] needs review · Level 1 · Two exits at least 1/2 the diagonal apart, 1/3 sprinklered (IBC 1015.2.1) · 1015.2.1
+WHY: Two exits at least 1/2 the diagonal apart, 1/3 sprinklered (IBC 1015.2.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where two exits or exit access doorways are required from any portion of the exit access," (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
+  "the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line between exit doors or exit access doorways." (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
+  "of the exitdoors or exit access doorways shall not be less than one-third of the length of the maximum overall diagonal dimension of the area served." (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 1
+
+[5 of 190] needs review · Level 1 · Three or more exits: two arranged per 1015.2.1 (IBC 1015.2.2) · 1015.2.2
+WHY: Three or more exits: two arranged per 1015.2.1 (IBC 1015.2.2): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where access to three or more exits is required, at least two exit doors or exit access doorways shall be arranged in accordance with the provisions of Section 1015.2.1." (1015.2.2, 2009 International Building Code (IBC), PDF p.266)
+  "the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line between exit doors or exit access doorways." (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
+  "of the exitdoors or exit access doorways shall not be less than one-third of the length of the maximum overall diagonal dimension of the area served." (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 1
+
+[6 of 190] needs review · Level 1 · Exit access travel at most 200 ft, I-4 sprinklered (IBC 1016.1) · 1016.1
+WHY: egress travel distance not measured: the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Exits shall be so located on each story such that the maximum length of exit access travel, measured from the most remote point within a story along the natural and unobstructed path of egress travel to an" (1016.1, 2009 International Building Code (IBC), PDF p.267)
+  "1-2,1-3,1-4 Not Permitted 200" (Table 1016.1, 2009 International Building Code (IBC), PDF p.267)
+  "b. Buildings equipped throughout with an automatic sprinkler system in accor dance with Section 903 .3.1.1 or 903.3.1.2." (Table 1016.1, 2009 International Building Code (IBC), PDF p.267)
+ELEMENTS:
+  Element 1
+
+[7 of 190] needs review · Level 1 · Occupant load at least net area / 35 (NFPA 16.1.7.1) · 16.1.7.1
+WHY: existing change of use not measured (or not usable); story occupant load not measured: stated by the architect (the story's design occupant load), and the description has no mark for it yet; story other use area not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.1.7.1 The occupant load, in number of persons for whom means of egress and other provisions are required, either shall be determined on the basis of the occupant load factors of Table 7.3.1.2 that are characteristic of the use of the space or shall be determined as the maximum probable population of the space under consideration, whichever is greater." (16.1.7.1, NFPA 101, Life Safety Code, 2012 Edition, PDF p.173)
+  "Day-Care Use 35 net 3.3 net" (Table 7.3.1.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.77)
+ELEMENTS:
+  Element 1
+
+[8 of 190] needs review · Level 1 · Common path 100 ft, sprinklered (NFPA 16.2.5.3.1) · 16.2.5.3.1
+WHY: common path of travel occupied not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.5.3.1 Common path of travel shall not exceed 100 ft (30 m) in a building protected throughout by an approved, supervised automatic sprinkler system in accordance with Section 9.7." (16.2.5.3.1, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 1
+
+[9 of 190] needs review · Level 1 · Travel room door to exit at most 100 ft (NFPA 16.2.6.2(1)) · 16.2.6.2
+WHY: egress travel from room door not measured: the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:" (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+  "The travel distance between any room door intended as an exit access and an exit shall not exceed 100 ft (30 m)." (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 1
+
+[10 of 190] needs review · Level 1 · Travel point in room to exit at most 150 ft (NFPA 16.2.6.2(2)) · 16.2.6.2
+WHY: egress travel distance occupied not measured: the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:" (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+  "The travel distance between any point in a room and an exit shall not exceed 150 ft (46 m)." (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 1
+
+[11 of 190] needs review · Level 1 · Travel +50 ft where sprinklered (NFPA 16.2.6.3) · 16.2.6.3
+WHY: egress travel distance occupied not measured: the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); egress travel from room door not measured: the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.6.3 The travel distance required by 16.2.6.2(1) and" (16.2.6.3, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+  "(2) shall be permitted to be increased by 50 ft (15 m) in" (16.2.6.3, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+  "The travel distance between any room door intended as an exit access and an exit shall not exceed 100 ft (30 m)." (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+  "The travel distance between any point in a room and an exit shall not exceed 150 ft (46 m)." (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 1
+
+[12 of 190] needs review · Level 1 · Other functions of space on the story (IBC Table 1004.1.1) · Table 1004.1.1
+WHY: story other use area not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "TABLE 1004.1.1 MAXIMUM FLOOR AREA ALLOWANCES PER OCCUPANT" (Table 1004.1.1, 2009 International Building Code (IBC), PDF p.247)
+ELEMENTS:
+  Element 1
+
+[13 of 190] needs review · Level 1 · Other uses on the story (NFPA Table 7.3.1.2) · Table 7.3.1.2
+WHY: story other use area not measured: Gordium doesn't measure this yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 1 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Table 7.3.1.2 Occupant Load Factor" (Table 7.3.1.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.77)
+ELEMENTS:
+  Element 1
+
+[14 of 190] needs review · Level 1 › VESTIBULE (31) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 2
+
+[15 of 190] needs review · Level 1 › VESTIBULE (31) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 2 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 2
+
+[16 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (32) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space common path not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 3
+
+[17 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (32) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 3 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 3
+
+[18 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (33) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space common path not measured: the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 4 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 4
+
+[19 of 190] needs review · Level 1 › SPRINKLERED ABANDONED SPACE (33) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 4 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 4
+
+[20 of 190] needs review · Level 1 › TOILET (34) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 5 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 5
+
+[21 of 190] needs review · Level 1 › TOILET (34) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 5 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 5
+
+[22 of 190] needs review · Level 1 › TOILET (35) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 6 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 6
+
+[23 of 190] needs review · Level 1 › TOILET (35) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 6 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 6
+
+[24 of 190] needs review · Level 1 › TOILET (36) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 7 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 7
+
+[25 of 190] needs review · Level 1 › TOILET (36) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 7 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 7
+
+[26 of 190] needs review · Level 1 › TOILET (37) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 8 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 8
+
+[27 of 190] needs review · Level 1 › TOILET (37) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 8 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 8
+
+[28 of 190] needs review · Level 1 › TOILET (38) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 9 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 9
+
+[29 of 190] needs review · Level 1 › TOILET (38) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 9 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 9
+
+[30 of 190] needs review · Level 1 › TOILET (39) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 10 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 10
+
+[31 of 190] needs review · Level 1 › TOILET (39) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 10 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 10
+
+[32 of 190] needs review · Level 1 › CLOSET (40) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space common path not measured: the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 11 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 11
+
+[33 of 190] needs review · Level 1 › CLOSET (40) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 11 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 11
+
+[34 of 190] needs review · Level 1 › CLOSET (41) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 12 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 12
+
+[35 of 190] needs review · Level 1 › CLOSET (41) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 12 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 12
+
+[36 of 190] needs review · Level 1 › CLOSET (42) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 13 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 13
+
+[37 of 190] needs review · Level 1 › CLOSET (42) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 13 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 13
+
+[38 of 190] needs review · Level 1 › CLOSET (43) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 14 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 14
+
+[39 of 190] needs review · Level 1 › CLOSET (43) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 14 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 14
+
+[40 of 190] needs review · Level 1 › CLOSET (44) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 15 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 15
+
+[41 of 190] needs review · Level 1 › CLOSET (44) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 15 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 15
+
+[42 of 190] needs review · Level 1 › CLASSROOM (2) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 16 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 16
+
+[43 of 190] needs review · Level 1 › CLASSROOM (2) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 16 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 16
+
+[44 of 190] needs review · Level 1 › MOUNTAIN CLASSROOM (3) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 17 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 17
+
+[45 of 190] needs review · Level 1 › MOUNTAIN CLASSROOM (3) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 17 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 17
+
+[46 of 190] needs review · Level 1 › OCEAN CLASSROOM (4) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 18 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 18
+
+[47 of 190] needs review · Level 1 › OCEAN CLASSROOM (4) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 18 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 18
+
+[48 of 190] needs review · Level 1 › INFANT/TODDLER CLASSROOM (5) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 19 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 19
+
+[49 of 190] needs review · Level 1 › INFANT/TODDLER CLASSROOM (5) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 19 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 19
+
+[50 of 190] needs review · Level 1 › SAFARI CLASSROOM (6) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 20 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 20
+
+[51 of 190] needs review · Level 1 › SAFARI CLASSROOM (6) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 20 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 20
+
+[52 of 190] needs review · Level 1 › FOREST CLASSROOM (7) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 21 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 21
+
+[53 of 190] needs review · Level 1 › FOREST CLASSROOM (7) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 21 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 21
+
+[54 of 190] needs review · Level 1 › CLASSROOM (8) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 22 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 22
+
+[55 of 190] needs review · Level 1 › CLASSROOM (8) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 22 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 22
+
+[56 of 190] needs review · Level 1 › BOOK STORAGE/STAFF LOUNGE (9) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 23 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 23
+
+[57 of 190] needs review · Level 1 › BOOK STORAGE/STAFF LOUNGE (9) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 23 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 23
+
+[58 of 190] needs review · Level 1 › KITCHEN (10) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 24 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 24
+
+[59 of 190] needs review · Level 1 › KITCHEN (10) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 24 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 24
+
+[60 of 190] needs review · Level 1 › STORAGE (11) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 25 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 25
+
+[61 of 190] needs review · Level 1 › STORAGE (11) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 25 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 25
+
+[62 of 190] needs review · Level 1 › LIFE SPACE (12) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 26 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 26
+
+[63 of 190] needs review · Level 1 › LIFE SPACE (12) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 26 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 26
+
+[64 of 190] needs review · Level 1 › STORAGE (13) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space common path not measured: the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 27 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 27
+
+[65 of 190] needs review · Level 1 › STORAGE (13) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 27 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 27
+
+[66 of 190] needs review · Level 1 › STORAGE (14) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 28 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 28
+
+[67 of 190] needs review · Level 1 › STORAGE (14) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 28 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 28
+
+[68 of 190] needs review · Level 1 › FAMILY LOUNGE (15) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 29 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 29
+
+[69 of 190] needs review · Level 1 › FAMILY LOUNGE (15) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 29 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 29
+
+[70 of 190] needs review · Level 1 › STAFF TOILET (16) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 30 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 30
+
+[71 of 190] needs review · Level 1 › STAFF TOILET (16) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 30 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 30
+
+[72 of 190] needs review · Level 1 › PLAYROOM (17) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 31 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 31
+
+[73 of 190] needs review · Level 1 › PLAYROOM (17) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 31 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 31
+
+[74 of 190] needs review · Level 1 › ADMINISTRATION (18) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 32 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 32
+
+[75 of 190] needs review · Level 1 › ADMINISTRATION (18) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 32 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 32
+
+[76 of 190] needs review · Level 1 › CONFERENCE (19) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 33 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 33
+
+[77 of 190] needs review · Level 1 › CONFERENCE (19) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 33 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 33
+
+[78 of 190] needs review · Level 1 › ELEC. (21) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space common path not measured: the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross); space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 34 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 34
+
+[79 of 190] needs review · Level 1 › ELEC. (21) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 34 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 34
+
+[80 of 190] needs review · Level 1 › LIFE SPACE (22) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 35 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 35
+
+[81 of 190] needs review · Level 1 › LIFE SPACE (22) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 35 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 35
+
+[82 of 190] needs review · Level 1 › TREATMENT (24) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 36 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 36
+
+[83 of 190] needs review · Level 1 › TREATMENT (24) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 36 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 36
+
+[84 of 190] needs review · Level 1 › STORAGE (28) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 37 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 37
+
+[85 of 190] needs review · Level 1 › STORAGE (28) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 37 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 37
+
+[86 of 190] needs review · Level 1 › STORAGE (29) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 38 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 38
+
+[87 of 190] needs review · Level 1 › STORAGE (29) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 38 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 38
+
+[88 of 190] needs review · Level 1 › STAFF TOILET (30) · Two exits from a space over 10 occupants or a long common path (IBC 1015.1) · 1015.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 39 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Two exits or exit access doorways from any space shall be provided where one of the following conditions exists:" (1015.1, 2009 International Building Code (IBC), PDF p.265)
+  "a. Day care maximum occupant load is 10." (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+  "In occupancies other than Groups H-l, H-2 and H-3, the common path of egress travelshall not exceed 75 feet (22 860 mm)." (1014.3, 2009 International Building Code (IBC), PDF p.265)
+ELEMENTS:
+  Element 39
+
+[89 of 190] needs review · Level 1 › STAFF TOILET (30) · Three exits from 501-1,000 occupants, four above (IBC 1015.1.1) · 1015.1.1
+WHY: space occupant load not measured: stated by the architect (the space's occupant load), and the description has no mark for it yet
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 39 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Three exits or exit access doorways shall be provided from any space with an occupant load of 501 to 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+  "Four exits or exit access doorways shall be provided from any space with an occupant load greater than 1,000." (1015.1.1, 2009 International Building Code (IBC), PDF p.266)
+ELEMENTS:
+  Element 39
+
+[90 of 190] needs review · Level 1 › CORRIDOR (26) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 40 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 40
+
+[91 of 190] needs review · Level 1 › CORRIDOR (26) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 40 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 40
+
+[92 of 190] needs review · Level 1 › CORRIDOR (26) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = with_door or door_ends_dead_end = without_door; complies if none
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 40 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 40
+
+[93 of 190] needs review · Level 1 › CORRIDOR (26) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = without_door; complies if door_ends_dead_end = with_door
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 40 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 40
+
+[94 of 190] needs review · Level 1 › CORRIDOR (26) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 40 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 40
+
+[95 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 2) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 41 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 41
+
+[96 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 2) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 41 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 41
+
+[97 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 2) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = with_door or door_ends_dead_end = without_door; complies if none
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 41 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 41
+
+[98 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 2) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = without_door; complies if door_ends_dead_end = with_door
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 41 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 41
+
+[99 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 2) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 41 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 41
+
+[100 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 3) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 42 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 42
+
+[101 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 3) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 42 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 42
+
+[102 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 3) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = with_door or door_ends_dead_end = without_door; complies if none
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 42 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 42
+
+[103 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 3) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = without_door; complies if door_ends_dead_end = with_door
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 42 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 42
+
+[104 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 3) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 42 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 42
+
+[105 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 4) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 43 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 43
+
+[106 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 4) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 43 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 43
+
+[107 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 4) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = with_door or door_ends_dead_end = without_door; complies if none
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 43 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 43
+
+[108 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 4) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = without_door; complies if door_ends_dead_end = with_door
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 43 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 43
+
+[109 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 4) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 43 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 43
+
+[110 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 5) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 44 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 44
+
+[111 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 5) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 44 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 44
+
+[112 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 5) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 44 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 44
+
+[113 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 5) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 44 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 44
+
+[114 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 5) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 44 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 44
+
+[115 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 6) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 45 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 45
+
+[116 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 6) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 45 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 45
+
+[117 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 6) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = with_door or door_ends_dead_end = without_door; complies if none
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 45 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 45
+
+[118 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 6) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: does not comply (or can't be told) if the open question is answered door_ends_dead_end = without_door; complies if door_ends_dead_end = with_door
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 45 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 45
+
+[119 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 6) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 45 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 45
+
+[120 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 7) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 46 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 46
+
+[121 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 7) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 46 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 46
+
+[122 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 7) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 46 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 46
+
+[123 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 7) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 46 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 46
+
+[124 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 8) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 47 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 47
+
+[125 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 8) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 47 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 47
+
+[126 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 8) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 47 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 47
+
+[127 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 8) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 47 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 47
+
+[128 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 9) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 48 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 48
+
+[129 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 9) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 48 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 48
+
+[130 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 9) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 48 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 48
+
+[131 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 9) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 48 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 48
+
+[132 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 10) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 49 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 49
+
+[133 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 10) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 49 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 49
+
+[134 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 10) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 49 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 49
+
+[135 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 10) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 49 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 49
+
+[136 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 11) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 50 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  Element 50
+
+[137 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 11) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 50 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 50
+
+[138 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 11) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 50 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  Element 50
+
+[139 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 11) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Show Element 50 in the model. [ShowElements]
+  3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  Element 50
+
+[140 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 12) · Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1) · 1018.1
+WHY: Corridor rating per Table 1018.1: I-4 0 h sprinklered (IBC 1018.1): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Corridors shall be fire-resistance rated in accordance with Table 1018.1." (1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "1-2 ,1-4 All" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "Not Permitted 0" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+  "c. Buildings equipped throughout with an automatic sprinkler system in accordance with Section 903.3.1.1 or 903.3.1.2 where allowed." (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+ELEMENTS:
+  not in this model now (not in this model now)
+
+[141 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 12) · Corridor at least 44 in, 36 in under 50 occupants (IBC 1018.2) · 1018.2
+WHY: corridor occupant load not measured: stated by the architect (the occupant load the corridor serves), and the description has no mark for it yet; corridor width not measured: the corridor's walls step, widen or jog: which of its stretches give its width, rather than its alcoves', isn't worked out (decision 6, amended 2026-11-22)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The minimum corridorwidth shall be as determined in Section 1005.1, but not less than 44 inches (1118 mm)." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+  "2. Thirty-six inches (914 mm)-With a required occu pant capacity of less than 50." (1018.2, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  not in this model now (not in this model now)
+
+[142 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 12) · Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4) · 1018.4
+WHY: Dead end at most 20 ft, or under 2.5 x its width (IBC 1018.4): needs review
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "the exit access shall be arranged such that there are no dead ends in corridors more than 20 feet (6096 mm) in length." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+  "3. A dead-end corridor shall not be limited in length where the length of the dead-end corridor is less than 2.5 times the least width of the dead-end corridor." (1018.4, 2009 International Building Code (IBC), PDF p.269)
+ELEMENTS:
+  not in this model now (not in this model now)
+
+[143 of 190] needs review · Level 1 › CORRIDOR (26) (dead end 12) · Corridor walls 1 h, or smoke partitions sprinklered (NFPA 16.3.6) · 16.3.6
+WHY: client spaces open outside not measured (or not usable); corridor fire rating hours not measured: stated by the architect (the corridor walls' fire-resistance rating), and the description has no mark for it yet; corridor walls smoke partitions not measured: stated by the architect (whether the corridor's walls are smoke partitions), and the description has no mark for it yet; existing change of use not measured (or not usable)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.3.6 Corridors. Every interior corridor shall be constructed of walls having not less than a 1-hour fire resistance rating in accordance with Section 8.3, unless otherwise permitted by any of the following:" (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "Corridor protection shall not be required where all spaces normally subject to client occupancy have not less than one door opening directly to the outside or to an exterior exit access balcony or corridor in accordance with 7.5.3." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+  "In buildings protected throughout by an approved, super- vised automatic sprinkler system in accordance with Sec- tion 9.7, corridor walls shall not be required to be rated, provided that such walls form smoke partitions in accor- dance with Section 8.4." (16.3.6, NFPA 101, Life Safety Code, 2012 Edition, PDF p.176)
+ELEMENTS:
+  not in this model now (not in this model now)
+
+[144 of 190] needs review · Egress · Group I-4, day care facilities (IBC 308.5) · 308.5
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "This group shall include buildings and structures occupied by persons of any age who receive custodial care for less than 24 hours by individuals other than parents or guardians, relatives by blood, marriage or adoption, and in a place other than the home of the person cared for." (308.5, 2009 International Building Code (IBC), PDF p.61)
+  "A facility such as the above with five or fewer persons shall be classified as a Group R-3 or shall comply with the Interna tional Residential Code in accordance with Section 101.2." (308.5, 2009 International Building Code (IBC), PDF p.61)
+
+[145 of 190] needs review · Egress · Adult care facility classified I-4 (IBC 308.5.1) · 308.5.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "A facility that provides accom modations for less than 24 hours for more than five unre lated adults and provides supervision and personal care services shall be classified as Group 1-4." (308.5.1, 2009 International Building Code (IBC), PDF p.61)
+
+[146 of 190] needs review · Egress · Child care facility classified I-4 or E (IBC 308.5.2) · 308.5.2
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "A facility that provides supervi sion and personal care on less than a 24-hour basis for more than five children 2 1/2 years of age or less shall be classified as Group 1-4." (308.5.2, 2009 International Building Code (IBC), PDF p.61)
+  "Exception: A child day care facility that provides care for more than five but no more than 100 children 2 1/2 years or less of age, where the rooms in which the chil dren are cared for are located on a level ofexit discharge serving such rooms and each of these child care rooms has an exitdoor directly to the exterior, shall be classified as Group E." (308.5.2, 2009 International Building Code (IBC), PDF p.61)
+
+[147 of 190] needs review · Egress · Each accessory occupancy classified on its own (IBC 508.2.2) · 508.2.2
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Accessory occupancies shall be individually classified in accordance with Section 302.1." (508.2.2, 2009 International Building Code (IBC), PDF p.111)
+
+[148 of 190] needs review · Egress · Accessory occupancy area and height (IBC 508.2.3) · 508.2.3
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "The height of each accessory occupancy shall not exceed the tabular values in" (508.2.3, 2009 International Building Code (IBC), PDF p.111)
+
+[149 of 190] needs review · Egress · No separation from the main occupancy, with exceptions (IBC 508.2.4) · 508.2.4
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "No separation is required between accessory occupancies and the main occupancy." (508.2.4, 2009 International Building Code (IBC), PDF p.112)
+
+[150 of 190] needs review · Egress · Incidental accessory occupancies separated (IBC 508.2.5) · 508.2.5
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "508.2.5 shall be separated from the remainder of the building or equipped with an automatic fire-extinguishing system, or both, in accordance with Table 508.2.5." (508.2.5, 2009 International Building Code (IBC), PDF p.112)
+  "Laundry rooms over 100 square feet" (Table 508.2.5, 2009 International Building Code (IBC), PDF p.112)
+
+[151 of 190] needs review · Egress · Rated separation of incidental rooms (IBC 508.2.5.1) · 508.2.5.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where Table 508.2.5 specifies a fire-resistance-rated separa tion, the incidental accessory occupancies shall be sepa rated from the remainder of the bUilding by a fire barrier" (508.2.5.1, 2009 International Building Code (IBC), PDF p.112)
+
+[152 of 190] needs review · Egress · Smoke-resisting separation where sprinklered (IBC 508.2.5.2) · 508.2.5.2
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where Table 508.2.5 permits an automatic fire-extinguishing system without a fire barrier, the inci-" (508.2.5.2, 2009 International Building Code (IBC), PDF p.112)
+
+[153 of 190] needs review · Egress · Sprinkler protection of the incidental room only (IBC 508.2.5.3) · 508.2.5.3
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "only the space occupied by the inci dental accessory occupancy need be equipped with such a system." (508.2.5.3, 2009 International Building Code (IBC), PDF p.113)
+
+[154 of 190] needs review · Egress · Design occupant load, accessory areas included (IBC 1004.1) · 1004.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where occupants from accessory areas egress through a primary space, the calculated occupant load for the primary space shall include the total occupant load of the primary space plus the number of occupants egressing through it from the accessory area." (1004.1, 2009 International Building Code (IBC), PDF p.246)
+
+[155 of 190] needs review · Egress · Exits obvious and unobstructed (IBC 1015.2) · 1015.2
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Required exits shall be located in a manner that makes their availability obvious. Exits shall be unobstructed at all times." (1015.2, 2009 International Building Code (IBC), PDF p.266)
+
+[156 of 190] needs review · Egress · Doors complying with 7.2.1 (NFPA 16.2.2.2.1) · 16.2.2.2.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.2.2.1 General. Doors complying with 7.2.1 shall be per- mitted." (16.2.2.2.1, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+
+[157 of 190] needs review · Egress · Delayed-egress locking (NFPA 16.2.2.2.3.1) · 16.2.2.2.3.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.2.2.3.1 Delayed-egress locking systems complying with 7.2.1.6.1 shall be permitted." (16.2.2.2.3.1, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+
+[158 of 190] needs review · Egress · Access-controlled egress doors (NFPA 16.2.2.2.3.2) · 16.2.2.2.3.2
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.2.2.3.2 Access-controlled egress door assemblies com- plying with 7.2.1.6.2 shall be permitted." (16.2.2.2.3.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+
+[159 of 190] needs review · Egress · Elevator lobby door locking (NFPA 16.2.2.2.3.3) · 16.2.2.2.3.3
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.2.2.3.3 Elevator lobby exit access door assemblies lock- ing in accordance with 7.2.1.6.3 shall be permitted." (16.2.2.2.3.3, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+
+[160 of 190] needs review · Egress · Latches openable by clients from inside (NFPA 16.2.2.2.4) · 16.2.2.2.4
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Every door latch to closets, storage areas, kitchens, and other similar spaces or areas shall be such that clients can open the door from inside the space or area." (16.2.2.2.4, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+
+[161 of 190] needs review · Egress · Bathroom locks openable from outside by staff (NFPA 16.2.2.2.5) · 16.2.2.2.5
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Every bathroom door lock shall be designed to allow opening of the locked door from the outside by" (16.2.2.2.5, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+
+[162 of 190] needs review · Egress · Doors complying with 7.2.1 (NFPA 17.2.2.2.1) · 17.2.2.2.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "17.2.2.2.1 General. Doors complying with 7.2.1 shall be per- mitted." (17.2.2.2.1, NFPA 101, Life Safety Code, 2012 Edition, PDF p.180)
+
+[163 of 190] needs review · Egress · Delayed-egress locking (NFPA 17.2.2.2.3.1) · 17.2.2.2.3.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "17.2.2.2.3.1 Delayed-egress locking systems complying with 7.2.1.6.1 shall be permitted." (17.2.2.2.3.1, NFPA 101, Life Safety Code, 2012 Edition, PDF p.181)
+
+[164 of 190] needs review · Egress · Access-controlled egress doors (NFPA 17.2.2.2.3.2) · 17.2.2.2.3.2
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "17.2.2.2.3.2 Access-controlled egress door assemblies com- plying with 7.2.1.6.2 shall be permitted." (17.2.2.2.3.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.181)
+
+[165 of 190] needs review · Egress · Elevator lobby door locking (NFPA 17.2.2.2.3.3) · 17.2.2.2.3.3
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "17.2.2.2.3.3 Elevator lobby exit access door assemblies lock- ing in accordance with 7.2.1.6.3 shall be permitted." (17.2.2.2.3.3, NFPA 101, Life Safety Code, 2012 Edition, PDF p.181)
+
+[166 of 190] needs review · Egress · Latches openable by clients from inside (NFPA 17.2.2.2.4) · 17.2.2.2.4
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Every door latch to closets, storage areas, kitchens, and other similar spaces or areas shall be such that clients can open the door from inside the space or area." (17.2.2.2.4, NFPA 101, Life Safety Code, 2012 Edition, PDF p.181)
+
+[167 of 190] needs review · Egress · Bathroom locks openable from outside by staff (NFPA 17.2.2.2.5) · 17.2.2.2.5
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Every bathroom door lock shall be designed to allow opening of the locked door from the" (17.2.2.2.5, NFPA 101, Life Safety Code, 2012 Edition, PDF p.181)
+
+[168 of 190] needs review · Egress · Day care separated from other occupancies (NFPA 6.1.14.4.1) · 6.1.14.4.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Where separated occupancies are provided, each part of the building comprising a distinct occupancy, as de- scribed in this chapter, shall be completely separated from other occupancies by fire-resistive assemblies," (6.1.14.4.1, NFPA 101, Life Safety Code, 2012 Edition, PDF p.48)
+  "Day-Care 2 2 2 2 2 3 2" (Table 6.1.14.4.1(b), NFPA 101, Life Safety Code, 2012 Edition, PDF p.50)
+  "Table 6.1.14.4.1(b) Required Separation of Occupancies (hours) , Part 2" (Table 6.1.14.4.1(b), NFPA 101, Life Safety Code, 2012 Edition, PDF p.50)
+
+[169 of 190] needs review · Egress · Separations 3, 2 or 1 h, per Chapter 8 (NFPA 6.1.14.4.2) · 6.1.14.4.2
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "6.1.14.4.2 Occupancy separations shall be classified as 3-hour fire resistance–rated, 2-hour fire resistance–rated, or 1-hour fire resistance–rated and shall meet the requirements of Chapter 8." (6.1.14.4.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.48)
+
+[170 of 190] needs review · Egress · Separation reduced 1 h, not below 1 h, sprinklered (6.1.14.4.3) · 6.1.14.4.3
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "6.1.14.4.3 The minimum fire resistance rating specified in Table 6.1.14.4.1(a) and Table 6.1.14.4.1(b) shall be permitted to be reduced by 1 hour, but in no case shall it be reduced to less than 1 hour, where the building is protected throughout by an approved automatic sprinkler system in accordance with 9.7.1.1(1) and supervised in accordance with 9.7.2, unless pro- hibited by the double-dagger footnote entries in the tables." (6.1.14.4.3, NFPA 101, Life Safety Code, 2012 Edition, PDF p.48)
+
+[171 of 190] needs review · Egress · Separations vertical, horizontal or both (NFPA 6.1.14.4.4) · 6.1.14.4.4
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "6.1.14.4.4 Occupancy separations shall be vertical, horizon- tal, or both or, when necessary, of such other form as required to provide complete separation between occupancy divisions in the building." (6.1.14.4.4, NFPA 101, Life Safety Code, 2012 Edition, PDF p.48)
+
+[172 of 190] needs review · Egress · Spaces with one exit, other occupancies (IBC Table 1015.1) · Table 1015.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "TABLE 1015.1 I SPACES WITH ONE EXIT OR EXIT ACCESS DOORWAY" (Table 1015.1, 2009 International Building Code (IBC), PDF p.266)
+
+[173 of 190] needs review · Egress · Travel distance, other occupancies (IBC Table 1016.1) · Table 1016.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "TABLE 1016.1 a EXIT ACCESS TRAVEL DISTANCE WITHOUT SPRINKLER WITH SPRINKLER" (Table 1016.1, 2009 International Building Code (IBC), PDF p.267)
+
+[174 of 190] needs review · Egress · Corridor rating, other occupancies (IBC Table 1018.1) · Table 1018.1
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "TABLE 1018.1 CORRIDOR FIRE-RESISTANCE RATING" (Table 1018.1, 2009 International Building Code (IBC), PDF p.268)
+
+[175 of 190] needs review · Egress · Incidental rooms and their separation (IBC Table 508.2.5) · Table 508.2.5
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "TABLE 508.2.5 INCIDENTAL ACCESSORY OCCUPANCIES" (Table 508.2.5, 2009 International Building Code (IBC), PDF p.112)
+
+[176 of 190] needs review · Egress · Hours of separation by occupancy (Table 6.1.14.4.1(b)) · Table 6.1.14.4.1(b)
+WHY: this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Table 6.1.14.4.1(b) Required Separation of Occupancies (hours) , Part 2" (Table 6.1.14.4.1(b), NFPA 101, Life Safety Code, 2012 Edition, PDF p.50)
+
+[177 of 190] needs review · Interior drawing
+WHY: The interior drawing: opening Fixed: Window 45" x 48" (LS1.0) (WN01): say whether it is an emergency escape and rescue opening (`escape`: true or false)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row.
+
+[178 of 190] needs review · Interior drawing
+WHY: The interior drawing: the stairs weren't read (no `stairs` in the description)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row.
+
+[179 of 190] needs review · Interior drawing
+WHY: The interior drawing: door Single-Flush: Door 36" x 84" (LS1.0) (D01): say whether it is the required exit door (`exit`: true or false)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row.
+
+[180 of 190] needs review · Interior drawing
+WHY: The interior drawing: the guards weren't read (no `guards` in the description)
+WHAT TO DO:
+  1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  The checker sent no quote with this row.
+
+[181 of 190] needs review · Means of egress doors · Egress doors swinging; with egress at 50 or more (IBC 1008.1.2) · 1008.1.2
+WHY: the means of egress doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "Egress doors shall be of the pivoted or side-hinged swinging type ." (1008.1.2, 2009 International Building Code (IBC), PDF p.251)
+  "Doors shall swing in the direction of egress travel where serving an occupant load of 50 or more persons or a Group H occupancy." (1008.1.2, 2009 International Building Code (IBC), PDF p.252)
+
+[182 of 190] needs review · Means of egress doors · Latch only with panic hardware at 100+ (NFPA 16.2.2.2.2) · 16.2.2.2.2
+WHY: the means of egress doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "16.2.2.2.2 Panic Hardware or Fire Exit Hardware. Any door in a required means of egress from an area having an occupant" (16.2.2.2.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+  "load of 100 or more persons shall be permitted to be provided with a latch or lock only if the latch or lock is panic hardware or fire exit hardware complying with 7.2.1.7." (16.2.2.2.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+
+[183 of 190] needs review · Means of egress doors · Latch only with panic hardware at 100+ (NFPA 17.2.2.2.2) · 17.2.2.2.2
+WHY: the means of egress doors aren't read yet
+WHAT TO DO:
+  1. Check it by hand against the law's words below: Gordium doesn't decide this one yet.
+  2. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+THE LAW'S WORDS:
+  "17.2.2.2.2 Panic Hardware or Fire Exit Hardware. Any door in a required means of egress from an area having an occupant" (17.2.2.2.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.180)
+  "load of 100 or more persons shall be permitted to be provided with a latch or lock only if the latch or lock is panic hardware or fire exit hardware complying with 7.2.1.7." (17.2.2.2.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.181)
+
+[184 of 190] complies · Level 1 › CORRIDOR (26) (dead end 7) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 46
+
+[185 of 190] complies · Level 1 › CORRIDOR (26) (dead end 8) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 47
+
+[186 of 190] complies · Level 1 › CORRIDOR (26) (dead end 9) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 48
+
+[187 of 190] complies · Level 1 › CORRIDOR (26) (dead end 10) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 49
+
+[188 of 190] complies · Level 1 › CORRIDOR (26) (dead end 11) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 50
+
+[189 of 190] complies · Level 1 › CORRIDOR (26) (dead end 12) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
+WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+THE LAW'S WORDS:
+  "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  not in this model now (not in this model now)
+
+[190 of 190] complies · Level 1 · Travel sleeping room to door at most 50 ft (NFPA 16.2.6.2(3)) · 16.2.6.2
+WHY: Travel sleeping room to door at most 50 ft (NFPA 16.2.6.2(3)): complies
+THE LAW'S WORDS:
+  "16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:" (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+  "The travel distance between any point in a sleeping room and an exit access door in that room shall not exceed 50 ft (15 m)." (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
+ELEMENTS:
+  Element 1

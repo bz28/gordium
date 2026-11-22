@@ -12,6 +12,19 @@ public enum Tone { Fails, Review, Complies, Neutral }
 /// Code of New York State (RCNYS), PDF p.102").</summary>
 public sealed record LawQuote(string Text, string? Where);
 
+/// <summary>A link the worker sent to where the law is (<c>detail.cited[]</c>: its citation and the source's page,
+/// "§325-26, p.67" and a URL ending <c>#page=67</c>): what "Open the law" opens. Never made in the add-in.</summary>
+public sealed record LawLink(string Citation, string Url);
+
+/// <summary>One figure set against its limit, each in the worker's own words: a zoning row's <c>proposed</c> and
+/// <c>sign</c> + <c>required</c>; an egress row's "net clear height 20 in, needs ≥ 24 in" as its measure, its figure
+/// and what it needs. Never a number the worker didn't give.</summary>
+/// <param name="What">What is measured ("net clear height"), or null when the row's name says it (zoning).</param>
+/// <param name="Measured">The figure found ("20 in", "20'-0\""), or null when nothing was measured.</param>
+/// <param name="How">How it was found: "measured", or "stated by the architect" (the stories count).</param>
+/// <param name="Limit">What the law allows or needs ("≥ 24 in", "≤ 25%").</param>
+public sealed record FigureLine(string? What, string? Measured, string How, string Limit);
+
 /// <summary>
 /// One row of a check as the text file and the results panel both say it (the one place its words are made):
 /// its verdict, its name, how far off it is, the checker's reason, the law's section and quotes, and the Revit
@@ -41,6 +54,16 @@ public sealed record ResultRow(string Id, string Name, Verdict Verdict, string V
                                string? HowFar, string? Reason, string? Section, IReadOnlyList<LawQuote> Quotes,
                                IReadOnlyList<string> Elements)
 {
+    /// <summary>The worker's own advice for the row (its <c>hint</c>: "To comply: reduce the footprint by at least 213
+    /// sf.", "Enter bedrooms and parking spaces"), or null when it gives none.</summary>
+    public string? Hint { get; init; }
+
+    /// <summary>The worker's links to the law's source at its page (<c>detail.cited</c>), each once.</summary>
+    public IReadOnlyList<LawLink> Links { get; init; } = [];
+
+    /// <summary>The figures, each set against its limit, as <see cref="Figures"/> says them (the same words, split).</summary>
+    public IReadOnlyList<FigureLine> FigureLines { get; init; } = [];
+
     /// <summary>Whether the reason already says the figures (an egress row's figures are read from its reason): the
     /// text file then says them once, in the reason; the panel shows the reason only when it says more.</summary>
     public bool FiguresInReason => Reason is not null && Figures is not null && Reason.Contains(Figures, StringComparison.Ordinal);
@@ -79,7 +102,13 @@ public sealed record ResultGroup(string Key, string Title, int Count, bool Folde
 }
 
 /// <summary>One count as the worker said it ("4 do not comply"), coloured by its words.</summary>
-public sealed record CountChip(string Words, Tone Tone);
+public sealed record CountChip(string Words, Tone Tone)
+{
+    /// <summary>Whether its words say something does not comply ("N do(es) not comply"): what it means, set from the
+    /// worker's words when the answer is read and kept when the model changes (only its colour greys: ResultRows.Stale),
+    /// so the count bar never hides a failure on a stale result.</summary>
+    public bool IsFailure { get; init; }
+}
 
 /// <summary>A law's counts (the worker's <c>view.sections[]</c>: "Zoning (City of Ithaca)"), or the whole summary's
 /// (<see cref="Title"/> null) from a worker that gives no sections.</summary>
@@ -97,6 +126,10 @@ public sealed record CountLine(string? Title, IReadOnlyList<CountChip> Chips);
 public sealed record ResultModel(Verdict State, string Headline, string Checked, IReadOnlyList<CountLine> Counts,
                                  IReadOnlyList<ResultGroup> Groups, string Inside, string? Stale = null)
 {
+    /// <summary>Which code the building was checked against and why (the worker's <c>which_code</c>), or null when
+    /// the answer doesn't say (then no line is shown).</summary>
+    public WhichCode? Code { get; init; }
+
     /// <summary>The state's colour: green only for a check that complies and still stands; red for one that
     /// doesn't; amber otherwise; grey once the model changed.</summary>
     public Tone StateTone => Stale is not null ? Tone.Neutral : State switch
@@ -112,6 +145,8 @@ public enum PanelPart
 {
     /// <summary>"The model changed since this check (14:32): click Check again".</summary>
     Stale,
+    /// <summary>Which code it was checked against and why (<see cref="WhichCode"/>), when the worker says.</summary>
+    Code,
     /// <summary>The worker's state, one line.</summary>
     State,
     /// <summary>The worker's counts, one compact line of chips per law.</summary>
@@ -144,10 +179,11 @@ public static class ResultRows
             g.Lines.Select(l => new ResultLine(l.Title, ToneOf(l.Status, l.StatusWord), l.Folded,
                                                l.Items.Select(id => rows[id]).ToList())).ToList())).ToList();
         return new ResultModel(result.State, ResultText.Headline(result), ResultText.CheckedWords(phase, options, street),
-                               Counts(result), groups, ResultText.InsideWords(inside));
+                               Counts(result), groups, ResultText.InsideWords(inside)) { Code = WhichCode.Read(result.Raw) };
     }
 
-    /// <summary>The panel's parts in the order it shows them: the stale notice (when stale), the state, the counts,
+    /// <summary>The panel's parts in the order it shows them: the stale notice (when stale), which code it was checked
+    /// against (when the worker says), the state, the counts,
     /// then straight away the groups (the results list, ResultList), so the first failing row is on screen at the
     /// pane's docked height (Revit 2027 trial: ~420 px); what was not read and the details (phase, options, street
     /// line, files) after the rows, folded.</summary>
@@ -157,6 +193,8 @@ public static class ResultRows
         var parts = new List<PanelPart>();
         if (model.Stale is not null)
             parts.Add(PanelPart.Stale);
+        if (model.Code is not null)
+            parts.Add(PanelPart.Code);                            // at the top of the summary, before the state
         parts.AddRange([PanelPart.State, PanelPart.Counts, PanelPart.Groups]);
         if (model.Inside.Length > 0)
             parts.Add(PanelPart.Inside);
@@ -238,25 +276,59 @@ public static class ResultRows
             reason = null;
 
         string? figures = null;
+        var lines = new List<FigureLine>();
         var proposed = Text(raw, "proposed");
         var required = Text(raw, "required");
         if (proposed is not null && required is not null)
         {
             var sign = Text(raw, "sign") is { } g && !required.StartsWith(g, StringComparison.Ordinal) ? g + " " : "";
             // a value the architect states (the stories count: the worker's record says so): never called measured
-            figures = $"{proposed} {(row.Stated ? "stated by the architect" : "measured")}, {sign}{required} allowed";
+            var how = row.Stated ? "stated by the architect" : "measured";
+            figures = $"{proposed} {how}, {sign}{required} allowed";
+            lines.Add(new FigureLine(null, proposed, how, sign + required));
         }
         else if (required is not null)
+        {
             figures = $"allowed {required}";
+            var sign = Text(raw, "sign") is { } g && !required.StartsWith(g, StringComparison.Ordinal) ? g + " " : "";
+            lines.Add(new FigureLine(null, null, "not measured", sign + required));
+        }
         else if (reason is not null && Stated(reason) is { } stated)
+        {
             figures = stated;
+            foreach (Match m in Needs.Matches(reason))
+                if (FigureSplit.Match(m.Value) is { Success: true } x)
+                    lines.Add(new FigureLine(x.Groups["what"].Value, x.Groups["got"].Value, "measured", x.Groups["need"].Value));
+        }
 
         // the worker's delta when it gives one (an empty delta: it says nothing of how far); else its margin
         var howFar = raw.ValueKind == JsonValueKind.Object && raw.TryGetProperty("delta", out var d) && d.ValueKind != JsonValueKind.Null
             ? Text(raw, "delta") : Text(raw, "margin");
 
         return new ResultRow(row.Id, row.Name, row.Status, ResultText.RowWords(row), ToneOf(row.Status, row.StatusWord),
-                             figures, howFar, reason, Section(raw), Quotes(raw), ResultText.Elements(raw));
+                             figures, howFar, reason, Section(raw), Quotes(raw), ResultText.Elements(raw))
+        {
+            Hint = Text(raw, "hint"), Links = Links(raw), FigureLines = lines,
+        };
+    }
+
+    // one of the figures a reason states, split into its measure, its figure and what it needs (the same words)
+    private static readonly Regex FigureSplit = new(@"^(?<what>[a-z][a-z /'-]*?) (?<got>-?[0-9].*?), needs (?<need>[≥≤<>] .+)$",
+                                              RegexOptions.CultureInvariant);
+
+    /// <summary>The worker's links to the law (<c>detail.cited</c>: citation and link), each link once; a link
+    /// that isn't a web or file address is left out (never opened).</summary>
+    private static List<LawLink> Links(JsonElement raw)
+    {
+        var links = new List<LawLink>();
+        if (raw.ValueKind != JsonValueKind.Object || !raw.TryGetProperty("detail", out var d) || d.ValueKind != JsonValueKind.Object
+            || !d.TryGetProperty("cited", out var cs) || cs.ValueKind != JsonValueKind.Array)
+            return links;
+        foreach (var c in cs.EnumerateArray())
+            if (Text(c, "link") is { } url && Uri.TryCreate(url, UriKind.Absolute, out var u)
+                && u.Scheme is "https" or "http" or "file" && links.All(l => l.Url != url))
+                links.Add(new LawLink(Text(c, "citation") ?? url, url));
+        return links;
     }
 
     // "net clear height 20 in, needs ≥ 24 in": the measure, the figure measured and the figure needed, as
@@ -328,7 +400,10 @@ public static class ResultRows
 
     private static List<CountChip> Chips(string summary) =>
         summary.Split(" · ", StringSplitOptions.RemoveEmptyEntries)
-               .Select(p => new CountChip(p, FailsWords.IsMatch(p) ? Tone.Fails : ComplyWords.IsMatch(p) ? Tone.Complies : Tone.Review))
+               .Select(p => new CountChip(p, FailsWords.IsMatch(p) ? Tone.Fails : ComplyWords.IsMatch(p) ? Tone.Complies : Tone.Review)
+               {
+                   IsFailure = FailsWords.IsMatch(p),
+               })
                .ToList();
 
     /// <summary>A text field, or null when absent, empty or the worker's "—" (nothing measured).</summary>

@@ -414,7 +414,13 @@ never say a row differently.
 - **Click a row** (or Up/Down): it is selected, and its elements (a zoning row's `objects`, an egress row's
   `part.id`: Revit UniqueIds) are selected in Revit **without moving the view** (`Selection.SetElementIds`), so
   Properties follows the panel; a row naming no element clears Revit's selection. **Show** (or Space) also zooms
-  (`ShowElements`). Enter or a double click opens the row's figures, reason, elements and the law's words; Ctrl+C
+  (`ShowElements`). Enter or a double click opens the row's **detail** in place of the list (UI PR 4,
+  `Details` in `ResultDetail.cs`): why (the worker's reason), what to do (the worker's own advice first, its `hint`,
+  then by the row's place, ending with Check again; nothing for a row that complies, only Check again once stale),
+  the figures against the limit and how far off in the worker's words, the law's words with *Open the law* (the
+  worker's `detail.cited` links), and its elements by the names architects use (`ElementNames`: "CLOSET (40)",
+  "Door D06"; Revit's id only when nothing else names one); every number it shows is in the worker's item or an
+  element's name (`DetailTests`); Ctrl+C
   copies the row as `check_project_result.txt` writes it (once stale, with when it was checked). It says
   plainly when it can't: that project closed or not the active one, or an element not in the model now (deleted, in
   a linked model, or an area Gordium read from the walls).

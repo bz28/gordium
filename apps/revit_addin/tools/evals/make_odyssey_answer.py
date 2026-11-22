@@ -1,0 +1,73 @@
+"""The Children's Odyssey day care's check answer (19 Libby St, Portland ME), for the Revit add-in's detail tests
+(apps/revit_addin/tests/Gordium.Revit.Reading.Tests/DetailTests.cs): the worker's own egress code
+(design_checker.egress.check and add_to_view, the code check_site runs) on the interior the add-in read from the
+marked model, with the Maine state law (IBC 2009, NFPA 101 2012) and the building's facts from the eval's hand check
+(make_eval_comparison.SHEET_VALUES). Only the answer is written (numbers and words the worker made), never by hand.
+
+Maine has no place in the repo yet (no zoning for Portland), so check_site can't be asked for it: the law is loaded
+here as egress.laws loads an inherited one, and the answer has the egress section alone (zoning's empty section is
+dropped). The route parts (story, space, corridor, means of egress door) are measured by the route code the eval runs
+(model_measurement.routes.measure, as make_eval_comparison.py), joined to the interior's own parts: check_site's
+interior measuring doesn't join them yet. Everything else is the worker's.
+
+    python make_odyssey_answer.py <interior description .json> <out .json>
+"""
+
+import json
+import sys
+from pathlib import Path
+
+REPO = Path(__file__).resolve().parents[4]
+for p in ("packages/design_checker", "packages/model_measurement", "packages/rule_format",
+          "packages/model_measurement/tests"):
+    sys.path.insert(0, str(REPO / p))
+
+from design_checker import egress, protocol  # noqa: E402
+from rule_format.rulebook import Context  # noqa: E402
+
+import make_eval_comparison as evalc  # noqa: E402
+
+MAINE = REPO / "regulations/jurisdictions/maine/maine_state"
+
+
+class _Maine:
+    """A place that inherits only Maine's state law (egress.laws reads a place's name and inherited rulebooks)."""
+    name = "Portland, ME (the eval)"
+
+    @staticmethod
+    def inherited_rulebooks():
+        from rule_format.place import building_code_rulebook
+        return ((MAINE, building_code_rulebook(MAINE)),)
+
+
+def answer(interior: dict) -> dict:
+    from model_measurement.routes import measure as measure_routes
+    real = egress.place_of, egress.refuse_state_alone, egress.measure_interior
+    inside = real[2]
+
+    def both(description):
+        measured = inside(description)
+        for kind, parts in measure_routes(description)["parts"].items():
+            if measured["parts"].get(kind) is None:
+                measured["parts"][kind] = parts
+        return measured
+    egress.place_of, egress.refuse_state_alone, egress.measure_interior = (lambda folder: _Maine), (lambda j: None), both
+    try:
+        found = egress.laws(MAINE)
+        got = egress.check(found, interior, dict(evalc.SHEET_VALUES), Context.for_jurisdiction(MAINE).allowed())
+    finally:
+        egress.place_of, egress.refuse_state_alone, egress.measure_interior = real
+    view = {"items": []}
+    egress.add_to_view(view, got, found["place"])
+    view["sections"] = [s for s in view["sections"] if s["key"] != "zoning"]
+    return {"id": 1, "ok": True, "result": {"view": view, "report_error": None}, "about": protocol.about()}
+
+
+def main(src: Path, out: Path) -> dict:
+    got = answer(json.loads(src.read_text(encoding="utf-8")))
+    out.write_text(json.dumps(got, ensure_ascii=False, indent=1) + "\n", encoding="utf-8", newline="\n")
+    return got
+
+
+if __name__ == "__main__":
+    main(Path(sys.argv[1]), Path(sys.argv[2]))

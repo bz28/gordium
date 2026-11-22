@@ -411,7 +411,9 @@ public sealed class ResultListTests
         var view = Addin("ResultsView.cs");
         Assert.Contains("        if (!_quiet)\n            _select(row.Row.Row);", view, StringComparison.Ordinal);     // the click and Up/Down
         Assert.Contains("_list.SelectionChanged += (_, _) => Selected();", view, StringComparison.Ordinal);
-        Assert.Single(System.Text.RegularExpressions.Regex.Matches(view, @"_zoom\("));                     // Show alone zooms
+        // Show alone zooms: the row's Show (or Space) in the list, and Show in its detail (DetailView)
+        Assert.Equal(2, System.Text.RegularExpressions.Regex.Matches(view, @"_zoom\(").Count);
+        Assert.Contains("        _zoom(uid is null ? row.Row : row.Row with { Elements = [uid] });", view, StringComparison.Ordinal);
         Assert.Contains("            case I.Key.Space when SelectedRow is { } row:\n                ShowRow(row);", view, StringComparison.Ordinal);
     }
 
@@ -426,7 +428,7 @@ public sealed class ResultListTests
         Assert.Contains("var layout = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);\n" +
                         "        _entries = _summary is null ? layout : ResultList.WithSummary(layout);", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
-        Assert.Contains("ResultList.CopyText(row.Row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When)", view, StringComparison.Ordinal);
+        Assert.Contains("ResultList.CopyText(row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When)", view, StringComparison.Ordinal);
         // each row's glyph and bar are its placed status (stale: the clock and the hatch), never a tone of the view's
         Assert.Contains("var glyph = PanelLook.Glyph(p.Status, 14);", entries, StringComparison.Ordinal);
         Assert.Contains("p.Status == PanelStatus.Stale ? PanelLook.StaleHatch : StatusLook.Colour(p.Status)", entries, StringComparison.Ordinal);
@@ -461,7 +463,7 @@ public sealed class ResultListTests
         Assert.DoesNotContain("_results.Children.Add(_summary)", view, StringComparison.Ordinal);
         Assert.Contains("C.Grid.SetRow(tools, 0);", view, StringComparison.Ordinal);
         // the stale banner and the grey state are in the summary (never green: StatusLook.Of(model.StateTone, stale))
-        var summary = Between(view, "    private static W.UIElement Summary(ResultModel model", "\n    }\n");
+        var summary = Between(view, "    private W.UIElement Summary(ResultModel model", "\n    }\n");
         Assert.Contains("case PanelPart.Stale:", summary, StringComparison.Ordinal);
         Assert.Contains("var state = StatusLook.Of(model.StateTone, stale);", summary, StringComparison.Ordinal);
         // review round 6: the status line (problems and what to do, the action last) wraps, capped at three lines so
