@@ -59,6 +59,10 @@ documents:
       pages: 32-68, 79, 147, 273-274, 315, 318, 340-342, 344
       sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1007.1', '1016.2', '1017', Table 1017.2, '1020.5']
       alone: ['903.3.1.1', '903.3.1.2']   # brought in without the parts under them (exempt locations, balconies, attics)
+      definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
+        202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
+          the rule measures the story's floor area by both of the book's own measures of floor area (README).
+        202:floor_area_net: As 202:floor_area_gross.
       tables:      # each table's lines, checked on the page image (the text doesn't say where a table ends); every
                    # table on the pages read is named, brought in or not
         Table 903.2.11.6: p.273 lines 14-36

@@ -8,17 +8,18 @@ copy_checked: 'The Public.Resource.Org copy on the Internet Archive (sha256 in 1
   bought from ICC.'
 second_reading:
   by: claude_code/claude-opus-5-5 (two helper agents that never saw the extracted text, one for pp.32-53 and one
-    for pp.54-344, and a third helper for the comparison words)
+    for pp.54-344, a third for p.47's FLOOR AREA, GROSS and NET (brought in 2026-11-22), and a helper for the comparison
+    words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
-    labeled by its id (45 pages, 150 boxes); two helpers that never saw the extracted text transcribed every line
-    of every box from the images alone (tables row by row, raised characters written as sealed marks); the transcript
-    went through document_extraction/numbers.py: 148 pieces, 296 numbers, every piece agrees. The two tables were
-    also read a third way, by position: each cell''s characters with their sizes and x positions (pdfplumber, p.315
-    and p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the plain text runs into
-    its cell; sources.yaml brought_in.misread puts each right by line, and both readings agree with the cells so
-    read. A third helper that saw only each piece''s transcribed text and its numbers'' values (and, for a table,
-    the sentence that uses it) marked each number''s comparison from the whole sentence (second_reading_comparisons);
+    labeled by its id (46 pages, 152 boxes, p.47''s two on 2026-11-22); helpers that never saw the extracted text
+    transcribed every line of every box from the images alone (tables row by row, raised characters written as sealed
+    marks); the transcript went through document_extraction/numbers.py: 150 pieces, 296 numbers, every piece agrees.
+    The two tables were also read a third way, by position: each cell''s characters with their sizes and x positions
+    (pdfplumber, p.315 and p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the
+    plain text runs into its cell; sources.yaml brought_in.misread puts each right by line, and both readings agree
+    with the cells so read. A third helper that saw only each piece''s transcribed text and its numbers'' values
+    (and, for a table, the sentence that uses it) marked each number''s comparison from the whole sentence (second_reading_comparisons);
     where it differs from the recorded words, a flag says which is right. The transcript, the page images and the
     comparison files are kept in the code cache (second_reading/step_1_*), outside the repo, since they hold the
     book''s words.'
@@ -480,6 +481,18 @@ pieces:
     - one
     second_reading_comparisons:
     - none
+  202:floor_area_gross:
+    piece_sha256: 0ec1037debb30ee5bd3fd4f383d4abba9c572dda5e5a847377a9619ed01ddd04
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:floor_area_net:
+    piece_sha256: b287c2feffbe54e55f93133bdeec98a30336a7cae1c3e01cd29ee187cf457739
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:grade_lumber:
     piece_sha256: 2664b231c2bb59c53a4fbe34447fcdff7fdba8446c9b6662a35226c44eb9ca11
     numbers:

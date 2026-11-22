@@ -123,3 +123,15 @@ def test_a_terms_tag_bracket_printed_in_roman_does_not_hide_the_term():
     cut = icc_sections.split(_book([row]), BROUGHT_IN, STYLE)
     assert cut["problems"] == [] and "202:toxic_roof" in {o[3] for o in cut["outside"]}
     assert "202:toxic_roof" not in {o[3] for o in icc_sections.split(_book([row]), BROUGHT_IN, None)["outside"]}
+
+
+def test_a_definition_brought_in_by_name_comes_in_with_why_and_a_stale_name_is_a_problem():
+    # 508.2.3 prints "floor area" in roman: FLOOR AREA, GROSS and NET come in only by name (brought_in.definitions)
+    yard = [_row(1, 8, "[BG] YARD. An open space.", bold="[BG] YARD.")]
+    assert "202:yard" not in {p["id"] for p in icc_sections.split(_book(yard), BROUGHT_IN, STYLE)["pieces"]}
+    named = {**BROUGHT_IN, "definitions": {"202:yard": "A rule measures with it."}}
+    cut = icc_sections.split(_book(yard), named, STYLE)
+    assert cut["problems"] == [] and "202:yard" in {p["id"] for p in cut["pieces"]}
+    stale = {**BROUGHT_IN, "definitions": {"202:floor_area_net": "No such term on these pages."}}
+    assert any("brought_in.definitions names 202:floor_area_net" in p
+               for p in icc_sections.split(_book(), stale, STYLE)["problems"])

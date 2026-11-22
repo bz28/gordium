@@ -163,6 +163,35 @@ bc_custodial_care:
   notes: '308.5''s Group I-4: persons receiving custodial care.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+bc_floor_area_gross:
+  term: FLOOR AREA, GROSS
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 47
+    lines:
+    - 21
+    - 25
+    quote: '[BE] FLOOR AREA, GROSS. The floor area within the inside perimeter of the exterior walls of the building under
+      consideration, exclu- sive of vent shafts and courts, without deduction for corridors, stairways, ramps, closets, the
+      thickness of interior walls, columns or other features. The floor area of a building, or portion thereof, not provided
+      with surrounding exterior walls shall be the usable area under the horizontal projection of the roof or floor above.
+      The gross floor area shall not include shafts with no openings or interior courts.'
+  notes: '508.2.3''s larger reading of the floor area of the story: parts.yaml story_gross_floor_area.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
+bc_floor_area_net:
+  term: FLOOR AREA, NET
+  sources:
+  - file: gov.ny.building.2025.pdf
+    page: 47
+    lines:
+    - 26
+    - 27
+    quote: '[BE] FLOOR AREA, NET. The actual occupied area not including unoccupied accessory areas such as corridors, stairways,
+      ramps, toilet rooms, mechanical rooms and closets.'
+  notes: '508.2.3''s smaller reading of the floor area of the story: parts.yaml story_net_floor_area.'
+  drafted_by: claude_code/claude-opus-5-5
+  status: draft
 bc_dwelling_unit:
   term: DWELLING UNIT
   sources:

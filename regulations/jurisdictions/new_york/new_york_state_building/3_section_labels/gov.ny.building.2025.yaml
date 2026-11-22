@@ -755,6 +755,38 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:floor_area_gross:
+    label: reference
+    topic: definitions
+    reason: 'Defines FLOOR AREA, GROSS, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 47
+      lines:
+      - 21
+      - 21
+      quote: '[BE] FLOOR AREA, GROSS. The floor area within the inside perimeter of the exterior walls of the building under
+        consideration, exclu-'
+    piece_sha256: 0ec1037debb30ee5bd3fd4f383d4abba9c572dda5e5a847377a9619ed01ddd04
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:floor_area_net:
+    label: reference
+    topic: definitions
+    reason: 'Defines FLOOR AREA, NET, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 47
+      lines:
+      - 26
+      - 26
+      quote: '[BE] FLOOR AREA, NET. The actual occupied area not including unoccupied accessory areas such as corridors, stairways,
+        ramps, toilet'
+    piece_sha256: b287c2feffbe54e55f93133bdeec98a30336a7cae1c3e01cd29ee187cf457739
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:grade_lumber:
     label: reference
     topic: definitions

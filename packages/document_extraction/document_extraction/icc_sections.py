@@ -343,10 +343,19 @@ def split(rows: list[dict], brought_in: dict, style: str | None = None) -> dict:
     for u in units:
         used[u["id"]], undefined[u["id"]] = _uses(u, _in_scope(u["id"], terms))
     keep = {u["id"] for u in units if in_sections(u)}
+    # Definitions brought in by name, each with why (`brought_in.definitions`: a term a section prints in roman, so
+    # its italics don't bring it in, but a rule measures with it: the Building Code's 508.2.3 "floor area" and FLOOR
+    # AREA, GROSS and NET); a name that is no definition on the pages read is a problem
+    named_terms = brought_in.get("definitions") or {}
+    for d, why in named_terms.items():
+        if d not in terms or not str(why or "").strip():
+            problems.append(f"brought_in.definitions names {d}, which is no definition on the pages read (or has no why)")
+        else:
+            keep.add(d)
     # A defined term printed in roman type in a brought-in section: R201.1 gives the defined meaning to italic words
     # only, so it doesn't strictly apply there, but it is brought in too, so the reader sees both (never fewer).
     roman = {u["id"]: sorted(_roman(u, _in_scope(u["id"], terms)) - used[u["id"]] - {u["id"]}) for u in units}
-    todo = [d for i in keep for d in used[i]] + [d for i in keep for d in roman[i]]
+    todo = [d for i in keep for d in used[i]] + [d for i in keep if i not in named_terms for d in roman[i]]
     while todo:                                      # each brought-in definition's own defined words, and theirs
         d = todo.pop()
         if d not in keep:
