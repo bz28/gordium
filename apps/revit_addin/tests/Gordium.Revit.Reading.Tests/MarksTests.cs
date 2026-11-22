@@ -70,6 +70,8 @@ public sealed class MarksTests
             ("Gordium: Exit", "e7a3c519-04d2-4b86-b1f5-93c8d6a2e470", MarkValueKind.Text, MarkBinding.Instance, ["OST_Doors"]),
             // the architect's count of stories (optional; reading design note, section 9)
             ("Gordium: Stories", "bf758947-8ee4-490c-a499-dee706a6f1e7", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // a space nobody occupies (route note decision 1b)
+            ("Gordium: Not occupied", "306bccbe-b2f7-4a73-9169-6be76fb46202", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))

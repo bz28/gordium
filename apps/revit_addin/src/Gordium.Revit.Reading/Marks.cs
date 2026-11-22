@@ -147,6 +147,17 @@ public static class Marks
         [Doors], "doors[].exit_kind, doors[].exit_id",
         "For a door that is an exit of the building, which kind, one of: " + ExitKinds.Listed + ". Every door into one stair enclosure is the same exit. Blank: not an exit (Gordium never guesses one).");
 
+    /// <summary>Whether the architect states nobody occupies a room (<c>rooms[].not_occupied</c>, route note decision 1b):
+    /// an abandoned space, a room whose door is permanently fixed shut, a shaft. Yes: NFPA 101's travel and common path
+    /// aren't measured from its points (7.6.1(1): "starting from the most remote point subject to occupancy"), each such
+    /// figure naming it; the IBC's still are (1016.1: "the most remote point within a story"). Never makes a room
+    /// crossable or not. Refused on a sleeping room or a day-care room. Blank or No: occupied, measured.</summary>
+    public static readonly MarkDefinition NotOccupied = new(
+        "Gordium: Not occupied", new("306bccbe-b2f7-4a73-9169-6be76fb46202"), MarkValueKind.YesNo, MarkBinding.Instance,
+        [Rooms], "rooms[].not_occupied",
+        "Yes when nobody occupies this space: abandoned, its door permanently fixed shut, a shaft or chase (not a room visited for storage, maintenance, testing or inspection, NFPA 101 A.3.3.21.6). " +
+        "Then NFPA 101's travel distance and common path aren't measured from it (7.6.1: from points subject to occupancy), each saying so; the IBC's still are (1016.1). Blank or No: occupied, measured.");
+
     public static readonly MarkDefinition LotSurveyed = new(
         "Gordium: Lot surveyed", new("133d30e3-832f-4956-88c3-6b48989ac3f7"), MarkValueKind.YesNo, MarkBinding.Instance,
         [ProjectInformation], "facts.lot_surveyed",
@@ -296,7 +307,7 @@ public static class Marks
         ClearConfirmed, TopRailIsHandrail, AllStairs, AllGuards, Zone, Use, LotSurveyed, CornerLot, StreetEdge, GroundFrom,
         NoStairs, NoDoors, NoGuards, NoBasements, NoHabitableAttics, NoSleepingLofts, NoRamps, NoAlternatingTreadDevices,
         NoShipLadders, NoPatioCovers, NoProjectionOverEscapeOpening, NoRoomsOnLevel, NotAStair, SiteSlab, SiteObject,
-        CanBeLocked, PassThrough, Exit, Stories,
+        CanBeLocked, PassThrough, Exit, Stories, NotOccupied,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

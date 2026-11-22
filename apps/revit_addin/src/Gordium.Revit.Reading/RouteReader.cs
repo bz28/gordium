@@ -83,6 +83,10 @@ public static class RouteReader
             room["pass_through"] = through;
         else
             notes.Add(new(r.Id, "pass_through", Marks.PassThrough.Name + " is not set: an escape route never passes through it"));
+        // the architect's statement that nobody occupies the room (route note decision 1b): sent as marked; unset is
+        // left out, and the room is occupied (measured), so no note: blank is the usual answer
+        if (r.NotOccupied is { } notOccupied)
+            room["not_occupied"] = notOccupied;
     }
 
     // ---- everything else, once the rooms and doors are read ----------------------------------------------------
@@ -214,7 +218,7 @@ public static class RouteReader
             $"rooms: {rooms.Count}; with a level {Rooms("level")}, a floor {Rooms("floor")}, holes {Rooms("holes")} " +
             $"({rooms.Sum(r => r["holes"]?.AsArray().Count ?? 0)} in all), obstructions {Rooms("obstructions")} " +
             $"({rooms.Sum(r => r["obstructions"]?.AsArray().Count ?? 0)} footprints); use {Rooms("use")}, can be locked {Rooms("lockable")}, " +
-            $"pass through {Rooms("pass_through")}",
+            $"pass through {Rooms("pass_through")}, marked not occupied {rooms.Count(r => r["not_occupied"]?.GetValue<bool>() == true)}",
             $"doors: {doors.Count}; with a level {Doors("level")}, a place in its wall {Doors("plan")} (its wall read " +
             $"{(read.Evidence["route_doors"] as JsonObject)?.Count(e => e.Value?["centre"] is not null) ?? 0}), sides {Doors("sides")} " +
             $"({doors.Count(d => d["sides"]?.AsArray().Any(s => s!.GetValue<string>() == Outside) == true)} to outside), " +

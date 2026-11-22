@@ -53,3 +53,13 @@ def test_a_room_missing_a_flag_stops_the_tool():
         tool.request({"by": "x", "rooms": [{"number": "1", "use": "Other", "lockable": True}]}, "m", "c")
     with pytest.raises(tool.BadMarks):
         tool.request({"rooms": []}, "m", "c")
+
+
+def test_a_rooms_not_occupied_is_written_only_where_the_file_states_it():
+    marks = {"by": "x", "rooms": [{"number": "32", "sleeping": False, "not_occupied": True},
+                                  {"number": "33", "sleeping": False}]}
+    entries = tool.request(marks, "m", "c")["marks"]
+    assert {"room": "32", "mark": "Gordium: Not occupied", "value": True} in entries
+    assert not any(e.get("room") == "33" and e.get("mark") == "Gordium: Not occupied" for e in entries)
+    with pytest.raises(tool.BadMarks):
+        tool.request({"by": "x", "rooms": [{"number": "32", "sleeping": False, "not_occupied": "yes"}]}, "m", "c")
