@@ -115,3 +115,11 @@ def test_a_raised_footnote_letter_run_into_a_cell_is_put_right_by_line_and_read_
     assert line == "I-4 150 200[fnc]" and [shown(s) for s in statements(line)] == ["150", "200"]
     _, bad = as_printed(rows, {"p.2 line 10": [{"ocr": "300c", "printed": "300[fnc]", "why": "Not there."}]})
     assert bad                                                             # a stale line never rewrites another
+
+
+def test_a_terms_tag_bracket_printed_in_roman_does_not_hide_the_term():
+    # "[BG" bold, "] " roman, "OCCUPIABLE ROOF." bold (the book's p.55, line 23): still a term of its own
+    row = {"page": 1, "line": 8, "text": "[BG] TOXIC ROOF. An exterior space.", "bold": [[0, 3], [5, 16]]}
+    cut = icc_sections.split(_book([row]), BROUGHT_IN, STYLE)
+    assert cut["problems"] == [] and "202:toxic_roof" in {o[3] for o in cut["outside"]}
+    assert "202:toxic_roof" not in {o[3] for o in icc_sections.split(_book([row]), BROUGHT_IN, None)["outside"]}

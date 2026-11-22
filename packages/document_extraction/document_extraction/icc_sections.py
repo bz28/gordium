@@ -75,6 +75,7 @@ class Style:
     term: re.Pattern
     table: re.Pattern | None = None     # a table's title line, in bold: its lines must be named (brought_in.tables)
     openings_never_heads: bool = False  # a chapter's opening line ("CHAPTER") is never a running head
+    bold_across_tag: bool = False       # a bold heading runs on past a tag's closing bracket printed in roman
     chapter_2: str = "Section R202"     # where the book's definitions are, as a problem names it
 
 
@@ -90,7 +91,7 @@ STYLES = {
         numbered=re.compile(r"^(?:\[[A-Z]{1,2}\] )?(\d{3,4}(?:\.\d+)+) (\S.*)$"),
         term=re.compile(r"^(?:\[[A-Z]{1,2}\] )?([A-Z0-9](?:[^.(]|\([^)]*\))*?)\.(?: |$)"),
         table=re.compile(r"^(?:\[[A-Z]{1,2}\] )?TABLE \d{3,4}(?:\.\d+)+"),
-        openings_never_heads=True, chapter_2="Section 202"),
+        openings_never_heads=True, bold_across_tag=True, chapter_2="Section 202"),
 }
 CHAPTER_OPENING = re.compile(r"^(?:Part [IVXLC]+\s*—.*|CHAPTER|APPENDIX)$")   # a chapter's or appendix's first page
 # Words that join defined terms inside one italic phrase ("dwelling(s) or townhouse(s)": the "s" of a bracketed
@@ -123,10 +124,18 @@ def slug(term: str) -> str:
     return re.sub(r"[^a-z0-9]+", "_", term.lower()).strip("_")
 
 
-def _bold_start(r: dict) -> str | None:
-    """The bold text a line starts with, or None."""
+def _bold_start(r: dict, across_tag: bool = False) -> str | None:
+    """The bold text a line starts with, or None. across_tag: a tag's closing bracket printed in roman ("[BG" bold,
+    "] " roman, "OCCUPIABLE ROOF." bold: the Building Code's p.55, line 23) does not end it."""
     runs = r.get("bold") or []
-    return r["text"][runs[0][0]:runs[0][1]] if runs and runs[0][0] == 0 else None
+    if not runs or runs[0][0] != 0:
+        return None
+    end = runs[0][1]
+    for a, b in runs[1:] if across_tag else ():
+        if r["text"][end:a].strip() not in ("]", ""):
+            break
+        end = b
+    return r["text"][:end]
 
 
 def furniture(rows_on_page: list[dict], heads: set[str], footer: re.Pattern = FOOTER) -> set[int]:
@@ -223,7 +232,7 @@ def split(rows: list[dict], brought_in: dict, style: str | None = None) -> dict:
                           "members": []})
             current = len(units) - 1
         page_before = r["page"]
-        bold = _bold_start(r)
+        bold = _bold_start(r, st.bold_across_tag)
         head = None
         opening = f"chapter opening on p.{r['page']}"
         where = f"p.{r['page']} line {r['line']}"
