@@ -460,3 +460,17 @@ def test_room_causes_sharing_a_room_are_one_card_keyed_and_named_by_all_its_room
                                 {"id": "2", "status": present.REVIEW, "causes": [b]}])
     assert [(c["key"], c["elements"], c["items"]) for c in got] == [("rooms:a,b,c", ["a", "b", "c"], ["1", "2"])]
     assert got[0]["words"] == "3 rooms have no route to an exit: A, B, C"
+
+
+def test_grouping_a_laws_items_gives_its_own_rows_their_causes():
+    """The hook, on the Odyssey's items with the law's own rows' causes taken away: present.grouped gives them back,
+    and every row in review is on a card."""
+    items = _odyssey_view()["items"]
+    for i in items:
+        if "@" not in i["id"]:
+            i.pop("causes", None)
+    groups = present.grouped(items)
+    review = {i["id"] for i in items if i["group"] == present.LAW_GROUP and i["status"] == present.REVIEW}
+    assert all(i.get("causes") for i in items if i["id"] in review)
+    on_cards = {x for g in groups for c in g.get("causes") or [] for x in c["items"]}
+    assert review <= on_cards

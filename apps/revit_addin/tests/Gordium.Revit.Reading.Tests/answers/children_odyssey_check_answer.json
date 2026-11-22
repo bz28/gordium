@@ -417,27 +417,32 @@
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
          "name": "SPRINKLERED ABANDONED SPACE (32)",
-         "why": "the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
          "name": "SPRINKLERED ABANDONED SPACE (33)",
-         "why": "the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
          "name": "CLOSET (40)",
-         "why": "the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
          "name": "STORAGE (13)",
-         "why": "the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
          "name": "ELEC. (21)",
-         "why": "the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         }
        ]
       },
@@ -716,12 +721,19 @@
      "causes": [
       {
        "kind": "fix_model",
-       "key": "model:space:space_common_path:the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "words": "space common path not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+       "key": "rooms:80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
+       "words": "1 room has no route to an exit: SPRINKLERED ABANDONED SPACE (32)",
        "elements": [
         "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74"
        ],
-       "measure": "space_common_path"
+       "rooms": [
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
+         "name": "SPRINKLERED ABANDONED SPACE (32)",
+         "why": "the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
+        }
+       ]
       },
       {
        "kind": "mark",
@@ -867,12 +879,19 @@
      "causes": [
       {
        "kind": "fix_model",
-       "key": "model:space:space_common_path:the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "words": "space common path not measured: the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+       "key": "rooms:80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
+       "words": "1 room has no route to an exit: SPRINKLERED ABANDONED SPACE (33)",
        "elements": [
         "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75"
        ],
-       "measure": "space_common_path"
+       "rooms": [
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
+         "name": "SPRINKLERED ABANDONED SPACE (33)",
+         "why": "the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
+        }
+       ]
       },
       {
        "kind": "mark",
@@ -1858,12 +1877,19 @@
      "causes": [
       {
        "kind": "fix_model",
-       "key": "model:space:space_common_path:the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
-       "words": "space common path not measured: the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+       "key": "rooms:80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
+       "words": "1 room has no route to an exit: CLOSET (40)",
        "elements": [
         "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c"
        ],
-       "measure": "space_common_path"
+       "rooms": [
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
+         "name": "CLOSET (40)",
+         "why": "the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
+        }
+       ]
       },
       {
        "kind": "mark",
@@ -4109,12 +4135,19 @@
      "causes": [
       {
        "kind": "fix_model",
-       "key": "model:space:space_common_path:the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
-       "words": "space common path not measured: the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+       "key": "rooms:90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
+       "words": "1 room has no route to an exit: STORAGE (13)",
        "elements": [
         "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc"
        ],
-       "measure": "space_common_path"
+       "rooms": [
+        {
+         "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
+         "name": "STORAGE (13)",
+         "why": "the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
+        }
+       ]
       },
       {
        "kind": "mark",
@@ -5100,12 +5133,19 @@
      "causes": [
       {
        "kind": "fix_model",
-       "key": "model:space:space_common_path:the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "words": "space common path not measured: the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+       "key": "rooms:90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
+       "words": "1 room has no route to an exit: ELEC. (21)",
        "elements": [
         "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a"
        ],
-       "measure": "space_common_path"
+       "rooms": [
+        {
+         "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
+         "name": "ELEC. (21)",
+         "why": "the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
+        }
+       ]
       },
       {
        "kind": "mark",
@@ -10748,27 +10788,32 @@
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
          "name": "SPRINKLERED ABANDONED SPACE (32)",
-         "why": "the point (55.308, 78.082) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (55.308, 78.082) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
          "name": "SPRINKLERED ABANDONED SPACE (33)",
-         "why": "the point (155.057, 78.927) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (155.057, 78.927) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
          "name": "CLOSET (40)",
-         "why": "the point (25.978, 35.841) has no route to any exit: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (25.978, 35.841) has no route to any exit: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
          "name": "STORAGE (13)",
-         "why": "the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
          "name": "ELEC. (21)",
-         "why": "the point (5.18, 25.183) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (5.18, 25.183) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         }
        ]
       },
@@ -16267,27 +16312,32 @@
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
          "name": "SPRINKLERED ABANDONED SPACE (32)",
-         "why": "the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
          "name": "SPRINKLERED ABANDONED SPACE (33)",
-         "why": "the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
          "name": "CLOSET (40)",
-         "why": "the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
          "name": "STORAGE (13)",
-         "why": "the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
          "name": "ELEC. (21)",
-         "why": "the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         }
        ]
       }
@@ -16397,12 +16447,47 @@
      "causes": [
       {
        "kind": "fix_model",
-       "key": "model:story:egress_travel_from_room_door:the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
-       "words": "egress travel from room door not measured: the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
+       "key": "rooms:80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74,80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75,80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c,90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc,90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
+       "words": "5 rooms have no route to an exit: SPRINKLERED ABANDONED SPACE (32), SPRINKLERED ABANDONED SPACE (33), CLOSET (40), STORAGE (13), ELEC. (21)",
        "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
+        "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
+        "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
+        "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
+        "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
+        "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a"
        ],
-       "measure": "egress_travel_from_room_door"
+       "rooms": [
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
+         "name": "SPRINKLERED ABANDONED SPACE (32)",
+         "why": "the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
+        },
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
+         "name": "SPRINKLERED ABANDONED SPACE (33)",
+         "why": "the room SPRINKLERED ABANDONED SPACE (33) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
+        },
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
+         "name": "CLOSET (40)",
+         "why": "the room CLOSET (40) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
+        },
+        {
+         "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
+         "name": "STORAGE (13)",
+         "why": "the room STORAGE (13) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
+        },
+        {
+         "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
+         "name": "ELEC. (21)",
+         "why": "the room ELEC. (21) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
+        }
+       ]
       }
      ],
      "law": "Egress (IBC 2009 and NFPA 101 2012, as Maine's codes)",
@@ -16523,27 +16608,32 @@
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
          "name": "SPRINKLERED ABANDONED SPACE (32)",
-         "why": "the point (55.308, 78.082) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (55.308, 78.082) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
          "name": "SPRINKLERED ABANDONED SPACE (33)",
-         "why": "the point (155.057, 78.927) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (155.057, 78.927) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
          "name": "CLOSET (40)",
-         "why": "the point (25.978, 35.841) has no route to any exit: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (25.978, 35.841) has no route to any exit: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
          "name": "STORAGE (13)",
-         "why": "the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
          "name": "ELEC. (21)",
-         "why": "the point (5.18, 25.183) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the point (5.18, 25.183) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
         }
        ]
       }
@@ -16710,38 +16800,34 @@
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
          "name": "SPRINKLERED ABANDONED SPACE (32)",
-         "why": "the point (55.308, 78.082) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
          "name": "SPRINKLERED ABANDONED SPACE (33)",
-         "why": "the point (155.057, 78.927) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the room SPRINKLERED ABANDONED SPACE (33) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
         },
         {
          "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
          "name": "CLOSET (40)",
-         "why": "the point (25.978, 35.841) has no route to any exit: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the room CLOSET (40) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
          "name": "STORAGE (13)",
-         "why": "the point (165.625, 70.156) has no route to any exit: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)"
+         "why": "the room STORAGE (13) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
         },
         {
          "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
          "name": "ELEC. (21)",
-         "why": "the point (5.18, 25.183) has no route to any exit (a path 12 in clear of every corner, through door centres and rooms it may cross)"
+         "why": "the room ELEC. (21) has no door from which a route reaches an exit without coming back into it",
+         "stop": "no_exit_access"
         }
        ]
-      },
-      {
-       "kind": "fix_model",
-       "key": "model:story:egress_travel_from_room_door:the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
-       "words": "egress travel from room door not measured: the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
-       "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
-       ],
-       "measure": "egress_travel_from_room_door"
       },
       {
        "kind": "mark",
@@ -18763,7 +18849,15 @@
      "code": {
       "section": "308.5",
       "quote": "This group shall include buildings and structures occupied by persons of any age who receive custodial care for less than 24 hours by individuals other than parents or guardians, relatives by blood, marriage or adoption, and in a place other than the home of the person cared for."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_308_5_1_adult_care_classification",
@@ -18805,7 +18899,15 @@
      "code": {
       "section": "308.5.1",
       "quote": "A facility that provides accom modations for less than 24 hours for more than five unre lated adults and provides supervision and personal care services shall be classified as Group 1-4."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_308_5_2_child_care_classification",
@@ -18851,7 +18953,15 @@
      "code": {
       "section": "308.5.2",
       "quote": "A facility that provides supervi sion and personal care on less than a 24-hour basis for more than five children 2 1/2 years of age or less shall be classified as Group 1-4."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_508_2_2_classification",
@@ -18893,7 +19003,15 @@
      "code": {
       "section": "508.2.2",
       "quote": "Accessory occupancies shall be individually classified in accordance with Section 302.1."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_508_2_3_area_and_height",
@@ -18935,7 +19053,15 @@
      "code": {
       "section": "508.2.3",
       "quote": "The height of each accessory occupancy shall not exceed the tabular values in"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_508_2_4_separation",
@@ -18977,7 +19103,15 @@
      "code": {
       "section": "508.2.4",
       "quote": "No separation is required between accessory occupancies and the main occupancy."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_508_2_5_incidental_accessory",
@@ -19023,7 +19157,15 @@
      "code": {
       "section": "508.2.5",
       "quote": "508.2.5 shall be separated from the remainder of the building or equipped with an automatic fire-extinguishing system, or both, in accordance with Table 508.2.5."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_508_2_5_1_rated_separation",
@@ -19065,7 +19207,15 @@
      "code": {
       "section": "508.2.5.1",
       "quote": "Where Table 508.2.5 specifies a fire-resistance-rated separa tion, the incidental accessory occupancies shall be sepa rated from the remainder of the bUilding by a fire barrier"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_508_2_5_2_smoke_resisting_separation",
@@ -19107,7 +19257,15 @@
      "code": {
       "section": "508.2.5.2",
       "quote": "Where Table 508.2.5 permits an automatic fire-extinguishing system without a fire barrier, the inci-"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_508_2_5_3_protection",
@@ -19149,7 +19307,15 @@
      "code": {
       "section": "508.2.5.3",
       "quote": "only the space occupied by the inci dental accessory occupancy need be equipped with such a system."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_1004_1_design_occupant_load",
@@ -19191,7 +19357,15 @@
      "code": {
       "section": "1004.1",
       "quote": "Where occupants from accessory areas egress through a primary space, the calculated occupant load for the primary space shall include the total occupant load of the primary space plus the number of occupants egressing through it from the accessory area."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_1015_2_arrangement",
@@ -19233,7 +19407,15 @@
      "code": {
       "section": "1015.2",
       "quote": "Required exits shall be located in a manner that makes their availability obvious. Exits shall be unobstructed at all times."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_16_2_2_2_1_doors_complying_with",
@@ -19275,7 +19457,15 @@
      "code": {
       "section": "16.2.2.2.1",
       "quote": "16.2.2.2.1 General. Doors complying with 7.2.1 shall be per- mitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_16_2_2_2_3_1_delayed_egress_locking",
@@ -19317,7 +19507,15 @@
      "code": {
       "section": "16.2.2.2.3.1",
       "quote": "16.2.2.2.3.1 Delayed-egress locking systems complying with 7.2.1.6.1 shall be permitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_16_2_2_2_3_2_access_controlled_egress",
@@ -19359,7 +19557,15 @@
      "code": {
       "section": "16.2.2.2.3.2",
       "quote": "16.2.2.2.3.2 Access-controlled egress door assemblies com- plying with 7.2.1.6.2 shall be permitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_16_2_2_2_3_3_elevator_lobby_door",
@@ -19401,7 +19607,15 @@
      "code": {
       "section": "16.2.2.2.3.3",
       "quote": "16.2.2.2.3.3 Elevator lobby exit access door assemblies lock- ing in accordance with 7.2.1.6.3 shall be permitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_16_2_2_2_4_latches_openable_by",
@@ -19443,7 +19657,15 @@
      "code": {
       "section": "16.2.2.2.4",
       "quote": "Every door latch to closets, storage areas, kitchens, and other similar spaces or areas shall be such that clients can open the door from inside the space or area."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_16_2_2_2_5_bathroom_locks_openable",
@@ -19485,7 +19707,15 @@
      "code": {
       "section": "16.2.2.2.5",
       "quote": "Every bathroom door lock shall be designed to allow opening of the locked door from the outside by"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_17_2_2_2_1_doors_complying_with",
@@ -19527,7 +19757,15 @@
      "code": {
       "section": "17.2.2.2.1",
       "quote": "17.2.2.2.1 General. Doors complying with 7.2.1 shall be per- mitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_17_2_2_2_3_1_delayed_egress_locking",
@@ -19569,7 +19807,15 @@
      "code": {
       "section": "17.2.2.2.3.1",
       "quote": "17.2.2.2.3.1 Delayed-egress locking systems complying with 7.2.1.6.1 shall be permitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_17_2_2_2_3_2_access_controlled_egress",
@@ -19611,7 +19857,15 @@
      "code": {
       "section": "17.2.2.2.3.2",
       "quote": "17.2.2.2.3.2 Access-controlled egress door assemblies com- plying with 7.2.1.6.2 shall be permitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_17_2_2_2_3_3_elevator_lobby_door",
@@ -19653,7 +19907,15 @@
      "code": {
       "section": "17.2.2.2.3.3",
       "quote": "17.2.2.2.3.3 Elevator lobby exit access door assemblies lock- ing in accordance with 7.2.1.6.3 shall be permitted."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_17_2_2_2_4_latches_openable_by",
@@ -19695,7 +19957,15 @@
      "code": {
       "section": "17.2.2.2.4",
       "quote": "Every door latch to closets, storage areas, kitchens, and other similar spaces or areas shall be such that clients can open the door from inside the space or area."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_17_2_2_2_5_bathroom_locks_openable",
@@ -19737,7 +20007,15 @@
      "code": {
       "section": "17.2.2.2.5",
       "quote": "Every bathroom door lock shall be designed to allow opening of the locked door from the"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_6_1_14_4_1_separation",
@@ -19787,7 +20065,15 @@
      "code": {
       "section": "6.1.14.4.1",
       "quote": "Where separated occupancies are provided, each part of the building comprising a distinct occupancy, as de- scribed in this chapter, shall be completely separated from other occupancies by fire-resistive assemblies,"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_6_1_14_4_2_separation_ratings",
@@ -19829,7 +20115,15 @@
      "code": {
       "section": "6.1.14.4.2",
       "quote": "6.1.14.4.2 Occupancy separations shall be classified as 3-hour fire resistance–rated, 2-hour fire resistance–rated, or 1-hour fire resistance–rated and shall meet the requirements of Chapter 8."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_6_1_14_4_3_sprinkler_reduction",
@@ -19871,7 +20165,15 @@
      "code": {
       "section": "6.1.14.4.3",
       "quote": "6.1.14.4.3 The minimum fire resistance rating specified in Table 6.1.14.4.1(a) and Table 6.1.14.4.1(b) shall be permitted to be reduced by 1 hour, but in no case shall it be reduced to less than 1 hour, where the building is protected throughout by an approved automatic sprinkler system in accordance with 9.7.1.1(1) and supervised in accordance with 9.7.2, unless pro- hibited by the double-dagger footnote entries in the tables."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_6_1_14_4_4_separation_form",
@@ -19913,7 +20215,15 @@
      "code": {
       "section": "6.1.14.4.4",
       "quote": "6.1.14.4.4 Occupancy separations shall be vertical, horizon- tal, or both or, when necessary, of such other form as required to provide complete separation between occupancy divisions in the building."
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_table_1015_1_other_occupancies",
@@ -19955,7 +20265,15 @@
      "code": {
       "section": "Table 1015.1",
       "quote": "TABLE 1015.1 I SPACES WITH ONE EXIT OR EXIT ACCESS DOORWAY"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_table_1016_1_other_occupancies",
@@ -19997,7 +20315,15 @@
      "code": {
       "section": "Table 1016.1",
       "quote": "TABLE 1016.1 a EXIT ACCESS TRAVEL DISTANCE WITHOUT SPRINKLER WITH SPRINKLER"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_table_1018_1_other_occupancies",
@@ -20039,7 +20365,15 @@
      "code": {
       "section": "Table 1018.1",
       "quote": "TABLE 1018.1 CORRIDOR FIRE-RESISTANCE RATING"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.ibc_table_508_2_5_incidental_rooms",
@@ -20081,7 +20415,15 @@
      "code": {
       "section": "Table 508.2.5",
       "quote": "TABLE 508.2.5 INCIDENTAL ACCESSORY OCCUPANCIES"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.general.nfpa_table_6_1_14_4_1_b__separation_hours",
@@ -20123,7 +20465,15 @@
      "code": {
       "section": "Table 6.1.14.4.1(b)",
       "quote": "Table 6.1.14.4.1(b) Required Separation of Occupancies (hours) , Part 2"
-     }
+     },
+     "causes": [
+      {
+       "kind": "measure_by_hand",
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.interior#1",
@@ -20157,7 +20507,15 @@
      "law": "Egress (IBC 2009 and NFPA 101 2012, as Maine's codes)",
      "law_short": "Egress",
      "law_key": "maine/maine_state",
-     "code": null
+     "code": null,
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "drawing:The interior drawing: opening Fixed: Window 45\" x 48\" (LS1.0) (WN01): say whether it is an emergency escape and rescue opening (`escape`: true or false)",
+       "words": "The interior drawing: opening Fixed: Window 45\" x 48\" (LS1.0) (WN01): say whether it is an emergency escape and rescue opening (`escape`: true or false)",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.interior#2",
@@ -20191,7 +20549,15 @@
      "law": "Egress (IBC 2009 and NFPA 101 2012, as Maine's codes)",
      "law_short": "Egress",
      "law_key": "maine/maine_state",
-     "code": null
+     "code": null,
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "drawing:The interior drawing: the stairs weren't read (no `stairs` in the description)",
+       "words": "The interior drawing: the stairs weren't read (no `stairs` in the description)",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.interior#3",
@@ -20225,7 +20591,15 @@
      "law": "Egress (IBC 2009 and NFPA 101 2012, as Maine's codes)",
      "law_short": "Egress",
      "law_key": "maine/maine_state",
-     "code": null
+     "code": null,
+     "causes": [
+      {
+       "kind": "mark",
+       "key": "drawing:The interior drawing: door Single-Flush: Door 36\" x 84\" (LS1.0) (D01): say whether it is the required exit door (`exit`: true or false)",
+       "words": "The interior drawing: door Single-Flush: Door 36\" x 84\" (LS1.0) (D01): say whether it is the required exit door (`exit`: true or false)",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "egress.interior#4",
@@ -20259,7 +20633,15 @@
      "law": "Egress (IBC 2009 and NFPA 101 2012, as Maine's codes)",
      "law_short": "Egress",
      "law_key": "maine/maine_state",
-     "code": null
+     "code": null,
+     "causes": [
+      {
+       "kind": "fix_model",
+       "key": "drawing:The interior drawing: the guards weren't read (no `guards` in the description)",
+       "words": "The interior drawing: the guards weren't read (no `guards` in the description)",
+       "elements": []
+      }
+     ]
     },
     {
      "id": "general.nfpa_16_2_5_2_dead_end@-/90a6a430-1684-4046-81c7-ffbf1c99b587-0005be10 (dead end 7)",
@@ -22206,80 +22588,66 @@
         "general.ibc_1014_3_common_path@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
         "general.ibc_1016_1_travel_distance@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
         "general.nfpa_16_2_5_3_1_common_path_sprinklered@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
+        "general.nfpa_16_2_6_2_room_door_to_exit@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
         "general.nfpa_16_2_6_2_point_in_room_to_exit@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
-        "general.nfpa_16_2_6_3_sprinkler_increase@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
-       ],
-       "rules": 5
-      },
-      {
-       "key": "model:story:egress_travel_from_room_door:the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
-       "kind": "fix_model",
-       "words": "egress travel from room door not measured: the room SPRINKLERED ABANDONED SPACE (32) has no door from which a route reaches an exit without coming back into it",
-       "elements": [
-        "933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
-       ],
-       "items": [
-        "general.nfpa_16_2_6_2_room_door_to_exit@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
-       ],
-       "rules": 1
-      },
-      {
-       "key": "model:space:space_common_path:the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "kind": "fix_model",
-       "words": "space common path not measured: the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "elements": [
-        "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74"
-       ],
-       "items": [
-        "general.ibc_1015_1_two_exits@-/80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74"
-       ],
-       "rules": 1
-      },
-      {
-       "key": "model:space:space_common_path:the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "kind": "fix_model",
-       "words": "space common path not measured: the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "elements": [
-        "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75"
-       ],
-       "items": [
-        "general.ibc_1015_1_two_exits@-/80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75"
-       ],
-       "rules": 1
-      },
-      {
-       "key": "model:space:space_common_path:the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
-       "kind": "fix_model",
-       "words": "space common path not measured: the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
-       "elements": [
-        "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c"
-       ],
-       "items": [
-        "general.ibc_1015_1_two_exits@-/80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c"
-       ],
-       "rules": 1
-      },
-      {
-       "key": "model:space:space_common_path:the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
-       "kind": "fix_model",
-       "words": "space common path not measured: the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
-       "elements": [
-        "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc"
-       ],
-       "items": [
-        "general.ibc_1015_1_two_exits@-/90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc"
-       ],
-       "rules": 1
-      },
-      {
-       "key": "model:space:space_common_path:the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "kind": "fix_model",
-       "words": "space common path not measured: the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
-       "elements": [
-        "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a"
-       ],
-       "items": [
+        "general.nfpa_16_2_6_3_sprinkler_increase@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e",
+        "general.ibc_1015_1_two_exits@-/80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
+        "general.ibc_1015_1_two_exits@-/80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
+        "general.ibc_1015_1_two_exits@-/80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
+        "general.ibc_1015_1_two_exits@-/90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
         "general.ibc_1015_1_two_exits@-/90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a"
+       ],
+       "rules": 7,
+       "rooms": [
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be74",
+         "name": "SPRINKLERED ABANDONED SPACE (32)",
+         "why": "the point (55.308, 78.082) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
+        },
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be75",
+         "name": "SPRINKLERED ABANDONED SPACE (33)",
+         "why": "the point (155.057, 78.927) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
+        },
+        {
+         "id": "80fb59e5-5bc1-45f7-837b-d8d1a96513e7-0005be7c",
+         "name": "CLOSET (40)",
+         "why": "the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
+        },
+        {
+         "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005bdfc",
+         "name": "STORAGE (13)",
+         "why": "the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94: its room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable: true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)",
+         "stop": "no_route_host_blocked"
+        },
+        {
+         "id": "90a6a430-1684-4046-81c7-ffbf1c99b587-0005be0a",
+         "name": "ELEC. (21)",
+         "why": "the point (5.18, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in clear of every corner, through door centres and rooms it may cross)",
+         "stop": "no_route"
+        }
+       ]
+      },
+      {
+       "key": "drawing:The interior drawing: the stairs weren't read (no `stairs` in the description)",
+       "kind": "fix_model",
+       "words": "The interior drawing: the stairs weren't read (no `stairs` in the description)",
+       "elements": [],
+       "items": [
+        "egress.interior#2"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "drawing:The interior drawing: the guards weren't read (no `guards` in the description)",
+       "kind": "fix_model",
+       "words": "The interior drawing: the guards weren't read (no `guards` in the description)",
+       "elements": [],
+       "items": [
+        "egress.interior#4"
        ],
        "rules": 1
       },
@@ -22482,6 +22850,68 @@
         "general.nfpa_16_1_7_1_occupant_load@-/933c4a06-93b8-11d3-80f8-00c04f8efc32-0000001e"
        ],
        "rules": 2
+      },
+      {
+       "key": "drawing:The interior drawing: opening Fixed: Window 45\" x 48\" (LS1.0) (WN01): say whether it is an emergency escape and rescue opening (`escape`: true or false)",
+       "kind": "mark",
+       "words": "The interior drawing: opening Fixed: Window 45\" x 48\" (LS1.0) (WN01): say whether it is an emergency escape and rescue opening (`escape`: true or false)",
+       "elements": [],
+       "items": [
+        "egress.interior#1"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "drawing:The interior drawing: door Single-Flush: Door 36\" x 84\" (LS1.0) (D01): say whether it is the required exit door (`exit`: true or false)",
+       "kind": "mark",
+       "words": "The interior drawing: door Single-Flush: Door 36\" x 84\" (LS1.0) (D01): say whether it is the required exit door (`exit`: true or false)",
+       "elements": [],
+       "items": [
+        "egress.interior#3"
+       ],
+       "rules": 1
+      },
+      {
+       "key": "by_hand:this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "kind": "measure_by_hand",
+       "words": "this rule isn't written for each part (no for_each), and a state law's rules are checked only part by part: it isn't checked, so check it by hand",
+       "elements": [],
+       "items": [
+        "egress.general.ibc_308_5_classification",
+        "egress.general.ibc_308_5_1_adult_care_classification",
+        "egress.general.ibc_308_5_2_child_care_classification",
+        "egress.general.ibc_508_2_2_classification",
+        "egress.general.ibc_508_2_3_area_and_height",
+        "egress.general.ibc_508_2_4_separation",
+        "egress.general.ibc_508_2_5_incidental_accessory",
+        "egress.general.ibc_508_2_5_1_rated_separation",
+        "egress.general.ibc_508_2_5_2_smoke_resisting_separation",
+        "egress.general.ibc_508_2_5_3_protection",
+        "egress.general.ibc_1004_1_design_occupant_load",
+        "egress.general.ibc_1015_2_arrangement",
+        "egress.general.nfpa_16_2_2_2_1_doors_complying_with",
+        "egress.general.nfpa_16_2_2_2_3_1_delayed_egress_locking",
+        "egress.general.nfpa_16_2_2_2_3_2_access_controlled_egress",
+        "egress.general.nfpa_16_2_2_2_3_3_elevator_lobby_door",
+        "egress.general.nfpa_16_2_2_2_4_latches_openable_by",
+        "egress.general.nfpa_16_2_2_2_5_bathroom_locks_openable",
+        "egress.general.nfpa_17_2_2_2_1_doors_complying_with",
+        "egress.general.nfpa_17_2_2_2_3_1_delayed_egress_locking",
+        "egress.general.nfpa_17_2_2_2_3_2_access_controlled_egress",
+        "egress.general.nfpa_17_2_2_2_3_3_elevator_lobby_door",
+        "egress.general.nfpa_17_2_2_2_4_latches_openable_by",
+        "egress.general.nfpa_17_2_2_2_5_bathroom_locks_openable",
+        "egress.general.nfpa_6_1_14_4_1_separation",
+        "egress.general.nfpa_6_1_14_4_2_separation_ratings",
+        "egress.general.nfpa_6_1_14_4_3_sprinkler_reduction",
+        "egress.general.nfpa_6_1_14_4_4_separation_form",
+        "egress.general.ibc_table_1015_1_other_occupancies",
+        "egress.general.ibc_table_1016_1_other_occupancies",
+        "egress.general.ibc_table_1018_1_other_occupancies",
+        "egress.general.ibc_table_508_2_5_incidental_rooms",
+        "egress.general.nfpa_table_6_1_14_4_1_b__separation_hours"
+       ],
+       "rules": 33
       },
       {
        "key": "gap:story:story_other_use_area",
@@ -22761,7 +23191,7 @@
  "about": {
   "protocol": "1.3",
   "site_schema": "gordium.site/1",
-  "worker_fingerprint": "276d25734a7c0f41a3600c9f1770b0db38c922e81d25f0d8a73c086f0afbb8e3",
+  "worker_fingerprint": "c83bb977d70459a3f02c9a1df0f7f904cd6ec4cdb0c8c3b269cfd0845754bb83",
   "rulebook": {
    "new_york/ithaca_city": "069367164b3bf20570f38681fdf923538fe72a75bda98635265b2d2e2e98cb70"
   }
