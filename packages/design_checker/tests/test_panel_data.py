@@ -240,9 +240,10 @@ def test_each_law_quote_carries_its_file_page_and_lines():
     assert first["url"] == "https://archive.org/details/gov.law.icc.ibc.2009"
     assert second["page"] == 174 and second["file"] == "gov.law.nfpa.101.2012.pdf"
     off = {"id": "y", "group": present.LAW_GROUP, "law_key": "maine/maine_state",
-           "detail": {"quotes": [{"text": "a"}], "sources": []}}
+           "detail": {"quotes": [{"text": "a"}, {"text": "b"}],
+                      "sources": [{"file": "icc.ibc.2009.pdf", "page": 265, "lines": [76, 78]}]}}
     present.law_quote_sources([off])
-    assert "file" not in off["detail"]["quotes"][0]          # lists that don't match: never another's source
+    assert not any("file" in q for q in off["detail"]["quotes"])   # lists that don't match: never another's source
 
 
 def test_a_part_row_carries_its_rules_sources_in_its_quotes_order(maine):
