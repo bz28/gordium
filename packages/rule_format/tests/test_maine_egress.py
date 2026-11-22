@@ -274,3 +274,21 @@ def test_each_book_reads_the_travel_measure_its_own_words_define(rules):
 def formula_names_of(text):
     from rule_format import formula
     return formula.names(text) if text.strip() else set()
+
+
+def test_an_nfpa_definition_names_the_measure_nfpa_defines():
+    """NFPA 101 measures travel and common path from points subject to occupancy (7.6.1(1)): a definition drawn only
+    from NFPA 101 that names a measure names the _occupied one, never the IBC's (review round 1, 2026-11-22)."""
+    import yaml
+    from rule_format.rulebook import REPO
+    defs = yaml.safe_load((REPO / "regulations/jurisdictions/maine/maine_state/4_term_definitions/definitions.yaml")
+                          .read_text(encoding="utf-8"))
+    for key, d in defs.items():
+        if not isinstance(d, dict) or not d.get("sources"):
+            continue
+        if {s.get("file") for s in d["sources"]} != {"gov.law.nfpa.101.2012.pdf"}:
+            continue
+        notes = d.get("notes") or ""
+        for measure in ("common_path_of_travel", "egress_travel_distance"):
+            if f"by {measure} " in notes or f"by {measure}." in notes or f"by {measure}(" in notes:
+                raise AssertionError(f"{key}: names {measure}, not {measure}_occupied")

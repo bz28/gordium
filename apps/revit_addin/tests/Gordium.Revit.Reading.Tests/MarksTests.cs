@@ -94,6 +94,17 @@ public sealed class MarksTests
             Assert.Contains(m.Name.Replace("Gordium: ", ""), note);
     }
 
+    [Fact]
+    public void The_stories_tooltip_cites_each_words_own_section()
+    {
+        // review round 1 (2026-11-22): "main entrance side" is 325-8A Column 8's (p.24), never 325-3B STORY's (p.19)
+        var d = Marks.Stories.Description;
+        var story = d.Substring(d.IndexOf("§325-3B", StringComparison.Ordinal));
+        story = story.Substring(0, story.IndexOf(';'));
+        Assert.DoesNotContain("main entrance", story, StringComparison.Ordinal);
+        Assert.Contains("main entrance side, §325-8A", d, StringComparison.Ordinal);
+    }
+
     // ---- reading a mark: unset is not stated -------------------------------------------------------------------
 
     [Fact]

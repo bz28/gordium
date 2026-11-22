@@ -190,7 +190,7 @@ public static class Marks
     public static readonly MarkDefinition Stories = new(
         "Gordium: Stories", new("bf758947-8ee4-490c-a499-dee706a6f1e7"), MarkValueKind.Integer, MarkBinding.Instance,
         [ProjectInformation], "facts.stories",
-        "The building's number of stories as the City of Ithaca counts them (§325-3B STORY: from one floor level to the next floor or the roof, counted at the main entrance side). " +
+        "The building's number of stories as the City of Ithaca counts them (§325-3B STORY: from one floor level to the next floor or the roof; counted at the main entrance side, §325-8A Column 8)." +
         "A basement counts when the floor above it is more than 6 ft above the grade plane or more than 12 ft above the finished ground at any point; a cellar never counts; " +
         "a mezzanine doesn't; an attic doesn't when unfinished and without human occupancy. A whole number, 1 or more: kept only within what the drawing allows. " +
         "Blank: the count is read from the drawing, and needs review where the drawing allows more than one.");
