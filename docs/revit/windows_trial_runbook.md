@@ -303,3 +303,58 @@ stable Revit 2027 release and pyRevit v7's CPython is experimental, which is why
 same Python worker. CI already runs the tests on Windows (`.github/workflows/ci.yml`, job `windows`). The commands
 and file layouts above were read from the repository, and the worker, its BOM refusal and the conformance command
 were run on the Mac.
+
+## 8. The New York eval
+
+Two New York buildings, each built in Revit from the repository's own description files, marked, checked with
+**Check my project** by request file (no clicks), and compared rule by rule with its answer key. Like the Portland
+day-care eval, every mark is an eval assumption standing in for the architect, written with its reason.
+
+| Building | Built from | Marks | Answer key | Checked |
+|---|---|---|---|---|
+| 80 South William St, Orangetown | `test_data/real_houses/orangetown_ny_80_south_william/revit_build_data.json` (layout.yaml and house.yaml) | its `eval_marks.yaml`: rooms' sleeping, escape windows, the front door, the seven `has_none` ticks, a stand-in lot's facts | `hand_check.yaml` (truth and prediction, 115 rules) | egress only: Ithaca's zoning doesn't apply there |
+| 106 Ithaca Rd | `test_data/test_sites/new_york/ithaca_city/106_ithaca_rd/revit_build_data.json` (the architects' spreadsheet) | its `eval_marks.yaml`: Project Information only | the spreadsheet's PASS/FAIL on its 11 rows | zoning (R-1b): the box has no interior |
+
+`apps/revit_addin/tools/evals/make_ny_build_data.py` writes the build data (`--check`: is it current); `eval_marks_request.py`
+the three requests; `compare_check_result.py` the comparison. The add-in must be this branch's (it builds several
+levels, a lot and spot grades, and marks windows by their Mark). Each request is taken once while Revit is idle, and
+in one idle the add-in takes a check before a marks request before a build, so **put each request in place only once
+the one before it has its line in `results.jsonl`**.
+
+In PowerShell, from the worktree (`C:\Users\benja\Documents\gordium_nyeval`), Revit closed:
+
+```powershell
+$T = "$env:LOCALAPPDATA\Gordium\trial"; $E = "$T\ny_eval"; New-Item -ItemType Directory -Force $E | Out-Null
+$py = "C:\Users\benja\Documents\gordium\.venv\Scripts\python.exe"
+powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps1 -Python $py
+foreach ($b in @(@{n="orangetown"; d="test_data\real_houses\orangetown_ny_80_south_william"},
+                 @{n="106_ithaca_rd"; d="test_data\test_sites\new_york\ithaca_city\106_ithaca_rd"})) {
+  & $py apps\revit_addin\tools\eval_marks_request.py "$($b.d)\eval_marks.yaml" --model "$E\$($b.n)_built.rvt" `
+    --save-as "$E\$($b.n)_marked.rvt" --out "$E\$($b.n)_set_marks.json" --build-data "$PWD\$($b.d)\revit_build_data.json" `
+    --build-out "$E\$($b.n)_build.json" --check-out "$E\$($b.n)_check.json"
+}
+```
+
+Then, for each building in turn (Revit running and idle; `$n` = `orangetown`, then `106_ithaca_rd`):
+
+1. `Copy-Item "$E\${n}_build.json" "$T\build_model_request.json"`. Wait for the `build_model` line: `"ok": true` and
+   `"all_built": true` (`failed` empty). Orangetown: walls 41, windows 14, the door 1 (`doors` says "no swing in the
+   data, left as Revit placed it"), floors 3, ceilings 17, rooms 17 placed and enclosed, each area beside house.yaml's;
+   106 Ithaca Rd: walls 4, the roof slab, the lot, 4 spot grades.
+2. `Copy-Item "$E\${n}_set_marks.json" "$T\set_marks_request.json"`. Wait for the `set_marks` line: `"ok": true`,
+   `refused` empty (Orangetown: 38 applied: the 17 rooms' sleeping marks, the 14 windows' escape marks and their 4
+   types' operations, the door's exit and escape marks and its type's operation; 106 Ithaca Rd: none, the copy saved).
+3. `Copy-Item "$E\${n}_check.json" "$T\check_project_request.json"`. Wait for the `check_project` line with an
+   `answer` (`missing` empty: if it lists a fact, the request's marks didn't take; nothing was checked). Orangetown's
+   `notes` should say no clear opening is confirmed on any window or the door, and nothing else is left out.
+4. `& $py apps\revit_addin\tools\evals\compare_check_result.py $n "$T\results.jsonl" --model "${n}_marked.rvt"`. It writes
+   the building's `revit_eval_comparison.yaml` and exits 0 when nothing differs that wasn't worked out beforehand.
+
+**What to expect** (worked out on the real worker from the same readings, `apps/revit_addin/tools/tests/test_ny_eval.py`):
+Orangetown, every one of the 115 egress rules as hand_check.yaml predicts (1 complies, 33 not applicable, 81 needs
+review), 18 more cautious than the truth for evaluation.md's reasons, no false pass; its three `has_none` readings
+come back as ticks, so they show not applicable rather than as readings to confirm (named, not a failure).
+106 Ithaca Rd: 9 of the 11 rows the architects' answer, coverage failing as theirs does; stories needs review and
+parking is not checked, because Project Information has no Stories, bedrooms or parking mark (both named in its
+`eval_marks.yaml` with their source). Anything else is a finding: a Revit reading that differs from the description
+(the comparison names the rule), or a build that drew something differently (the `build_model` line says what).
