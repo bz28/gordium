@@ -488,6 +488,22 @@ labels:
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
+  202:emergency_escape_and_rescue_opening:
+    label: reference
+    topic: definitions
+    reason: 'Defines EMERGENCY ESCAPE AND RESCUE OPENING, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 42
+      lines:
+      - 14
+      - 14
+      quote: '[BE] EMERGENCY ESCAPE AND RESCUE OPENING. An operable exterior window, door or other similar device that provides
+        for a'
+    piece_sha256: 2e3b4be459c83e184ca9490e00d148447e710ffd44d5ad74cb43c97c1522cf0e
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
   202:exit:
     label: reference
     topic: definitions
@@ -1161,6 +1177,22 @@ labels:
       quote: '[BE] OCCUPANT LOAD. The number of persons for which the means of egress of a building or portion thereof is
         designed.'
     piece_sha256: 34acc708103436bec61308e893be03c30850fa95033e704b590fb2544f2235dc
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  202:occupiable_roof:
+    label: reference
+    topic: definitions
+    reason: 'Defines OCCUPIABLE ROOF, a word the brought-in sections use: a definition, no requirement.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 55
+      lines:
+      - 23
+      - 23
+      quote: '[BG] OCCUPIABLE ROOF. An exterior space on a roof that is designed for human occupancy, other than maintenance
+        or repair, and'
+    piece_sha256: 147025df4dc91f66629e0181e397529266df09bf2fb79182e9c5622482bd5cc9
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft
@@ -2039,6 +2071,101 @@ labels:
         from any space with an occupant load of 501 to 1,000. Four exits or exit access doorways shall be provided from any
         space with an occu- pant load greater than 1,000.
     piece_sha256: 6f99daba63cd22d6c6b869777291d20039e0d258954f3ac6ed5b12627f802bb7
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.3.3:
+    label: rule
+    topic: means_of_egress
+    reason: 'Each story has at least the number of exits Table 1006.3.3 gives for its occupant load (two up to 500, three
+      from 501 to 1,000, four above), one only where 1006.3.4 permits it: measurable per story.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 48
+      - 50
+      quote: 1006.3.3 Egress based on occupant load. Each story and occupiable roof shall have the minimum number of separate
+        and distinct exits, or access to exits, as specified in Table 1006.3.3. A single exit or access to a single exit shall
+        be permitted in accor- dance with Section 1006.3.4. The required number of exits, or exit access stairways or ramps
+        providing access to exits, from any
+    piece_sha256: ab5929caa236b71491d5c9c1f07057e32c589e8140ffa35b773c94f676c8ebd8
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1006.3.3:
+    label: reference
+    topic: means_of_egress
+    reason: 'The three counts 1006.3.3 uses, by occupant load, for every occupancy: all of them are applied by general.bc_1006_3_3_story_exits
+      (no row left for a flag).'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 316
+      lines:
+      - 55
+      - 57
+      quote: 1-500 2 501-1,000 3 More than 1,000 4
+    piece_sha256: 4130d9a0b41818952db31430570d7fc36e48882a9d5af889636a9a361ed22c71
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell's
+      x position) and on the page image.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.3.4:
+    label: reference
+    topic: means_of_egress
+    reason: 'Says when a story may have a single exit (item 1: Table 1006.3.4(2)''s values; items 2 to 5: rooms that exit
+      directly outside, mechanical parking, Groups R-3 and R-4, dwelling units): a permission the story rules read (general.bc_1006_3_3_story_exits,
+      general.bc_1007_1_1_remoteness); where an item a rule doesn''t measure may apply, they need review, never fail.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 317
+      lines:
+      - 3
+      - 6
+      quote: '1006.3.4 Single exits. A single exit or access to a single exit shall be permitted from any story or occupiable
+        roof where one of the following conditions exists: 1. The occupant load, number of dwelling units and exit access
+        travel distance do not exceed the values in Table 1006.3.4(1) or 1006.3.4(2).'
+    piece_sha256: c32fcf403157de323e6a97a6c19a9d6c7f15e91077c2b780696a12e340b94a47
+    notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  Table 1006.3.4(2):
+    label: rule
+    topic: means_of_egress
+    reason: 'The values 1006.3.4 item 1 uses: Group I on the first story above or below grade plane may have one exit with
+      at most 10 occupants and 75 feet of exit access travel; on the second story and above, not at all.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 317
+      lines:
+      - 40
+      - 41
+      quote: First story above or below grade plane and occupiable H-2, H-3 3 25 roofs over the first story above grade plane
+        H-4, H-5, I, R-1, R-2a, c 10 75
+    piece_sha256: 9b63439c3fa895032dde52a5271827c65c4a1563d2fa2f2ef15058a094a51be2
+    notes: 'Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run. Read by position (each cell''s
+      characters and x positions on p.317) and on the page image: the I row is H-4, H-5, I, R-1, R-2 (notes a, c) | 10 | 75,
+      under ''First story above or below grade plane and occupiable roofs over the first story above grade plane''; Group
+      I is not in the second-story row. Gordium''s rules are drafted for Group I-4 (day care) first; the table''s other rows
+      have a flag of their own (a section''s rule checks only its own row).'
+    drafted_by: claude_code/claude-opus-5-5
+    status: draft
+  1006.3.4.1:
+    label: flag
+    topic: means_of_egress
+    reason: 'Mixed occupancies served by single exits: each occupancy within its row, the ratios summed to not more than one:
+      other groups than I-4, a person checks.'
+    sources:
+    - file: gov.ny.building.2025.pdf
+      page: 317
+      lines:
+      - 54
+      - 56
+      quote: 1006.3.4.1 Mixed occupancies. Where one exit, or exit access stairway or ramp providing access to exits at other
+        stories, is permitted to serve individual stories, mixed occupancies shall be permitted to be served by single exits
+        provided that each indi- vidual occupancy complies with the applicable requirements of Table 1006.3.4(1) or 1006.3.4(2)
+        for that occupancy. Where
+    piece_sha256: 580a41a3d1f1bbe500ce51da960d1605fa761c200d2bdadcc4eadab7ee52f9db
     notes: Drafted by hand in a Claude Code session (2026-11-21); no recorded labeling run.
     drafted_by: claude_code/claude-opus-5-5
     status: draft

@@ -53,11 +53,14 @@ documents:
       # with SECTION 309 after it); 508.2 (accessory occupancies, p.147, with 508.3 after it); 903.3.1.1 and 903.3.1.2
       # (the two sprinkler systems the travel, common path and remoteness limits name, pp.273-274, each without the
       # parts under it: their exempt locations and extent are the architect's statement); 1006.2.1 and Table
-      # 1006.2.1 (common path, spaces with one exit, p.315, with 1006.2.2 after); 1007.1 (exit separation, p.318, with
+      # 1006.2.1 (common path, spaces with one exit, p.315, with 1006.2.2 after); 1006.3.3, Table 1006.3.3, 1006.3.4
+      # and Table 1006.3.4(2) (a story's number of exits, and when one will do: pp.316-317, so a story is held to two
+      # separated exits only where it needs two; review round 3, 2026-11-22); 1007.1 (exit separation, p.318, with
       # SECTION 1008 after); 1016.2 (egress through intervening spaces, pp.340-341) and Section 1017 (exit access
       # travel distance, pp.341-342, with SECTION 1018 after); 1020.5 (dead ends, p.344, with 1020.6 after).
-      pages: 32-68, 79, 147, 273-274, 315, 318, 340-342, 344
-      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1007.1', '1016.2', '1017', Table 1017.2, '1020.5']
+      pages: 32-68, 79, 147, 273-274, 315-318, 340-342, 344
+      sections: ['308.5', '508.2', '1006.2.1', Table 1006.2.1, '1006.3.3', Table 1006.3.3, '1006.3.4', Table 1006.3.4(2),
+                 '1007.1', '1016.2', '1017', Table 1017.2, '1020.5']
       alone: ['903.3.1.1', '903.3.1.2']   # brought in without the parts under them (exempt locations, balconies, attics)
       definitions:   # brought in by name, each with why: a term a rule measures with that no section prints in italics
         202:floor_area_gross: 508.2.3 prints "floor area of the story" in roman, so its italics bring in no definition;
@@ -67,6 +70,9 @@ documents:
                    # table on the pages read is named, brought in or not
         Table 903.2.11.6: p.273 lines 14-36
         Table 1006.2.1: p.315 lines 14-44
+        Table 1006.3.3: p.316 lines 52-57
+        Table 1006.3.4(1): p.317 lines 17-32
+        Table 1006.3.4(2): p.317 lines 33-53
         Table 1017.2: p.341 lines 24-59
         Table 1020.2: p.344 lines 3-18
         Table 1020.3: p.344 lines 25-34

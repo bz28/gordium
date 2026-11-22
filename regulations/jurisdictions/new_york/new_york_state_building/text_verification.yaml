@@ -8,21 +8,21 @@ copy_checked: 'The Public.Resource.Org copy on the Internet Archive (sha256 in 1
   bought from ICC.'
 second_reading:
   by: claude_code/claude-opus-5-5 (two helper agents that never saw the extracted text, one for pp.32-53 and one
-    for pp.54-344, a third for p.47's FLOOR AREA, GROSS and NET (brought in 2026-11-22), and a helper for the comparison
-    words)
+    for pp.54-344, a third and a fourth for the pieces brought in on 2026-11-22 (p.47's FLOOR AREA, GROSS and NET;
+    1006.3.3, 1006.3.4 and their tables), and a helper for the comparison words)
   'on': 2026-11-21
   how: 'Each brought-in page was rendered from the PDF at 170 dpi with a red box around every brought-in piece,
-    labeled by its id (46 pages, 152 boxes, p.47''s two on 2026-11-22); helpers that never saw the extracted text
-    transcribed every line of every box from the images alone (tables row by row, raised characters written as sealed
-    marks); the transcript went through document_extraction/numbers.py: 150 pieces, 296 numbers, every piece agrees.
-    The two tables were also read a third way, by position: each cell''s characters with their sizes and x positions
-    (pdfplumber, p.315 and p.341), which shows each raised note letter (5.04-point beside 8.4-point digits) the
-    plain text runs into its cell; sources.yaml brought_in.misread puts each right by line, and both readings agree
-    with the cells so read. A third helper that saw only each piece''s transcribed text and its numbers'' values
-    (and, for a table, the sentence that uses it) marked each number''s comparison from the whole sentence (second_reading_comparisons);
-    where it differs from the recorded words, a flag says which is right. The transcript, the page images and the
-    comparison files are kept in the code cache (second_reading/step_1_*), outside the repo, since they hold the
-    book''s words.'
+    labeled by its id (48 pages, 159 boxes; p.47''s two and pp.42, 55, 316-317''s seven on 2026-11-22); helpers
+    that never saw the extracted text transcribed every line of every box from the images alone (tables row by row,
+    raised characters written as sealed marks); the transcript went through document_extraction/numbers.py: 157
+    pieces, 332 numbers, every piece agrees. The tables were also read a third way, by position: each cell''s characters
+    with their sizes and x positions (pdfplumber, pp.315-317 and p.341), which shows each raised note letter (5.04-point
+    beside 8.4-point digits) the plain text runs into its cell; sources.yaml brought_in.misread puts each right
+    by line, and both readings agree with the cells so read. A third helper that saw only each piece''s transcribed
+    text and its numbers'' values (and, for a table, the sentence that uses it) marked each number''s comparison
+    from the whole sentence (second_reading_comparisons); where it differs from the recorded words, a flag says
+    which is right. The transcript, the page images and the comparison files are kept in the code cache (second_reading/step_1_*),
+    outside the repo, since they hold the book''s words.'
 pieces:
   '202':
     piece_sha256: d517861fa9698a910e750045fb415f0e7138ffa3e3a1ef2fd689171fda2f98b3
@@ -364,6 +364,12 @@ pieces:
     - one or more
     second_reading_comparisons:
     - '>='
+  202:emergency_escape_and_rescue_opening:
+    piece_sha256: 2e3b4be459c83e184ca9490e00d148447e710ffd44d5ad74cb43c97c1522cf0e
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
   202:exit:
     piece_sha256: 6f4c6a822f8c6d6adda671ed50e7453bb47a9e1f6137adb4070c0ab424429474
     numbers: []
@@ -693,6 +699,12 @@ pieces:
     second_reading_comparisons: []
   202:occupant_load:
     piece_sha256: 34acc708103436bec61308e893be03c30850fa95033e704b590fb2544f2235dc
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  202:occupiable_roof:
+    piece_sha256: 147025df4dc91f66629e0181e397529266df09bf2fb79182e9c5622482bd5cc9
     numbers: []
     second_reading: agrees
     second_reading_numbers: []
@@ -1425,6 +1437,158 @@ pieces:
       occupant load of 501 to 1,000'', then ''1,000'' (>): ''greater than 1,000'' (recorded with its words). the
       recorded words miss it (numbers.py reads comparison words only directly before a number or after its unit).
       The second reading is right.'
+  1006.3.3:
+    piece_sha256: ab5929caa236b71491d5c9c1f07057e32c589e8140ffa35b773c94f676c8ebd8
+    numbers: []
+    second_reading: agrees
+    second_reading_numbers: []
+    second_reading_comparisons: []
+  Table 1006.3.3:
+    piece_sha256: 4130d9a0b41818952db31430570d7fc36e48882a9d5af889636a9a361ed22c71
+    numbers:
+    - '1'
+    - '2'
+    - '501'
+    - '000'
+    - '3'
+    - more than 1,000
+    - '4'
+    second_reading: agrees
+    second_reading_numbers:
+    - '1'
+    - '2'
+    - '501'
+    - '000'
+    - '3'
+    - more than 1,000
+    - '4'
+    second_reading_comparisons:
+    - between
+    - '>='
+    - between
+    - between
+    - '>='
+    - '>'
+    - '>='
+    flags:
+    - 'Exit counts: ''2'', ''3'', ''4'' (>=), the column MINIMUM NUMBER OF EXITS OR ACCESS TO EXITS PER STORY; recorded
+      ''none'' (a table prints no comparison words). Occupant-load rows: ''1'' and ''501'' (between), the ranges
+      printed ''1-500'' and ''501-1,000''; numbers.py reads no number joined to a hyphen before it, so it loses
+      500 and reads the ''000'' of ''1,000'' (between) alone; ''more than 1,000'' (>) is recorded with its words.
+      The second reading is right; read cell by cell by position (p.316) and on the page image.'
+  1006.3.4:
+    piece_sha256: c32fcf403157de323e6a97a6c19a9d6c7f15e91077c2b780696a12e340b94a47
+    numbers:
+    - one
+    - one
+    - one
+    - one
+    - one
+    - not less than two
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - one
+    - one
+    - one
+    - one
+    - not less than two
+    second_reading_comparisons:
+    - none
+    - none
+    - none
+    - none
+    - none
+    - '>='
+  Table 1006.3.4(2):
+    piece_sha256: 9b63439c3fa895032dde52a5271827c65c4a1563d2fa2f2ef15058a094a51be2
+    numbers:
+    - one
+    - one
+    - '49'
+    - '75'
+    - '3'
+    - '25'
+    - '10'
+    - '75'
+    - '29'
+    - '75'
+    - '29'
+    - '75'
+    - third
+    - 1 foot
+    - 304.8 mm
+    - '1031'
+    - 100 foot
+    - not more than 100 foot
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - one
+    - '49'
+    - '75'
+    - '3'
+    - '25'
+    - '10'
+    - '75'
+    - '29'
+    - '75'
+    - '29'
+    - '75'
+    - third
+    - 1 foot
+    - 304.8 mm
+    - '1031'
+    - 100 foot
+    - not more than 100 foot
+    second_reading_comparisons:
+    - none
+    - none
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - <=
+    - none
+    - none
+    - none
+    - none
+    - <=
+    - <=
+    flags:
+    - 'Exit access travel cells: ''25'', ''75'' (<=), each a length in feet (the column heading prints ''TRAVEL
+      DISTANCE (feet)'', never beside the number; read by position on p.317 and on the page image), recorded ''none'';
+      1006.3.4 item 1 permits one exit where they ''do not exceed the values'', so each is a maximum. Footnotes
+      b and d: ''100 foot'' (<=) (''a maximum exit access travel distance of 100 feet''). The second reading is
+      right.'
+    - 'Occupant load cells: ''3'', ''10'', ''29'', ''49'' (<=), counts of occupants (MAXIMUM OCCUPANT LOAD PER STORY),
+      recorded ''none''; each is a maximum for a story with one exit. The second reading is right.'
+  1006.3.4.1:
+    piece_sha256: 580a41a3d1f1bbe500ce51da960d1605fa761c200d2bdadcc4eadab7ee52f9db
+    numbers:
+    - one
+    - 1004.1 inch
+    - not exceed one
+    - four
+    - not exceed one
+    second_reading: agrees
+    second_reading_numbers:
+    - one
+    - 1004.1 inch
+    - not exceed one
+    - four
+    - not exceed one
+    second_reading_comparisons:
+    - none
+    - none
+    - <=
+    - none
+    - <=
   '1007.1':
     piece_sha256: b1b81f60ecaffaae9e69c0be44962f767c2651b14313a6419e68e616da2581f7
     numbers:
