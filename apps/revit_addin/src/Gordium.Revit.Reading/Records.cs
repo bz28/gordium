@@ -340,8 +340,12 @@ public sealed record InstanceItem(IReadOnlyList<GeometryItem>? Items) : Geometry
 public sealed record OtherItem(string TypeName) : GeometryItem;
 
 /// <summary>An element that can be a lot line: a property line (<c>PropertyLine</c>: its curves from
-/// <c>GetBoundary()</c> in Revit 2027, from its geometry in 2026, to check) or a model line.</summary>
-public sealed record LotLineElement(string UniqueId, bool IsPropertyLine, IReadOnlyList<LotCurve> Curves);
+/// <c>GetBoundary()</c> in Revit 2027, from its geometry in 2026, to check) or a model line. <paramref name="Unbound"/>:
+/// how many of its curves have no ends (<c>Curve.IsBound</c> false: a full circle or ellipse drawn as one curve, or
+/// an unbound line), left out of <paramref name="Curves"/> because they have no end points to give; the Revit layer
+/// only counts them, and <see cref="LotReader"/> decides what they mean (the lot then needs review, never read
+/// without them).</summary>
+public sealed record LotLineElement(string UniqueId, bool IsPropertyLine, IReadOnlyList<LotCurve> Curves, int Unbound = 0);
 
 /// <summary>One curve of a lot line: its ends; whether it is a <c>Line</c>; its length (<c>Curve.Length</c>); and,
 /// for any other curve, a point at a normalised parameter 0..1 (<c>Curve.Evaluate(t, true)</c>).</summary>

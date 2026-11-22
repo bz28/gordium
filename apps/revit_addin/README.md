@@ -151,7 +151,10 @@ nothing. So the decisions are built and tested here, on the Mac.
    building measure needs review); one not loaded, or a closed workset in the model, means not everything was
    looked at (`inventory_complete: false`).
 5. **The lot:** the lot picked, else the one closed property line; never an open one; arcs followed closely. A
-   property line inside a linked model makes the lot need review (`lot_block`): the lot may be the link's.
+   property line inside a linked model makes the lot need review (`lot_block`): the lot may be the link's. A curve
+   with no ends (`Curve.IsBound` false: a full circle or ellipse drawn as one curve) is never read as a lot line and
+   never left out: a property line holding one makes the lot need review (unless another lot was picked), and so
+   does a picked line holding one; a model line nobody picked is no lot line at all.
 6. **Coordinates:** every point turned once into shared (survey) coordinates; a box turned by all 8 corners.
    Units are always feet (Revit's own).
 

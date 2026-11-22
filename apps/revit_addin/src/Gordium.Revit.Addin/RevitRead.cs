@@ -288,18 +288,22 @@ internal static class RevitRead
     }
 
     /// <summary>Every property line (its boundary, <c>PropertyLine.GetBoundary()</c>, Revit 2027) and every model
-    /// line the architect could pick (<c>CurveElement</c>).</summary>
+    /// line the architect could pick (<c>CurveElement</c>). A curve with no ends (<c>Curve.IsBound</c> false: a full
+    /// circle or ellipse drawn as one curve; <c>GetEndPoint</c> throws on it) is only counted
+    /// (<see cref="LotLineElement.Unbound"/>), never read; LotReader decides what it means.</summary>
     internal static List<LotLineElement> LotLines(Document doc)
     {
         var lines = new List<LotLineElement>();
         foreach (var pl in new FilteredElementCollector(doc).OfClass(typeof(PropertyLine)).Cast<PropertyLine>().ToList())
-            lines.Add(new LotLineElement(pl.UniqueId, true,
-                pl.GetBoundary().SelectMany(loop => loop).Select(Curve).ToList()));
+            lines.Add(LotLine(pl.UniqueId, true, pl.GetBoundary().SelectMany(loop => loop).ToList()));
         foreach (var ce in new FilteredElementCollector(doc).OfClass(typeof(CurveElement)).Cast<CurveElement>().ToList())
             if (ce.CurveElementType == CurveElementType.ModelCurve && ce.GeometryCurve is { } c)
-                lines.Add(new LotLineElement(ce.UniqueId, false, [Curve(c)]));
+                lines.Add(LotLine(ce.UniqueId, false, [c]));
         return lines;
     }
+
+    private static LotLineElement LotLine(string id, bool isPropertyLine, List<Curve> curves) =>
+        new(id, isPropertyLine, curves.Where(c => c.IsBound).Select(Curve).ToList(), curves.Count(c => !c.IsBound));
 
     private static LotCurve Curve(Curve c) =>
         new(P(c.GetEndPoint(0)), P(c.GetEndPoint(1)), c is Line, c.Length, t => P(c.Evaluate(t, true)));

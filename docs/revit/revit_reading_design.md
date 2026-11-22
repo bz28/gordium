@@ -142,6 +142,7 @@ closed one the lot is `no_lot_outline`.
 | A linked model holding a property line, at any depth (in code; Ben to confirm) | `lot_block` on the site, whatever lot is read (as Rhino's block holding anything on the Site layer): the lot may be the link's, not the host's | **new scene G** |
 | A straight piece | One lot line: its two ends | 01 |
 | An arc (or any curved piece) | Points along it at most 0.25 ft apart (at least 16), `curved: true`, never its chord (as `read_3dm._edges`) | 17 |
+| A curve with no ends (`Curve.IsBound` false: a full circle or ellipse drawn as one curve; found on Autodesk's Snowdon Towers sample, where reading its ends failed the whole check) | The Revit layer only counts it (`LotLineElement.Unbound`), never reads it. A property line holding one, nothing picked: `lot: null` and `tool_words` saying so (it may be the lot, so no other property line is taken as the one, and its other curves are never read as a lot without it). A picked line holding one (property line or model line): `lot: null`, `tool_words` saying so. Another lot picked: that lot is read. A model line nobody picked: no lot line, as before. A street-edge click on such a property line keeps no edge | Reader tests (`A_lot_line_with_a_curve_with_no_ends_...`) |
 
 Reading a property line's boundary: `PropertyLine.GetBoundary()` exists only in the Revit 2027 API. In Revit 2026
 the reader takes the property line's curves from its geometry (**to check** that `get_Geometry` gives them, and that an arc comes back as an `Arc`, never already broken into
