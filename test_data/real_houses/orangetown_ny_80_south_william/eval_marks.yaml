@@ -79,6 +79,8 @@ project_information:
      why: "STAND-IN: Check my project checks the City of Ithaca only and sends nothing without a zone; the lot is in the Town of Orangetown, so every zoning row is left out of the comparison"}
   - {mark: "Gordium: Use", value: one_family_detached, why: "A-1 project data: single-family dwelling (evaluation.md, 'The run')"}
   - {mark: "Gordium: Lot surveyed", value: false, why: "the stand-in lot is no survey (the cautious word)"}
+  - {mark: "Gordium: Stories above grade plane", value: 3,
+     why: "EVAL ASSUMPTION, a bound true whatever the basement is: the house has three levels (A-2 basement and main floor, A-3 second floor), the space over the second floor an unfinished 'ATTIC' (A-5), not a story above grade plane (RCNYS R202 ATTIC; only a habitable attic is one, R316.3); so at most 3 stories above grade plane, and the Residential Code covers it (R101.2 item 1). Without it the check can't tell which code governs (no ground is marked, so Ithaca's stories count can't stand in: docs/decisions/2026-11-22_which_ny_code.md). Added 2026-11-22"}
   - {mark: "Gordium: Street edge", value: "-20 -30 62 -30",
      why: "the stand-in lot's south edge (revit_build_data.json lot: the house's front, the porch, faces south on A-2), in Revit's internal feet, a new project's shared coordinates"}
   - {mark: "Gordium: This house has no sleeping lofts", value: true, why: "house.yaml has_none sleeping_loft: none drawn (A-2, A-3, A-5)"}
