@@ -269,9 +269,17 @@ public sealed class CheckProjectCommand : IExternalCommand
         id is null ? null : long.TryParse(id, NumberStyles.Integer, CultureInfo.InvariantCulture, out var n)
             ? doc.GetElement(new ElementId(n))?.Name ?? id : id;
 
-    /// <summary>A UniqueId as the architect finds the element: its category and Revit's element id (Select by ID).</summary>
-    private static string? Label(Document doc, string uid) =>
-        doc.GetElement(uid) is { } e ? $"{e.Category?.Name ?? "element"} id {e.Id.Value.ToString(CultureInfo.InvariantCulture)}" : null;
+    /// <summary>A UniqueId as the architect names the element (ElementNames: "CLOSET (40)", "Door D06", "Level: 1st
+    /// floor"), by Revit's id only when nothing else names it; null for one not in the model.</summary>
+    private static string? Label(Document doc, string uid)
+    {
+        if (doc.GetElement(uid) is not { } e)
+            return null;
+        var room = e as SpatialElement;
+        var name = room is not null ? e.get_Parameter(BuiltInParameter.ROOM_NAME)?.AsString() : e.Name;
+        var mark = room is null ? e.get_Parameter(BuiltInParameter.ALL_MODEL_MARK)?.AsString() : null;
+        return ElementNames.Of(e.Category?.Name, name, room?.Number, mark, e.Id.Value);
+    }
 
     /// <summary>A check asked for by file while Revit is idle, no clicks (check_project_request.json:
     /// <c>{"model": "&lt;path&gt;.rvt", "marks": {"Gordium: Zone": "R-1b", "Gordium: Lot surveyed": true, ...}}</c>,
