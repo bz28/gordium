@@ -346,3 +346,10 @@ def test_a_row_with_no_reason_on_a_part_with_readings_has_its_own_causes(maine):
         "r9": {"name": "CLOSET (40)", "why": "the point (1, 2) has no route to any exit", "stop": "no_route"}}}}
     got = panel_data.causes(rule, row, {}, part, more, {}, dict(NEW_DAY_CARE), allowed, ())
     assert [c["key"] for c in got] == ["rooms:r9"] and got[0]["words"] == "1 room has no route to an exit: CLOSET (40)"
+
+
+def test_a_zoning_row_waiting_on_facts_names_them_in_the_architects_words():
+    """The seed session's ADU row: its card says the facts as the "Enter …" button does, never the facts' names."""
+    got = present.zoning_causes({"needs": ["accessory_dwelling_unit"], "status": present.REVIEW})
+    assert got == [{"kind": "mark", "key": "facts:accessory_dwelling_unit", "words": "Enter whether an ADU is on the lot",
+                    "elements": [], "needs": ["accessory_dwelling_unit"]}]

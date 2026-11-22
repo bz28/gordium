@@ -2312,8 +2312,12 @@ def zoning_causes(item: dict) -> list[dict]:
     objects = [o for o in item.get("objects") or [] if isinstance(o, str)]
     needs = [n for n in item.get("needs") or [] if isinstance(n, str)]
     if needs:
-        return [{"kind": panel_data.MARK, "key": "facts:" + ",".join(sorted(needs)),
-                 "words": item.get("hint") or ("Enter " + ", ".join(needs)), "elements": [], "needs": needs}]
+        try:                                          # the facts' own words, as the row's "Enter …" button says them
+            words = rhino_logic.enter_words(needs)
+        except KeyError:
+            words = "Enter " + ", ".join(n.replace("_", " ") for n in needs)
+        return [{"kind": panel_data.MARK, "key": "facts:" + ",".join(sorted(needs)), "words": words,
+                 "elements": [], "needs": needs}]
     if item.get("hint") in (PICK_MAIN, PICK_ADU):
         return [{"kind": panel_data.MARK, "key": "pick:" + item["hint"], "words": item["hint"], "elements": objects}]
     reason = (item.get("reason") or "").strip()
