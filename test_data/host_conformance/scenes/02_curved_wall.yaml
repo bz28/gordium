@@ -18,6 +18,12 @@ expected:
   R-1b.yard_projections: needs_review
   R-1b.height: needs_review
   R-1b.stories: needs_review
+  # 2026-11-22: the stories unknown, so which New York code governs can't be told (RCNYS R101.2: not
+  # more than three stories above grade plane; design_checker/code_scope.py): both books wait, each with
+  # a needs-review line saying so
+  egress.code_scope: needs_review
+  egress.code_scope#new_york/new_york_state_building: needs_review
+  egress.waiting#new_york/new_york_state_building: not_checked
   R-1b.lot_coverage: needs_review      # the footprint isn't known
   # found on running (not in the hand-working): with the building unreadable, Gordium can't tell how many buildings
   # there are or where, so four rows that don't apply to one measured house appear, each needing review

@@ -331,11 +331,15 @@ public sealed class ResultRowsTests(RealWorker worker) : IClassFixture<RealWorke
         h.ProjectMarks[Marks.Use.Guid] = new(true, Text: "one_family_detached");
         h.ProjectMarks[Marks.LotSurveyed.Guid] = new(true, 1);
         h.ProjectMarks[Marks.StreetEdge.Guid] = new(true, Text: StreetEdges.Format([(edge.Start, edge.End)]));
+        // a house of a basement and one story: no ground is marked, so Ithaca's count can't stand in, and the stories
+        // above grade plane are stated for the Residential Code to govern (code_scope.py; else both books run)
+        h.ProjectMarks[Marks.StoriesAboveGradePlane.Guid] = new(true, 2);
         var client = await worker.RunningAsync();
         var prepared = await ProjectCheck.PrepareAsync(outside, h.Model(), new WorkerLeftOut(client));
         var result = await ProjectCheck.SendAsync(client, prepared.Request!);
         var model = ResultRows.Build(result, "phase 2", prepared.OptionsChecked, prepared.Inside, prepared.Street);
 
+        Assert.Equal("residential_code", result.Raw.GetProperty("which_code").GetProperty("code").GetString());
         Assert.Equal(result.Groups.Select(g => (g.Key, g.Count)), model.Groups.Select(g => (g.Key, g.Count)));
         Assert.Equal(result.Items.Count, model.Groups.SelectMany(g => g.AllRows).Count());
         var height = model.Groups.SelectMany(g => g.AllRows).Single(r => r.Id.Contains("r319_2_2", StringComparison.Ordinal) && r.Verdict == Verdict.DoesNotComply);
