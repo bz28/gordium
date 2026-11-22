@@ -1182,7 +1182,7 @@ def _slabs_within(plain: list[dict], grade) -> list[dict]:
     """The plain parts that are a slab resting in the building, not a part that may hold a story of its own: each
     starts above the ground, is too thin to hold a story (under 7 ft, R305.1: it could hold none), and lies, in plan,
     within the outline of the parts standing on the ground at least a story tall (their outer outline, its courtyards
-    filled), with its bottom no higher than their top: a floor slab or a roof slab between or over the walls, as a
+    filled), lying wholly within their height (its top no higher than their top): a floor slab or a roof slab between or over the walls, as a
     Revit model draws each floor and roof as its own element (docs/revit/revit_reading_design.md, section 7, "Stories
     of a building drawn as parts"). STORY is "the portion of a building which is between one floor level and the next
     higher floor level or the roof" (§325-3B): such a slab is one of those levels, never the portion between. Anything
@@ -1199,7 +1199,7 @@ def _slabs_within(plain: list[dict], grade) -> list[dict]:
     out = []
     for b in plain:
         lo, hi = _extent(b)
-        if lo is None or lo <= grade + TOL or hi - lo >= STORY_ROOM - TOL or lo > top + TOL or hi > top + TOL:
+        if lo is None or lo <= grade + TOL or hi - lo >= STORY_ROOM - TOL or hi > top + TOL:
             continue
         if _projection(b).difference(outline.buffer(TOL)).area <= 1e-6:
             out.append(b)
