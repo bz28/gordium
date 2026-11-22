@@ -8,7 +8,8 @@ namespace Gordium.Revit.Addin;
 /// checker (the worker) when Revit closes.</summary>
 public sealed class App : IExternalApplication
 {
-    /// <summary>The one worker this Revit session uses, started by the first button that needs it.</summary>
+    /// <summary>The one worker this Revit session uses, started by the first button that needs it. Set and cleared
+    /// only by Trial (WorkerAsync, StopWorker), under its lock.</summary>
     internal static WorkerClient? Worker { get; set; }
 
     public Result OnStartup(UIControlledApplication application)
@@ -179,8 +180,7 @@ public sealed class App : IExternalApplication
         application.ControlledApplication.DocumentClosing -= ResultsPane.OnDocumentClosing;
         application.ThemeChanged -= ResultsPane.OnThemeChanged;
         application.ThemeChanged -= Ribbon.OnThemeChanged;
-        var worker = Worker;
-        Worker = null;
+        var worker = Trial.StopWorker();
         if (worker is not null)
         {
             int? pid = worker.ProcessId;

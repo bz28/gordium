@@ -63,11 +63,24 @@ internal static class Trial
 
     private static readonly object WorkerLock = new();
     private static Task<WorkerClient>? _starting;
+    private static bool _closing;
 
     /// <summary>The worker this Revit session uses, without waiting: the running one, the one being started, or one
     /// started now on a pool thread (Check project starts it before its read, so Python starts while Revit reads; PR
     /// 8). A start that failed is tried again by the next call. One at a time (the lock): a check's start and a
     /// trial tool's never make two.</summary>
+    /// <summary>Takes the session's worker away (Revit closing), under the same lock: the caller disposes it.</summary>
+    internal static WorkerClient? StopWorker()
+    {
+        lock (WorkerLock)
+        {
+            var worker = App.Worker;
+            App.Worker = null;
+            _closing = true;                                  // a start still running stops its worker when it ends
+            return worker;
+        }
+    }
+
     internal static Task<WorkerClient> WorkerAsync()
     {
         lock (WorkerLock)
@@ -83,7 +96,14 @@ internal static class Trial
             {
                 var started = await WorkerClient.StartAsync(Options(clone)).ConfigureAwait(false);
                 lock (WorkerLock)
+                {
+                    if (_closing)
+                    {
+                        started.Dispose();                    // Revit closed while it started: never left running
+                        throw new InvalidOperationException("Revit is closing: the worker was stopped");
+                    }
                     App.Worker = started;
+                }
                 return started;
             });
             return _starting;
