@@ -4,6 +4,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: at least 182.7 sq ft to spare if confirmed
 THE LAW'S WORDS:
   "Aggregate accessory occupan cies shall not occupy more than 10 percent of the building area of the story in which they are located and shall not exceed the tabular values in Table 503," (508.2.1, 2009 International Building Code (IBC), PDF p.111)
 ELEMENTS:
@@ -38,6 +39,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 1 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: 116.16 ft to spare if confirmed
 THE LAW'S WORDS:
   "Where two exits or exit access doorways are required from any portion of the exit access," (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
   "the exit doors or exit access doorways shall be placed a distance apart equal to not less than one-half of the length of the maximum overall diagonal dimension of the building or area to be served measured in a straight line between exit doors or exit access doorways." (1015.2.1, 2009 International Building Code (IBC), PDF p.266)
@@ -1148,6 +1150,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 40 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: up to 19.79 ft over under some reading; see why
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -1210,6 +1213,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 41 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: up to 17.13 ft over under some reading; see why
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -1272,6 +1276,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 42 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: up to 8.11 ft over under some reading; see why
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -1334,6 +1339,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 43 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: up to 5.16 ft over under some reading; see why
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -1396,6 +1402,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 44 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: 17.98 ft to spare if confirmed
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -1458,6 +1465,7 @@ WHAT TO DO:
   1. Resolve what the reason above says (a fact to enter, a mark to set, the model to fix), or decide it by hand against the law's words below.
   2. Show Element 45 in the model. [ShowElements]
   3. Check again once it's changed: only the check changes a verdict. [CheckAgain]
+HOW FAR: at least 19.91 ft to spare if confirmed
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -2108,6 +2116,7 @@ THE LAW'S WORDS:
 
 [184 of 190] complies · Level 1 › CORRIDOR (26) (dead end 7) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
 WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+HOW FAR: 37.53 ft to spare
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -2115,6 +2124,7 @@ ELEMENTS:
 
 [185 of 190] complies · Level 1 › CORRIDOR (26) (dead end 8) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
 WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+HOW FAR: 41.74 ft to spare
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -2122,6 +2132,7 @@ ELEMENTS:
 
 [186 of 190] complies · Level 1 › CORRIDOR (26) (dead end 9) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
 WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+HOW FAR: 41.74 ft to spare
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -2129,6 +2140,7 @@ ELEMENTS:
 
 [187 of 190] complies · Level 1 › CORRIDOR (26) (dead end 10) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
 WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+HOW FAR: 42.41 ft to spare
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -2136,6 +2148,7 @@ ELEMENTS:
 
 [188 of 190] complies · Level 1 › CORRIDOR (26) (dead end 11) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
 WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+HOW FAR: 42.41 ft to spare
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -2143,6 +2156,7 @@ ELEMENTS:
 
 [189 of 190] complies · Level 1 › CORRIDOR (26) (dead end 12) · Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2) · 16.2.5.2
 WHY: Dead-end corridor 20 ft, 50 ft sprinklered (NFPA 16.2.5.2): complies
+HOW FAR: 42.41 ft to spare
 THE LAW'S WORDS:
   "16.2.5.2 No dead-end corridor shall exceed 20 ft (6100 mm), other than in buildings protected throughout by an approved, supervised automatic sprinkler system in accordance with Sec- tion 9.7, in which case dead-end corridors shall not exceed 50 ft (15 m)." (16.2.5.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
 ELEMENTS:
@@ -2150,6 +2164,7 @@ ELEMENTS:
 
 [190 of 190] complies · Level 1 · Travel sleeping room to door at most 50 ft (NFPA 16.2.6.2(3)) · 16.2.6.2
 WHY: Travel sleeping room to door at most 50 ft (NFPA 16.2.6.2(3)): complies
+HOW FAR: 50 ft to spare
 THE LAW'S WORDS:
   "16.2.6.2 Travel distance shall meet all of the following crite- ria, unless otherwise permitted by 16.2.6.3:" (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
   "The travel distance between any point in a sleeping room and an exit access door in that room shall not exceed 50 ft (15 m)." (16.2.6.2, NFPA 101, Life Safety Code, 2012 Edition, PDF p.174)
