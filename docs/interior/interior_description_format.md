@@ -161,7 +161,10 @@ Which rooms a route may cross (decision 1a): a **corridor**, or a room marked `p
 `lockable: false` and `pass_through` given. Every other room is **end-only**: kitchens, accessory storage, toilets,
 closets, workrooms, sleeping rooms, a room that can be locked, and a room whose `use`, `lockable` or `pass_through`
 isn't given. `pass_through: true` on an end-only use, a sleeping room or a room with `lockable: true` is refused:
-the room isn't read and its story's routes need review.
+the room isn't read and its story's routes need review. A closet, accessory storage or toilet whose every opening is
+a door into one end-only room with its `use` given and `lockable: false` is taken as part of that room (Gordium's
+reading, shown with the figures it reaches: route note decision 1a and open question 11): its route leaves through
+that room, never across another end-only room.
 
 A door's centre sits in the middle of its wall, so each of its rooms is found by geometry: that room's face of the
 opening (half the wall's thickness from the centre) is on the room's outline, within 1/16 in. A door under 24 in

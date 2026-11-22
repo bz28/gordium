@@ -96,6 +96,61 @@ area need review.
    read (that room not read, so its story needs review). A room whose only way to an exit crosses an end-only room
    needs review (an exception, such as 1014.2's for a kitchen, may allow it; Gordium doesn't assume one). This only
    removes routes, so it only lengthens them.
+   **A room that opens only into the room it serves** (amended 2026-11-21; Gordium's reading, open question 11). A
+   closet, a storeroom or a toilet (`use` `closet`, `accessory_storage` or `toilet`) whose every opening is a door
+   into one end-only room, and no door of it an exit, is taken as part of that room, the room it serves: its route
+   starts in it, leaves by one of those doors into the room it serves, and goes on as a route that started there (that
+   room's own doors and passages, never across any other end-only room). The room served must state its `use` and
+   `lockable: false`: one that can be locked, or whose locking isn't given, still blocks (1014.2 item 2, 7.5.2.1
+   "subject to locking"), and the inner room keeps no route, the reason named. It chains: a closet that opens only
+   into a storeroom that opens only into another is part of both (its openings into a room it serves don't count as
+   ways out). A room with a passage, a room of any other use (a classroom, a kitchen, an electrical room marked
+   `other`) and a room with two rooms beyond it are not covered: they keep decision 1a's rule. A door from such a room
+   into the room it serves is an exit access door (decision 11). Every figure this reading reaches says so beside it
+   ("Gordium's reading · confirm with the architects"), the part's `confirm`, and the checker puts it in each row that
+   reads that figure. It only adds routes where none were (never shortens a route that existed): a room it covers had
+   no route before, so its story needed review.
+   *Why (resolved before asking, 2026-11-21).* The whole law: IBC 2009 1014.2 (read from the OCR copy only: not
+   verified) item 1 "Egress from a room or space shall not pass through adjoining or intervening rooms or areas,
+   except where such adjoining rooms or areas and the area served are accessory to one or the other, are not a Group
+   H occupancy and provide a discernible path of egress travel to an exit"; item 2 "An exit access shall not pass
+   through a room that can be locked to prevent egress"; item 4 "Egress shall not pass through kitchens, storage
+   rooms, closets or spaces used for similar purposes", whose only exceptions are "a kitchen area serving adjoining
+   rooms constituting part of the same dwelling unit or sleeping unit" and Group M stockrooms (2.1 to 2.4: same hazard,
+   "Not more than 50 percent of the exit access is through the stockroom", "not subject to locking from the egress
+   side", a 44-inch demarcated aisle). NFPA 101 2012 7.5.1.6 (p.80): "Exit access from rooms or spaces shall be
+   permitted to be through adjoining or intervening rooms or areas, provided that such rooms or areas are accessory
+   to the area served"; 7.5.2.1 (p.80): "Access to an exit shall not be through kitchens, storerooms other than as
+   provided in Chapters 36 and 37, restrooms, workrooms, closets, bedrooms or similar spaces, or other rooms or spaces
+   subject to locking, unless passage through such rooms or spaces is permitted for the occupancy by Chapter 18, 19,
+   22, or 23" (day care, Chapter 16, is not among them); A.7.5.2.1: "It is not the intent that an area with equipment
+   such as a beverage brewpot, microwave oven, and a toaster be considered a kitchen"; 7.6.1(1) (p.81) measures travel
+   "starting from the most remote point subject to occupancy"; and, for day care, 16.2.2.2.4 (p.174): "Every door
+   latch to closets, storage areas, kitchens, and other similar spaces or areas shall be such that clients can open
+   the door from inside the space or area", A.16.2.2.2.4 (p.412): "The purpose of this requirement is to prevent
+   arrangements whereby a client can be trapped in a space or area". So the books expect people inside closets and
+   storerooms, measure travel from them, and send them out by the door they came in; none says where that door may
+   lead, and item 4's words, read alone, forbid even a pantry's way out through its kitchen. Interpretations found on
+   the public web (no ICC or NFPA viewer read): the North Carolina Department of Insurance's appeal decision on egress
+   of a Group B office through a Group S-1 warehouse (Fleming / Town of Apex, 2021-10-26,
+   https://ncosfm.gov/appeals/20211026-fleming-empire-distributers-ncdoi-decision/open, read 2026-11-21) quotes the
+   2015 IBC Commentary on 1016.2 (2009's 1014.2): "it is not the intent of this provision to address the situation of
+   egress for offices through an associated warehouse space", and concludes the item's intent "was to disallow egress
+   from one area though another area where the possibility of a blocked means of egress path is probable either by
+   hazard or locked doorways. It appears that 'storage rooms' are listed because of the possibility of locked doors in
+   the path of egress and because of uncertain egress path through such rooms". Wisconsin's commercial-buildings egress
+   FAQ (https://dsps.wi.gov/Documents/Programs/CommercialBuildings/FAQEgress.pdf, cited in search results 2026-11-21,
+   the page itself not found when fetched) is reported to allow egress through a storage room accessory to the area
+   served with a discernible path, and to caution against a small storeroom that can become crowded. Forum threads
+   (thebuildingcodeforum.com, not readable by script) lean both ways; they are not interpretations. **Classified:
+   strong common practice, not answered by the law** (the words forbid it, the measuring and day-care sections
+   assume it, the stated intent is a path another area's occupants can't trust or that can be locked, which a room's
+   own closet isn't): Gordium's reading, always shown, to confirm (open question 11). Not adopted: two named readings
+   (a strict one beside it): the strict reading gives such a room no route, so no figure, and a rule could then never
+   pass under both: the same as needs review, with nothing gained. *Not covered, a separate to-do:* a space not
+   subject to occupancy (7.6.1(1); the sheet's abandoned spaces, "DOOR PERMANENTLY FIXED SHUT", the electrical room):
+   the description has no mark for it, so such a room keeps decision 1a's rule (no route, needs review) until a
+   "not occupied" mark exists.
 2. **What a route is, exactly.** The route from a point p to an exit is **the shortest curve** that (a) lies in the
    zone's free floor: the crossable rooms' outlines (decision 1a) minus walls, holes and obstructions, joined
    through door openings, passing each door at its centre; (b) stays at least 12 in from every corner: each wall
@@ -253,7 +308,8 @@ area need review.
     is an unknown space or a room not read; a point of the clear floor with no route to any exit even with no
     clearance, or a cluster or pocket with no routed clear edge round it (decision 3: shown, never a number); obstructions
     or rooms read from a link; a corridor not made of straight legs (dead end only); and any reading that could
-    shorten a route; a room that reaches an exit only through an end-only room (decision 1a); an `exit_kind` with
+    shorten a route; a room that reaches an exit only through an end-only room (decision 1a; a closet, storeroom or
+    toilet opening only into the room it serves goes through it, the reading said beside the figure); an `exit_kind` with
     no `exit_id`; a door under 24 in clear; any key of the additions left out. Readings that only lengthen one
     (decisions 1, 1a, 3, 5, 6) don't hold a pass: a pass under them is a
     pass under the shorter reading too.
@@ -395,6 +451,20 @@ these hand figures as written in the test file, never taken from the code under 
     19.482 + 1.25 = 20.732 beats 19.75, so it is kept and cut. Pinned two ways, so it fails whatever mesh the build
     uses: the drop test itself, given this triangle and a best so far of 19.75, must say "kept" (it fails if h is
     replaced by 3 in: 19.732 < 19.75, dropped); and the story's figure is at least 20.471.
+20. **Rooms that open only into the room they serve** (decision 1a, amended 2026-11-21). A corridor 0 to 40 by 0 to
+    6 with its exit in the south wall, centred at (15, -0.25); north of it a kitchen 10 to 20 by 6.5 to 16.5
+    (`lockable: false`), its door to the corridor centred at (15, 6.25); a closet 10 to 14 by 17 to 20 whose only
+    door, centred at (12, 16.75), opens into the kitchen. From the closet's (12, 18): straight to its door 1.25,
+    straight across the kitchen to the kitchen's door, sqrt(3^2 + 10.5^2) = 10.920 (1.37 ft off the nearest jamb,
+    clear of every ring), then straight across the corridor to the exit, 6.5: **18.670 ft**. Fails on revert (no
+    route). And: the kitchen `lockable: true` (or
+    not given): no route, the reason naming the kitchen; a classroom (`day_care`, not crossable) between the closet
+    and the kitchen: still no route (the classroom isn't the closet's only way out into a crossable room, and nothing
+    crosses the kitchen); a storeroom whose only door opens into another storeroom whose own door opens on the
+    corridor: a route, through both (and a closet off the inner one: a route through all three); a closet with a
+    second door, into the corridor: its own route, never through the kitchen; a room `other` (the electrical room)
+    off the kitchen: no route. The door from the closet is its exit access door, and the story's figure carries the
+    reading's `confirm`.
 
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
@@ -403,8 +473,8 @@ unknown space, commit `67dd698f`). Measured on that model:
 
 | Sheet figure | Limit | Agreement asked |
 |---|---|---|
-| Travel distance 130'-8" | 200' | within 2 percent or 2 ft, whichever is larger |
-| Common path 48'-6" | 75' | within 2 percent or 2 ft |
+| Travel distance 130'-8" | 200' | Gordium's no-clearance figure from the sheet's start to the sheet's exit no longer than the sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger, and the verdicts the same (changed 2026-11-21, below; the old test, within 2 percent or 2 ft of the stated figure, still reported) |
+| Common path 48'-6" | 75' | the same test (no longer than the line as drawn plus 2 percent or 2 ft, verdicts the same; the old one still reported) |
 | Dead end 21'-6", least width 10' | 2.5 x 10' = 25' | length within 1 ft, width within 1 in |
 | Remoteness 183'-10" | 70'-1" (diagonal 210'-2 1/2" / 3) | within 1 ft of Gordium's nearest-edge figure or of its door-centre figure (both reported: the sheet may measure either; they differ by up to half the two doors' widths); diagonal within 6 in |
 | Storage 1,428 sf | 1,650 sf (10 percent of the story) | the inside-walls figures within 1 percent; story area against 16,539 sf (the sheet's 16,509 is a recorded error); the rule complies under all four readings (decision 8), or the readings it fails under are a finding |
@@ -414,7 +484,20 @@ paths on a 1/8 in = 1 ft drawing, where 1/32 in of pencil is 3 in, and the start
 eye; the model is a trace of that sheet, each wall a few inches either way. Route lengths gather those errors over
 many bends; straight lines and areas gather few. **The clearance:** a hand path usually hugs corners, so the route
 lengths are compared with Gordium's no-clearance figure; the 12-in figure (the one the rules read) is reported beside
-it, with its corners, to show the difference is the clearance and nothing else. **A difference outside tolerance is
+it, with its corners, to show the difference is the clearance and nothing else. **Why the travel and common-path
+test changed (2026-11-21, after the first run, not to make it pass).** The first run measured both well short of
+the sheet (116.03 ft against 130'-8", 41.07 against 48'-6", no clearance), and the reason is a difference of
+method, not of model: the sheet's lines are drawn orthogonally, along the grid, every turn a right angle
+(`sheet_line_in_model` in the eval file), while the books measure "along the natural and unobstructed path of egress
+travel" (IBC 2009 1016.1, OCR copy only) and "Along the centerline of the natural path of travel ... Curving around
+any corners or obstructions, with a 12 in. (305 mm) clearance therefrom" (NFPA 101 2012 7.6.1(1) and (2)). An
+orthogonal line between the same two points is never shorter than the natural path (no path between two points is
+shorter than the shortest one, and up to 41 percent longer, decision 1's *rejected* rectilinear), so a two-sided
+tolerance would mark the code wrong for measuring what the books say. The test is now one-sided against the sheet's
+own line: Gordium's figure, from the sheet's start to the sheet's exit, must be no longer than that line as drawn
+plus the tolerance (a longer figure is a finding: a farther point or a longer path than the architect found), and
+each of its rules' verdicts must be the sheet's. The old two-sided comparison stays in the eval file beside it
+(`agreement.before_2026_11_21`), and a miss under it is still logged, so nothing it found is hidden. **A difference outside tolerance is
 investigated, never tuned away:** Gordium draws each route back on the model, and if it found a farther point or a
 longer dead end than the sheet shows, that is recorded as a finding on the sheet (as its story area is), not a fix
 to the code. The model and its description stay outside the repo, as the sheet does (open question 5); the eval
@@ -469,3 +552,13 @@ remoteness and areas; the reader; then the eval on the Children's Odyssey model.
     the walk out with no clearance, then the cluster's greatest routed edge route (decision 3, test 18), an upper
     bound, so no false pass. Is that the intent, or does the clearance give way where the opening is narrower (as it
     does at a door's centre)? Either answer gives no more than Gordium's figure.
+11. **A closet, storeroom or toilet that opens only into the room it serves** (2026-11-21, decision 1a): IBC 1014.2
+    item 4 and NFPA 7.5.2.1 forbid egress through kitchens, storerooms and closets, with no exception for a room's own
+    closet; read literally, a pantry off a kitchen, or an inner storeroom off a storeroom, has no legal way out.
+    Gordium's reading (strong common practice, sources in decision 1a): such a room is part of the room it serves, so
+    its route leaves through that room, but never through a room that can be locked or across any other end-only
+    room. Is that how the architects and the City read it? And, on this model: the eval marks the kitchen and the
+    storerooms `lockable: true` ("kept locked"), so the closet off the kitchen and the inner storeroom still have no
+    route. NFPA 16.2.2.2.4 requires every latch to a day care's closets, storage and kitchens to open from inside: if
+    those rooms lock only against entry, they can't be "locked to prevent egress" (1014.2 item 2) and the mark would
+    be `lockable: false`; which is the architect's to say.
