@@ -1106,7 +1106,7 @@ def _with_stories_bound(values: dict, measured: dict, facts: dict | None = None,
     record = measured.get("stories") or {}
     drawn = bool(record.get("objects")) and not any(isinstance(r, dict) and r.get("geometry_error")
                                                    for r in measured.values())
-    how = "typed" if str(record.get("how") or "").startswith("stated by the architect") else "read"
+    how = "typed" if record.get("stated") is True else "read"     # the measuring's flag (measure.py), never its words
     aside = {}
     for why, names in (conflicts(facts or {}) if conflicts else []):
         for k in names:
