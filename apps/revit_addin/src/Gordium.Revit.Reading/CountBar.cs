@@ -41,10 +41,10 @@ public static class CountBar
         if (open)
             return new CountRow(Short(line.Title), line.Title, line.Chips, []);
         // by position, never by value (two counts may say the same words), shown in the worker's order
-        var room = Math.Max(0, keep - line.Chips.Count(c => c.Tone == Tone.Fails));
+        var room = Math.Max(0, keep - line.Chips.Count(c => c.IsFailure));
         var show = new bool[line.Chips.Count];
         for (var i = 0; i < show.Length; i++)
-            if (line.Chips[i].Tone == Tone.Fails)
+            if (line.Chips[i].IsFailure)                // what it means, never its colour (grey once stale)
                 show[i] = true;
             else if (room > 0)
             {

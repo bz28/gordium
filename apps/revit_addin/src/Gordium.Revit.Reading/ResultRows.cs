@@ -102,7 +102,13 @@ public sealed record ResultGroup(string Key, string Title, int Count, bool Folde
 }
 
 /// <summary>One count as the worker said it ("4 do not comply"), coloured by its words.</summary>
-public sealed record CountChip(string Words, Tone Tone);
+public sealed record CountChip(string Words, Tone Tone)
+{
+    /// <summary>Whether its words say something does not comply ("N do(es) not comply"): what it means, set from the
+    /// worker's words when the answer is read and kept when the model changes (only its colour greys: ResultRows.Stale),
+    /// so the count bar never hides a failure on a stale result.</summary>
+    public bool IsFailure { get; init; }
+}
 
 /// <summary>A law's counts (the worker's <c>view.sections[]</c>: "Zoning (City of Ithaca)"), or the whole summary's
 /// (<see cref="Title"/> null) from a worker that gives no sections.</summary>
@@ -394,7 +400,10 @@ public static class ResultRows
 
     private static List<CountChip> Chips(string summary) =>
         summary.Split(" · ", StringSplitOptions.RemoveEmptyEntries)
-               .Select(p => new CountChip(p, FailsWords.IsMatch(p) ? Tone.Fails : ComplyWords.IsMatch(p) ? Tone.Complies : Tone.Review))
+               .Select(p => new CountChip(p, FailsWords.IsMatch(p) ? Tone.Fails : ComplyWords.IsMatch(p) ? Tone.Complies : Tone.Review)
+               {
+                   IsFailure = FailsWords.IsMatch(p),
+               })
                .ToList();
 
     /// <summary>A text field, or null when absent, empty or the worker's "—" (nothing measured).</summary>
