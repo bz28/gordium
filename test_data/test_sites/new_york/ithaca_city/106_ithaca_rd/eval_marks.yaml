@@ -45,15 +45,19 @@ measures:
   Minimum rear yard (offset): rear_yard
   Minimum parking: parking_spaces
 
-# Where Gordium in Revit can't give the architects' answer, and why: each worked out before the Revit run, from the
-# add-in's own code (never from a run). A row whose difference isn't here is UNEXPLAINED in the comparison.
+# Where Gordium in Revit can't give the architects' answer, and why: each worked out from the code, with the words its
+# reason must hold (`reason_has`): a row is "expected" only when Gordium's verdict AND its reason are these, so a
+# different mechanism giving the same verdict is UNEXPLAINED (review round 3: the first Revit run's stories row was
+# the roof slab read as a raised part, not the reason written here).
 expected_differences:
   - row: Maximum stories
     gordium: needs_review
-    why: "Revit sends no stories: Project Information has no Stories mark (ProjectFacts sends zone, use, lot surveyed, corner lot, ground and street only), and native Revit floors are not counted as stories (only Gordium's floor blocks or a stated count). A plain 35 ft wall could hold up to 5 stories at 7 ft a story (R305.1), so 'at worst 5 against 3'. The spreadsheet's 3 (Inputs!B13) needs a Stories mark or floor blocks"
-    source: "apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs ProjectFacts.Read; packages/model_measurement/model_measurement/places/ithaca_city/measure.py _stories ('draw its floors or enter the count')"
+    reason_has: ["could hold up to 5 stories", "draw its floors or enter the count"]
+    why: "the drawing allows 1 to 5 stories and nothing states the count: the four 35 ft walls (Inputs!B12) could hold up to 5 at 7 ft a story (R305.1), and every building has at least one (§325-3B STORY). The roof, a slab resting in the walls, is the roof of the STORY definition, not another story (measure._slabs_within). Revit's Project Information has no Stories mark (ProjectFacts sends zone, use, lot surveyed, corner lot, ground and street only), so the spreadsheet's 3 (Inputs!B13) isn't sent; a count stated would stand within 1 to 5"
+    source: "packages/model_measurement/model_measurement/places/ithaca_city/measure.py _stories_whole ('draw its floors or enter the count'), _slabs_within; apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs ProjectFacts.Read; docs/revit/revit_reading_design.md section 7, 'Stories of a building drawn as parts'"
   - row: Minimum parking
     gordium: not_checked
+    reason_has: ["Needs bedrooms and parking spaces"]
     why: "Revit sends no parking spaces or bedrooms: Project Information has no mark for either, so the row 'Needs bedrooms and parking spaces, which the model doesn't show' (the spreadsheet's 1 space and 3 bedrooms, Inputs!B15, B14)"
     source: "apps/revit_addin/src/Gordium.Revit.Reading/ProjectCheck.cs ProjectFacts.Read; places/ithaca_city/measure.py STATED"
 

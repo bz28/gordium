@@ -106,6 +106,13 @@ def false_pass(gordium: str, truth: str) -> bool:
     return (gordium == "complies" and truth != "complies") or (gordium == "not_applicable" and truth != "not_applicable")         or KINDNESS[gordium] > KINDNESS[truth]
 
 
+def reason_as_expected(expected: dict, reason) -> bool:
+    """Whether Gordium's reason is the one the expected difference predicts: every one of its `reason_has` words in
+    it. An expectation with none matches nothing (a verdict alone never explains a difference)."""
+    words = expected.get("reason_has")
+    return bool(words) and isinstance(reason, str) and all(w in reason for w in words)
+
+
 def _load(folder: Path, name: str):
     return yaml.safe_load((folder / name).read_text(encoding="utf-8"))
 
@@ -220,10 +227,12 @@ def compare_106(result: dict) -> dict:
             unexplained.append(label)
         elif g == a:
             pass
-        elif label in expected and expected[label]["gordium"] == g:
+        elif label in expected and expected[label]["gordium"] == g and reason_as_expected(expected[label], item.get("reason")):
             row["difference"] = f"expected: {expected[label]['why']} ({expected[label]['source']})"
         else:
-            row["difference"] = f"UNEXPLAINED: Gordium says {g}, the architects {a}"
+            row["difference"] = f"UNEXPLAINED: Gordium says {g}, the architects {a}" + (
+                f"; the expected difference's verdict, but not its reason (it should hold {expected[label].get('reason_has')})"
+                if label in expected and expected[label]["gordium"] == g else "")
             unexplained.append(label)
         if g is not None and false_pass(g, a):
             row["difference"] = (row.get("difference", "") +

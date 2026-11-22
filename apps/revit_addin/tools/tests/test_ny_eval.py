@@ -238,10 +238,28 @@ def test_the_106_rows_compare_with_the_architects_and_name_each_difference(tmp_p
     assert rows["Minimum lot size"]["gordium_measured"] == 6570.0 and rows["Minimum lot size"]["architects_proposed"] == 6674
     assert "coincidence" in rows["Minimum rear yard (offset)"]["note"]
     assert made["other_r1b_rules"] == {"R-1b.stream_setback": "needs_review"}
-    # the two differences worked out before the run are named with their source; anything else is unexplained
-    made = run(tmp_path, "106_ithaca_rd", spreadsheet_like(**{"R-1b.stories": "needs_review",
-                                                             "R-1b.parking_one_family": "not_checked"}))
+    # the two differences worked out before the run are named with their source, verdict and reason; anything else
+    # is unexplained
+    expected = spreadsheet_like(**{"R-1b.stories": "needs_review", "R-1b.parking_one_family": "not_checked"})
+    for i in expected["view"]["items"]:
+        if i["id"] == "R-1b.stories":
+            i["reason"] = "a 35 ft solid (wall_s) could hold up to 5 stories: draw its floors or enter the count."
+        if i["id"] == "R-1b.parking_one_family":
+            i["reason"] = "Needs bedrooms and parking spaces, which the model doesn't show"
+    made = run(tmp_path, "106_ithaca_rd", expected)
     assert made["ok"] and made["summary"]["expected_differences"] == ["Maximum stories", "Minimum parking"]
+    # review round 3: the expected verdict for another reason (the first Revit run's roof read as a raised part) is
+    # unexplained, never expected
+    raised = spreadsheet_like(**{"R-1b.stories": "needs_review", "R-1b.parking_one_family": "not_checked"})
+    for i in raised["view"]["items"]:
+        if i["id"] == "R-1b.stories":
+            i["reason"] = ("part of the building (roof-0005b778) starts above the ground: it may be another story: "
+                           "draw its stories as floor blocks, or check the count")
+        if i["id"] == "R-1b.parking_one_family":
+            i["reason"] = "Needs bedrooms and parking spaces, which the model doesn't show"
+    made = run(tmp_path, "106_ithaca_rd", raised)
+    assert not made["ok"] and made["summary"]["unexplained"] == ["Maximum stories"]
+    assert made["summary"]["expected_differences"] == ["Minimum parking"]
     made = run(tmp_path, "106_ithaca_rd", spreadsheet_like(**{"R-1b.rear_yard": "needs_review"}))
     assert not made["ok"] and made["summary"]["unexplained"] == ["Minimum rear yard (offset)"]
     # a pass where the architects fail is named as such
@@ -288,13 +306,47 @@ def test_the_orangetown_reading_checked_by_the_real_worker_compares_as_predicted
     assert made["summary"]["as_predicted"] == 115
 
 
-def test_the_106_design_checked_by_the_real_worker_differs_from_the_architects_only_where_expected(tmp_path):
-    # the spreadsheet's box as a host reads it (the Rhino reading of the same design: the Revit reader copies its
-    # decisions), with the facts the eval's Project Information marks state and the build's spot grades
+def as_revit_parts(site: dict) -> dict:
+    """The site with its house as the Revit build draws it and the Revit reader sends it: one building per element,
+    each wall a box along its centre line (its ends reaching the corners' outer faces, as Revit joins them) and the
+    roof the build's floor slab, its top at the Roof level (review round 3: the first Revit run read this roof as a
+    raised part)."""
+    data = build(SITE)
+    template = {k: v for k, v in site["buildings"][0].items() if k not in ("id", "faces")}
+    lv = {x["name"]: x["elevation_ft"] for x in data["levels"]}
+    parts = []
+    for w in data["walls"]:
+        h = w["thickness_in"] / 24
+        (sx, sy), (ex, ey) = w["start"], w["end"]
+        x0, x1, y0, y1 = min(sx, ex) - h, max(sx, ex) + h, min(sy, ey) - h, max(sy, ey) + h
+        z0 = lv[w["level"]]
+        parts.append({**template, "id": f"wall {w['id']}",
+                      "faces": _box(x0, y0, x1, y1, z0, z0 + w["height_ft"])})
+    for f in data["floors"]:
+        xs, ys = [p[0] for p in f["outline"]], [p[1] for p in f["outline"]]
+        top = lv[f["level"]] + f.get("top_offset_ft", 0)
+        parts.append({**template, "id": "roof", "faces": _box(min(xs), min(ys), max(xs), max(ys), top - f["thickness_in"] / 12, top)})
+    return {**site, "buildings": parts}
+
+
+def _box(x0, y0, x1, y1, z0, z1) -> list:
+    ring = [(x0, y0), (x1, y0), (x1, y1), (x0, y1)]
+    sides = [{"points": [[*ring[i], z0], [*ring[(i + 1) % 4], z0], [*ring[(i + 1) % 4], z1], [*ring[i], z1]], "holes": []}
+             for i in range(4)]
+    return [{"points": [[x, y, z0] for x, y in ring], "holes": []}, {"points": [[x, y, z1] for x, y in ring], "holes": []}, *sides]
+
+
+@pytest.mark.parametrize("reading", ["the box", "the Revit parts"])
+def test_the_106_design_checked_by_the_real_worker_differs_from_the_architects_only_where_expected(tmp_path, reading):
+    # the spreadsheet's box as a host reads it (the Rhino reading of the same design), and as the Revit build's parts
+    # (four walls and the roof slab, one building each), with the facts the eval's Project Information marks state
+    # and the build's spot grades
     from design_checker import site_json
 
     full = load(SITE, "spreadsheet_design_model_facts.yaml")["lot_facts"]
     site = site_json.read_model(SITE / "spreadsheet_design_model.3dm", full, True)
+    if reading == "the Revit parts":
+        site = as_revit_parts(site)
     site["grade"] = {"source": "spot", "points": [s["at"] for s in build(SITE)["spot_grades"]]}
     marks = marks_tool.check_request(load(SITE, "eval_marks.yaml"), "m")["marks"]
     facts = {"jurisdiction": "regulations/jurisdictions/new_york/ithaca_city", "zone": marks["Gordium: Zone"],
