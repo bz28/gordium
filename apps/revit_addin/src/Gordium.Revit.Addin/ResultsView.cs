@@ -241,6 +241,25 @@ internal sealed class ResultsView : C.UserControl, IListHost, IDetailHost
                                                 Typed(new C.TextBlock { Text = model.Stale, FontWeight = W.FontWeights.SemiBold,
                                                                         TextWrapping = W.TextWrapping.Wrap }, Body), bottom: 6));
                     break;
+                case PanelPart.Code when model.Code is { } code:
+                    // which code and why, the worker's words: plain when decided (never green), needs review when not,
+                    // the clock once stale; the law's quoted words on hover; at most two lines (the whole on hover)
+                    var codeStatus = code.Status(stale);
+                    var codeWords = Typed(new C.TextBlock
+                    {
+                        Text = code.Words, TextWrapping = W.TextWrapping.Wrap, TextTrimming = W.TextTrimming.CharacterEllipsis,
+                        MaxHeight = 2 * 1.4 * PanelTokens.TypeOf(Caption).Size, VerticalAlignment = W.VerticalAlignment.Center,
+                    }, Caption);
+                    Ink(codeWords, codeStatus is { } cs ? StatusLook.Colour(cs) : PanelTokens.TextMuted);
+                    W.UIElement codeLine = codeStatus is { } s2 ? WithGlyph(s2, codeWords, size: 12) : codeWords;
+                    var codeBox = new C.Border
+                    {
+                        Child = codeLine, Margin = new W.Thickness(0, 0, 0, 4),
+                        ToolTip = string.Join("\n\n", new[] { code.Words, code.Tooltip }.Where(t => t is not null)),
+                    };
+                    W.Automation.AutomationProperties.SetName(codeBox, code.Words);
+                    summary.Children.Add(codeBox);
+                    break;
                 case PanelPart.State:
                     var state = StatusLook.Of(model.StateTone, stale);
                     summary.Children.Add(WithGlyph(state, Ink(Typed(new C.TextBlock

@@ -120,6 +120,9 @@ public sealed record CountLine(string? Title, IReadOnlyList<CountChip> Chips);
 public sealed record ResultModel(Verdict State, string Headline, string Checked, IReadOnlyList<CountLine> Counts,
                                  IReadOnlyList<ResultGroup> Groups, string Inside, string? Stale = null)
 {
+    /// <summary>Which code the building was checked against and why (the worker's <c>which_code</c>), or null when
+    /// the answer doesn't say (then no line is shown).</summary>
+    public WhichCode? Code { get; init; }
 
     /// <summary>The state's colour: green only for a check that complies and still stands; red for one that
     /// doesn't; amber otherwise; grey once the model changed.</summary>
@@ -136,6 +139,8 @@ public enum PanelPart
 {
     /// <summary>"The model changed since this check (14:32): click Check again".</summary>
     Stale,
+    /// <summary>Which code it was checked against and why (<see cref="WhichCode"/>), when the worker says.</summary>
+    Code,
     /// <summary>The worker's state, one line.</summary>
     State,
     /// <summary>The worker's counts, one compact line of chips per law.</summary>
@@ -168,10 +173,11 @@ public static class ResultRows
             g.Lines.Select(l => new ResultLine(l.Title, ToneOf(l.Status, l.StatusWord), l.Folded,
                                                l.Items.Select(id => rows[id]).ToList())).ToList())).ToList();
         return new ResultModel(result.State, ResultText.Headline(result), ResultText.CheckedWords(phase, options, street),
-                               Counts(result), groups, ResultText.InsideWords(inside));
+                               Counts(result), groups, ResultText.InsideWords(inside)) { Code = WhichCode.Read(result.Raw) };
     }
 
-    /// <summary>The panel's parts in the order it shows them: the stale notice (when stale), the state, the counts,
+    /// <summary>The panel's parts in the order it shows them: the stale notice (when stale), which code it was checked
+    /// against (when the worker says), the state, the counts,
     /// then straight away the groups (the results list, ResultList), so the first failing row is on screen at the
     /// pane's docked height (Revit 2027 trial: ~420 px); what was not read and the details (phase, options, street
     /// line, files) after the rows, folded.</summary>
@@ -181,6 +187,8 @@ public static class ResultRows
         var parts = new List<PanelPart>();
         if (model.Stale is not null)
             parts.Add(PanelPart.Stale);
+        if (model.Code is not null)
+            parts.Add(PanelPart.Code);                            // at the top of the summary, before the state
         parts.AddRange([PanelPart.State, PanelPart.Counts, PanelPart.Groups]);
         if (model.Inside.Length > 0)
             parts.Add(PanelPart.Inside);
