@@ -151,10 +151,71 @@ area need review.
    assume it, the stated intent is a path another area's occupants can't trust or that can be locked, which a room's
    own closet isn't): Gordium's reading, always shown, to confirm (open question 11). Not adopted: two named readings
    (a strict one beside it): the strict reading gives such a room no route, so no figure, and a rule could then never
-   pass under both: the same as needs review, with nothing gained. *Not covered, a separate to-do:* a space not
-   subject to occupancy (7.6.1(1); the sheet's abandoned spaces, "DOOR PERMANENTLY FIXED SHUT", the electrical room):
-   the description has no mark for it, so such a room keeps decision 1a's rule (no route, needs review) until a
-   "not occupied" mark exists.
+   pass under both: the same as needs review, with nothing gained. *Not covered here:* a space not subject to
+   occupancy (7.6.1(1); the sheet's abandoned spaces, "DOOR PERMANENTLY FIXED SHUT"): decision 1b.
+1b. **A space the architect marks not occupied** (added 2026-11-22). A room may carry `not_occupied: true`: the
+   architect's statement that nobody occupies it (an abandoned space, a room whose door is permanently fixed shut, a
+   shaft or chase). It changes exactly one thing: **NFPA 101's travel and common path are not measured from points
+   in it**, because NFPA's own words measure them only from points subject to occupancy; **the IBC's are measured
+   from every point of the story as before**, because its words have no such carve-out. Concretely, the story part
+   gives `egress_travel_distance_occupied` and `common_path_of_travel_occupied` (decision 11), the greatest over the
+   rooms not marked so, and the NFPA rules read them (16.2.6.2(2), 16.2.5.3.1 and .2, Chapter 17's same three, and
+   the 16.2.6.3 and 17.2.6.3 flags; each rule's `revised` says so); `egress_travel_distance` and
+   `common_path_of_travel` stay over every room, read by the IBC's (1016.1, 1014.3). `egress_travel_from_room_door`
+   (read by NFPA 16.2.6.2(1) only, measured "in accordance with Section 7.6", 16.2.6.1) leaves out the doors of a
+   room marked so. Nothing else changes: the room is crossed only where decision 1a already lets a route cross it
+   (the mark never makes a room crossable, nor stops one being crossed: a corridor marked so is still walked
+   through, its own points simply aren't start points), its own `space` part is measured as before (IBC 1015.1),
+   and the areas count it as before. With no room marked, the `_occupied` figures are the same numbers as the
+   others (copied, the same walk). Refused on read (the room not read, so its story needs review):
+   `not_occupied: true` on a sleeping room or a `day_care` room (their use is occupancy), or a value that isn't true
+   or false. Left out or false: the room is occupied and measured; **an unmarked room is never left out**. Every
+   figure that leaves rooms out says so beside it: the story part's `architect_stated` ({measure: words}: "measured leaving
+   out 2 spaces marked not occupied by the architect: SPRINKLERED ABANDONED SPACE (32), SPRINKLERED ABANDONED SPACE
+   (33)"), which the checker puts in each row that reads it, and `more` lists them (`left_out`). It is the
+   architect's statement, not Gordium's reading: it never turns a pass into needs review (as decision 1a's `confirm`
+   does), but it is never hidden. Every room on the story marked so: no point to measure from, so the `_occupied`
+   figures are not measured (needs review), never 0.
+   *Why (resolved before asking, 2026-11-22).* **The whole law, NFPA.** NFPA 101 2012 (the cached text, p.81) 7.6.1:
+   "The travel distance to an exit shall be measured on the floor or other walking surface as follows: (1) Along
+   the centerline of the natural path of travel, starting from the most remote point subject to occupancy"; 7.6.2
+   the same words for outside stairs; 7.6.6: "The travel distance in any occupied space to not less than one exit,
+   measured in accordance with 7.6.1 through 7.6.5, shall not exceed the limits specified in this Code"; 16.2.6.1
+   (p.174): "Travel distance shall be measured in accordance with Section 7.6"; A.3.3.47 (p.345): "Common path of
+   travel is measured in the same manner as travel distance but terminates at that point where two separate and
+   distinct routes become available". What "subject to occupancy" covers: the Code doesn't define it; nearest is
+   3.3.21.6 (p.29), "Normally Unoccupied Building Service Equipment Support Area. A building service equipment
+   support area in which people are not expected to be present on a regular basis", whose annex A.3.3.21.6 (p.343)
+   says such areas "are often found in attics, crawl spaces, chases, and interstitial areas where the space is vacant
+   or intended exclusively for routing ductwork, cables, conduits, piping, and similar services and is rarely
+   accessed ... Where portions of such spaces are routinely visited for storage, maintenance, testing, or
+   inspection, that portion is excluded from this definition", and 7.13.1.1 (p.86) applies 7.13 to such areas "in
+   lieu of the provisions of Sections 7.1 through 7.12" (so 7.6's travel limits don't reach into them). The mark's
+   words follow that line. **The IBC.** 2009 1016.1 (p.267, OCR copy only, not verified): "the maximum length of
+   exit access travel, measured from the most remote point within a story"; 1002.1 COMMON PATH OF EGRESS TRAVEL
+   (p.244): "That portion of exit access which the occupants are required to traverse before two separate and
+   distinct paths of egress travel to two exits are available"; 1014.3's exceptions (p.265) name occupancy groups
+   and sprinklers, no unoccupied space. Its definitions speak of occupied portions ("EXIT ACCESS. That portion of a
+   means of egress system that leads from any occupied portion of a building or structure to an exit", p.244), but
+   the limits are measured from "the most remote point within a story". The 2025 Building Code of New York State
+   (the cached text, the 2024 IBC's words) measures travel "from the most remote point of each room, area or space"
+   (1017.3, p.342; COMMON PATH OF EGRESS TRAVEL, p.38, the same) and has one carve-out, for the common path only:
+   1006.2.1 exception 3 (p.315), "Unoccupied mechanical rooms and penthouses are not required to comply with the
+   common path of egress travel distance measurement". A summary of the 2021 IBC's significant changes lists that
+   as "eliminating common path of travel distance limitations for unoccupied mechanical rooms and penthouses"
+   (https://cms5.revize.com/revize/eagle/2021%20IBC%20Significant%20Changes.pdf, read 2026-11-22): before 2021, so
+   in the 2009 IBC, the limit applied to them too, and even now it is lifted for mechanical rooms and penthouses
+   only, never for travel distance. No ICC commentary or interpretation was read (no ICC viewer). **Classified:
+   answered by the law**, each book by its own words: NFPA measures from points subject to occupancy (7.6.1(1),
+   7.6.6, A.3.3.47); the 2009 IBC from every point within the story. Whether a given room is subject to occupancy
+   is a fact about how the building is used: the architect's to state (the mark, shown), never Gordium's to guess
+   from a room's name. *Rejected:* **the mark for every rule** (the IBC's words don't allow it: a false pass where
+   the IBC's farthest point is in the room); **two named readings of one figure** (the IBC rules would pass only if
+   both did, and the reading with the room has no route: needs review, nothing gained; and the NFPA rules would be
+   held to a reading their own words rule out); **refusing the mark on a room a route crosses** (people may pass
+   through a space nobody stays in; its points are simply not start points). The sheet's electrical room, ELEC.
+   (21), is "routinely visited for ... maintenance" (A.3.3.21.6), so it is occupied unless the architect says
+   otherwise (open question 12).
 2. **What a route is, exactly.** The route from a point p to an exit is **the shortest curve** that (a) lies in the
    zone's free floor: the crossable rooms' outlines (decision 1a) minus walls, holes and obstructions, joined
    through door openings, passing each door at its centre; (b) stays at least 12 in from every corner: each wall
@@ -322,8 +383,9 @@ area need review.
 
 | Measure | How |
 |---|---|
-| `egress_travel_distance`, `common_path_of_travel` | decisions 1 to 5, the greatest over the story |
-| `egress_travel_from_room_door` | from each **exit access door** of a room (a door from which a permitted route reaches an exit without coming back into the room: the doors `space_exit_count` counts; never one into a closet or toilet) to the nearest exit, the greatest |
+| `egress_travel_distance`, `common_path_of_travel` | decisions 1 to 5, the greatest over the story (every room: IBC 2009 1016.1, 1002.1) |
+| `egress_travel_distance_occupied`, `common_path_of_travel_occupied` | the same, over the rooms not marked `not_occupied` (decision 1b: NFPA 7.6.1(1), A.3.3.47), the rooms left out said beside each (`architect_stated`); the same numbers as the two above when none is marked |
+| `egress_travel_from_room_door` | from each **exit access door** of a room not marked `not_occupied` (decision 1b) (a door from which a permitted route reaches an exit without coming back into the room: the doors `space_exit_count` counts; never one into a closet or toilet) to the nearest exit, the greatest |
 | `egress_travel_in_sleeping_room` | from each point of a `sleeping` room to the nearest of that room's exit access doors (as above, never a closet or toilet door); a sleeping room with none needs review; 0 with no sleeping room on the story |
 | `story_exit_count`, `space_exit_count` | distinct `exit_id`s on the story; a space's doors and passages from which a permitted route reaches an exit without coming back into it, each counted once |
 | `space_common_path` | decision 5 over the space's own points |
@@ -473,6 +535,27 @@ these hand figures as written in the test file, never taken from the code under 
     off the kitchen: no route. The door from the closet is its exit access door, and the story's figure carries the
     reading's `confirm`.
 
+21. **A space marked not occupied** (decision 1b). A corridor 0 to 40 by 0 to 6, its exit in the south wall centred
+    at (20, -0.25); north of it an office (`other`, not crossable) 15 to 25 by 6.5 to 16.5, its door to the corridor
+    centred at (20, 6.25); and an abandoned space (`other`) 15 to 25 by 17 to 27 whose only door, centred at (20,
+    16.75), opens into the office. Unmarked, the abandoned space has no route (its only way out crosses the office,
+    end-only: decision 1a), so every travel and common-path figure of the story, both books', needs review, and so
+    does the room-door travel (it has no exit access door). Marked `not_occupied: true`: the IBC's figures still need
+    review (the room still has no route), and NFPA's are measured over the corridor and the office. By hand, with no
+    ring in the way: the office's far corner (15, 16.5) straight to its door centre, sqrt(5^2 + 10.25^2) = 11.404
+    (1.24 ft and 1.46 ft off the jambs (18.5, 6.5) and (21.5, 6.5)), then straight down through the exit's centre,
+    6.5: 17.904 ft; the corridor's end (0, 6) to the exit is at least the straight line sqrt(20^2 + 6.25^2) = 20.954
+    ft. So the NFPA travel figure is at least 20.954, and it equals the figure of the same story with the abandoned
+    space and its door taken out (no route of the others ever entered it). The room-door travel: the office's door
+    straight down to the exit, **6.5 ft** exactly. The corridor marked not occupied too: the office's route still
+    crosses it, and the NFPA figure is the office's alone, at least 17.904 and under 20.954. Every room marked: not
+    measured. And: a sleeping or `day_care` room marked so is refused (the room not read); `not_occupied: "yes"`
+    isn't read; with the abandoned space opening on the corridor instead (door centred at (5, 6.25), the space 0 to
+    10 by 6.5 to 16.5) and marked, the IBC figure (from its far corner (0, 16.5): at least 11.404 + the straight
+    line from (5, 6.25) to the exit, sqrt(15^2 + 6.5^2) = 16.348, so 27.752) is larger than NFPA's (under 22), each
+    beside its own rules. Each row reading an `_occupied` figure (or the room-door travel) with a room left out says
+    "measured leaving out 1 space marked not occupied by the architect: abandoned"; an IBC row doesn't.
+
 **The eval: the architect's own sheet.** `test_data/answer_keys/portland_me_19_libby_st/hand_check.yaml` (on the
 branch) records sheet LS1.0 of the Children's Odyssey day care (Portland, Oct 2016). Gordium built a Revit model from
 the sheet's data; the reader already read it once (it found a 0.4 sq ft sliver between overlapping walls, now an
@@ -577,3 +660,13 @@ remoteness and areas; the reader; then the eval on the Children's Odyssey model.
     route. NFPA 16.2.2.2.4 requires every latch to a day care's closets, storage and kitchens to open from inside: if
     those rooms lock only against entry, they can't be "locked to prevent egress" (1014.2 item 2) and the mark would
     be `lockable: false`; which is the architect's to say.
+12. **Spaces not subject to occupancy** (2026-11-22, decision 1b). NFPA 101 measures travel and common path from
+    points "subject to occupancy" (7.6.1(1), A.3.3.47); the 2009 IBC from "the most remote point within a story"
+    (1016.1), with no carve-out (the 2021 IBC's 1006.2.1 exception 3 lifts the common path only, and only for
+    unoccupied mechanical rooms and penthouses). So for the IBC's rules Gordium still measures from a room marked
+    `not_occupied`, and on the day care those rules still need review while the two abandoned spaces (32, 33) have
+    no route. For the architects: (a) are rooms 32 and 33 subject to occupancy (one door "PERMANENTLY FIXED SHUT";
+    and the other's?), so that the mark is theirs to set (the eval file, an answer key, isn't changed here); (b) does
+    the code official accept that a sealed abandoned space has no IBC travel distance, which the 2009 words don't
+    say; (c) ELEC. (21): routinely visited for maintenance, so occupied under A.3.3.21.6's line, unless they say it
+    isn't.
