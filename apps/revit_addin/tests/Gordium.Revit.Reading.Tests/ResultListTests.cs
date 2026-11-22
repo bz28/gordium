@@ -89,10 +89,19 @@ public sealed class ResultListTests
         Assert.Equal(ListSection.Complies, folded.Section);
         Assert.All(placed.Where(p => p.Section == ListSection.Complies), p => Assert.Contains(p.Row.Verdict, new[] { Verdict.Complies, Verdict.NotApplicable }));
         // the failures can't be folded, even if asked
-        var closed = ResultList.Layout(placed, ListFilter.All, null, null, false, closed: Everything);
-        Assert.False(closed.OfType<ListHeading>().Single(h => h.Section == ListSection.Fails).Folded);
-        Assert.False(closed.OfType<ListHeading>().Single(h => h.Section == ListSection.Fails).Foldable);
-        Assert.Equal(4, Ids(closed).Count);                                     // the four failures still shown
+        // review round 1: no place but complies can be folded, by a click or by anything kept from an earlier check
+        // (grouping.py: needs review and check by hand are lines that are shown, never a fold)
+        foreach (var opened in new IReadOnlySet<ListSection>?[] { null, Everything, new HashSet<ListSection>() })
+        {
+            var any = ResultList.Layout(placed, ListFilter.All, null, null, false, opened);
+            Assert.All(any.OfType<ListHeading>().Where(h => h.Section != ListSection.Complies), h => Assert.False(h.Folded || h.Foldable));
+            Assert.True(any.OfType<ListHeading>().Single(h => h.Section == ListSection.Complies).Foldable);
+            Assert.Equal(placed.Count(p => p.Section != ListSection.Complies),
+                         Ids(any).Count(id => placed.Single(p => p.Row.Id == id).Section != ListSection.Complies));
+        }
+        var view = Addin("ResultsView.cs");
+        Assert.DoesNotContain("_closed", view, StringComparison.Ordinal);
+        Assert.Contains("        if (section != ListSection.Complies)\n            return;\n        if (!_opened.Remove(section))", view, StringComparison.Ordinal);
     }
 
     [Fact]
@@ -242,6 +251,54 @@ public sealed class ResultListTests
     }
 
     [Fact]
+    public void A_line_title_heads_its_rows_only_where_its_worker_tier_puts_them_all()
+    {
+        // review round 1: the worker's complies line holds a row the add-in reads as needs review (a word it doesn't
+        // know): that row is with the reviews, and neither it nor the line's other rows are under the line's words
+        var odd = Row("e.w2c", Verdict.NeedsReview, name: "Window 2 · Opening control", words: "needs review (the checker said \"maybe\")");
+        var model = Model(
+            Lines("egress:review", ("Front door: 2 need review", [Row("e.d1", Verdict.NeedsReview, name: "Front door · One egress door"),
+                                                                 Row("e.d2", Verdict.NeedsReview, name: "Front door · Side-hinged")])),
+            Lines("egress:complies", ("Window 2: 2 comply · 1 doesn't apply", [Row("e.w2a", Verdict.Complies), Row("e.w2b", Verdict.NotApplicable), odd]),
+                                     ("Window 3: 2 comply", [Row("e.w3a", Verdict.Complies), Row("e.w3b", Verdict.Complies)])));
+        var layout = ResultList.Layout(ResultList.Place(model), ListFilter.All, null, null, false, opened: Everything);
+        var subs = layout.OfType<ListSubheading>().Select(s => s.Title).ToList();
+        Assert.Equal(["Front door: 2 need review", "Window 3: 2 comply"], subs);
+        // the moved row is right after the review line's rows, under no line's words
+        var at = layout.ToList().FindIndex(e => e is ListRowEntry { Row.Row.Id: "e.w2c" });
+        Assert.IsType<ListRowEntry>(layout[at - 1]);
+        Assert.Equal(ListSection.Review, ((ListRowEntry)layout[at]).Row.Section);
+        // a zoning group's title is never over a row it doesn't place (a review the worker grouped under "complies")
+        var zoning = Model(Group("review", Row("z.h", Verdict.NeedsReview)), Group("complies", Row("z.c", Verdict.Complies), Row("z.r", Verdict.NeedsReview)));
+        var z = ResultList.Layout(ResultList.Place(zoning), ListFilter.All, null, null, false, opened: Everything);
+        Assert.DoesNotContain(z.OfType<ListSubheading>(), s => s.Title == "complies");
+        Assert.Equal(ListSection.Review, ResultList.PlaceOf("review"));
+        Assert.Equal(ListSection.ByHand, ResultList.PlaceOf("egress:by_hand"));
+        Assert.Equal(ListSection.ByHand, ResultList.PlaceOf("not_covered"));
+        Assert.Null(ResultList.PlaceOf("egress"));                                   // a law waiting for rooms
+    }
+
+    [Fact]
+    public void The_lists_keys_act_only_on_a_row_or_the_list_and_sub_headings_draw_their_glyph()
+    {
+        // review round 1: Space on the Details fold's header (inside the list) opens it, never zooms to the row selected
+        Assert.True(ResultList.ListTakesKey(onRow: true, onList: false));
+        Assert.True(ResultList.ListTakesKey(onRow: false, onList: true));
+        Assert.False(ResultList.ListTakesKey(onRow: false, onList: false));
+        var view = Addin("ResultsView.cs");
+        var keys = view[view.IndexOf("    private void ListKeys(", StringComparison.Ordinal)..];
+        Assert.StartsWith("    private void ListKeys(object sender, I.KeyEventArgs e)\n    {\n        // only a key on a row, or on the list itself", keys, StringComparison.Ordinal);
+        Assert.Contains("if (!ResultList.ListTakesKey(onRow: Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is RowItem,\n" +
+                        "                                     onList: ReferenceEquals(e.OriginalSource, _list)))\n            return;", keys, StringComparison.Ordinal);
+        // a sub-heading's status is drawn, as its doc says (its place's glyph; the clock once stale)
+        var entries = Addin("ResultsList.cs");
+        var sub = entries[entries.IndexOf("    private static W.UIElement Sub(SubItem item)", StringComparison.Ordinal)..];
+        sub = sub[..sub.IndexOf("\n    }\n", StringComparison.Ordinal)];
+        Assert.Contains("var glyph = PanelLook.Glyph(item.Sub.Status, 11);", sub, StringComparison.Ordinal);
+        Assert.Contains("line.Children.Add(glyph);", sub, StringComparison.Ordinal);
+    }
+
+    [Fact]
     public void Up_and_down_move_over_rows_only()
     {
         var layout = ResultList.Layout(ResultList.Place(Mixed()), ListFilter.All, null, null, false, opened: Everything);
@@ -316,7 +373,7 @@ public sealed class ResultListTests
         var styles = Addin("PanelStyles.xaml");
         // the rows, their order, filters, search, keys and copy are ResultList's (tested here), never the view's own
         Assert.Contains("_placed = ResultList.Place(model);", view, StringComparison.Ordinal);
-        Assert.Contains("_entries = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened, _closed);", view, StringComparison.Ordinal);
+        Assert.Contains("_entries = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);", view, StringComparison.Ordinal);
         Assert.Contains("FocusEntry(ResultList.Next(_entries, _list.SelectedIndex, e.Key == I.Key.Down ? 1 : -1));", view, StringComparison.Ordinal);
         Assert.Contains("ResultList.CopyText(row.Row.Row, _content?.Labels, _content?.Model?.Stale is null ? null : _content.When)", view, StringComparison.Ordinal);
         // each row's glyph and bar are its placed status (stale: the clock and the hatch), never a tone of the view's

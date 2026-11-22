@@ -148,11 +148,18 @@ public sealed class EntryView : C.Border
 
     private static W.UIElement Sub(SubItem item)
     {
-        var t = Muted(item.Sub.Title, top: 6, bottom: 3);
-        t.Margin = new W.Thickness(4, 6, 0, 3);
+        var line = new C.DockPanel { Margin = new W.Thickness(4, 6, 0, 3) };
+        line.SetResourceReference(C.Panel.BackgroundProperty, PanelTokens.BgPane);
+        var glyph = PanelLook.Glyph(item.Sub.Status, 11);                   // its place's glyph (the clock once stale)
+        glyph.Margin = new W.Thickness(0, 1, 6, 0);
+        glyph.VerticalAlignment = W.VerticalAlignment.Top;
+        C.DockPanel.SetDock(glyph, C.Dock.Left);
+        line.Children.Add(glyph);
+        var t = Muted(item.Sub.Title);
         t.FontWeight = W.FontWeights.SemiBold;
-        t.MouseLeftButtonDown += (_, e) => e.Handled = true;
-        return t;
+        line.Children.Add(t);
+        line.MouseLeftButtonDown += (_, e) => e.Handled = true;            // a sub-heading is never selected
+        return line;
     }
 
     private static W.UIElement Row(RowItem item)

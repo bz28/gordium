@@ -23,14 +23,17 @@ public enum ListFilter { All, Fails, Review, Complies }
 /// <param name="SourceKey">That line's or group's key (rows of one source are shown together).</param>
 /// <param name="SourceRows">How many rows that line or group holds.</param>
 /// <param name="FromLine">Whether the source is a worker line (else a group listed row by row).</param>
+/// <param name="SourcePlace">The place the worker's own tier or group puts that source in (<see cref="ResultList.PlaceOf"/>),
+/// or null when its key names none: a sub-heading is shown only in that place, so a row the add-in reads more
+/// cautiously than its worker line is never shown under the line's words ("2 comply · 1 doesn't apply").</param>
 public sealed record ListRow(ResultRow Row, ListSection Section, PanelStatus Status, string Source, string SourceKey,
-                             int SourceRows, bool FromLine);
+                             int SourceRows, bool FromLine, ListSection? SourcePlace = null);
 
 /// <summary>One entry of the list as shown: a place's heading, a sub-heading, or a row.</summary>
 public abstract record ListEntry;
 
-/// <summary>A place's heading ("NEEDS REVIEW · 12 rows"): folded or open, and whether a click can fold it (not while
-/// a filter or a search shows only matching rows: those are always shown).</summary>
+/// <summary>A place's heading ("NEEDS REVIEW · 12 rows"): folded or open, and whether a click can fold it (only the
+/// complies place, and not while a filter or a search shows only matching rows: those are always shown).</summary>
 public sealed record ListHeading(ListSection Section, string Title, int Rows, bool Folded, bool Foldable, PanelStatus Status)
     : ListEntry;
 
@@ -64,11 +67,12 @@ public static class ResultList
         foreach (var g in model.Groups)
         {
             var byHand = g.Key.EndsWith(":by_hand", StringComparison.Ordinal);
+            var own = PlaceOf(g.Key);
             if (g.Lines.Count == 0)
-                placed.AddRange(g.Rows.Select(r => Placed(r, byHand, stale, g.Title, "g:" + g.Key, g.Rows.Count, fromLine: false)));
+                placed.AddRange(g.Rows.Select(r => Placed(r, byHand, stale, g.Title, "g:" + g.Key, g.Rows.Count, fromLine: false, own)));
             else
                 foreach (var l in g.Lines)
-                    placed.AddRange(l.Rows.Select(r => Placed(r, byHand, stale, l.Title, "l:" + g.Key + "/" + l.Title, l.Rows.Count, fromLine: true)));
+                    placed.AddRange(l.Rows.Select(r => Placed(r, byHand, stale, l.Title, "l:" + g.Key + "/" + l.Title, l.Rows.Count, fromLine: true, own)));
         }
         // stable: OrderBy keeps the worker's order within a place (and among failures of the same size, or none)
         return placed.Select((p, n) => (p, n))
@@ -78,8 +82,26 @@ public static class ResultList
                      .Select(x => x.p).ToList();
     }
 
-    private static ListRow Placed(ResultRow r, bool byHand, bool stale, string source, string key, int count, bool fromLine) =>
-        new(r, SectionOf(r.Verdict, byHand), StatusLook.Of(r.Tone, stale), source, key, count, fromLine);
+    private static ListRow Placed(ResultRow r, bool byHand, bool stale, string source, string key, int count, bool fromLine,
+                                  ListSection? own) =>
+        new(r, SectionOf(r.Verdict, byHand), StatusLook.Of(r.Tone, stale), source, key, count, fromLine, own);
+
+    /// <summary>The place a worker group's key gives its rows (present.grouped: zoning's <c>fails</c>, <c>review</c>,
+    /// <c>use_details</c>, <c>complies</c>, <c>not_checked</c>, <c>not_covered</c>; a law's
+    /// <c>&lt;law&gt;:fails|review|by_hand|complies</c>), or null for any other (a law still waiting for rooms).</summary>
+    public static ListSection? PlaceOf(string groupKey)
+    {
+        ArgumentNullException.ThrowIfNull(groupKey);
+        var tier = groupKey.LastIndexOf(':') is var i and >= 0 ? groupKey[(i + 1)..] : groupKey;
+        return tier switch
+        {
+            "fails" => ListSection.Fails,
+            "review" or "use_details" => ListSection.Review,
+            "by_hand" or "not_checked" or "not_covered" => ListSection.ByHand,
+            "complies" => ListSection.Complies,
+            _ => null,
+        };
+    }
 
     /// <summary>A row's place, from its own verdict as the add-in reads it (a status word it doesn't know, or "not
     /// applicable" with no reason, is already needs review): a failure is always first, wherever the worker grouped
@@ -200,13 +222,16 @@ public static class ResultList
 
     /// <summary>The list as shown: each place that has rows to show, its heading, then (unless folded) its rows, a
     /// run of rows of one worker line or group under that line's sub-heading in the review, check-by-hand and complies
-    /// places (a line of one row is that row, no sub-heading; the failures are one run, largest first). With no filter
-    /// and no search, the complies place is folded unless <paramref name="opened"/> holds it, and a place in
-    /// <paramref name="closed"/> is folded too (never the failures); with a filter or a search, only the matching rows,
-    /// nothing folded (a match is never hidden).</summary>
+    /// places (a line of one row is that row, no sub-heading; the failures are one run, largest first). A line's or
+    /// group's words head its rows only in the place its worker tier puts it, and only when every one of its rows is
+    /// there: a row the add-in reads more cautiously than its line (moved to another place) is never shown under that
+    /// line's words, nor are the line's other rows (its words count a row no longer with them). With no filter and no
+    /// search, the complies place is folded unless <paramref name="opened"/> holds it; no other place is ever folded
+    /// (grouping.py: a line that is shown, never a fold); with a filter or a search, only the matching rows, nothing
+    /// folded (a match is never hidden).</summary>
     public static IReadOnlyList<ListEntry> Layout(IReadOnlyList<ListRow> placed, ListFilter filter, string? query,
                                                   IReadOnlyDictionary<string, string>? labels, bool stale,
-                                                  IReadOnlySet<ListSection>? opened = null, IReadOnlySet<ListSection>? closed = null)
+                                                  IReadOnlySet<ListSection>? opened = null)
     {
         ArgumentNullException.ThrowIfNull(placed);
         var terms = Terms(query);
@@ -220,13 +245,13 @@ public static class ResultList
             var shown = all.Where(r => Matches(r.Row, terms, labels)).ToList();
             if (shown.Count == 0)
                 continue;
-            var folded = !narrowed && section != ListSection.Fails
-                         && (section == ListSection.Complies ? opened?.Contains(section) != true : closed?.Contains(section) == true);
-            entries.Add(new ListHeading(section, Title(section, all), shown.Count, folded, Foldable: !narrowed && section != ListSection.Fails,
-                                        StatusOf(section, all, stale)));
+            var foldable = !narrowed && section == ListSection.Complies;
+            var folded = foldable && opened?.Contains(section) != true;
+            entries.Add(new ListHeading(section, Title(section, all), shown.Count, folded, foldable, StatusOf(section, all, stale)));
             if (folded)
                 continue;
-            var several = all.Select(p => p.SourceKey).Distinct().Skip(1).Any();     // more than one line or group here
+            var here = all.GroupBy(p => p.SourceKey, StringComparer.Ordinal).ToDictionary(g => g.Key, g => g.Count(), StringComparer.Ordinal);
+            var several = here.Count > 1;                                           // more than one line or group here
             var status = StatusOf(section, all, stale);
             string? run = null;
             foreach (var r in shown)
@@ -234,7 +259,7 @@ public static class ResultList
                 if (section != ListSection.Fails && r.SourceKey != run)
                 {
                     run = r.SourceKey;
-                    if (r.FromLine ? r.SourceRows > 1 : several)
+                    if (r.SourcePlace == section && here[r.SourceKey] == r.SourceRows && (r.FromLine ? r.SourceRows > 1 : several))
                         entries.Add(new ListSubheading(r.SourceKey, r.Source, status));
                 }
                 entries.Add(new ListRowEntry(r));
@@ -277,6 +302,12 @@ public static class ResultList
             said.Add(row.Reason);
         return string.Join(" · ", said);
     }
+
+    /// <summary>Whether the list's keys (Up, Down, Enter, Space, Ctrl+C) act on a key press: only one on a row
+    /// (<paramref name="onRow"/>: its source is inside a row's container) or on the list itself (<paramref name="onList"/>:
+    /// nothing in it focused yet). A key on anything else in the list (the Details and "What wasn't read" folds after the
+    /// rows) is that control's own: Space on a fold's header opens it, never zooms to the row selected.</summary>
+    public static bool ListTakesKey(bool onRow, bool onList) => onRow || onList;
 
     /// <summary>What Ctrl+C copies: the row as the text file writes it (<see cref="ResultText.Row"/>: its verdict, name,
     /// figures, reason and elements, each element by the project's label), and, once the model changed after the

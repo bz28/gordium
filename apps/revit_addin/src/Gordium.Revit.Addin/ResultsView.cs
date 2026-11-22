@@ -60,7 +60,6 @@ internal sealed class ResultsView : C.UserControl, IListHost
     private List<ListItem> _items = [];
     private ListFilter _filter = ListFilter.All;
     private readonly HashSet<ListSection> _opened = [];
-    private readonly HashSet<ListSection> _closed = [];
     private readonly HashSet<string> _openRows = new(StringComparer.Ordinal);
     private readonly HashSet<string> _openFolds = new(StringComparer.Ordinal);
     private string? _selectedId;
@@ -354,7 +353,7 @@ internal sealed class ResultsView : C.UserControl, IListHost
     {
         var labels = _content?.Labels;
         var stale = _content?.Model?.Stale is not null;
-        _entries = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened, _closed);
+        _entries = ResultList.Layout(_placed, _filter, _search.Text, labels, stale, _opened);
         var items = new List<ListItem>(_entries.Count + 2);
         RowItem? selected = null;
         foreach (var e in _entries)
@@ -427,6 +426,10 @@ internal sealed class ResultsView : C.UserControl, IListHost
 
     private void ListKeys(object sender, I.KeyEventArgs e)
     {
+        // only a key on a row, or on the list itself: never one meant for a fold after the rows (Space on Details)
+        if (!ResultList.ListTakesKey(onRow: Within<C.ListBoxItem>(e.OriginalSource)?.DataContext is RowItem,
+                                     onList: ReferenceEquals(e.OriginalSource, _list)))
+            return;
         var ctrl = (I.Keyboard.Modifiers & I.ModifierKeys.Control) != 0;
         switch (e.Key)
         {
@@ -493,12 +496,14 @@ internal sealed class ResultsView : C.UserControl, IListHost
 
     // ---- what a list entry asks (IListHost) ----------------------------------------------------------------
 
-    /// <summary>A heading clicked: its place folded or shown (the failures are never folded: ResultList.Layout).</summary>
+    /// <summary>A heading clicked: the complies place shown or folded again (no other place is ever folded:
+    /// ResultList.Layout).</summary>
     public void Toggle(ListSection section)
     {
-        var set = section == ListSection.Complies ? _opened : _closed;
-        if (!set.Remove(section))
-            set.Add(section);
+        if (section != ListSection.Complies)
+            return;
+        if (!_opened.Remove(section))
+            _opened.Add(section);
         Relayout();
     }
 
