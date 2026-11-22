@@ -32,7 +32,32 @@ internal sealed class ResultsPane : IDockablePaneProvider
         };
     }
 
-    private static ResultsView View() => _view ??= new ResultsView(Zoom, CheckAgain, OpenProjectInformation);
+    private static ResultsView View() => _view ??= new ResultsView(Zoom, CheckAgain, OpenProjectInformation, _theme);
+
+    /// <summary>Revit's theme as the panel last read it (light until read).</summary>
+    private static PanelTheme _theme = PanelTheme.Light;
+
+    /// <summary>Follows Revit's light or dark theme (UIThemeManager.CurrentTheme): read at startup and on every
+    /// ThemeChanged (Revit 2024+), the panel's token dictionary swapped when it differs. Never throws out of Revit's
+    /// event: a theme that can't be read keeps the panel as it is, and says so in the log.</summary>
+    internal static void FollowTheme()
+    {
+        try
+        {
+            var theme = PanelLook.OfRevit(UIThemeManager.CurrentTheme);
+            if (theme == _theme && _view is not null)
+                return;
+            _theme = theme;
+            _view?.UseTheme(theme);
+        }
+        catch (Exception x)       // never out of Revit's event
+        {
+            Trial.Log("results_panel", new Dictionary<string, object?> { ["theme"] = $"{x.GetType().Name}: {x.Message}" });
+        }
+    }
+
+    /// <summary>Revit's ThemeChanged: the UI theme or the canvas theme changed; the panel follows the UI theme.</summary>
+    internal static void OnThemeChanged(object? sender, Autodesk.Revit.UI.Events.ThemeChangedEventArgs e) => FollowTheme();
 
     /// <summary>Shows a check in the pane and brings the pane up (on Revit's thread: a command or a panel action).</summary>
     internal static void Show(UIApplication ui, Document doc, PanelContent content)

@@ -458,7 +458,13 @@ the jurisdiction is the City of Ithaca). Why each choice:
   refused request is dropped). One scrolling list, rows straight after the counts, *Details* folded after them. An
   edit to the checked project greys everything (no green) and says to check again; closing it takes the rows
   down. The street edge is asked for only when it is the last fact and the view is a plan showing a property line.
-  Why each choice: the reading design note, section 9.
+  Its look follows Revit's light or dark theme (`UIThemeManager.CurrentTheme` at startup, `ThemeChanged` after):
+  one token dictionary per theme (`PanelLook.cs`, from `PanelTokens` in `Gordium.Revit.Reading`), the controls
+  restyled (`PanelStyles.xaml`), and every status drawn as its own glyph beside its words (`StatusLook`: fail an
+  octagon, needs review a triangle, complies a circle with a check, not applicable a dash, stale a clock), never
+  by colour alone; green only for the worker's "complies", never once stale.
+  Why each choice: the reading design note, section 9, and the UI design pass (`docs/revit/ui_design_pass.md`,
+  section 2.5).
 
 How we know: `ProjectCheckTests` (scene 01 as fake Revit records with interior houses 1 and 5, checked by the real
 worker: the scene's hand-worked zoning verdicts, the houses' egress verdicts, a project with no lot never complies,
@@ -467,8 +473,10 @@ doesn't know and a "not applicable" with no reason: nothing shown as a pass that
 `ResultRowsTests` (the panel's rows: 200 rows all shown once in the worker's groups with its counts, never
 recounted; the worker's delta and never a margin it didn't give; egress figures from the reason with no margin
 worked out; sections and quotes; count chips coloured only by their words; every text-file row word for word the
-panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote). The WPF panel itself
-is checked in Revit (it needs Revit to run).
+panel's; and a real answer's egress failure, R319.2.2, with its figures, section and quote) and `PanelThemeTests`
+(every text colour at least 4.5:1 on every background it sits on in both themes, every status mark at least 3:1,
+every status its own glyph and word, green only for complies and never stale, no fixed colour in the view). The WPF
+panel itself is checked in Revit (it needs Revit to run).
 
 ## Build a model from data
 
