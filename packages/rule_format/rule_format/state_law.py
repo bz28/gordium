@@ -23,6 +23,7 @@ from pathlib import Path
 
 from .rulebook import STATE_SETTINGS, Context, kept_text, load, read_jsonl, verification_files
 
+SCOPES = ("residential_code", "building_code")   # a state.yaml `scope`: design_checker/code_scope.py CODES
 VERIFICATION = "text_verification.yaml"
 READINGS = ("agrees", "differs")
 FIELDS = {"document", "copy_checked", "second_reading", "pieces", "notes", "not_verified"}
@@ -43,9 +44,15 @@ def state_settings_problems(folder: Path, ctx: Context) -> list[str]:
         s = load(Path(folder) / STATE_SETTINGS)
     except Exception as e:  # reported, never raised
         return [f"{STATE_SETTINGS} can't be read ({type(e).__name__}: {e})"]
-    if not isinstance(s, dict) or set(s) - {"name", "law", "results_title"}:
-        return [f"{STATE_SETTINGS} must be a mapping of name, law and results_title only"]
+    if not isinstance(s, dict) or set(s) - {"name", "law", "results_title", "scope", "waiting_why"}:
+        return [f"{STATE_SETTINGS} must be a mapping of name, law, results_title, scope and waiting_why only"]
     out = [] if isinstance(s.get("name"), str) and s["name"].strip() else ["no name"]
+    # which buildings the law covers, where a state has two books for egress (New York: the Residential Code and
+    # the Building Code); a check runs a scoped law only where design_checker/code_scope.py finds it covers the building
+    if "scope" in s and s["scope"] not in SCOPES:
+        out.append(f"scope must be one of {', '.join(SCOPES)} (left out: the law covers every building)")
+    if "waiting_why" in s and not (isinstance(s["waiting_why"], str) and s["waiting_why"].strip()):
+        out.append("waiting_why must be words: what a check says this law will check once rooms are drawn")
     if "results_title" in s and not (isinstance(s["results_title"], str) and s["results_title"].strip()):
         out.append("results_title must be words: how a check's results of this law are headed, e.g. "
                    "\"Egress (NY State Residential Code 2025)\" (left out: \"<name> building code\")")
