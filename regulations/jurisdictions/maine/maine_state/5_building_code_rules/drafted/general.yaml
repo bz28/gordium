@@ -1766,7 +1766,7 @@ rules:
   topic: means_of_egress
   title: Common path 100 ft, sprinklered (NFPA 16.2.5.3.1)
   applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use) and sprinklered_9_7 and sprinkler_supervised_9_7
-  check: common_path_of_travel <= 100
+  check: common_path_of_travel_occupied <= 100
   for_each: story
   when_none: needs_review
   sources:
@@ -1788,7 +1788,7 @@ rules:
       - id: p1
         name: First floor (the sheet)
         measures:
-          common_path_of_travel: 48.5
+          common_path_of_travel_occupied: 48.5
     rows:
     - part: p1
       outcome: pass
@@ -1804,7 +1804,7 @@ rules:
       - id: p2
         name: Long common path
         measures:
-          common_path_of_travel: 110
+          common_path_of_travel_occupied: 110
     rows:
     - part: p2
       outcome: fail
@@ -1830,7 +1830,7 @@ rules:
       - id: p1
         name: Unsprinklered
         measures:
-          common_path_of_travel: 48.5
+          common_path_of_travel_occupied: 48.5
     rows:
     - part: p1
       outcome: not_applicable
@@ -1840,13 +1840,22 @@ rules:
     stricter than this 100 ft; both apply, the stricter governs, as the sheet says.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_16_2_5_3_2_common_path_not_sprinklered
   kind: rule
   topic: means_of_egress
   title: Common path 75 ft, not sprinklered (NFPA 16.2.5.3.2)
   applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use) and not (sprinklered_9_7 and
     sprinkler_supervised_9_7)
-  check: common_path_of_travel <= 75
+  check: common_path_of_travel_occupied <= 75
   for_each: story
   when_none: needs_review
   sources:
@@ -1868,7 +1877,7 @@ rules:
       - id: p1
         name: Short common path
         measures:
-          common_path_of_travel: 48.5
+          common_path_of_travel_occupied: 48.5
     rows:
     - part: p1
       outcome: pass
@@ -1883,7 +1892,7 @@ rules:
       - id: p2
         name: Long common path
         measures:
-          common_path_of_travel: 80
+          common_path_of_travel_occupied: 80
     rows:
     - part: p2
       outcome: fail
@@ -1909,7 +1918,7 @@ rules:
       - id: p1
         name: Sprinklered
         measures:
-          common_path_of_travel: 80
+          common_path_of_travel_occupied: 80
     rows:
     - part: p1
       outcome: not_applicable
@@ -1919,6 +1928,15 @@ rules:
     copy); both apply, the stricter governs (they agree).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_16_2_6_2_room_door_to_exit
   kind: rule
   topic: means_of_egress
@@ -2013,9 +2031,9 @@ rules:
   topic: means_of_egress
   title: Travel point in room to exit at most 150 ft (NFPA 16.2.6.2(2))
   applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use)
-  check: egress_travel_distance <= 150
+  check: egress_travel_distance_occupied <= 150
   review_when:
-  - when: egress_travel_distance > 150 and sprinklered_9_7 and sprinkler_supervised_9_7
+  - when: egress_travel_distance_occupied > 150 and sprinklered_9_7 and sprinkler_supervised_9_7
     reason: 'Over 150 ft in a building protected throughout by an approved, supervised automatic sprinkler system (Section
       9.7): 16.2.6.3 permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_16_2_6_3_sprinkler_increase);
       a person applies it.'
@@ -2045,7 +2063,7 @@ rules:
       - id: p1
         name: First floor (the sheet)
         measures:
-          egress_travel_distance: 130.667
+          egress_travel_distance_occupied: 130.667
     rows:
     - part: p1
       outcome: pass
@@ -2062,7 +2080,7 @@ rules:
       - id: p2
         name: Long travel
         measures:
-          egress_travel_distance: 160
+          egress_travel_distance_occupied: 160
     rows:
     - part: p2
       outcome: fail
@@ -2089,7 +2107,7 @@ rules:
       - id: p9
         name: Sprinklered, over the limit
         measures:
-          egress_travel_distance: 180
+          egress_travel_distance_occupied: 180
     rows:
     - part: p9
       outcome: needs_review
@@ -2100,6 +2118,19 @@ rules:
     passes both.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: review_when
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_16_2_6_2_sleeping_room_to_door
   kind: rule
   topic: means_of_egress
@@ -2173,7 +2204,7 @@ rules:
   topic: means_of_egress
   title: Travel +50 ft where sprinklered (NFPA 16.2.6.3)
   applies_when: nfpa_day_care_occupancy and (not day_care_existing or existing_change_of_use) and sprinklered_9_7 and sprinkler_supervised_9_7
-    and (egress_travel_from_room_door > 100 or egress_travel_distance > 150)
+    and (egress_travel_from_room_door > 100 or egress_travel_distance_occupied > 150)
   for_each: story
   when_none: not_applicable
   sources:
@@ -2212,7 +2243,7 @@ rules:
       - id: p1
         name: Over the plain limit
         measures:
-          egress_travel_distance: 170
+          egress_travel_distance_occupied: 170
           egress_travel_from_room_door: 90
     rows:
     - part: p1
@@ -2229,7 +2260,7 @@ rules:
       - id: p1
         name: Within the plain limits
         measures:
-          egress_travel_distance: 130.667
+          egress_travel_distance_occupied: 130.667
           egress_travel_from_room_door: 90
     rows:
     - part: p1
@@ -2252,6 +2283,15 @@ rules:
     a building, a person applies it.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_16_3_6_corridor_walls
   kind: rule
   topic: means_of_egress
@@ -2848,7 +2888,7 @@ rules:
   topic: means_of_egress
   title: Common path 100 ft, sprinklered (NFPA 17.2.5.3.1)
   applies_when: nfpa_day_care_occupancy and day_care_existing and sprinklered_9_7 and sprinkler_supervised_9_7
-  check: common_path_of_travel <= 100
+  check: common_path_of_travel_occupied <= 100
   for_each: story
   when_none: needs_review
   sources:
@@ -2871,7 +2911,7 @@ rules:
       - id: p1
         name: First floor (the sheet)
         measures:
-          common_path_of_travel: 48.5
+          common_path_of_travel_occupied: 48.5
     rows:
     - part: p1
       outcome: pass
@@ -2888,7 +2928,7 @@ rules:
       - id: p2
         name: Long common path
         measures:
-          common_path_of_travel: 110
+          common_path_of_travel_occupied: 110
     rows:
     - part: p2
       outcome: fail
@@ -2916,7 +2956,7 @@ rules:
       - id: p1
         name: Unsprinklered
         measures:
-          common_path_of_travel: 48.5
+          common_path_of_travel_occupied: 48.5
     rows:
     - part: p1
       outcome: not_applicable
@@ -2926,12 +2966,21 @@ rules:
     stricter than this 100 ft; both apply, the stricter governs, as the sheet says.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_17_2_5_3_2_common_path_not_sprinklered
   kind: rule
   topic: means_of_egress
   title: Common path 75 ft, not sprinklered (NFPA 17.2.5.3.2)
   applies_when: nfpa_day_care_occupancy and day_care_existing and not (sprinklered_9_7 and sprinkler_supervised_9_7)
-  check: common_path_of_travel <= 75
+  check: common_path_of_travel_occupied <= 75
   for_each: story
   when_none: needs_review
   sources:
@@ -2954,7 +3003,7 @@ rules:
       - id: p1
         name: Short common path
         measures:
-          common_path_of_travel: 48.5
+          common_path_of_travel_occupied: 48.5
     rows:
     - part: p1
       outcome: pass
@@ -2970,7 +3019,7 @@ rules:
       - id: p2
         name: Long common path
         measures:
-          common_path_of_travel: 80
+          common_path_of_travel_occupied: 80
     rows:
     - part: p2
       outcome: fail
@@ -2998,7 +3047,7 @@ rules:
       - id: p1
         name: Sprinklered
         measures:
-          common_path_of_travel: 80
+          common_path_of_travel_occupied: 80
     rows:
     - part: p1
       outcome: not_applicable
@@ -3008,6 +3057,15 @@ rules:
     copy); both apply, the stricter governs (they agree).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (common_path_of_travel_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_17_2_6_2_room_door_to_exit
   kind: rule
   topic: means_of_egress
@@ -3106,9 +3164,9 @@ rules:
   topic: means_of_egress
   title: Travel point in room to exit at most 150 ft (NFPA 17.2.6.2(2))
   applies_when: nfpa_day_care_occupancy and day_care_existing
-  check: egress_travel_distance <= 150
+  check: egress_travel_distance_occupied <= 150
   review_when:
-  - when: egress_travel_distance > 150 and sprinklered_9_7
+  - when: egress_travel_distance_occupied > 150 and sprinklered_9_7
     reason: 'Over 150 ft in a building protected throughout by an approved automatic sprinkler system (Section 9.7): 17.2.6.3
       permits 50 ft more, a permission whose number the checker doesn''t add (general.nfpa_17_2_6_3_sprinkler_increase); a
       person applies it.'
@@ -3139,7 +3197,7 @@ rules:
       - id: p1
         name: First floor (the sheet)
         measures:
-          egress_travel_distance: 130.667
+          egress_travel_distance_occupied: 130.667
     rows:
     - part: p1
       outcome: pass
@@ -3157,7 +3215,7 @@ rules:
       - id: p2
         name: Long travel
         measures:
-          egress_travel_distance: 160
+          egress_travel_distance_occupied: 160
     rows:
     - part: p2
       outcome: fail
@@ -3186,7 +3244,7 @@ rules:
       - id: p9
         name: Sprinklered, over the limit
         measures:
-          egress_travel_distance: 180
+          egress_travel_distance_occupied: 180
     rows:
     - part: p9
       outcome: needs_review
@@ -3197,6 +3255,19 @@ rules:
     passes both.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: check
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: review_when
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_17_2_6_2_sleeping_room_to_door
   kind: rule
   topic: means_of_egress
@@ -3273,7 +3344,7 @@ rules:
   topic: means_of_egress
   title: Travel +50 ft where sprinklered (NFPA 17.2.6.3)
   applies_when: nfpa_day_care_occupancy and day_care_existing and sprinklered_9_7 and (egress_travel_from_room_door > 100
-    or egress_travel_distance > 150)
+    or egress_travel_distance_occupied > 150)
   for_each: story
   when_none: not_applicable
   sources:
@@ -3313,7 +3384,7 @@ rules:
       - id: p1
         name: Over the plain limit
         measures:
-          egress_travel_distance: 170
+          egress_travel_distance_occupied: 170
           egress_travel_from_room_door: 90
     rows:
     - part: p1
@@ -3331,7 +3402,7 @@ rules:
       - id: p1
         name: Within the plain limits
         measures:
-          egress_travel_distance: 130.667
+          egress_travel_distance_occupied: 130.667
           egress_travel_from_room_door: 90
     rows:
     - part: p1
@@ -3355,6 +3426,15 @@ rules:
     a building, a person applies it. Chapter 17 prints ''an approved automatic sprinkler system'' (not ''supervised'').'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
+  revised:
+  - field: applies_when
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
+  - field: examples
+    by: Claude for Ben (the not-occupied mark, route note decision 1b)
+    date: 2026-11-22
+    why: 'NFPA 101 2012 7.6.1(1) measures travel distance "starting from the most remote point subject to occupancy" (16.2.6.1 and 17.2.6.1: "in accordance with Section 7.6"), and A.3.3.47 measures the common path "in the same manner as travel distance"; the 2009 IBC measures from "the most remote point within a story" (1016.1). The drafted rule read the measure both books shared, so a room the architect marks not occupied (an abandoned space) held this rule at needs review although NFPA''s words leave it out. It now reads NFPA''s own measure (egress_travel_distance_occupied, parts.yaml): the same figure where no room is marked; the IBC rules keep the shared one. Route note decision 1b (docs/decisions/2026-11-20_route_measurement.md).'
 - id: general.nfpa_17_3_6_corridor_walls
   kind: rule
   topic: means_of_egress

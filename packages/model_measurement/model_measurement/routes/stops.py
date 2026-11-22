@@ -24,6 +24,10 @@ STOPS = {
                      "shorten routes): {reason}",
     "pass_through_refused": "the room {name} is marked `pass_through: true`, but {why}: a route never crosses it, "
                             "so the mark is refused and the room isn't read",
+    "not_occupied_refused": "the room {name} is marked `not_occupied: true`, but it is {why}, whose use is "
+                            "occupancy: the mark is refused and the room isn't read",
+    "none_occupied": "every room on the story is marked `not_occupied` by the architect: no point subject to "
+                     "occupancy to measure from (NFPA 101 7.6.1(1))",
     "rooms_overlap": "the rooms {a} and {b} overlap ({area} sq in): which floor is which is unclear",
     "unknown_space": "the enclosed space {name} has no room drawn in it: it may hold the most remote point or a "
                      "route (open question 4)",

@@ -17,6 +17,9 @@ figures behind each measure: the routes drawn, the bounds, the corridors' centre
 says a measure stands on Gordium's reading (decision 1a, a room that opens only into the room it serves: the story's
 travel and common path, and that room's own exit count and common path), for the checker to show beside each row
 that reads it; a row that would comply on it needs review until the reading is confirmed (rule_format.parts.rows).
+`architect_stated`, {measure: words}, says a figure leaves out rooms the architect marks `not_occupied` (decision 1b:
+NFPA's `egress_travel_distance_occupied`, `common_path_of_travel_occupied` and the room-door travel; the IBC's
+figures never leave a room out), shown beside each row that reads it, never holding a pass: the architect's statement.
 
 The pieces (decision 11): floor.py reads each story's floor, zones and rings (decisions 1, 1a, 10); paths.py draws
 decision 2's routes; remote.py gives decision 3's travel figure; common_path.py decision 5's; dead_ends.py decision
@@ -30,6 +33,7 @@ drawn in it, may be either (a corridor part marked `maybe`). The architect's own
 corridor's rating and smoke partitions) are marks the description doesn't carry yet: not measured.
 """
 
+import copy
 import math
 
 from model_measurement.interior.read import name_of
@@ -43,9 +47,15 @@ from model_measurement.routes.stops import Stop
 MEASURED_FORMAT = "gordium.routes_measured/1"
 KINDS = ("story", "space", "corridor")
 SF = FOOT * FOOT
-READ_THROUGH = ("egress_travel_distance", "egress_travel_from_room_door", "common_path_of_travel")
+# decision 1b: NFPA 101 measures travel and common path from points "subject to occupancy" (7.6.1(1), A.3.3.47), the
+# 2009 IBC from every point within the story (1016.1): each book's figure under its own measure's name
+OCCUPIED = {"egress_travel_distance": "egress_travel_distance_occupied",
+            "common_path_of_travel": "common_path_of_travel_occupied"}
+READ_THROUGH = ("egress_travel_distance", "egress_travel_from_room_door", "common_path_of_travel", *OCCUPIED.values())
 ROUTE_MEASURES = ("story_exit_count", "egress_travel_distance", "egress_travel_from_room_door",
-                  "egress_travel_in_sleeping_room", "common_path_of_travel", "exit_remoteness_ratio")
+                  "egress_travel_in_sleeping_room", "common_path_of_travel", "exit_remoteness_ratio",
+                  *OCCUPIED.values())
+LEFT_OUT_WORDS = "measured leaving out {n} space{s} marked not occupied by the architect: {names}"
 STATED = {"story_occupant_load": "the story's design occupant load", "space_occupant_load": "the space's occupant load",
           "corridor_occupant_load": "the occupant load the corridor serves",
           "corridor_fire_rating_hours": "the corridor walls' fire-resistance rating",
@@ -197,18 +207,9 @@ def _story_routes(sp, story, routes, uses, items, access) -> dict:
             figures[rid] = story_figure(routes, rooms={rid})
         except Stop as s:
             figures[rid] = s
-    stopped = [f for f in figures.values() if isinstance(f, Stop)]
-    common = None if stopped else _try(sp, "common_path_of_travel", lambda: story_figure(routes))
-    if stopped:
-        sp["not_measured"]["common_path_of_travel"] = stopped[0].reason
-        corridors = {rid: _attempt(lambda rid=rid: story_figure(routes, rooms={rid}))
-                     for rid in sorted(k for k, v in story.rooms.items() if v is not None and uses.get(k) == "corridor")}
-        more["common_path_of_travel"] = _over_rooms_measured(story, {**figures, **corridors})
-    if common is not None:
-        m["common_path_of_travel"] = _feet(common.figure)
-        more["common_path_of_travel"] = _figure(common)
-        pair = at_point(routes, common.at)
-        more["common_path_of_travel"].update(exits=list(pair.exits), routes=[_drawn(x) for x in pair.routes])
+    _common(sp, story, routes, uses, figures, "common_path_of_travel", None)
+    left_out = sorted(k for k, v in story.rooms.items() if v is not None and v.not_occupied)
+    _occupied(sp, story, routes, uses, figures, left_out)
     got = _try(sp, "exit_remoteness_ratio", lambda: straight.ratio(story))
     if got is not None:
         far, across, ratio = got
@@ -219,6 +220,8 @@ def _story_routes(sp, story, routes, uses, items, access) -> dict:
                                                                                              across.corners]}
     worst, why = None, None
     for rid, doors in access.items():
+        if rid in left_out:                       # decision 1b: a room nobody occupies is no start (NFPA 7.6.1(1))
+            continue
         if isinstance(doors, Stop) or not doors:
             why = why or (doors.reason if isinstance(doors, Stop) else
                           Stop("no_exit_access", name=story.rooms[rid].name).reason)
@@ -247,6 +250,64 @@ def _story_routes(sp, story, routes, uses, items, access) -> dict:
         worst = max(worst, got)
     m["egress_travel_in_sleeping_room"] = _feet(worst)
     return figures
+
+
+def _common(sp, story, routes, uses, figures, name, rooms) -> None:
+    """The story's common path (decision 5) over `rooms` (None: every room), under `name`, or why not: a room among
+    them whose own figure stopped stops it (its reason; the greatest over the rooms measured in `more`)."""
+    m, more = sp["measures"], sp["more"]
+    within = (lambda k: True) if rooms is None else (lambda k: k in rooms)
+    stopped = [f for k, f in figures.items() if isinstance(f, Stop) and within(k)]
+    common = None if stopped else _try(sp, name, lambda: story_figure(routes, rooms=rooms))
+    if stopped:
+        sp["not_measured"][name] = stopped[0].reason
+        corridors = {rid: _attempt(lambda rid=rid: story_figure(routes, rooms={rid}))
+                     for rid in sorted(k for k, v in story.rooms.items()
+                                       if v is not None and uses.get(k) == "corridor" and within(k))}
+        more[name] = _over_rooms_measured(story, {**{k: f for k, f in figures.items() if within(k)}, **corridors})
+    if common is not None:
+        m[name] = _feet(common.figure)
+        more[name] = _figure(common)
+        pair = at_point(routes, common.at)
+        more[name].update(exits=list(pair.exits), routes=[_drawn(x) for x in pair.routes])
+
+
+def _occupied(sp, story, routes, uses, figures, left_out) -> None:
+    """Decision 1b: NFPA's travel and common path, from the points of the rooms not marked `not_occupied` only. With
+    none marked, the same figures as the IBC's (copied: the same walk); every room marked, not measured (no point to
+    start from, never 0); else measured over the others, and `architect_stated` says which rooms were left out, for
+    every row reading these figures (or the room-door travel, which leaves out their doors) to show: the architect's
+    statement, never hidden."""
+    m, more, gone = sp["measures"], sp["more"], sp["not_measured"]
+    if not left_out:
+        for ibc, nfpa in OCCUPIED.items():
+            if ibc in m:
+                m[nfpa] = m[ibc]
+            if ibc in gone:
+                gone[nfpa] = gone[ibc]
+            if ibc in more:
+                more[nfpa] = copy.deepcopy(more[ibc])
+        return
+    names = [story.rooms[k].name for k in left_out]
+    words = LEFT_OUT_WORDS.format(n=len(names), s="" if len(names) == 1 else "s", names=", ".join(names))
+    sp["architect_stated"] = {name: words for name in (*OCCUPIED.values(), "egress_travel_from_room_door")}
+    occupied = {k for k, v in story.rooms.items() if v is not None and not v.not_occupied}
+    if not occupied:
+        for nfpa in OCCUPIED.values():
+            gone[nfpa] = Stop("none_occupied").reason
+        return
+    name = OCCUPIED["egress_travel_distance"]
+    travel = _try(sp, name, lambda: farthest(_TravelOnly(routes, occupied)))
+    if travel is not None:
+        m[name] = _feet(travel.figure)
+        more[name] = _figure(travel)
+        more[name]["route"] = _drawn(routes.route(travel.at))
+    else:
+        more[name] = _over_rooms_measured(story, {rid: _attempt(lambda rid=rid: farthest(_TravelOnly(routes, {rid})))
+                                                  for rid in sorted(occupied)})
+    _common(sp, story, routes, uses, figures, OCCUPIED["common_path_of_travel"], occupied)
+    for nfpa in OCCUPIED.values():                # the rooms left out, beside each figure drawn
+        more.setdefault(nfpa, {})["left_out"] = names
 
 
 def _attempt(work):

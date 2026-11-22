@@ -61,12 +61,15 @@ def _key_examples(rule):
     return [e for e in rule["examples"] if "The answer key" in (e.get("note") or "")]
 
 
-MEASURED = {   # each check of the answer key: the measure the sheet's number is, in the rules' units
-    "Exit access travel distance (the most remote point to an exit)": ("egress_travel_distance", 130.667),
-    "Common path of egress travel": ("common_path_of_travel", 48.5),
-    "Dead-end corridor": ("corridor_dead_end_length", 21.5),
-    "Exit (or exit access doorway) remoteness": ("exit_remoteness_ratio", 0.8745),
-    "Accessory storage area on the story": ("story_accessory_area", 1428),
+# the sheet's travel and common path start in a classroom, a room subject to occupancy: the figure of both books'
+# measures (the IBC's from every point, NFPA's from points subject to occupancy: route note decision 1b)
+MEASURED = {   # each check of the answer key: the measures the sheet's number is, in the rules' units
+    "Exit access travel distance (the most remote point to an exit)": (
+        ("egress_travel_distance", "egress_travel_distance_occupied"), 130.667),
+    "Common path of egress travel": (("common_path_of_travel", "common_path_of_travel_occupied"), 48.5),
+    "Dead-end corridor": (("corridor_dead_end_length",), 21.5),
+    "Exit (or exit access doorway) remoteness": (("exit_remoteness_ratio",), 0.8745),
+    "Accessory storage area on the story": (("story_accessory_area",), 1428),
 }
 
 
@@ -82,8 +85,9 @@ def test_the_rules_reproduce_the_architects_hand_check(ctx, rules):
             r = rules[rid]
             if check["what"] not in MEASURED or "check" not in r:
                 continue
-            measure, value = MEASURED[check["what"]]
-            if measure not in parts.formula_names(r):
+            measures, value = MEASURED[check["what"]]
+            measure = next((m for m in measures if m in parts.formula_names(r)), None)
+            if measure is None:
                 continue
             found = _key_examples(r)
             assert found, rid
@@ -106,9 +110,9 @@ def test_the_sheets_limits_are_the_rules_numbers(rules):
     path, 20 ft and 2.5 x the width (IBC) and 50 ft (NFPA sprinklered) dead ends, one-third of the diagonal, 10%."""
     has = {rid: rules[rid]["check"] for rid in rules if "check" in rules[rid]}
     assert "egress_travel_distance <= 200" in has["general.ibc_1016_1_travel_distance"]
-    assert has["general.nfpa_16_2_6_2_point_in_room_to_exit"] == "egress_travel_distance <= 150"
+    assert has["general.nfpa_16_2_6_2_point_in_room_to_exit"] == "egress_travel_distance_occupied <= 150"
     assert has["general.ibc_1014_3_common_path"] == "common_path_of_travel <= 75"
-    assert has["general.nfpa_16_2_5_3_1_common_path_sprinklered"] == "common_path_of_travel <= 100"
+    assert has["general.nfpa_16_2_5_3_1_common_path_sprinklered"] == "common_path_of_travel_occupied <= 100"
     assert "2.5 * corridor_dead_end_least_width" in has["general.ibc_1018_4_dead_end"]
     assert "50 if" in has["general.nfpa_16_2_5_2_dead_end"] and "else 20" in has["general.nfpa_16_2_5_2_dead_end"]
     assert "1 / 3 if" in has["general.ibc_1015_2_1_remoteness"]
@@ -177,7 +181,7 @@ def test_chapter_16_reaches_an_existing_day_care_unless_no_change_of_use_is_stat
     day care is held to Chapter 16 too unless the architect states there was no change of use."""
     r = rules["general.nfpa_16_2_5_3_1_common_path_sprinklered"]
     existing = NEW_SPRINKLERED | {"day_care_existing": True}
-    long_path = {"common_path_of_travel": 110}
+    long_path = {"common_path_of_travel_occupied": 110}
     assert _rows(r, "story", long_path, existing, ctx) == ["needs_review"]                 # change of use not said
     assert _rows(r, "story", long_path, existing | {"existing_change_of_use": True}, ctx) == ["fail"]
     assert _rows(r, "story", long_path, existing | {"existing_change_of_use": False}, ctx) == ["not_applicable"]
@@ -241,3 +245,32 @@ def test_every_rule_citing_a_readme_open_question_is_named_in_that_question(rule
     assert cited >= 2
     assert "whether that flat 20 ft governs" in rules["general.nfpa_16_2_5_2_dead_end"]["review_when"][0]["reason"]
     assert "flat 20-ft dead-end limit governs" in items["2"]
+
+
+def test_each_book_reads_the_travel_measure_its_own_words_define(rules):
+    """NFPA 101 measures travel and common path from points "subject to occupancy" (7.6.1(1), A.3.3.47): its rules
+    read the `_occupied` measures, which leave out a room the architect marks not occupied; the 2009 IBC from "the
+    most remote point within a story" (1016.1): its rules read the measures over every room (route note decision
+    1b). A rule reading the other book's measure is the false pass (IBC) or the needless review (NFPA)."""
+    shared, occupied = {"egress_travel_distance", "common_path_of_travel"}, \
+        {"egress_travel_distance_occupied", "common_path_of_travel_occupied"}
+    seen = {"ibc": 0, "nfpa": 0}
+    for rid, r in rules.items():
+        names = set()
+        texts = [r.get("check") or "", r.get("applies_when") or ""] + [w["when"] for w in r.get("review_when") or []]
+        for text in texts:
+            names |= formula_names_of(text)
+        books = {s["file"] for s in r.get("sources") or []}
+        if books == {"gov.law.nfpa.101.2012.pdf"} and names & (shared | occupied):
+            assert not names & shared and names & occupied, rid
+            assert any(v["field"] in ("check", "applies_when") for v in r.get("revised") or []), rid   # said why
+            seen["nfpa"] += 1
+        if books == {"icc.ibc.2009.pdf"} and names & (shared | occupied):
+            assert not names & occupied, rid
+            seen["ibc"] += 1
+    assert seen == {"ibc": 2, "nfpa": 8}
+
+
+def formula_names_of(text):
+    from rule_format import formula
+    return formula.names(text) if text.strip() else set()

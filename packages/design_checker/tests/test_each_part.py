@@ -201,8 +201,8 @@ def test_a_row_on_a_reading_to_confirm_keeps_its_comparison_and_title_and_says_t
     words = "Gordium's reading · confirm with the architects: CLOSET through KITCHEN"
     for value, outcome, wanted in ((140.0, "fail", "100"),
                                    (40.0, "needs_review", "complies only if this reading is confirmed: ")):
-        given = {"story": [{"id": "L1", "name": "Level 1", "measures": {"common_path_of_travel": value},
-                            "confirm": {"common_path_of_travel": words}}]}
+        given = {"story": [{"id": "L1", "name": "Level 1", "measures": {"common_path_of_travel_occupied": value},
+                            "confirm": {"common_path_of_travel_occupied": words}}]}
         got = check_parts([rule], given, values, allowed)
         row, = got["rows"]
         assert row["outcome"] == outcome and words in row["line"] and wanted in row["line"], row["line"]
@@ -212,3 +212,30 @@ def test_a_row_on_a_reading_to_confirm_keeps_its_comparison_and_title_and_says_t
         else:                    # review round 2: never a pass, never grouped under Complies
             assert got["results"][rule["id"]] == "needs_review"
             assert all(item["status"] != "complies" for item in got["items"])
+
+
+def test_a_row_on_the_architects_not_occupied_mark_says_which_rooms_it_left_out_and_keeps_its_verdict():
+    """Route note decision 1b: a story figure measured leaving out rooms the architect marks not occupied
+    (`architect_stated`) says so in every row reading it, after the line; the verdict is the comparison's (a pass
+    stays a pass: the architect's statement, not a reading of Gordium's); an IBC rule's row, reading the figure over
+    every room, says nothing of it."""
+    from rule_format.rulebook import REPO, Context, load
+    from design_checker.each_part import check_parts
+    maine = REPO / "regulations/jurisdictions/maine/maine_state"
+    rules = {r["id"]: r for r in load(maine / "5_building_code_rules/drafted/general.yaml")["rules"]}
+    allowed = Context.for_jurisdiction(maine).allowed()
+    values = {"nfpa_day_care_occupancy": True, "day_care_existing": False, "sprinklered_9_7": False,
+              "sprinkler_supervised_9_7": False, "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}
+    words = ("measured leaving out 2 spaces marked not occupied by the architect: SPRINKLERED ABANDONED SPACE (32), "
+             "SPRINKLERED ABANDONED SPACE (33)")
+    nfpa = rules["general.nfpa_16_2_6_2_point_in_room_to_exit"]
+    for value, outcome in ((130.0, "pass"), (160.0, "fail")):
+        given = {"story": [{"id": "L1", "name": "Level 1",
+                            "measures": {"egress_travel_distance_occupied": value, "egress_travel_distance": value},
+                            "architect_stated": {"egress_travel_distance_occupied": words}}]}
+        got = check_parts([nfpa], given, values, allowed)
+        row, = got["rows"]
+        assert row["outcome"] == outcome and row["line"].count(words) == 1, row["line"]
+        assert got["results"][nfpa["id"]] == outcome
+        ibc, = check_parts([rules["general.ibc_1016_1_travel_distance"]], given, values, allowed)["rows"]
+        assert words not in ibc["line"]
