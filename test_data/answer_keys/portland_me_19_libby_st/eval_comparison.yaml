@@ -32,11 +32,13 @@ figures:
       to_the_nearest_exit_with_12_in: 110.141
       nearest_exit: 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
       story:
-        not_measured: the point (165.625, 70.156) has no route to any exit (a path
-          12 in clear of every corner, through door centres and rooms it may cross)
+        not_measured: 'the point (165.625, 70.156) has no route to any exit: its room
+          STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable:
+          true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)'
         rooms_not_measured:
-          CLOSET (40): the point (25.978, 35.841) has no route to any exit (a path
-            12 in clear of every corner, through door centres and rooms it may cross)
+          CLOSET (40): 'the point (25.978, 35.841) has no route to any exit: its room
+            CLOSET (40) opens only into KITCHEN (10), which can be locked (`lockable:
+            true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)'
           ELEC. (21): the point (5.171, 25.183) has no route to any exit (a path 12
             in clear of every corner, through door centres and rooms it may cross)
           SPRINKLERED ABANDONED SPACE (32): the point (55.308, 78.082) has no route
@@ -45,21 +47,37 @@ figures:
           SPRINKLERED ABANDONED SPACE (33): the point (155.057, 78.927) has no route
             to any exit (a path 12 in clear of every corner, through door centres
             and rooms it may cross)
-          STORAGE (13): the point (165.625, 70.156) has no route to any exit (a path
-            12 in clear of every corner, through door centres and rooms it may cross)
+          STORAGE (13): 'the point (165.625, 70.156) has no route to any exit: its
+            room STORAGE (13) opens only into STORAGE (14), which can be locked (`lockable:
+            true`), so a route never passes through it (IBC 1014.2 item 2, NFPA 7.5.2.1)'
         over_rooms_measured: 110.247
         from_room: STORAGE (11)
         at:
         - 138.9
         - 84.4833
     agreement:
-      tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
-        figure
-      sheet: 130.667
+      tolerance: 'Gordium''s no-clearance figure, from the sheet''s start to the sheet''s
+        exit, no longer than the sheet''s line as drawn plus 2 percent of it or 2
+        ft, whichever is larger, and every rule of this figure giving the sheet''s
+        verdict (changed 2026-11-21: the sheet''s line is orthogonal, never shorter
+        than the natural path IBC 1016.1 and NFPA 7.6.1 measure)'
+      sheet_line_as_drawn: 130.325
       gordium: 116.034
-      difference: -14.633
-      allowed: 2.613
+      longer_than_drawn_by: -14.291
+      allowed: 2.607
+      no_longer: true
+      verdicts_same:
+        general.ibc_1016_1_travel_distance: false
+        general.nfpa_16_2_6_2_point_in_room_to_exit: false
       within_tolerance: false
+      before_2026_11_21:
+        tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
+          figure
+        sheet: 130.667
+        gordium: 116.034
+        difference: -14.633
+        allowed: 2.613
+        within_tolerance: false
   common_path:
     sheet_stated: 48.5
     sheet_words: DISTANCE TO COMMON PATH OF TRAVEL = 48'-6"
@@ -87,9 +105,10 @@ figures:
           (a path 12 in clear of every corner, through door centres and rooms it may
           cross)
         rooms_not_measured:
-          CLOSET (40): the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
-            (a path 12 in clear of every corner, through door centres and rooms it
-            may cross)
+          CLOSET (40): 'the point (25.978, 35.841) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94:
+            its room CLOSET (40) opens only into KITCHEN (10), which can be locked
+            (`lockable: true`), so a route never passes through it (IBC 1014.2 item
+            2, NFPA 7.5.2.1)'
           CORRIDOR (26): 'more than 64 routes from (63.232, 37.844) are equally short
             (within 1e-6 ft): which to take isn''t worked out'
           ELEC. (21): the point (5.171, 25.183) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
@@ -101,22 +120,37 @@ figures:
           SPRINKLERED ABANDONED SPACE (33): the point (155.057, 78.927) has no route
             to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94 (a path 12 in
             clear of every corner, through door centres and rooms it may cross)
-          STORAGE (13): the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94
-            (a path 12 in clear of every corner, through door centres and rooms it
-            may cross)
+          STORAGE (13): 'the point (165.625, 70.156) has no route to the exit 90a6a430-1684-4046-81c7-ffbf1c99b587-0005bc94:
+            its room STORAGE (13) opens only into STORAGE (14), which can be locked
+            (`lockable: true`), so a route never passes through it (IBC 1014.2 item
+            2, NFPA 7.5.2.1)'
         over_rooms_measured: 43.45
         from_room: MOUNTAIN CLASSROOM (3)
         at:
         - 194.0778
         - 1.5519
     agreement:
-      tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
-        figure
-      sheet: 48.5
+      tolerance: Gordium's no-clearance figure from the sheet's start no longer than
+        the sheet's line as drawn plus 2 percent of it or 2 ft, whichever is larger,
+        and every rule of this figure giving the sheet's verdict (changed 2026-11-21,
+        as for the travel distance)
+      sheet_line_as_drawn: 48.404
       gordium: 41.066
-      difference: -7.434
+      longer_than_drawn_by: -7.338
       allowed: 2.0
+      no_longer: true
+      verdicts_same:
+        general.ibc_1014_3_common_path: false
+        general.nfpa_16_2_5_3_1_common_path_sprinklered: false
       within_tolerance: false
+      before_2026_11_21:
+        tolerance: within 2 percent or 2 ft, whichever is larger, of Gordium's no-clearance
+          figure
+        sheet: 48.5
+        gordium: 41.066
+        difference: -7.434
+        allowed: 2.0
+        within_tolerance: false
   dead_end:
     sheet_stated: 21.5
     sheet_words: DEAD END CORRIDOR DISTANCE = 21'-6"
@@ -267,6 +301,20 @@ verdicts:
       sheet: pass
       same: false
   every_verdict_the_same: false
+  by_figure:
+    travel_distance:
+    - general.ibc_1016_1_travel_distance
+    - general.nfpa_16_2_6_2_point_in_room_to_exit
+    common_path:
+    - general.ibc_1014_3_common_path
+    - general.nfpa_16_2_5_3_1_common_path_sprinklered
+    dead_end:
+    - general.ibc_1018_4_dead_end
+    - general.nfpa_16_2_5_2_dead_end
+    remoteness:
+    - general.ibc_1015_2_1_remoteness
+    storage:
+    - general.ibc_508_2_1_accessory_area
 by_hand:
   travel_distance: the sheet's line turns at right angles and runs the corridor's
     centre line to the east exit; Gordium's is the shortest walk to the same exit
