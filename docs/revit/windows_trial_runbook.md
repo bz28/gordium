@@ -370,3 +370,31 @@ record "stated by the architect for the whole building, within what the drawing 
 no bedrooms or parking mark (named in its `eval_marks.yaml` with their source). A stories row that needs review now
 is a finding (the mark not set or not sent). Anything else is a finding: a Revit reading that differs from the description
 (the comparison names the rule), or a build that drew something differently (the `build_model` line says what).
+
+### The Building Code eval (2026-11-22)
+
+A third building, for the 2025 Building Code of New York State: Gordium's own two-story, four-unit apartment
+building (`test_data/test_sites/new_york/ithaca_city/four_unit_apartment/`: `apartment.yaml` the building,
+`revit_build_data.json` built from it, `eval_marks.yaml` its marks, `expected.yaml` the hand-worked results; why:
+[docs/decisions/2026-11-22_which_ny_code.md](../decisions/2026-11-22_which_ny_code.md)). It needs this branch's add-in
+(the marks Occupancy groups and Sprinkler system, and `which_code` in the answer). From the worktree
+(`C:\Users\benja\Documents\gordium_nycheck`), Revit closed:
+
+```powershell
+$T = "$env:LOCALAPPDATA\Gordium\trial"; $E = "$T\ny_eval"; New-Item -ItemType Directory -Force $E | Out-Null
+$py = "C:\Users\benja\Documents\gordium\.venv\Scripts\python.exe"; $n = "four_unit_apartment"
+$d = "test_data\test_sites\new_york\ithaca_city\four_unit_apartment"
+powershell -ExecutionPolicy Bypass -File apps\revit_addin\install_trial_addin.ps1 -Python $py
+& $py apps\revit_addin\tools\eval_marks_request.py "$d\eval_marks.yaml" --model "$E\${n}_built.rvt" `
+  --save-as "$E\${n}_marked.rvt" --out "$E\${n}_set_marks.json" --build-data "$PWD\$d\revit_build_data.json" `
+  --build-out "$E\${n}_build.json" --check-out "$E\${n}_check.json"
+```
+
+Then steps 1 to 4 above with `$n = "four_unit_apartment"`. **What to expect:** the build: walls 16, doors 10, rooms 10
+placed and enclosed (5 on each level), floors 3, the lot, 4 spot grades. Marks: 44 applied (each room's sleeping,
+use, can be locked and pass through; the four stair-enclosure doors' Gordium: Exit). The check: `which_code` is
+`building_code`, "a building of Group R-2, none of the dwellings R101.2 lists (101.2)"; only the Building Code's egress
+section (no Residential Code section); each story's exits 2, their remoteness 41.0 / 68.425 = 0.599 (complies,
+1007.1.1); every rule's verdict as `expected.yaml` (3 comply, 26 need review, 4 not applicable). The comparison exits 0.
+A Residential Code section, a story whose routes aren't measured, or an exit count other than 2 is a finding: the
+Revit reading differs from `make_ny_build_data.interior_of` (the comparison names the rule).
