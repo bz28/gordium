@@ -360,8 +360,11 @@ area need review.
      were read as two directions (16 ft where it is 45: test 24). A step is drawn only where both its centre lines run (review round 2: one drawn at the end of a stretch where a
      centre line no longer ran ended on no line, and with others there made a loop of no area: 10 ft where it is
      39.5, test 25); a step passing a third place on its line, a place reached by steps alone, or a closed end on no
-     stretch: needs review; and anything unexpected in working the dead ends out is each corridor's needs-review
-     reason, never a crash of the story.
+     stretch: needs review; and anything unexpected in working the dead ends out (a stop raised inside included) is
+     each corridor's needs-review reason, never a crash of the story. A floor of corridors that can't be worked out
+     leaves nothing on the graph the story's corridors share, and these checks look only at a floor's own places
+     (review round 3, test 25d to 25f: a failed floor's leftovers once cost a healthy corridor its figure); with that,
+     a closed end on no stretch can no longer arise, and its check stays as a guard.
    - **Ends.** A centre line runs past its last crossing or step only with its own stretch there (as before). An end
      at its rectangle's end with nothing joined there is a closed end only if walled across the stretch's whole
      width (then run to the real floor's end, as before); floor beyond such an end that no centre line reaches:
