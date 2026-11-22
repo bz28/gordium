@@ -19,8 +19,13 @@ Two parts, the figure the greater:
   edge meeting the ring passes through its corner), else the greatest sampled walk on the floor (no clearance) out
   to its edge samples, over the corners of 3-in triangles covering it, plus 3 in.
 
-Every sample with no route stops the figure (needs review), the reason named; an edge arc shut in by rings is
-sampled at its ends at least, so a pocket shut in by rings is found from its own arcs. Lengths in inches.
+- **The pockets** (clear floor shut in by rings: a route there exists only with no clearance). Their samples are
+  left out of the two parts above and bounded through the clusters round them: those clusters' greatest routed
+  edge sample, plus 1.5 in, plus the greatest sampled walk out of the pocket and the rings, plus 3 in.
+
+Any other sample with no route, or a pocket or cluster with no routed clear edge round it, stops the figure (needs
+review), the reason named; every edge arc is sampled at its ends at least, so a pocket shut in by rings is found from
+its own arcs. Lengths in inches.
 """
 
 import heapq
@@ -42,6 +47,7 @@ FINE = 3.0            # in: the longest side they are cut to
 SPACING = 3.0         # in: the most between E's samples along an arc
 NEAR = FINE + SPACING / 2     # in: a clear point of a triangle a ring reaches, to E and along it
 SIDES = 64            # the polygons that cover a cluster's rings for its walk-out samples
+SHUT = "too_narrow"   # a point with a route only with no clearance: in a pocket shut in by rings
 
 
 @dataclass
@@ -216,21 +222,31 @@ class _Walk:
 
 
 def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
-    """The story's travel figure (decision 3): Stop when any sample has no route (the reason named)."""
+    """The story's travel figure (decision 3). A sample with a route only with no clearance is in a pocket, bounded
+    through its clusters; Stop when any other sample has no route, or a pocket or cluster has no routed edge."""
     r = routes.r
     cache = {}
     found = {"best": -math.inf, "at": None}
 
     def value(p):
+        """The route's length from a clear point, or None for a point shut in by rings (a route exists with no
+        clearance): a pocket, bounded through the cluster that shuts it in (below)."""
         key = (round(p[0], 9), round(p[1], 9))
         if key not in cache:
-            got = routes.travel(p, exit_ids)
+            try:
+                got = routes.travel(p, exit_ids)
+            except Stop as s:
+                if s.key != SHUT:
+                    raise
+                cache[key] = None
+                shut.append((p, s))
+                return None
             cache[key] = got
             if got > found["best"]:
                 found.update(best=got, at=p)
         return cache[key]
 
-    floor_bound, near, clusters = -math.inf, None, []
+    floor_bound, near, clusters, shut = -math.inf, None, [], []
     for room in [x for x in routes.story.rooms.values() if x is not None]:
         cut = room.holes + room.obstructions
         floor = room.outline.difference(unary_union(cut)) if cut else room.outline
@@ -241,13 +257,16 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
         walls = _walls(floor)
         arcs = _clear_arcs(floor, rings, r, walls) if rings else []
         edge = {k: [] for k in range(len(rings))}
+        shut_before = len(shut)
         for k, a0, sweep in arcs:
             c = rings[k]
             n = max(1, math.ceil(r * sweep / SPACING))
             for i in range(n + 1):
                 ang = a0 + sweep * i / n
                 p = (c[0] + r * math.cos(ang), c[1] + r * math.sin(ang))
-                edge[k].append((value(p), p))
+                got = value(p)
+                if got is not None:                  # an arc facing a pocket has no route: not the routed edge
+                    edge[k].append((got, p))
         edge_best = max((v for got in edge.values() for v, _ in got), default=-math.inf)
 
         # the clear floor
@@ -267,6 +286,8 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
                 nonlocal_near.append(tri)
                 return
             values = [value(p) for p in tri]
+            if any(v is None for v in values):       # in a pocket: bounded through its cluster
+                return
             heapq.heappush(heap, (-(max(values) + own_h(tri)), id(tri), tri, values))
 
         nonlocal_near = []
@@ -285,6 +306,8 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
         if nonlocal_near and math.isfinite(edge_best):
             near = max(near if near is not None else -math.inf, edge_best + NEAR)
 
+        # the pockets: clear floor shut in by rings, each bounded through the clusters round it
+        pockets = _pockets(floor, rings, r, [p for p, _ in shut[shut_before:]]) if len(shut) > shut_before else []
         # the clusters
         for group in _groups(rings, r):
             disks = unary_union([Point(rings[k]).buffer(r, 64) for k in group])
@@ -302,6 +325,8 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
                     "walk out sampled"
             clusters.append(Cluster([rings[k] for k in group], top_v, top_p, margin, how,
                                     top_v + SPACING / 2 + margin))
+        for pocket, first in pockets:
+            clusters.append(_pocket_bound(floor, pocket, first, rings, r, edge, _groups(rings, r)))
     if not math.isfinite(found["best"]):
         raise Stop("nothing_to_sample")
     parts = [("the clear floor", max(floor_bound, found["best"]))]
@@ -311,6 +336,51 @@ def farthest(routes: StoryRoutes, exit_ids=None) -> Remote:
     part, figure = max(parts, key=lambda x: x[1])
     return Remote(figure, found["best"], found["at"], max(floor_bound, found["best"]), near, clusters, part,
                   len(cache))
+
+
+def _pockets(floor, rings, r, shut_points) -> list:
+    """The pockets holding these shut-in points: each a piece of the floor less the rings (the rings taken as
+    polygons inside their circles, so a piece holds all of its clear floor), [(piece, a point in it)]."""
+    inner = unary_union([Polygon([(c[0] + r * math.cos(2 * math.pi * i / SIDES), c[1] + r * math.sin(2 * math.pi * i
+                                                                                                     / SIDES))
+                                  for i in range(SIDES)]) for c in rings])
+    rest = floor.difference(inner)
+    pieces = [g for g in getattr(rest, "geoms", [rest]) if g.area > 0]
+    out = []
+    for p in shut_points:
+        piece = next((g for g in pieces if g.buffer(EPS).covers(Point(p))), None)
+        if piece is None:
+            raise Stop("walk_shut", x=_show(p)[0], y=_show(p)[1])
+        if all(q is not piece for q, _ in out):
+            out.append((piece, p))
+    return out
+
+
+def _pocket_bound(floor, pocket, first, rings, r, edge, groups) -> Cluster:
+    """A pocket's bound: the greatest route on the routed clear edge of the clusters round it, plus 1.5 in, plus the
+    greatest walk on the floor with no clearance from any point of the pocket or of those clusters' rings to that
+    edge (sampled over 3-in triangles, plus 3 in). An upper bound on the figure Gordium gives a pocket's points
+    (the walk out, then that edge point's route: open question 10). No routed edge round it: Stop (shut in)."""
+    near = [g for g in groups if any(Point(rings[k]).buffer(r + EPS, 64).intersects(pocket) for k in g)]
+    samples = [(v, p) for g in near for k in g for v, p in edge[k]]
+    if not samples:
+        raise Stop("cluster_shut", x=_show(first)[0], y=_show(first)[1])
+    top_v, top_p = max(samples)
+    cover = unary_union([pocket] + [Point(rings[k]).buffer(r / math.cos(math.pi / SIDES), SIDES // 4)
+                                    for g in near for k in g]).intersection(floor)
+    walk = _Walk(floor, [p for _, p in samples])
+    points = {(round(p[0], 9), round(p[1], 9)): p for t in _triangles(cover, FINE) for p in t}
+    if not points:
+        raise Stop("walk_shut", x=_show(first)[0], y=_show(first)[1])
+    worst = 0.0
+    for p in points.values():
+        w = walk(p)
+        if not math.isfinite(w):
+            raise Stop("walk_shut", x=_show(p)[0], y=_show(p)[1])
+        worst = max(worst, w)
+    margin = worst + FINE
+    return Cluster([rings[k] for g in near for k in g], top_v, top_p, margin, "pocket shut in by rings",
+                   top_v + SPACING / 2 + margin)
 
 
 def _walk_margin(floor, rings, r, targets) -> float:

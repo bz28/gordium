@@ -14,6 +14,8 @@ import hashlib
 import json
 import math
 import re
+
+import pytest
 from collections import Counter
 
 from openpyxl import load_workbook
@@ -64,6 +66,80 @@ def test_every_result_changing_discrepancy_is_on_the_page():
     cited = set(re.findall(r"\[discrepancy (\d+\.\d+)\]", DOC))
     assert red, "the discrepancies table format changed; update this test"
     assert sorted(red - cited) == [] and sorted(cited - red) == []
+
+
+def test_every_result_changing_discrepancy_of_another_place_says_where_it_is_tracked():
+    """The page above is Ithaca's. Another place's result-changing (🔴) item (numbered P1, P2, ...) must name the
+    file where its question is tracked, and that file must exist, so no such item is left with no one to answer it."""
+    rows = re.findall(r"^\| (P\d+) \|(.*🔴.*)$", DISCREPANCIES, re.M)
+    assert rows, "the other places' discrepancies table format changed; update this test"
+    for number, row in rows:
+        tracked = re.search(r"Tracked in `([^`]+)`", row)
+        assert tracked, f"discrepancy {number} is result-changing but says nowhere where it is tracked"
+        assert (REPO / tracked.group(1)).is_file(), f"discrepancy {number}: {tracked.group(1)} doesn't exist"
+
+
+def test_the_childcare_log_has_every_figure_and_verdict_the_eval_finds_apart_from_the_sheet():
+    """Every figure the childcare eval marks outside its tolerance, and every rule whose verdict differs from the
+    sheet's, has a row in the childcare log of docs/discrepancies_with_architects.md (named by its key in the eval
+    file), so no difference is left out of review."""
+    import yaml
+
+    data = yaml.safe_load((REPO / "test_data/answer_keys/portland_me_19_libby_st/eval_comparison.yaml")
+                          .read_text(encoding="utf-8"))
+    log = DISCREPANCIES.split("# Children's Odyssey", 1)[1]
+    apart = [f"figures.{name}" for name, fig in data["figures"].items()
+             if (fig.get("agreement") or {}).get("within_tolerance") is False]
+    apart += [f"storage.{key}" for key, value in data["storage"].items()
+              if isinstance(value, dict) and value.get("within_tolerance") is False]
+    apart += [rule.split(".", 1)[1] for rule, v in data["verdicts"]["rules"].items() if v["same"] is False]
+    assert apart, "the eval file's format changed; update this test"
+    assert [key for key in apart if f"`{key}`" not in log] == []
+    unrouted = {room for fig in data["figures"].values()
+                for room in (((fig.get("gordium") or {}).get("story") or {}).get("rooms_not_measured") or [])}
+    assert unrouted and sorted(room for room in unrouted if room not in log) == []
+    # a point the log names comes from the room it names it with (each room's own reason, as the eval file gives it)
+    reasons = {room: why for fig in data["figures"].values()
+               for room, why in (((fig.get("gordium") or {}).get("story") or {}).get("rooms_not_measured") or {}).items()}
+    for sentence in re.split(r"(?<=[.;:])\s", log):
+        for point in re.findall(r"\(\d+\.\d+, \d+\.\d+\)", sentence):
+            owners = {room for room, why in reasons.items() if point in why}
+            if owners:
+                before = sentence[:sentence.index(point)]
+                named = [room for room in reasons if room in before]
+                assert named, (point, owners, sentence)
+                nearest = max(named, key=before.rindex)          # the room named last before the point
+                assert nearest in owners, (point, nearest, owners)
+    # the accessory area complies under all four readings: the largest accessory area against 10% of the smallest
+    # story area (decision 8), stated in the log with that limit
+    limit = round(0.1 * min(data["storage"]["gordium_story_sf"]))
+    assert f"{limit:,} sf" in log
+    _tie_rooms_held_to_their_reason(log, reasons)
+    # the guard rejects the two wrong shapes the log once had (review rounds 12 to 14) and two list and comma
+    # wordings a clause split let through (round 15)
+    p4 = "**6** rooms aren't measured. The 5 of P5 have no route to the exit `...0005bc94`. CORRIDOR (26) stops on a tie."
+    assert p4 in log
+    for wrong in ("**6** rooms have no route to one of the two exits: the 5 of P5 plus CORRIDOR (26) (which stops on a tie)",
+                  "**6** rooms have no route to the exit: SPRINKLERED ABANDONED SPACE (32), and CORRIDOR (26) (which stops on a tie)",
+                  "**6** rooms aren't measured, CORRIDOR (26) stops on a tie. CORRIDOR (26) does reach both exits",
+                  "**6** rooms aren't measured. The 5 of P5 have no route; so has CORRIDOR (26), on a tie."):
+        with pytest.raises(AssertionError):
+            _tie_rooms_held_to_their_reason(log.replace(p4, wrong), reasons)
+
+
+def _tie_rooms_held_to_their_reason(log, reasons):
+    """A room stopped for a reason other than "has no route" (a tie) is held to its own reason: no sentence naming it
+    says "no route" or "both exits" at all, and one says it stops on a tie. Checked by whole sentences (to a full stop
+    or a table bar), never by clause, so no list or punctuation can separate a "no route" from the room it is about:
+    the log gives such a room a sentence of its own."""
+    clauses = re.split(r"(?<!\.)\.(?=\s|$)|\|", log)
+    for room, why in reasons.items():
+        if "has no route" in why:
+            continue
+        mine = [c for c in clauses if room in c]
+        assert mine and not [c for c in mine if "no route" in c or "both exits" in c], (room, mine)
+        if "equally short" in why:
+            assert any("tie" in c or "equally short" in c for c in mine), (room, mine)
 
 
 def test_every_needs_review_claim_is_true_of_the_code():

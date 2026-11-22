@@ -375,8 +375,31 @@ def test_too_many_tied_routes_is_said(monkeypatch):
 
 PATH_KEYS = {"story_not_measured", "not_on_floor", "no_route", "route_reenters", "too_many_ties", "exit_unknown",
              "inside_ring", "too_narrow", "cluster_shut", "walk_shut", "nothing_to_sample"}   # the last three: test_routes_remote.py
+LATER_KEYS = {"corridor_not_legs", "corridor_end_only", "door_off_legs", "dead_end_unbounded",   # test_routes_dead_ends.py
+              "too_few_exits", "outline_needed", "area_room_not_read", "area_no_use", "area_unknown_space",
+              "area_rooms_overlap",                                                  # test_routes_straight_areas.py
+              "stated_not_given", "not_measured_yet", "readings", "room_not_measured", "maybe_kind",
+              "exit_access_unclear", "passage_in_ring", "no_room_doors", "no_exit_access"}   # test_routes_parts.py
 
 
 def test_every_reason_has_a_case():
     from test_routes_floor import FLOOR_CASES
-    assert set(FLOOR_CASES) | PATH_KEYS == set(STOPS)
+    assert set(FLOOR_CASES) | PATH_KEYS | LATER_KEYS == set(STOPS)
+
+
+@pytest.mark.parametrize("layout", [room_on_corridor, lambda: column_room(north_exit=True), table_room])
+def test_the_legs_between_door_centres_from_the_zones_one_graph_are_its_own_graphs(layout):
+    """paths.py builds one graph per zone with every door centre on it, for the legs between them and for
+    sampling; each leg is the same as one found on a graph of its own (lengths and ties), and the fast length
+    from a point is the slow one."""
+    got = routes(layout())
+    s = got.story
+    for zone in s.zones:
+        engine = got._engine(zone)
+        centres = [s.doors[d].centre for d in zone.doors]
+        engine.prepare(centres)
+        for i, a in enumerate(centres):
+            for b in centres[i + 1:]:
+                fast = sorted(round(x.length, 6) for x in engine.between(a, b))
+                slow = sorted(round(x.length, 6) for x in engine.paths(a, b))
+                assert fast == slow, (a, b, fast, slow)
