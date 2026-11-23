@@ -272,14 +272,15 @@ public static class SetupFacts
                     var choices = Choices(m, options, zone);
                     var kind = choices is { Count: > 0 } ? FieldKind.Choice : FieldKind.Text;
                     string? problem = null;
-                    if (text is not null && kind == FieldKind.Choice && !choices!.Any(c => string.Equals(c.Value, text, StringComparison.OrdinalIgnoreCase)))
-                        problem = m == Marks.Zone ? $"\"{text}\" isn't a district Gordium has rules for: pick one"
-                                  : m == Marks.Use ? $"\"{text}\" isn't one of Gordium's use words: pick one"
-                                  : $"\"{text}\" isn't one of Gordium's words: pick one";
-                    // a word typed in another case is the list's word (Gordium reads it so): shown as the list's
-                    var current = text is null ? null
-                        : choices?.FirstOrDefault(c => string.Equals(c.Value, text, StringComparison.OrdinalIgnoreCase))?.Value ?? text;
-                    fields.Add(new(m, label, kind, group, required, choices ?? [], current, law, problem));
+                    // only the list's own word counts as set: the checker reads the words exactly, so a word typed in
+                    // another case is a problem (choose it from the list), and kept as typed so a Save writes it over
+                    if (text is not null && kind == FieldKind.Choice && !choices!.Any(c => c.Value == text))
+                        problem = choices!.Any(c => string.Equals(c.Value, text, StringComparison.OrdinalIgnoreCase))
+                                  ? $"\"{text}\" is typed in another case: choose it from the list (Gordium reads the words exactly)"
+                                  : m == Marks.Zone ? $"\"{text}\" isn't a district Gordium has rules for: choose one"
+                                  : m == Marks.Use ? $"\"{text}\" isn't one of the City's uses Gordium knows: choose one"
+                                  : $"\"{text}\" isn't one of Gordium's words: choose one";
+                    fields.Add(new(m, label, kind, group, required, choices ?? [], text, Plain.TryGetValue(m.Guid, out var plain) ? plain : law, problem));
                     break;
                 }
                 default:
@@ -289,9 +290,19 @@ public static class SetupFacts
         return fields.OrderBy(f => Order(f.Group)).ToList();      // stable: Marks.All's order within each heading
     }
 
+    /// <summary>The form's own help for a mark whose tooltip is written in Gordium's words (the use: its tooltip names the
+    /// stored words and the room uses too). The tooltip in Revit stays as it is.</summary>
+    private static readonly Dictionary<Guid, string> Plain = new()
+    {
+        [Marks.Use.Guid] = "What the building is used for, as the City of Ithaca's zoning chart names it. A use the district's " +
+                           "chart doesn't list is still yours to state: its use rule then needs review (or doesn't comply), never a pass.",
+    };
+
     /// <summary>A Text mark's allowed values, or null when Gordium lists none (typed). The zone: the districts with a
-    /// rulebook; the use: the district's uses (permitted first, each special-permit one saying so) or, with no district
-    /// yet, every use of the city, each with its name. Both null until the worker has answered (typed meanwhile).</summary>
+    /// rulebook; the use: every use of the city, by its name, the district's own first (permitted first, each
+    /// special-permit one saying so), then the others "not listed for" the district (as host_core.facts.district_use_names
+    /// keeps a use the district doesn't list): the architect can always state the true use. Both null until the worker
+    /// has answered (typed meanwhile).</summary>
     public static IReadOnlyList<FieldChoice>? Choices(MarkDefinition m, PlaceOptions? options, string? zone)
     {
         if (m == Marks.Zone)
@@ -302,9 +313,12 @@ public static class SetupFacts
                 return null;
             var names = options.Uses.ToDictionary(u => u.Id, u => u.Name, StringComparer.Ordinal);
             var district = zone is not null && options.DistrictUses.TryGetValue(zone, out var d) ? d : null;
-            if (district is { Count: > 0 })
-                return district.Select(u => new FieldChoice(u.Id, u.Permitted == false && u.Note is { } note ? $"{u.Name} ({note})" : u.Name)).ToList();
-            return options.Uses.Select(u => new FieldChoice(u.Id, u.Name)).ToList();
+            if (district is not { Count: > 0 })
+                return options.Uses.Select(u => new FieldChoice(u.Id, u.Name)).ToList();
+            var listed = district.Select(u => new FieldChoice(u.Id, u.Permitted == false && u.Note is { } note ? $"{u.Name} ({note})" : u.Name)).ToList();
+            var ids = district.Select(u => u.Id).ToHashSet(StringComparer.Ordinal);
+            return listed.Concat(options.Uses.Where(u => !ids.Contains(u.Id))
+                .Select(u => new FieldChoice(u.Id, $"{u.Name} (not listed for {zone}: its use rule needs review)"))).ToList();
         }
         return Listed.TryGetValue(m.Guid, out var list) ? list() : null;
     }
@@ -403,6 +417,19 @@ public static class SetupWrites
         accepted.Select(s => s.Write).DistinctBy(w => (w.Element, w.Mark.Guid)).ToList();
 }
 
+/// <summary>What Check project does with what is missing (<see cref="SetupGate.Decide"/>).</summary>
+public enum SetupStep
+{
+    /// <summary>The Setup form, nothing sent.</summary>
+    Show,
+
+    /// <summary>Sent as Check now anyway sends: what is missing was already checked anyway for.</summary>
+    SendAnyway,
+
+    /// <summary>Nothing needed is missing: the check as before.</summary>
+    Send,
+}
+
 /// <summary>Whether the form shows, and whether the check runs by itself.</summary>
 public static class SetupGate
 {
@@ -415,6 +442,12 @@ public static class SetupGate
         return fields.Where(f => f.Required && !f.IsSet || f.Problem is not null).Select(f => f.Mark.Name)
             .Concat(lines.Where(l => l.Needed && !l.Done).Select(l => l.Key)).ToList();
     }
+
+    /// <summary>What Check project does: shows the form (something needed missing), sends anyway (missing only what the
+    /// architect already chose Check now anyway for this session: sent as Check now anyway sends, each fact left out
+    /// said, never a pick first), or sends.</summary>
+    public static SetupStep Decide(IReadOnlyCollection<string> needed, IReadOnlyCollection<string>? anywayFor) =>
+        needed.Count == 0 ? SetupStep.Send : ShowSetup(needed, anywayFor) ? SetupStep.Show : SetupStep.SendAnyway;
 
     /// <summary>Whether Check project shows the form: something needed is missing, unless the architect already chose
     /// "Check now anyway" for exactly what is missing (or more) in this session: a fact newly missing shows it again.</summary>
@@ -463,12 +496,32 @@ public static class SetupWords
         return InBuildingWords(name, noun);
     }
 
+    /// <summary>The form's notice when a check sent nothing, in plain words from what is missing (never the marks'
+    /// typing instructions): the street edge kept no longer on the lot (or matching two edges), or the facts not set.</summary>
+    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun)
+    {
+        ArgumentNullException.ThrowIfNull(notSet);
+        if (refused == StreetRefusal.NoLongerAnEdge)
+            return "Nothing was checked: the street edge kept is no longer an edge of the lot (the property line changed). " +
+                   "Pick it again on the plan, then Save.";
+        if (refused == StreetRefusal.Ambiguous)
+            return "Nothing was checked: the street edge kept matches two edges of the lot (an arc and its chord). " +
+                   "Pick it again on the plan, then Save.";
+        var names = notSet.Select(m => Label(m, noun).ToLowerInvariant()).ToList();
+        if (notSet.Contains(Marks.Zone))
+            return "Nothing was checked: the zone chooses the rules, so nothing can be checked without it. Choose it above" +
+                   (names.Count > 1 ? $"; also not set: {string.Join(", ", names.Where(n => n != "zone"))}." : ".");
+        return names.Count == 0 ? "Nothing was checked: set the facts above, then Save."
+            : $"Nothing was checked: not set: {string.Join(", ", names)}. Set them above, then Save.";
+    }
+
     /// <summary>What a fact not set leaves when the architect checks anyway: each is needs review, never a pass.</summary>
     public static string SentWithout(MarkDefinition m, string noun) =>
         m == Marks.Use ? "Use not set: every rule that turns on the use needs review."
         : m == Marks.LotSurveyed ? "Lot surveyed not set: the property line is read as traced from the tax map (its 2 ft accuracy), never as surveyed."
         : m == Marks.StreetEdge ? "Street edge not picked: the front yard, the yards measured from it and the lot width need review."
         : m == Marks.Zone ? "Zone not set: the district chooses the rules, so nothing can be checked without it."
+        : m == Marks.Stories ? "Stories holds a count under 1 (a count is 1 or more), so it wasn't sent: height and stories need review."
         : $"{Label(m, noun)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
 }
 
@@ -569,7 +622,9 @@ public static class SetupChecklist
             var room = roomById[group.Key!];
             var only = Yes(room, Marks.SleepingRoom) is null ? $"; {RoomName(room)} is only suggested as a sleeping room" : "";
             var already = group.FirstOrDefault(w => Yes(w, Marks.EscapeOpening) == true);
-            var operable = group.Where(w => !string.Equals(OperationOf(w), "Fixed", StringComparison.OrdinalIgnoreCase)).ToList();
+            // never a window the architect marked No (it isn't their escape opening), nor a fixed one
+            var operable = group.Where(w => Yes(w, Marks.EscapeOpening) != false
+                                            && !string.Equals(OperationOf(w), "Fixed", StringComparison.OrdinalIgnoreCase)).ToList();
             var chosen = already ?? operable.OrderByDescending(w => (w.TypeWidth ?? 0) * (w.TypeHeight ?? 0))
                                             .ThenBy(w => w.UniqueId, StringComparer.Ordinal).FirstOrDefault();
             foreach (var w in group.Where(w => Yes(w, Marks.EscapeOpening) is null))

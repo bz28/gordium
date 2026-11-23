@@ -8,6 +8,7 @@ namespace Gordium.Revit.Addin;
 /// <see cref="SetupRun"/>, never a Revit call here.</summary>
 internal sealed record SetupHandlers(
     Action<MarkDefinition, string> Choose,
+    Action<MarkDefinition, string> Type,
     Action Save,
     Action Discard,
     Action<IReadOnlyList<Suggestion>> Accept,
@@ -92,11 +93,12 @@ internal sealed class SetupView : C.StackPanel
             var set = fields.Count(f => f.IsSet || _draft.Chosen(f.Mark) is not null);
             Children.Add(Fold("group:" + group.Key, $"{group.Key} ({set} of {fields.Count} set)", panel, top: 6));
         }
-        var changes = _screen.Fields.Count(f => _draft.Chosen(f.Mark) is { } c && c != f.Current);
+        var changes = Changes();
         var line = new C.WrapPanel { Margin = new W.Thickness(0, 10, 0, 0) };
-        var save = Button(changes == 0 ? "Save" : $"Save {changes} {(changes == 1 ? "change" : "changes")}", primary: true,
+        var save = Button("Save", primary: true,
                           $"Writes what you chose to Project Information, as one undo step ({SetupWrites.FactsTransaction})");
-        save.IsEnabled = changes > 0;
+        _save = save;
+        SaveWords();
         save.Click += (_, _) => _do.Save();
         line.Children.Add(save);
         if (changes > 0)
@@ -111,6 +113,22 @@ internal sealed class SetupView : C.StackPanel
         info.Click += (_, _) => _do.ProjectInformation();
         line.Children.Add(info);
         Children.Add(line);
+    }
+
+    private C.Button? _save;
+
+    private int Changes() => _screen.Fields.Count(f => _draft.Chosen(f.Mark) is { } c && c != f.Current);
+
+    /// <summary>The Save button's words and whether it can be clicked, from the draft now (a box typed in updates it
+    /// without the form being drawn again, so the click on Save is never lost to a redraw).</summary>
+    private void SaveWords()
+    {
+        if (_save is null)
+            return;
+        var changes = Changes();
+        _save.Content = changes == 0 ? "Save" : $"Save {changes} {(changes == 1 ? "change" : "changes")}";
+        W.Automation.AutomationProperties.SetName(_save, (string)_save.Content);
+        _save.IsEnabled = changes > 0;
     }
 
     private W.UIElement Field(SetupField f)
@@ -173,17 +191,17 @@ internal sealed class SetupView : C.StackPanel
                 var text = new C.TextBox { Text = shown ?? "", Margin = new W.Thickness(0, 3, 0, 0), MaxWidth = f.Kind == FieldKind.Number ? 90 : double.PositiveInfinity,
                                            HorizontalAlignment = f.Kind == FieldKind.Number ? W.HorizontalAlignment.Left : W.HorizontalAlignment.Stretch };
                 W.Automation.AutomationProperties.SetName(text, f.Label);
-                // a choice on leaving the box or Enter, only when the text differs from what is shown
-                void Commit()
+                // the draft follows every keystroke, with no redraw (Save's words follow): a click on Save right after
+                // typing writes what was typed; Enter draws the form again (its "not saved yet")
+                text.TextChanged += (_, _) =>
                 {
-                    if (text.Text.Trim() != (shown ?? ""))
-                        _do.Choose(f.Mark, text.Text);
-                }
-                text.LostKeyboardFocus += (_, _) => Commit();
+                    _do.Type(f.Mark, text.Text);
+                    SaveWords();
+                };
                 text.KeyDown += (_, e) =>
                 {
-                    if (e.Key == System.Windows.Input.Key.Enter)
-                        Commit();
+                    if (e.Key == System.Windows.Input.Key.Enter && text.Text.Trim().Length > 0)
+                        _do.Choose(f.Mark, text.Text);
                 };
                 box.Children.Add(text);
                 break;

@@ -50,12 +50,12 @@ internal static class SetupRun
 
     private static SetupScreen Screen() => SetupScreen.Build(_model!, _sides, _options, Draft);
 
-    /// <summary>Check project's gate (Revit's thread, during the check's read): the screen when the form must show
-    /// (something needed missing, not already checked anyway for), else null and the check goes on.</summary>
-    internal static SetupScreen? Needs(Document doc)
+    /// <summary>Check project's gate (Revit's thread, during the check's read): the form's screen, and what to do
+    /// (SetupGate.Decide: show the form, send anyway for what was already checked anyway, or send).</summary>
+    internal static (SetupScreen Screen, SetupStep Step) Needs(Document doc)
     {
         var screen = Read(doc);
-        return SetupGate.ShowSetup(screen.Needed, Anyway.TryGetValue(Key(doc), out var a) ? a : null) ? screen : null;
+        return (screen, SetupGate.Decide(screen.Needed, Anyway.TryGetValue(Key(doc), out var a) ? a : null));
     }
 
     /// <summary>Shows the form (Revit's thread): the screen given (Check project's) or read now (Mark facts, the
@@ -125,6 +125,14 @@ internal static class SetupRun
             Draft.Choose(mark, value);
             Redraw();
         },
+        // a box typed in: the draft only (no redraw while typing); emptied, nothing chosen
+        Type: (mark, value) =>
+        {
+            if (value.Trim().Length == 0)
+                Draft.Forget(mark);
+            else
+                Draft.Choose(mark, value);
+        },
         Save: () => Write("Save the project facts", SetupWrites.FactsTransaction, () =>
         {
             var (writes, problems) = Draft.Writes(Screen().Fields);
@@ -182,7 +190,9 @@ internal static class SetupRun
         {
             _shown = null;
             ResultsPane.Say(said);
-            CheckProjectCommand.Check(ui);
+            // the form's own project, never whichever is active now
+            if (CheckRun.Start(ui, doc) is { } refused)
+                ResultsPane.Say(refused);
             return;
         }
         Show(ui, doc, screen, _notice);

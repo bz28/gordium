@@ -95,7 +95,11 @@ public sealed class CheckProjectCommand : IExternalCommand
             bool Active() => ui.ActiveUIDocument?.Document.Equals(doc) == true;
             // the Setup form (docs/decisions/2026-11-22_setup_form.md): a fact the check needs missing, and the form
             // shows instead of a check (unless the architect chose Check now anyway for exactly these): nothing sent
-            if (!check.Anyway && SetupRun.Needs(doc) is { } setup)
+            var (setup, step) = check.Anyway ? (null, SetupStep.SendAnyway) : SetupRun.Needs(doc);
+            // sent anyway: the architect's Check now anyway, or a check whose missing facts were already checked anyway
+            var anyway = step == SetupStep.SendAnyway;
+            log["setup_step"] = step.ToString();
+            if (step == SetupStep.Show && setup is not null)
             {
                 log["setup"] = setup.Needed;
                 var shown = CheckRun.Flow.NothingSent(check.Ticket);
@@ -112,7 +116,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             var read = ProjectFacts.Read(RevitMarks.Model(doc));
             var view = Active() && ShowsPropertyLine(ui.ActiveUIDocument!);
             // checked anyway: never a pick first (the form's Pick on plan is the way to give it)
-            var ask = check.Anyway ? StreetAsk.NotNeeded : StreetEdges.Ask(read, read.StreetEdges is null, view, Active());
+            var ask = anyway ? StreetAsk.NotNeeded : StreetEdges.Ask(read, read.StreetEdges is null, view, Active());
             log["street_ask"] = ask.ToString();
             if (ask == StreetAsk.Pick && Active())
                 check.Clock.Architect("street_pick", () => PickStreet(ui.ActiveUIDocument!, log));
@@ -122,7 +126,7 @@ public sealed class CheckProjectCommand : IExternalCommand
                 check.End("cancelled");                   // cancelled during the pick (Revit answers then): not read
                 return;
             }
-            var prepared = ReadModel(doc, ui.Application, log, check.Worker, check.Anyway);
+            var prepared = ReadModel(doc, ui.Application, log, check.Worker, anyway);
             // the edge kept can't be sent (no longer a lot edge, or matching two): asked for again at once, as its
             // message says, and checked once more (the typed reason, never its words); in a view that can show it
             if (StreetEdges.NeedsNewPick(prepared))
@@ -142,7 +146,13 @@ public sealed class CheckProjectCommand : IExternalCommand
                 // the Setup form, saying why nothing was sent (the zone missing on Check now anyway, a street edge
                 // no longer on the lot): every way to give the fact is there
                 if (shown)
-                    SetupRun.Show(ui, doc, notice: clear + "Nothing was checked: " + string.Join(" ", StreetEdges.MissingAsShown(prepared.Missing, ask)));
+                {
+                    // in plain words from what is missing (the old typing instructions stay in the log's "missing")
+                    var marks = RevitMarks.Model(doc);
+                    var notSet = SetupFacts.NotSent(marks, ProjectFacts.Read(marks));
+                    SetupRun.Show(ui, doc, notice: clear + SetupWords.NothingSent(prepared.StreetRefused, notSet,
+                        SetupWords.Noun(Marks.Text(marks.ProjectMarks.GetValueOrDefault(Marks.Use.Guid)))));
+                }
                 Blocked();
                 check.End(shown ? "nothing_sent" : "cancelled");
                 return;

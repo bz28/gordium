@@ -103,7 +103,10 @@ public sealed class SetupTests
         Assert.Equal(FieldKind.Choice, zone.Kind);
         Assert.Equal(["R-1a", "R-1b", "R-2a"], zone.Choices.Select(c => c.Value));
         var use = fields[Marks.Use.Guid];
-        Assert.Equal(["one_family_detached", "two_family_detached"], use.Choices.Select(c => c.Value));
+        // the district's own first, then every other city use, said not listed there (the true use can always be stated)
+        Assert.Equal(["one_family_detached", "two_family_detached", "day_care"], use.Choices.Select(c => c.Value));
+        Assert.Equal("Day care center (not listed for R-1b: its use rule needs review)", use.Choices[2].Label);
+        Assert.DoesNotContain("one_family_detached", use.Law, StringComparison.Ordinal);   // plain help, not Gordium's words
         Assert.Equal("Two-family dwelling, detached (by special permit (zoning chart p.2))", use.Choices[1].Label);
         Assert.Equal(FieldKind.YesNo, fields[Marks.LotSurveyed.Guid].Kind);
         Assert.Equal(FieldKind.Number, fields[Marks.Stories.Guid].Kind);
@@ -389,6 +392,122 @@ public sealed class SetupTests
         // a building that isn't a house gets the escape-route lines
         Assert.Contains(care.Lines, l => l.Key == "room_use");
         Assert.DoesNotContain(Screen(Model(new() { [Marks.Use.Guid] = new(true, Text: "one_family_detached") })).Lines, l => l.Key == "room_use");
+    }
+
+    // ---- review round 1 -------------------------------------------------------------------------------------------
+
+    /// <summary>R1 #1: after Check now anyway, a later Check with the same facts missing is sent anyway (as Check now
+    /// anyway sends), never skipped with nothing sent; a fact newly missing shows the form; nothing missing sends.</summary>
+    [Fact]
+    public void A_later_check_with_the_same_facts_missing_is_sent_anyway()
+    {
+        var anyway = new HashSet<string> { Marks.Use.Name };
+        Assert.Equal(SetupStep.SendAnyway, SetupGate.Decide([Marks.Use.Name], anyway));
+        Assert.Equal(SetupStep.Show, SetupGate.Decide([Marks.Use.Name, Marks.Zone.Name], anyway));
+        Assert.Equal(SetupStep.Show, SetupGate.Decide([Marks.Use.Name], null));
+        Assert.Equal(SetupStep.Send, SetupGate.Decide([], anyway));
+        // the add-in sends it as anyway: no street pick, read with anyway, the results' "Checked without"
+        var check = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
+        Assert.Contains("var anyway = step == SetupStep.SendAnyway;", check, StringComparison.Ordinal);
+        Assert.Contains("var ask = anyway ? StreetAsk.NotNeeded :", check, StringComparison.Ordinal);
+        Assert.Contains("ReadModel(doc, ui.Application, log, check.Worker, anyway);", check, StringComparison.Ordinal);
+    }
+
+    /// <summary>R1 #2: a city use the district's chart doesn't list (a day care in R-1b) is the architect's to state:
+    /// kept, labelled not listed, no problem, not needed; only a word that isn't a city use at all is a problem.</summary>
+    [Fact]
+    public void A_city_use_the_district_doesnt_list_can_be_stated()
+    {
+        var s = Screen(Model(new() { [Marks.Zone.Guid] = new(true, Text: "R-1b"), [Marks.Use.Guid] = new(true, Text: "day_care") }));
+        var use = s.Fields.Single(f => f.Mark == Marks.Use);
+        Assert.Null(use.Problem);
+        Assert.True(use.IsSet);
+        Assert.DoesNotContain(Marks.Use.Name, s.Needed);
+        Assert.Contains("not listed for R-1b", use.CurrentLabel, StringComparison.Ordinal);
+        var odd = Screen(Model(new() { [Marks.Use.Guid] = new(true, Text: "casino") })).Fields.Single(f => f.Mark == Marks.Use);
+        Assert.Contains("isn't one of the City's uses", odd.Problem, StringComparison.Ordinal);
+    }
+
+    /// <summary>R1 #3: a window the architect marked No is never the one suggested; the next largest operable is.</summary>
+    [Fact]
+    public void A_window_marked_no_is_never_the_suggested_escape_opening()
+    {
+        var model = Model(null, [.. House.Where(e => e.UniqueId != "w1"), Window("w1", "36 x 60", "Casement", 3, 5, escape: false)]);
+        var escape = Line(Screen(model), "escape_opening").Suggestions.ToDictionary(x => x.Element);
+        Assert.False(escape.ContainsKey("w1"));
+        Assert.Equal("Yes", escape["w3"].Words);
+        Assert.DoesNotContain(escape.Values, x => x.Basis.Contains("as Window w1", StringComparison.Ordinal));
+    }
+
+    /// <summary>R1 #4: the check that runs by itself checks the form's own project, never the active one.</summary>
+    [Fact]
+    public void The_check_that_runs_by_itself_is_the_forms_project()
+    {
+        var flow = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupFlow.cs"));
+        var refreshed = flow[flow.IndexOf("private static void Refreshed(", StringComparison.Ordinal)..];
+        refreshed = refreshed[..refreshed.IndexOf("\n    }", StringComparison.Ordinal)];
+        Assert.Contains("CheckRun.Start(ui, doc)", refreshed, StringComparison.Ordinal);
+        Assert.DoesNotContain("CheckProjectCommand.Check(ui)", refreshed, StringComparison.Ordinal);
+    }
+
+    /// <summary>R1 #5: the form's "Nothing was checked" is in plain words from what is missing: never Gordium's stored
+    /// words or "when Check project asks".</summary>
+    [Fact]
+    public void Nothing_sent_is_said_in_plain_words()
+    {
+        var words = SetupWords.NothingSent(StreetRefusal.None, [Marks.Zone, Marks.Use, Marks.StreetEdge], "building");
+        Assert.StartsWith("Nothing was checked: the zone chooses the rules", words, StringComparison.Ordinal);
+        Assert.Contains("use, street edge", words, StringComparison.Ordinal);
+        Assert.DoesNotContain("one_family_detached", words, StringComparison.Ordinal);
+        Assert.DoesNotContain("Check project asks", words, StringComparison.Ordinal);
+        Assert.Contains("Pick it again on the plan", SetupWords.NothingSent(StreetRefusal.NoLongerAnEdge, [], "house"), StringComparison.Ordinal);
+        var check = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "CheckProject.cs"));
+        Assert.Contains("notice: clear + SetupWords.NothingSent(prepared.StreetRefused, notSet,", check, StringComparison.Ordinal);
+        Assert.DoesNotContain("notice: clear + \"Nothing was checked: \" + string.Join", check, StringComparison.Ordinal);
+    }
+
+    /// <summary>R1 #6: a zone or use typed in another case isn't set (the checker reads it exactly): a problem, needed,
+    /// and choosing the list's word writes it over.</summary>
+    [Fact]
+    public void A_word_typed_in_another_case_is_a_problem_and_a_save_writes_it_over()
+    {
+        var project = new Dictionary<Guid, MarkValue> { [Marks.Zone.Guid] = new(true, Text: "r-1b"), [Marks.Use.Guid] = new(true, Text: "One_Family_Detached") };
+        var s = Screen(Model(project));
+        var use = s.Fields.Single(f => f.Mark == Marks.Use);
+        Assert.Contains("another case", use.Problem, StringComparison.Ordinal);
+        Assert.Contains(Marks.Use.Name, s.Needed);
+        Assert.Contains(Marks.Zone.Name, s.Needed);
+        var draft = new SetupDraft();
+        draft.Choose(Marks.Zone, "R-1b");
+        draft.Choose(Marks.Use, "one_family_detached");
+        var (writes, _) = draft.Writes(Screen(Model(project), draft).Fields);
+        Assert.Equal([new MarkValue(true, Text: "R-1b"), new MarkValue(true, Text: "one_family_detached")], writes.Select(w => w.Value));
+    }
+
+    /// <summary>R1 #7: a box typed in counts at once, with no redraw (so the click on Save right after isn't lost to a
+    /// redraw), and a typed count is in the Save's writes.</summary>
+    [Fact]
+    public void A_typed_value_counts_without_leaving_the_box()
+    {
+        var view = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupView.cs"));
+        Assert.Contains("text.TextChanged += (_, _) =>\n                {\n                    _do.Type(f.Mark, text.Text);\n                    SaveWords();", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("LostKeyboardFocus", view, StringComparison.Ordinal);
+        var flow = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupFlow.cs"));
+        var type = flow[flow.IndexOf("Type: (mark, value) =>", StringComparison.Ordinal)..];
+        type = type[..type.IndexOf("},", StringComparison.Ordinal)];
+        Assert.DoesNotContain("Redraw", type, StringComparison.Ordinal);
+        var draft = new SetupDraft();
+        draft.Choose(Marks.Stories, "3");
+        Assert.Equal([new MarkValue(true, 3)], draft.Writes(Screen(Model(), draft).Fields).Writes.Select(w => w.Value));
+    }
+
+    /// <summary>R1 #8: a stories count under 1 left out says so, never "not one of Gordium's words".</summary>
+    [Fact]
+    public void A_stories_count_under_one_left_out_says_so()
+    {
+        var words = SetupWords.SentWithout(Marks.Stories, "house");
+        Assert.DoesNotContain("words", words, StringComparison.Ordinal);
+        Assert.Contains("1 or more", words, StringComparison.Ordinal);
     }
 
     /// <summary>What a fact left out of a check sent anyway does, in words: never a pass.</summary>
