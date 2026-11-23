@@ -19,9 +19,9 @@ from pathlib import Path
 from . import parts
 from . import place as places
 from .labels import load_pieces, validate_labels
-from .rulebook import (REPO, STATE_SETTINGS, Context, finding_conflicts, law_folders, load, locate, not_quotable,
-                       research_entries, rulebook_file_problems, rulebook_paths, rules_folder, term_file_problems,
-                       utf8_console)
+from .rulebook import (PROPOSED_MEASURES, REPO, STATE_SETTINGS, Context, finding_conflicts, law_folders, load, locate,
+                       needed_by_problems, not_quotable, research_entries, rulebook_file_problems, rulebook_paths,
+                       rules_folder, term_file_problems, utf8_console)
 from .state_law import VERIFICATION, state_settings_problems, verification_problems
 
 
@@ -84,6 +84,12 @@ def main() -> int:
             print(f"{'✗' if problems else '✓'} {path.relative_to(REPO)}")
             for problem in problems:
                 print(f"    {problem}")
+            failed += bool(problems)
+        proposed = rules_folder(jurisdiction) / PROPOSED_MEASURES
+        if proposed.exists():
+            checked += 1
+            problems = needed_by_problems(proposed, list(rulebook_paths(rules_folder(jurisdiction))))
+            print(f"{'✗' if problems else '✓'} {proposed.relative_to(REPO)}" + "".join(f"\n    {p}" for p in problems))
             failed += bool(problems)
         if state:
             checked += 1

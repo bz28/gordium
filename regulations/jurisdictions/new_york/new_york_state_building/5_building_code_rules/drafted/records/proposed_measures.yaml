@@ -77,6 +77,7 @@ sprinklered_903_3_1_3:
     e and 1006.2.2.6 hold such a Group R-3 to 125 ft and R-4 to 75 ft'
   unit: yes_no
   needed_by:
+  - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_table_1017_2_a_e_f1_m_r_s1
 other_occupancy_present:
   meaning: 'The building holds an occupancy other than Group I-4 (a mixed building: another tenant, or an accessory or separated
@@ -123,12 +124,15 @@ occupancy_group:
   - U
   - mixed
   needed_by:
+  - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_1016_2_intervening_spaces_other_groups
   - general.bc_1016_2_other_occupancies
   - general.bc_1017_2_2_f1_s1_increase
   - general.bc_1017_2_3_h5_increase
+  - general.bc_1018_4_merchandise_pads
   - general.bc_1020_5_dead_end_other_groups
   - general.bc_1020_5_other_occupancies
+  - general.bc_407_4_2_sleeping_room_travel
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -159,8 +163,32 @@ assembly_fixed_seating:
     c, 1030.8; Table 1017.2 note a, 1030.7), as the architect states it
   unit: yes_no
   needed_by:
+  - general.bc_1006_2_1_two_exits
+  - general.bc_1006_2_2_6_r3_r4_nfpa_13d
+  - general.bc_1017_2_travel_distance
+  - general.bc_1030_8_fixed_seating_common_path
   - general.bc_table_1006_2_1_a_e_m
+  - general.bc_table_1006_2_1_b
+  - general.bc_table_1006_2_1_f
+  - general.bc_table_1006_2_1_h1_h2_h3
+  - general.bc_table_1006_2_1_h4_h5
+  - general.bc_table_1006_2_1_i1_i2
+  - general.bc_table_1006_2_1_i3
+  - general.bc_table_1006_2_1_r1
+  - general.bc_table_1006_2_1_r2
+  - general.bc_table_1006_2_1_r3_r4
+  - general.bc_table_1006_2_1_s
+  - general.bc_table_1006_2_1_u
   - general.bc_table_1017_2_a_e_f1_m_r_s1
+  - general.bc_table_1017_2_b
+  - general.bc_table_1017_2_f2_s2_u
+  - general.bc_table_1017_2_h1
+  - general.bc_table_1017_2_h2
+  - general.bc_table_1017_2_h3
+  - general.bc_table_1017_2_h4
+  - general.bc_table_1017_2_h5
+  - general.bc_table_1017_2_i1
+  - general.bc_table_1017_2_i2_i3
 special_egress_spaces:
   meaning: 'The building holds a space the code gives its own exits or exit access travel limit, as the architect states it:
     a covered or open mall (402.8), a Group I-2 care suite (407.4.4), a special amusement area (411), an aircraft manufacturing
@@ -169,8 +197,16 @@ special_egress_spaces:
     (3104.9); left unstated, the rows those spaces change need review'
   unit: yes_no
   needed_by:
-  - general.bc_1006_2_2_rooms_by_use
+  - general.bc_1006_2_1_two_exits
+  - general.bc_1006_2_2_1_boiler_rooms
+  - general.bc_1006_2_2_2_refrigeration_machinery_rooms
+  - general.bc_1006_2_2_3_refrigerated_rooms
+  - general.bc_1006_2_2_4_electrical_rooms
+  - general.bc_1006_2_2_5_vehicular_ramps
+  - general.bc_1006_2_2_6_r3_r4_nfpa_13d
   - general.bc_1016_2_intervening_spaces_other_groups
+  - general.bc_1017_2_travel_distance
+  - general.bc_407_4_2_sleeping_room_travel
   - general.bc_table_1006_2_1_a_e_m
   - general.bc_table_1006_2_1_b
   - general.bc_table_1006_2_1_f
@@ -199,6 +235,7 @@ merchandise_pads:
     30 ft from any point in a pad, 75 ft for not more than 50 occupants), as the architect states it'
   unit: yes_no
   needed_by:
+  - general.bc_1018_4_merchandise_pads
   - general.bc_table_1006_2_1_a_e_m
 egress_balcony_increase_taken:
   meaning: The design takes 2025 BCNYS 1017.2.1's exterior egress balcony increase (up to 100 ft more travel where the last
@@ -206,6 +243,7 @@ egress_balcony_increase_taken:
   unit: yes_no
   needed_by:
   - general.bc_1017_2_1_balcony_increase
+  - general.bc_1017_2_travel_distance
   - general.bc_table_1017_2_a_e_f1_m_r_s1
   - general.bc_table_1017_2_b
   - general.bc_table_1017_2_f2_s2_u

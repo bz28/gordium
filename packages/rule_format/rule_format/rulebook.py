@@ -56,6 +56,36 @@ MEASURE_KINDS = {name: UNIT_KINDS.get(m["unit"], "number") for name, m in yaml.s
 PROPOSED_MEASURES = "drafted/records/proposed_measures.yaml"   # under the folder's rulebooks (rules_folder)
 
 
+def needed_by_problems(proposed: Path, rulebooks: list) -> list[str]:
+    """A proposed measure's `needed_by` must name exactly the rules whose applies_when, check or review_when read it
+    (worked out from their formulas), so the list can't drift from the rules (review round 2, 2026-11-23)."""
+    listed = load(proposed) or {}
+    reads: dict[str, set] = {}
+    for path in rulebooks:
+        for r in (load(path) or {}).get("rules") or []:
+            if not isinstance(r, dict):
+                continue
+            texts = [r.get("applies_when"), r.get("check")] + [w.get("when") for w in r.get("review_when") or []
+                                                                if isinstance(w, dict)]
+            for t in texts:
+                if isinstance(t, str):
+                    try:
+                        names = formula.names(t)
+                    except formula.FormulaError:
+                        continue
+                    for n in names & set(listed):
+                        reads.setdefault(n, set()).add(r.get("id"))
+    out = []
+    for name, m in listed.items():
+        got = set(m.get("needed_by") or []) if isinstance(m, dict) else set()
+        want = reads.get(name, set())
+        if got - want:
+            out.append(f"{name}: needed_by names {sorted(got - want)}, which don't read it")
+        if want - got:
+            out.append(f"{name}: needed_by misses {sorted(want - got)}, which read it")
+    return out
+
+
 def _listed_values(record: dict) -> set:
     """The text values a proposed text measure's record lists (`values:`, each a text), else none."""
     values = record.get("values")
