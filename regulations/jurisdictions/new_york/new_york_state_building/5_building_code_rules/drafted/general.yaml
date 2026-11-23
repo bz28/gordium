@@ -26,10 +26,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: Which group the building is in decides every limit below; the architect states it (occupancy_group_i4), a person
-      confirms.
-  notes: The rules of this rulebook are drafted for Group I-4 only (their applies_when); a building in another group needs
-    its own rules, so this flag always shows. Hand-drafted in a Claude Code session (2026-11-21).
+    note: Which group the building is in decides every limit below; the architect states it, a person confirms.
+  notes: Which group the building is in is the architect's statement (Project Information's occupancy groups); every limit
+    reads it, so this flag shows for a person to confirm a Group I-4 classification. Hand-drafted in a Claude Code session
+    (2026-11-21; reworded 2026-11-23).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_308_5_1_group_e
@@ -108,8 +108,7 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: 'Group R-3 or the Residential Code of New York State (the sibling folder new_york_state/): the architect states
-      it.'
+    note: 'Group R-3 or the Residential Code of New York State: the architect states it.'
   notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -160,7 +159,7 @@ rules:
   review_when:
   - when: story_accessory_area > 0.10 * story_net_floor_area and story_accessory_area <= 0.10 * story_gross_floor_area
     reason: 'Within 10 percent of the story''s gross floor area but over 10 percent of its net floor area: which 508.2.3 means
-      is open (open_questions); a person checks.'
+      is open (the open question); a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -255,7 +254,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   open_questions:
   - '508.2.3''s ''floor area of the story'': the story''s gross floor area (202 FLOOR AREA, GROSS) or its net floor area (202
     FLOOR AREA, NET)?'
@@ -289,8 +288,8 @@ rules:
       between the two readings needs review.'
   notes: Passes only within 10 percent of the smaller reading (the net floor area), fails only over 10 percent of the larger
     (the gross), and needs review between them, or where either is not given. The second test (Table 506.2's tabular values,
-    Section 506, not brought in) is general.bc_508_2_3_tabular_values, which always needs review. Hand-drafted in a Claude
-    Code session (2026-11-21).
+    Section 506, not brought in) is the rule “Accessory occupancies within Table 506.2's values (BCNYS 508.2.3)”, which always
+    needs review. Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_508_2_3_tabular_values
@@ -341,8 +340,8 @@ rules:
   check: egress_travel_in_sleeping_room <= 50
   review_when:
   - when: egress_travel_in_sleeping_room > 50 and special_egress_spaces
-    reason: 'Over 50 ft within a sleeping room, in a building that may have care suites (special_egress_spaces, stated or
-      not ruled out): 407.4.2 is for a sleeping room not in a care suite, a person checks.'
+    reason: 'Over 50 ft within a sleeping room, in a building that may have care suites (stated, or not ruled out): 407.4.2
+      is for a sleeping room not in a care suite, a person checks.'
   for_each: story
   when_none: needs_review
   sources:
@@ -415,10 +414,10 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2 note a''s 407.4 for Group I-2: 407.4.2 holds a sleeping room not in a care suite to 50 ft from any
-    point to its exit access door, measured as egress_travel_in_sleeping_room; a care suite (407.4.4, not brought in) is special_egress_spaces''
-    (review). Hand-drafted in a Claude Code session (2026-11-23, review round 1).'
+    point to its exit access door, measured as the travel within a sleeping room; a care suite (407.4.4, not brought in) is
+    such a space'' (review). Hand-drafted in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_1_two_exits
@@ -432,7 +431,7 @@ rules:
   - when: space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or sprinklered_903_3_1_2))
     reason: 'Two exits or more, and a common path over 75 ft (or a building not sprinklered throughout, where the table gives
       Group I-4 no common path): whether Table 1006.2.1 caps the common path or only decides when a second exit is needed
-      is open (open_questions); a person checks.'
+      is open (the open question); a person checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or sprinklered_903_3_1_2) and space_common_path
       <= 75))
@@ -444,7 +443,7 @@ rules:
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and ((space_occupant_load <= 10 and (sprinklered_903_3_1_1
       or sprinklered_903_3_1_2) and space_common_path <= 75))
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use, stated or not
-      ruled out (special_egress_spaces): a person checks.'
+      ruled out (as the architect states it): a person checks.'
   for_each: space
   when_none: needs_review
   sources:
@@ -660,7 +659,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -689,8 +688,8 @@ rules:
     needs review (the open question), never a pass. Exception 1 (foyers and lobbies counted without the loads discharging
     through them) and exception 3 (unoccupied mechanical rooms and penthouses need not meet the common path) only loosen the
     test: a person''s check where they apply. The cumulative occupant load (1004.2, not brought in) is in the architect''s
-    space_occupant_load. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the same 10 for
-    day care. Hand-drafted in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed seating,
+    the space''s occupant load. Most restrictive where the 2009 IBC applied (Maine): 1015.1 and Table 1015.1 set the same
+    10 for day care. Hand-drafted in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): a room with fixed seating,
     in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft); a one-exit space where a 1006.2.2 room
     is stated or not ruled out needs review (as its siblings).'
   drafted_by: claude_code/claude-opus-5-5
@@ -719,9 +718,9 @@ rules:
   - given:
       occupancy_group: mixed
     expect: needs_review
-    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
-      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
-      isn''t marked yet, so a person checks.'
+    note: 'A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to
+      each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which
+      occupancy isn''t marked yet, so a person checks.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -745,8 +744,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30 else 75))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
       <= 49 and space_common_path <= 75
     reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
@@ -762,7 +761,8 @@ rules:
       (75 if space_occupant_load <= 30 else 75)))
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and occupancy_group == "M" and merchandise_pads and space_common_path > (75 if space_occupant_load
       <= 50 else 30)
     reason: 'Group M with merchandise pads stated or not ruled out: 1018.4 caps the common path at 30 ft from any point in
@@ -1183,7 +1183,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -1210,16 +1210,16 @@ rules:
     (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
     NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
     alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
-    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
-    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
-    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
-    in space_occupant_load. Note c: a room or space used for assembly purposes with fixed seating follows 1030.8 (not brought
-    in), so a Group A space with one exit needs review unless the architect states the building has no fixed seating (assembly_fixed_seating).
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room
-    is stated or not ruled out needs review; Group A with fixed seating, and Group M with merchandise pads, stated or not
-    ruled out, need review over 1030.8''s and 1018.4''s 30 ft (75 ft for fewer occupants), with any number of exits. Review
-    round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30
-    ft (75 ft).'
+    system). As the I-4 rule (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space
+    with two exits and a common path over the value needs review (open question 1); a space that is itself an exit (an exit
+    stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply);
+    the cumulative occupant load (1004.2) is in the space''s occupant load. Note c: a room or space used for assembly purposes
+    with fixed seating follows 1030.8 (not brought in), so a Group A space with one exit needs review unless the architect
+    states the building has no fixed seating (as the architect states it). Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review; Group A with
+    fixed seating, and Group M with merchandise pads, stated or not ruled out, need review over 1030.8''s and 1018.4''s 30
+    ft (75 ft for fewer occupants), with any number of exits. Review round 2 (2026-11-23): a room with fixed seating, in any
+    group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_b
@@ -1234,8 +1234,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
       <= 49 and space_common_path <= 100
     reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
@@ -1248,7 +1248,8 @@ rules:
       (100 if space_occupant_load <= 30 else 75)))
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <=
@@ -1534,7 +1535,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -1561,12 +1562,13 @@ rules:
     (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
     NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
     alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
-    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
-    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
-    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
-    in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space
-    where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating,
-    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    system). As the I-4 rule (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space
+    with two exits and a common path over the value needs review (open question 1); a space that is itself an exit (an exit
+    stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply);
+    the cumulative occupant load (1004.2) is in the space''s occupant load. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round
+    2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75
+    ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_f
@@ -1581,8 +1583,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30 else 75))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
       <= 49 and space_common_path <= 100
     reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
@@ -1595,7 +1597,8 @@ rules:
       (75 if space_occupant_load <= 30 else 75)))
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (100 if (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (75 if space_occupant_load <= 30
@@ -1881,7 +1884,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -1908,12 +1911,13 @@ rules:
     (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
     NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
     alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
-    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
-    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
-    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
-    in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space
-    where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating,
-    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    system). As the I-4 rule (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space
+    with two exits and a common path over the value needs review (open question 1); a space that is itself an exit (an exit
+    stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply);
+    the cumulative occupant load (1004.2) is in the space''s occupant load. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round
+    2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75
+    ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_h1_h2_h3
@@ -1926,13 +1930,14 @@ rules:
   review_when:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 25 or not sprinklered_903_3_1_1)
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 3 and sprinklered_903_3_1_1
       and space_common_path <= 25)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 3 and sprinklered_903_3_1_1 and space_common_path
       <= 25))
@@ -2183,7 +2188,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -2207,12 +2212,12 @@ rules:
       or the Department of State.
   notes: 'Table 1006.2.1''s H-1, H-2, H-3 row: 3 occupants; Not Permitted (NP) without an automatic sprinkler system, 25 ft
     with one (note b: 903.2.5, Group H''s own system, not brought in: a space with one exit can fail, never pass). As the
-    I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs review (open question
-    1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and
-    3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room
-    is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated
-    or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    I-4 rule (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits
+    and a common path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure)
+    is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative
+    occupant load (1004.2) is in the space''s occupant load. Hand-drafted in a Claude Code session (2026-11-23). Review round
+    1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23):
+    a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_h4_h5
@@ -2225,13 +2230,14 @@ rules:
   review_when:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not sprinklered_903_3_1_1)
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 10 and sprinklered_903_3_1_1
       and space_common_path <= 75)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and sprinklered_903_3_1_1 and space_common_path
       <= 75))
@@ -2482,7 +2488,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -2506,12 +2512,12 @@ rules:
       or the Department of State.
   notes: 'Table 1006.2.1''s H-4, H-5 row: 10 occupants; Not Permitted (NP) without an automatic sprinkler system, 75 ft with
     one (note b: 903.2.5, Group H''s own system, not brought in: a space with one exit can fail, never pass). As the I-4 rule
-    (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs review (open question 1);
-    a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only
-    loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room
-    is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated
-    or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits and a common
+    path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
+    1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
+    (1004.2) is in the space''s occupant load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
+    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
+    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_i1_i2
@@ -2525,8 +2531,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
       <= 10 and space_common_path <= 75
     reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
@@ -2542,7 +2548,8 @@ rules:
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75))
@@ -2807,7 +2814,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   - given:
       occupancy_group: I-2
       sprinklered_903_3_1_1: true
@@ -2853,14 +2860,15 @@ rules:
     one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
     systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
     note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
-    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
-    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
-    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
-    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. The row also names I-4, whose
-    rule is general.bc_1006_2_1_two_exits (unchanged). Note d: Group I-2''s travel limits are 407.4''s (not brought in), so
-    a Group I-2 space with one exit needs review. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
-    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (the
+    rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits and a common
+    path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
+    1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
+    (1004.2) is in the space''s occupant load. The row also names I-4, whose rule is the rule “Two exits over 10 occupants
+    or a 75-ft common path, I-4 (BCNYS 1006.2.1)” (unchanged). Note d: Group I-2''s travel limits are 407.4''s (not brought
+    in), so a Group I-2 space with one exit needs review. Hand-drafted in a Claude Code session (2026-11-23). Review round
+    1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23):
+    a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_i3
@@ -2874,8 +2882,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 100 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
       <= 10 and space_common_path <= 100
     reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
@@ -2887,7 +2895,8 @@ rules:
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 100)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 100))
@@ -3146,7 +3155,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -3172,13 +3181,13 @@ rules:
     (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
     systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
     note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
-    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
-    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
-    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
-    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Hand-drafted in a Claude Code
-    session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs
-    review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over
-    1030.8''s 30 ft (75 ft).'
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (the
+    rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits and a common
+    path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
+    1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
+    (1004.2) is in the space''s occupant load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
+    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
+    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_r1
@@ -3192,13 +3201,14 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 75 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 10 and (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 10 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 75))
@@ -3450,7 +3460,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -3476,13 +3486,13 @@ rules:
     (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
     systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
     note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
-    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
-    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
-    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
-    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Hand-drafted in a Claude Code
-    session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs
-    review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over
-    1030.8''s 30 ft (75 ft).'
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (the
+    rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits and a common
+    path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
+    1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
+    (1004.2) is in the space''s occupant load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
+    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
+    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_r2
@@ -3496,13 +3506,14 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 125 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and special_egress_spaces and space_exit_count < 2 and (space_occupant_load <= 20 and (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125))
@@ -3773,7 +3784,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -3799,14 +3810,14 @@ rules:
     (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
     systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
     note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
-    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
-    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
-    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
-    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. A dwelling unit is a space (1006.3.4
-    item 5.1: ''complies with Section 1006.2.1 as a space with one means of egress''). Hand-drafted in a Claude Code session
-    (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review.
-    Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s
-    30 ft (75 ft).'
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (the
+    rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits and a common
+    path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
+    1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
+    (1004.2) is in the space''s occupant load. A dwelling unit is a space (1006.3.4 item 5.1: ''complies with Section 1006.2.1
+    as a space with one means of egress''). Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
+    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
+    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_r3_r4
@@ -3820,8 +3831,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and (space_common_path > 125 or not (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and space_occupant_load <= 20 and not ((sprinklered_903_3_1_1 or sprinklered_903_3_1_2)
       and space_common_path <= 125)
     reason: 'Group R-3 or R-4, one exit, at most 20 occupants, and a common path the row''s columns wouldn''t allow: note
@@ -3831,7 +3842,8 @@ rules:
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125)
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 20 and (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) and space_common_path <= 125))
@@ -4105,7 +4117,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -4131,15 +4143,16 @@ rules:
     one (note a: 903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler
     systems in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
     note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
-    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (general.bc_1006_2_1_two_exits):
-    a space with two exits and a common path over the value needs review (open question 1); a space that is itself an exit
-    (space_is_exit: an exit stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s
-    check where they apply); the cumulative occupant load (1004.2) is in space_occupant_load. Lines 30 and 31 print the same
-    values for R-3 and R-4. Note e: the common path applies to Group R-3 only in a mixed occupancy building, and the rule
-    reads one-group buildings, so where only the common path (or its NP) would fail a space of 20 or fewer, it needs review;
-    note g (903.3.1.3 systems: 1006.2.2.6) likewise. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
-    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    a sprinkler system, and where only the sprinklered column would pass, a person checks the system). As the I-4 rule (the
+    rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space with two exits and a common
+    path over the value needs review (open question 1); a space that is itself an exit (an exit stair enclosure) is not one
+    1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load
+    (1004.2) is in the space''s occupant load. Lines 30 and 31 print the same values for R-3 and R-4. Note e: the common path
+    applies to Group R-3 only in a mixed occupancy building, and the rule reads one-group buildings, so where only the common
+    path (or its NP) would fail a space of 20 or fewer, it needs review; note g (903.3.1.3 systems: 1006.2.2.6) likewise.
+    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room
+    is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated
+    or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_s
@@ -4154,8 +4167,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (100 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
       <= 29 and space_common_path <= 100
     reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
@@ -4168,7 +4181,8 @@ rules:
       (100 if space_occupant_load <= 30 else 75)))
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 29 and space_common_path <= (100 if (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <=
@@ -4441,7 +4455,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -4468,13 +4482,14 @@ rules:
     (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
     NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
     alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
-    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
-    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
-    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
-    in space_occupant_load. Note f (a Group S-2 open parking garage: a common path not more than 100 ft) is no looser than
-    the row for the loads it allows (29 or fewer). Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with
-    fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    system). As the I-4 rule (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space
+    with two exits and a common path over the value needs review (open question 1); a space that is itself an exit (an exit
+    stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply);
+    the cumulative occupant load (1004.2) is in the space''s occupant load. Note f (a Group S-2 open parking garage: a common
+    path not more than 100 ft) is no looser than the row for the loads it allows (29 or fewer). Hand-drafted in a Claude Code
+    session (2026-11-23). Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs
+    review. Review round 2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over
+    1030.8''s 30 ft (75 ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_2_1_u
@@ -4489,8 +4504,8 @@ rules:
   - when: not space_is_exit and space_exit_count >= 2 and space_common_path > (75 if (sprinklered_903_3_1_1 or (sprinklered_903_3_1_2
       and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <= 30 else 75))
     reason: 'Two exits or more, and a common path over the row''s value (or no sprinkler system where the row gives none):
-      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (open_questions); a
-      person checks.'
+      whether Table 1006.2.1 caps the common path or only decides when a second exit is needed is open (the open question);
+      a person checks.'
   - when: not space_is_exit and space_exit_count < 2 and sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and space_occupant_load
       <= 49 and space_common_path <= 75
     reason: 'One exit, within the row only with a sprinkler system, and the system is NFPA 13R (903.3.1.2) outside Group R:
@@ -4503,7 +4518,8 @@ rules:
       (100 if space_occupant_load <= 30 else 75)))
     reason: 'One exit within the row, in a building that may hold a room 1006.2.2 gives two exits by its use (a boiler, incinerator
       or furnace room over 500 sq ft with fuel-fired equipment over 400,000 Btu; a refrigeration machinery room or a refrigerated
-      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (special_egress_spaces): a person checks.'
+      room over 1,000 sq ft; an electrical room per NFPA 70), stated or not ruled out (as the architect states it): a person
+      checks.'
   - when: not space_is_exit and assembly_fixed_seating and space_common_path > (75 if space_occupant_load < 50 else 30) and
       (space_is_exit or space_exit_count >= 2 or (space_occupant_load <= 49 and space_common_path <= (75 if (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (100 if space_occupant_load <=
@@ -4789,7 +4805,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   open_questions:
   - Does Table 1006.2.1's common path cap a story's common path of egress travel wherever it is measured, or only decide when
     a space needs a second exit or exit access doorway?
@@ -4816,12 +4832,13 @@ rules:
     (''Automatic sprinkler systems in Group R occupancies shall be permitted to be installed throughout in accordance with
     NFPA 13R''), and the table''s note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system
     alone gets the column without a sprinkler system, and where only the sprinklered column would pass, a person checks the
-    system). As the I-4 rule (general.bc_1006_2_1_two_exits): a space with two exits and a common path over the value needs
-    review (open question 1); a space that is itself an exit (space_is_exit: an exit stair enclosure) is not one 1006.2 counts.
-    Exceptions 1 and 3 only loosen the test (a person''s check where they apply); the cumulative occupant load (1004.2) is
-    in space_occupant_load. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a one-exit space
-    where a 1006.2.2 room is stated or not ruled out needs review. Review round 2 (2026-11-23): a room with fixed seating,
-    in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75 ft).'
+    system). As the I-4 rule (the rule “Two exits over 10 occupants or a 75-ft common path, I-4 (BCNYS 1006.2.1)”): a space
+    with two exits and a common path over the value needs review (open question 1); a space that is itself an exit (an exit
+    stair enclosure) is not one 1006.2 counts. Exceptions 1 and 3 only loosen the test (a person''s check where they apply);
+    the cumulative occupant load (1004.2) is in the space''s occupant load. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 1 (2026-11-23): a one-exit space where a 1006.2.2 room is stated or not ruled out needs review. Review round
+    2 (2026-11-23): a room with fixed seating, in any group, stated or not ruled out, needs review over 1030.8''s 30 ft (75
+    ft).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_2_1_boiler_rooms
@@ -4852,9 +4869,9 @@ rules:
       special_egress_spaces: false
     expect: not_applicable
     note: 'The architect states the building has none: not applicable.'
-  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the building''s special_egress_spaces
-    is stated yes or not stated; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted in a Claude
-    Code session (2026-11-23, review round 1).'
+  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the architect states such a room
+    is in the building, or doesn''t rule one out; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted
+    in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_2_2_refrigeration_machinery_rooms
@@ -4895,9 +4912,9 @@ rules:
       special_egress_spaces: false
     expect: not_applicable
     note: 'The architect states the building has none: not applicable.'
-  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the building''s special_egress_spaces
-    is stated yes or not stated; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted in a Claude
-    Code session (2026-11-23, review round 1).'
+  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the architect states such a room
+    is in the building, or doesn''t rule one out; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted
+    in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_2_3_refrigerated_rooms
@@ -4930,9 +4947,9 @@ rules:
       special_egress_spaces: false
     expect: not_applicable
     note: 'The architect states the building has none: not applicable.'
-  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the building''s special_egress_spaces
-    is stated yes or not stated; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted in a Claude
-    Code session (2026-11-23, review round 1).'
+  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the architect states such a room
+    is in the building, or doesn''t rule one out; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted
+    in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_2_4_electrical_rooms
@@ -4962,9 +4979,9 @@ rules:
       special_egress_spaces: false
     expect: not_applicable
     note: 'The architect states the building has none: not applicable.'
-  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the building''s special_egress_spaces
-    is stated yes or not stated; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted in a Claude
-    Code session (2026-11-23, review round 1).'
+  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the architect states such a room
+    is in the building, or doesn''t rule one out; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted
+    in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_2_5_vehicular_ramps
@@ -4992,9 +5009,9 @@ rules:
       special_egress_spaces: false
     expect: not_applicable
     note: 'The architect states the building has none: not applicable.'
-  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the building''s special_egress_spaces
-    is stated yes or not stated; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted in a Claude
-    Code session (2026-11-23, review round 1).'
+  notes: 'A room whose use sets its exits (1006.2.2), not marked in the model: shown where the architect states such a room
+    is in the building, or doesn''t rule one out; every row of Table 1006.2.1 needs review for a one-exit space then. Hand-drafted
+    in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1006_2_2_6_r3_r4_nfpa_13d
@@ -5151,12 +5168,13 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: '1006.2.2.6, where 903.2.8 permits an NFPA 13D system (903.3.1.3) in Group R-3 or R-4: exit access travel at most
     125 ft (R-3) or 75 ft (R-4), not the 200 ft column Table 1017.2''s note e gives such a building; Table 1017.2''s row reads
-    the same limits (general.bc_table_1017_2_a_e_f1_m_r_s1). Hand-drafted in a Claude Code session (2026-11-23, review round
-    1). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review (1030.7); a space note
-    a sends elsewhere, stated or not ruled out, needs review (as its sibling rows).'
+    the same limits (the rule “Exit access travel distance, A, E, F-1, M, R, S-1 (BCNYS Table 1017.2)”). Hand-drafted in a
+    Claude Code session (2026-11-23, review round 1). Review round 2 (2026-11-23): fixed seating stated or not ruled out,
+    in any group, needs review (1030.7); a space note a sends elsewhere, stated or not ruled out, needs review (as its sibling
+    rows).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   review_when:
@@ -5170,7 +5188,7 @@ rules:
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
 - id: general.bc_1006_2_1_1_three_or_more_exits
   kind: rule
   topic: means_of_egress
@@ -5237,9 +5255,9 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   notes: For every occupancy. The 500 is Table 1006.3.3's printed two-exit band ('1-500', a story's), used for a space by
-    analogy; a fractional load over 500 needs three (finding space_over_500_needs_three). Hand-drafted in a Claude Code session
+    analogy; a fractional load over 500 needs three (the finding on loads over 500). Hand-drafted in a Claude Code session
     (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -5486,16 +5504,17 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1006.3.3: two exits up to 500 occupants, three from 501 to 1,000, four above, for every occupancy. One exit
     is enough only where 1006.3.4 allows it: this rule reads item 1 for Group I-4 (Table 1006.3.4(2)''s I row: the first story
     above or below grade plane, at most 10 occupants and 75 ft of exit access travel; Group I is not in the second-story row,
     and the third story and higher are NP), and gives needs review, never fail, where item 2 is stated, on any story (rooms
     that exit directly outside at the level of exit discharge, which on a sloping site may be an upper story), or left blank
-    or the building is in another occupancy (its rows are general.bc_table_1006_3_4_2__other_occupancies). Items 3 to 5 (mechanical
-    parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted in a Claude Code session (2026-11-21).
-    Since 2026-11-23 it applies to Group I-4 and a building of two or more groups (or one whose groups aren''t stated: needs
-    review); every other group is general.bc_table_1006_3_4_2__<groups> or, Group R-2 of dwelling units, general.bc_table_1006_3_4_1__r2_dwelling_units.'
+    or the building is in another occupancy (its rows are the rule “Tables 1006.3.4(1) and (2) in a building of two or more
+    groups (BCNYS)”). Items 3 to 5 (mechanical parking, Groups R-3 and R-4, dwelling units) are for other groups. Hand-drafted
+    in a Claude Code session (2026-11-21). Since 2026-11-23 it applies to Group I-4 and a building of two or more groups (or
+    one whose groups aren''t stated: needs review); every other group is the rules for its rows or, Group R-2 of dwelling
+    units, the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   applies_when: occupancy_group_i4 or occupancy_group == "mixed"
@@ -5560,7 +5579,7 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: needs review.'
   notes: Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups (one
-    group's rows are general.bc_table_1006_3_4_2__<groups> and general.bc_table_1006_3_4_1__r2_dwelling_units).
+    group's rows are the rules for its rows and the rule “A story's one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1006_3_4_2__a_b_e_f_m_u
@@ -5812,7 +5831,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   - given:
       occupancy_group: I-4
       sprinklered_903_3_1_1: true
@@ -5833,7 +5852,8 @@ rules:
     - part: p1
       outcome: not_applicable
     expect: not_applicable
-    note: 'Not this rule''s groups (Group I-4: general.bc_1006_3_3_story_exits).'
+    note: 'Not this rule''s groups (Group I-4: the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
+      1006.3.3)”).'
   - given:
       occupancy_group: A-1
       sprinklered_903_3_1_1: true
@@ -5844,14 +5864,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
-  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (general.bc_1006_3_3_story_exits)
-    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s single
-    exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
-    and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units
-    10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13;
-    the second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3
-    and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review
+    note: 'No story: with none, the rule needs review.'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
+    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
+    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
+    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
+    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
+    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
+    second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3 and
+    R-4). Item 2 (rooms exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review
     where they could allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable
     roofs are not measured. The story''s place (first, second, fourth or higher above grade plane) and its occupant load are
     the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).'
@@ -6012,7 +6033,8 @@ rules:
     - part: p1
       outcome: not_applicable
     expect: not_applicable
-    note: 'Not this rule''s groups (Group I-4: general.bc_1006_3_3_story_exits).'
+    note: 'Not this rule''s groups (Group I-4: the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
+      1006.3.3)”).'
   - given:
       occupancy_group: H-1
       sprinklered_903_3_1_1: true
@@ -6023,14 +6045,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
-  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (general.bc_1006_3_3_story_exits)
-    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s single
-    exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
-    and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units
-    10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13;
-    the second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3
-    and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review
+    note: 'No story: with none, the rule needs review.'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
+    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
+    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
+    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
+    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
+    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
+    second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3 and
+    R-4). Item 2 (rooms exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review
     where they could allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable
     roofs are not measured. The story''s place (first, second, fourth or higher above grade plane) and its occupant load are
     the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).'
@@ -6216,7 +6239,8 @@ rules:
     - part: p1
       outcome: not_applicable
     expect: not_applicable
-    note: 'Not this rule''s groups (Group I-4: general.bc_1006_3_3_story_exits).'
+    note: 'Not this rule''s groups (Group I-4: the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
+      1006.3.3)”).'
   - given:
       occupancy_group: S-1
       sprinklered_903_3_1_1: true
@@ -6227,14 +6251,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
-  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (general.bc_1006_3_3_story_exits)
-    and Group R-2 of dwelling units (Table 1006.3.4(1): general.bc_table_1006_3_4_1__r2_dwelling_units), with 1006.3.4''s single
-    exits: item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants
-    and 75 ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units
-    10 and 75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13;
-    the second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3
-    and R-4). Item 2 (rooms exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review
+    note: 'No story: with none, the rule needs review.'
+  notes: '1006.3.3 (Table 1006.3.3: two exits up to 500 occupants, three to 1,000, four above) for every group but I-4 (the
+    rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”) and Group R-2 of dwelling units (Table
+    1006.3.4(1): the rule “A story''s one exit, R-2 dwelling units (BCNYS Table 1006.3.4(1))”), with 1006.3.4''s single exits:
+    item 1''s Table 1006.3.4(2) rows (the first story above or below grade plane: A, B, E, F, M and U 49 occupants and 75
+    ft, 100 ft in B and F with NFPA 13, note b; H-2 and H-3 3 and 25 ft; H-4, H-5, I, R-1 and R-2 of sleeping units 10 and
+    75 ft, R-2 only per note a, a sprinkler system and escape openings per 1031; S 29 and 75 ft, 100 ft with NFPA 13; the
+    second story: B, F, M and S 29 and 75 ft, 100 ft per note b; the third story and higher NP), and item 4 (Groups R-3 and
+    R-4). Item 2 (rooms exiting directly outside, stated or not ruled out) and Group S-2''s items 3 and note d need review
     where they could allow one exit. Item 5 (a dwelling unit''s own single exit) is a unit''s, not a story''s. Occupiable
     roofs are not measured. The story''s place (first, second, fourth or higher above grade plane) and its occupant load are
     the architect''s until measured. Hand-drafted in a Claude Code session (2026-11-23).'
@@ -6454,7 +6479,7 @@ rules:
     - part: p1
       outcome: not_applicable
     expect: not_applicable
-    note: 'R-2 of sleeping units: Table 1006.3.4(2) (note b), general.bc_table_1006_3_4_2__<groups>.'
+    note: 'R-2 of sleeping units: Table 1006.3.4(2) (note b), the rules for its rows.'
   - given:
       occupancy_group: R-2
       r2_sleeping_units: false
@@ -6466,7 +6491,7 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1006.3.4(1) for Group R-2 of dwelling units (note b; one of sleeping units is Table 1006.3.4(2)''s): a basement
     or the first, second or third story above grade plane may have one exit with at most 4 dwelling units and 125 ft of exit
     access travel, only in a building sprinklered per 903.3.1.1 or 903.3.1.2 with emergency escape and rescue openings per
@@ -6481,8 +6506,8 @@ rules:
   check: exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2 else 1 / 2)
   review_when:
   - when: story_exit_count < 2
-    reason: 'Fewer than two exits on the story: whether two are required is general.bc_1006_3_3_story_exits''s question; a
-      person checks.'
+    reason: 'Fewer than two exits on the story: whether two are required is the rule “Exits per story by occupant load, one
+      where 1006.3.4 allows (BCNYS 1006.3.3)”''s question; a person checks.'
   - when: story_exit_count >= 2 and not (exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
       else 1 / 2)) and (not (occupancy_group_i4 or other_occupancy_present) or other_occupancy_present and occupancy_group
       == "mixed" or story_rooms_exit_directly_outside or (story_first_above_or_below_grade and story_occupant_load <= 10 and
@@ -6684,7 +6709,8 @@ rules:
     - part: p3
       outcome: needs_review
     expect: needs_review
-    note: 'One exit: whether two are required is general.bc_1006_3_3_story_exits''s question.'
+    note: 'One exit: whether two are required is the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS
+      1006.3.3)”''s question.'
   - given:
       occupancy_group: B
       occupancy_group_i4: false
@@ -6720,20 +6746,20 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: '1007.1.1 applies where two exits are required. A story''s required number is 1006.3.3''s (Table 1006.3.3), and one
     will do where 1006.3.4 allows it: for Group I-4, Table 1006.3.4(2)''s I row (the first story above or below grade plane,
     at most 10 occupants and 75 ft of exit access travel), or item 2 (rooms that exit directly outside). So a close pair fails
     only on a Group I-4 story with no other occupancy that needs two (an upper story, more than 10 occupants or more than
-    75 ft) and whose architect states item 2 is not relied on (story_rooms_exit_directly_outside: no); where that fact is
-    blank it needs review; where one may do, or the building is in another occupancy (or its occupancy isn''t stated), it
-    needs review. Exception 1 (exit stairways or ramps joined by a 1-hour corridor complying with Section 1020: measured along
-    the corridor) only loosens the test: a person''s check. exit_remoteness_ratio is of the two farthest-apart exits or exit
-    access doorways, measured to any point of a doorway''s width (1007.1.1.1), so it is the best pair. Each space''s own are
-    general.bc_1007_1_1_space_remoteness. Hand-drafted in a Claude Code session (2026-11-21). Every group (2026-11-23): where
-    the building is of one group other than I-4, a close pair fails unless that group''s row of Table 1006.3.4(1) or (2) (a
-    story) or Table 1006.2.1 (a space) could allow one exit, read loosely (the larger value of its columns), so it never fails
-    where one could do.'
+    75 ft) and whose architect states item 2 is not relied on (stated no); where that fact is blank it needs review; where
+    one may do, or the building is in another occupancy (or its occupancy isn''t stated), it needs review. Exception 1 (exit
+    stairways or ramps joined by a 1-hour corridor complying with Section 1020: measured along the corridor) only loosens
+    the test: a person''s check. the exits'' separation is of the two farthest-apart exits or exit access doorways, measured
+    to any point of a doorway''s width (1007.1.1.1), so it is the best pair. Each space''s own are the rule “A space''s doorways
+    1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)”. Hand-drafted in a Claude Code session (2026-11-21). Every group
+    (2026-11-23): where the building is of one group other than I-4, a close pair fails unless that group''s row of Table
+    1006.3.4(1) or (2) (a story) or Table 1006.2.1 (a space) could allow one exit, read loosely (the larger value of its columns),
+    so it never fails where one could do.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_three_or_more_exits
@@ -6753,9 +6779,10 @@ rules:
   examples:
   - given: {}
     expect: needs_review
-    note: A story's count of exits is general.bc_1006_3_3_story_exits's (Table 1006.3.3) and the distance between its farthest
-      pair general.bc_1007_1_1_remoteness's; whether the others are a reasonable distance apart is a person's judgment. Each
-      space's own are general.bc_1007_1_2_space_three_or_more.
+    note: 'A story''s count of exits is the rule “Exits per story by occupant load, one where 1006.3.4 allows (BCNYS 1006.3.3)”''s
+      (Table 1006.3.3) and the distance between its farthest pair the rule “Two exits at least 1/2 the diagonal apart, 1/3
+      sprinklered (BCNYS 1007.1.1)”''s; whether the others are a reasonable distance apart is a person''s judgment. Each space''s
+      own are the rule “A space needing three exits: two arranged per 1007.1.1 (BCNYS 1007.1.2)”.'
   notes: Hand-drafted in a Claude Code session (2026-11-21).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -6772,8 +6799,8 @@ rules:
       <= 75))
     reason: 'The space''s doorways are close together, but it may not need two: Table 1006.2.1''s I-4 row (10 or fewer occupants,
       sprinklered, a common path of 75 ft or less) lets it have one, or the space is in another occupancy (or its occupancy
-      isn''t stated), whose row is a flag (general.bc_table_1006_2_1_other_occupancies). Whether 1007.1.1 applies to it is
-      a person''s check.'
+      isn''t stated), whose row is a flag (the rule “Table 1006.2.1 in a building of two or more groups (BCNYS)”). Whether
+      1007.1.1 applies to it is a person''s check.'
   - when: space_exit_count >= 2 and not space_exit_remoteness_ratio >= (1 / 3 if sprinklered_903_3_1_1 or sprinklered_903_3_1_2
       else 1 / 2) and other_occupancy_present and (occupancy_group in ["A-1", "A-2", "A-3", "A-4", "A-5", "E", "M"] and space_occupant_load
       <= 49 and space_common_path <= 75 or occupancy_group in ["B", "F-1", "F-2", "U"] and space_occupant_load <= 49 and space_common_path
@@ -6972,16 +6999,17 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   notes: '1007.1 separates exits and exit access doorways ''serving spaces, including individual building stories'', so each
-    space with two or more is checked, not only each story (general.bc_1007_1_1_remoteness). Measured to any point along each
-    doorway''s width (1007.1.1.1). 1007.1.1 applies where two are required (1006.2.1), and this rulebook encodes only Table
-    1006.2.1''s I-4 row: a close pair fails only in a Group I-4 building with no other occupancy where that row requires two
-    (more than 10 occupants, a common path over 75 ft, or not sprinklered); anywhere else (a space that may have one, another
-    occupancy, or an occupancy not stated) it needs review. A space whose ratio isn''t measured needs review. Hand-drafted
-    in a Claude Code session (2026-11-21). Every group (2026-11-23): where the building is of one group other than I-4, a
-    close pair fails unless that group''s row of Table 1006.3.4(1) or (2) (a story) or Table 1006.2.1 (a space) could allow
-    one exit, read loosely (the larger value of its columns), so it never fails where one could do.'
+    space with two or more is checked, not only each story (the rule “Two exits at least 1/2 the diagonal apart, 1/3 sprinklered
+    (BCNYS 1007.1.1)”). Measured to any point along each doorway''s width (1007.1.1.1). 1007.1.1 applies where two are required
+    (1006.2.1), and this rulebook encodes only Table 1006.2.1''s I-4 row: a close pair fails only in a Group I-4 building
+    with no other occupancy where that row requires two (more than 10 occupants, a common path over 75 ft, or not sprinklered);
+    anywhere else (a space that may have one, another occupancy, or an occupancy not stated) it needs review. A space whose
+    ratio isn''t measured needs review. Hand-drafted in a Claude Code session (2026-11-21). Every group (2026-11-23): where
+    the building is of one group other than I-4, a close pair fails unless that group''s row of Table 1006.3.4(1) or (2) (a
+    story) or Table 1006.2.1 (a space) could allow one exit, read loosely (the larger value of its columns), so it never fails
+    where one could do.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1007_1_2_space_three_or_more
@@ -7091,8 +7119,8 @@ rules:
     - part: p3
       outcome: needs_review
     expect: needs_review
-    note: 'Three doors drawn, but six occupants: three are not required, so 1007.1.2 doesn''t apply; general.bc_1007_1_1_space_remoteness
-      decides whether two must be apart.'
+    note: 'Three doors drawn, but six occupants: three are not required, so 1007.1.2 doesn''t apply; the rule “A space''s
+      doorways 1/2 the diagonal apart, 1/3 sprinklered (BCNYS 1007.1.1)” decides whether two must be apart.'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
@@ -7109,7 +7137,8 @@ rules:
     - part: p4
       outcome: pass
     expect: pass
-    note: 'Two doors: nothing for this part (general.bc_1006_2_1_1_three_or_more_exits fails the missing third).'
+    note: 'Two doors: nothing for this part (the rule “Three exits from 501-1,000 occupants, four above (BCNYS 1006.2.1.1)”
+      fails the missing third).'
   - given:
       occupancy_group_i4: true
       sprinklered_903_3_1_1: true
@@ -7119,13 +7148,13 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   notes: '1007.1.2 applies ''Where access to three or more exits is required'': for a space, 1006.2.1.1 requires three from
     an occupant load of 501 (to 1,000; four above). So it fails only where three are required and even the two farthest-apart
     are too close; where three or more are drawn but three aren''t required, or the occupant load isn''t given, it needs review,
     never fail. For every occupancy. The 500 is Table 1006.3.3''s printed two-exit band (''1-500'', a story''s), used for
-    a space by analogy; a fractional load over 500 needs three (finding space_over_500_needs_three). Hand-drafted in a Claude
-    Code session (2026-11-21).'
+    a space by analogy; a fractional load over 500 needs three (the finding on loads over 500). Hand-drafted in a Claude Code
+    session (2026-11-21).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   findings:
@@ -7353,14 +7382,13 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
+    note: 'No space: with none, the rule needs review.'
   notes: 'Items 4, 5 and 6 are measurable from the path; item 1 (enclosed elevator lobbies, Section 3006, not brought in)
     and items 2 and 3 (adjoining rooms accessory to one another with a discernible path; Group H''s hazard) are a person''s.
     Item 6''s exceptions (a kitchen within the same dwelling or sleeping unit; a Group M stockroom) are not Group I-4''s;
     item 4''s exception covers only an elevator lobby''s electrically locked exit access door complying with 1010.2.14 (not
-    brought in): such lobbies are counted apart (space_egress_through_electrically_locked_lobby) and need review; every other
-    lockable room, an enclosed elevator lobby included, is a locked room and fails. Hand-drafted in a Claude Code session
-    (2026-11-21).'
+    brought in): such lobbies are counted apart (counted apart) and need review; every other lockable room, an enclosed elevator
+    lobby included, is a locked room and fails. Hand-drafted in a Claude Code session (2026-11-21).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1016_2_other_occupancies
@@ -7399,7 +7427,7 @@ rules:
     expect: needs_review
     note: 'The occupancy isn''t stated: needs review.'
   notes: 'Hand-drafted in a Claude Code session (2026-11-21). Narrowed 2026-11-23 to a building of two or more groups: one
-    group''s is general.bc_1016_2_intervening_spaces_other_groups (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
+    group''s is the rule “Egress through intervening spaces, every group but I-4 (BCNYS 1016.2)” (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1016_2_intervening_spaces_other_groups
@@ -7610,7 +7638,7 @@ rules:
     - part: p1
       outcome: not_applicable
     expect: not_applicable
-    note: 'Group I-4 is general.bc_1016_2_intervening_spaces: not applicable.'
+    note: 'Group I-4 is the rule “Egress not through locked rooms, kitchens, storage or closets (BCNYS 1016.2)”: not applicable.'
   - given:
       occupancy_group: B
     parts:
@@ -7618,15 +7646,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No space: the rule''s when_none (needs_review).'
-  notes: '1016.2 for every group but I-4 (general.bc_1016_2_intervening_spaces), the same check: items 4 (a lockable room),
-    5 (dwelling units and sleeping areas through other sleeping areas or bathrooms) and 6 (kitchens, storage rooms, closets)
-    measured from the path; items 1 to 3 (an enclosed elevator lobby; an intervening room accessory to the one served, or
-    in Group H of the same or lesser hazard) and item 4''s electrically locked lobby door are a person''s check. Item 6''s
-    exceptions only loosen it: a kitchen of the same dwelling or sleeping unit (groups with such units) and a Group M stockroom
-    meeting 2.1 to 2.4 need review where they would be the only thing failing. Hand-drafted in a Claude Code session (2026-11-23).
-    Review round 1 (2026-11-23): Group I-2 with care suites stated or not ruled out, and Group I-3, need review (407.4.4.1,
-    408.6.3).'
+    note: 'No space: with none, the rule needs review.'
+  notes: '1016.2 for every group but I-4 (the rule “Egress not through locked rooms, kitchens, storage or closets (BCNYS 1016.2)”),
+    the same check: items 4 (a lockable room), 5 (dwelling units and sleeping areas through other sleeping areas or bathrooms)
+    and 6 (kitchens, storage rooms, closets) measured from the path; items 1 to 3 (an enclosed elevator lobby; an intervening
+    room accessory to the one served, or in Group H of the same or lesser hazard) and item 4''s electrically locked lobby
+    door are a person''s check. Item 6''s exceptions only loosen it: a kitchen of the same dwelling or sleeping unit (groups
+    with such units) and a Group M stockroom meeting 2.1 to 2.4 need review where they would be the only thing failing. Hand-drafted
+    in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): Group I-2 with care suites stated or not ruled out,
+    and Group I-3, need review (407.4.4.1, 408.6.3).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1016_2_1_multiple_tenants
@@ -7790,12 +7818,12 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s I-4 row: 150 ft without an automatic sprinkler system, 200 ft with one per 903.3.1.1 (note c). An
     I-4 building sprinklered only per 903.3.1.2 (NFPA 13R) does not meet note c, so 150 ft applies (the stricter reading).
     Measured as 1017.3 says (from the most remote point of each room, area or space, along the natural and unobstructed path,
-    to the entrance to the nearest exit; stairways along their nosings, 1017.3.1): egress_travel_distance. Allowances that
-    loosen it (1017.2.1''s exterior balcony; note a''s other sections) are their own flags or not brought in. Hand-drafted
+    to the entrance to the nearest exit; stairways along their nosings, 1017.3.1): the exit access travel distance. Allowances
+    that loosen it (1017.2.1''s exterior balcony; note a''s other sections) are their own flags or not brought in. Hand-drafted
     in a Claude Code session (2026-11-21). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
     needs review (1030.7); a space note a sends elsewhere, stated or not ruled out, needs review (as its sibling rows); over
     its distance within 1017.2.1''s balcony increase, taken or not stated, needs review.'
@@ -7812,11 +7840,12 @@ rules:
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: egress_balcony_increase_taken and egress_travel_distance > (200 if sprinklered_903_3_1_1 else 150) and egress_travel_distance
       <= (200 if sprinklered_903_3_1_1 else 150) + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: a person checks (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: a person checks (the rule “Exterior egress balcony increase, up to 100
+      ft (BCNYS 1017.2.1)”).'
 - id: general.bc_table_1017_2_other_occupancies
   kind: flag
   topic: means_of_egress
@@ -7835,9 +7864,9 @@ rules:
   - given:
       occupancy_group: mixed
     expect: needs_review
-    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
-      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
-      isn''t marked yet, so a person checks.'
+    note: 'A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to
+      each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which
+      occupancy isn''t marked yet, so a person checks.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -7864,7 +7893,8 @@ rules:
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else (125 if occupancy_group == "R-3"
       and sprinklered_903_3_1_3 else 75 if occupancy_group == "R-4" and sprinklered_903_3_1_3 else 200)) + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and occupancy_group not in ["R-1", "R-2", "R-3", "R-4"] and
       egress_travel_distance <= 250 and egress_travel_distance > 200
     reason: 'Within the sprinklered column only, with an NFPA 13R system (903.3.1.2) outside Group R: 903.3.1.2 permits an
@@ -7875,12 +7905,12 @@ rules:
   - when: occupancy_group in ["F-1", "S-1"] and sprinklered_903_3_1_1 and egress_travel_distance > 250 and egress_travel_distance
       <= 400
     reason: 'Over 250 ft in Group F-1 or S-1 with NFPA 13, within 1017.2.2''s 400 ft, whose other conditions (one story; 24
-      ft to the ceiling) aren''t measured: a person''s check (general.bc_1017_2_2_f1_s1_increase).'
+      ft to the ceiling) aren''t measured: a person''s check (the rule “Groups F-1 and S-1 increase to 400 ft (BCNYS 1017.2.2)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: building_has_atrium and egress_travel_distance > 200 and egress_travel_distance <= (250 if (sprinklered_903_3_1_1
       or (sprinklered_903_3_1_2 and occupancy_group in ["R-1", "R-2", "R-3", "R-4"])) else 200)
     reason: 'Over 200 ft, within the row, in a building with an atrium (stated or not ruled out): 1017.3.2.3 holds the part
@@ -8288,22 +8318,22 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s A, E, F-1, M, R, S-1 row: 200 ft without an automatic sprinkler system, 250 ft with one (note b:
     903.3.1.1 or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems
     in Group R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s
     note sends the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without
     a sprinkler system, and where only the sprinklered column would pass, a person checks the system). Measured as 1017.3
-    says (egress_travel_distance). 1017.2.1''s balcony increase is a person''s check where taken or not stated and the distance
-    is within it; the other sections note a lists are general.bc_table_1017_2_note_a. Over its distance in Group F-1 or S-1
-    with NFPA 13, 1017.2.2''s 400 ft is a person''s check (its one-story and ceiling conditions aren''t measured); in Group
-    A, 1030.7 is, unless the architect states the space has no fixed seating (assembly_fixed_seating). Note e (R-3 and R-4
-    with an NFPA 13D system, 903.3.1.3) keeps such a building in the 200 ft column: 13D is no 903.3.1.1 or 903.3.1.2 system.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review; Groups R-3 and R-4 with an NFPA 13D system (903.3.1.3: note e''s 903.2.8) are held
-    to 1006.2.2.6''s 125 ft and 75 ft; in Group A, any travel needs review while fixed seating isn''t ruled out (1030.7);
-    over 200 ft with an atrium stated or not ruled out needs review (1017.3.2.3). Review round 2 (2026-11-23): fixed seating
-    stated or not ruled out, in any group, needs review (1030.7).'
+    says . 1017.2.1''s balcony increase is a person''s check where taken or not stated and the distance is within it; the
+    other sections note a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Over its distance
+    in Group F-1 or S-1 with NFPA 13, 1017.2.2''s 400 ft is a person''s check (its one-story and ceiling conditions aren''t
+    measured); in Group A, 1030.7 is, unless the architect states the space has no fixed seating (as the architect states
+    it). Note e (R-3 and R-4 with an NFPA 13D system, 903.3.1.3) keeps such a building in the 200 ft column: 13D is no 903.3.1.1
+    or 903.3.1.2 system. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends
+    elsewhere (as the architect states it), stated or not ruled out, needs review; Groups R-3 and R-4 with an NFPA 13D system
+    (903.3.1.3: note e''s 903.2.8) are held to 1006.2.2.6''s 125 ft and 75 ft; in Group A, any travel needs review while fixed
+    seating isn''t ruled out (1030.7); over 200 ft with an atrium stated or not ruled out needs review (1017.3.2.3). Review
+    round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_i1
@@ -8316,7 +8346,8 @@ rules:
   review_when:
   - when: egress_balcony_increase_taken and egress_travel_distance > 250 and egress_travel_distance <= 250 + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: sprinklered_903_3_1_2 and not sprinklered_903_3_1_1 and occupancy_group not in ["R-1", "R-2", "R-3", "R-4"] and
       egress_travel_distance <= 250
     reason: 'Within the sprinklered column only, with an NFPA 13R system (903.3.1.2) outside Group R: 903.3.1.2 permits an
@@ -8328,7 +8359,7 @@ rules:
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: building_has_atrium and egress_travel_distance > 200 and egress_travel_distance <= 250
     reason: 'Over 200 ft, within the row, in a building with an atrium (stated or not ruled out): 1017.3.2.3 holds the part
       of the travel within the atrium (off the level of exit discharge) to 200 ft, not measured; a person checks.'
@@ -8511,17 +8542,17 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s I-1 row: Not Permitted without an automatic sprinkler system, 250 ft with one (note b: 903.3.1.1
     or 903.3.1.2; 903.3.1.2 permits an NFPA 13R system only in Group R occupancies (''Automatic sprinkler systems in Group
     R occupancies shall be permitted to be installed throughout in accordance with NFPA 13R''), and the table''s note sends
     the reader to Section 903 for where it is permitted: outside Group R a 13R system alone gets the column without a sprinkler
-    system, and where only the sprinklered column would pass, a person checks the system). Measured as 1017.3 says (egress_travel_distance).
-    1017.2.1''s balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections
-    note a lists are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a space note a sends elsewhere (special_egress_spaces), stated or not ruled out, needs review; over 200 ft with an atrium
-    stated or not ruled out needs review (1017.3.2.3). Review round 2 (2026-11-23): fixed seating stated or not ruled out,
-    in any group, needs review (1030.7).'
+    system, and where only the sprinklered column would pass, a person checks the system). Measured as 1017.3 says . 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
+    (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (as the architect states it), stated or not
+    ruled out, needs review; over 200 ft with an atrium stated or not ruled out needs review (1017.3.2.3). Review round 2
+    (2026-11-23): fixed seating stated or not ruled out, in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_b
@@ -8534,12 +8565,13 @@ rules:
   - when: egress_balcony_increase_taken and egress_travel_distance > (300 if sprinklered_903_3_1_1 else 200) and egress_travel_distance
       <= (300 if sprinklered_903_3_1_1 else 200) + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: building_has_atrium and egress_travel_distance > 200 and egress_travel_distance <= (300 if sprinklered_903_3_1_1
       else 200)
     reason: 'Over 200 ft, within the row, in a building with an atrium (stated or not ruled out): 1017.3.2.3 holds the part
@@ -8753,14 +8785,14 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s B row: 200 ft without an automatic sprinkler system, 300 ft with one (note c: 903.3.1.1 only, so
-    an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony
-    increase is a person''s check where taken or not stated and the distance is within it; the other sections note a lists
-    are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a
-    space note a sends elsewhere (special_egress_spaces), stated or not ruled out, needs review; over 200 ft with an atrium
-    stated or not ruled out needs review (1017.3.2.3). Review round 2 (2026-11-23): fixed seating stated or not ruled out,
-    in any group, needs review (1030.7).'
+    an NFPA 13R system gets the column without one). Measured as 1017.3 says . 1017.2.1''s balcony increase is a person''s
+    check where taken or not stated and the distance is within it; the other sections note a lists are the rule “Table 1017.2
+    note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session (2026-11-23). Review round 1
+    (2026-11-23): a space note a sends elsewhere (as the architect states it), stated or not ruled out, needs review; over
+    200 ft with an atrium stated or not ruled out needs review (1017.3.2.3). Review round 2 (2026-11-23): fixed seating stated
+    or not ruled out, in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_f2_s2_u
@@ -8773,12 +8805,13 @@ rules:
   - when: egress_balcony_increase_taken and egress_travel_distance > (400 if sprinklered_903_3_1_1 else 300) and egress_travel_distance
       <= (400 if sprinklered_903_3_1_1 else 300) + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: building_has_atrium and egress_travel_distance > 200 and egress_travel_distance <= (400 if sprinklered_903_3_1_1
       else 300)
     reason: 'Over 200 ft, within the row, in a building with an atrium (stated or not ruled out): 1017.3.2.3 holds the part
@@ -8983,14 +9016,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s F-2, S-2, U row: 300 ft without an automatic sprinkler system, 400 ft with one (note c: 903.3.1.1
-    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s
-    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
-    a lists are general.bc_table_1017_2_note_a. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23):
-    a space note a sends elsewhere (special_egress_spaces), stated or not ruled out, needs review; over 200 ft with an atrium
-    stated or not ruled out needs review (1017.3.2.3); Group S-2 over its distance needs review (1017.3 exception 1, open
-    parking garages). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review (1030.7).'
+    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says . 1017.2.1''s balcony increase is a
+    person''s check where taken or not stated and the distance is within it; the other sections note a lists are the rule
+    “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session (2026-11-23).
+    Review round 1 (2026-11-23): a space note a sends elsewhere (as the architect states it), stated or not ruled out, needs
+    review; over 200 ft with an atrium stated or not ruled out needs review (1017.3.2.3); Group S-2 over its distance needs
+    review (1017.3 exception 1, open parking garages). Review round 2 (2026-11-23): fixed seating stated or not ruled out,
+    in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h1
@@ -9002,12 +9036,13 @@ rules:
   review_when:
   - when: egress_balcony_increase_taken and egress_travel_distance > 75 and egress_travel_distance <= 75 + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: assembly_fixed_seating
     reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
       small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
@@ -9101,8 +9136,8 @@ rules:
     - part: p1
       outcome: pass
     expect: pass
-    note: 'NFPA 13 (903.3.1.1): 75 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
-      check.'
+    note: 'NFPA 13 (903.3.1.1): 75 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-1
       sprinklered_903_3_1_1: true
@@ -9172,14 +9207,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-1 row: Not Permitted without an automatic sprinkler system, 75 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
-    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
-    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
-    needs review (1030.7).'
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
+    (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (as the architect states it), stated or not
+    ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review
+    (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h2
@@ -9191,12 +9227,13 @@ rules:
   review_when:
   - when: egress_balcony_increase_taken and egress_travel_distance > 100 and egress_travel_distance <= 100 + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: assembly_fixed_seating
     reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
       small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
@@ -9290,8 +9327,8 @@ rules:
     - part: p1
       outcome: pass
     expect: pass
-    note: 'NFPA 13 (903.3.1.1): 100 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
-      check.'
+    note: 'NFPA 13 (903.3.1.1): 100 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-2
       sprinklered_903_3_1_1: true
@@ -9361,14 +9398,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-2 row: Not Permitted without an automatic sprinkler system, 100 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
-    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
-    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
-    needs review (1030.7).'
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
+    (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (as the architect states it), stated or not
+    ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review
+    (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h3
@@ -9380,12 +9418,13 @@ rules:
   review_when:
   - when: egress_balcony_increase_taken and egress_travel_distance > 150 and egress_travel_distance <= 150 + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: assembly_fixed_seating
     reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
       small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
@@ -9479,8 +9518,8 @@ rules:
     - part: p1
       outcome: pass
     expect: pass
-    note: 'NFPA 13 (903.3.1.1): 150 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
-      check.'
+    note: 'NFPA 13 (903.3.1.1): 150 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-3
       sprinklered_903_3_1_1: true
@@ -9550,14 +9589,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-3 row: Not Permitted without an automatic sprinkler system, 150 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
-    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
-    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
-    needs review (1030.7).'
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
+    (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (as the architect states it), stated or not
+    ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review
+    (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h4
@@ -9569,12 +9609,13 @@ rules:
   review_when:
   - when: egress_balcony_increase_taken and egress_travel_distance > 175 and egress_travel_distance <= 175 + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: assembly_fixed_seating
     reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
       small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
@@ -9668,8 +9709,8 @@ rules:
     - part: p1
       outcome: pass
     expect: pass
-    note: 'NFPA 13 (903.3.1.1): 175 ft complies (at most). Note d''s 903.2.5.1 is general.bc_table_1017_2_note_d_group_h''s
-      check.'
+    note: 'NFPA 13 (903.3.1.1): 175 ft complies (at most). Note d''s 903.2.5.1 is the rule “Group H''s sprinkler system, Tables
+      1017.2 note d and 1006.2.1 note b (BCNYS)”''s check.'
   - given:
       occupancy_group: H-4
       sprinklered_903_3_1_1: true
@@ -9739,14 +9780,15 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-4 row: Not Permitted without an automatic sprinkler system, 175 ft with one (note d: 903.2.5.1,
-    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with general.bc_table_1017_2_note_d_group_h
-    shown for a person to confirm it). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s balcony increase is a
-    person''s check where taken or not stated and the distance is within it; the other sections note a lists are general.bc_table_1017_2_note_a.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
-    needs review (1030.7).'
+    Group H''s own system, not brought in: read here as the stated NFPA 13 system, with the rule “Group H''s sprinkler system,
+    Tables 1017.2 note d and 1006.2.1 note b (BCNYS)” shown for a person to confirm it). Measured as 1017.3 says . 1017.2.1''s
+    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
+    a lists are the rule “Table 1017.2 note a: sections that change the distance (BCNYS)”. Hand-drafted in a Claude Code session
+    (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (as the architect states it), stated or not
+    ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review
+    (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_h5
@@ -9758,15 +9800,16 @@ rules:
   review_when:
   - when: egress_balcony_increase_taken and egress_travel_distance > 200 and egress_travel_distance <= 200 + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: sprinklered_903_3_1_1 and egress_travel_distance > 200 and egress_travel_distance <= 300
     reason: 'Over 200 ft in Group H-5 with NFPA 13, within 1017.2.3''s 300 ft for fabrication areas, whose conditions aren''t
-      measured: a person''s check (general.bc_1017_2_3_h5_increase).'
+      measured: a person''s check (the rule “Group H-5 increase to 300 ft (BCNYS 1017.2.3)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: assembly_fixed_seating
     reason: 'The building may have a room or space used for assembly purposes with fixed seating, in any group (303.1.1, 303.1.2:
       small assembly spaces are part of their main occupancy; 303.1.3: an E school''s auditorium), stated or not ruled out:
@@ -9956,14 +9999,14 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s H-5 row: Not Permitted without an automatic sprinkler system, 200 ft with one (note c: 903.3.1.1
-    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s
-    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
-    a lists are general.bc_table_1017_2_note_a. Over 200 ft, 1017.2.3''s 300 ft for fabrication areas is a person''s check.
-    Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces),
-    stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group,
-    needs review (1030.7).'
+    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says . 1017.2.1''s balcony increase is a
+    person''s check where taken or not stated and the distance is within it; the other sections note a lists are the rule
+    “Table 1017.2 note a: sections that change the distance (BCNYS)”. Over 200 ft, 1017.2.3''s 300 ft for fabrication areas
+    is a person''s check. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note a
+    sends elsewhere (as the architect states it), stated or not ruled out, needs review. Review round 2 (2026-11-23): fixed
+    seating stated or not ruled out, in any group, needs review (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_i2_i3
@@ -9975,12 +10018,13 @@ rules:
   review_when:
   - when: egress_balcony_increase_taken and egress_travel_distance > 200 and egress_travel_distance <= 200 + 100
     reason: 'Over the table''s distance, but within 1017.2.1''s exterior egress balcony increase (up to 100 ft more), which
-      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (general.bc_1017_2_1_balcony_increase).'
+      the design takes or whose taking isn''t stated: the balcony (Section 1021) and its length are a person''s check (the
+      rule “Exterior egress balcony increase, up to 100 ft (BCNYS 1017.2.1)”).'
   - when: special_egress_spaces
     reason: 'The building may hold a space Table 1017.2 note a gives its own distance (a mall, 402.8; a Group I-2 care suite,
       407.4; a special amusement area, 411.2; aircraft manufacturing, 412.6; a refrigeration machinery or refrigerated room,
       1006.2.2.2 and 1006.2.2.3: 150 ft unsprinklered; a temporary structure, 3103.4: 100 ft; a pedestrian walkway, 3104.9:
-      200 ft), stated or not ruled out (special_egress_spaces): its limit isn''t this row''s, a person checks.'
+      200 ft), stated or not ruled out (as the architect states it): its limit isn''t this row''s, a person checks.'
   - when: occupancy_group == "I-2" and egress_travel_in_sleeping_room > 50
     reason: 'Group I-2: a sleeping room''s travel to its exit access door is over 407.4.2''s 50 ft; allowed only in a care
       suite (407.4.4.3: 100 ft within the suite), not marked: a person checks.'
@@ -10209,16 +10253,17 @@ rules:
     rows:
     - outcome: needs_review
     expect: needs_review
-    note: 'No story: the rule''s when_none (needs_review).'
+    note: 'No story: with none, the rule needs review.'
   notes: 'Table 1017.2''s I-2, I-3 row: Not Permitted without an automatic sprinkler system, 200 ft with one (note c: 903.3.1.1
-    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says (egress_travel_distance). 1017.2.1''s
-    balcony increase is a person''s check where taken or not stated and the distance is within it; the other sections note
-    a lists are general.bc_table_1017_2_note_a. Note a''s 407.4 (I-2) and 408.6.1, 408.8.1 (I-3) change travel further and
-    aren''t brought in: general.bc_table_1017_2_note_a shows for a person to check them. Hand-drafted in a Claude Code session
-    (2026-11-23). Review round 1 (2026-11-23): a space note a sends elsewhere (special_egress_spaces), stated or not ruled
-    out, needs review; Group I-2 holds a sleeping room to 407.4.2''s 50 ft (over it, a care suite''s 100 ft may apply: review),
-    and Group I-3 never passes (408.6.1''s smoke-barrier distances aren''t measured). Review round 2 (2026-11-23): fixed seating
-    stated or not ruled out, in any group, needs review (1030.7).'
+    only, so an NFPA 13R system gets the column without one). Measured as 1017.3 says . 1017.2.1''s balcony increase is a
+    person''s check where taken or not stated and the distance is within it; the other sections note a lists are the rule
+    “Table 1017.2 note a: sections that change the distance (BCNYS)”. Note a''s 407.4 (I-2) and 408.6.1, 408.8.1 (I-3) change
+    travel further and aren''t brought in: the rule “Table 1017.2 note a: sections that change the distance (BCNYS)” shows
+    for a person to check them. Hand-drafted in a Claude Code session (2026-11-23). Review round 1 (2026-11-23): a space note
+    a sends elsewhere (as the architect states it), stated or not ruled out, needs review; Group I-2 holds a sleeping room
+    to 407.4.2''s 50 ft (over it, a care suite''s 100 ft may apply: review), and Group I-3 never passes (408.6.1''s smoke-barrier
+    distances aren''t measured). Review round 2 (2026-11-23): fixed seating stated or not ruled out, in any group, needs review
+    (1030.7).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_table_1017_2_note_a
@@ -10257,8 +10302,8 @@ rules:
     refrigeration machinery rooms and refrigerated rooms within 150 ft where not sprinklered, 1006.2.2.2 and 1006.2.2.3),
     so the rows'' rules may pass a building that holds one: this flag always shows. 1006.3.4 (one exit), 1017.2.2 (F-1, S-1)
     and 1017.2.3 (H-5) are this rulebook''s own rules and flags. Hand-drafted in a Claude Code session (2026-11-23). Review
-    round 1 (2026-11-23): shown only where special_egress_spaces is stated yes or not stated; every row of Table 1017.2 needs
-    review then, never falling back on its own distance.'
+    round 1 (2026-11-23): shown only where such a space is stated or not ruled out; every row of Table 1017.2 needs review
+    then, never falling back on its own distance.'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
   applies_when: special_egress_spaces
@@ -10292,7 +10337,7 @@ rules:
     note: 'Not Group H: not applicable.'
   notes: Group H's rows of Tables 1017.2 (note d) and 1006.2.1 (note b) give their sprinklered values to a system per 903.2.5.1
     and 903.2.5 (not brought in); 903.3.1 has every system follow 903.3.1.1 unless another section permits otherwise, so the
-    rows read the stated NFPA 13 system (sprinklered_903_3_1_1) as one, and this flag shows for a person to confirm. Hand-drafted
+    rows read the stated NFPA 13 system (an NFPA 13 system) as one, and this flag shows for a person to confirm. Hand-drafted
     in a Claude Code session (2026-11-23).
   drafted_by: claude_code/claude-opus-5-5
   status: draft
@@ -10343,9 +10388,9 @@ rules:
   - given:
       occupancy_group: mixed
     expect: needs_review
-    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
-      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
-      isn''t marked yet, so a person checks. The increase''s own conditions are a person''s check too.'
+    note: 'A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to
+      each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which
+      occupancy isn''t marked yet, so a person checks. The increase''s own conditions are a person''s check too.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -10378,9 +10423,9 @@ rules:
   - given:
       occupancy_group: mixed
     expect: needs_review
-    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
-      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
-      isn''t marked yet, so a person checks. The increase''s own conditions are a person''s check too.'
+    note: 'A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to
+      each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which
+      occupancy isn''t marked yet, so a person checks. The increase''s own conditions are a person''s check too.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -10453,8 +10498,8 @@ rules:
     expect: not_applicable
     note: 'The architect states the building has none: not applicable.'
   notes: '1018.4 for Group M merchandise pads, not drawn: shown where pads are stated or not ruled out; Table 1006.2.1''s
-    A, E, M row needs review over 30 ft then (general.bc_table_1006_2_1_a_e_m). Hand-drafted in a Claude Code session (2026-11-23,
-    review round 1).'
+    A, E, M row needs review over 30 ft then (the rule “A space''s one exit, A, E, M (BCNYS Table 1006.2.1)”). Hand-drafted
+    in a Claude Code session (2026-11-23, review round 1).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
 - id: general.bc_1030_8_fixed_seating_common_path
@@ -10573,7 +10618,7 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
+    note: 'No corridor: with none, the rule doesn''t apply.'
   notes: 'Exception 2''s 50 ft (sprinklered per 903.3.1.1) lists Groups B, E, F, I-1, M, R-1, R-2, S and U, not I-4; exceptions
     1 and 4 are I-3 and I-2. It applies where more than one exit or exit access doorway is required (1006.2.1): with one,
     there is no limit, so this rule may only be stricter there. The 2009 IBC (1018.4, the Maine sheet''s code) set the same.
@@ -10606,9 +10651,9 @@ rules:
   - given:
       occupancy_group: mixed
     expect: needs_review
-    note: 'A building of two or more groups (occupancy_group: mixed): 1004.4 applies the means of egress requirements to each
-      portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which occupancy
-      isn''t marked yet, so a person checks.'
+    note: 'A building of two or more groups (two or more groups stated): 1004.4 applies the means of egress requirements to
+      each portion by its own occupancy, and a component two occupancies share meets the more stringent; which room is which
+      occupancy isn''t marked yet, so a person checks.'
   - given:
       occupancy_group: R-2
     expect: not_applicable
@@ -10839,12 +10884,13 @@ rules:
     rows:
     - outcome: not_applicable
     expect: not_applicable
-    note: 'No corridor: the rule''s when_none (not_applicable).'
-  notes: '1020.5 and its exceptions for every group but I-4 (general.bc_1020_5_dead_end): 20 ft; 50 ft in Groups B, E, F,
-    I-1, M, R-1, R-2, S and U with an NFPA 13 system (903.3.1.1: exception 2; a 13R system does not meet it); any length under
-    2.5 times the least width (exception 3). Exceptions 1 (Group I-3, Conditions 2 to 4: 50 ft) and 4 (Group I-2, Condition
-    2, corridors not serving patient rooms or treatment spaces: 30 ft) turn on a condition the architect doesn''t state yet,
-    so within them it needs review, never a pass. As the I-4 rule: it applies where more than one exit or exit access doorway
-    is required, and with one there is no limit, so it may only be stricter there. Hand-drafted in a Claude Code session (2026-11-23).'
+    note: 'No corridor: with none, the rule doesn''t apply.'
+  notes: '1020.5 and its exceptions for every group but I-4 (the rule “Dead end at most 20 ft, or under 2.5 x its width, I-4
+    (BCNYS 1020.5)”): 20 ft; 50 ft in Groups B, E, F, I-1, M, R-1, R-2, S and U with an NFPA 13 system (903.3.1.1: exception
+    2; a 13R system does not meet it); any length under 2.5 times the least width (exception 3). Exceptions 1 (Group I-3,
+    Conditions 2 to 4: 50 ft) and 4 (Group I-2, Condition 2, corridors not serving patient rooms or treatment spaces: 30 ft)
+    turn on a condition the architect doesn''t state yet, so within them it needs review, never a pass. As the I-4 rule: it
+    applies where more than one exit or exit access doorway is required, and with one there is no limit, so it may only be
+    stricter there. Hand-drafted in a Claude Code session (2026-11-23).'
   drafted_by: claude_code/claude-opus-5-5
   status: draft
