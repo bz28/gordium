@@ -515,3 +515,54 @@ each fails when its behaviour is reverted. Differences from the agreed pictures:
 results, not 11 (its own two rows count too, one of them on the rooms card); two pills that don't fit side by side
 (a count over 99) sit at the top and bottom right; the summary covers every row, egress included, grouped as the
 checker groups them, and says the checker's headline and what was checked rather than the district and use.
+
+## Change 20: fields for the house's own facts
+
+Why: on 106 Ithaca Rd as Revit read it, the worker's first cards (a stream within 20 ft, who lives there, the garage's
+cars) said "No Gordium mark is named for this": the architect could only decide them by hand, never set them in Revit.
+
+What changed: seven Project Information marks (`Marks.cs`), each with a tooltip quoting the law it answers, read by
+`ProjectFacts.HouseFacts` and listed by the Setup form (it builds from `Marks.All`): Stream within 20 ft and Distance
+from stream (§325-26), Unrelated people per unit, Owner-occupied and Functional family unit (§325-3B DWELLING,
+ONE-FAMILY, OWNER, FUNCTIONAL FAMILY UNIT), Garage cars and Private garages (the zoning chart's private garage, note 6).
+The worker's cards already name the fields they need (`facts.stream_near_lot`…), so each card now finds its mark and
+opens Project Information; on the house, fix 1 becomes "Set 9 facts on Project Information" (a Project Information fix
+counts its facts by their marks: the stream's card asks two). What is left with no field: the stair nosings fact and
+the "these are all the rooms / openings / doors" lists.
+
+The rules kept: a blank field is not stated, so its rule needs review (never No or 0); a value Gordium can't read (not
+Yes or No, not a whole number, a count under its least, a distance under 0) is said in plain words, not sent, and named
+as not sent in a check sent anyway; the distance is a Feet field saved as typed (19.96 ft is never 20); nothing is
+written without Save. Pinned in `HouseFactFieldsTests` and `ProjectCheckTests` (through the real worker: blank, the
+stream, occupancy and garage rules need review; set, they comply; four cars in one garage fails).
+
+Confirmed in Revit 2027 (2026-11-23, a copy of 106 Ithaca Rd with its lot facts typed and none of these set): Check
+project added the marks and fix 1 read "Set 9 facts on Project Information" with its Open Project Information button;
+in Mark facts, the seven fields sit under "The lot and the house", each tooltip quoting its law; choosing Stream within
+20 ft No, Accessory dwelling unit No, Owner-occupied Yes, Functional family unit No, 0 unrelated people and 2 garage cars
+and pressing Save 6 facts, then Check again, gave What changed: the stream setback, one-family occupancy and private
+garage now comply, and fix 1 became the two lists alone.
+
+Review round 1 (3 confirmed, all fixed and pinned): every number a mark takes now says what it is before it is typed,
+in the Setup form's label ("Distance from stream (ft)", "Garage cars (count)") and in the tooltip's first words ("In
+feet:", "A count:"; `Marks.Unit`), so 200 meant as inches is never saved as 200 ft; an opened Project Information fix
+says "The 6 causes asking 9 facts" (`Fix.MembersWords`), never a second number of facts; and every passage a mark's
+tooltip quotes is the law's words exactly (§325-26 now quoted with its exception), checked against the City's extracted
+text, the rulebooks' quotes and the code decision's cites. Also fixed: What changed's hover now lists every changed
+verdict (`PaneWords.ChangesAll`), where it gave the worker's one line with a different "and N more" count than the pane's.
+
+Review round 2 (2 confirmed, both fixed and pinned): a length mark's tooltip is shown by Revit's own Project
+Information and Type Properties dialogs too, which read a typed number in the project's length units, so it now opens
+"A length, in this project's length units" and never names feet; the Setup form's length field follows the project's
+units the same way (`LengthUnits`, from `Units.GetFormatOptions(SpecTypeId.Length)`): labelled "(mm)" in a millimeters
+project, shown and typed in it, saved in feet so Revit shows the number typed; a project in units Gordium doesn't read
+takes feet and says so beside the field. And every passage a mark quotes is a whole sentence of the law or ends with
+"…" (Distance from stream now quotes §325-26 with its exception too).
+
+Review round 3 (3 confirmed, all fixed and pinned): a length typed in the form is converted as Revit converts it
+(typed / units per foot: 6.096 m is exactly 20 ft, where a feet-per-unit factor gave 19.999999999999996 and failed 20
+ft), and a value typed again is compared in feet, never as the shown text; the definitions that decide an answer are
+quoted whole (OWNER with who holds the property and how, FUNCTIONAL FAMILY UNIT with its criteria and presumptions,
+GARAGE, PRIVATE with its no-business proviso), the "Yes when" words no narrower or broader than the law's, and a quote
+cut short needs a reason listed in the test; and what is said beside a length (its problem, the notice, "sent
+without") is in the project's units.

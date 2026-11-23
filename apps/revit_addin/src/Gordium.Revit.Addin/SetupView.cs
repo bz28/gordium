@@ -166,7 +166,7 @@ internal sealed class SetupView : C.StackPanel
         title.Children.Add(Words(f.Label, Body, semibold: true));
         if (f.Required && !f.IsSet && chosen is null)
             title.Children.Add(Ink(Words("  needed", Caption), PanelTokens.StatusReview));
-        if (chosen is not null && chosen != f.Current)
+        if (_draft.Changes(f))                                         // the one rule Save's count and its writes use
             title.Children.Add(Ink(Words("  not saved yet", Caption), PanelTokens.Accent));
         box.Children.Add(title);
         switch (f.Kind)
@@ -212,10 +212,11 @@ internal sealed class SetupView : C.StackPanel
                 break;
             }
             case FieldKind.Number:
+            case FieldKind.Feet:
             case FieldKind.Text:
             {
-                var text = new C.TextBox { Text = shown ?? "", Margin = new W.Thickness(0, 3, 0, 0), MaxWidth = f.Kind == FieldKind.Number ? 90 : double.PositiveInfinity,
-                                           HorizontalAlignment = f.Kind == FieldKind.Number ? W.HorizontalAlignment.Left : W.HorizontalAlignment.Stretch };
+                var text = new C.TextBox { Text = shown ?? "", Margin = new W.Thickness(0, 3, 0, 0), MaxWidth = f.Kind is FieldKind.Number or FieldKind.Feet ? 90 : double.PositiveInfinity,
+                                           HorizontalAlignment = f.Kind is FieldKind.Number or FieldKind.Feet ? W.HorizontalAlignment.Left : W.HorizontalAlignment.Stretch };
                 W.Automation.AutomationProperties.SetName(text, f.Label);
                 // the draft follows every keystroke, with no redraw (Save's words follow): a click on Save right after
                 // typing writes what was typed; Enter draws the form again (its "not saved yet")

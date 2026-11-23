@@ -16,9 +16,10 @@ public sealed record RevitModel
     /// <summary>Revit's version (<c>Application.VersionNumber</c>), for <c>host.version</c>.</summary>
     public string Version { get; init; } = "";
 
-    /// <summary>The project's length display unit (<c>Units.GetFormatOptions(SpecTypeId.Length).GetUnitTypeId()</c>),
-    /// named for tracing only (<c>host.model_units</c>): Revit's internal unit is the foot whatever this says, so no
-    /// point is ever converted.</summary>
+    /// <summary>The project's length display unit (<c>Units.GetFormatOptions(SpecTypeId.Length).GetUnitTypeId()</c>):
+    /// named in the description (<c>host.model_units</c>), and the unit the Setup form shows, takes and words a length
+    /// mark in (<see cref="LengthUnits"/>), as Revit's own dialogs do. What is read and sent is always feet (Revit's
+    /// internal unit), so no point read from the model is converted.</summary>
     public string DisplayUnits { get; init; } = "Feet";
 
     /// <summary>How near two curve ends must be to count as joined (<c>Application.VertexTolerance</c>, feet).</summary>
