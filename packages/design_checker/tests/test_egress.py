@@ -445,32 +445,34 @@ def test_a_file_the_validation_read_changing_works_it_out_again(validations, sha
     assert len(validations) > 2, f"{shared} changed, but nothing was worked out again"
 
 
-def test_a_file_appearing_clears_the_kept_validation_even_where_exists_skips_os_stat(validations, monkeypatch):
+def test_a_file_appearing_clears_the_kept_validation_even_where_exists_skips_os_stat(validations, monkeypatch,
+                                                                                    tmp_path):
     """Review round 9: on Python 3.13+ on Windows, Path.exists and is_file go through os.path (no os.stat), so a file
     appearing later (a PDF copy put in 1_source_documents) was never seen; the snapshot walks the folders, so it is."""
     import os
     monkeypatch.setattr(Path, "exists", lambda self, **k: os.path.exists(self))
     monkeypatch.setattr(Path, "is_file", lambda self, **k: os.path.isfile(self))
     monkeypatch.setattr(Path, "is_dir", lambda self, **k: os.path.isdir(self))
+    # a root of its own beside the real ones (a test never writes into the shared regulations: another test checking
+    # at the same time, on another worker, would read it), laid out as a state folder's sources are
+    sources = tmp_path / "new_york_state" / "1_source_documents"
+    sources.mkdir(parents=True)
+    real = egress._roots
+    monkeypatch.setattr(egress, "_roots", lambda folder: real(folder) + [tmp_path])
     egress.laws(ITHACA)
-    copy = STATE / "1_source_documents" / "gov.ny.residential.2025.pdf"
-    assert not copy.exists()
-    copy.write_bytes(b"%PDF-1.7 a copy")
-    try:
-        egress.laws(ITHACA)
-    finally:
-        copy.unlink()
+    (sources / "gov.ny.residential.2025.pdf").write_bytes(b"%PDF-1.7 a copy")
+    egress.laws(ITHACA)
     assert len(validations) > 2
 
 
-def test_a_new_file_anywhere_under_a_root_clears_the_kept_validation(validations):
+def test_a_new_file_anywhere_under_a_root_clears_the_kept_validation(validations, monkeypatch, tmp_path):
+    deep = tmp_path / "jurisdictions" / "new_york" / "a_place"
+    deep.mkdir(parents=True)
+    real = egress._roots
+    monkeypatch.setattr(egress, "_roots", lambda folder: real(folder) + [tmp_path])
     egress.laws(ITHACA)
-    new = REPO / "regulations" / "jurisdictions" / "new_york" / "_a_new_file.tmp"
-    new.write_text("x", encoding="utf-8")
-    try:
-        egress.laws(ITHACA)
-    finally:
-        new.unlink()
+    (deep / "_a_new_file.tmp").write_text("x", encoding="utf-8")
+    egress.laws(ITHACA)
     assert len(validations) > 2
 
 
