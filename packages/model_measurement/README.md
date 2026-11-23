@@ -163,8 +163,8 @@ Every reason the code gives today comes from the table:
   the lot facts are still read and checked);
   "every lot line is on a street: which yards are front, side and rear is an open question for the architects".
 - **Corner lots** (§325-19C): "say whether this is a corner lot (two streets meet at it, §325-19C): enter corner
-  lot yes or no"; "a corner lot, but the street lot lines given are all on one street: pick the lot lines on both
-  streets"; "which street lot lines are on which street isn't recorded: pick the street side so Gordium knows which
+  lot yes or no"; "a corner lot outside the residential districts: §325-19C gives two front yards only to corner lots in residential districts, so which street yard is a front yard and which a side yard is for a person to judge" (a B-district lot: no yard is measured, needs review); "a corner lot, but the street lot
+  lines given are all on one street: pick the lot lines on both streets"; "which street lot lines are on which street isn't recorded: pick the street side so Gordium knows which
   lines are which street (a corner lot's lot width is the frontage on one street, §325-8A col. 7)"; "the street lot
   lines recorded on one street aren't next to each other, or one lot line's pieces are recorded on two streets: pick
   the street side again, one click on each street"; "the address street given isn't one run of the street lot lines

@@ -12,8 +12,8 @@ from host_source import host_doc, host_script
 PATHS = scenarios.paths()
 
 
-def test_there_are_twelve_scenarios_each_with_working_and_a_citation():
-    assert len(PATHS) == 12        # ten R-1b designs, one R-1a, one R-3a
+def test_there_are_fifteen_scenarios_each_with_working_and_a_citation():
+    assert len(PATHS) == 15        # ten R-1b designs, one R-1a, one R-3a, two B-2a, one B-1b
     for p in PATHS:
         sc = scenarios.load(p)
         for block in [sc["expected"], (sc.get("then") or {}).get("expected") or {}]:

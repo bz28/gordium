@@ -131,8 +131,8 @@ def _own_title(item: dict) -> str:
     name, reason = item.get("name") or item.get("id") or "", (item.get("reason") or "").strip()
     if not reason:
         return name
-    if reason.lower().startswith(name.lower()):
-        return reason
+    if reason.lower().startswith((name.lower(), "the " + name.lower())):
+        return reason                                 # "The interior drawing: …", never "Interior drawing: The interior…"
     # the reason opening with the name's own last words ("Ramps: not applicable" and "Not applicable: the description
     # says…"): said once ("Ramps: not applicable: the description says…"), never "not applicable: Not applicable"
     tail = name.rsplit(": ", 1)[-1].strip() if ": " in name else ""
@@ -349,7 +349,7 @@ CARD_ORDER = {"fix_model": 0, "mark": 1, "measure_by_hand": 2, "decide": 3}   # 
 def cause_cards(items: list[dict]) -> list[dict]:
     """The "Fix these first" cards (docs/revit/ui_design_pass.md section 2.3): the needs-review items grouped by their
     first cause (panel_data's `causes`, the one to act on first), each card {key, kind, words, elements, items,
-    rules}: one job however many rows it clears. Words and ids only: every item keeps its status, every item with a
+    rules, field?, fields?}: one job however many rows it clears. Words and ids only: every item keeps its status, every item with a
     cause is on exactly one card, an item with none on none. Cards in the order the architect can act on them (the
     model and its marks first, then what is measured by hand, then what a person decides), then by how many rows each
     clears, then as first met."""
@@ -364,6 +364,9 @@ def cause_cards(items: list[dict]) -> list[dict]:
                             "items": [], "rules": 0}
             if c.get("rooms"):
                 at[c["key"]]["rooms"] = list(c["rooms"])
+            for k in ("field", "fields"):          # the description field a mark needs (panel_data's note)
+                if c.get(k):
+                    at[c["key"]][k] = list(c[k]) if isinstance(c[k], list) else c[k]
             cards.append(at[c["key"]])
         card = at[c["key"]]
         card["items"].append(i["id"])

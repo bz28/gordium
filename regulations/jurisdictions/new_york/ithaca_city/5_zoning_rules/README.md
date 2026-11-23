@@ -27,6 +27,13 @@ Rules stay marked **draft**: architect approval is deferred for now (decided 202
   and limits on primary buildings (chart p.2 notes 3 and 5). Each chart number is checked against the chart
   reader's cells for its own column (`packages/document_extraction/tests/test_r1b_matches_chart.py`). A hand
   rulebook is the one the checker uses for its zone (`rulebook.rulebook_for`).
+- `B-1a.yaml`, `B-1b.yaml`, `B-2a.yaml`, `B-2d.yaml`, `B-4.yaml`, `B-5.yaml`: the commercial districts whose chart
+  follows the residential pattern (chart p.4 uses, p.5 dimensions, p.15 parking), drafted by Claude by hand from the
+  City's documents, 2026-11-22, laid out alike by a small script of Claude's own. Each chart number is checked
+  against the chart reader's cells for its own column (`packages/document_extraction/tests/test_b_districts_match_chart.py`).
+  Not answer keys for the drafting script (it drafts the residential pages only). What is covered and what isn't:
+  `6_coverage_report/commercial_districts.md`; the other non-residential districts, for later:
+  `docs/decisions/2026-11-22_commercial_districts.md`.
 - `drafted/`: every residential district drafted by the drafting script (`packages/rule_drafting`):
   `drafted/<district>.yaml` and `drafted/general.yaml` (rules for every district). Chart numbers in these
   come only from the chart reader's cells. The script's own records are in `drafted/records/`: what it

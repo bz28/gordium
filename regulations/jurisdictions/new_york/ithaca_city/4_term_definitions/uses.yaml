@@ -1,7 +1,8 @@
-# Primary uses in the City of Ithaca's residential districts, as named in the zoning charts (page 2).
-# These ids are the only values the `use` measurement may take in residential rules.
+# Primary uses in the City of Ithaca's residential (chart p.2) and commercial (chart p.4) districts, as the zoning
+# charts name them. These ids are the only values the `use` measurement may take in any rule.
 # Each quote is the city's exact row label (verified by `python -m rule_format`).
-# Accessory uses (garages, ADUs, home occupations...) and non-residential districts' uses: later.
+# Accessory uses (garages, ADUs, home occupations...): later. The commercial districts' uses (chart p.4) follow the
+# residential ones; a name the two charts both use ("Church or related building") is one use.
 
 one_family_detached:
   name: "One-family dwelling, detached"
@@ -200,5 +201,178 @@ bed_and_breakfast_inn:
       page: 2
       lines: [28, 28]
       quote: "Bed-and-breakfast inn - - - - -"
+  drafted_by: claude
+  status: draft
+
+# The commercial districts' primary uses (chart p.4, the B- and CBD columns) that the residential chart (p.2)
+# doesn't list. Added 2026-11-22 with the B-district rulebooks; a use both charts list keeps its p.2 entry above.
+
+adult_day_care_facility:
+  name: "Adult day care facility"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [22, 22]
+      quote: "Adult day care facility"
+  drafted_by: claude
+  status: draft
+
+funeral_home:
+  name: "Funeral home or mortuary"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [27, 27]
+      quote: "Funeral home or mortuary"
+  drafted_by: claude
+  status: draft
+
+business_or_professional_office:
+  name: "Business or professional office"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [28, 28]
+      quote: "Business or professional office"
+  drafted_by: claude
+  status: draft
+
+bank:
+  name: "Bank or monetary institution"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [29, 29]
+      quote: "Bank or monetary institution"
+  drafted_by: claude
+  status: draft
+
+office_of_government:
+  name: "Office of government"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [30, 30]
+      quote: "Office of government"
+  drafted_by: claude
+  status: draft
+
+retail_store_or_service_commercial:
+  name: "Retail store or service commercial facility"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [32, 32]
+      quote: "Retail store or service commercial facility"
+  drafted_by: claude
+  status: draft
+
+restaurant_or_tavern:
+  name: "Restaurant, fast food establishment, tavern"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [33, 33]
+      quote: "Restaurant, fast food establishment, tavern"
+  drafted_by: claude
+  status: draft
+
+club_or_lodge:
+  name: "Club, lodge, or private social center"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [34, 34]
+      quote: "Club, lodge, or private social center"
+  drafted_by: claude
+  status: draft
+
+light_hand_fabrication:
+  name: "Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [35, 35]
+      quote: "Confectionery, millinery, dressmaking or other activities"
+  drafted_by: claude
+  status: draft
+
+place_of_public_assembly:
+  name: "Theater, bowling alley, auditorium, or other similar place of public assembly"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [38, 38]
+      quote: "Theater, bowling alley, auditorium, or other similar place of"
+  drafted_by: claude
+  status: draft
+
+hotel_motel:
+  name: "Hotel, motel"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [41, 41]
+      quote: "Hotel, motel"
+  drafted_by: claude
+  status: draft
+
+urban_beverage_producer:
+  name: "Urban beverage producer"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [42, 42]
+      quote: "Urban beverage producer"
+  drafted_by: claude
+  status: draft
+
+parking_garage:
+  name: "Parking garage"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [43, 43]
+      quote: "Parking garage"
+  drafted_by: claude
+  status: draft
+
+gasoline_station:
+  name: "Gasoline station"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [44, 44]
+      quote: "Gasoline station"
+  drafted_by: claude
+  status: draft
+
+motor_vehicle_sales_and_service:
+  name: "Motor vehicle sales and service"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [45, 45]
+      quote: "Motor vehicle sales and service"
+  drafted_by: claude
+  status: draft
+
+service_shop:
+  name: "Printing, heating, welding, air conditioning, plumbing, or similar shop"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [46, 46]
+      quote: "Printing, heating, welding, air conditioning, plumbing, or"
+  drafted_by: claude
+  status: draft
+
+redemption_center:
+  name: "Redemption center"
+  sources:
+    - file: zoning_charts_2026-04.pdf
+      page: 4
+      lines: [49, 49]
+      quote: "Redemption center - - SP SP SP SP SP SP"
   drafted_by: claude
   status: draft

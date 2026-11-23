@@ -92,7 +92,7 @@ def test_no_outline_no_diagonal():
     del d["story_outlines"]
     with pytest.raises(Stop) as stop:
         straight.diagonal(story(d))
-    assert stop.value.key == "outline_needed" and "story_outlines" in stop.value.reason
+    assert stop.value.key == "outline_needed" and "story outlines" in stop.value.reason
 
 
 # --- test 9: storage on the line -----------------------------------------------------------------------------------

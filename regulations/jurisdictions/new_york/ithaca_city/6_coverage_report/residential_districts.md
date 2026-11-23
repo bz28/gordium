@@ -286,7 +286,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 | R5 | §325-3B:dwelling_two_family: Who may occupy each unit of a two-family dwelling | R-1a, R-1b | not applicable: A two-family dwelling isn't permitted in this district (chart p.2, "-"), whatever this definition's R-1 sentence says. | “Two-family dwelling [fn4] - - • • • • • • •” (zoning chart p.2 l.13; the district's own cell in row “Two-family dwelling [fn4]” is “-”) |
 | R6 | §325-3B:dwelling_two_family: Who may occupy each unit of a two-family dwelling | R-3a, R-3aa, R-3b, RU | not applicable: Its occupancy limits name only R-1/CR-1 and R-2/CR-2 zones. (occupancy_two_family flags a unit with more than one unrelated person here, under the multiple-dwelling definitions instead.) | “In R-2 and CR-2 Zones, each unit of a two-family dwelling may be occupied” (Ch. 325 p.9 l.8–9) |
 | R7 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | R-1a, R-1b, R-2a, R-2b | in the rulebook by mapping: use. Each house type the architect states (one-family, two-family, ...) is defined by its dwelling units. Research §6 (docs/research/2026-10-20_architect_questions.md) reads the definition as a category, not a limit. | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
-| R8 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | R-3a, R-3b | flag (needs review) by mapping: use. Each house type the architect states is defined by its dwelling units (research §6, a category); R-3a's and R-3b's use entry is a flag for the special-permit uses. | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
+| R8 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | R-3a, R-3b | flag (needs review) by mapping: use. Each house type the architect states is defined by its dwelling units (research §6, a category); R-3a's and R-3b's use rule sends the special-permit uses to review. | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
 | R9 | §325-3B:dwelling_unit: What a dwelling unit is, as the rules count units and house types | R-3aa, RU | in the rulebook by mapping: lot_area_multiple_family, lot_area_one_family_attached. These lot sizes grow with the dwelling units the architect states (research §6, a category). | “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10) |
 | R10 | §325-3B:functional_family_unit: When unrelated people count as a functional family unit | all 9 districts | flag: occupancy_one_family | “the following criteria must be present” (Ch. 325 p.10 l.15) |
 | R11 | §325-3B:green_space: Green space, at least 75% softscape, where a minimum applies | R-1a, R-1b, R-2a, R-2b, R-2c, R-3a, R-3aa, R-3b | not applicable: The residential chart sets a green-space minimum only for RU (chart p.3, note 13). | “Where a minimum green space requirement applies” (Ch. 325 p.12 l.4) |
@@ -496,7 +496,7 @@ Code can't prove that the law's words support a decision; it proves only that th
 - **What a dwelling unit is, as the rules count units and house types**
   - R-1a, R-1b, R-2a, R-2b: in the rulebook: `use` (mapped). Gordium's mapping, not a citation: Each house type the architect states (one-family, two-family, ...) is defined by its dwelling units. Research §6 (docs/research/2026-10-20_architect_questions.md) reads the definition as a category, not a limit.
   - R-2c: in the rulebook: `lot_area_one_family_attached` (cited), `lot_area_one_family_semi_detached` (cited), `lot_area_two_family` (cited)
-  - R-3a, R-3b: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: Each house type the architect states is defined by its dwelling units (research §6, a category); R-3a's and R-3b's use entry is a flag for the special-permit uses. The law: “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10).
+  - R-3a, R-3b: flag (needs review): `use` (mapped). Gordium's mapping, not a citation: Each house type the architect states is defined by its dwelling units (research §6, a category); R-3a's and R-3b's use rule sends the special-permit uses to review. The law: “One or more rooms designed or used for living quarters by one household” (Ch. 325 p.9 l.10).
   - R-3aa, RU: in the rulebook: `lot_area_one_family_attached` (mapped), `lot_area_multiple_family` (mapped). Gordium's mapping, not a citation: These lot sizes grow with the dwelling units the architect states (research §6, a category).
 - **Each unit has its own entrance and living, cooking, sanitary and sleeping facilities**
   - R-1a, R-1b, R-2a, R-2b, R-3a, R-3aa, R-3b, RU: **MISSING** (low): Nothing checks that each unit has what the definition requires (its own entrance; the kitchen, sanitary and sleeping facilities); a massing model shows no rooms. Research §6 (docs/research/2026-10-20_architect_questions.md) reads it as a category the stated house type carries, so a design is only as right as that statement.
@@ -1627,11 +1627,11 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `R-2c.adu_detached_size` | rule | §325-3B:accessory_dwelling_unit_detached, §325-28C | accessory_dwelling_unit (stated), adu_detached (stated), adu_existing_building (stated), adu_footprint (model), adu_height (model), adu_stories (model) | **none** |
 | `R-2c.adu_detached_setbacks` | rule | §325-3B:accessory_dwelling_unit_detached, §325-28C | accessory_dwelling_unit (stated), adu_detached (stated), adu_existing_building (stated), adu_rear_yard (model), adu_side_yard (model), use (stated) | **none** |
 
-### R-3a: 34 rules, 10 flags; 8 checked on a model
+### R-3a: 35 rules, 9 flags; 8 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-3a.use` | flag | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
+| `R-3a.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
 | `R-3a.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-3a.lot_area_one_family_semi_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-3a.lot_area_two_family` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | scenario 12 |
@@ -1725,11 +1725,11 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `R-3aa.adu_detached_size` | rule | §325-3B:accessory_dwelling_unit_detached, §325-28C | accessory_dwelling_unit (stated), adu_detached (stated), adu_existing_building (stated), adu_footprint (model), adu_height (model), adu_stories (model) | **none** |
 | `R-3aa.adu_detached_setbacks` | rule | §325-3B:accessory_dwelling_unit_detached, §325-28C | accessory_dwelling_unit (stated), adu_detached (stated), adu_existing_building (stated), adu_rear_yard (model), adu_side_yard (model) | **none** |
 
-### R-3b: 34 rules, 10 flags; 0 checked on a model
+### R-3b: 35 rules, 9 flags; 0 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `R-3b.use` | flag | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
+| `R-3b.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
 | `R-3b.lot_area_one_family_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-3b.lot_area_one_family_semi_detached` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |
 | `R-3b.lot_area_two_family` | rule | §325-3B:lot (via definition) | lot_area (model), use (stated) | **none** |

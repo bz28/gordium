@@ -14,7 +14,7 @@ from shapely.geometry import Polygon, box
 from shapely.ops import transform, unary_union
 
 from model_measurement.interior.geometry import Surface, least_gap, shapes
-from model_measurement.interior.read import tidy
+from model_measurement.interior.read import tidy, yes_no
 from model_measurement.interior.stops import Stop
 
 LEVEL = 1 / 16          # in: a nosing's ends may differ this much in height, or in position along the run
@@ -151,7 +151,7 @@ def side_lines(st: dict, flight: Flight, reader) -> dict:
     start, end = flight.span()
     sides = st.get("sides")
     if not isinstance(sides, dict):
-        raise Stop("missing", what="the stair's sides (`sides`: left and right)")
+        raise Stop("missing", what="the stair's sides (left and right)")
     out = {}
     for side in ("left", "right"):
         given = sides.get(side)
@@ -200,7 +200,7 @@ def widths(st: dict, flight: Flight, reader) -> tuple[float, float | None, int |
     handrails, why = {"left": [], "right": []}, None
     given = st.get("handrails")
     if not isinstance(given, list):
-        why = Stop("missing", what="the stair's handrails (`handrails`: a list, empty for none)").reason
+        why = Stop("missing", what="the stair's handrails (an empty list for none)").reason
     else:
         for n, h in enumerate(given, 1):
             if not isinstance(h, dict):
@@ -257,7 +257,7 @@ def headroom(st: dict, flight: Flight, reader) -> float:
     width from its first nosing to its top one (R318.7.2)."""
     given = st.get("overhead")
     if given is None:
-        raise Stop("missing", what="what is above the flight (`overhead`)")
+        raise Stop("missing", what="what is above the flight")
     if not isinstance(given, list):
         raise Stop("not_a_list", key="overhead")
     if not given:
@@ -314,8 +314,13 @@ def _spiral(st: dict, not_straight: str | None, measures: dict, stopped: dict) -
     closed circular form (a flight that isn't measured straight may be any curved stair), and true would make the
     ordinary R318.7 rules not applicable (review round 1: a false-pass path for a curved stair). Otherwise, or not
     given, it is not measured (its rules need review)."""
-    said = st.get("spiral")
-    if not isinstance(said, bool):
+    try:
+        said = yes_no(st, "spiral", "the flight", "it is a spiral stairway", required=False)
+    except Stop as s:
+        said = s
+    if isinstance(said, Stop):
+        stopped["stair_spiral"] = said.reason
+    elif said is None:
         stopped["stair_spiral"] = Stop("spiral_not_said").reason
     elif said is False and not_straight is not None:
         stopped["stair_spiral"] = Stop("spiral_not_straight", reason=not_straight).reason

@@ -2616,6 +2616,11 @@ def _lot_lines(lot: Lot, facts: dict):
     streets = set(lot.street)
     basis, question = {"front": [], "side": [], "rear": [], "depth": []}, [("which lot lines count as side and rear lot lines is an open question for the "
                             "architects (lot_depth)")]
+    if facts.get("corner_lot") and not str(facts.get("zone") or "").upper().startswith(("R-", "RU")):
+        # §325-19C gives a corner lot two front yards "in residential districts" only: in a business district
+        # (B-1a ... B-5) which street yard is a front yard and which a side yard isn't settled by the law, so no yard is
+        # measured (needs review), never a street yard passed as a front yard that a side yard's minimum would fail
+        return stop("corner_outside_residential")
     if facts.get("corner_lot"):
         two = law.finding(facts, "front_yard", "corner_lot_two_front_yards")
         one = law.finding(facts, "side_yard", "corner_lot_side_yard_column_13")
