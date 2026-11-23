@@ -1337,56 +1337,56 @@ Code can't prove that the law's words support a decision; it proves only that th
 | `CBD-50.active_street_level_use` | flag | §325-8D | — | **none** |
 | `CBD-50.historic_review` | flag | §325-8D | — | **none** |
 
-### CBD-60: 13 rules, 7 flags; 0 checked on a model
+### CBD-60: 13 rules, 7 flags; 10 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `CBD-60.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
+| `CBD-60.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | scenario 16, scenario 17 |
 | `CBD-60.lot_area_hotel_motel` | rule | §325-3B:lot (via definition), §325-8A, §325-22A | lot_area (model), lot_width (model), use (stated) | **none** |
-| `CBD-60.lot_width` | rule | §325-8A | lot_width (model), use (stated) | **none** |
-| `CBD-60.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A, §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | **none** |
-| `CBD-60.min_stories` | rule | §325-3B:building_area (via definition), §325-3B:story (via definition), §325-8A (via definition), §325-16G | building_area (model), stories (model or stated) | **none** |
-| `CBD-60.min_height` | rule | §325-3B:building_area (via definition), §325-3B:height_of_building (via definition), §325-8A | building_area (model), building_height (model) | **none** |
-| `CBD-60.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A | building_area (model), lot_area (model) | **none** |
-| `CBD-60.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | rear_yard (model) | **none** |
+| `CBD-60.lot_width` | rule | §325-8A | lot_width (model), use (stated) | scenario 16 |
+| `CBD-60.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A, §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | scenario 16, scenario 17 |
+| `CBD-60.min_stories` | rule | §325-3B:building_area (via definition), §325-3B:story (via definition), §325-8A (via definition), §325-16G | building_area (model), stories (model or stated) | scenario 16, scenario 17 |
+| `CBD-60.min_height` | rule | §325-3B:building_area (via definition), §325-3B:height_of_building (via definition), §325-8A | building_area (model), building_height (model) | scenario 16, scenario 17 |
+| `CBD-60.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A | building_area (model), lot_area (model) | scenario 16, scenario 17 |
+| `CBD-60.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | rear_yard (model) | scenario 16, scenario 17 |
 | `CBD-60.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-16C, §325-18B | building_height (model), front_yard_eaves (model), rear_yard_eaves (model), side_yard_larger_eaves (model), side_yard_smaller_eaves (model) | **none** |
 | `CBD-60.accessory_buildings` | rule | §325-25, §325-25A, §325-25C | accessory_buildings (model), accessory_distances_apply (model), accessory_rear_yard (model), accessory_side_yard (model) | **none** |
-| `CBD-60.transition_yards` | flag | §325-19A, §325-19B | — | **none** |
+| `CBD-60.transition_yards` | flag | §325-19A, §325-19B | — | scenario 16 |
 | `CBD-60.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | **none** |
 | `CBD-60.yards_not_shared` | flag | §325-3B:lot_building, §325-7B | primary_buildings (stated) | **none** |
 | `CBD-60.occupancy_one_family` | rule | §325-3B:dwelling_one_family, §325-3B:family, §325-3B:functional_family_unit, §325-8B | functional_family_unit (stated), unrelated_persons_with_children (stated), use (stated) | **none** |
 | `CBD-60.occupancy_two_family` | flag | §325-3B:dwelling_multiple_or_multiple_residence, §325-3B:dwelling_two_family, §325-3B:family | unrelated_persons (stated), use (stated) | **none** |
 | `CBD-60.home_occupation_size` | rule | §325-3B:home_occupation | home_occupation (stated), home_occupation_area (stated), home_occupation_unit_area (stated), use (stated) | **none** |
 | `CBD-60.accessory_dwelling_unit` | flag | §325-3B:accessory_dwelling_unit | accessory_dwelling_unit (stated) | **none** |
-| `CBD-60.parking` | flag | §325-8A, §325-20D | — | **none** |
+| `CBD-60.parking` | flag | §325-8A, §325-20D | — | scenario 16 |
 | `CBD-60.motel_standards` | flag | §325-22B, §325-22D, §325-22F, §325-22H | use (stated) | **none** |
-| `CBD-60.active_street_level_use` | flag | §325-8D | — | **none** |
+| `CBD-60.active_street_level_use` | flag | §325-8D | — | scenario 16, scenario 17 |
 
-### CBD-85: 13 rules, 8 flags; 0 checked on a model
+### CBD-85: 13 rules, 8 flags; 9 checked on a model
 
 | Rule | Kind | Ch. 325 pieces it cites | Measures | Tested on a model |
 |---|---|---|---|---|
-| `CBD-85.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | **none** |
+| `CBD-85.use` | rule | §325-8A, §325-8B, §325-9B | use (stated) | scenario 18 |
 | `CBD-85.lot_area_hotel_motel` | rule | §325-3B:lot (via definition), §325-8A, §325-22A | lot_area (model), lot_width (model), use (stated) | **none** |
 | `CBD-85.lot_width` | rule | §325-8A | lot_width (model), use (stated) | **none** |
-| `CBD-85.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A, §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | **none** |
-| `CBD-85.min_stories` | rule | §325-3B:building_area (via definition), §325-3B:story (via definition), §325-8A (via definition), §325-16G | building_area (model), stories (model or stated) | **none** |
+| `CBD-85.height` | rule | §325-3B:height_of_building (via definition), §325-3B:front_yard (via definition), §325-3B:side_yard (via definition), §325-3B:rear_yard (via definition), §325-8A, §325-16C, §325-18A (via definition), §325-18B (via definition) | building_height (model), front_yard (model), rear_yard (model), side_yard_larger (model), side_yard_smaller (model) | scenario 18 |
+| `CBD-85.min_stories` | rule | §325-3B:building_area (via definition), §325-3B:story (via definition), §325-8A (via definition), §325-16G | building_area (model), stories (model or stated) | scenario 18 |
 | `CBD-85.min_height` | rule | §325-3B:building_area (via definition), §325-3B:height_of_building (via definition), §325-8A | building_area (model), building_height (model) | **none** |
-| `CBD-85.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A | building_area (model), lot_area (model) | **none** |
-| `CBD-85.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | rear_yard (model) | **none** |
+| `CBD-85.lot_coverage` | rule | §325-3B:building_area (via definition), §325-3B:lot (via definition), §325-8A | building_area (model), lot_area (model) | scenario 18 |
+| `CBD-85.rear_yard` | rule | §325-3B:rear_yard (via definition), §325-8A, §325-18A (via definition), §325-18B (via definition) | rear_yard (model) | scenario 18 |
 | `CBD-85.yard_projections` | rule | §325-3B:height_of_building (via definition), §325-16C, §325-18B | building_height (model), front_yard_eaves (model), rear_yard_eaves (model), side_yard_larger_eaves (model), side_yard_smaller_eaves (model) | **none** |
 | `CBD-85.accessory_buildings` | rule | §325-25, §325-25A, §325-25C | accessory_buildings (model), accessory_distances_apply (model), accessory_rear_yard (model), accessory_side_yard (model) | **none** |
-| `CBD-85.transition_yards` | flag | §325-19A, §325-19B | — | **none** |
+| `CBD-85.transition_yards` | flag | §325-19A, §325-19B | — | scenario 18 |
 | `CBD-85.stream_setback` | rule | §325-3B:structure, §325-26 | stream_distance (stated), stream_near_lot (stated) | **none** |
 | `CBD-85.yards_not_shared` | flag | §325-3B:lot_building, §325-7B | primary_buildings (stated) | **none** |
 | `CBD-85.occupancy_one_family` | rule | §325-3B:dwelling_one_family, §325-3B:family, §325-3B:functional_family_unit, §325-8B | functional_family_unit (stated), unrelated_persons_with_children (stated), use (stated) | **none** |
 | `CBD-85.occupancy_two_family` | flag | §325-3B:dwelling_multiple_or_multiple_residence, §325-3B:dwelling_two_family, §325-3B:family | unrelated_persons (stated), use (stated) | **none** |
 | `CBD-85.home_occupation_size` | rule | §325-3B:home_occupation | home_occupation (stated), home_occupation_area (stated), home_occupation_unit_area (stated), use (stated) | **none** |
 | `CBD-85.accessory_dwelling_unit` | flag | §325-3B:accessory_dwelling_unit | accessory_dwelling_unit (stated) | **none** |
-| `CBD-85.parking` | flag | §325-8A, §325-20D | — | **none** |
+| `CBD-85.parking` | flag | §325-8A, §325-20D | — | scenario 18 |
 | `CBD-85.motel_standards` | flag | §325-22B, §325-22D, §325-22F, §325-22H | use (stated) | **none** |
-| `CBD-85.active_street_level_use` | flag | §325-8D | — | **none** |
-| `CBD-85.green_street_stepback` | flag | §325-8D | — | **none** |
+| `CBD-85.active_street_level_use` | flag | §325-8D | — | scenario 18 |
+| `CBD-85.green_street_stepback` | flag | §325-8D | — | scenario 18 |
 
 ### CBD-100: 13 rules, 7 flags; 0 checked on a model
 
