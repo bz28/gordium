@@ -15,7 +15,7 @@ docs/interior/interior_measurements.md.
 """
 
 from model_measurement.interior.read import choice, tidy
-from model_measurement.interior.stops import Stop
+from model_measurement.interior.stops import Stop, said
 
 OPERATIONS = ("side_hinged", "sliding", "folding", "pocket", "other")
 # whether a door is side-hinged, read straight from its operation (R318.2: "a side-hinged door"); `other` doesn't say
@@ -45,7 +45,7 @@ def clear_width(d: dict, reader) -> float:
     side = choice(d.get("hinge_side"), ("left", "right"), "the door's hinge side")
     stops = d.get("stops")
     if not isinstance(stops, dict):
-        raise Stop("missing", what="the door's stops (`stops`: hinge, latch)")
+        raise Stop("missing", what="the door's stops (hinge side and latch side)")
     hinge = reader.length(stops.get("hinge"), "the hinge-side stop")
     latch = reader.length(stops.get("latch"), "the latch-side stop")
     if (latch <= hinge) if side == "left" else (latch >= hinge):
@@ -115,7 +115,7 @@ def stated_clear(d: dict, reader):
         return None
     if not isinstance(s, dict):
         raise Stop("door_stated_shape")
-    unknown = sorted(str(k) for k in s if k not in STATED_KEYS)
+    unknown = sorted(str(said(k)) for k in s if k not in STATED_KEYS)
     if unknown:
         raise Stop("door_stated_keys", keys=", ".join(unknown))
     source = s.get("source")

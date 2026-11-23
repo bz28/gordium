@@ -46,9 +46,9 @@ def drawn_top(g: dict, reader, walk: float, top: float) -> float:
     top only if the members reach it all along."""
     extent, members = g.get("extent"), g.get("members")
     if not isinstance(extent, dict):
-        raise Stop("missing", what="the guard's extent (`extent`: left, right)")
+        raise Stop("missing", what="the guard's extent (its left and right ends)")
     if not isinstance(members, list):
-        raise Stop("missing", what="the guard's members (`members`: rails, balusters, posts, panels)")
+        raise Stop("missing", what="the guard's members (rails, balusters, posts, panels)")
     left = reader.length(extent.get("left"), "the guard's left end")
     right = reader.length(extent.get("right"), "the guard's right end")
     if right <= left:
@@ -69,14 +69,14 @@ def largest_sphere(g: dict, reader, walk: float, top: float) -> float:
     The guard's ends (`extent`) stand against something solid (a wall, a newel post); the walking surface is solid."""
     extent = g.get("extent")
     if not isinstance(extent, dict):
-        raise Stop("missing", what="the guard's extent (`extent`: left, right)")
+        raise Stop("missing", what="the guard's extent (its left and right ends)")
     left = reader.length(extent.get("left"), "the guard's left end")
     right = reader.length(extent.get("right"), "the guard's right end")
     if right <= left:
         raise Stop("not_positive", what="the guard's length", value=tidy(right - left))
     members = g.get("members")
     if not isinstance(members, list):
-        raise Stop("missing", what="the guard's members (`members`: rails, balusters, posts, panels)")
+        raise Stop("missing", what="the guard's members (rails, balusters, posts, panels)")
     blocks = []
     for n, m in enumerate(members, 1):
         l, r, b, t = reader.rectangle(m, f"guard member {n}")

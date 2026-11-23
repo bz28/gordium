@@ -130,7 +130,7 @@ def test_a_room_with_no_route_is_a_cause_naming_its_room_by_id(maine):
         first = i["causes"][0]
         assert first["kind"] == panel_data.FIX_MODEL and first["elements"] == ["s2"] and first["key"] == "rooms:s2"
         assert first["words"] == "1 room has no route to an exit: s2"
-        assert first["rooms"][0]["why"].startswith("the point")
+        assert first["rooms"][0]["why"].startswith("the room s2 has no route")     # by its name, never a point
     cards = grouping.cause_cards(rows)
     assert len(cards) == 1 and cards[0]["items"] == [i["id"] for i in rows] and cards[0]["elements"] == ["s2"]
 
@@ -163,7 +163,7 @@ def test_a_fact_the_project_states_is_a_mark(maine):
     got = panel_data.causes(rule, row, {}, None, {}, {}, {"day_care_existing": True}, maine[1], ())
     assert got == [{"kind": "mark", "key": "fact:existing_change_of_use",
                     "words": "existing change of use: not stated for the project", "elements": [],
-                    "measure": "existing_change_of_use"}]
+                    "measure": "existing_change_of_use", "field": "facts.existing_change_of_use"}]
 
 
 def test_every_row_in_review_has_a_cause_and_no_other_row_has_one(maine):
@@ -355,7 +355,8 @@ def test_a_zoning_row_waiting_on_facts_names_them_in_the_architects_words():
     """The seed session's ADU row: its card says the facts as the "Enter …" button does, never the facts' names."""
     got = present.zoning_causes({"needs": ["accessory_dwelling_unit"], "status": present.REVIEW})
     assert got == [{"kind": "mark", "key": "facts:accessory_dwelling_unit", "words": "Enter whether an ADU is on the lot",
-                    "elements": [], "needs": ["accessory_dwelling_unit"]}]
+                    "elements": [], "needs": ["accessory_dwelling_unit"], "field": "facts.accessory_dwelling_unit",
+                    "fields": ["facts.accessory_dwelling_unit"]}]
 
 
 # ---- review round 1 (2026-11-22) -----------------------------------------------------------------------------------
@@ -412,11 +413,18 @@ def test_every_law_row_in_review_is_on_one_card():
         assert set(on_cards) == review and len(on_cards) == len(set(on_cards)), g["key"]
 
 
+def _interior(stop, **blanks):
+    from model_measurement.interior.stops import Stop
+    return "The interior drawing: " + Stop(stop, **blanks).reason
+
+
 @pytest.mark.parametrize("item,kind", [
-    ({"id": "egress.interior#1", "law_short": "Egress", "reason": "The interior drawing: opening W1: say whether it is "
-      "an emergency escape and rescue opening (`escape`: true or false)", "objects": ["w1"]}, "mark"),
-    ({"id": "egress.interior#2", "law_short": "Egress",
-      "reason": "The interior drawing: the stairs weren't read (no `stairs` in the description)"}, "fix_model"),
+    ({"id": "egress.interior#1", "law_short": "Egress", "objects": ["w1"],
+      "reason": _interior("flag_missing", what="opening W1",
+                          question="it is an emergency escape and rescue opening")}, "mark"),
+    # the stairs the drawing doesn't say it has all of: the architect's to state (a mark), its field the stairs
+    ({"id": "egress.interior#2", "law_short": "Egress", "reason": _interior("not_read", what="stairs", key="stairs")},
+     "mark"),
     ({"id": "egress.general.ibc_308_5", "law_short": "Egress", "reason": None}, "decide"),
     ({"id": "egress.not_checked_yet", "law_short": "Egress", "reason": "x"}, "measure_by_hand"),
     ({"id": "egress.has_none.stair", "law_short": "Egress", "reason": "Confirm: no stairs"}, "decide"),

@@ -116,28 +116,29 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 
 | Key | Reason |
 |---|---|
-| `not_a_description` | the interior description isn't a mapping |
-| `wrong_format` | the interior description's format isn't gordium.interior/1 (it says {got}) |
-| `units` | the interior description's units ({units}) aren't one of in, ft, mm, m |
-| `not_read` | the {what} weren't read (no `{key}` in the description) |
-| `not_a_list` | `{key}` in the description isn't a list |
+| `not_a_description` | the interior sent from the model can't be read (it isn't a set of named entries) |
+| `wrong_format` | the interior sent from the model is in a form Gordium doesn't read ({got}, not gordium.interior/1) |
+| `units` | the interior sent from the model gives its sizes in {units}, not in inches, feet, millimetres or metres |
+| `not_read` | the {what} weren't read: the model doesn't say these are all the {what} (or that there are none) |
+| `not_a_list` | the {key} sent from the model can't be read (they aren't a list) |
 | `not_a_mapping` | {what} #{n} isn't a mapping |
-| `flag_missing` | {what} {name}: say whether it is {question} (`{key}`: true or false) |
-| `unknown_spaces_entry` | `unknown_spaces` #{n} isn't a space with an id (a mapping with a text `id`): the rooms aren't read |
+| `flag_missing` | {what} doesn't say whether {question} (yes or no) |
+| `flag_not_yes_no` | {what} gives whether {question} as {got}, not as a yes/no value |
+| `unknown_spaces_entry` | enclosed space #{n} with no room drawn in it can't be read (it has no id): the rooms aren't read |
 | `unknown_space` | an enclosed space with no room drawn in it: its use isn't known, so it may be a sleeping room (draw a room in it and say whether it is a sleeping room) |
-| `has_none_not_a_list` | `has_none` in the description isn't a list (each entry a `kind` and its `source`): what the house has none of isn't read |
-| `has_none_entry` | `has_none` entry #{n} isn't a `kind` (with its `source`): it isn't read |
-| `has_none_listed` | `has_none` names {kind!r}, which the description lists itself: say there are none with an empty list (`{key}: []`), not in `has_none` |
-| `has_none_sleeping_room` | `has_none` names 'sleeping_room': a room that isn't a sleeping room says so itself (`sleeping: false`), not in `has_none` |
-| `has_none_kind` | `has_none` names {kind!r}, not a kind it can say the house has none of ({kinds}): it isn't read |
-| `has_none_no_source` | the description says the house has no {words} but not where that comes from (`source`, such as the sheet): it isn't taken, so their rules need review |
-| `has_none_reading` | the description says the house has no {words}, but its `reading` isn't true or false: it isn't taken, so their rules need review |
-| `has_none_twice` | the description says {count} times that the house has no {words}: it isn't taken, so their rules need review |
-| `has_none_keys` | the description says the house has no {words}, with keys it doesn't know ({keys}; an entry has `kind`, `source` and, optionally, `reading`): it isn't taken, so their rules need review |
-| `has_none_below_ground` | the description says the house has no basements, yet {what}: which is right is unclear, so their rules need review |
-| `has_none_room_within` | the description says the house has no sleeping lofts, yet {what}: which is right is unclear, so their rules need review |
-| `has_none_unknown_space` | the description says the house has no {words}, yet it gives {count} enclosed space(s) whose use isn't known (`unknown_spaces`), any of which could be one: it isn't taken, so their rules need review |
-| `has_none_contradicted` | the description says the house has no {words}, yet it also gives `{key}`, which isn't an empty list: which is right is unclear, so their rules need review |
+| `has_none_not_a_list` | what the model says the house has none of can't be read (it isn't a list, each entry a kind and its source): it isn't read |
+| `has_none_entry` | entry #{n} of what the house has none of isn't a kind with its source: it isn't read |
+| `has_none_listed` | the model says the house has no {kind}, but {key} have a list of their own in the model: say there are none with an empty list of {key}, not as something the house has none of |
+| `has_none_sleeping_room` | the model says the house has no sleeping rooms: a room that isn't a sleeping room says so itself (sleeping room: no), not as something the house has none of |
+| `has_none_kind` | the model says the house has none of {kind!r}, not a kind it can say that of (one of: {kinds}): it isn't read |
+| `has_none_no_source` | the model says the house has no {words} but not where that comes from (its source, such as the sheet): it isn't taken, so their rules need review |
+| `has_none_reading` | the model says the house has no {words}, but gives whether that rests on a reading of the law as {got}, not as a yes/no value: it isn't taken, so their rules need review |
+| `has_none_twice` | the model says {count} times that the house has no {words}: it isn't taken, so their rules need review |
+| `has_none_keys` | the model says the house has no {words}, giving more than a kind, a source and, optionally, a reading (also {keys}): it isn't taken, so their rules need review |
+| `has_none_below_ground` | the model says the house has no basements, yet {what}: which is right is unclear, so their rules need review |
+| `has_none_room_within` | the model says the house has no sleeping lofts, yet {what}: which is right is unclear, so their rules need review |
+| `has_none_unknown_space` | the model says the house has no {words}, yet it gives {count} enclosed space(s) whose use isn't known (no room drawn in them), any of which could be one: it isn't taken, so their rules need review |
+| `has_none_contradicted` | the model says the house has no {words}, yet it also gives {key}, and not an empty list: which is right is unclear, so their rules need review |
 | `missing` | {what} isn't given |
 | `not_a_length` | {what} isn't a length (a number) |
 | `too_far` | {what} is more than 1,000,000,000 in (about 15,800 miles) from the origin: not a place in a house |
@@ -162,7 +163,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `nothing_overhead` | nothing above the flight is given: give what is above it (a ceiling, the floor above, a beam) |
 | `room_unknown` | the room the opening is in isn't one of the rooms given |
 | `room_twice` | {count} rooms have the id {id!r}: which one the opening is in is unclear |
-| `operation_needs_clear` | a{n} {operation} window's clear opening depends on how far it opens and its hardware: give the maker's net clear opening (`stated_clear`) |
+| `operation_needs_clear` | a{n} {operation} window's clear opening depends on how far it opens and its hardware: give the maker's net clear opening (its clear width, height, bottom and source) |
 | `no_frame` | the opening's frame isn't given (and no maker's clear opening) |
 | `hinge_angle` | the hinged sash's open angle ({angle}°) isn't between 0 and 180 |
 | `no_sashes` | the open sashes of a sliding window aren't given |
@@ -178,7 +179,7 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `no_ground` | the finished ground level outside the opening isn't given |
 | `ground_mixed` | the ground outside the opening is within 44 in of its bottom at some points and not at others |
 | `readings_differ` | the readings give different answers; {question} |
-| `spiral_not_said` | whether the flight is a spiral stairway isn't given (`spiral`: true or false) |
+| `spiral_not_said` | whether the flight is a spiral stairway isn't given (yes or no) |
 | `spiral_not_straight` | the flight is said not to be a spiral stairway, but it isn't measured as a straight flight ({reason}): its shape isn't known |
 | `spiral_but_straight` | the flight is said to be a spiral stairway, but its nosings make a straight flight with rectangular treads: which is right is unclear |
 | `spiral_not_shown` | the flight is said to be a spiral stairway, but nothing measured shows R202's closed circular form around a supporting column (a curved stair isn't one): its shape isn't known |
@@ -189,19 +190,19 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `winders` | the treads aren't rectangular (nosing {n}'s ends are {off} in apart along the run): winder treads are measured at the walkline, not yet |
 | `nosings_not_forward` | the nosings don't move forward up the flight (tread {n} is {depth} in deep) |
 | `side_not_along` | the {side} {what} doesn't run along the flight from its first nosing to its top one |
-| `side_off_treads` | the stair's {side} side stands {off} in out beyond its treads' ends, more than a skirt or stringer between them ({most} in): it doesn't bound this stair (draw it where the treads end, or give the side as `open`) |
+| `side_off_treads` | the stair's {side} side stands {off} in out beyond its treads' ends, more than a skirt or stringer between them ({most} in): it doesn't bound this stair (draw it where the treads end, or give that side as open) |
 | `sides_cross` | the stair's sides meet or cross (clear width {width} in) |
 | `treads_cross` | at the treads, a tread's end meets or crosses the other side (clear width {width} in): check the nosings' ends and the stair's sides |
 | `handrails_cross` | at handrail height, a handrail meets or crosses the other side (clear width {width} in): check each handrail's side |
 | `handrail_side` | a handrail's side is {got!r}, not left or right |
 | `handrail_part_way` | no {side} handrail runs the whole flight between the stair's sides (from above its lowest nosing to above its top one, R320.5): whether that side has a handrail isn't measured |
 | `guard_top_not_drawn` | the guard's members don't reach its stated top all along it (at its lowest the drawn guard is {least} in high): which is its height is unclear |
-| `guard_kind` | say whether the guard is along a stair (`stair`) or at a level walking surface (`walking_surface`): give one |
+| `guard_kind` | say whether the guard is along a stair or at a level walking surface: give one |
 | `guard_opening_shape` | an opening in the guard isn't a rectangle: the largest sphere through it isn't measured yet |
 | `stair_unknown` | the stair the guard is along isn't one of the stairs given (by its id) |
 | `stair_unread` | the stair the guard is along couldn't be measured: {reason} |
-| `guard_no_side` | both of the stair's sides are given as open: a guard along it stands on neither (give the side the guard stands on as the guard's inside face, in the stair's `sides`) |
-| `guard_off_side` | the guard's top line doesn't stand along a side of its stair ({off} in, in plan, from the nearer side drawn, at its farthest; within {on} in is drawing noise): which side it protects is unclear (a side with a guard is given as the guard's inside face, in the stair's `sides`) |
+| `guard_no_side` | both of the stair's sides are given as open: a guard along it stands on neither (give the side the guard stands on as the guard's inside face, as that side of the stair) |
+| `guard_off_side` | the guard's top line doesn't stand along a side of its stair ({off} in, in plan, from the nearer side drawn, at its farthest; within {on} in is drawing noise): which side it protects is unclear (a side with a guard is given as the guard's inside face, as that side of the stair) |
 | `stair_guard_openings` | a stair guard's openings (the 4 3/8 in sphere, the triangle at each step) aren't measured yet |
 | `not_side_hinged` | R318.2 measures a side-hinged door open 90 degrees; this door is {operation} |
 | `stops_wrong_way` | the latch-side stop isn't on the far side of the opening from the hinge side |
@@ -209,8 +210,8 @@ From `interior/stops.py`, word for word (a blank in braces is filled in with the
 | `leaf_not_closing` | the closed leaf stops {short} in short of the latch-side stop (within 1/16 in is drawing noise): the leaf drawn doesn't close this opening |
 | `leaf_behind_hinge_stop` | the closed leaf's hinge edge stands {back} in behind the hinge-side stop, more than a stop laps a leaf ({most} in): the leaf drawn doesn't close this opening (a swing-clear hinge isn't measured yet) |
 | `pin_off_leaf` | the hinge pin stands {off} in back from the leaf's hinge-side corner (behind the face it swings toward, or toward the hinge jamb; within 1/16 in is drawing noise): the leaf drawn isn't hung on that pin |
-| `door_stated_shape` | the door's maker's clear opening (`stated_clear`) isn't a mapping of width, height and source: neither clear size counts |
-| `door_stated_keys` | the door's maker's clear opening (`stated_clear`) has keys it doesn't know ({keys}; it has `width`, `height` and `source`): neither clear size counts |
-| `door_stated_no_source` | the door's maker's clear opening (`stated_clear`) doesn't say where it comes from (`source`, such as the maker's catalogue): neither clear size counts |
+| `door_stated_shape` | the door's maker's clear opening isn't a width, a height and a source: neither clear size counts |
+| `door_stated_keys` | the door's maker's clear opening gives more than its width, height and source (also {keys}): neither clear size counts |
+| `door_stated_no_source` | the door's maker's clear opening doesn't say where it comes from (its source, such as the maker's catalogue): neither clear size counts |
 | `door_drawn_unread` | the door's clear {what} is drawn but can't be measured from the drawing ({reason}): the maker's stated one alone could be more than the door as drawn, so neither counts |
 | `not_positive` | {what} is {value} in: not more than zero |

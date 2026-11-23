@@ -138,6 +138,15 @@ def _show(p) -> tuple:
 
 # --- one leg ---------------------------------------------------------------------------------------------------------
 
+def _exit_words(story: Story, exits: dict, wanted) -> str:
+    """The exits a route was looked for to, as the architect names them: by their doors' names ("the exit door D12",
+    "an exit door (D01 or D12)"), never by the exit's id (the id stays in the data)."""
+    names = sorted({story.doors[d].name for e in wanted for d in exits.get(e, ()) if d in story.doors})
+    if not names:
+        return "the exit asked for"
+    return f"the exit door {names[0]}" if len(names) == 1 else f"an exit door ({' or '.join(names)})"
+
+
 def _reverse(piece):
     if piece[0] == "line":
         return ("line", piece[2], piece[1])
@@ -632,8 +641,8 @@ class StoryRoutes:
         room that opens only into one end-only room, say why its route can't go through it, or (only when the room
         it serves has no route on from any of its doors) that the room it serves has none either. The no-clearance
         retry comes first: a point with a route only with no clearance is shut in (a pocket, decision 3)."""
-        exits = "any exit" if exit_ids is None else "the exit " + ", ".join(sorted(wanted))
         story = self.story
+        exits = "any exit" if exit_ids is None else _exit_words(story, self.exits, wanted)
         if self.r > 0:
             if self._plain is None:
                 self._plain = StoryRoutes(self.story, 0.0)
