@@ -229,17 +229,26 @@ def building_measures(building: dict | None) -> dict:
     states: occupancy_group_i4 and other_occupancy_present from the groups, the two sprinkler systems the limits
     name from the system, and the two stated yes/no facts. A fact not stated is left out (its rules need review)."""
     facts, _ = _given(building)
-    out = {}
-    if "occupancy_groups" in facts:
-        out["occupancy_group_i4"] = "I-4" in facts["occupancy_groups"]
-        out["other_occupancy_present"] = any(g != "I-4" for g in facts["occupancy_groups"])
-    if "sprinkler_system" in facts:
-        out["sprinklered_903_3_1_1"] = facts["sprinkler_system"] == "nfpa_13"
-        out["sprinklered_903_3_1_2"] = facts["sprinkler_system"] == "nfpa_13r"
-    for k in ("egress_balcony_increase_taken", "building_has_atrium"):
-        if k in facts:
-            out[k] = facts[k]
-    return out
+    return {m: worked(facts[fact]) for m, (fact, worked) in DERIVED.items() if fact in facts}
+
+
+# Each building measure the BCNYS rulebook reads: the `building` fact it is worked out from, and how
+# (building_measures). The one table, so a cause that lacks a measure names the fact, and the host's field, that
+# answers it (field_of: occupancy_group_i4 is answered by building.occupancy_groups, never a field of its own)
+DERIVED = {
+    "occupancy_group_i4": ("occupancy_groups", lambda groups: "I-4" in groups),
+    "other_occupancy_present": ("occupancy_groups", lambda groups: any(g != "I-4" for g in groups)),
+    "sprinklered_903_3_1_1": ("sprinkler_system", lambda system: system == "nfpa_13"),
+    "sprinklered_903_3_1_2": ("sprinkler_system", lambda system: system == "nfpa_13r"),
+    "egress_balcony_increase_taken": ("egress_balcony_increase_taken", lambda v: v),
+    "building_has_atrium": ("building_has_atrium", lambda v: v),
+}
+
+
+def field_of(measure: str) -> str | None:
+    """The description's field that answers a building measure ("building.occupancy_groups" for
+    occupancy_group_i4: Revit's Gordium: Occupancy groups feeds it), or None for a measure no building fact gives."""
+    return f"building.{DERIVED[measure][0]}" if measure in DERIVED else None
 
 
 def _answer(code, why, cites, used, ask=None, assumes=()):
