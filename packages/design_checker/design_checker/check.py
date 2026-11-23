@@ -35,6 +35,7 @@ from model_measurement.places import measuring
 from model_measurement.plugin_measuring import TAX_MAP_TOLERANCE
 from model_measurement.project import fact_problems, load_facts, working
 from model_measurement.read_3dm import read_site
+from model_measurement.stops import in_words
 from project_report.report import OUTPUT_EXTRA, OUTPUT_HEADERS, build, tables
 from rule_format import formula, parts
 from rule_format.place import plugin_place
@@ -986,6 +987,7 @@ def check_site(site: dict, facts: dict, name: str = "model", report_path: Path |
     give each law's own state; its state and summary are over both."""
     today = present.checked_today(today)
     _refuse_bad_facts(facts)
+    site = in_words(site)           # problems as words, coded ones too ({code, args}): the report says them plainly
     model_path = Path(name)
     say = step or _quiet
     say(STEPS["measure"])

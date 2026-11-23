@@ -6,6 +6,7 @@ lists each one word for word and tests/test_stop_list.py has a case that gives e
 design_checker/site_json.py).
 """
 
+import json
 import re
 
 STOPS = {
@@ -187,6 +188,9 @@ STOPS = {
     # words): it makes the building's measuring need review all the same. Never a reason the table has words for
     # (site_json refuses that: the reason's own code is sent), and never read back by code_of (TOOL_WORDS)
     "tool_words": "{words}",
+    # a problem handed over as neither words nor a {code, args} pair a reason fills (a caller passing its own
+    # objects): it is said, never dropped and never a crash, so what it stops needs review (words_of)
+    "problem_unreadable": "a problem sent with the drawing can't be read ({what})",
     # what research settled and what is still open, read from the city's files (interpretations.py)
     "law_missing": "the city's files no longer have {what} (answered without naming the reading, or removed): the "
                    "measuring can't follow it",
@@ -204,6 +208,45 @@ STOPS = {
 def stop(key: str, **values) -> str:
     """The reason for `key`, with its blanks filled in."""
     return STOPS[key].format(**values)
+
+
+def words_of(problem) -> str:
+    """A problem in words: words as they are; a coded one ({"code": key, "args": {...}}, as the site description
+    names problems: design_checker/site_json.py) as stop(key, **args) words it. Anything else (a code no reason
+    has, blanks that don't fit, another kind of value) is said as problem_unreadable, so whatever it stops still
+    needs review: never a crash, never dropped, never a pass. THE one way a problem becomes words."""
+    if isinstance(problem, str):
+        return problem
+    if isinstance(problem, dict) and set(problem) == {"code", "args"} and problem["code"] in STOPS \
+            and isinstance(problem["args"], dict) and sorted(problem["args"]) == sorted(set(blanks(problem["code"]))) \
+            and all(isinstance(v, (str, int, float)) for v in problem["args"].values()):
+        return stop(problem["code"], **problem["args"])
+    try:
+        what = json.dumps(problem, sort_keys=True, ensure_ascii=False, default=repr)
+    except (TypeError, ValueError):
+        what = repr(problem)
+    return stop("problem_unreadable", what=what if len(what) <= 120 else what[:117] + "...")
+
+
+def said(problems) -> str:
+    """Problems and reasons joined into one reason ("a; b"), each in words (words_of)."""
+    return "; ".join(words_of(p) for p in problems or [])
+
+
+def in_words(site: dict) -> dict:
+    """A site with every problem in words (words_of): the site's own, each building's and each unsent object's.
+    A copy; the site given is left as it is. The measuring and the check read problems as words only."""
+    out = dict(site)
+    if isinstance(out.get("problems"), list):
+        out["problems"] = [words_of(p) for p in out["problems"]]
+    if isinstance(out.get("buildings"), list):
+        out["buildings"] = [{**b, "problems": [words_of(p) for p in b["problems"]]}
+                            if isinstance(b, dict) and isinstance(b.get("problems"), list) else b
+                            for b in out["buildings"]]
+    if isinstance(out.get("unsent"), list):
+        out["unsent"] = [{**u, "problem": words_of(u["problem"])} if isinstance(u, dict) and "problem" in u else u
+                         for u in out["unsent"]]
+    return out
 
 
 BLANK = re.compile(r"\{([a-z_]+)\}")
