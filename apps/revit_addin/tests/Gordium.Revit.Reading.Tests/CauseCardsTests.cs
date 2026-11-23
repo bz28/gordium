@@ -429,10 +429,12 @@ public sealed class CauseCardsTests
                         "            ui.GetDockablePane(DockablePanes.BuiltInDockablePanes.PropertiesPalette).Show();\n" +
                         "            Say(CauseCards.AfterProperties(request.Card, selected));", pane, StringComparison.Ordinal);
         var view = Addin("ResultsView.cs");
-        Assert.Contains("_card(new CardRequest(card, action, CauseCards.ShowIds(card, Labels), Short(card.Words)));", view, StringComparison.Ordinal);
+        // a fix (the intuitive pane: the cards joined) sends exactly its cards' elements the project has (Fixes.ShowIds)
+        Assert.Contains("_card(new CardRequest(first, action, Fixes.ShowIds(group, Labels), Short(group.Title)));", view, StringComparison.Ordinal);
         Assert.DoesNotContain("new CardRequest(card, action, card.Elements", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("group.Elements, ", view, StringComparison.Ordinal);
         Assert.Contains("    public void TickRow(ListRow row, bool ticked)\n    {\n        _looked.SetRow(row, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
-        Assert.Contains("    public void TickCard(CauseCard card, bool ticked)\n    {\n        _looked.SetCard(card.Key, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
+        Assert.Contains("    public void TickCard(Fix group, bool ticked)\n    {\n        _looked.SetCard(group.Key, ticked);\n        RefreshTicks();\n    }", view, StringComparison.Ordinal);
         Assert.Contains("    internal void Show(PanelContent content)\n    {\n        NewCheck(content);", view, StringComparison.Ordinal);
         Assert.Contains("        if (model.Stale is null)\n            _compared[key] = (content.When, model);", view, StringComparison.Ordinal);
         Assert.Contains("        if (_shownCheck == (content.Project, content.When))\n            return;", view, StringComparison.Ordinal);
