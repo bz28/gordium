@@ -6,7 +6,7 @@
 
 ## What happened
 
-Inheriting New York's second book (the 2025 Building Code, [which NY code](2026-11-22_which_ny_code.md)) made every check read and validate two rulebooks instead of one. The branch first kept the validated laws per process. Four review rounds each found a way that cache could answer from stale laws, on a path that decides pass or fail:
+Inheriting New York's second book (the 2025 Building Code, [which NY code](2026-11-22_which_ny_code.md)) made every check read and validate two rulebooks instead of one. The branch first kept the validated laws per process. Three review rounds (8, 9 and 10) found four ways that cache could answer from stale laws, on a path that decides pass or fail:
 
 - **Round 8, P1:** the cache key listed its readers by hand and missed the cheap helpers (`_not_checked_yet`, `_sections`, `_scope_settings`, `_title`), so a test's patched result leaked into later tests.
 - **Round 8, P2:** the key's file list was kept by hand and missed `regulations/reviewers.yaml` and the extraction guide's `vocabulary.yaml`, so editing either left a long-running worker validating stale.
@@ -22,7 +22,7 @@ So the cache is gone: `egress.laws` works out every law fresh on every call, as 
 | main (the Residential Code only) | 0.69 s | 0.37 s |
 | this branch, no cache | 0.99 s | 0.67 s |
 
-The extra 0.30 s a check is the Building Code book's validation. A possible non-caching speed-up, not made in this branch: validate only the books a check runs (a house the Residential Code governs never reads the Building Code's rules). It isn't trivially safe: `laws` is also read by other callers (the permit sheets) that expect every inherited book validated, so it needs its own change and review.
+The extra 0.30 s a check is the Building Code book's validation. A possible non-caching speed-up, not made in this branch: validate only the books a check runs (a house the Residential Code governs never reads the Building Code's rules). `check` already runs only the books that govern the building, and the permit sheets build their laws from the check's own sections, so the only other caller of `egress.laws` is the Odyssey eval tool (`apps/revit_addin/tools/evals/make_odyssey_answer.py`, which reads Maine). It still changes what `egress.laws` returns, so it needs its own change and review.
 
 ## The planned fix: compile, then freeze
 
