@@ -535,3 +535,10 @@ Yes or No, not a whole number, a count under its least, a distance under 0) is s
 as not sent in a check sent anyway; the distance is a Feet field saved as typed (19.96 ft is never 20); nothing is
 written without Save. Pinned in `HouseFactFieldsTests` and `ProjectCheckTests` (through the real worker: blank, the
 stream, occupancy and garage rules need review; set, they comply; four cars in one garage fails).
+
+Confirmed in Revit 2027 (2026-11-23, a copy of 106 Ithaca Rd with its lot facts typed and none of these set): Check
+project added the marks and fix 1 read "Set 9 facts on Project Information" with its Open Project Information button;
+in Mark facts, the seven fields sit under "The lot and the house", each tooltip quoting its law; choosing Stream within
+20 ft No, Accessory dwelling unit No, Owner-occupied Yes, Functional family unit No, 0 unrelated people and 2 garage cars
+and pressing Save 6 facts, then Check again, gave What changed: the stream setback, one-family occupancy and private
+garage now comply, and fix 1 became the two lists alone.
