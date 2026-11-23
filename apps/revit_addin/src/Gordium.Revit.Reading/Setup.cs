@@ -228,7 +228,7 @@ public static class SetupFacts
             left.Add(Marks.Stories);
         // the dwelling's own counts (which New York code governs reads them): one set under its least isn't sent
         foreach (var (m, key) in new[] { (Marks.DwellingUnits, "dwelling_units"), (Marks.UnitsInAttachedBuilding, "attached_units_in_building"),
-                     (Marks.RoomsLetForProfit, "rooms_let_for_profit") })
+                     (Marks.RoomsLetForProfit, "rooms_let_for_profit"), (Marks.AdusOnParcel, "adus_on_parcel") })
             if (Marks.Count(Get(model, m)) is not null && read.Facts[key] is null)
                 left.Add(m);
         return left;

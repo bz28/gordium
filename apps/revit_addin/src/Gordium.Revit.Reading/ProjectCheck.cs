@@ -64,6 +64,16 @@ public static class ProjectCheck
         var interior = InteriorReader.Read(inside);
         if (building.Building is { } said)       // which New York code governs: the architect's statements, as given
             interior.Interior["building"] = said;
+        // sent anyway: the lot facts set but not sent (a count under its least) are named, so the code decision reads
+        // each as stated and unread, never as not stated (code_scope.py facts_not_sent; review round 5)
+        var unsent = notStated.Select(m => m.Feeds).Where(f => f.StartsWith("facts.", StringComparison.Ordinal))
+                              .Select(f => (JsonNode)f["facts.".Length..].Split(' ')[0].TrimEnd(',')).ToList();
+        if (unsent.Count > 0)
+        {
+            var block = interior.Interior["building"] as JsonObject ?? new JsonObject();
+            block["facts_not_sent"] = new JsonArray([.. unsent]);
+            interior.Interior["building"] = block;
+        }
         var site = await SiteReader.DescribeAsync(outside, read.Facts, asker, cancel).ConfigureAwait(false);
         var match = read.StreetEdges is { } kept ? StreetEdges.Match(kept, site.Site["lot"] as JsonObject, outside.InternalToShared) : null;
         // a kept edge no longer on the lot is asked for again, anyway too: anyway leaves out only what isn't set
@@ -230,7 +240,8 @@ public static class ProjectFacts
         // the dwelling's own facts (optional; which New York code governs reads them, and Ithaca's zoning): each sent
         // as stated, a count under its least asked again, never sent
         foreach (var (mark, key, least) in new[] { (Marks.DwellingUnits, "dwelling_units", 1),
-                     (Marks.UnitsInAttachedBuilding, "attached_units_in_building", 1), (Marks.RoomsLetForProfit, "rooms_let_for_profit", 0) })
+                     (Marks.UnitsInAttachedBuilding, "attached_units_in_building", 1), (Marks.RoomsLetForProfit, "rooms_let_for_profit", 0),
+                     (Marks.AdusOnParcel, "adus_on_parcel", 1) })
             if (Marks.Count(Get(mark)) is { } n)
             {
                 if (n < least)

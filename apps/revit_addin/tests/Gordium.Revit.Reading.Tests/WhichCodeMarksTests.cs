@@ -131,6 +131,28 @@ public sealed class WhichCodeMarksTests(RealWorker worker) : IClassFixture<RealW
         Assert.Contains("can't read", which.GetProperty("why").GetString(), StringComparison.Ordinal);
     }
 
+    /// <summary>Review round 5: sent anyway, a dwelling count under its least is left out and named in the building
+    /// block (facts_not_sent), so the code decision reads it as stated and unread: needs review, never "not stated";
+    /// the ADUs on the parcel is a mark sent as a lot fact.</summary>
+    [Fact]
+    public async Task Sent_anyway_a_count_under_its_least_is_named_so_the_code_needs_review()
+    {
+        var (house, outside) = Project("1_ranch_compliant");
+        Mark(house, Marks.StoriesAboveGradePlane, new(true, 1));
+        Mark(house, Marks.DwellingUnits, new(true, 0));
+        var client = await worker.RunningAsync();
+        var prepared = await ProjectCheck.PrepareAsync(outside, house.Model(), new WorkerLeftOut(client), anyway: true);
+        Assert.Contains(Marks.DwellingUnits, prepared.NotStated);
+        Assert.False(prepared.Request!.Facts.ContainsKey("dwelling_units"));
+        Assert.Equal(["dwelling_units"], prepared.Request.Interior["building"]!["facts_not_sent"]!.AsArray().Select(n => n!.GetValue<string>()));
+        var which = (await ProjectCheck.SendAsync(client, prepared.Request)).Raw.GetProperty("which_code");
+        Assert.Equal(JsonValueKind.Null, which.GetProperty("code").ValueKind);
+        Assert.Contains("dwelling units", which.GetProperty("why").GetString(), StringComparison.Ordinal);
+        Mark(house, Marks.DwellingUnits, new(true, 1));
+        Mark(house, Marks.AdusOnParcel, new(true, 2));
+        Assert.Equal(2, ProjectFacts.Read(house.Model()).Facts["adus_on_parcel"]!.GetValue<int>());
+    }
+
     private static (FakeHouse, RevitModel) Project(string house)
     {
         var h = FakeHouse.Draw(house);

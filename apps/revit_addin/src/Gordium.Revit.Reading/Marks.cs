@@ -279,6 +279,12 @@ public static class Marks
         MarkBinding.Instance, [ProjectInformation], "facts.accessory_dwelling_unit",
         "Yes when an accessory dwelling unit (§325-3B, §325-28) is on the lot, attached or detached; then say whether it is detached (Gordium: ADU detached). No: none. Blank: Gordium assumes none and says so.");
 
+    /// <summary>The accessory dwelling units on the parcel (<c>facts.adus_on_parcel</c>), 1 or more.</summary>
+    public static readonly MarkDefinition AdusOnParcel = new(
+        "Gordium: ADUs on parcel", new("1fa82254-92d5-4f27-acef-924bfc047d7c"), MarkValueKind.Integer, MarkBinding.Instance,
+        [ProjectInformation], "facts.adus_on_parcel",
+        "With an accessory dwelling unit on the lot: the accessory dwelling units on the parcel, any already there included (§325-28C(1): one per parcel), 1 or more. More than one keeps which code governs at needs review (each may be one more of the building's units, RCNYS R202 DWELLING). Blank: Gordium assumes one, the one stated, and says so.");
+
     /// <summary>Whether the accessory dwelling unit is detached (<c>facts.adu_detached</c>).</summary>
     public static readonly MarkDefinition AduDetached = new(
         "Gordium: ADU detached", new("ebd07d28-ce47-4e7d-95e7-6e164d7d7bc8"), MarkValueKind.YesNo, MarkBinding.Instance,
@@ -400,7 +406,7 @@ public static class Marks
         CanBeLocked, PassThrough, Exit, Stories, NotOccupied,
         FollowsBuildingCode, StoriesAboveGradePlane, SeparateMeansOfEgress, TownhouseUnits, CareFacility, OccupancyGroups,
         SprinklerSystem, DwellingUnits, UnitsInAttachedBuilding, HomeOccupation, RoomsLetForProfit, AccessoryDwellingUnit,
-        AduDetached,
+        AduDetached, AdusOnParcel,
     ];
 
     // ---- reading a mark: an unset mark is "not stated", never a default (principle 4) -----------------------------

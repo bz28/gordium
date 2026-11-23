@@ -87,6 +87,7 @@ public sealed class MarksTests
             ("Gordium: Rooms let for profit", "2f038e8d-2d26-4e46-b92a-1c51d08bca87", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: Accessory dwelling unit", "6fcbf10d-a1c2-406a-b6c7-e726b4a695f2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
             ("Gordium: ADU detached", "ebd07d28-ce47-4e7d-95e7-6e164d7d7bc8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: ADUs on parcel", "1fa82254-92d5-4f27-acef-924bfc047d7c", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
