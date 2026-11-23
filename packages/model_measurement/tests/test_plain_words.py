@@ -399,7 +399,7 @@ GRID = {
     "door operation": ("interior", ("doors", 0, "operation"), "side_hinged", "operation", None),
     "has-none reading": ("interior", ("has_none",), False, "reading",
                          lambda v: [{"kind": "ramp", "source": "A-2", "reading": v}]),
-    "room name": ("both", ("rooms", 0, "name"), "Bedroom", "room", None),
+    "room name": ("both", ("rooms", 0, "name"), "Bedroom", "room", None),        # with a room fault: ROOM_FAULT
     "lockable": ("routes", ("rooms", 0, "lockable"), False, "locked", None),
     "pass through": ("routes", ("rooms", 0, "pass_through"), False, "pass through", None),
     "not occupied": ("routes", ("rooms", 0, "not_occupied"), False, "occupied", None),
@@ -427,21 +427,49 @@ def _route_reasons(d):
         {st.outline_stop for st in floor.stories.values() if st.outline_stop}
 
 
+def _room_fault(d):
+    """A second fault on the same room (its sleeping mark given as text), so a reason that names the room appears
+    whatever its name is: a name alone is never a reason."""
+    d["rooms"][0].update(sleeping="maybe", name="Bedroom")   # a name not its id: a name not read shows as the id
+
+
+ROOM_FAULT = {"room name": _room_fault}
+# a value a slot reads as right, or as not given where not given is allowed: no reason is due (checked: each gives
+# none, never assumed; every other value must give one). None for lockable, pass through, not occupied and use:
+# optional, "not given" makes the room one a route never crosses, never a reason. None for spiral: base() gives no
+# spiral already, so its reason (spiral_not_said) is in the untouched reasons. True for a yes/no mark (and the
+# has-none reading): a right value. A room name not text: it falls back to the id, shown in the room's reason.
+NO_REASON_DUE = {
+    "lockable": {None, True}, "pass through": {None, True}, "not occupied": {None},
+    "use": {None}, "spiral": {None}, "has-none reading": {True},
+    "sleeping": {True}, "escape": {True}, "exit": {True},
+}
+
+
 def _grid_reasons():
     from routes_layouts import room_on_corridor
     readers = {"interior": (base, _interior_reasons), "routes": (room_on_corridor, _route_reasons)}
     out = []
     for slot, (which, path, right, naming, wrap) in GRID.items():
+        also = ROOM_FAULT.get(slot)
         for name, (make, reasons) in readers.items():
             if which not in (name, "both"):
                 continue
-            plain = reasons(make())
+            first = make()
+            if also:
+                also(first)
+            plain = reasons(first)
             for value in GRID_VALUES:
                 v = [right] if value == "RIGHT_IN_A_LIST" else value
                 d = make()
+                if also:
+                    also(d)
                 _set(d, path, wrap(v) if wrap else v)
-                for r in reasons(d) - plain:
+                new = reasons(d) - plain
+                for r in new:
                     out.append((slot, name, value, naming, r))
+                if not new:
+                    out.append((slot, name, value, naming, None))     # none: allowed only where NO_REASON_DUE
     return out
 
 
@@ -452,8 +480,22 @@ def test_every_wrong_value_in_every_slot_is_said_plainly_and_truly():
     found = _grid_reasons()
     assert len(found) > 100, len(found)
     bad = []
+    # the grid guards every slot: each gives a reason for some value, and each value with none is one stated above
+    for slot in GRID:
+        assert any(r for s, _, _, _, r in found if s == slot and r), f"{slot}: no value gave a reason"
+    for slot, reader, value, naming, r in found:
+        none_due = repr(value) in {repr(x) for x in NO_REASON_DUE.get(slot, set())}
+        if r is None and not none_due:
+            bad.append((slot, reader, value, ["gave no reason"], None))
+        if r is not None and none_due:
+            bad.append((slot, reader, value, ["a reason where none is due"], r))
+    found = [f for f in found if f[4] is not None]
     for slot, reader, value, naming, r in found:
         problems = []
+        if slot == "room name" and not re.search(r"(?:^| )room [br](?: |$)", r):
+            problems.append("the room not named by its id")
+        if re.search(r"gives \d+, not", r) and not isinstance(value, list):
+            problems.append("a number given read as a count")
         if "(, " in r or " , not" in r or "in , not" in r or ": ," in r:
             problems.append("an empty gap")
         if re.search(r"\b(None|True|False)\b", r) or "[" in r or "{" in r:
@@ -476,3 +518,36 @@ def test_every_wrong_value_in_every_slot_is_said_plainly_and_truly():
         if not any(naming in r.lower() for r in rs):
             bad.append((slot, reader, value, [f"no reason names the {naming}"], rs))
     assert not bad, "\n".join(map(repr, bad[:40])) + f"\n({len(bad)} in all)"
+
+
+
+def test_a_room_name_that_isnt_text_is_said_by_the_rooms_id():
+    from routes_layouts import room_on_corridor
+    for name in (True, ["x"], [], {}):
+        d = base()
+        d["rooms"][0].update(name=name, sleeping="maybe")
+        interior = measure(d)["problems"]
+        assert interior == ["room b gives whether it is a sleeping room as the text 'maybe', not as a yes/no value"], \
+            interior
+        d = room_on_corridor()
+        d["rooms"][0].update(name=name, sleeping="maybe")
+        said = _route_reasons(d)
+        assert any(r.startswith("the room r isn't read:") for r in said), said
+        assert not any(re.search(r"\bTrue\b|\[|\{", r) for r in said), said
+
+
+def test_a_number_given_where_a_list_belongs_is_said_as_a_number_never_a_count():
+    from routes_layouts import room_on_corridor
+    d = room_on_corridor()
+    d["doors"][0]["sides"] = 1
+    assert any("the door gives the number 1, not 2 sides" in r for r in _route_reasons(d))
+    d = room_on_corridor()
+    d["passages"] = [{"rooms": 2, "line": [[0, 15], [5, 15]]}]
+    assert any("the passage gives the number 2, not 2 rooms" in r for r in _route_reasons(d))
+
+
+@pytest.mark.parametrize("pid, shown", [(True, "(no name)"), (["b"], "(no name)"), ("  ", "(no name)"), (7, "7"),
+                                        ("b", "b")])
+def test_a_parts_id_is_its_name_only_when_it_is_text_or_a_number(pid, shown):
+    from model_measurement.interior.read import name_of
+    assert name_of({"name": [], "id": pid}) == shown

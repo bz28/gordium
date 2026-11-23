@@ -111,11 +111,15 @@ class Reader:
 
 
 def name_of(part: dict) -> str:
-    """A part's name as a reason says it: its name, else its id, never blank text."""
-    for key in ("name", "id"):
-        got = part.get(key)
-        if got is not None and str(got).strip():
-            return str(got)
+    """A part's name as a reason says it: its name where it is text with something in it, else its id where that is
+    text with something in it or a number (never a yes/no value), else "(no name)": never blank text, a yes/no
+    value or a list's or a mapping's own words."""
+    name = part.get("name")
+    if isinstance(name, str) and name.strip():
+        return name
+    pid = part.get("id")
+    if (isinstance(pid, str) and pid.strip()) or (isinstance(pid, (int, float)) and not isinstance(pid, bool)):
+        return str(pid)
     return "(no name)"
 
 

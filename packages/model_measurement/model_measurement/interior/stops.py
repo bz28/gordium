@@ -230,6 +230,8 @@ def counted(value, one: str, many: str):
         n = len(value)
         head = f"{n} {one if n == 1 else many}"
         return Words(head + f": {_in_words(list(value))}" if 0 < n <= LISTED_MOST else head)
+    if isinstance(value, (int, float)) and not isinstance(value, bool):
+        return Words(f"the number {value}")             # never read as a count: "gives the number 1, not 2 sides"
     return given_as(value)
 
 
