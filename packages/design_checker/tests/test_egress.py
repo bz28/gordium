@@ -401,3 +401,24 @@ def test_a_saved_report_names_the_interior_it_was_checked_against(tmp_path):
     check_site(SITE, dict(FACTS), interior=empty, report_path=out)
     cells = [c.value for c in load_workbook(out)["Check"]["A"] if c.value]
     assert f"Interior: sha256 {egress.fingerprint(empty)} (no rooms drawn yet, egress not checked)" in cells
+
+
+def test_the_laws_are_worked_out_once_until_a_file_they_are_read_from_changes(monkeypatch):
+    """Two of New York's books read and validated took a third of each check (2026-11-23): worked out once, each
+    caller its own copy, worked out again when any file they are read from changes."""
+    import os
+    real, calls = egress._laws, []
+    monkeypatch.setattr(egress, "_laws", lambda j: calls.append(j) or real(j))
+    egress._LAWS.clear()
+    first, second = egress.laws(ITHACA), egress.laws(ITHACA)
+    assert len(calls) == 1 and first == second and first is not second
+    second["laws"][0]["rules"].clear()                                  # a caller's copy is its own
+    assert egress.laws(ITHACA)["laws"][0]["rules"] and len(calls) == 1
+    state = STATE / "state.yaml"
+    st = state.stat()
+    try:
+        os.utime(state, ns=(st.st_atime_ns, st.st_mtime_ns + 1_000_000))
+        egress.laws(ITHACA)
+        assert len(calls) == 2                                          # a file changed: worked out again
+    finally:
+        os.utime(state, ns=(st.st_atime_ns, st.st_mtime_ns))

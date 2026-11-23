@@ -111,8 +111,17 @@ public sealed class PanelSupportTests
         Assert.Equal("Gordium: street edge", StreetEdges.PickTitle);
         var addin = Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin");
         var setup = File.ReadAllText(Path.Combine(addin, "SetupFlow.cs"));
-        Assert.Contains("ResultsPane.Say(StreetEdges.OpenAPlanFromSetup)", setup, StringComparison.Ordinal);
-        Assert.DoesNotContain("ResultsPane.Say(StreetEdges.OpenAPlan)", setup, StringComparison.Ordinal);
+        // round 7: every message the Setup form's Pick on plan path shows names Pick on plan, never Check again, and
+        // the path shows only those (and the picked edge's own words)
+        Assert.All(StreetEdges.FromSetup, m => Assert.Contains("Pick on plan again", m, StringComparison.Ordinal));
+        Assert.All(StreetEdges.FromSetup, m => Assert.DoesNotContain("Check", m, StringComparison.Ordinal));
+        var path = setup[setup.IndexOf("private static void PickStreet()", StringComparison.Ordinal)..];
+        path = path[..path.IndexOf("Save writes it with the other facts.", StringComparison.Ordinal)];
+        foreach (var name in new[] { "OpenAPlanFromSetup", "SwitchToItFromSetup", "NoPropertyLineFromSetup", "NonePickedFromSetup" })
+            Assert.Contains("StreetEdges." + name, path, StringComparison.Ordinal);
+        Assert.DoesNotContain("StreetEdges.OpenAPlan)", path, StringComparison.Ordinal);
+        Assert.DoesNotContain("StreetEdges.SwitchToIt)", path, StringComparison.Ordinal);
+        Assert.DoesNotContain("Check again", path, StringComparison.Ordinal);
         var check = File.ReadAllText(Path.Combine(addin, "CheckProject.cs"));
         var pick = check[check.IndexOf("static List<PickedEdge> PickEdges(", StringComparison.Ordinal)..];
         pick = pick[..pick.IndexOf("return kept;", StringComparison.Ordinal)];

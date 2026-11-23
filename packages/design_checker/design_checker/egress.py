@@ -108,11 +108,47 @@ def _folder(jurisdiction) -> Path:
     return p if p.is_absolute() else REPO / p
 
 
+_LAWS: dict = {}          # the laws worked out, by what they were worked out from (laws: never a stale answer)
+
+
+def _laws_key(jurisdiction) -> tuple:
+    """What a place's laws are worked out from: every file of the place's settings, of each folder it inherits, and
+    of the rule format's shared registries (each path with its size and change time), the readers used (a test that
+    swaps one gets a fresh answer) and the code cache named. Any change makes a new key."""
+    import os
+    folder = _folder(jurisdiction)
+    roots = [folder / "jurisdiction.yaml", REPO / "packages/rule_format/rule_format"]
+    try:
+        roots += list(place_of(folder).inherits)
+    except Exception:
+        pass
+    stats = []
+    for root in roots:
+        files = [root] if root.is_file() else sorted(q for q in root.rglob("*") if q.is_file()
+                                                     and "__pycache__" not in q.parts) if root.is_dir() else []
+        for q in files:
+            s = q.stat()
+            stats.append((str(q), s.st_size, s.st_mtime_ns))
+    # each reader by the function itself (a class method's bound object is new at every look)
+    readers = (load, rulebook_file_problems, state_settings_problems, Context.for_jurisdiction.__func__, place_of)
+    return (str(folder), tuple(stats), tuple(id(r) for r in readers), os.environ.get("GORDIUM_CODE_CACHE"))
+
+
 def laws(jurisdiction) -> dict:
     """The place and every state law it inherits, ready to check: {"place": its name, "laws": [{key, title, short,
     folder, rulebook, rules, problems, section_of, documents}]}. A rulebook that doesn't pass the rule checks gives
-    no rules and its problems (needs review, never a row)."""
+    no rules and its problems (needs review, never a row). Worked out once for what it is read from (_laws_key: two
+    of New York's books, read and validated, took a third of a check), each caller given its own copy."""
+    import copy
     refuse_state_alone(jurisdiction)
+    key = _laws_key(jurisdiction)
+    if key not in _LAWS:
+        _LAWS.clear()                       # one place's laws kept at a time: never a cache that grows
+        _LAWS[key] = _laws(jurisdiction)
+    return copy.deepcopy(_LAWS[key])
+
+
+def _laws(jurisdiction) -> dict:
     p = place_of(_folder(jurisdiction))
     out = []
     for folder, book in p.inherited_rulebooks():

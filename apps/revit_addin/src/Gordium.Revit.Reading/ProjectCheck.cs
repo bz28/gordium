@@ -441,6 +441,24 @@ public static class StreetEdges
         "Gordium asked for its street edge (a click would have landed in another project): switch to it, open a site " +
         "plan that shows the property line, and click Check again.";
 
+    // ---- the same refusals said where Pick on plan was pressed in the Setup form: the next step is that button ------
+
+    /// <summary><see cref="SwitchToIt"/> from the Setup form's Pick on plan.</summary>
+    public static readonly string SwitchToItFromSetup = $"{Marks.StreetEdge.Name}: this project isn't the active one (a " +
+        "click would land in another project): switch to it, open a site plan that shows the property line, and press " +
+        "Pick on plan again.";
+
+    /// <summary>The project has no property line to pick, from the Setup form's Pick on plan.</summary>
+    public static readonly string NoPropertyLineFromSetup = $"{Marks.StreetEdge.Name}: this project has no property line " +
+        "to pick: draw it (Massing & Site > Property Line), then press Pick on plan again.";
+
+    /// <summary>Esc pressed before any edge was kept, from the Setup form's Pick on plan.</summary>
+    public const string NonePickedFromSetup = "No street edge was picked: press Pick on plan again to pick it.";
+
+    /// <summary>Every message the Setup form's Pick on plan path can show before an edge is picked (the pick's own
+    /// per-click words, <see cref="Nearest"/>'s, name no button): each names Pick on plan as the next step.</summary>
+    public static IReadOnlyList<string> FromSetup => [OpenAPlanFromSetup, SwitchToItFromSetup, NoPropertyLineFromSetup, NonePickedFromSetup];
+
     /// <summary>What to fill in, as the panel lists it: when the view couldn't show the property line, the street
     /// edge's "click when Check project asks" replaced by <see cref="OpenAPlan"/> (a kept edge's own reason kept,
     /// <see cref="OpenAPlan"/> after it).</summary>
