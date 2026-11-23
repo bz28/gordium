@@ -335,6 +335,9 @@ class Context:
     use_rows: dict[str, list[dict]] = field(default_factory=dict)    # use -> its sources in uses.yaml
     cells: dict[str, dict[tuple, dict]] = field(default_factory=dict)  # file -> (page, section, row, column) -> cell
     districts: set[str] = field(default_factory=set)                 # district names, as the city writes them
+    # a chart column that holds several districts -> the districts it holds (jurisdiction.yaml districts.shared_columns:
+    # Ithaca's one "Central Business" column for CBD-50 ... CBD-140)
+    shared_columns: dict[str, list[str]] = field(default_factory=dict)
     proposed: dict[str, dict] = field(default_factory=dict)          # measures drafts asked for, not yet in measures.yaml
     pieces: set[str] = field(default_factory=set)                    # every piece id the law is cut into (research cites them)
     uncached: dict[str, str] = field(default_factory=dict)           # file -> why its text can't be read here (cache)
@@ -434,13 +437,15 @@ class Context:
         certainty are in the file; unresolved parts of a table can never be cited. `j`: the jurisdiction, whose
         settings say which chart columns are districts."""
         from .place import place
-        column = place(j).district_column
-        found = _kept(f"cells {sha} {column.pattern}", Path(path).read_bytes(), lambda data: _cells_of(data, sha, column))
+        column, shared = place(j).district_column, place(j).shared_columns
+        found = _kept(f"cells {sha} {column.pattern} {sorted(shared.items())!r}", Path(path).read_bytes(),
+                      lambda data: _cells_of(data, sha, column, shared))
         if found is None:
             self._problem(name, f"{path.name} was read from a different version; re-extract")
             return
         cells, districts = found
         self.districts |= districts
+        self.shared_columns |= shared
         self.cells[name] = cells
 
     def _load_extracted(self, name, sha, path, pages=None, misreads=None):
@@ -505,8 +510,9 @@ def _shown_cache(path: Path) -> str:
         return path.as_posix()
 
 
-def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | None:
-    """A .cells.jsonl file's bytes -> (its cells, its districts: the columns `district_column` matches), or None when
+def _cells_of(data: bytes, sha: str, district_column: re.Pattern, shared: dict | None = None) -> tuple | None:
+    """A .cells.jsonl file's bytes -> (its cells, its districts: the columns `district_column` matches, and the districts
+    each column of `shared` holds), or None when
     its header names another PDF version than `sha` (checked before any row is read, so a stale file is always
     "re-extract", never a crash)."""
     rows = _jsonl_rows(data)
@@ -516,6 +522,7 @@ def _cells_of(data: bytes, sha: str, district_column: re.Pattern) -> tuple | Non
     for r in rows[1:]:
         if "columns" in r:
             districts |= {district_name(c["name"]) for c in r["columns"] if district_column.fullmatch(c["name"])}
+            districts |= {d for c in r["columns"] for d in (shared or {}).get(c["name"], [])}
         elif "value" in r and not r.get("heading"):
             cells[(r["page"], r["section"], r["row"].strip(), r["column"])] = r
     return cells, districts
@@ -549,6 +556,12 @@ LAYOUTS = {"ecode360", "icc", "two_column"}
 # A chart column that is a district, as the chart prints it (R-1B, R-3AA, RU), is each place's own: its
 # jurisdiction.yaml districts.chart_column, through the registry (place.py: Place.district_column), the one
 # definition the chart reader, the inspector and the drafter all use.
+
+
+def column_districts(column: str, shared: dict | None = None) -> list[str]:
+    """The districts a chart column is for: those a shared column holds (jurisdiction.yaml districts.shared_columns,
+    e.g. Ithaca's "Central Business" column for CBD-50 ... CBD-140), else the one the column names (R-1B -> R-1b)."""
+    return list((shared or {}).get(column) or [district_name(column)])
 
 
 def district_name(column: str) -> str:
@@ -738,7 +751,7 @@ def _cell_source_problems(s: dict, ctx: "Context", district: str | None = None) 
     if district is not None and isinstance(c, dict) and isinstance(c.get("column"), str):
         if district == "general":
             return [f"source {name}: a rule for every district can't cite one district's cell ({c['column']})"]
-        if district_name(c["column"]) != district:
+        if district not in column_districts(c["column"], ctx.shared_columns):
             return [f"source {name}: cell column {c['column']} isn't district {district}"]
     if s.keys() != {"file", "page", "cell"}:
         return [f"source {name}: a cell source has exactly file, page and cell (no lines or quote)"]

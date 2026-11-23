@@ -25,7 +25,10 @@ time_zone:                            # the place's own day: the date a lookup w
 
 districts:
   chart_column: 'R-\d[A-Z]*|RU|B-\d[A-Z]*'   # a zoning-chart column that is a district, as the chart prints it
-                                      # (R-1B, RU, B-2A); the CBD column ("Central Business") is read but isn't one yet
+                                      # (R-1B, RU, B-2A)
+  shared_columns:                     # a chart column that holds several districts: the commercial charts (p.4, p.5)
+    "Central Business": [CBD-50, CBD-60, CBD-85, CBD-100, CBD-120, CBD-140]   # head one column "CBD-50, -60, -85,
+                                      # -100, -120, -140"; each rulebook cites that column's cells as its own
 
 law:                                  # the documents in 1_source_documents/ the code reads, by what they are
   zoning_code: chapter_325_zoning_2026-10.pdf
