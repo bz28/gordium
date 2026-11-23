@@ -197,6 +197,21 @@ public static class PaneWords
         return more.Count == 0 ? null : "And " + string.Join("; ", more) + " (hover for all).";
     }
 
+    /// <summary>What "hover for all" shows: every changed verdict, each on its line in the worker's order (the ones
+    /// listed and the ones <see cref="ChangesMore"/> counts: never a count of its own), then the results that say
+    /// something new, counted as <see cref="ChangesMore"/> counts them. A change that is no list: the worker's one line.</summary>
+    public static string ChangesAll(CheckChange change)
+    {
+        ArgumentNullException.ThrowIfNull(change);
+        if (!ChangeIsList(change))
+            return change.Words;
+        var lines = new List<string> { $"{change.Rows.Count} changed verdict{(change.Rows.Count == 1 ? "" : "s")}:" };
+        lines.AddRange(change.Rows.Select(r => "• " + r.Words));
+        if (change.Said > 0)
+            lines.Add($"{change.Said} more say something new");
+        return string.Join("\n", lines);
+    }
+
     /// <summary>A changed result's glyph status: its new verdict's (<see cref="ChangeTone"/>) while the results
     /// stand, the clock once they are stale (never a green complies for a model that may have changed).</summary>
     public static PanelStatus ChangeStatus(RowChange change, bool stale) => StatusLook.Of(ChangeTone(change), stale);

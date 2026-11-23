@@ -309,6 +309,38 @@ public sealed class PaneTests
         Assert.Equal(Tone.Review, PaneWords.ChangeTone(new RowChange("a", "a", Verdict.Complies, null, "a no longer in the check")));
     }
 
+    /// <summary>"Hover for all" shows all: the hover lists every changed verdict (the ones listed and every one
+    /// "And N more" counts), never a count of its own that disagrees with the pane's (review round 1 of change 20: the
+    /// pane said "And 5 more" while the hover, the worker's one line, said "and 6 more").</summary>
+    [Fact]
+    public void What_changeds_hover_lists_every_verdict_the_pane_counts()
+    {
+        var change = CheckChanges.Between(Model(House()), new DateTime(2026, 11, 22, 14, 32, 0), Model(HouseAfter()))!;
+        var all = PaneWords.ChangesAll(change).Split('\n');
+        var listed = all.Where(l => l.StartsWith("• ", StringComparison.Ordinal)).ToList();
+        Assert.Equal(change.Rows.Select(r => "• " + r.Words), listed);               // every one, in the worker's order
+        Assert.Equal(PaneWords.ChangesShown(change).Count + 5, listed.Count);       // shown + "And 5 more"
+        Assert.StartsWith("9 changed verdicts:", all[0], StringComparison.Ordinal);
+        Assert.DoesNotContain(all, l => l.Contains("and 6 more", StringComparison.Ordinal));         // the worker's one line's own count
+        var view = Read("ResultsView.cs");
+        Assert.Contains("ToolTip = PaneWords.ChangesAll(change)", view, StringComparison.Ordinal);
+        Assert.DoesNotContain("ToolTip = change.Words", view, StringComparison.Ordinal);
+    }
+
+    /// <summary>The house's Project Information fix says one number of facts everywhere: its title, its count and the
+    /// opened card's overline (review round 1 of change 20: the overline counted its cards as facts).</summary>
+    [Fact]
+    public void The_house_project_information_fix_never_claims_two_numbers_of_facts()
+    {
+        var fix = FixesOf(House())[0];
+        Assert.Equal("pi", fix.Key);
+        var numbers = new[] { fix.Title, fix.Count, fix.MembersWords }
+            .SelectMany(w => System.Text.RegularExpressions.Regex.Matches(w, @"(\d+) facts").Select(m => m.Groups[1].Value)).Distinct().ToList();
+        Assert.Equal(["9"], numbers);
+        Assert.Equal("The 6 causes asking 9 facts, in Gordium's checker's words", fix.MembersWords);
+        Assert.Contains("Overline(g.MembersWords)", Read("CauseCardsView.cs"), StringComparison.Ordinal);
+    }
+
     // ---- changes 10 and 11: error and stale in plain words ---------------------------------------------------------
 
     /// <summary>The error says nothing passed and nothing changed, with Try again and Copy details; the exception and
