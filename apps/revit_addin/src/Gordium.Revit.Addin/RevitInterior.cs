@@ -48,6 +48,7 @@ internal static class RevitInterior
         using (BandPiecesKept.Open(Hits("inside.cache.band_pieces")))
         using (NearKept.Open(Hits("inside.cache.near")))
         using (ModelKept.Open())
+        using (IndexKept.Open())
         {
             // each step timed and counted for the log's read_steps (never part of the records)
             rooms = ReadSteps.Time("inside.rooms", () => new FilteredElementCollector(doc).OfCategory(BuiltInCategory.OST_Rooms)
@@ -974,9 +975,7 @@ internal static class RevitInterior
             // has a bounding box that meets the solid's box, so the box (padded by a foot) only passes extra candidates
             // the solid test then drops. The list is the same; the slow test runs on a room's neighbours, not on every
             // element of the model (Snowdon Towers: 300 of its 408 s of reading went here, read_steps 2026-11-22).
-            var hits = new FilteredElementCollector(doc).WhereElementIsNotElementType()
-                .WherePasses(new BoundingBoxIntersectsFilter(Padded(solid, 1.0)))
-                .WherePasses(new ElementIntersectsSolidFilter(solid))
+            var hits = Collect(doc, Padded(solid, 1.0), new ElementIntersectsSolidFilter(solid))
                 .Where(e => e.Id != room.Id)
                 .Select(e => new NearbyElement(e.UniqueId, Category(e), e.Name, (e as FamilyInstance)?.Host?.UniqueId,
                                                PhaseDemolished: Id(e.DemolishedPhaseId), DesignOption: Id(e.DesignOption?.Id)))
@@ -1209,8 +1208,7 @@ internal static class RevitInterior
         try
         {
             var options = new Options { DetailLevel = ViewDetailLevel.Fine, IncludeNonVisibleObjects = false };
-            var found = ReadSteps.Time(step + ".collect",
-                () => new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box)).ToList());
+            var found = ReadSteps.Time(step + ".collect", () => Collect(doc, box));
             ReadSteps.Count(step + ".candidates", found.Count);
             ReadSteps.Max(step + ".candidates_per_call", found.Count);
             var list = new List<NearbyElement>();
@@ -1260,6 +1258,63 @@ internal static class RevitInterior
     private static readonly ReadMemo<GeometryKey, NearbyElement> NearKept = new();
 
     private static readonly ReadMemo<long, BuiltInCategory?> ModelKept = new();
+
+    /// <summary>The model's element boxes (<see cref="BoxIndex"/>), listed once while <see cref="Read"/>'s scope is open.</summary>
+    private static readonly ReadMemo<int, BoxIndex> IndexKept = new();
+
+    /// <summary>How much an element's box is grown before it is left out of what Revit's box filter is run on: far more
+    /// than any gap between the box Revit filters on and the one it gives (they are the same box).</summary>
+    private const double IndexPad = 1.0;
+
+    /// <summary>What <c>new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new
+    /// BoundingBoxIntersectsFilter(box))</c>, then <paramref name="then"/>, passes, in the order it gives them. With
+    /// <see cref="Read"/>'s scope open, Revit's filters are run on <see cref="BoxIndex.Candidates"/> alone (every
+    /// element whose box, grown a foot, meets the box, or with none: all that can pass), and what passes is put back
+    /// in the model's order; with more candidates than a quarter of the model, or no scope open, on the whole model as
+    /// before.</summary>
+    private static List<Element> Collect(Document doc, Outline box, ElementFilter? then = null)
+    {
+        if (IndexKept.IsOpen)
+        {
+            var index = IndexKept.Get(0, () => ReadSteps.Time("inside.index", () => IndexOf(doc)));
+            ReadSteps.Count("inside.index.asks");
+            if (index.Candidates(new Box3(P(box.MinimumPoint), P(box.MaximumPoint)), IndexPad, index.Count / 4) is { } candidates)
+            {
+                ReadSteps.Count("inside.index.candidates", candidates.Count);
+                if (candidates.Count == 0)
+                    return [];
+                var some = new FilteredElementCollector(doc, candidates.Select(k => new ElementId(k)).ToList()).WhereElementIsNotElementType()
+                    .WherePasses(new BoundingBoxIntersectsFilter(box));
+                return index.InOrder(then is null ? some : some.WherePasses(then), e => e.Id.Value);
+            }
+        }
+        var all = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box));
+        return (then is null ? all : all.WherePasses(then)).ToList();
+    }
+
+    /// <summary>Every element Revit's box filter can pass (those it passes for a box round the whole of any model), in
+    /// the order it gives them, each with its box in model coordinates (null when it gives none, or refuses).</summary>
+    private static BoxIndex IndexOf(Document doc)
+    {
+        const double Everywhere = 1e9;
+        var all = new FilteredElementCollector(doc).WhereElementIsNotElementType()
+            .WherePasses(new BoundingBoxIntersectsFilter(new Outline(new XYZ(-Everywhere, -Everywhere, -Everywhere), new XYZ(Everywhere, Everywhere, Everywhere))))
+            .ToElements();
+        ReadSteps.Count("inside.index.elements", all.Count);
+        return new BoxIndex(all.Select(e => (e.Id.Value, ModelBox(e))).ToList());
+    }
+
+    private static Box3? ModelBox(Element e)
+    {
+        try
+        {
+            return e.get_BoundingBox(null) is { } b ? Box3.Turned(P(b.Min), P(b.Max), b.Transform is { } t ? T(t) : Reading.Transform3.Identity) : null;
+        }
+        catch (Exception)
+        {
+            return null;                                         // no box to tell by: always a candidate
+        }
+    }
 
     private static string Category(Element e) => e.Category is { } c ? c.BuiltInCategory.ToString() : "";
 

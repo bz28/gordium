@@ -149,6 +149,33 @@ public sealed class ReadSpeedTests
         Assert.Contains("ReadMemo<GeometryKey, NearbyElement> NearKept = new();", source);
     }
 
+    [Fact]
+    public void Revits_own_box_filter_decides_what_is_near_on_the_box_indexs_candidates_or_on_the_whole_model()
+    {
+        var source = Addin("RevitInterior.cs");
+        var collect = source[source.IndexOf("private static List<Element> Collect(", StringComparison.Ordinal)..source.IndexOf("private static BoxIndex IndexOf(", StringComparison.Ordinal)];
+        foreach (var hook in new[]
+                 {
+                     // only with the read's scope open (the model unchanged), and never with more than a quarter of the model
+                     "if (IndexKept.IsOpen)",
+                     "index.Candidates(new Box3(P(box.MinimumPoint), P(box.MaximumPoint)), IndexPad, index.Count / 4) is { } candidates",
+                     // Revit's filters on the candidates, put back in the model's order
+                     "new FilteredElementCollector(doc, candidates.Select(k => new ElementId(k)).ToList()).WhereElementIsNotElementType()\n" +
+                     "                    .WherePasses(new BoundingBoxIntersectsFilter(box));",
+                     "return index.InOrder(then is null ? some : some.WherePasses(then), e => e.Id.Value);",
+                     // else the whole model, as before
+                     "var all = new FilteredElementCollector(doc).WhereElementIsNotElementType().WherePasses(new BoundingBoxIntersectsFilter(box));",
+                 })
+            Assert.Contains(hook, collect);
+        Assert.Contains("private const double IndexPad = 1.0;", source);
+        // the index lists what Revit's box filter passes for a box round any model, each with its box round all 8 corners
+        Assert.Contains(".WherePasses(new BoundingBoxIntersectsFilter(new Outline(new XYZ(-Everywhere, -Everywhere, -Everywhere), new XYZ(Everywhere, Everywhere, Everywhere))))", source);
+        Assert.Contains("e.get_BoundingBox(null) is { } b ? Box3.Turned(P(b.Min), P(b.Max), b.Transform is { } t ? T(t) : Reading.Transform3.Identity) : null;", source);
+        // every look round goes through Collect: the rooms' insides and Near's
+        Assert.Contains("var found = ReadSteps.Time(step + \".collect\", () => Collect(doc, box));", source);
+        Assert.Equal(2, Count(source, "Collect(doc, "));
+    }
+
     private static int Count(string text, string what)
     {
         var n = 0;
