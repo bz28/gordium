@@ -6,7 +6,7 @@
 
 Gordium checks a design against the city's exact words. In the places below, the words can be read more than one way, and Gordium can't decide them on its own.
 
-**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones (19 then left). The R-1a and R-3a answer keys (2026-10-20) raise 4 questions of their own (§5.3 to §5.6) and carry 3 law-wide ones into their own rules; the R-2a, R-2b and R-2c answer keys (2026-10-21) raise 3 more (§5.7 to §5.9) and carry the same 3 into theirs; the R-3aa, R-3b and RU answer keys (2026-10-25) raise 5 more (§5.10 to §5.14) and carry 7 earlier ones into their own rules (§1.2, §1.3, §4.5, §5.3 to §5.6), each tagged where it is recorded; the occupancy rules (2026-10-27) raise 2 more (§5.15, recorded in 7 districts' rules, and §5.16, in R-1a and R-1b); the coverage audit's gaps (2026-10-27) raise 1 more (§5.17, recorded in all 9 districts' rules); the private garage's car limit (2026-10-29) raises 2 more (§5.18, recorded in 4 districts' rules, and §5.19, in R-2c); the accessory dwelling unit rules (2026-10-29) raise 3 more (§5.20, recorded in 8 districts' rules, §5.21, in R-1a and R-1b, and §5.22, in R-2c), and a bed-and-breakfast inn in R-1 and R-2 (2026-10-29) raises 1 more (§5.23, recorded in 5 districts' rules), so 103 are left (40 different questions). What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
+**Researched first.** Before a question reaches you, Gordium reads the whole law for it (every section that uses the word, or a word that means the same, from the term index), then the City's own decisions (zoning board records), then the building codes, then other cities. That research, on 2026-10-20, settled 20 of the 37 questions this page used to ask, narrowed 4 more to the part still open, and found 2 new ones (19 then left). The R-1a and R-3a answer keys (2026-10-20) raise 4 questions of their own (§5.3 to §5.6) and carry 3 law-wide ones into their own rules; the R-2a, R-2b and R-2c answer keys (2026-10-21) raise 3 more (§5.7 to §5.9) and carry the same 3 into theirs; the R-3aa, R-3b and RU answer keys (2026-10-25) raise 5 more (§5.10 to §5.14) and carry 7 earlier ones into their own rules (§1.2, §1.3, §4.5, §5.3 to §5.6), each tagged where it is recorded; the occupancy rules (2026-10-27) raise 2 more (§5.15, recorded in 7 districts' rules, and §5.16, in R-1a and R-1b); the coverage audit's gaps (2026-10-27) raise 1 more (§5.17, recorded in all 9 districts' rules); the private garage's car limit (2026-10-29) raises 2 more (§5.18, recorded in 4 districts' rules, and §5.19, in R-2c); the accessory dwelling unit rules (2026-10-29) raise 3 more (§5.20, recorded in 8 districts' rules, §5.21, in R-1a and R-1b, and §5.22, in R-2c), and a bed-and-breakfast inn in R-1 and R-2 (2026-10-29) raises 1 more (§5.23, recorded in 5 districts' rules); the commercial districts' rulebooks (B-1a, B-1b, B-2a, B-2d, B-4, B-5, 2026-11-22) raise 5 more (§5.24 to §5.28) and carry §5.3 into B-1a and B-1b, so 118 are left (45 different questions). What it settled is listed in §6, with its sources, and recorded with each rule or definition (the full report is `docs/research/2026-10-20_architect_questions.md`). What is left below is what research couldn't settle. Each question says what was searched and why it is still open, and a test fails if a recorded question has no research behind it.
 
 **Please note, until these are answered:** each question below says what Gordium does **today** and what it will do **from a model**, once it measures a Rhino model itself (being built now). There are three cases:
 - **NEEDS REVIEW:** Gordium can't decide, so it says so instead of guessing.
@@ -191,7 +191,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 
 ---
 
-## 5. Accessory buildings, accessory dwelling units, and the R-3a, R-2c, R-3aa, R-3b and RU districts
+## 5. Accessory buildings, accessory dwelling units, and the R-3a, R-2c, R-3aa, R-3b, RU and B districts
 
 ### 5.1 An accessory building that isn't frame; a height limit?
 `[325-25C#1]`
@@ -212,7 +212,7 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Options:** (a) the front yard on the street the address is on; (b) the one the designer names.
 
 ### 5.3 R-3a (and R-3aa, R-3b, RU): lot size for a dormitory or a nursing home
-`[R-3a.lot_area_other_use#1]` `[R-3aa.lot_area_other_use#1]` `[R-3b.lot_area_other_use#1]` `[RU.lot_area_other_use#1]`
+`[R-3a.lot_area_other_use#1]` `[R-3aa.lot_area_other_use#1]` `[R-3b.lot_area_other_use#1]` `[RU.lot_area_other_use#1]` `[B-1a.lot_area_other_use#1]` `[B-1b.lot_area_other_use#1]`
 
 - **The city's words:** "DORMITORY — A multiple dwelling which provides sleeping accommodations…" and "(4) A building used or occupied as a convalescent, old-age or nursing home" under DWELLING, MULTIPLE (§325-3, [p.7](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=7)). The chart's lot-size rows (p.3) have "Multiple family dwelling" and "Other use", but no dormitory or nursing-home row. Their figures by district: R-3a and R-3aa, multiple dwelling 6,000 sf new or 7,000 sf by conversion with note 7 ("+750 sf for each additional unit; +500 sf per room let for profit"), other use 6,000 sf; R-3b, 3,500 sf new or 4,000 sf by conversion with note 8 ("+500 sf for each additional unit; +300 sf per room let for profit"), other use 4,000 sf; RU, 16,500 sf with note 9 ("+1,500 sf for each additional unit"), other use 30,000 sf.
 - **What research found:** the definitions make both multiple dwellings, but the chart lists them as uses of their own and gives the fraternity house (also a multiple dwelling) its own row, which suggests a use with no row is an "Other use". No City record found.
@@ -399,6 +399,49 @@ Links to Chapter 325 open our stored copy of the city's PDF (for people with acc
 - **Why it matters:** an owner-managed house in R-1b offered as a 5-room bed-and-breakfast inn may apply for a special permit under one reading, and is not allowed under the other.
 - **Until you answer:** Today and from a model, a bed-and-breakfast inn in R-1 or R-2 gets NEEDS REVIEW (R-1b.use and the same rule in R-1a, R-2a, R-2b, R-2c), saying it may be prohibited or allowed only with the special permit; before 2026-10-29 it did not comply.
 - **Options:** (a) the chart governs: not permitted in R-1 and R-2; (b) §325-9B(1)(p) governs: allowed with a Planning and Development Board special permit.
+
+### 5.24 B-2d, B-4 and B-5: a motel's lot size, the chart's 3,000 sf or §325-22A's 20,000 sf?
+`[B-4.lot_area_hotel_motel#1]` `[B-5.lot_area_hotel_motel#1]`
+
+- **The city's words:** the commercial chart's Motel rows give B-2D, B-4 and B-5 "3,000 sf" and "40 ft" (zoning charts, April 2026, [p.5](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/zoning_charts_2026-04.pdf#page=5)), and B-2A "20,000 sf" and "100 ft"; §325-22A says "Motels shall maintain a minimum lot size of 20,000 square feet and a minimum frontage of 100 feet on a public right-of-way." ([p.64](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=64)). (In B-2d a hotel or motel isn't permitted, chart p.4, so only B-4 and B-5 ask.)
+- **What research found:** §325-8B(8) makes every chart column subject to Article V, which holds §325-22, so the stricter figure reads as governing; the chart's smaller cell may mean small-lot motels were meant to be allowed. No City record found.
+- **Why it matters:** a motel on a 10,000 sf B-4 lot meets the chart and not the law.
+- **Until you answer:** Today and from a model, a hotel or motel lot with 20,000 sf and 100 ft complies; one with the other-use figures (3,000 sf, 40 ft) but less than 20,000 sf or 100 ft gets NEEDS REVIEW (a hotel that isn't a motel needs only the other-use row); less fails.
+- **Options:** (a) §325-22A governs (20,000 sf and 100 ft); (b) the chart governs in these districts (3,000 sf and 40 ft).
+
+### 5.25 B-2a and B-4 require no front yard: does the height bonus ask for one?
+`[B-2a.height#1]` `[B-4.height#1]`
+
+- **The city's words:** §325-16C: "(1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional height." ([p.47](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=47)); the chart's front yard for B-2A and B-4 is "-" (p.5).
+- **What research found:** with no front yard required there may be nothing to increase, or a 0 ft yard that grows. No City record found.
+- **Why it matters:** a 44 ft B-2a building at the sidewalk complies under one reading and not the other.
+- **Until you answer:** Today and from a model, Gordium assumes the stricter reading: a building using the bonus must stand back from the street by its extra height, so it may say does not comply where the other reading complies, never the reverse.
+- **Options:** (a) the front yard grows from 0 ft; (b) no front yard is required, bonus or not.
+
+### 5.26 B-1a, B-1b and B-2d: may a building of 500 sf or less skip the two-story minimum?
+`[B-1a.min_stories#1]` `[B-1b.min_stories#1]` `[B-2d.min_stories#1]`
+
+- **The city's words:** chart note 6: "Minimum building height requirement shall not apply to development, including additions and/or expansions of existing development where the new development or addition or expansion of the existing development does not exceed a footprint of 500 square feet." (p.5, on the heading over both the stories and the feet rows); §325-16G: "Notwithstanding anything to the contrary contained herein, in the CBD-60, … B-1a, B-1b, B-2c, and B-2d Zoning Districts, no primary use building shall be erected that is less than two stories" ([p.48](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=48)), with no such exception; §325-8A(15) gives the 500 sf exception for Column 16, the height in feet ([p.26](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=26)).
+- **What research found:** the exception is written for the feet; the two-story rule says "notwithstanding anything to the contrary". No City record found. (The R-3aa question §5.10 is the residential twin.)
+- **Why it matters:** a one-story 400 sf kiosk in B-1b.
+- **Until you answer:** Today and from a model, a one-story building whose buildings cover 500 sf or less gets NEEDS REVIEW; larger, does not comply.
+- **Options:** (a) note 6 lifts both minimums; (b) it lifts only the height in feet; two stories are always required.
+
+### 5.27 B-4 and B-5: is an accessory dwelling unit permitted? The chart's cell is blank
+`[B-4.accessory_dwelling_unit#1]` `[B-5.accessory_dwelling_unit#1]`
+
+- **The city's words:** the commercial chart's "Accessory Dwelling Unit" row marks • for B-1A to B-2D and leaves B-4, B-5 and CBD blank (p.4); §325-3B defines an ADU as "A smaller, secondary dwelling unit located on the same lot as a primary residential, commercial, or mixed-use structure" ([p.4](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=4)).
+- **What research found:** the definition contemplates an ADU beside a commercial building; the chart neither permits nor forbids it here. No City record found.
+- **Until you answer:** Today and from a model, an ADU on a B-4 or B-5 lot gets NEEDS REVIEW (and in every B district §325-28's limits are checked by hand for now).
+- **Options:** (a) permitted (a blank is no prohibition); (b) not permitted (only • is permitted).
+
+### 5.28 B-1a, B-1b, B-4 and B-5: chart p.15 gives "-" for parking. None required, or §325-20?
+`[B-1a.parking#1]` `[B-1b.parking#1]` `[B-4.parking#1]` `[B-5.parking#1]`
+
+- **The city's words:** §325-8A(4): "The off-street parking spaces listed in this column shall be provided for each building hereafter erected or altered." ([p.24](https://github.com/bz28/gordium/blob/main/regulations/jurisdictions/new_york/ithaca_city/1_source_documents/chapter_325_zoning_2026-10.pdf#page=24)); the commercial parking chart (p.15) gives B-2A and B-2D a figure per use and "-" on every row for B-1A, B-1B, B-4, B-5 and CBD, with note 2: "For all other uses see §325-20."
+- **What research found:** §325-20's general standards give no count by district. No City interpretation found.
+- **Until you answer:** Today and from a model, every B lot gets NEEDS REVIEW for parking (Gordium never reads "-" as none required).
+- **Options:** (a) no off-street parking is required in these districts; (b) §325-20 or another section sets it.
 
 ---
 
