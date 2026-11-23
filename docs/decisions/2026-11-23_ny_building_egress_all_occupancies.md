@@ -58,7 +58,7 @@ Two P0 findings (a fixed-seat assembly space passing on Table 1006.2.1's 75 ft; 
 
 | Where | Tightens | Handled by |
 |---|---|---|
-| Table 1006.2.1 note c, 1030.8 (brought in) | an assembly space with fixed seating: 30 ft from any seat (75 ft under 50), any number of exits | the A, E, M row needs review over it where `assembly_fixed_seating` is yes or not stated (seats aren't drawn); flag `bc_1030_8_...` |
+| Table 1006.2.1 note c, 1030.8 (brought in) | a room used for assembly purposes with fixed seating, in any group (303.1.1 to 303.1.3: an E school's auditorium, a B lecture hall): 30 ft from any seat (75 ft under 50), any number of exits | every Table 1006.2.1 row (and Group I-4's) needs review over it where `assembly_fixed_seating` is yes or not stated (seats aren't drawn); flag `bc_1030_8_...` on the fact alone |
 | 1018.4 (brought in) | Group M merchandise pads: 30 ft from any point in a pad (75 ft for 50 or fewer) | the row needs review over it where `merchandise_pads` is yes or not stated; flag `bc_1018_4_...` |
 | Table 1017.2 note e, 1006.2.2.6 (brought in) | Groups R-3 and R-4 with NFPA 13D: 125 ft and 75 ft | the row's limit, and rule `bc_1006_2_2_6_...`; new fact `sprinklered_903_3_1_3` |
 | 1006.2.2.1 to 1006.2.2.5 (brought in) | boiler, refrigeration, refrigerated and electrical rooms: two exits; refrigeration rooms 150 ft unsprinklered | a one-exit space within its row needs review, and every travel row, where `special_egress_spaces` is yes or not stated; five flags |
@@ -66,11 +66,15 @@ Two P0 findings (a fixed-seat assembly space passing on Table 1006.2.1's 75 ft; 
 | note a: 407.4 (Group I-2) | 407.4.2: 50 ft within a sleeping room (brought in); 407.4.4 care suites | rule `bc_407_4_2_...` and the I-2 travel row (over 50 ft: review); care suites are `special_egress_spaces`'; 1016.2 needs review for I-2 with care suites not ruled out (407.4.4.1) |
 | note a: 408.6.1, 408.8.1 (Group I-3) | smoke-barrier doors within 150 and 200 ft | the I-3 travel row never passes; 1016.2 needs review for I-3 (408.6.3) |
 | 1017.3.2.3 | 200 ft within an atrium | rows allowing more than 200 ft need review over it where `building_has_atrium` is yes or not stated |
-| 1017.3 exception 1, 1030.7 | open parking garages measured to a riser; assembly travel along aisles, never over seats | Group S-2 over its row needs review; any Group A travel needs review while fixed seating isn't ruled out |
+| 1017.3 exception 1, 1030.7 (brought in) | open parking garages measured to a riser; assembly seating's travel along the aisles, never over the seats, in any group | Group S-2 over its row needs review; every travel row (Group I-4's and 1006.2.2.6's too) needs review while fixed seating isn't ruled out |
 | 1006.3.4 (note a) | a one-exit story's 75 or 125 ft | the story-exit rules (`bc_1006_3_3_story_exits`; every group in section group 2) |
 | Routes `_is_exit` (P1) | a horizontal exit's far room counted as an exit | only `exit_enclosure` and `exit_passageway` doors make the room they enter an exit |
 
 Checked on purpose and found loosening, not tightening: 1017.2.1 (balcony), 1017.2.2 (F-1, S-1), 1017.2.3 (H-5), 412.6 (aircraft manufacturing), 1030.7's exceptions, 1006.2.1's exceptions 1 and 3, Table 1006.2.1 note f; each already needs review only within the increase. New stated facts: `sprinklered_903_3_1_3` (from `sprinkler_system: nfpa_13d`), `special_egress_spaces`, `merchandise_pads` (the interior format's building block); the Revit add-in has no marks for the last two yet, so a Revit check leaves them unstated and the rows they guard need review.
+
+## Review round 2 (2026-11-23)
+
+Five findings: fixed seating held only Group A rows (1030.7 and 1030.8 apply to any room used for assembly with fixed seats, whatever its group: now every travel and common-path row, Group I-4's included, and the flag on the fact alone; 1030.7 brought in); the Group I-4 rows lacked the sweep's `special_egress_spaces` and balcony reviews (added); the interior format's `special_egress_spaces` comment missed care suites and vehicular ramps; `needed_by` had drifted (rebuilt, and `python -m rule_format` now refuses any drift, which found Maine's too); the README's piece and number counts were stale (a test now ties them to the second reading). The class fix: `packages/rule_format/tests/test_ny_building_tightening_walk.py` walks every group (and mixed, and unstated), every value of every building fact the drafted rules read (the walk fails if a rule reads one it doesn't vary), and measures just inside and past each tightened limit, against an oracle written from the table above: no travel or common-path row passes where a tightening applies. At `a1425e1a` it found 2,451 such passes across 24 rules (fixed seating in every group but A, the I-4 rows, 1006.2.2.6's rule; with 407.4.2's rule, which measures a sleeping room's own travel, left out of its scope); after the fixes, none.
 
 ## What the four-unit apartment still waits on
 

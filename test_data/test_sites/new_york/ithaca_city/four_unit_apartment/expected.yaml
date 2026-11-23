@@ -90,7 +90,7 @@ results:
   general.bc_table_1006_2_1_u: not_applicable
   # the flags: a person's check, each its own line (other_occupancy_present is yes: Group R-2 is not I-4; the
   # balcony and atrium flags' facts aren't stated, so they show), but those narrowed 2026-11-23 to a building of two
-  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 23 show
+  # or more groups or to another group (not applicable: R-2 is one group, its rows drafted); 24 show
   general.bc_308_5_classification: needs_review
   general.bc_308_5_1_group_e: needs_review
   general.bc_308_5_2_religious_worship: needs_review
@@ -119,7 +119,7 @@ results:
   general.bc_1006_2_2_6_r3_r4_nfpa_13d: not_applicable     # Group R-2, no NFPA 13D system
   general.bc_407_4_2_sleeping_room_travel: not_applicable  # not Group I-2
   general.bc_1018_4_merchandise_pads: not_applicable       # not Group M
-  general.bc_1030_8_fixed_seating_common_path: not_applicable   # not Group A
+  general.bc_1030_8_fixed_seating_common_path: needs_review     # fixed seating not stated (any group: round 2)
   general.bc_table_1017_2_note_d_group_h: not_applicable
   general.bc_1017_2_1_balcony_increase: needs_review
   general.bc_1017_2_2_f1_s1_increase: not_applicable

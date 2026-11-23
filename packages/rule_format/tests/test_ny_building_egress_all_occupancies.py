@@ -378,3 +378,28 @@ def test_a_space_with_its_own_limit_stated_or_not_ruled_out_never_passes_a_trave
     assert _one(i2, "story", _travel(150), g, ctx) == "pass"                          # 50 ft in the room
     assert _one(i2, "story", {"egress_travel_distance": 150, "egress_travel_in_sleeping_room": 50.01}, g, ctx) == \
         "needs_review"                                                                 # over 407.4.2's 50 ft
+
+
+def test_the_readme_counts_the_pieces_and_numbers_the_second_reading_holds():
+    """Review round 2 (P3): the folder's README states how many pieces are brought in and how many numbers were
+    read twice; both must be the second reading's own counts, so a piece brought in can't leave them stale."""
+    pieces = load(NY / "text_verification.yaml")["pieces"]
+    numbers = sum(len(e["numbers"]) for e in pieces.values())
+    readme = (NY / "README.md").read_text(encoding="utf-8")
+    assert f"{len(pieces)} pieces." in readme and f"(all {len(pieces)} pieces, {numbers} numbers, agree)" in readme
+
+
+def test_needed_by_is_checked_against_the_rules_that_read_each_fact(tmp_path):
+    """Review round 2 (P3): rule_format refuses a proposed measure whose needed_by names a rule that doesn't read it,
+    or misses one that does."""
+    from rule_format.rulebook import needed_by_problems
+    book = tmp_path / "general.yaml"
+    book.write_text("rules:\n- id: general.a\n  check: x_fact and y > 1\n- id: general.b\n  applies_when: x_fact\n",
+                    encoding="utf-8")
+    proposed = tmp_path / "proposed.yaml"
+    proposed.write_text("x_fact:\n  unit: yes_no\n  needed_by: [general.a, general.c]\n", encoding="utf-8")
+    got = needed_by_problems(proposed, [book])
+    assert any("general.c" in p and "don't read it" in p for p in got)
+    assert any("general.b" in p and "misses" in p for p in got)
+    assert needed_by_problems(NY / "5_building_code_rules/drafted/records/proposed_measures.yaml",
+                              [RULEBOOK]) == []
