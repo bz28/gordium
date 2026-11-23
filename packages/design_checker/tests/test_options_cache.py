@@ -321,6 +321,17 @@ def test_options_is_quick():
     assert again < 1.0, again
 
 
+def test_the_memo_kept_for_one_answer_gives_the_answer_worked_out_rule_by_rule(monkeypatch):
+    """_options keeps each applies_when verdict and each rule's names for one answer (21 districts × 37 uses took
+    ~0.27 s worked out again on Windows, 2026-11-23; ~0.05 s kept). The same answer as a fresh memo for every call."""
+    _clear()
+    kept = check.options(CITY)
+    original = check._read_for
+    monkeypatch.setattr(check, "_read_for", lambda rules, use, uses, memo=None: original(rules, use, uses, None))
+    check._OPTIONS.clear()
+    assert check.options(CITY) == kept
+
+
 def test_a_uses_file_that_cannot_be_read_is_an_error_as_before(tmp_path):
     """Review round 1: a uses.yaml that is there but is no file (a folder) is an error, as it always was, never a
     city with no uses. Windows refuses to open a folder with PermissionError, macOS and Linux with IsADirectoryError."""
