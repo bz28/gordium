@@ -296,7 +296,7 @@ These are proposed numbers for Ben to confirm or change before day 1. They are l
   `apps\revit_addin\tests\Gordium.Worker.Tests\fake_worker.py` and the mode, run with the venv Python and the
   clone as working folder) in mode `not_applicable`, then `unknown_status_in_review`, and list `result.Groups`
   with each row's `Status`, `StatusWord` and `Reason` in the message box. Go if: in `not_applicable`, "Ramps: not
-  applicable" is under "IRC · Complies" (folded), with its reason, as `NotApplicable`, and the state is `Complies`;
+  applicable" is under "IRC · Complies or not applicable" (folded; the heading names both since #112), with its reason, as `NotApplicable`, and the state is `Complies`;
   in `unknown_status_in_review`, that row is `NeedsReview` with the word `set_aside`, and the state is
   `NeedsReview`. How the panel itself shows them (the mark, the colour, a folded group on screen) waits for the
   dockable pane, after a go. The real worker can't give a row not applicable to the add-in yet: `check_site` doesn't
