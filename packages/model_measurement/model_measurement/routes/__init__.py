@@ -452,6 +452,23 @@ def _in_room(story, routes, rid, doors) -> float:
     return farthest(_Within).figure
 
 
+def _is_exit(story, rid) -> bool:
+    """Whether the room is itself an exit (a stair enclosure, an exit passageway: IBC 1016.1's exits), not a space the
+    exits serve: a door of it marked an exit enters it (its `exit_id` is this room, as the format gives an
+    enclosure's doors, docs/interior/interior_description_format.md). No exit door of it, or each one entering the
+    room on its other side or leading outside (an exterior exit door at discharge), and it is a space. An exit door
+    whose exit is neither room it joins (a stair's own id) leaves it unknown (Stop)."""
+    for d in sorted((d for d in story.doors.values() if rid in d.sides and d.exit_kind), key=lambda d: d.id):
+        if d.exit_id == rid:
+            return True
+    for d in sorted((d for d in story.doors.values() if rid in d.sides and d.exit_kind), key=lambda d: d.id):
+        other = next((s for s in d.sides if s != rid), None)
+        if d.exit_kind != "exterior_at_discharge" and d.exit_id != other:
+            raise Stop("exit_side_unclear", name=story.rooms[rid].name if story.rooms.get(rid) else rid,
+                       door=d.name, exit_id=d.exit_id)
+    return False
+
+
 def _space_part(rid, name, story, routes, room, access, figures, why_not) -> dict:
     p = _part(rid, name, story.level)
     p["not_measured"]["space_occupant_load"] = Stop("stated_not_given", what=STATED["space_occupant_load"]).reason
@@ -465,6 +482,10 @@ def _space_part(rid, name, story, routes, room, access, figures, why_not) -> dic
         for m in ("space_exit_count", "space_common_path"):
             p["not_measured"][m] = why
         return p
+    try:
+        p["measures"]["space_is_exit"] = _is_exit(story, rid)
+    except Stop as s:
+        p["not_measured"]["space_is_exit"] = s.reason
     if isinstance(access, Stop):
         p["not_measured"]["space_exit_count"] = access.reason
     else:

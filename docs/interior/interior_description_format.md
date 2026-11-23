@@ -194,6 +194,7 @@ building:
   sprinkler_system: none               # none, nfpa_13 (903.3.1.1), nfpa_13r (903.3.1.2), nfpa_13d (903.3.1.3)
   egress_balcony_increase_taken: false # BCNYS 1017.2.1 (a fact the Building Code's flags read)
   building_has_atrium: false
+  assembly_fixed_seating: false        # rooms used for assembly with fixed seating (BCNYS Table 1006.2.1 note c)
   facts_not_sent: [dwelling_units]     # lot facts the host had a value for but couldn't send
 ```
 

@@ -118,13 +118,22 @@ def test_a_building_fact_gordium_cant_read_is_said_never_used():
 
 def test_the_building_measures_follow_the_groups_and_the_sprinkler_system():
     assert code_scope.building_measures({"occupancy_groups": ["R-2"], "sprinkler_system": "nfpa_13r"}) == {
-        "occupancy_group_i4": False, "other_occupancy_present": True, "sprinklered_903_3_1_1": False,
-        "sprinklered_903_3_1_2": True}
+        "occupancy_group_i4": False, "other_occupancy_present": True, "occupancy_group": "R-2",
+        "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": True}
     assert code_scope.building_measures({"occupancy_groups": ["I-4"], "sprinkler_system": "nfpa_13"}) == {
-        "occupancy_group_i4": True, "other_occupancy_present": False, "sprinklered_903_3_1_1": True,
-        "sprinklered_903_3_1_2": False}
+        "occupancy_group_i4": True, "other_occupancy_present": False, "occupancy_group": "I-4",
+        "sprinklered_903_3_1_1": True, "sprinklered_903_3_1_2": False}
     assert code_scope.building_measures({"sprinkler_system": "nfpa_13d"}) == {
         "sprinklered_903_3_1_1": False, "sprinklered_903_3_1_2": False}       # 903.3.1.3: neither limit's system
+
+
+def test_the_one_occupancy_group_or_mixed_for_two_and_the_seating_fact():
+    """The table-row rules read occupancy_group: the one group stated, "mixed" for two or more (a person's check,
+    1004.4), left out with none (docs/decisions/2026-11-23_ny_building_egress_all_occupancies.md)."""
+    assert code_scope.building_measures({"occupancy_groups": ["B", "A-3"]})["occupancy_group"] == "mixed"
+    assert code_scope.building_measures({"occupancy_groups": ["M", "M"]})["occupancy_group"] == "M"
+    assert "occupancy_group" not in code_scope.building_measures({"sprinkler_system": "none"})
+    assert code_scope.building_measures({"assembly_fixed_seating": False}) == {"assembly_fixed_seating": False}
 
 
 # ---- in the check -----------------------------------------------------------------------------------------------------
@@ -183,7 +192,7 @@ def test_the_answer_carries_which_code_in_the_deciders_own_words():
 def test_a_building_code_flag_for_the_whole_building_is_its_own_needs_review_line():
     found = egress.laws(ITHACA)
     bcnys = next(law for law in found["laws"] if law["scope"] == code_scope.BUILDING)
-    flag = next(r for r in bcnys["rules"] if r["id"] == "general.bc_table_1017_2_other_occupancies")
+    flag = next(r for r in bcnys["rules"] if r["id"] == "general.bc_1016_2_other_occupancies")
     out = {}
     item = egress._flag_item(bcnys, flag, flag["id"], {"other_occupancy_present": True}, bcnys["kinds"], out)
     assert item["status"] == present.REVIEW and item["reason"].startswith("A person checks this")
