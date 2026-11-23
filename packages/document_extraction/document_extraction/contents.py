@@ -313,7 +313,7 @@ def build(jurisdiction: Path) -> tuple[Path | None, str | None, list[str], str |
     """(the contents file's path, its text, the problems, why it was skipped): for the folder's one code book, or
     its ecode360 chapter."""
     import yaml
-    from rule_format.rulebook import cached
+    from rule_format.rulebook import cached, read_jsonl
 
     from .extract import sha256
     docs = yaml.safe_load((jurisdiction / "1_source_documents" / "sources.yaml").read_text(encoding="utf-8"))["documents"]
@@ -325,7 +325,7 @@ def build(jurisdiction: Path) -> tuple[Path | None, str | None, list[str], str |
     out_dir = jurisdiction / "2_extracted_text"
     path = out_dir / f"{stem}.contents.jsonl"
     sections_file = out_dir / f"{stem}.sections.jsonl"
-    pieces = [json.loads(x) for x in sections_file.read_text(encoding="utf-8").splitlines()[1:]] \
+    pieces = read_jsonl(sections_file)[1:] \
         if sections_file.exists() else []
     if doc.get("layout") == "icc":
         pdf = cached(doc)
@@ -339,7 +339,7 @@ def build(jurisdiction: Path) -> tuple[Path | None, str | None, list[str], str |
         source = "pdf"
     else:
         text = out_dir / f"{stem}.jsonl"
-        text_rows = [json.loads(x) for x in text.read_text(encoding="utf-8").splitlines()[1:]]
+        text_rows = read_jsonl(text)[1:]
         pages, rows, problems = read_ecode360(text_rows, pieces)
         source = f"2_extracted_text/{text.name} + {sections_file.name}"
     header = {"file": doc["file"], "sha256": doc["sha256"], "made_by": MADE_BY, "pages": pages, "source": source,

@@ -15,12 +15,11 @@ the most telling of its pieces' (rules > flag > not_checked_yet > not_for_checki
 `whole` false where only some of a section was brought in (the rest is not brought in).
 """
 
-import json
 import re
 from pathlib import Path
 
 from rule_format.labels import load_pieces
-from rule_format.rulebook import load
+from rule_format.rulebook import load, read_jsonl
 
 RULES, FLAG, NOT_YET, NOT_FOR, NOT_IN = "rules", "flag", "not_checked_yet", "not_for_checking", "not_brought_in"
 ORDER = (RULES, FLAG, NOT_YET, NOT_FOR)
@@ -28,8 +27,22 @@ CONTAINERS = ("chapter", "article", "appendix")   # what a section is in (a part
 CHART = "zoning_charts"                     # the District Regulations Chart is part of §325-8 (§325-8A, p.24)
 
 
+_READ = {}     # (path, how) -> (its size and time, what was read): each file read again only once it changes
+
+
+def _read(path: Path, how: str):
+    """A file's contents (`how`: "jsonl", "pieces" or "yaml"), read once and kept until the file changes (a check
+    runs on every edit; the files change only when made again). Never changed by a caller."""
+    stat = path.stat()
+    key, mark = (str(path), how), (stat.st_size, stat.st_mtime_ns)
+    if key not in _READ or _READ[key][0] != mark:
+        got = read_jsonl(path) if how == "jsonl" else load_pieces(path)[1] if how == "pieces" else load(path)
+        _READ[key] = (mark, got)
+    return _READ[key][1]
+
+
 def _rows(path: Path) -> tuple[dict, list[dict]]:
-    lines = [json.loads(x) for x in path.read_text(encoding="utf-8").splitlines() if x.strip()]
+    lines = _read(path, "jsonl")
     return (lines[0], lines[1:]) if lines else ({}, [])
 
 
@@ -48,9 +61,9 @@ def _folder_books(folder: Path, key: str, documents: dict) -> list[dict]:
         header, rows = _rows(path)
         file = header.get("file")
         sections_file = folder / "2_extracted_text" / (path.name[:-len(".contents.jsonl")] + ".sections.jsonl")
-        pieces = load_pieces(sections_file)[1] if sections_file.is_file() else {}
+        pieces = _read(sections_file, "pieces") if sections_file.is_file() else {}
         labels_file = folder / "3_section_labels" / (path.name[:-len(".contents.jsonl")] + ".yaml")
-        labels = (load(labels_file) or {}).get("labels") or {} if labels_file.is_file() else {}
+        labels = (_read(labels_file, "yaml") or {}).get("labels") or {} if labels_file.is_file() else {}
         out.append({"key": key, "folder": folder, "file": file,
                     "document": (documents.get(file) or {}).get("title") or file,
                     "header": header, "rows": rows, "pieces": pieces, "labels": labels,
@@ -125,7 +138,7 @@ def _coverage(book: dict, rules: list[dict]) -> dict:
     out = {}
     loaded = {r.get("id") for r in rules if isinstance(r, dict)}
     if report.is_file():                    # an ICC book: the generated list of pieces with rules
-        data = load(report) or {}
+        data = _read(report, "yaml") or {}
         listed = {str(p) for p in data.get("not_checked_yet") or []}
         for pid, entry in (data.get("pieces") or {}).items():
             ids = [i for i in entry.get("rules") or [] if i in loaded]

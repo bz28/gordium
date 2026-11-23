@@ -253,3 +253,21 @@ def test_the_apartments_limits_not_worked_out_say_what_they_depend_on(apartment)
     by = {i["id"]: i for i in apartment["view"]["items"]}
     assert "dwelling units" in by["R-3a.lot_area_multiple_family"]["limit_words"]
     assert all(i.get("required") == "—" for i in by.values() if "limit_words" in i)
+
+
+def test_a_pick_is_the_architects_to_state_and_a_tax_map_row_needs_a_survey():
+    from model_measurement.stops import stop
+    got, = ui_data.asks_of(_zoning(stop("no_main_building"), objects=["b1", "b2"]), _ctx())
+    assert (got["kind"], got["headline"], got["elements"]) == (ui_data.MARK, "Pick the main building", ["b1", "b2"])
+    item = _zoning("Lot lines are from the tax map (±2'-0\"): at worst 35'-0\" against 35'-0\" · Pick survey lot lines…",
+                   objects=["lot"])
+    item["causes"] = present.zoning_causes(item)
+    got, = ui_data.asks_of(item, _ctx())
+    assert (got["kind"], got["elements"]) == (ui_data.SURVEY, ["lot"])
+
+
+def test_a_headline_from_the_measurings_words_leaves_its_figures_to_the_why():
+    from model_measurement.stops import stop
+    clause = stop("ground_off_building", ground="0.0", bottom="2.25", top="40.25")
+    got, = ui_data.asks_of(_zoning(clause), _ctx())
+    assert got["headline"] == "The ground level doesn't meet the buildings" and got["why"] == clause

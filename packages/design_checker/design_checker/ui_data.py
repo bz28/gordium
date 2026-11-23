@@ -96,8 +96,16 @@ def _cap(text: str) -> str:
 
 
 def _clause_head(text: str) -> str:
-    """A clause's words up to its first colon, as a headline ("The street side isn't given")."""
-    return _cap(text.split(": ")[0].strip().rstrip("."))
+    """A clause's words up to its first colon, its brackets left out, as a headline ("The street side isn't given";
+    "The ground level doesn't meet the buildings" from "the ground level (0.0 ft) doesn't meet the buildings (they
+    run from 2.25 to 40.25 ft): check the ground level"). The clause whole is the ask's why."""
+    head = text.split(": ")[0]
+    while True:
+        cut = re.sub(r"\s*\([^()]*\)", "", head)
+        if cut == head:
+            break
+        head = cut
+    return _cap(" ".join(head.split()).rstrip(".")) or _cap(text.strip())
 
 
 # ---- asks ---------------------------------------------------------------------------------------------------
@@ -209,6 +217,19 @@ def _stop_of(clause: str):
     return None
 
 
+def _is_pick(key: str) -> bool:
+    """Whether the measuring's stop asks the architect to pick something (the main building, the street side):
+    its own words say "pick" (model_measurement/stops.py)."""
+    from model_measurement.stops import STOPS
+    return bool(re.search(r"(^|: )pick ", STOPS.get(key, "")))
+
+
+def _pick_head(clause: str) -> str:
+    """A pick's headline: what to pick, from the stop's own words ("Pick the main building")."""
+    m = re.search(r"(?:^|: )(pick [^(:;]*)", clause)
+    return _cap(m.group(1).strip().rstrip(".")) if m else _clause_head(clause)
+
+
 def _open_ids(site: dict | None, place) -> list[str]:
     """The site's building objects that aren't closed solids, by the place's own measuring (its _open_ids), else by
     the reader's own problem words."""
@@ -273,6 +294,9 @@ def _zoning_asks(item: dict, ctx: dict) -> list[dict]:
             ids = _named(ctx.get("site"), what, ctx["open_ids"])
             out.append({"kind": FIX_MODEL, "key": f"stop:open_solid:{what}",
                         "headline": f"“{what}” isn't a closed solid", "why": clause, "elements": ids})
+        elif key is not None and _is_pick(key):
+            out.append({"kind": MARK, "key": f"stop:{key}", "headline": _pick_head(clause), "why": clause,
+                        "elements": [o for o in item.get("objects") or [] if isinstance(o, str)]})
         elif key is not None:
             out.append({"kind": FIX_MODEL, "key": f"stop:{key}:{clause}", "headline": _clause_head(clause),
                         "why": clause, "elements": []})
@@ -283,6 +307,12 @@ def _zoning_asks(item: dict, ctx: dict) -> list[dict]:
         elif not needs:
             out.append({"kind": DECIDE, "key": f"reason:{item.get('id')}:{clause}", "headline":
                         "A person decides this: see why", "why": clause, "elements": []})
+    if any(c.get("key") == "survey_lot_lines" for c in item.get("causes") or []):
+        # within the tax map's 2 ft either way, a survey's lot lines settle it (present.zoning_causes' own cause)
+        out = [a for a in out if a["kind"] != DECIDE] + [
+            {"kind": SURVEY, "key": "survey_lot_lines", "headline": "Lot lines from a survey settle this (the tax "
+             "map is good to 2 ft)", "why": reason, "elements": [o for o in item.get("objects") or []
+                                                                 if isinstance(o, str)]}]
     if not out:
         out = [_from_cause(c, None) for c in item.get("causes") or []]
     if item.get("id") == "scope.not_included":
