@@ -5,7 +5,7 @@ Gordium was run on them. **Not yet verified by an architect** (architect review 
 approval is): they are a careful second reading, not an outside check. When that deferred review happens, who
 and when is recorded here.
 
-Fifteen designs an architect really draws on a City of Ithaca lot (ten in R-1b, one in R-1a, one in R-3a, two in B-2a and one in B-1b), each with the result **worked out by hand
+Eighteen designs an architect really draws on a City of Ithaca lot (ten in R-1b, one in R-1a, one in R-3a, two in B-2a, one in B-1b, two in CBD-60 and one in CBD-85), each with the result **worked out by hand
 from the code's own words before Gordium was run on it**. The expected results are never changed to match
 Gordium. When Gordium disagrees, the disagreement is investigated: either the code is fixed, or the question goes
 to the architects (written up under `disagreements` in the scenario). A disagreement where Gordium is less
@@ -20,7 +20,11 @@ Each `<name>.yaml` holds:
   two-family house at its height, stories, coverage, front and side-yard limits (each one R-1b would fail). `13_…` is
   a two-story shop with offices above inside every B-2a limit; `14_…` a B-1b office building 1 ft under B-1b's 25 ft
   minimum height; `15_…` a one-story B-2a store at 60% coverage (allowed only with parking nearby: needs review) with
-  side yards of 5 ft (one must be 10).
+  side yards of 5 ft (one must be 10). `16_…` is a five-story CBD-60 building of shops and apartments built to the
+  street and side lines (complies; the §325-8D(3) active-use flag, transition yards and parking need review); `17_…`
+  a six-story CBD-60 office 4 ft over the 60 ft its name gives, on the street line, so the §325-16C bonus can't
+  apply (does not comply); `18_…` a seven-story CBD-85 building on the 100 block of West Green Street, inside 85 ft,
+  whose §325-8D(2) stepback is a flag (needs review).
 - `lot`: the lot corners (feet; the street runs along the first edge), whether it's from a survey
 - `buildings`: each solid on the Building layer. A building with `floors` is stacked floor blocks, each one story,
   the way GordiumStart draws them. `others`: solids on the lot that are **not** on the Building layer.

@@ -1,0 +1,1312 @@
+# CBD-50 (City of Ithaca, Central Business): rules drafted by Claude by reading the zoning charts (April 2026: p.4 uses,
+# p.5 dimensions, p.15 parking and loading) and Chapter 325, 2026-11-23. Draft (architect approval is deferred for now,
+# decided 2026-10-19). The charts give every CBD sub-district one column, "Central Business" (CBD-50, -60, -85, -100, -120,
+# -140); its values are checked against the chart reader's cells (packages/document_extraction/tests/
+# test_cbd_districts_match_chart.py), and the height comes from the district's name (chart note 5: 50 ft). Every
+# quote is verified against the PDF text by `python -m rule_format`. Written the way the B rulebooks were, laid out with a
+# small script of Claude's own so the six CBD rulebooks are written alike. The reading of the law, and what isn't covered
+# yet: docs/decisions/2026-11-23_central_business_districts.md.
+#
+# Flags here (needs review on every lot they apply to): active street-level use (§325-8D(3)), the transition yards
+# next to residential lots (§325-19), parking, accessory dwelling units, motels' extra standards;
+# Landmarks Preservation Commission review (§325-8D(1)). No loading flag: no
+# off-street loading is required in any CBD district (§325-8A(5), §325-21B, C).
+# Not covered yet: height exceptions (§325-16A, B), signs (Chapter 272), design review (Chapter 160), site plan review,
+# the performance standards (§325-23).
+
+district: CBD-50
+rules:
+- id: CBD-50.use
+  kind: rule
+  topic: uses
+  title: Permitted primary uses (chart p.4, the CBD column)
+  check: >-
+    use in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family", "multiple_family", "dormitory",
+    "church", "public_park_or_playground", "library_or_fire_station", "nursery_school_or_child_day_care", "adult_day_care_facility",
+    "nursing_home", "funeral_home", "business_or_professional_office", "bank", "office_of_government", "school", "retail_store_or_service_commercial",
+    "restaurant_or_tavern", "club_or_lodge", "light_hand_fabrication", "place_of_public_assembly", "hotel_motel", "urban_beverage_producer",
+    "parking_garage"]
+  review_when:
+  - when: use == "cemetery"
+    reason: >-
+      Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(b)
+      lists cemeteries in all districts.
+  - when: use == "public_utility_structure"
+    reason: >-
+      Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(c)
+      lists public utility facilities in all districts.
+  - when: use == "neighborhood_commercial_facility"
+    reason: >-
+      Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(f)
+      lists neighborhood retail or service commercial facilities only in R-2, R-3, CR-2, CR-3 and CR-4, so the chart's SP
+      has no matching entry in the law's list; either way it isn't permitted by right here.
+  - when: use == "hospital_or_sanitarium"
+    reason: >-
+      Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(g)
+      lists hospitals or sanatoriums only in R-3, CR-3 and CR-4, so the chart's SP has no matching entry in the law's list;
+      either way it isn't permitted by right here.
+  - when: use == "bed_and_breakfast_inn"
+    reason: >-
+      Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(p)
+      lists bed-and-breakfast inns in all districts.
+  - when: use == "redemption_center"
+    reason: >-
+      Marked SP for CBD on the zoning chart (p.4): a special permit from the Planning and Development Board. §325-9B(1)(o)
+      lists redemption centers only in B-2 Districts, so the chart's SP has no matching entry in the law's list; either way
+      it isn't permitted by right here.
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [6, 6]
+    quote: CBD-50, -60, -85,
+    not_limits: {50: a district name (CBD-50), 60: a district name (CBD-60), 85: a district name (CBD-85)}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [8, 8]
+    quote: -100, -120, -140
+    not_limits: {100: a district name (CBD-100), 120: a district name (CBD-120), 140: a district name (CBD-140)}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [15, 16]
+    quote: >-
+      (2) Column 2: Permitted Primary Uses. Uses which are permitted in each use district are listed, subject to the further
+      regulations in this section and of Article V.
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'One-family dwelling, detached', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'One-family dwelling, semi-detached', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'One-family dwelling, attached', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Two-family dwelling, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Multiple family dwelling, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Dormitory, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Church or related building, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Public park or playground, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Library or fire station, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Cemetery or related building, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Public utility structure except office, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Nursery school, child day care center', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Adult day care facility, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Neighborhood commercial facility, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Nursing, convalescent or rest home', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Hospital or sanitarium, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Bed-and-breakfast inn, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Funeral home or mortuary, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Business or professional office, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Bank or monetary institution, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Office of government, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: School and related buildings, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Retail store or service commercial facility, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Restaurant, fast food establishment, tavern', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Club, lodge, or private social center', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell:
+      section: Primary Uses
+      row: >-
+        Confectionery, millinery, dressmaking or other activities involving light hand fabrication as well as sales
+      column: Central Business
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Theater, bowling alley, auditorium, or other similar place of public assembly', column: Central
+        Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Hotel, motel', column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Urban beverage producer, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Parking garage, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Gasoline station, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Motor vehicle sales and service, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Printing, heating, welding, air conditioning, plumbing, or similar shop', column: Central
+        Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: Redemption center, column: Central Business}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [22, 23]
+    quote: >-
+      (1) The uses listed under the district regulations in § 325-8, District regulations, which require a special permit
+      from the Planning and Development Board, are as follows:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [25, 25]
+    quote: (b) Cemeteries in all districts.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [26, 26]
+    quote: (c) Public utility facilities in all districts.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [29, 30]
+    quote: >-
+      (f) Neighborhood retail or service commercial facilities in R-2, R-3, CR-2, CR-3, and CR-4 Districts.
+    not_limits: {2: 'district names (R-2, CR-2), not numbers', 3: 'district names (R-3, CR-3), not numbers', 4: 'a district
+        name (CR-4), not a number'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 30
+    lines: [31, 31]
+    quote: (g) Hospitals or sanatoriums in R-3, CR-3, and CR-4 Districts.
+    not_limits: {3: 'district names (R-3, CR-3), not numbers', 4: 'a district name (CR-4), not a number'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 31
+    lines: [35, 35]
+    quote: (o) Redemption centers in B-2 Districts.
+    not_limits: {2: 'the district name B-2, not a number'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 31
+    lines: [36, 36]
+    quote: (p) Bed-and-breakfast inns in all districts.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 26
+    lines: [19, 20]
+    quote: >-
+      (3) Regulations, standards and permitted uses are generally cumulative, except for the P-1 and MH-1 Districts and except
+      where otherwise indicated by specific prohibition or omission.
+    not_limits: {1: 'the district names P-1 and MH-1, not numbers'}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [22, 22]
+    quote: Adult day care facility
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [29, 29]
+    quote: Bank or monetary institution
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [28, 28]
+    quote: Bed-and-breakfast inn - - - - -
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [28, 28]
+    quote: Business or professional office
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [20, 20]
+    quote: Cemetery or related building
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [17, 17]
+    quote: Church or related building
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [34, 34]
+    quote: Club, lodge, or private social center
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [16, 16]
+    quote: Dormitory - - - - - • - • •[fn5]
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [27, 27]
+    quote: Funeral home or mortuary
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [27, 27]
+    quote: Hospital or sanitarium - - - - -
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [41, 41]
+    quote: Hotel, motel
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [19, 19]
+    quote: Library or fire station
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [35, 35]
+    quote: Confectionery, millinery, dressmaking or other activities
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [14, 14]
+    quote: Multiple family dwelling [fn4]
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [25, 25]
+    quote: Neighborhood commercial facility
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [23, 23]
+    quote: Nursery school, child day care center
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [26, 26]
+    quote: Nursing, convalescent or rest home
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [30, 30]
+    quote: Office of government
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [12, 12]
+    quote: One-family dwelling, attached [fn4]
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [9, 9]
+    quote: One-family dwelling, detached [fn4] • • •
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [11, 11]
+    quote: One-family dwelling, semi-detached [fn4]
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [38, 38]
+    quote: Theater, bowling alley, auditorium, or other similar place of
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [18, 18]
+    quote: Public park or playground
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [21, 21]
+    quote: Public utility structure except office
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [49, 49]
+    quote: Redemption center - - SP SP SP SP SP SP
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [33, 33]
+    quote: Restaurant, fast food establishment, tavern
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [32, 32]
+    quote: Retail store or service commercial facility
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [22, 22]
+    quote: School and related buildings
+  - file: zoning_charts_2026-04.pdf
+    page: 2
+    lines: [13, 13]
+    quote: Two-family dwelling [fn4] - - • •
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [42, 42]
+    quote: Urban beverage producer
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    lines: [43, 43]
+    quote: Parking garage
+  examples:
+  - given: {use: retail_store_or_service_commercial}
+    expect: pass
+  - given: {use: multiple_family}
+    expect: pass
+  - given: {use: parking_garage}
+    expect: pass
+    note: • in the CBD column (p.4 line 43)
+  - given: {use: gasoline_station}
+    expect: fail
+  - given: {use: service_shop}
+    expect: fail
+  - given: {use: redemption_center}
+    expect: needs_review
+  - given: {use: bed_and_breakfast_inn}
+    expect: needs_review
+  - given: {use: fraternity_sorority_group_house}
+    expect: fail
+    note: on the residential chart (p.2) only; the commercial chart (p.4) omits it
+  notes: >-
+    Chart p.4 has one column for every CBD sub-district, headed "CBD-50, -60, -85, -100, -120, -140" (note 1: see §325-8(D));
+    CBD-50 is one of them. Its marks: • permitted (25 uses), SP a special permit (6), - not permitted (3). The chart has no
+    legend; • and SP are read as for the residential chart (R-1b.use's finding chart_marks). A use the commercial chart doesn't
+    list at all (a fraternity, a zero-lot-line house, an adult day care home) fails: §325-8B(3) makes permitted uses cumulative
+    "except where otherwise indicated by specific prohibition or omission", and the chart omits them (Gordium's reading, the
+    same as the B districts'). A permitted use may still be barred from a storefront at street level (§325-8D(3): the active_street_level_use
+    flag).
+  drafted_by: claude
+  status: draft
+- id: CBD-50.lot_area_hotel_motel
+  kind: rule
+  topic: dimensions
+  title: Motel lot size and frontage (chart p.5, §325-22A)
+  applies_when: use == "hotel_motel"
+  check: lot_area >= 20000 and lot_width >= 100
+  review_when:
+  - when: lot_width >= 10 and (lot_area < 20000 or lot_width < 100)
+    reason: >-
+      Enough for the CBD column's motel rows (no lot size, 10 ft wide), not for §325-22A's 20,000 sf and 100 ft. The chart's
+      use row is "Hotel, motel" but §325-22 is for motels; a hotel that isn't a motel is held to the other-use row. Say which
+      it is, and which governs a motel here (an open question).
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: Motel, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Size, row: Other use, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Width, row: Motel, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Width, row: Other use, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Hotel, motel', column: Central Business}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [12, 13]
+    quote: >-
+      A. Lot size and frontage. Motels shall maintain a minimum lot size of 20,000 square feet and a minimum frontage of 100
+      feet on a public right-of-way.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [27, 30]
+    quote: >-
+      (6) Column 6: Minimum Lot Size, Area in Square Feet. Lots hereafter used for a permitted use in each use district shall
+      be of a size equal to or greater than the total square feet indicated in this column, subject to the further regulations
+      of Column 7 of the District Regulations Chart and of Article V.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [31, 34]
+    quote: >-
+      (7) Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted use in each use district
+      shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column, subject
+      to the further regulations of Column 6 of the District Regulations Chart and of Article V.
+  examples:
+  - given: {use: hotel_motel, lot_area: 20000, lot_width: 100}
+    expect: pass
+    note: a motel's 20,000 sf and 100 ft (§325-22A)
+  - given: {use: hotel_motel, lot_area: 5000, lot_width: 10}
+    expect: needs_review
+    note: the chart's motel rows (10 ft, no lot size) but not §325-22A's
+  - given: {use: hotel_motel, lot_area: 20000, lot_width: 99.99}
+    expect: needs_review
+  - given: {use: hotel_motel, lot_area: 20000, lot_width: 9.99}
+    expect: fail
+    note: short even of the chart's 10 ft
+  - given: {use: retail_store_or_service_commercial, lot_area: 1, lot_width: 1}
+    expect: not_applicable
+  notes: >-
+    The CBD column's motel lot-size cell is blank and its width is 10 ft (chart p.5); §325-22A asks every motel for 20,000
+    sf and 100 ft. Gordium passes a motel only with both, reviews one with the chart's 10 ft, and fails less.
+  open_questions:
+  - >-
+    A motel in a CBD district: does §325-22A's 20,000 sf and 100 ft frontage govern, or the CBD column's motel rows (no lot
+    size, 10 ft wide)?
+  research:
+  - question: >-
+      A motel in a CBD district: does §325-22A's 20,000 sf and 100 ft frontage govern, or the CBD column's motel rows (no
+      lot size, 10 ft wide)?
+    searched: [325-22A, 325-8A, 325-8B, 325-8D]
+    sources:
+    - file: chapter_325_zoning_2026-10.pdf
+      page: 64
+      lines: [12, 13]
+      quote: >-
+        A. Lot size and frontage. Motels shall maintain a minimum lot size of 20,000 square feet and a minimum frontage of
+        100 feet on a public right-of-way.
+    why_open: >-
+      The same question as B-4's and B-5's (§5.24): §325-8B(8) makes every chart column subject to Article V, which holds
+      §325-22, so the stricter figure reads as governing; the chart's CBD motel rows (blank lot size, 10 ft) may mean small-lot
+      motels were meant downtown. No City record found.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.lot_width
+  kind: rule
+  topic: dimensions
+  title: Minimum lot width, 10 ft (chart p.5, §325-8A(7))
+  applies_when: use != "hotel_motel"
+  check: lot_width >= 10
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Minimum Lot Width, row: Other use, column: Central Business}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [31, 34]
+    quote: >-
+      (7) Column 7: Minimum Lot Size, Width in Feet at Street Line. Lots hereafter used for a permitted use in each use district
+      shall have frontage measured on a public right-of-way equal to or greater than the width specified in this column, subject
+      to the further regulations of Column 6 of the District Regulations Chart and of Article V.
+  examples:
+  - given: {use: business_or_professional_office, lot_width: 10}
+    expect: pass
+    note: exactly the minimum
+  - given: {use: multiple_family, lot_width: 9.99}
+    expect: fail
+  - given: {use: hotel_motel, lot_width: 1}
+    expect: not_applicable
+  notes: >-
+    The CBD column's width rows are 10 ft for a motel and every other use. Its lot-size rows are "-" for every use (and blank
+    for a motel): no minimum lot area, so this district has no lot-size rule but a motel's (§325-22A).
+  drafted_by: claude
+  status: draft
+- id: CBD-50.height
+  kind: rule
+  topic: dimensions
+  title: Maximum building height, 50 ft (chart p.5 note 5), with the §325-16C bonus
+  check: >-
+    building_height <= 50 or building_height <= 50 + 0.1 * 50 and front_yard >= building_height - 50 and side_yard_smaller
+    >= building_height - 50 and side_yard_larger >= building_height - 50 and rear_yard >= 10 + (building_height - 50)
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: 'Maximum Building Height [fn3]', row: Height in feet, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [6, 6]
+    quote: CBD-50, -60, -85, -100, -120, -140
+    not_limits: {60: a district name (CBD-60), 85: a district name (CBD-85), 100: a district name (CBD-100), 120: a district
+        name (CBD-120), 140: a district name (CBD-140)}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [39, 40]
+    quote: >-
+      (5) Each of the CBD sub-districts have a maximum building height that corresponds with its suffix - for example CBD-50
+      has a maximum building height of 50 feet, CBD-100 has a maximum building height of 100 feet, etc.
+    not_limits: {100: 'the example CBD-100''s height, not this district''s'}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [37, 37]
+    quote: (3) See §325-16.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [38, 39]
+    quote: >-
+      (9) Column 9: Maximum Height of Building, Height in Feet. Buildings hereafter erected shall be limited in height as
+      specified herein.
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Front (minimum), column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (one side minimum), column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (other side minimum), column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: 'Rear (minimum, % of depth or feet, whichever is less)', column: Central Business}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: [6, 7]
+    quote: >-
+      In any district, any main building may be erected to a height in excess of that specified for the district, provided
+      that:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: [8, 9]
+    quote: >-
+      (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional
+      height.
+    not_limits: {1: 'one foot per foot: the formula adds (building_height - 50) to each yard, one to one'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: [11, 12]
+    quote: >-
+      (3) In each district, the number of additional feet may not exceed 10% of the maximum building height allowed in that
+      district.
+  examples:
+  - given: {building_height: 50, front_yard: 0, side_yard_smaller: 0, side_yard_larger: 0, rear_yard: 10}
+    expect: pass
+    note: 'exactly 50 ft (note 5: the suffix), built to the street and side lot lines'
+  - given: {building_height: 50.01, front_yard: 0, side_yard_smaller: 0, side_yard_larger: 0, rear_yard: 10}
+    expect: fail
+    note: over the limit, so every yard must grow by the extra height
+  - given: {building_height: 55.0, front_yard: 5.0, side_yard_smaller: 5.0, side_yard_larger: 5.0, rear_yard: 15.0}
+    expect: pass
+    note: the most the bonus allows (10% of 50 = 5 ft), each yard 5 ft larger
+  - given: {building_height: 55.01, front_yard: 60, side_yard_smaller: 60, side_yard_larger: 60, rear_yard: 90}
+    expect: fail
+    note: past the bonus, however large the yards
+  - given: {building_height: 52, front_yard: 1.99, side_yard_smaller: 2, side_yard_larger: 2, rear_yard: 12}
+    expect: fail
+    note: the front yard must be 0 + 2
+  - given: {building_height: 52, front_yard: 2, side_yard_smaller: 1.99, side_yard_larger: 2, rear_yard: 12}
+    expect: fail
+    note: each side yard must be 0 + 2
+  - given: {building_height: 52, front_yard: 2, side_yard_smaller: 2, side_yard_larger: 2, rear_yard: 11.99}
+    expect: fail
+    note: the rear yard must be 10 + 2
+  notes: >-
+    Note 5: each CBD sub-district's maximum height is its suffix, so CBD-50's is 50 ft. The bonus (§325-16C): 10% of 50 ft
+    = 5 ft, so at most 55 ft, with every required yard 1 ft larger per extra foot (the CBD column: front, sides "-", rear
+    10 ft). With no front or side yard required, Gordium still asks a building using the bonus for front and side yards of
+    the extra height, the cautious reading of §325-16C(1); see the open question.
+  open_questions:
+  - >-
+    §325-16C(1): CBD-50 requires no front or side yard. Does a building using the height bonus need front and side yards of
+    the extra height, or none?
+  research:
+  - question: >-
+      §325-16C(1): CBD-50 requires no front or side yard. Does a building using the height bonus need front and side yards
+      of the extra height, or none?
+    searched: [325-16C, 325-8A, 325-8D, '325-3B:front_yard']
+    sources: []
+    why_open: >-
+      "Each required front, side and rear yard is increased": with no front or side yard required, there may be no required
+      yard to increase, or a zero-foot one that grows. Neither the law nor a City decision found says which (the same question
+      as B-2a's and B-4's front yard, §5.25). Gordium uses the stricter reading (yards of the extra height).
+  drafted_by: claude
+  status: draft
+- id: CBD-50.min_stories
+  kind: rule
+  topic: dimensions
+  title: At least two stories (chart p.5, note 6)
+  check: stories >= 2 or building_area <= 500
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: 'Minimum Building Height [fn3,6]', row: Number of stories, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [6, 6]
+    quote: CBD-50, -60, -85, -100, -120, -140
+    not_limits: {50: a district name (CBD-50), 60: a district name (CBD-60), 85: a district name (CBD-85), 100: a district
+        name (CBD-100), 120: a district name (CBD-120), 140: a district name (CBD-140)}
+  - &id001
+    file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [41, 42]
+    quote: >-
+      (6) Minimum building height requirement shall not apply to development, including additions and/or expansions of existing
+      development where the new development or addition or expansion of the existing development does not exceed a footprint
+      of 500 square feet.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 48
+    lines: [13, 15]
+    quote: >-
+      G. Notwithstanding anything to the contrary contained herein, in the CBD-60, CBD-85, CBD-100, CBD-120, CBD-140, B-1a,
+      B-1b, B-2c, and B-2d Zoning Districts, no primary use building shall be erected that is less than two stories in any
+      of these zones.
+    not_limits: {60: a district name (CBD-60), 85: a district name (CBD-85), 100: a district name (CBD-100), 120: a district
+        name (CBD-120), 140: a district name (CBD-140), 1: 'district names (B-1a, B-1b)'}
+  examples:
+  - given: {stories: 2, building_area: 1200}
+    expect: pass
+    note: two stories, at the minimum
+  - given: {stories: 1, building_area: 1200}
+    expect: fail
+  - given: {stories: 1, building_area: 500}
+    expect: pass
+    note: 'note 6: a footprint of 500 sf or less is exempt (§325-16G doesn''t name CBD-50)'
+  - given: {stories: 1, building_area: 500.01}
+    expect: fail
+  notes: >-
+    The CBD column (chart p.5, headed "CBD-50, -60, -85, -100, -120, -140") sets a minimum of two stories for every CBD sub-district,
+    and the chart is part of Chapter 325 (§325-8A), so CBD-50 has it too. §325-16G's two-story rule names CBD-60 to CBD-140
+    but not CBD-50: it adds its own "notwithstanding" rule there and takes nothing away here. So in CBD-50 only the chart's
+    minimum applies, with its note 6: development whose footprint is 500 sf or less is exempt (the open question §5.26 is
+    about §325-16G, which doesn't reach CBD-50). Gordium checks the building as drawn, as new construction; an addition can't
+    be told apart.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.min_height
+  kind: rule
+  topic: dimensions
+  title: Minimum building height, 25 ft (chart p.5, §325-8A(15))
+  check: building_height >= 25 or building_area <= 500
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: 'Minimum Building Height [fn3,6]', row: Height in feet, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [6, 6]
+    quote: CBD-50, -60, -85, -100, -120, -140
+    not_limits: {50: a district name (CBD-50), 60: a district name (CBD-60), 85: a district name (CBD-85), 100: a district
+        name (CBD-100), 120: a district name (CBD-120), 140: a district name (CBD-140)}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 26
+    lines: [4, 8]
+    quote: >-
+      (15) Column 16: Minimum Height of Building, Height in Feet. Buildings hereafter erected shall have a minimum height
+      as specified herein; provided, however, that the requirements of this column shall not apply to development, including
+      additions and/or expansions of existing development where the new development or addition or expansion of the existing
+      development does not exceed a footprint of 500 square feet.
+  - *id001
+  examples:
+  - given: {building_height: 25, building_area: 1200}
+    expect: pass
+    note: exactly the minimum
+  - given: {building_height: 24.99, building_area: 1200}
+    expect: fail
+  - given: {building_height: 12, building_area: 500}
+    expect: pass
+    note: a footprint of 500 sf or less is exempt
+  - given: {building_height: 12, building_area: 500.01}
+    expect: fail
+  notes: >-
+    building_area (every building on the lot, porches and decks included) is at least the new building's footprint, so a lot
+    whose buildings cover 500 sf or less is exempt. An addition of 500 sf or less to a larger building is exempt too, but
+    Gordium checks the building as drawn and can't tell an addition: it may say does not comply where the exception applies
+    (never the other way).
+  drafted_by: claude
+  status: draft
+- id: CBD-50.lot_coverage
+  kind: rule
+  topic: dimensions
+  title: Maximum lot coverage by buildings, 100% (chart p.5, §325-8A(10))
+  check: building_area <= 1.0 * lot_area
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Maximum Lot Coverage by Buildings, row: Percent of lot area, column: Central Business}
+  - &id002
+    file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [44, 44]
+    quote: (8) Except as required for rear yard or side yard, as applicable.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [5, 7]
+    quote: >-
+      On a lot hereafter used, no greater percentage of total lot area may be covered by principal and accessory buildings
+      above ground.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [7, 9]
+    quote: >-
+      For this purpose, the area covered by principal and accessory buildings shall include all porches, attached or freestanding
+      decks, balconies projecting more than two feet from a building or structure, ramps, and/or landings.
+    not_limits:
+      2: >-
+        what building_area counts (balconies projecting more than two feet): a measuring rule, not this formula's limit
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [9, 10]
+    quote: >-
+      This sum, divided by the total lot area, shall not exceed the maximum allowed percentage of lot coverage specified in
+      this column.
+  examples:
+  - given: {building_area: 10000, lot_area: 10000}
+    expect: pass
+    note: the whole lot (100%)
+  - given: {building_area: 10000.01, lot_area: 10000}
+    expect: fail
+  notes: >-
+    The CBD column allows buildings to cover the whole lot, note 8: "Except as required for rear yard or side yard, as applicable":
+    the 10 ft rear yard (rear_yard) and, next to a residential lot, that district's yards (transition_yards, a flag) still
+    hold.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.rear_yard
+  kind: rule
+  topic: dimensions
+  title: Rear yard at least 10 ft (chart p.5)
+  check: rear_yard >= 10
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: 'Rear (minimum, % of depth or feet, whichever is less)', column: Central Business}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 25
+    lines: [22, 26]
+    quote: >-
+      (a) Subject to the provisions of the following Subsection A(14)(b), buildings hereafter erected in each district must
+      have a rear yard of at least the depth which is the percentage figure listed in this column. Such percentage shall be
+      taken of the lot depth. If the two side lot lines are of unequal lengths, the rear yard percentage shall be taken of
+      the average of the two lengths.
+    not_limits: {2: 'the two side lot lines: how lot depth is measured (measures.yaml lot_depth), not a limit'}
+  examples:
+  - given: {rear_yard: 10, lot_depth: 100}
+    expect: pass
+    note: exactly 10 ft
+  - given: {rear_yard: 9.99, lot_depth: 100}
+    expect: fail
+  notes: >-
+    The CBD column's rear yard is a flat 10 ft (no percentage of the lot depth, and note 9 isn't on it). The front and side
+    yards are "-": none is required, so there is no front or side yard rule. On a corner lot no yard is measured (needs review):
+    §325-19C's two front yards are for residential districts only, and which street yard is a CBD lot's front isn't settled.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.yard_projections
+  kind: rule
+  topic: dimensions
+  title: Eaves into required yards, at most 2 ft (§325-18B)
+  check: >-
+    rear_yard_eaves >= 10 + max(building_height - 50, 0) - 2 and (building_height <= 50 or front_yard_eaves >= building_height
+    - 50 - 2 and side_yard_smaller_eaves >= building_height - 50 - 2 and side_yard_larger_eaves >= building_height - 50 -
+    2)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines: [13, 16]
+    quote: >-
+      B. Projecting architectural features. The space in any required yard shall be open and unobstructed except for ordinary
+      projections of windowsills, belt courses, cornices, eaves and other architectural features; provided, however, that
+      such features shall not project more than two feet into any required yard.
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Front (minimum), column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (one side minimum), column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: Side (other side minimum), column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: Yard Dimensions, row: 'Rear (minimum, % of depth or feet, whichever is less)', column: Central Business}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 47
+    lines: [8, 9]
+    quote: >-
+      (1) Each required front, side and rear yard is increased one foot on the ground for each one foot of such additional
+      height.
+    not_limits: {1: 'one foot per foot: the formula adds (building_height - 50) to each yard, one to one'}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    cell: {section: 'Maximum Building Height [fn3]', row: Height in feet, column: Central Business}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [6, 6]
+    quote: CBD-50, -60, -85, -100, -120, -140
+    not_limits: {60: a district name (CBD-60), 85: a district name (CBD-85), 100: a district name (CBD-100), 120: a district
+        name (CBD-120), 140: a district name (CBD-140)}
+  - file: zoning_charts_2026-04.pdf
+    page: 5
+    lines: [39, 40]
+    quote: >-
+      (5) Each of the CBD sub-districts have a maximum building height that corresponds with its suffix - for example CBD-50
+      has a maximum building height of 50 feet, CBD-100 has a maximum building height of 100 feet, etc.
+    not_limits: {100: 'the example CBD-100''s height, not this district''s'}
+  examples:
+  - given: {building_height: 45, rear_yard_eaves: 8}
+    expect: pass
+    note: an eave exactly 2 ft into the 10 ft rear yard
+  - given: {building_height: 45, rear_yard_eaves: 7.99}
+    expect: fail
+  - given: {building_height: 52, rear_yard_eaves: 10, front_yard_eaves: 0, side_yard_smaller_eaves: 0, side_yard_larger_eaves: 0}
+    expect: pass
+    note: '2 ft over the height: each yard is 2 ft deeper and an eave may take 2 ft of it'
+  - given: {building_height: 53, rear_yard_eaves: 11, front_yard_eaves: 0.99, side_yard_smaller_eaves: 1, side_yard_larger_eaves: 1}
+    expect: fail
+    note: >-
+      3 ft over the height: the front yard is 3 ft and an eave may come within 1 ft of the street lot line
+  notes: >-
+    The yards are measured to the walls; this rule measures the same yards to the outermost part, eaves included, and lets
+    that be up to 2 ft less. In a CBD district only the rear yard is required (10 ft), unless the building uses the height
+    bonus, which asks front and side yards of the extra height (the height rule's open question).
+  drafted_by: claude
+  status: draft
+- id: CBD-50.accessory_buildings
+  kind: rule
+  topic: dimensions
+  title: 'Accessory buildings: 3 ft side and rear (§325-25)'
+  applies_when: accessory_buildings > 0
+  check: (not accessory_distances_apply or accessory_side_yard >= 3 and accessory_rear_yard >= 3)
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines: [34, 36]
+    quote: >-
+      Accessory structures, including private garages, storage sheds, toolhouses, garden houses, playhouses or similar structures,
+      shall be exempt from side yard requirements contained in the District Regulations Chart in § 325-8[fn22] and shall be
+      governed by the requirements below:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 66
+    lines: [37, 40]
+    quote: >-
+      A. Accessory structures wholly or partially above grade. Accessory structures which are wholly or partially above finished
+      grade are permitted in any side or rear yard but not in a required front yard, except as permitted under the further
+      provisions of this section. Corner lots shall be considered to have two front yards.
+    not_limits:
+      2: >-
+        two front yards on a corner lot: which yards are front yards (the accessory front yard is measured to every street
+        line), not a limit
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines: [6, 9]
+    quote: >-
+      C. Frame accessory buildings. Frame accessory buildings may not be placed less than three feet from any side lot line
+      or rear lot line in all districts, except in R-1 Districts, where accessory buildings may not be placed less than six
+      feet from any side lot line nor less than three feet from any rear lot line, subject to further provisions of this section.
+    not_limits:
+      1: the district name R-1, not a number of feet
+      6: >-
+        six feet applies in R-1 districts only; in a CBD district it is three feet (accessory_side_yard >= 3)
+  examples:
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 3}
+    expect: pass
+    note: exactly 3 ft from the side and rear lot lines
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 2.99,
+      accessory_rear_yard: 3}
+    expect: fail
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: true, accessory_side_yard: 3, accessory_rear_yard: 2.99}
+    expect: fail
+  - given: {accessory_buildings: 1, accessory_front_yard: 100, accessory_distances_apply: false, accessory_side_yard: 1, accessory_rear_yard: 1}
+    expect: pass
+    note: not frame, under the readings that give it no distance
+  - given: {accessory_buildings: 0}
+    expect: not_applicable
+  notes: >-
+    CBD-50 is not an R-1 District, so §325-25C's 3 ft applies. The CBD districts require no front yard, so §325-25A keeps
+    an accessory building out of none.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.transition_yards
+  kind: flag
+  topic: dimensions
+  title: 'Next to a residential lot: that district''s yards (§325-19A, B)'
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 49
+    lines: [23, 25]
+    quote: >-
+      A. [fn12]Side yard and rear yard transition. Where a lot in a business or industrial district abuts a lot in a residential
+      district, there shall be provided along such abutting lines a yard equal in width or depth to that required in the residential
+      district. (See illustration below.)
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 50
+    lines: [3, 6]
+    quote: >-
+      B. Front yard transition. Where frontage is partly in a residential and partly in a business or industrial district,
+      the front yard depth in the business or industrial district shall be equal to 1/2 the required front yard depth of the
+      residential district for a distance of at least 50 feet into the business or industrial district. (See illustration
+      below.)
+  - *id002
+  notes: >-
+    CBD-50 is a business district (§325-4: "CBD Central Business"), so §325-19A and B apply. Gordium doesn't know yet whether
+    a lot next to this one is in a residential district, so every CBD lot gets this flag: where it abuts a residential lot,
+    the yard along that line must be the residential district's (chart note 8 keeps such a yard out of the 100% coverage);
+    where the street frontage is partly residential, the front yard is half the residential one for at least 50 ft. Check
+    by hand (the City's zoning map shows the neighbours).
+  drafted_by: claude
+  status: draft
+- id: CBD-50.stream_setback
+  kind: rule
+  topic: dimensions
+  title: New structures at least 20 ft from an inlet wall or stream bank (§325-26)
+  check: not stream_near_lot or stream_distance >= 20
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 67
+    lines: [15, 19]
+    quote: >-
+      No new structure shall be located nearer than 20 feet to an inlet wall or to the bank of an inlet channel or stream,
+      measured at an average water level, except for those structures directly connected with marine or public or commercial
+      recreation activities. (See illustration below.) Properties located within the Cherry Street District, the Market District,
+      the Newman District, and the West End/Waterfront District are exempt from this requirement.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 19
+    lines: [19, 20]
+    quote: >-
+      STRUCTURE — Anything constructed or erected on the ground or which is attached to another structure or building. Structures
+      shall not include patios or terraces.
+  examples:
+  - given: {stream_near_lot: false}
+    expect: pass
+  - given: {stream_near_lot: true, stream_distance: 20}
+    expect: pass
+  - given: {stream_near_lot: true, stream_distance: 19.99}
+    expect: fail
+  notes: >-
+    CBD-50 is none of the four districts §325-26 exempts. Structures for marine or public or commercial recreation are excepted;
+    Gordium doesn't ask, so such a structure nearer than 20 ft says does not comply and needs a person's look.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.yards_not_shared
+  kind: flag
+  topic: dimensions
+  title: A yard required for one building can't count for another (§325-7B)
+  applies_when: primary_buildings > 1
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [8, 10]
+    quote: >-
+      B. Use of yard for another building. No part of a yard or other open space about any building required for the purposes
+      of complying with the provisions of this chapter shall be included as a part of a yard or other open space similarly
+      required for another building.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 14
+    lines: [37, 38]
+    quote: >-
+      LOT, BUILDING — A parcel of land occupied or to be occupied by one or more buildings and any accessory buildings, together
+      with such open spaces as are required
+  drafted_by: claude
+  status: draft
+- id: CBD-50.occupancy_one_family
+  kind: rule
+  topic: density_and_occupancy
+  title: 'One-family occupancy (§325-3B: family + 1 unrelated)'
+  applies_when: use in ["one_family_detached", "one_family_semi_detached", "one_family_attached"]
+  check: unrelated_persons_with_children <= 1
+  review_when:
+  - when: unrelated_persons_with_children > 1 and functional_family_unit
+    reason: >-
+      A functional family unit may occupy a one-family dwelling whatever its size (§325-3B DWELLING, ONE-FAMILY); whether
+      this household is one is the City's finding.
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [36, 37]
+    quote: >-
+      DWELLING, ONE-FAMILY — A dwelling unit occupied exclusively for residential purposes by an individual or family and
+      not more than one unrelated individual or a functional family unit.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [37, 40]
+    quote: >-
+      In the R-1 Zones, occupancy by an individual or a family and not more than two unrelated individuals is permitted if
+      the dwelling is owner-occupied. In the R-2 and R-3 Zones, occupancy by an individual or a family and not more than two
+      unrelated individuals is permitted.
+    not_limits:
+      1: the district name R-1, not a number
+      2: >-
+        the district name R-2; and the R-1, R-2 and R-3 allowance of two, which isn't this district's
+      3: the district name R-3, not a number
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 9
+    lines: [27, 28]
+    quote: >-
+      FAMILY — One or more persons occupying a dwelling unit, all of whom are related by blood, marriage or adoption.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 10
+    lines: [11, 13]
+    quote: >-
+      FUNCTIONAL FAMILY UNIT — A group of individuals living together in a single dwelling unit and functioning as a family
+      with respect to those characteristics that are consistent with the purposes of zoning restrictions in residential neighborhoods.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 26
+    lines: [28, 28]
+    quote: >-
+      (6) [fn3]In R-1 and R-2 Districts, minor dependent children in the care of a parent or relative shall be
+    not_limits: {1: 'the district name R-1, not a number', 2: 'the district name R-2, not a number'}
+  examples:
+  - given: {use: one_family_detached, unrelated_persons_with_children: 1}
+    expect: pass
+  - given: {use: one_family_detached, unrelated_persons_with_children: 2, functional_family_unit: false}
+    expect: fail
+    note: 'two unrelated: allowed in R-2 and R-3, not here'
+  - given: {use: one_family_detached, unrelated_persons_with_children: 2, functional_family_unit: true}
+    expect: needs_review
+  - given: {use: two_family, unrelated_persons_with_children: 5}
+    expect: not_applicable
+  notes: >-
+    CBD-50 is none of the R-1, R-2 and R-3 Zones whose sentences raise the limit, so the definition's first sentence holds:
+    an individual or a family and not more than one unrelated individual. Minor dependent children are left out only in R-1
+    and R-2 Districts (§325-8B(6)), so here they count.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.occupancy_two_family
+  kind: flag
+  topic: density_and_occupancy
+  title: 'Two-family occupancy (§325-3B: unrelated people may make a multiple dwelling)'
+  applies_when: use == "two_family" and unrelated_persons > 1
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 9
+    lines: [3, 4]
+    quote: >-
+      DWELLING, TWO-FAMILY — A building containing two dwelling units occupied exclusively for residential purposes.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [25, 26]
+    quote: >-
+      (2) A dwelling unit, occupied by a group of four or more unrelated persons, exclusive of minor dependent children in
+      the care of a parent or relative.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 7
+    lines: [27, 29]
+    quote: >-
+      (3) A building containing living, sanitary and sleeping facilities occupied by one or two families and more than two
+      roomers or boarders, exclusive of minor dependent children in the care of a parent or relative, residing with either
+      one of such families.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 9
+    lines: [27, 28]
+    quote: >-
+      FAMILY — One or more persons occupying a dwelling unit, all of whom are related by blood, marriage or adoption.
+  notes: >-
+    Four or more unrelated persons in a unit, or more than two roomers, make the building a multiple dwelling (§325-3B), which
+    is permitted here (chart p.4) with no lot size of its own in the CBD column; check by hand.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.home_occupation_size
+  kind: rule
+  topic: uses
+  title: 'Home occupation size (§325-3B: at most 25% of its unit and 500 sq ft)'
+  applies_when: >-
+    use in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family", "multiple_family"] and
+    home_occupation
+  check: home_occupation_area <= 500 and home_occupation_area <= 0.25 * home_occupation_unit_area
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 12
+    lines: [26, 28]
+    quote: >-
+      HOME OCCUPATION — (1) A subordinate use of a nonresidential nature which is conducted within a dwelling unit or a building
+      accessory thereto by a resident of the dwelling unit, who maintains the dwelling unit as
+    not_limits: {1: the paragraph's number}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 13
+    lines: [18, 19]
+    quote: >-
+      (f) The occupation occupies no more than 25% of the dwelling unit and no more than a total of 500 indoor square feet,
+      including accessory structures.
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Accessory Uses, row: Home occupation, column: Central Business}
+  examples:
+  - given: {use: multiple_family, home_occupation: true, home_occupation_area: 500, home_occupation_unit_area: 2000}
+    expect: pass
+  - given: {use: multiple_family, home_occupation: true, home_occupation_area: 500.01, home_occupation_unit_area: 2400}
+    expect: fail
+  - given: {use: multiple_family, home_occupation: true, home_occupation_area: 300, home_occupation_unit_area: 1199}
+    expect: fail
+    note: over 25% of its unit
+  - given: {use: multiple_family, home_occupation: false}
+    expect: not_applicable
+  notes: >-
+    Chart p.4 marks a home occupation • (permitted) in the CBD column; §325-9B(1)(i)'s special permit is for residential districts
+    only.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.accessory_dwelling_unit
+  kind: flag
+  topic: density_and_occupancy
+  title: 'Accessory dwelling unit: the chart''s cell is blank'
+  applies_when: accessory_dwelling_unit
+  sources:
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Accessory Uses, row: Accessory Dwelling Unit, column: Central Business}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 4
+    lines: [7, 11]
+    quote: >-
+      ACCESSORY DWELLING UNIT (ADU) — A smaller, secondary dwelling unit located on the same lot as a primary residential,
+      commercial, or mixed-use structure. An ADU must have a separate entrance from the outside of the building or through
+      a common hall and must provide living, cooking, sanitary, and sleeping facilities. All ADUs must adhere to building
+      code regulations for residential use.
+  notes: >-
+    Chart p.4's accessory dwelling unit row has no mark in the CBD column (neither • nor -), so whether one is permitted here
+    is unsettled; check with the City.
+  open_questions:
+  - >-
+    Chart p.4's accessory dwelling unit row is blank for the CBD districts: is an accessory dwelling unit permitted in CBD-50?
+  research:
+  - question: >-
+      Chart p.4's accessory dwelling unit row is blank for the CBD districts: is an accessory dwelling unit permitted in CBD-50?
+    searched: [325-28, 325-28A, 325-28B, 325-28C, '325-3B:accessory_dwelling_unit', 325-8B, 325-8D]
+    sources: []
+    why_open: >-
+      §325-3B defines an ADU as on the lot of "a primary residential, commercial, or mixed-use structure", which reads as
+      allowing one beside a commercial building; the chart marks it • in B-1a to B-2d and leaves B-4, B-5 and CBD blank (§5.27).
+      §325-8D says nothing of ADUs. No City record found that says whether blank means not permitted.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.parking
+  kind: flag
+  topic: parking_and_loading
+  title: Off-street parking (chart p.15, §325-20)
+  sources:
+  - &id003
+    file: chapter_325_zoning_2026-10.pdf
+    page: 24
+    lines: [19, 21]
+    quote: >-
+      (4) Column 4: Off-Street Parking Requirement. The off-street parking spaces listed in this column shall be provided
+      for each building hereafter erected or altered. In addition, see Article IV and § 325-20.
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [7, 7]
+    quote: B-4 B-5 CBD
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [9, 9]
+    quote: Minimum Parking Requirement (# spaces) [fn2]
+  - file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [39, 39]
+    quote: Other Uses - - See §325-20 See §325-20 - - -
+    not_limits: {325: a section number}
+  - &id004
+    file: zoning_charts_2026-04.pdf
+    page: 15
+    lines: [61, 61]
+    quote: (2) For all other uses see §325-20.
+  - &id005
+    file: chapter_325_zoning_2026-10.pdf
+    page: 55
+    lines: [6, 6]
+    quote: >-
+      [fn2] See also the District Regulations Chart[fn14] for districts in which off-street parking is not required.
+    not_limits: {2: the footnote's number, 14: the footnote's number}
+  notes: >-
+    The CBD column on chart p.15 is "-" on every row, the "Other Uses" row included (where B-2A and B-2D say "See §325-20"),
+    and §325-20D(3)(b)'s footnote 2 points to the chart "for districts in which off-street parking is not required": the strongest
+    reading is that none is required downtown. Gordium still doesn't read "-" as none required (the same open question as
+    B-1a, B-1b, B-4 and B-5, §5.28), and doesn't count parking yet, so every lot gets this flag.
+  open_questions:
+  - >-
+    Chart p.15 gives "-" for every use in the CBD column: does that mean no off-street parking is required in CBD-50, or that
+    §325-20 sets it?
+  research:
+  - question: >-
+      Chart p.15 gives "-" for every use in the CBD column: does that mean no off-street parking is required in CBD-50, or
+      that §325-20 sets it?
+    searched: [325-8A, 325-20, 325-20B, 325-20D, 325-8D]
+    sources:
+    - *id003
+    - *id004
+    - *id005
+    why_open: >-
+      §325-8A(4) requires the spaces the chart's column lists; a "-" lists none. §325-20D(3)(b) footnote 2 says the chart
+      shows "districts in which off-street parking is not required", which supports none, but the chart never says which marks
+      mean that, and note 2 sends "all other uses" to §325-20, whose table gives counts by use. No City interpretation found;
+      Gordium never reads "-" as none required (a flag).
+  drafted_by: claude
+  status: draft
+- id: CBD-50.motel_standards
+  kind: flag
+  topic: uses
+  title: 'Motels: parking, paving, driveways, landscaping, uses (§325-22)'
+  applies_when: use == "hotel_motel"
+  sources:
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [14, 14]
+    quote: B. Parking. One car space per sleeping unit shall be provided.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [17, 19]
+    quote: >-
+      D. Driveway width. A minimum width of 22 feet for a driveway shall be provided for two-way traffic movement or two driveways
+      of 12 feet minimum width each shall be provided for one-way traffic into and out from the guest parking area.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [21, 22]
+    quote: >-
+      F. Landscaping. All rear and side yards must be planted to a minimum of two feet in width with dense shrubbery or a
+      combination of a decorative fence and shrubbery.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 64
+    lines: [25, 26]
+    quote: >-
+      H. Uses. Motels constructed must be limited to guest accommodation and management offices and uses accessory thereto.
+  - file: zoning_charts_2026-04.pdf
+    page: 4
+    cell: {section: Primary Uses, row: 'Hotel, motel', column: Central Business}
+  drafted_by: claude
+  status: draft
+- id: CBD-50.active_street_level_use
+  kind: flag
+  topic: uses
+  title: Active use at street level on the Commons and in the overlay zone (§325-8D(3))
+  sources:
+  - &id006
+    file: chapter_325_zoning_2026-10.pdf
+    page: 28
+    lines: [19, 19]
+    quote: D. Additional restrictions in the CBD districts.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 29
+    lines: [4, 11]
+    quote: >-
+      (3) All properties located in the CBD district that contain a storefront that fronts on the Primary Commons must contain
+      an active use on the street level for that portion of the building that fronts onto the Primary Commons. Additionally,
+      all properties located within the boundaries shown on the map, entitled "Proposed Boundary for Mandatory Street Level
+      Active Use Overlay Zone (SLAUOZ)-July 2017" must also contain active use on the street level for the portions of the
+      building that front onto the street. Nonactive uses are prohibited on the storefronts that front onto the street or
+      onto the Commons. Examples of nonactive uses include, but are not limited to, any residential uses or commercial activities
+      that have blocked windows.
+    not_limits: {3: the paragraph's number, 2017: 'the map''s date, not a limit'}
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 29
+    lines: [15, 17]
+    quote: >-
+      (a) "Active uses" are defined as uses that encourage high levels of pedestrian activity and enliven the streetscape,
+      and create well-lit spaces with ample visibility into the storefront area.
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 29
+    lines: [25, 28]
+    quote: >-
+      (b) Additional uses may be permitted if the Planning and Development Board determines them to be an active use and grants
+      special approval for the use. The Planning Board may also grant a special approval of a nonactive use if a property
+      owner is able to show that the physical structure is not easily adaptable to be used as one of the above-listed active
+      uses.
+  notes: >-
+    Where the lot has a storefront fronting the Primary Commons, or lies in the Mandatory Street Level Active Use Overlay
+    Zone (SLAUOZ, July 2017 map; the address lookup shows it where it finds it), the street-level part of the building that
+    fronts the Commons or the street must hold an active use (a store, a restaurant, a theater, a hotel, a bank, light hand
+    fabrication; others by the Planning Board's special approval). No residential use and no blocked windows there. Gordium
+    knows neither the storefronts nor what each floor is used for, so every CBD lot gets this flag, whatever the building's
+    main use: check by hand.
+  drafted_by: claude
+  status: draft
+- id: CBD-50.historic_review
+  kind: flag
+  topic: uses
+  title: 'New construction: Landmarks Preservation Commission review (§325-8D(1))'
+  sources:
+  - *id006
+  - file: chapter_325_zoning_2026-10.pdf
+    page: 28
+    lines: [20, 23]
+    quote: >-
+      (1) The CBD-50 Zone is located within the DeWitt Park Historic District. New construction in any zone that is located
+      within a designated local historic district is subject to review and approval by the Ithaca Landmarks Preservation Commission
+      for compliance with § 228-5B and C of the Municipal Code.
+    not_limits: {50: a district name (CBD-50)}
+  notes: >-
+    §325-8D(1) says the CBD-50 Zone is within the DeWitt Park Historic District, and new construction in a designated local
+    historic district needs the Ithaca Landmarks Preservation Commission's review and approval (§228-5B and C). The City's
+    online map draws CBD-50 by DeWitt Park only, but the printed map (May 2026, p.5) colours the West State Street blocks
+    (online: CBD-52) like CBD-50, so check whether this lot is in a local historic district (the address lookup shows the
+    ones it finds); in one, the design needs the Commission's approval, which Gordium can't give. New construction anywhere
+    in a CBD district inside a local historic district needs the same review (the address lookup's historic district).
+  drafted_by: claude
+  status: draft

@@ -125,6 +125,8 @@ def test_two_places_need_a_picker_never_the_first_one(tmp_path):
     (lambda s: s["addresses"].update(tail="Testville TS"), 'addresses.tail must start with ", "'),
     (lambda s: s["law"].update(zoning_chart=None), "law.zoning_chart must name a file"),
     (lambda s: s["districts"].update(chart_column="(T-1)|"), "districts.chart_column matches an empty heading"),
+    (lambda s: s["districts"].update(shared_columns={"Central": []}), "districts.shared_columns must map"),
+    (lambda s: s["districts"].update(shared_columns={"Central": ["T-1", "T-1"]}), "districts.shared_columns must map"),
     (lambda s: s["addresses"].update(nearby_places=["cayuga heights"]), "addresses.nearby_places must be single words"),
     (lambda s: s["time_zone"].update(standard_utc_offset_hours=False), "standard_utc_offset_hours must be a number"),
 ])

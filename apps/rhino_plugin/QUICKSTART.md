@@ -3,7 +3,8 @@
 For an architect who has just opened Rhino. About 10 minutes the first time, then 1 minute per project.
 
 Gordium checks your massing against the City of Ithaca zoning rules (the residential districts R-1a, R-1b, R-2a, R-2b,
-R-2c, R-3a, R-3aa, R-3b and RU, and the business districts B-1a, B-1b, B-2a, B-2d, B-4 and B-5, for now;
+R-2c, R-3a, R-3aa, R-3b and RU, and the business districts B-1a, B-1b, B-2a, B-2d, B-4 and B-5, and the downtown districts CBD-50, CBD-60, CBD-85,
+CBD-100, CBD-120 and CBD-140, for now;
 the sample project below is an R-1b one-family house) while you design. Every item is **✓ complies**, **✕ does not comply**, **? needs review** or **– not checked**. It
 never says "complies" unless it is sure (see [What "needs review" means](#what-needs-review-means)).
 

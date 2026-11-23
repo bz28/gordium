@@ -12,7 +12,7 @@ B = ["B-1a", "B-1b", "B-2a", "B-2d", "B-4", "B-5"]
 def test_the_zone_choices_hold_every_b_district_with_a_rulebook_and_no_other():
     zones = options(ITHACA)["zones"]
     assert set(B) <= set(zones)
-    assert not {"B-2b", "B-2c", "CBD-60"} & set(zones)          # no rulebook (docs/decisions/2026-11-22_commercial_districts.md)
+    assert not {"B-2b", "B-2c", "CBD-52"} & set(zones)          # no rulebook (docs/decisions/2026-11-22_commercial_districts.md)
 
 
 def test_the_use_choices_follow_each_b_columns_marks_on_chart_p4():

@@ -746,6 +746,28 @@ def test_a_cell_from_another_districts_column_is_rejected(chart_ctx):
     assert any("can't cite one district's cell" in p for p in validate(general, chart_ctx))
 
 
+def test_a_shared_columns_cell_is_each_of_its_districts_own_and_no_other(chart_ctx):
+    """One chart column can hold several districts (Ithaca's "Central Business" column, CBD-50 ... CBD-140:
+    jurisdiction.yaml districts.shared_columns): each of them may cite its cells; a district it doesn't hold may not."""
+    shared = REAR_CELL | {"column": "Central Business"}
+    chart_ctx.cells["charts.pdf"][(3, "Yard Dimensions", REAR_CELL["row"], "Central Business")] = shared
+    chart_ctx.shared_columns = {"Central Business": ["R-1b", "R-2a"]}
+    cbd = CELL_SOURCE | {"cell": CELL_SOURCE["cell"] | {"column": "Central Business"}}
+    assert validate(rulebook(sources=[cbd, *NOTES]), chart_ctx) == []
+    chart_ctx.shared_columns = {"Central Business": ["R-2a"]}
+    assert any("cell column Central Business isn't district R-1b" in p
+               for p in validate(rulebook(sources=[cbd, *NOTES]), chart_ctx))
+
+
+def test_ithacas_cbd_rulebooks_cite_the_one_central_business_column():
+    from rule_format.place import place
+    from rule_format.rulebook import REPO, column_districts
+    j = REPO / "regulations/jurisdictions/new_york/ithaca_city"
+    shared = place(j).shared_columns
+    assert column_districts("Central Business", shared) == ["CBD-50", "CBD-60", "CBD-85", "CBD-100", "CBD-120", "CBD-140"]
+    assert column_districts("B-2A", shared) == ["B-2a"]
+
+
 def test_a_yes_no_measure_can_be_a_test_on_its_own(ctx):
     ctx.proposed = {"adu_separate_entrance": {"unit": "yes_no", "meaning": "ADU has a separate entrance"}}
     rule = {"id": "R-1b.adu_entrance", "kind": "rule", "topic": "dimensions", "title": "ADU entrance",

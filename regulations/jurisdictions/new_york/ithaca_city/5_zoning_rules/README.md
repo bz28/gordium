@@ -34,6 +34,12 @@ Rules stay marked **draft**: architect approval is deferred for now (decided 202
   Not answer keys for the drafting script (it drafts the residential pages only). What is covered and what isn't:
   `6_coverage_report/commercial_districts.md`; the other non-residential districts, for later:
   `docs/decisions/2026-11-22_commercial_districts.md`.
+- `CBD-50.yaml`, `CBD-60.yaml`, `CBD-85.yaml`, `CBD-100.yaml`, `CBD-120.yaml`, `CBD-140.yaml`: the central business
+  districts, which share one chart column ("Central Business", p.4 uses, p.5 dimensions; jurisdiction.yaml
+  `districts.shared_columns`), each with the height its name gives (chart note 5) and §325-8D's flags; drafted by
+  Claude by hand, 2026-11-23, laid out alike by a small script of Claude's own. Checked against the chart reader's
+  cells by `packages/document_extraction/tests/test_cbd_districts_match_chart.py`. The reading of the law:
+  `docs/decisions/2026-11-23_central_business_districts.md`; coverage: `6_coverage_report/central_business_districts.md`.
 - `drafted/`: every residential district drafted by the drafting script (`packages/rule_drafting`):
   `drafted/<district>.yaml` and `drafted/general.yaml` (rules for every district). Chart numbers in these
   come only from the chart reader's cells. The script's own records are in `drafted/records/`: what it
