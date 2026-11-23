@@ -13,7 +13,7 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>
 endobj
 5 0 obj
-<< /Length 30224 >>
+<< /Length 30232 >>
 stream
 BT /F2 14 Tf 0 0 0 rg 68 744.4 Td (CODE ANALYSIS: EGRESS) Tj ET
 BT /F2 7.5 Tf 0.7 0.15 0.12 rg 68 728.4 Td (Egress result: DOES NOT COMPLY) Tj ET
@@ -205,8 +205,8 @@ BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 389.9 Td (R319.4.2.1,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 380.9 Td (R319.4.2.2,) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 687.2 371.9 Td (R319.6) Tj ET
 BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 470.9 Td (to give: an awning window's clear opening depends on how far it opens and its) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 461.9 Td (hardware: give the maker's net clear opening \(its clear width, height and) Tj ET
-BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 452.9 Td (source\) · not read yet: fully openable, path height and 18 more) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 461.9 Td (hardware: give the maker's net clear opening \(its clear width, height, bottom) Tj ET
+BT /F1 7 Tf 0.1 0.1 0.1 rg 745.07 452.9 Td (and source\) · not read yet: fully openable, path height and 18 more) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 68 367.9 m 994 367.9 l S
 0.3 w [] 0 d
@@ -633,8 +633,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (cb70) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (d29c12a82617614597b56b35c2bfbd66632fa18a44cb68ce71cea10b7fa4) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (f858) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (ab0974741844b9830df18bb88252cbc98d4ffdf72d279c4bb715bf5f43093) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (a27) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -758,8 +758,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (cb70) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (d29c12a82617614597b56b35c2bfbd66632fa18a44cb68ce71cea10b7fa4) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (f858) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (ab0974741844b9830df18bb88252cbc98d4ffdf72d279c4bb715bf5f43093) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (a27) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -911,8 +911,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (cb70) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (d29c12a82617614597b56b35c2bfbd66632fa18a44cb68ce71cea10b7fa4) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (f858) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (ab0974741844b9830df18bb88252cbc98d4ffdf72d279c4bb715bf5f43093) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (a27) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1064,8 +1064,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (cb70) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (d29c12a82617614597b56b35c2bfbd66632fa18a44cb68ce71cea10b7fa4) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (f858) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (ab0974741844b9830df18bb88252cbc98d4ffdf72d279c4bb715bf5f43093) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (a27) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1254,8 +1254,8 @@ BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 493.4 Td (cb70) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 483.4 m 1202.4 483.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 475.4 Td (GORDIUM CODE FINGERPRINT AT CHECK) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (d29c12a82617614597b56b35c2bfbd66632fa18a44cb68ce71cea10b7fa4) Tj ET
-BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (f858) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 466.4 Td (ab0974741844b9830df18bb88252cbc98d4ffdf72d279c4bb715bf5f43093) Tj ET
+BT /F1 5.5 Tf 0.1 0.1 0.1 rg 1016 458.4 Td (a27) Tj ET
 0.3 w [] 0 d
 0.55 0.55 0.55 RG 1008 448.4 m 1202.4 448.4 l S
 BT /F1 5.5 Tf 0.35 0.35 0.35 rg 1016 440.4 Td (INTERIOR DRAWING CHECKED) Tj ET
@@ -1288,18 +1288,18 @@ xref
 0000000148 00000 n 
 0000000245 00000 n 
 0000000347 00000 n 
-0000030623 00000 n 
-0000030760 00000 n 
-0000038628 00000 n 
-0000038765 00000 n 
-0000046776 00000 n 
-0000046914 00000 n 
-0000054970 00000 n 
-0000055109 00000 n 
-0000064984 00000 n 
-0000065123 00000 n 
+0000030631 00000 n 
+0000030768 00000 n 
+0000038636 00000 n 
+0000038773 00000 n 
+0000046784 00000 n 
+0000046922 00000 n 
+0000054978 00000 n 
+0000055117 00000 n 
+0000064992 00000 n 
+0000065131 00000 n 
 trailer
 << /Size 16 /Root 1 0 R /Info 15 0 R >>
 startxref
-65241
+65249
 %%EOF
