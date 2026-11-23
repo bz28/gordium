@@ -287,6 +287,7 @@ public static class ProjectFacts
     {
         ArgumentNullException.ThrowIfNull(model);
         var problems = new List<(MarkDefinition, string)>();
+        var unit = LengthUnits.Of(model.DisplayUnits);          // a length's messages in the project's units, as it is typed
         foreach (var (mark, key, least) in HouseFactMarks)
         {
             if (!model.ProjectMarks.TryGetValue(mark.Guid, out var v) || !v.HasValue)
@@ -312,10 +313,10 @@ public static class ProjectFacts
                     if (facts is not null) facts[key] = feet;
                     break;
                 case MarkValueKind.Length when Marks.Length(v) is { } feet:
-                    problems.Add((mark, $"is {feet.ToString("0.###", CultureInfo.InvariantCulture)} ft: type a distance of 0 ft or more, or leave it blank"));
+                    problems.Add((mark, $"is {LengthUnits.Shown(feet, unit)} {unit.Symbol}: type a length of 0 {unit.Symbol} or more, or leave it blank"));
                     break;
                 default:
-                    problems.Add((mark, "holds a value that isn't a length: type a distance in feet, or leave it blank"));
+                    problems.Add((mark, $"holds a value that isn't a length: type a length in {unit.Words}, or leave it blank"));
                     break;
             }
         }

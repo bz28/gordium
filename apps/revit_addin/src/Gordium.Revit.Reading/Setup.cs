@@ -61,6 +61,9 @@ public sealed record SetupField(MarkDefinition Mark, string Label, FieldKind Kin
     /// <summary>For a length field: the unit it is shown and typed in (the project's, as Revit's dialogs show it).</summary>
     public LengthUnit LengthUnit { get; init; } = LengthUnits.Feet;
 
+    /// <summary>For a length field: the feet the mark holds, exactly (null when blank).</summary>
+    public double? HeldFeet { get; init; }
+
     /// <summary>The label of what it holds now (a use's name, not its word), or null.</summary>
     public string? CurrentLabel => Current is null ? null : CurrentChoice?.Label ?? Current;
 
@@ -312,6 +315,7 @@ public static class SetupFacts
                     fields.Add(new(m, SetupWords.Label(m, noun, unit.Symbol), FieldKind.Feet, group, required, [], shown, law + note, null)
                     {
                         LengthUnit = unit,
+                        HeldFeet = Marks.Length(v),
                     });
                     break;
                 }
@@ -404,6 +408,17 @@ public sealed class SetupDraft
 
     public int Count => _chosen.Count;
 
+    /// <summary>Whether <paramref name="chosen"/> is what the field's mark holds already: a length by the feet it
+    /// parses to against the feet the mark holds (never the shown text, rounded to 6 places: 6.096 typed over a mark
+    /// holding 19.999999999999996 ft is written, so it is 20 ft); anything else by its text.</summary>
+    private static bool Holds(SetupField f, string chosen)
+    {
+        if (f.Kind != FieldKind.Feet)
+            return chosen == f.Current;
+        return f.HeldFeet is { } held && double.TryParse(chosen, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var typed)
+               && double.IsFinite(typed) && f.LengthUnit.ToFeet(typed) == held;
+    }
+
     public void Clear() => _chosen.Clear();
 
     /// <summary>The writes a Save makes: each field the architect chose a value for that differs from what the mark
@@ -419,7 +434,7 @@ public sealed class SetupDraft
             if (Chosen(f.Mark) is not { } raw)
                 continue;
             var chosen = raw.Trim();
-            if (chosen.Length == 0 || chosen == f.Current && f.Problem is null)
+            if (chosen.Length == 0 || f.Problem is null && Holds(f, chosen))
                 continue;                                   // nothing chosen, or what it holds already
             MarkValue? value = f.Kind switch
             {
@@ -428,7 +443,7 @@ public sealed class SetupDraft
                                       && n >= SetupFacts.Least(f.Mark) => new MarkValue(true, n),
                 FieldKind.Choice when f.Choices.FirstOrDefault(c => c.Value == chosen) is { } c => new MarkValue(true, Text: c.Value),
                 FieldKind.Feet when double.TryParse(chosen, NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var typed)
-                                    && double.IsFinite(typed) && typed >= 0 => new MarkValue(true, Number: typed * f.LengthUnit.FeetPer),
+                                    && double.IsFinite(typed) && typed >= 0 => new MarkValue(true, Number: f.LengthUnit.ToFeet(typed)),
                 FieldKind.Text => new MarkValue(true, Text: chosen),
                 // the street edge: only edges Gordium's pick kept (never typed text)
                 FieldKind.StreetPick when StreetEdges.Parse(chosen) is not null => new MarkValue(true, Text: chosen),
@@ -550,7 +565,7 @@ public static class SetupWords
 
     /// <summary>The form's notice when a check sent nothing, in plain words from what is missing (never the marks'
     /// typing instructions): the street edge kept no longer on the lot (or matching two edges), or the facts not set.</summary>
-    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun)
+    public static string NothingSent(StreetRefusal refused, IReadOnlyList<MarkDefinition> notSet, string noun, string? lengthUnit = null)
     {
         ArgumentNullException.ThrowIfNull(notSet);
         if (refused == StreetRefusal.NoLongerAnEdge)
@@ -559,7 +574,7 @@ public static class SetupWords
         if (refused == StreetRefusal.Ambiguous)
             return "Nothing was checked: the street edge kept matches two edges of the lot (an arc and its chord). " +
                    "Pick it again on the plan, then Save.";
-        var names = notSet.Select(m => Label(m, noun).ToLowerInvariant()).ToList();
+        var names = notSet.Select(m => Label(m, noun, lengthUnit).ToLowerInvariant()).ToList();
         if (notSet.Contains(Marks.Zone))
             return "Nothing was checked: the zone chooses the rules, so nothing can be checked without it. Choose it above" +
                    (names.Count > 1 ? $"; also not set: {string.Join(", ", names.Where(n => n != "zone"))}." : ".");
@@ -568,13 +583,13 @@ public static class SetupWords
     }
 
     /// <summary>What a fact not set leaves when the architect checks anyway: each is needs review, never a pass.</summary>
-    public static string SentWithout(MarkDefinition m, string noun) =>
+    public static string SentWithout(MarkDefinition m, string noun, string? lengthUnit = null) =>
         m == Marks.Use ? "Use not set: every rule that turns on the use needs review."
         : m == Marks.LotSurveyed ? "Lot surveyed not set: the property line is read as traced from the tax map (its 2 ft accuracy), never as surveyed."
         : m == Marks.StreetEdge ? "Street edge not picked: the front yard, the yards measured from it and the lot width need review."
         : m == Marks.Zone ? "Zone not set: the district chooses the rules, so nothing can be checked without it."
         : m == Marks.Stories ? "Stories holds a count under 1 (a count is 1 or more), so it wasn't sent: height and stories need review."
-        : $"{Label(m, noun)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
+        : $"{Label(m, noun, lengthUnit)}: what it holds isn't one of Gordium's words, so it wasn't sent: the rows it decides need review.";
 }
 
 /// <summary>The facts inside the building, as the checklist's lines.</summary>
@@ -817,22 +832,30 @@ public static class SetupChecklist
 
 /// <summary>A length unit the Setup form shows and takes a length mark in: its symbol, its words, the feet in one of it,
 /// and whether it is the project's own (false: the project's units aren't ones Gordium reads, and feet are used).</summary>
-public sealed record LengthUnit(string Symbol, string Words, double FeetPer, bool Known = true);
+public sealed record LengthUnit(string Symbol, string Words, double PerFoot, bool Known = true)
+{
+    /// <summary>A number typed in this unit, in feet: typed / units per foot, as Revit converts it (6.096 m is exactly
+    /// 20 ft; times a feet-per-unit factor gave 19.999999999999996, which fails 20 ft).</summary>
+    public double ToFeet(double typed) => typed / PerFoot;
+
+    /// <summary>A length in feet, in this unit.</summary>
+    public double FromFeet(double feet) => feet * PerFoot;
+}
 
 /// <summary>The project's length display unit (<c>RevitModel.DisplayUnits</c>, Revit's unit type id) as the Setup form
 /// uses it, so a length typed there is the length Revit's own dialogs show for the same number (review round 2 of
 /// change 20: feet typed in a meters project's dialog were 3.28 times too long).</summary>
 public static class LengthUnits
 {
-    public static readonly LengthUnit Feet = new("ft", "feet", 1.0);
+    public static readonly LengthUnit Feet = new("ft", "feet", 1);
 
     private static readonly (string Id, LengthUnit Unit)[] Table =
     [
         ("feet", Feet), ("feetFractionalInches", Feet),
-        ("inches", new("in", "inches", 1.0 / 12)), ("fractionalInches", new("in", "inches", 1.0 / 12)),
-        ("millimeters", new("mm", "millimeters", 1.0 / 304.8)), ("centimeters", new("cm", "centimeters", 1.0 / 30.48)),
-        ("decimeters", new("dm", "decimeters", 1.0 / 3.048)),
-        ("meters", new("m", "meters", 1.0 / 0.3048)), ("metersCentimeters", new("m", "meters", 1.0 / 0.3048)),
+        ("inches", new("in", "inches", 12)), ("fractionalInches", new("in", "inches", 12)),
+        ("millimeters", new("mm", "millimeters", 304.8)), ("centimeters", new("cm", "centimeters", 30.48)),
+        ("decimeters", new("dm", "decimeters", 3.048)),
+        ("meters", new("m", "meters", 0.3048)), ("metersCentimeters", new("m", "meters", 0.3048)),
     ];
 
     /// <summary>The unit of a Revit unit type id ("autodesk.unit.unit:millimeters-1.0.1"; "Feet", the reader's default,
@@ -849,5 +872,5 @@ public static class LengthUnits
     /// <summary>A length in feet as the form shows it in <paramref name="unit"/> (to 6 places, so 22.5 ft is 6858 mm,
     /// never 6858.000000000001), or null.</summary>
     public static string? Shown(double? feet, LengthUnit unit) =>
-        feet is { } f ? Math.Round(f / unit.FeetPer, 6).ToString("0.######", CultureInfo.InvariantCulture) : null;
+        feet is { } f ? Math.Round(unit.FromFeet(f), 6).ToString("0.######", CultureInfo.InvariantCulture) : null;
 }
