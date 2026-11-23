@@ -261,12 +261,17 @@ internal static class SetupRun
     {
         if (_doc is not { IsValidObject: true } doc || ui.ActiveUIDocument is not { } uidoc || !uidoc.Document.Equals(doc))
         {
-            ResultsPane.Say(StreetEdges.SwitchToIt);
+            ResultsPane.Say(StreetEdges.SwitchToItFromSetup);   // pressed in the form: the next step is that button
+            return;
+        }
+        if (!RevitRead.LotLines(doc).Any(l => l.IsPropertyLine))
+        {
+            ResultsPane.Say(StreetEdges.NoPropertyLineFromSetup);
             return;
         }
         if (!CheckProjectCommand.ShowsPropertyLine(uidoc))
         {
-            ResultsPane.Say(StreetEdges.OpenAPlan);
+            ResultsPane.Say(StreetEdges.OpenAPlanFromSetup);     // pressed in the form: the next step is that button
             return;
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
@@ -275,7 +280,7 @@ internal static class SetupRun
         log["street_edge_chosen"] = text;
         Trial.Log("setup", log);
         Redraw();
-        ResultsPane.Say(text is null ? "No street edge was picked."
+        ResultsPane.Say(text is null ? StreetEdges.NonePickedFromSetup
             : $"Street edge picked: {string.Join(" and ", kept.Select(e => StreetEdges.Describe(e, RevitRead.InternalToShared(doc))))}. Save writes it with the other facts.");
     });
 }

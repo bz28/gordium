@@ -388,8 +388,10 @@ public sealed class SetupTests
         Assert.Equal("This house has no stairs", SetupWords.Label(Marks.NoStairs, "house"));
         var care = Screen(Model(new() { [Marks.Use.Guid] = new(true, Text: "day_care") }));
         Assert.Equal("building", care.Noun);
-        Assert.DoesNotContain(care.Fields, f => f.Label.Contains("house", StringComparison.OrdinalIgnoreCase)
-                                               || f.Law.Contains("house", StringComparison.OrdinalIgnoreCase));
+        // never the building called a house; a term of the law that holds the letters (a townhouse unit, the
+        // household) is no such word (merged with the code decision's marks, 2026-11-22)
+        var house = new System.Text.RegularExpressions.Regex(@"\bhouses?\b", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        Assert.DoesNotContain(care.Fields, f => house.IsMatch(f.Label) || house.IsMatch(f.Law));
         Assert.Contains(care.Fields, f => f.Label == "This building has no stairs");
         // a building that isn't a house gets the escape-route lines
         Assert.Contains(care.Lines, l => l.Key == "room_use");

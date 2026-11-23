@@ -21,6 +21,9 @@ import pytest
 import yaml
 
 from design_checker import each_part, egress, present
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))   # egress_house beside this file
+import egress_house  # noqa: E402
 from design_checker.check import check_site, summary
 from rule_format.place import place
 from rule_format.rulebook import REPO, building_code_rulebook, load
@@ -30,6 +33,7 @@ from test_measure import FACTS, box, lot  # noqa: E402
 
 ITHACA = "regulations/jurisdictions/new_york/ithaca_city"
 STATE = REPO / "regulations/jurisdictions/new_york/new_york_state"
+BUILDING = REPO / "regulations/jurisdictions/new_york/new_york_state_building"
 SITE = {"units": "ft", "lot": lot([(0, 0), (60, 0), (60, 110), (0, 110)]),
         "buildings": [box(10, 25, 40, 75, 0, 30)], "problems": []}
 RANCH = REPO / "test_data/interior_houses/1_ranch_compliant/house.yaml"
@@ -61,14 +65,17 @@ def rows_of(result, rule_id):
 
 def test_ithacas_check_includes_the_state_rules():
     """The test the building-code decision (2026-11-12, item 6) promised: Ithaca inherits New York State's folder,
-    and its check runs every one of that folder's rules."""
+    and its check runs every one of that folder's rules. Since 2026-11-22 it inherits the Building Code's folder too,
+    and a house the Residential Code covers is checked against the house code alone, its sections as before."""
     book = building_code_rulebook(STATE)
-    assert place(ITHACA).inherited_rulebooks() == ((STATE, book),)
+    assert place(ITHACA).inherited_rulebooks() == ((STATE, book), (BUILDING, building_code_rulebook(BUILDING)))
     rules = load(book)["rules"]
     assert len(rules) >= 53                                   # the 53 drafted house egress rules, at least
     found = egress.laws(ITHACA)
-    assert [law["key"] for law in found["laws"]] == ["new_york/new_york_state"]
+    assert [(law["key"], law["scope"]) for law in found["laws"]] == [
+        ("new_york/new_york_state", "residential_code"), ("new_york/new_york_state_building", "building_code")]
     assert found["laws"][0]["problems"] == [] and found["laws"][0]["rules"] == rules
+    assert found["laws"][1]["problems"] == []
     result = check_site(SITE, dict(FACTS), interior=ranch())
     assert set(result["egress"]["results"]) == {r["id"] for r in rules}       # every state rule answered
     assert [s["title"] for s in result["sections"]] == ["Zoning (City of Ithaca)",
@@ -115,7 +122,7 @@ def test_zoning_may_comply_while_egress_waits_but_the_design_never_reads_as_comp
     zoning = [{"id": "R-1b.rear_yard", "rule": "R-1b.rear_yard", "name": "Rear yard", "group": "building",
                "status": present.COMPLIES}]
     view = {"items": copy.deepcopy(zoning)}
-    egress.add_to_view(view, egress.check(egress.laws(ITHACA), None, {}, {}), "City of Ithaca")
+    egress.add_to_view(view, egress.check(egress.laws(ITHACA), None, dict(egress_house.HOUSE), {}), "City of Ithaca")
     assert view["sections"][0] == {"key": "zoning", "title": "Zoning (City of Ithaca)", "state": present.COMPLIES,
                                    "summary": "1 complies"}
     assert view["sections"][1]["state"] == egress.WAITING
@@ -290,7 +297,7 @@ def test_a_check_validates_the_state_rules_the_same_with_or_without_the_code_cac
     monkeypatch.setattr(Context, "for_jurisdiction",
                         classmethod(lambda cls, j, **kw: asked.append(kw) or real(cls, j, **kw)))
     egress.laws(ITHACA)
-    assert asked == [{"use_cache": False}]                                  # a design's check never reads it
+    assert asked == [{"use_cache": False}] * 2       # a design's check never reads it (both of New York's books)
 
 
 def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer():
@@ -300,11 +307,11 @@ def test_a_law_whose_every_row_is_not_applicable_never_vanishes_from_the_answer(
     stairs = [r for r in found["laws"][0]["rules"] if r.get("for_each") == "stair"]
     found["laws"][0]["rules"] = stairs                          # a house with no stairs: every row not applicable
     house = dict(ranch(), stairs=[])
-    got = egress.check(found, house, {}, {"use": set()})
+    got = egress.check(found, house, dict(egress_house.HOUSE), {"use": set()})
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW),
                                                               ("egress.not_checked_yet", present.REVIEW)]
     found["laws"][0]["not_checked_yet"] = []     # this pin is about nothing_applied alone: every section checked
-    got = egress.check(found, house, {}, {"use": set()})
+    got = egress.check(found, house, dict(egress_house.HOUSE), {"use": set()})
     assert [(i["id"], i["status"]) for i in got["items"]] == [("egress.nothing_applied", present.REVIEW)]
     view = {"items": [{"id": "z", "rule": "z", "name": "Rear yard", "group": "building", "status": present.COMPLIES}]}
     egress.add_to_view(view, got, "City of Ithaca")
@@ -350,7 +357,7 @@ def test_a_state_rule_not_written_for_each_part_needs_review_never_dropped():
     whole = {k: v for k, v in copy.deepcopy(found["laws"][0]["rules"][0]).items() if k not in egress.part_rules.PART_FIELDS}
     whole["id"] = "general.whole_building"
     found["laws"][0]["rules"].append(whole)
-    got = egress.check(found, ranch(), {}, {"use": set()})
+    got = egress.check(found, ranch(), dict(egress_house.HOUSE), {"use": set()})
     assert got["results"]["general.whole_building"] == "needs_review"
     [row] = [i for i in got["items"] if i["rule"] == "general.whole_building"]
     assert row["status"] == present.REVIEW and row["reason"] == egress.NOT_PER_PART
@@ -373,8 +380,9 @@ def test_a_bad_state_settings_file_needs_review_never_takes_zoning_down(settings
         monkeypatch.setattr(sl, "load", bad)
     result = check_site(SITE, dict(FACTS), interior=sill_too_high())
     assert result["sections"][0]["key"] == "zoning"
-    [only] = law_items(result)
-    assert only["status"] == present.REVIEW and only["id"].endswith(".rules")
+    # every state.yaml is the bad one here, so neither says which buildings it covers: both run, each refused
+    items = law_items(result)
+    assert [(i["status"], i["id"].split("#")[0].endswith(".rules")) for i in items] == [(present.REVIEW, True)] * 2
     assert result["egress"]["results"] == {}
 
 

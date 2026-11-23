@@ -10,6 +10,9 @@ import copy
 import pytest
 
 from design_checker import egress, grouping, present
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))   # egress_house beside this file
+import egress_house  # noqa: E402
 from permit_sheets import words as sheet_words
 
 ITHACA = "regulations/jurisdictions/new_york/ithaca_city"
@@ -46,7 +49,7 @@ def house(*claims, **lists):
 
 
 def run(found, desc):
-    return egress.check(found, desc, {"dwelling_units": 1}, {"use": set()})
+    return egress.check(found, desc, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()})
 
 
 def claim_items(got):
@@ -101,7 +104,7 @@ def test_a_law_whose_only_items_are_claims_is_still_nothing_checked(found):
     ramp_only = [r for r in law["rules"] if r["id"] in RAMP_RULES]
     measured = egress.measure_interior(house({"kind": "ramp", "source": SOURCE}))
     measured["problems"] = []
-    out = egress._law_items({**law, "rules": ramp_only}, measured, {"dwelling_units": 1}, {"use": set()}, [], {})
+    out = egress._law_items({**law, "rules": ramp_only}, measured, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()}, [], {})
     assert [i["status"] for i in out] == [present.NOT_APPLICABLE, present.REVIEW]
     assert out[1]["id"].endswith(".nothing_applied")
     assert present.state(out) == present.REVIEW
@@ -213,7 +216,7 @@ def test_a_row_not_applicable_for_another_reason_is_not_the_claims(found):
     from design_checker import each_part
     rule = _stair_rule(found, "general.r318_7_1_stair_clear_width_above_handrail")
     got = each_part.check_parts([rule], {"stair": [_stair(True)], "sleeping_loft": [], "loft_room": []},
-                                {"dwelling_units": 1}, {"use": set()}, LOFT)
+                                {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()}, LOFT)
     row = next(r for r in got["rows"] if r["id"] == "s1")
     assert row["outcome"] == "not_applicable" and "has_none" not in row
     assert got["set_aside"] == {"sleeping_loft": []}
@@ -223,10 +226,10 @@ def test_a_pass_that_reads_a_reading_claims_measure_needs_review(found):
     from design_checker import each_part
     rule = _stair_rule(found, "general.r318_7_1_stair_clear_width_above_handrail")
     given = {"stair": [_stair(False)], "sleeping_loft": [], "loft_room": []}
-    settled = each_part.check_parts([rule], given, {"dwelling_units": 1}, {"use": set()}, LOFT)
+    settled = each_part.check_parts([rule], given, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()}, LOFT)
     assert next(r for r in settled["rows"] if r["id"] == "s1")["outcome"] == "pass"     # a stated fact: a real pass
     reading = {"sleeping_loft": dict(LOFT["sleeping_loft"], reading=True)}
-    got = each_part.check_parts([rule], given, {"dwelling_units": 1}, {"use": set()}, reading)
+    got = each_part.check_parts([rule], given, {"dwelling_units": 1, **egress_house.HOUSE}, {"use": set()}, reading)
     row = next(r for r in got["rows"] if r["id"] == "s1")
     assert row["outcome"] == "needs_review" and row["has_none"] == "sleeping_loft"
     assert row["reason"].startswith("complies only if this reading is confirmed: ")

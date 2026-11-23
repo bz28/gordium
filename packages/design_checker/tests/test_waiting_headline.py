@@ -17,6 +17,9 @@ import sys
 import pytest
 
 from design_checker import egress, present
+import sys as _sys  # noqa: E402
+_sys.path.insert(0, str(__import__("pathlib").Path(__file__).parent))   # egress_house beside this file
+import egress_house  # noqa: E402
 from design_checker import rhino_logic as logic
 from design_checker.check import check_site, summary
 from host_source import host_text
@@ -68,7 +71,7 @@ def viewed(zoning_items, *laws):
 
 def test_the_headline_reads_zoning_complies_egress_waiting_no_rooms_drawn_yet():
     view = {"items": zoning(present.COMPLIES, present.COMPLIES)}
-    egress.add_to_view(view, egress.check(LAWS, None, {}, {}), "City of Ithaca")     # the real waiting egress
+    egress.add_to_view(view, egress.check(LAWS, None, dict(egress_house.HOUSE), {}), "City of Ithaca")     # the real waiting egress
     assert view["summary"] == "Zoning complies · Egress waiting: no rooms drawn yet"
     assert view["waiting_only"] is True and view["state"] == present.REVIEW
 

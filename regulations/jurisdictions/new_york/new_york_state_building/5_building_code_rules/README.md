@@ -6,3 +6,4 @@ The rulebook for this state law: `drafted/general.yaml`, 33 rules for a Group I-
 - Where the law is open, a rule needs review rather than pass (Table 1006.2.1's common path for a space with two exits: README open question 1).
 - Rules repeat over parts (`for_each`: story, space, corridor; `rule_format/parts.yaml`), with the building's facts as proposed measures (`drafted/records/proposed_measures.yaml`), stated by the architect.
 - Graded against the Maine architect's hand check of a day care, as if built in New York: `packages/rule_format/tests/test_ny_building_egress.py`.
+- Run by Check project for buildings the Building Code governs (2026-11-22: `design_checker/code_scope.py`); the four-unit eval building's hand-worked results: `test_data/test_sites/new_york/ithaca_city/four_unit_apartment/expected.yaml`.

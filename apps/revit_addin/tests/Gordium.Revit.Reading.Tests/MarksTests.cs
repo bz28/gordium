@@ -72,6 +72,22 @@ public sealed class MarksTests
             ("Gordium: Stories", "bf758947-8ee4-490c-a499-dee706a6f1e7", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
             // a space nobody occupies (route note decision 1b)
             ("Gordium: Not occupied", "306bccbe-b2f7-4a73-9169-6be76fb46202", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_Rooms"]),
+            // which New York code governs, and what the Building Code's rules read (docs/decisions/2026-11-22_which_ny_code.md)
+            ("Gordium: Follows the Building Code", "01405f95-7061-47e2-b2a3-7706747c0817", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Stories above grade plane", "3f5ba80f-f877-49d9-bc47-a86de4a87a19", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Separate means of egress", "489999a0-b6a0-4d36-a186-a7874e8e78ff", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Townhouse units", "81480188-21b7-4786-b2b3-c3da847439c2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Care facility", "58d76f42-7618-4c1c-8765-3af6c45b31d2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Occupancy groups", "ea50d05c-05a2-46b3-aafc-6cbb22bf19ac", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Sprinkler system", "4b542577-d04e-463a-87fa-019dbc102374", MarkValueKind.Text, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            // the dwelling's own facts the code decision reads (review round 1: an ask named marks Revit didn't have)
+            ("Gordium: Dwelling units", "aa32131a-e757-47a3-abf8-9deb81d7a09a", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Units in the attached building", "bccb088a-c087-475f-9ff9-53fd10133d0e", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Home occupation", "c6a7cf3a-28b8-4c18-98f2-cf34215901bf", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Rooms let for profit", "2f038e8d-2d26-4e46-b92a-1c51d08bca87", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: Accessory dwelling unit", "6fcbf10d-a1c2-406a-b6c7-e726b4a695f2", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: ADU detached", "ebd07d28-ce47-4e7d-95e7-6e164d7d7bc8", MarkValueKind.YesNo, MarkBinding.Instance, ["OST_ProjectInformation"]),
+            ("Gordium: ADUs on parcel", "1fa82254-92d5-4f27-acef-924bfc047d7c", MarkValueKind.Integer, MarkBinding.Instance, ["OST_ProjectInformation"]),
         };
         Assert.Equal(expected.Length, Marks.All.Count);
         foreach (var (m, e) in Marks.All.Zip(expected))
