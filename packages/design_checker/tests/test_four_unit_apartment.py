@@ -1,8 +1,9 @@
 """The Building Code eval (test_data/test_sites/new_york/ithaca_city/four_unit_apartment): Gordium's two-story,
 four-unit building, as the Revit reader reads it once built from revit_build_data.json and marked by eval_marks.yaml
 (make_ny_build_data.interior_of), checked against its hand-worked expected.yaml: the Building Code governs, its rules
-run on the routes' stories and spaces, the occupant-load rules say they need a figure not read yet, and every flag
-is its own needs-review line. Never a pass the hand-work doesn't give."""
+run on the routes' stories and spaces, the occupant-load rules say they need a figure not read yet, its group's
+table rows give real verdicts (2026-11-23), and every flag is its own needs-review line. Never a pass the hand-work
+doesn't give."""
 
 import math
 import sys
@@ -62,8 +63,23 @@ def test_a_rule_reading_a_figure_not_measured_yet_says_so(got):
 
 
 def test_each_flag_is_its_own_line_with_its_section(got):
+    """19 of the rulebook's 25 flags show (2026-11-23): those narrowed to a building of two or more groups, or to
+    another group (F-1 and S-1's increase, H-5's, Group H's sprinkler system), are not applicable to a one-group R-2."""
     flags = [i for i in got["items"] if i["reason"].startswith("A person checks this")]
-    assert len(flags) == 23 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+    assert len(flags) == 19 and all(i["status"] == present.REVIEW and i["code"]["section"] for i in flags)
+
+
+def test_its_groups_rows_give_real_verdicts(got, expected):
+    """Group R-2, no sprinkler system (2026-11-23): each story's travel within Table 1017.2's 200 ft, no dead end,
+    and each apartment's one door fails Table 1006.2.1's R-2 row (Not Permitted without a sprinkler system); the
+    stair enclosures are exits, so that row asks nothing of them."""
+    for s in got["interior"]["parts"]["story"]:
+        assert s["measures"]["egress_travel_distance"] <= expected["egress_travel_distance_at_most"]
+    is_exit = {p["name"].split(" L")[0]: p["measures"]["space_is_exit"] for p in got["interior"]["parts"]["space"]}
+    assert is_exit == expected["spaces"]["space_is_exit"]
+    rows = {(r["name"], r["outcome"]) for r in got["rows"] if r["rule"] == "general.bc_table_1006_2_1_r2"}
+    assert {o for n, o in rows if n.startswith("Apartment")} == {"fail"}
+    assert {o for n, o in rows if n.startswith("Stair")} == {"pass"}
 
 
 def test_the_build_data_is_made_from_the_building(tmp_path):

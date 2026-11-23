@@ -971,7 +971,7 @@
  "not_drawn": {
   "stairs": "the two exit stair enclosures are drawn as rooms only: no Building Code rule here reads a stair's risers or treads, and the residential stair rules don't run (the Building Code governs)",
   "windows": "no rule checked reads a window (the Building Code's escape-window sections aren't brought in)",
-  "apartment interiors": "each apartment is one room: the rules checked read the routes from its door, and its own rooms would only lengthen the travel figures, which no rule checked for Group R-2 limits (expected.yaml)"
+  "apartment interiors": "each apartment is one room: the rules checked read the routes from its door, and its own rooms would only lengthen the travel figures, about 54 ft against Table 1017.2's 200 ft for Group R-2 (expected.yaml)"
  },
  "assumptions": [
   {
