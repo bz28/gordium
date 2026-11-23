@@ -37,6 +37,13 @@ public sealed record Fix(string Key, string Title, CardAction Action, IReadOnlyL
     /// one card can ask two, the stream's yes and its distance), else its cards.</summary>
     public int Joined => Key == "pi" && Members.SelectMany(CauseCards.MarksOf).Distinct().Count() is var n and > 0 ? n : Members.Count;
 
+    /// <summary>The opened fix's overline over its cards: "The 11 causes, in Gordium's checker's words"; for a
+    /// Project Information fix whose cards ask more facts than there are cards, both counts ("The 6 causes asking 9
+    /// facts, …"), so it never claims a number of facts the title and count don't.</summary>
+    public string MembersWords =>
+        (Noun == "facts" && Joined != Members.Count ? $"The {Members.Count} causes asking {Joined} facts" : $"The {Members.Count} {Noun}")
+        + ", in Gordium's checker's words";
+
     /// <summary>"28 results waiting on this · 11 causes": counted, never a figure.</summary>
     public string Count => $"{PaneWords.Results(Rows.Count)} waiting on this" + (Joined > 1 ? $" · {Joined} {Noun}" : "");
 }
