@@ -1,0 +1,1867 @@
+# Central business coverage decisions: what a person decided about each piece of Chapter 325 labeled `rule` or
+# `flag`, for each CBD district with a rulebook. The table built from it is 6_coverage_report/central_business_districts.md
+# (`python -m section_labeling audit`; never hand-edit the table). The format and the checks are the residential file's
+# (residential_coverage.yaml, its header; packages/section_labeling/section_labeling/district_audit.py).
+# Drafted by Claude (2026-11-23) from the CBD rulebooks and the law's text: every part a CBD rule cites is decided by
+# those rules; the rest started from the B districts' decisions (commercial_coverage.yaml) and each was then read again
+# for the CBD column (chart p.4 and p.5: a "-" decision names the CBD column's own cell), §325-8D, §325-16G (not CBD-50),
+# and §325-21C (no loading in any CBD district). A second reading, not an architect's.
+
+districts:
+- CBD-50
+- CBD-60
+- CBD-85
+- CBD-100
+- CBD-120
+- CBD-140
+parked:
+  corner_lot_front:
+    name: 'Corner lots: which side is the front'
+    decided: Ben's later list, 2026-10-25
+  historic_flood:
+    name: Historic district and flood zone lookups
+    decided: Ben's later list, 2026-10-25
+  slope:
+    name: Real ground slope (lots are treated as flat; on a sloping lot height and stories need review)
+    decided: Ben's later list, 2026-10-25
+  survey_import:
+    name: Survey import (CAD/PDF)
+    decided: Ben's later list, 2026-10-25
+  chimney_fence:
+    name: Chimneys, fences and other objects (how objects are identified in the model needs Ben's OK)
+    decided: Ben's later list, 2026-10-25
+  parking:
+    name: 'Parking (typed count and read from the drawing): on hold'
+    decided: Ben's later list, 2026-10-25
+pieces:
+  325-3B:accessory_dwelling_unit:
+  - what: What an accessory dwelling unit is (a second dwelling unit on the lot of a primary structure)
+    quote: A smaller, secondary dwelling unit located on the same lot
+    lines:
+    - - 4
+      - 7
+      - 8
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+  - what: What an ADU must have (a separate entrance; living, cooking, sanitary and sleeping facilities; the building code
+      for residential use)
+    quote: An ADU must have a separate entrance from the outside of the building or through a common hall
+    lines:
+    - - 4
+      - 8
+      - 11
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+  325-3B:building_area:
+  - what: What counts toward lot coverage (principal and accessory buildings, porches, decks, balconies over 2 ft, ramps,
+      landings)
+    lines:
+    - - 5
+      - 23
+      - 28
+    all:
+      status: rulebook
+      rules:
+      - lot_coverage
+      - min_height
+      - min_stories
+  - what: Pergolas, and terraces and patios above grade, kept out of required yards
+    lines:
+    - - 5
+      - 27
+      - 29
+    all:
+      status: rulebook
+      rules:
+      - lot_coverage
+      - min_height
+      - min_stories
+  325-3B:cooperative_household:
+  - what: Four or more unrelated persons in one unit make it a multiple dwelling
+    all:
+      status: missing
+      priority: low
+      why: 'No rule names a cooperative household. The occupancy rules (occupancy_one_family: at most one unrelated person;
+        occupancy_two_family: a flag over one) keep it from passing as a one- or two-family dwelling, but nothing tells the
+        architect that such a household makes the unit a multiple dwelling.'
+  325-3B:dwelling_one_family:
+  - what: Who may occupy a one-family dwelling (one unrelated person, or two in R-1 when owner-occupied and in R-2/R-3)
+    all:
+      status: rulebook
+      rules:
+      - occupancy_one_family
+  325-3B:one_family_attached_dwelling:
+  - what: An attached building holds three to six one-family dwellings
+    lines:
+    - - 8
+      - 11
+      - 14
+    all:
+      status: missing
+      priority: low
+      why: No rule checks that an attached building holds three to six one-family dwellings in the CBD districts (the residential
+        districts' attached_units_per_building isn't carried over yet).
+  - what: Each dwelling shares a party wall or structure and has direct exterior access from the ground floor
+    lines:
+    - - 8
+      - 11
+      - 14
+    all:
+      status: missing
+      priority: low
+      why: Nothing checks party walls or each unit's own ground-floor door; a massing model shows neither.
+  325-3B:dwelling_two_family:
+  - what: What a two-family dwelling is (a building containing two dwelling units)
+    lines:
+    - - 9
+      - 3
+      - 4
+    all:
+      status: flag
+      rules:
+      - occupancy_two_family
+      quote: DWELLING, TWO-FAMILY — A building containing two dwelling units occupied exclusively for residential purposes.
+      page: 9
+  - what: Who may occupy each unit of a two-family dwelling
+    lines:
+    - - 9
+      - 4
+      - 9
+    all:
+      status: flag
+      rules:
+      - occupancy_two_family
+      quote: residential purposes. In R-1 and CR-1 Zones, each unit may be occupied by an individual or family
+      page: 9
+  325-3B:dwelling_unit:
+  - what: What a dwelling unit is, as the rules count units and house types
+    quote: One or more rooms designed or used for living quarters by one household
+    lines:
+    - - 9
+      - 10
+      - 12
+    all:
+      status: flag
+      rules:
+      - use
+      mapped: Each house type the architect states is defined by its dwelling units (research §6, a category), and each is
+        a use the use rule checks.
+  - what: Each unit has its own entrance and living, cooking, sanitary and sleeping facilities
+    lines:
+    - - 9
+      - 10
+      - 12
+    all:
+      status: missing
+      priority: low
+      why: Nothing checks that each unit has what the definition requires (its own entrance; the kitchen, sanitary and sleeping
+        facilities); a massing model shows no rooms. Research §6 (docs/research/2026-10-20_architect_questions.md) reads it
+        as a category the stated house type carries, so a design is only as right as that statement.
+  325-3B:functional_family_unit:
+  - what: When unrelated people count as a functional family unit
+    all:
+      status: rulebook
+      rules:
+      - occupancy_one_family
+  325-3B:green_space:
+  - what: Green space, at least 75% softscape, where a minimum applies
+    quote: Where a minimum green space requirement applies
+    all:
+      status: not_applicable
+      why: The commercial chart (p.5) sets no green-space minimum for the CBD districts.
+      quote: Where a minimum green space requirement applies
+  325-3B:height_of_building:
+  - what: How building height is measured
+    all:
+      status: rulebook
+      rules:
+      - height
+      - min_height
+      - yard_projections
+  325-3B:home_occupation:
+  - what: What a home occupation is and how it must run (in the dwelling or an accessory building, by a resident; no more
+      than two outside employees; no exterior display, storage or nuisance; traffic and parking; no retail)
+    lines:
+    - - 12
+      - 26
+      - 30
+    - - 13
+      - 3
+      - 17
+    - - 13
+      - 20
+      - 34
+    all:
+      status: rulebook
+      rules:
+      - home_occupation_size
+  - what: (f) At most 25% of the dwelling unit and 500 indoor square feet, accessory structures included
+    lines:
+    - - 13
+      - 18
+      - 19
+    all:
+      status: rulebook
+      rules:
+      - home_occupation_size
+  325-3B:large_beverage_producer:
+  - what: Large beverage producers (production cap, silo height)
+    all:
+      status: not_applicable
+      why: Not a use the commercial chart (p.4) lists for the CBD districts, so it isn't permitted there (§325-8A(2) says
+        the permitted uses are listed). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml).
+      page: 24
+      quote: Uses which are permitted in each use district are listed
+  325-3B:neighborhood_commercial_facility:
+  - what: What a neighborhood commercial facility may sell
+    quote: Such facility shall be limited to the retail sale of convenience goods
+    all:
+      status: flag
+      rules:
+      - use
+      mapped: A neighborhood commercial facility is a special-permit use in the CBD column (chart p.4, SP), so the use rule
+        says needs review.
+  325-3B:occupant:
+  - what: Who counts as an occupant (R-2c), for the lot sizes that grow with occupants
+    lines:
+    - - 16
+      - 5
+      - 14
+    - - 16
+      - 28
+      - 33
+    all:
+      status: not_applicable
+      why: The definition is for R-2c only.
+      quote: In R-2c Zones only
+  - what: Least habitable space per occupant (sleeping rooms 80/120/180/240 sf..., unit 150/250/350/450 sf...)
+    lines:
+    - - 16
+      - 15
+      - 27
+    all:
+      status: not_applicable
+      why: The definition is for R-2c only.
+      quote: In R-2c Zones only
+  325-3B:rooming_house:
+  - what: A rooming house (a multiple dwelling, §325-3B DWELLING, MULTIPLE (5)) and what it must include
+    lines:
+    - - 18
+      - 7
+      - 10
+    all:
+      status: not_applicable
+      why: The CBD column sets no lot size for a multiple dwelling (chart p.5, "-"), so a rooming house or rooming unit adds
+        none.
+      file: zoning_charts_2026-04.pdf
+      page: 5
+      quote: Multiple family dwelling, new construction 6,000 sf [fn2] 6,000 sf [fn2] 3,000 sf 3,000 sf 3,000 sf 3,000 sf
+        -
+      cell:
+        section: Minimum Lot Size
+        row: Multiple family dwelling, new construction
+  - what: It must include complete kitchen facilities or a separate entrance
+    lines:
+    - - 18
+      - 8
+      - 9
+    all:
+      status: missing
+      priority: low
+      why: Nothing checks that each unit has what the definition requires (its own entrance; the kitchen, sanitary and sleeping
+        facilities); a massing model shows no rooms. Research §6 (docs/research/2026-10-20_architect_questions.md) reads it
+        as a category the stated house type carries, so a design is only as right as that statement.
+  325-3B:rooming_unit:
+  - what: A rooming unit (counted in the multiple-dwelling lot size)
+    lines:
+    - - 18
+      - 11
+      - 13
+    all:
+      status: not_applicable
+      why: The CBD column sets no lot size for a multiple dwelling (chart p.5, "-"), so a rooming house or rooming unit adds
+        none.
+      file: zoning_charts_2026-04.pdf
+      page: 5
+      quote: Multiple family dwelling, new construction 6,000 sf [fn2] 6,000 sf [fn2] 3,000 sf 3,000 sf 3,000 sf 3,000 sf
+        -
+      cell:
+        section: Minimum Lot Size
+        row: Multiple family dwelling, new construction
+  - what: It must include complete kitchen facilities or a separate entrance
+    lines:
+    - - 18
+      - 12
+      - 13
+    all:
+      status: missing
+      priority: low
+      why: Nothing checks that each unit has what the definition requires (its own entrance; the kitchen, sanitary and sleeping
+        facilities); a massing model shows no rooms. Research §6 (docs/research/2026-10-20_architect_questions.md) reads it
+        as a category the stated house type carries, so a design is only as right as that statement.
+  325-3B:row_house:
+  - what: A row house's modules (facade at most 25 ft, one street-facing entry each)
+    all:
+      status: missing
+      priority: low
+      why: A row house is a multiple dwelling (§325-3B DWELLING, MULTIPLE (5)); no rule checks its module widths or street-facing
+        entries.
+  325-3B:standard_canopy:
+  - what: Fixed canopies (at most 4 ft out and 4 ft tall, 8 ft clear above a sidewalk)
+    all:
+      status: missing
+      priority: low
+      why: No rule checks canopies; a massing model doesn't draw them.
+  325-3B:standard_awning:
+  - what: Retractable awnings (at most 4 ft out and 4 ft tall, 7 ft clear above a sidewalk)
+    all:
+      status: missing
+      priority: low
+      why: No rule checks awnings; a massing model doesn't draw them.
+  325-3B:story:
+  - what: What a story is (basements over 6 ft above grade plane or 12 ft above ground count; cellars and unfinished attics
+      don't)
+    all:
+      status: rulebook
+      rules:
+      - min_stories
+    CBD-140:
+      status: rulebook
+      rules:
+      - min_stories
+      - stories
+  325-3B:terrace_or_patio:
+  - what: Terraces and patios above grade kept out of required yards
+    all:
+      status: missing
+      priority: low
+      why: No rule names pergolas or raised terraces and patios; one is checked only if drawn as a solid on the Building layer
+        touching the house (then it is measured as part of the building).
+  325-3B:trailer_or_travel_trailer:
+  - what: Travel trailers (a temporary dwelling at most 8 ft wide and 32 ft long)
+    all:
+      status: not_applicable
+      why: Not a use the commercial chart (p.4) lists for the CBD districts, so it isn't permitted there (§325-8A(2) says
+        the permitted uses are listed). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml).
+      page: 24
+      quote: Uses which are permitted in each use district are listed
+  325-3B:urban_beverage_producer:
+  - what: Urban beverage producers (production cap, silo height)
+    all:
+      status: missing
+      priority: medium
+      why: No rule checks an urban beverage producer's production cap or silo height; it is permitted in the CBD column (chart
+        p.4, •).
+  325-7A:
+  - what: Every building and use conforms to its district's regulations
+    all:
+      status: not_applicable
+      why: No requirement of its own beyond the district's regulations, each of which is its own row here (the checker applies
+        the lot's zone's whole rulebook, rulebook.rulebook_for).
+      quote: unless in conformity with the regulations herein specified for the district in which it is located
+  325-7B:
+  - what: A yard required for one building can't also count for another building
+    all:
+      status: flag
+      rules:
+      - yards_not_shared
+      quote: B. Use of yard for another building. No part of a yard or other open space about any building required for the
+        purposes of complying with the provisions of this chapter shall be included as a part of a yard or other open space
+        similarly required for another building.
+      page: 24
+  325-8A:
+  - what: 'Column 2: permitted primary uses'
+    quote: Uses which are permitted in each use district are listed
+    lines:
+    - - 24
+      - 12
+      - 16
+    all:
+      status: rulebook
+      rules:
+      - use
+  - what: 'Column 3: a private garage''s size (chart p.4)'
+    lines:
+    - - 24
+      - 17
+      - 18
+    all:
+      status: not_applicable
+      quote: Uses permitted to be accessory to the main use of the
+      why: The commercial chart's private garage row (p.4 line 53) is a plain • for the CBD column (no car limit, no note),
+        so there is no garage size to check.
+  - what: 'Column 3: the other permitted accessory uses (chart p.4: structure for construction purposes, towers, home occupation,
+      parking areas, redemption center, gardens)'
+    lines:
+    - - 24
+      - 17
+      - 18
+    all:
+      status: missing
+      priority: medium
+      why: No rule checks the accessory uses on chart p.4 other than a home occupation's size (home_occupation_size, under
+        §325-3B). Towers, neighborhood parking areas and gardens need a special permit; a structure for construction purposes
+        may stay two years; parking is a flag (parking). An ADU is the next part.
+  - what: 'Column 3: an accessory dwelling unit (chart p.4 line 51)'
+    lines:
+    - - 24
+      - 17
+      - 18
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: '(3) Column 3: Permitted Accessory Uses. Uses permitted to be accessory to the main use of the'
+      page: 24
+  - what: 'Column 4: off-street parking'
+    quote: The off-street parking spaces listed in this column shall be provided
+    lines:
+    - - 24
+      - 19
+      - 21
+    all:
+      status: flag
+      rules:
+      - parking
+  - what: 'Column 5: off-street loading'
+    lines:
+    - - 24
+      - 22
+      - 26
+    all:
+      status: not_applicable
+      quote: except for properties located in any CBD district
+      why: '§325-8A(5) excepts every CBD district from the loading column (and §325-21C requires no loading there): no loading
+        flag.'
+  - what: 'Columns 6 and 7: minimum lot area and width'
+    quote: Lots hereafter used for a permitted use in each use district shall be of a size equal to or greater than
+    lines:
+    - - 24
+      - 27
+      - 34
+    all:
+      status: rulebook
+      rules:
+      - lot_area_hotel_motel
+      - lot_width
+  - what: 'Columns 8 and 9: stories (counted at the main entrance side) and height'
+    lines:
+    - - 24
+      - 35
+      - 39
+    - - 25
+      - 3
+      - 4
+    all:
+      status: rulebook
+      rules:
+      - height
+      - min_stories
+    CBD-140:
+      status: rulebook
+      rules:
+      - height
+      - min_stories
+      - stories
+  - what: 'Column 10: lot coverage (principal and accessory buildings, porches, decks, balconies, ramps, landings)'
+    lines:
+    - - 25
+      - 5
+      - 11
+    all:
+      status: rulebook
+      rules:
+      - lot_coverage
+      - min_height
+      - min_stories
+  - what: 'Columns 11 to 15: front, side and rear yards (the rear yard opposite the address street on a corner or through
+      lot)'
+    lines:
+    - - 25
+      - 12
+      - 34
+    - - 26
+      - 3
+      - 3
+    all:
+      status: rulebook
+      rules:
+      - height
+      - rear_yard
+  - what: 'Column 16: minimum height'
+    lines:
+    - - 26
+      - 4
+      - 9
+    all:
+      status: rulebook
+      rules:
+      - min_height
+  325-8B:
+  - what: (1) Each additional primary building on the lot needs its own minimum lot area
+    quote: each square-footage requirement applies separately to the initial permitted primary use
+    lines:
+    - - 26
+      - 10
+      - 16
+    all:
+      status: not_applicable
+      why: The law sets this for residential districts only; a CBD district is a business district.
+      quote: for all residential use districts
+  - what: (2) Landfilling and bulkheading plans need Board of Public Works approval
+    lines:
+    - - 26
+      - 17
+      - 18
+    all:
+      status: missing
+      priority: low
+      why: No flag; a massing model doesn't show fill or bulkheads.
+  - what: (3) Uses are generally cumulative, except where a specific prohibition or omission says otherwise
+    quote: except where otherwise indicated by specific prohibition or omission
+    lines:
+    - - 26
+      - 19
+      - 21
+    all:
+      status: rulebook
+      rules:
+      - use
+  - what: (4) A use allowed by special permit or variance follows the stricter district's regulations
+    quote: the regulations applying to such use shall be those of whichever district has the stricter regulations
+    lines:
+    - - 26
+      - 22
+      - 25
+    all:
+      status: flag
+      rules:
+      - use
+      mapped: A special-permit use goes to needs review (the use rule), where the stricter regulations are worked out by hand.
+  - what: (5) Every use meets the general performance standards (§325-23)
+    lines:
+    - - 26
+      - 26
+      - 27
+    all:
+      status: missing
+      priority: operational
+      why: Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
+  - what: (6) Minor children aren't counted as unrelated occupants (R-1 and R-2)
+    lines:
+    - - 26
+      - 28
+      - 28
+    - - 27
+      - 3
+      - 3
+    all:
+      status: rulebook
+      rules:
+      - occupancy_one_family
+  - what: '(7), (8), (10): pointers to the NYS Uniform Code, to Article V and to §325-8A(15)'
+    lines:
+    - - 27
+      - 4
+      - 8
+    - - 27
+      - 11
+      - 12
+    all:
+      status: not_applicable
+      why: Pointers with no requirement of their own; each Article V section is its own row in this table, and the Uniform
+        Code is outside Chapter 325.
+      quote: All columns established by this section are subject to the supplementary regulations stated in Article V
+  - what: (9) R-3 land that directly abuts R-1 (the law points to §325-9B(1); the conditions are in §325-19E)
+    quote: For special conditions on development of property in R-3 that directly abuts R-1
+    lines:
+    - - 27
+      - 9
+      - 10
+    all:
+      status: not_applicable
+      why: A pointer for R-3 land abutting R-1 land; not a CBD district.
+      quote: R-3 that directly abuts R-1
+  - what: (11) Nonconforming uses and structures follow Article VI
+    lines:
+    - - 27
+      - 13
+      - 15
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-8C:
+  - what: West End/Waterfront, Cherry Street, Market and Newman districts
+    all:
+      status: not_applicable
+      why: Applies only in those districts.
+      quote: Additional restrictions in the West End/Waterfront, the Cherry Street District, the Market District, and the
+        Newman Districts
+  325-8D:
+  - what: CBD districts
+    all:
+      status: flag
+      rules:
+      - active_street_level_use
+      quote: D. Additional restrictions in the CBD districts.
+    CBD-50:
+      status: flag
+      rules:
+      - active_street_level_use
+      - historic_review
+      quote: D. Additional restrictions in the CBD districts.
+    CBD-85:
+      status: flag
+      rules:
+      - active_street_level_use
+      - green_street_stepback
+      quote: D. Additional restrictions in the CBD districts.
+  325-8E:
+  - what: 'South Hill Overlay: no second primary structure on a parcel (R-1 and R-2)'
+    all:
+      status: not_applicable
+      why: Applies to R-1 and R-2 property in the overlay only.
+      quote: with a zoning designation of R-1 or R-2
+  325-9B:
+  - what: Primary uses that need a special permit (cemeteries, utilities, schools, nursery schools, neighborhood commercial,
+      hospitals, day care)
+    quote: which require a special permit from the Planning and Development Board, are as follows
+    lines:
+    - - 30
+      - 21
+      - 36
+    - - 31
+      - 34
+      - 35
+    - - 31
+      - 38
+      - 39
+    - - 32
+      - 3
+      - 6
+    all:
+      status: rulebook
+      rules:
+      - use
+  - what: (p) Bed-and-breakfast inns need a special permit in all districts
+    quote: Bed-and-breakfast inns in all districts
+    lines:
+    - - 31
+      - 36
+      - 36
+    all:
+      status: rulebook
+      rules:
+      - use
+  - what: (i) A home occupation needs a special permit unless it meets all four criteria
+    lines:
+    - - 30
+      - 37
+      - 38
+    - - 31
+      - 3
+      - 15
+    all:
+      status: not_applicable
+      why: The law sets this for residential districts only; a CBD district is a business district.
+      quote: Home occupations in all residential districts
+  - what: Other accessory uses that need a special permit (antennas and towers, telecommunications, towers for electricity,
+      gardens, neighborhood parking)
+    lines:
+    - - 31
+      - 16
+      - 33
+    - - 31
+      - 37
+      - 37
+    all:
+      status: missing
+      priority: medium
+      why: No rule or flag asks about the accessory uses that need a special permit (a home occupation is permitted by right
+        in the CBD districts, chart p.4), namely an antenna or dish over 6 ft, in the front yard or over 10 ft tall; telecommunications
+        facilities; a tower for electricity; a neighborhood garden; neighborhood parking.
+  325-9D:
+  - what: Criteria the Board uses to grant a special permit, for a primary use
+    quote: A special permit shall be granted for a proposed use or activity if it meets the following criteria
+    lines:
+    - - 33
+      - 7
+      - 37
+    all:
+      status: flag
+      rules:
+      - use
+      mapped: A special-permit primary use goes to needs review (the use entry); the criteria are the Board's judgment.
+  - what: Accessory uses that need a special permit
+    lines:
+    - - 33
+      - 7
+      - 37
+    all:
+      status: missing
+      priority: medium
+      why: No rule or flag asks about the accessory uses that need a special permit (a home occupation is permitted by right
+        in the CBD districts, chart p.4), namely an antenna or dish over 6 ft, in the front yard or over 10 ft tall; telecommunications
+        facilities; a tower for electricity; a neighborhood garden; neighborhood parking.
+  325-10C:
+  - what: Bed-and-breakfast inns (special-permit conditions)
+    quote: Bed-and-breakfast inns in all districts
+    lines:
+    - - 35
+      - 3
+      - 20
+    all:
+      status: flag
+      rules:
+      - use
+      mapped: A bed-and-breakfast inn is a special-permit use in the CBD column (chart p.4, SP), so the use rule says needs
+        review.
+  - what: Neighborhood gardens (special-permit conditions)
+    lines:
+    - - 35
+      - 21
+      - 40
+    - - 36
+      - 3
+      - 44
+    - - 37
+      - 3
+      - 6
+    all:
+      status: missing
+      priority: low
+      why: 'A garden is an accessory use needing a special permit (chart p.4: SP in the CBD column); nothing asks about one.'
+  - what: Schools and related uses (special-permit conditions)
+    quote: Schools and related uses. The following specific conditions shall be applicable
+    lines:
+    - - 37
+      - 7
+      - 25
+    all:
+      status: not_applicable
+      quote: permits for schools and related uses in all residential districts
+      why: The conditions are for school special permits in residential districts; in the CBD column a school is permitted
+        by right (chart p.4, •).
+  325-11B:
+  - what: Cluster subdivisions (deviations the Planning and Development Board may approve)
+    all:
+      status: missing
+      priority: low
+      why: A cluster subdivision's approved deviations aren't modelled; Gordium checks one lot under the district's own rules.
+  325-11C:
+  - what: What a cluster subdivision application must show
+    all:
+      status: missing
+      priority: low
+      why: An approval process for a subdivision; no flag.
+  325-12C:
+  - what: Planned unit development (PUD) intent
+    all:
+      status: not_applicable
+      why: A PUD is its own district, made by rezoning.
+      quote: In reaching its decision on whether to rezone to a PUD
+  325-12D:
+  - what: PUD uses and limits
+    all:
+      status: not_applicable
+      why: A PUD's limits are set by its own rezoning law.
+      quote: shall be as set forth in the legislation rezoning the area to a PUD
+  325-12E:
+  - what: PUD site plan approval
+    all:
+      status: not_applicable
+      why: Applies within a PUD, its own district.
+      quote: No structure shall be erected or placed within a PUD
+  325-12F:
+  - what: PUD criteria
+    all:
+      status: not_applicable
+      why: Applies to an application to rezone to a PUD.
+      quote: The Common Council will consider an application for any PUD
+  325-12H:
+  - what: PUD conditions
+    all:
+      status: not_applicable
+      why: Applies to a rezoning to a PUD.
+      quote: In any rezoning to a PUD
+  325-15A:
+  - what: Removing topsoil and grading
+    all:
+      status: missing
+      priority: operational
+      why: Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
+  325-15B:
+  - what: Mobile homes follow Chapter 210 (Housing Standards)
+    all:
+      status: not_applicable
+      why: A pointer to Chapter 210, outside Chapter 325; no zoning requirement of its own.
+      quote: Mobile homes and mobile home parks shall be in conformity with Article II of Chapter 210
+  325-15C:
+  - what: No unsanitary storage in the open
+    all:
+      status: missing
+      priority: operational
+      why: Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
+  325-15D:
+  - what: Garage sales (how long, how often)
+    all:
+      status: missing
+      priority: operational
+      why: Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
+  325-15E:
+  - what: Junkyards and salvage yards
+    all:
+      status: not_applicable
+      why: Not a use the commercial chart (p.4) lists for the CBD districts, so it isn't permitted there (§325-8A(2) says
+        the permitted uses are listed). Gordium accepts only the chart's uses (4_term_definitions/uses.yaml).
+      page: 24
+      quote: Uses which are permitted in each use district are listed
+  325-15F:
+  - what: Gasoline service stations (referral for review)
+    all:
+      status: not_applicable
+      why: A gasoline station isn't permitted in the CBD districts (chart p.4, "-").
+      file: zoning_charts_2026-04.pdf
+      page: 4
+      quote: Gasoline station - - - - - • • - §325-15(F)
+      cell:
+        section: Primary Uses
+        row: Gasoline station
+  325-16A:
+  - what: Height exceptions (spires, chimneys, mechanical equipment, solar, antennas) and their 20%/30% area cap
+    quote: The height limitations of this chapter shall not apply to
+    all:
+      status: parked
+      item: chimney_fence
+      why: Needs a way to tell such objects apart in the model. Until then anything above the main roof is measured both ways
+        (left out and to its top), so the height needs review rather than passing.
+  325-16B:
+  - what: A parapet or cornice may rise up to 5 ft above the height limit
+    all:
+      status: missing
+      priority: low
+      why: Not checked; a parapet is measured both ways (left out and to its top), so the height needs review rather than
+        passing (cautious). Whether it may sit on top of the §325-16C bonus is open (questions_for_architects.md 4.5).
+  325-16C:
+  - what: Extra height when every yard grows a foot per foot (at most 10%), stories never exceeded
+    all:
+      status: rulebook
+      rules:
+      - height
+      - yard_projections
+    CBD-140:
+      status: rulebook
+      rules:
+      - height
+      - stories
+      - yard_projections
+  325-16D:
+  - what: U-1 District gorge areas
+    all:
+      status: not_applicable
+      why: Applies only in the U-1 District.
+      quote: in any U-1 District
+  325-16F:
+  - what: WEDZ-1 District stories
+    all:
+      status: not_applicable
+      why: Applies only in the WEDZ-1 District.
+      quote: in the WEDZ-1 District
+  325-16G:
+  - what: Two-story minimum in CBD and B districts
+    all:
+      status: rulebook
+      rules:
+      - min_stories
+    CBD-50:
+      status: not_applicable
+      quote: in the CBD-60, CBD-85, CBD-100, CBD-120, CBD-140, B-1a, B-1b, B-2c, and B-2d Zoning Districts
+      why: '§325-16G names CBD-60 to CBD-140, not CBD-50: there the chart''s own two-story minimum holds, with its note 6
+        (min_stories).'
+      also:
+      - min_stories
+  325-17A:
+  - what: A lot can't be made so small that a required yard shrinks
+    all:
+      status: rulebook
+      rules:
+      - rear_yard
+      mapped: The yards are checked on the lot as drawn, so a lot reduced below them fails (no front or side yard is required
+        here).
+  325-17B:
+  - what: Corner visibility triangle (nothing over 2 ft within 20 ft of the street corner)
+    quote: On a corner lot in any residential district, no fence, wall, grading, hedge or other structure or planting more
+      than two feet in height
+    all:
+      status: parked
+      item: chimney_fence
+      why: Fences, walls, hedges, grading and plantings aren't identified in the model (research X4 settled the rule).
+  325-17C:
+  - what: No fence, wall, sign or planting that hides traffic
+    quote: In all districts, no fence, wall, grading, hedge, sign, assembly or other structure or planting
+    all:
+      status: parked
+      item: chimney_fence
+  325-17D:
+  - what: Fences may not block a neighbor's light, air or view
+    quote: No fence or wall other than a building may be built to a height that will interfere with the light, air or view
+      of any neighboring property
+    all:
+      status: parked
+      item: chimney_fence
+  325-18A:
+  - what: Porches, decks, balconies over 2 ft, ramps and landings are part of the building, for yards and coverage
+    all:
+      status: rulebook
+      rules:
+      - height
+      - rear_yard
+  325-18B:
+  - what: Eaves may project at most 2 ft into a required yard
+    lines:
+    - - 49
+      - 13
+      - 16
+    all:
+      status: rulebook
+      rules:
+      - height
+      - rear_yard
+      - yard_projections
+  - what: Windowsills, belt courses, cornices and other features may project at most 2 ft
+    lines:
+    - - 49
+      - 13
+      - 16
+    all:
+      status: rulebook
+      rules:
+      - height
+      - rear_yard
+      - yard_projections
+  325-18C:
+  - what: U-1 Zone setback next to a residential zone
+    all:
+      status: not_applicable
+      why: Applies to buildings in the U-1 Zone.
+      quote: in the U-1 Zone
+  325-19A:
+  - what: Business or industrial lots next to residential lots keep a residential yard
+    all:
+      status: flag
+      rules:
+      - transition_yards
+      quote: A. [fn12]Side yard and rear yard transition. Where a lot in a business or industrial district abuts a lot in
+        a residential district, there shall be provided along such abutting lines a yard equal in width or depth to that required
+        in the residential district. (See illustration below.)
+      page: 49
+  325-19B:
+  - what: Front yard transition into a business or industrial district
+    all:
+      status: flag
+      rules:
+      - transition_yards
+      quote: B. Front yard transition. Where frontage is partly in a residential and partly in a business or industrial district,
+        the front yard depth in the business or industrial district shall be equal to 1/2 the required front yard depth of
+        the residential district for a distance of at least 50 feet into the business or industrial district. (See illustration
+        below.)
+      page: 50
+  325-19C:
+  - what: Corner lots have a front yard on each street
+    all:
+      status: not_applicable
+      why: 'Corner lots in residential districts only; a CBD corner lot measures no yard (needs review: model_measurement''s
+        corner_outside_residential).'
+      quote: On corner lots in residential districts
+  325-19D:
+  - what: No transitions in B-2d
+    all:
+      status: not_applicable
+      why: Applies only in the B-2d District.
+      quote: shall not apply in the B-2d District
+  325-19E:
+  - what: Stricter limits for R-3 development abutting R-1 land
+    quote: The development of any permitted use in the R-3a or R-3b Zoning District, except a one-family or two-family dwelling
+    all:
+      status: not_applicable
+      why: R-3a and R-3b land only.
+      quote: R-3a or R-3b Zoning District
+  325-20C:
+  - what: Parking for nonconforming uses
+    quote: the amount of off-street parking permitted on a property containing a nonconforming use
+    all:
+      status: parked
+      item: parking
+  325-20D:
+  - what: Parking areas and driveways (permits, dimensions, surfacing, screening)
+    quote: In all zoning districts, no parking area or driveway may be constructed
+    all:
+      status: parked
+      item: parking
+      also:
+      - parking
+  325-20E:
+  - what: Parking in front yards (orientation, driveway width)
+    quote: In all residential districts, all front yard parking within 15 feet of the front property line
+    all:
+      status: not_applicable
+      quote: In all residential districts, all front yard parking within 15 feet of the front
+      why: The law sets this for residential districts only.
+  325-20F:
+  - what: New or enlarged parking areas of three or more spaces in residential districts
+    quote: on lots within residential zoning districts
+    all:
+      status: not_applicable
+      quote: on lots within residential zoning districts
+      why: The law sets this for residential districts only.
+  325-20G:
+  - what: Parking areas in nonresidential districts
+    all:
+      status: parked
+      item: parking
+      quote: Parking areas on lots in nonresidential zoning districts
+      why: Parking areas on a CBD lot are its own requirements (screening, setbacks); parking is on hold (Ben's later list),
+        and every CBD lot gets the parking flag.
+  325-20H:
+  - what: Parking in WEDZ-1
+    all:
+      status: not_applicable
+      why: Applies only in WEDZ-1.
+      quote: Parking in WEDZ-1 District
+  325-20I:
+  - what: Parking in the Southwest Area
+    all:
+      status: not_applicable
+      why: Applies only in the Southwest Area.
+      quote: Parking in the Southwest Area
+  325-20J:
+  - what: Parking in U-1
+    all:
+      status: not_applicable
+      why: Applies only in the U-1 District.
+      quote: Parking for the U-1 Zoning District
+  325-21A:
+  - what: Loading space size (450 sf)
+    quote: An off-street loading space shall have a minimum of 450 square feet
+    lines:
+    - - 63
+      - 41
+      - 42
+    all:
+      status: not_applicable
+      piece: 325-21C
+      quote: There shall be no off-street loading requirement for any properties located in any CBD zoning district.
+      why: '§325-21C: no off-street loading is required in any CBD district (and §325-21B excepts "properties located in any
+        CBD district"), so there is nothing to check and no loading flag.'
+  - what: 'Loading for every other use (chart p.15 line 55, "Other use: See §325-21")'
+    lines:
+    - - 63
+      - 41
+      - 42
+    all:
+      status: not_applicable
+      piece: 325-21C
+      quote: There shall be no off-street loading requirement for any properties located in any CBD zoning district.
+      why: '§325-21C: no off-street loading is required in any CBD district (and §325-21B excepts "properties located in any
+        CBD district"), so there is nothing to check and no loading flag.'
+  325-21B:
+  - what: Which uses need loading spaces (all business and industrial land uses, and multiple dwellings of more than 25 units),
+      and how many
+    quote: shall apply to all business and industrial land uses and multiple dwelling structures having more than 25 units
+    lines:
+    - - 63
+      - 43
+      - 43
+    - - 64
+      - 3
+      - 8
+    all:
+      status: not_applicable
+      piece: 325-21C
+      quote: There shall be no off-street loading requirement for any properties located in any CBD zoning district.
+      why: '§325-21C: no off-street loading is required in any CBD district (and §325-21B excepts "properties located in any
+        CBD district"), so there is nothing to check and no loading flag.'
+  - what: 'Loading for every other use (chart p.15 line 55, "Other use: See §325-21")'
+    lines:
+    - - 63
+      - 43
+      - 43
+    - - 64
+      - 3
+      - 8
+    all:
+      status: not_applicable
+      piece: 325-21C
+      quote: There shall be no off-street loading requirement for any properties located in any CBD zoning district.
+      why: '§325-21C: no off-street loading is required in any CBD district (and §325-21B excepts "properties located in any
+        CBD district"), so there is nothing to check and no loading flag.'
+  325-21C:
+  - what: No loading in CBD districts
+    all:
+      status: not_applicable
+      quote: in any CBD zoning district
+      why: 'No off-street loading is required in a CBD district: nothing to check (no loading flag in its rulebook).'
+  325-22A:
+  - what: Motels (lot size and frontage)
+    all:
+      status: rulebook
+      rules:
+      - lot_area_hotel_motel
+  325-22B:
+  - what: Motels (parking)
+    all:
+      status: flag
+      rules:
+      - motel_standards
+      quote: B. Parking. One car space per sleeping unit shall be provided.
+      page: 64
+  325-22C:
+  - what: Motels (paving)
+    all:
+      status: flag
+      rules:
+      - motel_standards
+      mapped: Every motel lot gets the motel_standards flag, which quotes §325-22's other paragraphs; this one is checked
+        by hand with them.
+      quote: C. Paving. Driveways and parking areas must be paved with hard-surface material and properly drained
+      page: 64
+  325-22D:
+  - what: Motels (driveway width)
+    all:
+      status: flag
+      rules:
+      - motel_standards
+      quote: D. Driveway width. A minimum width of 22 feet for a driveway shall be provided for two-way traffic movement or
+        two driveways of 12 feet minimum width each shall be provided for one-way traffic into and out from the guest parking
+        area.
+      page: 64
+  325-22E:
+  - what: Motels (curb cuts)
+    all:
+      status: flag
+      rules:
+      - motel_standards
+      mapped: Every motel lot gets the motel_standards flag, which quotes §325-22's other paragraphs; this one is checked
+        by hand with them.
+      quote: E. Curb cuts. No more than two curb cuts on a major arterial street or highway shall be permitted.
+      page: 64
+  325-22F:
+  - what: Motels (landscaping)
+    all:
+      status: flag
+      rules:
+      - motel_standards
+      quote: F. Landscaping. All rear and side yards must be planted to a minimum of two feet in width with dense shrubbery
+        or a combination of a decorative fence and shrubbery.
+      page: 64
+  325-22G:
+  - what: Motels (lighting)
+    all:
+      status: flag
+      rules:
+      - motel_standards
+      mapped: Every motel lot gets the motel_standards flag, which quotes §325-22's other paragraphs; this one is checked
+        by hand with them.
+      quote: G. Illumination. Driveways must be adequately lighted so as to provide safe access and egress. Lighting
+      page: 64
+  325-22H:
+  - what: Motels (uses)
+    all:
+      status: flag
+      rules:
+      - motel_standards
+      quote: H. Uses. Motels constructed must be limited to guest accommodation and management offices and uses accessory
+        thereto.
+      page: 64
+  325-23A:
+  - what: General performance standards (noise, smoke, odor, dust...)
+    all:
+      status: missing
+      priority: operational
+      why: Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
+  325-24B:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-24C:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-24D:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-24E:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-24F:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-24G:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-24H:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-24I:
+  - what: Industrial performance standards
+    all:
+      status: not_applicable
+      why: Applies in districts whose regulations refer to §325-24; the commercial chart (pp.4, 5) never refers to §325-24.
+      page: 65
+      quote: All uses in districts where reference is made to this section shall conform to performance standards herein
+  325-25:
+  - what: Accessory structures follow §325-25 instead of the chart's side yards
+    all:
+      status: rulebook
+      rules:
+      - accessory_buildings
+  325-25A:
+  - what: Accessory structures above grade are not in a required front yard (two on a corner lot)
+    all:
+      status: rulebook
+      rules:
+      - accessory_buildings
+  325-25B:
+  - what: Accessory structures wholly below grade may go anywhere
+    all:
+      status: missing
+      priority: low
+      why: A permission Gordium doesn't use for placement (lot coverage leaves parts below ground out, the lot_coverage finding
+        below_ground_not_counted); nothing lets one sit in a required yard, which can only be stricter than the law.
+  325-25C:
+  - what: Frame accessory buildings 3 ft from side and rear lot lines (6 ft side in R-1)
+    all:
+      status: rulebook
+      rules:
+      - accessory_buildings
+  325-25D:
+  - what: A detached garage may straddle a common lot line by agreement
+    all:
+      status: missing
+      priority: low
+      why: A permission Gordium doesn't use; a garage across the lot line reads as off the lot (stricter than the law).
+  325-26:
+  - what: New structures at least 20 ft from an inlet wall or a stream bank
+    all:
+      status: rulebook
+      rules:
+      - stream_setback
+  325-27D:
+  - what: Short-term rentals (where, who may host)
+    all:
+      status: missing
+      priority: operational
+      why: Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
+  325-27F:
+  - what: Short-term rental operating rules
+    all:
+      status: missing
+      priority: operational
+      why: Governs how the property is used or run (or a permit for it), not what is drawn; no rule or flag.
+  325-28B:
+  - what: Accessory dwelling units (applicability; new construction's area requirements for every ADU permitted since 2025)
+    quote: This section applies to all accessory dwelling units (ADUs) within the City of Ithaca
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+  325-28C:
+  - what: (1) At most one ADU per parcel
+    lines:
+    - - 72
+      - 7
+      - 8
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: C. ADU requirements.
+      page: 72
+  - what: (2) No off-street parking is required for an ADU
+    lines:
+    - - 72
+      - 9
+      - 9
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: (2) There shall be no off-street parking requirement for an ADU.
+      page: 72
+  - what: (3) At most two bedrooms
+    lines:
+    - - 72
+      - 10
+      - 10
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: (3) An ADU may have a maximum of two bedrooms.
+      page: 72
+  - what: (4) Not in the primary front yard
+    lines:
+    - - 72
+      - 11
+      - 11
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: (4) ADUs may not be located in the primary front yard.
+      page: 72
+  - what: (5), (6) May not be sold separately, nor the parcel subdivided to separate it
+    lines:
+    - - 72
+      - 12
+      - 14
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: (5) An ADU may be leased separately but may not be sold separately from the primary structure.
+      page: 72
+  - what: (7)(a) An attached ADU at most 40% of the primary structure's floor area
+    lines:
+    - - 72
+      - 15
+      - 16
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: '(7) All ADUs shall meet the following size requirements:'
+      page: 72
+  - what: '(7)(b), (c) A detached ADU: an existing building may not grow past; new construction at most 800 sf footprint,
+      two stories and 20 ft'
+    lines:
+    - - 72
+      - 17
+      - 22
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: '(b) Detached ADU, existing accessory building: none. [1] An existing accessory building may be altered or expanded,
+        provided that it does not exceed the size limitations for new construction.'
+      page: 72
+  - what: (8)(a) An attached ADU's setbacks are the primary structure's
+    lines:
+    - - 72
+      - 23
+      - 24
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: '(8) All ADUs shall meet the following setback requirements:'
+      page: 72
+  - what: '(8)(b) A detached ADU''s side and rear setbacks: 5 ft, or the primary structure''s if less; an existing building
+      may not encroach further'
+    lines:
+    - - 72
+      - 25
+      - 30
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: '(b) Detached ADU, existing accessory building: none. [1] An existing accessory building may be altered or expanded,
+        provided that it does not further encroach upon any setback requirement for new construction.'
+      page: 72
+  - what: '(8)(b)[2][b] A detached ADU''s secondary front yard: the primary structure''s front setback'
+    lines:
+    - - 72
+      - 31
+      - 31
+    all:
+      status: flag
+      rules:
+      - accessory_dwelling_unit
+      mapped: 'In the CBD districts §325-28''s requirements are a flag (accessory_dwelling_unit): needs review wherever an
+        ADU is said to be on the lot; the residential districts'' ADU rules aren''t carried over yet.'
+      quote: '[b] Front setback, secondary front yard: same as primary structure.'
+      page: 72
+  325-29:
+  - what: Landmarks and landmark districts (Chapter 228 review)
+    quote: Officially designated landmarks or landmark districts of the City shall be governed by the provisions of Chapter
+      228
+    all:
+      status: parked
+      item: historic_flood
+  325-29.1D:
+  - what: Adult uses
+    all:
+      status: not_applicable
+      why: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the commercial chart.
+      page: 76
+      quote: Adult uses may only be located within the Adult Use Overlay Zone
+  325-29.1E:
+  - what: Adult uses
+    all:
+      status: not_applicable
+      why: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the commercial chart.
+      page: 76
+      quote: Adult uses may only be located within the Adult Use Overlay Zone
+  325-29.1F:
+  - what: Adult uses
+    all:
+      status: not_applicable
+      why: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the commercial chart.
+      page: 76
+      quote: Adult uses may only be located within the Adult Use Overlay Zone
+  325-29.1G:
+  - what: Adult uses
+    all:
+      status: not_applicable
+      why: Adult uses may only be located in the Adult Use Overlay Zone, and aren't on the commercial chart.
+      page: 76
+      quote: Adult uses may only be located within the Adult Use Overlay Zone
+  325-29.2A:
+  - what: Southwest Area districts (SW-1, SW-2, SW-3)
+    all:
+      status: not_applicable
+      why: Applies only in the Southwest Area districts.
+      page: 77
+      quote: Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3
+  325-29.2B:
+  - what: Southwest Area districts (SW-1, SW-2, SW-3)
+    all:
+      status: not_applicable
+      why: Applies only in the Southwest Area districts.
+      page: 77
+      quote: Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3
+  325-29.2C:
+  - what: Southwest Area districts (SW-1, SW-2, SW-3)
+    all:
+      status: not_applicable
+      why: Applies only in the Southwest Area districts.
+      page: 77
+      quote: Any and all development projects within the SW-1 District and Sub-districts SW-2 and SW-3
+  325-29.3C:
+  - what: 'Dumpsters: R-1 and R-2 only by variance; R-3 and RU out of public view or screened'
+    all:
+      status: missing
+      priority: low
+      why: Nothing asks about dumpsters; a massing model doesn't show them.
+  325-29.3D:
+  - what: What the Board weighs for a dumpster variance
+    all:
+      status: missing
+      priority: low
+      why: A Board judgment for a dumpster variance; nothing asks about dumpsters.
+  325-29.3E:
+  - what: Where the Board puts a dumpster it allows
+    all:
+      status: missing
+      priority: low
+      why: A Board decision for a dumpster variance; nothing asks about dumpsters.
+  325-29.6D:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.6F:
+  - what: Underground or cable broadband isn't governed by Article V-A
+    all:
+      status: not_applicable
+      why: 'An exemption: nothing to check.'
+      quote: such installations are not governed by the zoning requirements of this article
+  325-29.7B:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.8A:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.8B:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.8C:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.9A:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.9B:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.11A:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.11C:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.12B:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.17E:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.18B:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.18F:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.20:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.21A:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.21B:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.21C:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.22:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.23A:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.23B:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-29.24A:
+  - what: Personal wireless service facilities
+    all:
+      status: missing
+      priority: other_project
+      why: Personal wireless service facilities (Article V-A) are a different kind of project from a building on a CBD lot;
+        nothing covers them.
+  325-32A:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-32C:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-33A:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-33B:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-33C:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-33D:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-33E:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-34A:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-34B:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-35A:
+  - what: Nonconforming uses, buildings and lots
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-41B:
+  - what: Criteria for a zoning permit for a deficiency on an existing nonconforming building
+    all:
+      status: missing
+      priority: low
+      why: Gordium checks a design as new construction; existing nonconforming uses, buildings and lots (Article VI) are never
+        asked about.
+  325-44A:
+  - what: C-SU Zone review
+    all:
+      status: not_applicable
+      why: Applies only in the C-SU Zone.
+      page: 126
+      quote: construction of new buildings or parking areas within the C-SU Zone shall be subject to strict review
+  325-44B:
+  - what: C-SU Zone design review
+    all:
+      status: not_applicable
+      why: Applies only in C-SU Zones.
+      quote: in C-SU Zones shall be subject to design review
+  325-45.1C:
+  - what: Collegetown Area Form Districts
+    all:
+      status: not_applicable
+      why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2).
+      page: 128
+      quote: within any district of the Collegetown Area Form Districts
+  325-45.1D:
+  - what: Collegetown Area Form Districts
+    all:
+      status: not_applicable
+      why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2).
+      page: 128
+      quote: within any district of the Collegetown Area Form Districts
+  325-45.1E:
+  - what: New construction in a local historic district or on a landmark's parcel needs Landmarks Commission approval
+    quote: Regardless of the underlying zoning, all new construction (including additions) within a designated local historic
+      district
+    all:
+      status: parked
+      item: historic_flood
+      why: It applies "regardless of the underlying zoning", so in the CBD districts too; it needs the historic district lookup.
+  325-45.2B:
+  - what: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)
+    all:
+      status: not_applicable
+      why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes.
+      piece: 325-45.2A
+      quote: Six zoning districts are established for the Collegetown area
+  325-45.2D:
+  - what: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)
+    all:
+      status: not_applicable
+      why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes.
+      piece: 325-45.2A
+      quote: Six zoning districts are established for the Collegetown area
+  325-45.2E:
+  - what: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)
+    all:
+      status: not_applicable
+      why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes.
+      piece: 325-45.2A
+      quote: Six zoning districts are established for the Collegetown area
+  325-45.2F:
+  - what: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)
+    all:
+      status: not_applicable
+      why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes.
+      piece: 325-45.2A
+      quote: Six zoning districts are established for the Collegetown area
+  325-45.2G:
+  - what: Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2)
+    all:
+      status: not_applicable
+      why: Applies only in the Collegetown Area Form Districts (CR-1 to CR-4, MU-1, MU-2), which §325-45.2A establishes.
+      piece: 325-45.2A
+      quote: Six zoning districts are established for the Collegetown area
+  325-45.3B:
+  - what: MU-2 street-level active uses
+    all:
+      status: not_applicable
+      why: Applies only in the MU-2 District (Collegetown).
+      quote: Within the MU-2 District
+  325-45.5A:
+  - what: Cliff Street Retreat Planned Unit Development District
+    all:
+      status: not_applicable
+      why: Applies only in the Cliff Street Retreat PUD District.
+      page: 162
+      quote: Cliff Street Retreat Planned Unit Development District
+  325-45.5B:
+  - what: Cliff Street Retreat Planned Unit Development District
+    all:
+      status: not_applicable
+      why: Applies only in the Cliff Street Retreat PUD District.
+      page: 162
+      quote: Cliff Street Retreat Planned Unit Development District
+  325-45.5C:
+  - what: Cliff Street Retreat Planned Unit Development District
+    all:
+      status: not_applicable
+      why: Applies only in the Cliff Street Retreat PUD District.
+      page: 162
+      quote: Cliff Street Retreat Planned Unit Development District
+  325-45.5D:
+  - what: Cliff Street Retreat Planned Unit Development District
+    all:
+      status: not_applicable
+      why: Applies only in the Cliff Street Retreat PUD District.
+      page: 162
+      quote: Cliff Street Retreat Planned Unit Development District
+  325-45.5E:
+  - what: Cliff Street Retreat Planned Unit Development District
+    all:
+      status: not_applicable
+      why: Applies only in the Cliff Street Retreat PUD District.
+      page: 162
+      quote: Cliff Street Retreat Planned Unit Development District
+  325-45.5F:
+  - what: Cliff Street Retreat Planned Unit Development District
+    all:
+      status: not_applicable
+      why: Applies only in the Cliff Street Retreat PUD District.
+      page: 162
+      quote: Cliff Street Retreat Planned Unit Development District
+  325-45.5G:
+  - what: Cliff Street Retreat Planned Unit Development District
+    all:
+      status: not_applicable
+      why: Applies only in the Cliff Street Retreat PUD District.
+      page: 162
+      quote: Cliff Street Retreat Planned Unit Development District
