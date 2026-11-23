@@ -151,6 +151,32 @@ ATTACHED = "one_family_attached"                  # three to six units in a row 
 ASK_BY_HAND = "check which code governs by hand, then tick {mark} Yes if it is the Building Code"
 
 
+def use_words(use: str) -> str:
+    """A use in an architect's words, never its key: R101.2's dwelling for a house ("a detached one-family
+    dwelling"), else the key's own words ("retail store or service commercial")."""
+    if use in HOUSES:
+        return HOUSES[use][0]
+    if use == ATTACHED:
+        return "an attached one-family dwelling"
+    return str(use).replace("_", " ")
+
+
+def fact_words(key: str) -> str:
+    """A fact by the mark the architect answers it with (MARK), else in words: never its key."""
+    return MARK.get(key) or str(key).replace("_", " ")
+
+
+def value_words(v) -> str:
+    """A value the architect stated that Gordium can't read, as it was stated, in words ("“three”", "“R 3”")."""
+    if isinstance(v, str):
+        return f"“{v.replace('_', ' ')}”"
+    if isinstance(v, (list, tuple)):
+        return "[" + ", ".join(value_words(x) for x in v) + "]"
+    if isinstance(v, dict):
+        return "{" + ", ".join(f"{fact_words(k)}: {value_words(x)}" for k, x in v.items()) + "}"
+    return repr(v)
+
+
 def _given(building) -> tuple[dict, list[str]]:
     """The `building` block's facts of the right kind, and what is wrong with the rest, each said and never used: a
     block that isn't a mapping, a key that isn't one of FACTS (a misspelled fact is never read as "not stated"), a
@@ -167,11 +193,12 @@ def _given(building) -> tuple[dict, list[str]]:
              (kind == "sprinkler" and v in SPRINKLERS) or \
              (kind == "names" and isinstance(v, list) and all(isinstance(x, str) for x in v))
         if kind is None:
-            bad.append(f"the building block's {k!r} is no fact Gordium reads ({', '.join(FACTS)})")
+            bad.append(f"the building block sends {value_words(k)}, which is no fact Gordium reads (it reads "
+                       f"{', '.join(fact_words(f) for f in FACTS)})")
         elif ok:
             out[k] = v
         else:
-            bad.append(f"the building's {k.replace('_', ' ')} is {v!r}, which Gordium can't read")
+            bad.append(f"the building's {k.replace('_', ' ')} is {value_words(v)}, which Gordium can't read")
     return out, bad
 
 
@@ -264,7 +291,8 @@ def decide(values: dict, building: dict | None) -> dict:
     wrong = [k for k in COUNTS if values.get(k) is not None and (type(values[k]) not in (int, float) or values[k] < 0)]
     wrong += [k for k in YES_NO if values.get(k) is not None and type(values[k]) is not bool]
     if wrong:
-        return _answer(None, "; ".join(f"the {k.replace('_', ' ')} is {values[k]!r}, which Gordium can't read"
+        return _answer(None, "; ".join(f"the {k.replace('_', ' ')} is {value_words(values[k])}, which Gordium can't "
+                                       "read"
                                        for k in wrong), ["R101.2"], used, "correct it")
     use = values.get("use")
     used["use"] = use
@@ -285,9 +313,8 @@ def decide(values: dict, building: dict | None) -> dict:
                        "lodgers and five bedrooms for them)", ["R101.2 item 4", "R202 BED AND BREAKFAST DWELLING"],
                        used, by_hand)
     if use not in HOUSES and use != ATTACHED:
-        named = use.replace("_", " ")            # the use in words ("retail store or service commercial")
-        return _answer(BUILDING, f"its use ({named}) is none of the dwellings R101.2 lists (101.2: every other "
-                       "building)", ["R101.2", "101.2"], used)
+        return _answer(BUILDING, f"its use ({use_words(use)}) is none of the dwellings R101.2 lists (101.2: every "
+                       "other building)", ["R101.2", "101.2"], used)
     # a dwelling R101.2 can cover: each condition it sets, and how many dwelling units the building holds
     if values.get("care_facility") is True or facts.get("care_facility") is True:
         used["care_facility"] = True
@@ -362,7 +389,8 @@ def decide(values: dict, building: dict | None) -> dict:
         stated_building = values.get("attached_units_in_building")
         if stated_building is not None and stated_building != n:
             used["attached_units_in_building"] = stated_building
-            return _answer(None, f"the use is {use} ({n} dwelling unit{'s' if n > 1 else ''} in the building) but "
+            return _answer(None, f"the use is {use_words(use)} ({n} dwelling unit{'s' if n > 1 else ''} in the "
+                           "building) but "
                            f"{stated_building:g} units in the whole attached building are stated",
                            ["R202 DWELLING", "R101.2"], used,
                            f"correct the use ({MARK['use']}) or the units ({MARK['attached_units_in_building']})")
@@ -372,7 +400,8 @@ def decide(values: dict, building: dict | None) -> dict:
     stated = values.get("dwelling_units")
     if type(stated) in (int, float) and stated != lot_units:
         used["dwelling_units"] = stated
-        return _answer(None, f"the use is {use} ({lot_units} dwelling unit{'s' if lot_units > 1 else ''} on the lot) "
+        return _answer(None, f"the use is {use_words(use)} ({lot_units} dwelling unit{'s' if lot_units > 1 else ''} "
+                       "on the lot) "
                        f"but {stated:g} dwelling units are stated" + (
                            ", which may or may not count the accessory dwelling unit in (Gordium: Dwelling units leaves "
                            "it out)" if adu is True and stated == lot_units + 1 else ""),
