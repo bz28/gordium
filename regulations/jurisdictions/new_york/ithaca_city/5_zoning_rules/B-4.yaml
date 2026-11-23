@@ -1241,10 +1241,7 @@ rules:
   kind: flag
   topic: parking_and_loading
   title: Off-street loading (chart p.15, §325-21)
-  applies_when: >-
-    use in ["multiple_family", "dormitory", "nursing_home", "hospital_or_sanitarium", "business_or_professional_office",
-    "office_of_government", "bank", "retail_store_or_service_commercial", "restaurant_or_tavern", "light_hand_fabrication",
-    "service_shop", "motor_vehicle_sales_and_service"]
+  applies_when: use not in ["one_family_detached", "one_family_semi_detached", "one_family_attached", "two_family"]
   sources:
   - file: chapter_325_zoning_2026-10.pdf
     page: 24
@@ -1263,6 +1260,10 @@ rules:
     quote: Office building 1 space 1 space 1 space 1 space 1 space 1 space -
   - file: zoning_charts_2026-04.pdf
     page: 15
+    lines: [55, 55]
+    quote: Other use See §325-21 See §325-21 See §325-21 See §325-21 See §325-21 See §325-21 -
+  - file: zoning_charts_2026-04.pdf
+    page: 15
     lines: [62, 62]
     quote: (3) Plus 1 space for each additional 15,000 sf of floor space or major fraction thereof.
   - file: chapter_325_zoning_2026-10.pdf
@@ -1272,12 +1273,34 @@ rules:
       A. Size requirements. An off-street loading space shall have a minimum of 450 square feet plus necessary additional
       space for entrance, exit and aisle space.
   - file: chapter_325_zoning_2026-10.pdf
+    page: 63
+    lines: [43, 43]
+    quote: >-
+      B. Space requirements. The following off-street loading space requirements shall apply to all business
+  - file: chapter_325_zoning_2026-10.pdf
     page: 64
     lines: [5, 8]
     quote: >-
       (1) One space shall be made available for each use having 3,000 to 10,000 feet of floor space, plus one additional
       space for each additional 15,000 square feet or major fraction thereof of floor space in a single occupancy over and
       above 10,000 square feet. In no case shall more than four spaces be required for any use of a single occupancy.
+  examples:
+  - given: {use: funeral_home}
+    expect: needs_review
+    note: 'a business land use (§325-21B); the chart''s Other use row: See §325-21'
+  - given: {use: hotel_motel}
+    expect: needs_review
+  - given: {use: multiple_family}
+    expect: needs_review
+    note: more than 25 units need loading
+  - given: {use: two_family}
+    expect: not_applicable
+    note: a dwelling of two units, no business use
+  notes: >-
+    §325-21B applies to "all business and industrial land uses and multiple dwelling structures having more than 25 units",
+    and the chart's "Other use" row sends every other use to §325-21: every use but a one- or two-family dwelling gets this
+    flag (a church, a school or a club too, where whether it is a business use is for a person to say). Never dropped for
+    a use the chart doesn't name.
   drafted_by: claude
   status: draft
 - id: B-4.motel_standards
