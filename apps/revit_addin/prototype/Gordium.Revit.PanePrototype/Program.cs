@@ -149,7 +149,7 @@ internal static class Program
                     Step(make(theme, []), "09_just_runs_house", 430, dark, p => p.Progress(CheckStage.Checking, DateTime.Now.AddSeconds(-6)));
                     // the error state, and stale
                     Step(make(theme, []), "10_error_house", 430, dark, p => p.Failed(
-                        "Nothing was checked: InvalidOperationException: the worker stopped (exit code 1) (logged to C:\\Users\\you\\AppData\\Local\\Gordium\\addin\\2027\\current\\check.log)"));
+                        CheckWords.CheckerStopped("the worker exited with code 1") + @" (logged to C:\Users\you\AppData\Local\Gordium\trial\results.jsonl)"));
                     Step(make(theme, []), "11_stale_house", 430, dark, p =>
                     {
                         p.Show(title, when, rows, labels);
