@@ -207,8 +207,9 @@ internal static class SetupRun
         ResultsPane.Say($"Selected {ids.Count}: set them together in Properties (a type's mark: Edit Type).");
     });
 
-    /// <summary>The street edge picked on the plan: the check's own pick (its words and confirmation), in a view that
-    /// shows the property line; then the form read again.</summary>
+    /// <summary>The street edge picked on the plan: Revit's pick (its words and confirmation, on Revit's thread), in a
+    /// view that shows the property line, kept in the form as "not saved yet": nothing is written until Save, which
+    /// writes it with the other facts in the one "Gordium: project facts" transaction.</summary>
     private static void PickStreet() => ResultsPane.Post("Pick the street edge", ui =>
     {
         if (_doc is not { IsValidObject: true } doc || ui.ActiveUIDocument is not { } uidoc || !uidoc.Document.Equals(doc))
@@ -222,8 +223,12 @@ internal static class SetupRun
             return;
         }
         var log = new Dictionary<string, object?> { ["document"] = doc.Title };
-        var kept = CheckProjectCommand.PickStreet(uidoc, log);
+        var kept = CheckProjectCommand.PickEdges(uidoc, log);
+        var text = Draft.Pick(kept);
+        log["street_edge_chosen"] = text;
         Trial.Log("setup", log);
-        Refreshed(ui, doc, kept ? "Street edge kept." : "No street edge was kept.");
+        Redraw();
+        ResultsPane.Say(text is null ? "No street edge was picked."
+            : $"Street edge picked: {string.Join(" and ", kept.Select(e => StreetEdges.Describe(e, RevitRead.InternalToShared(doc))))}. Save writes it with the other facts.");
     });
 }

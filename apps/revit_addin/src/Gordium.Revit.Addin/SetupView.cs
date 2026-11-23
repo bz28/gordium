@@ -191,18 +191,19 @@ internal sealed class SetupView : C.StackPanel
             case FieldKind.StreetPick:
             {
                 var row = new C.DockPanel { Margin = new W.Thickness(0, 3, 0, 0) };
-                var pick = Button(f.Current is null ? "Pick on plan" : "Pick again", primary: false,
+                var pick = Button(shown is null ? "Pick on plan" : "Pick again", primary: false,
                                   "Click the lot edge along the street in a site or floor plan that shows the property line");
                 C.DockPanel.SetDock(pick, C.Dock.Right);
                 pick.Click += (_, _) => _do.PickStreet();
                 row.Children.Add(pick);
-                row.Children.Add(Words(f.Current is null ? "Not picked" : f.Problem is null ? "Picked (kept on Project Information)" : "Can't be read",
+                row.Children.Add(Words(chosen is not null && chosen != f.Current ? "Picked"
+                                       : f.Current is null ? "Not picked" : f.Problem is null ? "Picked (kept on Project Information)" : "Can't be read",
                                        Body, top: 3));
                 box.Children.Add(row);
                 break;
             }
         }
-        if (f.Problem is not null)
+        if (f.Problem is not null && chosen is null)
             box.Children.Add(Ink(Words(f.Problem, Caption, wrap: true, top: 2), PanelTokens.StatusReview));
         // the law it answers: two lines, the whole on hover
         var law = Muted(f.Law, top: 2);

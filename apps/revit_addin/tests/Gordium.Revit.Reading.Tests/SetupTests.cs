@@ -146,6 +146,47 @@ public sealed class SetupTests
         Assert.Empty(held.Writes(Screen(Model(AllStated()), held).Fields).Writes);
     }
 
+    /// <summary>Pick on plan writes nothing: the edge picked is a choice in the draft, "not saved yet", and Save writes
+    /// it with the other facts in the same batch (one "Gordium: project facts" transaction, one Ctrl+Z), as the text
+    /// Gordium's pick writes (StreetEdges.Keep's); typed text that isn't an edge Gordium wrote is never written.</summary>
+    [Fact]
+    public void Pick_on_plan_writes_nothing_until_save_and_save_writes_the_edge_with_the_other_facts()
+    {
+        var project = new Dictionary<Guid, MarkValue>();
+        var model = Model(project);
+        var draft = new SetupDraft();
+        draft.Choose(Marks.Zone, "R-1b");
+        var edge = new PickedEdge(new Xyz(0, 0, 0), new Xyz(60, 0, 0), true, 60, new Xyz(30, 0, 0));
+        var text = draft.Pick([edge]);
+        Assert.Empty(project);                                          // picked: nothing in the model
+        var screen = Screen(model, draft);
+        var street = screen.Fields.Single(f => f.Mark == Marks.StreetEdge);
+        Assert.Null(street.Current);
+        Assert.Contains(Marks.StreetEdge.Name, screen.Needed);          // not saved: still needed, the check doesn't run
+        var kept = "";
+        StreetEdges.Keep([edge], t => { kept = t; return true; }, new Dictionary<string, object?>());
+        Assert.Equal(kept, text);
+        var (writes, problems) = draft.Writes(screen.Fields);
+        Assert.Empty(problems);
+        Assert.Equal([Marks.Zone, Marks.StreetEdge], writes.Select(w => w.Mark));        // one Save, one batch
+        Assert.Equal(new MarkValue(true, Text: kept), writes[1].Value);
+        Assert.Equal(SetupFacts.ProjectInformation, writes[1].Element);
+        Assert.Null(draft.Pick([]));                                    // nothing picked: the choice stays as it was
+        Assert.Equal(kept, draft.Chosen(Marks.StreetEdge));
+        var typed = new SetupDraft();
+        typed.Choose(Marks.StreetEdge, "the front");
+        Assert.Empty(typed.Writes(screen.Fields).Writes);
+        // the Revit side: the form's pick keeps the edges in the draft and writes nothing itself
+        var flow = File.ReadAllText(Path.Combine(Env.Repo, "apps", "revit_addin", "src", "Gordium.Revit.Addin", "SetupFlow.cs"));
+        var pick = flow[flow.IndexOf("private static void PickStreet()", StringComparison.Ordinal)..];
+        pick = pick[..pick.IndexOf("\n    }", StringComparison.Ordinal)];
+        Assert.Contains("CheckProjectCommand.PickEdges(uidoc, log)", pick, StringComparison.Ordinal);
+        Assert.Contains("Draft.Pick(kept)", pick, StringComparison.Ordinal);
+        Assert.DoesNotContain("PickStreet(uidoc", pick, StringComparison.Ordinal);
+        Assert.DoesNotContain("Transaction", pick, StringComparison.Ordinal);
+        Assert.DoesNotContain("Write(", pick, StringComparison.Ordinal);
+    }
+
     // ---- the checklist and its suggestions ----------------------------------------------------------------------
 
     private static ChecklistLine Line(SetupScreen s, string key) => s.Lines.Single(l => l.Key == key);

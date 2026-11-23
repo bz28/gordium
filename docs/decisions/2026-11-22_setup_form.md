@@ -16,7 +16,8 @@ architects trying the add-in.\
 2. **Project facts are a real form**: a dropdown where the answer is one of a known list (Zone: the districts the
    place has rulebooks for; Use: Gordium's use words with their names, the district's permitted ones first, a
    special-permit one saying so; Ground from: its two words), Yes/No toggles, a number box for the stories, and
-   **Pick on plan** for the street edge (the check's own street pick, with its confirmation). Each field shows the law
+   **Pick on plan** for the street edge (Revit's pick on Revit's thread, each edge said back and confirmed; the edge
+   picked is kept in the form as "not saved yet" and written by Save with the other facts, in the same transaction). Each field shows the law
    it answers: the mark's own tooltip. The form lists **every mark Marks.cs binds to Project Information** (data, not a
    hand list), each under a heading found from what it feeds (`facts.*`: the lot and the building; `building.*`: which
    building code; `has_none`: what the building has none of), so marks added to Marks.cs appear with no change to the
@@ -41,7 +42,7 @@ architects trying the add-in.\
      Single-Flush, Pocket, Bifold...).
    - *Room use* (a building that isn't a house): from the room's name, the marking list's own table.
 5. **Gordium writes only on the architect's click**, and each click is **one undoable transaction named for Gordium**:
-   Save writes the project facts chosen ("Gordium: project facts"), Accept writes the suggestions accepted ("Gordium:
+   Save writes the project facts chosen, the street edge picked among them ("Gordium: project facts"), Accept writes the suggestions accepted ("Gordium:
    suggestions accepted"). A field never touched is never written (a blank stays blank); a value that isn't one of the
    field's choices, or a count under its least, is refused with why and not written. Neither name is the check's own,
    so results shown go stale after either (as after any edit); one Ctrl+Z takes a whole Save or accept back.

@@ -328,6 +328,20 @@ public sealed class SetupDraft
 
     public string? Chosen(MarkDefinition mark) => _chosen.TryGetValue(mark.Guid, out var v) ? v : null;
 
+    /// <summary>The street edges the architect picked on the plan, kept in the draft as the Street edge mark's text
+    /// (exactly as StreetEdges.Keep writes it): nothing is written until Save, which writes it with the other facts in
+    /// the one transaction. Returns the text; none picked changes nothing.</summary>
+    public string? Pick(IReadOnlyList<PickedEdge> edges)
+    {
+        ArgumentNullException.ThrowIfNull(edges);
+        if (edges.Count == 0)
+            return null;
+        string? text = null;
+        StreetEdges.Keep(edges, t => { text = t; return true; }, new Dictionary<string, object?>());
+        Choose(Marks.StreetEdge, text!);
+        return text;
+    }
+
     public int Count => _chosen.Count;
 
     public void Clear() => _chosen.Clear();
@@ -354,7 +368,9 @@ public sealed class SetupDraft
                                       && n >= SetupFacts.Least(f.Mark) => new MarkValue(true, n),
                 FieldKind.Choice when f.Choices.FirstOrDefault(c => c.Value == chosen) is { } c => new MarkValue(true, Text: c.Value),
                 FieldKind.Text => new MarkValue(true, Text: chosen),
-                _ => null,                                  // the street edge is picked, never typed
+                // the street edge: only edges Gordium's pick kept (never typed text)
+                FieldKind.StreetPick when StreetEdges.Parse(chosen) is not null => new MarkValue(true, Text: chosen),
+                _ => null,
             };
             if (value is null)
             {

@@ -436,7 +436,8 @@ Anything not read exactly is left out with its reason. **How we know:** `RouteTe
   added to Marks.cs appears with no change here), under a heading found from what it feeds. Zone and Use are dropdowns
   of the worker's `options` (`WorkerClient.OptionsAsync`: the districts with a rulebook, the use words with their
   names, the district's permitted ones first), typed until the worker answers; Yes/No toggles; a number for counts;
-  **Pick on plan** for the street edge (the check's own pick, `CheckProjectCommand.PickStreet`). Each shows the law
+  **Pick on plan** for the street edge (Revit's pick, `CheckProjectCommand.PickEdges`, kept in the draft as "not
+  saved yet" and written by Save with the other facts; the check's own pick, `PickStreet`, still writes at once). Each shows the law
   it answers (the mark's tooltip, "house" said as "building" unless the use is a one- or two-family dwelling).
 - **What a Save writes** (`SetupDraft.Writes`): only the fields the architect chose a value for that differs from the
   mark, as one transaction "Gordium: project facts" (`RevitMarks.Write`, the one writer, which the request file's

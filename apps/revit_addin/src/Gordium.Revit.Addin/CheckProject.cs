@@ -364,13 +364,32 @@ public sealed class CheckProjectCommand : IExternalCommand
         && new FilteredElementCollector(ui.Document, plan.Id).OfClass(typeof(PropertyLine)).Any();
 
     /// <summary>Asks the architect to click the lot edges along the street, and keeps them in the Street edge mark.
-    /// True when an edge was kept.</summary>
+    /// True when an edge was kept. (The check's own pick; the Setup form picks with <see cref="PickEdges"/> and writes
+    /// the edge only on Save.)</summary>
     internal static bool PickStreet(UIDocument ui, Dictionary<string, object?> log)
+    {
+        var doc = ui.Document;
+        var kept = PickEdges(ui, log);
+        if (kept.Count == 0)
+            return false;
+        using var t = new Transaction(doc, ResultRows.StreetTransaction);
+        t.Start();
+        var p = doc.ProjectInformation.get_Parameter(Marks.StreetEdge.Guid)
+                ?? throw new InvalidOperationException($"{Marks.StreetEdge.Name} isn't on Project Information");
+        // Set's false throws naming the mark (the transaction then rolls back) and nothing is logged as kept
+        StreetEdges.Keep(kept, p.Set, log);
+        t.Commit();
+        return true;
+    }
+
+    /// <summary>Revit's pick of the lot edges along the street, each said back and confirmed: the edges kept, nothing
+    /// written (empty when none was, or no property line is drawn).</summary>
+    internal static List<PickedEdge> PickEdges(UIDocument ui, Dictionary<string, object?> log)
     {
         var doc = ui.Document;
         var lines = RevitRead.LotLines(doc).Where(l => l.IsPropertyLine).ToDictionary(l => l.UniqueId);
         if (lines.Count == 0)
-            return false;                                            // no property line: the dialog says what is missing
+            return [];                                               // no property line: the dialog says what is missing
         var toShared = RevitRead.InternalToShared(doc);
         var kept = new List<PickedEdge>();
         var said = new List<string>();
@@ -418,16 +437,7 @@ public sealed class CheckProjectCommand : IExternalCommand
             }
         }
         log["street_picks"] = said;
-        if (kept.Count == 0)
-            return false;
-        using var t = new Transaction(doc, ResultRows.StreetTransaction);
-        t.Start();
-        var p = doc.ProjectInformation.get_Parameter(Marks.StreetEdge.Guid)
-                ?? throw new InvalidOperationException($"{Marks.StreetEdge.Name} isn't on Project Information");
-        // Set's false throws naming the mark (the transaction then rolls back) and nothing is logged as kept
-        StreetEdges.Keep(kept, p.Set, log);
-        t.Commit();
-        return true;
+        return kept;
     }
 
     private sealed class PropertyLines : ISelectionFilter
