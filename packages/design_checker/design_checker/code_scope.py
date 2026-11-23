@@ -114,7 +114,7 @@ MARK = {"stories_above_grade_plane": "Gordium: Stories above grade plane",
         "dwelling_units": "Gordium: Dwelling units", "care_facility": "Gordium: Care facility",
         "home_occupation": "Gordium: Home occupation", "rooms_let_for_profit": "Gordium: Rooms let for profit",
         "accessory_dwelling_unit": "Gordium: Accessory dwelling unit", "adu_detached": "Gordium: ADU detached",
-        "adus_on_parcel": "Gordium: ADUs on parcel"}
+        "adus_on_parcel": "Gordium: ADUs on parcel", "sprinkler_system": "Gordium: Sprinkler system"}
 # Gordium's reading for a house where these aren't stated (strong common practice, shown as a reading to confirm:
 # docs/decisions/2026-11-22_which_ny_code.md decision 2a): none, so the use's own dwelling decides. Each: the fact,
 # what is assumed, and how the architect says otherwise
@@ -161,20 +161,42 @@ def use_words(use: str) -> str:
     return str(use).replace("_", " ")
 
 
+# the use as the architect chose it, for a line saying the facts disagree with it (the verdict lines name R101.2's
+# dwelling instead, the law's term): its words and a note to go in the line's brackets
+CHOSEN = {"one_family_detached": ("a one-family detached dwelling", ""),
+          "one_family_detached_zero_lot_line": ("a one-family detached dwelling on a zero lot line", ""),
+          "two_family": ("a two-family dwelling", ""),
+          "one_family_semi_detached": ("a one-family semi-detached dwelling", "one of a pair"),
+          ATTACHED: ("a one-family attached dwelling", "")}
+
+
+def chosen_use_words(use: str, count: str) -> str:
+    """The use as the architect chose it, with what the line counts in its brackets: "a one-family semi-detached
+    dwelling (one of a pair, 2 dwelling units in the building)"."""
+    name, note = CHOSEN.get(use) or (use_words(use), "")
+    return f"{name} ({note + ', ' if note else ''}{count})"
+
+
 def fact_words(key: str) -> str:
     """A fact by the mark the architect answers it with (MARK), else in words: never its key."""
     return MARK.get(key) or str(key).replace("_", " ")
 
 
 def value_words(v) -> str:
-    """A value the architect stated that Gordium can't read, as it was stated, in words ("“three”", "“R 3”")."""
+    """A value the architect stated that Gordium can't read, quoted exactly as stated (“R_3”, “three”: the
+    architect's own characters, the one that made it unreadable included); a blank one "blank", a yes/no "Yes" or
+    "No"; a list or a set of facts by its parts."""
+    if v is None:
+        return "blank"
+    if isinstance(v, bool):
+        return "Yes" if v else "No"
     if isinstance(v, str):
-        return f"“{v.replace('_', ' ')}”"
+        return f"“{v}”"
     if isinstance(v, (list, tuple)):
         return "[" + ", ".join(value_words(x) for x in v) + "]"
     if isinstance(v, dict):
         return "{" + ", ".join(f"{fact_words(k)}: {value_words(x)}" for k, x in v.items()) + "}"
-    return repr(v)
+    return f"{v:g}" if isinstance(v, (int, float)) else f"“{v}”"
 
 
 def _given(building) -> tuple[dict, list[str]]:
@@ -194,7 +216,7 @@ def _given(building) -> tuple[dict, list[str]]:
              (kind == "names" and isinstance(v, list) and all(isinstance(x, str) for x in v))
         if kind is None:
             bad.append(f"the building block sends {value_words(k)}, which is no fact Gordium reads (it reads "
-                       f"{', '.join(fact_words(f) for f in FACTS)})")
+                       f"{', '.join(MARK[f] for f in FACTS if f in MARK)})")
         elif ok:
             out[k] = v
         else:
@@ -389,8 +411,8 @@ def decide(values: dict, building: dict | None) -> dict:
         stated_building = values.get("attached_units_in_building")
         if stated_building is not None and stated_building != n:
             used["attached_units_in_building"] = stated_building
-            return _answer(None, f"the use is {use_words(use)} ({n} dwelling unit{'s' if n > 1 else ''} in the "
-                           "building) but "
+            return _answer(None, "the use is " + chosen_use_words(use, f"{n} dwelling unit{'s' if n > 1 else ''} "
+                                                                  "in the building") + " but "
                            f"{stated_building:g} units in the whole attached building are stated",
                            ["R202 DWELLING", "R101.2"], used,
                            f"correct the use ({MARK['use']}) or the units ({MARK['attached_units_in_building']})")
@@ -400,8 +422,8 @@ def decide(values: dict, building: dict | None) -> dict:
     stated = values.get("dwelling_units")
     if type(stated) in (int, float) and stated != lot_units:
         used["dwelling_units"] = stated
-        return _answer(None, f"the use is {use_words(use)} ({lot_units} dwelling unit{'s' if lot_units > 1 else ''} "
-                       "on the lot) "
+        return _answer(None, "the use is " + chosen_use_words(use, f"{lot_units} dwelling unit"
+                                                              f"{'s' if lot_units > 1 else ''} on the lot") + " "
                        f"but {stated:g} dwelling units are stated" + (
                            ", which may or may not count the accessory dwelling unit in (Gordium: Dwelling units leaves "
                            "it out)" if adu is True and stated == lot_units + 1 else ""),
