@@ -255,6 +255,15 @@ def _more(given) -> dict:
             if isinstance(p, dict) and isinstance(p.get("id"), str) and isinstance(p.get("more"), dict)}
 
 
+NOT_SENT = "weren't sent from the model"
+
+
+def not_sent_words(kind: str) -> str:
+    """A part kind the interior description can give but left out (its list missing), in an architect's words:
+    "the stairs weren't sent from the model"."""
+    return f"the {parts._plural(kind).replace('_', ' ')} {NOT_SENT}"
+
+
 def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not: dict | None,
               more: dict | None = None) -> dict | None:
     """Why a needs-review row isn't settled, for grouping the results (docs/decisions/2026-11-16_results_grouping.md);
@@ -283,8 +292,7 @@ def unsettled(row: dict, rule: dict, given, values: dict, allowed: dict, why_not
                 return {"gordium": NOT_READ, "kinds": unread}
             # a kind the description can give but left out (no `stairs` list): the drawing's to give, never a gap
             return {"gordium": None, "measures": [], "gaps": [], "notes": [],
-                    "inputs": [f"the {parts._plural(k).replace('_', ' ')} aren't in the interior drawing (no "
-                               f"`{READ_KINDS[k]}` list)" for k in drawn], "decide": False}
+                    "inputs": [not_sent_words(k) for k in drawn], "decide": False}
         return {"gordium": None, "measures": [], "gaps": [], "inputs": [], "notes": [row["reason"]],
                 "decide": False}
     why_not = why_not or {}

@@ -266,7 +266,7 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
     own = set(parts.measure_kinds(kind))
     kinds = _kinds(allowed, parts.measure_kinds(kind))
     known = {**parts.building_values(building), **(row.get("values") or {})}
-    from design_checker.each_part import _usable, _words
+    from design_checker.each_part import NOT_SENT, _usable, _words
     if flag:                       # a person decides with every figure the rule reads: each one missing is a cause
         try:
             missing = [m for m in sorted(parts.formula_names(rule)) if not _usable(known.get(m), kinds.get(m))]
@@ -303,16 +303,15 @@ def causes(rule: dict, row: dict, open_: dict | None, part: dict | None, more: d
                  "words": f"{_words(rule, m)} not measured" + (f": {why}" if why else " (or not usable)"),
                  "elements": own_id, "measure": m})
     for note in o.get("inputs") or []:
-        if "aren't in the interior drawing" in note:
+        if NOT_SENT in note:
             add({"kind": FIX_MODEL, "key": f"drawing:{note}", "words": note, "elements": []})
     if row.get("has_none"):
         add({"kind": DECIDE, "key": f"reading:{row['has_none']}", "words": row.get("reason") or "a reading to confirm",
              "elements": own_id})
-    elif not flag and readings and (row.get("reason") or "").startswith("does not comply (or can't be told) if"):
+    elif not flag and readings and parts.is_reading_words(row.get("reason")):
         tags = sorted({t for m in missing if isinstance(readings.get(m), list) for r in readings[m]
                        if isinstance(r, dict) and isinstance(r.get("named"), dict) for t in r["named"]})
-        add({"kind": DECIDE, "key": "question:" + ",".join(tags),
-             "words": "an open question decides it (" + ", ".join(tags) + "): " + row["reason"], "elements": own_id,
+        add({"kind": DECIDE, "key": "question:" + ",".join(tags), "words": row["reason"], "elements": own_id,
              "questions": tags})
     elif not flag and row.get("reason") and not out:
         add({"kind": DECIDE, "key": f"reason:{row['reason']}", "words": row["reason"], "elements": own_id})
