@@ -125,7 +125,7 @@ ASSUMED = (("care_facility", "no one outside the household receives care here"),
            ("dwelling_units", "the use's own dwelling units on the lot"),
            ("adus_on_parcel", "one accessory dwelling unit on the parcel, the one stated"))
 # the kinds of the lot facts the decision reads (a value of another kind is said, never used)
-COUNTS = ("dwelling_units", "attached_units_in_building", "adus_on_parcel", "rooms_let_for_profit")
+COUNTS = ("dwelling_units", "attached_units_in_building", "adus_on_parcel", "rooms_let_for_profit", "stories")
 YES_NO = ("accessory_dwelling_unit", "adu_detached", "home_occupation")
 # where check.py found Ithaca's stories count read from the drawing with nothing drawn below the ground
 STORIES_DRAWN = "stories_from_drawing"
@@ -405,6 +405,21 @@ def decide(values: dict, building: dict | None) -> dict:
                                                     "" if use == "two_family" else
                                                     " (two semi-detached units in one building)"),
                          "R101.2 item 2", 2)
+    # R101.2 covers its dwellings only "with a separate means of egress", and R202 TOWNHOUSE UNIT "has a separate means
+    # of egress" (review round 7: it was read for two units only): said No, never the Residential Code
+    egress = facts.get("separate_means_of_egress")
+    if egress is False and n != 2:
+        return _answer(None, f"{what}, but its means of egress is stated not to be separate: R101.2 covers its "
+                       "dwellings only \"with a separate means of egress\""
+                       + (", and a townhouse unit \"has a separate means of egress\" (R202)" if n is None else ""),
+                       [item, "R101.2"] + (["R202 TOWNHOUSE UNIT"] if n is None else []), used,
+                       f"correct {MARK['separate_means_of_egress']}" + (f" or {MARK['townhouse_units']}" if n is None
+                                                                       else ""))
+    # townhouse units said of a building that isn't three or more attached units: no townhouse (R202 TOWNHOUSE)
+    if facts.get("townhouse_units") is True and n is not None:
+        return _answer(None, f"{what}, but its units are stated to be townhouse units: a townhouse is \"a building that "
+                       "contains three or more attached townhouse units\" (R202)", [item, "R202 TOWNHOUSE"], used,
+                       f"correct the use ({MARK['use']}) or {MARK['townhouse_units']}")
     # Gordium's reading of what wasn't stated (decision 2a), each said as a reading to confirm: none of the uses
     # beyond the dwelling, no ADU, the use's own dwelling units, and beside a stated ADU only that one
     unstated = lambda k: values.get(k) is None and facts.get(k) is None
